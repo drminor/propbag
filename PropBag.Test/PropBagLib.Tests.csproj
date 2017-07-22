@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GTest.cs" />
     <Compile Include="TestModel1.props.cs" />
     <Compile Include="TestNullable.cs" />
     <Compile Include="TestSAndGLoose.cs" />
