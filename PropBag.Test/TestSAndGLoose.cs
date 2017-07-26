@@ -3,7 +3,8 @@ using System.Collections.Generic;
 
 using NUnit.Framework;
 
-using PropBagLib;
+//using PropBagLib;
+using DRM.PropBag;
 
 namespace PropBagLib.Tests
 {
@@ -24,12 +25,12 @@ namespace PropBagLib.Tests
 
         private SandGLoosetModel mod1;
 
-        //[OneTimeSetUp]
-        [SetUp]
+        [OneTimeSetUp]
+        //[SetUp]
         public void Create()
         {
             // Create
-            mod1 = new SandGLoosetModel(PropBagTypeSafetyModeEnum.Loose);
+            mod1 = new SandGLoosetModel(PropBagTypeSafetyMode.Loose);
             //Action<string, string> f = this.DoWhenUpdatedExt;
             mod1.SubscribeToPropStringChanged = this.DoWhenUpdatedExt;
         }
@@ -55,7 +56,7 @@ namespace PropBagLib.Tests
         public void ShouldSAndGLooseUseNewProp()
         {
             mod1[PROP_NEW] = "string";
-            Assert.That(mod1.GetType(PROP_NEW), Is.EqualTo(typeof(string)));
+            Assert.That(mod1.GetTypeOfProperty(PROP_NEW), Is.EqualTo(typeof(string)));
             Assert.That(mod1[PROP_NEW], Is.EqualTo("string"));
         }
 
@@ -63,10 +64,10 @@ namespace PropBagLib.Tests
         public void ShouldSAndGLooseUseNew1stNullNotOk()
         {
             mod1[PROP_NEW] = null;
-            Assert.That(mod1.GetType(PROP_NEW), Is.EqualTo(typeof(object)));
+            Assert.That(mod1.GetTypeOfProperty(PROP_NEW), Is.EqualTo(typeof(object)));
 
             mod1[PROP_NEW] = "string";
-            Assert.That(mod1.GetType(PROP_NEW), Is.EqualTo(typeof(string)));
+            Assert.That(mod1.GetTypeOfProperty(PROP_NEW), Is.EqualTo(typeof(string)));
             Assert.That(mod1[PROP_NEW], Is.EqualTo("string"));
         }
 
@@ -75,7 +76,7 @@ namespace PropBagLib.Tests
         {
             mod1[PROP_NEW] = "string";
             mod1[PROP_NEW] = null;
-            Assert.That(mod1.GetType(PROP_NEW), Is.EqualTo(typeof(string)));
+            Assert.That(mod1.GetTypeOfProperty(PROP_NEW), Is.EqualTo(typeof(string)));
             Assert.That(mod1[PROP_NEW], Is.Null);
         }
 
@@ -93,9 +94,27 @@ namespace PropBagLib.Tests
             Assert.Throws<ArgumentNullException>(() => x = mod1[null]);
         }
 
+        [Test]
+        public void SetInt1000WithType()
+        {
+            for (int cntr = 0; cntr < 999; cntr++)
+            {
+                mod1.PropInt = cntr;
+            }
+        }
 
-        //[OneTimeTearDown]
-        [TearDown]
+        [Test]
+        public void SetInt1000NoType()
+        {
+            for (int cntr = 0; cntr < 999; cntr++)
+            {
+                mod1["PropInt1"] = cntr;
+            }
+        }
+
+
+        [OneTimeTearDown]
+        //[TearDown]
         public void destroy()
         {
             mod1 = null;

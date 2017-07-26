@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using System.Collections.ObjectModel;
 using NUnit.Framework;
 
-using PropBagLib;
-using System.Collections.ObjectModel;
+//using PropBagLib;
+using DRM.PropBag;
+
 
 namespace PropBagLib.Tests
 {
@@ -23,7 +24,7 @@ namespace PropBagLib.Tests
         public void Create()
         {
             // Create
-            mod1 = new NullableModel(PropBagTypeSafetyModeEnum.AllPropsMustBeRegistered);
+            mod1 = new NullableModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
         }
 
         [Test]
@@ -79,6 +80,7 @@ namespace PropBagLib.Tests
             Assert.That(mod1.PropICollectionInt, Is.EqualTo(newVal));
             Assert.That(mod1.ItGotUpdated, Is.EqualTo(true));
 
+            //TODO: This shouldn't be here : it is testing setting a property that has not been defined with AddProp.
             mod1.ItGotUpdated = false;
             mod1["PropICollectionInt"] = newVal;
             Assert.That(mod1.PropICollectionInt, Is.EqualTo(newVal));

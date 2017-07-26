@@ -6,6 +6,9 @@ using System.Reflection;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
+using DRM.ReferenceEquality;
+using DRM.Ipnwv;
+
 namespace PropBagLib
 {
 
@@ -117,10 +120,94 @@ namespace PropBagLib
 
         #region Public Methods and Properties
 
-        public void SubscribeToPropChanged<T>(string propertyName, Action<T, T> doOnChange)
+        public object GetIt([CallerMemberName] string propertyName = null)
         {
-            if (propertyName == null) throw new ApplicationException("PropertyName cannot be null.");
+            // This will throw an exception if no value has been added to the _tVals dictionary with a key of propertyName,
+            // either by calling AddProp or SetIt.
+            return GetValue(propertyName).Value;
+        }
 
+        public T GetIt<T>([CallerMemberName] string propertyName = null)
+        {
+            // This will throw an exception if no value has been added to the _tVals dictionary with a key of propertyName,
+            // either by calling AddProp or SetIt.
+            return (T)(GetValue(propertyName).Value);
+        }
+
+        public void SetIt<T>(T value, [CallerMemberName] string propertyName = null)
+        {
+            ValueWithType vwt;
+
+            // We are assuming that the vast majority of the time, an entry will exist in the _tVals dictionary with this propertyName,
+            // otherwise we would make use Dictionary.ContainsKey to test.
+
+            try
+            {
+                vwt = GetValue(propertyName);
+            }
+            catch (KeyNotFoundException)
+            {
+                if (AllPropsMustBeRegistered)
+                {
+                    throw new ApplicationException(string.Format("Property: {0} has not been defined with a call to AddProp() and the operation setting 'AllPropsMustBeRegistered' is set to true.", propertyName));
+                }
+
+                // Property has not been defined yet, let's create a definition for it now and initialize the value.
+                tVals.Add(propertyName, ValueWithType.CreateValueWithType<T>(value, comparer: null, plainComparer: null, doIfChanged: null, doAfterNotify: false, isRegistered: false));
+
+                // No reason to call DoSet, it will find no change and do nothing.
+                return;
+            }
+
+            DoSet(propertyName, vwt, value, typeof(T));
+        }
+
+        /// <summary>
+        /// Gets and Sets property values by name. The caller is responsible for casting the value back to the correct type on retrieval.
+        /// On set, if the property has not yet been set, the type of the value is used to define the property's type.
+        /// If on the first set, the value is null, the type will be object and the definition will be marked as pending.
+        /// Once the property has been set with a non-null value, the property's type is fixed.
+        /// 
+        /// </summary>
+        /// <param name="propertyName"></param>
+        /// <returns></returns>
+        public object this[string propertyName]
+        {
+            get
+            {
+                return GetValue(propertyName).Value;
+            }
+            set
+            {
+                // This will throw an exception if a property with this name has not yet been given a value.
+                ValueWithType vwt;
+                try
+                {
+                    vwt = GetValue(propertyName);
+                }
+                catch (KeyNotFoundException)
+                {
+                    if (AllPropsMustBeRegistered)
+                        throw new KeyNotFoundException(string.Format("Property: {0} has not been declared by calling AddProp, nor has its value been set by calling SetIt<T>. Cannot use this method in this case. Declare by calling AddProp, or use the SetIt<T> method.", propertyName));
+
+                    if (!AllowSetsViaThisForNewProps)
+                    {
+                        throw new ApplicationException(string.Format("Property: {0} has not been defined with a call to AddProp or any SetIt<T> call and the operation setting 'AllowSetsViaThisForNewProps' is set to false.", propertyName));
+                    }
+
+                    vwt = ValueWithType.CreateValueInferType(value);
+                    this.tVals.Add(propertyName, vwt);
+
+                    // No point in calling DoSet, it would find that the value is the same and do nothing.
+                    return;
+                }
+
+                DoSet(propertyName, vwt, value, (value == null ? null : value.GetType()));
+            }
+        }
+
+        public void SubscribeToPropChanged<T>(Action<T, T> doOnChange, [CallerMemberName] string propertyName = null)
+        {
             ValueWithType vwt = GetValue(propertyName);
 
             vwt.CheckTypeSimple(typeof(T), propertyName);
@@ -142,49 +229,13 @@ namespace PropBagLib
         protected void ConnectToPropChanged<T>(Action<T, T> doOnChange, [CallerMemberName] string subToPropertyName = null)
         {
             string propertyName = GetPropNameFromSubTo(subToPropertyName);
-            SubscribeToPropChanged<T>(propertyName, doOnChange);
+            SubscribeToPropChanged<T>(doOnChange, propertyName);
         }
 
         private string GetPropNameFromSubTo(string x)
         {
             //SubscribeToPropStringChanged
             return x.Substring(11, x.Length - 18);
-        }
-
-        // Requires all properties to be registered, since no type information can be determined from the call to set the value.
-        public object this[string propertyName]
-        {
-            get
-            {
-                return GetValue(propertyName).Value;
-            }
-            set
-            {
-                // This will throw an exception if a property with this name has not yet been given a value.
-                ValueWithType vwt;
-                try
-                {
-                    vwt = GetValue(propertyName);
-                }
-                catch (KeyNotFoundException)
-                {
-                    if(AllPropsMustBeRegistered)
-                        throw new KeyNotFoundException(string.Format("Property: {0} has not been declared by calling AddProp, nor has its value been set by calling SetIt<T>. Cannot use this method in this case. Declare by calling AddProp, or use the SetIt<T> method.", propertyName));
-
-                    if (!AllowSetsViaThisForNewProps)
-                    {
-                        throw new ApplicationException(string.Format("Property: {0} has not been defined with a call to AddProp or any SetIt<T> call and the operation setting 'AllowSetsViaThisForNewProps' is set to false.", propertyName));
-                    }
-
-                    vwt = ValueWithType.CreateValueInferType(value);
-                    this.tVals.Add(propertyName, vwt);
-
-                    // No point in calling DoSet, it would find that the value is the same and do nothing.
-                    return;
-                }
-
-                DoSet(propertyName, vwt, value, (value == null ? null : value.GetType()));
-            }
         }
 
         public bool PropertyExists([CallerMemberName] string propertyName = null)
@@ -212,58 +263,10 @@ namespace PropBagLib
             return GetValue(propertyName).IsRegistered;
         }
 
-        #endregion
-
-        #region Protected Methods and Properties
-
-        protected object GetIt([CallerMemberName] string propertyName = null)
-        {
-            // This will throw an exception if no value has been added to the _tVals dictionary with a key of propertyName,
-            // either by calling AddProp or SetIt.
-            return GetValue(propertyName).Value;
-        }
-
-        protected T GetIt<T>([CallerMemberName] string propertyName = null)
-        {
-            // This will throw an exception if no value has been added to the _tVals dictionary with a key of propertyName,
-            // either by calling AddProp or SetIt.
-            return (T)(GetValue(propertyName).Value);
-        }
-
-        protected void SetIt<T>(T value, [CallerMemberName] string propertyName = null)
-        {
-            ValueWithType vwt;
-
-            // We are assuming that the vast majority of the time, an entry will exist in the _tVals dictionary with this propertyName,
-            // otherwise we would make use Dictionary.ContainsKey to test.
-
-            try
-            {
-                vwt = GetValue(propertyName);
-            }
-            catch (KeyNotFoundException)
-            {
-                if (AllPropsMustBeRegistered)
-                {
-                    throw new ApplicationException(string.Format("Property: {0} has not been defined with a call to AddProp() and the operation setting 'AllPropsMustBeRegistered' is set to true.", propertyName));
-                }
-
-                // Property has not been defined yet, let's create a definition for it now and initialize the value.
-                tVals.Add(propertyName, ValueWithType.CreateValueWithType<T>(value, comparer: null, plainComparer:null, doIfChanged: null, doAfterNotify: false, isRegistered:false)); 
-
-                // No reason to call DoSet, it will find no change and do nothing.
-                return;
-            }
-
-            //
-
-            DoSet(propertyName, vwt, value, typeof(T));
-        }
-
         /// <summary>
         /// Returns all of the values in dictionary of objects, keyed by PropertyName.
         /// </summary>
-        protected IDictionary<string, object> GetAll
+        public IDictionary<string, object> GetAll
         {
             get
             {
@@ -784,9 +787,11 @@ namespace PropBagLib
                 #if CORE
                     return GMT_TYPE.GetMethod("IsEqualUsingPlainComparer");
                 #endif
+
                 }
                 else
                 {
+
                     // Setup a method that uses IEquitableComparer<T> for the given type.
                 #if STANDARD
                     return GMT_TYPE.GetMethod("IsEqualUsingComparer", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(typeOfThisValue);

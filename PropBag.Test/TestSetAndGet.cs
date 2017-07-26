@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using NUnit.Framework;
 
 
-using PropBagLib;
+//using PropBagLib;
+using DRM.PropBag;
 
 namespace PropBagLib.Tests
 {
@@ -25,7 +26,13 @@ namespace PropBagLib.Tests
         public void Create()
         {
             // Create
-            mod1 = new SetAndGetModel(PropBagTypeSafetyModeEnum.AllPropsMustBeFirstSetWithSetIt);
+            mod1 = new SetAndGetModel(PropBagTypeSafetyMode.AllPropsMustBeFirstSetWithSetIt);
+        }
+
+        [Test]
+        public void BuildRT()
+        {
+            PropBagT4.RT_Builder.BuildIt();
         }
 
         [Test]

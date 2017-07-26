@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Text;
 using NUnit.Framework;
 
+using DRM.ReferenceEquality;
 
-using PropBagLib;
+//using PropBagLib;
+using DRM.PropBag;
 
 namespace PropBagLib.Tests
 {
@@ -20,9 +22,9 @@ namespace PropBagLib.Tests
         public void Create()
         {
             // Create
-            mod1 = new RefEqualityModel(PropBagTypeSafetyModeEnum.AllPropsMustBeRegistered);
+            mod1 = new RefEqualityModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
 
-            mod1.SubscribeToPropChanged<string>("PropString", DoWhenUpdatedExt);
+            mod1.SubscribeToPropChanged<string>(DoWhenUpdatedExt, "PropString");
         }
 
         [Test]

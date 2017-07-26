@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading;
 
-namespace PropBagLib
+namespace DRM.ReferenceEquality
 {
 
     ///<remarks>

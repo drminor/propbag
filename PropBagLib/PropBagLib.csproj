@@ -39,18 +39,24 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="INotifyPropertyWithValsChanged.cs" />
     <Compile Include="PropBag.cs" />
     <Compile Include="PropBagTypeSafetyModeEnum.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PropertyChangedWithValsEventArgs.cs" />
-    <Compile Include="PropertyChangedWithValsHandler.cs" />
-    <Compile Include="ReferenceEqualityComparer.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="CPOL.htm">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\NotifyPropChangedWithVals\Inpwv.csproj">
+      <Project>{18580a49-4d08-4b0d-9a2e-4ed38891c63b}</Project>
+      <Name>Inpwv</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ReferenceEquality\ReferenceEquality.csproj">
+      <Project>{7d01bb96-f2c9-45a3-ab94-3c03a66b5937}</Project>
+      <Name>ReferenceEquality</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -3,7 +3,8 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 
-using PropBagLib;
+using DRM.PropBag;
+//using PropBagLib;
 using System.Collections.ObjectModel;
 
 
@@ -11,7 +12,7 @@ namespace PropBagLib.Tests
 {
     public partial class SetAndGetModel : PropBag
     {
-        public SetAndGetModel(PropBagTypeSafetyModeEnum typeSafetyMode) : base(typeSafetyMode)
+        public SetAndGetModel(PropBagTypeSafetyMode typeSafetyMode) : base(typeSafetyMode)
         {
             AddProp<object>("PropObject", initalValue:null);
 
@@ -24,7 +25,7 @@ namespace PropBagLib.Tests
 
         public bool ItGotUpdated = false;
 
-        public RefEqualityModel(PropBagTypeSafetyModeEnum typeSafetyMode) : base(typeSafetyMode)
+        public RefEqualityModel(PropBagTypeSafetyMode typeSafetyMode) : base(typeSafetyMode)
         {
             AddProp<string>("PropString", useReferenceEquality: true, doIfChanged: DoWhenUpdated, doAfterNotify: false, initalValue: "Test");
         }
@@ -41,7 +42,7 @@ namespace PropBagLib.Tests
 
         public bool ItGotUpdated = false;
 
-        public NullableModel(PropBagTypeSafetyModeEnum typeSafetyMode)
+        public NullableModel(PropBagTypeSafetyMode typeSafetyMode)
             : base(typeSafetyMode)
         {
             AddProp<Nullable<int>>("PropNullableInt", doIfChanged: DoWhenUpdated, doAfterNotify: false, comparer: null, initalValue: new Nullable<int>());
@@ -63,7 +64,8 @@ namespace PropBagLib.Tests
 
     public partial class SandGLoosetModel : PropBag
     {
-        public SandGLoosetModel(PropBagTypeSafetyModeEnum typeSafetyMode) : base(typeSafetyMode)
+        public SandGLoosetModel(PropBagTypeSafetyMode typeSafetyMode)
+            : base(typeSafetyMode)
         {
             AddProp<object>("PropObject", initalValue: null);
 
