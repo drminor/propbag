@@ -27,7 +27,7 @@ namespace PropBagLib.Tests
 
         public RefEqualityModel(PropBagTypeSafetyMode typeSafetyMode) : base(typeSafetyMode)
         {
-            AddProp<string>("PropString", useReferenceEquality: true, doIfChanged: DoWhenUpdated, doAfterNotify: false, initalValue: "Test");
+            AddPropObjComp<string>("PropString", doIfChanged: DoWhenUpdated, doAfterNotify: false, comparer: null, initalValue: "Test");
         }
 
         public void DoWhenUpdated(string oldVal, string newVal)
@@ -47,7 +47,7 @@ namespace PropBagLib.Tests
         {
             AddProp<Nullable<int>>("PropNullableInt", doIfChanged: DoWhenUpdated, doAfterNotify: false, comparer: null, initalValue: new Nullable<int>());
 
-            AddProp<ICollection<int>>("PropICollectionInt", doIfChanged: DoWhenUpdatedCol, doAfterNotify:false, comparer:null, initalValue: new Collection<int>());
+            AddPropObjComp<ICollection<int>>("PropICollectionInt", doIfChanged: DoWhenUpdatedCol, doAfterNotify: false, comparer: null, initalValue: new Collection<int>());
         }
 
         public void DoWhenUpdated(Nullable<int> oldVal, Nullable<int> newVal)

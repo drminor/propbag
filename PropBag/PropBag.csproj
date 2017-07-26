@@ -39,6 +39,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PropRefComp..cs" />
     <Compile Include="Prop.cs" />
     <Compile Include="IProp.cs" />
     <Compile Include="PropBag.cs" />

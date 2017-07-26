@@ -457,10 +457,10 @@ namespace DRM.PropBag
             tVals.Add(propertyName, ValueWithType.Create<T>(initalValue, doIfChanged, doAfterNotify, comparer));
         }
 
-        public void AddProp<T>(string propertyName, bool useReferenceEquality, Action<T, T> doIfChanged, bool doAfterNotify = false,
-             T initalValue = default(T))
+        public void AddPropObjComp<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false,
+            IEqualityComparer<object> comparer = null, T initalValue = default(T))
         {
-            tVals.Add(propertyName, ValueWithType.CreateWithRefEquality(initalValue, doIfChanged, doAfterNotify));
+            tVals.Add(propertyName, ValueWithType.CreateWithObjComparer(initalValue, doIfChanged, doAfterNotify, comparer));
         }
 
         public void AddProp<T>(string propertyName, T initalValue = default(T))
@@ -473,9 +473,9 @@ namespace DRM.PropBag
             tVals.Add(propertyName, ValueWithType.Create<T>(initalValue, null, false, comparer));
         }
 
-        public void AddProp<T>(string propertyName, bool useReferenceEquality, T initalValue = default(T))
+        public void AddPropObjComp<T>(string propertyName, IEqualityComparer<object> comparer, T initalValue = default(T))
         {
-            tVals.Add(propertyName, ValueWithType.CreateWithRefEquality<T>(initalValue));
+            tVals.Add(propertyName, ValueWithType.CreateWithObjComparer<T>(initalValue, null, false, comparer));
         }
 
         #endregion
@@ -615,13 +615,15 @@ namespace DRM.PropBag
 
             static public ValueWithType Create<T>(T value, Action<T,T> doWhenChanged = null, bool doAfterNotify = false, IEqualityComparer<T> comparer = null)
             {
+                // Use the implementation which takes IEqualityComparer<T>
                 Prop<T> prop = new Prop<T>(value, doWhenChanged, doAfterNotify, comparer);
                 return new ValueWithType(typeof(T), prop, typeIsSolid: true);
             }
 
-            static public ValueWithType CreateWithRefEquality<T>(T value, Action<T, T> doWhenChanged = null, bool doAfterNotify = false)
+            static public ValueWithType CreateWithObjComparer<T>(T value, Action<T, T> doWhenChanged = null, bool doAfterNotify = false, IEqualityComparer<object> comparer = null)
             {
-                Prop<T> prop = new Prop<T>(value, doWhenChanged, doAfterNotify, useReferenceEquality: true);
+                // Use the Implementation which takes IEqualityComparer<object>
+                PropObjComp<T> prop = new PropObjComp<T>(value, doWhenChanged, doAfterNotify);
                 return new ValueWithType(typeof(T), prop, typeIsSolid: true);
             }
 

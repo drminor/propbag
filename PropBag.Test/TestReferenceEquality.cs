@@ -130,9 +130,10 @@ namespace PropBagLib.Tests
             Assert.That(ReferenceEqualityComparer.Default.Equals(before, after), Is.EqualTo(false));
 
             // The current value is the same reference as the value used to set it last.
+
             Assert.That(ReferenceEqualityComparer.Default.Equals(after, testAfter), Is.EqualTo(true), "After and testAfter refer to different addresses.");
 
-            // PropBag is using reference comparison and did discover a change, and did call our callback method.
+            // PropBag is using reference comparison and did discover a change (before != after), and did call our callback method.
             Assert.That(mod1.ItGotUpdated, Is.EqualTo(true));
         }
 
