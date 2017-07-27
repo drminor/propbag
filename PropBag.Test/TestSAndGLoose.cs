@@ -22,7 +22,6 @@ namespace PropBagLib.Tests
         const string PROP_STRING = "PropString";
         const string PROP_NEW = "PropNotDeclared";
 
-
         private SandGLoosetModel mod1;
 
         [OneTimeSetUp]
@@ -31,9 +30,10 @@ namespace PropBagLib.Tests
         {
             // Create
             mod1 = new SandGLoosetModel(PropBagTypeSafetyMode.Loose);
-            //Action<string, string> f = this.DoWhenUpdatedExt;
             mod1.SubscribeToPropStringChanged = this.DoWhenUpdatedExt;
         }
+
+
 
         [Test]
         public void ShouldSAndGLooseBool()

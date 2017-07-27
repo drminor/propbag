@@ -8,17 +8,34 @@ using DRM.ReferenceEquality;
 
 namespace DRM.PropBag
 {
-    public class PropObjComp<T> : IProp<T>
+
+    public class PropExternStoreObjComp<T> : IProp<T>
     {
-        public PropObjComp(T curValue, Action<T,T> doWhenChanged, bool doAfterNotify, IEqualityComparer<object> comparer = null)
+        public PropExternStoreObjComp(Guid tag, GetExtVal<T> getter, SetExtVal<T> setter, Action<T, T> doWhenChanged, bool doAfterNotify, IEqualityComparer<object> comparer)
         {
-            Value = curValue;
+            Tag = tag;
+            Getter = getter;
+            Setter = setter;
             DoWHenChanged = doWhenChanged;
             DoAfterNotify = doAfterNotify;
             Comparer = comparer ?? ReferenceEqualityComparer.Default;
         }
 
-        public T Value { get; set; }
+        public T Value {
+            get
+            {
+                return Getter(Tag);
+            }
+            set
+            {
+                Setter(Tag, value);
+            }
+        }
+
+        public Guid Tag { get; private set; }
+        private GetExtVal<T> Getter { get; set; }
+        private SetExtVal<T> Setter { get; set; }
+
         public Action<T, T> DoWHenChanged { get; set; }
         public IEqualityComparer<object> Comparer { get; private set; }
         public bool DoAfterNotify { get; set; }
@@ -34,6 +51,11 @@ namespace DRM.PropBag
         public bool CompareTo(T newValue)
         {
             return Comparer.Equals(newValue, Value);
+        }
+
+        public bool Compare(T val1, T val2)
+        {
+            return Comparer.Equals(val1, val2);
         }
 
     }

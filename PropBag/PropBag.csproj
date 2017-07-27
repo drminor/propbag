@@ -39,7 +39,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="PropRefComp..cs" />
+    <Compile Include="ExtValDelegates.cs" />
+    <Compile Include="PropExternStoreObjComp.cs" />
+    <Compile Include="PropNoStoreObjComp.cs" />
+    <Compile Include="PropNoStore.cs" />
+    <Compile Include="PropExternStore.cs" />
+    <Compile Include="PropObjComp..cs" />
     <Compile Include="Prop.cs" />
     <Compile Include="IProp.cs" />
     <Compile Include="PropBag.cs" />

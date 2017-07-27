@@ -297,7 +297,7 @@ namespace PropBagLib
 
             if (!theSame)
             {
-                RaisePropertyChangingEvent(propertyName);
+                OnPropertyChanging(propertyName);
 
                 // Save the value before the update.
                 object oldVal = vwt.Value;
@@ -310,8 +310,8 @@ namespace PropBagLib
                     if (vwt.DoAfterNotify)
                     {
                         //Raise the event -- Then the call back.
-                        RaisePropertyChangedEvent(propertyName);
-                        RaisePropertyChangedWithValsEvent(propertyName, oldVal, value);
+                        OnPropertyChanged(propertyName);
+                        OnPropertyChangedWithVals(propertyName, oldVal, value);
 
                         vwt.DoCallBack(oldVal, value);
                     }
@@ -320,15 +320,15 @@ namespace PropBagLib
                         // Run the call back -- then raise the event.
                         vwt.DoCallBack(oldVal, value);
 
-                        RaisePropertyChangedEvent(propertyName);
-                        RaisePropertyChangedWithValsEvent(propertyName, oldVal, value);
+                        OnPropertyChanged(propertyName);
+                        OnPropertyChangedWithVals(propertyName, oldVal, value);
                     }
                 }
                 else
                 {
                     //Raise the event
-                    RaisePropertyChangedEvent(propertyName);
-                    RaisePropertyChangedWithValsEvent(propertyName, oldVal, value);
+                    OnPropertyChanged(propertyName);
+                    OnPropertyChangedWithVals(propertyName, oldVal, value);
                 }
             }
         }
@@ -408,14 +408,14 @@ namespace PropBagLib
                 T oldValueSaved = oldValue;
 
                 // Let callers know we are about to make the change. This gives them a chance to grab the current value. 
-                RaisePropertyChangingEvent(propertyName);
+                OnPropertyChanging(propertyName);
 
                 // Make the update.
                 oldValue = newValue;
 
                 //Raise the event 
-                RaisePropertyChangedEvent(propertyName);
-                RaisePropertyChangedWithValsEvent(propertyName, oldValueSaved, newValue);
+                OnPropertyChanged(propertyName);
+                OnPropertyChangedWithVals(propertyName, oldValueSaved, newValue);
             }
 
             //Signal what happened. 
@@ -423,7 +423,7 @@ namespace PropBagLib
         }
 
         // Raise Standard Events
-        protected void RaisePropertyChangedEvent(string propertyName)
+        protected void OnPropertyChanged(string propertyName)
         {
             PropertyChangedEventHandler handler = Interlocked.CompareExchange(ref PropertyChanged, null, null);
 
@@ -431,7 +431,7 @@ namespace PropBagLib
                 handler(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        protected void RaisePropertyChangingEvent([System.Runtime.CompilerServices.CallerMemberName]string propertyName = null)
+        protected void OnPropertyChanging([System.Runtime.CompilerServices.CallerMemberName]string propertyName = null)
         {
             PropertyChangingEventHandler handler = Interlocked.CompareExchange(ref PropertyChanging, null, null);
 
@@ -439,8 +439,8 @@ namespace PropBagLib
                 handler(this, new PropertyChangingEventArgs(propertyName));
         }
 
-        // Raise Type Events
-        protected void RaisePropertyChangedWithValsEvent(string propertyName, object oldVal, object newVal)
+        // Raise Typed Event
+        protected void OnPropertyChangedWithVals(string propertyName, object oldVal, object newVal)
         {
             PropertyChangedWithValsHandler handler = Interlocked.CompareExchange(ref PropertyChangedWithVals, null, null);
 

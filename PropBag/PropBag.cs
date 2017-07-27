@@ -35,12 +35,14 @@ namespace DRM.PropBag
 
     public class PropBag : INotifyPropertyChanged, INotifyPropertyChanging, INotifyPropertyChangedWithVals
     {
+        #region Member Declarations
+
         // TO-DOC: Explain since we may subscribe to our own events we would like to have these initialized.
         // confirm that on post construction events are initialized for us if we don't
         // alternative could be that they are initialized on first assignment.
-        public event PropertyChangedEventHandler PropertyChanged = delegate { };
-        public event PropertyChangingEventHandler PropertyChanging = delegate { };
-        public event PropertyChangedWithValsHandler PropertyChangedWithVals = delegate { };
+        public event PropertyChangedEventHandler PropertyChanged; // = delegate { };
+        public event PropertyChangingEventHandler PropertyChanging; // = delegate { };
+        public event PropertyChangedWithValsHandler PropertyChangedWithVals; // = delegate { };
 
         private readonly Dictionary<string, ValueWithType> tVals;
 
@@ -58,6 +60,8 @@ namespace DRM.PropBag
         /// Used to create Delegates when the type of the value is not known at run time.
         /// </summary>
         static Type GMT_TYPE = typeof(GenericMethodTemplates);
+
+        #endregion
 
         #region Constructor
 
@@ -118,9 +122,9 @@ namespace DRM.PropBag
 
         #endregion
 
-        #region Public Methods and Properties
+        #region Protected Methods and Properties
 
-        public object this[string propertyName]
+        protected object this[string propertyName]
         {
             get
             {
@@ -132,7 +136,7 @@ namespace DRM.PropBag
             }
         }
 
-        public object GetIt([CallerMemberName] string propertyName = null)
+        protected object GetIt([CallerMemberName] string propertyName = null)
         {
             // This will throw an exception if no value has been added to the _tVals dictionary with a key of propertyName,
             // either by calling AddProp or SetIt.
@@ -142,7 +146,7 @@ namespace DRM.PropBag
             return vwt.Value;
         }
 
-        public T GetIt<T>([CallerMemberName] string propertyName = null)
+        protected T GetIt<T>([CallerMemberName] string propertyName = null)
         {
             // This will throw an exception if no value has been added to the _tVals dictionary with a key of propertyName,
             // either by calling AddProp or SetIt.
@@ -152,7 +156,7 @@ namespace DRM.PropBag
             return prop.Value;
         }
 
-        public void SetIt(object value, [CallerMemberName] string propertyName = null)
+        protected void SetIt(object value, [CallerMemberName] string propertyName = null)
         {
             ValueWithType vwt;
             try
@@ -179,13 +183,23 @@ namespace DRM.PropBag
 
             if (value != null)
             {
-                Type newType = value.GetType();
-                if (!vwt.TypeIsSolid) //  && newType != typeof(object) && (null != Nullable.GetUnderlyingType(newType)))
+                if (!vwt.TypeIsSolid) 
                 {
-                    MakeTypeSolid(propertyName, vwt, value, newType);
+                    try
+                    {
+                        // TODO, we probably need to be more creative when determining the type of this new value.
+                        Type newType = value.GetType();
+                        MakeTypeSolid(vwt, newType);
+                    }
+                    catch (InvalidCastException ice)
+                    {
+                        throw new ApplicationException(string.Format("The property: {0} was originally set to null, now its being set to a value whose type is a value type; value types don't allow setting to null.", propertyName),ice);
+                    }
                 }
                 else
                 {
+                    // Object.GetType() is sufficent here, since AreTypesSame will handle comparison nuances.
+                    Type newType = value.GetType();
                     if (!AreTypesSame(newType, vwt.Type))
                     {
                         throw new ApplicationException(string.Format("Attempting to set property: {0} whose type is {1}, with a call whose type parameter is {2} is invalid.", propertyName, vwt.Type.ToString(), newType.ToString()));
@@ -205,17 +219,7 @@ namespace DRM.PropBag
             setProDel(value, this, propertyName, vwt.Prop);
         }
 
-
-        private DoSetDelegate GetPropSetterDelegate(ValueWithType vwt)
-        {
-            if (vwt.DoSetProVal == null)
-            {
-                vwt.DoSetProVal = GetDoSetDelegate(vwt.Type);
-            }
-            return vwt.DoSetProVal;
-        }
-
-        public void SetIt<T>(T value, [CallerMemberName] string propertyName = null)
+        protected void SetIt<T>(T value, [CallerMemberName] string propertyName = null)
         {
             ValueWithType vwt;
 
@@ -237,15 +241,20 @@ namespace DRM.PropBag
                 return;
             }
 
-            Type newType = typeof(T);
-
-            if (!vwt.TypeIsSolid && value != null) //  && newType != typeof(object) && (null != Nullable.GetUnderlyingType(newType)))
+            if (!vwt.TypeIsSolid)
             {
-                MakeTypeSolid(propertyName, vwt, value, newType);
+                try
+                {
+                    MakeTypeSolid(vwt, typeof(T));
+                }
+                catch (InvalidCastException ice)
+                {
+                    throw new ApplicationException(string.Format("The property: {0} was originally set to null, now its being set to a value whose type is a value type; value types don't allow setting to null.", propertyName),ice);
+                }
             }
             else
             {
-                if (!AreTypesSame(newType, vwt.Type))
+                if (!AreTypesSame(typeof(T), vwt.Type))
                 {
                     throw new ApplicationException(string.Format("Attempting to set property: {0} whose type is {1}, with a call whose type parameter is {2} is invalid.", propertyName, vwt.Type.ToString(), typeof(T).ToString()));
                 }
@@ -254,16 +263,73 @@ namespace DRM.PropBag
             DoSet(value, propertyName, (IProp<T>)vwt.Prop);
         }
 
-        public void SubscribeToPropChanged<T>(Action<T, T> doOnChange, [CallerMemberName] string propertyName = null)
+        /// <summary>
+        /// For use when the Property Bag's internal storage is not appropriate. This allows
+        /// the property implementor to use a backing store of their choice.
+        /// The property must be registered with a call to AddPropNoStore.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="newValue">The new value to use to update the property. No operation will be performed if this value is the same as the current value.</param>
+        /// <param name="curValue">The current value of the property, must be specified using the ref keyword.</param>
+        /// <param name="propertyName"></param>
+        /// <returns>True if the value was updated, otherwise false.</returns>
+        protected bool SetIt<T>(T newValue, ref T curValue, [CallerMemberName]string propertyName = null)
+        {
+            ValueWithType vwt;
+
+            try
+            {
+                vwt = GetValueWithType(propertyName);
+            }
+            catch (KeyNotFoundException)
+            {
+                throw new ApplicationException(string.Format("Property: {0} has not been defined with a call to AddProp().", propertyName));
+            }
+
+            IProp<T> prop = (IProp<T>)vwt.Prop;
+
+            bool theSame = prop.Compare(newValue, curValue);
+
+            if (!theSame)
+            {
+                // Save the value before the update.
+                T oldValue = curValue;
+
+                OnPropertyChanging(propertyName);
+
+                // Make the update.
+                curValue = newValue;
+
+                // Raise notify events.
+                DoNotifyWork<T>(oldValue, newValue, propertyName, prop);
+            }
+
+            // Return true, if the new value was found to be different than the current value.
+            return !theSame;
+        }
+
+        protected void SubscribeToPropChanged<T>(Action<T, T> doOnChange, [CallerMemberName] string propertyName = null)
         {
             ValueWithType vwt = GetValueWithType(propertyName);
 
-            // TODO: Figure out how to handle when the registered type is not solid.
-
-            // Make sure that the Action type is the same as the type registerd for this property.
-            if (!AreTypesSame(typeof(T), vwt.Type))
+            if (!vwt.TypeIsSolid)
             {
-                throw new ApplicationException(string.Format("Attempting to subscribe to PropChanged for property: {0} whose type is {1}, with a call whose type parameter is {2} is invalid.", propertyName, vwt.Type.ToString(), typeof(T).ToString()));
+                try
+                {
+                    MakeTypeSolid(vwt, typeof(T));
+                }
+                catch (InvalidCastException ice)
+                {
+                    throw new ApplicationException(string.Format("The property: {0} was originally set to null, now a subscription to propChanged is being made with an action whose parameters' type is a value type; value types don't allow setting to null.", propertyName), ice);
+                }
+            }
+            else
+            {
+                // Make sure that the Action type is the same as the type registerd for this property.
+                if (!AreTypesSame(typeof(T), vwt.Type))
+                {
+                    throw new ApplicationException(string.Format("Attempting to subscribe to PropChanged for property: {0} whose type is {1}, with a call whose type parameter is {2} is invalid.", propertyName, vwt.Type.ToString(), typeof(T).ToString()));
+                }
             }
 
             PropertyChangedWithValsHandler handler = (s, e) =>
@@ -280,22 +346,10 @@ namespace DRM.PropBag
             vwt.PropChangedWithValsHandlerList.Add(handler);
         }
 
-        // This is protected, since public callers would know how to prepare the name of the property declaration from which this call is made.
         protected void ConnectToPropChanged<T>(Action<T, T> doOnChange, [CallerMemberName] string subToPropertyName = null)
         {
             string propertyName = GetPropNameFromSubTo(subToPropertyName);
             SubscribeToPropChanged<T>(doOnChange, propertyName);
-        }
-
-        /// <summary>
-        /// Given a string in the form "SubscribeTo{0}Changed", where {0} is the underlying property name, parse out and return the value of {0}.
-        /// </summary>
-        /// <param name="x"></param>
-        /// <returns></returns>
-        private string GetPropNameFromSubTo(string x)
-        {
-            //SubscribeToPropStringChanged
-            return x.Substring(11, x.Length - 18);
         }
 
         public bool PropertyExists([CallerMemberName] string propertyName = null)
@@ -308,7 +362,7 @@ namespace DRM.PropBag
             return GetValueWithType(propertyName).Type;
         }
 
-        public List<PropertyChangedWithValsHandler> GetPropChangedWithValsHandlers([CallerMemberName] string propertyName = null)
+        protected List<PropertyChangedWithValsHandler> GetPropChangedWithValsHandlers([CallerMemberName] string propertyName = null)
         {
             return GetValueWithType(propertyName).PropChangedWithValsHandlerList;
         }
@@ -316,7 +370,7 @@ namespace DRM.PropBag
         /// <summary>
         /// Returns all of the values in dictionary of objects, keyed by PropertyName.
         /// </summary>
-        public IDictionary<string, object> GetAll
+        protected IDictionary<string, object> GetAllPropertyValues
         {
             // This uses reflection.
             get
@@ -335,68 +389,79 @@ namespace DRM.PropBag
 
         #region Private Methods and Properties
 
-        private void DoSet<T>(T value, string propertyName, IProp<T> prop)
+        private void DoSet<T>(T newValue, string propertyName, IProp<T> prop)
         {
-            bool theSame = prop.CompareTo(value);
+            bool theSame = prop.CompareTo(newValue);
 
             if (!theSame)
             {
-                RaisePropertyChangingEvent(propertyName);
-
                 // Save the value before the update.
-                T oldVal = prop.Value;
+                T oldValue = prop.Value;
+
+                OnPropertyChanging(propertyName);
 
                 // Make the update.
-                prop.Value = value;
+                prop.Value = newValue;
 
-                if (prop.HasCallBack) 
-                {
-                    if (prop.DoAfterNotify)
-                    {
-                        //Raise the event -- Then the call back.
-                        RaisePropertyChangedEvent(propertyName);
-                        RaisePropertyChangedWithValsEvent(propertyName, oldVal, value);
-
-                        prop.DoWHenChanged(oldVal, value);
-                    }
-                    else
-                    {
-                        // Run the call back -- then raise the event.
-                        prop.DoWHenChanged(oldVal, value);
-
-                        RaisePropertyChangedEvent(propertyName);
-                        RaisePropertyChangedWithValsEvent(propertyName, oldVal, value);
-                    }
-                }
-                else
-                {
-                    //Raise the event
-                    RaisePropertyChangedEvent(propertyName);
-                    RaisePropertyChangedWithValsEvent(propertyName, oldVal, value);
-                }
+                // Raise notify events.
+                DoNotifyWork(oldValue, newValue, propertyName, prop);
             }
         }
 
-
-        private ValueWithType GetValueWithType(string propertyName)
+        private void DoNotifyWork<T>(T oldVal, T newValue, string propertyName, IProp<T> prop)
         {
-            if (propertyName == null) throw new ArgumentNullException("propertyName", "PropertyName is null on call to GetValue.");
-            return tVals[propertyName];
+            if (prop.HasCallBack)
+            {
+                if (prop.DoAfterNotify)
+                {
+                    // Raise the changed events,
+                    OnPropertyChanged(propertyName);
+                    OnPropertyChangedWithVals(propertyName, oldVal, newValue);
+
+                    // then perform the call back.
+                    prop.DoWHenChanged(oldVal, newValue);
+                }
+                else
+                {
+                    // Peform the call back,
+                    prop.DoWHenChanged(oldVal, newValue);
+
+                    // then raise the changed events 
+                    OnPropertyChanged(propertyName);
+                    OnPropertyChangedWithVals(propertyName, oldVal, newValue);
+                }
+            }
+            else
+            {
+                //Raise the changed events 
+                OnPropertyChanged(propertyName);
+                OnPropertyChangedWithVals(propertyName, oldVal, newValue);
+            }
+
         }
 
-        /// <summary>
-        /// Updates the ValueWithType instance
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="value"></param>
-        private void MakeTypeSolid(string propertyName, ValueWithType vwt, object newValue, Type newType)
+        private ValueWithType GetValueWithType(string propertyName, bool? desiredHasStoreValue = true)
+        {
+            if (propertyName == null) throw new ArgumentNullException("propertyName", "PropertyName is null on call to GetValue.");
+            ValueWithType vwt = tVals[propertyName];
+
+            if (desiredHasStoreValue.HasValue && desiredHasStoreValue.Value != vwt.HasStore)
+            {
+                if (desiredHasStoreValue.Value)
+                    //Caller needs property to have a backing store.
+                    throw new InvalidOperationException(string.Format("Property: {0} has no backing store held by this instance of PropBag. This operation can only be performed on properties for which a backing store is held by this instance.", propertyName));
+                else
+                    throw new InvalidOperationException(string.Format("Property: {0} has a backing store held by this instance of PropBag. This operation can only be performed on properties for which no backing store is kept by PropBag.", propertyName));
+            }
+
+            return vwt;
+        }
+
+        private void MakeTypeSolid(ValueWithType vwt, Type newType)
         {
             Type currentType = vwt.Type;
 
-            // This is the value from the current prop, using the current type.
-            object value = vwt.Value;
-            if (value != null) throw new ApplicationException(string.Format("The current value of property: {0} should be null when MakeTypeSolid is called.", propertyName));
-
+            Debug.Assert(vwt.Value == null, "The current value of the property should be null when MakeTypeSolid is called.");
 
             System.Type underlyingtype = Nullable.GetUnderlyingType(newType);
 
@@ -404,11 +469,15 @@ namespace DRM.PropBag
             // If it is, then it was invalid to set this property to null in the first place.
             // Consider setting value to the type's default value instead of throwing this exception.
             if (underlyingtype == null && newType.IsValueType)
-                throw new ApplicationException(string.Format("The property: {0} was originally set to null, now its being set to a value whose type is a value type; value types don't allow setting to null.", propertyName));
+                throw new InvalidCastException("The new type is a non-nullable value type.");
 
+            // We are using strict equality here, since we have the oportunity to update the type to anything
+            // that is assignable from a value of type object (which is everything.)
             if (newType != currentType)
             {
-                vwt.UpdateWithSolidType(newValue, value);
+                // Next statement uses reflection.
+                object curValue = vwt.Value;
+                vwt.UpdateWithSolidType(newType, curValue);
             }
         }
 
@@ -437,6 +506,26 @@ namespace DRM.PropBag
             }
         }
 
+        private DoSetDelegate GetPropSetterDelegate(ValueWithType vwt)
+        {
+            if (vwt.DoSetProVal == null)
+            {
+                vwt.DoSetProVal = GetDoSetDelegate(vwt.Type);
+            }
+            return vwt.DoSetProVal;
+        }
+
+        /// <summary>
+        /// Given a string in the form "SubscribeTo{0}Changed", where {0} is the underlying property name, parse out and return the value of {0}.
+        /// </summary>
+        /// <param name="x"></param>
+        /// <returns></returns>
+        private string GetPropNameFromSubTo(string x)
+        {
+            //SubscribeToPropStringChanged
+            return x.Substring(11, x.Length - 18);
+        }
+
         #endregion
 
         #region Add Prop Methods
@@ -463,6 +552,26 @@ namespace DRM.PropBag
             tVals.Add(propertyName, ValueWithType.CreateWithObjComparer(initalValue, doIfChanged, doAfterNotify, comparer));
         }
 
+        // This allow the caller to use their own storage to hold the value.
+        public Guid AddPropExtStore<T>(string propertyName, GetExtVal<T> getter, SetExtVal<T> setter, IEqualityComparer<T> comparer)
+        {
+            Guid tag = Guid.NewGuid();
+            tVals.Add(propertyName, ValueWithType.CreateWithCustStore<T>(tag, getter, setter, comparer));
+
+            return tag;
+        }
+
+        //-- Need ExtStore with ObjComp
+
+        public void AddPropNoStore<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false,
+            IEqualityComparer<T> comparer = null)
+        {
+            tVals.Add(propertyName, ValueWithType.CreateWithNoStore<T>(doIfChanged, doAfterNotify, comparer));
+        }
+
+        //-- Need NoStore with ObjComp
+
+        // The remainder of the AddProp variants are "sugar" -- they allow for abbreviated calls to what is provided above.
         public void AddProp<T>(string propertyName, T initalValue = default(T))
         {
             tVals.Add(propertyName, ValueWithType.Create<T>(initalValue));
@@ -478,49 +587,13 @@ namespace DRM.PropBag
             tVals.Add(propertyName, ValueWithType.CreateWithObjComparer<T>(initalValue, null, false, comparer));
         }
 
+
         #endregion
 
-        #region Set and Raise Event
-
-        /// <summary>
-        /// For use when the Property Bag's internal storage is not appropriate. This allows
-        /// the property implementor to use a backing store of their choice.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="newValue"></param>
-        /// <param name="oldValue"></param>
-        /// <param name="propertyName"></param>
-        /// <returns>True if the value was updated, otherwise false.</returns>
-        protected bool SetAndRaise<T>(T newValue, ref T oldValue, [System.Runtime.CompilerServices.CallerMemberName]string propertyName = null)
-        {
-            // TODO: Need to provide way for caller to specify comparer<T>
-            // or change to always call, and make it the responsibility of the caller to only call if changed.
-
-            // TO-DOC: Need to document how these values are compared.
-            bool theSame = EqualityComparer<T>.Default.Equals(newValue, oldValue);
-
-            if (!theSame)
-            {
-                // Save the old value. 
-                T oldValueSaved = oldValue;
-
-                // Let callers know we are about to make the change. This gives them a chance to grab the current value. 
-                RaisePropertyChangingEvent(propertyName);
-
-                // Make the update.
-                oldValue = newValue;
-
-                //Raise the event 
-                RaisePropertyChangedEvent(propertyName);
-                RaisePropertyChangedWithValsEvent(propertyName, oldValueSaved, newValue);
-            }
-
-            //Signal what happened. 
-            return !theSame;
-        }
+        #region Methods to Raise Events
 
         // Raise Standard Events
-        protected void RaisePropertyChangedEvent(string propertyName)
+        protected void OnPropertyChanged(string propertyName)
         {
             PropertyChangedEventHandler handler = Interlocked.CompareExchange(ref PropertyChanged, null, null);
 
@@ -528,7 +601,7 @@ namespace DRM.PropBag
                 handler(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        protected void RaisePropertyChangingEvent([System.Runtime.CompilerServices.CallerMemberName]string propertyName = null)
+        protected void OnPropertyChanging([System.Runtime.CompilerServices.CallerMemberName]string propertyName = null)
         {
             PropertyChangingEventHandler handler = Interlocked.CompareExchange(ref PropertyChanging, null, null);
 
@@ -537,7 +610,7 @@ namespace DRM.PropBag
         }
 
         // Raise Type Events
-        protected void RaisePropertyChangedWithValsEvent(string propertyName, object oldVal, object newVal)
+        private void OnPropertyChangedWithVals(string propertyName, object oldVal, object newVal)
         {
             PropertyChangedWithValsHandler handler = Interlocked.CompareExchange(ref PropertyChangedWithVals, null, null);
 
@@ -573,8 +646,9 @@ namespace DRM.PropBag
             static private Type GMT_TYPE = typeof(GenericMethodTemplates);
 
             public Type Type { get; private set; }
-            public object Prop { get; set; }
-            public bool TypeIsSolid { get; set; }
+            public object Prop { get; private set; }
+            public bool TypeIsSolid { get; private set; }
+            public bool HasStore { get; private set; }
 
             public List<PropertyChangedWithValsHandler> PropChangedWithValsHandlerList { get; private set; }
 
@@ -601,11 +675,13 @@ namespace DRM.PropBag
             #endregion
 
             // Constructor
-            public ValueWithType(Type typeOfThisValue, object prop, bool typeIsSolid)
+            public ValueWithType(Type typeOfThisValue, object prop, bool typeIsSolid, bool hasStore = true)
             {
                 Type = typeOfThisValue;
                 Prop = prop;
                 TypeIsSolid = typeIsSolid;
+                HasStore = hasStore;
+
                 PropChangedWithValsHandlerList = new List<PropertyChangedWithValsHandler>();
                 DoGetProVal = null;
                 DoSetProVal = null;
@@ -613,11 +689,11 @@ namespace DRM.PropBag
 
             #region Factory Methods
 
-            static public ValueWithType Create<T>(T value, Action<T,T> doWhenChanged = null, bool doAfterNotify = false, IEqualityComparer<T> comparer = null)
+            static public ValueWithType Create<T>(T value, Action<T,T> doWhenChanged = null, bool doAfterNotify = false, IEqualityComparer<T> comparer = null, bool typeIsSolid = true)
             {
                 // Use the implementation which takes IEqualityComparer<T>
                 Prop<T> prop = new Prop<T>(value, doWhenChanged, doAfterNotify, comparer);
-                return new ValueWithType(typeof(T), prop, typeIsSolid: true);
+                return new ValueWithType(typeof(T), prop, typeIsSolid);
             }
 
             static public ValueWithType CreateWithObjComparer<T>(T value, Action<T, T> doWhenChanged = null, bool doAfterNotify = false, IEqualityComparer<object> comparer = null)
@@ -625,6 +701,34 @@ namespace DRM.PropBag
                 // Use the Implementation which takes IEqualityComparer<object>
                 PropObjComp<T> prop = new PropObjComp<T>(value, doWhenChanged, doAfterNotify);
                 return new ValueWithType(typeof(T), prop, typeIsSolid: true);
+            }
+
+            static public ValueWithType CreateWithCustStore<T>(Guid tag, GetExtVal<T> getter, SetExtVal<T> setter, IEqualityComparer<T> comparer)
+            {
+                // Use the implementation which allow the caller to provide the backing store.
+                PropExternStore<T> prop = new PropExternStore<T>(tag, getter, setter, null, false, comparer);
+                return new ValueWithType(typeof(T), prop, typeIsSolid: true);
+            }
+
+            static public ValueWithType CreateWithCustStoreObjComp<T>(Guid tag, GetExtVal<T> getter, SetExtVal<T> setter, IEqualityComparer<object> comparer)
+            {
+                // Use the implementation which allow the caller to provide the backing store.
+                PropExternStoreObjComp<T> prop = new PropExternStoreObjComp<T>(tag, getter, setter, null, false, comparer);
+                return new ValueWithType(typeof(T), prop, typeIsSolid: true);
+            }
+
+            static public ValueWithType CreateWithNoStore<T>(Action<T, T> doWhenChanged = null, bool doAfterNotify = false, IEqualityComparer<T> comparer = null)
+            {
+                // Use the implementation which uses no backing store. The caller can only update using call to SetIt<T> where the current and new values are provided.
+                PropNoStore<T> prop = new PropNoStore<T>(doWhenChanged, doAfterNotify, comparer);
+                return new ValueWithType(typeof(T), prop, typeIsSolid: true, hasStore: false);
+            }
+
+            static public ValueWithType CreateWithNoStoreObjComp<T>(Action<T, T> doWhenChanged = null, bool doAfterNotify = false, IEqualityComparer<object> comparer = null)
+            {
+                // Use the implementation which uses no backing store. The caller can only update using call to SetIt<T> where the current and new values are provided.
+                PropNoStoreObjComp<T> prop = new PropNoStoreObjComp<T>(doWhenChanged, doAfterNotify, comparer);
+                return new ValueWithType(typeof(T), prop, typeIsSolid: true, hasStore: false);
             }
 
             static public ValueWithType CreateValueInferType(object value)
@@ -644,8 +748,7 @@ namespace DRM.PropBag
                 }
 
                 CreateVWTDelegate createValWithType = GetVWTCreator(typeOfThisValue);
-                ValueWithType vwt = createValWithType(value);
-                vwt.TypeIsSolid = typeIsSolid;
+                ValueWithType vwt = createValWithType(value, typeIsSolid);
 
                 return vwt;
             }
@@ -665,16 +768,11 @@ namespace DRM.PropBag
                 }
             }
 
-            public void UpdateWithSolidType(object newValue, object curValue)
+            public void UpdateWithSolidType(Type typeOfThisValue, object curValue)
             {
-                Debug.Assert(newValue != null, "NewValue is null on call to UpdateWithSolidType.");
-                Debug.Assert(curValue == null, "CurValue is null on call to UpdateWithSolidType.");
-
-                System.Type typeOfThisValue = newValue.GetType();
-
                 // Create a brand new ValueWithType instance -- we could have created a custom Delegate for this -- but this strategy reuses more code.
                 CreateVWTDelegate vwtCreator = GetVWTCreator(typeOfThisValue);
-                ValueWithType newVwt = vwtCreator(curValue);
+                ValueWithType newVwt = vwtCreator(curValue, true);
 
                 this.Prop = newVwt.Prop;
                 this.Type = typeOfThisValue;
@@ -691,7 +789,7 @@ namespace DRM.PropBag
 
             private delegate object GetPropValDelegate(object prop);
 
-            private delegate ValueWithType CreateVWTDelegate(object value);
+            private delegate ValueWithType CreateVWTDelegate(object value, bool typeIsSolid);
 
             #endregion
 
@@ -724,9 +822,9 @@ namespace DRM.PropBag
                     return ((IProp<T>)prop).Value;
                 }
 
-                private static ValueWithType CreateVWT<T>(object value)
+                private static ValueWithType CreateVWT<T>(object value, bool isTypeSolid)
                 {
-                    return ValueWithType.Create<T>((T)value);
+                    return ValueWithType.Create<T>((T)value, null, false, null, isTypeSolid);
                 }
             }
 

@@ -8,18 +8,35 @@ using DRM.ReferenceEquality;
 
 namespace DRM.PropBag
 {
-    public class Prop<T> : IProp<T>
-    {
 
-        public Prop(T curValue, Action<T,T> doWhenChanged, bool doAfterNotify, IEqualityComparer<T> comparer)
+    public class PropExternStore<T> : IProp<T>
+    {
+        public PropExternStore(Guid tag, GetExtVal<T> getter, SetExtVal<T> setter, Action<T, T> doWhenChanged, bool doAfterNotify, IEqualityComparer<T> comparer)
         {
-            Value = curValue;
+            Tag = tag;
+            Getter = getter;
+            Setter = setter;
             DoWHenChanged = doWhenChanged;
             DoAfterNotify = doAfterNotify;
             Comparer = comparer ?? EqualityComparer<T>.Default;
+
         }
 
-        public T Value { get; set; }
+        public T Value {
+            get
+            {
+                return Getter(Tag);
+            }
+            set
+            {
+                Setter(Tag, value);
+            }
+        }
+
+        public Guid Tag { get; private set; }
+        private GetExtVal<T> Getter { get; set; }
+        private SetExtVal<T> Setter { get; set; }
+
         public Action<T, T> DoWHenChanged { get; set; }
         public IEqualityComparer<T> Comparer { get; private set; }
         public bool DoAfterNotify { get; set; }

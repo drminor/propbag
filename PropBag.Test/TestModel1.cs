@@ -50,6 +50,12 @@ namespace PropBagLib.Tests
             AddPropObjComp<ICollection<int>>("PropICollectionInt", doIfChanged: DoWhenUpdatedCol, doAfterNotify: false, comparer: null, initalValue: new Collection<int>());
         }
 
+        public new object this[string key]
+        {
+            get { return base[key]; }
+            set { base[key] = value; }
+        }
+
         public void DoWhenUpdated(Nullable<int> oldVal, Nullable<int> newVal)
         {
             ItGotUpdated = true;
@@ -80,6 +86,12 @@ namespace PropBagLib.Tests
             AddProp<Uri>("PropUri");
 
             AddProp<Lazy<int>>("PropLazyInt");
+        }
+
+        public new object this[string key]
+        {
+            get { return base[key]; }
+            set { base[key] = value; }
         }
 
 

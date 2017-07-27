@@ -64,6 +64,22 @@ namespace PropBagLib.Tests
             set { SetIt<string>(value); }
         }
 
+        public Action<string, string> SubscribeToPropStringChanged
+        {
+            //get
+            //{
+            //    // TODO: Fix this??
+            //    //return GetPropChangedWithValsHandlers();
+            //    return null;
+            //}
+            set
+            {
+                ConnectToPropChanged(value);
+            }
+        }
+
+
+
     }
 
     public partial class NullableModel

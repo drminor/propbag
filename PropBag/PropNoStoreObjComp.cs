@@ -8,20 +8,29 @@ using DRM.ReferenceEquality;
 
 namespace DRM.PropBag
 {
-    public class Prop<T> : IProp<T>
+    public class PropNoStoreObjComp<T> : IProp<T>
     {
-
-        public Prop(T curValue, Action<T,T> doWhenChanged, bool doAfterNotify, IEqualityComparer<T> comparer)
+        public PropNoStoreObjComp(Action<T, T> doWhenChanged, bool doAfterNotify, IEqualityComparer<object> comparer)
         {
-            Value = curValue;
             DoWHenChanged = doWhenChanged;
             DoAfterNotify = doAfterNotify;
-            Comparer = comparer ?? EqualityComparer<T>.Default;
+            Comparer = comparer ?? ReferenceEqualityComparer.Default;
         }
 
-        public T Value { get; set; }
+        public T Value
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+            set
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         public Action<T, T> DoWHenChanged { get; set; }
-        public IEqualityComparer<T> Comparer { get; private set; }
+        public IEqualityComparer<object> Comparer { get; private set; }
         public bool DoAfterNotify { get; set; }
 
         public bool HasCallBack
@@ -34,7 +43,7 @@ namespace DRM.PropBag
 
         public bool CompareTo(T newValue)
         {
-            return Comparer.Equals(newValue, Value);
+            throw new NotImplementedException();
         }
 
         public bool Compare(T val1, T val2)
