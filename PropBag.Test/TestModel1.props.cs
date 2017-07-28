@@ -64,21 +64,10 @@ namespace PropBagLib.Tests
             set { SetIt<string>(value); }
         }
 
-        public Action<string, string> SubscribeToPropStringChanged
+        public void SubscribeToPropStringChanged(Action<string, string> action)
         {
-            //get
-            //{
-            //    // TODO: Fix this??
-            //    //return GetPropChangedWithValsHandlers();
-            //    return null;
-            //}
-            set
-            {
-                ConnectToPropChanged(value);
-            }
+            SubscribeToPropChanged<string>(action, "PropString");
         }
-
-
 
     }
 
@@ -100,23 +89,9 @@ namespace PropBagLib.Tests
     public partial class SandGLoosetModel
     {
 
-        public Action<string, string> SubscribeToPropStringChanged
+        public void SubscribeToPropStringChanged(Action<string, string> action)
         {
-            //get
-            //{
-            //    // TODO: Fix this??
-            //    //return GetPropChangedWithValsHandlers();
-            //    return null;
-            //}
-            set
-            {
-                //if (value.Count < 1) throw new ApplicationException("The list is empty.");
-                //foreach (Action<string, string> h in value)
-                //{
-                //    ConnectToPropChanged(h);
-                //}
-                ConnectToPropChanged(value);
-            }
+            SubscribeToPropChanged<string>(action, "PropString");
         }
 
         public object PropObject

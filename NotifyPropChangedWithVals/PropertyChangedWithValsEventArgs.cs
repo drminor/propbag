@@ -11,7 +11,7 @@ namespace DRM.Ipnwv
     /// Provides typed value change information for the <see cref="INotifyPropertyChanged.PropertyChanged"/> event.
     /// </summary>
     /// <typeparam name="T">The type of the property that changed.</typeparam>
-    public class PropertyChangedWithValsEventArgs<T> : PropertyChangedEventArgs
+    public class PropertyChangedWithTValsEventArgs<T> : PropertyChangedEventArgs
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="PropertyChangedEventArgs{T}"/> class.
@@ -19,7 +19,7 @@ namespace DRM.Ipnwv
         /// <param name="propertyName">Name of the property.</param>
         /// <param name="oldValue">The old value of the property.</param>
         /// <param name="newValue">The new value of the property.</param>
-        public PropertyChangedWithValsEventArgs(string propertyName, T oldValue, T newValue) : base(propertyName)
+        public PropertyChangedWithTValsEventArgs(string propertyName, T oldValue, T newValue) : base(propertyName)
         {
             OldValue = oldValue;
             NewValue = newValue;
@@ -47,7 +47,8 @@ namespace DRM.Ipnwv
         /// <param name="propertyName">Name of the property.</param>
         /// <param name="oldValue">The old value of the property.</param>
         /// <param name="newValue">The new value of the property.</param>
-        public PropertyChangedWithValsEventArgs(string propertyName, object oldValue, object newValue) : base(propertyName)
+        public PropertyChangedWithValsEventArgs(string propertyName, object oldValue, object newValue)
+            : base(propertyName)
         {
             OldValue = oldValue;
             NewValue = newValue;

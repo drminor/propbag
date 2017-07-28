@@ -37,6 +37,10 @@ namespace DRM.PropBag
     {
         #region Member Declarations
 
+        // TO-DOC: Explain that the life time of any sources that listen to the events provided by this class,
+        // including the events provided by the IProp instances
+        // is determined by the lifetime of the instances of classes that derive from this PropBag class.
+
         // TO-DOC: Explain since we may subscribe to our own events we would like to have these initialized.
         // confirm that on post construction events are initialized for us if we don't
         // alternative could be that they are initialized on first assignment.
@@ -101,23 +105,16 @@ namespace DRM.PropBag
         {
             foreach (KeyValuePair<string, ValueWithType> kvp in tVals)
             {
-                foreach (PropertyChangedWithValsHandler h in kvp.Value.PropChangedWithValsHandlerList)
+                ValueWithType vwt = kvp.Value;
+
+                foreach (PropertyChangedWithValsHandler h in vwt.PropChangedWithValsHandlerList)
                 {
                     this.PropertyChangedWithVals -= h;
                 }
+
+                // TODO: Is this necessary?
+                vwt = null;
             }
-        }
-
-        public void RemoveProp(string propertyName)
-        {
-            ValueWithType vwt = GetValueWithType(propertyName);
-
-            foreach (PropertyChangedWithValsHandler h in vwt.PropChangedWithValsHandlerList)
-            {
-                this.PropertyChangedWithVals -= h;
-            }
-
-            tVals.Remove(propertyName);
         }
 
         #endregion
@@ -308,6 +305,24 @@ namespace DRM.PropBag
             return !theSame;
         }
 
+        protected void SubscribeToPropChanged(Action<object, object> doOnChange, [CallerMemberName] string propertyName = null)
+        {
+            ValueWithType vwt = GetValueWithType(propertyName);
+
+            PropertyChangedWithValsHandler action = (s, e) =>
+            {
+                if (string.Equals(e.PropertyName, propertyName, StringComparison.InvariantCulture))
+                {
+                    doOnChange(e.OldValue, e.NewValue);
+                }
+            };
+
+            this.PropertyChangedWithVals += action;
+
+            // References are kept here so that we can remove them when this instance is disposed.
+            vwt.PropChangedWithValsHandlerList.Add(action);
+        }
+
         protected void SubscribeToPropChanged<T>(Action<T, T> doOnChange, [CallerMemberName] string propertyName = null)
         {
             ValueWithType vwt = GetValueWithType(propertyName);
@@ -316,6 +331,10 @@ namespace DRM.PropBag
             {
                 try
                 {
+                    // Note: Even though type information is being supplied by the caller,
+                    // it is the type of the current value.
+                    // Reflection must be used in implementation of the MakeTypeSolid method to retrive the type
+                    // of the current value.
                     MakeTypeSolid(vwt, typeof(T));
                 }
                 catch (InvalidCastException ice)
@@ -332,7 +351,9 @@ namespace DRM.PropBag
                 }
             }
 
-            PropertyChangedWithValsHandler handler = (s, e) =>
+            IProp<T> prop = (IProp<T>) vwt.Prop;
+
+            PropertyChangedWithTValsHandler<T> action = (s, e) =>
             {
                 if (string.Equals(e.PropertyName, propertyName, StringComparison.InvariantCulture))
                 {
@@ -340,16 +361,19 @@ namespace DRM.PropBag
                 }
             };
 
-            this.PropertyChangedWithVals += handler;
-
-            // References are kept here so that we can remove them when this instance is disposed.
-            vwt.PropChangedWithValsHandlerList.Add(handler);
+            prop.PropertyChangedWithTVals += action;
         }
 
         protected void ConnectToPropChanged<T>(Action<T, T> doOnChange, [CallerMemberName] string subToPropertyName = null)
         {
             string propertyName = GetPropNameFromSubTo(subToPropertyName);
             SubscribeToPropChanged<T>(doOnChange, propertyName);
+        }
+
+        protected void ConnectToPropChanged(Action<object, object> doOnChange, [CallerMemberName] string subToPropertyName = null)
+        {
+            string propertyName = GetPropNameFromSubTo(subToPropertyName);
+            SubscribeToPropChanged(doOnChange, propertyName);
         }
 
         public bool PropertyExists([CallerMemberName] string propertyName = null)
@@ -365,6 +389,18 @@ namespace DRM.PropBag
         protected List<PropertyChangedWithValsHandler> GetPropChangedWithValsHandlers([CallerMemberName] string propertyName = null)
         {
             return GetValueWithType(propertyName).PropChangedWithValsHandlerList;
+        }
+
+        protected void RemoveProp(string propertyName)
+        {
+            ValueWithType vwt = GetValueWithType(propertyName);
+
+            foreach (PropertyChangedWithValsHandler h in vwt.PropChangedWithValsHandlerList)
+            {
+                this.PropertyChangedWithVals -= h;
+            }
+
+            tVals.Remove(propertyName);
         }
 
         /// <summary>
@@ -414,8 +450,11 @@ namespace DRM.PropBag
             {
                 if (prop.DoAfterNotify)
                 {
-                    // Raise the changed events,
+                    // Raise the standard PropertyChanged event
                     OnPropertyChanged(propertyName);
+                    // The typed, PropertyChanged event defined on the individual property.
+                    prop.OnPropertyChangedWithTVals(propertyName, oldVal, newValue);
+                    // The un-typed, PropertyChanged shared event.
                     OnPropertyChangedWithVals(propertyName, oldVal, newValue);
 
                     // then perform the call back.
@@ -426,15 +465,21 @@ namespace DRM.PropBag
                     // Peform the call back,
                     prop.DoWHenChanged(oldVal, newValue);
 
-                    // then raise the changed events 
+                    // Raise the standard PropertyChanged event
                     OnPropertyChanged(propertyName);
+                    // The typed, PropertyChanged event defined on the individual property.
+                    prop.OnPropertyChangedWithTVals(propertyName, oldVal, newValue);
+                    // The un-typed, PropertyChanged shared event.
                     OnPropertyChangedWithVals(propertyName, oldVal, newValue);
                 }
             }
             else
             {
-                //Raise the changed events 
+                // Raise the standard PropertyChanged event
                 OnPropertyChanged(propertyName);
+                // The typed, PropertyChanged event defined on the individual property.
+                prop.OnPropertyChangedWithTVals(propertyName, oldVal, newValue);
+                // The un-typed, PropertyChanged shared event.
                 OnPropertyChangedWithVals(propertyName, oldVal, newValue);
             }
 
@@ -561,7 +606,13 @@ namespace DRM.PropBag
             return tag;
         }
 
-        //-- Need ExtStore with ObjComp
+        public Guid AddPropExtStore<T>(string propertyName, GetExtVal<T> getter, SetExtVal<T> setter, IEqualityComparer<object> comparer)
+        {
+            Guid tag = Guid.NewGuid();
+            tVals.Add(propertyName, ValueWithType.CreateWithCustStoreObjComp<T>(tag, getter, setter, comparer));
+
+            return tag;
+        }
 
         public void AddPropNoStore<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false,
             IEqualityComparer<T> comparer = null)
@@ -569,7 +620,11 @@ namespace DRM.PropBag
             tVals.Add(propertyName, ValueWithType.CreateWithNoStore<T>(doIfChanged, doAfterNotify, comparer));
         }
 
-        //-- Need NoStore with ObjComp
+        public void AddPropNoStore<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false,
+            IEqualityComparer<object> comparer = null)
+        {
+            tVals.Add(propertyName, ValueWithType.CreateWithNoStoreObjComp<T>(doIfChanged, doAfterNotify, comparer));
+        }
 
         // The remainder of the AddProp variants are "sugar" -- they allow for abbreviated calls to what is provided above.
         public void AddProp<T>(string propertyName, T initalValue = default(T))
@@ -609,7 +664,6 @@ namespace DRM.PropBag
                 handler(this, new PropertyChangingEventArgs(propertyName));
         }
 
-        // Raise Type Events
         private void OnPropertyChangedWithVals(string propertyName, object oldVal, object newVal)
         {
             PropertyChangedWithValsHandler handler = Interlocked.CompareExchange(ref PropertyChangedWithVals, null, null);
@@ -777,8 +831,12 @@ namespace DRM.PropBag
                 this.Prop = newVwt.Prop;
                 this.Type = typeOfThisValue;
                 this.TypeIsSolid = true;
+
+                // Clear the cached getter and setter delegates, since these depend on the type of the value.
                 this.DoGetProVal = null;
                 this.DoSetProVal = null;
+
+                // Do not update the members of the PropChangedWithValsHandlerList, since these delegates use object references, not typed references.
             }
 
             #endregion

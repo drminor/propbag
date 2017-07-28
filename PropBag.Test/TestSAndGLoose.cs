@@ -30,10 +30,8 @@ namespace PropBagLib.Tests
         {
             // Create
             mod1 = new SandGLoosetModel(PropBagTypeSafetyMode.Loose);
-            mod1.SubscribeToPropStringChanged = this.DoWhenUpdatedExt;
+            mod1.SubscribeToPropStringChanged(DoWhenUpdatedExt);
         }
-
-
 
         [Test]
         public void ShouldSAndGLooseBool()

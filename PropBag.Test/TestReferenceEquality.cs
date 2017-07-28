@@ -24,7 +24,7 @@ namespace PropBagLib.Tests
             // Create
             mod1 = new RefEqualityModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
 
-            mod1.SubscribeToPropStringChanged = DoWhenUpdatedExt;
+            mod1.SubscribeToPropStringChanged(DoWhenUpdatedExt);
         }
 
         [Test]
