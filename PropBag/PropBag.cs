@@ -133,6 +133,8 @@ namespace DRM.PropBag
             }
         }
 
+
+
         protected object GetIt([CallerMemberName] string propertyName = null)
         {
             // This will throw an exception if no value has been added to the _tVals dictionary with a key of propertyName,
@@ -149,7 +151,8 @@ namespace DRM.PropBag
             // either by calling AddProp or SetIt.
             ValueWithType vwt = GetValueWithType(propertyName);
 
-            IProp<T> prop = (IProp<T>)(vwt.Prop);
+            IProp<T> prop = CheckTypeInfo<T>(vwt, propertyName);
+
             return prop.Value;
         }
 
@@ -238,26 +241,9 @@ namespace DRM.PropBag
                 return;
             }
 
-            if (!vwt.TypeIsSolid)
-            {
-                try
-                {
-                    MakeTypeSolid(vwt, typeof(T));
-                }
-                catch (InvalidCastException ice)
-                {
-                    throw new ApplicationException(string.Format("The property: {0} was originally set to null, now its being set to a value whose type is a value type; value types don't allow setting to null.", propertyName),ice);
-                }
-            }
-            else
-            {
-                if (!AreTypesSame(typeof(T), vwt.Type))
-                {
-                    throw new ApplicationException(string.Format("Attempting to set property: {0} whose type is {1}, with a call whose type parameter is {2} is invalid.", propertyName, vwt.Type.ToString(), typeof(T).ToString()));
-                }
-            }
+            IProp<T> prop = CheckTypeInfo<T>(vwt, propertyName);
 
-            DoSet(value, propertyName, (IProp<T>)vwt.Prop);
+            DoSet(value, propertyName, prop);
         }
 
         /// <summary>
@@ -283,7 +269,7 @@ namespace DRM.PropBag
                 throw new ApplicationException(string.Format("Property: {0} has not been defined with a call to AddProp().", propertyName));
             }
 
-            IProp<T> prop = (IProp<T>)vwt.Prop;
+            IProp<T> prop = CheckTypeInfo<T>(vwt, propertyName);
 
             bool theSame = prop.Compare(newValue, curValue);
 
@@ -323,35 +309,11 @@ namespace DRM.PropBag
             vwt.PropChangedWithValsHandlerList.Add(action);
         }
 
-        protected void SubscribeToPropChanged<T>(Action<T, T> doOnChange, [CallerMemberName] string propertyName = null)
+        protected void SubscribeToPropChanged<T>(Action<T, T> doOnChange, string propertyName)
         {
             ValueWithType vwt = GetValueWithType(propertyName);
 
-            if (!vwt.TypeIsSolid)
-            {
-                try
-                {
-                    // Note: Even though type information is being supplied by the caller,
-                    // it is the type of the current value.
-                    // Reflection must be used in implementation of the MakeTypeSolid method to retrive the type
-                    // of the current value.
-                    MakeTypeSolid(vwt, typeof(T));
-                }
-                catch (InvalidCastException ice)
-                {
-                    throw new ApplicationException(string.Format("The property: {0} was originally set to null, now a subscription to propChanged is being made with an action whose parameters' type is a value type; value types don't allow setting to null.", propertyName), ice);
-                }
-            }
-            else
-            {
-                // Make sure that the Action type is the same as the type registerd for this property.
-                if (!AreTypesSame(typeof(T), vwt.Type))
-                {
-                    throw new ApplicationException(string.Format("Attempting to subscribe to PropChanged for property: {0} whose type is {1}, with a call whose type parameter is {2} is invalid.", propertyName, vwt.Type.ToString(), typeof(T).ToString()));
-                }
-            }
-
-            IProp<T> prop = (IProp<T>) vwt.Prop;
+            IProp<T> prop = CheckTypeInfo<T>(vwt, propertyName);
 
             PropertyChangedWithTValsHandler<T> action = (s, e) =>
             {
@@ -364,16 +326,58 @@ namespace DRM.PropBag
             prop.PropertyChangedWithTVals += action;
         }
 
-        protected void ConnectToPropChanged<T>(Action<T, T> doOnChange, [CallerMemberName] string subToPropertyName = null)
+        protected void SubscribeToPropChanged<T>(PropertyChangedWithTValsHandler<T> action, string propertyName)
         {
-            string propertyName = GetPropNameFromSubTo(subToPropertyName);
-            SubscribeToPropChanged<T>(doOnChange, propertyName);
+            ValueWithType vwt = GetValueWithType(propertyName);
+
+            IProp<T> prop = CheckTypeInfo<T>(vwt, propertyName);
+
+            prop.PropertyChangedWithTVals += action;
         }
 
-        protected void ConnectToPropChanged(Action<object, object> doOnChange, [CallerMemberName] string subToPropertyName = null)
+        protected void AddToPropChanged<T>(PropertyChangedWithTValsHandler<T> action, [CallerMemberName] string eventPropertyName = null)
         {
-            string propertyName = GetPropNameFromSubTo(subToPropertyName);
-            SubscribeToPropChanged(doOnChange, propertyName);
+            string propertyName = GetPropNameFromEventProp(eventPropertyName);
+            SubscribeToPropChanged<T>(action, propertyName);
+        }
+
+        protected void UnSubscribeToPropChanged<T>(PropertyChangedWithTValsHandler<T> action, string propertyName)
+        {
+            ValueWithType vwt = GetValueWithType(propertyName);
+
+            IProp<T> prop = CheckTypeInfo<T>(vwt, propertyName);
+
+            prop.PropertyChangedWithTVals -= action;
+        }
+
+        protected void RemoveFromPropChanged<T>(PropertyChangedWithTValsHandler<T> action, [CallerMemberName] string eventPropertyName = null)
+        {
+            string propertyName = GetPropNameFromEventProp(eventPropertyName);
+            UnSubscribeToPropChanged<T>(action, propertyName);
+        }
+
+        private IProp<T> CheckTypeInfo<T>(ValueWithType vwt, string propertyName)
+        {
+            if (!vwt.TypeIsSolid)
+            {
+                try
+                {
+                    MakeTypeSolid(vwt, typeof(T));
+                }
+                catch (InvalidCastException ice)
+                {
+                    throw new ApplicationException(string.Format("The property: {0} was originally set to null, now its being set to a value whose type is a value type; value types don't allow setting to null.", propertyName), ice);
+                }
+            }
+            else
+            {
+                if (!AreTypesSame(typeof(T), vwt.Type))
+                {
+                    throw new ApplicationException(string.Format("Attempting to set property: {0} whose type is {1}, with a call whose type parameter is {2} is invalid.", propertyName, vwt.Type.ToString(), typeof(T).ToString()));
+                }
+            }
+
+            return (IProp<T>)vwt.Prop;
         }
 
         public bool PropertyExists([CallerMemberName] string propertyName = null)
@@ -561,14 +565,14 @@ namespace DRM.PropBag
         }
 
         /// <summary>
-        /// Given a string in the form "SubscribeTo{0}Changed", where {0} is the underlying property name, parse out and return the value of {0}.
+        /// Given a string in the form "{0}Changed", where {0} is the underlying property name, parse out and return the value of {0}.
         /// </summary>
         /// <param name="x"></param>
         /// <returns></returns>
-        private string GetPropNameFromSubTo(string x)
+        private string GetPropNameFromEventProp(string x)
         {
-            //SubscribeToPropStringChanged
-            return x.Substring(11, x.Length - 18);
+            //PropStringChanged
+            return x.Substring(0, x.Length - 7);
         }
 
         #endregion

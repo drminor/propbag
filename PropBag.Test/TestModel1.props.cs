@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using DRM.Ipnwv;
+
 namespace PropBagLib.Tests
 {
     public partial class SetAndGetModel
@@ -69,6 +71,18 @@ namespace PropBagLib.Tests
             SubscribeToPropChanged<string>(action, "PropString");
         }
 
+        public event PropertyChangedWithTValsHandler<string> PropStringChanged
+        {
+            add
+            {
+                AddToPropChanged<string>(value);
+            }
+            remove
+            {
+                RemoveFromPropChanged<string>(value);
+            }
+        }
+
     }
 
     public partial class NullableModel
@@ -88,10 +102,21 @@ namespace PropBagLib.Tests
 
     public partial class SandGLoosetModel
     {
-
         public void SubscribeToPropStringChanged(Action<string, string> action)
         {
             SubscribeToPropChanged<string>(action, "PropString");
+        }
+
+        public event PropertyChangedWithTValsHandler<string> PropStringChanged
+        {
+            add
+            {
+                AddToPropChanged<string>(value);
+            }
+            remove
+            {
+                RemoveFromPropChanged<string>(value);
+            }
         }
 
         public object PropObject
