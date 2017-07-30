@@ -5,6 +5,7 @@ using NUnit.Framework;
 
 //using PropBagLib;
 using DRM.PropBag;
+using DRM.Ipnwv;
 
 namespace PropBagLib.Tests
 {
@@ -23,6 +24,7 @@ namespace PropBagLib.Tests
         const string PROP_NEW = "PropNotDeclared";
 
         private SandGLoosetModel mod1;
+        bool PropStringChangeWasCalled = false;
 
         [OneTimeSetUp]
         //[SetUp]
@@ -31,6 +33,17 @@ namespace PropBagLib.Tests
             // Create
             mod1 = new SandGLoosetModel(PropBagTypeSafetyMode.Loose);
             mod1.SubscribeToPropStringChanged(DoWhenUpdatedExt);
+
+            mod1.PropStringChanged += mod1_PropStringChanged;
+
+        }
+
+        void mod1_PropStringChanged(object sender, PropertyChangedWithTValsEventArgs<string> e)
+        {
+            IProp<string> prop = (IProp<string>) sender;
+            string oldVal = e.OldValue;
+            string newVal = e.NewValue;
+            PropStringChangeWasCalled = true;
         }
 
         [Test]
@@ -48,6 +61,7 @@ namespace PropBagLib.Tests
             string temp = (string) mod1[PROP_STRING];
             Assert.That(temp, Is.EqualTo("Test2"));
             Assert.That(mod1[PROP_STRING], Is.EqualTo("Test2"));
+            Assert.That(PropStringChangeWasCalled, Is.EqualTo(true), "PropStringChangeWasCalled = false");
         }
 
         [Test]

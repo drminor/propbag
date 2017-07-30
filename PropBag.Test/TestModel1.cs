@@ -12,6 +12,8 @@ namespace PropBagLib.Tests
 {
     public partial class SetAndGetModel : PropBag
     {
+        public SetAndGetModel() : this(PropBagTypeSafetyMode.Loose) { }
+
         public SetAndGetModel(PropBagTypeSafetyMode typeSafetyMode) : base(typeSafetyMode)
         {
             AddProp<object>("PropObject", initalValue:null);

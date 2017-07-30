@@ -20,11 +20,23 @@ namespace PropBagLib.Tests
 
         private NullableModel mod1;
 
+        bool propNullableIntChanged = false;
+
         [OneTimeSetUp]
         public void Create()
         {
             // Create
             mod1 = new NullableModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+
+            mod1.PropNullableIntChanged += mod1_PropNullableIntChanged;
+        }
+
+        void mod1_PropNullableIntChanged(object sender, DRM.Ipnwv.PropertyChangedWithTValsEventArgs<int?> e)
+        {
+            Nullable<int> oldVal = e.OldValue;
+            Nullable<int> newValue = e.NewValue;
+
+            propNullableIntChanged = true;
         }
 
         [Test]
@@ -36,6 +48,7 @@ namespace PropBagLib.Tests
             mod1.PropNullableInt = 0;
             Assert.That(mod1.PropNullableInt, Is.EqualTo(0));
             Assert.That(mod1.ItGotUpdated, Is.EqualTo(true));
+            Assert.That(propNullableIntChanged, Is.EqualTo(true), "propNullableIntChanged = false");
 
             mod1.ItGotUpdated = false;
             mod1.PropNullableInt = new Nullable<int>(1);

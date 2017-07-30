@@ -87,6 +87,18 @@ namespace PropBagLib.Tests
 
     public partial class NullableModel
     {
+        public event PropertyChangedWithTValsHandler<Nullable<int>> PropNullableIntChanged
+        {
+            add
+            {
+                AddToPropChanged<Nullable<int>>(value);
+            }
+            remove
+            {
+                RemoveFromPropChanged<Nullable<int>>(value);
+            }
+        }
+
         public Nullable<int> PropNullableInt
         {
             get { return GetIt<Nullable<int>>(); }

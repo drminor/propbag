@@ -1,0 +1,18 @@
+﻿<?xml version="1.0"?>
+<model class-name="TestClass" type-safety-mode="Loose" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="https://www.swamphillproductions.com/PropBagModel ../PropBagModel/PropBagModel.xsd">
+  <props>
+    <prop use-reference-equality="false">
+      <name>Prop1</name>
+      <type>int</type>
+    </prop>
+    <prop use-reference-equality="false">
+      <name>Prop2</name>
+      <type>string</type>
+    </prop>
+    <prop use-reference-equality="false">
+      <name>Prop3</name>
+      <type>double</type>
+    </prop>
+  </props>
+</model>

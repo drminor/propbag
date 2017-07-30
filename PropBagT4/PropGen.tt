@@ -1,0 +1,68 @@
+﻿<#@ template debug="true" hostspecific="true" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ assembly name="$(TargetPath)" #>
+<#@ import namespace="PropBagT4" #>
+<#@ output extension=".cs" #>
+<#
+	string absolutePath = @"C:\DEV\VS2013Projects\PubPropBag\PropBagT4\TestInput.xml";
+
+	PropModel pm;
+	using(PropModelReaderX pmReader = new PropModelReaderX())
+	{
+		pm = pmReader.ReadXml(absolutePath);
+	}
+
+	//pm.ReadText(absolutePath);
+#>
+using DRM.Ipnwv;
+using DRM.PropBag;
+
+public partial class <#= pm.ClassName #> : PropBag
+{
+	public <#= pm.ClassName #>() : this(PropBagTypeSafetyMode.<#= pm.SafetyModeString #>) { }
+
+	public <#= pm.ClassName #>(PropBagTypeSafetyMode typeSafetyMode) : base(typeSafetyMode)
+	{
+		<# foreach (PropItem pi in pm.Props)  { #>
+AddProp<<#= pi.Type #>>("<#= pi.Name #>");
+		<# } #>
+
+	}
+
+#region Property Declarations
+	<# foreach (PropItem pi in pm.Props)  { #>  
+	public <#= pi.Type #> <#= pi.Name #>
+	{
+		get
+		{
+			return GetIt<<#= pi.Type #>>();
+		}
+		set
+		{
+			SetIt<<#= pi.Type #>>(value);
+		}
+	}  
+<#  } #> 
+#endregion
+
+#region PropetyChangedWithTVals Event Declarations
+	<# foreach (PropItem pi in pm.Props)  { #>  
+        public event PropertyChangedWithTValsHandler<<#= pi.Type #>> <#= pi.Name #>Changed
+        {
+            add
+            {
+                AddToPropChanged<<#= pi.Type #>>(value);
+            }
+            remove
+            {
+                RemoveFromPropChanged<<#= pi.Type #>>(value);
+            }
+        }
+<#  } #> 
+#endregion
+
+} 

@@ -51,6 +51,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PropGen.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>PropGen.tt</DependentUpon>
+    </Compile>
     <Compile Include="RT_Builder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RT.cs">
@@ -60,6 +65,10 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="PropGen.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>PropGen.cs</LastGenOutput>
+    </None>
     <None Include="RT.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>RT.cs</LastGenOutput>
@@ -67,6 +76,24 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="TestInput - Copy.xml" />
+    <Content Include="TestInput.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\NotifyPropChangedWithVals\Inpwv.csproj">
+      <Project>{18580a49-4d08-4b0d-9a2e-4ed38891c63b}</Project>
+      <Name>Inpwv</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PropBagShared\PropBagShared.csproj">
+      <Project>{1544a8f7-3296-4788-97b4-bfd15e6bf914}</Project>
+      <Name>PropBagShared</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PropBag\PropBag.csproj">
+      <Project>{7387b893-fbdc-4b9c-ac9e-0b56388b46c1}</Project>
+      <Name>PropBag</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

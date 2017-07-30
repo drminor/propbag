@@ -30,12 +30,6 @@ namespace PropBagLib.Tests
         }
 
         [Test]
-        public void BuildRT()
-        {
-            PropBagT4.RT_Builder.BuildIt();
-        }
-
-        [Test]
         public void ShouldSetAndRetrieveBool()
         {
             mod1.PropBool = true;

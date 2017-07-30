@@ -133,8 +133,6 @@ namespace DRM.PropBag
             }
         }
 
-
-
         protected object GetIt([CallerMemberName] string propertyName = null)
         {
             // This will throw an exception if no value has been added to the _tVals dictionary with a key of propertyName,
@@ -291,7 +289,7 @@ namespace DRM.PropBag
             return !theSame;
         }
 
-        protected void SubscribeToPropChanged(Action<object, object> doOnChange, [CallerMemberName] string propertyName = null)
+        public void SubscribeToPropChanged(Action<object, object> doOnChange, [CallerMemberName] string propertyName = null)
         {
             ValueWithType vwt = GetValueWithType(propertyName);
 
@@ -309,6 +307,8 @@ namespace DRM.PropBag
             vwt.PropChangedWithValsHandlerList.Add(action);
         }
 
+        // TODO: Do we really want to support this?
+        // If yes, should it be public.
         protected void SubscribeToPropChanged<T>(Action<T, T> doOnChange, string propertyName)
         {
             ValueWithType vwt = GetValueWithType(propertyName);
@@ -326,7 +326,7 @@ namespace DRM.PropBag
             prop.PropertyChangedWithTVals += action;
         }
 
-        protected void SubscribeToPropChanged<T>(PropertyChangedWithTValsHandler<T> action, string propertyName)
+        public void SubscribeToPropChanged<T>(PropertyChangedWithTValsHandler<T> action, string propertyName)
         {
             ValueWithType vwt = GetValueWithType(propertyName);
 
@@ -341,7 +341,7 @@ namespace DRM.PropBag
             SubscribeToPropChanged<T>(action, propertyName);
         }
 
-        protected void UnSubscribeToPropChanged<T>(PropertyChangedWithTValsHandler<T> action, string propertyName)
+        public  void UnSubscribeToPropChanged<T>(PropertyChangedWithTValsHandler<T> action, string propertyName)
         {
             ValueWithType vwt = GetValueWithType(propertyName);
 
@@ -456,8 +456,10 @@ namespace DRM.PropBag
                 {
                     // Raise the standard PropertyChanged event
                     OnPropertyChanged(propertyName);
+
                     // The typed, PropertyChanged event defined on the individual property.
                     prop.OnPropertyChangedWithTVals(propertyName, oldVal, newValue);
+
                     // The un-typed, PropertyChanged shared event.
                     OnPropertyChangedWithVals(propertyName, oldVal, newValue);
 
@@ -471,8 +473,10 @@ namespace DRM.PropBag
 
                     // Raise the standard PropertyChanged event
                     OnPropertyChanged(propertyName);
+
                     // The typed, PropertyChanged event defined on the individual property.
                     prop.OnPropertyChangedWithTVals(propertyName, oldVal, newValue);
+
                     // The un-typed, PropertyChanged shared event.
                     OnPropertyChangedWithVals(propertyName, oldVal, newValue);
                 }
@@ -481,8 +485,10 @@ namespace DRM.PropBag
             {
                 // Raise the standard PropertyChanged event
                 OnPropertyChanged(propertyName);
+
                 // The typed, PropertyChanged event defined on the individual property.
                 prop.OnPropertyChangedWithTVals(propertyName, oldVal, newValue);
+
                 // The un-typed, PropertyChanged shared event.
                 OnPropertyChangedWithVals(propertyName, oldVal, newValue);
             }
