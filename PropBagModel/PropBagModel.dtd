@@ -1,0 +1,10 @@
+﻿<!ELEMENT model (props)>
+  
+<!ATTLIST model class-name CDATA #REQUIRED>
+<!ATTLIST model type-safety-mode (AllPropsMustBeRegistered|AllPropsMustBeFirstSetWithSetIt|Loose) "AllPropsMustBeRegistered">
+
+<!ELEMENT props (prop*)>
+<!ELEMENT prop (name, type)>
+<!ATTLIST prop use-reference-equality (true|false) "false" >
+<!ELEMENT name (#PCDATA)>
+<!ELEMENT type (#PCDATA)>

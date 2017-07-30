@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="model">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="prop" />
+      </xs:sequence>
+      <xs:attribute name="class-name" type="xs:string" use="required" />
+      <xs:attribute default="AllPropsMustBeRegistered" name="type-safety-mode">
+        <xs:simpleType>
+          <xs:restriction base="xs:NMTOKEN">
+            <xs:enumeration value="AllPropsMustBeRegistered" />
+            <xs:enumeration value="AllPropsMustBeFirstSetWithSetIt" />
+            <xs:enumeration value="Loose" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="prop">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="name" />
+        <xs:element ref="type" />
+      </xs:sequence>
+      <xs:attribute default="false" name="use-reference-equality">
+        <xs:simpleType>
+          <xs:restriction base="xs:NMTOKEN">
+            <xs:enumeration value="true" />
+            <xs:enumeration value="false" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="name" type="xs:string" />
+  <xs:element name="type" type="xs:string" />
+</xs:schema>
