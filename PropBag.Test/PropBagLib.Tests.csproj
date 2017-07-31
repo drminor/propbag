@@ -43,6 +43,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="TestAllPropsRegistered.cs" />
+    <Compile Include="TestAllPropsRegisteredModel.cs" />
+    <Compile Include="TestAllPropsRegisteredModel.props.cs">
+      <DependentUpon>TestAllPropsRegisteredModel.props.tt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="TestNullable.prop.cs">
       <DependentUpon>TestNullable.prop.tt</DependentUpon>
       <AutoGen>True</AutoGen>
@@ -50,7 +58,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Compile>
     <Compile Include="TestModel1.props.cs" />
-    <Compile Include="TestNullable..cs" />
+    <None Include="TestNullable..cs" />
     <Compile Include="TestSAndGLoose.cs" />
     <Compile Include="TestSetAndGet.cs" />
     <Compile Include="TestReferenceEquality.cs" />
@@ -58,6 +66,11 @@
     <Compile Include="TestModel1.cs" />
     <Compile Include="TestT4.cs" />
     <Compile Include="UnitTestHelpers.cs" />
+    <Content Include="TestAllPropsRegisteredModel.props.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>TestAllPropsRegisteredModel.props.cs</LastGenOutput>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NotifyPropChangedWithVals\Inpwv.csproj">
@@ -98,7 +111,8 @@
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="TestNullablePropDefs.xml" />
+    <Content Include="TestAllPropsRegisteredModel_PropDefs.xml" />
+    <Content Include="TestNullable_PropDefs.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

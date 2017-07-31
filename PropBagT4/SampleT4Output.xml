@@ -1,6 +1,5 @@
-﻿<?xml version="1.0"?>
-<model class-name="TestClass" type-safety-mode="Loose" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-xsi:schemaLocation="https://www.swamphillproductions.com/PropBagModel ../PropBagModel/PropBagModel.xsd">
+<?xml version="1.0"?>
+<model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" class-name="TestClass" type-safety-mode="Loose">
   <props>
     <prop use-reference-equality="false">
       <name>Prop1</name>

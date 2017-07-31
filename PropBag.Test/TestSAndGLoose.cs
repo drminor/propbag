@@ -46,12 +46,12 @@ namespace PropBagLib.Tests
             PropStringChangeWasCalled = true;
         }
 
-        [Test]
-        public void ShouldSAndGLooseBool()
-        {
-            mod1[PROP_BOOL] = true;
-            Assert.That(mod1[PROP_BOOL], Is.EqualTo(true));
-        }
+        //[Test]
+        //public void ShouldSAndGLooseBool()
+        //{
+        //    mod1[PROP_BOOL] = true;
+        //    Assert.That(mod1[PROP_BOOL], Is.EqualTo(true));
+        //}
 
         [Test]
         public void ShouldSAndGLooseString()
@@ -63,6 +63,17 @@ namespace PropBagLib.Tests
             Assert.That(mod1[PROP_STRING], Is.EqualTo("Test2"));
             Assert.That(PropStringChangeWasCalled, Is.EqualTo(true), "PropStringChangeWasCalled = false");
         }
+
+        [Test]
+        public void ShouldSAndGLooseBool()
+        {
+            mod1[PROP_BOOL] = true;
+
+            bool temp = (bool)mod1[PROP_BOOL];
+            Assert.That(temp, Is.EqualTo(true));
+            //Assert.That(PropStringChangeWasCalled, Is.EqualTo(true), "PropStringChangeWasCalled = false");
+        }
+
 
         [Test]
         public void ShouldSAndGLooseUseNewProp()

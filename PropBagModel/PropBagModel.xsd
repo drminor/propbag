@@ -6,6 +6,7 @@
         <xs:element ref="props" />
       </xs:sequence>
       <xs:attribute name="class-name" type="xs:string" use="required" />
+      <xs:attribute name="namespace" type="xs:string" use="required" />
       <xs:attribute default="AllPropsMustBeRegistered" name="type-safety-mode">
         <xs:simpleType>
           <xs:restriction base="xs:NMTOKEN">
@@ -29,10 +30,12 @@
       <xs:sequence>
         <xs:element ref="name" />
         <xs:element ref="type" />
+        <xs:element ref="initial-value" minOccurs="0" maxOccurs="1" />
       </xs:sequence>
       <xs:attribute default="false" name="use-reference-equality" type="xs:boolean" />
     </xs:complexType>
   </xs:element>
   <xs:element name="name" type="xs:string" />
   <xs:element name="type" type="xs:string" />
+  <xs:element name="initial-value" type="xs:string" />
 </xs:schema>

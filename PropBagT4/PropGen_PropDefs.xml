@@ -1,0 +1,34 @@
+﻿<?xml version="1.0"?>
+<model class-name="TestAllPropsRegistered" namespace="PropBagLib.Tests" type-safety-mode="AllPropsMustBeRegistered" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="https://www.swamphillproductions.com/PropBagModel ../PropBagModel/PropBagModel.xsd">
+  <props>
+    <prop>
+      <name>PropObject</name>
+      <type>object</type>
+    </prop>
+    <prop>
+      <name>PropString</name>
+      <type>string</type>
+    </prop>
+    <prop>
+      <name>PropBool</name>
+      <type>bool</type>
+    </prop>
+    <prop>
+      <name>PropInt</name>
+      <type>int</type>
+    </prop>
+    <prop>
+      <name>PropTimeSpan</name>
+      <type>TimeSpan</type>
+    </prop>
+    <prop>
+      <name>PropUri</name>
+      <type>Uri</type>
+    </prop>
+    <prop>
+      <name>PropLazyInt</name>
+      <type>Lazy&lt;int&gt;</type>
+    </prop>
+  </props>
+</model>

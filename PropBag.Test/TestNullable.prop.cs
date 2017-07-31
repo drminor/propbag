@@ -1,97 +1,75 @@
-﻿
+﻿using System;
+using System.Collections.Generic;
 using DRM.Ipnwv;
 using DRM.PropBag;
 
-public partial class TestNullable : PropBag
+namespace PropBagLib.Tests
 {
-	public TestNullable() : this(PropBagTypeSafetyMode.Loose) { }
-
-	public TestNullable(PropBagTypeSafetyMode typeSafetyMode) : base(typeSafetyMode)
+	public partial class TestNullable : PropBag
 	{
-		AddProp<int>("Prop1");
-		AddProp<string>("Prop2");
-		AddProp<double>("Prop3");
-		
-	}
+		public TestNullable() : this(PropBagTypeSafetyMode.Loose) { }
 
-#region Property Declarations
+		public TestNullable(PropBagTypeSafetyMode typeSafetyMode) : base(typeSafetyMode)
+		{
+				AddProp<Nullable<int>>("PropNullableInt");
+			AddProp<ICollection<int>>("PropICollectionInt");
+		}
+
+	#region Property Declarations
+		  
+		public Nullable<int> PropNullableInt
+		{
+			get
+			{
+				return GetIt<Nullable<int>>();
+			}
+			set
+			{
+				SetIt<Nullable<int>>(value);
+			}
+		}  
 	  
-	public int Prop1
-	{
-		get
+		public ICollection<int> PropICollectionInt
 		{
-			return GetIt<int>();
-		}
-		set
-		{
-			SetIt<int>(value);
-		}
-	}  
-  
-	public string Prop2
-	{
-		get
-		{
-			return GetIt<string>();
-		}
-		set
-		{
-			SetIt<string>(value);
-		}
-	}  
-  
-	public double Prop3
-	{
-		get
-		{
-			return GetIt<double>();
-		}
-		set
-		{
-			SetIt<double>(value);
-		}
-	}  
- 
-#endregion
+			get
+			{
+				return GetIt<ICollection<int>>();
+			}
+			set
+			{
+				SetIt<ICollection<int>>(value);
+			}
+		}  
+	 
+	#endregion
 
-#region PropetyChangedWithTVals Event Declarations
+	#region PropetyChangedWithTVals Event Declarations
+		  
+			public event PropertyChangedWithTValsHandler<Nullable<int>> PropNullableIntChanged
+			{
+				add
+				{
+					AddToPropChanged<Nullable<int>>(value);
+				}
+				remove
+				{
+					RemoveFromPropChanged<Nullable<int>>(value);
+				}
+			}
 	  
-        public event PropertyChangedWithTValsHandler<int> Prop1Changed
-        {
-            add
-            {
-                AddToPropChanged<int>(value);
-            }
-            remove
-            {
-                RemoveFromPropChanged<int>(value);
-            }
-        }
-  
-        public event PropertyChangedWithTValsHandler<string> Prop2Changed
-        {
-            add
-            {
-                AddToPropChanged<string>(value);
-            }
-            remove
-            {
-                RemoveFromPropChanged<string>(value);
-            }
-        }
-  
-        public event PropertyChangedWithTValsHandler<double> Prop3Changed
-        {
-            add
-            {
-                AddToPropChanged<double>(value);
-            }
-            remove
-            {
-                RemoveFromPropChanged<double>(value);
-            }
-        }
- 
-#endregion
+			public event PropertyChangedWithTValsHandler<ICollection<int>> PropICollectionIntChanged
+			{
+				add
+				{
+					AddToPropChanged<ICollection<int>>(value);
+				}
+				remove
+				{
+					RemoveFromPropChanged<ICollection<int>>(value);
+				}
+			}
+	 
+	#endregion
 
-} 
+	} 
+}

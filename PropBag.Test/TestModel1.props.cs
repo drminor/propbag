@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using DRM.Ipnwv;
+using DRM.PropBag;
 
 namespace PropBagLib.Tests
 {
@@ -87,29 +88,29 @@ namespace PropBagLib.Tests
 
     public partial class NullableModel
     {
-        public event PropertyChangedWithTValsHandler<Nullable<int>> PropNullableIntChanged
-        {
-            add
-            {
-                AddToPropChanged<Nullable<int>>(value);
-            }
-            remove
-            {
-                RemoveFromPropChanged<Nullable<int>>(value);
-            }
-        }
+        //public event PropertyChangedWithTValsHandler<Nullable<int>> PropNullableIntChanged
+        //{
+        //    add
+        //    {
+        //        AddToPropChanged<Nullable<int>>(value);
+        //    }
+        //    remove
+        //    {
+        //        RemoveFromPropChanged<Nullable<int>>(value);
+        //    }
+        //}
 
-        public Nullable<int> PropNullableInt
-        {
-            get { return GetIt<Nullable<int>>(); }
-            set { SetIt<Nullable<int>>(value);  }
-        }
+        //public Nullable<int> PropNullableInt
+        //{
+        //    get { return GetIt<Nullable<int>>(); }
+        //    set { SetIt<Nullable<int>>(value);  }
+        //}
 
-        public ICollection<int> PropICollectionInt
-        {
-            get { return GetIt<ICollection<int>>(); }
-            set { SetIt<ICollection<int>>(value); }
-        }
+        //public ICollection<int> PropICollectionInt
+        //{
+        //    get { return GetIt<ICollection<int>>(); }
+        //    set { SetIt<ICollection<int>>(value); }
+        //}
     }
 
     public partial class SandGLoosetModel
@@ -178,5 +179,6 @@ namespace PropBagLib.Tests
             set { SetIt<Lazy<int>>(value); }
         }
     }
+
 
 }

@@ -44,11 +44,17 @@ namespace DRM.PropBagModel
             }
         }
 
+        static public string GetDefFileName(string n)
+        {
+            string t = string.Format("{0}_PropDefs.xml", n);
+            return t;
+        }
+
         static public void Test()
         {
             string path = @"C:\DEV\VS2013Projects\PubPropBag\PropBagT4\SampleT4Output.xml";
 
-            PropModel pm = new PropModel("TestClass", PropBagTypeSafetyMode.Loose);
+            PropModel pm = new PropModel("TestClass", "PropBagLib.Tests", PropBagTypeSafetyMode.Loose);
 
             pm.Props = new PropItem[3];
 

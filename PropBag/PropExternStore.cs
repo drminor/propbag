@@ -42,7 +42,7 @@ namespace DRM.PropBag
 
         public IEqualityComparer<T> Comparer { get; private set; }
 
-        public Action<T, T> DoWHenChanged { get; private set; }
+        public Action<T, T> DoWHenChanged { get; set; }
         public bool DoAfterNotify { get; set; }
 
         public event PropertyChangedWithTValsHandler<T> PropertyChangedWithTVals;

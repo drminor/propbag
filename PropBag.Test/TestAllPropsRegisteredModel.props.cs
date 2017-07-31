@@ -5,15 +5,15 @@ using DRM.PropBag;
 
 namespace PropBagLib.Tests
 {
-	public partial class PropGen : PropBag
+	public partial class TestAllPropsRegisteredModel : PropBag
 	{
-		public PropGen() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered) { }
+		public TestAllPropsRegisteredModel() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered) { }
 
-		public PropGen(PropBagTypeSafetyMode typeSafetyMode) : base(typeSafetyMode)
+		public TestAllPropsRegisteredModel(PropBagTypeSafetyMode typeSafetyMode) : base(typeSafetyMode)
 		{
 				AddProp<object>("PropObject");
 			AddProp<string>("PropString");
-			AddProp<bool>("PropBool");
+			AddProp<bool>("PropBool", false);
 			AddProp<int>("PropInt");
 			AddProp<TimeSpan>("PropTimeSpan");
 			AddProp<Uri>("PropUri");

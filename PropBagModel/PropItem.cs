@@ -17,6 +17,10 @@ namespace DRM.PropBagModel
         [XmlElement("type")]
         public string Type { get; set; }
 
+        [XmlElement("initial-value")]
+        public string InitialValue { get; set; }
+
+
         [XmlAttribute(AttributeName = "use-reference-equality")]
         public bool UseReferenceEquality { get; set; }
 

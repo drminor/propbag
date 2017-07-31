@@ -4,65 +4,75 @@
 <#@ import namespace="System.Linq" #>
 <#@ import namespace="System.Text" #>
 <#@ import namespace="System.Collections.Generic" #>
-<#@ assembly name="$(TargetPath)" #>
-<#@ import namespace="PropBagT4" #>
+<#@ assembly name="$(SolutionDir)PropBagModel\bin\Debug\PropBagModel.dll" #>
+<#@ import namespace="DRM.PropBagModel" #>
 <#@ output extension=".cs" #>
 <#
-	string absolutePath = @"C:\DEV\VS2013Projects\PubPropBag\PropBagT4\TestInput.xml";
+	//string absolutePath = @"C:\DEV\VS2013Projects\PubPropBag\PropBagT4\TestInput.xml";
 
-	PropModel pm;
-	using(PropModelReaderX pmReader = new PropModelReaderX())
-	{
-		pm = pmReader.ReadXml(absolutePath);
-	}
+	// Remove the .tt and the .props "extensions" from this template's file name.
+	string className = PropModelReader.GetClassNameFromTemplateFilename(Path.GetFileName(Host.TemplateFile));
+	string defFileName = PropModelReader.GetDefFileName(className);
 
-	//pm.ReadText(absolutePath);
+	//defFileName = "TestNullablePropDefs.xml";
+
+	string path = this.Host.ResolvePath(defFileName);
+	PropModel pm = PropModelReader.ReadXml(path);
+
+	pm.ClassName = className;
 #>
+using System;
+using System.Collections.Generic;
 using DRM.Ipnwv;
 using DRM.PropBag;
 
-public partial class <#= pm.ClassName #> : PropBag
+namespace <#= pm.Namespace #>
 {
-	public <#= pm.ClassName #>() : this(PropBagTypeSafetyMode.<#= pm.SafetyModeString #>) { }
-
-	public <#= pm.ClassName #>(PropBagTypeSafetyMode typeSafetyMode) : base(typeSafetyMode)
+	public partial class <#= pm.ClassName #> : PropBag
 	{
-		<# foreach (PropItem pi in pm.Props)  { #>
-AddProp<<#= pi.Type #>>("<#= pi.Name #>");
-		<# } #>
+		public <#= pm.ClassName #>() : this(PropBagTypeSafetyMode.<#= pm.SafetyModeString #>) { }
 
-	}
-
-#region Property Declarations
-	<# foreach (PropItem pi in pm.Props)  { #>  
-	public <#= pi.Type #> <#= pi.Name #>
-	{
-		get
+		public <#= pm.ClassName #>(PropBagTypeSafetyMode typeSafetyMode) : base(typeSafetyMode)
 		{
-			return GetIt<<#= pi.Type #>>();
-		}
-		set
+			<# foreach (PropItem pi in pm.Props)  {
+		if(pi.InitialValue != null) { #>
+	AddProp<<#= pi.Type #>>("<#= pi.Name #>", <#= pi.InitialValue #>);
+<# } else { #>
+	AddProp<<#= pi.Type #>>("<#= pi.Name #>");
+<# } #>
+		<# } #>}
+
+	#region Property Declarations
+		<# foreach (PropItem pi in pm.Props)  { #>  
+		public <#= pi.Type #> <#= pi.Name #>
 		{
-			SetIt<<#= pi.Type #>>(value);
-		}
-	}  
-<#  } #> 
-#endregion
+			get
+			{
+				return GetIt<<#= pi.Type #>>();
+			}
+			set
+			{
+				SetIt<<#= pi.Type #>>(value);
+			}
+		}  
+	<#  } #> 
+	#endregion
 
-#region PropetyChangedWithTVals Event Declarations
-	<# foreach (PropItem pi in pm.Props)  { #>  
-        public event PropertyChangedWithTValsHandler<<#= pi.Type #>> <#= pi.Name #>Changed
-        {
-            add
-            {
-                AddToPropChanged<<#= pi.Type #>>(value);
-            }
-            remove
-            {
-                RemoveFromPropChanged<<#= pi.Type #>>(value);
-            }
-        }
-<#  } #> 
-#endregion
+	#region PropetyChangedWithTVals Event Declarations
+		<# foreach (PropItem pi in pm.Props)  { #>  
+			public event PropertyChangedWithTValsHandler<<#= pi.Type #>> <#= pi.Name #>Changed
+			{
+				add
+				{
+					AddToPropChanged<<#= pi.Type #>>(value);
+				}
+				remove
+				{
+					RemoveFromPropChanged<<#= pi.Type #>>(value);
+				}
+			}
+	<#  } #> 
+	#endregion
 
-} 
+	} 
+}

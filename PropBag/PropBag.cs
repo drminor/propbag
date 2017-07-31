@@ -425,6 +425,15 @@ namespace DRM.PropBag
             }
         }
 
+        protected bool RegisterDoWhenChanged<T>(Action<T, T> doWhenChanged, bool doAfterNotify = false, [CallerMemberName] string propertyName = null)
+        {
+            ValueWithType vwt = GetValueWithType(propertyName);
+
+            IProp<T> prop = CheckTypeInfo<T>(vwt, propertyName);
+
+            return vwt.UpdateDoWhenChanged(doWhenChanged, doAfterNotify);
+        }
+
         #endregion
 
         #region Private Methods and Properties
@@ -850,6 +859,19 @@ namespace DRM.PropBag
             }
 
             #endregion
+
+            public bool UpdateDoWhenChanged<T>(Action<T, T> doWhenChanged, bool doAfterNotify)
+            {
+                IProp<T> prop = (IProp<T>) this.Prop;
+
+                bool hadExistingValue = prop.DoWHenChanged != null;
+
+                prop.DoWHenChanged = doWhenChanged;
+                prop.DoAfterNotify = doAfterNotify;
+
+                return hadExistingValue;
+
+            }
 
             #region Delegate declarations
 

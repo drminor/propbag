@@ -16,7 +16,7 @@ namespace DRM.PropBag
         bool CompareTo(T value);
         bool Compare(T val1, T val2);
 
-        Action<T, T> DoWHenChanged { get; }
+        Action<T, T> DoWHenChanged { get; set; }
         bool DoAfterNotify { get; set; }
 
         event PropertyChangedWithTValsHandler<T> PropertyChangedWithTVals;

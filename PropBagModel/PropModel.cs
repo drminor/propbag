@@ -16,6 +16,9 @@ namespace DRM.PropBagModel
         [XmlAttribute (AttributeName="class-name")]
         public string ClassName { get; set; }
 
+        [XmlAttribute(AttributeName = "namespace")]
+        public string Namespace { get; set; }
+
         [XmlAttribute(AttributeName = "type-safety-mode")]
         public PropBagTypeSafetyMode TypeSafetyMode { get; set; }
 
@@ -29,9 +32,10 @@ namespace DRM.PropBagModel
             TypeSafetyMode = PropBagTypeSafetyMode.AllPropsMustBeRegistered;
         }
 
-        public PropModel(string className, PropBagTypeSafetyMode typeSafetyMode)
+        public PropModel(string className, string namespaceName, PropBagTypeSafetyMode typeSafetyMode)
         {
             ClassName = className;
+            Namespace = namespaceName;
             TypeSafetyMode = typeSafetyMode;
         }
 
