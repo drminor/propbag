@@ -308,10 +308,27 @@ namespace DRM.PropBag
         }
 
         // TODO: Do we really want to support this?
-        // If yes, should it be public.
+        // If yes, should it be public?
         protected void SubscribeToPropChanged<T>(Action<T, T> doOnChange, string propertyName)
         {
-            ValueWithType vwt = GetValueWithType(propertyName);
+            ValueWithType vwt;
+
+            try
+            {
+                vwt = GetValueWithType(propertyName);
+            }
+            catch (KeyNotFoundException)
+            {
+                if (AllPropsMustBeRegistered)
+                {
+                    //TODO: Check this message.
+                    throw new ApplicationException(string.Format("Property: {0} has not been defined with a call to AddProp() and the operation setting 'AllPropsMustBeRegistered' is set to true.", propertyName));
+                }
+
+                // Property has not been defined yet, let's create a definition for it now and initialize the value.
+                vwt = ValueWithType.Create<T>(default(T));
+                tVals.Add(propertyName, vwt);
+            }
 
             IProp<T> prop = CheckTypeInfo<T>(vwt, propertyName);
 
@@ -328,7 +345,6 @@ namespace DRM.PropBag
 
         public void SubscribeToPropChanged<T>(PropertyChangedWithTValsHandler<T> action, string propertyName)
         {
-
             ValueWithType vwt;
 
             try
