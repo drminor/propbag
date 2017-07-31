@@ -269,6 +269,8 @@ namespace PropBagLib.Tests
             Assert.That(mod1.PropICollectionInt, Is.EqualTo(newVal));
             Assert.That(mod1.DoWhenICollectionIntChanged_WasCalled, Is.EqualTo(true));
 
+            Assert.That(propICollectionInt_WasUpdated, Is.EqualTo(true));
+
             //TODO: This shouldn't be here : it is testing setting a property that has not been defined with AddProp.
             //mod1.DoWhenICollectionIntChanged_WasCalled = false;
             //mod1["PropICollectionInt"] = newVal;
