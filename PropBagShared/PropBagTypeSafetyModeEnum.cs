@@ -9,7 +9,7 @@ namespace DRM.PropBag
     public enum PropBagTypeSafetyMode
     {
         AllPropsMustBeRegistered,
-        AllPropsMustBeFirstSetWithSetIt,
+        OnlyTypedAccess,
         Loose
     }
 

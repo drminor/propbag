@@ -26,7 +26,7 @@ namespace PropBagLib.Tests
         public void Create()
         {
             // Create
-            mod1 = new SetAndGetModel(PropBagTypeSafetyMode.AllPropsMustBeFirstSetWithSetIt);
+            mod1 = new SetAndGetModel(PropBagTypeSafetyMode.OnlyTypedAccess);
         }
 
         [Test]

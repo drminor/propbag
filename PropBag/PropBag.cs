@@ -81,7 +81,7 @@ namespace DRM.PropBag
                         AllowSetsViaThisForNewProps = false;
                         break;
                     }
-                case PropBagTypeSafetyMode.AllPropsMustBeFirstSetWithSetIt:
+                case PropBagTypeSafetyMode.OnlyTypedAccess:
                     {
                         AllPropsMustBeRegistered = false;
                         AllowSetsViaThisForNewProps = false;
