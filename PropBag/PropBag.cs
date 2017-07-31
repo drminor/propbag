@@ -651,11 +651,13 @@ namespace DRM.PropBag
             tVals.Add(propertyName, ValueWithType.Create<T>(initalValue));
         }
 
+        // Use IEqualityComparer<T> and no doIfCHanged Action
         public void AddProp<T>(string propertyName, IEqualityComparer<T> comparer, T initalValue = default(T))
         {
             tVals.Add(propertyName, ValueWithType.Create<T>(initalValue, null, false, comparer));
         }
 
+        // Use IEqualityComparer<object> and no doIfChanged action.
         public void AddPropObjComp<T>(string propertyName, IEqualityComparer<object> comparer, T initalValue = default(T))
         {
             tVals.Add(propertyName, ValueWithType.CreateWithObjComparer<T>(initalValue, null, false, comparer));

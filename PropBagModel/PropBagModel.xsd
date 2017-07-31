@@ -37,5 +37,5 @@
   </xs:element>
   <xs:element name="name" type="xs:string" />
   <xs:element name="type" type="xs:string" />
-  <xs:element name="initial-value" type="xs:string" />
+  <xs:element name="initial-value" type="xs:string" nillable="true" />
 </xs:schema>

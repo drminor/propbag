@@ -46,5 +46,20 @@ namespace DRM.PropBagModel
                 return TypeSafetyMode.ToString();
             }
         }
+
+        public string GetAddPropMethodCallText(PropItem pi)
+        {
+            string addPropMethodName = pi.UseReferenceEquality ? "AddPropObjComp" : "AddProp";
+
+            // Note: If the caller specifies null for the initial value then the InitialValue will be "null", and will not be equal to null.
+            if (pi.InitialValue != null)
+            {
+                return (string.Format("{0}<{1}>(\"{2}\", null, false, null, {3})", addPropMethodName, pi.Type, pi.Name, pi.InitialValue));
+            }
+            else
+            {
+                return (string.Format("{0}<{1}>(\"{2}\", null, false, null)", addPropMethodName, pi.Type, pi.Name));
+            }
+        }
     }
 }

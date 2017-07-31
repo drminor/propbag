@@ -59,60 +59,6 @@ namespace PropBagLib.Tests
         }
     }
 
-    public partial class RefEqualityModel
-    {
-        public string PropString
-        {
-            get { return GetIt<string>(); }
-            set { SetIt<string>(value); }
-        }
-
-        public void SubscribeToPropStringChanged(Action<string, string> action)
-        {
-            SubscribeToPropChanged<string>(action, "PropString");
-        }
-
-        public event PropertyChangedWithTValsHandler<string> PropStringChanged
-        {
-            add
-            {
-                AddToPropChanged<string>(value);
-            }
-            remove
-            {
-                RemoveFromPropChanged<string>(value);
-            }
-        }
-
-    }
-
-    public partial class NullableModel
-    {
-        //public event PropertyChangedWithTValsHandler<Nullable<int>> PropNullableIntChanged
-        //{
-        //    add
-        //    {
-        //        AddToPropChanged<Nullable<int>>(value);
-        //    }
-        //    remove
-        //    {
-        //        RemoveFromPropChanged<Nullable<int>>(value);
-        //    }
-        //}
-
-        //public Nullable<int> PropNullableInt
-        //{
-        //    get { return GetIt<Nullable<int>>(); }
-        //    set { SetIt<Nullable<int>>(value);  }
-        //}
-
-        //public ICollection<int> PropICollectionInt
-        //{
-        //    get { return GetIt<ICollection<int>>(); }
-        //    set { SetIt<ICollection<int>>(value); }
-        //}
-    }
-
     public partial class SandGLoosetModel
     {
         public void SubscribeToPropStringChanged(Action<string, string> action)

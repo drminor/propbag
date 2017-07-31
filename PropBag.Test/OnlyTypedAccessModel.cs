@@ -5,13 +5,14 @@ using DRM.PropBag;
 
 namespace PropBagLib.Tests
 {
-    public partial class TestAllPropsRegisteredModel : DRM.PropBag.PropBag
+    public partial class OnlyTypedAccessModel : DRM.PropBag.PropBag
     {
-        public bool DoWhenStringChangedWasCalled { get; set; }
+        public bool DoWhenStringChanged_WasCalled { get; set; }
         public string DoWhenStringPropOldVal { get; set; }
         public string DoWhenStringPropNewVal { get; set; }
 
-        public TestAllPropsRegisteredModel(bool hookupDoWhenStringChanged, bool doAfterNotify) : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered)
+        public OnlyTypedAccessModel(bool hookupDoWhenStringChanged, bool doAfterNotify)
+            : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered)
         {
             if(hookupDoWhenStringChanged)
             {
@@ -26,13 +27,10 @@ namespace PropBagLib.Tests
 
         public void DoWhenStringChanged(string oldVal, string newVal)
         {
-            DoWhenStringChangedWasCalled = true;
+            DoWhenStringChanged_WasCalled = true;
             DoWhenStringPropOldVal = oldVal;
             DoWhenStringPropNewVal = newVal;
         }
-
-
-
 
     }
 }

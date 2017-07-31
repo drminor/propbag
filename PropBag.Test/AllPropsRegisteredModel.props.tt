@@ -34,13 +34,10 @@ namespace <#= pm.Namespace #>
 
 		public <#= pm.ClassName #>(PropBagTypeSafetyMode typeSafetyMode) : base(typeSafetyMode)
 		{
-			<# foreach (PropItem pi in pm.Props)  {
-		if(pi.InitialValue != null) { #>
-	AddProp<<#= pi.Type #>>("<#= pi.Name #>", <#= pi.InitialValue #>);
-<# } else { #>
-	AddProp<<#= pi.Type #>>("<#= pi.Name #>");
-<# } #>
-		<# } #>}
+	<# foreach (PropItem pi in pm.Props) {#>
+        <#= pm.GetAddPropMethodCallText(pi) #>;
+	<#  } #>
+	}
 
 	#region Property Declarations
 		<# foreach (PropItem pi in pm.Props)  { #>  

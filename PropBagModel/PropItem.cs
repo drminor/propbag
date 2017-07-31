@@ -17,7 +17,7 @@ namespace DRM.PropBagModel
         [XmlElement("type")]
         public string Type { get; set; }
 
-        [XmlElement("initial-value")]
+        [XmlElement("initial-value", IsNullable=true)]
         public string InitialValue { get; set; }
 
 

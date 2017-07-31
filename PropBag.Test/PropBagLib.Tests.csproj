@@ -43,32 +43,27 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="OnlyTypedAccessModel.cs" />
+    <Compile Include="OnlyTypedAccessModel.props.cs" />
+    <Compile Include="TestOnlyTypedAccess.cs" />
     <Compile Include="TestAllPropsRegistered.cs" />
-    <Compile Include="TestAllPropsRegisteredModel.cs" />
-    <Compile Include="TestAllPropsRegisteredModel.props.cs">
-      <DependentUpon>TestAllPropsRegisteredModel.props.tt</DependentUpon>
+    <Compile Include="AllPropsRegisteredModel.cs" />
+    <Compile Include="AllPropsRegisteredModel.props.cs">
+      <DependentUpon>AllPropsRegisteredModel.props.tt</DependentUpon>
       <AutoGen>True</AutoGen>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <DesignTime>True</DesignTime>
-    </Compile>
-    <Compile Include="TestNullable.prop.cs">
-      <DependentUpon>TestNullable.prop.tt</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Compile>
     <Compile Include="TestModel1.props.cs" />
-    <None Include="TestNullable..cs" />
     <Compile Include="TestSAndGLoose.cs" />
     <Compile Include="TestSetAndGet.cs" />
-    <Compile Include="TestReferenceEquality.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestModel1.cs" />
     <Compile Include="TestT4.cs" />
     <Compile Include="UnitTestHelpers.cs" />
-    <Content Include="TestAllPropsRegisteredModel.props.tt">
+    <Content Include="AllPropsRegisteredModel.props.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>TestAllPropsRegisteredModel.props.cs</LastGenOutput>
+      <LastGenOutput>AllPropsRegisteredModel.props.cs</LastGenOutput>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
@@ -100,19 +95,13 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <Content Include="TestNullable.prop.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>TestNullable.prop.cs</LastGenOutput>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="TestAllPropsRegisteredModel_PropDefs.xml" />
-    <Content Include="TestNullable_PropDefs.xml" />
+    <Content Include="AllPropsRegisteredModel_PropDefs.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

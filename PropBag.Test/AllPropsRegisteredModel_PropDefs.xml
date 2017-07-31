@@ -9,7 +9,12 @@ xsi:schemaLocation="https://www.swamphillproductions.com/PropBagModel ../PropBag
     <prop>
       <name>PropString</name>
       <type>string</type>
+      <initial-value xsi:nil="true"/>
     </prop>
+    <prop use-reference-equality="true">
+      <name>PropStringUseRefComp</name>
+      <type>string</type>
+    </prop>    
     <prop>
       <name>PropBool</name>
       <type>bool</type>
@@ -30,6 +35,15 @@ xsi:schemaLocation="https://www.swamphillproductions.com/PropBagModel ../PropBag
     <prop>
       <name>PropLazyInt</name>
       <type>Lazy&lt;int&gt;</type>
+    </prop>
+    <prop>
+      <name>PropNullableInt</name>
+      <type>Nullable&lt;int&gt;</type>
+      <initial-value>-1</initial-value>
+    </prop>
+    <prop>
+      <name>PropICollectionInt</name>
+      <type>ICollection&lt;int&gt;</type>
     </prop>
   </props>
 </model>

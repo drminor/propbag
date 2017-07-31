@@ -5,19 +5,22 @@ using DRM.PropBag;
 
 namespace PropBagLib.Tests
 {
-	public partial class TestAllPropsRegisteredModel : PropBag
+	public partial class AllPropsRegisteredModel : PropBag
 	{
-		public TestAllPropsRegisteredModel() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered) { }
+		public AllPropsRegisteredModel() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered) { }
 
-		public TestAllPropsRegisteredModel(PropBagTypeSafetyMode typeSafetyMode) : base(typeSafetyMode)
+		public AllPropsRegisteredModel(PropBagTypeSafetyMode typeSafetyMode) : base(typeSafetyMode)
 		{
-				AddProp<object>("PropObject");
-			AddProp<string>("PropString");
-			AddProp<bool>("PropBool", false);
-			AddProp<int>("PropInt");
-			AddProp<TimeSpan>("PropTimeSpan");
-			AddProp<Uri>("PropUri");
-			AddProp<Lazy<int>>("PropLazyInt");
+	        AddProp<object>("PropObject", null, false, null);
+	        AddProp<string>("PropString", null, false, null);
+	        AddPropObjComp<string>("PropStringUseRefComp", null, false, null);
+	        AddProp<bool>("PropBool", null, false, null, false);
+	        AddProp<int>("PropInt", null, false, null);
+	        AddProp<TimeSpan>("PropTimeSpan", null, false, null);
+	        AddProp<Uri>("PropUri", null, false, null);
+	        AddProp<Lazy<int>>("PropLazyInt", null, false, null);
+	        AddProp<Nullable<int>>("PropNullableInt", null, false, null, -1);
+	        AddProp<ICollection<int>>("PropICollectionInt", null, false, null);
 		}
 
 	#region Property Declarations
@@ -35,6 +38,18 @@ namespace PropBagLib.Tests
 		}  
 	  
 		public string PropString
+		{
+			get
+			{
+				return GetIt<string>();
+			}
+			set
+			{
+				SetIt<string>(value);
+			}
+		}  
+	  
+		public string PropStringUseRefComp
 		{
 			get
 			{
@@ -105,6 +120,30 @@ namespace PropBagLib.Tests
 				SetIt<Lazy<int>>(value);
 			}
 		}  
+	  
+		public Nullable<int> PropNullableInt
+		{
+			get
+			{
+				return GetIt<Nullable<int>>();
+			}
+			set
+			{
+				SetIt<Nullable<int>>(value);
+			}
+		}  
+	  
+		public ICollection<int> PropICollectionInt
+		{
+			get
+			{
+				return GetIt<ICollection<int>>();
+			}
+			set
+			{
+				SetIt<ICollection<int>>(value);
+			}
+		}  
 	 
 	#endregion
 
@@ -123,6 +162,18 @@ namespace PropBagLib.Tests
 			}
 	  
 			public event PropertyChangedWithTValsHandler<string> PropStringChanged
+			{
+				add
+				{
+					AddToPropChanged<string>(value);
+				}
+				remove
+				{
+					RemoveFromPropChanged<string>(value);
+				}
+			}
+	  
+			public event PropertyChangedWithTValsHandler<string> PropStringUseRefCompChanged
 			{
 				add
 				{
@@ -191,6 +242,30 @@ namespace PropBagLib.Tests
 				remove
 				{
 					RemoveFromPropChanged<Lazy<int>>(value);
+				}
+			}
+	  
+			public event PropertyChangedWithTValsHandler<Nullable<int>> PropNullableIntChanged
+			{
+				add
+				{
+					AddToPropChanged<Nullable<int>>(value);
+				}
+				remove
+				{
+					RemoveFromPropChanged<Nullable<int>>(value);
+				}
+			}
+	  
+			public event PropertyChangedWithTValsHandler<ICollection<int>> PropICollectionIntChanged
+			{
+				add
+				{
+					AddToPropChanged<ICollection<int>>(value);
+				}
+				remove
+				{
+					RemoveFromPropChanged<ICollection<int>>(value);
 				}
 			}
 	 
