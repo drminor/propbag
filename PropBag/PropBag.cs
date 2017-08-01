@@ -212,7 +212,7 @@ namespace DRM.PropBag
                 }
             }
 
-            // This uses reflection.
+            // This uses reflection on first access.
             DoSetDelegate setProDel = GetPropSetterDelegate(vwt);
             setProDel(value, this, propertyName, vwt.Prop);
         }
@@ -259,8 +259,9 @@ namespace DRM.PropBag
             ValueWithType vwt;
 
             try
-            {
-                vwt = GetValueWithType(propertyName);
+            { 
+                // This will fail if the property has a backing store.
+                vwt = GetValueWithType(propertyName, desiredHasStoreValue: false);
             }
             catch (KeyNotFoundException)
             {
@@ -461,6 +462,8 @@ namespace DRM.PropBag
 
         protected bool RegisterDoWhenChanged<T>(Action<T, T> doWhenChanged, bool doAfterNotify = false, [CallerMemberName] string propertyName = null)
         {
+            // TODO: Need to register property here if it has not been registered, since we have type info.
+            
             ValueWithType vwt = GetValueWithType(propertyName);
 
             IProp<T> prop = CheckTypeInfo<T>(vwt, propertyName);
@@ -582,6 +585,11 @@ namespace DRM.PropBag
         // Its important to make sure new is new and cur is cur.
         private bool AreTypesSame(Type newType, Type curType)
         {
+
+            if (newType == curType)
+                return true;
+
+
             Type aUnder = Nullable.GetUnderlyingType(newType);
 
             if (aUnder != null)
@@ -599,7 +607,7 @@ namespace DRM.PropBag
                 }
                 else
                 {
-                    return newType == curType;
+                    return false;
                 }
             }
         }
@@ -673,7 +681,7 @@ namespace DRM.PropBag
             tVals.Add(propertyName, ValueWithType.CreateWithNoStore<T>(doIfChanged, doAfterNotify, comparer));
         }
 
-        public void AddPropNoStore<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false,
+        public void AddPropNoStoreObjComp<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false,
             IEqualityComparer<object> comparer = null)
         {
             tVals.Add(propertyName, ValueWithType.CreateWithNoStoreObjComp<T>(doIfChanged, doAfterNotify, comparer));

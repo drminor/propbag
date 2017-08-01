@@ -246,7 +246,6 @@ namespace PropBagLib.Tests
         {
             mod1 = new AllPropsRegisteredModel(true, false);
             mod1.PropICollectionIntChanged += mod1_PropICollectionIntChanged;
-            mod1.PropNullableIntChanged += mod1_PropNullableIntChanged;
 
 
             mod1.DoWhenICollectionIntChanged_WasCalled = false;

@@ -43,6 +43,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PerformanceModel.cs" />
+    <Compile Include="PerformanceModel.props.cs">
+      <DependentUpon>PerformanceModel.props.tt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="LooseModel.cs" />
     <Compile Include="OnlyTypedAccessModel.cs" />
     <Compile Include="OnlyTypedAccessModel.props.cs" />
@@ -94,6 +101,11 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="PerformanceModel.props.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>PerformanceModel.props.cs</LastGenOutput>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -101,6 +113,7 @@
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="PerformanceModel_PropDefs.xml" />
     <Content Include="AllPropsRegisteredModel_PropDefs.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

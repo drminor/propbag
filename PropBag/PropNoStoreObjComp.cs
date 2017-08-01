@@ -24,11 +24,12 @@ namespace DRM.PropBag
         {
             get
             {
-                throw new NotImplementedException();
+                throw new InvalidOperationException();
             }
             set
             {
-                throw new NotImplementedException();
+                //Commented out to avoid CA1065 -- Do not raise execptions in unexpected locations.
+                //throw new NotImplementedException();
             }
         }
 
