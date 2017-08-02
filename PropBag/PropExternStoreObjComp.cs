@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using DRM.ReferenceEquality;
-using DRM.Ipnwv;
+using DRM.Ipnwvc;
 
 namespace DRM.PropBag
 {

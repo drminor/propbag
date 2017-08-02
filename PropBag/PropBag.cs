@@ -8,7 +8,7 @@ using System.Runtime.CompilerServices;
 
 using DRM.ReferenceEquality;
 
-using DRM.Ipnwv;
+using DRM.Ipnwvc;
 
 namespace DRM.PropBag
 {
@@ -47,6 +47,7 @@ namespace DRM.PropBag
         public event PropertyChangedEventHandler PropertyChanged; // = delegate { };
         public event PropertyChangingEventHandler PropertyChanging; // = delegate { };
         public event PropertyChangedWithValsHandler PropertyChangedWithVals; // = delegate { };
+
 
         private readonly Dictionary<string, ValueWithType> tVals;
 
@@ -112,8 +113,8 @@ namespace DRM.PropBag
                     this.PropertyChangedWithVals -= h;
                 }
 
-                // TODO: Is this necessary?
-                vwt = null;
+                // TODO: Is this necessary -- Don't think so.
+                //vwt = null;
             }
         }
 
@@ -290,6 +291,11 @@ namespace DRM.PropBag
             return !theSame;
         }
 
+        // TODO: Consider making this protected, and then as an option in the PropDefs.xml
+        // to expose it using a wrapper in the props.cs file.
+
+        // This is used to allow the caller to get notified only when a particular property is changed with values.
+        // It can be used in any of the three modes, but is especially handy for Loose mode.
         public void SubscribeToPropChanged(Action<object, object> doOnChange, [CallerMemberName] string propertyName = null)
         {
             ValueWithType vwt = GetValueWithType(propertyName);
@@ -308,9 +314,12 @@ namespace DRM.PropBag
             vwt.PropChangedWithValsHandlerList.Add(action);
         }
 
-        // TODO: Do we really want to support this?
-        // If yes, should it be public?
-        protected void SubscribeToPropChanged<T>(Action<T, T> doOnChange, string propertyName)
+        // TODO: Consider making this protected, and then as an option in the PropDefs.xml
+        // to expose it using a wrapper in the props.cs file.
+
+        // This is used to support 'OnlyTypeAccess' mode,
+        // to allow callers to easily subscribe to PropertyChangedWithVals.
+        public void SubscribeToPropChanged<T>(Action<T, T> doOnChange, string propertyName)
         {
             ValueWithType vwt;
 
@@ -322,7 +331,6 @@ namespace DRM.PropBag
             {
                 if (AllPropsMustBeRegistered)
                 {
-                    //TODO: Check this message.
                     throw new ApplicationException(string.Format("Property: {0} has not been defined with a call to AddProp() and the operation setting 'AllPropsMustBeRegistered' is set to true.", propertyName));
                 }
 
@@ -344,6 +352,8 @@ namespace DRM.PropBag
             prop.PropertyChangedWithTVals += action;
         }
 
+        // This uses "real" PropertyChanged event handers -- not actions.
+        // The subscriber is responsible for inspecting the value of the property name.
         public void SubscribeToPropChanged<T>(PropertyChangedWithTValsHandler<T> action, string propertyName)
         {
             ValueWithType vwt;
@@ -356,7 +366,6 @@ namespace DRM.PropBag
             {
                 if (AllPropsMustBeRegistered)
                 {
-                    //TODO: Check this message.
                     throw new ApplicationException(string.Format("Property: {0} has not been defined with a call to AddProp() and the operation setting 'AllPropsMustBeRegistered' is set to true.", propertyName));
                 }
 
@@ -637,10 +646,10 @@ namespace DRM.PropBag
         #region Add Prop Methods
 
         /// <summary>
-        /// Use when you want to specify an Action<typeparamref name="T", typeparamref name="T"> to be performed
+        /// Use when you want to specify an Action<typeparamref name="T"/> to be performed
         /// either before or after the PropertyChanged event has been raised.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="T">The type of this property's value.</typeparam>
         /// <param name="propertyName"></param>
         /// <param name="doIfChanged"></param>
         /// <param name="doAfterNotify"></param>
@@ -659,18 +668,22 @@ namespace DRM.PropBag
         }
 
         // This allow the caller to use their own storage to hold the value.
-        public Guid AddPropExtStore<T>(string propertyName, GetExtVal<T> getter, SetExtVal<T> setter, IEqualityComparer<T> comparer)
+        public Guid AddPropExtStore<T>(string propertyName, GetExtVal<T> getter, SetExtVal<T> setter, 
+            Action<T, T> doIfChanged, bool doAfterNotify = false,
+            IEqualityComparer<T> comparer = null)
         {
             Guid tag = Guid.NewGuid();
-            tVals.Add(propertyName, ValueWithType.CreateWithCustStore<T>(tag, getter, setter, comparer));
+            tVals.Add(propertyName, ValueWithType.CreateWithCustStore<T>(tag, getter, setter, doIfChanged, doAfterNotify, comparer));
 
             return tag;
         }
 
-        public Guid AddPropExtStore<T>(string propertyName, GetExtVal<T> getter, SetExtVal<T> setter, IEqualityComparer<object> comparer)
+        public Guid AddPropExtStoreObjComp<T>(string propertyName, GetExtVal<T> getter, SetExtVal<T> setter,
+            Action<T, T> doIfChanged, bool doAfterNotify = false,
+            IEqualityComparer<object> comparer = null)
         {
             Guid tag = Guid.NewGuid();
-            tVals.Add(propertyName, ValueWithType.CreateWithCustStoreObjComp<T>(tag, getter, setter, comparer));
+            tVals.Add(propertyName, ValueWithType.CreateWithCustStoreObjComp<T>(tag, getter, setter, doIfChanged, doAfterNotify, comparer));
 
             return tag;
         }
@@ -688,12 +701,14 @@ namespace DRM.PropBag
         }
 
         // The remainder of the AddProp variants are "sugar" -- they allow for abbreviated calls to what is provided above.
+
+        // Just name and optional intital value.
         public void AddProp<T>(string propertyName, T initalValue = default(T))
         {
             tVals.Add(propertyName, ValueWithType.Create<T>(initalValue));
         }
 
-        // Use IEqualityComparer<T> and no doIfCHanged Action
+        // Use IEqualityComparer<T> and no doIfChanged Action
         public void AddProp<T>(string propertyName, IEqualityComparer<T> comparer, T initalValue = default(T))
         {
             tVals.Add(propertyName, ValueWithType.Create<T>(initalValue, null, false, comparer));
@@ -806,31 +821,37 @@ namespace DRM.PropBag
 
             #region Factory Methods
 
-            static public ValueWithType Create<T>(T value, Action<T,T> doWhenChanged = null, bool doAfterNotify = false, IEqualityComparer<T> comparer = null, bool typeIsSolid = true)
+            static public ValueWithType Create<T>(T value, Action<T,T> doWhenChanged = null, bool doAfterNotify = false,
+                IEqualityComparer<T> comparer = null, bool typeIsSolid = true)
             {
                 // Use the implementation which takes IEqualityComparer<T>
                 Prop<T> prop = new Prop<T>(value, doWhenChanged, doAfterNotify, comparer);
                 return new ValueWithType(typeof(T), prop, typeIsSolid);
             }
 
-            static public ValueWithType CreateWithObjComparer<T>(T value, Action<T, T> doWhenChanged = null, bool doAfterNotify = false, IEqualityComparer<object> comparer = null)
+            static public ValueWithType CreateWithObjComparer<T>(T value, Action<T, T> doWhenChanged = null, bool doAfterNotify = false,
+                IEqualityComparer<object> comparer = null)
             {
                 // Use the Implementation which takes IEqualityComparer<object>
                 PropObjComp<T> prop = new PropObjComp<T>(value, doWhenChanged, doAfterNotify);
                 return new ValueWithType(typeof(T), prop, typeIsSolid: true);
             }
 
-            static public ValueWithType CreateWithCustStore<T>(Guid tag, GetExtVal<T> getter, SetExtVal<T> setter, IEqualityComparer<T> comparer)
+            static public ValueWithType CreateWithCustStore<T>(Guid tag, GetExtVal<T> getter, SetExtVal<T> setter, 
+                Action<T, T> doWhenChanged = null, bool doAfterNotify = false,
+                IEqualityComparer<T> comparer = null)
             {
                 // Use the implementation which allow the caller to provide the backing store.
-                PropExternStore<T> prop = new PropExternStore<T>(tag, getter, setter, null, false, comparer);
+                PropExternStore<T> prop = new PropExternStore<T>(tag, getter, setter, doWhenChanged, doAfterNotify, comparer);
                 return new ValueWithType(typeof(T), prop, typeIsSolid: true);
             }
 
-            static public ValueWithType CreateWithCustStoreObjComp<T>(Guid tag, GetExtVal<T> getter, SetExtVal<T> setter, IEqualityComparer<object> comparer)
+            static public ValueWithType CreateWithCustStoreObjComp<T>(Guid tag, GetExtVal<T> getter, SetExtVal<T> setter,
+                Action<T, T> doWhenChanged = null, bool doAfterNotify = false,
+                IEqualityComparer<object> comparer = null)
             {
                 // Use the implementation which allow the caller to provide the backing store.
-                PropExternStoreObjComp<T> prop = new PropExternStoreObjComp<T>(tag, getter, setter, null, false, comparer);
+                PropExternStoreObjComp<T> prop = new PropExternStoreObjComp<T>(tag, getter, setter, doWhenChanged, doAfterNotify, comparer);
                 return new ValueWithType(typeof(T), prop, typeIsSolid: true);
             }
 
