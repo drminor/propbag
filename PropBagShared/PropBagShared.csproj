@@ -45,9 +45,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\NotifyPropChangedWithVals\Inpwv.csproj">
+    <ProjectReference Include="..\NotifyPropChangedWithVals\Inpwvc.csproj">
       <Project>{18580a49-4d08-4b0d-9a2e-4ed38891c63b}</Project>
-      <Name>Inpwv</Name>
+      <Name>Inpwvc</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

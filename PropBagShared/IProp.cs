@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-using DRM.Ipnwv;
+using DRM.Ipnwvc;
 
 
 namespace DRM.PropBag
