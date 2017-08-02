@@ -7,7 +7,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 using DRM.ReferenceEquality;
-using DRM.Ipnwv;
+using DRM.Ipnwvc;
 
 namespace PropBagLib
 {

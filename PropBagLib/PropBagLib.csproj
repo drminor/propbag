@@ -49,9 +49,9 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\NotifyPropChangedWithVals\Inpwv.csproj">
+    <ProjectReference Include="..\NotifyPropChangedWithVals\Inpwvc.csproj">
       <Project>{18580a49-4d08-4b0d-9a2e-4ed38891c63b}</Project>
-      <Name>Inpwv</Name>
+      <Name>Inpwvc</Name>
     </ProjectReference>
     <ProjectReference Include="..\ReferenceEquality\ReferenceEquality.csproj">
       <Project>{7d01bb96-f2c9-45a3-ab94-3c03a66b5937}</Project>
