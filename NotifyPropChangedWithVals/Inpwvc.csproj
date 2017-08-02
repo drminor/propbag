@@ -7,7 +7,7 @@
     <ProjectGuid>{18580A49-4D08-4B0D-9A2E-4ED38891C63B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>DRM.Ipnwv</RootNamespace>
+    <RootNamespace>DRM.Ipnwvc</RootNamespace>
     <AssemblyName>NotifyPropChangedWithVals</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

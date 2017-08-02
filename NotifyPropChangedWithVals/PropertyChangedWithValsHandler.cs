@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DRM.Ipnwv
+namespace DRM.Ipnwvc
 {
 
     // Summary:

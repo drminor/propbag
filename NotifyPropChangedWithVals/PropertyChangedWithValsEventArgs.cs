@@ -5,7 +5,7 @@
 /// https://github.com/danielmoore/WpfIgniter
 /// </remarks>
 
-namespace DRM.Ipnwv
+namespace DRM.Ipnwvc
 {
     /// <summary>
     /// Provides typed value change information for the <see cref="INotifyPropertyChanged.PropertyChanged"/> event.
