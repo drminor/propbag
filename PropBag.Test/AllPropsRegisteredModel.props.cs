@@ -1,7 +1,11 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
-using DRM.Ipnwv;
+using PropBagLib.Tests;
+using System.Reflection;
 using DRM.PropBag;
+using DRM.Ipnwvc;
+
 
 namespace PropBagLib.Tests
 {
@@ -12,15 +16,16 @@ namespace PropBagLib.Tests
 		public AllPropsRegisteredModel(PropBagTypeSafetyMode typeSafetyMode) : base(typeSafetyMode)
 		{
 	        AddProp<object>("PropObject", null, false, null);
-	        AddProp<string>("PropString", null, false, null);
-	        AddPropObjComp<string>("PropStringUseRefComp", null, false, null);
+	        AddProp<string>("PropString", GetDelegate<string>("DoWhenStringChanged"), false, null);
+	        AddProp<string>("PropStringCallDoAfter", GetDelegate<string>("DoWhenStringChanged"), true, null);
+	        AddPropObjComp<string>("PropStringUseRefComp", GetDelegate<string>("DoWhenStringChanged"), false, null);
 	        AddProp<bool>("PropBool", null, false, null, false);
 	        AddProp<int>("PropInt", null, false, null);
 	        AddProp<TimeSpan>("PropTimeSpan", null, false, null);
 	        AddProp<Uri>("PropUri", null, false, null);
 	        AddProp<Lazy<int>>("PropLazyInt", null, false, null);
-	        AddProp<Nullable<int>>("PropNullableInt", null, false, null, -1);
-	        AddProp<ICollection<int>>("PropICollectionInt", null, false, null);
+	        AddProp<Nullable<int>>("PropNullableInt", GetDelegate<Nullable<int>>("DoWhenNullIntChanged"), false, null, -1);
+	        AddProp<ICollection<int>>("PropICollectionInt", GetDelegate<ICollection<int>>("DoWhenICollectionIntChanged"), false, null);
 		}
 
 	#region Property Declarations
@@ -38,6 +43,18 @@ namespace PropBagLib.Tests
 		}  
 	  
 		public string PropString
+		{
+			get
+			{
+				return GetIt<string>();
+			}
+			set
+			{
+				SetIt<string>(value);
+			}
+		}  
+	  
+		public string PropStringCallDoAfter
 		{
 			get
 			{
@@ -173,6 +190,18 @@ namespace PropBagLib.Tests
 				}
 			}
 	  
+			public event PropertyChangedWithTValsHandler<string> PropStringCallDoAfterChanged
+			{
+				add
+				{
+					AddToPropChanged<string>(value);
+				}
+				remove
+				{
+					RemoveFromPropChanged<string>(value);
+				}
+			}
+	  
 			public event PropertyChangedWithTValsHandler<string> PropStringUseRefCompChanged
 			{
 				add
@@ -270,6 +299,25 @@ namespace PropBagLib.Tests
 			}
 	 
 	#endregion
+
+		/// <summary>
+		/// If the delegate exists, the original name is returned,
+		/// otherwise null is returned.
+		/// </summary>
+		/// <param name="methodName">Some public or non-public instance method in this class.</param>
+		/// <returns>The name, unchanged, if the method exists, otherwise null.</returns>
+		private Action<T, T> GetDelegate<T>(string methodName)
+		{
+		    Type pp = this.GetType();
+		    MethodInfo mi = pp.GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+		
+		    if (mi == null) return null;
+		
+		    Action<T, T> result = (Action<T, T>)mi.CreateDelegate(typeof(Action<T, T>), this);
+		
+		    return result;
+		}
+
 
 	} 
 }

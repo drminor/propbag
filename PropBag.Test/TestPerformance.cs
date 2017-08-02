@@ -5,7 +5,7 @@ using NUnit.Framework;
 
 
 using DRM.PropBag;
-using DRM.Ipnwv;
+using DRM.Ipnwvc;
 
 namespace PropBagLib.Tests
 {

@@ -14,7 +14,7 @@ namespace PropBagLib.Tests
     public class TestT4
     {
 
-        const string InputPath = @"C:\DEV\VS2013Projects\PubPropBag\PropBagT4\TestInput.xml";
+        const string InputPath = @"C:\DEV\VS2013Projects\PubPropBag\PropBagT4\PropGen_PropDefs.xml";
 
         [Test]
         public void ReadInput()
@@ -22,7 +22,14 @@ namespace PropBagLib.Tests
             PropModel pm = PropModelReader.ReadXml(InputPath);
 
             Assert.That(pm, Is.Not.EqualTo(null), "PropModelReader returned null");
-            //PropModelReaderX.Test();
+
+            string nameSpaceText = pm.GetNamespaces();
+
+            foreach (PropItem pi in pm.Props)
+            {
+                string AddPropText = pm.GetAddPropMethodCallText(pi);
+            }
+
         }
 
         [Test]

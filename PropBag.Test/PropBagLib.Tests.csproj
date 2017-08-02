@@ -75,9 +75,9 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\NotifyPropChangedWithVals\Inpwv.csproj">
+    <ProjectReference Include="..\NotifyPropChangedWithVals\Inpwvc.csproj">
       <Project>{18580a49-4d08-4b0d-9a2e-4ed38891c63b}</Project>
-      <Name>Inpwv</Name>
+      <Name>Inpwvc</Name>
     </ProjectReference>
     <ProjectReference Include="..\PropBagModel\PropBagModel.csproj">
       <Project>{8c801165-03c1-429b-8099-4f5505921da5}</Project>
@@ -101,6 +101,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="AllPropsRegisteredModel_PropDefs.xml" />
     <Content Include="PerformanceModel.props.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>PerformanceModel.props.cs</LastGenOutput>
@@ -114,7 +115,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="PerformanceModel_PropDefs.xml" />
-    <Content Include="AllPropsRegisteredModel_PropDefs.xml" />
+    <Content Include="AllPropsRegisteredModel_PropDefs - Test.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

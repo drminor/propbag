@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using System.Reflection;
+
 using DRM.PropBag;
 
 namespace PropBagLib.Tests
@@ -14,21 +16,14 @@ namespace PropBagLib.Tests
         public bool DoWhenNullIntChanged_WasCalled { get; set; }
         public bool DoWhenICollectionIntChanged_WasCalled { get; set; }
 
-        public AllPropsRegisteredModel(bool hookupDoWhenStringChanged, bool doAfterNotify) : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered)
+        // This is used to test adding a property that has not been registered via a call to AddProp
+        public new object this[string key]
         {
-            if(hookupDoWhenStringChanged)
-            {
-                RegisterDoWhenChanged<string>(DoWhenStringChanged, doAfterNotify, "PropString");
-
-                // Use the same hander for PropStringObjComp
-                RegisterDoWhenChanged<string>(DoWhenStringChanged, doAfterNotify, "PropStringUseRefComp");
-
-                RegisterDoWhenChanged<Nullable<int>>(DoWhenNullIntChanged, false, "PropNullableInt");
-
-                RegisterDoWhenChanged<ICollection<int>>(DoWhenICollectionIntChanged, false, "PropICollectionInt");
-            }
+            get { return base[key]; }
+            set { base[key] = value; }
         }
 
+        // This may be used at some point.
         //public bool RegisterDoWhenUpdated<T>(Action<T, T> doWhenUpdated, bool doAfterNotify, string propertyName)
         //{
         //    return this.RegisterDoWhenChanged(doWhenUpdated, doAfterNotify, propertyName);
@@ -41,16 +36,15 @@ namespace PropBagLib.Tests
             DoWhenStringPropNewVal = newVal;
         }
 
-        public void DoWhenNullIntChanged(Nullable<int> oldVal, Nullable<int> newVal)
+        private void DoWhenNullIntChanged(Nullable<int> oldVal, Nullable<int> newVal)
         {
             DoWhenNullIntChanged_WasCalled = true;
         }
 
-        public void DoWhenICollectionIntChanged(ICollection<int> oldVal, ICollection<int> newVal)
+        private void DoWhenICollectionIntChanged(ICollection<int> oldVal, ICollection<int> newVal)
         {
             DoWhenICollectionIntChanged_WasCalled = true;
         }
-
 
     }
 }

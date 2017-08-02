@@ -21,11 +21,8 @@
 
 	pm.ClassName = className;
 #>
-using System;
-using System.Collections.Generic;
-using DRM.Ipnwv;
-using DRM.PropBag;
 
+<#= pm.GetNamespaces() #>
 namespace <#= pm.Namespace #>
 {
 	public partial class <#= pm.ClassName #> : PropBag
@@ -70,6 +67,8 @@ namespace <#= pm.Namespace #>
 			}
 	<#  } #> 
 	#endregion
+
+<#= PropModelStaticText.GetGetDelegateMethodText() #>
 
 	} 
 }

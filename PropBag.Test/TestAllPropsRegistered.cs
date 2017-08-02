@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using System.Collections.ObjectModel;
-using DRM.Ipnwv;
+using DRM.Ipnwvc;
 using DRM.PropBag;
 using DRM.ReferenceEquality;
 
@@ -61,6 +61,8 @@ namespace PropBagLib.Tests
 
             temp = mod1.PropBool;
             Assert.That(temp, Is.EqualTo(true), "Expecting the value of PropBool to be updated to true.");
+
+
         }
 
         [Test]
@@ -87,25 +89,19 @@ namespace PropBagLib.Tests
             Assert.That(propStringOldVal, Is.Null, "Expecting the value of propStringOldVal to be null.");
             Assert.That(propStringNewVal, Is.EqualTo("Water Colors"), "Expecting the value of propStringNewVal to be 'Water Colors.'");
 
-            Assert.That(doWhenStringChangedWasCalled, Is.False, "Expecting internal DoWhenPropStringChanged to not have been called.");
+            Assert.That(mod1.DoWhenStringChanged_WasCalled, Is.True, "Expecting internal DoWhenPropStringChanged to not have been called.");
 
-            Assert.That(mod1.DoWhenStringPropOldVal, Is.EqualTo("y"), "Expecting the value of propStringOldVal to be 'y.'");
-            Assert.That(mod1.DoWhenStringPropNewVal, Is.EqualTo("z"), "Expecting the value of propStringNewVal to be 'z.'");
+            Assert.That(mod1.DoWhenStringPropOldVal, Is.Null, "Expecting the value of propStringOldVal to be 'y.'");
+            Assert.That(mod1.DoWhenStringPropNewVal, Is.EqualTo("Water Colors"), "Expecting the value of propStringNewVal to be 'z.'");
         }
 
         [Test]
-        public void TestAllRegDoWhenTiming()
+        public void TestDoWhenPropStringChangedBefore()
         {
-            TestDoWhenStringPropChangedTiming(false);
-            TestDoWhenStringPropChangedTiming(true);
-        }
-
-        private void TestDoWhenStringPropChangedTiming(bool doAfterNotify)
-        {
-            mod1 = new AllPropsRegisteredModel(true, doAfterNotify);
+            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
             mod1.PropStringChanged += mod1_PropStringChanged;
 
-            string temp = mod1.PropStringUseRefComp;
+            string temp = mod1.PropString;
             Assert.That(temp, Is.Null, "Expecting the initial value of PropString to be null.");
 
             propStringOldVal = "u";
@@ -123,20 +119,44 @@ namespace PropBagLib.Tests
             Assert.That(propStringOldVal, Is.Null, "Expecting the value of propStringOldVal to be null.");
             Assert.That(propStringNewVal, Is.EqualTo("Water Colors"), "Expecting the value of propStringNewVal to be 'Water Colors.'");
 
-            if (doAfterNotify)
-            {
-                Assert.That(doWhenStringChangedWasCalled, Is.False, "Expecting internal DoWhenPropStringChanged to be after before the public event.");
-            }
-            else
-            {
-                Assert.That(doWhenStringChangedWasCalled, Is.True, "Expecting internal DoWhenPropStringChanged to be called before the public event.");
-            }
+            Assert.That(doWhenStringChangedWasCalled, Is.True, "Expecting internal DoWhenPropStringChanged to be called before the public event.");
 
             Assert.That(mod1.DoWhenStringPropOldVal, Is.Null, "Expecting the value of propStringOldVal to be null.");
             Assert.That(mod1.DoWhenStringPropNewVal, Is.EqualTo("Water Colors"), "Expecting the value of propStringNewVal to be 'Water Colors.'");
             Assert.That(mod1.DoWhenStringChanged_WasCalled, Is.True, "Expecting internal DoWhenPropStringChanged not to have been called.");
-
         }
+
+        [Test]
+        public void TestDoWhenPropStringChangedAfter()
+        {
+            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+            mod1.PropStringCallDoAfterChanged += mod1_PropStringChanged;
+
+            string temp = mod1.PropStringCallDoAfter;
+            Assert.That(temp, Is.Null, "Expecting the initial value of PropString to be null.");
+
+            propStringOldVal = "u";
+            propStringNewVal = "x";
+            mod1.DoWhenStringChanged_WasCalled = false;
+            mod1.DoWhenStringPropOldVal = "y";
+            mod1.DoWhenStringPropNewVal = "z";
+
+            mod1.PropStringCallDoAfter = "Water Colors";
+
+            temp = mod1.PropStringCallDoAfter;
+            Assert.That(temp, Is.EqualTo("Water Colors"), "Expecting the value of PropString to be updated to 'Water Colors.'");
+            Assert.That(propStringWasUpdated, Is.True, "Expecting mod1_PropStringChanged to have been called.");
+
+            Assert.That(propStringOldVal, Is.Null, "Expecting the value of propStringOldVal to be null.");
+            Assert.That(propStringNewVal, Is.EqualTo("Water Colors"), "Expecting the value of propStringNewVal to be 'Water Colors.'");
+
+            Assert.That(doWhenStringChangedWasCalled, Is.False, "Expecting internal DoWhenPropStringChanged to not be called before the public event.");
+
+            Assert.That(mod1.DoWhenStringPropOldVal, Is.Null, "Expecting the value of propStringOldVal to be null.");
+            Assert.That(mod1.DoWhenStringPropNewVal, Is.EqualTo("Water Colors"), "Expecting the value of propStringNewVal to be 'Water Colors.'");
+            Assert.That(mod1.DoWhenStringChanged_WasCalled, Is.True, "Expecting internal DoWhenPropStringChanged not to have been called.");
+        }
+
 
         #endregion
 
@@ -145,7 +165,7 @@ namespace PropBagLib.Tests
         [Test]
         public void TestStringRefComp()
         {
-            mod1 = new AllPropsRegisteredModel(true, true);
+            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
             mod1.PropStringUseRefCompChanged += mod1_PropStringUseRefCompChanged;
 
             // Use our Reference Equality Comparer.
@@ -171,7 +191,7 @@ namespace PropBagLib.Tests
             Assert.That(theyAreTheSame, Is.True, "Temp should point to the same memory location as the string literal 'Water Colors.'");
 
             Assert.That(propStringWasUpdated, Is.True, "Expecting mod1_PropStringUseRefCompChanged to have been called.");
-            Assert.That(mod1.DoWhenStringChanged_WasCalled, Is.True, "Expecting internal DoWhenPropStringChanged not to have been called.");
+            Assert.That(mod1.DoWhenStringChanged_WasCalled, Is.True, "Expecting internal DoWhenPropStringChanged to have been called.");
 
 
             propStringWasUpdated = false;
@@ -184,7 +204,7 @@ namespace PropBagLib.Tests
             Assert.That(theyAreTheSame, Is.True, "Temp should point to the same memory location as the string literal 'Water Colors.'");
 
             Assert.That(propStringWasUpdated, Is.False, "Expecting mod1_PropStringUseRefCompChanged to have NOT been called.");
-            Assert.That(mod1.DoWhenStringChanged_WasCalled, Is.False, "Expecting internal DoWhenPropStringChanged not to have been called.");
+            Assert.That(mod1.DoWhenStringChanged_WasCalled, Is.False, "Expecting internal DoWhenPropStringChanged to not have been called.");
 
             propStringWasUpdated = false;
             mod1.DoWhenStringChanged_WasCalled = false;
@@ -211,7 +231,7 @@ namespace PropBagLib.Tests
         [Test]
         public void ShouldSetAndRetrieveNullableInt()
         {
-            mod1 = new AllPropsRegisteredModel(true, false);
+            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
             mod1.PropNullableIntChanged += mod1_PropNullableIntChanged;
 
             Assert.That(mod1.PropNullableInt, Is.EqualTo(-1),"The intitalvalue should be -1");
@@ -244,7 +264,7 @@ namespace PropBagLib.Tests
         [Test]
         public void ShouldSetAndRetrieveICollectionInt()
         {
-            mod1 = new AllPropsRegisteredModel(true, false);
+            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
             mod1.PropICollectionIntChanged += mod1_PropICollectionIntChanged;
 
 
@@ -270,12 +290,62 @@ namespace PropBagLib.Tests
 
             Assert.That(propICollectionInt_WasUpdated, Is.EqualTo(true));
 
-            //TODO: This shouldn't be here : it is testing setting a property that has not been defined with AddProp.
-            //mod1.DoWhenICollectionIntChanged_WasCalled = false;
-            //mod1["PropICollectionInt"] = newVal;
-            //Assert.That(mod1.PropICollectionInt, Is.EqualTo(newVal));
-            //Assert.That(mod1.DoWhenICollectionIntChanged_WasCalled, Is.EqualTo(false));
         }
+
+        #endregion
+
+        #region Test Adding Unregistered Property
+
+        [Test]
+        public void TestAddNewProp()
+        {
+            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+
+            KeyNotFoundException kk = new KeyNotFoundException();
+
+            Type tt = kk.GetType();
+
+            Assert.Throws(tt, () => mod1["NewProperty"] = "This is a a test.");
+        }
+
+
+        #endregion
+
+        #region Test Subscribing to the generic event 
+
+        [Test]
+        public void TestPropertyChangedWithVals()
+        {
+            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+            mod1.PropertyChangedWithVals += mod1_PropertyChangedWithVals;
+
+            mod1.PropInt = 0;
+
+            mod1.PropInt = 1;
+
+        }
+
+        void mod1_PropertyChangedWithVals(object sender, PropertyChangedWithValsEventArgs e)
+        {
+            object sendr = sender;
+            string prpName = e.PropertyName;
+            object oldVal = e.OldValue;
+            object newVal = e.NewValue;
+        }
+
+        #endregion
+
+        #region Test Enhance Add Prop Calls
+
+        // TODO: Improve and uncomment
+        //[Test]
+        //public void TestFindMethod()
+        //{
+        //    mod1 = new AllPropsRegisteredModel();
+        //    bool methExists = mod1.DoesMethodExist("DoWhenNullIntChanged");
+
+        //    Assert.That(methExists, Is.True, "The method should exist.");
+        //}
 
         #endregion
 

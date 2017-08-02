@@ -1,6 +1,11 @@
 ﻿<?xml version="1.0"?>
 <model class-name="TestAllPropsRegistered" namespace="PropBagLib.Tests" type-safety-mode="AllPropsMustBeRegistered" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="https://www.swamphillproductions.com/PropBagModel ../PropBagModel/PropBagModel.xsd">
+  <namespaces>
+    <namespace>System</namespace>
+    <namespace>System.Collections.Generic</namespace>
+    <namespace>PropBagLib.Tests</namespace>
+  </namespaces>
   <props>
     <prop>
       <name>PropObject</name>
@@ -10,10 +15,19 @@ xsi:schemaLocation="https://www.swamphillproductions.com/PropBagModel ../PropBag
       <name>PropString</name>
       <type>string</type>
       <initial-value xsi:nil="true"/>
+      <do-when-changed>DoWhenStringChanged</do-when-changed>
     </prop>
-    <prop use-reference-equality="true">
+    <prop>
+      <name>PropStringCallDoAfter</name>
+      <type>string</type>
+      <initial-value xsi:nil="true"/>
+      <do-when-changed do-after-notify="true">DoWhenStringChanged</do-when-changed>
+    </prop>
+    <prop>
       <name>PropStringUseRefComp</name>
       <type>string</type>
+      <comparer comparer-type="reference"/>
+      <do-when-changed>DoWhenStringChanged</do-when-changed>
     </prop>    
     <prop>
       <name>PropBool</name>
@@ -40,10 +54,12 @@ xsi:schemaLocation="https://www.swamphillproductions.com/PropBagModel ../PropBag
       <name>PropNullableInt</name>
       <type>Nullable&lt;int&gt;</type>
       <initial-value>-1</initial-value>
+      <do-when-changed>DoWhenNullIntChanged</do-when-changed>
     </prop>
     <prop>
       <name>PropICollectionInt</name>
       <type>ICollection&lt;int&gt;</type>
+      <do-when-changed>DoWhenICollectionIntChanged</do-when-changed>
     </prop>
   </props>
 </model>

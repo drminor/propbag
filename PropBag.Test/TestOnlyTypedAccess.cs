@@ -80,22 +80,17 @@ namespace PropBagLib.Tests
             Assert.That(propStringOldVal, Is.Null, "Expecting the value of propStringOldVal to be null.");
             Assert.That(propStringNewVal, Is.EqualTo("Water Colors"), "Expecting the value of propStringNewVal to be 'Water Colors.'");
 
-            Assert.That(doWhenStringChanged_WasCalled, Is.False, "Expecting internal DoWWhenPropStringChanged not to be called.");
+            Assert.That(doWhenStringChanged_WasCalled, Is.True, "Expecting internal DoWhenPropStringChanged to be called.");
 
-            Assert.That(mod1.DoWhenStringPropOldVal, Is.EqualTo("y"), "Expecting the value of propStringOldVal to be 'y.'");
-            Assert.That(mod1.DoWhenStringPropNewVal, Is.EqualTo("z"), "Expecting the value of propStringNewVal to be 'z.'");
+            Assert.That(mod1.DoWhenStringPropOldVal, Is.Null, "Expecting the value of propStringOldVal to be 'y.'");
+            Assert.That(mod1.DoWhenStringPropNewVal, Is.EqualTo("Water Colors"), "Expecting the value of propStringNewVal to be 'z.'");
         }
 
         [Test]
-        public void TestAllRegDoWhenTiming()
+        public void TestDoWhenPropStringChangedBefore()
         {
-            TestDoWhenStringPropChangedTiming(false);
-            TestDoWhenStringPropChangedTiming(true);
-        }
+            mod1 = new OnlyTypedAccessModel(PropBagTypeSafetyMode.OnlyTypedAccess);
 
-        private void TestDoWhenStringPropChangedTiming(bool doAfterNotify)
-        {
-            mod1 = new OnlyTypedAccessModel(true, doAfterNotify);
             mod1.PropStringChanged += mod1_PropStringChanged;
 
             string temp = mod1.PropString;
@@ -116,24 +111,68 @@ namespace PropBagLib.Tests
             Assert.That(propStringOldVal, Is.Null, "Expecting the value of propStringOldVal to be null.");
             Assert.That(propStringNewVal, Is.EqualTo("Water Colors"), "Expecting the value of propStringNewVal to be 'Water Colors.'");
 
-            if (doAfterNotify)
-            {
-                Assert.That(doWhenStringChanged_WasCalled, Is.False, "Expecting internal DoWWhenPropStringChanged to be after before the public event.");
-            }
-            else
-            {
-                Assert.That(doWhenStringChanged_WasCalled, Is.True, "Expecting internal DoWWhenPropStringChanged to be called before the public event.");
-            }
+            Assert.That(doWhenStringChanged_WasCalled, Is.True, "Expecting internal DoWWhenPropStringChanged to be called before the public event.");
 
             Assert.That(mod1.DoWhenStringPropOldVal, Is.Null, "Expecting the value of propStringOldVal to be null.");
             Assert.That(mod1.DoWhenStringPropNewVal, Is.EqualTo("Water Colors"), "Expecting the value of propStringNewVal to be 'Water Colors.'");
+            Assert.That(mod1.DoWhenStringChanged_WasCalled, Is.True, "Expecting internal DoWhenPropStringChanged not to have been called.");
+        }
+
+        [Test]
+        public void TestDoWhenPropStringChangedAfter()
+        {
+            mod1 = new OnlyTypedAccessModel(PropBagTypeSafetyMode.OnlyTypedAccess);
+
+            mod1.PropStringCallDoAfterChanged += mod1_PropStringChanged;
+
+            string temp = mod1.PropStringCallDoAfter;
+            Assert.That(temp, Is.Null, "Expecting the initial value of PropString to be null.");
+
+            propStringOldVal = "u";
+            propStringNewVal = "x";
+            mod1.DoWhenStringChanged_WasCalled = false;
+            mod1.DoWhenStringPropOldVal = "y";
+            mod1.DoWhenStringPropNewVal = "z";
+
+            mod1.PropStringCallDoAfter = "Water Colors";
+
+            temp = mod1.PropStringCallDoAfter;
+            Assert.That(temp, Is.EqualTo("Water Colors"), "Expecting the value of PropString to be updated to 'Water Colors.'");
+            Assert.That(propString_WasUpdated, Is.True, "Expecting propStringWasUpdated to be true.");
+
+            Assert.That(propStringOldVal, Is.Null, "Expecting the value of propStringOldVal to be null.");
+            Assert.That(propStringNewVal, Is.EqualTo("Water Colors"), "Expecting the value of propStringNewVal to be 'Water Colors.'");
+
+            Assert.That(doWhenStringChanged_WasCalled, Is.False, "Expecting internal DoWWhenPropStringChanged to not be called before the public event.");
+
+            Assert.That(mod1.DoWhenStringPropOldVal, Is.Null, "Expecting the value of propStringOldVal to be null.");
+            Assert.That(mod1.DoWhenStringPropNewVal, Is.EqualTo("Water Colors"), "Expecting the value of propStringNewVal to be 'Water Colors.'");
+            Assert.That(mod1.DoWhenStringChanged_WasCalled, Is.True, "Expecting internal DoWhenPropStringChanged not to have been called.");
+        }
+        
+        #endregion
+
+        #region Test Adding Unregistered Property
+
+        [Test]
+        public void TestAddNewProp()
+        {
+            mod1 = new OnlyTypedAccessModel(PropBagTypeSafetyMode.OnlyTypedAccess);
+
+
+            //KeyNotFoundException kk = new KeyNotFoundException();
+            ApplicationException aa = new ApplicationException();
+
+            Type tt = aa.GetType();
+
+            Assert.Throws(tt, () => mod1["NewProperty"] = "This is a a test.");
         }
 
         #endregion
 
         #region Event Handlers
 
-        void mod1_PropStringChanged(object sender, DRM.Ipnwv.PropertyChangedWithTValsEventArgs<string> e)
+        void mod1_PropStringChanged(object sender, DRM.Ipnwvc.PropertyChangedWithTValsEventArgs<string> e)
         {
             propStringOldVal = e.OldValue;
             propStringNewVal = e.NewValue;

@@ -11,19 +11,21 @@ namespace PropBagLib.Tests
         public string DoWhenStringPropOldVal { get; set; }
         public string DoWhenStringPropNewVal { get; set; }
 
-        public OnlyTypedAccessModel(bool hookupDoWhenStringChanged, bool doAfterNotify)
-            : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered)
-        {
-            if(hookupDoWhenStringChanged)
-            {
-                RegisterDoWhenChanged<string>(DoWhenStringChanged, doAfterNotify, "PropString");
-            }
-        }
-
-        //public bool RegisterDoWhenUpdated<T>(Action<T, T> doWhenUpdated, bool doAfterNotify, string propertyName)
+        //public OnlyTypedAccessModel(bool hookupDoWhenStringChanged, bool doAfterNotify)
+        //    : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered)
         //{
-        //    return this.RegisterDoWhenChanged(doWhenUpdated, doAfterNotify, propertyName);
+        //    if(hookupDoWhenStringChanged)
+        //    {
+        //        RegisterDoWhenChanged<string>(DoWhenStringChanged, doAfterNotify, "PropString");
+        //    }
         //}
+
+        // This is used to test adding a property that has not been registered via a call to AddProp
+        public new object this[string key]
+        {
+            get { return base[key]; }
+            set { base[key] = value; }
+        }
 
         public void DoWhenStringChanged(string oldVal, string newVal)
         {

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using DRM.Ipnwv;
+using DRM.Ipnwvc;
 using DRM.PropBag;
 
 namespace PropBagLib.Tests
@@ -12,13 +12,18 @@ namespace PropBagLib.Tests
         public OnlyTypedAccessModel(PropBagTypeSafetyMode typeSafetyMode)
             : base(typeSafetyMode)
         {
-            AddProp<object>("PropObject");
-            AddProp<string>("PropString");
-            AddProp<bool>("PropBool", false);
-            AddProp<int>("PropInt");
-            AddProp<TimeSpan>("PropTimeSpan");
-            AddProp<Uri>("PropUri");
-            AddProp<Lazy<int>>("PropLazyInt");
+            AddProp<object>("PropObject", null, false, null);
+            AddProp<string>("PropString", DoWhenStringChanged, false, null);
+            AddProp<string>("PropStringCallDoAfter", DoWhenStringChanged, true, null);
+            AddPropObjComp<string>("PropStringUseRefComp", DoWhenStringChanged, false, null);
+            AddProp<bool>("PropBool", null, false, null, false);
+            AddProp<int>("PropInt", null, false, null);
+            AddProp<TimeSpan>("PropTimeSpan", null, false, null);
+            AddProp<Uri>("PropUri", null, false, null);
+            AddProp<Lazy<int>>("PropLazyInt", null, false, null);
+            //AddProp<Nullable<int>>("PropNullableInt", DoWhenNullIntChanged, false, null, -1);
+            //AddProp<ICollection<int>>("PropICollectionInt", DoWhenICollectionIntChanged), false, null);
+
         }
 
         #region Property Declarations
@@ -47,6 +52,17 @@ namespace PropBagLib.Tests
             }
         }
 
+        public string PropStringCallDoAfter
+        {
+            get
+            {
+                return GetIt<string>();
+            }
+            set
+            {
+                SetIt<string>(value);
+            }
+        }
         public bool PropBool
         {
             get
@@ -120,6 +136,18 @@ namespace PropBagLib.Tests
             remove
             {
                 RemoveFromPropChanged<object>(value);
+            }
+        }
+
+        public event PropertyChangedWithTValsHandler<string> PropStringCallDoAfterChanged
+        {
+            add
+            {
+                AddToPropChanged<string>(value);
+            }
+            remove
+            {
+                RemoveFromPropChanged<string>(value);
             }
         }
 

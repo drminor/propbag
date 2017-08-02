@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0"?>
 <model class-name="TestAllPropsRegistered" namespace="PropBagLib.Tests" type-safety-mode="AllPropsMustBeRegistered" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-xsi:schemaLocation="https://www.swamphillproductions.com/PropBagModel ../PropBagModel/PropBagModel.xsd">
+xsi:schemaLocation="http://tempuri.org/PropBagModel ../PropBagModel/PropBagModel.xsd">
   <namespaces>
     <namespace>System</namespace>
     <namespace>System.Collections.Generic</namespace>
@@ -14,42 +14,33 @@ xsi:schemaLocation="https://www.swamphillproductions.com/PropBagModel ../PropBag
     <prop>
       <name>PropString</name>
       <type>string</type>
-      <initial-value xsi:nil="true"/>
     </prop>
-    <prop>
-      <name>PropStringUseRefComp</name>
-      <type>string</type>
-      <comparer comparer-type="reference"/>
-    </prop>    
-    <prop>
+    <prop storage-type="none">
       <name>PropBool</name>
       <type>bool</type>
-      <initial-value>false</initial-value>
+      <comparer comparer-type="reference">xxx</comparer>
+      <do-when-changed do-after-notify="true">yyy</do-when-changed>
     </prop>
-    <prop>
+    <prop storage-type="none">
       <name>PropInt</name>
       <type>int</type>
     </prop>
-    <prop>
+    <prop storage-type="external">
       <name>PropTimeSpan</name>
       <type>TimeSpan</type>
+      <do-when-changed>DoWhenTimeSpanChanges</do-when-changed>
     </prop>
     <prop>
       <name>PropUri</name>
       <type>Uri</type>
+      <comparer comparer-type="reference"/>
+      <do-when-changed do-after-notify="false">TestDelegate</do-when-changed>
     </prop>
     <prop>
       <name>PropLazyInt</name>
       <type>Lazy&lt;int&gt;</type>
-    </prop>
-    <prop>
-      <name>PropNullableInt</name>
-      <type>Nullable&lt;int&gt;</type>
-      <initial-value>-1</initial-value>
-    </prop>
-    <prop>
-      <name>PropICollectionInt</name>
-      <type>ICollection&lt;int&gt;</type>
+      <initial-value>new Lazy&lt;int&gt;(() => 10)</initial-value>
+      <comparer>MyTestComparer</comparer>
     </prop>
   </props>
 </model>
