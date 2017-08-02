@@ -3,6 +3,7 @@
   <xs:element name="model">
     <xs:complexType>
       <xs:sequence>
+        <xs:element ref="namespaces" />
         <xs:element ref="props" />
       </xs:sequence>
       <xs:attribute name="class-name" type="xs:string" use="required" />
@@ -18,6 +19,14 @@
       </xs:attribute>
     </xs:complexType>
   </xs:element>
+  <xs:element name="namespaces">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="namespace" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="namespace" type="xs:string" />
   <xs:element name="props">
     <xs:complexType>
       <xs:sequence>
@@ -30,12 +39,48 @@
       <xs:sequence>
         <xs:element ref="name" />
         <xs:element ref="type" />
-        <xs:element ref="initial-value" minOccurs="0" maxOccurs="1" />
+        <xs:element minOccurs="0" maxOccurs="1" ref="initial-value" />
+        <xs:element minOccurs="0" maxOccurs="1" ref="comparer" />
+        <xs:element minOccurs="0" maxOccurs="1" ref="do-when-changed" />
       </xs:sequence>
-      <xs:attribute default="false" name="use-reference-equality" type="xs:boolean" />
+      <xs:attribute default="internal" name="storage-type">
+        <xs:simpleType>
+          <xs:restriction base="xs:NMTOKEN">
+            <xs:enumeration value="internal" />
+            <xs:enumeration value="external" />
+            <xs:enumeration value="none" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
     </xs:complexType>
   </xs:element>
   <xs:element name="name" type="xs:string" />
   <xs:element name="type" type="xs:string" />
-  <xs:element name="initial-value" type="xs:string" nillable="true" />
+  <xs:element name="initial-value" type="xs:string"  nillable="true"/>
+  <xs:element name="comparer">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute default="typed" name="comparer-type">
+            <xs:simpleType>
+              <xs:restriction base="xs:NMTOKEN">
+                <xs:enumeration value="typed" />
+                <xs:enumeration value="object" />
+                <xs:enumeration value="reference" />
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="do-when-changed">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute default="false" name="do-after-notify" type="xs:boolean"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
 </xs:schema>

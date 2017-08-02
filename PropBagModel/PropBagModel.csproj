@@ -39,9 +39,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PropComparerField.cs" />
+    <Compile Include="PropDoWhenChanged.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropItem.cs" />
     <Compile Include="PropModel.cs" />
+    <Compile Include="PropModelStaticText.cs" />
+    <None Include="PropBagModel - Copy.xsd">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="PropModelReader_OLD.cs" />
     <Compile Include="PropModelReader.cs" />
   </ItemGroup>
@@ -55,9 +61,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\NotifyPropChangedWithVals\Inpwv.csproj">
+    <ProjectReference Include="..\NotifyPropChangedWithVals\Inpwvc.csproj">
       <Project>{18580a49-4d08-4b0d-9a2e-4ed38891c63b}</Project>
-      <Name>Inpwv</Name>
+      <Name>Inpwvc</Name>
     </ProjectReference>
     <ProjectReference Include="..\PropBagShared\PropBagShared.csproj">
       <Project>{1544a8f7-3296-4788-97b4-bfd15e6bf914}</Project>

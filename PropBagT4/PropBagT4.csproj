@@ -78,14 +78,16 @@
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="PropGen_PropDefs.xml" />
+    <Content Include="PropGen_PropDefs.xml">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="TestInput - Copy.xml" />
     <Content Include="TestInput.xml" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\NotifyPropChangedWithVals\Inpwv.csproj">
+    <ProjectReference Include="..\NotifyPropChangedWithVals\Inpwvc.csproj">
       <Project>{18580a49-4d08-4b0d-9a2e-4ed38891c63b}</Project>
-      <Name>Inpwv</Name>
+      <Name>Inpwvc</Name>
     </ProjectReference>
     <ProjectReference Include="..\PropBagShared\PropBagShared.csproj">
       <Project>{1544a8f7-3296-4788-97b4-bfd15e6bf914}</Project>

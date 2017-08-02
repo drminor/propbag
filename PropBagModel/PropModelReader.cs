@@ -5,7 +5,7 @@ using System.Xml.Serialization;
 
 using System.Xml;
 
-using DRM.Ipnwv;
+using DRM.Ipnwvc;
 using DRM.PropBag;
 
 

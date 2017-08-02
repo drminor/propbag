@@ -1,7 +1,10 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
-using DRM.Ipnwv;
+using PropBagLib.Tests;
 using DRM.PropBag;
+using DRM.Ipnwvc;
+
 
 namespace PropBagLib.Tests
 {
@@ -11,13 +14,13 @@ namespace PropBagLib.Tests
 
 		public PropGen(PropBagTypeSafetyMode typeSafetyMode) : base(typeSafetyMode)
 		{
-				AddProp<object>("PropObject");
-			AddProp<string>("PropString");
-			AddProp<bool>("PropBool");
-			AddProp<int>("PropInt");
-			AddProp<TimeSpan>("PropTimeSpan");
-			AddProp<Uri>("PropUri");
-			AddProp<Lazy<int>>("PropLazyInt");
+            //AddProp<object>("PropObject", null, false, null);
+            //AddProp<string>("PropString", null, false, null);
+            //AddPropNoStoreObjComp<bool>("PropBool", yyy, true, null);
+            //AddPropNoStore<int>("PropInt", null, false, null);
+            //AddPropExtStore<TimeSpan>("PropTimeSpan", null, null, DoWhenTimeSpanChanges, false, null);
+            //AddPropObjComp<Uri>("PropUri", TestDelegate, false, null);
+            //AddProp<Lazy<int>>("PropLazyInt", null, false, MyTestComparer, new Lazy<int>(() => 10));
 		}
 
 	#region Property Declarations
