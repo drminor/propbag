@@ -67,7 +67,6 @@
     <Compile Include="TestPerformance.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestT4.cs" />
-    <Compile Include="UnitTestHelpers.cs" />
     <Content Include="AllPropsRegisteredModel.props.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>AllPropsRegisteredModel.props.cs</LastGenOutput>
