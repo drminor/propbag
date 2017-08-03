@@ -301,7 +301,7 @@ namespace PropBagLib.Tests
         {
             mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
 
-            KeyNotFoundException kk = new KeyNotFoundException();
+            InvalidOperationException kk = new InvalidOperationException();
 
             Type tt = kk.GetType();
 

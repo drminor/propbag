@@ -43,6 +43,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ExtStoreTests\ExtStoreModel.props.cs">
+      <DependentUpon>ExtStoreModel.props.tt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="ExtStoreTests\ExtStoreModel.cs" />
     <Compile Include="PerformanceModel.cs" />
     <Compile Include="PerformanceModel.props.cs">
       <DependentUpon>PerformanceModel.props.tt</DependentUpon>
@@ -74,6 +81,10 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ExtValProviderExample\ExtValProviderExample.csproj">
+      <Project>{6630577e-3f6c-41cd-ae9b-f8362909b25b}</Project>
+      <Name>ExtValProviderExample</Name>
+    </ProjectReference>
     <ProjectReference Include="..\NotifyPropChangedWithVals\Inpwvc.csproj">
       <Project>{18580a49-4d08-4b0d-9a2e-4ed38891c63b}</Project>
       <Name>Inpwvc</Name>
@@ -101,9 +112,15 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="AllPropsRegisteredModel_PropDefs.xml" />
+    <Content Include="ExtStoreTests\ExtStoreModel_PropDefs.xml" />
     <Content Include="PerformanceModel.props.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>PerformanceModel.props.cs</LastGenOutput>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ExtStoreTests\ExtStoreModel.props.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>ExtStoreModel.props.cs</LastGenOutput>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="packages.config" />

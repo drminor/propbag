@@ -159,9 +159,7 @@ namespace PropBagLib.Tests
         {
             mod1 = new OnlyTypedAccessModel(PropBagTypeSafetyMode.OnlyTypedAccess);
 
-
-            //KeyNotFoundException kk = new KeyNotFoundException();
-            ApplicationException aa = new ApplicationException();
+            InvalidOperationException aa = new InvalidOperationException();
 
             Type tt = aa.GetType();
 

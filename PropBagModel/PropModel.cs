@@ -89,7 +89,7 @@ namespace DRM.PropBagModel
 
         public string GetAddPropMethodCallText(PropItem pi)
         {
-            bool useGetDelegate = true;
+            bool resolveDoWhenDelsAtRuntime = true;
 
             string methodName;
             string formatString;
@@ -98,7 +98,7 @@ namespace DRM.PropBagModel
             if (pi.DoWhenChangedField == null) pi.DoWhenChangedField = new PropDoWhenChanged(null, false);
 
             string doWhenChanged;
-            if (useGetDelegate)
+            if (resolveDoWhenDelsAtRuntime)
                 doWhenChanged = pi.DoWhenChangedField.DoWhenChanged == null ? "null" : WrapWithGetDelegate(pi.DoWhenChangedField.DoWhenChanged, pi.Type);
             else
                 doWhenChanged = pi.DoWhenChangedField.DoWhenChanged ?? "null";
@@ -109,10 +109,7 @@ namespace DRM.PropBagModel
             string objComp = normPcf.ComparerType == PropComparerType.typed ? null : "ObjComp";
 
             string comparer;
-            if (useGetDelegate)
-                comparer = normPcf.Comparer == null ? "null" : WrapWithGetDelegate(normPcf.Comparer, pi.Type);
-            else
-                comparer = normPcf.Comparer ?? "null";
+            comparer = normPcf.Comparer ?? "null";
 
             switch (pi.StorageType)
             {

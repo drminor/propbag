@@ -17,7 +17,7 @@ namespace PropBagLib.Tests
 		{
 	        AddProp<object>("PropObject", null, false, null);
 	        AddProp<string>("PropString", GetDelegate<string>("DoWhenStringChanged"), false, null);
-	        AddProp<string>("PropStringCallDoAfter", GetDelegate<string>("DoWhenStringChanged"), true, null);
+	        AddProp<string>("PropStringCallDoAfter", GetDelegate<string>("DoWhenStringChanged"), true, EqualityComparer<string>.Default);
 	        AddPropObjComp<string>("PropStringUseRefComp", GetDelegate<string>("DoWhenStringChanged"), false, null);
 	        AddProp<bool>("PropBool", null, false, null, false);
 	        AddProp<int>("PropInt", null, false, null);

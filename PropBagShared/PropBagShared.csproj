@@ -40,6 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ExtValDelegates.cs" />
+    <Compile Include="IBindExtStore.cs" />
     <Compile Include="IProp.cs" />
     <Compile Include="PropBagTypeSafetyModeEnum.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
