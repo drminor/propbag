@@ -59,7 +59,7 @@ namespace DRM.PropBag
         /// <summary>
         /// If not true, attempting to set a property, not previously set with a call to AddProp or SetIt<typeparamref name="T"/>, will cause an exception to be thrown.
         /// </summary>
-        public readonly bool AllowSetsViaThisForNewProps;
+        public readonly bool OnlyTypedAccess;
 
         /// <summary>
         /// Used to create Delegates when the type of the value is not known at run time.
@@ -79,19 +79,19 @@ namespace DRM.PropBag
                 case PropBagTypeSafetyMode.AllPropsMustBeRegistered:
                     {
                         AllPropsMustBeRegistered = true;
-                        AllowSetsViaThisForNewProps = false;
+                        OnlyTypedAccess = true;
                         break;
                     }
                 case PropBagTypeSafetyMode.OnlyTypedAccess:
                     {
                         AllPropsMustBeRegistered = false;
-                        AllowSetsViaThisForNewProps = false;
+                        OnlyTypedAccess = true;
                         break;
                     }
                 case PropBagTypeSafetyMode.Loose:
                     {
                         AllPropsMustBeRegistered = false;
-                        AllowSetsViaThisForNewProps = true;
+                        OnlyTypedAccess = false;
                         break;
                     }
                 default:
@@ -112,9 +112,6 @@ namespace DRM.PropBag
                 {
                     this.PropertyChangedWithVals -= h;
                 }
-
-                // TODO: Is this necessary -- Don't think so.
-                //vwt = null;
             }
         }
 
@@ -136,6 +133,11 @@ namespace DRM.PropBag
 
         protected object GetIt([CallerMemberName] string propertyName = null)
         {
+            if (OnlyTypedAccess)
+            {
+                throw new InvalidOperationException("Attempt to access property using this method is not allowed when TypeSafetyMode is 'OnlyTypedAccess.'");
+            }
+
             // This will throw an exception if no value has been added to the _tVals dictionary with a key of propertyName,
             // either by calling AddProp or SetIt.
             ValueWithType vwt = GetValueWithType(propertyName);
@@ -157,6 +159,11 @@ namespace DRM.PropBag
 
         protected void SetIt(object value, [CallerMemberName] string propertyName = null)
         {
+            if (OnlyTypedAccess)
+            {
+                throw new InvalidOperationException("Attempt to access property using this method is not allowed when TypeSafetyMode is 'OnlyTypedAccess.'");
+            }
+
             ValueWithType vwt;
             try
             {
@@ -167,9 +174,9 @@ namespace DRM.PropBag
                 if (AllPropsMustBeRegistered)
                     throw new KeyNotFoundException(string.Format("Property: {0} has not been declared by calling AddProp, nor has its value been set by calling SetIt<T>. Cannot use this method in this case. Declare by calling AddProp, or use the SetIt<T> method.", propertyName));
 
-                if (!AllowSetsViaThisForNewProps)
+                if (OnlyTypedAccess)
                 {
-                    throw new ApplicationException(string.Format("Property: {0} has not been defined with a call to AddProp or any SetIt<T> call and the operation setting 'AllowSetsViaThisForNewProps' is set to false.", propertyName));
+                    throw new ApplicationException(string.Format("Property: {0} has not been defined with a call to AddProp or any SetIt<T> call and the operation setting 'OnlyTypeAccesss' is set to true.", propertyName));
                 }
 
                 // This uses reflection.
@@ -266,7 +273,14 @@ namespace DRM.PropBag
             }
             catch (KeyNotFoundException)
             {
-                throw new ApplicationException(string.Format("Property: {0} has not been defined with a call to AddProp().", propertyName));
+                if (AllPropsMustBeRegistered)
+                {
+                    throw new ApplicationException(string.Format("Property: {0} has not been defined with a call to AddProp() and the operation setting 'AllPropsMustBeRegistered' is set to true.", propertyName));
+                }
+
+                // Property has not been defined yet, let's create a definition for it now 
+                vwt = ValueWithType.CreateWithNoStore<T>();
+                tVals.Add(propertyName, vwt);
             }
 
             IProp<T> prop = CheckTypeInfo<T>(vwt, propertyName);
@@ -321,25 +335,7 @@ namespace DRM.PropBag
         // to allow callers to easily subscribe to PropertyChangedWithVals.
         public void SubscribeToPropChanged<T>(Action<T, T> doOnChange, string propertyName)
         {
-            ValueWithType vwt;
-
-            try
-            {
-                vwt = GetValueWithType(propertyName);
-            }
-            catch (KeyNotFoundException)
-            {
-                if (AllPropsMustBeRegistered)
-                {
-                    throw new ApplicationException(string.Format("Property: {0} has not been defined with a call to AddProp() and the operation setting 'AllPropsMustBeRegistered' is set to true.", propertyName));
-                }
-
-                // Property has not been defined yet, let's create a definition for it now and initialize the value.
-                vwt = ValueWithType.Create<T>(default(T));
-                tVals.Add(propertyName, vwt);
-            }
-
-            IProp<T> prop = CheckTypeInfo<T>(vwt, propertyName);
+            IProp<T> prop = GetPropDef<T>(propertyName);
 
             PropertyChangedWithTValsHandler<T> action = (s, e) =>
             {
@@ -356,8 +352,26 @@ namespace DRM.PropBag
         // The subscriber is responsible for inspecting the value of the property name.
         public void SubscribeToPropChanged<T>(PropertyChangedWithTValsHandler<T> action, string propertyName)
         {
-            ValueWithType vwt;
+            IProp<T> prop = GetPropDef<T>(propertyName);
 
+            prop.PropertyChangedWithTVals += action;
+        }
+
+        private ValueWithType GetTypeCheckedVWT<T>(string propertyName)
+        {
+            ValueWithType vwt;
+            GetPropDef<T>(propertyName, out vwt);
+            return vwt;
+        }
+
+        private IProp<T> GetPropDef<T>(string propertyName)
+        {
+            ValueWithType vwt;
+            return GetPropDef<T>(propertyName, out vwt);
+        }
+
+        private IProp<T> GetPropDef<T>(string propertyName, out ValueWithType vwt)
+        {
             try
             {
                 vwt = GetValueWithType(propertyName);
@@ -376,7 +390,7 @@ namespace DRM.PropBag
 
             IProp<T> prop = CheckTypeInfo<T>(vwt, propertyName);
 
-            prop.PropertyChangedWithTVals += action;
+            return prop;
         }
 
         protected void AddToPropChanged<T>(PropertyChangedWithTValsHandler<T> action, [CallerMemberName] string eventPropertyName = null)
@@ -469,13 +483,17 @@ namespace DRM.PropBag
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="doWhenChanged"></param>
+        /// <param name="doAfterNotify"></param>
+        /// <param name="propertyName"></param>
+        /// <returns>True, if there was an existing Action in place for this property.</returns>
         protected bool RegisterDoWhenChanged<T>(Action<T, T> doWhenChanged, bool doAfterNotify = false, [CallerMemberName] string propertyName = null)
         {
-            // TODO: Need to register property here if it has not been registered, since we have type info.
-            
-            ValueWithType vwt = GetValueWithType(propertyName);
-
-            IProp<T> prop = CheckTypeInfo<T>(vwt, propertyName);
+            ValueWithType vwt = GetTypeCheckedVWT<T>(propertyName);
 
             return vwt.UpdateDoWhenChanged(doWhenChanged, doAfterNotify);
         }
@@ -597,7 +615,6 @@ namespace DRM.PropBag
 
             if (newType == curType)
                 return true;
-
 
             Type aUnder = Nullable.GetUnderlyingType(newType);
 
@@ -935,7 +952,6 @@ namespace DRM.PropBag
                 prop.DoAfterNotify = doAfterNotify;
 
                 return hadExistingValue;
-
             }
 
             #region Delegate declarations
