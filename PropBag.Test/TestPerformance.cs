@@ -22,8 +22,7 @@ namespace PropBagLib.Tests
 
         private PerformanceModel mod1;
 
-        bool PropInt_WasChanged = false;
-        bool PropInt_WasChanged2 = false;
+        bool varToEnsureWorkIsDone = false;
 
         const int InterationCount = 1000000;
 
@@ -165,7 +164,7 @@ namespace PropBagLib.Tests
         {
             if (e.PropertyName == "PropInt")
             {
-                PropInt_WasChanged = true;
+                varToEnsureWorkIsDone = !varToEnsureWorkIsDone;
             }
         }
 
@@ -173,7 +172,7 @@ namespace PropBagLib.Tests
         {
             if (e.PropertyName == "PropIntNoStore")
             {
-                PropInt_WasChanged = true;
+                varToEnsureWorkIsDone = !varToEnsureWorkIsDone;
             }
         }
 
@@ -181,7 +180,7 @@ namespace PropBagLib.Tests
         {
             if (e.PropertyName == "PropIntStandard")
             {
-                PropInt_WasChanged2 = true;
+                varToEnsureWorkIsDone = !varToEnsureWorkIsDone;
             }
         }
 
