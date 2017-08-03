@@ -1,0 +1,19 @@
+﻿<?xml version="1.0"?>
+<model class-name="TestAllPropsRegistered" namespace="PropBagLib.Tests" type-safety-mode="AllPropsMustBeRegistered" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="https://www.swamphillproductions.com/PropBagModel ../../PropBagModel/PropBagModel.xsd">
+  <namespaces>
+    <namespace>System</namespace>
+    <namespace>System.Collections.Generic</namespace>
+    <namespace>PropBagLib.Tests</namespace>
+  </namespaces>
+  <props>
+    <prop storage-type="external" >
+      <name>PropObject</name>
+      <type>object</type>
+    </prop>
+    <prop storage-type="external">
+      <name>PropString</name>
+      <type>string</type>
+    </prop>
+  </props>
+</model>
