@@ -9,7 +9,7 @@ namespace PropBagLib
     public enum PropBagTypeSafetyModeEnum
     {
         AllPropsMustBeRegistered,
-        AllPropsMustBeFirstSetWithSetIt,
+        OnlyTypedAccess,
         Loose
     }
 

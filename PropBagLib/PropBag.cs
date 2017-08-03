@@ -54,7 +54,7 @@ namespace PropBagLib
         /// <summary>
         /// If not true, attempting to set a property, not previously set with a call to AddProp or SetIt<typeparamref name="T"/>, will cause an exception to be thrown.
         /// </summary>
-        public readonly bool AllowSetsViaThisForNewProps;
+        public readonly bool OnlyTypedAccess;
 
         #endregion
 
@@ -69,19 +69,19 @@ namespace PropBagLib
                 case PropBagTypeSafetyModeEnum.AllPropsMustBeRegistered:
                     {
                         AllPropsMustBeRegistered = true;
-                        AllowSetsViaThisForNewProps = false;
+                        OnlyTypedAccess = true;
                         break;
                     }
-                case PropBagTypeSafetyModeEnum.AllPropsMustBeFirstSetWithSetIt:
+                case PropBagTypeSafetyModeEnum.OnlyTypedAccess:
                     {
                         AllPropsMustBeRegistered = false;
-                        AllowSetsViaThisForNewProps = false;
+                        OnlyTypedAccess = true;
                         break;
                     }
                 case PropBagTypeSafetyModeEnum.Loose:
                     {
                         AllPropsMustBeRegistered = false;
-                        AllowSetsViaThisForNewProps = true;
+                        OnlyTypedAccess = false;
                         break;
                     }
                 default:
@@ -190,9 +190,9 @@ namespace PropBagLib
                     if (AllPropsMustBeRegistered)
                         throw new KeyNotFoundException(string.Format("Property: {0} has not been declared by calling AddProp, nor has its value been set by calling SetIt<T>. Cannot use this method in this case. Declare by calling AddProp, or use the SetIt<T> method.", propertyName));
 
-                    if (!AllowSetsViaThisForNewProps)
+                    if (OnlyTypedAccess)
                     {
-                        throw new ApplicationException(string.Format("Property: {0} has not been defined with a call to AddProp or any SetIt<T> call and the operation setting 'AllowSetsViaThisForNewProps' is set to false.", propertyName));
+                        throw new ApplicationException(string.Format("Property: {0} has not been defined with a call to AddProp or any SetIt<T> call and the operation setting 'OnlyTypeAccesss' is set to true.", propertyName));
                     }
 
                     vwt = ValueWithType.CreateValueInferType(value);
