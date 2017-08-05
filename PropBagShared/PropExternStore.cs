@@ -12,12 +12,15 @@ namespace DRM.PropBag
 
     public class PropExternStore<T> : PropGenBase, IProp<T>
     {
-        public PropExternStore(bool typeIsSolid = true, Action<T, T> doWhenChanged = null, bool doAfterNotify = false, IEqualityComparer<T> comparer = null)
+        public PropExternStore(string propertyName, object extraInfo,
+            bool typeIsSolid = true,
+            Action<T, T> doWhenChanged = null, bool doAfterNotify = false, IEqualityComparer<T> comparer = null)
             : base(typeof(T), typeIsSolid, false)
         {
             Tag = Guid.NewGuid(); // tag;
             Getter = null; // getter;
             Setter = null; // setter;
+
             DoWHenChangedAction = doWhenChanged;
             PropertyChangedWithTVals = delegate { };
             DoAfterNotify = doAfterNotify;
@@ -39,8 +42,8 @@ namespace DRM.PropBag
         }
 
         public Guid Tag { get; private set; }
-        private GetExtVal<T> Getter { get; set; }
-        private SetExtVal<T> Setter { get; set; }
+        public GetExtVal<T> Getter { get; set; }
+        public SetExtVal<T> Setter { get; set; }
 
         IEqualityComparer<T> Comparer { get; set; }
 

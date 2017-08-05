@@ -48,9 +48,7 @@ namespace DRM.PropBag
         public event PropertyChangingEventHandler PropertyChanging; // = delegate { };
         public event PropertyChangedWithValsHandler PropertyChangedWithVals; // = delegate { };
 
-        // TODO: Have the derived class specify which factory to use.
-        PropFactory thePropFactory = new PropFactory();
-
+        AbstractPropFactory thePropFactory;
 
         private readonly Dictionary<string, IPropGen> tVals;
 
@@ -75,9 +73,11 @@ namespace DRM.PropBag
 
         #region Constructor
 
-        public PropBag() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered) { }
+        public PropBag() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered, new PropFactory()) { }
 
-        public PropBag(PropBagTypeSafetyMode typeSafetyMode)
+        public PropBag(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, new PropFactory()) { }
+
+        public PropBag(PropBagTypeSafetyMode typeSafetyMode, AbstractPropFactory thePropFactory)
         {
             switch (typeSafetyMode)
             {
@@ -103,6 +103,7 @@ namespace DRM.PropBag
                     throw new ApplicationException("Unexpected value for typeSafetyMode parameter.");
             }
 
+            this.thePropFactory = thePropFactory;
             tVals = new Dictionary<string, IPropGen>();
             doSetDelegateDict = new Dictionary<Type, DoSetDelegate>();
         }
@@ -189,7 +190,7 @@ namespace DRM.PropBag
                     throw new ApplicationException(string.Format("Property: {0} has not been defined with a call to AddProp or any SetIt<T> call and the operation setting 'OnlyTypeAccesss' is set to true.", propertyName));
                 }
 
-                vwt = thePropFactory.CreatePropInferType(value);
+                vwt = thePropFactory.CreatePropInferType(value, propertyName, null, true);
                 tVals.Add(propertyName, vwt);
 
                 // No point in calling DoSet, it would find that the value is the same and do nothing.
@@ -205,7 +206,7 @@ namespace DRM.PropBag
                         // TODO, we probably need to be more creative when determining the type of this new value.
                         Type newType = value.GetType();
 
-                        MakeTypeSolid(ref vwt, newType);
+                        MakeTypeSolid(ref vwt, newType, propertyName);
                         tVals[propertyName] = vwt;
                     }
                     catch (InvalidCastException ice)
@@ -253,7 +254,7 @@ namespace DRM.PropBag
 
                 // Property has not been defined yet, let's create a definition for it now and initialize the value.
 
-                vwt = thePropFactory.Create<T>(value);
+                vwt = thePropFactory.Create<T>(value, propertyName);
                 tVals.Add(propertyName, vwt);
 
                 // No reason to call DoSet, it will find no change and do nothing.
@@ -293,7 +294,7 @@ namespace DRM.PropBag
                 }
 
                 // Property has not been defined yet, let's create a definition for it now 
-                vwt = thePropFactory.CreateWithNoneOrDefault<T>(hasStorage: false, typeIsSolid: true);
+                vwt = thePropFactory.CreateWithNoneOrDefault<T>(propertyName, hasStorage: false, typeIsSolid: true);
 
                 tVals.Add(propertyName, vwt);
             }
@@ -402,7 +403,7 @@ namespace DRM.PropBag
 
                 // Property has not been defined yet, let's create a definition for it now and initialize the value.
 
-                vwt = thePropFactory.CreateWithNoneOrDefault<T>();
+                vwt = thePropFactory.CreateWithNoneOrDefault<T>(propertyName);
                 tVals.Add(propertyName, vwt);
             }
 
@@ -417,7 +418,7 @@ namespace DRM.PropBag
             SubscribeToPropChanged<T>(action, propertyName);
         }
 
-        public  void UnSubscribeToPropChanged<T>(PropertyChangedWithTValsHandler<T> action, string propertyName)
+        public void UnSubscribeToPropChanged<T>(PropertyChangedWithTValsHandler<T> action, string propertyName)
         {
             IPropGen vwt = GetValueWithType(propertyName);
 
@@ -438,7 +439,7 @@ namespace DRM.PropBag
             {
                 try
                 {
-                    MakeTypeSolid(ref vwt, typeof(T));
+                    MakeTypeSolid(ref vwt, typeof(T), propertyName);
                     dict[propertyName] = vwt;
                 }
                 catch (InvalidCastException ice)
@@ -589,7 +590,7 @@ namespace DRM.PropBag
             return vwt;
         }
 
-        private void MakeTypeSolid(ref IPropGen vwt, Type newType)
+        private void MakeTypeSolid(ref IPropGen vwt, Type newType, string propertyName)
         {
             Type currentType = vwt.Type;
 
@@ -610,7 +611,7 @@ namespace DRM.PropBag
                 // Next statement uses reflection.
                 object curValue = vwt.Value;
 
-                IPropGen newVwt = thePropFactory.Create(vwt.Value, newType);
+                IPropGen newVwt = thePropFactory.Create(newType, vwt.Value, propertyName, null, true, true);
 
                 //vwt.UpdateWithSolidType(newType, curValue);
                 vwt = newVwt;
@@ -687,7 +688,7 @@ namespace DRM.PropBag
         public void AddProp<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
             IEqualityComparer<T> comparer = null, T initalValue = default(T))
         {
-            IPropGen pg = thePropFactory.Create<T>(initalValue, true, true, doIfChanged, doAfterNotify, comparer);
+            IPropGen pg = thePropFactory.Create<T>(initalValue, propertyName, null, true, true, doIfChanged, doAfterNotify, comparer);
             tVals.Add(propertyName, pg);
         }
 
@@ -695,7 +696,7 @@ namespace DRM.PropBag
             T initalValue = default(T))
         {
             RefEqualityComparer<T> refComp = RefEqualityComparer<T>.Default;
-            IPropGen pg = thePropFactory.Create<T>(initalValue, true, true, doIfChanged, doAfterNotify, refComp);
+            IPropGen pg = thePropFactory.Create<T>(initalValue, propertyName, null, true, true, doIfChanged, doAfterNotify, refComp);
 
             tVals.Add(propertyName, pg);
         }
@@ -724,14 +725,14 @@ namespace DRM.PropBag
         public void AddPropNoStore<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false,
             IEqualityComparer<T> comparer = null)
         {
-            IPropGen pg = thePropFactory.CreateWithNoneOrDefault<T>(false, true, doIfChanged, doAfterNotify, comparer);
+            IPropGen pg = thePropFactory.CreateWithNoneOrDefault<T>(propertyName, null, false, true, doIfChanged, doAfterNotify, comparer);
             tVals.Add(propertyName, pg);
         }
 
         public void AddPropNoStoreObjComp<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false)
         {
             RefEqualityComparer<T> refComp = RefEqualityComparer<T>.Default;
-            IPropGen pg = thePropFactory.CreateWithNoneOrDefault<T>(false, true, doIfChanged, doAfterNotify, refComp);
+            IPropGen pg = thePropFactory.CreateWithNoneOrDefault<T>(propertyName, null, false, true, doIfChanged, doAfterNotify, refComp);
 
             tVals.Add(propertyName, pg);
         }
