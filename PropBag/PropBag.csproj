@@ -39,13 +39,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="ExtValDelegates.cs" />
-    <None Include="PropExternStoreObjComp.cs" />
-    <None Include="PropNoStoreObjComp.cs" />
-    <None Include="PropNoStore.cs" />
-    <None Include="PropExternStore.cs" />
-    <None Include="PropObjComp..cs" />
-    <None Include="Prop.cs" />
     <Compile Include="PropBag.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

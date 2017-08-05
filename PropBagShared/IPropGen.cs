@@ -16,13 +16,7 @@ namespace DRM.PropBag
 
         List<PropertyChangedWithValsHandler> PropChangedWithValsHandlerList { get; }
 
-        //DoSetDelegate DoSetProVal { get; set; }
-
         object Value { get; }
-
-        //void UpdateWithSolidType(Type typeOfThisValue, object curValue);
-
-        //bool UpdateDoWhenChanged<T>(Action<T, T> doWhenChanged, bool doAfterNotify);
 
     }
 }

@@ -40,7 +40,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CreatePropDelegate.cs" />
-    <Compile Include="DoSetDelegate.cs" />
     <Compile Include="ExtValDelegates.cs" />
     <Compile Include="IBindExtStore.cs" />
     <Compile Include="IProp.cs" />
