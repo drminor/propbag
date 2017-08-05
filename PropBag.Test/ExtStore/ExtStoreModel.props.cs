@@ -17,33 +17,33 @@ namespace PropBagLib.Tests
 
 		public ExtStoreModel(PropBagTypeSafetyMode typeSafetyMode, AbstractPropFactory factory) : base(typeSafetyMode, factory)
 		{
-	        AddProp<object>("PropObject", null, false, null);
-	        AddProp<string>("PropString", null, false, null);
+	        AddProp<int>("PropInt3", null, false, null);
+	        AddProp<int>("PropInt4", null, false, null);
 		}
 
 	#region Property Declarations
 		  
-		public object PropObject
+		public int PropInt3
 		{
 			get
 			{
-				return GetIt<object>();
+				return GetIt<int>();
 			}
 			set
 			{
-				SetIt<object>(value);
+				SetIt<int>(value);
 			}
 		}  
 	  
-		public string PropString
+		public int PropInt4
 		{
 			get
 			{
-				return GetIt<string>();
+				return GetIt<int>();
 			}
 			set
 			{
-				SetIt<string>(value);
+				SetIt<int>(value);
 			}
 		}  
 	 
@@ -51,27 +51,27 @@ namespace PropBagLib.Tests
 
 	#region PropetyChangedWithTVals Event Declarations
 		  
-			public event PropertyChangedWithTValsHandler<object> PropObjectChanged
+			public event PropertyChangedWithTValsHandler<int> PropInt3Changed
 			{
 				add
 				{
-					AddToPropChanged<object>(value);
+					AddToPropChanged<int>(value);
 				}
 				remove
 				{
-					RemoveFromPropChanged<object>(value);
+					RemoveFromPropChanged<int>(value);
 				}
 			}
 	  
-			public event PropertyChangedWithTValsHandler<string> PropStringChanged
+			public event PropertyChangedWithTValsHandler<int> PropInt4Changed
 			{
 				add
 				{
-					AddToPropChanged<string>(value);
+					AddToPropChanged<int>(value);
 				}
 				remove
 				{
-					RemoveFromPropChanged<string>(value);
+					RemoveFromPropChanged<int>(value);
 				}
 			}
 	 

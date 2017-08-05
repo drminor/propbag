@@ -121,11 +121,10 @@ namespace DRM.PropBag
         {
             PropExternStore<T> propWithExtStore = new PropExternStore<T>(propertyName, extraInfo, typeIsSolid, doWhenChanged, doAfterNotify, comparer);
 
-            //    public delegate T GetExtVal<T>(Guid tag);
-
+            //public delegate T GetExtVal<T>(Guid tag);
             //GetExtVal<T> xx = ((x) => x.ToString());
-
             //propWithExtStore.Getter = xx;
+
             return propWithExtStore;
         }
 

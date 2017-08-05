@@ -43,13 +43,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ExtStore\ExtData.cs" />
     <Compile Include="ExtStore\ExtStoreModel.props.cs">
       <DependentUpon>ExtStoreModel.props.tt</DependentUpon>
       <AutoGen>True</AutoGen>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <DesignTime>True</DesignTime>
     </Compile>
-    <None Include="ExtStore\ExtStoreModel.cs" />
+    <Compile Include="ExtStore\ExtStoreModel.cs" />
+    <Compile Include="ExtStore\TestExternalStore.cs" />
     <Compile Include="Performance\PerformanceModel.cs" />
     <Compile Include="Performance\PerformanceModel.props.cs">
       <DependentUpon>PerformanceModel.props.tt</DependentUpon>

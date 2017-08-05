@@ -9,12 +9,7 @@ using DRM.Ipnwvc;
 
 namespace PropBagLib.Tests
 {
-    /// <summary>
-    /// This class contains tests that directly use the PropBag class.
-    /// Other classes contain tests that test classes that inherit from PropBag.
-    /// 
-    /// 
-    /// </summary>
+
 
     [TestFixtureAttribute]
     public class TestPerformance
