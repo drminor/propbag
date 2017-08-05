@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-using DRM.ReferenceEquality;
 using DRM.Ipnwvc;
 
 namespace DRM.PropBag
@@ -13,19 +12,22 @@ namespace DRM.PropBag
 
     public class PropExternStore<T> : PropGenBase, IProp<T>
     {
-        public PropExternStore(Guid tag, GetExtVal<T> getter, SetExtVal<T> setter, Action<T, T> doWhenChanged, bool doAfterNotify, IEqualityComparer<T> comparer , bool typeIsSolid, bool hasStore = true ) : base(typeof(T), typeIsSolid, hasStore)
+        public PropExternStore(bool typeIsSolid = true, Action<T, T> doWhenChanged = null, bool doAfterNotify = false, IEqualityComparer<T> comparer = null)
+            : base(typeof(T), typeIsSolid, false)
         {
-            Tag = tag;
-            Getter = getter;
-            Setter = setter;
-            DoWHenChanged = doWhenChanged;
-            PropertyChangedWithTVals = null;
+            Tag = Guid.NewGuid(); // tag;
+            Getter = null; // getter;
+            Setter = null; // setter;
+            DoWHenChangedAction = doWhenChanged;
+            PropertyChangedWithTVals = delegate { };
             DoAfterNotify = doAfterNotify;
             Comparer = comparer ?? EqualityComparer<T>.Default;
 
+            base.TypedProp = this;
+
         }
 
-        public T Value {
+        public T TypedValue {
             get
             {
                 return Getter(Tag);
@@ -40,9 +42,15 @@ namespace DRM.PropBag
         private GetExtVal<T> Getter { get; set; }
         private SetExtVal<T> Setter { get; set; }
 
-        public IEqualityComparer<T> Comparer { get; private set; }
+        IEqualityComparer<T> Comparer { get; set; }
 
-        public Action<T, T> DoWHenChanged { get; set; }
+        Action<T, T> _doWhenChangedAction;
+        Action<T, T> DoWHenChangedAction
+        {
+            get { return _doWhenChangedAction; }
+            set { _doWhenChangedAction = value; }
+        }
+
         public bool DoAfterNotify { get; set; }
 
         public event PropertyChangedWithTValsHandler<T> PropertyChangedWithTVals;
@@ -51,8 +59,16 @@ namespace DRM.PropBag
         {
             get
             {
-                return DoWHenChanged != null;
+                return DoWHenChangedAction != null;
             }
+        }
+
+        public void DoWhenChanged(T oldVal, T newVal)
+        {
+            Action<T, T> doWhenAction = Interlocked.CompareExchange(ref _doWhenChangedAction, null, null);
+
+            if (doWhenAction != null)
+                doWhenAction(oldVal, newVal);
         }
 
         public void OnPropertyChangedWithTVals(string propertyName, T oldVal, T newVal)
@@ -65,7 +81,7 @@ namespace DRM.PropBag
 
         public bool CompareTo(T newValue)
         {
-            return Comparer.Equals(newValue, Value);
+            return Comparer.Equals(newValue, TypedValue);
         }
 
         public bool Compare(T val1, T val2)

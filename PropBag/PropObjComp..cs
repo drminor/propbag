@@ -10,7 +10,7 @@ using DRM.Ipnwvc;
 
 namespace DRM.PropBag
 {
-    public class PropObjComp<T> : IProp<T>
+    public class PropObjComp<T> : PropGenBase, IProp<T>
     {
         public PropObjComp(T curValue, Action<T,T> doWhenChanged, bool doAfterNotify, IEqualityComparer<object> comparer = null)
         {

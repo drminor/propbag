@@ -10,9 +10,10 @@ using DRM.Ipnwvc;
 
 namespace DRM.PropBag
 {
-    public class Prop<T> : IProp<T>
+    public class Prop<T> : PropGenBase, IProp<T>
     {
-        public Prop(T curValue, Action<T, T> doWhenChanged, bool doAfterNotify, IEqualityComparer<T> comparer)
+        public Prop(T curValue, Action<T, T> doWhenChanged, bool doAfterNotify, IEqualityComparer<T> comparer, bool typeIsSolid, bool hasStore = true)
+            : base(typeof(T), typeIsSolid, hasStore)
         {
             Value = curValue;
             DoWHenChanged = doWhenChanged;

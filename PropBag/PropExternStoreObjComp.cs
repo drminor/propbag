@@ -11,7 +11,7 @@ using DRM.Ipnwvc;
 namespace DRM.PropBag
 {
 
-    public class PropExternStoreObjComp<T> : IProp<T>
+    public class PropExternStoreObjComp<T> : PropGenBase, IProp<T>
     {
         public PropExternStoreObjComp(Guid tag, GetExtVal<T> getter, SetExtVal<T> setter, Action<T, T> doWhenChanged, bool doAfterNotify, IEqualityComparer<object> comparer)
         {

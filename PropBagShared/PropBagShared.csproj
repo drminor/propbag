@@ -39,11 +39,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CreatePropDelegate.cs" />
+    <Compile Include="DoSetDelegate.cs" />
     <Compile Include="ExtValDelegates.cs" />
     <Compile Include="IBindExtStore.cs" />
     <Compile Include="IProp.cs" />
+    <Compile Include="IPropGen.cs" />
+    <Compile Include="AbstractPropFactory.cs" />
+    <Compile Include="Prop.cs" />
     <Compile Include="PropBagTypeSafetyModeEnum.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PropExternStore.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="PropGenBase.cs" />
+    <Compile Include="RefEqualityComparer.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NotifyPropChangedWithVals\Inpwvc.csproj">

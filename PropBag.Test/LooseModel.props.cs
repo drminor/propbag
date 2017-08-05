@@ -12,13 +12,13 @@ namespace PropBagLib.Tests
         public LooseModel(PropBagTypeSafetyMode typeSafetyMode)
             : base(typeSafetyMode)
         {
-            //AddProp<object>("PropObject");
-            //AddProp<string>("PropString");
-            //AddProp<bool>("PropBool", false);
-            //AddProp<int>("PropInt");
-            //AddProp<TimeSpan>("PropTimeSpan");
-            //AddProp<Uri>("PropUri");
-            //AddProp<Lazy<int>>("PropLazyInt");
+            AddProp<object>("PropObject");
+            AddProp<string>("PropString");
+            AddProp<bool>("PropBool", null, false, null, false);
+            AddProp<int>("PropInt");
+            AddProp<TimeSpan>("PropTimeSpan");
+            AddProp<Uri>("PropUri");
+            AddProp<Lazy<int>>("PropLazyInt");
         }
 
         #region Property Declarations

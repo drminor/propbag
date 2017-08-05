@@ -10,7 +10,7 @@ using DRM.Ipnwvc;
 
 namespace DRM.PropBag
 {
-    public class PropNoStoreObjComp<T> : IProp<T>
+    public class PropNoStoreObjComp<T> : PropGenBase, IProp<T>
     {
         public PropNoStoreObjComp(Action<T, T> doWhenChanged, bool doAfterNotify, IEqualityComparer<object> comparer)
         {
@@ -33,7 +33,7 @@ namespace DRM.PropBag
             }
         }
 
-        public IEqualityComparer<object> Comparer { get; private set; }
+        IEqualityComparer<object> Comparer { get; set; }
 
         public Action<T, T> DoWHenChanged { get; set; }
         public bool DoAfterNotify { get; set; }

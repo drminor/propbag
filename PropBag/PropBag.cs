@@ -48,8 +48,13 @@ namespace DRM.PropBag
         public event PropertyChangingEventHandler PropertyChanging; // = delegate { };
         public event PropertyChangedWithValsHandler PropertyChangedWithVals; // = delegate { };
 
+        // TODO: Have the derived class specify which factory to use.
+        PropFactory thePropFactory = new PropFactory();
 
-        private readonly Dictionary<string, ValueWithType> tVals;
+
+        private readonly Dictionary<string, IPropGen> tVals;
+
+        private readonly Dictionary<Type, DoSetDelegate> doSetDelegateDict;
 
         /// <summary>
         /// If true, attempting to set a property for which no call to AddProp has been made, will cause an exception to thrown.
@@ -98,21 +103,26 @@ namespace DRM.PropBag
                     throw new ApplicationException("Unexpected value for typeSafetyMode parameter.");
             }
 
-            tVals = new Dictionary<string, ValueWithType>();
+            tVals = new Dictionary<string, IPropGen>();
+            doSetDelegateDict = new Dictionary<Type, DoSetDelegate>();
         }
 
         // When we are being destructed, remove all of the handlers that we provisioned.
         ~PropBag()
         {
-            foreach (KeyValuePair<string, ValueWithType> kvp in tVals)
+            foreach (KeyValuePair<string,IPropGen> kvp in tVals)
             {
-                ValueWithType vwt = kvp.Value;
+                IPropGen vwt = kvp.Value;
 
                 foreach (PropertyChangedWithValsHandler h in vwt.PropChangedWithValsHandlerList)
                 {
                     this.PropertyChangedWithVals -= h;
                 }
             }
+
+            // Maybe not necessary, but since each of these refers back to this instance of PropBag,
+            // it may make it a little easier on the garbage collector.
+            doSetDelegateDict.Clear();
         }
 
         #endregion
@@ -140,7 +150,7 @@ namespace DRM.PropBag
 
             // This will throw an exception if no value has been added to the _tVals dictionary with a key of propertyName,
             // either by calling AddProp or SetIt.
-            ValueWithType vwt = GetValueWithType(propertyName);
+            IPropGen vwt = GetValueWithType(propertyName);
 
             // This uses reflection.
             return vwt.Value;
@@ -150,11 +160,11 @@ namespace DRM.PropBag
         {
             // This will throw an exception if no value has been added to the _tVals dictionary with a key of propertyName,
             // either by calling AddProp or SetIt.
-            ValueWithType vwt = GetValueWithType(propertyName);
+            IPropGen vwt = GetValueWithType(propertyName);
 
-            IProp<T> prop = CheckTypeInfo<T>(vwt, propertyName);
+            IProp<T> prop = CheckTypeInfo<T>(vwt, propertyName, tVals);
 
-            return prop.Value;
+            return prop.TypedValue;
         }
 
         protected void SetIt(object value, [CallerMemberName] string propertyName = null)
@@ -164,7 +174,7 @@ namespace DRM.PropBag
                 throw new InvalidOperationException("Attempt to access property using this method is not allowed when TypeSafetyMode is 'OnlyTypedAccess.'");
             }
 
-            ValueWithType vwt;
+            IPropGen vwt;
             try
             {
                 vwt = GetValueWithType(propertyName);
@@ -179,9 +189,8 @@ namespace DRM.PropBag
                     throw new ApplicationException(string.Format("Property: {0} has not been defined with a call to AddProp or any SetIt<T> call and the operation setting 'OnlyTypeAccesss' is set to true.", propertyName));
                 }
 
-                // This uses reflection.
-                vwt = ValueWithType.CreateValueInferType(value);
-                this.tVals.Add(propertyName, vwt);
+                vwt = thePropFactory.CreatePropInferType(value);
+                tVals.Add(propertyName, vwt);
 
                 // No point in calling DoSet, it would find that the value is the same and do nothing.
                 return;
@@ -195,7 +204,9 @@ namespace DRM.PropBag
                     {
                         // TODO, we probably need to be more creative when determining the type of this new value.
                         Type newType = value.GetType();
-                        MakeTypeSolid(vwt, newType);
+
+                        MakeTypeSolid(ref vwt, newType);
+                        tVals[propertyName] = vwt;
                     }
                     catch (InvalidCastException ice)
                     {
@@ -222,12 +233,12 @@ namespace DRM.PropBag
 
             // This uses reflection on first access.
             DoSetDelegate setProDel = GetPropSetterDelegate(vwt);
-            setProDel(value, this, propertyName, vwt.Prop);
+            setProDel(value, this, propertyName, vwt);
         }
 
         protected void SetIt<T>(T value, [CallerMemberName] string propertyName = null)
         {
-            ValueWithType vwt;
+            IPropGen vwt;
 
             try
             {
@@ -241,13 +252,16 @@ namespace DRM.PropBag
                 }
 
                 // Property has not been defined yet, let's create a definition for it now and initialize the value.
-                tVals.Add(propertyName, ValueWithType.Create<T>(value));
+
+                vwt = thePropFactory.Create<T>(value);
+                tVals.Add(propertyName, vwt);
 
                 // No reason to call DoSet, it will find no change and do nothing.
                 return;
             }
 
-            IProp<T> prop = CheckTypeInfo<T>(vwt, propertyName);
+            IProp<T> prop = CheckTypeInfo<T>(vwt, propertyName, tVals);
+
 
             DoSet(value, propertyName, prop);
         }
@@ -264,7 +278,7 @@ namespace DRM.PropBag
         /// <returns>True if the value was updated, otherwise false.</returns>
         protected bool SetIt<T>(T newValue, ref T curValue, [CallerMemberName]string propertyName = null)
         {
-            ValueWithType vwt;
+            IPropGen vwt;
 
             try
             { 
@@ -279,11 +293,12 @@ namespace DRM.PropBag
                 }
 
                 // Property has not been defined yet, let's create a definition for it now 
-                vwt = ValueWithType.CreateWithNoStore<T>();
+                vwt = thePropFactory.CreateWithNoneOrDefault<T>(hasStorage: false, typeIsSolid: true);
+
                 tVals.Add(propertyName, vwt);
             }
 
-            IProp<T> prop = CheckTypeInfo<T>(vwt, propertyName);
+            IProp<T> prop = CheckTypeInfo<T>(vwt, propertyName, tVals);
 
             bool theSame = prop.Compare(newValue, curValue);
 
@@ -312,7 +327,9 @@ namespace DRM.PropBag
         // It can be used in any of the three modes, but is especially handy for Loose mode.
         public void SubscribeToPropChanged(Action<object, object> doOnChange, [CallerMemberName] string propertyName = null)
         {
-            ValueWithType vwt = GetValueWithType(propertyName);
+
+            // TODO: consider creating a new property, if one doesn't exist, using just the name.
+            IPropGen vwt = GetValueWithType(propertyName);
 
             PropertyChangedWithValsHandler action = (s, e) =>
             {
@@ -357,20 +374,20 @@ namespace DRM.PropBag
             prop.PropertyChangedWithTVals += action;
         }
 
-        private ValueWithType GetTypeCheckedVWT<T>(string propertyName)
+        private IPropGen GetTypeCheckedVWT<T>(string propertyName)
         {
-            ValueWithType vwt;
+            IPropGen vwt;
             GetPropDef<T>(propertyName, out vwt);
             return vwt;
         }
 
         private IProp<T> GetPropDef<T>(string propertyName)
         {
-            ValueWithType vwt;
+            IPropGen vwt;
             return GetPropDef<T>(propertyName, out vwt);
         }
 
-        private IProp<T> GetPropDef<T>(string propertyName, out ValueWithType vwt)
+        private IProp<T> GetPropDef<T>(string propertyName, out IPropGen vwt)
         {
             try
             {
@@ -384,11 +401,12 @@ namespace DRM.PropBag
                 }
 
                 // Property has not been defined yet, let's create a definition for it now and initialize the value.
-                vwt = ValueWithType.Create<T>(default(T));
+
+                vwt = thePropFactory.CreateWithNoneOrDefault<T>();
                 tVals.Add(propertyName, vwt);
             }
 
-            IProp<T> prop = CheckTypeInfo<T>(vwt, propertyName);
+            IProp<T> prop = CheckTypeInfo<T>(vwt, propertyName, tVals);
 
             return prop;
         }
@@ -401,9 +419,9 @@ namespace DRM.PropBag
 
         public  void UnSubscribeToPropChanged<T>(PropertyChangedWithTValsHandler<T> action, string propertyName)
         {
-            ValueWithType vwt = GetValueWithType(propertyName);
+            IPropGen vwt = GetValueWithType(propertyName);
 
-            IProp<T> prop = CheckTypeInfo<T>(vwt, propertyName);
+            IProp<T> prop = CheckTypeInfo<T>(vwt, propertyName, tVals);
 
             prop.PropertyChangedWithTVals -= action;
         }
@@ -414,13 +432,14 @@ namespace DRM.PropBag
             UnSubscribeToPropChanged<T>(action, propertyName);
         }
 
-        private IProp<T> CheckTypeInfo<T>(ValueWithType vwt, string propertyName)
+        private IProp<T> CheckTypeInfo<T>(IPropGen vwt, string propertyName, IDictionary<string, IPropGen> dict)
         {
             if (!vwt.TypeIsSolid)
             {
                 try
                 {
-                    MakeTypeSolid(vwt, typeof(T));
+                    MakeTypeSolid(ref vwt, typeof(T));
+                    dict[propertyName] = vwt;
                 }
                 catch (InvalidCastException ice)
                 {
@@ -435,7 +454,7 @@ namespace DRM.PropBag
                 }
             }
 
-            return (IProp<T>)vwt.Prop;
+            return (IProp<T>)vwt;
         }
 
         public bool PropertyExists([CallerMemberName] string propertyName = null)
@@ -455,7 +474,7 @@ namespace DRM.PropBag
 
         protected void RemoveProp(string propertyName)
         {
-            ValueWithType vwt = GetValueWithType(propertyName);
+            IPropGen vwt = GetValueWithType(propertyName);
 
             foreach (PropertyChangedWithValsHandler h in vwt.PropChangedWithValsHandlerList)
             {
@@ -475,7 +494,7 @@ namespace DRM.PropBag
             {
                 Dictionary<string, object> result = new Dictionary<string, object>();
 
-                foreach (KeyValuePair<string, ValueWithType> kvp in tVals)
+                foreach (KeyValuePair<string, IPropGen> kvp in tVals)
                 {
                     result.Add(kvp.Key, kvp.Value.Value);
                 }
@@ -491,12 +510,12 @@ namespace DRM.PropBag
         /// <param name="doAfterNotify"></param>
         /// <param name="propertyName"></param>
         /// <returns>True, if there was an existing Action in place for this property.</returns>
-        protected bool RegisterDoWhenChanged<T>(Action<T, T> doWhenChanged, bool doAfterNotify = false, [CallerMemberName] string propertyName = null)
-        {
-            ValueWithType vwt = GetTypeCheckedVWT<T>(propertyName);
+        //protected bool RegisterDoWhenChanged<T>(Action<T, T> doWhenChanged, bool doAfterNotify = false, [CallerMemberName] string propertyName = null)
+        //{
+        //    IPropGen vwt = GetTypeCheckedVWT<T>(propertyName);
 
-            return vwt.UpdateDoWhenChanged(doWhenChanged, doAfterNotify);
-        }
+        //    return vwt.UpdateDoWhenChanged(doWhenChanged, doAfterNotify);
+        //}
 
         #endregion
 
@@ -509,12 +528,12 @@ namespace DRM.PropBag
             if (!theSame)
             {
                 // Save the value before the update.
-                T oldValue = prop.Value;
+                T oldValue = prop.TypedValue;
 
                 OnPropertyChanging(propertyName);
 
                 // Make the update.
-                prop.Value = newValue;
+                prop.TypedValue = newValue;
 
                 // Raise notify events.
                 DoNotifyWork(oldValue, newValue, propertyName, prop);
@@ -523,38 +542,7 @@ namespace DRM.PropBag
 
         private void DoNotifyWork<T>(T oldVal, T newValue, string propertyName, IProp<T> prop)
         {
-            if (prop.HasCallBack)
-            {
-                if (prop.DoAfterNotify)
-                {
-                    // Raise the standard PropertyChanged event
-                    OnPropertyChanged(propertyName);
-
-                    // The typed, PropertyChanged event defined on the individual property.
-                    prop.OnPropertyChangedWithTVals(propertyName, oldVal, newValue);
-
-                    // The un-typed, PropertyChanged shared event.
-                    OnPropertyChangedWithVals(propertyName, oldVal, newValue);
-
-                    // then perform the call back.
-                    prop.DoWHenChanged(oldVal, newValue);
-                }
-                else
-                {
-                    // Peform the call back,
-                    prop.DoWHenChanged(oldVal, newValue);
-
-                    // Raise the standard PropertyChanged event
-                    OnPropertyChanged(propertyName);
-
-                    // The typed, PropertyChanged event defined on the individual property.
-                    prop.OnPropertyChangedWithTVals(propertyName, oldVal, newValue);
-
-                    // The un-typed, PropertyChanged shared event.
-                    OnPropertyChangedWithVals(propertyName, oldVal, newValue);
-                }
-            }
-            else
+            if (prop.DoAfterNotify)
             {
                 // Raise the standard PropertyChanged event
                 OnPropertyChanged(propertyName);
@@ -564,14 +552,30 @@ namespace DRM.PropBag
 
                 // The un-typed, PropertyChanged shared event.
                 OnPropertyChangedWithVals(propertyName, oldVal, newValue);
-            }
 
+                // then perform the call back.
+                prop.DoWhenChanged(oldVal, newValue);
+            }
+            else
+            {
+                // Peform the call back,
+                prop.DoWhenChanged(oldVal, newValue);
+
+                // Raise the standard PropertyChanged event
+                OnPropertyChanged(propertyName);
+
+                // The typed, PropertyChanged event defined on the individual property.
+                prop.OnPropertyChangedWithTVals(propertyName, oldVal, newValue);
+
+                // The un-typed, PropertyChanged shared event.
+                OnPropertyChangedWithVals(propertyName, oldVal, newValue);
+            }
         }
 
-        private ValueWithType GetValueWithType(string propertyName, bool? desiredHasStoreValue = true)
+        private IPropGen GetValueWithType(string propertyName, bool? desiredHasStoreValue = true)
         {
             if (propertyName == null) throw new ArgumentNullException("propertyName", "PropertyName is null on call to GetValue.");
-            ValueWithType vwt = tVals[propertyName];
+           IPropGen vwt = tVals[propertyName];
 
             if (desiredHasStoreValue.HasValue && desiredHasStoreValue.Value != vwt.HasStore)
             {
@@ -585,7 +589,7 @@ namespace DRM.PropBag
             return vwt;
         }
 
-        private void MakeTypeSolid(ValueWithType vwt, Type newType)
+        private void MakeTypeSolid(ref IPropGen vwt, Type newType)
         {
             Type currentType = vwt.Type;
 
@@ -605,7 +609,11 @@ namespace DRM.PropBag
             {
                 // Next statement uses reflection.
                 object curValue = vwt.Value;
-                vwt.UpdateWithSolidType(newType, curValue);
+
+                IPropGen newVwt = thePropFactory.Create(vwt.Value, newType);
+
+                //vwt.UpdateWithSolidType(newType, curValue);
+                vwt = newVwt;
             }
         }
 
@@ -638,13 +646,17 @@ namespace DRM.PropBag
             }
         }
 
-        private DoSetDelegate GetPropSetterDelegate(ValueWithType vwt)
+        private DoSetDelegate GetPropSetterDelegate(IPropGen vwt)
         {
-            if (vwt.DoSetProVal == null)
+            Type typeOfThisProperty = vwt.Type;
+
+            if(!doSetDelegateDict.ContainsKey(typeOfThisProperty))
             {
-                vwt.DoSetProVal = GetDoSetDelegate(vwt.Type);
+                DoSetDelegate del = GetDoSetDelegate(typeOfThisProperty);
+                doSetDelegateDict[typeOfThisProperty] = del;
+                return del;
             }
-            return vwt.DoSetProVal;
+            return doSetDelegateDict[typeOfThisProperty];
         }
 
         /// <summary>
@@ -672,70 +684,77 @@ namespace DRM.PropBag
         /// <param name="doAfterNotify"></param>
         /// <param name="comparer">A instance of a class that implements IEqualityComparer and thus an Equals method.</param>
         /// <param name="initalValue"></param>
-        public void AddProp<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false,
+        public void AddProp<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
             IEqualityComparer<T> comparer = null, T initalValue = default(T))
         {
-            tVals.Add(propertyName, ValueWithType.Create<T>(initalValue, doIfChanged, doAfterNotify, comparer));
+            IPropGen pg = thePropFactory.Create<T>(initalValue, true, true, doIfChanged, doAfterNotify, comparer);
+            tVals.Add(propertyName, pg);
         }
 
-        public void AddPropObjComp<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false,
-            IEqualityComparer<object> comparer = null, T initalValue = default(T))
+        public void AddPropObjComp<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
+            T initalValue = default(T))
         {
-            tVals.Add(propertyName, ValueWithType.CreateWithObjComparer(initalValue, doIfChanged, doAfterNotify, comparer));
+            RefEqualityComparer<T> refComp = RefEqualityComparer<T>.Default;
+            IPropGen pg = thePropFactory.Create<T>(initalValue, true, true, doIfChanged, doAfterNotify, refComp);
+
+            tVals.Add(propertyName, pg);
         }
 
-        // This allow the caller to use their own storage to hold the value.
-        public Guid AddPropExtStore<T>(string propertyName, GetExtVal<T> getter, SetExtVal<T> setter, 
-            Action<T, T> doIfChanged, bool doAfterNotify = false,
-            IEqualityComparer<T> comparer = null)
-        {
-            Guid tag = Guid.NewGuid();
-            tVals.Add(propertyName, ValueWithType.CreateWithCustStore<T>(tag, getter, setter, doIfChanged, doAfterNotify, comparer));
+        //// This allow the caller to use their own storage to hold the value.
+        //public Guid AddPropExtStore<T>(string propertyName, GetExtVal<T> getter, SetExtVal<T> setter, 
+        //    Action<T, T> doIfChanged, bool doAfterNotify = false,
+        //    IEqualityComparer<T> comparer = null)
+        //{
+        //    Guid tag = Guid.NewGuid();
+        //    tVals.Add(propertyName, ValueWithType.CreateWithCustStore<T>(tag, getter, setter, doIfChanged, doAfterNotify, comparer));
 
-            return tag;
-        }
+        //    return tag;
+        //}
 
-        public Guid AddPropExtStoreObjComp<T>(string propertyName, GetExtVal<T> getter, SetExtVal<T> setter,
-            Action<T, T> doIfChanged, bool doAfterNotify = false,
-            IEqualityComparer<object> comparer = null)
-        {
-            Guid tag = Guid.NewGuid();
-            tVals.Add(propertyName, ValueWithType.CreateWithCustStoreObjComp<T>(tag, getter, setter, doIfChanged, doAfterNotify, comparer));
+        //public Guid AddPropExtStoreObjComp<T>(string propertyName, GetExtVal<T> getter, SetExtVal<T> setter,
+        //    Action<T, T> doIfChanged, bool doAfterNotify = false,
+        //    IEqualityComparer<object> comparer = null)
+        //{
+        //    Guid tag = Guid.NewGuid();
+        //    tVals.Add(propertyName, ValueWithType.CreateWithCustStoreObjComp<T>(tag, getter, setter, doIfChanged, doAfterNotify, comparer));
 
-            return tag;
-        }
+        //    return tag;
+        //}
 
         public void AddPropNoStore<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false,
             IEqualityComparer<T> comparer = null)
         {
-            tVals.Add(propertyName, ValueWithType.CreateWithNoStore<T>(doIfChanged, doAfterNotify, comparer));
+            IPropGen pg = thePropFactory.CreateWithNoneOrDefault<T>(false, true, doIfChanged, doAfterNotify, comparer);
+            tVals.Add(propertyName, pg);
         }
 
-        public void AddPropNoStoreObjComp<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false,
-            IEqualityComparer<object> comparer = null)
+        public void AddPropNoStoreObjComp<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false)
         {
-            tVals.Add(propertyName, ValueWithType.CreateWithNoStoreObjComp<T>(doIfChanged, doAfterNotify, comparer));
+            RefEqualityComparer<T> refComp = RefEqualityComparer<T>.Default;
+            IPropGen pg = thePropFactory.CreateWithNoneOrDefault<T>(false, true, doIfChanged, doAfterNotify, refComp);
+
+            tVals.Add(propertyName, pg);
         }
 
-        // The remainder of the AddProp variants are "sugar" -- they allow for abbreviated calls to what is provided above.
+        //// The remainder of the AddProp variants are "sugar" -- they allow for abbreviated calls to what is provided above.
 
-        // Just name and optional intital value.
-        public void AddProp<T>(string propertyName, T initalValue = default(T))
-        {
-            tVals.Add(propertyName, ValueWithType.Create<T>(initalValue));
-        }
+        //// Just name and optional intital value.
+        //public void AddProp<T>(string propertyName, T initalValue = default(T))
+        //{
+        //    tVals.Add(propertyName, ValueWithType.Create<T>(initalValue));
+        //}
 
-        // Use IEqualityComparer<T> and no doIfChanged Action
-        public void AddProp<T>(string propertyName, IEqualityComparer<T> comparer, T initalValue = default(T))
-        {
-            tVals.Add(propertyName, ValueWithType.Create<T>(initalValue, null, false, comparer));
-        }
+        //// Use IEqualityComparer<T> and no doIfChanged Action
+        //public void AddProp<T>(string propertyName, IEqualityComparer<T> comparer, T initalValue = default(T))
+        //{
+        //    tVals.Add(propertyName, ValueWithType.Create<T>(initalValue, null, false, comparer));
+        //}
 
-        // Use IEqualityComparer<object> and no doIfChanged action.
-        public void AddPropObjComp<T>(string propertyName, IEqualityComparer<object> comparer, T initalValue = default(T))
-        {
-            tVals.Add(propertyName, ValueWithType.CreateWithObjComparer<T>(initalValue, null, false, comparer));
-        }
+        //// Use IEqualityComparer<object> and no doIfChanged action.
+        //public void AddPropObjComp<T>(string propertyName, IEqualityComparer<object> comparer, T initalValue = default(T))
+        //{
+        //    tVals.Add(propertyName, ValueWithType.CreateWithObjComparer<T>(initalValue, null, false, comparer));
+        //}
 
 
         #endregion
@@ -788,7 +807,20 @@ namespace DRM.PropBag
 
         #endregion
 
-        private class ValueWithType
+        #region Property Bag Generic Method Templates
+
+        // Method Templates for Property Bag
+        static class GenericMethodTemplates
+        {
+            private static void DoSetBridge<T>(object value, PropBag target, string propertyName, object prop)
+            {
+                target.DoSet<T>((T)value, propertyName, (IProp<T>)prop);
+            }
+        }
+
+        #endregion
+
+        private class ValueWithTypexx
         {
             #region Member Declarations
 
@@ -824,7 +856,7 @@ namespace DRM.PropBag
             #endregion
 
             // Constructor
-            public ValueWithType(Type typeOfThisValue, object prop, bool typeIsSolid, bool hasStore = true)
+            public ValueWithTypexx(Type typeOfThisValue, object prop, bool typeIsSolid, bool hasStore = true)
             {
                 Type = typeOfThisValue;
                 Prop = prop;
@@ -838,75 +870,75 @@ namespace DRM.PropBag
 
             #region Factory Methods
 
-            static public ValueWithType Create<T>(T value, Action<T,T> doWhenChanged = null, bool doAfterNotify = false,
-                IEqualityComparer<T> comparer = null, bool typeIsSolid = true)
-            {
-                // Use the implementation which takes IEqualityComparer<T>
-                Prop<T> prop = new Prop<T>(value, doWhenChanged, doAfterNotify, comparer);
-                return new ValueWithType(typeof(T), prop, typeIsSolid);
-            }
+            //static public ValueWithType Create<T>(T value, Action<T,T> doWhenChanged = null, bool doAfterNotify = false,
+            //    IEqualityComparer<T> comparer = null, bool typeIsSolid = true)
+            //{
+            //    // Use the implementation which takes IEqualityComparer<T>
+            //    Prop<T> prop = new Prop<T>(value, doWhenChanged, doAfterNotify, comparer);
+            //    return new ValueWithType(typeof(T), prop, typeIsSolid);
+            //}
 
-            static public ValueWithType CreateWithObjComparer<T>(T value, Action<T, T> doWhenChanged = null, bool doAfterNotify = false,
-                IEqualityComparer<object> comparer = null)
-            {
-                // Use the Implementation which takes IEqualityComparer<object>
-                PropObjComp<T> prop = new PropObjComp<T>(value, doWhenChanged, doAfterNotify);
-                return new ValueWithType(typeof(T), prop, typeIsSolid: true);
-            }
+            //static public ValueWithType CreateWithObjComparer<T>(T value, Action<T, T> doWhenChanged = null, bool doAfterNotify = false,
+            //    IEqualityComparer<object> comparer = null)
+            //{
+            //    // Use the Implementation which takes IEqualityComparer<object>
+            //    PropObjComp<T> prop = new PropObjComp<T>(value, doWhenChanged, doAfterNotify, comparer);
+            //    return new ValueWithType(typeof(T), prop, typeIsSolid: true);
+            //}
 
-            static public ValueWithType CreateWithCustStore<T>(Guid tag, GetExtVal<T> getter, SetExtVal<T> setter, 
-                Action<T, T> doWhenChanged = null, bool doAfterNotify = false,
-                IEqualityComparer<T> comparer = null)
-            {
-                // Use the implementation which allow the caller to provide the backing store.
-                PropExternStore<T> prop = new PropExternStore<T>(tag, getter, setter, doWhenChanged, doAfterNotify, comparer);
-                return new ValueWithType(typeof(T), prop, typeIsSolid: true);
-            }
+            //static public ValueWithType CreateWithCustStore<T>(Guid tag, GetExtVal<T> getter, SetExtVal<T> setter, 
+            //    Action<T, T> doWhenChanged = null, bool doAfterNotify = false,
+            //    IEqualityComparer<T> comparer = null)
+            //{
+            //    // Use the implementation which allow the caller to provide the backing store.
+            //    PropExternStore<T> prop = new PropExternStore<T>(tag, getter, setter, doWhenChanged, doAfterNotify, comparer);
+            //    return new ValueWithType(typeof(T), prop, typeIsSolid: true);
+            //}
 
-            static public ValueWithType CreateWithCustStoreObjComp<T>(Guid tag, GetExtVal<T> getter, SetExtVal<T> setter,
-                Action<T, T> doWhenChanged = null, bool doAfterNotify = false,
-                IEqualityComparer<object> comparer = null)
-            {
-                // Use the implementation which allow the caller to provide the backing store.
-                PropExternStoreObjComp<T> prop = new PropExternStoreObjComp<T>(tag, getter, setter, doWhenChanged, doAfterNotify, comparer);
-                return new ValueWithType(typeof(T), prop, typeIsSolid: true);
-            }
+            //static public ValueWithType CreateWithCustStoreObjComp<T>(Guid tag, GetExtVal<T> getter, SetExtVal<T> setter,
+            //    Action<T, T> doWhenChanged = null, bool doAfterNotify = false,
+            //    IEqualityComparer<object> comparer = null)
+            //{
+            //    // Use the implementation which allow the caller to provide the backing store.
+            //    PropExternStoreObjComp<T> prop = new PropExternStoreObjComp<T>(tag, getter, setter, doWhenChanged, doAfterNotify, comparer);
+            //    return new ValueWithType(typeof(T), prop, typeIsSolid: true);
+            //}
 
-            static public ValueWithType CreateWithNoStore<T>(Action<T, T> doWhenChanged = null, bool doAfterNotify = false, IEqualityComparer<T> comparer = null)
-            {
-                // Use the implementation which uses no backing store. The caller can only update using call to SetIt<T> where the current and new values are provided.
-                PropNoStore<T> prop = new PropNoStore<T>(doWhenChanged, doAfterNotify, comparer);
-                return new ValueWithType(typeof(T), prop, typeIsSolid: true, hasStore: false);
-            }
+            //static public ValueWithType CreateWithNoStore<T>(Action<T, T> doWhenChanged = null, bool doAfterNotify = false, IEqualityComparer<T> comparer = null)
+            //{
+            //    // Use the implementation which uses no backing store. The caller can only update using call to SetIt<T> where the current and new values are provided.
+            //    PropNoStore<T> prop = new PropNoStore<T>(doWhenChanged, doAfterNotify, comparer);
+            //    return new ValueWithType(typeof(T), prop, typeIsSolid: true, hasStore: false);
+            //}
 
-            static public ValueWithType CreateWithNoStoreObjComp<T>(Action<T, T> doWhenChanged = null, bool doAfterNotify = false, IEqualityComparer<object> comparer = null)
-            {
-                // Use the implementation which uses no backing store. The caller can only update using call to SetIt<T> where the current and new values are provided.
-                PropNoStoreObjComp<T> prop = new PropNoStoreObjComp<T>(doWhenChanged, doAfterNotify, comparer);
-                return new ValueWithType(typeof(T), prop, typeIsSolid: true, hasStore: false);
-            }
+            //static public ValueWithType CreateWithNoStoreObjComp<T>(Action<T, T> doWhenChanged = null, bool doAfterNotify = false, IEqualityComparer<object> comparer = null)
+            //{
+            //    // Use the implementation which uses no backing store. The caller can only update using call to SetIt<T> where the current and new values are provided.
+            //    PropNoStoreObjComp<T> prop = new PropNoStoreObjComp<T>(doWhenChanged, doAfterNotify, comparer);
+            //    return new ValueWithType(typeof(T), prop, typeIsSolid: true, hasStore: false);
+            //}
 
-            static public ValueWithType CreateValueInferType(object value)
-            {
-                System.Type typeOfThisValue;
-                bool typeIsSolid;
+            //static public ValueWithType CreateValueInferType(object value)
+            //{
+            //    System.Type typeOfThisValue;
+            //    bool typeIsSolid;
 
-                if (value == null)
-                {
-                    typeOfThisValue = typeof(object);
-                    typeIsSolid = false;
-                }
-                else
-                {
-                    typeOfThisValue = value.GetType();
-                    typeIsSolid = true;
-                }
+            //    if (value == null)
+            //    {
+            //        typeOfThisValue = typeof(object);
+            //        typeIsSolid = false;
+            //    }
+            //    else
+            //    {
+            //        typeOfThisValue = value.GetType();
+            //        typeIsSolid = true;
+            //    }
 
-                CreateVWTDelegate createValWithType = GetVWTCreator(typeOfThisValue);
-                ValueWithType vwt = createValWithType(value, typeIsSolid);
+            //    CreateVWTDelegate createValWithType = GetVWTCreator(typeOfThisValue);
+            //    ValueWithType vwt = createValWithType(value, typeIsSolid);
 
-                return vwt;
-            }
+            //    return vwt;
+            //}
 
             #endregion
 
@@ -923,36 +955,36 @@ namespace DRM.PropBag
                 }
             }
 
-            public void UpdateWithSolidType(Type typeOfThisValue, object curValue)
-            {
-                // Create a brand new ValueWithType instance -- we could have created a custom Delegate for this -- but this strategy reuses more code.
-                CreateVWTDelegate vwtCreator = GetVWTCreator(typeOfThisValue);
-                ValueWithType newVwt = vwtCreator(curValue, true);
+            //public void UpdateWithSolidType(Type typeOfThisValue, object curValue)
+            //{
+            //    // Create a brand new ValueWithType instance -- we could have created a custom Delegate for this -- but this strategy reuses more code.
+            //    CreateVWTDelegate vwtCreator = GetVWTCreator(typeOfThisValue);
+            //    ValueWithType newVwt = vwtCreator(curValue, true);
 
-                this.Prop = newVwt.Prop;
-                this.Type = typeOfThisValue;
-                this.TypeIsSolid = true;
+            //    this.Prop = newVwt.Prop;
+            //    this.Type = typeOfThisValue;
+            //    this.TypeIsSolid = true;
 
-                // Clear the cached getter and setter delegates, since these depend on the type of the value.
-                this.DoGetProVal = null;
-                this.DoSetProVal = null;
+            //    // Clear the cached getter and setter delegates, since these depend on the type of the value.
+            //    this.DoGetProVal = null;
+            //    this.DoSetProVal = null;
 
-                // Do not update the members of the PropChangedWithValsHandlerList, since these delegates use object references, not typed references.
-            }
+            //    // Do not update the members of the PropChangedWithValsHandlerList, since these delegates use object references, not typed references.
+            //}
 
             #endregion
 
-            public bool UpdateDoWhenChanged<T>(Action<T, T> doWhenChanged, bool doAfterNotify)
-            {
-                IProp<T> prop = (IProp<T>) this.Prop;
+            //public bool UpdateDoWhenChanged<T>(Action<T, T> doWhenChanged, bool doAfterNotify)
+            //{
+            //    IProp<T> prop = (IProp<T>) this.Prop;
 
-                bool hadExistingValue = prop.DoWHenChanged != null;
+            //    bool hadExistingValue = prop.DoWHenChangedAction != null;
 
-                prop.DoWHenChanged = doWhenChanged;
-                prop.DoAfterNotify = doAfterNotify;
+            //    prop.DoWHenChangedAction = doWhenChanged;
+            //    prop.DoAfterNotify = doAfterNotify;
 
-                return hadExistingValue;
-            }
+            //    return hadExistingValue;
+            //}
 
             #region Delegate declarations
 
@@ -960,7 +992,7 @@ namespace DRM.PropBag
 
             private delegate object GetPropValDelegate(object prop);
 
-            private delegate ValueWithType CreateVWTDelegate(object value, bool typeIsSolid);
+            //private delegate ValueWithType CreateVWTDelegate(object value, bool typeIsSolid);
 
             #endregion
 
@@ -968,19 +1000,20 @@ namespace DRM.PropBag
 
             private static GetPropValDelegate GetPropGetter(Type typeOfThisValue)
             {
-                MethodInfo methInfoGetProp = GMT_TYPE.GetMethod("GetPropValue", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(typeOfThisValue);
-                GetPropValDelegate result = (GetPropValDelegate)Delegate.CreateDelegate(typeof(GetPropValDelegate), methInfoGetProp);
+                //MethodInfo methInfoGetProp = GMT_TYPE.GetMethod("GetPropValue", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(typeOfThisValue);
+                //GetPropValDelegate result = (GetPropValDelegate)Delegate.CreateDelegate(typeof(GetPropValDelegate), methInfoGetProp);
 
-                return result;
+                //return result;
+                return null;
             }
 
-            private static CreateVWTDelegate GetVWTCreator(Type typeOfThisValue)
-            {
-                MethodInfo methInfoVWTCreator = GMT_TYPE.GetMethod("CreateVWT", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(typeOfThisValue);
-                CreateVWTDelegate result = (CreateVWTDelegate)Delegate.CreateDelegate(typeof(CreateVWTDelegate), methInfoVWTCreator);
+            //private static CreateVWTDelegate GetVWTCreator(Type typeOfThisValue)
+            //{
+            //    MethodInfo methInfoVWTCreator = GMT_TYPE.GetMethod("CreateVWT", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(typeOfThisValue);
+            //    CreateVWTDelegate result = (CreateVWTDelegate)Delegate.CreateDelegate(typeof(CreateVWTDelegate), methInfoVWTCreator);
 
-                return result;
-            }
+            //    return result;
+            //}
 
             #endregion
 
@@ -990,29 +1023,21 @@ namespace DRM.PropBag
             {
                 private static object GetPropValue<T>(object prop)
                 {
-                    return ((IProp<T>)prop).Value;
+                    return ((IProp<T>)prop).TypedValue;
                 }
 
-                private static ValueWithType CreateVWT<T>(object value, bool isTypeSolid)
+                private static IPropGen CreateVWT<T>(object value, bool isTypeSolid)
                 {
-                    return ValueWithType.Create<T>((T)value, null, false, null, isTypeSolid);
+                    // TODO: Fix Me
+                    return null;
+                    //return ValueWithType.Create<T>((T)value, null, false, null, isTypeSolid);
                 }
             }
 
             #endregion
         }
 
-        #region Property Bag Generic Method Templates
 
-        // Method Templates for Property Bag
-        static class GenericMethodTemplates
-        {
-            private static void DoSetBridge<T>(object value, PropBag target, string propertyName, object prop)
-            {
-                target.DoSet<T>((T)value, propertyName, (IProp<T>)prop);
-            }
-        }
 
-        #endregion
     }
 }

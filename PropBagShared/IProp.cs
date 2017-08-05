@@ -10,13 +10,15 @@ using DRM.Ipnwvc;
 
 namespace DRM.PropBag
 {
-    public interface IProp<T>
+    public interface IProp<T> : IPropGen
     {
-        T Value { get; set; }
+        T TypedValue { get; set; }
         bool CompareTo(T value);
         bool Compare(T val1, T val2);
 
-        Action<T, T> DoWHenChanged { get; set; }
+        //Action<T, T> DoWHenChangedAction { get; set; }
+
+        void DoWhenChanged(T oldVal, T newVal);
         bool DoAfterNotify { get; set; }
 
         event PropertyChangedWithTValsHandler<T> PropertyChangedWithTVals;
@@ -25,6 +27,5 @@ namespace DRM.PropBag
 
         // Raise Type Events
         void OnPropertyChangedWithTVals(string propertyName, T oldVal, T newVal);
-
     }
 }

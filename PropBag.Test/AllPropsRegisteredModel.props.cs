@@ -15,17 +15,17 @@ namespace PropBagLib.Tests
 
 		public AllPropsRegisteredModel(PropBagTypeSafetyMode typeSafetyMode) : base(typeSafetyMode)
 		{
-	        AddProp<object>("PropObject", null, false, null);
-	        AddProp<string>("PropString", GetDelegate<string>("DoWhenStringChanged"), false, null);
-	        AddProp<string>("PropStringCallDoAfter", GetDelegate<string>("DoWhenStringChanged"), true, EqualityComparer<string>.Default);
-	        AddPropObjComp<string>("PropStringUseRefComp", GetDelegate<string>("DoWhenStringChanged"), false, null);
-	        AddProp<bool>("PropBool", null, false, null, false);
-	        AddProp<int>("PropInt", null, false, null);
-	        AddProp<TimeSpan>("PropTimeSpan", null, false, null);
-	        AddProp<Uri>("PropUri", null, false, null);
-	        AddProp<Lazy<int>>("PropLazyInt", null, false, null);
-	        AddProp<Nullable<int>>("PropNullableInt", GetDelegate<Nullable<int>>("DoWhenNullIntChanged"), false, null, -1);
-	        AddProp<ICollection<int>>("PropICollectionInt", GetDelegate<ICollection<int>>("DoWhenICollectionIntChanged"), false, null);
+            AddProp<object>("PropObject", null, false, null);
+            AddProp<string>("PropString", GetDelegate<string>("DoWhenStringChanged"), false, null);
+            AddProp<string>("PropStringCallDoAfter", GetDelegate<string>("DoWhenStringChanged"), true, EqualityComparer<string>.Default);
+            AddPropObjComp<string>("PropStringUseRefComp", GetDelegate<string>("DoWhenStringChanged"), false, null);
+            AddProp<bool>("PropBool", null, false, null, false);
+            AddProp<int>("PropInt", null, false, null);
+            AddProp<TimeSpan>("PropTimeSpan", null, false, null);
+            AddProp<Uri>("PropUri", null, false, null);
+            AddProp<Lazy<int>>("PropLazyInt", null, false, null);
+            AddProp<Nullable<int>>("PropNullableInt", GetDelegate<Nullable<int>>("DoWhenNullIntChanged"), false, null, -1);
+            AddProp<ICollection<int>>("PropICollectionInt", GetDelegate<ICollection<int>>("DoWhenICollectionIntChanged"), false, null);
 		}
 
 	#region Property Declarations
