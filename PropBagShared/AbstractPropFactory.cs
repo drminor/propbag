@@ -35,6 +35,7 @@ namespace DRM.PropBag
             }
             else
             {
+                // TODO, we probably need to be more creative when determining the type of this new value.
                 typeOfThisValue = value.GetType();
                 typeIsSolid = true;
             }

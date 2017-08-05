@@ -92,5 +92,34 @@ namespace DRM.PropBag
             return Comparer.Equals(val1, val2);
         }
 
+        public bool UpdateDoWhenChangedAction(Action<T, T> doWhenChangedAction, bool? doAfterNotify)
+        {
+            bool hadOnePreviously = doWhenChangedAction != null;
+
+            this.DoWHenChangedAction = doWhenChangedAction;
+            if (doAfterNotify.HasValue)
+            {
+                this.DoAfterNotify = doAfterNotify.Value;
+            }
+            else
+            {
+                // If there was a previous value of DoWhenChangedAction, leave the value of doAfterNotify alone,
+                // otherwise set it to the default value of false.
+                if (!hadOnePreviously)
+                {
+                    // Set doAfterNotify to the default value of false.
+                    this.DoAfterNotify = false;
+                }
+            }
+
+            return hadOnePreviously;
+        }
+
+        ~PropExternStore()
+        {
+            Comparer = null;
+            DoWHenChangedAction = null;
+            PropertyChangedWithTVals = delegate {};
+        }
     }
 }

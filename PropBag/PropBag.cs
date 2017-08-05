@@ -503,6 +503,7 @@ namespace DRM.PropBag
             }
         }
 
+
         /// <summary>
         /// 
         /// </summary>
@@ -511,12 +512,14 @@ namespace DRM.PropBag
         /// <param name="doAfterNotify"></param>
         /// <param name="propertyName"></param>
         /// <returns>True, if there was an existing Action in place for this property.</returns>
-        //protected bool RegisterDoWhenChanged<T>(Action<T, T> doWhenChanged, bool doAfterNotify = false, [CallerMemberName] string propertyName = null)
-        //{
-        //    IPropGen genProp = GetTypeCheckedVWT<T>(propertyName);
+        protected bool RegisterDoWhenChanged<T>(Action<T, T> doWhenChanged, bool doAfterNotify = false, [CallerMemberName] string propertyName = null)
+        {
+            IProp<T> prop = GetPropDef<T>(propertyName);
 
-        //    return genProp.UpdateDoWhenChanged(doWhenChanged, doAfterNotify);
-        //}
+            //TDO: FixMe
+
+            return prop.UpdateDoWhenChangedAction(doWhenChanged, doAfterNotify);
+        }
 
         #endregion
 
