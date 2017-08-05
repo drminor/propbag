@@ -30,6 +30,9 @@ namespace DRM.PropBagModel
         [XmlElement("comparer", IsNullable = true)]
         public PropComparerField ComparerField { get; set; }
 
+        //[XmlElement("comparer", IsNullable = true)]
+        //public string Comparer { get; set; }
+
         [XmlElement("do-when-changed", IsNullable = true)]
         public PropDoWhenChanged DoWhenChangedField { get; set; }
 
@@ -43,7 +46,8 @@ namespace DRM.PropBagModel
         public PropItem() : this(null, null) { }
 
 
-        public PropItem(string name, string type, PropStorageType storageType = PropStorageType.@internal, PropComparerField comparer = null, PropDoWhenChanged doWhenChanged = null)
+        public PropItem(string name, string type, PropStorageType storageType = PropStorageType.@internal,
+            PropDoWhenChanged doWhenChanged = null, PropComparerField comparer = null)
         {
             Name = name;
             Type = type;

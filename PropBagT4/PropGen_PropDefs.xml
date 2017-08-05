@@ -18,7 +18,7 @@ xsi:schemaLocation="http://tempuri.org/PropBagModel ../PropBagModel/PropBagModel
     <prop storage-type="none">
       <name>PropBool</name>
       <type>bool</type>
-      <comparer comparer-type="reference">xxx</comparer>
+      <comparer use-reference-equality="true">xxx</comparer>
       <do-when-changed do-after-notify="true">yyy</do-when-changed>
     </prop>
     <prop storage-type="none">
@@ -33,7 +33,7 @@ xsi:schemaLocation="http://tempuri.org/PropBagModel ../PropBagModel/PropBagModel
     <prop>
       <name>PropUri</name>
       <type>Uri</type>
-      <comparer comparer-type="reference"/>
+      <comparer use-reference-equality="true"/>
       <do-when-changed do-after-notify="false">TestDelegate</do-when-changed>
     </prop>
     <prop>

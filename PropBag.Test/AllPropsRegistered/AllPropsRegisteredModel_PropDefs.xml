@@ -27,7 +27,7 @@ xsi:schemaLocation="https://www.swamphillproductions.com/PropBagModel ../PropBag
     <prop>
       <name>PropStringUseRefComp</name>
       <type>string</type>
-      <comparer comparer-type="reference"/>
+      <comparer use-reference-equality="true"/>
       <do-when-changed>DoWhenStringChanged</do-when-changed>
     </prop>    
     <prop>

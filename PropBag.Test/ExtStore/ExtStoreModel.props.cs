@@ -11,8 +11,6 @@ namespace PropBagLib.Tests
 {
 	public partial class ExtStoreModel : PropBag
 	{
-
-
 		public ExtStoreModel() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered) { }
 
 		public ExtStoreModel(PropBagTypeSafetyMode typeSafetyMode) : base(typeSafetyMode)

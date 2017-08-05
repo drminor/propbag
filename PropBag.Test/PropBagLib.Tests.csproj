@@ -43,38 +43,38 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="ExtStoreTests\ExtStoreModel.props.cs">
+    <None Include="ExtStore\ExtStoreModel.props.cs">
       <DependentUpon>ExtStoreModel.props.tt</DependentUpon>
       <AutoGen>True</AutoGen>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <DesignTime>True</DesignTime>
     </None>
-    <None Include="ExtStoreTests\ExtStoreModel.cs" />
-    <Compile Include="PerformanceModel.cs" />
-    <Compile Include="PerformanceModel.props.cs">
+    <None Include="ExtStore\ExtStoreModel.cs" />
+    <Compile Include="Performance\PerformanceModel.cs" />
+    <Compile Include="Performance\PerformanceModel.props.cs">
       <DependentUpon>PerformanceModel.props.tt</DependentUpon>
       <AutoGen>True</AutoGen>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="LooseModel.cs" />
-    <Compile Include="OnlyTypedAccessModel.cs" />
-    <Compile Include="OnlyTypedAccessModel.props.cs" />
-    <Compile Include="TestLoose.cs" />
-    <Compile Include="TestOnlyTypedAccess.cs" />
-    <Compile Include="TestAllPropsRegistered.cs" />
-    <Compile Include="AllPropsRegisteredModel.cs" />
-    <Compile Include="AllPropsRegisteredModel.props.cs">
+    <Compile Include="Loose\LooseModel.cs" />
+    <Compile Include="OnlyTypedAccess\OnlyTypedAccessModel.cs" />
+    <Compile Include="OnlyTypedAccess\OnlyTypedAccessModel.props.cs" />
+    <Compile Include="Loose\TestLoose.cs" />
+    <Compile Include="OnlyTypedAccess\TestOnlyTypedAccess.cs" />
+    <Compile Include="AllPropsRegistered\TestAllPropsRegistered.cs" />
+    <Compile Include="AllPropsRegistered\AllPropsRegisteredModel.cs" />
+    <Compile Include="AllPropsRegistered\AllPropsRegisteredModel.props.cs">
       <DependentUpon>AllPropsRegisteredModel.props.tt</DependentUpon>
       <AutoGen>True</AutoGen>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="LooseModel.props.cs" />
-    <Compile Include="TestPerformance.cs" />
+    <Compile Include="Loose\LooseModel.props.cs" />
+    <Compile Include="Performance\TestPerformance.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TestT4.cs" />
-    <Content Include="AllPropsRegisteredModel.props.tt">
+    <Compile Include="T4\TestT4.cs" />
+    <Content Include="AllPropsRegistered\AllPropsRegisteredModel.props.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>AllPropsRegisteredModel.props.cs</LastGenOutput>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -111,14 +111,14 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="AllPropsRegisteredModel_PropDefs.xml" />
-    <Content Include="ExtStoreTests\ExtStoreModel_PropDefs.xml" />
-    <Content Include="PerformanceModel.props.tt">
+    <Content Include="AllPropsRegistered\AllPropsRegisteredModel_PropDefs.xml" />
+    <Content Include="ExtStore\ExtStoreModel_PropDefs.xml" />
+    <Content Include="Performance\PerformanceModel.props.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>PerformanceModel.props.cs</LastGenOutput>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="ExtStoreTests\ExtStoreModel.props.tt">
+    <Content Include="ExtStore\ExtStoreModel.props.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>ExtStoreModel.props.cs</LastGenOutput>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -130,8 +130,8 @@
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="PerformanceModel_PropDefs.xml" />
-    <Content Include="AllPropsRegisteredModel_PropDefs - Test.xml" />
+    <Content Include="Performance\PerformanceModel_PropDefs.xml" />
+    <Content Include="AllPropsRegistered\AllPropsRegisteredModel_PropDefs - Test.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

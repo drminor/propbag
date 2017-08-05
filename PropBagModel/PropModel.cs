@@ -105,11 +105,23 @@ namespace DRM.PropBagModel
 
             string doAfterNotify = pi.DoWhenChangedField.DoAfterNotify ? "true" : "false";
 
-            PropComparerField normPcf = GetNormalizedPcf(pi.ComparerField);
-            string objComp = normPcf.ComparerType == PropComparerType.typed ? null : "ObjComp";
+            //PropComparerField normPcf = GetNormalizedPcf(pi.ComparerField);
+            //string objComp = normPcf.ComparerType == PropComparerType.typed ? null : "ObjComp";
 
+
+            string objComp;
             string comparer;
-            comparer = normPcf.Comparer ?? "null";
+
+            if (pi.ComparerField != null)
+            {
+                objComp = pi.ComparerField.UseRefEquality ? "ObjComp" : null;
+                comparer = pi.ComparerField.Comparer ?? "null";
+            }
+            else
+            {
+                objComp = null;
+                comparer = "null";
+            }
 
             switch (pi.StorageType)
             {
@@ -165,25 +177,25 @@ namespace DRM.PropBagModel
             return string.Format("GetDelegate<{0}>(\"{1}\")", type, delegateName);
         }
 
-        private PropComparerField GetNormalizedPcf(PropComparerField pcf)
-        {
-            if (pcf == null)
-            {
-                // This will result in the default comparer for the property's type to be use.
-                return new PropComparerField(null, PropComparerType.typed);
-            }
+        //private PropComparerField GetNormalizedPcf(PropComparerField pcf)
+        //{
+        //    if (pcf == null)
+        //    {
+        //        // This will result in the default comparer for the property's type to be use.
+        //        return new PropComparerField(null, PropComparerType.typed);
+        //    }
 
-            if(pcf.ComparerType == PropComparerType.reference)
-            {
-                // This will result in our ReferenceEqualityComparer to be used.
-                return new PropComparerField(null, PropComparerType.@object);
-            }
+        //    if(pcf.ComparerType == PropComparerType.reference)
+        //    {
+        //        // This will result in our ReferenceEqualityComparer to be used.
+        //        return new PropComparerField(null, PropComparerType.@object);
+        //    }
 
-            // The pcf has typed" or "@object" for the value of its PropComparerType
-            // and either has a "real" value for the comparer delegate, or the null value:
-            // in either case it will be handled correctly by the call to AddProp
-            return pcf;
+        //    // The pcf has typed" or "@object" for the value of its PropComparerType
+        //    // and either has a "real" value for the comparer delegate, or the null value:
+        //    // in either case it will be handled correctly by the call to AddProp
+        //    return pcf;
 
-        }
+        //}
     }
 }

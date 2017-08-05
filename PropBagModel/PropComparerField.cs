@@ -9,27 +9,30 @@ using System.Xml.Serialization;
 namespace DRM.PropBagModel
 {
 
-    public enum PropComparerType
-    {
-        typed,
-        @object,
-        reference
-    }
+    //public enum PropComparerType
+    //{
+    //    typed,
+    //    @object,
+    //    reference
+    //}
 
     public class PropComparerField
     {
-        [XmlAttribute("comparer-type")]
-        public PropComparerType ComparerType { get; set; }
+        //[XmlAttribute("comparer-type")]
+        //public PropComparerType ComparerType { get; set; }
 
         [XmlText]
         public string Comparer { get; set; }
 
+        [XmlAttribute("use-reference-equality")]
+        public bool UseRefEquality { get; set; }
+
         public PropComparerField() : this(null) { }
 
-        public PropComparerField(string comparer, PropComparerType cType = PropComparerType.typed)
+        public PropComparerField(string comparer, bool useRefEquality = false)
         {
-            ComparerType = cType;
             Comparer = comparer;
+            UseRefEquality = useRefEquality;
         }
     }
 }

@@ -61,15 +61,7 @@
     <xs:complexType>
       <xs:simpleContent>
         <xs:extension base="xs:string">
-          <xs:attribute default="typed" name="comparer-type">
-            <xs:simpleType>
-              <xs:restriction base="xs:NMTOKEN">
-                <xs:enumeration value="typed" />
-                <xs:enumeration value="object" />
-                <xs:enumeration value="reference" />
-              </xs:restriction>
-            </xs:simpleType>
-          </xs:attribute>
+          <xs:attribute default="false" name="use-reference-equality" type="xs:boolean"/>
         </xs:extension>
       </xs:simpleContent>
     </xs:complexType>
