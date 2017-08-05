@@ -51,11 +51,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="PropGen.cs">
+    <None Include="PropGen.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>PropGen.tt</DependentUpon>
-    </Compile>
+    </None>
     <Compile Include="RT_Builder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RT.cs">

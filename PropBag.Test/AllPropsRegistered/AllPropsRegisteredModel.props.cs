@@ -11,9 +11,11 @@ namespace PropBagLib.Tests
 {
 	public partial class AllPropsRegisteredModel : PropBag
 	{
-		public AllPropsRegisteredModel() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered) { }
+		public AllPropsRegisteredModel() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered, null) { }
 
-		public AllPropsRegisteredModel(PropBagTypeSafetyMode typeSafetyMode) : base(typeSafetyMode)
+		public AllPropsRegisteredModel(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
+
+		public AllPropsRegisteredModel(PropBagTypeSafetyMode typeSafetyMode, AbstractPropFactory factory) : base(typeSafetyMode, factory)
 		{
 	        AddProp<object>("PropObject", null, false, null);
 	        AddProp<string>("PropString", GetDelegate<string>("DoWhenStringChanged"), false, null);

@@ -73,9 +73,9 @@ namespace DRM.PropBag
 
         #region Constructor
 
-        public PropBag() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered, new PropFactory()) { }
+        public PropBag() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered, null) { }
 
-        public PropBag(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, new PropFactory()) { }
+        public PropBag(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
 
         public PropBag(PropBagTypeSafetyMode typeSafetyMode, AbstractPropFactory thePropFactory)
         {
@@ -103,7 +103,7 @@ namespace DRM.PropBag
                     throw new ApplicationException("Unexpected value for typeSafetyMode parameter.");
             }
 
-            this.thePropFactory = thePropFactory;
+            this.thePropFactory = thePropFactory ?? new PropFactory();
             tVals = new Dictionary<string, IPropGen>();
             doSetDelegateDict = new Dictionary<Type, DoSetDelegate>();
         }

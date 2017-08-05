@@ -48,10 +48,7 @@ namespace DRM.PropBagModel
             set { requiredNameSpaces = value; }
         }
 
-        public PropModel() : this(null, null)
-        {
-            TypeSafetyMode = PropBagTypeSafetyMode.AllPropsMustBeRegistered;
-        }
+        public PropModel() : this(null, null) { }
 
         public PropModel(string className, string namespaceName, 
             PropBagTypeSafetyMode typeSafetyMode = PropBagTypeSafetyMode.AllPropsMustBeRegistered)

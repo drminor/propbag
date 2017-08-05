@@ -27,9 +27,11 @@ namespace <#= pm.Namespace #>
 {
 	public partial class <#= pm.ClassName #> : PropBag
 	{
-		public <#= pm.ClassName #>() : this(PropBagTypeSafetyMode.<#= pm.SafetyModeString #>) { }
+		public <#= pm.ClassName #>() : this(PropBagTypeSafetyMode.<#= pm.SafetyModeString #>, null) { }
 
-		public <#= pm.ClassName #>(PropBagTypeSafetyMode typeSafetyMode) : base(typeSafetyMode)
+		public <#= pm.ClassName #>(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
+
+		public <#= pm.ClassName #>(PropBagTypeSafetyMode typeSafetyMode, AbstractPropFactory factory) : base(typeSafetyMode, factory)
 		{
 	<# foreach (PropItem pi in pm.Props) {#>
         <#= pm.GetAddPropMethodCallText(pi) #>;

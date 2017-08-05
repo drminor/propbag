@@ -11,9 +11,11 @@ namespace PropBagLib.Tests
 {
 	public partial class PerformanceModel : PropBag
 	{
-		public PerformanceModel() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered) { }
+		public PerformanceModel() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered, null) { }
 
-		public PerformanceModel(PropBagTypeSafetyMode typeSafetyMode) : base(typeSafetyMode)
+		public PerformanceModel(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
+
+		public PerformanceModel(PropBagTypeSafetyMode typeSafetyMode, AbstractPropFactory factory) : base(typeSafetyMode, factory)
 		{
 	        AddProp<object>("PropObject", null, false, null);
 	        AddProp<string>("PropString", null, false, null);
