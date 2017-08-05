@@ -91,9 +91,6 @@ namespace DRM.PropBagModel
         {
             bool resolveDoWhenDelsAtRuntime = true;
 
-            string methodName;
-            string formatString;
-            object[] vals;
 
             if (pi.DoWhenChangedField == null) pi.DoWhenChangedField = new PropDoWhenChanged(null, false);
 
@@ -123,51 +120,80 @@ namespace DRM.PropBagModel
                 comparer = "null";
             }
 
-            switch (pi.StorageType)
+            string methodName;
+            string formatString;
+            object[] vals;
+
+            if(pi.HasStore)
             {
-                case PropStorageType.@internal:
-                    {
-                        //    public void AddProp<T>(string propertyName, 
-                        //        Action<T, T> doIfChanged, 
-                        //        bool doAfterNotify = false,
-                        //        IEqualityComparer<T> comparer = null,
-                        //        T initalValue = default(T))
+                //    public void AddProp<T>(string propertyName, 
+                //        Action<T, T> doIfChanged, 
+                //        bool doAfterNotify = false,
+                //        IEqualityComparer<T> comparer = null,
+                //        T initalValue = default(T))
 
-                        methodName = "AddProp";
-                        formatString = pi.InitialValue == null ? "{0}{1}<{2}>(\"{3}\", {4}, {5}, {6})" : "{0}{1}<{2}>(\"{3}\", {4}, {5}, {6}, {7})";
-                        vals = new object[] { methodName, objComp, pi.Type, pi.Name, doWhenChanged, doAfterNotify, comparer, pi.InitialValue };
-                        break;
-                    }
-                case PropStorageType.none:
-                    {
-                        //  public void AddPropNoStore<T>(string propertyName,
-                        //      Action<T, T> doIfChanged,
-                        //      bool doAfterNotify = false,
-                        //      IEqualityComparer<T> comparer = null)
-
-                        methodName = "AddPropNoStore";
-                        formatString = "{0}{1}<{2}>(\"{3}\", {4}, {5}, {6})";
-                        vals = new object[] { methodName, objComp, pi.Type, pi.Name, doWhenChanged, doAfterNotify, comparer };
-                        break;
-                    }
-                case PropStorageType.external:
-                    {
-                        //  public Guid AddPropExtStore<T>(string propertyName,
-                        //      GetExtVal<T> getter, SetExtVal<T> setter, 
-                        //      Action<T, T> doIfChanged,
-                        //      bool doAfterNotify = false,
-                        //      IEqualityComparer<T> comparer = null)
-
-                        methodName = "AddPropExtStore";
-                        formatString = "{0}{1}<{2}>(\"{3}\", {4}, {5}, {6}, {7}, {8})";
-                        vals = new object[] { methodName, objComp, pi.Type, pi.Name, "null", "null", doWhenChanged, doAfterNotify, comparer };
-                        break;
-                    }
-                default:
-                    {
-                        throw new ApplicationException("Unexpected value for PropStorageType.");
-                    }
+                methodName = "AddProp";
+                formatString = pi.InitialValue == null ? "{0}{1}<{2}>(\"{3}\", {4}, {5}, {6})" : "{0}{1}<{2}>(\"{3}\", {4}, {5}, {6}, {7})";
+                vals = new object[] { methodName, objComp, pi.Type, pi.Name, doWhenChanged, doAfterNotify, comparer, pi.InitialValue };
             }
+            else
+            {
+                //  public void AddPropNoStore<T>(string propertyName,
+                //      Action<T, T> doIfChanged,
+                //      bool doAfterNotify = false,
+                //      IEqualityComparer<T> comparer = null)
+
+                methodName = "AddPropNoStore";
+                formatString = "{0}{1}<{2}>(\"{3}\", {4}, {5}, {6})";
+                vals = new object[] { methodName, objComp, pi.Type, pi.Name, doWhenChanged, doAfterNotify, comparer };
+            }
+
+
+            //switch (pi.HasStore)
+            //{
+            //    case PropStorageType.@internal:
+            //        {
+            //            //    public void AddProp<T>(string propertyName, 
+            //            //        Action<T, T> doIfChanged, 
+            //            //        bool doAfterNotify = false,
+            //            //        IEqualityComparer<T> comparer = null,
+            //            //        T initalValue = default(T))
+
+            //            methodName = "AddProp";
+            //            formatString = pi.InitialValue == null ? "{0}{1}<{2}>(\"{3}\", {4}, {5}, {6})" : "{0}{1}<{2}>(\"{3}\", {4}, {5}, {6}, {7})";
+            //            vals = new object[] { methodName, objComp, pi.Type, pi.Name, doWhenChanged, doAfterNotify, comparer, pi.InitialValue };
+            //            break;
+            //        }
+            //    case PropStorageType.none:
+            //        {
+            //            //  public void AddPropNoStore<T>(string propertyName,
+            //            //      Action<T, T> doIfChanged,
+            //            //      bool doAfterNotify = false,
+            //            //      IEqualityComparer<T> comparer = null)
+
+            //            methodName = "AddPropNoStore";
+            //            formatString = "{0}{1}<{2}>(\"{3}\", {4}, {5}, {6})";
+            //            vals = new object[] { methodName, objComp, pi.Type, pi.Name, doWhenChanged, doAfterNotify, comparer };
+            //            break;
+            //        }
+            //    case PropStorageType.external:
+            //        {
+            //            //  public Guid AddPropExtStore<T>(string propertyName,
+            //            //      GetExtVal<T> getter, SetExtVal<T> setter, 
+            //            //      Action<T, T> doIfChanged,
+            //            //      bool doAfterNotify = false,
+            //            //      IEqualityComparer<T> comparer = null)
+
+            //            methodName = "AddPropExtStore";
+            //            formatString = "{0}{1}<{2}>(\"{3}\", {4}, {5}, {6}, {7}, {8})";
+            //            vals = new object[] { methodName, objComp, pi.Type, pi.Name, "null", "null", doWhenChanged, doAfterNotify, comparer };
+            //            break;
+            //        }
+            //    default:
+            //        {
+            //            throw new ApplicationException("Unexpected value for PropStorageType.");
+            //        }
+            //}
 
             return string.Format(formatString, vals);
         }

@@ -9,12 +9,12 @@ using System.Xml.Serialization;
 namespace DRM.PropBagModel
 {
 
-    public enum PropStorageType
-    {
-        @internal,
-        external,
-        none
-    }
+    //public enum PropStorageType
+    //{
+    //    @internal,
+    //    external,
+    //    none
+    //}
 
     public class PropItem
     {
@@ -30,29 +30,23 @@ namespace DRM.PropBagModel
         [XmlElement("comparer", IsNullable = true)]
         public PropComparerField ComparerField { get; set; }
 
-        //[XmlElement("comparer", IsNullable = true)]
-        //public string Comparer { get; set; }
-
         [XmlElement("do-when-changed", IsNullable = true)]
         public PropDoWhenChanged DoWhenChangedField { get; set; }
 
-        //[XmlAttribute(AttributeName = "use-reference-equality")]
-        //public bool UseReferenceEquality { get; set; }
+        //[XmlAttribute(AttributeName = "storage-type")]
+        //public PropStorageType StorageType { get; set; }
 
-        [XmlAttribute(AttributeName = "storage-type")]
-        public PropStorageType StorageType { get; set; }
-
+        [XmlAttribute(AttributeName = "caller-provides-storage")]
+        public bool HasStore { get; set; }
 
         public PropItem() : this(null, null) { }
 
-
-        public PropItem(string name, string type, PropStorageType storageType = PropStorageType.@internal,
+        public PropItem(string name, string type, bool hasStore = true,
             PropDoWhenChanged doWhenChanged = null, PropComparerField comparer = null)
         {
             Name = name;
             Type = type;
-            //UseReferenceEquality = useRefEquality;
-            StorageType = storageType;
+            HasStore = hasStore;
             ComparerField = comparer;
             DoWhenChangedField = doWhenChanged;
 

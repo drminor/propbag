@@ -43,15 +43,7 @@
         <xs:element minOccurs="0" maxOccurs="1" ref="comparer" />
         <xs:element minOccurs="0" maxOccurs="1" ref="do-when-changed" />
       </xs:sequence>
-      <xs:attribute default="internal" name="storage-type">
-        <xs:simpleType>
-          <xs:restriction base="xs:NMTOKEN">
-            <xs:enumeration value="internal" />
-            <xs:enumeration value="external" />
-            <xs:enumeration value="none" />
-          </xs:restriction>
-        </xs:simpleType>
-      </xs:attribute>
+      <xs:attribute default="true" name="caller-provides-storage" type="xs:boolean"/>
     </xs:complexType>
   </xs:element>
   <xs:element name="name" type="xs:string" />

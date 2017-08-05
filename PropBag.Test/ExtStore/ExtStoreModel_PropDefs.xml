@@ -7,11 +7,11 @@ xsi:schemaLocation="https://www.swamphillproductions.com/PropBagModel ../../Prop
     <namespace>PropBagLib.Tests</namespace>
   </namespaces>
   <props>
-    <prop storage-type="external" >
+    <prop>
       <name>PropObject</name>
       <type>object</type>
     </prop>
-    <prop storage-type="external">
+    <prop>
       <name>PropString</name>
       <type>string</type>
     </prop>

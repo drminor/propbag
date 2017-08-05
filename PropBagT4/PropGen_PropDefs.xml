@@ -15,17 +15,17 @@ xsi:schemaLocation="http://tempuri.org/PropBagModel ../PropBagModel/PropBagModel
       <name>PropString</name>
       <type>string</type>
     </prop>
-    <prop storage-type="none">
+    <prop caller-provides-storage="false">
       <name>PropBool</name>
       <type>bool</type>
       <comparer use-reference-equality="true">xxx</comparer>
       <do-when-changed do-after-notify="true">yyy</do-when-changed>
     </prop>
-    <prop storage-type="none">
+    <prop caller-provides-storage="false">
       <name>PropInt</name>
       <type>int</type>
     </prop>
-    <prop storage-type="external">
+    <prop caller-provides-storage="false">
       <name>PropTimeSpan</name>
       <type>TimeSpan</type>
       <do-when-changed>DoWhenTimeSpanChanges</do-when-changed>

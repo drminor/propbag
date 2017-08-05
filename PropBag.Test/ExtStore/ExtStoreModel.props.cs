@@ -15,8 +15,8 @@ namespace PropBagLib.Tests
 
 		public ExtStoreModel(PropBagTypeSafetyMode typeSafetyMode) : base(typeSafetyMode)
 		{
-	        AddPropExtStore<object>("PropObject", null, null, null, false, null);
-	        AddPropExtStore<string>("PropString", null, null, null, false, null);
+	        AddProp<object>("PropObject", null, false, null);
+	        AddProp<string>("PropString", null, false, null);
 		}
 
 	#region Property Declarations
