@@ -686,35 +686,37 @@ namespace DRM.PropBag
         /// <param name="comparer">A instance of a class that implements IEqualityComparer and thus an Equals method.</param>
         /// <param name="initalValue"></param>
         public void AddProp<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
-            IEqualityComparer<T> comparer = null, T initalValue = default(T))
+            IEqualityComparer<T> comparer = null, T initalValue = default(T), object extraInfo = null)
         {
-            IPropGen pg = thePropFactory.Create<T>(initalValue, propertyName, null, true, true, doIfChanged, doAfterNotify, comparer);
+            IPropGen pg = thePropFactory.Create<T>(initalValue, propertyName, extraInfo, true, true, doIfChanged, doAfterNotify, comparer);
             tVals.Add(propertyName, pg);
         }
 
         public void AddPropObjComp<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
-            T initalValue = default(T))
+            T initalValue = default(T), object extraInfo = null)
         {
             RefEqualityComparer<T> refComp = RefEqualityComparer<T>.Default;
-            IPropGen pg = thePropFactory.Create<T>(initalValue, propertyName, null, true, true, doIfChanged, doAfterNotify, refComp);
+            IPropGen pg = thePropFactory.Create<T>(initalValue, propertyName, extraInfo, true, true, doIfChanged, doAfterNotify, refComp);
 
             tVals.Add(propertyName, pg);
         }
 
         public void AddPropNoStore<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false,
-            IEqualityComparer<T> comparer = null)
+            IEqualityComparer<T> comparer = null, object extraInfo = null)
         {
-            IPropGen pg = thePropFactory.CreateWithNoneOrDefault<T>(propertyName, null, false, true, doIfChanged, doAfterNotify, comparer);
+            IPropGen pg = thePropFactory.CreateWithNoneOrDefault<T>(propertyName, extraInfo, false, true, doIfChanged, doAfterNotify, comparer);
             tVals.Add(propertyName, pg);
         }
 
-        public void AddPropNoStoreObjComp<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false)
+        public void AddPropNoStoreObjComp<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false, object extraInfo = null)
+            
         {
             RefEqualityComparer<T> refComp = RefEqualityComparer<T>.Default;
-            IPropGen pg = thePropFactory.CreateWithNoneOrDefault<T>(propertyName, null, false, true, doIfChanged, doAfterNotify, refComp);
+            IPropGen pg = thePropFactory.CreateWithNoneOrDefault<T>(propertyName, extraInfo, false, true, doIfChanged, doAfterNotify, refComp);
 
             tVals.Add(propertyName, pg);
         }
+
 
         //// The remainder of the AddProp variants are "sugar" -- they allow for abbreviated calls to what is provided above.
 
