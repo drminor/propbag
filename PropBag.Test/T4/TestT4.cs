@@ -15,12 +15,6 @@ namespace PropBagLib.Tests
     public class TestT4
     {
 
-        //const string InputPath = @"C:\DEV\VS2013Projects\PubPropBag\PropBagT4\PropGen_PropDefs.xml";
-
-
-
-        
-
         [Test]
         public void ReadInput()
         {
