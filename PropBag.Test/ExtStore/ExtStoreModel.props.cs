@@ -17,8 +17,8 @@ namespace PropBagLib.Tests
 
 		public ExtStoreModel(PropBagTypeSafetyMode typeSafetyMode, AbstractPropFactory factory) : base(typeSafetyMode, factory)
 		{
-	        AddProp<int>("PropInt3", null, false, null);
-	        AddProp<int>("PropInt4", null, false, null);
+	        AddPropNoValue<int>("PropInt3", null, false, null);
+	        AddPropNoValue<int>("PropInt4", null, false, null);
 		}
 
 	#region Property Declarations

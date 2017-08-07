@@ -41,6 +41,23 @@ namespace DRM.PropBag
             }
         }
 
+        public bool ValueIsDefined
+        {
+            get
+            {
+                return Getter != null;
+            }
+            private set
+            {
+                throw new InvalidOperationException("PropExternStore does not support setting 'ValueIsDefined.'");
+            }
+        }
+
+        public bool SetValueToUndefined()
+        {
+            throw new InvalidOperationException("PropExternStore does not support setting 'ValueIsDefined.'");
+        }
+
         public Guid Tag { get; private set; }
         public GetExtVal<T> Getter { get; set; }
         public SetExtVal<T> Setter { get; set; }
@@ -58,13 +75,13 @@ namespace DRM.PropBag
 
         public event PropertyChangedWithTValsHandler<T> PropertyChangedWithTVals;
 
-        public bool HasCallBack
-        {
-            get
-            {
-                return DoWHenChangedAction != null;
-            }
-        }
+        //public bool HasCallBack
+        //{
+        //    get
+        //    {
+        //        return DoWHenChangedAction != null;
+        //    }
+        //}
 
         public void DoWhenChanged(T oldVal, T newVal)
         {

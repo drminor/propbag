@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0"?>
 <model class-name="TestAllPropsRegistered" namespace="PropBagLib.Tests" type-safety-mode="AllPropsMustBeRegistered" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-xsi:schemaLocation="https://www.swamphillproductions.com/PropBagModel ../PropBagModel/PropBagModel.xsd">
+xsi:schemaLocation="https://www.swamphillproductions.com/PropBagModel ../../PropBagModel/PropBagModel.xsd">
   <namespaces>
     <namespace>System</namespace>
     <namespace>System.Collections.Generic</namespace>
@@ -10,16 +10,18 @@ xsi:schemaLocation="https://www.swamphillproductions.com/PropBagModel ../PropBag
     <prop>
       <name>PropObject</name>
       <type>object</type>
+      <initial-value use-default="true"/>
     </prop>
     <prop>
       <name>PropString</name>
       <type>string</type>
-      <initial-value xsi:nil="true"/>
+      <initial-value use-empty-string="true"/>
     </prop>
     <prop>
       <name>PropStringUseRefComp</name>
       <type>string</type>
-      <comparer comparer-type="reference"/>
+      <initial-value use-default="true"/>
+      <comparer use-reference-equality="true"/>
     </prop>    
     <prop>
       <name>PropBool</name>
@@ -29,18 +31,22 @@ xsi:schemaLocation="https://www.swamphillproductions.com/PropBagModel ../PropBag
     <prop>
       <name>PropInt</name>
       <type>int</type>
+      <initial-value use-default="true"/>
     </prop>
     <prop>
       <name>PropTimeSpan</name>
       <type>TimeSpan</type>
+      <initial-value use-default="true"/>
     </prop>
     <prop>
       <name>PropUri</name>
       <type>Uri</type>
+      <initial-value use-default="true"/>
     </prop>
     <prop>
       <name>PropLazyInt</name>
       <type>Lazy&lt;int&gt;</type>
+      <initial-value use-default="true"/>
     </prop>
     <prop>
       <name>PropNullableInt</name>
@@ -50,6 +56,7 @@ xsi:schemaLocation="https://www.swamphillproductions.com/PropBagModel ../PropBag
     <prop>
       <name>PropICollectionInt</name>
       <type>ICollection&lt;int&gt;</type>
+      <initial-value use-null="true"></initial-value>
     </prop>
   </props>
 </model>

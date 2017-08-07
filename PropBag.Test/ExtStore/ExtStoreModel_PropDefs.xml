@@ -1,5 +1,13 @@
 ﻿<?xml version="1.0"?>
-<model class-name="TestAllPropsRegistered" namespace="PropBagLib.Tests" type-safety-mode="AllPropsMustBeRegistered" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<model
+  class-name="TestExtStoreModel"
+  namespace="PropBagLib.Tests"
+  type-safety-mode="AllPropsMustBeRegistered"
+  defer-method-ref-resolution="true"
+  
+  require-explicit-initial-value="false"
+  
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="https://www.swamphillproductions.com/PropBagModel ../../PropBagModel/PropBagModel.xsd">
   <namespaces>
     <namespace>System</namespace>

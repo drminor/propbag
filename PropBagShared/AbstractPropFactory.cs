@@ -15,7 +15,7 @@ namespace DRM.PropBag
             bool hasStorage = true, bool typeIsSolid = true,
             Action<T, T> doWhenChanged = null, bool doAfterNotify = false, IEqualityComparer<T> comparer = null);
 
-        public abstract IProp<T> CreateWithNoneOrDefault<T>(
+        public abstract IProp<T> CreateWithNoValue<T>(
             string propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
             Action<T, T> doWhenChanged = null, bool doAfterNotify = false, IEqualityComparer<T> comparer = null);
@@ -59,7 +59,7 @@ namespace DRM.PropBag
 
         protected virtual CreatePropWithNoneOrDefaultDelegate GetPropWithNoneOrDefaultCreator(Type typeOfThisValue)
         {
-            MethodInfo mi = gmtType.GetMethod("CreatePropWithNoneOrDefault", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(typeOfThisValue);
+            MethodInfo mi = gmtType.GetMethod("CreatePropWithNoValue", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(typeOfThisValue);
             CreatePropWithNoneOrDefaultDelegate result = (CreatePropWithNoneOrDefaultDelegate)Delegate.CreateDelegate(typeof(CreatePropWithNoneOrDefaultDelegate), mi);
 
             return result;
@@ -79,13 +79,13 @@ namespace DRM.PropBag
             return prop;
         }
 
-        public override IProp<T> CreateWithNoneOrDefault<T>(
+        public override IProp<T> CreateWithNoValue<T>(
             string propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
             Action<T, T> doWhenChanged = null, bool doAfterNotify = false, IEqualityComparer<T> comparer = null)
         {
-            T initialVal = default(T);
-            IProp<T> prop = new Prop<T>(initialVal, hasStorage, typeIsSolid, doWhenChanged, doAfterNotify, comparer);
+
+            IProp<T> prop = new Prop<T>(hasStorage, typeIsSolid, doWhenChanged, doAfterNotify, comparer);
             return prop;
         }
 
@@ -112,10 +112,10 @@ namespace DRM.PropBag
             bool dummy = true, bool typeIsSolid = true,
             Action<T, T> doWhenChanged = null, bool doAfterNotify = false, IEqualityComparer<T> comparer = null)
         {
-            return CreateWithNoneOrDefault(propertyName, extraInfo, dummy, typeIsSolid, doWhenChanged, doAfterNotify, comparer);
+            return CreateWithNoValue(propertyName, extraInfo, dummy, typeIsSolid, doWhenChanged, doAfterNotify, comparer);
         }
 
-        public override IProp<T> CreateWithNoneOrDefault<T>(
+        public override IProp<T> CreateWithNoValue<T>(
             string propertyName, object extraInfo = null,
             bool dummy = true, bool typeIsSolid = true,
             Action<T, T> doWhenChanged = null, bool doAfterNotify = false, IEqualityComparer<T> comparer = null)
@@ -149,12 +149,12 @@ namespace DRM.PropBag
             return propFactory.Create<T>((T)value, propertyName, extraInfo, hasStorage, isTypeSolid);
         }
 
-        public static IProp<T> CreatePropWithNoneOrDefault<T>(AbstractPropFactory propFactory,
+        public static IProp<T> CreatePropWithNoValue<T>(AbstractPropFactory propFactory,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid)
         {
             //PropFactory pf = propFactory as PropFactory;
-            return propFactory.CreateWithNoneOrDefault<T>(propertyName, extraInfo, hasStorage, isTypeSolid);
+            return propFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, isTypeSolid);
         }
     }
 

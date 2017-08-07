@@ -39,6 +39,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PropInitalValueField.cs" />
     <Compile Include="PropComparerField.cs" />
     <Compile Include="PropDoWhenChanged.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

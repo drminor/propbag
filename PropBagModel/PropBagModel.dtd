@@ -1,14 +1,16 @@
 ﻿<!ELEMENT model (namespaces, props)>
   
 <!ATTLIST model class-name CDATA #REQUIRED>
+<!ATTLIST model namespace CDATA #REQUIRED>
 <!ATTLIST model type-safety-mode (AllPropsMustBeRegistered|OnlyTypedAccess|Loose) "AllPropsMustBeRegistered">
+<!ATTLIST model defer-method-ref-resolution (true|false) "false">
 
 <!ELEMENT namespaces (namespace*)>
 <!ELEMENT namespace (#PCDATA)>
 
 <!ELEMENT props (prop*)>
 <!ELEMENT prop (name, type, initial-value?, comparer?, do-when-changed?)>
-<!ATTLIST prop storage-type (internal|external|none) "internal" >
+<!ATTLIST prop caller-provides-storage (true|false) "false">
 
 <!ELEMENT name (#PCDATA)>
 <!ELEMENT type (#PCDATA)>
@@ -16,7 +18,7 @@
 <!ELEMENT initial-value (#PCDATA)>
 
 <!ELEMENT comparer (#PCDATA)>
-<!ATTLIST comparer comparer-type (typed|object|reference) "typed">
+<!ATTLIST comparer use-reference-equality (true|false) "false">
 
 <!ELEMENT do-when-changed (#PCDATA)>
 <!ATTLIST do-when-changed do-after-notify (true|false) "false">

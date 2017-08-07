@@ -17,6 +17,8 @@
           </xs:restriction>
         </xs:simpleType>
       </xs:attribute>
+      <xs:attribute name="defer-method-ref-resolution" type="xs:boolean" default="true"/>
+      <xs:attribute name="require-explicit-initial-value" type="xs:boolean" default="true"/>
     </xs:complexType>
   </xs:element>
   <xs:element name="namespaces">
@@ -43,17 +45,28 @@
         <xs:element minOccurs="0" maxOccurs="1" ref="comparer" />
         <xs:element minOccurs="0" maxOccurs="1" ref="do-when-changed" />
       </xs:sequence>
-      <xs:attribute default="true" name="caller-provides-storage" type="xs:boolean"/>
+      <xs:attribute name="caller-provides-storage" type="xs:boolean" default="false"/>
     </xs:complexType>
   </xs:element>
   <xs:element name="name" type="xs:string" />
   <xs:element name="type" type="xs:string" />
-  <xs:element name="initial-value" type="xs:string"  nillable="true"/>
+  <xs:element name="initial-value">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string" >
+          <xs:attribute name="use-undefined" type="xs:boolean" default="false"/>
+          <xs:attribute name="use-default" type="xs:boolean" default="false"/>
+          <xs:attribute name="use-null" type="xs:boolean" default="false"/>
+          <xs:attribute name="use-empty-string" type="xs:boolean" default="false"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
   <xs:element name="comparer">
     <xs:complexType>
       <xs:simpleContent>
-        <xs:extension base="xs:string">
-          <xs:attribute default="false" name="use-reference-equality" type="xs:boolean"/>
+        <xs:extension base="xs:string" >
+          <xs:attribute name="use-reference-equality" type="xs:boolean" default="false"/>
         </xs:extension>
       </xs:simpleContent>
     </xs:complexType>
@@ -62,7 +75,7 @@
     <xs:complexType>
       <xs:simpleContent>
         <xs:extension base="xs:string">
-          <xs:attribute default="false" name="do-after-notify" type="xs:boolean"/>
+          <xs:attribute name="do-after-notify" type="xs:boolean" default="false"/>
         </xs:extension>
       </xs:simpleContent>
     </xs:complexType>

@@ -294,7 +294,7 @@ namespace DRM.PropBag
                 }
 
                 // Property has not been defined yet, let's create a definition for it now 
-                genProp = thePropFactory.CreateWithNoneOrDefault<T>(propertyName, hasStorage: false, typeIsSolid: true);
+                genProp = thePropFactory.CreateWithNoValue<T>(propertyName, hasStorage: false, typeIsSolid: true);
 
                 tVals.Add(propertyName, genProp);
             }
@@ -328,9 +328,24 @@ namespace DRM.PropBag
         // It can be used in any of the three modes, but is especially handy for Loose mode.
         public void SubscribeToPropChanged(Action<object, object> doOnChange, [CallerMemberName] string propertyName = null)
         {
+            IPropGen genProp;
+            try
+            {
+                genProp = GetGenProp(propertyName);
+            }
+            catch (KeyNotFoundException)
+            {
+                if (AllPropsMustBeRegistered)
+                    throw new KeyNotFoundException(string.Format("Property: {0} has not been declared by calling AddProp, nor has its value been set by calling SetIt<T>. Cannot use this method in this case. Declare by calling AddProp, or use the SetIt<T> method.", propertyName));
 
-            // TODO: consider creating a new property, if one doesn't exist, using just the name.
-            IPropGen genProp = GetGenProp(propertyName);
+                if (OnlyTypedAccess)
+                {
+                    throw new ApplicationException(string.Format("Property: {0} has not been defined with a call to AddProp or any SetIt<T> call and the operation setting 'OnlyTypeAccesss' is set to true.", propertyName));
+                }
+
+                genProp = thePropFactory.CreateWithNoValue<object>(propertyName, null, true, false, null, false, null);
+                tVals.Add(propertyName, genProp);
+            }
 
             PropertyChangedWithValsHandler action = (s, e) =>
             {
@@ -388,6 +403,13 @@ namespace DRM.PropBag
             return GetPropDef<T>(propertyName, out genProp);
         }
 
+        /// <summary>
+        /// This should only be called from methods that do not include a new or initial value for the property.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="propertyName"></param>
+        /// <param name="genProp"></param>
+        /// <returns></returns>
         private IProp<T> GetPropDef<T>(string propertyName, out IPropGen genProp)
         {
             try
@@ -403,7 +425,7 @@ namespace DRM.PropBag
 
                 // Property has not been defined yet, let's create a definition for it now and initialize the value.
 
-                genProp = thePropFactory.CreateWithNoneOrDefault<T>(propertyName);
+                genProp = thePropFactory.CreateWithNoValue<T>(propertyName);
                 tVals.Add(propertyName, genProp);
             }
 
@@ -503,7 +525,6 @@ namespace DRM.PropBag
             }
         }
 
-
         /// <summary>
         /// 
         /// </summary>
@@ -515,9 +536,6 @@ namespace DRM.PropBag
         protected bool RegisterDoWhenChanged<T>(Action<T, T> doWhenChanged, bool doAfterNotify = false, [CallerMemberName] string propertyName = null)
         {
             IProp<T> prop = GetPropDef<T>(propertyName);
-
-            //TDO: FixMe
-
             return prop.UpdateDoWhenChangedAction(doWhenChanged, doAfterNotify);
         }
 
@@ -527,20 +545,32 @@ namespace DRM.PropBag
 
         private void DoSet<T>(T newValue, string propertyName, IProp<T> prop)
         {
-            bool theSame = prop.CompareTo(newValue);
-
-            if (!theSame)
+            if (!prop.ValueIsDefined)
             {
-                // Save the value before the update.
-                T oldValue = prop.TypedValue;
-
-                OnPropertyChanging(propertyName);
-
-                // Make the update.
+                // Update and only raise the standard OnPropertyChanged
+                // Since there's no way to pass an undefined value to the other OnPropertyChanged event subscribers.
                 prop.TypedValue = newValue;
 
-                // Raise notify events.
-                DoNotifyWork(oldValue, newValue, propertyName, prop);
+                // Raise the standard PropertyChanged event
+                OnPropertyChanged(propertyName);
+            }
+            else
+            {
+                bool theSame = prop.CompareTo(newValue);
+
+                if (!theSame)
+                {
+                    // Save the value before the update.
+                    T oldValue = prop.TypedValue;
+
+                    OnPropertyChanging(propertyName);
+
+                    // Make the update.
+                    prop.TypedValue = newValue;
+
+                    // Raise notify events.
+                    DoNotifyWork(oldValue, newValue, propertyName, prop);
+                }
             }
         }
 
@@ -689,7 +719,7 @@ namespace DRM.PropBag
         /// <param name="comparer">A instance of a class that implements IEqualityComparer and thus an Equals method.</param>
         /// <param name="initalValue"></param>
         public IProp<T> AddProp<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
-            IEqualityComparer<T> comparer = null, T initalValue = default(T), object extraInfo = null)
+            IEqualityComparer<T> comparer = null, object extraInfo = null, T initalValue = default(T))
         {
             IProp<T> pg = thePropFactory.Create<T>(initalValue, propertyName, extraInfo, true, true, doIfChanged, doAfterNotify, comparer);
             tVals.Add(propertyName, pg);
@@ -697,8 +727,17 @@ namespace DRM.PropBag
             return pg;
         }
 
+        public IProp<T> AddPropNoValue<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
+            IEqualityComparer<T> comparer = null, object extraInfo = null)
+        {
+            IProp<T> pg = thePropFactory.CreateWithNoValue<T>(propertyName, extraInfo, true, true, doIfChanged, doAfterNotify, comparer);
+            tVals.Add(propertyName, pg);
+
+            return pg;
+        }
+
         public IProp<T> AddPropObjComp<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
-            T initalValue = default(T), object extraInfo = null)
+            object extraInfo = null, T initalValue = default(T))
         {
             RefEqualityComparer<T> refComp = RefEqualityComparer<T>.Default;
             IProp<T> pg = thePropFactory.Create<T>(initalValue, propertyName, extraInfo, true, true, doIfChanged, doAfterNotify, refComp);
@@ -708,10 +747,21 @@ namespace DRM.PropBag
             return pg;
         }
 
+        public IProp<T> AddPropObjCompNoValue<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
+            object extraInfo = null)
+        {
+            RefEqualityComparer<T> refComp = RefEqualityComparer<T>.Default;
+            IProp<T> pg = thePropFactory.CreateWithNoValue<T>(propertyName, extraInfo, true, true, doIfChanged, doAfterNotify, refComp);
+
+            tVals.Add(propertyName, pg);
+
+            return pg;
+        }
+
         public IProp<T> AddPropNoStore<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false,
             IEqualityComparer<T> comparer = null, object extraInfo = null)
         {
-            IProp<T> pg = thePropFactory.CreateWithNoneOrDefault<T>(propertyName, extraInfo, false, true, doIfChanged, doAfterNotify, comparer);
+            IProp<T> pg = thePropFactory.CreateWithNoValue<T>(propertyName, extraInfo, false, true, doIfChanged, doAfterNotify, comparer);
             tVals.Add(propertyName, pg);
 
             return pg;
@@ -720,7 +770,7 @@ namespace DRM.PropBag
         public IProp<T> AddPropNoStoreObjComp<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false, object extraInfo = null)
         {
             RefEqualityComparer<T> refComp = RefEqualityComparer<T>.Default;
-            IProp<T> pg = thePropFactory.CreateWithNoneOrDefault<T>(propertyName, extraInfo, false, true, doIfChanged, doAfterNotify, refComp);
+            IProp<T> pg = thePropFactory.CreateWithNoValue<T>(propertyName, extraInfo, false, true, doIfChanged, doAfterNotify, refComp);
 
             tVals.Add(propertyName, pg);
 

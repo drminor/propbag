@@ -130,9 +130,26 @@ namespace PropBagLib.Tests
         public void TestDoWhenPropStringChangedAfter()
         {
             mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
-            mod1.PropStringCallDoAfterChanged += mod1_PropStringChanged;
 
-            string temp = mod1.PropStringCallDoAfter;
+            string temp;
+
+            // TODO: The first part of this needs to be moved to its own separate test.
+            //InvalidOperationException ioe = new InvalidOperationException();
+            //Type tt = ioe.GetType();
+            //Assert.Throws(tt, () => temp = mod1.PropStringCallDoAfter, "Expecting the value to be undefined.");
+
+            mod1.PropStringCallDoAfterChanged += mod1_PropStringChanged;
+            mod1.PropertyChanged += mod1_PropertyChanged;
+            mod1.PropertyChangedWithVals += mod1_PropertyChangedWithVals;
+            mod1.PropertyChanging += mod1_PropertyChanging;
+
+            // TODO: Need to also test "mod1.PropStringCallDoAfterChanged += mod1_PropStringChanged;"
+            // When the mode is loose, or OnlyTypedAccess.
+
+            mod1.PropStringCallDoAfter = null;
+    
+            // Original Test starts here.
+            temp = mod1.PropStringCallDoAfter;
             Assert.That(temp, Is.Null, "Expecting the initial value of PropString to be null.");
 
             propStringOldVal = "u";
@@ -157,6 +174,13 @@ namespace PropBagLib.Tests
             Assert.That(mod1.DoWhenStringChanged_WasCalled, Is.True, "Expecting internal DoWhenPropStringChanged not to have been called.");
         }
 
+        void mod1_PropertyChanging(object sender, System.ComponentModel.PropertyChangingEventArgs e)
+        {
+        }
+
+        void mod1_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+        }
 
         #endregion
 

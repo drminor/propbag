@@ -1,6 +1,12 @@
 ﻿<?xml version="1.0"?>
-<model class-name="TestAllPropsRegistered" namespace="PropBagLib.Tests" type-safety-mode="AllPropsMustBeRegistered" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-xsi:schemaLocation="http://tempuri.org/PropBagModel ../PropBagModel/PropBagModel.xsd">
+<model
+  class-name="PropsGen"
+  namespace="PropBagLib.Tests"
+  type-safety-mode="AllPropsMustBeRegistered"
+  require-explicit-initial-value="false"
+  
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="https://www.swamphillproductions.com/PropBagModel ../PropBagModel/PropBagModel.xsd">
   <namespaces>
     <namespace>System</namespace>
     <namespace>System.Collections.Generic</namespace>
@@ -8,39 +14,12 @@ xsi:schemaLocation="http://tempuri.org/PropBagModel ../PropBagModel/PropBagModel
   </namespaces>
   <props>
     <prop>
-      <name>PropObject</name>
-      <type>object</type>
-    </prop>
-    <prop>
-      <name>PropString</name>
-      <type>string</type>
-    </prop>
-    <prop caller-provides-storage="false">
-      <name>PropBool</name>
-      <type>bool</type>
-      <comparer use-reference-equality="true">xxx</comparer>
-      <do-when-changed do-after-notify="true">yyy</do-when-changed>
-    </prop>
-    <prop caller-provides-storage="false">
-      <name>PropInt</name>
+      <name>PropInt3</name>
       <type>int</type>
     </prop>
-    <prop caller-provides-storage="false">
-      <name>PropTimeSpan</name>
-      <type>TimeSpan</type>
-      <do-when-changed>DoWhenTimeSpanChanges</do-when-changed>
-    </prop>
     <prop>
-      <name>PropUri</name>
-      <type>Uri</type>
-      <comparer use-reference-equality="true"/>
-      <do-when-changed do-after-notify="false">TestDelegate</do-when-changed>
-    </prop>
-    <prop>
-      <name>PropLazyInt</name>
-      <type>Lazy&lt;int&gt;</type>
-      <initial-value>new Lazy&lt;int&gt;(() => 10)</initial-value>
-      <comparer>MyTestComparer</comparer>
+      <name>PropInt4</name>
+      <type>int</type>
     </prop>
   </props>
 </model>

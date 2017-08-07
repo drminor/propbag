@@ -14,7 +14,38 @@ namespace DRM.PropBag
         public Prop(T initalValue, bool hasStore = true, bool typeIsSolid = true, Action<T, T> doWhenChanged = null, bool doAfterNotify = false, IEqualityComparer<T> comparer = null)
             : base(typeof(T), typeIsSolid, hasStore)
         {
-            if(hasStore) TypedValue = initalValue;
+            if (hasStore)
+            {
+                TypedValue = initalValue;
+                ValueIsDefined = true;
+            }
+
+            DoWHenChangedAction = doWhenChanged;
+            PropertyChangedWithTVals = delegate { };
+            DoAfterNotify = doAfterNotify;
+            Comparer = comparer ?? EqualityComparer<T>.Default;
+
+            base.TypedProp = this;
+        }
+
+        // If this is not a value type, "ValueIsDefined" will be set to false.
+        public Prop(bool hasStore = true, bool typeIsSolid = true, Action<T, T> doWhenChanged = null, bool doAfterNotify = false, IEqualityComparer<T> comparer = null)
+            : base(typeof(T), typeIsSolid, hasStore)
+        {
+            if (hasStore)
+            {
+                ValueIsDefined = false;
+
+                //if (typeof(T).IsValueType)
+                //{
+                //    TypedValue = default(T);
+                //    ValueIsDefined = true;
+                //}
+                //else
+                //{
+                //    ValueIsDefined = false;
+                //}
+            }
 
             DoWHenChangedAction = doWhenChanged;
             PropertyChangedWithTVals = delegate { };
@@ -29,15 +60,38 @@ namespace DRM.PropBag
         {
             get
             {
-                if (HasStore) return _value;
-                throw new InvalidOperationException();
+                if (HasStore)
+                {
+                    if (!ValueIsDefined) throw new InvalidOperationException("The value of this property has not yet been set.");
+                    return _value;
+                }
+                else
+                {
+                    throw new InvalidOperationException();
+                }
             }
             set
             {
-                if (!HasStore)
+                if (HasStore)
+                {
+                    _value = value;
+                    ValueIsDefined = true;
+                }
+                else
+                {
                     throw new InvalidOperationException();
-                _value = value;
+                }
             }
+        }
+
+        public bool ValueIsDefined { get; private set; }
+
+        public bool SetValueToUndefined()
+        {
+            bool oldSetting = this.ValueIsDefined;
+            ValueIsDefined = false;
+
+            return oldSetting;
         }
 
         IEqualityComparer<T> Comparer { get; set; }
@@ -52,13 +106,13 @@ namespace DRM.PropBag
 
         public event PropertyChangedWithTValsHandler<T> PropertyChangedWithTVals;
 
-        public bool HasCallBack
-        {
-            get
-            {
-                return DoWHenChangedAction != null;
-            }
-        }
+        //public bool HasCallBack
+        //{
+        //    get
+        //    {
+        //        return DoWHenChangedAction != null;
+        //    }
+        //}
 
         public void DoWhenChanged(T oldVal, T newVal)
         {
@@ -86,6 +140,8 @@ namespace DRM.PropBag
 
         public bool Compare(T val1, T val2)
         {
+            if (!ValueIsDefined) return false;
+
             return Comparer.Equals(val1, val2);
         }
 

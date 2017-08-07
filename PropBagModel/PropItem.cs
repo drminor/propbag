@@ -24,17 +24,14 @@ namespace DRM.PropBagModel
         [XmlElement("type")]
         public string Type { get; set; }
 
-        [XmlElement("initial-value", IsNullable=true)]
-        public string InitialValue { get; set; }
+        [XmlElement("initial-value")]
+        public PropIniialValueField InitalValueField { get; set;}
 
-        [XmlElement("comparer", IsNullable = true)]
+        [XmlElement("comparer")]
         public PropComparerField ComparerField { get; set; }
 
-        [XmlElement("do-when-changed", IsNullable = true)]
+        [XmlElement("do-when-changed")]
         public PropDoWhenChanged DoWhenChangedField { get; set; }
-
-        //[XmlAttribute(AttributeName = "storage-type")]
-        //public PropStorageType StorageType { get; set; }
 
         [XmlAttribute(AttributeName = "caller-provides-storage")]
         public bool HasStore { get; set; }
