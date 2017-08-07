@@ -51,10 +51,6 @@
       <Project>{1544a8f7-3296-4788-97b4-bfd15e6bf914}</Project>
       <Name>PropBagShared</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ReferenceEquality\ReferenceEquality.csproj">
-      <Project>{7d01bb96-f2c9-45a3-ab94-3c03a66b5937}</Project>
-      <Name>ReferenceEquality</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

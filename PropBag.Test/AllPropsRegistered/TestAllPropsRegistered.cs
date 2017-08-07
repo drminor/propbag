@@ -7,8 +7,6 @@ using System.Threading.Tasks;
 using System.Collections.ObjectModel;
 using DRM.Ipnwvc;
 using DRM.PropBag;
-using DRM.ReferenceEquality;
-
 
 using NUnit.Framework;
 
@@ -193,7 +191,7 @@ namespace PropBagLib.Tests
             mod1.PropStringUseRefCompChanged += mod1_PropStringUseRefCompChanged;
 
             // Use our Reference Equality Comparer.
-            IEqualityComparer<object> comparer = ReferenceEqualityComparer.Default;
+            IEqualityComparer<string> comparer = RefEqualityComparer<string>.Default;
 
             string temp = mod1.PropStringUseRefComp;
             Assert.That(temp, Is.Null, "Expecting the initial value of PropString to be null.");

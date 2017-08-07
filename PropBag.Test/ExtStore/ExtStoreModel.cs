@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using DRM.Ipnwvc;
 using DRM.PropBag;
 
-using ExtValProviderExample;
 
 namespace PropBagLib.Tests
 {

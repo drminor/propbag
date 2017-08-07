@@ -51,6 +51,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ExtStoreModel.props.tt</DependentUpon>
     </Compile>
+    <Compile Include="FileUtils.cs" />
     <Compile Include="Performance\PerformanceModel.cs" />
     <Compile Include="Performance\PerformanceModel.props.cs">
       <DependentUpon>PerformanceModel.props.tt</DependentUpon>
@@ -74,6 +75,14 @@
     <Compile Include="Loose\LooseModel.props.cs" />
     <Compile Include="Performance\TestPerformance.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Content Include="T4\PropGen_PropDefs.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <None Include="T4\PropGen.cs">
+      <DependentUpon>PropGen.tt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </None>
     <Compile Include="T4\TestT4.cs" />
     <Content Include="AllPropsRegistered\AllPropsRegisteredModel.props.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
@@ -82,10 +91,6 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ExtValProviderExample\ExtValProviderExample.csproj">
-      <Project>{6630577e-3f6c-41cd-ae9b-f8362909b25b}</Project>
-      <Name>ExtValProviderExample</Name>
-    </ProjectReference>
     <ProjectReference Include="..\NotifyPropChangedWithVals\Inpwvc.csproj">
       <Project>{18580a49-4d08-4b0d-9a2e-4ed38891c63b}</Project>
       <Name>Inpwvc</Name>
@@ -98,17 +103,9 @@
       <Project>{1544a8f7-3296-4788-97b4-bfd15e6bf914}</Project>
       <Name>PropBagShared</Name>
     </ProjectReference>
-    <ProjectReference Include="..\PropBagT4\PropBagT4.csproj">
-      <Project>{577b98c8-54db-4021-8f4b-791ef18af942}</Project>
-      <Name>PropBagT4</Name>
-    </ProjectReference>
     <ProjectReference Include="..\PropBag\PropBag.csproj">
       <Project>{7387b893-fbdc-4b9c-ac9e-0b56388b46c1}</Project>
       <Name>PropBag</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ReferenceEquality\ReferenceEquality.csproj">
-      <Project>{7d01bb96-f2c9-45a3-ab94-3c03a66b5937}</Project>
-      <Name>ReferenceEquality</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -125,6 +122,10 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="packages.config" />
+    <None Include="T4\PropGen.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>PropGen.cs</LastGenOutput>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
