@@ -1,15 +1,15 @@
 ﻿
-using System;
-using System.Collections.Generic;
-using PropBagLib.Tests;
 using System.Reflection;
 using DRM.PropBag;
 using DRM.Ipnwvc;
+using System;
+using System.Collections.Generic;
+using PropBagLib.Tests;
 
 
 namespace PropBagLib.Tests
 {
-	public partial class AllPropsRegisteredModel : PropBag
+	public partial class AllPropsRegisteredModel : PubPropBag
 	{
 		public AllPropsRegisteredModel() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered, null) { }
 

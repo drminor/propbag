@@ -6,6 +6,7 @@
         <xs:element ref="namespaces" />
         <xs:element ref="props" />
       </xs:sequence>
+      <xs:attribute name="derive-from-pub-prop-bag" type="xs:boolean" default="false"/>
       <xs:attribute name="class-name" type="xs:string" use="required" />
       <xs:attribute name="namespace" type="xs:string" use="required" />
       <xs:attribute default="AllPropsMustBeRegistered" name="type-safety-mode">

@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0"?>
 <model
+  derive-from-pub-prop-bag="true"
   class-name="TestAllPropsRegistered"
   namespace="PropBagLib.Tests"
   type-safety-mode="AllPropsMustBeRegistered"

@@ -1,10 +1,10 @@
 ﻿
-using System;
-using System.Collections.Generic;
-using PropBagLib.Tests;
 using System.Reflection;
 using DRM.PropBag;
 using DRM.Ipnwvc;
+using System;
+using System.Collections.Generic;
+using PropBagLib.Tests;
 
 
 namespace PropBagLib.Tests
@@ -17,8 +17,8 @@ namespace PropBagLib.Tests
 
 		public ExtStoreModel(PropBagTypeSafetyMode typeSafetyMode, AbstractPropFactory factory) : base(typeSafetyMode, factory)
 		{
-	        AddPropNoValue<int>("PropInt3", null, false, null);
-	        AddPropNoValue<int>("PropInt4", null, false, null);
+	        AddProp<int>("PropInt3", null, false, null);
+	        AddProp<int>("PropInt4", null, false, null);
 		}
 
 	#region Property Declarations

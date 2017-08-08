@@ -78,6 +78,7 @@
     <Content Include="T4\PropGen_PropDefs.xml">
       <SubType>Designer</SubType>
     </Content>
+    <Compile Include="PubPropBag\TestPubPropBag.cs" />
     <Compile Include="T4\PropGen.cs">
       <DependentUpon>PropGen.tt</DependentUpon>
       <AutoGen>True</AutoGen>

@@ -18,6 +18,9 @@ namespace DRM.PropBagModel
         const string INPWV_NAME_SPACE = "DRM.Ipnwvc";
         const string REFLECTION_NAME_SPACE = "System.Reflection";
 
+        [XmlAttribute(AttributeName = "derive-from-pub-prop-bag")]
+        public bool DeriveFromPubPropBag { get; set; }
+
         [XmlAttribute (AttributeName="class-name")]
         public string ClassName { get; set; }
 
@@ -90,6 +93,11 @@ namespace DRM.PropBagModel
             }
            
             return r.AppendLine().ToString();
+        }
+
+        public string GetBaseClassName()
+        {
+            return DeriveFromPubPropBag ? "PubPropBag" : "PropBag";
         }
 
         public string GetAddPropMethodCallText(PropItem pi, 
@@ -260,6 +268,13 @@ namespace DRM.PropBagModel
                 string msg = "For property {0}: he initial-value has been specified, but use-empty-string has also been set to true; "
                 + "this is ambiguous.";
                 throw new ArgumentException(string.Format(msg, propertyName));
+            }
+
+            if (pivf.SetToDefault)
+            {
+                value = "null";
+                useDefault = true;
+                return true;
             }
 
             if (pivf.SetToUndefined)

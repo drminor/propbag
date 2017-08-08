@@ -467,7 +467,7 @@ namespace DRM.PropBag
         }
 
         protected IProp<T> PAddPropObjComp<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
-            object extraInfo = null, T initalValue = default(T))
+            IEqualityComparer<T> comparer = null, object extraInfo = null, T initalValue = default(T))
         {
             RefEqualityComparer<T> refComp = RefEqualityComparer<T>.Default;
 
@@ -487,7 +487,7 @@ namespace DRM.PropBag
         }
 
         protected IProp<T> PAddPropObjCompNoValue<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
-            object extraInfo = null)
+            IEqualityComparer<T> comparer = null,object extraInfo = null)
         {
             RefEqualityComparer<T> refComp = RefEqualityComparer<T>.Default;
 
@@ -506,7 +506,8 @@ namespace DRM.PropBag
             return pg;
         }
 
-        protected IProp<T> PAddPropObjCompNoStore<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false, object extraInfo = null)
+        protected IProp<T> PAddPropObjCompNoStore<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false, 
+            IEqualityComparer<T> comparer = null, object extraInfo = null)
         {
             RefEqualityComparer<T> refComp = RefEqualityComparer<T>.Default;
 

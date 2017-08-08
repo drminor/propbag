@@ -25,7 +25,7 @@
 <#= pm.GetNamespaces() #>
 namespace <#= pm.Namespace #>
 {
-	public partial class <#= pm.ClassName #> : PropBag
+	public partial class <#= pm.ClassName #> : <#= pm.GetBaseClassName() #>
 	{
 		public <#= pm.ClassName #>() : this(PropBagTypeSafetyMode.<#= pm.SafetyModeString #>, null) { }
 

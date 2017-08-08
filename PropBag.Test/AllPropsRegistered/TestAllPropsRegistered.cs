@@ -425,6 +425,19 @@ namespace PropBagLib.Tests
 
         #endregion
 
+        #region Test PubPropBag
+
+        [Test]
+        public void TestPublicPropBag()
+        {
+            PubPropBag ppb = new PubPropBag(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+
+            ppb.AddProp<int>("PropInt");
+
+
+        }
+        #endregion
+
         #region Test Enhance Add Prop Calls
 
         // TODO: Improve and uncomment

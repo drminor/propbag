@@ -107,9 +107,9 @@ namespace DRM.PropBag
         }
 
         protected IProp<T> AddPropObjComp<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
-            object extraInfo = null, T initialValue = default(T))
+            IEqualityComparer<T> comparer = null, object extraInfo = null, T initialValue = default(T))
         {
-            return base.PAddPropObjComp(propertyName, doIfChanged, doAfterNotify, extraInfo, initialValue);
+            return base.PAddPropObjComp(propertyName, doIfChanged, doAfterNotify, comparer, extraInfo, initialValue);
         }
 
         protected IProp<T> AddPropNoValue<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
@@ -119,9 +119,9 @@ namespace DRM.PropBag
         }
 
         protected IProp<T> AddPropObjCompNoValue<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
-            object extraInfo = null)
+            IEqualityComparer<T> comparer = null, object extraInfo = null)
         {
-            return base.PAddPropObjCompNoValue(propertyName, doIfChanged, doAfterNotify, extraInfo);
+            return base.PAddPropObjCompNoValue(propertyName, doIfChanged, doAfterNotify, comparer, extraInfo);
         }
 
         protected IProp<T> AddPropNoStore<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false,
@@ -130,9 +130,10 @@ namespace DRM.PropBag
             return base.PAddPropNoStore<T>(propertyName, doIfChanged, doAfterNotify, comparer, extraInfo);
         }
 
-        protected IProp<T> AddPropObjCompNoStore<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false, object extraInfo = null)
+        protected IProp<T> AddPropObjCompNoStore<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false,
+            IEqualityComparer<T> comparer = null, object extraInfo = null)
         {
-            return base.PAddPropObjCompNoStore(propertyName, doIfChanged, doAfterNotify, extraInfo);
+            return base.PAddPropObjCompNoStore(propertyName, doIfChanged, doAfterNotify, comparer, extraInfo);
         }
 
         protected void RemoveProp(string propertyName)
