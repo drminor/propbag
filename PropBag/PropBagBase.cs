@@ -342,20 +342,8 @@ namespace DRM.PropBag
                 tVals.Add(propertyName, genProp);
             }
 
-            PropertyChangedWithValsHandler eventHandler = (s, e) =>
-            {
-                //if (string.Equals(e.PropertyName, propertyName, StringComparison.InvariantCulture))
-                //{
-                    doOnChange(e.OldValue, e.NewValue);
-                //}
-            };
+            genProp.SubscribeToPropChanged(doOnChange);
 
-            genProp.PropertyChangedWithVals += eventHandler;
-
-            //this.PropertyChangedWithVals += eventHandler;
-
-            // References are kept here so that we can remove them when this instance is disposed.
-            //genProp.PropChangedWithValsHandlerList.Add(eventHandler);
         }
 
         public bool UnSubscribeToPropChanged(Action<object, object> doOnChange, string propertyName)
@@ -370,16 +358,7 @@ namespace DRM.PropBag
                 return false;
             }
 
-            PropertyChangedWithValsHandler eventHandler = (s, e) =>
-            {
-                //if (string.Equals(e.PropertyName, propertyName, StringComparison.InvariantCulture))
-                //{
-                    doOnChange(e.OldValue, e.NewValue);
-                //}
-            };
-
-            genProp.PropertyChangedWithVals -= eventHandler;
-            return true;
+            return genProp.UnSubscribeToPropChanged(doOnChange);
         }
 
         // Allow callers to easily subscribe to PropertyChangedWithTVals.

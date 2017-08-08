@@ -18,9 +18,8 @@ namespace DRM.PropBag
         event PropertyChangedWithValsHandler PropertyChangedWithVals;
         void OnPropertyChangedWithVals(string propertyName, object oldVal, object newVal);
 
-        //bool Remove
-
-        //List<PropertyChangedWithValsHandler> PropChangedWithValsHandlerList { get; }
+        void SubscribeToPropChanged(Action<object, object> doOnChange);
+        bool UnSubscribeToPropChanged(Action<object, object> doOnChange);
 
         object Value { get; }
 

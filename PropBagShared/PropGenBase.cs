@@ -75,6 +75,45 @@ namespace DRM.PropBag
 
         public event PropertyChangedWithValsHandler PropertyChangedWithVals;
 
+        private List<Tuple<Action<object, object>, PropertyChangedWithValsHandler>> actTable = null;
+
+        public void SubscribeToPropChanged(Action<object, object> doOnChange)
+        {
+            PropertyChangedWithValsHandler eventHandler = (s, e) => { doOnChange(e.OldValue, e.NewValue); };
+
+            if (GetHandlerFromAction(doOnChange, ref actTable) == null)
+            {
+                PropertyChangedWithVals += eventHandler;
+                actTable.Add(new Tuple<Action<object, object>, PropertyChangedWithValsHandler>(doOnChange, eventHandler));
+            }
+        }
+
+        public bool UnSubscribeToPropChanged(Action<object, object> doOnChange)
+        {
+            PropertyChangedWithValsHandler eventHander = GetHandlerFromAction(doOnChange, ref actTable);
+
+            if (eventHander == null) return false;
+
+            PropertyChangedWithVals -= eventHander;
+            return true;
+        }
+
+        private PropertyChangedWithValsHandler GetHandlerFromAction(Action<object, object> act,
+            ref List<Tuple<Action<object, object>, PropertyChangedWithValsHandler>> actTable)
+        {
+            if (actTable == null)
+            {
+                actTable = new List<Tuple<Action<object, object>, PropertyChangedWithValsHandler>>();
+                return null;
+            }
+
+            foreach (Tuple<Action<object, object>, PropertyChangedWithValsHandler> tup in actTable)
+            {
+                if (tup.Item1 == act) return tup.Item2;
+            }
+            return null;
+        }
+
         public void OnPropertyChangedWithVals(string propertyName, object oldVal, object newVal)
         {
             PropertyChangedWithValsHandler handler = Interlocked.CompareExchange(ref PropertyChangedWithVals, null, null);
