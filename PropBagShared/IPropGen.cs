@@ -14,7 +14,13 @@ namespace DRM.PropBag
         bool TypeIsSolid { get;}
         bool HasStore { get; }
 
-        List<PropertyChangedWithValsHandler> PropChangedWithValsHandlerList { get; }
+        // Property Changed with typed values support
+        event PropertyChangedWithValsHandler PropertyChangedWithVals;
+        void OnPropertyChangedWithVals(string propertyName, object oldVal, object newVal);
+
+        //bool Remove
+
+        //List<PropertyChangedWithValsHandler> PropChangedWithValsHandlerList { get; }
 
         object Value { get; }
 

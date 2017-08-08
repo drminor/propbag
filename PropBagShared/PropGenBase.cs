@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using System.Threading;
 using System.Reflection;
 
 using DRM.Ipnwvc;
@@ -27,8 +28,7 @@ namespace DRM.PropBag
 
         public bool HasStore { get; set; }
 
-        public List<PropertyChangedWithValsHandler> PropChangedWithValsHandlerList { get; set; }
-
+        //public List<PropertyChangedWithValsHandler> PropChangedWithValsHandlerList { get; set; }
 
         private GetPropValDelegate _doGet;
         private GetPropValDelegate DoGetProVal
@@ -56,7 +56,7 @@ namespace DRM.PropBag
             TypeIsSolid = typeIsSolid;
             HasStore = hasStore;
 
-            PropChangedWithValsHandlerList = new List<PropertyChangedWithValsHandler>();
+            //PropChangedWithValsHandlerList = new List<PropertyChangedWithValsHandler>();
         }
 
 
@@ -73,20 +73,17 @@ namespace DRM.PropBag
             }
         }
 
+        public event PropertyChangedWithValsHandler PropertyChangedWithVals;
+
+        public void OnPropertyChangedWithVals(string propertyName, object oldVal, object newVal)
+        {
+            PropertyChangedWithValsHandler handler = Interlocked.CompareExchange(ref PropertyChangedWithVals, null, null);
+
+            if (handler != null)
+                handler(this, new PropertyChangedWithValsEventArgs(propertyName, oldVal, newVal));
+        }
+
         #endregion
-
-        //public bool UpdateDoWhenChanged<T>(Action<T, T> doWhenChanged, bool doAfterNotify)
-        //{
-        //    //IProp<T> prop = (IProp<T>) this.Prop;
-        //    IProp<T> prop = (IProp<T>) this;
-
-        //    bool hadExistingValue = prop.DoWHenChangedAction != null;
-
-        //    prop.DoWHenChangedAction = doWhenChanged;
-        //    prop.DoAfterNotify = doAfterNotify;
-
-        //    return hadExistingValue;
-        //}
 
         #region Helper Methods for the Generic Method Templates
 
@@ -102,6 +99,11 @@ namespace DRM.PropBag
         }
 
         #endregion
+
+        ~PropGenBase()
+        {
+            PropertyChangedWithVals = null;
+        }
 
         #region Generic Method Templates
 

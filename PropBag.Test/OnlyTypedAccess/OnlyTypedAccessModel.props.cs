@@ -15,15 +15,14 @@ namespace PropBagLib.Tests
             AddProp<object>("PropObject", null, false, null);
             AddProp<string>("PropString", DoWhenStringChanged, false, null);
             AddProp<string>("PropStringCallDoAfter", DoWhenStringChanged, true, null);
-            AddPropObjComp<string>("PropStringUseRefComp", DoWhenStringChanged, false, initalValue: null);
-            AddProp<bool>("PropBool", null, false, null, initalValue: false);
+            AddPropObjComp<string>("PropStringUseRefComp", DoWhenStringChanged, false, initialValue: null);
+            AddProp<bool>("PropBool", null, false, null, initialValue: false);
             AddProp<int>("PropInt", null, false, null);
             AddProp<TimeSpan>("PropTimeSpan", null, false, null);
             AddProp<Uri>("PropUri", null, false, null);
             AddProp<Lazy<int>>("PropLazyInt", null, false, null);
             //AddProp<Nullable<int>>("PropNullableInt", DoWhenNullIntChanged, false, null, -1);
             //AddProp<ICollection<int>>("PropICollectionInt", DoWhenICollectionIntChanged), false, null);
-
         }
 
         #region Property Declarations

@@ -78,11 +78,11 @@
     <Content Include="T4\PropGen_PropDefs.xml">
       <SubType>Designer</SubType>
     </Content>
-    <None Include="T4\PropGen.cs">
+    <Compile Include="T4\PropGen.cs">
       <DependentUpon>PropGen.tt</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-    </None>
+    </Compile>
     <Compile Include="T4\TestT4.cs" />
     <Content Include="AllPropsRegistered\AllPropsRegisteredModel.props.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
@@ -133,7 +133,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Performance\PerformanceModel_PropDefs.xml" />
-    <Content Include="AllPropsRegistered\AllPropsRegisteredModel_PropDefs - Test.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

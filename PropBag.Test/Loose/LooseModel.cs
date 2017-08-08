@@ -11,15 +11,6 @@ namespace PropBagLib.Tests
         public string DoWhenStringPropOldVal { get; set; }
         public string DoWhenStringPropNewVal { get; set; }
 
-        //public LooseModel(bool hookupDoWhenStringChanged, bool doAfterNotify)
-        //    : this(PropBagTypeSafetyMode.Loose)
-        //{
-        //    if (hookupDoWhenStringChanged)
-        //    {
-        //        RegisterDoWhenChanged<string>(DoWhenStringChanged, doAfterNotify, "PropString");
-        //    }
-        //}
-
         public new object this[string key]
         {
             get { return base[key]; }

@@ -52,6 +52,8 @@ namespace PropBagLib.Tests
         {
             mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
 
+            //mod1.reg
+
             bool temp = mod1.PropBool;
             Assert.That(temp, Is.EqualTo(false),"Expecting the initial value of PropBool to be false.");
 
@@ -189,6 +191,8 @@ namespace PropBagLib.Tests
         {
             mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
             mod1.PropStringUseRefCompChanged += mod1_PropStringUseRefCompChanged;
+
+            
 
             // Use our Reference Equality Comparer.
             IEqualityComparer<string> comparer = RefEqualityComparer<string>.Default;
@@ -335,6 +339,9 @@ namespace PropBagLib.Tests
 
         #region Test Subscribing to the generic event 
 
+        object genObjOldVal = -1;
+        object genObjNewVal = -2;
+
         [Test]
         public void TestPropertyChangedWithVals()
         {
@@ -342,17 +349,78 @@ namespace PropBagLib.Tests
             mod1.PropertyChangedWithVals += mod1_PropertyChangedWithVals;
 
             mod1.PropInt = 0;
-
             mod1.PropInt = 1;
 
+            Assert.That(genObjOldVal, Is.EqualTo(0), "The old value should have been 0.");
+            Assert.That(genObjNewVal, Is.EqualTo(1), "The old value should have been 1.");
         }
 
         void mod1_PropertyChangedWithVals(object sender, PropertyChangedWithValsEventArgs e)
         {
             object sendr = sender;
             string prpName = e.PropertyName;
-            object oldVal = e.OldValue;
-            object newVal = e.NewValue;
+            if (prpName == "PropInt")
+            {
+                genObjOldVal = e.OldValue;
+                genObjNewVal = e.NewValue;
+            }
+        }
+
+        #endregion
+
+        #region Test Subscribing to events for a particular property
+
+        [Test]
+        public void TestSubscribePropChangedGen()
+        {
+            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+            mod1.SubscribeToPropChanged(doWhenPropIntChangesGen, "PropInt");
+
+            mod1.PropInt = 0;
+            mod1.PropInt = 1;
+
+            Assert.That(genObjOldVal, Is.EqualTo(0), "The old value should have been 0.");
+            Assert.That(genObjNewVal, Is.EqualTo(1), "The new value should have been 1.");
+
+            mod1.UnSubscribeToPropChanged(doWhenPropIntChangesGen, "PropInt");
+            mod1.PropInt = 2;
+
+            Assert.That(genObjOldVal, Is.EqualTo(0), "The old value should have been 0. The action did not get unscribed.");
+            Assert.That(genObjNewVal, Is.EqualTo(1), "The new value should have been 1.");
+        }
+
+        void doWhenPropIntChangesGen(object oldVal, object newValue)
+        {
+            genObjOldVal = oldVal;
+            genObjNewVal = newValue;
+        }
+
+        int typedOldVal;
+        int typedNewVal;
+
+        [Test]
+        public void TestSubscribePropChangedTyped()
+        {
+            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+            mod1.SubscribeToPropChanged<int>(doWhenPropIntChangesTyped, "PropInt");
+
+            mod1.PropInt = 0;
+            mod1.PropInt = 1;
+
+            Assert.That(typedOldVal, Is.EqualTo(0), "The old value should have been 0.");
+            Assert.That(typedNewVal, Is.EqualTo(1), "The new value should have been 1.");
+
+            mod1.UnSubscribeToPropChanged<int>(doWhenPropIntChangesTyped, "PropInt");
+            mod1.PropInt = 2;
+
+            Assert.That(typedOldVal, Is.EqualTo(0), "The old value should have been 0. The action did not get unscribed.");
+            Assert.That(typedNewVal, Is.EqualTo(1), "The new value should have been 1.");
+        }
+
+        void doWhenPropIntChangesTyped(int oldVal, int newValue)
+        {
+            typedOldVal = oldVal;
+            typedNewVal = newValue;
         }
 
         #endregion

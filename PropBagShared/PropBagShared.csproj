@@ -45,6 +45,7 @@
     <Compile Include="IProp.cs" />
     <Compile Include="IPropGen.cs" />
     <Compile Include="AbstractPropFactory.cs" />
+    <Compile Include="IPubPropBag.cs" />
     <Compile Include="Prop.cs" />
     <Compile Include="PropBagTypeSafetyModeEnum.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

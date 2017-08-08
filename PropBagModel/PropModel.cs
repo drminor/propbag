@@ -78,16 +78,17 @@ namespace DRM.PropBagModel
         public string GetNamespaces()
         {
             StringBuilder r = new StringBuilder();
-            foreach (string s in Namespaces)
-            {
-                r.AppendLine(string.Format("using {0};", s));
-            }
 
             foreach (string s in RequiredNamespaces)
             {
                 r.AppendLine(string.Format("using {0};", s));
             }
-            
+
+            foreach (string s in Namespaces)
+            {
+                r.AppendLine(string.Format("using {0};", s));
+            }
+           
             return r.AppendLine().ToString();
         }
 
@@ -145,12 +146,6 @@ namespace DRM.PropBagModel
 
             if(pi.HasStore)
             {
-                //    public void AddProp<T>(string propertyName, 
-                //        Action<T, T> doIfChanged, 
-                //        bool doAfterNotify = false,
-                //        IEqualityComparer<T> comparer = null,
-                //        T initalValue = default(T))
-
                 methodName = "AddProp";
                 string initVal;
                 bool setToDefault;

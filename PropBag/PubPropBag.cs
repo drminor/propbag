@@ -25,21 +25,21 @@ namespace DRM.PropBag
 
     #endregion
 
-    public class PropBag : PropBagBase, IPropBag
+    public class PubPropBag : PropBagBase, IPubPropBag
     {
         #region Constructor
 
-        public PropBag() : base() {}
+        public PubPropBag() : base() {} //(PropBagTypeSafetyMode.AllPropsMustBeRegistered, null) { }
 
-        public PropBag(PropBagTypeSafetyMode typeSafetyMode) : base(typeSafetyMode) {}
+        public PubPropBag(PropBagTypeSafetyMode typeSafetyMode) : base(typeSafetyMode) {} // this(typeSafetyMode, null) { }
 
-        public PropBag(PropBagTypeSafetyMode typeSafetyMode, AbstractPropFactory thePropFactory) : base(typeSafetyMode, thePropFactory) {}
+        public PubPropBag(PropBagTypeSafetyMode typeSafetyMode, AbstractPropFactory thePropFactory) : base(typeSafetyMode, thePropFactory) { }
 
         #endregion
 
-        #region Propety Access Methods 
+        #region Propety Access Methods
 
-        protected object this[string propertyName]
+        public object this[string propertyName]
         {
             get
             {
@@ -51,22 +51,22 @@ namespace DRM.PropBag
             }
         }
 
-        protected object GetIt([CallerMemberName] string propertyName = null)
+        public object GetIt([CallerMemberName] string propertyName = null)
         {
             return base.PGetIt(propertyName);
         }
 
-        protected T GetIt<T>([CallerMemberName] string propertyName = null)
+        public T GetIt<T>([CallerMemberName] string propertyName = null)
         {
             return base.PGetIt<T>(propertyName);
         }
 
-        protected void SetIt(object value, [CallerMemberName] string propertyName = null)
+        public void SetIt(object value, [CallerMemberName] string propertyName = null)
         {
             base.PSetIt(value, propertyName);
         }
 
-        protected void SetIt<T>(T value, [CallerMemberName] string propertyName = null)
+        public void SetIt<T>(T value, [CallerMemberName] string propertyName = null)
         {
             base.PSetIt(value, propertyName);
         }
@@ -81,14 +81,14 @@ namespace DRM.PropBag
         /// <param name="curValue">The current value of the property, must be specified using the ref keyword.</param>
         /// <param name="propertyName"></param>
         /// <returns>True if the value was updated, otherwise false.</returns>
-        protected bool SetIt<T>(T newValue, ref T curValue, [CallerMemberName]string propertyName = null)
+        public bool SetIt<T>(T newValue, ref T curValue, [CallerMemberName]string propertyName = null)
         {
             return base.PSetIt(newValue, ref curValue, propertyName);
         }
 
         #endregion
 
-        #region Property Management 
+        #region Property Management
 
         /// <summary>
         /// Use when you want to specify an Action<typeparamref name="T"/> to be performed
@@ -100,42 +100,42 @@ namespace DRM.PropBag
         /// <param name="doAfterNotify"></param>
         /// <param name="comparer">A instance of a class that implements IEqualityComparer and thus an Equals method.</param>
         /// <param name="initalValue"></param>
-        protected IProp<T> AddProp<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
-            IEqualityComparer<T> comparer = null, object extraInfo = null, T initialValue = default(T))
+        public IProp<T> AddProp<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
+            IEqualityComparer<T> comparer = null, object extraInfo = null, T initalValue = default(T))
         {
-            return base.PAddProp(propertyName, doIfChanged, doAfterNotify, comparer, extraInfo, initialValue);
+            return base.PAddProp(propertyName, doIfChanged, doAfterNotify, comparer, extraInfo, initalValue);
         }
 
-        protected IProp<T> AddPropObjComp<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
-            object extraInfo = null, T initialValue = default(T))
+        public IProp<T> AddPropObjComp<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
+            object extraInfo = null, T initalValue = default(T))
         {
-            return base.PAddPropObjComp(propertyName, doIfChanged, doAfterNotify, extraInfo, initialValue);
+            return base.PAddPropObjComp(propertyName, doIfChanged, doAfterNotify, extraInfo, initalValue);
         }
 
-        protected IProp<T> AddPropNoValue<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
+        public IProp<T> AddPropNoValue<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
             IEqualityComparer<T> comparer = null, object extraInfo = null)
         {
-            return PAddPropNoValue(propertyName, doIfChanged, doAfterNotify, comparer, extraInfo);
+            return AddPropNoValue(propertyName, doIfChanged, doAfterNotify, comparer, extraInfo);
         }
 
-        protected IProp<T> AddPropObjCompNoValue<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
+        public IProp<T> AddPropObjCompNoValue<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
             object extraInfo = null)
         {
             return base.PAddPropObjCompNoValue(propertyName, doIfChanged, doAfterNotify, extraInfo);
         }
 
-        protected IProp<T> AddPropNoStore<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false,
+        public IProp<T> AddPropNoStore<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false,
             IEqualityComparer<T> comparer = null, object extraInfo = null)
         {
             return base.PAddPropNoStore<T>(propertyName, doIfChanged, doAfterNotify, comparer, extraInfo);
         }
 
-        protected IProp<T> AddPropObjCompNoStore<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false, object extraInfo = null)
+        public IProp<T> AddPropObjCompNoStore<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false, object extraInfo = null)
         {
             return base.PAddPropObjCompNoStore(propertyName, doIfChanged, doAfterNotify, extraInfo);
         }
 
-        protected void RemoveProp(string propertyName)
+        public void RemoveProp(string propertyName)
         {
             base.PRemoveProp(propertyName);
         }
@@ -148,20 +148,20 @@ namespace DRM.PropBag
         /// <param name="doAfterNotify"></param>
         /// <param name="propertyName"></param>
         /// <returns>True, if there was an existing Action in place for this property.</returns>
-        protected bool RegisterDoWhenChanged<T>(Action<T, T> doWhenChanged, bool doAfterNotify = false, [CallerMemberName] string propertyName = null)
+        public bool RegisterDoWhenChanged<T>(Action<T, T> doWhenChanged, bool doAfterNotify = false, [CallerMemberName] string propertyName = null)
         {
-            return base.PRegisterDoWhenChanged(doWhenChanged, doAfterNotify, propertyName);    
+            return base.PRegisterDoWhenChanged(doWhenChanged, doAfterNotify, propertyName);
         }
 
         /// <summary>
         /// Returns all of the values in dictionary of objects, keyed by PropertyName.
         /// </summary>
-        protected IDictionary<string, object> GetAllPropertyValues()
+        public IDictionary<string, object> GetAllPropertyValues()
         {
             return base.PGetAllPropertyValues();
         }
 
-        protected IList<string> GetAllPropertyNames()
+        public IList<string> GetAllPropertyNames()
         {
             return base.PGetAllPropertyNames();
         }
@@ -187,5 +187,7 @@ namespace DRM.PropBag
         }
 
         #endregion
+
     }
 }
+
