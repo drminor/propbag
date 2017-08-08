@@ -23,9 +23,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{F2ED0334-4E97-452C-AC93-3289C450B073}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{F93D2783-82C5-46F0-A50A-3925ADE7B367}"
 	ProjectSection(SolutionItems) = preProject
-		Documentation.md = Documentation.md
+		Documentaton\Documentation.md = Documentaton\Documentation.md
 	EndProjectSection
 EndProject
 Global
@@ -59,6 +59,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{F2ED0334-4E97-452C-AC93-3289C450B073} = {D1E92622-001D-48C3-901F-5DD6393BEA53}
+		{F93D2783-82C5-46F0-A50A-3925ADE7B367} = {D1E92622-001D-48C3-901F-5DD6393BEA53}
 	EndGlobalSection
 EndGlobal
