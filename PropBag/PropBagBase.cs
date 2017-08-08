@@ -410,7 +410,7 @@ namespace DRM.PropBag
         /// <typeparam name="T"></typeparam>
         /// <param name="eventHandler"></param>
         /// <param name="eventPropertyName"></param>
-        public void AddToPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, [CallerMemberName] string eventPropertyName = null)
+        protected void AddToPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, [CallerMemberName] string eventPropertyName = null)
         {
             string propertyName = GetPropNameFromEventProp(eventPropertyName);
             SubscribeToPropChanged<T>(eventHandler, propertyName);
@@ -423,7 +423,7 @@ namespace DRM.PropBag
         /// <typeparam name="T"></typeparam>
         /// <param name="eventHandler"></param>
         /// <param name="eventPropertyName"></param>
-        public void RemoveFromPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, [CallerMemberName] string eventPropertyName = null)
+        protected void RemoveFromPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, [CallerMemberName] string eventPropertyName = null)
         {
             string propertyName = GetPropNameFromEventProp(eventPropertyName);
             UnSubscribeToPropChanged<T>(eventHandler, propertyName);

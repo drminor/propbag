@@ -18,6 +18,9 @@ namespace DRM.PropBag
         void SetIt<T>(T value, [CallerMemberName] string propertyName = null);
         bool SetIt<T>(T newValue, ref T curValue, [CallerMemberName]string propertyName = null);
 
+        //void AddToPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, [CallerMemberName] string eventPropertyName = null);
+        //void RemoveFromPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, [CallerMemberName] string eventPropertyName = null);
+
         IProp<T> AddProp<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
             IEqualityComparer<T> comparer = null, object extraInfo = null, T initalValue = default(T));
 
@@ -56,9 +59,6 @@ namespace DRM.PropBag
 
         void SubscribeToPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, string propertyName);
         void UnSubscribeToPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, string propertyName);
-
-        void AddToPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, [CallerMemberName] string eventPropertyName = null);
-        void RemoveFromPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, [CallerMemberName] string eventPropertyName = null);
 
         void SubscribeToPropChanged<T>(Action<T, T> doOnChange, string propertyName);
         bool UnSubscribeToPropChanged<T>(Action<T, T> doOnChange, string propertyName);
