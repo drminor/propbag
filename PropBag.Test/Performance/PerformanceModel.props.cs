@@ -19,7 +19,7 @@ namespace PropBagLib.Tests
 		{
 	        AddProp<object>("PropObject", null, false, null);
 	        AddProp<string>("PropString", null, false, null, null, "");
-	        AddPropObjComp<string>("PropStringUseRefComp", null, false, null);
+	        AddPropObjComp<string>("PropStringUseRefComp", null, false);
 	        AddProp<bool>("PropBool", null, false, null, null, false);
 	        AddProp<int>("PropInt", null, false, null);
 	        AddProp<TimeSpan>("PropTimeSpan", null, false, null);

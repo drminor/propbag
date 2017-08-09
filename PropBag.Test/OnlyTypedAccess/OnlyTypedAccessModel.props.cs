@@ -16,7 +16,7 @@ namespace PropBagLib.Tests
             AddProp<string>("PropString", DoWhenStringChanged, false, null);
             AddProp<string>("PropStringCallDoAfter", DoWhenStringChanged, true, null);
             AddPropObjComp<string>("PropStringUseRefComp", DoWhenStringChanged, false, initialValue: null);
-            AddProp<bool>("PropBool", null, false, null, initialValue: false);
+            AddProp<bool>("PropBool", initialValue: false);
             AddProp<int>("PropInt", null, false, null);
             AddProp<TimeSpan>("PropTimeSpan", null, false, null);
             AddProp<Uri>("PropUri", null, false, null);

@@ -447,85 +447,50 @@ namespace DRM.PropBag
 
         #region Property Management
 
-        /// <summary>
-        /// Use when you want to specify an Action<typeparamref name="T"/> to be performed
-        /// either before or after the PropertyChanged event has been raised.
-        /// </summary>
-        /// <typeparam name="T">The type of this property's value.</typeparam>
-        /// <param name="propertyName"></param>
-        /// <param name="doIfChanged"></param>
-        /// <param name="doAfterNotify"></param>
-        /// <param name="comparer">A instance of a class that implements IEqualityComparer and thus an Equals method.</param>
-        /// <param name="initalValue"></param>
-        protected IProp<T> PAddProp<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
-            IEqualityComparer<T> comparer = null, object extraInfo = null, T initalValue = default(T))
+        ///// <summary>
+        ///// Use when you want to specify an Action<typeparamref name="T"/> to be performed
+        ///// either before or after the PropertyChanged event has been raised.
+        ///// </summary>
+        ///// <typeparam name="T">The type of this property's value.</typeparam>
+        ///// <param name="propertyName"></param>
+        ///// <param name="doIfChanged"></param>
+        ///// <param name="doAfterNotify"></param>
+        ///// <param name="comparer">A instance of a class that implements IEqualityComparer and thus an Equals method.</param>
+        ///// <param name="initalValue"></param>
+        //protected IProp<T> PAddProp<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify,
+        //    IEqualityComparer<T> comparer, object extraInfo, T initalValue = default(T))
+        //{
+        //    IProp<T> pg = thePropFactory.Create<T>(initalValue, propertyName, extraInfo, true, true, doIfChanged, doAfterNotify, comparer);
+        //    tVals.Add(propertyName, pg);
+
+        //    return pg;
+        //}
+
+        //protected IProp<T> PAddPropNoValue<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify,
+        //    IEqualityComparer<T> comparer, object extraInfo)
+        //{
+        //    IProp<T> pg = thePropFactory.CreateWithNoValue<T>(propertyName, extraInfo, true, true, doIfChanged, doAfterNotify, comparer);
+        //    tVals.Add(propertyName, pg);
+
+        //    return pg;
+        //}
+
+        //protected IProp<T> PAddPropNoStore<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify,
+        //    IEqualityComparer<T> comparer, object extraInfo)
+        //{
+        //    IProp<T> pg = thePropFactory.CreateWithNoValue<T>(propertyName, extraInfo, false, true, doIfChanged, doAfterNotify, comparer);
+        //    tVals.Add(propertyName, pg);
+
+        //    return pg;
+        //}
+
+        protected void AddProp<T>(string propertyName, IProp<T> prop)
         {
-            IProp<T> pg = thePropFactory.Create<T>(initalValue, propertyName, extraInfo, true, true, doIfChanged, doAfterNotify, comparer);
-            tVals.Add(propertyName, pg);
-
-            return pg;
-        }
-
-        protected IProp<T> PAddPropObjComp<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
-            IEqualityComparer<T> comparer = null, object extraInfo = null, T initalValue = default(T))
-        {
-            RefEqualityComparer<T> refComp = RefEqualityComparer<T>.Default;
-
-            IProp<T> pg = thePropFactory.Create<T>(initalValue, propertyName, extraInfo, true, true, doIfChanged, doAfterNotify, refComp);
-            tVals.Add(propertyName, pg);
-
-            return pg;
-        }
-
-        protected IProp<T> PAddPropNoValue<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
-            IEqualityComparer<T> comparer = null, object extraInfo = null)
-        {
-            IProp<T> pg = thePropFactory.CreateWithNoValue<T>(propertyName, extraInfo, true, true, doIfChanged, doAfterNotify, comparer);
-            tVals.Add(propertyName, pg);
-
-            return pg;
-        }
-
-        protected IProp<T> PAddPropObjCompNoValue<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
-            IEqualityComparer<T> comparer = null,object extraInfo = null)
-        {
-            RefEqualityComparer<T> refComp = RefEqualityComparer<T>.Default;
-
-            IProp<T> pg = thePropFactory.CreateWithNoValue<T>(propertyName, extraInfo, true, true, doIfChanged, doAfterNotify, refComp);
-            tVals.Add(propertyName, pg);
-
-            return pg;
-        }
-
-        protected IProp<T> PAddPropNoStore<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false,
-            IEqualityComparer<T> comparer = null, object extraInfo = null)
-        {
-            IProp<T> pg = thePropFactory.CreateWithNoValue<T>(propertyName, extraInfo, false, true, doIfChanged, doAfterNotify, comparer);
-            tVals.Add(propertyName, pg);
-
-            return pg;
-        }
-
-        protected IProp<T> PAddPropObjCompNoStore<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false, 
-            IEqualityComparer<T> comparer = null, object extraInfo = null)
-        {
-            RefEqualityComparer<T> refComp = RefEqualityComparer<T>.Default;
-
-            IProp<T> pg = thePropFactory.CreateWithNoValue<T>(propertyName, extraInfo, false, true, doIfChanged, doAfterNotify, refComp);
-            tVals.Add(propertyName, pg);
-
-            return pg;
+            tVals.Add(propertyName, prop);
         }
 
         protected void PRemoveProp(string propertyName)
         {
-            //IPropGen genProp = GetGenProp(propertyName);
-
-            //foreach (PropertyChangedWithValsHandler h in genProp.PropChangedWithValsHandlerList)
-            //{
-            //    this.PropertyChangedWithVals -= h;
-            //}
-
             tVals.Remove(propertyName);
         }
 
@@ -542,11 +507,6 @@ namespace DRM.PropBag
             IProp<T> prop = GetPropDef<T>(propertyName);
             return prop.UpdateDoWhenChangedAction(doWhenChanged, doAfterNotify);
         }
-
-        //protected List<PropertyChangedWithValsHandler> GetPropChangedWithValsHandlers(string propertyName)
-        //{
-        //    return GetGenProp(propertyName).PropChangedWithValsHandlerList;
-        //}
 
         /// <summary>
         /// Returns all of the values in dictionary of objects, keyed by PropertyName.

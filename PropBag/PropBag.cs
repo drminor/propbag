@@ -103,37 +103,64 @@ namespace DRM.PropBag
         protected IProp<T> AddProp<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
             IEqualityComparer<T> comparer = null, object extraInfo = null, T initialValue = default(T))
         {
-            return base.PAddProp(propertyName, doIfChanged, doAfterNotify, comparer, extraInfo, initialValue);
+            bool hasStorage = true;
+            bool typeIsSolid = true;
+            IProp<T> pg = thePropFactory.Create<T>(initialValue, propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
+            AddProp<T>(propertyName, pg);
+            return pg;
         }
 
         protected IProp<T> AddPropObjComp<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
-            IEqualityComparer<T> comparer = null, object extraInfo = null, T initialValue = default(T))
+            object extraInfo = null, T initialValue = default(T))
         {
-            return base.PAddPropObjComp(propertyName, doIfChanged, doAfterNotify, comparer, extraInfo, initialValue);
+            bool hasStorage = true;
+            bool typeIsSolid = true;
+            IEqualityComparer<T> comparer = thePropFactory.GetRefEqualityComparer<T>();
+            IProp<T> pg = thePropFactory.Create<T>(initialValue, propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
+            AddProp<T>(propertyName, pg);
+            return pg;
         }
 
         protected IProp<T> AddPropNoValue<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
             IEqualityComparer<T> comparer = null, object extraInfo = null)
         {
-            return PAddPropNoValue(propertyName, doIfChanged, doAfterNotify, comparer, extraInfo);
+            bool hasStorage = true;
+            bool typeIsSolid = true;
+            IProp<T> pg = thePropFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
+            AddProp<T>(propertyName, pg);
+            return pg;
         }
 
         protected IProp<T> AddPropObjCompNoValue<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
-            IEqualityComparer<T> comparer = null, object extraInfo = null)
+            object extraInfo = null)
         {
-            return base.PAddPropObjCompNoValue(propertyName, doIfChanged, doAfterNotify, comparer, extraInfo);
+            bool hasStorage = true;
+            bool typeIsSolid = true;
+            IEqualityComparer<T> comparer = thePropFactory.GetRefEqualityComparer<T>();
+            IProp<T> pg = thePropFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
+            AddProp<T>(propertyName, pg);
+            return pg;
         }
 
         protected IProp<T> AddPropNoStore<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false,
             IEqualityComparer<T> comparer = null, object extraInfo = null)
         {
-            return base.PAddPropNoStore<T>(propertyName, doIfChanged, doAfterNotify, comparer, extraInfo);
+            bool hasStorage = false;
+            bool typeIsSolid = true;
+            IProp<T> pg = thePropFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
+            AddProp<T>(propertyName, pg);
+            return pg;
         }
 
         protected IProp<T> AddPropObjCompNoStore<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false,
-            IEqualityComparer<T> comparer = null, object extraInfo = null)
+            object extraInfo = null)
         {
-            return base.PAddPropObjCompNoStore(propertyName, doIfChanged, doAfterNotify, comparer, extraInfo);
+            bool hasStorage = false;
+            bool typeIsSolid = true;
+            IEqualityComparer<T> comparer = thePropFactory.GetRefEqualityComparer<T>();
+            IProp<T> pg = thePropFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
+            AddProp<T>(propertyName, pg);
+            return pg;
         }
 
         protected void RemoveProp(string propertyName)

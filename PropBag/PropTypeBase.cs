@@ -9,108 +9,36 @@ using DRM.Ipnwvc;
 
 namespace DRM.PropBag
 {
-    public class Prop<T> : PropGenBase, IProp<T>
+    public abstract class PropTypedBase<T> : PropGenBase, IProp<T>
     {
-        public Prop(T initalValue, bool hasStore = true, bool typeIsSolid = true, Action<T, T> doWhenChanged = null, bool doAfterNotify = false, IEqualityComparer<T> comparer = null)
-            : base(typeof(T), typeIsSolid, hasStore)
+        protected PropTypedBase(Type typeOfThisValue, bool typeIsSolid, bool hasStore,
+            Action<T, T> doWhenChanged, bool doAfterNotify,
+            IEqualityComparer<T> comparer)
+            : base(typeOfThisValue, typeIsSolid, hasStore)
         {
-            if (hasStore)
-            {
-                TypedValue = initalValue;
-                ValueIsDefined = true;
-            }
-
             DoWHenChangedAction = doWhenChanged;
-            PropertyChangedWithTVals = delegate { };
             DoAfterNotify = doAfterNotify;
-            Comparer = comparer ?? EqualityComparer<T>.Default;
-
+            Comparer = comparer;
+            PropertyChangedWithTVals = delegate { };
             base.TypedProp = this;
         }
 
-        // If this is not a value type, "ValueIsDefined" will be set to false.
-        public Prop(bool hasStore = true, bool typeIsSolid = true, Action<T, T> doWhenChanged = null, bool doAfterNotify = false, IEqualityComparer<T> comparer = null)
-            : base(typeof(T), typeIsSolid, hasStore)
-        {
-            if (hasStore)
-            {
-                ValueIsDefined = false;
 
-                //if (typeof(T).IsValueType)
-                //{
-                //    TypedValue = default(T);
-                //    ValueIsDefined = true;
-                //}
-                //else
-                //{
-                //    ValueIsDefined = false;
-                //}
-            }
+        abstract public T TypedValue { get; set; }
 
-            DoWHenChangedAction = doWhenChanged;
-            PropertyChangedWithTVals = delegate { };
-            DoAfterNotify = doAfterNotify;
-            Comparer = comparer ?? EqualityComparer<T>.Default;
+        abstract public bool ValueIsDefined { get; }
 
-            base.TypedProp = this;
-        }
+        abstract public bool SetValueToUndefined();
 
-        T _value;
-        public T TypedValue
-        {
-            get
-            {
-                if (HasStore)
-                {
-                    if (!ValueIsDefined) throw new InvalidOperationException("The value of this property has not yet been set.");
-                    return _value;
-                }
-                else
-                {
-                    throw new InvalidOperationException();
-                }
-            }
-            set
-            {
-                if (HasStore)
-                {
-                    _value = value;
-                    ValueIsDefined = true;
-                }
-                else
-                {
-                    throw new InvalidOperationException();
-                }
-            }
-        }
+        protected IEqualityComparer<T> Comparer { get; set; }
 
-        public bool ValueIsDefined { get; private set; }
-
-        public bool SetValueToUndefined()
-        {
-            bool oldSetting = this.ValueIsDefined;
-            ValueIsDefined = false;
-
-            return oldSetting;
-        }
-
-        IEqualityComparer<T> Comparer { get; set; }
-
-        Action<T, T> _doWhenChangedAction;
-        Action<T, T> DoWHenChangedAction {
+        private Action<T, T> _doWhenChangedAction;
+        protected Action<T, T> DoWHenChangedAction {
             get { return _doWhenChangedAction;  }
             set { _doWhenChangedAction = value; }
         }
 
         public bool DoAfterNotify { get; set; }
-
-        //public bool HasCallBack
-        //{
-        //    get
-        //    {
-        //        return DoWHenChangedAction != null;
-        //    }
-        //}
 
         public void DoWhenChanged(T oldVal, T newVal)
         {
@@ -119,28 +47,6 @@ namespace DRM.PropBag
             if (doWhenAction != null)
                 doWhenAction(oldVal, newVal);
         }
-
-
-        //private PropertyChangedWithTValsHandler<T> _propertyChangedWithTVals;
-        //private object pcwt_lock = new object();
-
-        //public event PropertyChangedWithTValsHandler<T> PropertyChangedWithTVals
-        //{
-        //    add
-        //    {
-        //        lock (pcwt_lock)
-        //        {
-        //            _propertyChangedWithTVals += value;
-        //        }
-        //    }
-        //    remove
-        //    {
-        //        lock (pcwt_lock)
-        //        {
-        //            _propertyChangedWithTVals -= value;
-        //        }
-        //    }
-        //}
 
         public event PropertyChangedWithTValsHandler<T> PropertyChangedWithTVals;
 
@@ -229,7 +135,7 @@ namespace DRM.PropBag
             return hadOnePreviously;
         }
 
-        ~Prop()
+        ~PropTypedBase()
         {
             Comparer = null;
             DoWHenChangedAction = null;

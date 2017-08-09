@@ -25,19 +25,19 @@ namespace DRM.PropBag
             IEqualityComparer<T> comparer = null, object extraInfo = null, T initalValue = default(T));
 
         IProp<T> AddPropObjComp<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
-            IEqualityComparer<T> comparer = null, object extraInfo = null, T initalValue = default(T));
+            object extraInfo = null, T initalValue = default(T));
 
         IProp<T> AddPropNoValue<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
             IEqualityComparer<T> comparer = null, object extraInfo = null);
 
         IProp<T> AddPropObjCompNoValue<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
-            IEqualityComparer<T> comparer = null, object extraInfo = null);
+            object extraInfo = null);
 
         IProp<T> AddPropNoStore<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false,
             IEqualityComparer<T> comparer = null, object extraInfo = null);
 
         IProp<T> AddPropObjCompNoStore<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false,
-            IEqualityComparer<T> comparer = null, object extraInfo = null);
+            object extraInfo = null);
 
         void RemoveProp(string propertyName);
 

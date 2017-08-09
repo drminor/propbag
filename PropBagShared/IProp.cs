@@ -28,7 +28,6 @@ namespace DRM.PropBag
         void DoWhenChanged(T oldVal, T newVal);
         bool DoAfterNotify { get; set; }
         bool UpdateDoWhenChangedAction(Action<T, T> doWHenChangedAction, bool? doAfterNotify);
-        //bool HasCallBack { get; }
 
         // Property Changed with typed values support
         event PropertyChangedWithTValsHandler<T> PropertyChangedWithTVals;

@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 namespace DRM.PropBag
 {
 
-    public delegate object CreatePropDelegate(AbstractPropFactory propFactory, object value,
+    public delegate object CreatePropDelegate(AbstractPropFactory propFactory,
+        object value,
         string propertyName, object extraInfo, 
         bool hasStorage, bool isTypeSolid);
 

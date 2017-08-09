@@ -39,6 +39,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Prop.cs" />
+    <Compile Include="PropExternStore.cs" />
+    <Compile Include="PropExtStoreFactory.cs" />
+    <Compile Include="PropFactory.cs" />
+    <Compile Include="PropGenBase.cs" />
+    <Compile Include="PropTypeBase.cs" />
     <Compile Include="PubPropBag.cs" />
     <Compile Include="PropBag.cs" />
     <Compile Include="PropBagBase.cs" />

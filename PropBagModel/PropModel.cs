@@ -122,6 +122,7 @@ namespace DRM.PropBagModel
             string doAfterNotify = pi.DoWhenChangedField.DoAfterNotify ? "true" : "false";
 
             // Comparer Logic
+            bool useRefEquality;
             string objComp;
             string comparer;
 
@@ -133,10 +134,12 @@ namespace DRM.PropBagModel
                         throw new ArgumentException("The value of comparer must be null, if UseRefEquality is specified.");
 
                     objComp = "ObjComp";
+                    useRefEquality = true;
                 }
                 else
                 {
                     objComp = null;
+                    useRefEquality = false;
                 }
 
                 comparer = pi.ComparerField.Comparer ?? "null";
@@ -144,8 +147,11 @@ namespace DRM.PropBagModel
             else
             {
                 objComp = null;
+                useRefEquality = false;
                 comparer = "null";
             }
+
+
 
             // Prepare the AddProp method call
             string methodName;
@@ -173,15 +179,32 @@ namespace DRM.PropBagModel
 
                     if (setToDefault) // (pi.InitalValueField.SetToDefault)
                     {
-                        formatString = "{0}{1}{2}<{3}>(\"{4}\", {5}, {6}, {7})";
-                        vals = new object[] { methodName, objComp, null, pi.Type, pi.Name, doWhenChanged, doAfterNotify, comparer };
+                        if (useRefEquality)
+                        {
+                            formatString = "AddProp{0}{1}<{2}>(\"{3}\", {4}, {5})";
+                            vals = new object[] {"ObjComp", null, pi.Type, pi.Name, doWhenChanged, doAfterNotify};
+
+                        }
+                        else
+                        {
+                            formatString = "AddProp{0}{1}<{2}>(\"{3}\", {4}, {5}, {6})";
+                            vals = new object[] {null, null, pi.Type, pi.Name, doWhenChanged, doAfterNotify, comparer};
+                        }
                     }
                     else
                     {
                         initVal = GetStringRepForValue(initVal, pi.Type);
 
-                        formatString = "{0}{1}{2}<{3}>(\"{4}\", {5}, {6}, {7}, {8}, {9})";
-                        vals = new object[] { methodName, objComp, null, pi.Type, pi.Name, doWhenChanged, doAfterNotify, comparer, "null", initVal };
+                        if(useRefEquality)
+                        {
+                            formatString = "AddProp{0}{1}<{2}>(\"{3}\", {4}, {5}, {6}, {7})";
+                            vals = new object[] {"ObjComp", null, pi.Type, pi.Name, doWhenChanged, doAfterNotify, "null", initVal};
+                        }
+                        else
+                        {
+                            formatString = "AddProp{0}{1}<{2}>(\"{3}\", {4}, {5}, {6}, {7}, {8})";
+                            vals = new object[] {null, null, pi.Type, pi.Name, doWhenChanged, doAfterNotify, comparer, "null", initVal};
+                        }
                     }
                 }
                 else
@@ -194,8 +217,18 @@ namespace DRM.PropBagModel
                     //      IEqualityComparer<T> comparer = null,
                     //      object extraInfo = null,
 
-                    formatString = "{0}{1}{2}<{3}>(\"{4}\", {5}, {6}, {7})";
-                    vals = new object[] { methodName, objComp, "NoValue", pi.Type, pi.Name, doWhenChanged, doAfterNotify, comparer };
+                    if (useRefEquality)
+                    {
+                        formatString = "AddProp{0}{1}<{2}>(\"{3}\", {4}, {5})";
+                        vals = new object[] {"ObjComp", "NoValue", pi.Type, pi.Name, doWhenChanged, doAfterNotify};
+
+                    }
+                    else
+                    {
+                        formatString = "AddProp{0}{1}<{2}>(\"{3}\", {4}, {5}, {6})";
+                        vals = new object[] {null, "NoValue", pi.Type, pi.Name, doWhenChanged, doAfterNotify, comparer};
+
+                    }
                 }
             }
             else
@@ -207,9 +240,18 @@ namespace DRM.PropBagModel
                 //      bool doAfterNotify = false,
                 //      IEqualityComparer<T> comparer = null)
 
-                methodName = "AddPropNoStore";
-                formatString = "{0}{1}{2}<{3}>(\"{4}\", {5}, {6}, {7})";
-                vals = new object[] { methodName, objComp, null, pi.Type, pi.Name, doWhenChanged, doAfterNotify, comparer };
+                if (useRefEquality)
+                {
+                    formatString = "AddProp{0}{1}<{2}>(\"{3}\", {4}, {5})";
+                    vals = new object[] {"ObjComp", "NoStore", pi.Type, pi.Name, doWhenChanged, doAfterNotify};
+
+                }
+                else
+                {
+                    formatString = "AddProp{0}{1}<{2}>(\"{3}\", {4}, {5}, {6})";
+                    vals = new object[] {null, "NoStore", pi.Type, pi.Name, doWhenChanged, doAfterNotify, comparer };
+
+                }
             }
 
             return string.Format(formatString, vals);
