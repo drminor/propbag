@@ -43,7 +43,7 @@ namespace DRM.PropBag
 
         override public bool SetValueToUndefined()
         {
-            throw new InvalidOperationException("PropExternStore does not support setting 'ValueIsDefined.'");
+            throw new InvalidOperationException("PropExternStore does not support setting the value to undefined.");
         }
 
         public Guid Tag { get; private set; }

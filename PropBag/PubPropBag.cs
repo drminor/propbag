@@ -105,7 +105,7 @@ namespace DRM.PropBag
         {
             bool hasStorage = true;
             bool typeIsSolid = true;
-            IProp<T> pg = thePropFactory.Create<T>(initialValue, propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
+            IProp<T> pg = ThePropFactory.Create<T>(initialValue, propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
             AddProp<T>(propertyName, pg);
             return pg;
         }
@@ -115,8 +115,8 @@ namespace DRM.PropBag
         {
             bool hasStorage = true;
             bool typeIsSolid = true;
-            IEqualityComparer<T> comparer = thePropFactory.GetRefEqualityComparer<T>();
-            IProp<T> pg = thePropFactory.Create<T>(initialValue, propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
+            IEqualityComparer<T> comparer = ThePropFactory.GetRefEqualityComparer<T>();
+            IProp<T> pg = ThePropFactory.Create<T>(initialValue, propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
             AddProp<T>(propertyName, pg);
             return pg;
         }
@@ -126,7 +126,7 @@ namespace DRM.PropBag
         {
             bool hasStorage = true;
             bool typeIsSolid = true;
-            IProp<T> pg = thePropFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
+            IProp<T> pg = ThePropFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
             AddProp<T>(propertyName, pg);
             return pg;
         }
@@ -136,8 +136,8 @@ namespace DRM.PropBag
         {
             bool hasStorage = true;
             bool typeIsSolid = true;
-            IEqualityComparer<T> comparer = thePropFactory.GetRefEqualityComparer<T>();
-            IProp<T> pg = thePropFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
+            IEqualityComparer<T> comparer = ThePropFactory.GetRefEqualityComparer<T>();
+            IProp<T> pg = ThePropFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
             AddProp<T>(propertyName, pg);
             return pg;
         }
@@ -147,7 +147,7 @@ namespace DRM.PropBag
         {
             bool hasStorage = false;
             bool typeIsSolid = true;
-            IProp<T> pg = thePropFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
+            IProp<T> pg = ThePropFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
             AddProp<T>(propertyName, pg);
             return pg;
         }
@@ -157,8 +157,8 @@ namespace DRM.PropBag
         {
             bool hasStorage = false;
             bool typeIsSolid = true;
-            IEqualityComparer<T> comparer = thePropFactory.GetRefEqualityComparer<T>();
-            IProp<T> pg = thePropFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
+            IEqualityComparer<T> comparer = ThePropFactory.GetRefEqualityComparer<T>();
+            IProp<T> pg = ThePropFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
             AddProp<T>(propertyName, pg);
             return pg;
         }

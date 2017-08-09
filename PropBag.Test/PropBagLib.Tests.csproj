@@ -75,10 +75,17 @@
     <Compile Include="Loose\LooseModel.props.cs" />
     <Compile Include="Performance\TestPerformance.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Content Include="PubPropBag\PubPropBagModel_PropDefs.xml" />
     <Content Include="T4\PropGen_PropDefs.xml">
       <SubType>Designer</SubType>
     </Content>
-    <Compile Include="PubPropBag\TestPubPropBag.cs" />
+    <Compile Include="PubPropBag\PubPropBagModel.props.cs">
+      <DependentUpon>PubPropBagModel.props.tt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="PubPropBag\PubPropBagModel.cs" />
     <Compile Include="T4\PropGen.cs">
       <DependentUpon>PropGen.tt</DependentUpon>
       <AutoGen>True</AutoGen>
@@ -123,6 +130,11 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="packages.config" />
+    <Content Include="PubPropBag\PubPropBagModel.props.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>PubPropBagModel.props.cs</LastGenOutput>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="T4\PropGen.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>PropGen.cs</LastGenOutput>

@@ -108,65 +108,31 @@ namespace DRM.PropBagModel
             if (!deferMethodRefResolution.HasValue) deferMethodRefResolution = this.DeferMethodRefResolution;
             if (!requireExplicitInitialValue.HasValue) requireExplicitInitialValue = this.RequireExplicitInitialValue;
 
-            // DoWhenChaned Logic
-            if (pi.DoWhenChangedField == null) pi.DoWhenChangedField = new PropDoWhenChanged(null, false);
+            PropDoWhenChanged doWhenPrepped = PrepareDoWhenChangedField(pi.DoWhenChangedField, deferMethodRefResolution.Value, pi.Type);
 
-            string doWhenChanged;
-            if (deferMethodRefResolution.Value)
-                // Wrap in a call to GetDelegate if non-null, otherwise return the string: "null"
-                doWhenChanged = pi.DoWhenChangedField.DoWhenChanged == null ? "null" : WrapWithGetDelegate(pi.DoWhenChangedField.DoWhenChanged, pi.Type);
-            else
-                // Return the string: "null", if there is no doWhenChanged action provided.
-                doWhenChanged = pi.DoWhenChangedField.DoWhenChanged ?? "null";
-
-            string doAfterNotify = pi.DoWhenChangedField.DoAfterNotify ? "true" : "false";
-
-            // Comparer Logic
-            bool useRefEquality;
-            string objComp;
-            string comparer;
-
-            if (pi.ComparerField != null) // It was included in the XML, but the value of the comparer string could be null.
-            {
-                if (pi.ComparerField.UseRefEquality)
-                {
-                    if (pi.ComparerField.Comparer != null)
-                        throw new ArgumentException("The value of comparer must be null, if UseRefEquality is specified.");
-
-                    objComp = "ObjComp";
-                    useRefEquality = true;
-                }
-                else
-                {
-                    objComp = null;
-                    useRefEquality = false;
-                }
-
-                comparer = pi.ComparerField.Comparer ?? "null";
-            }
-            else
-            {
-                objComp = null;
-                useRefEquality = false;
-                comparer = "null";
-            }
-
-
+            PropComparerField comparerPrepped = PrepareComparerField(pi.ComparerField);
 
             // Prepare the AddProp method call
-            string methodName;
             string formatString;
-            object[] vals;
+            object[] vals = new object[] {
+                comparerPrepped.UseRefEquality ? "ObjComp" : null,
+                null, // will eventually be null, "NoValue" or "NoStore"
+                pi.Type,
+                pi.Name,
+                doWhenPrepped.DoWhenChanged,
+                doWhenPrepped.DoAfterNotify ? "true" : "false",
+                comparerPrepped.Comparer, "null",
+                "null", // Extra Info -- if we ever use it.
+                null // Initial Value
+            };
+
 
             if(pi.HasStore)
             {
-                methodName = "AddProp";
-                string initVal;
-                bool setToDefault;
-                bool valueIsDefined = InitialValueIsDefined(pi.InitalValueField, pi.Name, 
-                    requireExplicitInitialValue.Value, out initVal, out setToDefault);
+                PropIniialValueField initialValPrepped = PrepareInitialField(pi.InitalValueField,
+                    pi.Name, requireExplicitInitialValue.Value);
 
-                if (valueIsDefined)
+                if (!initialValPrepped.SetToUndefined)
                 {
                     // AddProp or AddPropObjComp
 
@@ -177,33 +143,28 @@ namespace DRM.PropBagModel
                     //      object extraInfo = null,
                     //      T initalValue = default(T))
 
-                    if (setToDefault) // (pi.InitalValueField.SetToDefault)
+                    if (initialValPrepped.SetToDefault) // (pi.InitalValueField.SetToDefault)
                     {
-                        if (useRefEquality)
+                        if (comparerPrepped.UseRefEquality)
                         {
                             formatString = "AddProp{0}{1}<{2}>(\"{3}\", {4}, {5})";
-                            vals = new object[] {"ObjComp", null, pi.Type, pi.Name, doWhenChanged, doAfterNotify};
-
                         }
                         else
                         {
                             formatString = "AddProp{0}{1}<{2}>(\"{3}\", {4}, {5}, {6})";
-                            vals = new object[] {null, null, pi.Type, pi.Name, doWhenChanged, doAfterNotify, comparer};
                         }
                     }
                     else
                     {
-                        initVal = GetStringRepForValue(initVal, pi.Type);
+                        vals[8] = GetStringRepForValue(initialValPrepped.InitialValue, pi.Type);
 
-                        if(useRefEquality)
+                        if (comparerPrepped.UseRefEquality)
                         {
-                            formatString = "AddProp{0}{1}<{2}>(\"{3}\", {4}, {5}, {6}, {7})";
-                            vals = new object[] {"ObjComp", null, pi.Type, pi.Name, doWhenChanged, doAfterNotify, "null", initVal};
+                            formatString = "AddProp{0}{1}<{2}>(\"{3}\", {4}, {5}, {7}, {8})";
                         }
                         else
                         {
                             formatString = "AddProp{0}{1}<{2}>(\"{3}\", {4}, {5}, {6}, {7}, {8})";
-                            vals = new object[] {null, null, pi.Type, pi.Name, doWhenChanged, doAfterNotify, comparer, "null", initVal};
                         }
                     }
                 }
@@ -217,17 +178,13 @@ namespace DRM.PropBagModel
                     //      IEqualityComparer<T> comparer = null,
                     //      object extraInfo = null,
 
-                    if (useRefEquality)
+                    if (comparerPrepped.UseRefEquality)
                     {
                         formatString = "AddProp{0}{1}<{2}>(\"{3}\", {4}, {5})";
-                        vals = new object[] {"ObjComp", "NoValue", pi.Type, pi.Name, doWhenChanged, doAfterNotify};
-
                     }
                     else
                     {
                         formatString = "AddProp{0}{1}<{2}>(\"{3}\", {4}, {5}, {6})";
-                        vals = new object[] {null, "NoValue", pi.Type, pi.Name, doWhenChanged, doAfterNotify, comparer};
-
                     }
                 }
             }
@@ -240,32 +197,51 @@ namespace DRM.PropBagModel
                 //      bool doAfterNotify = false,
                 //      IEqualityComparer<T> comparer = null)
 
-                if (useRefEquality)
+                if (comparerPrepped.UseRefEquality)
                 {
                     formatString = "AddProp{0}{1}<{2}>(\"{3}\", {4}, {5})";
-                    vals = new object[] {"ObjComp", "NoStore", pi.Type, pi.Name, doWhenChanged, doAfterNotify};
-
                 }
                 else
                 {
                     formatString = "AddProp{0}{1}<{2}>(\"{3}\", {4}, {5}, {6})";
-                    vals = new object[] {null, "NoStore", pi.Type, pi.Name, doWhenChanged, doAfterNotify, comparer };
-
                 }
             }
 
             return string.Format(formatString, vals);
         }
 
-        private bool InitialValueIsDefined(PropIniialValueField pivf,
-            string propertyName,
-            bool requireExplicitInitialValue,
-            out string value,
-            out bool useDefault)
+        private PropDoWhenChanged PrepareDoWhenChangedField(PropDoWhenChanged dwcf, bool deferMethodRefResolution, string propertyType)
         {
-            if (pivf == null) 
+            if (dwcf == null) return new PropDoWhenChanged("null");
+
+            string doWhenChanged;
+            if (deferMethodRefResolution)
+                // Wrap in a call to GetDelegate if non-null, otherwise return the string: "null"
+                doWhenChanged = dwcf.DoWhenChanged == null ? "null" : WrapWithGetDelegate(dwcf.DoWhenChanged, propertyType);
+            else
+                // Return the string: "null", if there is no doWhenChanged action provided.
+                doWhenChanged = dwcf.DoWhenChanged ?? "null";
+
+            return new PropDoWhenChanged(doWhenChanged, dwcf.DoAfterNotify);
+        }
+
+        private PropComparerField PrepareComparerField(PropComparerField cf)
+        {
+            if (cf == null) return new PropComparerField("null");
+
+            if (cf.UseRefEquality && cf.Comparer != null)
             {
-                if(requireExplicitInitialValue)
+                throw new ArgumentException("cf value of comparer must be null, if UseRefEquality is specified.");
+            }
+
+            return new PropComparerField(cf.Comparer ?? "null", cf.UseRefEquality);
+        }
+
+        private PropIniialValueField PrepareInitialField(PropIniialValueField pivf, string propertyName, bool requireExplicitInitialValue)
+        {
+            if (pivf == null)
+            {
+                if (requireExplicitInitialValue)
                 {
                     string msg = "For property {0}: Property definitions that have false for the value of 'caller-provides-storage' "
                         + "must include an initial-value element.";
@@ -273,9 +249,7 @@ namespace DRM.PropBagModel
                 }
 
                 // This will result in the default value being used.
-                value = null;
-                useDefault = true;
-                return true;
+                return new PropIniialValueField(null, setToDefault: true, setToUndefined: false, setToNull: false, setToEmptyString: false);
             }
 
             if (pivf.InitialValue == null && !pivf.SetToDefault && !pivf.SetToUndefined && !pivf.SetToNull && !pivf.SetToEmptyString)
@@ -293,7 +267,7 @@ namespace DRM.PropBagModel
 
             if (pivf.SetToUndefined && pivf.InitialValue != null)
             {
-                string msg = "For property {0}: he initial-value has been specified, but use-undefined has also been set to true; " 
+                string msg = "For property {0}: he initial-value has been specified, but use-undefined has also been set to true; "
                 + "this is ambiguous.";
                 throw new ArgumentException(string.Format(msg, propertyName));
             }
@@ -312,49 +286,34 @@ namespace DRM.PropBagModel
                 throw new ArgumentException(string.Format(msg, propertyName));
             }
 
-            if (pivf.SetToDefault)
-            {
-                value = "null";
-                useDefault = true;
-                return true;
-            }
+            //if (pivf.SetToDefault)
+            //{
+            //    return new PropIniialValueField("null", setToDefault: true, setToUndefined: false, setToNull: false, setToEmptyString: false);
+            //}
 
-            if (pivf.SetToUndefined)
-            {
-                value = null;
-                useDefault = false;
-                return false;
-            }
+            //if (pivf.SetToUndefined)
+            //{
+            //    return new PropIniialValueField(null, setToDefault: false, setToUndefined: true, setToNull: false, setToEmptyString: false);
+            //}
 
             if (pivf.SetToNull)
             {
-                value = "null";
-                useDefault = false;
-                return true;
+                return new PropIniialValueField("null", setToDefault: false, setToUndefined: false, setToNull: true, setToEmptyString: false);
             }
 
             if (pivf.SetToEmptyString)
             {
-                value = "\"\"";
-                useDefault = false;
-                return true;
+                return new PropIniialValueField("\"\"", setToDefault: false, setToUndefined: false, setToNull: false, setToEmptyString: true);
+
             }
 
-            value = pivf.InitialValue;
-            useDefault = false;
-            return true;
+            return pivf;
         }
 
         private string GetStringRepForValue(string value, string type)
         {
-            //// The caller would have used "use-null", if they wanted it set to null.
-            //// The caller must be specifing the empty string.
-            //if (value == null && type == "string")
-            //{
-            //    return "\"\"";
-            //}
-
-            // Null results in no output from the string.format method, replace with "null".
+            // A Null value would result in no output from the string.format method,
+            // replace with "null".
             return value ?? "null";
         }
 

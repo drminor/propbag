@@ -46,18 +46,11 @@
     <Compile Include="PropItem.cs" />
     <Compile Include="PropModel.cs" />
     <Compile Include="PropModelStaticText.cs" />
-    <None Include="PropBagModel - Copy.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="PropModelReader_OLD.cs" />
     <Compile Include="PropModelReader.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PropBagModel.dtd" />
     <None Include="PropBagModel.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="PropBagModel_old.xsd">
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>

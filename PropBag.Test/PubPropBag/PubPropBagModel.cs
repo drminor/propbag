@@ -9,13 +9,10 @@ using DRM.PropBag;
 
 namespace PropBagLib.Tests
 {
-    public class TestPubPropBag : PubPropBag
+    public partial class PubPropBagModel : PubPropBag
     {
 
-        public TestPubPropBag() : base(PropBagTypeSafetyMode.AllPropsMustBeRegistered) 
-        {
-            
-        }
+
 
     }
 }

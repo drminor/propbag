@@ -1,14 +1,17 @@
 ﻿<!ELEMENT model (namespaces, props)>
-  
+
+<!ATTLIST model derive-from-pub-prop-bag (true|false) "false">  
 <!ATTLIST model class-name CDATA #REQUIRED>
 <!ATTLIST model namespace CDATA #REQUIRED>
 <!ATTLIST model type-safety-mode (AllPropsMustBeRegistered|OnlyTypedAccess|Loose) "AllPropsMustBeRegistered">
 <!ATTLIST model defer-method-ref-resolution (true|false) "false">
+<!ATTLIST model require-explicit-initial-value (true|false) "false">
 
 <!ELEMENT namespaces (namespace*)>
 <!ELEMENT namespace (#PCDATA)>
 
 <!ELEMENT props (prop*)>
+
 <!ELEMENT prop (name, type, initial-value?, comparer?, do-when-changed?)>
 <!ATTLIST prop caller-provides-storage (true|false) "false">
 
@@ -16,6 +19,11 @@
 <!ELEMENT type (#PCDATA)>
 
 <!ELEMENT initial-value (#PCDATA)>
+<!ATTLIST initial-value use-undefined (true|false) "false">
+<!ATTLIST initial-value use-default (true|false) "false">
+<!ATTLIST initial-value use-null (true|false) "false">
+<!ATTLIST initial-value use-empty-string (true|false) "false">
+
 
 <!ELEMENT comparer (#PCDATA)>
 <!ATTLIST comparer use-reference-equality (true|false) "false">

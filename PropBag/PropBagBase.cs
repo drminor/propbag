@@ -46,13 +46,13 @@ namespace DRM.PropBag
         public event PropertyChangingEventHandler PropertyChanging; // = delegate { };
         public event PropertyChangedWithValsHandler PropertyChangedWithVals; // = delegate { };
 
-        protected AbstractPropFactory thePropFactory { get; private set; }
+        public AbstractPropFactory ThePropFactory { get; private set; }
 
         private readonly Dictionary<string, IPropGen> tVals;
 
         private readonly Dictionary<Type, DoSetDelegate> doSetDelegateDict;
 
-        public PropBagTypeSafetyMode TypeSafetyMode { get; protected set; }
+        public PropBagTypeSafetyMode TypeSafetyMode { get; private set; }
 
 
         /// <summary>
@@ -106,7 +106,7 @@ namespace DRM.PropBag
             }
 
             // Use the "built-in" property factory, if the caller did not supply one.
-            this.thePropFactory = thePropFactory ?? new PropFactory();
+            this.ThePropFactory = thePropFactory ?? new PropFactory();
 
             tVals = new Dictionary<string, IPropGen>();
             doSetDelegateDict = new Dictionary<Type, DoSetDelegate>();
@@ -115,16 +115,6 @@ namespace DRM.PropBag
         // When we are being destructed, remove all of the handlers that we provisioned.
         ~PropBagBase()
         {
-            //foreach (KeyValuePair<string,IPropGen> kvp in tVals)
-            //{
-            //    IPropGen genProp = kvp.Value;
-
-            //    foreach (PropertyChangedWithValsHandler h in genProp.PropChangedWithValsHandlerList)
-            //    {
-            //        this.PropertyChangedWithVals -= h;
-            //    }
-            //}
-
             // Maybe not necessary, but since each of these delegates refer back to this instance of PropBag,
             // it may make it a little easier on the garbage collector.
             doSetDelegateDict.Clear();
@@ -185,7 +175,7 @@ namespace DRM.PropBag
                     throw new ApplicationException(string.Format("Property: {0} has not been defined with a call to AddProp or any SetIt<T> call and the operation setting 'OnlyTypeAccesss' is set to true.", propertyName));
                 }
 
-                genProp = thePropFactory.CreatePropInferType(value, propertyName, null, true);
+                genProp = ThePropFactory.CreatePropInferType(value, propertyName, null, true);
                 tVals.Add(propertyName, genProp);
 
                 // No point in calling DoSet, it would find that the value is the same and do nothing.
@@ -248,8 +238,7 @@ namespace DRM.PropBag
                 }
 
                 // Property has not been defined yet, let's create a definition for it now and initialize the value.
-
-                genProp = thePropFactory.Create<T>(value, propertyName);
+                genProp = ThePropFactory.Create<T>(value, propertyName);
                 tVals.Add(propertyName, genProp);
 
                 // No reason to call DoSet, it will find no change and do nothing.
@@ -288,7 +277,7 @@ namespace DRM.PropBag
                 }
 
                 // Property has not been defined yet, let's create a definition for it now 
-                genProp = thePropFactory.CreateWithNoValue<T>(propertyName, hasStorage: false, typeIsSolid: true);
+                genProp = ThePropFactory.CreateWithNoValue<T>(propertyName, hasStorage: false, typeIsSolid: true);
 
                 tVals.Add(propertyName, genProp);
             }
@@ -338,7 +327,7 @@ namespace DRM.PropBag
                     throw new ApplicationException(string.Format("Property: {0} has not been defined with a call to AddProp or any SetIt<T> call and the operation setting 'OnlyTypeAccesss' is set to true.", propertyName));
                 }
 
-                genProp = thePropFactory.CreateWithNoValue<object>(propertyName, null, true, false, null, false, null);
+                genProp = ThePropFactory.CreateWithNoValue<object>(propertyName, null, true, false, null, false, null);
                 tVals.Add(propertyName, genProp);
             }
 
@@ -446,43 +435,6 @@ namespace DRM.PropBag
         #endregion
 
         #region Property Management
-
-        ///// <summary>
-        ///// Use when you want to specify an Action<typeparamref name="T"/> to be performed
-        ///// either before or after the PropertyChanged event has been raised.
-        ///// </summary>
-        ///// <typeparam name="T">The type of this property's value.</typeparam>
-        ///// <param name="propertyName"></param>
-        ///// <param name="doIfChanged"></param>
-        ///// <param name="doAfterNotify"></param>
-        ///// <param name="comparer">A instance of a class that implements IEqualityComparer and thus an Equals method.</param>
-        ///// <param name="initalValue"></param>
-        //protected IProp<T> PAddProp<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify,
-        //    IEqualityComparer<T> comparer, object extraInfo, T initalValue = default(T))
-        //{
-        //    IProp<T> pg = thePropFactory.Create<T>(initalValue, propertyName, extraInfo, true, true, doIfChanged, doAfterNotify, comparer);
-        //    tVals.Add(propertyName, pg);
-
-        //    return pg;
-        //}
-
-        //protected IProp<T> PAddPropNoValue<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify,
-        //    IEqualityComparer<T> comparer, object extraInfo)
-        //{
-        //    IProp<T> pg = thePropFactory.CreateWithNoValue<T>(propertyName, extraInfo, true, true, doIfChanged, doAfterNotify, comparer);
-        //    tVals.Add(propertyName, pg);
-
-        //    return pg;
-        //}
-
-        //protected IProp<T> PAddPropNoStore<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify,
-        //    IEqualityComparer<T> comparer, object extraInfo)
-        //{
-        //    IProp<T> pg = thePropFactory.CreateWithNoValue<T>(propertyName, extraInfo, false, true, doIfChanged, doAfterNotify, comparer);
-        //    tVals.Add(propertyName, pg);
-
-        //    return pg;
-        //}
 
         protected void AddProp<T>(string propertyName, IProp<T> prop)
         {
@@ -683,8 +635,7 @@ namespace DRM.PropBag
                 }
 
                 // Property has not been defined yet, let's create a definition for it now and initialize the value.
-
-                genProp = thePropFactory.CreateWithNoValue<T>(propertyName);
+                genProp = ThePropFactory.CreateWithNoValue<T>(propertyName);
                 tVals.Add(propertyName, genProp);
             }
 
@@ -714,7 +665,7 @@ namespace DRM.PropBag
                 // Next statement uses reflection.
                 object curValue = genProp.Value;
 
-                IPropGen newwGenProp = thePropFactory.Create(newType, genProp.Value, propertyName, null, true, true);
+                IPropGen newwGenProp = ThePropFactory.Create(newType, genProp.Value, propertyName, null, true, true);
 
                 //genProp.UpdateWithSolidType(newType, curValue);
                 genProp = newwGenProp;

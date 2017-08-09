@@ -9,13 +9,13 @@ using PropBagLib.Tests;
 
 namespace PropBagLib.Tests
 {
-	public partial class PropGen : PropBag
+	public partial class PubPropBagModel : PubPropBag
 	{
-		public PropGen() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered, null) { }
+		public PubPropBagModel() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered, null) { }
 
-		public PropGen(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
+		public PubPropBagModel(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
 
-		public PropGen(PropBagTypeSafetyMode typeSafetyMode, AbstractPropFactory factory) : base(typeSafetyMode, factory)
+		public PubPropBagModel(PropBagTypeSafetyMode typeSafetyMode, AbstractPropFactory factory) : base(typeSafetyMode, factory)
 		{
 	        AddProp<object>("PropObject", null, false, null);
 	        AddProp<string>("PropString", GetDelegate<string>("DoWhenStringChanged"), false, null);
@@ -302,7 +302,7 @@ namespace PropBagLib.Tests
 	 
 	#endregion
 
-			/// <summary>
+		/// <summary>
 		/// If the delegate exists, the original name is returned,
 		/// otherwise null is returned.
 		/// </summary>
