@@ -22,7 +22,7 @@ namespace DRM.PropBag
         /// Our callers could simply cast all instances that inherit from PropGenBase into a IProp<typeparamref name="T"/>
         /// When they need to access the instanace as a IProp<typeparamref name="T"/>, but this makes it more formal.
         /// </summary>
-        public object TypedProp { get; set; }
+        public IProp TypedProp { get; set; }
 
         public bool TypeIsSolid { get; set; }
 
@@ -55,10 +55,7 @@ namespace DRM.PropBag
             TypedProp = null;
             TypeIsSolid = typeIsSolid;
             HasStore = hasStore;
-
-            //PropChangedWithValsHandlerList = new List<PropertyChangedWithValsHandler>();
         }
-
 
         #region Public Methods and Properties
 
@@ -107,10 +104,12 @@ namespace DRM.PropBag
                 return null;
             }
 
-            foreach (Tuple<Action<object, object>, PropertyChangedWithValsHandler> tup in actTable)
+            for (int i = 0; i < actTable.Count; i++)
             {
+                Tuple<Action<object, object>, PropertyChangedWithValsHandler> tup = actTable[i];
                 if (tup.Item1 == act) return tup.Item2;
             }
+
             return null;
         }
 
@@ -139,8 +138,10 @@ namespace DRM.PropBag
 
         #endregion
 
-        ~PropGenBase()
+        public void CleanUp()
         {
+            if(TypedProp != null) TypedProp.CleanUpTyped();
+            actTable = null;
             PropertyChangedWithVals = null;
         }
 

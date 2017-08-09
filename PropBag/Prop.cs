@@ -9,7 +9,7 @@ using DRM.Ipnwvc;
 
 namespace DRM.PropBag
 {
-    public class Prop<T> : PropTypedBase<T>
+    public sealed class Prop<T> : PropTypedBase<T>
     {
         public Prop(T initalValue, bool hasStore = true, bool typeIsSolid = true,
             Action<T, T> doWhenChanged = null, bool doAfterNotify = false,

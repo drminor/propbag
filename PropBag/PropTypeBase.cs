@@ -82,10 +82,12 @@ namespace DRM.PropBag
                 return null;
             }
 
-            foreach (Tuple<Action<T, T>, PropertyChangedWithTValsHandler<T>> tup in actTable)
+            for (int i = 0; i < actTable.Count; i++)
             {
+                Tuple<Action<T, T>, PropertyChangedWithTValsHandler<T>> tup = actTable[i];
                 if (tup.Item1 == act) return tup.Item2;
             }
+
             return null;
         }
 
@@ -135,12 +137,19 @@ namespace DRM.PropBag
             return hadOnePreviously;
         }
 
-        ~PropTypedBase()
+        public object TypedValueAsObject { get { return Value; } }
+
+        public bool CallBacksHappenAfterPubEvents { get { return DoAfterNotify; } }
+        public bool HasCallBack { get { return DoWHenChangedAction != null; } }
+        public bool HasChangedWithTValSubscribers { get { return PropertyChangedWithTVals != null; } }
+
+        public void CleanUpTyped()
         {
             Comparer = null;
             DoWHenChangedAction = null;
             PropertyChangedWithTVals = null;
         }
+
     }
 }
          

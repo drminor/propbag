@@ -15,7 +15,7 @@ namespace PropBagLib.Tests
     public class TestPerformance
     {
 
-        private PerformanceModel mod1;
+        public PerformanceModel mod1;
 
         bool varToEnsureWorkIsDone = false;
 
@@ -30,6 +30,7 @@ namespace PropBagLib.Tests
         [TearDown]
         public void destroy()
         {
+            mod1.ClearEventSubscribers();
             mod1 = null;
         }
 

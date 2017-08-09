@@ -1,19 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-
-using DRM.Ipnwvc;
-
 
 namespace DRM.PropBag
 {
-    public interface IProp<T> : IPropGen
+    /// <summary>
+    /// These are the non-type specific features that every instance of IProp<typeparamref name="T"/> implement.
+    /// </summary>
+    public interface IProp
     {
-        T TypedValue { get; set; }
-
+        object TypedValueAsObject { get; }
         bool ValueIsDefined { get; }
 
         /// <summary>
@@ -22,18 +16,10 @@ namespace DRM.PropBag
         /// <returns>True, if the value was defined at the time this call was made.</returns>
         bool SetValueToUndefined();
 
-        bool CompareTo(T value);
-        bool Compare(T val1, T val2);
+        bool CallBacksHappenAfterPubEvents { get; }
+        bool HasCallBack { get; }
+        bool HasChangedWithTValSubscribers { get; }
 
-        void DoWhenChanged(T oldVal, T newVal);
-        bool DoAfterNotify { get; set; }
-        bool UpdateDoWhenChangedAction(Action<T, T> doWHenChangedAction, bool? doAfterNotify);
-
-        // Property Changed with typed values support
-        event PropertyChangedWithTValsHandler<T> PropertyChangedWithTVals;
-        void OnPropertyChangedWithTVals(string propertyName, T oldVal, T newVal);
-
-        void SubscribeToPropChanged(Action<T, T> doOnChange);
-        bool UnSubscribeToPropChanged(Action<T, T> doOnChange);
+        void CleanUpTyped();
     }
 }

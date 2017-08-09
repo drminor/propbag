@@ -43,6 +43,8 @@
     <Compile Include="ExtValDelegates.cs" />
     <Compile Include="IBindExtStore.cs" />
     <Compile Include="IProp.cs" />
+    <Compile Include="IPropTyped.cs" />
+    <Compile Include="IPropBag.cs" />
     <Compile Include="IPropGen.cs" />
     <Compile Include="AbstractPropFactory.cs" />
     <Compile Include="IPubPropBag.cs" />
@@ -56,9 +58,7 @@
       <Name>Inpwvc</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Documentation\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

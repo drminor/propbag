@@ -10,7 +10,7 @@ using DRM.Ipnwvc;
 namespace DRM.PropBag
 {
 
-    public class PropExternStore<T> : PropTypedBase<T>
+    public sealed class PropExternStore<T> : PropTypedBase<T>
     {
         public PropExternStore(string propertyName, object extraInfo,
             bool typeIsSolid = true,
@@ -49,6 +49,5 @@ namespace DRM.PropBag
         public Guid Tag { get; private set; }
         public GetExtVal<T> Getter { get; set; }
         public SetExtVal<T> Setter { get; set; }
-
     }
 }

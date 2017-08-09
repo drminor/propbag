@@ -194,6 +194,16 @@ namespace DRM.PropBag
             return base.PGetAllPropertyNames();
         }
 
+        protected void ClearAll()
+        {
+            base.PClearAll();
+        }
+
+        protected void ClearEventSubscribers()
+        {
+            base.PClearEventSubscribers();
+        }
+
         #endregion
 
         #region Methods to Raise Events

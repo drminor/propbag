@@ -33,5 +33,10 @@ namespace PropBagLib.Tests
             DoWhenICollectionIntChanged_WasCalled = true;
         }
 
+        new public void ClearEventSubscribers()
+        {
+            base.PClearEventSubscribers();
+        }
+
     }
 }

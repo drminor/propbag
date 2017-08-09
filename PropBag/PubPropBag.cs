@@ -194,35 +194,17 @@ namespace DRM.PropBag
             return base.PGetAllPropertyNames();
         }
 
+        public void ClearAll()
+        {
+            base.PClearAll();
+        }
+
+        public void ClearEventSubscribers()
+        {
+            base.PClearEventSubscribers();
+        }
+
         #endregion
-
-        //#region Event Accessor Support 
-
-        ///// <summary>
-        ///// Uses the name of the property or event accessor of the calling method to indentify the property,
-        ///// if the propertyName argument is not specifed.
-        ///// </summary>
-        ///// <typeparam name="T"></typeparam>
-        ///// <param name="eventHandler"></param>
-        ///// <param name="eventPropertyName"></param>
-        //public void AddToPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, [CallerMemberName] string eventPropertyName = null)
-        //{
-        //    base.PAddToPropChanged(eventHandler, eventPropertyName);
-        //}
-
-        ///// <summary>
-        ///// Uses the name of the property or event accessor of the calling method to indentify the property,
-        ///// if the propertyName argument is not specifed.
-        ///// </summary>
-        ///// <typeparam name="T"></typeparam>
-        ///// <param name="eventHandler"></param>
-        ///// <param name="eventPropertyName"></param>
-        //public void RemoveFromPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, [CallerMemberName] string eventPropertyName = null)
-        //{
-        //    base.PRemoveFromPropChanged(eventHandler, eventPropertyName);
-        //}
-
-        //#endregion
 
         #region Methods to Raise Events
 

@@ -112,14 +112,18 @@ namespace DRM.PropBag
             doSetDelegateDict = new Dictionary<Type, DoSetDelegate>();
         }
 
-        // When we are being destructed, remove all of the handlers that we provisioned.
-        ~PropBagBase()
+        protected void PClearEventSubscribers()
         {
-            // Maybe not necessary, but since each of these delegates refer back to this instance of PropBag,
-            // it may make it a little easier on the garbage collector.
-            doSetDelegateDict.Clear();
+            foreach (var x in tVals.Values)
+            {
+                x.CleanUp();
+            }
+        }
 
-            // Really not necessary, but while were here...
+        protected void PClearAll()
+        {
+            doSetDelegateDict.Clear();
+            PClearEventSubscribers();
             tVals.Clear();
         }
 

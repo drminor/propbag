@@ -40,6 +40,7 @@ namespace PropBagLib.Tests
         [OneTimeTearDown]
         public void destroy()
         {
+            mod1.ClearEventSubscribers();
             mod1 = null;
         }
 

@@ -8,6 +8,9 @@ using DRM.Ipnwvc;
 
 namespace DRM.PropBag
 {
+    /// <summary>
+    /// Adds GetIt, SetIt, and AddProp methods to IPropBag.
+    /// </summary>
     public interface IPubPropBag : IPropBag
     {
         object this[string propertyName] { get; set; }
@@ -47,23 +50,11 @@ namespace DRM.PropBag
         IDictionary<string, object> GetAllPropertyValues();
 
         IList<string> GetAllPropertyNames();
+
+        void ClearAll();
+
+        void ClearEventSubscribers();
+
     }
 
-    public interface IPropBag : INotifyPropertyChanged, INotifyPropertyChanging, INotifyPropertyChangedWithVals
-    {
-        PropBagTypeSafetyMode TypeSafetyMode { get; }
-
-        bool PropertyExists(string propertyName);
-
-        Type GetTypeOfProperty(string propertyName);
-
-        void SubscribeToPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, string propertyName);
-        void UnSubscribeToPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, string propertyName);
-
-        void SubscribeToPropChanged<T>(Action<T, T> doOnChange, string propertyName);
-        bool UnSubscribeToPropChanged<T>(Action<T, T> doOnChange, string propertyName);
-
-        void SubscribeToPropChanged(Action<object, object> doOnChange, string propertyName);
-        bool UnSubscribeToPropChanged(Action<object, object> doOnChange, string propertyName);
-    }
 }
