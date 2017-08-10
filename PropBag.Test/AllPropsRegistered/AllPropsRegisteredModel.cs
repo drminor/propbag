@@ -16,6 +16,13 @@ namespace PropBagLib.Tests
         public bool DoWhenNullIntChanged_WasCalled { get; set; }
         public bool DoWhenICollectionIntChanged_WasCalled { get; set; }
 
+        // This is used to test adding a property that has not been registered via a call to AddProp
+        public new object this[string key]
+        {
+            get { return base[key]; }
+            set { base[key] = value; }
+        }
+
         public void DoWhenStringChanged(string oldVal, string newVal)
         {
             DoWhenStringChanged_WasCalled = true;

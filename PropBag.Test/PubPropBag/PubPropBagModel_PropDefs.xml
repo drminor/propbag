@@ -1,12 +1,11 @@
 ﻿<?xml version="1.0"?>
 <model
   derive-from-pub-prop-bag="true"
-  class-name="TestAllPropsRegistered"
-  namespace="PropBagLib.Tests"
-  type-safety-mode="AllPropsMustBeRegistered"
-  defer-method-ref-resolution="true"
+  class-name="PubPropBagModel"
+  output-namespace="PropBagLib.Tests"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-xsi:schemaLocation="https://www.swamphillproductions.com/PropBagModel ../../PropBagModel/PropBagModel.xsd">
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xsi:schemaLocation="https://www.swamphillproductions.com/PropBagModel ../../PropBagModel/PropBagModel.xsd">
   <namespaces>
     <namespace>System</namespace>
     <namespace>System.Collections.Generic</namespace>

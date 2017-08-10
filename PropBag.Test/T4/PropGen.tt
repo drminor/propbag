@@ -5,7 +5,9 @@
 <#@ import namespace="System.Text" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ assembly name="$(SolutionDir)PropBagModel\bin\Debug\PropBagModel.dll" #>
+<#@ assembly name="$(SolutionDir)PropBagClassGenerator\bin\Debug\PropBagClassGenerator.dll" #>
 <#@ import namespace="DRM.PropBagModel" #>
+<#@ import namespace="DRM.PropBagClassGenerator" #>
 <#@ output extension=".cs" #>
 <#
 	//string absolutePath = @"C:\DEV\VS2013Projects\PubPropBag\PropBagT4\TestInput.xml";
@@ -22,19 +24,19 @@
 	pm.ClassName = className;
 #>
 
-<#= pm.GetNamespaces() #>
+<#= T4Support.GetNamespaces(pm) #>
 namespace <#= pm.Namespace #>
 {
-	public partial class <#= pm.ClassName #> : <#= pm.GetBaseClassName() #>
+	public partial class <#= pm.ClassName #> : <#= T4Support.GetBaseClassName(pm) #>
 	{
-		public <#= pm.ClassName #>() : this(PropBagTypeSafetyMode.<#= pm.SafetyModeString #>, null) { }
+		public <#= pm.ClassName #>() : this(PropBagTypeSafetyMode.<#= T4Support.GetSafetyModeString(pm) #>, null) { }
 
 		public <#= pm.ClassName #>(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
 
 		public <#= pm.ClassName #>(PropBagTypeSafetyMode typeSafetyMode, AbstractPropFactory factory) : base(typeSafetyMode, factory)
 		{
 	<# foreach (PropItem pi in pm.Props) {#>
-        <#= pm.GetAddPropMethodCallText(pi) #>;
+        <#= T4Support.GetAddPropMethodCallText(pm, pi) #>;
 	<#  } #>
 	}
 
@@ -70,7 +72,7 @@ namespace <#= pm.Namespace #>
 	<#  } #> 
 	#endregion
 
-	<#= PropModelStaticText.GetGetDelegateMethodText() #>
+<#= PropModelStaticText.GetGetDelegateMethodText() #>
 
 	} 
 }

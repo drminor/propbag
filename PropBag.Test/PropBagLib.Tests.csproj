@@ -43,6 +43,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CreateAtRunTime\CreateAtRunTimeModel.cs" />
+    <Compile Include="CreateAtRunTime\TestCreateAtRunTime.cs" />
     <Compile Include="ExtStore\ExtData.cs" />
     <Compile Include="ExtStore\ExtStoreModel.cs" />
     <Compile Include="ExtStore\TestExternalStore.cs" />
@@ -102,6 +104,10 @@
     <ProjectReference Include="..\NotifyPropChangedWithVals\Inpwvc.csproj">
       <Project>{18580a49-4d08-4b0d-9a2e-4ed38891c63b}</Project>
       <Name>Inpwvc</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PropBagClassGenerator\PropBagClassGenerator.csproj">
+      <Project>{d6578133-d762-4e46-a37a-831640690c35}</Project>
+      <Name>PropBagClassGenerator</Name>
     </ProjectReference>
     <ProjectReference Include="..\PropBagModel\PropBagModel.csproj">
       <Project>{8c801165-03c1-429b-8099-4f5505921da5}</Project>

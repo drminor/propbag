@@ -18,15 +18,15 @@ namespace PropBagLib.Tests
 		public PerformanceModel(PropBagTypeSafetyMode typeSafetyMode, AbstractPropFactory factory) : base(typeSafetyMode, factory)
 		{
 	        AddProp<object>("PropObject", null, false, null);
-	        AddProp<string>("PropString", null, false, null, null, "");
+	        AddProp<string>("PropString", null, false, null);
 	        AddPropObjComp<string>("PropStringUseRefComp", null, false);
-	        AddProp<bool>("PropBool", null, false, null, null, false);
+	        AddProp<bool>("PropBool", null, false, null);
 	        AddProp<int>("PropInt", null, false, null);
 	        AddProp<TimeSpan>("PropTimeSpan", null, false, null);
 	        AddProp<Uri>("PropUri", null, false, null);
 	        AddProp<Lazy<int>>("PropLazyInt", null, false, null);
-	        AddProp<Nullable<int>>("PropNullableInt", null, false, null, null, -1);
-	        AddProp<ICollection<int>>("PropICollectionInt", null, false, null, null, null);
+	        AddProp<Nullable<int>>("PropNullableInt", null, false, null);
+	        AddProp<ICollection<int>>("PropICollectionInt", null, false, null);
 		}
 
 	#region Property Declarations

@@ -36,14 +36,24 @@ namespace DRM.PropBagModel
         [XmlAttribute(AttributeName = "caller-provides-storage")]
         public bool HasStore { get; set; }
 
+        [XmlIgnore]
+        public bool TypeIsSolid { get; set; }
+
+        [XmlIgnore]
+        public string ExtraInfo { get; set; }
+
         public PropItem() : this(null, null) { }
 
-        public PropItem(string name, string type, bool hasStore = true,
+        public PropItem(string type, string name,
+            string extraInfo = null, bool hasStore = true,
+            bool typeIsSolid = true,
             PropDoWhenChanged doWhenChanged = null, PropComparerField comparer = null)
         {
-            Name = name;
             Type = type;
+            Name = name;
+            ExtraInfo = extraInfo;
             HasStore = hasStore;
+            TypeIsSolid = typeIsSolid;
             ComparerField = comparer;
             DoWhenChangedField = doWhenChanged;
 

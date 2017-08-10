@@ -9,7 +9,7 @@ using PropBagLib.Tests;
 
 namespace PropBagLib.Tests
 {
-	public partial class AllPropsRegisteredModel : PubPropBag
+	public partial class AllPropsRegisteredModel : PropBag
 	{
 		public AllPropsRegisteredModel() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered, null) { }
 

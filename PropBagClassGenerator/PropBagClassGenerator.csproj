@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{8C801165-03C1-429B-8099-4F5505921DA5}</ProjectGuid>
+    <ProjectGuid>{D6578133-D762-4E46-A37A-831640690C35}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>DRM.PropBagModel</RootNamespace>
-    <AssemblyName>PropBagModel</AssemblyName>
+    <RootNamespace>DRM.PropBagClassGenerator</RootNamespace>
+    <AssemblyName>PropBagClassGenerator</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -39,31 +39,28 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="PropInitalValueField.cs" />
-    <Compile Include="PropComparerField.cs" />
-    <Compile Include="PropDoWhenChanged.cs" />
+    <Compile Include="PropDefRaw.cs" />
+    <Compile Include="PropModelExtensions.cs" />
+    <Compile Include="PropGenerator.cs" />
+    <Compile Include="T4Support.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PropItem.cs" />
-    <Compile Include="PropModel.cs" />
-    <Compile Include="PropModelStaticText.cs" />
-    <Compile Include="PropModelReader.cs" />
-    <Compile Include="PropModelWriter.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="PropBagModel.dtd" />
-    <None Include="PropBagModel.xsd">
-      <SubType>Designer</SubType>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\NotifyPropChangedWithVals\Inpwvc.csproj">
-      <Project>{18580a49-4d08-4b0d-9a2e-4ed38891c63b}</Project>
-      <Name>Inpwvc</Name>
+    <ProjectReference Include="..\PropBagModel\PropBagModel.csproj">
+      <Project>{8c801165-03c1-429b-8099-4f5505921da5}</Project>
+      <Name>PropBagModel</Name>
     </ProjectReference>
     <ProjectReference Include="..\PropBagShared\PropBagShared.csproj">
       <Project>{1544a8f7-3296-4788-97b4-bfd15e6bf914}</Project>
       <Name>PropBagShared</Name>
     </ProjectReference>
+    <ProjectReference Include="..\PropBag\PropBag.csproj">
+      <Project>{7387b893-fbdc-4b9c-ac9e-0b56388b46c1}</Project>
+      <Name>PropBag</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

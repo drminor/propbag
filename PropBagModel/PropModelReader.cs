@@ -50,25 +50,25 @@ namespace DRM.PropBagModel
             return t;
         }
 
-        static public void Test()
-        {
-            string path = @"C:\DEV\VS2013Projects\PubPropBag\PropBagT4\SampleT4Output.xml";
+        //static public void Test()
+        //{
+        //    string path = @"C:\DEV\VS2013Projects\PubPropBag\PropBagT4\SampleT4Output.xml";
 
-            PropModel pm = new PropModel("TestClass", "PropBagLib.Tests", PropBagTypeSafetyMode.Loose);
+        //    PropModel pm = new PropModel("TestClass", "PropBagLib.Tests", PropBagTypeSafetyMode.Loose);
 
-            pm.Props = new PropItem[3];
+        //    pm.Props = new PropItem[3];
 
-            pm.Props[0] = new PropItem("Prop1", "int");
-            pm.Props[1] = new PropItem("Prop2", "string");
-            pm.Props[2] = new PropItem("Prop3", "double");
+        //    pm.Props[0] = new PropItem("Prop1", "int");
+        //    pm.Props[1] = new PropItem("Prop2", "string");
+        //    pm.Props[2] = new PropItem("Prop3", "double");
 
 
-            XmlSerializer mySerializer = new XmlSerializer(typeof(PropModel));
+        //    XmlSerializer mySerializer = new XmlSerializer(typeof(PropModel));
 
-            // To read the file, create a FileStream.
-            FileStream myFileStream = new FileStream(path, FileMode.OpenOrCreate);
+        //    // To read the file, create a FileStream.
+        //    FileStream myFileStream = new FileStream(path, FileMode.OpenOrCreate);
 
-            mySerializer.Serialize(myFileStream, pm);
-        }
+        //    mySerializer.Serialize(myFileStream, pm);
+        //}
     }
 }

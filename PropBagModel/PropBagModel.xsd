@@ -3,13 +3,13 @@
   <xs:element name="model">
     <xs:complexType>
       <xs:sequence>
-        <xs:element ref="namespaces" />
+        <xs:element ref="namespaces" minOccurs="0" maxOccurs="1" />
         <xs:element ref="props" />
       </xs:sequence>
       <xs:attribute name="derive-from-pub-prop-bag" type="xs:boolean" default="false"/>
       <xs:attribute name="class-name" type="xs:string" use="required" />
-      <xs:attribute name="namespace" type="xs:string" use="required" />
-      <xs:attribute default="AllPropsMustBeRegistered" name="type-safety-mode">
+      <xs:attribute name="output-namespace" type="xs:string" use="required" />
+      <xs:attribute name="type-safety-mode" default="AllPropsMustBeRegistered" >
         <xs:simpleType>
           <xs:restriction base="xs:NMTOKEN">
             <xs:enumeration value="AllPropsMustBeRegistered" />
@@ -33,7 +33,7 @@
   <xs:element name="props">
     <xs:complexType>
       <xs:sequence>
-        <xs:element minOccurs="0" maxOccurs="unbounded" ref="prop" />
+        <xs:element  ref="prop" minOccurs="0" maxOccurs="unbounded" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
