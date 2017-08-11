@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using DRM.Ipnwvc;
+using DRM.Inpcwv;
 using DRM.PropBag;
 
 namespace PropBagLib.Tests

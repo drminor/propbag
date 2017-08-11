@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-using DRM.Ipnwvc;
+using DRM.Inpcwv;
 
 namespace DRM.PropBag
 {
@@ -563,7 +563,7 @@ namespace DRM.PropBag
             }
         }
 
-        private IPropGen GetGenProp(string propertyName, bool? desiredHasStoreValue = true)
+        protected IPropGen GetGenProp(string propertyName, bool? desiredHasStoreValue = true)
         {
             if (propertyName == null) throw new ArgumentNullException("propertyName", "PropertyName is null on call to GetValue.");
             IPropGen genProp = tVals[propertyName];

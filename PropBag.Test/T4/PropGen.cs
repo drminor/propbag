@@ -1,7 +1,7 @@
 ﻿
 using System.Reflection;
 using DRM.PropBag;
-using DRM.Ipnwvc;
+using DRM.Inpcwv;
 using System;
 using System.Collections.Generic;
 using PropBagLib.Tests;

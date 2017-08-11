@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using DRM.Ipnwvc;
+using DRM.Inpcwv;
 using DRM.PropBag;
 
 using NUnit.Framework;
@@ -127,6 +127,21 @@ namespace PropBagLib.Tests
 
             object x;
             Assert.Throws<ArgumentNullException>(() => x = mod1[null]);
+        }
+
+        [Test]
+        public void UpdateViaPropGenAccess()
+        {
+            mod1 = new LooseModel(PropBagTypeSafetyMode.Loose);
+
+            IPropGen pg = mod1.GetProp("PropBool");
+
+            IProp<bool> pt = (IProp<bool>) pg.TypedProp;
+
+            //pt.Value = false;
+
+            //pt.Value = true;
+
         }
 
         #endregion

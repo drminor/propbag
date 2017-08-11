@@ -9,7 +9,7 @@ namespace DRM.PropBag
     ///<remarks>
     /// This was guided and inspied by this article: https://stackoverflow.com/questions/1890058/iequalitycomparert-that-uses-referenceequals
     /// Author: Snowbear (Marat Yuldashev, Ukraine)
-    /// With improvements from: AnorZaken (Real name unknown.)
+    /// With improvements from: Anor Zaken (Real name unknown.)
     /// 
     /// I futher improved it by using System.Lazy to instantiate the singleton, thereby making it (a little bit more) thread safe.
     /// 

@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 using System.IO;
 using NUnit.Framework;
 
-using DRM.PropBagModel;
-using DRM.PropBagClassGenerator;
+using DRM.PropBag.XMLModel;
+using DRM.PropBag.ClassGenerator;
 
 namespace PropBagLib.Tests
 {

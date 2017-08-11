@@ -170,7 +170,7 @@ namespace PropBagLib.Tests
 
         #region Event Handlers
 
-        void mod1_PropStringChanged(object sender, DRM.Ipnwvc.PropertyChangedWithTValsEventArgs<string> e)
+        void mod1_PropStringChanged(object sender, DRM.Inpcwv.PropertyChangedWithTValsEventArgs<string> e)
         {
             propStringOldVal = e.OldValue;
             propStringNewVal = e.NewValue;

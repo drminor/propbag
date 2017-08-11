@@ -1,16 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using DRM.Ipnwvc;
+using DRM.Inpcwv;
 using DRM.PropBag;
 
 namespace PropBagLib.Tests
 {
     public partial class LooseModel : PropBag
     {
-        public LooseModel() : this(PropBagTypeSafetyMode.OnlyTypedAccess) { }
 
-        public LooseModel(PropBagTypeSafetyMode typeSafetyMode)
-            : base(typeSafetyMode)
+        public LooseModel() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered, null) { }
+
+		public LooseModel(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
+
+		public LooseModel(PropBagTypeSafetyMode typeSafetyMode, AbstractPropFactory factory) : base(typeSafetyMode, factory)
         {
             AddProp<object>("PropObject");
             AddProp<string>("PropString");

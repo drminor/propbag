@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-using DRM.Ipnwvc;
+using DRM.Inpcwv;
 
 namespace DRM.PropBag
 {

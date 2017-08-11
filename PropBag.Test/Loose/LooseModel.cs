@@ -17,6 +17,11 @@ namespace PropBagLib.Tests
             set { base[key] = value; }
         }
 
+        public IPropGen GetProp(string propertyName)
+        {
+            return base.GetGenProp(propertyName, null);
+        }
+
         public void DoWhenStringChanged(string oldVal, string newVal)
         {
             DoWhenStringChanged_WasCalled = true;

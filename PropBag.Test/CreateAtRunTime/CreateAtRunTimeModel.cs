@@ -8,10 +8,10 @@ using System.Collections.Generic;
 //using System.Runtime.CompilerServices;
 using System.Reflection;
 
-using DRM.Ipnwvc;
+using DRM.Inpcwv;
 using DRM.PropBag;
-using DRM.PropBagClassGenerator;
-using DRM.PropBagModel;
+using DRM.PropBag.ClassGenerator;
+using DRM.PropBag.XMLModel;
 
 namespace PropBagLib.Tests
 {

@@ -40,7 +40,7 @@ namespace DRM.PropBag
 
         public override IPropGen Create(Type typeOfThisProperty, object value, string propertyName, object extraInfo, bool hasStorage, bool isTypeSolid)
         {
-            CreatePropDelegate propCreator = GetPropCreator(typeOfThisProperty);
+            CreatePropWithValueDelegate propCreator = GetPropCreator(typeOfThisProperty);
             IPropGen prop = (IPropGen)propCreator(this, value, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid);
             return prop;
         }

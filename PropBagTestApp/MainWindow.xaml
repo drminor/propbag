@@ -1,0 +1,34 @@
+﻿<Window x:Class="PropBagTestApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:pb="clr-namespace:DRM.PropBag.ControlsWPF;assembly=WPFControls"
+        Title="MainWindow" Height="350" Width="525">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <pb:PropBagControl Grid.Row="0" Width="90" Height="90" Color="Crimson" >
+            <pb:PropBagControl.Template>
+                <ControlTemplate>
+                    <Border x:Name="PART_MainBorder">
+                        <Button x:Name="PART_body" HorizontalAlignment="Center" VerticalAlignment="Center" Background="Black"></Button>
+                    </Border>
+                </ControlTemplate>
+            </pb:PropBagControl.Template>
+
+        </pb:PropBagControl>
+        
+        <pb:PropItem x:Name="PropFirst" Grid.Row="1" PropertyName="First" PropertyType="Boolean" ExtraInfo="extra">
+            <pb:InitialValueField InitialValue="25"/>
+            <TextBlock></TextBlock>
+        </pb:PropItem>
+        
+        <Button Grid.Row="2" Content="OK" Height="20" Width="50" Click="Button_Click"></Button>
+
+
+
+    </Grid>
+</Window>

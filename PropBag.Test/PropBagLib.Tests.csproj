@@ -101,21 +101,9 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\NotifyPropChangedWithVals\Inpwvc.csproj">
+    <ProjectReference Include="..\NotifyPropChangedWithVals\Inpcwv.csproj">
       <Project>{18580a49-4d08-4b0d-9a2e-4ed38891c63b}</Project>
-      <Name>Inpwvc</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\PropBagClassGenerator\PropBagClassGenerator.csproj">
-      <Project>{d6578133-d762-4e46-a37a-831640690c35}</Project>
-      <Name>PropBagClassGenerator</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\PropBagModel\PropBagModel.csproj">
-      <Project>{8c801165-03c1-429b-8099-4f5505921da5}</Project>
-      <Name>PropBagModel</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\PropBagShared\PropBagShared.csproj">
-      <Project>{1544a8f7-3296-4788-97b4-bfd15e6bf914}</Project>
-      <Name>PropBagShared</Name>
+      <Name>Inpcwv</Name>
     </ProjectReference>
     <ProjectReference Include="..\PropBag\PropBag.csproj">
       <Project>{7387b893-fbdc-4b9c-ac9e-0b56388b46c1}</Project>
