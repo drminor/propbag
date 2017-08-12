@@ -43,10 +43,11 @@
     <Compile Include="ClassGenerator\PropGenerator.cs" />
     <Compile Include="ClassGenerator\PropModelExtensions.cs" />
     <Compile Include="ClassGenerator\T4Support.cs" />
+    <Compile Include="ControlModel\NotifyPropertyChangedBase.cs" />
     <Compile Include="Factories\AbstractPropFactory.cs" />
     <Compile Include="ControlModel\PropComparerField.cs" />
     <Compile Include="ControlModel\PropDoWhenChanged.cs" />
-    <Compile Include="ControlModel\PropInitalValueField.cs" />
+    <Compile Include="ControlModel\PropInitialValueField.cs" />
     <Compile Include="ControlModel\PropItem.cs" />
     <Compile Include="ControlModel\PropModel.cs" />
     <Compile Include="Factories\CreatePropDelegate.cs" />

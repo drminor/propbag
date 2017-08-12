@@ -742,7 +742,7 @@ namespace DRM.PropBag
                 handler(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        protected void POnPropertyChanging([System.Runtime.CompilerServices.CallerMemberName]string propertyName = null)
+        protected void POnPropertyChanging(string propertyName)
         {
             PropertyChangingEventHandler handler = Interlocked.CompareExchange(ref PropertyChanging, null, null);
 

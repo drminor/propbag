@@ -6,15 +6,18 @@ using System.Threading.Tasks;
 
 using System.Xml.Serialization;
 
-namespace DRM.PropBag.ControlModel
+namespace DRM.PropBag.ControlModel 
 {
-    public class PropDoWhenChanged
+    public class PropDoWhenChanged : NotifyPropertyChangedBase, IEquatable<PropDoWhenChanged>
     {
+        string dwc;
+        bool dan;
+
         [XmlText]
-        public string DoWhenChanged { get; set; }
+        public string DoWhenChanged { get { return dwc; } set { SetIfDifferent<string>(ref dwc, value); } }
 
         [XmlAttribute("do-after-notify")]
-        public bool DoAfterNotify { get; set; }
+        public bool DoAfterNotify { get { return dan; } set { SetIfDifferent<bool>(ref dan, value); } }
 
         public PropDoWhenChanged() : this(null) {}
 
@@ -22,6 +25,15 @@ namespace DRM.PropBag.ControlModel
         {
             DoWhenChanged = doWhenChangedDelegateName;
             DoAfterNotify = doAfterNotify;
+        }
+
+        public bool Equals(PropDoWhenChanged other)
+        {
+            if (other == null) return false;
+
+            if (other.DoAfterNotify == DoAfterNotify && other.DoWhenChanged == DoWhenChanged) return true;
+
+            return false;
         }
     }
 }

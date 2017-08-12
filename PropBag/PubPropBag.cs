@@ -209,17 +209,17 @@ namespace DRM.PropBag
         #region Methods to Raise Events
 
         // Raise Standard Events
-        protected void OnPropertyChanged(string propertyName)
+        protected void OnPropertyChanged([CallerMemberName]string propertyName = null)
         {
             base.POnPropertyChanged(propertyName);
         }
 
-        protected void OnPropertyChanging([System.Runtime.CompilerServices.CallerMemberName]string propertyName = null)
+        protected void OnPropertyChanging([CallerMemberName]string propertyName = null)
         {
             base.POnPropertyChanging(propertyName);
         }
 
-        protected void OnPropertyChangedWithVals(string propertyName, object oldVal, object newVal)
+        protected void OnPropertyChangedWithVals(object oldVal, object newVal, [CallerMemberName]string propertyName = null)
         {
             base.POnPropertyChangedWithVals(propertyName, oldVal, newVal);
         }

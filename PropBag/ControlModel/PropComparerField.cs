@@ -8,24 +8,17 @@ using System.Xml.Serialization;
 
 namespace DRM.PropBag.ControlModel
 {
-
-    //public enum PropComparerType
-    //{
-    //    typed,
-    //    @object,
-    //    reference
-    //}
-
-    public class PropComparerField
+    public class PropComparerField : NotifyPropertyChangedBase, IEquatable<PropComparerField>
     {
-        //[XmlAttribute("comparer-type")]
-        //public PropComparerType ComparerType { get; set; }
+
+        string c;
+        bool ure;
 
         [XmlText]
-        public string Comparer { get; set; }
+        public string Comparer { get { return c; } set { SetIfDifferent<string>(ref c, value); } }
 
         [XmlAttribute("use-reference-equality")]
-        public bool UseRefEquality { get; set; }
+        public bool UseRefEquality { get { return ure; } set { SetIfDifferent<bool>(ref ure, value); } }
 
         public PropComparerField() : this(null) { }
 
@@ -33,6 +26,15 @@ namespace DRM.PropBag.ControlModel
         {
             Comparer = comparer;
             UseRefEquality = useRefEquality;
+        }
+
+        public bool Equals(PropComparerField other)
+        {
+            if (other == null) return false;
+
+            if (other.Comparer == Comparer && other.UseRefEquality == UseRefEquality) return true;
+
+            return false;
         }
     }
 }
