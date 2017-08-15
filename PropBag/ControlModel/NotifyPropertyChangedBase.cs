@@ -22,7 +22,7 @@ namespace DRM.PropBag.ControlModel
 
         protected bool SetIfDifferent<T>(ref T oldVal, T newVal, [CallerMemberName]string propertyName = null) where T : IEquatable<T>
         {
-            if(oldVal.Equals(newVal))
+            if ((oldVal == null && newVal != null) || (oldVal != null && !oldVal.Equals(newVal)))
             {
                 OnPropertyChanging(propertyName);
                 oldVal = newVal;
@@ -34,7 +34,7 @@ namespace DRM.PropBag.ControlModel
 
         protected bool SetIfDifferentVT<T>(ref T oldVal, T newVal, [CallerMemberName]string propertyName = null) where T : struct
         {
-            if (oldVal.Equals(newVal))
+            if (!oldVal.Equals(newVal))
             {
                 OnPropertyChanging(propertyName);
                 oldVal = newVal;

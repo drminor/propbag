@@ -14,7 +14,7 @@ namespace DRM.PropBag.ControlModel
         string pt;
         PropInitialValueField ivf;
         PropComparerField cf;
-        PropDoWhenChanged dwc;
+        PropDoWhenChangedField dwc;
 
         bool hs;
         bool tis;
@@ -33,7 +33,9 @@ namespace DRM.PropBag.ControlModel
         public PropComparerField ComparerField { get { return cf; } set { SetIfDifferent<PropComparerField>(ref cf, value); } }
 
         [XmlElement("do-when-changed")]
-        public PropDoWhenChanged DoWhenChangedField { get { return dwc; } set { SetIfDifferent<PropDoWhenChanged>(ref dwc, value); } }
+        public PropDoWhenChangedField DoWhenChangedField { get { return dwc; }
+            set { SetIfDifferent<PropDoWhenChangedField>(ref dwc, value); }
+        }
 
         [XmlAttribute(AttributeName = "caller-provides-storage")]
         public bool HasStore { get { return hs; } set { SetIfDifferent<bool>(ref hs, value); } }
@@ -50,7 +52,7 @@ namespace DRM.PropBag.ControlModel
             string extraInfo = null, bool hasStore = true,
             bool typeIsSolid = true,
             PropInitialValueField initialValueField = null,
-            PropDoWhenChanged doWhenChanged = null, PropComparerField comparer = null)
+            PropDoWhenChangedField doWhenChanged = null, PropComparerField comparer = null)
         {
             PropertyType = type;
             PropertyName = name;
@@ -59,7 +61,7 @@ namespace DRM.PropBag.ControlModel
             TypeIsSolid = typeIsSolid;
             InitialValueField = initialValueField;
             ComparerField = comparer;
-            DoWhenChangedField = doWhenChanged;
+            DoWhenChangedField = doWhenChanged ?? new PropDoWhenChangedField();
 
         }
     }

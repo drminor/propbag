@@ -94,9 +94,13 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\WPFControls\PropBagControlsWPF.csproj">
+    <ProjectReference Include="..\PropBagControlsWPF\PropBagControlsWPF.csproj">
       <Project>{9bee9979-9812-4675-8f97-a4dd1e7dba5f}</Project>
       <Name>PropBagControlsWPF</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PropBag\PropBag.csproj">
+      <Project>{7387b893-fbdc-4b9c-ac9e-0b56388b46c1}</Project>
+      <Name>PropBag</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

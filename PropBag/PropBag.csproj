@@ -19,7 +19,7 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <WarningLevel>2</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -46,7 +46,7 @@
     <Compile Include="ControlModel\NotifyPropertyChangedBase.cs" />
     <Compile Include="Factories\AbstractPropFactory.cs" />
     <Compile Include="ControlModel\PropComparerField.cs" />
-    <Compile Include="ControlModel\PropDoWhenChanged.cs" />
+    <Compile Include="ControlModel\PropDoWhenChangedField.cs" />
     <Compile Include="ControlModel\PropInitialValueField.cs" />
     <Compile Include="ControlModel\PropItem.cs" />
     <Compile Include="ControlModel\PropModel.cs" />

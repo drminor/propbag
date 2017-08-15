@@ -47,15 +47,21 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DoWhenChangedAction.cs" />
+    <Compile Include="DuoActionTypeConverter.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
     <Compile Include="InitialValueField.cs" />
+    <Compile Include="NamespaceItem.cs" />
+    <Compile Include="NamespacesCollection.cs" />
+    <Compile Include="PropBagTemplate.cs" />
+    <Compile Include="PropDoWhenChangedField.cs" />
     <Compile Include="PropItem.cs" />
+    <Compile Include="PropsCollection.cs" />
     <Page Include="Themes\Generic.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Compile Include="PropBagControl.cs">
-      <SubType>Code</SubType>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -85,6 +91,10 @@
     <ProjectReference Include="..\NotifyPropChangedWithVals\Inpcwv.csproj">
       <Project>{18580a49-4d08-4b0d-9a2e-4ed38891c63b}</Project>
       <Name>Inpcwv</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PropBag\PropBag.csproj">
+      <Project>{7387b893-fbdc-4b9c-ac9e-0b56388b46c1}</Project>
+      <Name>PropBag</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

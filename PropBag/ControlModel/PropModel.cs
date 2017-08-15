@@ -17,10 +17,8 @@ namespace DRM.PropBag.ControlModel
         PropBagTypeSafetyMode tsm;
         bool dmrr;
         bool reiv;
-
         ObservableCollection<string> _namespaces;
         ObservableCollection<PropItem> _props;
-
 
         [XmlAttribute(AttributeName = "derive-from-pub-prop-bag")]
         public bool DeriveFromPubPropBag { get { return dfppb; } set { SetIfDifferent<bool>(ref dfppb, value); } }
@@ -33,16 +31,8 @@ namespace DRM.PropBag.ControlModel
 
         [XmlAttribute(AttributeName = "type-safety-mode")]
         public PropBagTypeSafetyMode TypeSafetyMode
-        { 
-            get { return tsm; }
-            set
-            {
-                if (tsm != value)
-                {
-                    SetIfDifferentVT<PropBagTypeSafetyMode>(ref tsm, value);
-                }
-            }
-        }
+        { get { return tsm; } set { SetIfDifferentVT<PropBagTypeSafetyMode>(ref tsm, value); } }
+
 
         [XmlAttribute(AttributeName = "defer-method-ref-resolution")]
         public bool DeferMethodRefResolution { get { return dmrr; } set { SetIfDifferent<bool>(ref dmrr, value); } }
@@ -55,10 +45,7 @@ namespace DRM.PropBag.ControlModel
         public ObservableCollection<string> Namespaces
         {
             get { return _namespaces; }
-            set
-            {
-                this.SetCollection<ObservableCollection<string>, string>(ref _namespaces, value);
-            }
+            set { this.SetCollection<ObservableCollection<string>, string>(ref _namespaces, value);  }
         }
 
         [XmlArray("props")]
@@ -66,14 +53,11 @@ namespace DRM.PropBag.ControlModel
         public ObservableCollection<PropItem> Props
         {
             get { return _props; }
-            set
-            {
-                this.SetCollection<ObservableCollection<PropItem>, PropItem>(ref _props, value);
-            }
+            set { this.SetCollection<ObservableCollection<PropItem>, PropItem>(ref _props, value); }
         }
 
-        public PropModel() : this("UndefinedClassName", "UndefinedNameSpace") { }
 
+        public PropModel() : this("UndefinedClassName", "UndefinedNameSpace") { }
 
         public PropModel(string className, string namespaceName,
             bool deriveFromPubPropBag = false,
