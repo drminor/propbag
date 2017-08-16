@@ -22,66 +22,8 @@ namespace DRM.PropBag.ControlsWPF
             DefaultStyleKeyProperty.OverrideMetadata(typeof(PropItem), new FrameworkPropertyMetadata(typeof(PropItem)));
         }
 
-        override protected void OnVisualChildrenChanged(DependencyObject added, DependencyObject removed)
-        {
-            int index;
-            bool tooMany;
-            if (!DoAllChildrenHaveTheCorrectType(this.Items, out index, out tooMany))
-            {
-                string elementType = ((Control)this.Items[index]).ToString();
-                string elementName = ((Control)this.Items[index]).Name;
-
-                if (tooMany)
-                {
-                    throw new InvalidOperationException(string.Format("{0} with name = {1} cannot be added here, an element of this type already exists.", elementType, elementName));
-                }
-                else
-                {
-                    throw new InvalidOperationException(string.Format("{0} with name = {1} cannot be added here.", elementType, elementName));
-                }
-
-            }
-
-            base.OnVisualChildrenChanged(added, removed);
-        }
-
-        private bool DoAllChildrenHaveTheCorrectType(ItemCollection chils, out int index, out bool tooMany)
-        {
-            index = -1;
-            tooMany = false;
-
-            if (chils == null) return true;
-
-            int initValueFieldCount = 0;
-            int doWhenChangedFieldCount = 0;
-            //int comparerFieldCount = 0;
-
-            for (int i = 0; i < chils.Count; i++)
-            {
-                object item = chils[i];
-
-                if (item is InitialValueField)
-                {
-                    if(++initValueFieldCount < 2) continue;
-                    tooMany = true;
-                    index = i;
-                    return false;
-                }
-
-                if (item is PropDoWhenChangedField)
-                {
-                    if (++doWhenChangedFieldCount < 2) continue;
-                    tooMany = true;
-                    index = i;
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
         public static readonly DependencyProperty PropertyNameProperty =
-            DependencyProperty.Register("PropertyName", typeof(string), typeof(PropItem), new PropertyMetadata(null));
+            DependencyProperty.Register("PropertyName", typeof(string), typeof(PropItem));
 
         public string PropertyName
         {
@@ -110,20 +52,35 @@ namespace DRM.PropBag.ControlsWPF
             }
         }
 
-        //public static readonly DependencyProperty InitialValueFieldProperty =
-        //    DependencyProperty.Register("InitialValueField", typeof(InitialValueField), typeof(PropItem));
+        static DependencyProperty HasStoreProperty =
+            DependencyProperty.Register("HasStore", typeof(bool), typeof(PropItem), new PropertyMetadata(true));
 
-        //public InitialValueField InitialValueField
-        //{
-        //    get
-        //    {
-        //        return (InitialValueField)this.GetValue(InitialValueFieldProperty);
-        //    }
-        //    set
-        //    {
-        //        this.SetValue(InitialValueFieldProperty, value);
-        //    }
-        //}
+        public bool HasStore
+        {
+            get
+            {
+                return (bool)this.GetValue(HasStoreProperty);
+            }
+            set
+            {
+                this.SetValue(HasStoreProperty, value);
+            }
+        }
+
+        static DependencyProperty TypeIsSolidProperty =
+            DependencyProperty.Register("TypeIsSolid", typeof(bool), typeof(PropItem), new PropertyMetadata(true));
+
+        public bool TypeIsSolid
+        {
+            get
+            {
+                return (bool)this.GetValue(TypeIsSolidProperty);
+            }
+            set
+            {
+                this.SetValue(TypeIsSolidProperty, value);
+            }
+        }
 
         public static readonly DependencyProperty ExtraInfoProperty =
             DependencyProperty.Register("ExtraInfo", typeof(string), typeof(PropItem), new PropertyMetadata(null));
@@ -139,6 +96,69 @@ namespace DRM.PropBag.ControlsWPF
                 this.SetValue(ExtraInfoProperty, value);
             }
         }
+
+        #region Child Management
+
+        override protected void OnVisualChildrenChanged(DependencyObject added, DependencyObject removed)
+        {
+            int index;
+            bool tooMany;
+            if (!DoAllChildrenHaveTheCorrectType(this.Items, out index, out tooMany))
+            {
+                string elementType = ((Control)this.Items[index]).ToString();
+                string elementName = ((Control)this.Items[index]).Name;
+
+                if (tooMany)
+                {
+                    throw new InvalidOperationException(string.Format("{0} with name = {1} cannot be added here, an element of this type already exists.", elementType, elementName));
+                }
+                else
+                {
+                    throw new InvalidOperationException(string.Format("{0} with name = {1} cannot be added here.", elementType, elementName));
+                }
+
+            }
+
+            base.OnVisualChildrenChanged(added, removed);
+        }
+
+        // TODO: Consider using DependencyProperties on the PropItem UserControl instead of user controls for these complex properties.
+        private bool DoAllChildrenHaveTheCorrectType(ItemCollection chils, out int index, out bool tooMany)
+        {
+            index = -1;
+            tooMany = false;
+
+            if (chils == null) return true;
+
+            int initValueFieldCount = 0;
+            int doWhenChangedFieldCount = 0;
+            //int comparerFieldCount = 0;
+
+            for (int i = 0; i < chils.Count; i++)
+            {
+                object item = chils[i];
+
+                if (item is InitialValueField)
+                {
+                    if (++initValueFieldCount < 2) continue;
+                    tooMany = true;
+                    index = i;
+                    return false;
+                }
+
+                if (item is PropDoWhenChangedField)
+                {
+                    if (++doWhenChangedFieldCount < 2) continue;
+                    tooMany = true;
+                    index = i;
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        #endregion
 
         #region Unused
 

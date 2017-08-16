@@ -11,7 +11,7 @@ using System.Reflection;
 using DRM.Inpcwv;
 using DRM.PropBag;
 using DRM.PropBag.ClassGenerator;
-using DRM.PropBag.XMLModel;
+using DRM.PropBag.ControlModel;
 
 namespace PropBagLib.Tests
 {
@@ -23,15 +23,18 @@ namespace PropBagLib.Tests
 		public CreateAtRunTimeModel(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
 
         public CreateAtRunTimeModel(PropBagTypeSafetyMode typeSafetyMode, AbstractPropFactory factory)
-            : base(typeSafetyMode, factory)
-		{
-		}
+            : base(typeSafetyMode, factory) { }
 
-        public void RegisterProps(PropModel pm)
+        public CreateAtRunTimeModel(PropModel pm) : base(pm)
         {
-            IProp<string> p = ThePropFactory.Create<string>("First string.", "First");
-            AddProp<string>("PropName", p);
+
         }
+
+        //public void RegisterProps(PropModel pm)
+        //{
+        //    IProp<string> p = ThePropFactory.Create<string>("First string.", "First");
+        //    AddProp<string>("PropName", p);
+        //}
 
         /// <summary>
         /// If the delegate exists, the original name is returned,

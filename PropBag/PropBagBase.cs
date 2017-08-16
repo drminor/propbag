@@ -79,9 +79,8 @@ namespace DRM.PropBag
 
         public PropBagBase(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
 
-        public PropBagBase(PropBagTypeSafetyMode typeSafetyMode, AbstractPropFactory thePropFactory)
+        public PropBagBase(PropBagTypeSafetyMode typeSafetyMode, AbstractPropFactory thePropFactory) 
         {
-            TypeSafetyMode = typeSafetyMode;
             switch (typeSafetyMode)
             {
                 case PropBagTypeSafetyMode.AllPropsMustBeRegistered:
@@ -111,6 +110,44 @@ namespace DRM.PropBag
 
             tVals = new Dictionary<string, IPropGen>();
             doSetDelegateDict = new Dictionary<Type, DoSetDelegate>();
+
+        }
+
+        public PropBagBase(DRM.PropBag.ControlModel.PropModel pm) : this(pm.TypeSafetyMode, null)
+        {
+            //TODO: Make the PropModel record the "PropFactory."
+
+            foreach (DRM.PropBag.ControlModel.PropItem pi in pm.Props)
+            {
+                // TODO: Get Object from ExtraInfo
+                object ei = pi.ExtraInfo == null ? null : "Fix Me";
+
+                IPropGen pg;
+
+                if (pi.InitialValueField.SetToUndefined)
+                {
+                    pg =  ThePropFactory.CreateFullNoValue(pi.PropertyType, pi.PropertyName, ei, pi.HasStore, pi.TypeIsSolid,
+                        pi.DoWhenChangedField.DoWhenChanged, pi.DoWhenChangedField.DoAfterNotify, null);
+
+                }
+                else
+                {
+                    object val;
+                    // TODO: Get Initial Value from string
+                    if (pi.PropertyType == typeof(string))
+                    {
+                        val = "1";
+                    }
+                    else
+                    {
+                        val = false;
+                    }
+
+                    pg = ThePropFactory.CreateFull(pi.PropertyType, val, pi.PropertyName, ei, pi.HasStore, pi.TypeIsSolid,
+                        pi.DoWhenChangedField.DoWhenChanged, pi.DoWhenChangedField.DoAfterNotify, null);
+                }
+                AddProp(pi.PropertyName, pg);
+            }
         }
 
         protected void PClearEventSubscribers()
@@ -130,7 +167,7 @@ namespace DRM.PropBag
 
         #endregion
 
-        #region Propety Access Methods
+        #region Property Access Methods
 
         protected object PGetIt(string propertyName)
         {
@@ -181,7 +218,7 @@ namespace DRM.PropBag
                 }
 
                 genProp = ThePropFactory.CreatePropInferType(value, propertyName, null, true);
-                tVals.Add(propertyName, genProp);
+                AddProp(propertyName, genProp);
 
                 // No point in calling DoSet, it would find that the value is the same and do nothing.
                 return;
@@ -244,7 +281,7 @@ namespace DRM.PropBag
 
                 // Property has not been defined yet, let's create a definition for it now and initialize the value.
                 genProp = ThePropFactory.Create<T>(value, propertyName);
-                tVals.Add(propertyName, genProp);
+                AddProp(propertyName, genProp);
 
                 // No reason to call DoSet, it will find no change and do nothing.
                 return;
@@ -283,8 +320,7 @@ namespace DRM.PropBag
 
                 // Property has not been defined yet, let's create a definition for it now 
                 genProp = ThePropFactory.CreateWithNoValue<T>(propertyName, hasStorage: false, typeIsSolid: true);
-
-                tVals.Add(propertyName, genProp);
+                AddProp(propertyName, genProp);
             }
 
             IProp<T> prop = CheckTypeInfo<T>(genProp, propertyName, tVals);
@@ -333,7 +369,7 @@ namespace DRM.PropBag
                 }
 
                 genProp = ThePropFactory.CreateWithNoValue<object>(propertyName, null, true, false, null, false, null);
-                tVals.Add(propertyName, genProp);
+                AddProp(propertyName, genProp);
             }
 
             genProp.SubscribeToPropChanged(doOnChange);
@@ -442,6 +478,12 @@ namespace DRM.PropBag
         #region Property Management
 
         protected void AddProp<T>(string propertyName, IProp<T> prop)
+        {
+            IPropGen pg = (IPropGen)prop;
+            tVals.Add(propertyName, pg);
+        }
+
+        protected void AddProp(string propertyName, IPropGen prop)
         {
             tVals.Add(propertyName, prop);
         }
@@ -641,7 +683,7 @@ namespace DRM.PropBag
 
                 // Property has not been defined yet, let's create a definition for it now and initialize the value.
                 genProp = ThePropFactory.CreateWithNoValue<T>(propertyName);
-                tVals.Add(propertyName, genProp);
+                AddProp(propertyName, genProp);
             }
 
             IProp<T> prop = CheckTypeInfo<T>(genProp, propertyName, tVals);

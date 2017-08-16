@@ -11,7 +11,7 @@ namespace DRM.PropBag.ControlModel
     public class PropItem : NotifyPropertyChangedBase
     {
         string pn;
-        string pt;
+        Type pt;
         PropInitialValueField ivf;
         PropComparerField cf;
         PropDoWhenChangedField dwc;
@@ -24,13 +24,17 @@ namespace DRM.PropBag.ControlModel
         public string PropertyName { get {return pn;}  set { SetIfDifferent<string>(ref pn, value); } }
 
         [XmlElement("type")]
-        public string PropertyType { get { return pt; } set { SetIfDifferent<string>(ref pt, value); } }
+        public Type PropertyType { get { return pt; } set { pt = value; } }
 
         [XmlElement("initial-value")]
-        public PropInitialValueField InitialValueField { get { return ivf; } set { SetIfDifferent<PropInitialValueField>(ref ivf, value); } }
+        public PropInitialValueField InitialValueField { get { return ivf; }
+            set { SetIfDifferent<PropInitialValueField>(ref ivf, value); }
+        }
 
         [XmlElement("comparer")]
-        public PropComparerField ComparerField { get { return cf; } set { SetIfDifferent<PropComparerField>(ref cf, value); } }
+        public PropComparerField ComparerField { get { return cf; }
+            set { SetIfDifferent<PropComparerField>(ref cf, value); }
+        }
 
         [XmlElement("do-when-changed")]
         public PropDoWhenChangedField DoWhenChangedField { get { return dwc; }
@@ -48,7 +52,7 @@ namespace DRM.PropBag.ControlModel
 
         public PropItem() : this(null, null) { }
 
-        public PropItem(string type, string name,
+        public PropItem(Type type, string name,
             string extraInfo = null, bool hasStore = true,
             bool typeIsSolid = true,
             PropInitialValueField initialValueField = null,

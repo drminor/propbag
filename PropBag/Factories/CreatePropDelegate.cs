@@ -16,4 +16,16 @@ namespace DRM.PropBag
         string propertyName, object extraInfo, 
         bool hasStorage, bool isTypeSolid);
 
+
+    public delegate object CreateFullPropWithValueDelegate(AbstractPropFactory propFactory,
+        object value,
+        string propertyName, object extraInfo,
+        bool hasStorage, bool isTypeSolid,
+        Delegate doWhenChanged, bool doAfterNotify, Delegate comparer);
+
+    public delegate object CreateFullPropDelegate(AbstractPropFactory propFactory,
+        string propertyName, object extraInfo,
+        bool hasStorage, bool isTypeSolid,
+        Delegate doWhenChanged, bool doAfterNotify, Delegate comparer);
+
 }

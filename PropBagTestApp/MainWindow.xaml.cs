@@ -17,8 +17,8 @@ using System.Collections;
 
 using System.Reflection; // This is temporary -- just for testing.
 
-using ControlModel = DRM.PropBag.ControlModel;
-using PBControls = DRM.PropBag.ControlsWPF;
+using DRM.PropBag.ControlModel;
+using DRM.PropBag.ControlsWPF;
 
 namespace PropBagTestApp
 {
@@ -27,18 +27,20 @@ namespace PropBagTestApp
     /// </summary>
     public partial class MainWindow : Window
     {
-
-        static private Type GMT_TYPE = typeof(GenericMethodTemplates);
-
+        [DRM.PropBag.ControlsWPF.PropBagInstanceAttribute("MainViewModel")]
+        MainViewModel ourData;
 
         public bool PropFirstDidChange;
         public bool PropMyStringDidChange;
-        
         
         public MainWindow()
         {
             PropFirstDidChange = false;
             InitializeComponent();
+
+            DRM.PropBag.ControlsWPF.PropBagTemplate theModel = this.MainViewModelPropTemplate;
+            DRM.PropBag.ControlModel.PropModel resultModel = theModel.GetPropBagModel();
+            ourData = new MainViewModel(resultModel);
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
@@ -48,9 +50,9 @@ namespace PropBagTestApp
             //bool result = TestStringToAction(s);
 
 
-            PBControls.PropBagTemplate theModel = this.PropBagOneModel;
+            //PBControls.PropBagTemplate theModel = this.MainViewModelPropTemplate;
 
-            ControlModel.PropModel resultModel = GetModelFromControls(theModel);
+            //ControlModel.PropModel resultModel = PBControls.PropBagTemplate.GetModelFromControls();
 
 
             MessageBox.Show("Hello, we're leaveing.");
@@ -67,6 +69,70 @@ namespace PropBagTestApp
             this.PropMyStringDidChange = true;
         }
 
+        //private ControlModel.PropModel GetModelFromControls(PBControls.PropBagTemplate theModel)
+        //{
+        //    string className = theModel.ClassName;
+        //    string outputNamespace = theModel.OutPutNameSpace;
+
+        //    ControlModel.PropModel result =
+        //        new ControlModel.PropModel(className,
+        //            outputNamespace,
+        //            false,
+        //            DRM.PropBag.PropBagTypeSafetyMode.AllPropsMustBeRegistered,
+        //            true,
+        //            true);
+
+
+        //    int namespacesCount = theModel.Namespaces == null ? 0 : theModel.Namespaces.Count();
+        //    for (int nsPtr = 0; nsPtr < namespacesCount; nsPtr++)
+        //    {
+        //        result.Namespaces.Add(theModel.Namespaces[nsPtr].Namespace);
+        //    }
+
+        //    int propsCount = theModel.Props == null ? 0 : theModel.Props.Count();
+
+        //    for (int propPtr = 0; propPtr < propsCount; propPtr++)
+        //    {
+        //        PBControls.PropItem pi = theModel.Props[propPtr];
+
+        //        bool hasStore = pi.HasStore; //.HasValue ? pi.HasStore.Value : true; // The default is true.
+        //        bool typeIsSolid = pi.TypeIsSolid; //.HasValue ? pi.TypeIsSolid.Value : true; // The default is true.
+        //        string extraInfo = pi.ExtraInfo; // ?? null;
+
+        //        ControlModel.PropItem rpi = new ControlModel.PropItem(pi.PropertyType, pi.PropertyName, extraInfo, hasStore, typeIsSolid);
+
+        //        foreach (Control uc in pi.Items)
+        //        {
+        //            if (uc is PBControls.InitialValueField)
+        //            {
+        //                PBControls.InitialValueField ivf = (PBControls.InitialValueField)uc;
+        //                rpi.InitialValueField = new ControlModel.PropInitialValueField(ivf.InitialValue, ivf.SetToDefault, ivf.SetToUndefined, ivf.SetToNull, ivf.SetToEmptyString);
+        //                continue;
+        //            }
+
+        //            if (uc is PBControls.PropDoWhenChangedField)
+        //            {
+        //                PBControls.PropDoWhenChangedField dwc = (PBControls.PropDoWhenChangedField)uc;
+
+        //                //ControlModel.DoWhenChangedAction rdwcAction
+        //                //    //= new ControlModel.DoWhenChangedAction(dwc.DoWhenChangedAction.ActionType, dwc.DoWhenChangedAction.ActionDelegate);
+        //                //    = new ControlModel.DoWhenChangedAction(dwc.DoWhenChangedAction.ActionDelegate);
+
+        //                ControlModel.PropDoWhenChangedField rdwc = new ControlModel.PropDoWhenChangedField(dwc.DoWhenChangedAction.ActionDelegate, dwc.DoAfterNotify);
+                        
+        //                rpi.DoWhenChangedField = rdwc; // new ControlModel.PropDoWhenChangedField(dwc.DoWhenChangedAction, dwc.DoAfterNotify);
+        //                continue;
+        //            }
+        //        }
+
+        //        result.Props.Add(rpi);
+
+        //    }
+        //    return result;
+        //}
+
+
+        #region Do When Changed Type Converter Tests
 
         private string TestActionToString()
         {
@@ -108,85 +174,16 @@ namespace PropBagTestApp
 
             //Delegate d = GetActionFromString<bool>(ownerType, methodName);
 
-            Delegate r = (Action<bool,bool>)DoWhenFirstChanges;
+            Delegate r = (Action<bool, bool>)DoWhenFirstChanges;
 
             return d == r;
         }
 
-        //private Delegate GetActionFromString<T>(string ownerType, string methodName, object target)
-        //{
-        //    Type ot = Type.GetType(ownerType);
-
-        //    MethodInfo mi = ot.GetMethod(methodName, BindingFlags.Instance | BindingFlags.NonPublic);
-
-        //    if (!IsDuoAction<T>(mi)) return null;
-
-        //    Action<T,T> del = (Action<T,T>) Delegate.CreateDelegate(typeof(Action<T, T>), target, mi);
-
-        //    return del;
-        //}
-
-
-        private ControlModel.PropModel GetModelFromControls(PBControls.PropBagTemplate theModel)
-        {
-            string className = theModel.ClassName;
-            string outputNamespace = "PropBagLib.Tests";
-
-            ControlModel.PropModel result =
-                new ControlModel.PropModel(className,
-                    outputNamespace,
-                    false,
-                    DRM.PropBag.PropBagTypeSafetyMode.AllPropsMustBeRegistered,
-                    true,
-                    true);
-
-
-            int namespacesCount = theModel.Namespaces == null ? 0 : theModel.Namespaces.Count();
-            for (int nsPtr = 0; nsPtr < namespacesCount; nsPtr++)
-            {
-                result.Namespaces.Add(theModel.Namespaces[nsPtr].Namespace);
-            }
-
-            int propsCount = theModel.Props == null ? 0 : theModel.Props.Count();
-
-            for (int propPtr = 0; propPtr < propsCount; propPtr++)
-            {
-                PBControls.PropItem pi = theModel.Props[propPtr];
-
-                ControlModel.PropItem rpi = new ControlModel.PropItem(pi.PropertyType.ToString(), pi.PropertyName, pi.ExtraInfo);
-
-                foreach (Control uc in pi.Items)
-                {
-                    if (uc is PBControls.InitialValueField)
-                    {
-                        PBControls.InitialValueField ivf = (PBControls.InitialValueField)uc;
-                        rpi.InitialValueField = new ControlModel.PropInitialValueField(ivf.InitialValue, ivf.SetToDefault, ivf.SetToUndefined, ivf.SetToNull, ivf.SetToEmptyString);
-                        continue;
-                    }
-
-                    if (uc is PBControls.PropDoWhenChangedField)
-                    {
-                        PBControls.PropDoWhenChangedField dwc = (PBControls.PropDoWhenChangedField)uc;
-
-                        //ControlModel.DoWhenChangedAction rdwcAction
-                        //    //= new ControlModel.DoWhenChangedAction(dwc.DoWhenChangedAction.ActionType, dwc.DoWhenChangedAction.ActionDelegate);
-                        //    = new ControlModel.DoWhenChangedAction(dwc.DoWhenChangedAction.ActionDelegate);
-
-                        ControlModel.PropDoWhenChangedField rdwc = new ControlModel.PropDoWhenChangedField(dwc.DoWhenChangedAction.ActionDelegate, dwc.DoAfterNotify);
-                        
-                        rpi.DoWhenChangedField = rdwc; // new ControlModel.PropDoWhenChangedField(dwc.DoWhenChangedAction, dwc.DoAfterNotify);
-                        continue;
-                    }
-                }
-
-                result.Props.Add(rpi);
-
-            }
-            return result;
-        }
-
+        #endregion
 
         #region Helper Methods for the Generic Method Templates
+
+        static private Type GMT_TYPE = typeof(GenericMethodTemplates);
 
         // Delegate declarations.
         private delegate Delegate GetActionRefDelegate(string ownerType, string methodName, object target);
@@ -200,7 +197,8 @@ namespace PropBagTestApp
         }
 
         #endregion
-    }
+    
+    } // End MainWindow
 
     #region Generic Method Templates
 
@@ -239,9 +237,6 @@ namespace PropBagTestApp
             }
             return true;
         }
-
-
-
     }
 
     #endregion

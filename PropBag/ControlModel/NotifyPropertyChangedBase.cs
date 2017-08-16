@@ -13,12 +13,12 @@ namespace DRM.PropBag.ControlModel
         public event PropertyChangedEventHandler PropertyChanged;
         public event PropertyChangingEventHandler PropertyChanging;
 
-        //protected void Set<T>(ref T oldVal, T newVal, [CallerMemberName]string propertyName = null)
-        //{
-        //    OnPropertyChanging(propertyName);
-        //    oldVal = newVal;
-        //    OnPropertyChanged(propertyName);
-        //}
+        protected void SetAlways<T>(ref T oldVal, T newVal, [CallerMemberName]string propertyName = null)
+        {
+            OnPropertyChanging(propertyName);
+            oldVal = newVal;
+            OnPropertyChanged(propertyName);
+        }
 
         protected bool SetIfDifferent<T>(ref T oldVal, T newVal, [CallerMemberName]string propertyName = null) where T : IEquatable<T>
         {
@@ -35,6 +35,20 @@ namespace DRM.PropBag.ControlModel
         protected bool SetIfDifferentVT<T>(ref T oldVal, T newVal, [CallerMemberName]string propertyName = null) where T : struct
         {
             if (!oldVal.Equals(newVal))
+            {
+                OnPropertyChanging(propertyName);
+                oldVal = newVal;
+                OnPropertyChanged(propertyName);
+                return true;
+            }
+            return false;
+        }
+
+        // TODO: This is expensive, consider creating custom IEquatable implementation for Action<T,T>s
+        protected bool SetIfDifferentDelegate<T>(ref T oldVal, T newVal, [CallerMemberName]string propertyName = null) where T : class
+        {
+
+            if (! (oldVal == newVal) )
             {
                 OnPropertyChanging(propertyName);
                 oldVal = newVal;

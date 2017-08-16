@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 
 using DRM.PropBag;
+using DRM.PropBag.ControlModel;
 
 namespace PropBagLib.Tests
 {
@@ -30,7 +31,18 @@ namespace PropBagLib.Tests
         [Test]
         public void Test1()
         {
-            mod1 = new CreateAtRunTimeModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+
+            PropModel pm = new PropModel("CreateAtRunTimeModel", "PropBagLib.Tests", deriveFromPubPropBag: false, typeSafetyMode: PropBagTypeSafetyMode.AllPropsMustBeRegistered, deferMethodRefResolution: true);
+
+            PropItem pi = new PropItem(typeof(string), "PropString", null, true, true, new PropInitialValueField("Initial Value"), null, null);
+
+            pm.Props.Add(pi);
+
+            mod1 = new CreateAtRunTimeModel(pm);
+
+            Assert.That(mod1, Is.Not.EqualTo(null), "Expected the CreateAtRunTimeModel to have been created.");
+
+            Assert.That(mod1.PropertyExists("PropString"), Is.True, "Expected the property with name = 'PropString' to have been create.");
 
 
         }

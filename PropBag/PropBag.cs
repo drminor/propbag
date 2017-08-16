@@ -35,6 +35,8 @@ namespace DRM.PropBag
 
         public PropBag(PropBagTypeSafetyMode typeSafetyMode, AbstractPropFactory thePropFactory) : base(typeSafetyMode, thePropFactory) {}
 
+        public PropBag(DRM.PropBag.ControlModel.PropModel pm) : base(pm) { }
+
         #endregion
 
         #region Propety Access Methods 
@@ -89,6 +91,12 @@ namespace DRM.PropBag
         #endregion
 
         #region Property Management 
+
+        //public bool CreatePropsFromModel(DRM.PropBag.ControlModel.PropModel pm)
+        //{
+        //    base.TypeSafetyMode = PropBagTypeSafetyMode.Loose;
+        //    return true;
+        //}
 
         /// <summary>
         /// Use when you want to specify an Action<typeparamref name="T"/> to be performed

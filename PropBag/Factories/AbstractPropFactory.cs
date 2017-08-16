@@ -23,6 +23,14 @@ namespace DRM.PropBag
 
         public abstract IPropGen Create(Type typeOfThisProperty, object value, string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid);
+
+        public abstract IPropGen CreateNoValue(Type typeOfThisProperty, string propertyName, object extraInfo, bool hasStorage, bool isTypeSolid);
+
+        public abstract IPropGen CreateFull(Type typeOfThisProperty, object value, string propertyName, object extraInfo, bool hasStorage, bool isTypeSolid,
+            Delegate doWhenChanged, bool doAfterNotify, Delegate comparer);
+
+        public abstract IPropGen CreateFullNoValue(Type typeOfThisProperty, string propertyName, object extraInfo, bool hasStorage, bool isTypeSolid,
+            Delegate doWhenChanged, bool doAfterNotify, Delegate comparer);
         
         public virtual IPropGen CreatePropInferType(object value, string propertyName, object extraInfo, bool hasStorage)
         {
@@ -71,6 +79,22 @@ namespace DRM.PropBag
             return result;
         }
 
+        protected virtual CreateFullPropWithValueDelegate GetFullPropCreator(Type typeOfThisValue)
+        {
+            MethodInfo mi = gmtType.GetMethod("CreateFullProp", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(typeOfThisValue);
+            CreateFullPropWithValueDelegate result = (CreateFullPropWithValueDelegate)Delegate.CreateDelegate(typeof(CreateFullPropWithValueDelegate), mi);
+
+            return result;
+        }
+
+        protected virtual  CreateFullPropDelegate GetFullPropWithNoneOrDefaultCreator(Type typeOfThisValue)
+        {
+            MethodInfo mi = gmtType.GetMethod("CreateFullPropWithNoValue", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(typeOfThisValue);
+            CreateFullPropDelegate result = (CreateFullPropDelegate)Delegate.CreateDelegate(typeof(CreateFullPropDelegate), mi);
+
+            return result;
+        }
+
         #endregion
     }
 
@@ -91,6 +115,25 @@ namespace DRM.PropBag
             //PropFactory pf = propFactory as PropFactory;
             return propFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, isTypeSolid);
         }
+
+        private static IProp<T> CreateFullProp<T>(AbstractPropFactory propFactory, object value,
+            string propertyName, object extraInfo,
+            bool hasStorage, bool isTypeSolid,
+            Delegate doWhenChanged, bool doAfterNotify, Delegate comparer)
+        {
+            //PropFactory pf = propFactory as PropFactory;
+            return propFactory.Create<T>((T)value, propertyName, extraInfo, hasStorage, isTypeSolid, (Action<T,T>) doWhenChanged, doAfterNotify, (IEqualityComparer<T>) comparer);
+        }
+
+        public static IProp<T> CreateFullPropWithNoValue<T>(AbstractPropFactory propFactory,
+            string propertyName, object extraInfo,
+            bool hasStorage, bool isTypeSolid,
+            Delegate doWhenChanged, bool doAfterNotify, Delegate comparer)
+        {
+            //PropFactory pf = propFactory as PropFactory;
+            return propFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, isTypeSolid, (Action<T, T>)doWhenChanged, doAfterNotify, (IEqualityComparer<T>)comparer);
+        }
+
     }
 
 

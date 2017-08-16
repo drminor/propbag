@@ -61,6 +61,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="MainViewModel.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -94,6 +95,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\NotifyPropChangedWithVals\Inpcwv.csproj">
+      <Project>{18580a49-4d08-4b0d-9a2e-4ed38891c63b}</Project>
+      <Name>Inpcwv</Name>
+    </ProjectReference>
     <ProjectReference Include="..\PropBagControlsWPF\PropBagControlsWPF.csproj">
       <Project>{9bee9979-9812-4675-8f97-a4dd1e7dba5f}</Project>
       <Name>PropBagControlsWPF</Name>

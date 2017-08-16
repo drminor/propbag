@@ -54,7 +54,10 @@
     <Compile Include="InitialValueField.cs" />
     <Compile Include="NamespaceItem.cs" />
     <Compile Include="NamespacesCollection.cs" />
+    <Compile Include="PropBagInstanceAttribute.cs" />
     <Compile Include="PropBagTemplate.cs" />
+    <Compile Include="PropBagTemplateExtensions.cs" />
+    <Compile Include="PropComparerField.cs" />
     <Compile Include="PropDoWhenChangedField.cs" />
     <Compile Include="PropItem.cs" />
     <Compile Include="PropsCollection.cs" />

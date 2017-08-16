@@ -29,11 +29,13 @@ namespace DRM.PropBag
     {
         #region Constructor
 
-        public PubPropBag() : base() {} //(PropBagTypeSafetyMode.AllPropsMustBeRegistered, null) { }
+        public PubPropBag() : base() {} 
 
-        public PubPropBag(PropBagTypeSafetyMode typeSafetyMode) : base(typeSafetyMode) {} // this(typeSafetyMode, null) { }
+        public PubPropBag(PropBagTypeSafetyMode typeSafetyMode) : base(typeSafetyMode) {} 
 
         public PubPropBag(PropBagTypeSafetyMode typeSafetyMode, AbstractPropFactory thePropFactory) : base(typeSafetyMode, thePropFactory) { }
+
+        public PubPropBag(DRM.PropBag.ControlModel.PropModel pm) : base(pm) { }
 
         #endregion
 

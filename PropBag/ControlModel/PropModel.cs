@@ -17,6 +17,8 @@ namespace DRM.PropBag.ControlModel
         PropBagTypeSafetyMode tsm;
         bool dmrr;
         bool reiv;
+        AbstractPropFactory pf;
+
         ObservableCollection<string> _namespaces;
         ObservableCollection<PropItem> _props;
 
@@ -39,6 +41,12 @@ namespace DRM.PropBag.ControlModel
 
         [XmlAttribute(AttributeName = "require-explicit-initial-value")]
         public bool RequireExplicitInitialValue { get { return reiv; } set { SetIfDifferent<bool>(ref reiv, value); } }
+
+
+        // TODO: This is not Serializable, consider providing string representation as a proxy
+        // Perhaps we should simply not serialize instances of PropBag Control Models.
+        [XmlIgnore]
+        public AbstractPropFactory PropFactory { get { return pf; }  set {SetAlways<AbstractPropFactory>(ref pf, value); } }
 
         [XmlArray("namespaces")]
         [XmlArrayItem("namespace")]
@@ -71,6 +79,7 @@ namespace DRM.PropBag.ControlModel
             TypeSafetyMode = typeSafetyMode;
             DeferMethodRefResolution = deferMethodRefResolution;
             RequireExplicitInitialValue = requireExplicitInitialValue;
+
             Namespaces = new ObservableCollection<string>();
             Props = new ObservableCollection<PropItem>();
         }
