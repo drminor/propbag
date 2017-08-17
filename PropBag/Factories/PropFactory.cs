@@ -43,20 +43,20 @@ namespace DRM.PropBag
         }
 
         public override IPropGen CreateFull(Type typeOfThisProperty, object value, string propertyName, object extraInfo, bool hasStorage, bool isTypeSolid,
-            Delegate doWhenChanged, bool doAfterNotify, Delegate comparer)
+            Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false)
         {
             CreateFullPropWithValueDelegate propCreator = GetFullPropCreator(typeOfThisProperty);
             IPropGen prop = (IPropGen)propCreator(this, value, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid, 
-                doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify, comparer: comparer);
+                doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify, comparer: comparer, useRefEquality: useRefEquality);
             return prop;
         }
 
         public override IPropGen CreateFullNoValue(Type typeOfThisProperty, string propertyName, object extraInfo, bool hasStorage, bool isTypeSolid,
-            Delegate doWhenChanged, bool doAfterNotify, Delegate comparer)
+            Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false)
         {
             CreateFullPropDelegate propCreator = GetFullPropWithNoneOrDefaultCreator(typeOfThisProperty);
             IPropGen prop = (IPropGen)propCreator(this, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
-                doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify, comparer: comparer);
+                doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify, comparer: comparer, useRefEquality: useRefEquality);
             return prop;
         }
 

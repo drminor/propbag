@@ -49,7 +49,7 @@ namespace DRM.PropBag
             }
             set
             {
-                PSetIt(value, propertyName);
+                PSetIt(value, propertyName, null);
             }
         }
 
@@ -65,12 +65,12 @@ namespace DRM.PropBag
 
         protected void SetIt(object value, [CallerMemberName] string propertyName = null)
         {
-            base.PSetIt(value, propertyName);
+            base.PSetIt(value, propertyName, null);
         }
 
         protected void SetIt<T>(T value, [CallerMemberName] string propertyName = null)
         {
-            base.PSetIt(value, propertyName);
+            base.PSetIt<T>(value, propertyName);
         }
 
         /// <summary>
@@ -85,7 +85,7 @@ namespace DRM.PropBag
         /// <returns>True if the value was updated, otherwise false.</returns>
         protected bool SetIt<T>(T newValue, ref T curValue, [CallerMemberName]string propertyName = null)
         {
-            return base.PSetIt(newValue, ref curValue, propertyName);
+            return base.PSetIt<T>(newValue, ref curValue, propertyName);
         }
 
         #endregion

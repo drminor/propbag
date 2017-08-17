@@ -4,28 +4,30 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using System.ComponentModel;
+
 using DRM.PropBag;
 using DRM.Inpcwv;
+using DRM.PropBag.ControlsWPF;
 using DRM.PropBag.ControlModel;
 
 namespace PropBagTestApp
 {
-    public class MainViewModel : PropBag
+    public class MainViewModel : PropBag, INotifyPropertyChanged, INotifyPropertyChanging
     {
+        public bool PropFirstDidChange;
+        public bool PropMyStringDidChange;
 
-        // Just for testing
-        public bool MyStringWasUpdated { get; set; }
+        private MainViewModel() { } // Shows that if no default constructor is available, the one that takes a single byte is use.
 
-        public MainViewModel(byte flag)
+        // If it not desirable to provide a public, default, parameterless constructor, 
+        // a consructor that takes a single byte can be used instead.
+        // NOTE: Neither of these constructors is required if an instance of this class already exists from the proerty 
+        // marked with the PropBagInstanceAttribute.
+        // An instance of this class must be available so that we create an instance of a Action<T,T> delegate.
+        public MainViewModel(byte dummmy)
         {
-            if (flag != 0x0)
-            {
-                string ourClassName = this.GetType().ToString();
-                throw new ApplicationException(string.Format("Unexpected value of flag when constructing the {0}.", ourClassName));
-            }
-            MyStringWasUpdated = false;
         }
-
 
         /// <summary>
         /// Constructor used by View to create with properties
@@ -33,12 +35,24 @@ namespace PropBagTestApp
         /// <param name="pm"></param>
         public MainViewModel(PropModel pm) : base(pm)
         {
-            MyStringWasUpdated = false;
+            this.PropFirstDidChange = false;
+            this.PropMyStringDidChange = false;
         }
 
-        private void HandleMyStringUpdates(string oldVal, string newVal)
+        public new object this[string propertyName]
         {
-            MyStringWasUpdated = true;
+            get { return base.GetIt(propertyName); }
+            set { base.SetIt(value, propertyName); }
+        }
+
+        private void DoWhenFirstChanges(bool oldVal, bool newVal)
+        {
+            this.PropFirstDidChange = true;
+        }
+
+        private void DoWhenMyStringChanges(string oldVal, string newVal)
+        {
+            this.PropMyStringDidChange = true;
         }
 
         

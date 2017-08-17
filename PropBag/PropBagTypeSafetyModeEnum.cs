@@ -10,7 +10,8 @@ namespace DRM.PropBag
     {
         AllPropsMustBeRegistered,
         OnlyTypedAccess,
-        Loose
+        Loose,
+        RequireRegButAllowUnTyped
     }
 
 }

@@ -21,11 +21,11 @@ namespace DRM.PropBag
         object value,
         string propertyName, object extraInfo,
         bool hasStorage, bool isTypeSolid,
-        Delegate doWhenChanged, bool doAfterNotify, Delegate comparer);
+        Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality);
 
     public delegate object CreateFullPropDelegate(AbstractPropFactory propFactory,
         string propertyName, object extraInfo,
         bool hasStorage, bool isTypeSolid,
-        Delegate doWhenChanged, bool doAfterNotify, Delegate comparer);
+        Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality);
 
 }

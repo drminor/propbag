@@ -8,6 +8,7 @@ using System.Runtime.CompilerServices;
 
 
 using DRM.Inpcwv;
+using DRM.PropBag.ControlModel;
 
 namespace DRM.PropBag
 {
@@ -101,6 +102,12 @@ namespace DRM.PropBag
                         OnlyTypedAccess = false;
                         break;
                     }
+                case PropBagTypeSafetyMode.RequireRegButAllowUnTyped :
+                    {
+                        AllPropsMustBeRegistered = true;
+                        OnlyTypedAccess = false;
+                        break;
+                    }
                 default:
                     throw new ApplicationException("Unexpected value for typeSafetyMode parameter.");
             }
@@ -113,42 +120,46 @@ namespace DRM.PropBag
 
         }
 
-        public PropBagBase(DRM.PropBag.ControlModel.PropModel pm) : this(pm.TypeSafetyMode, null)
+        public PropBagBase(ControlModel.PropModel pm) : this(pm.TypeSafetyMode, null)
         {
             //TODO: Make the PropModel record the "PropFactory."
 
             foreach (DRM.PropBag.ControlModel.PropItem pi in pm.Props)
             {
-                // TODO: Get Object from ExtraInfo
-                object ei = pi.ExtraInfo == null ? null : "Fix Me";
+                object ei = pi.ExtraInfo;
+
+                // TODO complete the PropComparerField.
+                Delegate comparer = null;
+                bool useRefEquality = false; // pi.ComparerField.UseRefEquality;
 
                 IPropGen pg;
 
-                if (pi.InitialValueField.SetToUndefined)
+                if (pi.HasStore && !pi.InitialValueField.SetToUndefined && !pi.InitialValueField.SetToDefault)
                 {
-                    pg =  ThePropFactory.CreateFullNoValue(pi.PropertyType, pi.PropertyName, ei, pi.HasStore, pi.TypeIsSolid,
-                        pi.DoWhenChangedField.DoWhenChanged, pi.DoWhenChangedField.DoAfterNotify, null);
+                    object value = GetValue(pi.InitialValueField);
 
+                    pg = ThePropFactory.CreateFull(pi.PropertyType, value, pi.PropertyName, ei, pi.HasStore, pi.TypeIsSolid,
+                        pi.DoWhenChangedField.DoWhenChanged, pi.DoWhenChangedField.DoAfterNotify, comparer, useRefEquality);
                 }
                 else
                 {
-                    object val;
-                    // TODO: Get Initial Value from string
-                    if (pi.PropertyType == typeof(string))
-                    {
-                        val = "1";
-                    }
-                    else
-                    {
-                        val = false;
-                    }
-
-                    pg = ThePropFactory.CreateFull(pi.PropertyType, val, pi.PropertyName, ei, pi.HasStore, pi.TypeIsSolid,
-                        pi.DoWhenChangedField.DoWhenChanged, pi.DoWhenChangedField.DoAfterNotify, null);
+                    pg = ThePropFactory.CreateFullNoValue(pi.PropertyType, pi.PropertyName, ei, pi.HasStore, pi.TypeIsSolid,
+                        pi.DoWhenChangedField.DoWhenChanged, pi.DoWhenChangedField.DoAfterNotify, comparer, useRefEquality);
                 }
                 AddProp(pi.PropertyName, pg);
             }
         }
+
+        private object GetValue(ControlModel.PropInitialValueField ivf)
+        {
+            Debug.Assert(ivf.SetToDefault == false, "Set To Default is true on call to GetValue.");
+            Debug.Assert(ivf.SetToUndefined == false, "Set To Undefined is true on call to GetValue.");
+
+            if (ivf.SetToNull) return null;
+            if (ivf.SetToEmptyString) return string.Empty;
+
+            return ivf.InitialValue;
+         }
 
         protected void PClearEventSubscribers()
         {
@@ -168,6 +179,34 @@ namespace DRM.PropBag
         #endregion
 
         #region Property Access Methods
+
+        protected object this[Type type, string propertyName]
+        {
+            get
+            {
+                IPropGen genProp = GetGenProp(propertyName);
+
+                if (!genProp.TypeIsSolid)
+                {
+                    MakeTypeSolid(ref genProp, type, propertyName);
+                    tVals[propertyName] = genProp;
+                }
+                else
+                {
+                    if (type != genProp.Type)
+                    {
+                        // TODO: Fix Me.
+                        throw new InvalidCastException("Fix Me");
+                    }
+                }
+                // This uses reflection.
+                return genProp.Value;
+            }
+            set
+            {
+                PSetIt(value, propertyName, type);
+            }
+        }
 
         protected object PGetIt(string propertyName)
         {
@@ -195,7 +234,13 @@ namespace DRM.PropBag
             return prop.TypedValue;
         }
 
-        protected void PSetIt(object value, string propertyName)
+        /// <summary>
+        /// Set's the value of the property with optional type information.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="propertyName"></param>
+        /// <param name="type">If unknown, set this parameter to null.</param>
+        protected void PSetIt(object value, string propertyName, Type type)
         {
             if (OnlyTypedAccess)
             {
@@ -230,8 +275,17 @@ namespace DRM.PropBag
                 {
                     try
                     {
-                        // TODO, we probably need to be more creative when determining the type of this new value.
-                        Type newType = value.GetType();
+                        Type newType;
+                        if (type != null)
+                        {
+                            // Use the type provided by the caller.
+                            newType = type;
+                        }
+                        else
+                        {
+                            // TODO, we probably need to be more creative when determining the type of this new value.
+                            newType = value.GetType();
+                        }
 
                         MakeTypeSolid(ref genProp, newType, propertyName);
                         tVals[propertyName] = genProp;
@@ -243,8 +297,18 @@ namespace DRM.PropBag
                 }
                 else
                 {
-                    // Object.GetType() is sufficent here, since AreTypesSame will handle comparison nuances.
-                    Type newType = value.GetType();
+                    Type newType;
+                    if (type != null)
+                    {
+                        // Use the type provided by the caller.
+                        newType = type;
+                    }
+                    else
+                    {
+                        // Object.GetType() is sufficent here, since AreTypesSame will handle comparison nuances.
+                        newType = value.GetType();
+                    }
+
                     if (!AreTypesSame(newType, genProp.Type))
                     {
                         throw new ApplicationException(string.Format("Attempting to set property: {0} whose type is {1}, with a call whose type parameter is {2} is invalid.", propertyName, genProp.Type.ToString(), newType.ToString()));

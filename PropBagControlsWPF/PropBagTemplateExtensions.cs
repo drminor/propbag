@@ -38,9 +38,9 @@ namespace DRM.PropBag.ControlsWPF
             {
                 PropItem pi = theModel.Props[propPtr];
 
-                bool hasStore = pi.HasStore; //.HasValue ? pi.HasStore.Value : true; // The default is true.
-                bool typeIsSolid = pi.TypeIsSolid; //.HasValue ? pi.TypeIsSolid.Value : true; // The default is true.
-                string extraInfo = pi.ExtraInfo; // ?? null;
+                bool hasStore = pi.HasStore; 
+                bool typeIsSolid = pi.TypeIsSolid; 
+                string extraInfo = pi.ExtraInfo; 
 
                 ControlModel.PropItem rpi = new ControlModel.PropItem(pi.PropertyType, pi.PropertyName, extraInfo, hasStore, typeIsSolid);
 

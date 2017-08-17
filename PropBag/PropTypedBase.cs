@@ -19,7 +19,7 @@ namespace DRM.PropBag
             DoWHenChangedAction = doWhenChanged;
             DoAfterNotify = doAfterNotify;
             Comparer = comparer;
-            PropertyChangedWithTVals = delegate { };
+            PropertyChangedWithTVals = null;
             base.TypedProp = this;
         }
 

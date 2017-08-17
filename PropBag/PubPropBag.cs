@@ -49,7 +49,7 @@ namespace DRM.PropBag
             }
             set
             {
-                PSetIt(value, propertyName);
+                PSetIt(value, propertyName, null);
             }
         }
 
@@ -65,12 +65,12 @@ namespace DRM.PropBag
 
         public void SetIt(object value, [CallerMemberName] string propertyName = null)
         {
-            base.PSetIt(value, propertyName);
+            base.PSetIt(value, propertyName, null);
         }
 
         public void SetIt<T>(T value, [CallerMemberName] string propertyName = null)
         {
-            base.PSetIt(value, propertyName);
+            base.PSetIt<T>(value, propertyName);
         }
 
         /// <summary>

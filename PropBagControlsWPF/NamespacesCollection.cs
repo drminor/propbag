@@ -9,5 +9,6 @@ namespace DRM.PropBag.ControlsWPF
 {
     public class NamespacesCollection : ObservableCollection<NamespaceItem>
     {
+        public NamespacesCollection() : base() {  }
     }
 }

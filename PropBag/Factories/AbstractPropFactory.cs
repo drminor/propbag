@@ -21,16 +21,24 @@ namespace DRM.PropBag
             bool hasStorage = true, bool typeIsSolid = true,
             Action<T, T> doWhenChanged = null, bool doAfterNotify = false, IEqualityComparer<T> comparer = null);
 
+        // TODO: Consider removing the "short" versions" and provide defaults for the "long" versions.
         public abstract IPropGen Create(Type typeOfThisProperty, object value, string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid);
 
-        public abstract IPropGen CreateNoValue(Type typeOfThisProperty, string propertyName, object extraInfo, bool hasStorage, bool isTypeSolid);
+        public abstract IPropGen CreateNoValue(Type typeOfThisProperty,
+            string propertyName, object extraInfo,
+            bool hasStorage, bool isTypeSolid);
 
-        public abstract IPropGen CreateFull(Type typeOfThisProperty, object value, string propertyName, object extraInfo, bool hasStorage, bool isTypeSolid,
-            Delegate doWhenChanged, bool doAfterNotify, Delegate comparer);
+        public abstract IPropGen CreateFull(Type typeOfThisProperty,
+            object value,
+            string propertyName, object extraInfo,
+            bool hasStorage, bool isTypeSolid,
+            Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false);
 
-        public abstract IPropGen CreateFullNoValue(Type typeOfThisProperty, string propertyName, object extraInfo, bool hasStorage, bool isTypeSolid,
-            Delegate doWhenChanged, bool doAfterNotify, Delegate comparer);
+        public abstract IPropGen CreateFullNoValue(Type typeOfThisProperty,
+            string propertyName, object extraInfo,
+            bool hasStorage, bool isTypeSolid,
+            Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false);
         
         public virtual IPropGen CreatePropInferType(object value, string propertyName, object extraInfo, bool hasStorage)
         {
@@ -119,19 +127,26 @@ namespace DRM.PropBag
         private static IProp<T> CreateFullProp<T>(AbstractPropFactory propFactory, object value,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid,
-            Delegate doWhenChanged, bool doAfterNotify, Delegate comparer)
+            Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false)
         {
-            //PropFactory pf = propFactory as PropFactory;
-            return propFactory.Create<T>((T)value, propertyName, extraInfo, hasStorage, isTypeSolid, (Action<T,T>) doWhenChanged, doAfterNotify, (IEqualityComparer<T>) comparer);
+            IEqualityComparer<T> compr = useRefEquality ? propFactory.GetRefEqualityComparer<T>() : (IEqualityComparer<T>)comparer;
+
+            // TODO: Check This.
+            T theVal = (T)value;
+
+            return propFactory.Create<T>(theVal, propertyName, extraInfo, hasStorage, isTypeSolid,
+                (Action<T,T>) doWhenChanged, doAfterNotify, compr);
         }
 
         public static IProp<T> CreateFullPropWithNoValue<T>(AbstractPropFactory propFactory,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid,
-            Delegate doWhenChanged, bool doAfterNotify, Delegate comparer)
+            Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false)
         {
-            //PropFactory pf = propFactory as PropFactory;
-            return propFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, isTypeSolid, (Action<T, T>)doWhenChanged, doAfterNotify, (IEqualityComparer<T>)comparer);
+            IEqualityComparer<T> compr = useRefEquality ? propFactory.GetRefEqualityComparer<T>() : (IEqualityComparer<T>)comparer;
+
+            return propFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, isTypeSolid, 
+                (Action<T, T>)doWhenChanged, doAfterNotify, compr);
         }
 
     }

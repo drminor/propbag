@@ -6,39 +6,64 @@
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         Title="MainWindow" Height="350" Width="525">
 
-    <Grid>
+    <Grid Name="TopGrid" >
         <Grid.RowDefinitions>
+            <RowDefinition/>
             <RowDefinition/>
             <RowDefinition/>
             <RowDefinition/>
         </Grid.RowDefinitions>
 
-        <pb:PropBagTemplate Grid.Row="0" x:Name="MainViewModelPropTemplate" ClassName="MainViewModel"
-                OutPutNameSpace="PropBagTestApp"
-                            DeriveFromPubPropBag="False"
-                            DeferMethodRefResolution="True"
-                            TypeSafetyMode="AllPropsMustBeRegistered">
-                            
+        <pb:PropBagTemplate Grid.Row="0" Name="T1" ClassName="MainViewModel" TypeSafetyMode="RequireRegButAllowUnTyped">
+            <pb:PropBagTemplate.Namespaces>
+                <pb:NamespaceItem Namespace="System.IO"/>
+            </pb:PropBagTemplate.Namespaces>
+
+            
+            <pb:PropBagTemplate.Props>
+                <pb:PropItem PropertyName="MyString" PropertyType="sys:String">
+                    <pb:InitialValueField InitialValue="11"/>
+                    <pb:PropDoWhenChangedField DoWhenChangedAction="System.String|PropBagTestApp.MainViewModel|DoWhenMyStringChanges"
+                                DoAfterNotify="False"/>
+                </pb:PropItem>
+            </pb:PropBagTemplate.Props>
+        </pb:PropBagTemplate>
+
+        <pb:PropBagTemplate Grid.Row="0" ClassName="MainViewModel2" TypeSafetyMode="RequireRegButAllowUnTyped">
             <pb:PropBagTemplate.Namespaces>
                 <pb:NamespaceItem Namespace="System"/>
-                <pb:NamespaceItem Namespace="System.Collections.Generic"/>
-                <pb:NamespaceItem Namespace="PropBagLib.Tests"/>
             </pb:PropBagTemplate.Namespaces>
 
             <pb:PropBagTemplate.Props>
-                <pb:PropItem PropertyName="MyString" PropertyType="sys:String"  >
-                    <pb:InitialValueField InitialValue="MyString now has a value."/>
-                    <pb:PropDoWhenChangedField DoWhenChangedAction="System.String|PropBagTestApp.MainWindow|DoWhenMyStringChanges" DoAfterNotify="False"/>
-                </pb:PropItem>
-                <pb:PropItem PropertyName="First" PropertyType="sys:Boolean" ExtraInfo="extra">
-                    <pb:InitialValueField SetToDefault="True"/>
-                    <pb:PropDoWhenChangedField DoWhenChangedAction="System.Boolean|PropBagTestApp.MainWindow|DoWhenFirstChanges" DoAfterNotify="True"/>
+                <pb:PropItem PropertyName="MyString" PropertyType="sys:String">
+                    <pb:InitialValueField InitialValue="22"/>
+                    <pb:PropDoWhenChangedField DoWhenChangedAction="System.String|PropBagTestApp.MainViewModel|DoWhenMyStringChanges"
+                                DoAfterNotify="False"/>
                 </pb:PropItem>
             </pb:PropBagTemplate.Props>
-
         </pb:PropBagTemplate>
 
+
+
+        <Label Grid.Row="1" Content="Label1:"></Label>
+        <TextBox Grid.Row="1" x:Name="txtRealField" Text="{Binding [MyString]}" Width="100" Height="25"></TextBox>
+
         <Button Grid.Row="2" Content="OK" Height="20" Width="50" Click="Button_Click"></Button>
+        
+        <Grid Name="InsideGrid" Grid.Row="3">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Label Grid.Row="0" Content="Label1:"></Label>
+
+            <TextBox Grid.Row="0" x:Name="txtRealField2" Text="{Binding [MyString]}" Width="100" Height="25"></TextBox>
+
+            <Button Grid.Row="1" Content="OK2" Height="20" Width="50" Click="Button_Click"></Button>
+
+
+        </Grid>
 
     </Grid>
+
 </Window>

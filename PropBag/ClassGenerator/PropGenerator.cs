@@ -11,6 +11,11 @@ using DRM.PropBag.XMLModel;
 
 namespace DRM.PropBag.ClassGenerator
 {
+    /// <summary>
+    /// This is not complete, and is not currently on the main development path to become completed.
+    /// As we work out similar problems present in the ControlModel classes, this also will benefit.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class PropGenerator<T>
     {
         static public IProp Create(PropDefRaw def, AbstractPropFactory factory, Type derivedType)

@@ -17,11 +17,20 @@ using System.Collections.ObjectModel;
 
 namespace DRM.PropBag.ControlsWPF
 {
-    public class PropBagTemplate : UserControl
+    public class PropBagTemplate : ItemsControl
     {
+
+        public static byte TEST_FLAG = 0xff;
+
         static PropBagTemplate()
         {
             DefaultStyleKeyProperty.OverrideMetadata(typeof(PropBagTemplate), new FrameworkPropertyMetadata(typeof(PropBagTemplate)));
+        }
+
+        public PropBagTemplate()
+        {
+            this.Namespaces = new NamespacesCollection();
+            this.Props = new PropsCollection();
         }
 
         static DependencyProperty DeriveFromPubPropBagProperty =
@@ -130,36 +139,36 @@ namespace DRM.PropBag.ControlsWPF
             }
         }
 
-        public static readonly DependencyProperty NamespacesProperty =
-            DependencyProperty.Register("Namespaces", typeof(NamespacesCollection), typeof(PropBagTemplate), new PropertyMetadata(new NamespacesCollection()));
+        //public static readonly DependencyProperty NamespacesProperty =
+        //    DependencyProperty.Register("Namespaces", typeof(NamespacesCollection), typeof(PropBagTemplate), new PropertyMetadata(new NamespacesCollection()));
 
-        public NamespacesCollection Namespaces
-        {
-            get
-            {
-                return (NamespacesCollection)this.GetValue(NamespacesProperty);
-            }
-            set
-            {
-                this.SetValue(NamespacesProperty, value);
-            }
-        }
+        public NamespacesCollection Namespaces { get; set; }
+        //{
+        //    get
+        //    {
+        //        return (NamespacesCollection)this.GetValue(NamespacesProperty);
+        //    }
+        //    set
+        //    {
+        //        this.SetValue(NamespacesProperty, value);
+        //    }
+        //}
 
 
-        public static readonly DependencyProperty PropsProperty =
-            DependencyProperty.Register("Props", typeof(PropsCollection), typeof(PropBagTemplate), new PropertyMetadata(new PropsCollection()));
+        //public static readonly DependencyProperty PropsProperty =
+        //    DependencyProperty.Register("Props", typeof(PropsCollection), typeof(PropBagTemplate), new PropertyMetadata(new PropsCollection()));
 
-        public PropsCollection Props
-        {
-            get
-            {
-                return (PropsCollection)this.GetValue(PropsProperty);
-            }
-            set
-            {
-                this.SetValue(PropsProperty, value);
-            }
-        }
+        public PropsCollection Props { get; set; }
+        //{
+        //    get
+        //    {
+        //        return (PropsCollection)this.GetValue(PropsProperty);
+        //    }
+        //    set
+        //    {
+        //        this.SetValue(PropsProperty, value);
+        //    }
+        //}
         
     }
 }

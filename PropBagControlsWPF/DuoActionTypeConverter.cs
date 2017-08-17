@@ -35,10 +35,14 @@ namespace DRM.PropBag.ControlsWPF
         // We need to return a DoWhenChangedAction
         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
         {
+            // If the context is null, or if the context doesn't provide a "live" root object,
+            // this returns a "placeholder" value. 
+            // We are assuming that these calls are being made before the "entire XAML environment" has been setup,
+            // and that eventually we will be called once the environment has been setup.
+
             if (context == null)
             {
-                Action<string, string> act = (x, y) => Console.WriteLine("");
-                return new DoWhenChangedAction(act);
+                return PlaceholderDelegate;
             }
 
             IRootObjectProvider rootProvider = context.GetService(typeof(IRootObjectProvider)) as IRootObjectProvider;
@@ -51,9 +55,12 @@ namespace DRM.PropBag.ControlsWPF
                 }
                 else
                 {
-                    Action<string, string> act = (x, y) => Console.WriteLine("");
-                    return new DoWhenChangedAction(act);
+                    return PlaceholderDelegate;
                 }
+            }
+            else
+            {
+                return PlaceholderDelegate;
             }
 
             return base.ConvertFrom(context, culture, value);
@@ -61,43 +68,140 @@ namespace DRM.PropBag.ControlsWPF
 
         private object doConvertFrom(string s, object xamlRoot)
         {
-            if (s == null) return null;
+            // TODO: create a custom exeception type for this.
+            if (s == null) throw new ApplicationException("The XamlRoot is null");
 
             try
             {
                 string[] parts = s.Split('|');
 
-                if (parts.Length < 3) return null;
+                if (parts.Length < 3)
+                    throw new ApplicationException("Value does not have three parts, separated by |.");
 
                 string strPropType = parts[0];
-                string strOwnerType = parts[1];
+                string strTargetType = parts[1]; // The name of the class that declares or "hosts" the method.
                 string methodName = parts[2];
 
+                // The typeConverter's context is a class that should have a property that provides access to an object 
+                // of the class that declares the method we are looking for.
+                // This property will be marked with the PropBagInstanceAttribute and will have
+                // the TargetType's class name as its PropBagTemplate value.
+                object targetInstance = ReflectionHelpers.GetTargetInstance(xamlRoot, strTargetType);
+                if(targetInstance == null)
+                    throw new ApplicationException(string.Format("Cannot find a reference to a running instance of {0}, and cannot find a public constructor to use to create a running instance.", strTargetType));
 
-                Type rootType = xamlRoot.GetType();
-                if(strOwnerType == rootType.ToString())
-                {
-                    // The typeConverter's context provides a reference to a running instance of the ownerType.
+                Type targetType = targetInstance.GetType();
+                if (strTargetType != targetType.ToString()) 
+                    throw new ApplicationException(string.Format("The {0} doesn't match the {1}", strTargetType, targetType.ToString()));
 
-                    Type propType = Type.GetType(strPropType);
-                    GetActionRefDelegate ActionGetter = GetTheGetActionRefDelegate(propType);
+                Type propType = Type.GetType(strPropType);
+                GetActionRefDelegate ActionGetter = GetTheGetActionRefDelegate(propType);
 
-                    Delegate d = ActionGetter(xamlRoot, rootType, methodName);
-                    return new DoWhenChangedAction(d);
-                }
-                else
-                {
-                    // Cannot resolve the owner's type.
-                    return null;
-                }
+                Delegate d = ActionGetter(targetInstance, targetType, methodName);
+                return new DoWhenChangedAction(d);
 
             } 
             catch (Exception ee)
             {
+                // This for testing.
                 string d = ee.Message;
                 throw;
             }
         }
+
+        //private object GetTargetInstance(object xamlRoot, string strTargetType)
+        //{
+        //    Type rootType = xamlRoot.GetType();
+
+        //    PropertyInfo[] propDefs = rootType.GetProperties(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+
+        //    for(int pPtr = 0; pPtr < propDefs.Length; pPtr++)
+        //    {
+        //        if (IsThisTheInstance(propDefs[pPtr], strTargetType))
+        //        {
+        //            return GetRunningInstance(propDefs[pPtr], xamlRoot);
+        //        }
+        //    }
+        //    return null;
+        //}
+
+        //private bool IsThisTheInstance(PropertyInfo propDef, string strTargetType)
+        //{
+        //    //IEnumerable<System.Attribute> list = propDef.GetCustomAttributes();
+        //    System.Attribute att = propDef.GetCustomAttribute(typeof(PropBagInstanceAttribute));
+        //    if (att == null) return false;
+
+        //    PropBagInstanceAttribute pbia = (PropBagInstanceAttribute)att;
+        //    return DoNameSpacesMatch(pbia.PropBagTemplate, strTargetType);
+        //}
+
+        //private bool DoNameSpacesMatch(string ns1, string ns2)
+        //{
+        //    int cnt1 = ns1.Count(x => x == '.');
+        //    int cnt2 = ns2.Count(x => x == '.');
+
+        //    if (cnt1 == cnt2)
+        //    {
+        //        return string.Equals(ns1, ns2, StringComparison.OrdinalIgnoreCase);
+        //    }
+        //    else
+        //    {
+        //        if (cnt1 < cnt2)
+        //        {
+        //            //var x = ns2.Split('.').Skip(cnt2 - cnt1);
+        //            //var y = string.Join<string>(".", x);
+
+        //            string localizedNs2 = string.Join(".", ns2.Split('.').Skip(cnt2 - cnt1));
+        //            return string.Equals(ns1, localizedNs2, StringComparison.OrdinalIgnoreCase);
+        //        }
+        //        else
+        //        {
+        //            string localizedNs1 = string.Join(".", ns1.Split('.').Skip(cnt1 - cnt2));
+        //            return string.Equals(localizedNs1, ns2, StringComparison.OrdinalIgnoreCase);
+        //        }
+        //    }
+        //}
+
+        //private object GetRunningInstance(PropertyInfo propDef, object propsParent)
+        //{
+        //    // Let's see if the property has been initialized, and if so we will use it's value.
+        //    MethodInfo mi = propDef.GetMethod;
+        //    object result = mi.Invoke(propsParent, null);
+        //    if (result != null) return result;
+
+        //    // Ok, lets try creating one using the default, public constructor which takes no parameters.
+        //    Type pt = propDef.PropertyType;
+        //    if (HasDefaultPublicConstructor(pt))
+        //    {
+        //        return Activator.CreateInstance(pt, null);
+        //    }
+        //    else
+        //    {
+        //        if (HasSpecialConstructor(pt))
+        //        {
+        //            // Ok, lets create a new one using the special constructor which takes a byte value of 0xFF.
+        //            byte flags = PropBagTemplate.TEST_FLAG;
+        //            result = Activator.CreateInstance(pt, new object[] { flags });
+        //            return result;
+        //        }
+        //        else
+        //        {
+        //            return null;
+        //        }
+        //    }
+        //}
+
+        //private bool HasDefaultPublicConstructor(Type targetType)
+        //{
+        //    return null != targetType.GetConstructor(Type.EmptyTypes);
+        //}
+
+        //private bool HasSpecialConstructor(Type targetType)
+        //{
+        //    Type[] types = new Type[1];
+        //    types[0] = typeof(byte);
+        //    return null != targetType.GetConstructor(types);
+        //}
 
         public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
         {
@@ -129,6 +233,15 @@ namespace DRM.PropBag.ControlsWPF
         //    return true;
         //}
 
+        // TODO: Should this return a value with the correct parameter types?
+        private DoWhenChangedAction PlaceholderDelegate 
+        {
+            get
+            {
+                Action<string, string> act = (x, y) => new object();
+                return new DoWhenChangedAction(act);
+            }
+        }
 
         #region Helper Methods for the Generic Method Templates
 

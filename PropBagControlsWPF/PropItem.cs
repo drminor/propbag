@@ -159,29 +159,5 @@ namespace DRM.PropBag.ControlsWPF
         }
 
         #endregion
-
-        #region Unused
-
-        private bool IsNewVisChildOk(DependencyObject added, out string elName)
-        {
-            elName = "not applicable";
-
-            if (added == null) return true;
-            if (added is ContentPresenter) return true;
-            if (added is ContentControl)
-            {
-                elName = ((ContentControl)added).Name;
-                return elName == "InitialValueFieldContent" || elName == "" || elName == null;
-            }
-
-            if (added is InitialValueField) return true;
-
-            return false;
-        }
-
-        #endregion
-
-
-
     }
 }

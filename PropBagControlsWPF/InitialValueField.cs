@@ -22,7 +22,6 @@ namespace DRM.PropBag.ControlsWPF
             DefaultStyleKeyProperty.OverrideMetadata(typeof(InitialValueField), new FrameworkPropertyMetadata(typeof(InitialValueField)));
         }
 
-
         static DependencyProperty InitialValueProperty =
             DependencyProperty.Register("InitialValue", typeof(string), typeof(InitialValueField));
 
@@ -96,6 +95,21 @@ namespace DRM.PropBag.ControlsWPF
             {
                 this.SetValue(SetToEmptyStringProperty, value);
             }
+        }
+
+        public bool AreWeValid()
+        {
+            int cnt = 0;
+            if (!string.IsNullOrEmpty(this.InitialValue)) if (++cnt > 1) return false;
+
+            if (SetToUndefined) if (++cnt > 1) return false;
+            if (SetToDefault) if (++cnt > 1) return false;
+            if (SetToNull) if (++cnt > 1) return false;
+            if (SetToEmptyString) if (++cnt > 1) return false;
+
+
+            return cnt == 1;
+
         }
 
     }
