@@ -116,8 +116,6 @@ namespace DRM.PropBag
 
         public PropBagBase(ControlModel.PropModel pm) : this(pm.TypeSafetyMode, null)
         {
-            //TODO: Make the PropModel record the "PropFactory."
-
             foreach (DRM.PropBag.ControlModel.PropItem pi in pm.Props)
             {
                 object ei = pi.ExtraInfo;
