@@ -87,7 +87,7 @@ namespace DRM.PropBag
                 case PropBagTypeSafetyMode.AllPropsMustBeRegistered:
                     {
                         AllPropsMustBeRegistered = true;
-                        OnlyTypedAccess = true;
+                        OnlyTypedAccess = false;
                         break;
                     }
                 case PropBagTypeSafetyMode.OnlyTypedAccess:
@@ -99,12 +99,6 @@ namespace DRM.PropBag
                 case PropBagTypeSafetyMode.Loose:
                     {
                         AllPropsMustBeRegistered = false;
-                        OnlyTypedAccess = false;
-                        break;
-                    }
-                case PropBagTypeSafetyMode.RequireRegButAllowUnTyped :
-                    {
-                        AllPropsMustBeRegistered = true;
                         OnlyTypedAccess = false;
                         break;
                     }
@@ -134,17 +128,18 @@ namespace DRM.PropBag
 
                 IPropGen pg;
 
-                if (pi.HasStore && !pi.InitialValueField.SetToUndefined && !pi.InitialValueField.SetToDefault)
+                if (pi.HasStore && !pi.InitialValueField.SetToUndefined)
                 {
                     object value = GetValue(pi.InitialValueField);
+                    bool useDefault = pi.InitialValueField.SetToDefault;
 
-                    pg = ThePropFactory.CreateFull(pi.PropertyType, value, pi.PropertyName, ei, pi.HasStore, pi.TypeIsSolid,
-                        pi.DoWhenChangedField.DoWhenChanged, pi.DoWhenChangedField.DoAfterNotify, comparer, useRefEquality);
+                    pg = ThePropFactory.CreateGen(pi.PropertyType, value, useDefault, pi.PropertyName, ei, pi.HasStore, pi.TypeIsSolid,
+                        pi.DoWhenChangedField.DoWhenChangedAction, pi.DoWhenChangedField.DoAfterNotify, comparer, useRefEquality);
                 }
                 else
                 {
-                    pg = ThePropFactory.CreateFullNoValue(pi.PropertyType, pi.PropertyName, ei, pi.HasStore, pi.TypeIsSolid,
-                        pi.DoWhenChangedField.DoWhenChanged, pi.DoWhenChangedField.DoAfterNotify, comparer, useRefEquality);
+                    pg = ThePropFactory.CreateGenWithNoValue(pi.PropertyType, pi.PropertyName, ei, pi.HasStore, pi.TypeIsSolid,
+                        pi.DoWhenChangedField.DoWhenChangedAction, pi.DoWhenChangedField.DoAfterNotify, comparer, useRefEquality);
                 }
                 AddProp(pi.PropertyName, pg);
             }
@@ -152,7 +147,7 @@ namespace DRM.PropBag
 
         private object GetValue(ControlModel.PropInitialValueField ivf)
         {
-            Debug.Assert(ivf.SetToDefault == false, "Set To Default is true on call to GetValue.");
+            //Debug.Assert(ivf.SetToDefault == false, "Set To Default is true on call to GetValue.");
             Debug.Assert(ivf.SetToUndefined == false, "Set To Undefined is true on call to GetValue.");
 
             if (ivf.SetToNull) return null;
@@ -255,11 +250,11 @@ namespace DRM.PropBag
             catch (KeyNotFoundException)
             {
                 if (AllPropsMustBeRegistered)
-                    throw new KeyNotFoundException(string.Format("Property: {0} has not been declared by calling AddProp, nor has its value been set by calling SetIt<T>. Cannot use this method in this case. Declare by calling AddProp, or use the SetIt<T> method.", propertyName));
+                    throw new InvalidOperationException(string.Format("Property: {0} has not been declared by calling AddProp, nor has its value been set by calling SetIt<T>. Cannot use this method in this case. Declare by calling AddProp, or use the SetIt<T> method.", propertyName));
 
                 if (OnlyTypedAccess)
                 {
-                    throw new ApplicationException(string.Format("Property: {0} has not been defined with a call to AddProp or any SetIt<T> call and the operation setting 'OnlyTypeAccesss' is set to true.", propertyName));
+                    throw new InvalidOperationException(string.Format("Property: {0} has not been defined with a call to AddProp or any SetIt<T> call and the TypeSafteyMode is set to 'OnlyTypeAccesss.'", propertyName));
                 }
 
                 genProp = ThePropFactory.CreatePropInferType(value, propertyName, null, true);
@@ -340,7 +335,7 @@ namespace DRM.PropBag
             {
                 if (AllPropsMustBeRegistered)
                 {
-                    throw new ApplicationException(string.Format("Property: {0} has not been defined with a call to AddProp() and the operation setting 'AllPropsMustBeRegistered' is set to true.", propertyName));
+                    throw new InvalidOperationException(string.Format("Property: {0} has not been defined with a call to AddProp() and the operation setting 'AllPropsMustBeRegistered' is set to true.", propertyName));
                 }
 
                 // Property has not been defined yet, let's create a definition for it now and initialize the value.
@@ -379,7 +374,7 @@ namespace DRM.PropBag
             {
                 if (AllPropsMustBeRegistered)
                 {
-                    throw new ApplicationException(string.Format("Property: {0} has not been defined with a call to AddProp() and the operation setting 'AllPropsMustBeRegistered' is set to true.", propertyName));
+                    throw new InvalidOperationException(string.Format("Property: {0} has not been defined with a call to AddProp() and the operation setting 'AllPropsMustBeRegistered' is set to true.", propertyName));
                 }
 
                 // Property has not been defined yet, let's create a definition for it now 
@@ -425,11 +420,11 @@ namespace DRM.PropBag
             catch (KeyNotFoundException)
             {
                 if (AllPropsMustBeRegistered)
-                    throw new KeyNotFoundException(string.Format("Property: {0} has not been declared by calling AddProp, nor has its value been set by calling SetIt<T>. Cannot use this method in this case. Declare by calling AddProp, or use the SetIt<T> method.", propertyName));
+                    throw new InvalidOperationException(string.Format("Property: {0} has not been declared by calling AddProp, nor has its value been set by calling SetIt<T>. Cannot use this method in this case. Declare by calling AddProp, or use the SetIt<T> method.", propertyName));
 
                 if (OnlyTypedAccess)
                 {
-                    throw new ApplicationException(string.Format("Property: {0} has not been defined with a call to AddProp or any SetIt<T> call and the operation setting 'OnlyTypeAccesss' is set to true.", propertyName));
+                    throw new InvalidOperationException(string.Format("Property: {0} has not been defined with a call to AddProp or any SetIt<T> call and the TypeSafety mode is set to 'OnlyTypeAccesss.'", propertyName));
                 }
 
                 genProp = ThePropFactory.CreateWithNoValue<object>(propertyName, null, true, false, null, false, null);
@@ -742,7 +737,7 @@ namespace DRM.PropBag
             {
                 if (AllPropsMustBeRegistered)
                 {
-                    throw new ApplicationException(string.Format("Property: {0} has not been defined with a call to AddProp() and the operation setting 'AllPropsMustBeRegistered' is set to true.", propertyName));
+                    throw new InvalidOperationException(string.Format("Property: {0} has not been defined with a call to AddProp() and the operation setting 'AllPropsMustBeRegistered' is set to true.", propertyName));
                 }
 
                 // Property has not been defined yet, let's create a definition for it now and initialize the value.
@@ -776,7 +771,7 @@ namespace DRM.PropBag
                 // Next statement uses reflection.
                 object curValue = genProp.Value;
 
-                IPropGen newwGenProp = ThePropFactory.Create(newType, genProp.Value, propertyName, null, true, true);
+                IPropGen newwGenProp = ThePropFactory.CreateGen(newType, genProp.Value, false, propertyName, null, true, true, null, false, null, false);
 
                 //genProp.UpdateWithSolidType(newType, curValue);
                 genProp = newwGenProp;

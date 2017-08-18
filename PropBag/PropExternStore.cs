@@ -14,8 +14,8 @@ namespace DRM.PropBag
     {
         public PropExternStore(string propertyName, object extraInfo,
             bool typeIsSolid = true,
-            Action<T, T> doWhenChanged = null, bool doAfterNotify = false, IEqualityComparer<T> comparer = null)
-            : base(typeof(T), typeIsSolid, true, doWhenChanged, doAfterNotify, comparer ?? EqualityComparer<T>.Default)
+            Action<T, T> doWhenChanged = null, bool doAfterNotify = false, Func<T,T,bool> comparer = null)
+            : base(typeof(T), typeIsSolid, true, doWhenChanged, doAfterNotify, comparer)
         {
             Tag = Guid.NewGuid(); // tag;
             Getter = null; // getter;

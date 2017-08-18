@@ -19,14 +19,14 @@ namespace PropBagLib.Tests
 		{
 	        AddProp<object>("PropObject", null, false, null);
 	        AddProp<string>("PropString", GetDelegate<string>("DoWhenStringChanged"), false, null);
-	        AddProp<string>("PropStringCallDoAfter", GetDelegate<string>("DoWhenStringChanged"), true, EqualityComparer<string>.Default);
+	        AddPropNoValue<string>("PropStringCallDoAfter", GetDelegate<string>("DoWhenStringChanged"), true, EqualityComparer<string>.Default.Equals);
 	        AddPropObjComp<string>("PropStringUseRefComp", GetDelegate<string>("DoWhenStringChanged"), true);
 	        AddProp<bool>("PropBool", null, false, null);
 	        AddProp<int>("PropInt", null, false, null);
 	        AddProp<TimeSpan>("PropTimeSpan", null, false, null);
 	        AddProp<Uri>("PropUri", null, false, null);
 	        AddProp<Lazy<int>>("PropLazyInt", null, false, null);
-	        AddProp<Nullable<int>>("PropNullableInt", GetDelegate<Nullable<int>>("DoWhenNullIntChanged"), false, null);
+	        AddProp<Nullable<int>>("PropNullableInt", GetDelegate<Nullable<int>>("DoWhenNullIntChanged"), false, null, null, -1);
 	        AddProp<ICollection<int>>("PropICollectionInt", GetDelegate<ICollection<int>>("DoWhenICollectionIntChanged"), false, null);
 		}
 

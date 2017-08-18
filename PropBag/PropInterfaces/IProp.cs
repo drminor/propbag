@@ -4,6 +4,7 @@ namespace DRM.PropBag
 {
     /// <summary>
     /// These are the non-type specific features that every instance of IProp<typeparamref name="T"/> implement.
+    /// These features are often implemented by an instance of a class that inherits from AbstractPropFactory.
     /// </summary>
     public interface IProp
     {

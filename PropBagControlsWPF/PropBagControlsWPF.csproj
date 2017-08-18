@@ -47,6 +47,7 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ComparerFuncTypeConverter.cs" />
     <Compile Include="DoWhenChangedAction.cs" />
     <Compile Include="DuoActionTypeConverter.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -57,6 +58,7 @@
     <Compile Include="PropBagInstanceAttribute.cs" />
     <Compile Include="PropBagTemplate.cs" />
     <Compile Include="PropBagTemplateExtensions.cs" />
+    <Compile Include="PropComparerFunc.cs" />
     <Compile Include="PropComparerField.cs" />
     <Compile Include="PropDoWhenChangedField.cs" />
     <Compile Include="PropItem.cs" />

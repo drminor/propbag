@@ -49,7 +49,8 @@ namespace DRM.PropBag.ControlsWPF
                     if (uc is InitialValueField)
                     {
                         InitialValueField ivf = (InitialValueField)uc;
-                        rpi.InitialValueField = new ControlModel.PropInitialValueField(ivf.InitialValue, ivf.SetToDefault, ivf.SetToUndefined, ivf.SetToNull, ivf.SetToEmptyString);
+                        rpi.InitialValueField = 
+                            new ControlModel.PropInitialValueField(ivf.InitialValue, ivf.SetToDefault, ivf.SetToUndefined, ivf.SetToNull, ivf.SetToEmptyString);
                         continue;
                     }
 
@@ -57,14 +58,21 @@ namespace DRM.PropBag.ControlsWPF
                     {
                         PropDoWhenChangedField dwc = (PropDoWhenChangedField)uc;
 
-                        //ControlModel.DoWhenChangedAction rdwcAction
-                        //    //= new ControlModel.DoWhenChangedAction(dwc.DoWhenChangedAction.ActionType, dwc.DoWhenChangedAction.ActionDelegate);
-                        //    = new ControlModel.DoWhenChangedAction(dwc.DoWhenChangedAction.ActionDelegate);
+                        ControlModel.PropDoWhenChangedField rdwc =
+                            new ControlModel.PropDoWhenChangedField(dwc.DoWhenChangedAction.DoWhenChanged, dwc.DoAfterNotify);
 
-                        ControlModel.PropDoWhenChangedField rdwc = new ControlModel.PropDoWhenChangedField(dwc.DoWhenChangedAction.ActionDelegate, dwc.DoAfterNotify);
-
-                        rpi.DoWhenChangedField = rdwc; // new ControlModel.PropDoWhenChangedField(dwc.DoWhenChangedAction, dwc.DoAfterNotify);
+                        rpi.DoWhenChangedField = rdwc; 
                         continue;
+                    }
+
+                    if (uc is PropComparerField)
+                    {
+                        PropComparerField pcf = (PropComparerField)uc;
+
+                        ControlModel.PropComparerField rpcf =
+                            new ControlModel.PropComparerField(pcf.ComparerFunc.Comparer, pcf.UseRefEquality);
+
+                        rpi.ComparerField = rpcf;
                     }
                 }
 

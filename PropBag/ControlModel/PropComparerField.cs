@@ -11,18 +11,18 @@ namespace DRM.PropBag.ControlModel
     public class PropComparerField : NotifyPropertyChangedBase, IEquatable<PropComparerField>
     {
 
-        string c;
+        Delegate c;
         bool ure;
 
-        [XmlText]
-        public string Comparer { get { return c; } set { SetIfDifferent<string>(ref c, value); } }
+        [XmlIgnore]
+        public Delegate Comparer { get { return c; } set { this.SetIfDifferentDelegate<Delegate>(ref c, value); } }
 
         [XmlAttribute("use-reference-equality")]
         public bool UseRefEquality { get { return ure; } set { SetIfDifferent<bool>(ref ure, value); } }
 
         public PropComparerField() : this(null) { }
 
-        public PropComparerField(string comparer, bool useRefEquality = false)
+        public PropComparerField(Delegate comparer, bool useRefEquality = false)
         {
             Comparer = comparer;
             UseRefEquality = useRefEquality;

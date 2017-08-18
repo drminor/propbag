@@ -13,7 +13,7 @@ namespace DRM.PropBag
     {
         protected PropTypedBase(Type typeOfThisValue, bool typeIsSolid, bool hasStore,
             Action<T, T> doWhenChanged, bool doAfterNotify,
-            IEqualityComparer<T> comparer)
+            Func<T,T,bool> comparer)
             : base(typeOfThisValue, typeIsSolid, hasStore)
         {
             DoWHenChangedAction = doWhenChanged;
@@ -30,7 +30,7 @@ namespace DRM.PropBag
 
         abstract public bool SetValueToUndefined();
 
-        protected IEqualityComparer<T> Comparer { get; set; }
+        protected Func<T,T,bool> Comparer { get; set; }
 
         private Action<T, T> _doWhenChangedAction;
         protected Action<T, T> DoWHenChangedAction {
@@ -104,14 +104,18 @@ namespace DRM.PropBag
             if (!HasStore)
                 throw new NotImplementedException();
 
-            return Comparer.Equals(newValue, TypedValue);
+            return Comparer(newValue, TypedValue);
+
+            //return Comparer.Equals(newValue, TypedValue);
         }
 
         public bool Compare(T val1, T val2)
         {
             if (!ValueIsDefined) return false;
 
-            return Comparer.Equals(val1, val2);
+            return Comparer(val1, val2);
+
+            //return Comparer.Equals(val1, val2);
         }
 
         public bool UpdateDoWhenChangedAction(Action<T, T> doWhenChangedAction, bool? doAfterNotify)

@@ -14,7 +14,7 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
 
-        <pb:PropBagTemplate Grid.Row="0" Name="T1" ClassName="MainViewModel" TypeSafetyMode="RequireRegButAllowUnTyped">
+        <pb:PropBagTemplate Grid.Row="0" Name="T1" ClassName="MainViewModel" TypeSafetyMode="AllPropsMustBeRegistered">
             <pb:PropBagTemplate.Namespaces>
                 <pb:NamespaceItem Namespace="System.IO"/>
             </pb:PropBagTemplate.Namespaces>
@@ -25,11 +25,12 @@
                     <pb:InitialValueField InitialValue="11"/>
                     <pb:PropDoWhenChangedField DoWhenChangedAction="System.String|PropBagTestApp.MainViewModel|DoWhenMyStringChanges"
                                 DoAfterNotify="False"/>
+                    <pb:PropComparerField ComparerFunc="System.String|0|System.Collections.Generic.EqualityComparer" UseRefEquality="False"/>
                 </pb:PropItem>
             </pb:PropBagTemplate.Props>
         </pb:PropBagTemplate>
 
-        <pb:PropBagTemplate Grid.Row="0" ClassName="MainViewModel2" TypeSafetyMode="RequireRegButAllowUnTyped">
+        <pb:PropBagTemplate Grid.Row="0" ClassName="MainViewModel2" TypeSafetyMode="AllPropsMustBeRegistered">
             <pb:PropBagTemplate.Namespaces>
                 <pb:NamespaceItem Namespace="System"/>
             </pb:PropBagTemplate.Namespaces>
@@ -39,6 +40,7 @@
                     <pb:InitialValueField InitialValue="22"/>
                     <pb:PropDoWhenChangedField DoWhenChangedAction="System.String|PropBagTestApp.MainViewModel|DoWhenMyStringChanges"
                                 DoAfterNotify="False"/>
+                    <pb:PropComparerField UseRefEquality="True"/>
                 </pb:PropItem>
             </pb:PropBagTemplate.Props>
         </pb:PropBagTemplate>

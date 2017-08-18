@@ -10,6 +10,11 @@ using DRM.Inpcwv;
 
 namespace DRM.PropBag
 {
+    /// <summary>
+    /// All properties have these features based on the type of the property.
+    /// Objects that implement this interface are often created by an instance of a class that inherits from AbstractPropFactory.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public interface IProp<T> : IPropGen, IProp
     {
         T TypedValue { get; set; }

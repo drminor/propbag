@@ -9,7 +9,8 @@ using DRM.Inpcwv;
 namespace DRM.PropBag
 {
     /// <summary>
-    /// All Properties share these features.
+    /// Classes that implement the IPropBag interface, keep a list of properties, each of which implements this interface.
+    /// These features are managed by the PropBag, and not by classes that inherit from AbstractProp.
     /// </summary>
     public interface IPropGen
     {

@@ -103,7 +103,7 @@ namespace DRM.PropBag
         /// <param name="comparer">A instance of a class that implements IEqualityComparer and thus an Equals method.</param>
         /// <param name="initalValue"></param>
         public IProp<T> AddProp<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
-            IEqualityComparer<T> comparer = null, object extraInfo = null, T initialValue = default(T))
+            Func<T,T,bool> comparer = null, object extraInfo = null, T initialValue = default(T))
         {
             bool hasStorage = true;
             bool typeIsSolid = true;
@@ -112,19 +112,20 @@ namespace DRM.PropBag
             return pg;
         }
 
+        // TODO: Consider removing this method and adding a parameter to AddProp named "UseRefEquality."
         public IProp<T> AddPropObjComp<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
             object extraInfo = null, T initialValue = default(T))
         {
             bool hasStorage = true;
             bool typeIsSolid = true;
-            IEqualityComparer<T> comparer = ThePropFactory.GetRefEqualityComparer<T>();
+            Func<T,T,bool> comparer = ThePropFactory.GetRefEqualityComparer<T>();
             IProp<T> pg = ThePropFactory.Create<T>(initialValue, propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
             AddProp<T>(propertyName, pg);
             return pg;
         }
 
         public IProp<T> AddPropNoValue<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
-            IEqualityComparer<T> comparer = null, object extraInfo = null)
+            Func<T,T,bool> comparer = null, object extraInfo = null)
         {
             bool hasStorage = true;
             bool typeIsSolid = true;
@@ -138,14 +139,14 @@ namespace DRM.PropBag
         {
             bool hasStorage = true;
             bool typeIsSolid = true;
-            IEqualityComparer<T> comparer = ThePropFactory.GetRefEqualityComparer<T>();
+            Func<T,T,bool> comparer = ThePropFactory.GetRefEqualityComparer<T>();
             IProp<T> pg = ThePropFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
             AddProp<T>(propertyName, pg);
             return pg;
         }
 
         public IProp<T> AddPropNoStore<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false,
-            IEqualityComparer<T> comparer = null, object extraInfo = null)
+            Func<T,T,bool> comparer = null, object extraInfo = null)
         {
             bool hasStorage = false;
             bool typeIsSolid = true;
@@ -159,7 +160,7 @@ namespace DRM.PropBag
         {
             bool hasStorage = false;
             bool typeIsSolid = true;
-            IEqualityComparer<T> comparer = ThePropFactory.GetRefEqualityComparer<T>();
+            Func<T,T,bool> comparer = ThePropFactory.GetRefEqualityComparer<T>();
             IProp<T> pg = ThePropFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
             AddProp<T>(propertyName, pg);
             return pg;

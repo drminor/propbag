@@ -74,7 +74,7 @@ namespace DRM.PropBag.ClassGenerator
                     //  public IProp<T> AddProp<T>(string propertyName, 
                     //      Action<T, T> doIfChanged = null,
                     //      bool doAfterNotify = false,
-                    //      IEqualityComparer<T> comparer = null,
+                    //      Func<T,T,bool> comparer = null,
                     //      object extraInfo = null,
                     //      T initalValue = default(T))
 
@@ -110,7 +110,7 @@ namespace DRM.PropBag.ClassGenerator
                     //  public IProp<T> AddProp<T>(string propertyName, 
                     //      Action<T, T> doIfChanged = null,
                     //      bool doAfterNotify = false,
-                    //      IEqualityComparer<T> comparer = null,
+                    //      Func<T,T,bool> comparer = null,
                     //      object extraInfo = null,
 
                     vals[1] = "NoValue";
@@ -131,7 +131,7 @@ namespace DRM.PropBag.ClassGenerator
                 //  public void AddPropNoStore<T>(string propertyName,
                 //      Action<T, T> doIfChanged,
                 //      bool doAfterNotify = false,
-                //      IEqualityComparer<T> comparer = null)
+                //      Func<T,T,bool> comparer = null)
 
                 vals[1] = "NoStore";
                 if (comparerPrepped.UseRefEquality)

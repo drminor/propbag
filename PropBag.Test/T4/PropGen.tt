@@ -4,10 +4,9 @@
 <#@ import namespace="System.Linq" #>
 <#@ import namespace="System.Text" #>
 <#@ import namespace="System.Collections.Generic" #>
-<#@ assembly name="$(SolutionDir)PropBagModel\bin\Debug\PropBagModel.dll" #>
-<#@ assembly name="$(SolutionDir)PropBagClassGenerator\bin\Debug\PropBagClassGenerator.dll" #>
-<#@ import namespace="DRM.PropBagModel" #>
-<#@ import namespace="DRM.PropBagClassGenerator" #>
+<#@ assembly name="$(SolutionDir)PropBag\bin\Debug\PropBag.dll" #>
+<#@ import namespace="DRM.PropBag.XMLModel" #>
+<#@ import namespace="DRM.PropBag.ClassGenerator" #>
 <#@ output extension=".cs" #>
 <#
 	//string absolutePath = @"C:\DEV\VS2013Projects\PubPropBag\PropBagT4\TestInput.xml";

@@ -13,6 +13,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
+using System.ComponentModel;
+
 namespace DRM.PropBag.ControlsWPF
 {
     public class PropComparerField : Control
@@ -20,6 +22,23 @@ namespace DRM.PropBag.ControlsWPF
         static PropComparerField()
         {
             DefaultStyleKeyProperty.OverrideMetadata(typeof(PropComparerField), new FrameworkPropertyMetadata(typeof(PropComparerField)));
+        }
+
+        static DependencyProperty ComparerFuncProperty =
+            DependencyProperty.Register("ComparerFunc", typeof(PropComparerFunc), typeof(PropComparerField), new PropertyMetadata(new PropComparerFunc()));
+
+        [TypeConverter(typeof(ComparerFuncTypeConverter))]
+        public PropComparerFunc ComparerFunc
+        {
+            get
+            {
+                var x = (PropComparerFunc)this.GetValue(ComparerFuncProperty);
+                return x;
+            }
+            set
+            {
+                this.SetValue(ComparerFuncProperty, value);
+            }
         }
 
         static DependencyProperty UseRefEqualityProperty =

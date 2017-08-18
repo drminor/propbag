@@ -12,6 +12,7 @@ using DRM.PropBag.XMLModel;
 namespace DRM.PropBag.ClassGenerator
 {
     /// <summary>
+    /// This takes an XML Model and at run-time creates the properties entries.
     /// This is not complete, and is not currently on the main development path to become completed.
     /// As we work out similar problems present in the ControlModel classes, this also will benefit.
     /// </summary>
@@ -20,7 +21,7 @@ namespace DRM.PropBag.ClassGenerator
     {
         static public IProp Create(PropDefRaw def, AbstractPropFactory factory, Type derivedType)
         {
-            IEqualityComparer<T> comparer = GetComp(def.Comparer, def.UseRefEquality, factory);
+            Func<T,T,bool> comparer = GetComp(def.Comparer, def.UseRefEquality, factory);
             Action<T,T> doWhen = GetDoWhen(def.DoWhenChanged, derivedType);
 
             if (def.HasStore)
@@ -31,7 +32,9 @@ namespace DRM.PropBag.ClassGenerator
                 }
                 else
                 {
-                    T initVal = Convert(def.InitialValue);
+                    bool useDefault = def.CreateType == PropCreateMethodEnum.useDefault;
+                    T initVal = factory.GetValue<T>(def.InitialValue, useDefault);
+
                     factory.Create<T>(initVal, def.PropName, def.ExtraInfo, def.HasStore, def.TypeIsSolid, doWhen, def.DoAfterNotify, comparer);
                 }
             }
@@ -42,7 +45,7 @@ namespace DRM.PropBag.ClassGenerator
             return null;
         }
 
-        static IEqualityComparer<T> GetComp(string x, bool useRefEquality, AbstractPropFactory factory)
+        static Func<T,T,bool> GetComp(string x, bool useRefEquality, AbstractPropFactory factory)
         {
             if (useRefEquality)
                 return factory.GetRefEqualityComparer<T>();
@@ -61,13 +64,6 @@ namespace DRM.PropBag.ClassGenerator
 
             return result;
         }
-
-        static T Convert(string x)
-        {
-            return default(T);
-        }
-
-
 
         static public PropDefRaw GetPropDef(PropModel propModel, PropItem pi, bool typeIsSolid = true)
         {

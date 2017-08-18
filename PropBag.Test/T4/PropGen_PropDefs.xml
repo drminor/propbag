@@ -26,7 +26,7 @@
       <name>PropStringCallDoAfter</name>
       <type>string</type>
       <initial-value use-undefined="true"/>
-      <comparer>EqualityComparer&lt;string&gt;.Default</comparer>
+      <comparer>EqualityComparer&lt;string&gt;.Default.Equals</comparer>
       <do-when-changed do-after-notify="true">DoWhenStringChanged</do-when-changed>
     </prop>
     <prop>

@@ -11,18 +11,13 @@ namespace DRM.PropBag.ControlsWPF
     [TypeConverter(typeof(DuoActionTypeConverter))]
     public class DoWhenChangedAction : IEquatable<DoWhenChangedAction>
     {
+        public Delegate DoWhenChanged { get; set; }
 
-        //public Type ActionType { get; set; }
-        public Delegate ActionDelegate { get; set; }
-
-        //public DoWhenChangedAction() : this(typeof(object), null) {}
         public DoWhenChangedAction() : this(null) { }
 
-        //public DoWhenChangedAction(Type actType, Delegate act)
         public DoWhenChangedAction(Delegate act)
         {
-            //ActionType = actType;
-            ActionDelegate = act;
+            DoWhenChanged = act;
         }
 
         public bool Equals(DoWhenChangedAction other)
@@ -30,8 +25,7 @@ namespace DRM.PropBag.ControlsWPF
             // TODO: Use Type Convert to covert each and then compare the string version.
             if (other == null) return false;
 
-            //if (other.ActionType == ActionType && other.ActionDelegate == ActionDelegate) return true;
-            if (other.ActionDelegate == ActionDelegate) return true;
+            if (other.DoWhenChanged == DoWhenChanged) return true;
 
             return false;
         }

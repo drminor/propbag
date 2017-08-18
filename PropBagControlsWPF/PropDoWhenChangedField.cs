@@ -28,7 +28,7 @@ namespace DRM.PropBag.ControlsWPF
 
 
         static DependencyProperty DoWhenChangedActionProperty =
-            DependencyProperty.Register("DoWhenChangedAction", typeof(DoWhenChangedAction), typeof(PropDoWhenChangedField));
+            DependencyProperty.Register("DoWhenChangedAction", typeof(DoWhenChangedAction), typeof(PropDoWhenChangedField), new PropertyMetadata(new DoWhenChangedAction()));
 
         [TypeConverter(typeof(DuoActionTypeConverter))]
         public DoWhenChangedAction DoWhenChangedAction
@@ -41,21 +41,6 @@ namespace DRM.PropBag.ControlsWPF
             set
             {
                 this.SetValue(DoWhenChangedActionProperty, value);
-            }
-        }
-
-        static DependencyProperty TestDoWProperty =
-            DependencyProperty.Register("TestDoW", typeof(string), typeof(PropDoWhenChangedField));
-
-        public string TestDoW
-        {
-            get
-            {
-                return (string)this.GetValue(TestDoWProperty);
-            }
-            set
-            {
-                this.SetValue(TestDoWProperty, value);
             }
         }
 

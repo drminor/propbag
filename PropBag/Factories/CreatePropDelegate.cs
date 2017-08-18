@@ -7,23 +7,23 @@ using System.Threading.Tasks;
 namespace DRM.PropBag
 {
 
-    public delegate object CreatePropWithValueDelegate(AbstractPropFactory propFactory,
-        object value,
-        string propertyName, object extraInfo, 
-        bool hasStorage, bool isTypeSolid);
+    //public delegate object CreatePropWithValueDelegate(AbstractPropFactory propFactory,
+    //    object value,
+    //    string propertyName, object extraInfo, 
+    //    bool hasStorage, bool isTypeSolid);
+
+    //public delegate object CreatePropDelegate(AbstractPropFactory propFactory,
+    //    string propertyName, object extraInfo, 
+    //    bool hasStorage, bool isTypeSolid);
+
 
     public delegate object CreatePropDelegate(AbstractPropFactory propFactory,
-        string propertyName, object extraInfo, 
-        bool hasStorage, bool isTypeSolid);
-
-
-    public delegate object CreateFullPropWithValueDelegate(AbstractPropFactory propFactory,
-        object value,
+        object value, bool useDefault,
         string propertyName, object extraInfo,
         bool hasStorage, bool isTypeSolid,
         Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality);
 
-    public delegate object CreateFullPropDelegate(AbstractPropFactory propFactory,
+    public delegate object CreatePropWithNoValueDelegate(AbstractPropFactory propFactory,
         string propertyName, object extraInfo,
         bool hasStorage, bool isTypeSolid,
         Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality);

@@ -132,7 +132,7 @@ namespace DRM.PropBag.ControlsWPF
 
             int initValueFieldCount = 0;
             int doWhenChangedFieldCount = 0;
-            //int comparerFieldCount = 0;
+            int comparerFieldCount = 0;
 
             for (int i = 0; i < chils.Count; i++)
             {
@@ -149,6 +149,14 @@ namespace DRM.PropBag.ControlsWPF
                 if (item is PropDoWhenChangedField)
                 {
                     if (++doWhenChangedFieldCount < 2) continue;
+                    tooMany = true;
+                    index = i;
+                    return false;
+                }
+
+                if (item is PropComparerField)
+                {
+                    if (++comparerFieldCount < 2) continue;
                     tooMany = true;
                     index = i;
                     return false;

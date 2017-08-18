@@ -8,10 +8,13 @@ using DRM.PropBag.XMLModel;
 
 namespace DRM.PropBag.ClassGenerator
 {
+    /// <summary>
+    /// Extends the DRM.PropBag.XMLModel.PropModel class.
+    /// </summary>
     public static class PropModelExtensions
     {
         const string PROP_BAG_NAME_SPACE = "DRM.PropBag";
-        const string INPWV_NAME_SPACE = "DRM.Ipnwvc";
+        const string INPWV_NAME_SPACE = "DRM.Inpcwv";
         const string REFLECTION_NAME_SPACE = "System.Reflection";
 
         /// <summary>

@@ -14,28 +14,28 @@ namespace DRM.PropBag
             T initialValue,
             string propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
-            Action<T, T> doWhenChanged = null, bool doAfterNotify = false, IEqualityComparer<T> comparer = null);
+            Action<T, T> doWhenChanged = null, bool doAfterNotify = false, Func<T,T,bool> comparer = null);
 
         public abstract IProp<T> CreateWithNoValue<T>(
             string propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
-            Action<T, T> doWhenChanged = null, bool doAfterNotify = false, IEqualityComparer<T> comparer = null);
+            Action<T, T> doWhenChanged = null, bool doAfterNotify = false, Func<T,T,bool> comparer = null);
 
-        // TODO: Consider removing the "short" versions" and provide defaults for the "long" versions.
-        public abstract IPropGen Create(Type typeOfThisProperty, object value, string propertyName, object extraInfo,
-            bool hasStorage, bool isTypeSolid);
+        //// TODO: Consider removing the "short" versions" and provide defaults for the "long" versions.
+        //public abstract IPropGen Create(Type typeOfThisProperty, object value, string propertyName, object extraInfo,
+        //    bool hasStorage, bool isTypeSolid);
 
-        public abstract IPropGen CreateNoValue(Type typeOfThisProperty,
-            string propertyName, object extraInfo,
-            bool hasStorage, bool isTypeSolid);
+        //public abstract IPropGen CreateNoValue(Type typeOfThisProperty,
+        //    string propertyName, object extraInfo,
+        //    bool hasStorage, bool isTypeSolid);
 
-        public abstract IPropGen CreateFull(Type typeOfThisProperty,
-            object value,
+        public abstract IPropGen CreateGen(Type typeOfThisProperty,
+            object value, bool useDefault,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid,
             Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false);
 
-        public abstract IPropGen CreateFullNoValue(Type typeOfThisProperty,
+        public abstract IPropGen CreateGenWithNoValue(Type typeOfThisProperty,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid,
             Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false);
@@ -57,13 +57,27 @@ namespace DRM.PropBag
                 typeIsSolid = true;
             }
 
-            IPropGen prop = this.Create(typeOfThisValue, value, propertyName, extraInfo, hasStorage, typeIsSolid);
+            IPropGen prop = this.CreateGen(typeOfThisValue, value, false, propertyName, extraInfo, hasStorage, typeIsSolid, null, false, null, false);
             return prop;
         }
 
-        public virtual IEqualityComparer<T> GetRefEqualityComparer<T>()
+        public virtual Func<T,T,bool> GetRefEqualityComparer<T>()
         {
-            return RefEqualityComparer<T>.Default;
+            var y = RefEqualityComparer<T>.Default;
+
+            DRM.PropBag.RefEqualityComparer<T> x = RefEqualityComparer<T>.Default;
+
+            Func<T, T, bool> result = x.Equals;
+            return x.Equals; // result;
+            //return RefEqualityComparer<T>.Default;
+        }
+
+        public virtual T GetValue<T>(object value, bool useDefault)
+        {
+            if (useDefault) return default(T);
+
+            // TODO: Check This.
+            return (T) value;
         }
 
 
@@ -71,34 +85,34 @@ namespace DRM.PropBag
 
         static private Type gmtType = typeof(APFGenericMethodTemplates);
 
-        protected virtual CreatePropWithValueDelegate GetPropCreator(Type typeOfThisValue)
+        //protected virtual CreatePropWithValueDelegate GetPropCreator(Type typeOfThisValue)
+        //{
+        //    MethodInfo mi = gmtType.GetMethod("CreateProp", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(typeOfThisValue);
+        //    CreatePropWithValueDelegate result = (CreatePropWithValueDelegate)Delegate.CreateDelegate(typeof(CreatePropWithValueDelegate), mi);
+
+        //    return result;
+        //}
+
+        //protected virtual CreatePropDelegate GetPropWithNoneOrDefaultCreator(Type typeOfThisValue)
+        //{
+        //    MethodInfo mi = gmtType.GetMethod("CreatePropWithNoValue", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(typeOfThisValue);
+        //    CreatePropDelegate result = (CreatePropDelegate)Delegate.CreateDelegate(typeof(CreatePropDelegate), mi);
+
+        //    return result;
+        //}
+
+        protected virtual CreatePropDelegate GetPropCreator(Type typeOfThisValue)
         {
             MethodInfo mi = gmtType.GetMethod("CreateProp", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(typeOfThisValue);
-            CreatePropWithValueDelegate result = (CreatePropWithValueDelegate)Delegate.CreateDelegate(typeof(CreatePropWithValueDelegate), mi);
-
-            return result;
-        }
-
-        protected virtual CreatePropDelegate GetPropWithNoneOrDefaultCreator(Type typeOfThisValue)
-        {
-            MethodInfo mi = gmtType.GetMethod("CreatePropWithNoValue", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(typeOfThisValue);
             CreatePropDelegate result = (CreatePropDelegate)Delegate.CreateDelegate(typeof(CreatePropDelegate), mi);
 
             return result;
         }
 
-        protected virtual CreateFullPropWithValueDelegate GetFullPropCreator(Type typeOfThisValue)
+        protected virtual  CreatePropWithNoValueDelegate GetPropWithNoValueCreator(Type typeOfThisValue)
         {
-            MethodInfo mi = gmtType.GetMethod("CreateFullProp", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(typeOfThisValue);
-            CreateFullPropWithValueDelegate result = (CreateFullPropWithValueDelegate)Delegate.CreateDelegate(typeof(CreateFullPropWithValueDelegate), mi);
-
-            return result;
-        }
-
-        protected virtual  CreateFullPropDelegate GetFullPropWithNoneOrDefaultCreator(Type typeOfThisValue)
-        {
-            MethodInfo mi = gmtType.GetMethod("CreateFullPropWithNoValue", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(typeOfThisValue);
-            CreateFullPropDelegate result = (CreateFullPropDelegate)Delegate.CreateDelegate(typeof(CreateFullPropDelegate), mi);
+            MethodInfo mi = gmtType.GetMethod("CreatePropWithNoValue", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(typeOfThisValue);
+            CreatePropWithNoValueDelegate result = (CreatePropWithNoValueDelegate)Delegate.CreateDelegate(typeof(CreatePropWithNoValueDelegate), mi);
 
             return result;
         }
@@ -108,42 +122,42 @@ namespace DRM.PropBag
 
     static class APFGenericMethodTemplates
     {
-        private static IProp<T> CreateProp<T>(AbstractPropFactory propFactory, object value,
-            string propertyName, object extraInfo,
-            bool hasStorage, bool isTypeSolid)
-        {
-            //PropFactory pf = propFactory as PropFactory;
-            return propFactory.Create<T>((T)value, propertyName, extraInfo, hasStorage, isTypeSolid);
-        }
+        //private static IProp<T> CreateProp<T>(AbstractPropFactory propFactory, object value,
+        //    string propertyName, object extraInfo,
+        //    bool hasStorage, bool isTypeSolid)
+        //{
+        //    //PropFactory pf = propFactory as PropFactory;
+        //    return propFactory.Create<T>((T)value, propertyName, extraInfo, hasStorage, isTypeSolid);
+        //}
 
-        public static IProp<T> CreatePropWithNoValue<T>(AbstractPropFactory propFactory,
-            string propertyName, object extraInfo,
-            bool hasStorage, bool isTypeSolid)
-        {
-            //PropFactory pf = propFactory as PropFactory;
-            return propFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, isTypeSolid);
-        }
+        //public static IProp<T> CreatePropWithNoValue<T>(AbstractPropFactory propFactory,
+        //    string propertyName, object extraInfo,
+        //    bool hasStorage, bool isTypeSolid)
+        //{
+        //    //PropFactory pf = propFactory as PropFactory;
+        //    return propFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, isTypeSolid);
+        //}
 
-        private static IProp<T> CreateFullProp<T>(AbstractPropFactory propFactory, object value,
+        private static IProp<T> CreateProp<T>(AbstractPropFactory propFactory,
+            object value, bool useDefault,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid,
             Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false)
         {
-            IEqualityComparer<T> compr = useRefEquality ? propFactory.GetRefEqualityComparer<T>() : (IEqualityComparer<T>)comparer;
+            Func<T,T,bool> compr = useRefEquality ? propFactory.GetRefEqualityComparer<T>() : (Func<T,T,bool>)comparer;
 
-            // TODO: Check This.
-            T theVal = (T)value;
+            T theVal = propFactory.GetValue<T>(value, useDefault);
 
             return propFactory.Create<T>(theVal, propertyName, extraInfo, hasStorage, isTypeSolid,
                 (Action<T,T>) doWhenChanged, doAfterNotify, compr);
         }
 
-        public static IProp<T> CreateFullPropWithNoValue<T>(AbstractPropFactory propFactory,
+        public static IProp<T> CreatePropWithNoValue<T>(AbstractPropFactory propFactory,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid,
             Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false)
         {
-            IEqualityComparer<T> compr = useRefEquality ? propFactory.GetRefEqualityComparer<T>() : (IEqualityComparer<T>)comparer;
+            Func<T,T,bool> compr = useRefEquality ? propFactory.GetRefEqualityComparer<T>() : (Func<T,T,bool>)comparer;
 
             return propFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, isTypeSolid, 
                 (Action<T, T>)doWhenChanged, doAfterNotify, compr);

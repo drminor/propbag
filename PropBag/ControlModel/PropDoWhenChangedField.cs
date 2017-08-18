@@ -11,14 +11,9 @@ namespace DRM.PropBag.ControlModel
         Delegate dwc;
         bool dan;
 
-        // TODO: Remove me.
-        // These are just used for testing.
-        string tdw;
-        public string TestDoW {get { return tdw; } set { SetIfDifferent<string>(ref tdw, value); } }
-
         // TODO: This is not Serializable, consider providing string representation as a proxy
         // Perhaps we should simply not serialize instances of PropBag Control Models.
-        public Delegate DoWhenChanged { get { return dwc; } set { SetIfDifferentDelegate<Delegate>(ref dwc, value); } }
+        public Delegate DoWhenChangedAction { get { return dwc; } set { SetIfDifferentDelegate<Delegate>(ref dwc, value); } }
 
         public bool DoAfterNotify { get { return dan; } set { SetIfDifferent<bool>(ref dan, value); } }
 
@@ -26,7 +21,7 @@ namespace DRM.PropBag.ControlModel
 
         public PropDoWhenChangedField(Delegate doWhenChangedAction, bool doAfterNotify = false)
         {
-            DoWhenChanged = doWhenChangedAction;
+            DoWhenChangedAction = doWhenChangedAction;
             DoAfterNotify = doAfterNotify;
         }
 
@@ -34,7 +29,7 @@ namespace DRM.PropBag.ControlModel
         {
             if (other == null) return false;
 
-            if (other.DoAfterNotify == DoAfterNotify && other.DoWhenChanged == DoWhenChanged) return true;
+            if (other.DoAfterNotify == DoAfterNotify && other.DoWhenChangedAction == DoWhenChangedAction) return true;
 
             return false;
         }

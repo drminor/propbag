@@ -75,8 +75,8 @@ namespace DRM.PropBag.ControlsWPF
             {
                 string[] parts = s.Split('|');
 
-                if (parts.Length < 3)
-                    throw new ApplicationException("Value does not have three parts, separated by |.");
+                if (parts.Length != 3)
+                    throw new ApplicationException("Value does not have exactly three parts, separated by |.");
 
                 string strPropType = parts[0];
                 string strTargetType = parts[1]; // The name of the class that declares or "hosts" the method.
@@ -109,110 +109,16 @@ namespace DRM.PropBag.ControlsWPF
             }
         }
 
-        //private object GetTargetInstance(object xamlRoot, string strTargetType)
-        //{
-        //    Type rootType = xamlRoot.GetType();
-
-        //    PropertyInfo[] propDefs = rootType.GetProperties(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
-
-        //    for(int pPtr = 0; pPtr < propDefs.Length; pPtr++)
-        //    {
-        //        if (IsThisTheInstance(propDefs[pPtr], strTargetType))
-        //        {
-        //            return GetRunningInstance(propDefs[pPtr], xamlRoot);
-        //        }
-        //    }
-        //    return null;
-        //}
-
-        //private bool IsThisTheInstance(PropertyInfo propDef, string strTargetType)
-        //{
-        //    //IEnumerable<System.Attribute> list = propDef.GetCustomAttributes();
-        //    System.Attribute att = propDef.GetCustomAttribute(typeof(PropBagInstanceAttribute));
-        //    if (att == null) return false;
-
-        //    PropBagInstanceAttribute pbia = (PropBagInstanceAttribute)att;
-        //    return DoNameSpacesMatch(pbia.PropBagTemplate, strTargetType);
-        //}
-
-        //private bool DoNameSpacesMatch(string ns1, string ns2)
-        //{
-        //    int cnt1 = ns1.Count(x => x == '.');
-        //    int cnt2 = ns2.Count(x => x == '.');
-
-        //    if (cnt1 == cnt2)
-        //    {
-        //        return string.Equals(ns1, ns2, StringComparison.OrdinalIgnoreCase);
-        //    }
-        //    else
-        //    {
-        //        if (cnt1 < cnt2)
-        //        {
-        //            //var x = ns2.Split('.').Skip(cnt2 - cnt1);
-        //            //var y = string.Join<string>(".", x);
-
-        //            string localizedNs2 = string.Join(".", ns2.Split('.').Skip(cnt2 - cnt1));
-        //            return string.Equals(ns1, localizedNs2, StringComparison.OrdinalIgnoreCase);
-        //        }
-        //        else
-        //        {
-        //            string localizedNs1 = string.Join(".", ns1.Split('.').Skip(cnt1 - cnt2));
-        //            return string.Equals(localizedNs1, ns2, StringComparison.OrdinalIgnoreCase);
-        //        }
-        //    }
-        //}
-
-        //private object GetRunningInstance(PropertyInfo propDef, object propsParent)
-        //{
-        //    // Let's see if the property has been initialized, and if so we will use it's value.
-        //    MethodInfo mi = propDef.GetMethod;
-        //    object result = mi.Invoke(propsParent, null);
-        //    if (result != null) return result;
-
-        //    // Ok, lets try creating one using the default, public constructor which takes no parameters.
-        //    Type pt = propDef.PropertyType;
-        //    if (HasDefaultPublicConstructor(pt))
-        //    {
-        //        return Activator.CreateInstance(pt, null);
-        //    }
-        //    else
-        //    {
-        //        if (HasSpecialConstructor(pt))
-        //        {
-        //            // Ok, lets create a new one using the special constructor which takes a byte value of 0xFF.
-        //            byte flags = PropBagTemplate.TEST_FLAG;
-        //            result = Activator.CreateInstance(pt, new object[] { flags });
-        //            return result;
-        //        }
-        //        else
-        //        {
-        //            return null;
-        //        }
-        //    }
-        //}
-
-        //private bool HasDefaultPublicConstructor(Type targetType)
-        //{
-        //    return null != targetType.GetConstructor(Type.EmptyTypes);
-        //}
-
-        //private bool HasSpecialConstructor(Type targetType)
-        //{
-        //    Type[] types = new Type[1];
-        //    types[0] = typeof(byte);
-        //    return null != targetType.GetConstructor(types);
-        //}
-
         public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
         {
-            return destinationType == typeof(InstanceDescriptor) || base.CanConvertTo(context, destinationType);
+            return destinationType == typeof(InstanceDescriptor) || destinationType == typeof(string) || base.CanConvertTo(context, destinationType);
         }
 
         // Overrides the ConvertTo method of TypeConverter.
         // We need to return a string.
         public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
         {
-            if (destinationType == typeof(DoWhenChangedAction))
+            if (destinationType == typeof(string))
             {
                 if (value is Delegate)
                 {
