@@ -122,9 +122,24 @@ namespace DRM.PropBag
             {
                 object ei = pi.ExtraInfo;
 
-                // TODO complete the PropComparerField.
-                Delegate comparer = null;
-                bool useRefEquality = false; // pi.ComparerField.UseRefEquality;
+                Delegate comparer;
+                bool useRefEquality;
+
+                if (pi.ComparerField == null)
+                {
+                    comparer = null;
+                    useRefEquality = false;
+                }
+                else
+                {
+                    comparer = pi.ComparerField.Comparer;
+                    useRefEquality = pi.ComparerField.UseRefEquality;
+                }
+
+                if (pi.InitialValueField == null)
+                {
+                    pi.InitialValueField = new PropInitialValueField(null, false, true, false, false);
+                }
 
                 IPropGen pg;
 
@@ -190,8 +205,7 @@ namespace DRM.PropBag
                 {
                     if (type != genProp.Type)
                     {
-                        // TODO: Fix Me.
-                        throw new InvalidCastException("Fix Me");
+                        throw new ApplicationException(string.Format("Attempting to set property: {0} whose type is {1}, with a call whose type parameter is {2} is invalid.", propertyName, genProp.Type.ToString(), type.ToString()));
                     }
                 }
                 // This uses reflection.
