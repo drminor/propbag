@@ -55,9 +55,6 @@ namespace DRM.PropBag.ControlsWPF
                 this.SetValue(UseRefEqualityProperty, value);
             }
 
-
-            // TODO: Create User Control for ComparerImpl (of type Delegate / IEquatable<T>
-            // And its attendant TypeConverter.
         }
     }
 }
