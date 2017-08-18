@@ -11,12 +11,15 @@ using DRM.Inpcwv;
 using DRM.PropBag.ControlsWPF;
 using DRM.PropBag.ControlModel;
 
+using System.Drawing;
+
 namespace PropBagTestApp
 {
     public class MainViewModel : PropBag, INotifyPropertyChanged, INotifyPropertyChanging
     {
         public bool PropFirstDidChange;
         public bool PropMyStringDidChange;
+        public bool PropMyPointDidChange;
 
         private MainViewModel() { } // Shows that if no default constructor is available, the one that takes a single byte is use.
 
@@ -37,6 +40,7 @@ namespace PropBagTestApp
         {
             this.PropFirstDidChange = false;
             this.PropMyStringDidChange = false;
+            this.PropMyPointDidChange = false;
         }
 
         public new object this[string propertyName]
@@ -53,6 +57,11 @@ namespace PropBagTestApp
         private void DoWhenMyStringChanges(string oldVal, string newVal)
         {
             this.PropMyStringDidChange = true;
+        }
+
+        private void DoWhenMyPointChanges(Point oldVal, Point newVal)
+        {
+            PropMyPointDidChange = true;
         }
 
         

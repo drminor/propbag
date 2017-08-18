@@ -21,14 +21,6 @@ namespace DRM.PropBag
             bool hasStorage = true, bool typeIsSolid = true,
             Action<T, T> doWhenChanged = null, bool doAfterNotify = false, Func<T,T,bool> comparer = null);
 
-        //// TODO: Consider removing the "short" versions" and provide defaults for the "long" versions.
-        //public abstract IPropGen Create(Type typeOfThisProperty, object value, string propertyName, object extraInfo,
-        //    bool hasStorage, bool isTypeSolid);
-
-        //public abstract IPropGen CreateNoValue(Type typeOfThisProperty,
-        //    string propertyName, object extraInfo,
-        //    bool hasStorage, bool isTypeSolid);
-
         public abstract IPropGen CreateGen(Type typeOfThisProperty,
             object value, bool useDefault,
             string propertyName, object extraInfo,
@@ -76,7 +68,14 @@ namespace DRM.PropBag
         {
             if (useDefault) return default(T);
 
-            // TODO: Check This.
+            // TODO: If we to support setting the initial value for types other than those with built-in
+            // converters from string,
+            // we must add a way for the user to specify a TypeConverter
+            // in the (DRM.PropBag.ControlsWPF) InitialValueField
+            if (typeof(T) == typeof(System.Drawing.Point))
+            {
+                return (T) new System.Drawing.PointConverter().ConvertFromInvariantString((string)value);
+            }
             return (T) value;
         }
 
@@ -84,22 +83,6 @@ namespace DRM.PropBag
         #region Shared Delegate Creation Logic
 
         static private Type gmtType = typeof(APFGenericMethodTemplates);
-
-        //protected virtual CreatePropWithValueDelegate GetPropCreator(Type typeOfThisValue)
-        //{
-        //    MethodInfo mi = gmtType.GetMethod("CreateProp", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(typeOfThisValue);
-        //    CreatePropWithValueDelegate result = (CreatePropWithValueDelegate)Delegate.CreateDelegate(typeof(CreatePropWithValueDelegate), mi);
-
-        //    return result;
-        //}
-
-        //protected virtual CreatePropDelegate GetPropWithNoneOrDefaultCreator(Type typeOfThisValue)
-        //{
-        //    MethodInfo mi = gmtType.GetMethod("CreatePropWithNoValue", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(typeOfThisValue);
-        //    CreatePropDelegate result = (CreatePropDelegate)Delegate.CreateDelegate(typeof(CreatePropDelegate), mi);
-
-        //    return result;
-        //}
 
         protected virtual CreatePropDelegate GetPropCreator(Type typeOfThisValue)
         {
@@ -122,22 +105,6 @@ namespace DRM.PropBag
 
     static class APFGenericMethodTemplates
     {
-        //private static IProp<T> CreateProp<T>(AbstractPropFactory propFactory, object value,
-        //    string propertyName, object extraInfo,
-        //    bool hasStorage, bool isTypeSolid)
-        //{
-        //    //PropFactory pf = propFactory as PropFactory;
-        //    return propFactory.Create<T>((T)value, propertyName, extraInfo, hasStorage, isTypeSolid);
-        //}
-
-        //public static IProp<T> CreatePropWithNoValue<T>(AbstractPropFactory propFactory,
-        //    string propertyName, object extraInfo,
-        //    bool hasStorage, bool isTypeSolid)
-        //{
-        //    //PropFactory pf = propFactory as PropFactory;
-        //    return propFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, isTypeSolid);
-        //}
-
         private static IProp<T> CreateProp<T>(AbstractPropFactory propFactory,
             object value, bool useDefault,
             string propertyName, object extraInfo,

@@ -4,6 +4,7 @@
         xmlns:pb="clr-namespace:DRM.PropBag.ControlsWPF;assembly=WPFControls"
         xmlns:propbag="clr-namespace:DRM.PropBag;assembly=PropBag"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:drw="clr-namespace:System.Drawing;assembly=System.Drawing"
         Title="MainWindow" Height="350" Width="525">
 
     <Grid Name="TopGrid" >
@@ -18,7 +19,6 @@
             <pb:PropBagTemplate.Namespaces>
                 <pb:NamespaceItem Namespace="System.IO"/>
             </pb:PropBagTemplate.Namespaces>
-
             
             <pb:PropBagTemplate.Props>
                 <pb:PropItem PropertyName="MyString" PropertyType="sys:String">
@@ -27,6 +27,13 @@
                                 DoAfterNotify="False"/>
                     <pb:PropComparerField ComparerFunc="System.String|0|System.Collections.Generic.EqualityComparer" UseRefEquality="False"/>
                 </pb:PropItem>
+
+                <pb:PropItem PropertyName="MyPoint" PropertyType="drw:Point">
+                    <pb:InitialValueField InitialValue="0,0"/>
+                    <pb:PropDoWhenChangedField DoWhenChangedAction="System.String|PropBagTestApp.MainViewModel|DoWhenMyPointChanges"
+                                DoAfterNotify="False"/>
+                </pb:PropItem>
+
             </pb:PropBagTemplate.Props>
         </pb:PropBagTemplate>
 

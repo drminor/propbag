@@ -32,27 +32,8 @@ namespace DRM.PropBag
             if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
             PropExternStore<T> propWithExtStore = new PropExternStore<T>(propertyName, extraInfo, typeIsSolid, doWhenChanged, doAfterNotify, comparer);
 
-            //public delegate T GetExtVal<T>(Guid tag);
-            //GetExtVal<T> xx = ((x) => x.ToString());
-            //propWithExtStore.Getter = xx;
-
             return propWithExtStore;
         }
-
-
-        //public override IPropGen Create(Type typeOfThisProperty, object value, string propertyName, object extraInfo, bool hasStorage, bool isTypeSolid)
-        //{
-        //    CreatePropWithValueDelegate propCreator = GetPropCreator(typeOfThisProperty);
-        //    IPropGen prop = (IPropGen)propCreator(this, value, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid);
-        //    return prop;
-        //}
-
-        //public override IPropGen CreateNoValue(Type typeOfThisProperty, string propertyName, object extraInfo, bool hasStorage, bool isTypeSolid)
-        //{
-        //    CreatePropDelegate propCreator = GetPropWithNoneOrDefaultCreator(typeOfThisProperty);
-        //    IPropGen prop = (IPropGen)propCreator(this, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid);
-        //    return prop;
-        //}
 
         public override IPropGen CreateGen(Type typeOfThisProperty,
             object value, bool useDefault,
