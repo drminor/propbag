@@ -8,6 +8,7 @@ namespace DRM.PropBag
     /// Vehicle to ferry Prop Values.
     /// Name, Type Value or NTV.
     /// </summary>
+    /// <remarks>Tis is not currently being used, and perhaps never will.</remarks>
     public struct NTV
     {
         public string PropName { get; private set; }

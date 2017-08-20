@@ -34,7 +34,7 @@ namespace DRM.PropBag
             singleInstance = new Lazy<RefEqualityComparer<T>>(() => new RefEqualityComparer<T>(), LazyThreadSafetyMode.PublicationOnly);
         }
 
-        private RefEqualityComparer() { } // Mark as private to disallow creation using the default constructor.
+        private RefEqualityComparer() { } // Mark as private to disallow creation of an instance of this class.
 
         /// <summary>
         /// Compares the object reference for each value to see if they are referencing the same object.

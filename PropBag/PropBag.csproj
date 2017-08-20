@@ -41,11 +41,15 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Caches\TypeDescBasedTConverterKey.cs" />
+    <Compile Include="Caches\GenerateHash.cs" />
+    <Compile Include="Caches\TypeDescBasedTConverterCache.cs" />
     <Compile Include="ClassGenerator\PropDefRaw.cs" />
     <Compile Include="ClassGenerator\PropGenerator.cs" />
     <Compile Include="ClassGenerator\PropModelExtensions.cs" />
     <Compile Include="ClassGenerator\T4Support.cs" />
     <Compile Include="ControlModel\NotifyPropertyChangedBase.cs" />
+    <Compile Include="Caches\DelegateCacheProvider.cs" />
     <Compile Include="Factories\AbstractPropFactory.cs" />
     <Compile Include="ControlModel\PropComparerField.cs" />
     <Compile Include="ControlModel\PropDoWhenChangedField.cs" />

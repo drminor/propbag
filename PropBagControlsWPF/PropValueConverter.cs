@@ -9,7 +9,8 @@ using System.Threading.Tasks;
 using System.Reflection;
 using System.ComponentModel.Design.Serialization;
 
-using DRM.PropBag.ControlModel;
+using DRM.PropBag.Caches;
+
 using System.Xaml;
 using System.Windows.Markup;
 using System.Windows.Data;
@@ -34,7 +35,7 @@ namespace DRM.PropBag.ControlsWPF
                 Type tt = GetFromParam(parameter);
                 if (tt != null)
                 {
-                    StringFromTDelegate del = GetTheStringFromTDelegate(tt);
+                    StringFromTDelegate del = GetTheStringFromTDelegate(tt, typeof(string));
                     return (string)del(value);
                 }
             }
@@ -90,14 +91,34 @@ namespace DRM.PropBag.ControlsWPF
             return result;
         }
 
-        private static StringFromTDelegate GetTheStringFromTDelegate(Type propertyType)
+        private static StringFromTDelegate GetTheStringFromTDelegate(Type propertyType, Type sourceType)
         {
-            System.Diagnostics.Debug.WriteLine(string.Format("A StringFromT delegate is being created for type: {0}", propertyType.ToString()));
+            TypeDescBasedTConverterKey key = new TypeDescBasedTConverterKey(sourceType, propertyType, isConvert: true);
+
+            StringFromTDelegate result = LookupTypeDescripterConverter(key);
+
+            System.Diagnostics.Debug.WriteLine(
+                string.Format("A StringFromT delegate is being requested for type: {0} and was {1}",
+                    propertyType.ToString(), result == null ? "not found." : "found."));
+
+            if (result != null) return result;
 
             MethodInfo methInfoGetProp = GMT_TYPE.GetMethod("GetStringFromT", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(propertyType);
-            StringFromTDelegate result = (StringFromTDelegate)Delegate.CreateDelegate(typeof(StringFromTDelegate), methInfoGetProp);
+            result = (StringFromTDelegate)Delegate.CreateDelegate(typeof(StringFromTDelegate), methInfoGetProp);
+
+            DelegateCacheProvider.TypeDescBasedTConverterCache.Add(key, result);
 
             return result;
+        }
+
+        private static StringFromTDelegate LookupTypeDescripterConverter(TypeDescBasedTConverterKey key)
+        {
+            if (DelegateCacheProvider.TypeDescBasedTConverterCache.ContainsKey(key))
+            {
+                return (StringFromTDelegate) DelegateCacheProvider.TypeDescBasedTConverterCache[key];
+            }
+            
+            return null;
         }
 
         #endregion
