@@ -82,6 +82,7 @@ namespace DRM.PropBag
 
         public PropBagBase(PropBagTypeSafetyMode typeSafetyMode, AbstractPropFactory thePropFactory) 
         {
+            this.TypeSafetyMode = typeSafetyMode;
             switch (typeSafetyMode)
             {
                 case PropBagTypeSafetyMode.AllPropsMustBeRegistered:
@@ -188,11 +189,25 @@ namespace DRM.PropBag
 
         #region Property Access Methods
 
+        //protected NTV this[string propertyName, byte dummy]
+        //{
+        //    get
+        //    {
+        //        IPropGen a =  GetGenProp(propertyName);
+        //        return new NTV(propertyName, a.Type, ((IProp)a).TypedValueAsObject);
+        //    }
+
+        //    set
+        //    {
+        //        PSetIt(value.Value, value.PropName);
+        //    }
+        //}
+
         protected object this[Type type, string propertyName]
         {
             get
             {
-                IPropGen genProp = GetGenProp(propertyName);
+                IPropGen genProp = GetGenProp(propertyName, ThePropFactory.ProvidesStorage);
 
                 if (!genProp.TypeIsSolid)
                 {
@@ -224,7 +239,7 @@ namespace DRM.PropBag
 
             // This will throw an exception if no value has been added to the _tVals dictionary with a key of propertyName,
             // either by calling AddProp or SetIt.
-            IPropGen genProp = GetGenProp(propertyName);
+            IPropGen genProp = GetGenProp(propertyName, ThePropFactory.ProvidesStorage);
 
             // This uses reflection.
             return genProp.Value;
@@ -232,13 +247,14 @@ namespace DRM.PropBag
 
         protected T PGetIt<T>(string propertyName)
         {
-            // This will throw an exception if no value has been added to the _tVals dictionary with a key of propertyName,
-            // either by calling AddProp or SetIt.
-            IPropGen genProp = GetGenProp(propertyName);
+            return (T) GetIProp<T>(propertyName).Value;
+        }
 
-            IProp<T> prop = CheckTypeInfo<T>(genProp, propertyName, tVals);
-
-            return prop.TypedValue;
+        protected IProp<T> GetIProp<T>(string propertyName)
+        {
+            bool hasStore = ThePropFactory.ProvidesStorage;
+            IPropGen genProp = GetGenProp(propertyName, hasStore);
+            return CheckTypeInfo<T>(genProp, propertyName, tVals);
         }
 
         /// <summary>
@@ -257,17 +273,12 @@ namespace DRM.PropBag
             IPropGen genProp;
             try
             {
-                genProp = GetGenProp(propertyName);
+                genProp = GetGenProp(propertyName, ThePropFactory.ProvidesStorage);
             }
-            catch (KeyNotFoundException)
+            catch (InvalidOperationException)
             {
                 if (AllPropsMustBeRegistered)
-                    throw new InvalidOperationException(string.Format("Property: {0} has not been declared by calling AddProp, nor has its value been set by calling SetIt<T>. Cannot use this method in this case. Declare by calling AddProp, or use the SetIt<T> method.", propertyName));
-
-                if (OnlyTypedAccess)
-                {
-                    throw new InvalidOperationException(string.Format("Property: {0} has not been defined with a call to AddProp or any SetIt<T> call and the TypeSafteyMode is set to 'OnlyTypeAccesss.'", propertyName));
-                }
+                    throw;
 
                 genProp = ThePropFactory.CreatePropInferType(value, propertyName, null, true);
                 AddProp(propertyName, genProp);
@@ -341,9 +352,9 @@ namespace DRM.PropBag
 
             try
             {
-                genProp = GetGenProp(propertyName);
+                genProp = GetGenProp(propertyName, ThePropFactory.ProvidesStorage);
             }
-            catch (KeyNotFoundException)
+            catch (InvalidOperationException)
             {
                 if (AllPropsMustBeRegistered)
                 {
@@ -382,7 +393,7 @@ namespace DRM.PropBag
                 // This will fail if the property has a backing store.
                 genProp = GetGenProp(propertyName, desiredHasStoreValue: false);
             }
-            catch (KeyNotFoundException)
+            catch (InvalidOperationException)
             {
                 if (AllPropsMustBeRegistered)
                 {
@@ -427,17 +438,18 @@ namespace DRM.PropBag
             IPropGen genProp;
             try
             {
-                genProp = GetGenProp(propertyName);
+                genProp = GetGenProp(propertyName, ThePropFactory.ProvidesStorage);
             }
-            catch (KeyNotFoundException)
+            catch (InvalidOperationException)
             {
                 if (AllPropsMustBeRegistered)
                     throw new InvalidOperationException(string.Format("Property: {0} has not been declared by calling AddProp, nor has its value been set by calling SetIt<T>. Cannot use this method in this case. Declare by calling AddProp, or use the SetIt<T> method.", propertyName));
 
-                if (OnlyTypedAccess)
-                {
-                    throw new InvalidOperationException(string.Format("Property: {0} has not been defined with a call to AddProp or any SetIt<T> call and the TypeSafety mode is set to 'OnlyTypeAccesss.'", propertyName));
-                }
+                // TODO: Make sure it makes sense to allow this operation when OnlyTypedAccess is true.
+                //if (OnlyTypedAccess)
+                //{
+                //    throw new InvalidOperationException(string.Format("Property: {0} has not been defined with a call to AddProp or any SetIt<T> call and the TypeSafety mode is set to 'OnlyTypeAccesss.'", propertyName));
+                //}
 
                 genProp = ThePropFactory.CreateWithNoValue<object>(propertyName, null, true, false, null, false, null);
                 AddProp(propertyName, genProp);
@@ -452,9 +464,9 @@ namespace DRM.PropBag
             IPropGen genProp;
             try
             {
-                genProp = GetGenProp(propertyName);
+                genProp = GetGenProp(propertyName, ThePropFactory.ProvidesStorage);
             }
-            catch (KeyNotFoundException)
+            catch (InvalidOperationException)
             {
                 return false;
             }
@@ -465,7 +477,10 @@ namespace DRM.PropBag
         // Allow callers to easily subscribe to PropertyChangedWithTVals.
         public void SubscribeToPropChanged<T>(Action<T, T> doOnChange, string propertyName)
         {
-            IProp<T> prop = GetPropDef<T>(propertyName);
+            
+            //IProp<T> prop = GetPropDef<T>(propertyName);
+
+            IProp<T> prop = GetIProp<T>(propertyName);
 
             prop.SubscribeToPropChanged(doOnChange);
         }
@@ -475,10 +490,10 @@ namespace DRM.PropBag
             IPropGen genProp;
             try
             {
-                genProp = GetGenProp(propertyName);
+                genProp = GetGenProp(propertyName, ThePropFactory.ProvidesStorage);
 
             }
-            catch (KeyNotFoundException)
+            catch (InvalidOperationException)
             {
                 return false;
             }
@@ -490,16 +505,22 @@ namespace DRM.PropBag
 
         public void SubscribeToPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, string propertyName)
         {
-            IProp<T> prop = GetPropDef<T>(propertyName);
+            // This will create the property if it does not exist with an undefined initial value.
+            //IProp<T> prop = GetPropDef<T>(propertyName);
+
+            // This wll throw an InvalidOperationException if the property does not exist.
+            IProp<T> prop = GetIProp<T>(propertyName);
 
             prop.PropertyChangedWithTVals += eventHandler;
         }
 
         public void UnSubscribeToPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, string propertyName)
         {
-            IPropGen genProp = GetGenProp(propertyName);
+            //IPropGen genProp = GetGenProp(propertyName);
 
-            IProp<T> prop = CheckTypeInfo<T>(genProp, propertyName, tVals);
+            //IProp<T> prop = CheckTypeInfo<T>(genProp, propertyName, tVals);
+
+            IProp<T> prop = GetIProp<T>(propertyName);
 
             prop.PropertyChangedWithTVals -= eventHandler;
         }
@@ -541,7 +562,7 @@ namespace DRM.PropBag
 
         public System.Type GetTypeOfProperty([CallerMemberName] string propertyName = null)
         {
-            return GetGenProp(propertyName).Type;
+            return GetGenProp(propertyName, ThePropFactory.ProvidesStorage).Type;
         }
 
         #endregion
@@ -574,7 +595,9 @@ namespace DRM.PropBag
         /// <returns>True, if there was an existing Action in place for this property.</returns>
         protected bool PRegisterDoWhenChanged<T>(Action<T, T> doWhenChanged, bool doAfterNotify, string propertyName)
         {
-            IProp<T> prop = GetPropDef<T>(propertyName);
+
+            IProp<T> prop = GetIProp<T>(propertyName);
+            //IProp<T> prop = GetPropDef<T>(propertyName);
             return prop.UpdateDoWhenChangedAction(doWhenChanged, doAfterNotify);
         }
 
@@ -680,7 +703,23 @@ namespace DRM.PropBag
         protected IPropGen GetGenProp(string propertyName, bool? desiredHasStoreValue = true)
         {
             if (propertyName == null) throw new ArgumentNullException("propertyName", "PropertyName is null on call to GetValue.");
-            IPropGen genProp = tVals[propertyName];
+
+            IPropGen genProp;
+            try
+            {
+                genProp = tVals[propertyName];
+            }
+            catch (KeyNotFoundException)
+            {
+                if (TypeSafetyMode == PropBagTypeSafetyMode.AllPropsMustBeRegistered)
+                {
+                    throw new InvalidOperationException(string.Format("Property: {0} has not been declared by calling AddProp. Cannot use this method in this case. Declare by calling AddProp.", propertyName));
+                }
+                else
+                {
+                    throw new InvalidOperationException(string.Format("No property: {0} exists in this PropBag.", propertyName));
+                }
+            }
 
             if (desiredHasStoreValue.HasValue && desiredHasStoreValue.Value != genProp.HasStore)
             {
@@ -719,48 +758,51 @@ namespace DRM.PropBag
             return (IProp<T>)genProp;
         }
 
-        private IPropGen GetTypeCheckedGenProp<T>(string propertyName)
-        {
-            IPropGen genProp;
-            GetPropDef<T>(propertyName, out genProp);
-            return genProp;
-        }
+        // TODO: These next three methods may be handy in the future -- or should we delete them.
+        // See GetIProp<T>(string propertyName)
 
-        private IProp<T> GetPropDef<T>(string propertyName)
-        {
-            IPropGen genProp;
-            return GetPropDef<T>(propertyName, out genProp);
-        }
+        //private IPropGen GetTypeCheckedGenProp<T>(string propertyName)
+        //{
+        //    IPropGen genProp;
+        //    GetPropDef<T>(propertyName, out genProp);
+        //    return genProp;
+        //}
 
-        /// <summary>
-        /// This should only be called from methods that do not include a new or initial value for the property.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="propertyName"></param>
-        /// <param name="genProp"></param>
-        /// <returns></returns>
-        private IProp<T> GetPropDef<T>(string propertyName, out IPropGen genProp)
-        {
-            try
-            {
-                genProp = GetGenProp(propertyName);
-            }
-            catch (KeyNotFoundException)
-            {
-                if (AllPropsMustBeRegistered)
-                {
-                    throw new InvalidOperationException(string.Format("Property: {0} has not been defined with a call to AddProp() and the operation setting 'AllPropsMustBeRegistered' is set to true.", propertyName));
-                }
+        //private IProp<T> GetPropDef<T>(string propertyName)
+        //{
+        //    IPropGen genProp;
+        //    return GetPropDef<T>(propertyName, out genProp);
+        //}
 
-                // Property has not been defined yet, let's create a definition for it now and initialize the value.
-                genProp = ThePropFactory.CreateWithNoValue<T>(propertyName);
-                AddProp(propertyName, genProp);
-            }
+        ///// <summary>
+        ///// This should only be called from methods that do not include a new or initial value for the property.
+        ///// </summary>
+        ///// <typeparam name="T"></typeparam>
+        ///// <param name="propertyName"></param>
+        ///// <param name="genProp"></param>
+        ///// <returns></returns>
+        //private IProp<T> GetPropDef<T>(string propertyName, out IPropGen genProp)
+        //{
+        //    try
+        //    {
+        //        genProp = GetGenProp(propertyName);
+        //    }
+        //    catch (KeyNotFoundException)
+        //    {
+        //        if (AllPropsMustBeRegistered)
+        //        {
+        //            throw new InvalidOperationException(string.Format("Property: {0} has not been defined with a call to AddProp() and the operation setting 'AllPropsMustBeRegistered' is set to true.", propertyName));
+        //        }
 
-            IProp<T> prop = CheckTypeInfo<T>(genProp, propertyName, tVals);
+        //        // Property has not been defined yet, let's create a definition for it now and initialize the value.
+        //        genProp = ThePropFactory.CreateWithNoValue<T>(propertyName);
+        //        AddProp(propertyName, genProp);
+        //    }
 
-            return prop;
-        }
+        //    IProp<T> prop = CheckTypeInfo<T>(genProp, propertyName, tVals);
+
+        //    return prop;
+        //}
 
         private void MakeTypeSolid(ref IPropGen genProp, Type newType, string propertyName)
         {
@@ -853,7 +895,11 @@ namespace DRM.PropBag
             PropertyChangedEventHandler handler = Interlocked.CompareExchange(ref PropertyChanged, null, null);
 
             if (handler != null)
+            {
+                // TOOD:! Fix This!!!
+                propertyName = "Item[]";
                 handler(this, new PropertyChangedEventArgs(propertyName));
+            }
         }
 
         protected void POnPropertyChanging(string propertyName)
@@ -861,7 +907,11 @@ namespace DRM.PropBag
             PropertyChangingEventHandler handler = Interlocked.CompareExchange(ref PropertyChanging, null, null);
 
             if (handler != null)
+            {
+                // TOOD:! Fix This!!!
+                propertyName = "Item[]";
                 handler(this, new PropertyChangingEventArgs(propertyName));
+            }
         }
 
         protected void POnPropertyChangedWithVals(string propertyName, object oldVal, object newVal)

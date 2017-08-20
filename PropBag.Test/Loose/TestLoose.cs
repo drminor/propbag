@@ -117,7 +117,7 @@ namespace PropBagLib.Tests
             mod1 = new LooseModel(PropBagTypeSafetyMode.Loose);
 
             object x;
-            Assert.Throws<KeyNotFoundException>(() => x = mod1["x"]);
+            Assert.Throws<InvalidOperationException>(() => x = mod1["x"]);
         }
 
         [Test]

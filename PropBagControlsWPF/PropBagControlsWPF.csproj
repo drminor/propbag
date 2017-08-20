@@ -63,6 +63,7 @@
     <Compile Include="PropDoWhenChangedField.cs" />
     <Compile Include="PropItem.cs" />
     <Compile Include="PropsCollection.cs" />
+    <Compile Include="PropValueConverter.cs" />
     <Compile Include="ReflectionHelpers.cs" />
     <Page Include="Themes\Generic.xaml">
       <Generator>MSBuild:Compile</Generator>

@@ -211,12 +211,19 @@ namespace DRM.PropBag
 
         #region Methods to Raise Events
 
-        // Raise Standard Events
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="propertyName">Use "Item[]" if you want to notify the WPF binding system that one of the PropBag properties has changed.</param>
         protected void OnPropertyChanged([CallerMemberName]string propertyName = null)
         {
             base.POnPropertyChanged(propertyName);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="propertyName">Use "Item[]" if you want to notify the WPF binding system that one of the PropBag properties is changing.</param>
         protected void OnPropertyChanging([CallerMemberName]string propertyName = null)
         {
             base.POnPropertyChanging(propertyName);

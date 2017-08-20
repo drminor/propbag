@@ -10,6 +10,8 @@ namespace DRM.PropBag
 {
     public abstract class AbstractPropFactory
     {
+        public abstract bool ProvidesStorage { get; }
+
         public abstract IProp<T> Create<T>(
             T initialValue,
             string propertyName, object extraInfo = null,
@@ -76,6 +78,13 @@ namespace DRM.PropBag
             {
                 return (T) new System.Drawing.PointConverter().ConvertFromInvariantString((string)value);
             }
+
+            if (typeof(T) == typeof(System.Guid)) return (T) (object)Guid.NewGuid();
+
+            if (typeof(T) == typeof(System.Int32)) return (T)(object)1;
+
+            if (typeof(T) == typeof(System.Double)) return (T)(object)1.0;
+
             return (T) value;
         }
 

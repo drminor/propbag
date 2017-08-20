@@ -8,6 +8,11 @@ namespace DRM.PropBag
 {
     public class PropFactory : AbstractPropFactory
     {
+        public override bool ProvidesStorage
+        {
+            get { return true; }
+        }
+
         public override IProp<T> Create<T>(
             T initialValue,
             string propertyName, object extraInfo = null,

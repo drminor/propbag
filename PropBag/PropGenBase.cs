@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Reflection;
 
+using System.Runtime.CompilerServices;
+
 using DRM.Inpcwv;
 
 namespace DRM.PropBag
@@ -68,6 +70,22 @@ namespace DRM.PropBag
             {
                 return DoGetProVal(TypedProp);
             }
+        }
+
+        ///// <summary>
+        ///// Does not use reflection.
+        ///// </summary>
+        //public object TypedValueAsObject
+        //{
+        //    get
+        //    {
+        //        return TypedProp.TypedValueAsObject;
+        //    }
+        //}
+
+        public NTV ToNTV([CallerMemberName] string propertyName = null)
+        {
+            return new NTV(propertyName, this.Type, this.TypedProp.TypedValueAsObject);
         }
 
         public event PropertyChangedWithValsHandler PropertyChangedWithVals;

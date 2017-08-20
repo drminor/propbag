@@ -25,27 +25,52 @@ namespace DRM.PropBag
 
     #endregion
 
-    public class PropBag : PropBagBase, IPropBag
+    public class PropBagExperimental : PropBagBase, IPropBag
     {
         #region Constructor
 
-        public PropBag() : base() {}
+        public PropBagExperimental() : base() {}
 
-        public PropBag(PropBagTypeSafetyMode typeSafetyMode) : base(typeSafetyMode) {}
+        public PropBagExperimental(PropBagTypeSafetyMode typeSafetyMode) : base(typeSafetyMode) {}
 
-        public PropBag(PropBagTypeSafetyMode typeSafetyMode, AbstractPropFactory thePropFactory) : base(typeSafetyMode, thePropFactory) {}
+        public PropBagExperimental(PropBagTypeSafetyMode typeSafetyMode, AbstractPropFactory thePropFactory) : base(typeSafetyMode, thePropFactory) {}
 
-        public PropBag(DRM.PropBag.ControlModel.PropModel pm) : base(pm) { }
+        public PropBagExperimental(DRM.PropBag.ControlModel.PropModel pm) : base(pm) { }
 
         #endregion
 
         #region Propety Access Methods 
 
-        public new object this[Type t, string propertyName]
+        public IPropGen GetGenProp(string propertyName)
         {
-            get { return base[t, propertyName]; }
-            set { base[t, propertyName] = value; }
+            return base.GetGenProp(propertyName, ThePropFactory.ProvidesStorage);
         }
+
+        //public NTV this[string propertyName]
+        //{
+        //    get
+        //    {
+        //        IPropGen pg = GetGenProp(propertyName, true);
+        //        return new NTV(propertyName, pg.Type, ((IProp)pg).TypedValueAsObject);
+        //    }
+        //    set
+        //    {
+        //        SetIt(value.Value, value.PropName);
+        //    }
+        //}
+
+        //public void SetValue(IPropGen pg, string propertyName)
+        //{
+        //    IProp ip = pg.TypedProp;
+        //    object v = ip.TypedValueAsObject;
+        //    SetIt(v, propertyName);
+        //}
+
+        //public new object this[Type t, string propertyName]
+        //{
+        //    get { return base[t, propertyName]; }
+        //    set { base[t, propertyName] = value;  }
+        //}
 
         protected object this[string propertyName]
         {

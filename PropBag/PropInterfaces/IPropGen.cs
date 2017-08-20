@@ -33,6 +33,8 @@ namespace DRM.PropBag
 
         object Value { get; }
 
+        NTV ToNTV(string propertyName);
+
         void CleanUp();
 
     }

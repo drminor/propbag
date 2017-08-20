@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
+using System.Runtime.CompilerServices;
+
 using DRM.Inpcwv;
 
 namespace DRM.PropBag
@@ -22,7 +24,6 @@ namespace DRM.PropBag
             PropertyChangedWithTVals = null;
             base.TypedProp = this;
         }
-
 
         abstract public T TypedValue { get; set; }
 
@@ -142,6 +143,11 @@ namespace DRM.PropBag
         }
 
         public object TypedValueAsObject { get { return Value; } }
+
+        //public NTV ToNTV([CallerMemberName] string propertyName = null)
+        //{
+        //    return new NTV(propertyName, Type, TypedValue);
+        //}
 
         public bool CallBacksHappenAfterPubEvents { get { return DoAfterNotify; } }
         public bool HasCallBack { get { return DoWHenChangedAction != null; } }

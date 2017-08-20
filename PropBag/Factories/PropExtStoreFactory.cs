@@ -8,6 +8,11 @@ namespace DRM.PropBag
 {
     public class PropExtStoreFactory : AbstractPropFactory
     {
+        public override bool ProvidesStorage
+        {
+            get { return false; }
+        }
+
         object Stuff;
         public PropExtStoreFactory(object stuff)
         {
@@ -44,6 +49,7 @@ namespace DRM.PropBag
             CreatePropDelegate propCreator = GetPropCreator(typeOfThisProperty);
             IPropGen prop = (IPropGen)propCreator(this, value, useDefault, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
                 doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify, comparer: comparer, useRefEquality: useRefEquality);
+
             return prop;
         }
 
@@ -55,6 +61,7 @@ namespace DRM.PropBag
             CreatePropWithNoValueDelegate propCreator = GetPropWithNoValueCreator(typeOfThisProperty);
             IPropGen prop = (IPropGen)propCreator(this, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
                 doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify, comparer: comparer, useRefEquality: useRefEquality);
+
             return prop;
         }
 
