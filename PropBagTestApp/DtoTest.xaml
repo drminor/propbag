@@ -43,13 +43,9 @@
         </pb:PropBagTemplate>
         
         <Label Grid.Row="0">ProductId:</Label>
-        <TextBox Grid.Row="0" x:Name="PId"  Height="25" Width="100">
-            <TextBox.Text>
-                <Binding Path="[ProductId]" Converter="{pb:PropValueConverter}"
-                         ConverterParameter="{x:Type sys:Guid}">
-                </Binding>
-            </TextBox.Text>
-        </TextBox>            
+        <TextBox Grid.Row="0" x:Name="PId"
+                 Text="{Binding Path=[ProductId], Converter={pb:PropValueConverter}, ConverterParameter={x:Type sys:Guid}}"
+                 Height="25" Width="100"/>
 
         <Label Grid.Row="1">Amount:</Label>
         <TextBox Grid.Row="1" x:Name="Amt" Height="25" Width="100">
