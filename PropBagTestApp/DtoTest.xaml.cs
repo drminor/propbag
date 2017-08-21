@@ -29,37 +29,47 @@ namespace PropBagTestApp
     {
 
         [PropBagInstanceAttribute("DtoTestViewModel")]
-        public DtoTestViewModel ourData { get; set; }
+        public DtoTestViewModel ourData
+        {
+            get
+            {
+                return (DtoTestViewModel)this.DataContext;
+            }
+            set
+            {
+                this.DataContext = value;
+            }
+        }
 
         public DtoTest()
         {
             InitializeComponent();
+
             Grid topGrid = (Grid)this.FindName("TopGrid");
 
             StandUpViewModels(topGrid);
 
-            topGrid.DataContext = ourData;
+            // This is an example of how to create the binding whose source is a property in the Property Bag
+            // to a UI Element in this class' view.
+            // This same binding could have been created in XAML.
 
             Binding c = new Binding("[Size]");
             c.Converter = new PropValueConverter();
             c.ConverterParameter = new TwoTypes(typeof(string), typeof(double));
-            //c.Mode = BindingMode.TwoWay;
-
             TextBox tb = (TextBox)this.FindName("Sz");
-            var x = tb.SetBinding(TextBox.TextProperty, c);
-
-            //Binding d = new Binding("Amount");
-            //d.Mode = BindingMode.TwoWay;
-
-            //TextBox tb1 = (TextBox)this.FindName("Amt");
-            //var x1 = tb1.SetBinding(TextBox.TextProperty, d);
-
-
+            tb.SetBinding(TextBox.TextProperty, c);
         }
 
+        /// <summary>
+        /// Each View that uses a PropertyBag template needs to include a copy of this method.
+        /// It looks for property in this class (the class in which this method is declared) marked with the 
+        /// PropBagInstanceAttribute Attribute.
+        /// It should be called in the view's constructor.
+        /// If the DataContext is will be assigned via code, it should be done after this method is called.
+        /// </summary>
+        /// <param name="root">The UI Element at which to begin looking for PropBagTemplate elements.</param>
         private void StandUpViewModels(Panel root)
         {
-            Type thisType = this.GetType();
             Type propModelType = typeof(DRM.PropBag.ControlModel.PropModel);
 
             IEnumerable<PropBagTemplate> propBagTemplates = root.Children.OfType<PropBagTemplate>();
@@ -71,6 +81,7 @@ namespace PropBagTestApp
                 if (pm != null)
                 {
                     // Get a reference to the property that access the class that needs to be created.
+                    Type thisType = this.GetType();
                     PropertyInfo classAccessor = ReflectionHelpers.GetPropBagClassProperty(thisType, pm.ClassName);
 
                     // Instantiate the target ViewModel

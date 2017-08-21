@@ -57,21 +57,6 @@ namespace PropBagTestApp
         {
             
         }
-
-
-        //public int Amount
-        //{
-        //    get
-        //    {
-        //        return base.GetIt<int>();
-        //    }
-        //    set
-        //    {
-        //        base.SetIt<int>(value);
-        //    }
-        //}
-
-
-        
+       
     }
 }
