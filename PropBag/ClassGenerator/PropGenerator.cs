@@ -19,7 +19,8 @@ namespace DRM.PropBag.ClassGenerator
     /// <typeparam name="T"></typeparam>
     public class PropGenerator<T>
     {
-        static public IProp Create(PropDefRaw def, AbstractPropFactory factory, Type derivedType)
+        // This is not being used as yet. If it is used, it should probably be renamed simply: Create
+        static public IProp CreateViaClassGenerator(PropDefRaw def, AbstractPropFactory factory, Type derivedType)
         {
             Func<T,T,bool> comparer = GetComp(def.Comparer, def.UseRefEquality, factory);
             Action<T,T> doWhen = GetDoWhen(def.DoWhenChanged, derivedType);
@@ -32,8 +33,15 @@ namespace DRM.PropBag.ClassGenerator
                 }
                 else
                 {
-                    bool useDefault = def.CreateType == PropCreateMethodEnum.useDefault;
-                    T initVal = factory.GetValue<T>(def.InitialValue, useDefault);
+                    T initVal;
+                    if (def.CreateType == PropCreateMethodEnum.useDefault)
+                    {
+                        initVal = factory.GetDefaultValue<T>();
+                    }
+                    else
+                    {
+                        initVal = factory.GetValueFromString<T>(def.InitialValue);
+                    }
 
                     factory.Create<T>(initVal, def.PropName, def.ExtraInfo, def.HasStore, def.TypeIsSolid, doWhen, def.DoAfterNotify, comparer);
                 }

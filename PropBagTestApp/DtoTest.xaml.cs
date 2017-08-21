@@ -42,7 +42,7 @@ namespace PropBagTestApp
 
             Binding c = new Binding("[Size]");
             c.Converter = new PropValueConverter();
-            c.ConverterParameter = ourData.GetGenProp("Size");
+            c.ConverterParameter = new TwoTypes(typeof(string), typeof(double));
             //c.Mode = BindingMode.TwoWay;
 
             TextBox tb = (TextBox)this.FindName("Sz");
@@ -81,6 +81,7 @@ namespace PropBagTestApp
 
         private void btnRead_Click(object sender, RoutedEventArgs e)
         {
+            ourData["ProductId"] = Guid.NewGuid();
             ourData["Amount"] = 12;
             ourData["Size"] = 2.09111d;
         }

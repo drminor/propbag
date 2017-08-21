@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 
 using System.Reflection;
+using System.ComponentModel;
+using System.Globalization;
 
 namespace DRM.PropBag
 {
@@ -23,8 +25,14 @@ namespace DRM.PropBag
             bool hasStorage = true, bool typeIsSolid = true,
             Action<T, T> doWhenChanged = null, bool doAfterNotify = false, Func<T,T,bool> comparer = null);
 
-        public abstract IPropGen CreateGen(Type typeOfThisProperty,
-            object value, bool useDefault,
+        public abstract IPropGen CreateGenFromObject(Type typeOfThisProperty,
+            object value,
+            string propertyName, object extraInfo,
+            bool hasStorage, bool isTypeSolid,
+            Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false);
+
+        public abstract IPropGen CreateGenFromString(Type typeOfThisProperty,
+            string value, bool useDefault,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid,
             Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false);
@@ -51,7 +59,8 @@ namespace DRM.PropBag
                 typeIsSolid = true;
             }
 
-            IPropGen prop = this.CreateGen(typeOfThisValue, value, false, propertyName, extraInfo, hasStorage, typeIsSolid, null, false, null, false);
+            IPropGen prop = this.CreateGenFromObject(typeOfThisValue, value, propertyName, extraInfo, 
+                hasStorage, typeIsSolid, null, false, null, false);
             return prop;
         }
 
@@ -66,26 +75,40 @@ namespace DRM.PropBag
             //return RefEqualityComparer<T>.Default;
         }
 
-        public virtual T GetValue<T>(object value, bool useDefault)
+        public virtual T GetDefaultValue<T>()
         {
-            if (useDefault) return default(T);
+            return default(T);
+        }
 
-            // TODO: If we to support setting the initial value for types other than those with built-in
-            // converters from string,
-            // we must add a way for the user to specify a TypeConverter
-            // in the (DRM.PropBag.ControlsWPF) InitialValueField
-            if (typeof(T) == typeof(System.Drawing.Point))
+        public virtual T GetValueFromObject<T>(object value)
+        {
+            if (value == null)
             {
-                return (T) new System.Drawing.PointConverter().ConvertFromInvariantString((string)value);
+                if (typeof(T).IsValueType) throw new InvalidCastException("Cannot set an object that have a ValueType to null.");
+                return (T)(object)null;
             }
 
-            if (typeof(T) == typeof(System.Guid)) return (T) (object)Guid.NewGuid();
+            // value is already of the correct type.
+            if (typeof(T) == typeof(object)) return (T)(object)value;
 
-            if (typeof(T) == typeof(System.Int32)) return (T)(object)1;
+            Type s = value.GetType();
 
-            if (typeof(T) == typeof(System.Double)) return (T)(object)1.0;
+            // value is already of the correct type.
+            if (s == typeof(T)) return (T)(object)value;
 
-            return (T) value;
+            object parameter = new ControlModel.TwoTypes(s, typeof(T));
+
+            return (T)PropFactoryValueConverter.ConvertBack(value, typeof(T), parameter, CultureInfo.CurrentCulture);
+        }
+
+        public virtual T GetValueFromString<T>(string value)
+        {
+            if (typeof(T) == typeof(string)) return (T)(object)value;
+
+            Type s = typeof(string);
+            object parameter = new ControlModel.TwoTypes(typeof(string), typeof(T));
+
+            return (T) PropFactoryValueConverter.ConvertBack(value, typeof(T), parameter, CultureInfo.CurrentCulture);
         }
 
 
@@ -93,10 +116,18 @@ namespace DRM.PropBag
 
         static private Type gmtType = typeof(APFGenericMethodTemplates);
 
-        protected virtual CreatePropDelegate GetPropCreator(Type typeOfThisValue)
+        protected virtual CreatePropFromObjectDelegate GetPropCreator(Type typeOfThisValue)
         {
-            MethodInfo mi = gmtType.GetMethod("CreateProp", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(typeOfThisValue);
-            CreatePropDelegate result = (CreatePropDelegate)Delegate.CreateDelegate(typeof(CreatePropDelegate), mi);
+            MethodInfo mi = gmtType.GetMethod("CreatePropFromObject", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(typeOfThisValue);
+            CreatePropFromObjectDelegate result = (CreatePropFromObjectDelegate)Delegate.CreateDelegate(typeof(CreatePropFromObjectDelegate), mi);
+
+            return result;
+        }
+
+        protected virtual CreatePropFromStringDelegate GetPropFromStringCreator(Type typeOfThisValue)
+        {
+            MethodInfo mi = gmtType.GetMethod("CreatePropFromString", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(typeOfThisValue);
+            CreatePropFromStringDelegate result = (CreatePropFromStringDelegate)Delegate.CreateDelegate(typeof(CreatePropFromStringDelegate), mi);
 
             return result;
         }
@@ -114,18 +145,40 @@ namespace DRM.PropBag
 
     static class APFGenericMethodTemplates
     {
-        private static IProp<T> CreateProp<T>(AbstractPropFactory propFactory,
-            object value, bool useDefault,
+        private static IProp<T> CreatePropFromObject<T>(AbstractPropFactory propFactory,
+            object value,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid,
             Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false)
         {
             Func<T,T,bool> compr = useRefEquality ? propFactory.GetRefEqualityComparer<T>() : (Func<T,T,bool>)comparer;
 
-            T theVal = propFactory.GetValue<T>(value, useDefault);
+            T initVal = propFactory.GetValueFromObject<T>(value);
 
-            return propFactory.Create<T>(theVal, propertyName, extraInfo, hasStorage, isTypeSolid,
+            return propFactory.Create<T>(initVal, propertyName, extraInfo, hasStorage, isTypeSolid,
                 (Action<T,T>) doWhenChanged, doAfterNotify, compr);
+        }
+
+        private static IProp<T> CreatePropFromString<T>(AbstractPropFactory propFactory,
+            string value, bool useDefault,
+            string propertyName, object extraInfo,
+            bool hasStorage, bool isTypeSolid,
+            Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false)
+        {
+            Func<T, T, bool> compr = useRefEquality ? propFactory.GetRefEqualityComparer<T>() : (Func<T, T, bool>)comparer;
+
+            T initVal;
+            if (useDefault)
+            {
+                initVal = propFactory.GetDefaultValue<T>();
+            }
+            else
+            {
+                initVal = propFactory.GetValueFromString<T>(value);
+            }
+
+            return propFactory.Create<T>(initVal, propertyName, extraInfo, hasStorage, isTypeSolid,
+                (Action<T, T>)doWhenChanged, doAfterNotify, compr);
         }
 
         public static IProp<T> CreatePropWithNoValue<T>(AbstractPropFactory propFactory,

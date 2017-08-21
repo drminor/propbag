@@ -36,14 +36,26 @@ namespace DRM.PropBag
             return prop;
         }
 
-        public override IPropGen CreateGen(Type typeOfThisProperty,
-            object value, bool useDefault,
+        public override IPropGen CreateGenFromObject(Type typeOfThisProperty,
+            object value,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid,
             Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false)
         {
-            CreatePropDelegate propCreator = GetPropCreator(typeOfThisProperty);
-            IPropGen prop = (IPropGen)propCreator(this, value, useDefault, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid, 
+            CreatePropFromObjectDelegate propCreator = GetPropCreator(typeOfThisProperty);
+            IPropGen prop = (IPropGen)propCreator(this, value, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid, 
+                doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify, comparer: comparer, useRefEquality: useRefEquality);
+            return prop;
+        }
+
+        public override IPropGen CreateGenFromString(Type typeOfThisProperty,
+            string value, bool useDefault,
+            string propertyName, object extraInfo,
+            bool hasStorage, bool isTypeSolid,
+            Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false)
+        {
+            CreatePropFromStringDelegate propCreator = GetPropFromStringCreator(typeOfThisProperty);
+            IPropGen prop = (IPropGen)propCreator(this, value, useDefault, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
                 doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify, comparer: comparer, useRefEquality: useRefEquality);
             return prop;
         }

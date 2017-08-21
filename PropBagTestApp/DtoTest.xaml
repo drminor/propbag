@@ -28,21 +28,33 @@
                 </pb:PropItem>
 
                 <pb:PropItem PropertyName="Amount" PropertyType="sys:Int32">
-                    <pb:InitialValueField InitialValue="0"/>
+                    <pb:InitialValueField InitialValue="10"/>
                 </pb:PropItem>
 
                 <pb:PropItem PropertyName="Size" PropertyType="sys:Double">
-                    <pb:InitialValueField InitialValue="0"/>
+                    <pb:InitialValueField InitialValue="10.4"/>
                 </pb:PropItem>
 
             </pb:PropBagTemplate.Props>
         </pb:PropBagTemplate>
         
         <Label Grid.Row="0">ProductId:</Label>
-        <TextBox Grid.Row="0" x:Name="PId" Text="Hello" Height="25" Width="100"/>
+        <TextBox Grid.Row="0" x:Name="PId"  Height="25" Width="100">
+            <TextBox.Text>
+                <Binding Path="[ProductId]" Converter="{pb:PropValueConverter}"
+                         ConverterParameter="{x:Type sys:Guid}">
+                </Binding>
+            </TextBox.Text>
+        </TextBox>            
 
         <Label Grid.Row="1">Amount:</Label>
-        <TextBox Grid.Row="1" x:Name="Amt" Text="{Binding Path=[Amount], Converter={pb:PropValueConverter}, ConverterParameter={x:Type sys:Int32}}" Height="25" Width="100"/>
+        <TextBox Grid.Row="1" x:Name="Amt" Height="25" Width="100">
+            <TextBox.Text>
+                <Binding Path="[Amount]" Converter="{pb:PropValueConverter}"
+                         ConverterParameter="{pb:TwoTypesMK {x:Type sys:String}, {x:Type sys:Int32}}">
+                </Binding>
+            </TextBox.Text>
+        </TextBox>
 
         <Label Grid.Row="2">Size:</Label>
         <TextBox Grid.Row="2" x:Name="Sz" 

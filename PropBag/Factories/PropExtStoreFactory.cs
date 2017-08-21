@@ -20,13 +20,14 @@ namespace DRM.PropBag
             Stuff = stuff;
         }
 
-        // TODO: consider throwing not implemented, instead of passively throwing away the initial value.
         public override IProp<T> Create<T>(T initialValue,
             string propertyName, object extraInfo = null,
             bool dummy = true, bool typeIsSolid = true,
             Action<T, T> doWhenChanged = null, bool doAfterNotify = false, Func<T,T,bool> comparer = null)
         {
-            return CreateWithNoValue(propertyName, extraInfo, dummy, typeIsSolid, doWhenChanged, doAfterNotify, comparer);
+            throw new InvalidOperationException("External Store Factory doesn't know how to create properties with inital values.");
+
+            //return CreateWithNoValue(propertyName, extraInfo, dummy, typeIsSolid, doWhenChanged, doAfterNotify, comparer);
         }
 
         public override IProp<T> CreateWithNoValue<T>(
@@ -40,17 +41,22 @@ namespace DRM.PropBag
             return propWithExtStore;
         }
 
-        public override IPropGen CreateGen(Type typeOfThisProperty,
-            object value, bool useDefault,
+        public override IPropGen CreateGenFromObject(Type typeOfThisProperty,
+            object value,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid,
             Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false)
         {
-            CreatePropDelegate propCreator = GetPropCreator(typeOfThisProperty);
-            IPropGen prop = (IPropGen)propCreator(this, value, useDefault, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
-                doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify, comparer: comparer, useRefEquality: useRefEquality);
+            throw new InvalidOperationException("External Store Factory doesn't know how to create properties with inital values.");
+        }
 
-            return prop;
+        public override IPropGen CreateGenFromString(Type typeOfThisProperty,
+            string value, bool useDefault,
+            string propertyName, object extraInfo,
+            bool hasStorage, bool isTypeSolid,
+            Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false)
+        {
+            throw new InvalidOperationException("External Store Factory doesn't know how to create properties with inital values.");
         }
 
         public override IPropGen CreateGenWithNoValue(Type typeOfThisProperty,

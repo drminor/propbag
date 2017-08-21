@@ -128,8 +128,15 @@ namespace DRM.PropBag.ClassGenerator
 
             if (pivf.SetToEmptyString)
             {
-                return new PropIniialValueField("\"\"", setToDefault: false, setToUndefined: false, setToNull: false, setToEmptyString: true);
-
+                if (pi.Type == typeof(Guid).ToString())
+                {
+                    const string EMPTY_GUID = "00000000-0000-0000-0000-000000000000";
+                    return new PropIniialValueField(EMPTY_GUID, setToDefault: false, setToUndefined: false, setToNull: false, setToEmptyString: true);
+                }
+                else
+                {
+                    return new PropIniialValueField("\"\"", setToDefault: false, setToUndefined: false, setToNull: false, setToEmptyString: true);
+                }
             }
 
             return pivf;

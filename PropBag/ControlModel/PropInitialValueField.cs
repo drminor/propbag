@@ -58,5 +58,20 @@ namespace DRM.PropBag.ControlModel
 
             return false;
         }
+
+        public string GetStringValue()
+        {
+            if (SetToDefault && SetToDefault && SetToUndefined) return null;
+            if (SetToEmptyString) return "";
+            return InitialValue;
+        }
+
+        public static PropInitialValueField UndefinedInitialValueField
+        {
+            get
+            {
+                return new PropInitialValueField(initialValue: null, setToDefault: false, setToUndefined: true, setToNull: false, setToEmptyString: false);
+            }
+        }
     }
 }

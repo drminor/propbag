@@ -137,17 +137,28 @@ namespace DRM.PropBag
 
                 if (pi.InitialValueField == null)
                 {
-                    pi.InitialValueField = new PropInitialValueField(null, false, true, false, false);
+                    pi.InitialValueField = PropInitialValueField.UndefinedInitialValueField;
                 }
 
                 IPropGen pg;
 
                 if (pi.HasStore && !pi.InitialValueField.SetToUndefined)
                 {
-                    object value = GetValue(pi.InitialValueField);
                     bool useDefault = pi.InitialValueField.SetToDefault;
+                    string value;
 
-                    pg = ThePropFactory.CreateGen(pi.PropertyType, value, useDefault, pi.PropertyName, ei, pi.HasStore, pi.TypeIsSolid,
+
+                    if (pi.InitialValueField.SetToEmptyString && pi.PropertyType == typeof(Guid))
+                    {
+                        const string EMPTY_GUID = "00000000-0000-0000-0000-000000000000";
+                        value = EMPTY_GUID;
+                    }
+                    else
+                    {
+                        value = pi.InitialValueField.GetStringValue();
+                    }
+
+                    pg = ThePropFactory.CreateGenFromString(pi.PropertyType, value, useDefault, pi.PropertyName, ei, pi.HasStore, pi.TypeIsSolid,
                         pi.DoWhenChangedField.DoWhenChangedAction, pi.DoWhenChangedField.DoAfterNotify, comparer, useRefEquality);
                 }
                 else
@@ -825,7 +836,7 @@ namespace DRM.PropBag
                 // Next statement uses reflection.
                 object curValue = genProp.Value;
 
-                IPropGen newwGenProp = ThePropFactory.CreateGen(newType, genProp.Value, false, propertyName, null, true, true, null, false, null, false);
+                IPropGen newwGenProp = ThePropFactory.CreateGenFromObject(newType, curValue, propertyName, null, true, true, null, false, null, false);
 
                 //genProp.UpdateWithSolidType(newType, curValue);
                 genProp = newwGenProp;

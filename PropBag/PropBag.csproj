@@ -50,6 +50,7 @@
     <Compile Include="ClassGenerator\T4Support.cs" />
     <Compile Include="ControlModel\NotifyPropertyChangedBase.cs" />
     <Compile Include="Caches\DelegateCacheProvider.cs" />
+    <Compile Include="ControlModel\TwoTypes.cs" />
     <Compile Include="Factories\AbstractPropFactory.cs" />
     <Compile Include="ControlModel\PropComparerField.cs" />
     <Compile Include="ControlModel\PropDoWhenChangedField.cs" />
@@ -58,6 +59,7 @@
     <Compile Include="ControlModel\PropModel.cs" />
     <Compile Include="Factories\CreatePropDelegate.cs" />
     <Compile Include="ExtValDelegates.cs" />
+    <Compile Include="Factories\PropFactoryValueConveter.cs" />
     <Compile Include="Prop.cs" />
     <Compile Include="PropBagExperimental.cs" />
     <Compile Include="PropBagInterfaces\IPropBag.cs" />
