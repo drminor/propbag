@@ -32,7 +32,7 @@ namespace PropBagLib.Tests
         public void Test1()
         {
 
-            PropModel pm = new PropModel("CreateAtRunTimeModel", "PropBagLib.Tests", deriveFromPubPropBag: false, typeSafetyMode: PropBagTypeSafetyMode.AllPropsMustBeRegistered, deferMethodRefResolution: true);
+            PropModel pm = new PropModel("CreateAtRunTimeModel", "main", "PropBagLib.Tests", deriveFromPubPropBag: false, typeSafetyMode: PropBagTypeSafetyMode.AllPropsMustBeRegistered, deferMethodRefResolution: true);
 
             PropItem pi = new PropItem(typeof(string), "PropString", null, true, true, new PropInitialValueField("Initial Value"), null, null);
 

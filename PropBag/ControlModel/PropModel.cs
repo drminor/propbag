@@ -13,6 +13,7 @@ namespace DRM.PropBag.ControlModel
 
         bool dfppb;
         string cn;
+        string ik;
         string ns;
         PropBagTypeSafetyMode tsm;
         bool dmrr;
@@ -27,6 +28,9 @@ namespace DRM.PropBag.ControlModel
 
         [XmlAttribute(AttributeName = "class-name")]
         public string ClassName { get { return cn; } set { SetIfDifferent<string>(ref cn, value); } }
+
+        [XmlIgnore]
+        public string InstanceKey { get { return ik; } set { SetIfDifferent<string>(ref ik, value); } }
 
         [XmlAttribute(AttributeName = "output-namespace")]
         public string Namespace { get { return ns; } set { SetIfDifferent<string>(ref ns, value); } }
@@ -65,9 +69,9 @@ namespace DRM.PropBag.ControlModel
         }
 
 
-        public PropModel() : this("UndefinedClassName", "UndefinedNameSpace") { }
+        public PropModel() : this("UndefinedClassName", null, "UndefinedNameSpace") { }
 
-        public PropModel(string className, string namespaceName,
+        public PropModel(string className, string instanceKey, string namespaceName,
             bool deriveFromPubPropBag = false,
             PropBagTypeSafetyMode typeSafetyMode = PropBagTypeSafetyMode.AllPropsMustBeRegistered,
             bool deferMethodRefResolution = true,
@@ -75,6 +79,7 @@ namespace DRM.PropBag.ControlModel
         {
             DeriveFromPubPropBag = deriveFromPubPropBag;
             ClassName = className;
+            InstanceKey = instanceKey;
             Namespace = namespaceName;
             TypeSafetyMode = typeSafetyMode;
             DeferMethodRefResolution = deferMethodRefResolution;

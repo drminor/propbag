@@ -28,7 +28,7 @@ namespace PropBagTestApp
     public partial class DtoTest : Window
     {
 
-        [PropBagInstanceAttribute("DtoTestViewModel")]
+        [PropBagInstanceAttribute("ourDataxx", "There is only one ViewModel in this View.")]
         public DtoTestViewModel ourData
         {
             get
@@ -82,7 +82,7 @@ namespace PropBagTestApp
                 {
                     // Get a reference to the property that access the class that needs to be created.
                     Type thisType = this.GetType();
-                    PropertyInfo classAccessor = ReflectionHelpers.GetPropBagClassProperty(thisType, pm.ClassName);
+                    PropertyInfo classAccessor = ReflectionHelpers.GetPropBagClassProperty(thisType, pm.ClassName, pm.InstanceKey);
 
                     // Instantiate the target ViewModel
                     ReflectionHelpers.CreateTargetAndAssign(this, classAccessor, propModelType, pm);

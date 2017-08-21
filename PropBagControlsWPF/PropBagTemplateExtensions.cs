@@ -11,6 +11,7 @@ namespace DRM.PropBag.ControlsWPF
         static public PropModel GetPropBagModel(this DRM.PropBag.ControlsWPF.PropBagTemplate theModel)
         {
             string className = theModel.ClassName;
+            string instanceKey = theModel.InstanceKey;
             string outputNamespace = theModel.OutPutNameSpace;
             bool deriveFromPubPropBag = theModel.DeriveFromPubPropBag;
             PropBagTypeSafetyMode typeSafetyMode = theModel.TypeSafetyMode;
@@ -19,6 +20,7 @@ namespace DRM.PropBag.ControlsWPF
 
             PropModel result =
                 new PropModel(className,
+                    instanceKey,
                     outputNamespace,
                     deriveFromPubPropBag,
                     typeSafetyMode,

@@ -63,6 +63,22 @@ namespace DRM.PropBag.ControlsWPF
             }
         }
 
+        public static readonly DependencyProperty InstanceKeyProperty =
+            DependencyProperty.Register("InstanceKey", typeof(string), typeof(PropBagTemplate),
+                new PropertyMetadata(DRM.PropBag.ControlsWPF.ReflectionHelpers.DEFAULT_INSTANCE_KEY));
+
+        public string InstanceKey
+        {
+            get
+            {
+                return (string)this.GetValue(InstanceKeyProperty);
+            }
+            set
+            {
+                this.SetValue(InstanceKeyProperty, value);
+            }
+        }
+
         public static readonly DependencyProperty OutPutNameSpaceProperty =
             DependencyProperty.Register("OutPutNameSpace", typeof(string), typeof(PropBagTemplate), new PropertyMetadata(null));
 

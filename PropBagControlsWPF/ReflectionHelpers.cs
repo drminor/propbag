@@ -8,15 +8,18 @@ using System.Reflection;
 
 namespace DRM.PropBag.ControlsWPF
 {
+
     public class ReflectionHelpers
     {
-        static public PropertyInfo GetPropBagClassProperty(Type declaringType, string className)
+        public const string DEFAULT_INSTANCE_KEY = "main";
+
+        static public PropertyInfo GetPropBagClassProperty(Type declaringType, string className, string instanceKey)
         {
             PropertyInfo[] propDefs = declaringType.GetProperties(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
 
             for (int pPtr = 0; pPtr < propDefs.Length; pPtr++)
             {
-                if (IsThisTheInstance(propDefs[pPtr], className))
+                if (IsPropBagInstanceWithCorrectType(propDefs[pPtr], className, instanceKey))
                 {
                     return propDefs[pPtr];
                 }
@@ -41,11 +44,11 @@ namespace DRM.PropBag.ControlsWPF
         /// <param name="xamlRoot"></param>
         /// <param name="strTargetType"></param>
         /// <returns></returns>
-        static public object GetTargetInstance(object xamlRoot, string strTargetType)
+        static public object GetTargetInstance(object xamlRoot, string strTargetType, string instanceKey)
         {
             Type rootType = xamlRoot.GetType();
 
-            PropertyInfo classProperty = GetPropBagClassProperty(rootType, strTargetType);
+            PropertyInfo classProperty = GetPropBagClassProperty(rootType, strTargetType, instanceKey);
 
             if (classProperty != null)
             {
@@ -55,14 +58,17 @@ namespace DRM.PropBag.ControlsWPF
             return null;
         }
 
-        static public bool IsThisTheInstance(PropertyInfo propDef, string strTargetType)
+        static public bool IsPropBagInstanceWithCorrectType(PropertyInfo propDef, string strTargetType, string instanceKey)
         {
             //IEnumerable<System.Attribute> list = propDef.GetCustomAttributes();
             System.Attribute att = propDef.GetCustomAttribute(typeof(PropBagInstanceAttribute));
             if (att == null) return false;
 
+            //return DoNameSpacesMatch(propDef.PropertyType.ToString(), strTargetType);
+
             PropBagInstanceAttribute pbia = (PropBagInstanceAttribute)att;
-            return DoNameSpacesMatch(pbia.PropBagTemplate, strTargetType);
+            return (pbia.InstanceKey == instanceKey);
+            //return DoNameSpacesMatch(pbia.PropBagTemplate, strTargetType);
         }
 
         static public bool DoNameSpacesMatch(string ns1, string ns2)

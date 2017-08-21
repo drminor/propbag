@@ -75,18 +75,34 @@ namespace DRM.PropBag.ControlsWPF
             {
                 string[] parts = s.Split('|');
 
-                if (parts.Length != 3)
-                    throw new ApplicationException("Value does not have exactly three parts, separated by |.");
+                if (parts.Length != 3 && parts.Length != 4)
+                    throw new ApplicationException("Value does not have three parts, or four parts, separated by |.");
 
-                string strPropType = parts[0];
-                string strTargetType = parts[1]; // The name of the class that declares or "hosts" the method.
-                string methodName = parts[2];
+                string strPropType = null; 
+                string strTargetType = null;  // The name of the class that declares or "hosts" the method.
+                string instanceKey = null;
+                string methodName = null; 
+
+                if (parts.Length == 3)
+                {
+                    strPropType = parts[0];
+                    strTargetType = parts[1]; 
+                    methodName = parts[2];
+                    instanceKey = ReflectionHelpers.DEFAULT_INSTANCE_KEY;
+                }
+                if (parts.Length == 4)
+                {
+                    strPropType = parts[0];
+                    strTargetType = parts[1];
+                    instanceKey = parts[2];
+                    methodName = parts[3];
+                }
 
                 // The typeConverter's context is a class that should have a property that provides access to an object 
                 // of the class that declares the method we are looking for.
                 // This property will be marked with the PropBagInstanceAttribute and will have
                 // the TargetType's class name as its PropBagTemplate value.
-                object targetInstance = ReflectionHelpers.GetTargetInstance(xamlRoot, strTargetType);
+                object targetInstance = ReflectionHelpers.GetTargetInstance(xamlRoot, strTargetType, instanceKey);
                 if(targetInstance == null)
                     throw new ApplicationException(string.Format("Cannot find a reference to a running instance of {0}, and cannot find a public constructor to use to create a running instance.", strTargetType));
 

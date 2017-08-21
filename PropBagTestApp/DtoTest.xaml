@@ -19,7 +19,7 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
 
-        <pb:PropBagTemplate Grid.Row="0" Name="T1" ClassName="DtoTestViewModel" TypeSafetyMode="AllPropsMustBeRegistered">
+        <pb:PropBagTemplate Grid.Row="0" Name="T1" ClassName="DtoTestViewModel" InstanceKey="ourDataxx" TypeSafetyMode="AllPropsMustBeRegistered">
             <pb:PropBagTemplate.Namespaces>
                 <pb:NamespaceItem Namespace="System.IO"/>
             </pb:PropBagTemplate.Namespaces>
@@ -27,7 +27,7 @@
             <pb:PropBagTemplate.Props>
                 <pb:PropItem PropertyName="ProductId" PropertyType="sys:Guid">
                     <pb:InitialValueField SetToEmptyString="True"/>
-                    <pb:PropDoWhenChangedField DoWhenChangedAction="System.Guid|PropBagTestApp.DtoTestViewModel|DoWhenProductIdChanges"
+                    <pb:PropDoWhenChangedField DoWhenChangedAction="System.Guid|PropBagTestApp.DtoTestViewModel|ourDataxx|DoWhenProductIdChanges"
                                 DoAfterNotify="False"/>
                 </pb:PropItem>
 
