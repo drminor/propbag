@@ -40,7 +40,7 @@ namespace PropBagTestApp
 
             Grid topGrid =  (Grid) this.FindName("TopGrid");
 
-            StandUpViewModels(topGrid);
+            ViewModelGenerator.StandUpViewModels(topGrid, this);
 
             topGrid.DataContext = ourData;
 
@@ -48,27 +48,6 @@ namespace PropBagTestApp
             insideGrid.DataContext = ourData2;
         }
 
-        private void StandUpViewModels(Panel root)
-        {
-            Type thisType = this.GetType();
-            Type propModelType = typeof(DRM.PropBag.ControlModel.PropModel);
-
-            IEnumerable<PropBagTemplate> propBagTemplates = root.Children.OfType<PropBagTemplate>();
-
-            foreach (PropBagTemplate pbt in propBagTemplates)
-            {
-                // Build a control model from the XAML contents of the template.
-                DRM.PropBag.ControlModel.PropModel pm = pbt.GetPropBagModel();
-                if (pm != null)
-                {
-                    // Get a reference to the property that access the class that needs to be created.
-                    PropertyInfo classAccessor = ReflectionHelpers.GetPropBagClassProperty(thisType, pm.ClassName, pm.InstanceKey);
-
-                    // Instantiate the target ViewModel
-                    ReflectionHelpers.CreateTargetAndAssign(this, classAccessor, propModelType, pm);
-                }
-            }
-        }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
