@@ -42,7 +42,7 @@ namespace PropBagLib.Tests
 
         new public void ClearEventSubscribers()
         {
-            base.PClearEventSubscribers();
+            base.ClearEventSubscribers();
         }
 
     }

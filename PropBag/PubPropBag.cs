@@ -53,32 +53,32 @@ namespace DRM.PropBag
         {
             get
             {
-                return PGetIt(propertyName);
+                return GetIt(propertyName);
             }
             set
             {
-                PSetIt(value, propertyName, null);
+                SetIt(value, propertyName, null);
             }
         }
 
-        public object GetIt([CallerMemberName] string propertyName = null)
+        new public object GetIt([CallerMemberName] string propertyName = null)
         {
-            return base.PGetIt(propertyName);
+            return base.GetIt(propertyName);
         }
 
-        public T GetIt<T>([CallerMemberName] string propertyName = null)
+        new public T GetIt<T>([CallerMemberName] string propertyName = null)
         {
-            return base.PGetIt<T>(propertyName);
+            return base.GetIt<T>(propertyName);
         }
 
-        public void SetIt(object value, [CallerMemberName] string propertyName = null)
+        new public void SetIt(object value, [CallerMemberName] string propertyName = null)
         {
-            base.PSetIt(value, propertyName, null);
+            base.SetIt(value, propertyName, null);
         }
 
-        public void SetIt<T>(T value, [CallerMemberName] string propertyName = null)
+        new public void SetIt<T>(T value, [CallerMemberName] string propertyName = null)
         {
-            base.PSetIt<T>(value, propertyName);
+            base.SetIt<T>(value, propertyName);
         }
 
         /// <summary>
@@ -91,9 +91,9 @@ namespace DRM.PropBag
         /// <param name="curValue">The current value of the property, must be specified using the ref keyword.</param>
         /// <param name="propertyName"></param>
         /// <returns>True if the value was updated, otherwise false.</returns>
-        public bool SetIt<T>(T newValue, ref T curValue, [CallerMemberName]string propertyName = null)
+        new public bool SetIt<T>(T newValue, ref T curValue, [CallerMemberName]string propertyName = null)
         {
-            return base.PSetIt(newValue, ref curValue, propertyName);
+            return base.SetIt<T>(newValue, ref curValue, propertyName);
         }
 
         #endregion
@@ -174,9 +174,9 @@ namespace DRM.PropBag
             return pg;
         }
 
-        public void RemoveProp(string propertyName)
+        new public void RemoveProp(string propertyName)
         {
-            base.PRemoveProp(propertyName);
+            base.RemoveProp(propertyName);
         }
 
         /// <summary>
@@ -187,62 +187,62 @@ namespace DRM.PropBag
         /// <param name="doAfterNotify"></param>
         /// <param name="propertyName"></param>
         /// <returns>True, if there was an existing Action in place for this property.</returns>
-        public bool RegisterDoWhenChanged<T>(Action<T, T> doWhenChanged, bool doAfterNotify = false, [CallerMemberName] string propertyName = null)
+        new public bool RegisterDoWhenChanged<T>(Action<T, T> doWhenChanged, bool doAfterNotify = false, [CallerMemberName] string propertyName = null)
         {
-            return base.PRegisterDoWhenChanged(doWhenChanged, doAfterNotify, propertyName);
+            return base.RegisterDoWhenChanged(doWhenChanged, doAfterNotify, propertyName);
         }
 
         /// <summary>
         /// Returns all of the values in dictionary of objects, keyed by PropertyName.
         /// </summary>
-        public IDictionary<string, object> GetAllPropertyValues()
+        new public IDictionary<string, object> GetAllPropertyValues()
         {
-            return base.PGetAllPropertyValues();
+            return base.GetAllPropertyValues();
         }
 
-        public IList<string> GetAllPropertyNames()
+        new public IList<string> GetAllPropertyNames()
         {
-            return base.PGetAllPropertyNames();
+            return base.GetAllPropertyNames();
         }
 
-        public void ClearAll()
+        new public void ClearAll()
         {
-            base.PClearAll();
+            base.ClearAll();
         }
 
-        public void ClearEventSubscribers()
+        new public void ClearEventSubscribers()
         {
-            base.PClearEventSubscribers();
-        }
-
-        #endregion
-
-        #region Methods to Raise Events
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="propertyName">Use "Item[]" if you want to notify the WPF binding system that one of the PropBag properties has changed.</param>
-        new protected void OnPropertyChanged([CallerMemberName]string propertyName = null)
-        {
-            base.OnPropertyChanged(propertyName);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="propertyName">Use "Item[]" if you want to notify the WPF binding system that one of the PropBag properties is changing.</param>
-        protected void OnPropertyChanging([CallerMemberName]string propertyName = null)
-        {
-            base.POnPropertyChanging(propertyName);
-        }
-
-        protected void OnPropertyChangedWithVals(object oldVal, object newVal, [CallerMemberName]string propertyName = null)
-        {
-            base.POnPropertyChangedWithVals(propertyName, oldVal, newVal);
+            base.ClearEventSubscribers();
         }
 
         #endregion
+
+        //#region Methods to Raise Events
+
+        ///// <summary>
+        ///// 
+        ///// </summary>
+        ///// <param name="propertyName">Use "Item[]" if you want to notify the WPF binding system that one of the PropBag properties has changed.</param>
+        //new protected void OnPropertyChanged([CallerMemberName]string propertyName = null)
+        //{
+        //    base.OnPropertyChanged(propertyName);
+        //}
+
+        ///// <summary>
+        ///// 
+        ///// </summary>
+        ///// <param name="propertyName">Use "Item[]" if you want to notify the WPF binding system that one of the PropBag properties is changing.</param>
+        //new protected void OnPropertyChanging([CallerMemberName]string propertyName = null)
+        //{
+        //    base.OnPropertyChanging(propertyName);
+        //}
+
+        //new protected void OnPropertyChangedWithVals(object oldVal, object newVal, [CallerMemberName]string propertyName = null)
+        //{
+        //    base.OnPropertyChangedWithVals(propertyName, oldVal, newVal);
+        //}
+
+        //#endregion
 
     }
 }

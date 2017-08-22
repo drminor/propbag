@@ -183,7 +183,7 @@ namespace DRM.PropBag
             return ivf.InitialValue;
          }
 
-        protected void PClearEventSubscribers()
+        protected void ClearEventSubscribers()
         {
             foreach (var x in tVals.Values)
             {
@@ -191,10 +191,10 @@ namespace DRM.PropBag
             }
         }
 
-        protected void PClearAll()
+        protected void ClearAll()
         {
             doSetDelegateDict.Clear();
-            PClearEventSubscribers();
+            ClearEventSubscribers();
             tVals.Clear();
         }
 
@@ -242,11 +242,11 @@ namespace DRM.PropBag
             set
             {
                 Type type = Type.GetType(typeName);
-                PSetIt(value, propertyName, type);
+                SetIt(value, propertyName, type);
             }
         }
 
-        protected object PGetIt(string propertyName)
+        protected object GetIt(string propertyName)
         {
             if (OnlyTypedAccess)
             {
@@ -261,7 +261,7 @@ namespace DRM.PropBag
             return genProp.Value;
         }
 
-        protected T PGetIt<T>(string propertyName)
+        protected T GetIt<T>(string propertyName)
         {
             return (T) GetIProp<T>(propertyName).Value;
         }
@@ -279,7 +279,7 @@ namespace DRM.PropBag
         /// <param name="value"></param>
         /// <param name="propertyName"></param>
         /// <param name="type">If unknown, set this parameter to null.</param>
-        protected void PSetIt(object value, string propertyName, Type type)
+        protected void SetIt(object value, string propertyName, Type type)
         {
             if (OnlyTypedAccess)
             {
@@ -362,7 +362,7 @@ namespace DRM.PropBag
             setProDel(value, this, propertyName, genProp);
         }
 
-        protected void PSetIt<T>(T value, string propertyName)
+        protected void SetIt<T>(T value, string propertyName)
         {
             IPropGen genProp;
 
@@ -400,7 +400,7 @@ namespace DRM.PropBag
         /// <param name="curValue">The current value of the property, must be specified using the ref keyword.</param>
         /// <param name="propertyName"></param>
         /// <returns>True if the value was updated, otherwise false.</returns>
-        protected bool PSetIt<T>(T newValue, ref T curValue, [CallerMemberName]string propertyName = null)
+        protected bool SetIt<T>(T newValue, ref T curValue, [CallerMemberName]string propertyName = null)
         {
             IPropGen genProp;
 
@@ -430,7 +430,7 @@ namespace DRM.PropBag
                 // Save the value before the update.
                 T oldValue = curValue;
 
-                POnPropertyChanging(propertyName);
+                OnPropertyChanging(propertyName);
 
                 // Make the update.
                 curValue = newValue;
@@ -596,7 +596,7 @@ namespace DRM.PropBag
             tVals.Add(propertyName, prop);
         }
 
-        protected void PRemoveProp(string propertyName)
+        protected void RemoveProp(string propertyName)
         {
             tVals.Remove(propertyName);
         }
@@ -609,7 +609,7 @@ namespace DRM.PropBag
         /// <param name="doAfterNotify"></param>
         /// <param name="propertyName"></param>
         /// <returns>True, if there was an existing Action in place for this property.</returns>
-        protected bool PRegisterDoWhenChanged<T>(Action<T, T> doWhenChanged, bool doAfterNotify, string propertyName)
+        protected bool RegisterDoWhenChanged<T>(Action<T, T> doWhenChanged, bool doAfterNotify, string propertyName)
         {
 
             IProp<T> prop = GetIProp<T>(propertyName);
@@ -620,7 +620,7 @@ namespace DRM.PropBag
         /// <summary>
         /// Returns all of the values in dictionary of objects, keyed by PropertyName.
         /// </summary>
-        protected IDictionary<string, object> PGetAllPropertyValues()
+        protected IDictionary<string, object> GetAllPropertyValues()
         {
             // This uses reflection.
             Dictionary<string, object> result = new Dictionary<string, object>();
@@ -632,7 +632,7 @@ namespace DRM.PropBag
             return result;
         }
 
-        protected IList<string> PGetAllPropertyNames()
+        protected IList<string> GetAllPropertyNames()
         {
             List<string> result = new List<string>();
 
@@ -667,7 +667,7 @@ namespace DRM.PropBag
                     // Save the value before the update.
                     T oldValue = prop.TypedValue;
 
-                    POnPropertyChanging(propertyName);
+                    OnPropertyChanging(propertyName);
 
                     // Make the update.
                     prop.TypedValue = newValue;
@@ -692,7 +692,7 @@ namespace DRM.PropBag
                 prop.OnPropertyChangedWithVals(propertyName, oldVal, newValue);
 
                 // The un-typed, PropertyChanged shared event.
-                POnPropertyChangedWithVals(propertyName, oldVal, newValue);
+                OnPropertyChangedWithVals(propertyName, oldVal, newValue);
 
                 // then perform the call back.
                 prop.DoWhenChanged(oldVal, newValue);
@@ -712,7 +712,7 @@ namespace DRM.PropBag
                 prop.OnPropertyChangedWithVals(propertyName, oldVal, newValue);
 
                 // The un-typed, PropertyChanged shared event.
-                POnPropertyChangedWithVals(propertyName, oldVal, newValue);
+                OnPropertyChangedWithVals(propertyName, oldVal, newValue);
             }
         }
 
@@ -918,7 +918,7 @@ namespace DRM.PropBag
             }
         }
 
-        protected void POnPropertyChanging(string propertyName)
+        protected void OnPropertyChanging(string propertyName)
         {
             PropertyChangingEventHandler handler = Interlocked.CompareExchange(ref PropertyChanging, null, null);
 
@@ -930,7 +930,7 @@ namespace DRM.PropBag
             }
         }
 
-        protected void POnPropertyChangedWithVals(string propertyName, object oldVal, object newVal)
+        protected void OnPropertyChangedWithVals(string propertyName, object oldVal, object newVal)
         {
             PropertyChangedWithValsHandler handler = Interlocked.CompareExchange(ref PropertyChangedWithVals, null, null);
 
