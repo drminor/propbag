@@ -28,9 +28,7 @@ namespace PropBagTestApp
         // NOTE: Neither of these constructors is required if an instance of this class already exists from the proerty 
         // marked with the PropBagInstanceAttribute.
         // An instance of this class must be available so that we create an instance of a Action<T,T> delegate.
-        public MainViewModel(byte dummmy)
-        {
-        }
+        public MainViewModel(byte dummy) : base(dummy) {}
 
         /// <summary>
         /// Constructor used by View to create with properties

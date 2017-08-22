@@ -29,7 +29,9 @@ namespace DRM.PropBag
     {
         #region Constructor
 
-        public PubPropBag() : base() {} 
+        public PubPropBag() { }
+
+        public PubPropBag(byte dummy) : base(dummy) { }
 
         public PubPropBag(PropBagTypeSafetyMode typeSafetyMode) : base(typeSafetyMode) {} 
 
@@ -40,6 +42,12 @@ namespace DRM.PropBag
         #endregion
 
         #region Propety Access Methods
+
+        public new object this[string typeName, string propertyName]
+        {
+            get { return base[typeName, propertyName]; }
+            set { base[typeName, propertyName] = value; }
+        }
 
         public object this[string propertyName]
         {
@@ -215,9 +223,9 @@ namespace DRM.PropBag
         /// 
         /// </summary>
         /// <param name="propertyName">Use "Item[]" if you want to notify the WPF binding system that one of the PropBag properties has changed.</param>
-        protected void OnPropertyChanged([CallerMemberName]string propertyName = null)
+        new protected void OnPropertyChanged([CallerMemberName]string propertyName = null)
         {
-            base.POnPropertyChanged(propertyName);
+            base.OnPropertyChanged(propertyName);
         }
 
         /// <summary>

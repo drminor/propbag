@@ -29,7 +29,9 @@ namespace DRM.PropBag
     {
         #region Constructor
 
-        public PropBag() : base() {}
+        public PropBag() { }
+
+        public PropBag(byte dummy) : base(dummy) {}
 
         public PropBag(PropBagTypeSafetyMode typeSafetyMode) : base(typeSafetyMode) {}
 
@@ -41,13 +43,13 @@ namespace DRM.PropBag
 
         #region Propety Access Methods 
 
-        public new object this[Type t, string propertyName]
+        public new object this[string typeName, string propertyName]
         {
-            get { return base[t, propertyName]; }
-            set { base[t, propertyName] = value; }
+            get { return base[typeName, propertyName]; }
+            set { base[typeName, propertyName] = value; }
         }
 
-        protected object this[string propertyName]
+        public object this[string propertyName]
         {
             get
             {
@@ -59,22 +61,22 @@ namespace DRM.PropBag
             }
         }
 
-        protected object GetIt([CallerMemberName] string propertyName = null)
+        public object GetIt([CallerMemberName] string propertyName = null)
         {
             return base.PGetIt(propertyName);
         }
 
-        protected T GetIt<T>([CallerMemberName] string propertyName = null)
+        public T GetIt<T>([CallerMemberName] string propertyName = null)
         {
             return base.PGetIt<T>(propertyName);
         }
 
-        protected void SetIt(object value, [CallerMemberName] string propertyName = null)
+        public void SetIt(object value, [CallerMemberName] string propertyName = null)
         {
             base.PSetIt(value, propertyName, null);
         }
 
-        protected void SetIt<T>(T value, [CallerMemberName] string propertyName = null)
+        public void SetIt<T>(T value, [CallerMemberName] string propertyName = null)
         {
             base.PSetIt<T>(value, propertyName);
         }
@@ -89,7 +91,7 @@ namespace DRM.PropBag
         /// <param name="curValue">The current value of the property, must be specified using the ref keyword.</param>
         /// <param name="propertyName"></param>
         /// <returns>True if the value was updated, otherwise false.</returns>
-        protected bool SetIt<T>(T newValue, ref T curValue, [CallerMemberName]string propertyName = null)
+        public bool SetIt<T>(T newValue, ref T curValue, [CallerMemberName]string propertyName = null)
         {
             return base.PSetIt<T>(newValue, ref curValue, propertyName);
         }
@@ -97,12 +99,6 @@ namespace DRM.PropBag
         #endregion
 
         #region Property Management 
-
-        //public bool CreatePropsFromModel(DRM.PropBag.ControlModel.PropModel pm)
-        //{
-        //    base.TypeSafetyMode = PropBagTypeSafetyMode.Loose;
-        //    return true;
-        //}
 
         /// <summary>
         /// Use when you want to specify an Action<typeparamref name="T"/> to be performed
@@ -120,7 +116,7 @@ namespace DRM.PropBag
             bool hasStorage = true;
             bool typeIsSolid = true;
             IProp<T> pg = ThePropFactory.Create<T>(initialValue, propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
-            AddProp<T>(propertyName, pg);
+            base.AddProp<T>(propertyName, pg);
             return pg;
         }
 
@@ -198,12 +194,12 @@ namespace DRM.PropBag
         /// <summary>
         /// Returns all of the values in dictionary of objects, keyed by PropertyName.
         /// </summary>
-        protected IDictionary<string, object> GetAllPropertyValues()
+        public IDictionary<string, object> GetAllPropertyValues()
         {
             return base.PGetAllPropertyValues();
         }
 
-        protected IList<string> GetAllPropertyNames()
+        public IList<string> GetAllPropertyNames()
         {
             return base.PGetAllPropertyNames();
         }
@@ -226,9 +222,9 @@ namespace DRM.PropBag
         /// 
         /// </summary>
         /// <param name="propertyName">Use "Item[]" if you want to notify the WPF binding system that one of the PropBag properties has changed.</param>
-        protected void OnPropertyChanged([CallerMemberName]string propertyName = null)
+        new protected void OnPropertyChanged([CallerMemberName]string propertyName = null)
         {
-            base.POnPropertyChanged(propertyName);
+            base.OnPropertyChanged(propertyName);
         }
 
         /// <summary>

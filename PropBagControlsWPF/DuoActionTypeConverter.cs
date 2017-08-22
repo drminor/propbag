@@ -73,30 +73,13 @@ namespace DRM.PropBag.ControlsWPF
 
             try
             {
-                string[] parts = s.Split('|');
+                Tuple<string, string, string, string> parts = GetParts(s);
 
-                if (parts.Length != 3 && parts.Length != 4)
-                    throw new ApplicationException("Value does not have three parts, or four parts, separated by |.");
+                string strPropType = parts.Item1;
+                string strTargetType = parts.Item2;
+                string instanceKey = parts.Item3;
+                string methodName = parts.Item4;
 
-                string strPropType = null; 
-                string strTargetType = null;  // The name of the class that declares or "hosts" the method.
-                string instanceKey = null;
-                string methodName = null; 
-
-                if (parts.Length == 3)
-                {
-                    strPropType = parts[0];
-                    strTargetType = parts[1]; 
-                    methodName = parts[2];
-                    instanceKey = ReflectionHelpers.DEFAULT_INSTANCE_KEY;
-                }
-                if (parts.Length == 4)
-                {
-                    strPropType = parts[0];
-                    strTargetType = parts[1];
-                    instanceKey = parts[2];
-                    methodName = parts[3];
-                }
 
                 // The typeConverter's context is a class that should have a property that provides access to an object 
                 // of the class that declares the method we are looking for.
@@ -123,6 +106,37 @@ namespace DRM.PropBag.ControlsWPF
                 string d = ee.Message;
                 throw;
             }
+        }
+
+        // TODO: Get the property type from the parent PropItem.
+        // TODO: Get the property class type and instance key from the parent PropBagTemplate.
+        private Tuple<string, string, string, string> GetParts(string s)
+        {
+            string[] parts = s.Split('|');
+
+            if (parts.Length != 3 && parts.Length != 4)
+                throw new ApplicationException("Value does not have three parts, or four parts, separated by |.");
+
+            string strPropType = null;
+            string strTargetType = null;  // The name of the class that declares or "hosts" the method.
+            string instanceKey = null;
+            string methodName = null;
+
+            if (parts.Length == 3)
+            {
+                strPropType = parts[0];
+                strTargetType = parts[1];
+                methodName = parts[2];
+                instanceKey = ReflectionHelpers.DEFAULT_INSTANCE_KEY;
+            }
+            if (parts.Length == 4)
+            {
+                strPropType = parts[0];
+                strTargetType = parts[1];
+                instanceKey = parts[2];
+                methodName = parts[3];
+            }
+            return new Tuple<string, string, string, string>(strPropType, strTargetType, instanceKey, methodName);
         }
 
         public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)

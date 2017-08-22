@@ -76,6 +76,8 @@ namespace DRM.PropBag
 
         #region Constructor
 
+        public PropBagBase(byte dummy) { } // This is called when reflection is used to discover the methods and properties.
+
         public PropBagBase() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered, null) { }
 
         public PropBagBase(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
@@ -214,11 +216,13 @@ namespace DRM.PropBag
         //    }
         //}
 
-        protected object this[Type type, string propertyName]
+        protected object this[string typeName, string propertyName]
         {
             get
             {
                 IPropGen genProp = GetGenProp(propertyName, ThePropFactory.ProvidesStorage);
+
+                Type type = Type.GetType(typeName);
 
                 if (!genProp.TypeIsSolid)
                 {
@@ -237,6 +241,7 @@ namespace DRM.PropBag
             }
             set
             {
+                Type type = Type.GetType(typeName);
                 PSetIt(value, propertyName, type);
             }
         }
@@ -651,7 +656,7 @@ namespace DRM.PropBag
                 prop.TypedValue = newValue;
 
                 // Raise the standard PropertyChanged event
-                POnPropertyChanged(propertyName);
+                OnPropertyChanged(propertyName);
             }
             else
             {
@@ -678,7 +683,7 @@ namespace DRM.PropBag
             if (prop.DoAfterNotify)
             {
                 // Raise the standard PropertyChanged event
-                POnPropertyChanged(propertyName);
+                OnPropertyChanged(propertyName);
 
                 // The typed, PropertyChanged event defined on the individual property.
                 prop.OnPropertyChangedWithTVals(propertyName, oldVal, newValue);
@@ -698,7 +703,7 @@ namespace DRM.PropBag
                 prop.DoWhenChanged(oldVal, newValue);
 
                 // Raise the standard PropertyChanged event
-                POnPropertyChanged(propertyName);
+                OnPropertyChanged(propertyName);
 
                 // The typed, PropertyChanged event defined on the individual property.
                 prop.OnPropertyChangedWithTVals(propertyName, oldVal, newValue);
@@ -901,7 +906,7 @@ namespace DRM.PropBag
         #region Methods to Raise Events
 
         // Raise Standard Events
-        protected void POnPropertyChanged(string propertyName)
+        protected void OnPropertyChanged(string propertyName)
         {
             PropertyChangedEventHandler handler = Interlocked.CompareExchange(ref PropertyChanged, null, null);
 

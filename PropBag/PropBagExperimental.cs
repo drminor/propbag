@@ -29,7 +29,9 @@ namespace DRM.PropBag
     {
         #region Constructor
 
-        public PropBagExperimental() : base() {}
+        public PropBagExperimental() { }
+
+        public PropBagExperimental(byte dummy) : base(dummy) { }
 
         public PropBagExperimental(PropBagTypeSafetyMode typeSafetyMode) : base(typeSafetyMode) {}
 
@@ -41,10 +43,10 @@ namespace DRM.PropBag
 
         #region Propety Access Methods 
 
-        public IPropGen GetGenProp(string propertyName)
-        {
-            return base.GetGenProp(propertyName, ThePropFactory.ProvidesStorage);
-        }
+        //public IPropGen GetGenProp(string propertyName)
+        //{
+        //    return base.GetGenProp(propertyName, ThePropFactory.ProvidesStorage);
+        //}
 
         //public NTV this[string propertyName]
         //{
@@ -66,13 +68,13 @@ namespace DRM.PropBag
         //    SetIt(v, propertyName);
         //}
 
-        //public new object this[Type t, string propertyName]
-        //{
-        //    get { return base[t, propertyName]; }
-        //    set { base[t, propertyName] = value;  }
-        //}
+        public new object this[string typeName, string propertyName]
+        {
+            get { return base[typeName, propertyName]; }
+            set { base[typeName, propertyName] = value; }
+        }
 
-        protected object this[string propertyName]
+        public object this[string propertyName]
         {
             get
             {
@@ -251,9 +253,9 @@ namespace DRM.PropBag
         /// 
         /// </summary>
         /// <param name="propertyName">Use "Item[]" if you want to notify the WPF binding system that one of the PropBag properties has changed.</param>
-        protected void OnPropertyChanged([CallerMemberName]string propertyName = null)
+        new protected void OnPropertyChanged([CallerMemberName]string propertyName = null)
         {
-            base.POnPropertyChanged(propertyName);
+            base.OnPropertyChanged(propertyName);
         }
 
         /// <summary>

@@ -92,10 +92,28 @@ namespace PropBagTestApp
 
         private void btnRead_Click(object sender, RoutedEventArgs e)
         {
-            ourData["ProductId"] = Guid.NewGuid();
-            ourData["Amount"] = 12;
-            ourData["Size"] = 2.09111d;
+            MyModel mm = new MyModel();
+
+            mm.ProductId = Guid.NewGuid();
+            mm.Amount = 145;
+            mm.Size = 17.8;
+
+            ReadWithMap(mm, ourData);
+
+            //ourData["ProductId"] = Guid.NewGuid();
+            ourData["Amount"] = 123;
+            //ourData["Size"] = 2.09111d;
         }
+
+        private void ReadWithMap(MyModel mm, DtoTestViewModel vm)             
+        {
+            var config = new AutoMapper.MapperConfiguration(cfg => cfg.CreateMap<MyModel, DtoTestViewModel>());
+
+            var mapper = config.CreateMapper();
+
+            mapper.Map<MyModel, DtoTestViewModel>(mm, vm);
+        }
+
 
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {

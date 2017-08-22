@@ -18,8 +18,8 @@ using System.Windows.Data;
 
 namespace DRM.PropBag.ControlsWPF
 {
-
-    public class TwoTypesMK : MarkupExtension
+    [MarkupExtensionReturnType(typeof(object))]
+    public class TwoTypesExtension : MarkupExtension
     {
         public Type SourceType { get; set; }
         public Type DestType { get; set; }
@@ -28,9 +28,9 @@ namespace DRM.PropBag.ControlsWPF
         /// Used when the source type is System.String
         /// </summary>
         /// <param name="destinationType"></param>
-        public TwoTypesMK(Type destinationType) : this(typeof(string), destinationType) { }
+        public TwoTypesExtension(Type destinationType) : this(typeof(string), destinationType) { }
 
-        public TwoTypesMK(Type sourceType, Type destinationType)
+        public TwoTypesExtension(Type sourceType, Type destinationType)
         {
             SourceType = sourceType;
             DestType = destinationType;
