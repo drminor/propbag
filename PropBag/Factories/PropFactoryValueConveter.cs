@@ -24,32 +24,40 @@ namespace DRM.PropBag
         // Value is native object, we need to return a targetType (hopefully a string at this point.)
         public static object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
+            if (targetType == typeof(string))
+            {
+                if (value == null) return string.Empty;
+            }
+
             TwoTypes tt = GetFromParam(parameter);
 
-            if (targetType == tt.SourceType)
+            if (!tt.IsEmpty)
             {
-                if (!tt.IsEmpty)
+                if (targetType == tt.SourceType)
                 {
                     StringFromTDelegate del = GetTheStringFromTDelegate(tt.DestType, tt.SourceType);
                     return del(value);
                 }
             }
+
             return null;
         }
 
         // Value is a string, we need to create a native object.
         public static object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
+            if (value == null && !targetType.IsValueType) return null;
+            
             TwoTypes tt = GetFromParam(parameter);
-
-            if (value.GetType() == tt.SourceType)
+            if (!tt.IsEmpty)
             {
-                if (!tt.IsEmpty)
+                if (value.GetType() == tt.SourceType)
                 {
                     TFromStringDelegate del = GetTheTFromStringDelegate(tt.DestType);
                     return del((string)value);
                 }
             }
+
             return null;
         }
 
