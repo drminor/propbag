@@ -41,6 +41,10 @@
       <HintPath>..\packages\AutoMapper.6.1.1\lib\net45\AutoMapper.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="AutoMapper.Collection, Version=3.1.2.0, Culture=neutral, PublicKeyToken=e57c3f0a3d6646db, processorArchitecture=MSIL">
+      <HintPath>..\packages\AutoMapper.Collection.3.1.2\lib\net45\AutoMapper.Collection.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -76,6 +80,7 @@
     <Compile Include="DtoTest.xaml.cs">
       <DependentUpon>DtoTest.xaml</DependentUpon>
     </Compile>
+    <Compile Include="DtoTestMapping.cs" />
     <Compile Include="DtoTestViewModel.cs" />
     <Compile Include="MainViewModel.cs" />
     <Compile Include="MainWindow.xaml.cs">

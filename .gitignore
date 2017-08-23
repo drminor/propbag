@@ -188,3 +188,7 @@ GeneratedArtifacts/
 _Pvt_Extensions/
 ModelManifest.xml
 /PropBagModelBuilt
+/PropBag.Test/DogTest
+/PropBag.Test/T4/TestSerialization.xml
+/PropBag.Test/T4/PropGen_PropDefs - WorkBase.xml
+/PropBag.Test/T4/PropGen_PropDefs - Copy.xml

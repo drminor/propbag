@@ -69,22 +69,14 @@ namespace PropBagTestApp
             mm.Amount = 145;
             mm.Size = 17.8;
 
-            ReadWithMap(mm, ourData);
+            MapUsingDict();
+
+            //ReadWithMap(mm, ourData);
 
             //ourData["ProductId"] = Guid.NewGuid();
-            ourData["Amount"] = 123;
+            //ourData["Amount"] = 123;
             //ourData["Size"] = 2.09111d;
         }
-
-        private void ReadWithMap(MyModel mm, DtoTestViewModel vm)             
-        {
-            var config = new AutoMapper.MapperConfiguration(cfg => cfg.CreateMap<MyModel, DtoTestViewModel>());
-
-            var mapper = config.CreateMapper();
-
-            mapper.Map<MyModel, DtoTestViewModel>(mm, vm);
-        }
-
 
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
@@ -94,14 +86,5 @@ namespace PropBagTestApp
             m1.Size = (double)ourData["Size"];
         }
 
-        private MyModel GetTestInstance()
-        {
-            MyModel m1 = new MyModel();
-            m1.ProductId = Guid.NewGuid();
-            m1.Amount = 10;
-            m1.Size = 32.44;
-
-            return m1;
-        }
     }
 }
