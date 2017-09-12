@@ -68,43 +68,31 @@ namespace DRM.PropBag
         //    SetIt(v, propertyName);
         //}
 
-        public new object this[string typeName, string propertyName]
-        {
-            get { return base[typeName, propertyName]; }
-            set { base[typeName, propertyName] = value; }
-        }
+        //public new object this[string typeName, string propertyName]
+        //{
+        //    get { return base[typeName, propertyName]; }
+        //    set { base[typeName, propertyName] = value; }
+        //}
 
-        public object this[string propertyName]
-        {
-            get
-            {
-                return GetIt(propertyName);
-            }
-            set
-            {
-                SetIt(value, propertyName, null);
-            }
-        }
+        //new protected object GetIt([CallerMemberName] string propertyName = null)
+        //{
+        //    return base.GetIt(propertyName);
+        //}
 
-        new protected object GetIt([CallerMemberName] string propertyName = null)
-        {
-            return base.GetIt(propertyName);
-        }
+        //new protected T GetIt<T>([CallerMemberName] string propertyName = null)
+        //{
+        //    return base.GetIt<T>(propertyName);
+        //}
 
-        new protected T GetIt<T>([CallerMemberName] string propertyName = null)
-        {
-            return base.GetIt<T>(propertyName);
-        }
+        //new protected void SetIt(object value, [CallerMemberName] string propertyName = null, Type propertyType = null)
+        //{
+        //    base.SetIt(value, propertyName, propertyType);
+        //}
 
-        new protected void SetIt(object value, [CallerMemberName] string propertyName = null)
-        {
-            base.SetIt(value, propertyName, null);
-        }
-
-        new protected void SetIt<T>(T value, [CallerMemberName] string propertyName = null)
-        {
-            base.SetIt<T>(value, propertyName);
-        }
+        //new protected void SetIt<T>(T value, [CallerMemberName] string propertyName = null)
+        //{
+        //    base.SetIt<T>(value, propertyName);
+        //}
 
         /// <summary>
         /// For use when the Property Bag's internal storage is not appropriate. This allows
@@ -116,10 +104,10 @@ namespace DRM.PropBag
         /// <param name="curValue">The current value of the property, must be specified using the ref keyword.</param>
         /// <param name="propertyName"></param>
         /// <returns>True if the value was updated, otherwise false.</returns>
-        new protected bool SetIt<T>(T newValue, ref T curValue, [CallerMemberName]string propertyName = null)
-        {
-            return base.SetIt<T>(newValue, ref curValue, propertyName);
-        }
+        //new protected bool SetIt<T>(T newValue, ref T curValue, [CallerMemberName]string propertyName = null)
+        //{
+        //    return base.SetIt<T>(newValue, ref curValue, propertyName);
+        //}
 
         #endregion
 

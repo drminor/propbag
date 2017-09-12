@@ -12,7 +12,7 @@ using DRM.PropBag.ClassGenerator;
 
 namespace PropBagLib.Tests
 {
-    [TestFixtureAttribute]
+    [TestFixture]
     public class TestT4
     {
 

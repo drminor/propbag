@@ -71,6 +71,7 @@ namespace DRM.PropBag
             if (eventHander == null) return false;
 
             PropertyChangedWithTVals -= eventHander;
+            // TODO: Remove the ActionTable entry.
             return true;
         }
 
@@ -142,7 +143,7 @@ namespace DRM.PropBag
             return hadOnePreviously;
         }
 
-        public object TypedValueAsObject { get { return Value; } }
+        public object TypedValueAsObject { get { return (object) TypedValue; } }
 
         //public NTV ToNTV([CallerMemberName] string propertyName = null)
         //{

@@ -29,7 +29,7 @@ namespace PropBagTestApp
     {
 
         [PropBagInstanceAttribute("ourDataxx", "There is only one ViewModel in this View.")]
-        public DtoTestViewModel ourData
+        public DtoTestViewModel OurData
         {
             get
             {
@@ -53,23 +53,26 @@ namespace PropBagTestApp
             // to a UI Element in this class' view.
             // This same binding could have been created in XAML.
 
-            Binding c = new Binding("[System.Double, Size]");
-            c.Converter = new PropValueConverter();
-            c.ConverterParameter = new TwoTypes(typeof(string), typeof(double));
-            c.TargetNullValue = string.Empty;
+            Binding c = new Binding("[System.Double, Size]")
+            {
+                Converter = new PropValueConverter(),
+                ConverterParameter = new TwoTypes(typeof(string), typeof(double)),
+                TargetNullValue = string.Empty
+            };
             TextBox tb = (TextBox)this.FindName("Sz");
             tb.SetBinding(TextBox.TextProperty, c);
         }
 
-        private void btnRead_Click(object sender, RoutedEventArgs e)
+        private void BtnRead_Click(object sender, RoutedEventArgs e)
         {
-            MyModel mm = new MyModel();
+            MyModel mm = new MyModel
+            {
+                ProductId = Guid.NewGuid(),
+                Amount = 145,
+                Size = 17.8
+            };
 
-            mm.ProductId = Guid.NewGuid();
-            mm.Amount = 145;
-            mm.Size = 17.8;
-
-            MapUsingDict();
+            //MapUsingDict();
 
             //ReadWithMap(mm, ourData);
 
@@ -78,12 +81,14 @@ namespace PropBagTestApp
             //ourData["Size"] = 2.09111d;
         }
 
-        private void btnSave_Click(object sender, RoutedEventArgs e)
+        private void BtnSave_Click(object sender, RoutedEventArgs e)
         {
-            MyModel m1 = new MyModel();
-            m1.ProductId = (Guid)ourData["ProductId"];
-            m1.Amount = (int)ourData["Amount"];
-            m1.Size = (double)ourData["Size"];
+            MyModel m1 = new MyModel
+            {
+                ProductId = (Guid)OurData["ProductId"],
+                Amount = (int)OurData["Amount"],
+                Size = (double)OurData["Size"]
+            };
         }
 
     }

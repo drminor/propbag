@@ -13,13 +13,6 @@ namespace DRM.PropBag
     /// </summary>
     public interface IPubPropBag : IPropBag
     {
-        object this[string propertyName] { get; set; }
-        object GetIt([CallerMemberName] string propertyName = null);
-        T GetIt<T>([CallerMemberName] string propertyName = null);
-
-        void SetIt(object value, [CallerMemberName] string propertyName = null);
-        void SetIt<T>(T value, [CallerMemberName] string propertyName = null);
-        bool SetIt<T>(T newValue, ref T curValue, [CallerMemberName]string propertyName = null);
 
         //void AddToPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, [CallerMemberName] string eventPropertyName = null);
         //void RemoveFromPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, [CallerMemberName] string eventPropertyName = null);
@@ -46,10 +39,6 @@ namespace DRM.PropBag
 
         bool RegisterDoWhenChanged<T>(Action<T, T> doWhenChanged, bool doAfterNotify = false,
             [CallerMemberName] string propertyName = null);
-
-        IDictionary<string, object> GetAllPropertyValues();
-
-        IList<string> GetAllPropertyNames();
 
         void ClearAll();
 

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 
 using DRM.Inpcwv;
+using System.Runtime.CompilerServices;
 
 namespace DRM.PropBag
 {
@@ -13,6 +14,16 @@ namespace DRM.PropBag
     public interface IPropBag : INotifyPropertyChanged, INotifyPropertyChanging, INotifyPropertyChangedWithVals
     {
         PropBagTypeSafetyMode TypeSafetyMode { get; }
+
+        //object this[string propertyName] { get; set; }
+        //object this[string typeName, string propertyName] { get; set; }
+
+        object GetIt([CallerMemberName] string propertyName = null, Type propertyType = null);
+        T GetIt<T>([CallerMemberName] string propertyName = null);
+
+        void SetItWithType(object value, Type propertyType = null, [CallerMemberName] string propertyName = null);
+        void SetIt<T>(T value, [CallerMemberName] string propertyName = null);
+        bool SetIt<T>(T newValue, ref T curValue, [CallerMemberName]string propertyName = null);
 
         bool PropertyExists(string propertyName);
 
@@ -26,5 +37,11 @@ namespace DRM.PropBag
 
         void SubscribeToPropChanged(Action<object, object> doOnChange, string propertyName);
         bool UnSubscribeToPropChanged(Action<object, object> doOnChange, string propertyName);
+
+        IList<string> GetAllPropertyNames();
+        IDictionary<string, object> GetAllPropertyValues();
+        IDictionary<string, ValPlusType> GetAllPropNamesAndTypes();
+
+        
     }
 }

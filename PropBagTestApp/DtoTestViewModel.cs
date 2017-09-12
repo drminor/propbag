@@ -15,7 +15,7 @@ using System.Drawing;
 
 namespace PropBagTestApp
 {
-    public class DtoTestViewModel : PropBag, INotifyPropertyChanged, INotifyPropertyChanging
+    public class DtoTestViewModel : PubPropBag, INotifyPropertyChanged, INotifyPropertyChanging
     {
 
         PropModel _pm;

@@ -15,7 +15,7 @@ using AutoMapper;
 using AutoMapper.Configuration.Conventions;
 using AutoMapper.Collection;
 using AutoMapper.EquivalencyExpression;
-
+using System.Runtime.Serialization;
 
 namespace PropBagTestApp
 {
@@ -52,10 +52,12 @@ namespace PropBagTestApp
 
         private MyModel GetTestInstance()
         {
-            MyModel m1 = new MyModel();
-            m1.ProductId = Guid.NewGuid();
-            m1.Amount = 10;
-            m1.Size = 32.44;
+            MyModel m1 = new MyModel
+            {
+                ProductId = Guid.NewGuid(),
+                Amount = 10,
+                Size = 32.44
+            };
 
             return m1;
         }
@@ -104,12 +106,17 @@ namespace PropBagTestApp
         }
     }
 
+   [Serializable]
     public class AList : Dictionary<string, object>
     {
+        public AList() { }
+
         public static AList Create()
         {
             AList result = new AList();
-            result.Add("ProductId", Guid.NewGuid());
+
+            Guid g = Guid.NewGuid();
+            result.Add("ProductId", g);
             int a = 32;
             result.Add("Amount", a);
 
@@ -119,6 +126,8 @@ namespace PropBagTestApp
 
             return result;
         }
+
+        protected AList(SerializationInfo info, StreamingContext context) : base(info, context) { }
     }
 }
 

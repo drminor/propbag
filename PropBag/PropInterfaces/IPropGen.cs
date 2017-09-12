@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
 
 using DRM.Inpcwv;
 
@@ -33,7 +34,7 @@ namespace DRM.PropBag
 
         object Value { get; }
 
-        NTV ToNTV(string propertyName);
+        ValPlusType ValuePlusType();
 
         void CleanUp();
 

@@ -5,6 +5,7 @@ using System.Threading;
 using System.Reflection;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Linq;
 
 
 using DRM.Inpcwv;
@@ -78,7 +79,8 @@ namespace DRM.PropBag
 
         public PropBagBase(byte dummy) { } // This is called when reflection is used to discover the methods and properties.
 
-        public PropBagBase() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered, null) { }
+        //public PropBagBase() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered, null) { }
+        public PropBagBase() : this(PropBagTypeSafetyMode.OnlyTypedAccess, null) { }
 
         public PropBagBase(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
 
@@ -216,39 +218,34 @@ namespace DRM.PropBag
         //    }
         //}
 
+        protected object this[string propertyName]
+        {
+            get
+            {
+                return GetIt(propertyName);
+            }
+            set
+            {
+                SetItWithType(value, null, propertyName);
+            }
+        }
+
         protected object this[string typeName, string propertyName]
         {
             get
             {
-                IPropGen genProp = GetGenProp(propertyName, ThePropFactory.ProvidesStorage);
-
-                Type type = Type.GetType(typeName);
-
-                if (!genProp.TypeIsSolid)
-                {
-                    MakeTypeSolid(ref genProp, type, propertyName);
-                    tVals[propertyName] = genProp;
-                }
-                else
-                {
-                    if (type != genProp.Type)
-                    {
-                        throw new ApplicationException(string.Format("Attempting to set property: {0} whose type is {1}, with a call whose type parameter is {2} is invalid.", propertyName, genProp.Type.ToString(), type.ToString()));
-                    }
-                }
-                // This uses reflection.
-                return genProp.Value;
+                return GetIt(propertyName, Type.GetType(propertyName));
             }
             set
             {
                 Type type = Type.GetType(typeName);
-                SetIt(value, propertyName, type);
+                SetItWithType(value, type, propertyName);
             }
         }
 
-        protected object GetIt(string propertyName)
+        public object GetIt([CallerMemberName] string propertyName = null, Type propertyType = null)
         {
-            if (OnlyTypedAccess)
+            if (propertyType == null && OnlyTypedAccess)
             {
                 throw new InvalidOperationException("Attempt to access property using this method is not allowed when TypeSafetyMode is 'OnlyTypedAccess.'");
             }
@@ -257,31 +254,52 @@ namespace DRM.PropBag
             // either by calling AddProp or SetIt.
             IPropGen genProp = GetGenProp(propertyName, ThePropFactory.ProvidesStorage);
 
+            if(propertyType != null)
+            {
+                if (!genProp.TypeIsSolid)
+                {
+                    MakeTypeSolid(ref genProp, propertyType, propertyName);
+                    tVals[propertyName] = genProp;
+                }
+                else
+                {
+                    if (propertyType != genProp.Type)
+                    {
+                        throw new InvalidOperationException(string.Format("Attempting to get property: {0} whose type is {1}, with a call whose type parameter is {2} is invalid.", propertyName, genProp.Type.ToString(), propertyType.ToString()));
+                    }
+                }
+            }
+
             // This uses reflection.
             return genProp.Value;
         }
 
-        protected T GetIt<T>(string propertyName)
+        public T GetIt<T>([CallerMemberName] string propertyName = null)
         {
             return (T) GetIProp<T>(propertyName).Value;
         }
 
-        protected IProp<T> GetIProp<T>(string propertyName)
+        public IProp<T> GetIProp<T>([CallerMemberName] string propertyName = null)
         {
             bool hasStore = ThePropFactory.ProvidesStorage;
             IPropGen genProp = GetGenProp(propertyName, hasStore);
             return CheckTypeInfo<T>(genProp, propertyName, tVals);
         }
 
+        public void SetItWithNoType(object value, [CallerMemberName]string propertyName = null)
+        {
+            SetItWithType(value, null, propertyName);
+        }
+
         /// <summary>
         /// Set's the value of the property with optional type information.
         /// </summary>
         /// <param name="value"></param>
+        /// <param name="propertyType">If unknown, set this parameter to null.</param>
         /// <param name="propertyName"></param>
-        /// <param name="type">If unknown, set this parameter to null.</param>
-        protected void SetIt(object value, string propertyName, Type type)
+        public void SetItWithType(object value, Type propertyType, [CallerMemberName]string propertyName = null)
         {
-            if (OnlyTypedAccess)
+            if (propertyType == null && OnlyTypedAccess)
             {
                 throw new InvalidOperationException("Attempt to access property using this method is not allowed when TypeSafetyMode is 'OnlyTypedAccess.'");
             }
@@ -310,10 +328,10 @@ namespace DRM.PropBag
                     try
                     {
                         Type newType;
-                        if (type != null)
+                        if (propertyType != null)
                         {
                             // Use the type provided by the caller.
-                            newType = type;
+                            newType = propertyType;
                         }
                         else
                         {
@@ -332,10 +350,10 @@ namespace DRM.PropBag
                 else
                 {
                     Type newType;
-                    if (type != null)
+                    if (propertyType != null)
                     {
                         // Use the type provided by the caller.
-                        newType = type;
+                        newType = propertyType;
                     }
                     else
                     {
@@ -362,7 +380,7 @@ namespace DRM.PropBag
             setProDel(value, this, propertyName, genProp);
         }
 
-        protected void SetIt<T>(T value, string propertyName)
+        public void SetIt<T>(T value, [CallerMemberName]string propertyName = null)
         {
             IPropGen genProp;
 
@@ -400,7 +418,7 @@ namespace DRM.PropBag
         /// <param name="curValue">The current value of the property, must be specified using the ref keyword.</param>
         /// <param name="propertyName"></param>
         /// <returns>True if the value was updated, otherwise false.</returns>
-        protected bool SetIt<T>(T newValue, ref T curValue, [CallerMemberName]string propertyName = null)
+        public bool SetIt<T>(T newValue, ref T curValue, [CallerMemberName]string propertyName = null)
         {
             IPropGen genProp;
 
@@ -611,16 +629,24 @@ namespace DRM.PropBag
         /// <returns>True, if there was an existing Action in place for this property.</returns>
         protected bool RegisterDoWhenChanged<T>(Action<T, T> doWhenChanged, bool doAfterNotify, string propertyName)
         {
-
             IProp<T> prop = GetIProp<T>(propertyName);
             //IProp<T> prop = GetPropDef<T>(propertyName);
             return prop.UpdateDoWhenChangedAction(doWhenChanged, doAfterNotify);
         }
 
+        public IDictionary<string, ValPlusType> GetAllPropNamesAndTypes()
+        {
+            IEnumerable<KeyValuePair<string, ValPlusType>> list =
+                tVals.Select(x => new KeyValuePair<string, ValPlusType>(x.Key, x.Value.ValuePlusType())).ToList();
+
+            IDictionary<string, ValPlusType> result = list.ToDictionary(pair => pair.Key, pair => pair.Value);
+            return result; 
+        }
+
         /// <summary>
         /// Returns all of the values in dictionary of objects, keyed by PropertyName.
         /// </summary>
-        protected IDictionary<string, object> GetAllPropertyValues()
+        public IDictionary<string, object> GetAllPropertyValues()
         {
             // This uses reflection.
             Dictionary<string, object> result = new Dictionary<string, object>();
@@ -632,7 +658,7 @@ namespace DRM.PropBag
             return result;
         }
 
-        protected IList<string> GetAllPropertyNames()
+        public IList<string> GetAllPropertyNames()
         {
             List<string> result = new List<string>();
 
@@ -877,6 +903,8 @@ namespace DRM.PropBag
             }
         }
 
+        // TODO: Consider create a factory and caching these centrally for the entire
+        // application domain.
         private DoSetDelegate GetPropSetterDelegate(IPropGen genProp)
         {
             Type typeOfThisProperty = genProp.Type;

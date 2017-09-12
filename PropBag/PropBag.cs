@@ -43,58 +43,48 @@ namespace DRM.PropBag
 
         #region Propety Access Methods 
 
-        public new object this[string typeName, string propertyName]
-        {
-            get { return base[typeName, propertyName]; }
-            set { base[typeName, propertyName] = value; }
-        }
+        //public new object this[string typeName, string propertyName]
+        //{
+        //    get { return base[typeName, propertyName]; }
+        //    set { base[typeName, propertyName] = value; }
+        //}
 
-        public object this[string propertyName]
-        {
-            get
-            {
-                return GetIt(propertyName);
-            }
-            set
-            {
-                SetIt(value, propertyName, null);
-            }
-        }
 
-        new public object GetIt([CallerMemberName] string propertyName = null)
-        {
-            return base.GetIt(propertyName);
-        }
 
-        new public T GetIt<T>([CallerMemberName] string propertyName = null)
-        {
-            return base.GetIt<T>(propertyName);
-        }
+        //new public object GetIt([CallerMemberName] string propertyName = null)
+        //{
+        //    return base.GetIt(propertyName);
+        //}
 
-        new public void SetIt(object value, [CallerMemberName] string propertyName = null)
-        {
-            base.SetIt(value, propertyName, null);
-        }
+        //new public T GetIt<T>([CallerMemberName] string propertyName = null)
+        //{
+        //    return base.GetIt<T>(propertyName);
+        //}
 
-        new public void SetIt<T>(T value, [CallerMemberName] string propertyName = null)
-        {
-            base.SetIt<T>(value, propertyName);
-        }
+        //new public void SetIt(object value, [CallerMemberName] string propertyName = null, Type propertyType = null)
+        //{
+        //    base.SetIt(value, propertyName, propertyType);
+        //}
 
-        /// <summary>
-        /// For use when the Property Bag's internal storage is not appropriate. This allows
-        /// the property implementor to use a backing store of their choice.
-        /// The property must be registered with a call to AddPropNoStore.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="newValue">The new value to use to update the property. No operation will be performed if this value is the same as the current value.</param>
-        /// <param name="curValue">The current value of the property, must be specified using the ref keyword.</param>
-        /// <param name="propertyName"></param>
-        /// <returns>True if the value was updated, otherwise false.</returns>
-        new public bool SetIt<T>(T newValue, ref T curValue, [CallerMemberName]string propertyName = null)
-        {
-            return base.SetIt<T>(newValue, ref curValue, propertyName);
-        }
+        //new public void SetIt<T>(T value, [CallerMemberName] string propertyName = null)
+        //{
+        //    base.SetIt<T>(value, propertyName);
+        //}
+
+        ///// <summary>
+        ///// For use when the Property Bag's internal storage is not appropriate. This allows
+        ///// the property implementor to use a backing store of their choice.
+        ///// The property must be registered with a call to AddPropNoStore.
+        ///// </summary>
+        ///// <typeparam name="T"></typeparam>
+        ///// <param name="newValue">The new value to use to update the property. No operation will be performed if this value is the same as the current value.</param>
+        ///// <param name="curValue">The current value of the property, must be specified using the ref keyword.</param>
+        ///// <param name="propertyName"></param>
+        ///// <returns>True if the value was updated, otherwise false.</returns>
+        //new public bool SetIt<T>(T newValue, ref T curValue, [CallerMemberName]string propertyName = null)
+        //{
+        //    return base.SetIt<T>(newValue, ref curValue, propertyName);
+        //}
 
         #endregion
 
@@ -176,15 +166,15 @@ namespace DRM.PropBag
         /// <summary>
         /// Returns all of the values in dictionary of objects, keyed by PropertyName.
         /// </summary>
-        new public IDictionary<string, object> GetAllPropertyValues()
-        {
-            return base.GetAllPropertyValues();
-        }
+        //new public IDictionary<string, object> GetAllPropertyValues()
+        //{
+        //    return base.GetAllPropertyValues();
+        //}
 
-        new public IList<string> GetAllPropertyNames()
-        {
-            return base.GetAllPropertyNames();
-        }
+        //new public IList<string> GetAllPropertyNames()
+        //{
+        //    return base.GetAllPropertyNames();
+        //}
 
         #endregion
 

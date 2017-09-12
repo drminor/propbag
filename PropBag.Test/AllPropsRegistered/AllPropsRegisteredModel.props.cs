@@ -40,7 +40,7 @@ namespace PropBagLib.Tests
 			}
 			set
 			{
-				SetIt<object>(value);
+				SetIt<object>(value, nameof(PropObject));
 			}
 		}  
 	  
@@ -52,7 +52,7 @@ namespace PropBagLib.Tests
 			}
 			set
 			{
-				SetIt<string>(value);
+				SetIt<string>(value, nameof(PropString));
 			}
 		}  
 	  
@@ -64,7 +64,7 @@ namespace PropBagLib.Tests
 			}
 			set
 			{
-				SetIt<string>(value);
+				SetIt<string>(value, nameof(PropStringCallDoAfter));
 			}
 		}  
 	  
@@ -76,7 +76,7 @@ namespace PropBagLib.Tests
 			}
 			set
 			{
-				SetIt<string>(value);
+				SetIt<string>(value, nameof(PropStringUseRefComp));
 			}
 		}  
 	  
