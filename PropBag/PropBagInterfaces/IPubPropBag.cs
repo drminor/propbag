@@ -13,9 +13,7 @@ namespace DRM.PropBag
     /// </summary>
     public interface IPubPropBag : IPropBag
     {
-
-        //void AddToPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, [CallerMemberName] string eventPropertyName = null);
-        //void RemoveFromPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, [CallerMemberName] string eventPropertyName = null);
+        object this[string typeName, string propertyName] { get; set; }
 
         IProp<T> AddProp<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
             Func<T,T,bool> comparer = null, object extraInfo = null, T initalValue = default(T));
@@ -43,7 +41,6 @@ namespace DRM.PropBag
         void ClearAll();
 
         void ClearEventSubscribers();
-
     }
 
 }

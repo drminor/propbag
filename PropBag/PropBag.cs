@@ -43,48 +43,11 @@ namespace DRM.PropBag
 
         #region Propety Access Methods 
 
-        //public new object this[string typeName, string propertyName]
-        //{
-        //    get { return base[typeName, propertyName]; }
-        //    set { base[typeName, propertyName] = value; }
-        //}
-
-
-
-        //new public object GetIt([CallerMemberName] string propertyName = null)
-        //{
-        //    return base.GetIt(propertyName);
-        //}
-
-        //new public T GetIt<T>([CallerMemberName] string propertyName = null)
-        //{
-        //    return base.GetIt<T>(propertyName);
-        //}
-
-        //new public void SetIt(object value, [CallerMemberName] string propertyName = null, Type propertyType = null)
-        //{
-        //    base.SetIt(value, propertyName, propertyType);
-        //}
-
-        //new public void SetIt<T>(T value, [CallerMemberName] string propertyName = null)
-        //{
-        //    base.SetIt<T>(value, propertyName);
-        //}
-
-        ///// <summary>
-        ///// For use when the Property Bag's internal storage is not appropriate. This allows
-        ///// the property implementor to use a backing store of their choice.
-        ///// The property must be registered with a call to AddPropNoStore.
-        ///// </summary>
-        ///// <typeparam name="T"></typeparam>
-        ///// <param name="newValue">The new value to use to update the property. No operation will be performed if this value is the same as the current value.</param>
-        ///// <param name="curValue">The current value of the property, must be specified using the ref keyword.</param>
-        ///// <param name="propertyName"></param>
-        ///// <returns>True if the value was updated, otherwise false.</returns>
-        //new public bool SetIt<T>(T newValue, ref T curValue, [CallerMemberName]string propertyName = null)
-        //{
-        //    return base.SetIt<T>(newValue, ref curValue, propertyName);
-        //}
+        protected new object this[string typeName, string propertyName]
+        {
+            get { return base[typeName, propertyName]; }
+            set { base[typeName, propertyName] = value; }
+        }
 
         #endregion
 
@@ -162,46 +125,6 @@ namespace DRM.PropBag
             AddProp<T>(propertyName, pg);
             return pg;
         }
-
-        /// <summary>
-        /// Returns all of the values in dictionary of objects, keyed by PropertyName.
-        /// </summary>
-        //new public IDictionary<string, object> GetAllPropertyValues()
-        //{
-        //    return base.GetAllPropertyValues();
-        //}
-
-        //new public IList<string> GetAllPropertyNames()
-        //{
-        //    return base.GetAllPropertyNames();
-        //}
-
-        #endregion
-
-        #region Methods to Raise Events
-
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        ///// <param name="propertyName">Use "Item[]" if you want to notify the WPF binding system that one of the PropBag properties has changed.</param>
-        //new protected void OnPropertyChanged([CallerMemberName]string propertyName = null)
-        //{
-        //    base.OnPropertyChanged(propertyName);
-        //}
-
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        ///// <param name="propertyName">Use "Item[]" if you want to notify the WPF binding system that one of the PropBag properties is changing.</param>
-        //new protected void OnPropertyChanging([CallerMemberName]string propertyName = null)
-        //{
-        //    base.OnPropertyChanging(propertyName);
-        //}
-
-        //new protected void OnPropertyChangedWithVals(object oldVal, object newVal, [CallerMemberName]string propertyName = null)
-        //{
-        //    base.OnPropertyChangedWithVals(propertyName, oldVal, newVal);
-        //}
 
         #endregion
     }

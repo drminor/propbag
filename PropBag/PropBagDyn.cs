@@ -13,7 +13,11 @@ namespace DRM.PropBag
 {
     public class PropBagDyn : DynamicObject, IPubPropBag
     {
-        PubPropBag propBag;
+        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangingEventHandler PropertyChanging;
+        public event PropertyChangedWithValsHandler PropertyChangedWithVals;
+
+        private PubPropBag propBag;
 
         #region Constructors
 
@@ -107,10 +111,6 @@ namespace DRM.PropBag
 
         #endregion
 
-        public event PropertyChangedEventHandler PropertyChanged;
-        public event PropertyChangingEventHandler PropertyChanging;
-        public event PropertyChangedWithValsHandler PropertyChangedWithVals;
-
         public override bool TrySetMember(SetMemberBinder binder, object value)
         {
             string pName = binder.Name;
@@ -149,8 +149,6 @@ namespace DRM.PropBag
                 return propBag.TypeSafetyMode;
             }
         }
-
-
 
         #region Add Property Methods
 
@@ -216,6 +214,19 @@ namespace DRM.PropBag
         public IDictionary<string, ValPlusType> GetAllPropNamesAndTypes()
         {
             return propBag.GetAllPropNamesAndTypes();
+        }
+
+        public object this[string typeName, string propertyName]
+        {
+            get
+            {
+                return GetIt(propertyName, Type.GetType(propertyName));
+            }
+            set
+            {
+                Type type = Type.GetType(typeName);
+                SetItWithType(value, type, propertyName);
+            }
         }
 
         public object GetIt([CallerMemberName] string propertyName = null, Type propertyType = null)

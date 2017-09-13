@@ -1,24 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
-using System.Reflection;
 
-using DRM.PropBag;
 using DRM.PropBag.ControlModel;
 using DRM.PropBag.ControlsWPF;
 
 using PropBagTestApp.Models;
+
+using AutoMapper;
 
 namespace PropBagTestApp
 {
@@ -28,7 +19,7 @@ namespace PropBagTestApp
     public partial class DtoTest : Window
     {
 
-        [PropBagInstanceAttribute("ourDataxx", "There is only one ViewModel in this View.")]
+        [PropBagInstanceAttribute("OurData", "There is only one ViewModel in this View.")]
         public DtoTestViewModel OurData
         {
             get
@@ -74,7 +65,7 @@ namespace PropBagTestApp
 
             //MapUsingDict();
 
-            //ReadWithMap(mm, ourData);
+            ReadWithMap(mm, OurData);
 
             //ourData["ProductId"] = Guid.NewGuid();
             //ourData["Amount"] = 123;
@@ -83,12 +74,27 @@ namespace PropBagTestApp
 
         private void BtnSave_Click(object sender, RoutedEventArgs e)
         {
-            MyModel m1 = new MyModel
+            //MyModel m1 = new MyModel
+            //{
+            //    ProductId = (Guid)OurData["ProductId"],
+            //    Amount = (int)OurData["Amount"],
+            //    Size = (double)OurData["Size"]
+            //};
+        }
+
+        private void ReadWithMap(MyModel mm, DtoTestViewModel vm)
+        {
+            GetMapper().Map<MyModel, DtoTestViewModel>(mm, vm);
+        }
+
+        private IMapper _mapper = null;
+        private IMapper GetMapper()
+        {
+            if (_mapper == null)
             {
-                ProductId = (Guid)OurData["ProductId"],
-                Amount = (int)OurData["Amount"],
-                Size = (double)OurData["Size"]
-            };
+                _mapper = new MapperConfiguration(cfg => { }).CreateMapper();
+            }
+            return _mapper;
         }
 
     }

@@ -204,20 +204,6 @@ namespace DRM.PropBag
 
         #region Property Access Methods
 
-        //protected NTV this[string propertyName, byte dummy]
-        //{
-        //    get
-        //    {
-        //        IPropGen a =  GetGenProp(propertyName);
-        //        return new NTV(propertyName, a.Type, ((IProp)a).TypedValueAsObject);
-        //    }
-
-        //    set
-        //    {
-        //        PSetIt(value.Value, value.PropName);
-        //    }
-        //}
-
         protected object this[string propertyName]
         {
             get

@@ -1,23 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using System.ComponentModel;
-
-using DRM.PropBag;
-using DRM.Inpcwv;
-using DRM.PropBag.ControlsWPF;
+﻿using DRM.PropBag;
 using DRM.PropBag.ControlModel;
-
-using System.Drawing;
 
 namespace PropBagTestApp
 {
-    public class DtoTestViewModel : PubPropBag, INotifyPropertyChanged, INotifyPropertyChanging
+    public class DtoTestViewModel : PropBagDyn
     {
-
         PropModel _pm;
 
         public DtoTestViewModel() { } // Shows that if no default constructor is available, the one that takes a single byte is use.
@@ -38,25 +25,9 @@ namespace PropBagTestApp
             // Save a reference to the model used to defined our properties.
             _pm = pm;
         }
-
         private void DoWhenProductIdChanges(bool oldVal, bool newVal)
         {
-            
+            System.Diagnostics.Debug.WriteLine("ProductId was changed.");
         }
-
-        public Guid ProductId
-        {
-            get
-            {
-                return (Guid)this["ProductId"];
-            }
-            set
-            {
-                this["ProductId"] = value;
-            }
-        }
-        public int Amount { get; set; }
-        public double Size { get; set; }
-
     }
 }

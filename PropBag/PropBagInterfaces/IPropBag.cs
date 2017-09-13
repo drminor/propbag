@@ -15,9 +15,6 @@ namespace DRM.PropBag
     {
         PropBagTypeSafetyMode TypeSafetyMode { get; }
 
-        //object this[string propertyName] { get; set; }
-        //object this[string typeName, string propertyName] { get; set; }
-
         object GetIt([CallerMemberName] string propertyName = null, Type propertyType = null);
         T GetIt<T>([CallerMemberName] string propertyName = null);
 
