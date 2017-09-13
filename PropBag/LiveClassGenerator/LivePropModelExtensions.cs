@@ -21,9 +21,9 @@ namespace DRM.PropBag.LiveClassGenerator
         /// <typeparam name="T">The Type that will receive the new get and set accessors.</typeparam>
         /// <param name="propBag">The PropBag intance from which to get the property information.</param>
         /// <returns>List of System.Reflection.MethodInfo records.</returns>
-        public static IEnumerable<AutoMapper.ProxyPropertyInfo> BuildPropertyInfoList<T>(this IPropBag propBag) where T: IPropBag
+        public static IEnumerable<MemberInfo> BuildPropertyInfoList<T>(this IPropBag propBag) where T: IPropBag
         {
-            ICollection<AutoMapper.ProxyPropertyInfo> result = new List<AutoMapper.ProxyPropertyInfo>();
+            ICollection<MemberInfo> result = new List<MemberInfo>();
 
             Type targetType = typeof(T);
 
@@ -49,7 +49,7 @@ namespace DRM.PropBag.LiveClassGenerator
                 //AutoMapper.ProxyPropertyInfo pi = new AutoMapper.ProxyPropertyInfo(propertyName, propertyType, targetType,
                 //    AutoMapper.ProxyPropHelpers.GetGetter(getterMethodInfo), AutoMapper.ProxyPropHelpers.GetSetter(setterMethodInfo));
 
-                AutoMapper.ProxyPropertyInfo pi = new AutoMapper.ProxyPropertyInfo(propertyName, propertyType, targetType,
+                ProxyPropertyInfo pi = new ProxyPropertyInfo(propertyName, propertyType, targetType,
                     getter, setter);
 
                 result.Add(pi);
@@ -81,31 +81,31 @@ namespace DRM.PropBag.LiveClassGenerator
             return result;
         }
 
-        //public static IEnumerable<AutoMapper.ProxyPropertyInfo> BuildPropertyInfoList2<T>(this IPropBag propBag) where T : IPropBag
-        //{
-        //    ICollection<AutoMapper.ProxyPropertyInfo> result = new List<AutoMapper.ProxyPropertyInfo>();
+        public static IEnumerable<ProxyPropertyInfo> BuildPropertyInfoList2<T>(this IPropBag propBag) where T : IPropBag
+        {
+            ICollection<ProxyPropertyInfo> result = new List<ProxyPropertyInfo>();
 
-        //    Type targetType = typeof(T);
+            Type targetType = typeof(T);
 
-        //    foreach (KeyValuePair<string, ValPlusType> kvp in propBag.GetAllPropNamesAndTypes())
-        //    {
-        //        string propertyName = kvp.Key;
-        //        Type propertyType = kvp.Value.Type;
+            foreach (KeyValuePair<string, ValPlusType> kvp in propBag.GetAllPropNamesAndTypes())
+            {
+                string propertyName = kvp.Key;
+                Type propertyType = kvp.Value.Type;
 
-        //        Func<object, object> getter =
-        //            new Func<object, object>((host) => ((IPropBag)host).GetIt(propertyName, propertyType));
+                Func<object, object> getter =
+                    new Func<object, object>((host) => ((IPropBag)host).GetIt(propertyName, propertyType));
 
-        //        Action<object, object> setter =
-        //            new Action<object, object>((host, value) => ((IPropBag)host).SetItWithType(value, propertyType, propertyName));
+                Action<object, object> setter =
+                    new Action<object, object>((host, value) => ((IPropBag)host).SetItWithType(value, propertyType, propertyName));
 
-        //        AutoMapper.ProxyPropertyInfo pi = new AutoMapper.ProxyPropertyInfo(propertyName, propertyType, targetType,
-        //            getter, setter);
+                ProxyPropertyInfo pi = new ProxyPropertyInfo(propertyName, propertyType, targetType,
+                    getter, setter);
 
-        //        result.Add(pi);
-        //    }
+                result.Add(pi);
+            }
 
-        //    return result;
-        //}
+            return result;
+        }
 
 
     }

@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="CreateAtRunTime\CreateAtRunTimeModel.cs" />
     <Compile Include="CreateAtRunTime\TestCreateAtRunTime.cs" />
+    <Compile Include="Dynamic\TestDynamic.cs" />
     <Compile Include="ExtStore\ExtData.cs" />
     <Compile Include="ExtStore\ExtStoreModel.cs" />
     <Compile Include="ExtStore\TestExternalStore.cs" />

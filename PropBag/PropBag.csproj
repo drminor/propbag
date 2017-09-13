@@ -67,6 +67,7 @@
     <Compile Include="LiveClassGenerator\PBDispatcher.cs" />
     <Compile Include="LiveClassGenerator\PropBagPropertyInfo.cs" />
     <Compile Include="Prop.cs" />
+    <Compile Include="PropBagDyn.cs" />
     <Compile Include="PropBagExperimental.cs" />
     <Compile Include="PropBagInterfaces\IPropBag.cs" />
     <Compile Include="PropBagInterfaces\IPubPropBag.cs" />

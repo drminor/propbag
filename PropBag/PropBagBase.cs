@@ -79,8 +79,8 @@ namespace DRM.PropBag
 
         public PropBagBase(byte dummy) { } // This is called when reflection is used to discover the methods and properties.
 
-        //public PropBagBase() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered, null) { }
-        public PropBagBase() : this(PropBagTypeSafetyMode.OnlyTypedAccess, null) { }
+        public PropBagBase() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered, null) { }
+        //public PropBagBase() : this(PropBagTypeSafetyMode.OnlyTypedAccess, null) { }
 
         public PropBagBase(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
 
@@ -286,9 +286,9 @@ namespace DRM.PropBag
             return CheckTypeInfo<T>(genProp, propertyName, tVals);
         }
 
-        public void SetItWithNoType(object value, [CallerMemberName]string propertyName = null)
+        public bool SetItWithNoType(object value, [CallerMemberName]string propertyName = null)
         {
-            SetItWithType(value, null, propertyName);
+            return SetItWithType(value, null, propertyName);
         }
 
         /// <summary>
@@ -297,7 +297,7 @@ namespace DRM.PropBag
         /// <param name="value"></param>
         /// <param name="propertyType">If unknown, set this parameter to null.</param>
         /// <param name="propertyName"></param>
-        public void SetItWithType(object value, Type propertyType, [CallerMemberName]string propertyName = null)
+        public bool SetItWithType(object value, Type propertyType, [CallerMemberName]string propertyName = null)
         {
             if (propertyType == null && OnlyTypedAccess)
             {
@@ -314,11 +314,18 @@ namespace DRM.PropBag
                 if (AllPropsMustBeRegistered)
                     throw;
 
-                genProp = ThePropFactory.CreatePropInferType(value, propertyName, null, true);
+                if (propertyType == null)
+                    genProp = ThePropFactory.CreatePropInferType(value, propertyName, null, true);
+                else
+                {
+                    bool typeIsSolid = !(propertyType == typeof(object));
+                    genProp = ThePropFactory.CreateGenFromObject(propertyType, value, propertyName, null, true, typeIsSolid, null, false, null);
+                }
+
                 AddProp(propertyName, genProp);
 
                 // No point in calling DoSet, it would find that the value is the same and do nothing.
-                return;
+                return true;
             }
 
             if (value != null)
@@ -377,10 +384,10 @@ namespace DRM.PropBag
 
             // This uses reflection on first access.
             DoSetDelegate setProDel = GetPropSetterDelegate(genProp);
-            setProDel(value, this, propertyName, genProp);
+            return setProDel(value, this, propertyName, genProp);
         }
 
-        public void SetIt<T>(T value, [CallerMemberName]string propertyName = null)
+        public bool SetIt<T>(T value, [CallerMemberName]string propertyName = null)
         {
             IPropGen genProp;
 
@@ -400,12 +407,12 @@ namespace DRM.PropBag
                 AddProp(propertyName, genProp);
 
                 // No reason to call DoSet, it will find no change and do nothing.
-                return;
+                return true;
             }
 
             IProp<T> prop = CheckTypeInfo<T>(genProp, propertyName, tVals);
 
-            DoSet(value, propertyName, prop);
+            return DoSet(value, propertyName, prop);
         }
 
         /// <summary>
@@ -673,7 +680,7 @@ namespace DRM.PropBag
 
         #region Private Methods and Properties
 
-        private void DoSet<T>(T newValue, string propertyName, IProp<T> prop)
+        private bool DoSet<T>(T newValue, string propertyName, IProp<T> prop)
         {
             if (!prop.ValueIsDefined)
             {
@@ -683,6 +690,7 @@ namespace DRM.PropBag
 
                 // Raise the standard PropertyChanged event
                 OnPropertyChanged(propertyName);
+                return true; // If it was originally unasigned, then it will always be updated.
             }
             else
             {
@@ -701,6 +709,7 @@ namespace DRM.PropBag
                     // Raise notify events.
                     DoNotifyWork(oldValue, newValue, propertyName, prop);
                 }
+                return !theSame;
             }
         }
 
@@ -970,7 +979,7 @@ namespace DRM.PropBag
 
         #region Generic Method Support
 
-        private delegate void DoSetDelegate(object value, PropBagBase target, string propertyName, object prop);
+        private delegate bool DoSetDelegate(object value, PropBagBase target, string propertyName, object prop);
 
         private DoSetDelegate GetDoSetDelegate(Type typeOfThisValue)
         {
@@ -992,9 +1001,9 @@ namespace DRM.PropBag
         // Method Templates for Property Bag
         static class GenericMethodTemplates
         {
-            private static void DoSetBridge<T>(object value, PropBagBase target, string propertyName, object prop)
+            private static bool DoSetBridge<T>(object value, PropBagBase target, string propertyName, object prop)
             {
-                target.DoSet<T>((T)value, propertyName, (IProp<T>)prop);
+                return target.DoSet<T>((T)value, propertyName, (IProp<T>)prop);
             }
         }
 

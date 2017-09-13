@@ -21,8 +21,9 @@ namespace DRM.PropBag
         object GetIt([CallerMemberName] string propertyName = null, Type propertyType = null);
         T GetIt<T>([CallerMemberName] string propertyName = null);
 
-        void SetItWithType(object value, Type propertyType = null, [CallerMemberName] string propertyName = null);
-        void SetIt<T>(T value, [CallerMemberName] string propertyName = null);
+        bool SetItWithNoType(object value, [CallerMemberName] string propertyName = null);
+        bool SetItWithType(object value, Type propertyType = null, [CallerMemberName] string propertyName = null);
+        bool SetIt<T>(T value, [CallerMemberName] string propertyName = null);
         bool SetIt<T>(T newValue, ref T curValue, [CallerMemberName]string propertyName = null);
 
         bool PropertyExists(string propertyName);

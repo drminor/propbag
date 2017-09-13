@@ -2,25 +2,42 @@
 using System.Globalization;
 using System.Reflection;
 
-using AutoMapper;
-
 namespace DRM.PropBag.LiveClassGenerator
 {
-    public class PropBagPropertyInfo : PropertyInfo
+    public class ProxyPropertyInfo : PropertyInfo
     {
         Type _hostType;
-        Func<object> _getter;
-        public Action<object,object> _setter;
+        MethodInfo _getter;
+        MethodInfo _setter;
+        Func<object, object> _getterFunc;
+        Action<object, object> _setterAction;
+        bool _useMethodInfos;
 
-        public PropBagPropertyInfo(string name, Type propertyType, Type hostType,
-            Func<object> getter,
-            Action<object,object> setter)
+
+        public ProxyPropertyInfo(string name, Type propertyType, Type hostType,
+            Func<object, object> getterFunc,
+            Action<object, object> setterAction)
         {
+            Name = name;
+            PropertyType = propertyType;
+            _hostType = hostType;
+            _getterFunc = getterFunc;
+            _setterAction = setterAction;
+            _useMethodInfos = false;
+        }
+
+        public ProxyPropertyInfo(string name, Type propertyType, Type hostType,
+            MethodInfo getter,
+            MethodInfo setter)
+        {
+            if (!getter.IsStatic || !setter.IsStatic) throw new ArgumentException("Both the getter and setter MethodInfo arguments must refer to a static method.");
+
             Name = name;
             PropertyType = propertyType;
             _hostType = hostType;
             _getter = getter;
             _setter = setter;
+            _useMethodInfos = true;
         }
 
         public override Type PropertyType { get; }
@@ -45,21 +62,39 @@ namespace DRM.PropBag.LiveClassGenerator
 
         public override object[] GetCustomAttributes(bool inherit)
         {
-            return new object[] { new ProxyPropertyAttribute("Test") };
+            return new Attribute[] { new AutoMapper.ExtraPropertyAttribute("Test") };
+        }
+
+        public T GetCustomAttribute<T>() where T : System.Attribute
+        {
+            if (typeof(T) == typeof(AutoMapper.ExtraPropertyAttribute))
+            {
+                return new AutoMapper.ExtraPropertyAttribute("Default, System Provided Attribute") as T;
+            }
+            return null;
         }
 
         public override object[] GetCustomAttributes(Type attributeType, bool inherit)
         {
-            if(attributeType == typeof(ProxyPropertyAttribute))
+            if (attributeType == typeof(AutoMapper.ExtraPropertyAttribute))
             {
-                return new Attribute[] { new ProxyPropertyAttribute("Test") };
+                return new Attribute[] { new AutoMapper.ExtraPropertyAttribute("Default, System Provided Attribute") };
             }
-            return new object[0];
+            return new Attribute[0];
         }
 
+        // TODO: Make this a lazy singleton
         public override MethodInfo GetGetMethod(bool nonPublic)
         {
-            return _getter.Method;
+            if (_useMethodInfos)
+            {
+                Func<object, object> temp = new Func<object, object>((host) => GetValue(host, null));
+                return temp.Method; // Getter.Method; 
+            }
+            else
+            {
+                return _getterFunc.Method;
+            }
         }
 
         public override ParameterInfo[] GetIndexParameters()
@@ -67,26 +102,51 @@ namespace DRM.PropBag.LiveClassGenerator
             return new ParameterInfo[0];
         }
 
+        // TODO: Make this a lazy singleton
         public override MethodInfo GetSetMethod(bool nonPublic)
         {
-            return _setter.Method;
+            if (_useMethodInfos)
+            {
+                Action<object, object> temp = new Action<object, object>((host, value) => SetValue(host, value, null));
+                return temp.Method; // Setter.Method;
+            }
+            else
+            {
+                return _setterAction.Method;
+            }
+
         }
 
         public override object GetValue(object obj, BindingFlags invokeAttr, Binder binder, object[] index, CultureInfo culture)
         {
-            object[] parameters = new object[1] { obj };
-            return _getter.Method.Invoke(_getter.Target, invokeAttr, binder, parameters, culture);
+            if (_useMethodInfos)
+            {
+                object[] parameters = new object[3] { obj, Name, PropertyType };
+                return _getter.Invoke(null, invokeAttr, binder, parameters, culture);
+            }
+            else
+            {
+                return _getterFunc(obj);
+            }
         }
 
         public override bool IsDefined(Type attributeType, bool inherit)
         {
-            return false;
+            return attributeType == typeof(AutoMapper.ExtraPropertyAttribute);
         }
 
         public override void SetValue(object obj, object value, BindingFlags invokeAttr, Binder binder, object[] index, CultureInfo culture)
         {
-            _setter.Method.Invoke(_setter.Target, invokeAttr, binder, new object[] { obj, value }, culture);
+            if (_useMethodInfos)
+            {
+                object[] parameters = new object[4] { obj, Name, PropertyType, value };
+                _setter.Invoke(null, invokeAttr, binder, parameters, culture);
+            }
+            else
+            {
+                _setterAction(obj, value);
+            }
         }
-    }
 
+    }
 }

@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using DRM.Inpcwv;
+﻿using DRM.Inpcwv;
 using DRM.PropBag;
-
 using NUnit.Framework;
+using System;
 
 namespace PropBagLib.Tests
 {
@@ -32,7 +26,7 @@ namespace PropBagLib.Tests
         }
 
         [OneTimeTearDown]
-        public void destroy()
+        public void Destroy()
         {
             mod1 = null;
         }
@@ -44,9 +38,10 @@ namespace PropBagLib.Tests
         [Test]
         public void ShouldUpdateBool()
         {
-            mod1 = new LooseModel(PropBagTypeSafetyMode.Loose);
-
-            mod1.PropBool = true;
+            mod1 = new LooseModel(PropBagTypeSafetyMode.Loose)
+            {
+                PropBool = true
+            };
             Assert.That(mod1.PropBool, Is.True, "PropBool did not get updated.");
         }
 
@@ -54,7 +49,7 @@ namespace PropBagLib.Tests
         public void ShouldUpdateString()
         {
             mod1 = new LooseModel(PropBagTypeSafetyMode.Loose);
-            mod1.PropStringChanged += mod1_PropStringChanged;
+            mod1.PropStringChanged += Mod1_PropStringChanged;
 
             mod1.PropString = "Test2";
 
@@ -67,9 +62,10 @@ namespace PropBagLib.Tests
         [Test]
         public void ShouldSAndGLooseBool()
         {
-            mod1 = new LooseModel(PropBagTypeSafetyMode.Loose);
-
-            mod1.PropBool = true;
+            mod1 = new LooseModel(PropBagTypeSafetyMode.Loose)
+            {
+                PropBool = true
+            };
 
             bool temp = mod1.PropBool;
             Assert.That(temp, Is.EqualTo(true));
@@ -148,7 +144,7 @@ namespace PropBagLib.Tests
 
         #region Event Handlers
 
-        void mod1_PropStringChanged(object sender, PropertyChangedWithTValsEventArgs<string> e)
+        void Mod1_PropStringChanged(object sender, PropertyChangedWithTValsEventArgs<string> e)
         {
             IProp<string> prop = (IProp<string>)sender;
             string oldVal = e.OldValue;

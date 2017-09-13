@@ -46,26 +46,32 @@ namespace PropBagLib.Tests
         [Test]
         public void WriteXml()
         {
-            PropModel pm = new PropModel();
-            pm.ClassName = "TestOu";
-            pm.DeriveFromPubPropBag = false;
-            pm.DeferMethodRefResolution = false;
-            pm.Namespace = "PropBagLib.Tests";
-            pm.Props = new List<PropItem>();
+            PropModel pm = new PropModel
+            {
+                ClassName = "TestOu",
+                DeriveFromPubPropBag = false,
+                DeferMethodRefResolution = false,
+                Namespace = "PropBagLib.Tests",
+                Props = new List<PropItem>()
+            };
 
-            PropItem p = new PropItem();
-            p.Name = "one";
-            p.Type = "int";
-            p.InitalValueField = new PropIniialValueField("1");
-            p.HasStore = true;
-                        
+            PropItem p = new PropItem
+            {
+                Name = "one",
+                Type = "int",
+                InitalValueField = new PropIniialValueField("1"),
+                HasStore = true
+            };
+
             pm.Props.Add(p);
 
-            p = new PropItem();
-            p.Name = "two";
-            p.Type = "string";
-            p.InitalValueField = new PropIniialValueField("1");
-            p.HasStore = true;
+            p = new PropItem
+            {
+                Name = "two",
+                Type = "string",
+                InitalValueField = new PropIniialValueField("1"),
+                HasStore = true
+            };
 
             pm.Props.Add(p);
 
