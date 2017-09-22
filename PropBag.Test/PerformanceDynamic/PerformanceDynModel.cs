@@ -1,23 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using System.Threading;
+﻿using System.Threading;
 using System.Runtime.CompilerServices;
 
 using System.ComponentModel;
 
+using DRM.TypeSafePropertyBag;
 using DRM.PropBag;
 
 namespace PropBagLib.Tests
 {
-    public partial class PerformanceModel : PropBag
+    public partial class PerformanceDynModel : PropBagDyn
     {
-        static public PerformanceModel Create(PropBagTypeSafetyMode safetyMode)
+        static public PerformanceDynModel Create(PropBagTypeSafetyMode safetyMode)
         {
-            PerformanceModel pm = new PerformanceModel(safetyMode);
+            PerformanceDynModel pm = new PerformanceDynModel(safetyMode);
             pm.AddPropNoStore<int>("PropIntNoStore", null, false, null);
             pm.AddPropNoStore<string>("PropStringNoStore", null, false, null);
 
@@ -69,7 +64,7 @@ namespace PropBagLib.Tests
             }
             set
             {
-                SetIt<int>(value, ref _propIntNoStore);
+                SetIt<int>(value, ref _propIntNoStore, nameof(PropIntNoStore));
             }
         }  
 
@@ -83,23 +78,13 @@ namespace PropBagLib.Tests
             }
             set
             {
-                SetIt(value, ref _propStringNoStore);
+                SetIt(value, ref _propStringNoStore, nameof(PropStringNoStore));
             }
         }
 
-        // For Loose Testing
-        //public new object this[string propertyName, string key]
-        //{
-        //    get { return base[propertyName, key]; }
-        //    set { base[propertyName, key] = value; }
-        //}
-
         protected void OnPropertyChanged2([CallerMemberName]string propertyName = null)
         {
-            PropertyChangedEventHandler handler = Interlocked.CompareExchange(ref PropertyChanged2, null, null);
-
-            if (handler != null)
-                handler(this, new PropertyChangedEventArgs(propertyName));
+            Interlocked.CompareExchange(ref PropertyChanged2, null, null)?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         new public void ClearEventSubscribers()

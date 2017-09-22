@@ -5,11 +5,10 @@
   require-explicit-initial-value="false"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-  xsi:schemaLocation="https://www.swamphillproductions.com/PropBagModel ../../PropBagModel/PropBagModel.xsd">
+  xsi:schemaLocation="https://www.swamphillproductions.com/PropBagModel ../../PropBag/XMLModel/PropBagModel.xsd">
   <namespaces>
     <namespace>System</namespace>
     <namespace>System.Collections.Generic</namespace>
-    <namespace>PropBagLib.Tests</namespace>
   </namespaces>
   <props>
     <prop>

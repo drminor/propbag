@@ -33,6 +33,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AutoMapper, Version=6.1.1.0, Culture=neutral, PublicKeyToken=be96cd2c38ef1005, processorArchitecture=MSIL">
+      <HintPath>..\packages\AutoMapper.6.1.1\lib\net45\AutoMapper.dll</HintPath>
+    </Reference>
     <Reference Include="nunit.framework, Version=3.8.1.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
       <HintPath>..\packages\NUnit.3.8.1\lib\net45\nunit.framework.dll</HintPath>
     </Reference>
@@ -58,6 +61,18 @@
       <DependentUpon>ExtStoreModel.props.tt</DependentUpon>
     </Compile>
     <Compile Include="FileUtils.cs" />
+    <Compile Include="OnlyTypedAccess\OnlyTypedAccessModel.props.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>OnlyTypedAccessModel.props.tt</DependentUpon>
+    </Compile>
+    <Compile Include="PerformanceDynamic\PerformanceDynModel.cs" />
+    <Compile Include="PerformanceDynamic\PerformanceDynModel.props.cs">
+      <DependentUpon>PerformanceDynModel.props.tt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="Performance\PerformanceModel.cs" />
     <Compile Include="Performance\PerformanceModel.props.cs">
       <DependentUpon>PerformanceModel.props.tt</DependentUpon>
@@ -67,7 +82,6 @@
     </Compile>
     <Compile Include="Loose\LooseModel.cs" />
     <Compile Include="OnlyTypedAccess\OnlyTypedAccessModel.cs" />
-    <Compile Include="OnlyTypedAccess\OnlyTypedAccessModel.props.cs" />
     <Compile Include="Loose\TestLoose.cs" />
     <Compile Include="OnlyTypedAccess\TestOnlyTypedAccess.cs" />
     <Compile Include="AllPropsRegistered\TestAllPropsRegistered.cs" />
@@ -79,8 +93,21 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="Loose\LooseModel.props.cs" />
+    <Compile Include="PerformanceDynamic\TestPerformanceDynamic.cs" />
     <Compile Include="Performance\TestPerformance.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Content Include="OnlyTypedAccess\OnlyTypedAccessModel_PropDefs.xml" />
+    <Content Include="OnlyTypedAccess\OnlyTypedAccessModel.props.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>OnlyTypedAccessModel.props.cs</LastGenOutput>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="PerformanceDynamic\PerformanceDynModel.props.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>PerformanceDynModel.props.cs</LastGenOutput>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="PerformanceDynamic\PerformanceDynModel_PropDefs.xml" />
     <Content Include="PubPropBag\PubPropBagModel_PropDefs.xml" />
     <Content Include="T4\PropGen_PropDefs.xml">
       <SubType>Designer</SubType>
@@ -105,13 +132,13 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\NotifyPropChangedWithVals\Inpcwv.csproj">
-      <Project>{18580a49-4d08-4b0d-9a2e-4ed38891c63b}</Project>
-      <Name>Inpcwv</Name>
-    </ProjectReference>
     <ProjectReference Include="..\PropBag\PropBag.csproj">
       <Project>{7387b893-fbdc-4b9c-ac9e-0b56388b46c1}</Project>
       <Name>PropBag</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TypeSafePropertyBag\TypeSafePropertyBag.csproj">
+      <Project>{bbb1e311-374e-4c91-a313-1667d83767db}</Project>
+      <Name>TypeSafePropertyBag</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

@@ -43,9 +43,8 @@
     <Reference Include="AgileObjects.ReadableExpressions, Version=1.9.1.0, Culture=neutral, PublicKeyToken=9f54ad81db69da8e, processorArchitecture=MSIL">
       <HintPath>..\packages\AgileObjects.ReadableExpressions.1.9.1\lib\net40\AgileObjects.ReadableExpressions.dll</HintPath>
     </Reference>
-    <Reference Include="AutoMapper, Version=6.2.0.0, Culture=neutral, PublicKeyToken=be96cd2c38ef1005, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\AutoMapper\src\AutoMapper\obj\Debug\net45\AutoMapper.dll</HintPath>
+    <Reference Include="AutoMapper, Version=6.1.1.0, Culture=neutral, PublicKeyToken=be96cd2c38ef1005, processorArchitecture=MSIL">
+      <HintPath>..\packages\AutoMapper.6.1.1\lib\net45\AutoMapper.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -67,6 +66,14 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Page Include="DtoTestEmit.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="DtoTestExtra.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="DtoTest.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -79,9 +86,18 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="PropBagModuleBuilderProvider.cs" />
+    <Compile Include="DtoTestEmit.xaml.cs">
+      <DependentUpon>DtoTestEmit.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="DtoTestExtra.xaml.cs">
+      <DependentUpon>DtoTestExtra.xaml</DependentUpon>
+    </Compile>
     <Compile Include="DtoTest.xaml.cs">
       <DependentUpon>DtoTest.xaml</DependentUpon>
     </Compile>
+    <Compile Include="DtoTestViewModelEmit.cs" />
+    <Compile Include="DtoTestViewModelExtra.cs" />
     <Compile Include="DtoTestViewModel.cs" />
     <Compile Include="MainViewModel.cs" />
     <Compile Include="MainWindow.xaml.cs">
@@ -119,9 +135,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\NotifyPropChangedWithVals\Inpcwv.csproj">
-      <Project>{18580a49-4d08-4b0d-9a2e-4ed38891c63b}</Project>
-      <Name>Inpcwv</Name>
+    <ProjectReference Include="..\AutoMapperSupport\AutoMapperSupport.csproj">
+      <Project>{10cf1c6f-f877-49a8-8678-6947f55e6920}</Project>
+      <Name>AutoMapperSupport</Name>
     </ProjectReference>
     <ProjectReference Include="..\PropBagControlsWPF\PropBagControlsWPF.csproj">
       <Project>{9bee9979-9812-4675-8f97-a4dd1e7dba5f}</Project>
@@ -130,6 +146,14 @@
     <ProjectReference Include="..\PropBag\PropBag.csproj">
       <Project>{7387b893-fbdc-4b9c-ac9e-0b56388b46c1}</Project>
       <Name>PropBag</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TypeSafePropertyBag\TypeSafePropertyBag.csproj">
+      <Project>{bbb1e311-374e-4c91-a313-1667d83767db}</Project>
+      <Name>TypeSafePropertyBag</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\WrapperGenLib\WrapperGenLib.csproj">
+      <Project>{f711fc98-af97-4041-a892-a3af78fa96ad}</Project>
+      <Name>WrapperGenLib</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

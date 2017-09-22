@@ -5,7 +5,7 @@ using NUnit.Framework;
 
 
 using DRM.PropBag;
-using DRM.Inpcwv;
+using DRM.TypeSafePropertyBag;
 
 namespace PropBagLib.Tests
 {
@@ -35,7 +35,7 @@ namespace PropBagLib.Tests
         }
 
         [TearDown]
-        public void destroy()
+        public void Destroy()
         {
             mod1 = null;
         }
@@ -46,8 +46,8 @@ namespace PropBagLib.Tests
         public void ExtStorePropsBasicSets()
         {
 
-            mod1.PropIntChanged += mod1_PropIntChanged;
-            mod1.PropStringChanged += mod1_PropStringChanged;
+            mod1.PropIntChanged += Mod1_PropIntChanged;
+            mod1.PropStringChanged += Mod1_PropStringChanged;
 
             mod1.PropInt = 2;
             mod1.PropInt = 10;
@@ -61,13 +61,13 @@ namespace PropBagLib.Tests
 
         }
 
-        void mod1_PropIntChanged(object sender, PropertyChangedWithTValsEventArgs<int> e)
+        void Mod1_PropIntChanged(object sender, PropertyChangedWithTValsEventArgs<int> e)
         {
             varToEnsureWorkIsDone = !varToEnsureWorkIsDone;
             upCntr++;
         }
 
-        void mod1_PropStringChanged(object sender, PropertyChangedWithTValsEventArgs<string> e)
+        void Mod1_PropStringChanged(object sender, PropertyChangedWithTValsEventArgs<string> e)
         {
             varToEnsureWorkIsDone = !varToEnsureWorkIsDone;
             upCntr++;

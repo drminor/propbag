@@ -45,11 +45,11 @@ namespace <#= pm.Namespace #>
 		{
 			get
 			{
-				return GetIt<<#= pi.Type #>>();
+				return GetIt<<#= pi.Type #>>(nameof(<#= pi.Name#>));
 			}
 			set
 			{
-				SetIt<<#= pi.Type #>>(value);
+				SetIt<<#= pi.Type #>>(value, nameof(<#= pi.Name#>));
 			}
 		}  
 	<#  } #> 
@@ -61,11 +61,11 @@ namespace <#= pm.Namespace #>
 			{
 				add
 				{
-					AddToPropChanged<<#= pi.Type #>>(value);
+					AddToPropChanged<<#= pi.Type #>>(value, nameof(<#= pi.Name#>Changed));
 				}
 				remove
 				{
-					RemoveFromPropChanged<<#= pi.Type #>>(value);
+					RemoveFromPropChanged<<#= pi.Type #>>(value, nameof(<#= pi.Name#>Changed));
 				}
 			}
 	<#  } #> 

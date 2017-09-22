@@ -13,4 +13,12 @@ namespace PropBagTestApp.Models
 
         public double Size { get; set; }
     }
+
+    public class MyModel2
+    {
+        public Guid ProductId { get; set; }
+        public long Amount { get; set; }
+
+        public double Size { get; set; }
+    }
 }

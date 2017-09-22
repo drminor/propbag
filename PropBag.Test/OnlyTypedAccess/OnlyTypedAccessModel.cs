@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 
 using DRM.PropBag;
+using DRM.TypeSafePropertyBag;
 
 namespace PropBagLib.Tests
 {
-    public partial class OnlyTypedAccessModel : DRM.PropBag.PropBag
+    public partial class OnlyTypedAccessModel : PropBag
     {
         public bool DoWhenStringChanged_WasCalled { get; set; }
         public string DoWhenStringPropOldVal { get; set; }
@@ -21,10 +22,10 @@ namespace PropBagLib.Tests
         //}
 
         // This is used to test adding a property that has not been registered via a call to AddProp
-        public new object this[string key]
+        public new object this[string propertyName, string key]
         {
-            get { return base[key]; }
-            set { base[key] = value; }
+            get { return base[propertyName, key]; }
+            set { base[propertyName, key] = value; }
         }
 
         public void DoWhenStringChanged(string oldVal, string newVal)

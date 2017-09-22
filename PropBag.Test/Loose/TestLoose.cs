@@ -1,4 +1,4 @@
-﻿using DRM.Inpcwv;
+﻿using DRM.TypeSafePropertyBag;
 using DRM.PropBag;
 using NUnit.Framework;
 using System;
@@ -78,9 +78,9 @@ namespace PropBagLib.Tests
         {
             mod1 = new LooseModel(PropBagTypeSafetyMode.Loose);
 
-            mod1[PROP_NEW] = "string";
+            mod1["System.String", PROP_NEW] = "string";
             Assert.That(mod1.GetTypeOfProperty(PROP_NEW), Is.EqualTo(typeof(string)));
-            Assert.That(mod1[PROP_NEW], Is.EqualTo("string"));
+            Assert.That(mod1["System.String", PROP_NEW], Is.EqualTo("string"));
         }
 
         [Test]
@@ -88,12 +88,12 @@ namespace PropBagLib.Tests
         {
             mod1 = new LooseModel(PropBagTypeSafetyMode.Loose);
 
-            mod1[PROP_NEW] = null;
+            mod1["System.Object", PROP_NEW] = null;
             Assert.That(mod1.GetTypeOfProperty(PROP_NEW), Is.EqualTo(typeof(object)));
 
-            mod1[PROP_NEW] = "string";
+            mod1["System.String", PROP_NEW] = "string";
             Assert.That(mod1.GetTypeOfProperty(PROP_NEW), Is.EqualTo(typeof(string)));
-            Assert.That(mod1[PROP_NEW], Is.EqualTo("string"));
+            Assert.That(mod1["System.String", PROP_NEW], Is.EqualTo("string"));
         }
 
         [Test]
@@ -101,10 +101,10 @@ namespace PropBagLib.Tests
         {
             mod1 = new LooseModel(PropBagTypeSafetyMode.Loose);
 
-            mod1[PROP_NEW] = "string";
-            mod1[PROP_NEW] = null;
+            mod1["System.String", PROP_NEW] = "string";
+            mod1["System.String", PROP_NEW] = null;
             Assert.That(mod1.GetTypeOfProperty(PROP_NEW), Is.EqualTo(typeof(string)));
-            Assert.That(mod1[PROP_NEW], Is.Null);
+            Assert.That(mod1["System.String", PROP_NEW], Is.Null);
         }
 
         [Test]
@@ -113,7 +113,7 @@ namespace PropBagLib.Tests
             mod1 = new LooseModel(PropBagTypeSafetyMode.Loose);
 
             object x;
-            Assert.Throws<InvalidOperationException>(() => x = mod1["x"]);
+            Assert.Throws<InvalidOperationException>(() => x = mod1["System.String", "x"]);
         }
 
         [Test]
@@ -122,7 +122,7 @@ namespace PropBagLib.Tests
             mod1 = new LooseModel(PropBagTypeSafetyMode.Loose);
 
             object x;
-            Assert.Throws<ArgumentNullException>(() => x = mod1[null]);
+            Assert.Throws<ArgumentNullException>(() => x = mod1["System.String", null]);
         }
 
         [Test]

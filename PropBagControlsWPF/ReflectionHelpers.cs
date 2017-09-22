@@ -139,10 +139,17 @@ namespace DRM.PropBag.ControlsWPF
             return null != targetType.GetConstructor(types);
         }
 
+        /// <summary>
+        /// Build a reference to constructor of the type that will inherit
+        /// from this IPropBag that takes a single (propModel) argument.
+        /// </summary>
+        /// <param name="targetType"></param>
+        /// <param name="propModelType"></param>
+        /// <returns></returns>
         static public ConstructorInfo GetPropModelConstructor(Type targetType, Type propModelType)
         {
-            Type[] types = new Type[1];
-            types[0] = propModelType;
+            Type[] types = new Type[] { propModelType };
+            //types[0] = propModelType;
             return targetType.GetConstructor(types);
         }
 

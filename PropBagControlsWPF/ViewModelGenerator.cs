@@ -24,11 +24,12 @@ namespace DRM.PropBag.ControlsWPF
         /// <param name="root">The UI Element at which to begin looking for PropBagTemplate elements.</param>
         /// <param name="modelHolder">The window or user control that "hosts" the property that is marked with
         /// the PropBagInstanceAttribute Attribute</param>
-        static public void StandUpViewModels(Panel root, FrameworkElement modelHolder)
+        static public Dictionary<string, BoundPropBag> StandUpViewModels(Panel root, FrameworkElement modelHolder)
         {
             Type propModelType = typeof(DRM.PropBag.ControlModel.PropModel);
 
             IEnumerable<PropBagTemplate> propBagTemplates = root.Children.OfType<PropBagTemplate>();
+            Dictionary<string, BoundPropBag> boundTemplates = new Dictionary<string, BoundPropBag>();
 
             foreach (PropBagTemplate pbt in propBagTemplates)
             {
@@ -42,8 +43,13 @@ namespace DRM.PropBag.ControlsWPF
 
                     // Instantiate the target ViewModel
                     ReflectionHelpers.CreateTargetAndAssign(modelHolder, classAccessor, propModelType, pm);
+
+                    // Record each "live" template.
+                    BoundPropBag boundPB = new BoundPropBag(classAccessor.PropertyType, pm);
+                    boundTemplates.Add(pm.InstanceKey, boundPB);
                 }
             }
+            return boundTemplates;
         }
 
         //static public void CreateMap(MyModel mm, DtoTestViewModel vm)

@@ -4,9 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using DRM.Inpcwv;
 using DRM.PropBag;
-
+using DRM.TypeSafePropertyBag;
 
 namespace PropBagLib.Tests
 {
@@ -36,7 +35,7 @@ namespace PropBagLib.Tests
         {
             get
             {
-                return GetIt<int>();
+                return GetIt<int>(nameof(PropInt));
             }
             set
             {
@@ -48,7 +47,7 @@ namespace PropBagLib.Tests
         {
             get
             {
-                return GetIt<string>();
+                return GetIt<string>(nameof(PropString));
             }
             set
             {
@@ -61,11 +60,11 @@ namespace PropBagLib.Tests
         {
             add
             {
-                AddToPropChanged<int>(value);
+                AddToPropChanged<int>(value, nameof(PropIntChanged));
             }
             remove
             {
-                RemoveFromPropChanged<int>(value);
+                RemoveFromPropChanged<int>(value, nameof(PropIntChanged));
             }
         }
 
@@ -73,11 +72,11 @@ namespace PropBagLib.Tests
         {
             add
             {
-                AddToPropChanged<string>(value);
+                AddToPropChanged<string>(value, nameof(PropStringChanged));
             }
             remove
             {
-                RemoveFromPropChanged<string>(value);
+                RemoveFromPropChanged<string>(value, nameof(PropStringChanged));
             }
         }
 

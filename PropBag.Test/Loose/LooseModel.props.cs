@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using DRM.Inpcwv;
+using DRM.TypeSafePropertyBag;
 using DRM.PropBag;
 
 namespace PropBagLib.Tests
@@ -29,11 +28,11 @@ namespace PropBagLib.Tests
         {
             get
             {
-                return (object)this["PropObject"];
+                return (object)this["System.Object", "PropObject"];
             }
             set
             {
-                this["PropObject"] = value;
+                this["System.Object", "PropObject"] = value;
             }
         }
 
@@ -41,11 +40,11 @@ namespace PropBagLib.Tests
         {
             get
             {
-                return (string)this["PropString"];
+                return (string)this["System.String", "PropString"];
             }
             set
             {
-                this["PropString"] = value;
+                this["System.String", "PropString"] = value;
             }
         }
 
@@ -53,11 +52,11 @@ namespace PropBagLib.Tests
         {
             get
             {
-                return (bool)this["PropBool"];
+                return (bool)this["System.Boolean","PropBool"];
             }
             set
             {
-                this["PropBool"] = value;
+                this["System.Boolean", "PropBool"] = value;
             }
         }
 
@@ -65,7 +64,7 @@ namespace PropBagLib.Tests
         {
             get
             {
-                return GetIt<int>();
+                return GetIt<int>(nameof(PropInt));
             }
             set
             {
@@ -77,7 +76,7 @@ namespace PropBagLib.Tests
         {
             get
             {
-                return GetIt<TimeSpan>();
+                return GetIt<TimeSpan>(nameof(PropTimeSpan));
             }
             set
             {
@@ -89,7 +88,7 @@ namespace PropBagLib.Tests
         {
             get
             {
-                return GetIt<Uri>();
+                return GetIt<Uri>(nameof(PropUri));
             }
             set
             {
@@ -101,7 +100,7 @@ namespace PropBagLib.Tests
         {
             get
             {
-                return GetIt<Lazy<int>>();
+                return GetIt<Lazy<int>>(nameof(PropLazyInt));
             }
             set
             {
@@ -117,11 +116,11 @@ namespace PropBagLib.Tests
         {
             add
             {
-                AddToPropChanged<object>(value);
+                AddToPropChanged<object>(value, nameof(PropObjectChanged));
             }
             remove
             {
-                RemoveFromPropChanged<object>(value);
+                RemoveFromPropChanged<object>(value,nameof(PropObjectChanged));
             }
         }
 
@@ -129,11 +128,11 @@ namespace PropBagLib.Tests
         {
             add
             {
-                AddToPropChanged<string>(value);
+                AddToPropChanged<string>(value, nameof(PropStringChanged));
             }
             remove
             {
-                RemoveFromPropChanged<string>(value);
+                RemoveFromPropChanged<string>(value, nameof(PropStringChanged));
             }
         }
 
@@ -141,11 +140,11 @@ namespace PropBagLib.Tests
         {
             add
             {
-                AddToPropChanged<bool>(value);
+                AddToPropChanged<bool>(value, nameof(PropBoolChanged));
             }
             remove
             {
-                RemoveFromPropChanged<bool>(value);
+                RemoveFromPropChanged<bool>(value, nameof(PropBoolChanged));
             }
         }
 
@@ -153,11 +152,11 @@ namespace PropBagLib.Tests
         {
             add
             {
-                AddToPropChanged<int>(value);
+                AddToPropChanged<int>(value, nameof(PropIntChanged));
             }
             remove
             {
-                RemoveFromPropChanged<int>(value);
+                RemoveFromPropChanged<int>(value, nameof(PropIntChanged));
             }
         }
 
@@ -165,11 +164,11 @@ namespace PropBagLib.Tests
         {
             add
             {
-                AddToPropChanged<TimeSpan>(value);
+                AddToPropChanged<TimeSpan>(value, nameof(PropTimeSpanChanged));
             }
             remove
             {
-                RemoveFromPropChanged<TimeSpan>(value);
+                RemoveFromPropChanged<TimeSpan>(value, nameof(PropTimeSpanChanged));
             }
         }
 
@@ -177,11 +176,11 @@ namespace PropBagLib.Tests
         {
             add
             {
-                AddToPropChanged<Uri>(value);
+                AddToPropChanged<Uri>(value, nameof(PropUriChanged));
             }
             remove
             {
-                RemoveFromPropChanged<Uri>(value);
+                RemoveFromPropChanged<Uri>(value, nameof(PropUriChanged));
             }
         }
 
@@ -189,11 +188,11 @@ namespace PropBagLib.Tests
         {
             add
             {
-                AddToPropChanged<Lazy<int>>(value);
+                AddToPropChanged<Lazy<int>>(value, nameof(PropLazyIntChanged));
             }
             remove
             {
-                RemoveFromPropChanged<Lazy<int>>(value);
+                RemoveFromPropChanged<Lazy<int>>(value, nameof(PropLazyIntChanged));
             }
         }
 

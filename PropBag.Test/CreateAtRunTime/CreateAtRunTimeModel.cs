@@ -1,17 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-//using System.Linq;
-//using System.Text;
-//using System.Threading.Tasks;
-
-//using System.Threading;
-//using System.Runtime.CompilerServices;
-using System.Reflection;
-
-using DRM.Inpcwv;
-using DRM.PropBag;
-using DRM.PropBag.ClassGenerator;
+﻿using DRM.PropBag;
 using DRM.PropBag.ControlModel;
+using System;
+using System.Reflection;
 
 namespace PropBagLib.Tests
 {

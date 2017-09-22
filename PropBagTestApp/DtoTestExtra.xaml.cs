@@ -6,25 +6,29 @@ using System.Windows.Data;
 
 using DRM.PropBag.ControlModel;
 using DRM.PropBag.ControlsWPF;
+using DRM.PropBag.LiveClassGenerator;
 
 using PropBagTestApp.Models;
 
 using AutoMapper;
+using System.Collections.Generic;
+using System.Reflection;
+using DRM.PropBag;
 
 namespace PropBagTestApp
 {
     /// <summary>
     /// Interaction logic for DtoTest.xaml
     /// </summary>
-    public partial class DtoTest : Window
+    public partial class DtoTestExtra : Window
     {
 
         [PropBagInstanceAttribute("OurData", "There is only one ViewModel in this View.")]
-        public DtoTestViewModel OurData
+        public DtoTestViewModelExtra OurData
         {
             get
             {
-                return (DtoTestViewModel)this.DataContext;
+                return (DtoTestViewModelExtra)this.DataContext;
             }
             set
             {
@@ -32,7 +36,7 @@ namespace PropBagTestApp
             }
         }
 
-        public DtoTest()
+        public DtoTestExtra()
         {
             InitializeComponent();
 
@@ -63,38 +67,49 @@ namespace PropBagTestApp
                 Size = 17.8
             };
 
-            //MapUsingDict();
-
             ReadWithMap(mm, OurData);
-
-            //ourData["ProductId"] = Guid.NewGuid();
-            //ourData["Amount"] = 123;
-            //ourData["Size"] = 2.09111d;
         }
 
         private void BtnSave_Click(object sender, RoutedEventArgs e)
         {
-            //MyModel m1 = new MyModel
-            //{
-            //    ProductId = (Guid)OurData["ProductId"],
-            //    Amount = (int)OurData["Amount"],
-            //    Size = (double)OurData["Size"]
-            //};
+            MyModel m1 = SaveWithMap(OurData);
         }
 
-        private void ReadWithMap(MyModel mm, DtoTestViewModel vm)
+        private void ReadWithMap(MyModel mm, DtoTestViewModelExtra vm)
         {
-            GetMapper().Map<MyModel, DtoTestViewModel>(mm, vm);
+            IPropBag ip = (IPropBag)vm;
+            IEnumerable<MemberInfo> extraMembers = ip.BuildPropertyInfoList<DtoTestViewModelExtra>();
+
+            GetMapper(vm).Map<MyModel, DtoTestViewModelExtra>(mm, vm);
+        }
+
+        private MyModel SaveWithMap(DtoTestViewModelExtra vm)
+        {
+            return GetMapper(vm).Map<DtoTestViewModelExtra, MyModel>(vm);
         }
 
         private IMapper _mapper = null;
-        private IMapper GetMapper()
+        private IMapper GetMapper(DtoTestViewModelExtra vm)
         {
             if (_mapper == null)
             {
-                _mapper = new MapperConfiguration(cfg => { }).CreateMapper();
+                IPropBag ip = (IPropBag)vm;
+                IEnumerable<MemberInfo> extraMembers = ip.BuildPropertyInfoList<DtoTestViewModelExtra>();
+
+                _mapper = new MapperConfiguration(cfg => {
+                    cfg
+                    .CreateMap<MyModel, DtoTestViewModelExtra>()
+                    //.AddExtraDestintionMembers(extraMembers)
+                    ;
+
+                    cfg
+                    .CreateMap<DtoTestViewModelExtra, MyModel>()
+                    //.AddExtraSourceMembers(extraMembers)
+                    ;
+                }).CreateMapper();
             }
             return _mapper;
         }
+
     }
 }

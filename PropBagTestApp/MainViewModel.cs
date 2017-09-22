@@ -1,16 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using System.ComponentModel;
-
-using DRM.PropBag;
-using DRM.Inpcwv;
-using DRM.PropBag.ControlsWPF;
+﻿using DRM.PropBag;
 using DRM.PropBag.ControlModel;
-
+using System.ComponentModel;
 using System.Drawing;
 
 namespace PropBagTestApp
@@ -41,11 +31,11 @@ namespace PropBagTestApp
             this.PropMyPointDidChange = false;
         }
 
-        public new object this[string propertyName]
-        {
-            get { return base.GetIt(propertyName); }
-            set { base.SetIt(value, propertyName); }
-        }
+        //public new object this[string propertyName]
+        //{
+        //    get { return base.GetValWithType(propertyName); }
+        //    set { base.SetIt(value, propertyName); }
+        //}
 
         private void DoWhenFirstChanges(bool oldVal, bool newVal)
         {

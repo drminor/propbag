@@ -3,19 +3,17 @@ using System.Collections.Generic;
 
 using NUnit.Framework;
 
-
 using DRM.PropBag;
 using DRM.TypeSafePropertyBag;
 
 namespace PropBagLib.Tests
 {
-
-
     [TestFixtureAttribute]
-    public class TestPerformance
+    public class TestPerformanceDynamic
     {
 
-        public PerformanceModel mod1;
+        public PerformanceDynModel mod1;
+        public dynamic mod1Dyn;
 
         bool varToEnsureWorkIsDone = false;
 
@@ -36,9 +34,10 @@ namespace PropBagLib.Tests
 
 
         [Test]
-        public void SetInt1000Regular()
+        public void SetInt1000RegularDyn()
         {
-            mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+            mod1Dyn = PerformanceDynModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+            mod1 = mod1Dyn as PerformanceDynModel;
             mod1.PropertyChanged += Mod1_PropertyChanged;
             mod1.PropertyChanged2 += Mod1_PropertyChanged2;
 
@@ -49,35 +48,53 @@ namespace PropBagLib.Tests
         }
 
         [Test]
-        public void SetInt1000WithType()
+        public void SetInt1000WithTypeDyn()
         {
-            mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+            mod1Dyn = PerformanceDynModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+            mod1 = mod1Dyn as PerformanceDynModel;
             mod1.PropertyChanged += Mod1_PropertyChanged;
             mod1.PropertyChanged2 += Mod1_PropertyChanged2;
 
             for (int cntr = 0; cntr < InterationCount - 1; cntr++)
             {
-                mod1.PropInt = cntr;
+                // TODO: FIx Me.
+                //mod1.PropIntND = cntr;
             }
         }
 
         [Test]
-        public void SetInt1000Index()
+        public void SetInt1000WithDynProp()
         {
-            mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.Loose);
+            mod1Dyn = PerformanceDynModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+            mod1 = mod1Dyn as PerformanceDynModel;
             mod1.PropertyChanged += Mod1_PropertyChanged;
             mod1.PropertyChanged2 += Mod1_PropertyChanged2;
 
             for (int cntr = 0; cntr < InterationCount - 1; cntr++)
             {
-                mod1["System.Int32","PropInt"] = cntr;
+                mod1Dyn.PropInt = cntr;
             }
         }
 
         [Test]
-        public void SetInt1000WithNoStore()
+        public void SetInt1000NoTypeDyn()
         {
-            mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+            mod1Dyn = PerformanceDynModel.Create(PropBagTypeSafetyMode.Loose);
+            mod1 = mod1Dyn as PerformanceDynModel;
+            mod1.PropertyChanged += Mod1_PropertyChanged;
+            mod1.PropertyChanged2 += Mod1_PropertyChanged2;
+
+            for (int cntr = 0; cntr < InterationCount - 1; cntr++)
+            {
+                mod1["System.Int32", "PropInt"] = cntr;
+            }
+        }
+
+        [Test]
+        public void SetInt1000WithNoStoreDyn()
+        {
+            mod1Dyn = PerformanceDynModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+            mod1 = mod1Dyn as PerformanceDynModel;
             mod1.PropertyChanged += Mod1_PropertyChangedNoStore;
             mod1.PropertyChanged2 += Mod1_PropertyChanged2;
 
@@ -90,9 +107,10 @@ namespace PropBagLib.Tests
         #region Same Tests but with String type
 
         [Test]
-        public void SetString1000Regular()
+        public void SetString1000RegularDyn()
         {
-            mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+            mod1Dyn = PerformanceDynModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+            mod1 = mod1Dyn as PerformanceDynModel;
             mod1.PropertyChanged += Mod1_PropertyChanged;
             mod1.PropertyChanged2 += Mod1_PropertyChanged2;
 
@@ -106,9 +124,10 @@ namespace PropBagLib.Tests
         }
 
         [Test]
-        public void SetString1000WithType()
+        public void SetString1000WithTypeDyn()
         {
-            mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+            mod1Dyn = PerformanceDynModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+            mod1 = mod1Dyn as PerformanceDynModel;
             mod1.PropertyChanged += Mod1_PropertyChanged;
             mod1.PropertyChanged2 += Mod1_PropertyChanged2;
 
@@ -117,14 +136,17 @@ namespace PropBagLib.Tests
             for (int cntr = 0; cntr < InterationCount - 1; cntr++)
             {
                 val = cntr.ToString();
-                mod1.PropString = val;
+                // TODO: Fix Me
+                //mod1.PropStringND = val;
             }
         }
 
+
         [Test]
-        public void SetString1000NoType()
+        public void SetString1000WithDynProp()
         {
-            mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.Loose);
+            mod1Dyn = PerformanceDynModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+            mod1 = mod1Dyn as PerformanceDynModel;
             mod1.PropertyChanged += Mod1_PropertyChanged;
             mod1.PropertyChanged2 += Mod1_PropertyChanged2;
 
@@ -133,14 +155,33 @@ namespace PropBagLib.Tests
             for (int cntr = 0; cntr < InterationCount - 1; cntr++)
             {
                 val = cntr.ToString();
-                mod1["System.String","PropString"] = val;
+                mod1Dyn.PropString = val;
             }
         }
 
         [Test]
-        public void SetString1000WithNoStore()
+        public void SetString1000IndexDyn()
         {
-            mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+            mod1Dyn = PerformanceDynModel.Create(PropBagTypeSafetyMode.Loose);
+            mod1 = mod1Dyn as PerformanceDynModel;
+            mod1.PropertyChanged += Mod1_PropertyChanged;
+            mod1.PropertyChanged2 += Mod1_PropertyChanged2;
+
+            string val;
+
+            for (int cntr = 0; cntr < InterationCount - 1; cntr++)
+            {
+                val = cntr.ToString();
+                mod1["PropString"] = val;
+            }
+        }
+
+
+        [Test]
+        public void SetString1000WithNoStoreDyn()
+        {
+            mod1Dyn = PerformanceDynModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+            mod1 = mod1Dyn as PerformanceDynModel;
             mod1.PropertyChanged += Mod1_PropertyChangedNoStore;
             mod1.PropertyChanged2 += Mod1_PropertyChanged2;
 

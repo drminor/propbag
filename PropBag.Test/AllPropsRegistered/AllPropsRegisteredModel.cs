@@ -17,11 +17,11 @@ namespace PropBagLib.Tests
         public bool DoWhenICollectionIntChanged_WasCalled { get; set; }
 
         // This is used to test adding a property that has not been registered via a call to AddProp
-        public new object this[string key]
-        {
-            get { return base[key]; }
-            set { base[key] = value; }
-        }
+        //public new object this[string propertyName, string key]
+        //{
+        //    get { return base[propertyName, key]; }
+        //    set { base[propertyName, key] = value; }
+        //}
 
         public void DoWhenStringChanged(string oldVal, string newVal)
         {

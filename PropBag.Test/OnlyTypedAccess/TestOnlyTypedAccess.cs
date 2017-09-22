@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using DRM.PropBag;
-
+﻿using DRM.PropBag;
+using DRM.TypeSafePropertyBag;
 using NUnit.Framework;
+using System;
 
 namespace PropBagLib.Tests
 {
@@ -33,7 +28,7 @@ namespace PropBagLib.Tests
         }
 
         [OneTimeTearDown]
-        public void destroy()
+        public void Destroy()
         {
             mod1 = null;
         }
@@ -60,7 +55,7 @@ namespace PropBagLib.Tests
         public void TestAllRegSetString()
         {
             mod1 = new OnlyTypedAccessModel(PropBagTypeSafetyMode.OnlyTypedAccess);
-            mod1.PropStringChanged += mod1_PropStringChanged;
+            mod1.PropStringChanged += Mod1_PropStringChanged;
 
             string temp = mod1.PropString;
             Assert.That(temp, Is.Null, "Expecting the initial value of PropString to be null.");
@@ -91,7 +86,7 @@ namespace PropBagLib.Tests
         {
             mod1 = new OnlyTypedAccessModel(PropBagTypeSafetyMode.OnlyTypedAccess);
 
-            mod1.PropStringChanged += mod1_PropStringChanged;
+            mod1.PropStringChanged += Mod1_PropStringChanged;
 
             string temp = mod1.PropString;
             Assert.That(temp, Is.Null, "Expecting the initial value of PropString to be null.");
@@ -123,7 +118,11 @@ namespace PropBagLib.Tests
         {
             mod1 = new OnlyTypedAccessModel(PropBagTypeSafetyMode.OnlyTypedAccess);
 
-            mod1.PropStringCallDoAfterChanged += mod1_PropStringChanged;
+            mod1.PropStringCallDoAfterChanged += Mod1_PropStringChanged;
+
+            // TODO: Need to add test to check that values are really set to undefined.
+
+            mod1.PropStringCallDoAfter = null;
 
             string temp = mod1.PropStringCallDoAfter;
             Assert.That(temp, Is.Null, "Expecting the initial value of PropString to be null.");
@@ -157,20 +156,20 @@ namespace PropBagLib.Tests
         [Test]
         public void TestAddNewProp()
         {
-            mod1 = new OnlyTypedAccessModel(PropBagTypeSafetyMode.OnlyTypedAccess);
+            mod1 = new OnlyTypedAccessModel(PropBagTypeSafetyMode.Tight);
 
             InvalidOperationException aa = new InvalidOperationException();
 
             Type tt = aa.GetType();
 
-            Assert.Throws(tt, () => mod1["NewProperty"] = "This is a a test.");
+            Assert.Throws(tt, () => mod1["System.String","NewProperty"] = "This is a a test.");
         }
 
         #endregion
 
         #region Event Handlers
 
-        void mod1_PropStringChanged(object sender, DRM.Inpcwv.PropertyChangedWithTValsEventArgs<string> e)
+        void Mod1_PropStringChanged(object sender, PropertyChangedWithTValsEventArgs<string> e)
         {
             propStringOldVal = e.OldValue;
             propStringNewVal = e.NewValue;

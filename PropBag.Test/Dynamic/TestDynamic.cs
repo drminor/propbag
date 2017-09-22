@@ -1,14 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using DRM.Inpcwv;
-using DRM.PropBag;
+﻿using DRM.PropBag;
 
 using NUnit.Framework;
-using System.Dynamic;
 
 namespace PropBagLib.Tests
 {
@@ -41,6 +33,8 @@ namespace PropBagLib.Tests
             pbd.AddProp<string>("MyString", null, false, null, null, "hello");
 
             td.MyString = "Good Bye";
+
+            Assert.That(td.MyString == "Good Bye");
     
 
         }

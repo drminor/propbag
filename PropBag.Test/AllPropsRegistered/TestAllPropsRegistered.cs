@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using System.Runtime.Serialization;
-
-using System.Collections.ObjectModel;
-using DRM.Inpcwv;
-using DRM.PropBag;
-
+﻿using DRM.PropBag;
 using NUnit.Framework;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Text;
+
+using DRM.TypeSafePropertyBag;
 
 namespace PropBagLib.Tests
 {
@@ -334,7 +329,7 @@ namespace PropBagLib.Tests
 
             Type tt = kk.GetType();
 
-            Assert.Throws(tt, () => mod1["NewProperty"] = "This is a a test.");
+            Assert.Throws(tt, () => mod1["System.String", "NewProperty"] = "This is a a test.");
         }
 
 
