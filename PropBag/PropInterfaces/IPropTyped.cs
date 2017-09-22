@@ -5,8 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-using DRM.Inpcwv;
-
+using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBag
 {

@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using System.ComponentModel;
 using System.Reflection;
 
+using DRM.TypeSafePropertyBag;
+
 namespace DRM.PropBag.Caches
 {
     public class TypeDescBasedTConverterKey

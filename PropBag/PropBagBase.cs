@@ -7,9 +7,10 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Linq;
 
+using DRM.TypeSafePropertyBag;
 
-using DRM.Inpcwv;
 using DRM.PropBag.ControlModel;
+using DRM.PropBag.Caches;
 
 namespace DRM.PropBag
 {
@@ -21,9 +22,9 @@ namespace DRM.PropBag
     /// by the well known Code Project Open License.
     /// Please refer to the file in this same folder named CPOP.htm for the exact set of terms that govern this release.
     /// Although not included as a condition of use, I would prefer that this text, 
-    /// or a similar text which covers all of the points, be included along with a copy of cpol.htm
+    /// or a similar text which covers all of the points made here, be included along with a copy of cpol.htm
     /// in the set of artifacts deployed with any product
-    /// wherein this source code, or a derivative thereof, is used to build the product.
+    /// wherein this source code, or a derivative thereof, is used.
     /// </summary>
 
     /// <remarks>
@@ -53,7 +54,7 @@ namespace DRM.PropBag
 
         private readonly Dictionary<string, IPropGen> tVals;
 
-        private readonly Dictionary<Type, DoSetDelegate> doSetDelegateDict;
+        //private readonly Dictionary<Type, DoSetDelegate> doSetDelegateDict;
 
         public PropBagTypeSafetyMode TypeSafetyMode { get; private set; }
 
@@ -89,6 +90,12 @@ namespace DRM.PropBag
             this.TypeSafetyMode = typeSafetyMode;
             switch (typeSafetyMode)
             {
+                case PropBagTypeSafetyMode.Tight:
+                    {
+                        AllPropsMustBeRegistered = true;
+                        OnlyTypedAccess = true;
+                        break;
+                    }
                 case PropBagTypeSafetyMode.AllPropsMustBeRegistered:
                     {
                         AllPropsMustBeRegistered = true;
@@ -115,8 +122,6 @@ namespace DRM.PropBag
             this.ThePropFactory = thePropFactory ?? new PropFactory();
 
             tVals = new Dictionary<string, IPropGen>();
-            doSetDelegateDict = new Dictionary<Type, DoSetDelegate>();
-
         }
 
         public PropBagBase(ControlModel.PropModel pm) : this(pm.TypeSafetyMode, null)
@@ -195,7 +200,9 @@ namespace DRM.PropBag
 
         protected void ClearAll()
         {
-            doSetDelegateDict.Clear();
+            // TODO: Fix Me.
+            //DelegateCacheProvider.DoSetDelegateCache.Clear();
+            //doSetDelegateDict.Clear();
             ClearEventSubscribers();
             tVals.Clear();
         }
@@ -204,32 +211,20 @@ namespace DRM.PropBag
 
         #region Property Access Methods
 
-        protected object this[string propertyName]
+        public object this[string typeName, string propertyName]
         {
             get
             {
-                return GetIt(propertyName);
-            }
-            set
-            {
-                SetItWithType(value, null, propertyName);
-            }
-        }
-
-        protected object this[string typeName, string propertyName]
-        {
-            get
-            {
-                return GetIt(propertyName, Type.GetType(propertyName));
+                return GetValWithType(propertyName, Type.GetType(typeName));
             }
             set
             {
                 Type type = Type.GetType(typeName);
-                SetItWithType(value, type, propertyName);
+                SetValWithType(propertyName, type, value);
             }
         }
 
-        public object GetIt([CallerMemberName] string propertyName = null, Type propertyType = null)
+        public object GetValWithType(string propertyName, Type propertyType)
         {
             if (propertyType == null && OnlyTypedAccess)
             {
@@ -260,30 +255,30 @@ namespace DRM.PropBag
             return genProp.Value;
         }
 
-        public T GetIt<T>([CallerMemberName] string propertyName = null)
+        public T GetIt<T>(string propertyName)
         {
             return (T) GetIProp<T>(propertyName).Value;
         }
 
-        public IProp<T> GetIProp<T>([CallerMemberName] string propertyName = null)
+        public IProp<T> GetIProp<T>(string propertyName)
         {
             bool hasStore = ThePropFactory.ProvidesStorage;
             IPropGen genProp = GetGenProp(propertyName, hasStore);
             return CheckTypeInfo<T>(genProp, propertyName, tVals);
         }
 
-        public bool SetItWithNoType(object value, [CallerMemberName]string propertyName = null)
+        public bool SetValWithNoType(string propertyName, object value)
         {
-            return SetItWithType(value, null, propertyName);
+            return SetValWithType(propertyName, null, value);
         }
 
         /// <summary>
         /// Set's the value of the property with optional type information.
         /// </summary>
-        /// <param name="value"></param>
-        /// <param name="propertyType">If unknown, set this parameter to null.</param>
         /// <param name="propertyName"></param>
-        public bool SetItWithType(object value, Type propertyType, [CallerMemberName]string propertyName = null)
+        /// <param name="propertyType">If unknown, set this parameter to null.</param>
+        /// <param name="value"></param>
+        public bool SetValWithType(string propertyName, Type propertyType, object value)
         {
             if (propertyType == null && OnlyTypedAccess)
             {
@@ -369,8 +364,9 @@ namespace DRM.PropBag
             }
 
             // This uses reflection on first access.
-            DoSetDelegate setProDel = GetPropSetterDelegate(genProp);
-            return setProDel(value, this, propertyName, genProp);
+            //DoSetDelegate setPropDel = GetPropSetterDelegate(genProp);
+            DoSetDelegate setPropDel = DelegateCacheProvider.DoSetDelegateCache.GetOrAdd(genProp.Type);
+            return setPropDel(value, this, propertyName, genProp);
         }
 
         public bool SetIt<T>(T value, [CallerMemberName]string propertyName = null)
@@ -559,7 +555,7 @@ namespace DRM.PropBag
         /// <typeparam name="T"></typeparam>
         /// <param name="eventHandler"></param>
         /// <param name="eventPropertyName"></param>
-        protected void AddToPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, [CallerMemberName] string eventPropertyName = null)
+        protected void AddToPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, string eventPropertyName)
         {
             string propertyName = GetPropNameFromEventProp(eventPropertyName);
             SubscribeToPropChanged<T>(eventHandler, propertyName);
@@ -572,7 +568,7 @@ namespace DRM.PropBag
         /// <typeparam name="T"></typeparam>
         /// <param name="eventHandler"></param>
         /// <param name="eventPropertyName"></param>
-        protected void RemoveFromPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, [CallerMemberName] string eventPropertyName = null)
+        protected void RemoveFromPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, string eventPropertyName)
         {
             string propertyName = GetPropNameFromEventProp(eventPropertyName);
             UnSubscribeToPropChanged<T>(eventHandler, propertyName);
@@ -582,12 +578,12 @@ namespace DRM.PropBag
 
         #region Public Methods
 
-        public bool PropertyExists([CallerMemberName] string propertyName = null)
+        public bool PropertyExists(string propertyName)
         {
             return tVals.ContainsKey(propertyName);
         }
 
-        public System.Type GetTypeOfProperty([CallerMemberName] string propertyName = null)
+        public System.Type GetTypeOfProperty(string propertyName)
         {
             return GetGenProp(propertyName, ThePropFactory.ProvidesStorage).Type;
         }
@@ -595,6 +591,79 @@ namespace DRM.PropBag
         #endregion
 
         #region Property Management
+
+        /// <summary>
+        /// Use when you want to specify an Action<typeparamref name="T"/> to be performed
+        /// either before or after the PropertyChanged event has been raised.
+        /// </summary>
+        /// <typeparam name="T">The type of this property's value.</typeparam>
+        /// <param name="propertyName"></param>
+        /// <param name="doIfChanged"></param>
+        /// <param name="doAfterNotify"></param>
+        /// <param name="comparer">A instance of a class that implements IEqualityComparer and thus an Equals method.</param>
+        /// <param name="initalValue"></param>
+        protected IProp<T> AddProp<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
+            Func<T, T, bool> comparer = null, object extraInfo = null, T initialValue = default(T))
+        {
+            bool hasStorage = true;
+            bool typeIsSolid = true;
+            IProp<T> pg = ThePropFactory.Create<T>(initialValue, propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
+            AddProp<T>(propertyName, pg);
+            return pg;
+        }
+
+        protected IProp<T> AddPropObjComp<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
+            object extraInfo = null, T initialValue = default(T))
+        {
+            bool hasStorage = true;
+            bool typeIsSolid = true;
+            Func<T, T, bool> comparer = ThePropFactory.GetRefEqualityComparer<T>();
+            IProp<T> pg = ThePropFactory.Create<T>(initialValue, propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
+            AddProp<T>(propertyName, pg);
+            return pg;
+        }
+
+        protected IProp<T> AddPropNoValue<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
+            Func<T, T, bool> comparer = null, object extraInfo = null)
+        {
+            bool hasStorage = true;
+            bool typeIsSolid = true;
+            IProp<T> pg = ThePropFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
+            AddProp<T>(propertyName, pg);
+            return pg;
+        }
+
+        protected IProp<T> AddPropObjCompNoValue<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
+            object extraInfo = null)
+        {
+            bool hasStorage = true;
+            bool typeIsSolid = true;
+            Func<T, T, bool> comparer = ThePropFactory.GetRefEqualityComparer<T>();
+            IProp<T> pg = ThePropFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
+            AddProp<T>(propertyName, pg);
+            return pg;
+        }
+
+        protected IProp<T> AddPropNoStore<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false,
+            Func<T, T, bool> comparer = null, object extraInfo = null)
+        {
+            bool hasStorage = false;
+            bool typeIsSolid = true;
+            IProp<T> pg = ThePropFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
+            AddProp<T>(propertyName, pg);
+            return pg;
+        }
+
+        protected IProp<T> AddPropObjCompNoStore<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false,
+            object extraInfo = null)
+        {
+            bool hasStorage = false;
+            bool typeIsSolid = true;
+            Func<T, T, bool> comparer = ThePropFactory.GetRefEqualityComparer<T>();
+            IProp<T> pg = ThePropFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
+            AddProp<T>(propertyName, pg);
+            return pg;
+        }
 
         protected void AddProp<T>(string propertyName, IProp<T> prop)
         {
@@ -627,6 +696,10 @@ namespace DRM.PropBag
             return prop.UpdateDoWhenChangedAction(doWhenChanged, doAfterNotify);
         }
 
+        /// <summary>
+        /// Makes a copy of the core list.
+        /// </summary>
+        /// <returns></returns>
         public IDictionary<string, ValPlusType> GetAllPropNamesAndTypes()
         {
             IEnumerable<KeyValuePair<string, ValPlusType>> list =
@@ -635,6 +708,8 @@ namespace DRM.PropBag
             IDictionary<string, ValPlusType> result = list.ToDictionary(pair => pair.Key, pair => pair.Value);
             return result; 
         }
+
+
 
         /// <summary>
         /// Returns all of the values in dictionary of objects, keyed by PropertyName.
@@ -872,7 +947,6 @@ namespace DRM.PropBag
         // Its important to make sure new is new and cur is cur.
         private bool AreTypesSame(Type newType, Type curType)
         {
-
             if (newType == curType)
                 return true;
 
@@ -883,34 +957,17 @@ namespace DRM.PropBag
                 // Compare the underlying type of this new value and the target property's underlying type.
                 Type bUnder = Nullable.GetUnderlyingType(curType);
 
-                return aUnder == bUnder;
+                return aUnder == bUnder || aUnder.UnderlyingSystemType == bUnder.UnderlyingSystemType;
+            }
+            else if(newType.IsGenericType)
+            {
+                return curType.IsAssignableFrom(newType);
             }
             else
             {
-                if (newType.IsGenericType)
-                {
-                    return curType.IsAssignableFrom(newType);
-                }
-                else
-                {
-                    return false;
-                }
+                return newType.UnderlyingSystemType == curType.UnderlyingSystemType;
             }
-        }
 
-        // TODO: Consider create a factory and caching these centrally for the entire
-        // application domain.
-        private DoSetDelegate GetPropSetterDelegate(IPropGen genProp)
-        {
-            Type typeOfThisProperty = genProp.Type;
-
-            if (!doSetDelegateDict.ContainsKey(typeOfThisProperty))
-            {
-                DoSetDelegate del = GetDoSetDelegate(typeOfThisProperty);
-                doSetDelegateDict[typeOfThisProperty] = del;
-                return del;
-            }
-            return doSetDelegateDict[typeOfThisProperty];
         }
 
         /// <summary>
@@ -918,10 +975,20 @@ namespace DRM.PropBag
         /// </summary>
         /// <param name="x"></param>
         /// <returns></returns>
-        private string GetPropNameFromEventProp(string x)
+        protected string GetPropNameFromEventProp(string x)
         {
             //PropStringChanged
             return x.Substring(0, x.Length - 7);
+        }
+
+        public object GetValueGen(object host, string propertyName, Type propertyType)
+        {
+            return ((IPropBag)host).GetValWithType(propertyName, propertyType);
+        }
+
+        public void SetValueGen(object host, string propertyName, Type propertyType, object value)
+        {
+            ((IPropBag)host).SetValWithType(propertyName, propertyType, value);
         }
 
         #endregion
@@ -965,31 +1032,36 @@ namespace DRM.PropBag
 
         #region Generic Method Support
 
-        private delegate bool DoSetDelegate(object value, PropBagBase target, string propertyName, object prop);
-
-        private DoSetDelegate GetDoSetDelegate(Type typeOfThisValue)
-        {
-            MethodInfo methInfoSetProp = GetDoSetMethInfo(typeOfThisValue);
-            DoSetDelegate result = (DoSetDelegate)Delegate.CreateDelegate(typeof(DoSetDelegate), methInfoSetProp);
-
-            return result;
-        }
-
-        private MethodInfo GetDoSetMethInfo(Type typeOfThisValue)
-        {
-            return GMT_TYPE.GetMethod("DoSetBridge", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(typeOfThisValue);
-        }
-
-        #endregion
-
-        #region Property Bag Generic Method Templates
+        //private DoSetDelegate GetPropSetterDelegate(IPropGen genProp)
+        //{
+        //    return DelegateCacheProvider.DoSetDelegateCache.GetOrAdd(genProp.Type);
+        //}
 
         // Method Templates for Property Bag
-        static class GenericMethodTemplates
+        internal static class GenericMethodTemplates
         {
+            static Lazy<MethodInfo> theSingleGenericDoSetBridgeMethodInfo;
+
+            public static MethodInfo GenericDoSetBridgeMethodInfo { get { return theSingleGenericDoSetBridgeMethodInfo.Value; } }
+
+            static GenericMethodTemplates()
+            {
+                theSingleGenericDoSetBridgeMethodInfo = new Lazy<MethodInfo>(() =>
+                    GMT_TYPE.GetMethod("DoSetBridge", BindingFlags.Static | BindingFlags.NonPublic), 
+                    LazyThreadSafetyMode.PublicationOnly);
+            }
+
             private static bool DoSetBridge<T>(object value, PropBagBase target, string propertyName, object prop)
             {
                 return target.DoSet<T>((T)value, propertyName, (IProp<T>)prop);
+            }
+
+            public static DoSetDelegate GetDoSetDelegate(Type typeOfThisValue)
+            {
+                MethodInfo methInfoSetProp = GenericMethodTemplates.GenericDoSetBridgeMethodInfo.MakeGenericMethod(typeOfThisValue);
+                DoSetDelegate result = (DoSetDelegate)Delegate.CreateDelegate(typeof(DoSetDelegate), methInfoSetProp);
+
+                return result;
             }
         }
 

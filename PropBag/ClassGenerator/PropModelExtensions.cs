@@ -14,7 +14,7 @@ namespace DRM.PropBag.ClassGenerator
     public static class PropModelExtensions
     {
         const string PROP_BAG_NAME_SPACE = "DRM.PropBag";
-        const string INPWV_NAME_SPACE = "DRM.Inpcwv";
+        const string INPWV_NAME_SPACE = "DRM.TypeSafePropertyBag";
         const string REFLECTION_NAME_SPACE = "System.Reflection";
 
         /// <summary>

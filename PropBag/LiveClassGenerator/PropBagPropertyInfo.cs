@@ -7,37 +7,43 @@ namespace DRM.PropBag.LiveClassGenerator
     public class ProxyPropertyInfo : PropertyInfo
     {
         Type _hostType;
+        IPropBag _bridge;
         MethodInfo _getter;
         MethodInfo _setter;
-        Func<object, object> _getterFunc;
-        Action<object, object> _setterAction;
-        bool _useMethodInfos;
+        //Func<object, object> _getterFunc;
+        //Action<object, object> _setterAction;
+        //bool _useMethodInfos;
 
+
+        //public ProxyPropertyInfo(string name, Type propertyType, Type hostType,
+        //    Func<object, object> getterFunc,
+        //    Action<object, object> setterAction)
+        //{
+        //    Name = name;
+        //    PropertyType = propertyType;
+        //    _hostType = hostType;
+        //    _getterFunc = getterFunc;
+        //    _setterAction = setterAction;
+        //    _useMethodInfos = false;
+        //}
 
         public ProxyPropertyInfo(string name, Type propertyType, Type hostType,
-            Func<object, object> getterFunc,
-            Action<object, object> setterAction)
-        {
-            Name = name;
-            PropertyType = propertyType;
-            _hostType = hostType;
-            _getterFunc = getterFunc;
-            _setterAction = setterAction;
-            _useMethodInfos = false;
-        }
-
-        public ProxyPropertyInfo(string name, Type propertyType, Type hostType,
+            IPropBag bridge,
             MethodInfo getter,
             MethodInfo setter)
         {
-            if (!getter.IsStatic || !setter.IsStatic) throw new ArgumentException("Both the getter and setter MethodInfo arguments must refer to a static method.");
+            if (getter.IsStatic || setter.IsStatic || getter.IsPrivate || setter.IsPrivate)
+            {
+                throw new ArgumentException("Both the getter and setter MethodInfo arguments must refer to a public instance method.");
+            }
 
             Name = name;
             PropertyType = propertyType;
             _hostType = hostType;
+            _bridge = bridge;
             _getter = getter;
             _setter = setter;
-            _useMethodInfos = true;
+            //_useMethodInfos = true;
         }
 
         public override Type PropertyType { get; }
@@ -86,15 +92,17 @@ namespace DRM.PropBag.LiveClassGenerator
         // TODO: Make this a lazy singleton
         public override MethodInfo GetGetMethod(bool nonPublic)
         {
-            if (_useMethodInfos)
-            {
-                Func<object, object> temp = new Func<object, object>((host) => GetValue(host, null));
-                return temp.Method; // Getter.Method; 
-            }
-            else
-            {
-                return _getterFunc.Method;
-            }
+            return _getter;
+            //if (_useMethodInfos)
+            //{
+            //    //Func<object, object> temp = new Func<object, object>((host) => GetValue(host, null));
+            //    //return temp.Method; // Getter.Method;
+            //    return _getter;
+            //}
+            //else
+            //{
+            //    return _getterFunc.Method;
+            //}
         }
 
         public override ParameterInfo[] GetIndexParameters()
@@ -105,29 +113,42 @@ namespace DRM.PropBag.LiveClassGenerator
         // TODO: Make this a lazy singleton
         public override MethodInfo GetSetMethod(bool nonPublic)
         {
-            if (_useMethodInfos)
-            {
-                Action<object, object> temp = new Action<object, object>((host, value) => SetValue(host, value, null));
-                return temp.Method; // Setter.Method;
-            }
-            else
-            {
-                return _setterAction.Method;
-            }
-
+            return _setter;
+            //if (_useMethodInfos)
+            //{
+            //    //Action<object, object> temp = new Action<object, object>((host, value) => SetValue(host, value, null));
+            //    //return temp.Method; // Setter.Method;
+            //    return _setter;
+            //}
+            //else
+            //{
+            //    return _setterAction.Method;
+            //}
         }
 
         public override object GetValue(object obj, BindingFlags invokeAttr, Binder binder, object[] index, CultureInfo culture)
         {
-            if (_useMethodInfos)
+            Type pType;
+            if (index != null && index.Length > 0)
             {
-                object[] parameters = new object[3] { obj, Name, PropertyType };
-                return _getter.Invoke(null, invokeAttr, binder, parameters, culture);
+                pType = (Type)index[0];
             }
             else
             {
-                return _getterFunc(obj);
+                pType = PropertyType;
             }
+            object[] parameters = new object[3] { obj, Name, pType };
+            return _getter.Invoke(_bridge, invokeAttr, binder, parameters, culture);
+
+            //if (_useMethodInfos)
+            //{
+            //    object[] parameters = new object[3] { obj, Name, PropertyType };
+            //    return _getter.Invoke(_bridge, invokeAttr, binder, parameters, culture);
+            //}
+            //else
+            //{
+            //    return _getterFunc(obj);
+            //}
         }
 
         public override bool IsDefined(Type attributeType, bool inherit)
@@ -137,15 +158,27 @@ namespace DRM.PropBag.LiveClassGenerator
 
         public override void SetValue(object obj, object value, BindingFlags invokeAttr, Binder binder, object[] index, CultureInfo culture)
         {
-            if (_useMethodInfos)
+            Type pType;
+            if (index != null && index.Length > 0)
             {
-                object[] parameters = new object[4] { obj, Name, PropertyType, value };
-                _setter.Invoke(null, invokeAttr, binder, parameters, culture);
+                pType = (Type)index[0];
             }
             else
             {
-                _setterAction(obj, value);
+                pType = PropertyType;
             }
+            object[] parameters = new object[4] { obj, Name, pType, value };
+            _setter.Invoke(_bridge, invokeAttr, binder, parameters, culture);
+
+            //if (_useMethodInfos)
+            //{
+            //    object[] parameters = new object[4] { obj, Name, PropertyType, value };
+            //    _setter.Invoke(_bridge, invokeAttr, binder, parameters, culture);
+            //}
+            //else
+            //{
+            //    _setterAction(obj, value);
+            //}
         }
 
     }

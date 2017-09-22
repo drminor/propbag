@@ -1,6 +1,7 @@
-﻿using System;
+﻿using DRM.TypeSafePropertyBag;
+using System;
 
-namespace DRM.PropBag
+namespace DRM.TypeSafePropertyBag
 {
     public struct ValPlusType : IEquatable<ValPlusType>
     {
@@ -47,7 +48,7 @@ namespace DRM.PropBag
         // override object.GetHashCode
         public override int GetHashCode()
         {
-            return DRM.PropBag.Caches.GenerateHash.CustomHash(Value.GetHashCode(), Type.GetHashCode());
+            return GenerateHash.CustomHash(Value.GetHashCode(), Type.GetHashCode());
         }
     }
 }

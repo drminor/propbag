@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-
 using System.Reflection;
-
+using DRM.TypeSafePropertyBag;
 using DRM.PropBag;
 using DRM.PropBag.ControlModel;
 
@@ -13,6 +12,33 @@ namespace DRM.PropBag.LiveClassGenerator
     /// </summary>
     public static class LivePropModelExtensions
     {
+        public const string DEFAULT_NAMESPACE_NAME = "WrappedPropBags";
+
+        public static Dictionary<string, Type> GetPropertyDefs(this PropModel pm)
+        {
+            Dictionary<string, Type> result = new Dictionary<string, Type>();
+            foreach(PropItem pi in pm.Props)
+            {
+                result.Add(pi.PropertyName, pi.PropertyType);
+            }
+            return result;
+        }
+
+        public static string GetFullTypeName(this PropModel pm, string defaultNameSpaceName = null)
+        {
+            if(pm.NamespaceName != null)
+            {
+                return $"{pm.NamespaceName}.{pm.ClassName}";
+            }
+
+            if (defaultNameSpaceName != null)
+            {
+                return $"{defaultNameSpaceName}.{pm.ClassName}";
+            }
+
+            return pm.ClassName;
+        }
+
         /// <summary>
         /// Creates property get and set accessors for the specified Type using the 
         /// information from the registered properties of this IPropBag instance.
@@ -37,75 +63,62 @@ namespace DRM.PropBag.LiveClassGenerator
 
                 //MethodInfo getterMethodInfo = typeof(IPropBag).GetMethod("GetIt", BindingFlags.Public | BindingFlags.Instance);
 
-                MethodInfo getter = typeof(PBDispatcher).GetMethod("GetValue", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+                //MethodInfo getter = typeof(PBDispatcher).GetMethod("GetValue", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
                 
                 //Action<object,object> setter =
                 //    new Action<object, object>((host, value) => ((IPropBag)host).SetItWithType(value, propertyType, propertyName));
 
                 //MethodInfo setterMethodInfo = typeof(IPropBag).GetMethod("SetItWithType", BindingFlags.Public | BindingFlags.Instance);
 
-                MethodInfo setter = typeof(PBDispatcher).GetMethod("SetValue", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+                //MethodInfo setter = typeof(PBDispatcher).GetMethod("SetValue", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
 
                 //AutoMapper.ProxyPropertyInfo pi = new AutoMapper.ProxyPropertyInfo(propertyName, propertyType, targetType,
                 //    AutoMapper.ProxyPropHelpers.GetGetter(getterMethodInfo), AutoMapper.ProxyPropHelpers.GetSetter(setterMethodInfo));
 
-                ProxyPropertyInfo pi = new ProxyPropertyInfo(propertyName, propertyType, targetType,
-                    getter, setter);
 
-                result.Add(pi);
+                MethodInfo getter = typeof(IPropBag).GetMethod("GetValueGen");
+                MethodInfo setter = typeof(IPropBag).GetMethod("SetValueGen");
 
+                // TODO: Revive Custom Automapper Form
+                //ProxyPropertyInfo pi = new ProxyPropertyInfo(propertyName, propertyType, typeof(T),
+                //    propBag, getter, setter);
 
-                //string propertyName = kvp.Key;
-                //Type propertyType = kvp.Value.Type;
-
-                //Func<object> getter =
-                //    new Func<object>(() => propBag.GetIt(propertyName, propertyType));
-
-                ////object tt = getter.Invoke();
-
-                //Action<object> setter =
-                //    new Action<object>((value) => propBag.SetItWithType(value, propertyType, propertyName));
-
-                ////setter("This is test of the direct setter");
-                ////setter.Method.Invoke(setter.Target, new object[] { "This is a test of invoking the Setter's method" });
-
-                //PropertyInfo pi = new ProxyPropertyInfo(propertyName, propertyType, targetType, getter, setter);
-                ////object val = pi.GetValue(null);
-                ////pi.SetValue(null, "This is a test of setting the new proxy property");
-
-                ////val = pi.GetValue(null);
+                
+                //ProxyPropertyInfo pi = new ProxyPropertyInfo(propertyName, propertyType, targetType,
+                //    getter, setter);
 
                 //result.Add(pi);
-            }
+
+           }
 
             return result;
         }
 
-        public static IEnumerable<ProxyPropertyInfo> BuildPropertyInfoList2<T>(this IPropBag propBag) where T : IPropBag
-        {
-            ICollection<ProxyPropertyInfo> result = new List<ProxyPropertyInfo>();
+        //public static IEnumerable<ProxyPropertyInfo> BuildPropertyInfoList2<T>(this IPropBag propBag) where T : IPropBag
+        //{
+        //    ICollection<ProxyPropertyInfo> result = new List<ProxyPropertyInfo>();
 
-            Type targetType = typeof(T);
+        //    Type targetType = typeof(T);
 
-            foreach (KeyValuePair<string, ValPlusType> kvp in propBag.GetAllPropNamesAndTypes())
-            {
-                string propertyName = kvp.Key;
-                Type propertyType = kvp.Value.Type;
+        //    foreach (KeyValuePair<string, ValPlusType> kvp in propBag.GetAllPropNamesAndTypes())
+        //    {
+        //        string propertyName = kvp.Key;
+        //        Type propertyType = kvp.Value.Type;
 
-                Func<object, object> getter =
-                    new Func<object, object>((host) => ((IPropBag)host).GetIt(propertyName, propertyType));
+        //        Func<object, object> getter =
+        //            new Func<object, object>((host) => ((IPropBag)host).GetIt(propertyName, propertyType));
 
-                Action<object, object> setter =
-                    new Action<object, object>((host, value) => ((IPropBag)host).SetItWithType(value, propertyType, propertyName));
+        //        Action<object, object> setter =
+        //            new Action<object, object>((host, value) => ((IPropBag)host).SetItWithType(value, propertyType, propertyName));
 
-                ProxyPropertyInfo pi = new ProxyPropertyInfo(propertyName, propertyType, targetType,
-                    getter, setter);
+        //        ProxyPropertyInfo pi = new ProxyPropertyInfo(propertyName, propertyType, targetType,
+        //            getter, setter);
 
-                result.Add(pi);
-            }
+        //        result.Add(pi);
+        //    }
 
-            return result;
-        }
+        //    return result;
+        //}
 
 
     }

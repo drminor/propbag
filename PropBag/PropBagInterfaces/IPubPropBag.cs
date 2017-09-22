@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.ComponentModel;
 
-using DRM.Inpcwv;
 
 namespace DRM.PropBag
 {
@@ -35,8 +34,8 @@ namespace DRM.PropBag
 
         void RemoveProp(string propertyName);
 
-        bool RegisterDoWhenChanged<T>(Action<T, T> doWhenChanged, bool doAfterNotify = false,
-            [CallerMemberName] string propertyName = null);
+        bool RegisterDoWhenChanged<T>(string propertyName, Action<T, T> doWhenChanged,
+            bool doAfterNotify = false);
 
         void ClearAll();
 

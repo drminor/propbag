@@ -8,8 +8,7 @@ using System.Threading;
 using System.Reflection;
 
 using System.Runtime.CompilerServices;
-
-using DRM.Inpcwv;
+using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBag
 {

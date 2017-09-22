@@ -10,12 +10,12 @@ namespace DRM.PropBag.LiveClassGenerator
     {
         static object GetValue(object host, string propertyName, Type propertyType)
         {
-            return ((IPropBag)host).GetIt(propertyName, propertyType);
+            return ((IPropBag)host).GetValWithType(propertyName, propertyType);
         }
 
         static void SetValue(object host, string propertyName, Type propertyType, object value)
         {
-            ((IPropBag)host).SetItWithType(value, propertyType, propertyName);
+            ((IPropBag)host).SetValWithType(propertyName, propertyType, value);
         }
     }
 }

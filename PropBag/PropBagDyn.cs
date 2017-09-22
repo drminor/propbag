@@ -6,7 +6,8 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
-using DRM.Inpcwv;
+using DRM.TypeSafePropertyBag;
+
 using System.Threading;
 
 namespace DRM.PropBag 
@@ -117,7 +118,7 @@ namespace DRM.PropBag
 
             try
             {
-                propBag.SetItWithNoType(value, pName);
+                propBag.SetValWithNoType(pName, value);
                 return true;
             }
             catch (System.Exception e)
@@ -133,7 +134,8 @@ namespace DRM.PropBag
 
             try
             {
-                result = propBag.GetIt(pName);
+                // TOOD: Figure out way to retrieve type from configuration data.
+                result = propBag.GetValWithType(pName, null);
                 return true;
             } 
             catch (System.Exception e)
@@ -152,35 +154,50 @@ namespace DRM.PropBag
 
         #region Add Property Methods
 
-        public IProp<T> AddProp<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false, Func<T, T, bool> comparer = null, object extraInfo = null, T initalValue = default(T))
+        public IProp<T> AddProp<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false, Func<T, T, bool> comparer = null, object extraInfo = null, T initialValue = default(T))
         {
-            RegisterDynProp(propertyName, initalValue);
-            return propBag.AddProp(propertyName, doIfChanged, doAfterNotify, comparer, extraInfo, initalValue);
+            IProp<T> prop = propBag.AddProp(propertyName, doIfChanged, doAfterNotify, comparer, extraInfo, initialValue);
+            RegisterDynProp(propertyName, initialValue);
+            return prop;
         }
 
         public IProp<T> AddPropNoStore<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false, Func<T, T, bool> comparer = null, object extraInfo = null)
         {
-            throw new NotImplementedException();
+            IProp<T> prop = propBag.AddPropNoStore<T>(propertyName, doIfChanged, doAfterNotify, comparer, extraInfo);
+            // TODO: This is not quite right.
+            RegisterDynProp(propertyName, default(T));
+            return prop;
         }
 
         public IProp<T> AddPropNoValue<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false, Func<T, T, bool> comparer = null, object extraInfo = null)
         {
-            throw new NotImplementedException();
+            IProp<T> prop = propBag.AddPropNoValue<T>(propertyName, doIfChanged, doAfterNotify, comparer, extraInfo);
+            // TODO: This is not quite right.
+            RegisterDynProp(propertyName, default(T));
+            return prop;
         }
 
-        public IProp<T> AddPropObjComp<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false, object extraInfo = null, T initalValue = default(T))
+        public IProp<T> AddPropObjComp<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false, object extraInfo = null, T initialValue = default(T))
         {
-            throw new NotImplementedException();
+            IProp<T> prop = propBag.AddPropObjComp<T>(propertyName, doIfChanged, doAfterNotify, extraInfo, initialValue);
+            RegisterDynProp(propertyName, default(T));
+            return prop;
         }
 
         public IProp<T> AddPropObjCompNoStore<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false, object extraInfo = null)
         {
-            throw new NotImplementedException();
+            IProp<T> prop = propBag.AddPropObjCompNoStore<T>(propertyName, doIfChanged, doAfterNotify, extraInfo);
+            // TODO: This is not quite right.
+            RegisterDynProp(propertyName, default(T));
+            return prop;
         }
 
         public IProp<T> AddPropObjCompNoValue<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false, object extraInfo = null)
         {
-            throw new NotImplementedException();
+            IProp<T> prop = propBag.AddPropObjCompNoValue<T>(propertyName, doIfChanged, doAfterNotify, extraInfo);
+            // TODO: This is not quite right.
+            RegisterDynProp(propertyName, default(T));
+            return prop;
         }
 
         private bool RegisterDynProp(string propertyName, object value)
@@ -216,25 +233,42 @@ namespace DRM.PropBag
             return propBag.GetAllPropNamesAndTypes();
         }
 
+        public object this[string propertyName]
+        {
+            get
+            {
+                return GetValWithType(propertyName);
+            }
+            set
+            {
+                SetValWithType(propertyName, null, value);
+            }
+        }
+
         public object this[string typeName, string propertyName]
         {
             get
             {
-                return GetIt(propertyName, Type.GetType(propertyName));
+                return GetValWithType(propertyName, Type.GetType(propertyName));
             }
             set
             {
                 Type type = Type.GetType(typeName);
-                SetItWithType(value, type, propertyName);
+                SetValWithType(propertyName, type, value);
             }
         }
 
-        public object GetIt([CallerMemberName] string propertyName = null, Type propertyType = null)
+        public object GetValWithNoType(string propertyName)
         {
-            return propBag.GetIt(propertyName, propertyType);
+            return propBag.GetValWithType(propertyName, null);
         }
 
-        public T GetIt<T>([CallerMemberName] string propertyName = null)
+        public object GetValWithType(string propertyName, Type propertyType = null)
+        {
+            return propBag.GetValWithType(propertyName, propertyType);
+        }
+
+        public T GetIt<T>(string propertyName)
         {
             return propBag.GetIt<T>(propertyName);
         }
@@ -249,9 +283,9 @@ namespace DRM.PropBag
             return propBag.PropertyExists(propertyName);
         }
 
-        public bool RegisterDoWhenChanged<T>(Action<T, T> doWhenChanged, bool doAfterNotify = false, [CallerMemberName] string propertyName = null)
+        public bool RegisterDoWhenChanged<T>(string propertyName, Action<T, T> doWhenChanged, bool doAfterNotify = false)
         {
-            return propBag.RegisterDoWhenChanged<T>(doWhenChanged, doAfterNotify, propertyName);
+            return propBag.RegisterDoWhenChanged<T>(propertyName, doWhenChanged, doAfterNotify);
         }
 
         public void RemoveProp(string propertyName)
@@ -259,24 +293,25 @@ namespace DRM.PropBag
             propBag.RemoveProp(propertyName);
         }
 
-        public bool SetIt<T>(T value, [CallerMemberName] string propertyName = null)
+        public bool SetIt<T>(T value, string propertyName)
         {
             return propBag.SetIt<T>(value, propertyName);
         }
 
-        public bool SetIt<T>(T newValue, ref T curValue, [CallerMemberName] string propertyName = null)
+        public bool SetIt<T>(T newValue, ref T curValue, string propertyName)
         {
             return propBag.SetIt<T>(newValue, ref curValue, propertyName);
         }
 
-        public bool SetItWithNoType(object value, [CallerMemberName] string propertyName = null)
+        public bool SetValWithNoType(string propertyName, object value)
         {
-            return propBag.SetItWithNoType(value, propertyName);
+            return propBag.SetValWithNoType(propertyName, value);
         }
 
-        public bool SetItWithType(object value, Type propertyType = null, [CallerMemberName] string propertyName = null)
+
+        public bool SetValWithType(string propertyName, Type propertyType, object value)
         {
-            return propBag.SetItWithType(value, propertyType, propertyName);
+            return propBag.SetValWithType(propertyName, propertyType, value);
         }
 
         public void SubscribeToPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, string propertyName)
@@ -307,6 +342,40 @@ namespace DRM.PropBag
         public bool UnSubscribeToPropChanged(Action<object, object> doOnChange, string propertyName)
         {
             return propBag.UnSubscribeToPropChanged(doOnChange, propertyName);
+        }
+
+
+        public new void AddToPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, [CallerMemberName] string eventPropertyName = null)
+        {
+            string propertyName = GetPropNameFromEventProp(eventPropertyName);
+            SubscribeToPropChanged<T>(eventHandler, propertyName);
+        }
+
+        public new void RemoveFromPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, [CallerMemberName] string eventPropertyName = null)
+        {
+            string propertyName = GetPropNameFromEventProp(eventPropertyName);
+            UnSubscribeToPropChanged<T>(eventHandler, propertyName);
+        }
+
+        /// <summary>
+        /// Given a string in the form "{0}Changed", where {0} is the underlying property name, parse out and return the value of {0}.
+        /// </summary>
+        /// <param name="x"></param>
+        /// <returns></returns>
+        protected string GetPropNameFromEventProp(string x)
+        {
+            //PropStringChanged
+            return x.Substring(0, x.Length - 7);
+        }
+
+        public object GetValueGen(object host, string propertyName, Type propertyType)
+        {
+            return ((IPropBag)host).GetValWithType(propertyName, propertyType);
+        }
+
+        public void SetValueGen(object host, string propertyName, Type propertyType, object value)
+        {
+            ((IPropBag)host).SetValWithType(propertyName, propertyType, value);
         }
     }
 

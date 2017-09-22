@@ -4,8 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
-
-using DRM.Inpcwv;
+using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBag
 {

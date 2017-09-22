@@ -6,8 +6,8 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using System.Runtime.CompilerServices;
+using DRM.TypeSafePropertyBag;
 
-using DRM.Inpcwv;
 
 namespace DRM.PropBag
 {
@@ -145,7 +145,7 @@ namespace DRM.PropBag
 
         public object TypedValueAsObject { get { return (object) TypedValue; } }
 
-        //public NTV ToNTV([CallerMemberName] string propertyName = null)
+        //public NTV ToNTV(string propertyName)
         //{
         //    return new NTV(propertyName, Type, TypedValue);
         //}

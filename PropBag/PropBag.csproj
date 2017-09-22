@@ -30,9 +30,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AutoMapper">
-      <HintPath>..\..\AutoMapper\src\AutoMapper\obj\Debug\net45\AutoMapper.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -45,7 +42,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Caches\TypeDescBasedTConverterKey.cs" />
-    <Compile Include="Caches\GenerateHash.cs" />
     <Compile Include="Caches\TypeDescBasedTConverterCache.cs" />
     <Compile Include="ClassGenerator\PropDefRaw.cs" />
     <Compile Include="ClassGenerator\PropGenerator.cs" />
@@ -54,6 +50,7 @@
     <Compile Include="ControlModel\NotifyPropertyChangedBase.cs" />
     <Compile Include="Caches\DelegateCacheProvider.cs" />
     <Compile Include="ControlModel\TwoTypes.cs" />
+    <Compile Include="DoSetDelegate.cs" />
     <Compile Include="Factories\AbstractPropFactory.cs" />
     <Compile Include="ControlModel\PropComparerField.cs" />
     <Compile Include="ControlModel\PropDoWhenChangedField.cs" />
@@ -65,7 +62,7 @@
     <Compile Include="Factories\PropFactoryValueConveter.cs" />
     <Compile Include="LiveClassGenerator\LivePropModelExtensions.cs" />
     <Compile Include="LiveClassGenerator\PBDispatcher.cs" />
-    <Compile Include="LiveClassGenerator\PropBagPropertyInfo.cs" />
+    <None Include="LiveClassGenerator\PropBagPropertyInfo.cs" />
     <Compile Include="Prop.cs" />
     <Compile Include="PropBagDyn.cs" />
     <Compile Include="PropBagExperimental.cs" />
@@ -84,7 +81,6 @@
     <Compile Include="PropBag.cs" />
     <Compile Include="PropBagBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ValPlusType.cs" />
     <Compile Include="RefEqualityComparer.cs" />
     <Compile Include="XMLModel\PropComparerField.cs" />
     <Compile Include="XMLModel\PropDoWhenChanged.cs" />
@@ -96,9 +92,9 @@
     <Compile Include="XMLModel\PropModelWriter.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\NotifyPropChangedWithVals\Inpcwv.csproj">
-      <Project>{18580a49-4d08-4b0d-9a2e-4ed38891c63b}</Project>
-      <Name>Inpcwv</Name>
+    <ProjectReference Include="..\TypeSafePropertyBag\TypeSafePropertyBag.csproj">
+      <Project>{bbb1e311-374e-4c91-a313-1667d83767db}</Project>
+      <Name>TypeSafePropertyBag</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

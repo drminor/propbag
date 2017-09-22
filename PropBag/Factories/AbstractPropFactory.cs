@@ -192,6 +192,7 @@ namespace DRM.PropBag
                 (Action<T, T>)doWhenChanged, doAfterNotify, compr);
         }
 
+
     }
 
 

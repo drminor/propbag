@@ -8,6 +8,7 @@ namespace DRM.PropBag
 {
     public enum PropBagTypeSafetyMode
     {
+        Tight, //AllPropMustBeRegistered + OnlyTypedAccess.
         AllPropsMustBeRegistered,
         OnlyTypedAccess,
         Loose

@@ -6,7 +6,6 @@ using System.Reflection;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-using DRM.Inpcwv;
 
 namespace DRM.PropBag
 {
@@ -18,9 +17,9 @@ namespace DRM.PropBag
     /// by the well known Code Project Open License.
     /// Please refer to the file in this same folder named CPOP.htm for the exact set of terms that govern this release.
     /// Although not included as a condition of use, I would prefer that this text, 
-    /// or a similar text which covers all of the points, be included along with a copy of cpol.htm
+    /// or a similar text which covers all of the points made here, be included along with a copy of cpol.htm
     /// in the set of artifacts deployed with any product
-    /// wherein this source code, or a derivative thereof, is used to build the product.
+    /// wherein this source code, or a derivative thereof, is used.
     /// </summary>
 
     #endregion
@@ -74,22 +73,22 @@ namespace DRM.PropBag
         //    set { base[typeName, propertyName] = value; }
         //}
 
-        //new protected object GetIt([CallerMemberName] string propertyName = null)
+        //new protected object GetIt(string propertyName)
         //{
         //    return base.GetIt(propertyName);
         //}
 
-        //new protected T GetIt<T>([CallerMemberName] string propertyName = null)
+        //new protected T GetIt<T>(string propertyName)
         //{
         //    return base.GetIt<T>(propertyName);
         //}
 
-        //new protected void SetIt(object value, [CallerMemberName] string propertyName = null, Type propertyType = null)
+        //new protected void SetIt(object value, string propertyName, Type propertyType = null)
         //{
         //    base.SetIt(value, propertyName, propertyType);
         //}
 
-        //new protected void SetIt<T>(T value, [CallerMemberName] string propertyName = null)
+        //new protected void SetIt<T>(T value, string propertyName)
         //{
         //    base.SetIt<T>(value, propertyName);
         //}
@@ -123,67 +122,74 @@ namespace DRM.PropBag
         /// <param name="doAfterNotify"></param>
         /// <param name="comparer">A instance of a class that implements IEqualityComparer and thus an Equals method.</param>
         /// <param name="initalValue"></param>
-        protected IProp<T> AddProp<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
-            Func<T,T,bool> comparer = null, object extraInfo = null, T initialValue = default(T))
+        public new IProp<T> AddProp<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
+            Func<T, T, bool> comparer = null, object extraInfo = null, T initialValue = default(T))
         {
-            bool hasStorage = true;
-            bool typeIsSolid = true;
-            IProp<T> pg = ThePropFactory.Create<T>(initialValue, propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
-            AddProp<T>(propertyName, pg);
-            return pg;
+            return base.AddProp<T>(propertyName, doIfChanged, doAfterNotify, comparer, extraInfo, initialValue);
+            //bool hasStorage = true;
+            //bool typeIsSolid = true;
+            //IProp<T> pg = ThePropFactory.Create<T>(initialValue, propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
+            //AddProp<T>(propertyName, pg);
+            //return pg;
         }
 
-        protected IProp<T> AddPropObjComp<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
+        // TODO: Consider removing this method and adding a parameter to AddProp named "UseRefEquality."
+        public new IProp<T> AddPropObjComp<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
             object extraInfo = null, T initialValue = default(T))
         {
-            bool hasStorage = true;
-            bool typeIsSolid = true;
-            Func<T,T,bool> comparer = ThePropFactory.GetRefEqualityComparer<T>();
-            IProp<T> pg = ThePropFactory.Create<T>(initialValue, propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
-            AddProp<T>(propertyName, pg);
-            return pg;
+            return base.AddPropObjComp(propertyName, doIfChanged, doAfterNotify, extraInfo, initialValue);
+            //bool hasStorage = true;
+            //bool typeIsSolid = true;
+            //Func<T,T,bool> comparer = ThePropFactory.GetRefEqualityComparer<T>();
+            //IProp<T> pg = ThePropFactory.Create<T>(initialValue, propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
+            //AddProp<T>(propertyName, pg);
+            //return pg;
         }
 
-        protected IProp<T> AddPropNoValue<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
-            Func<T,T,bool> comparer = null, object extraInfo = null)
+        public new IProp<T> AddPropNoValue<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
+            Func<T, T, bool> comparer = null, object extraInfo = null)
         {
-            bool hasStorage = true;
-            bool typeIsSolid = true;
-            IProp<T> pg = ThePropFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
-            AddProp<T>(propertyName, pg);
-            return pg;
+            return base.AddPropNoValue(propertyName, doIfChanged, doAfterNotify, comparer, extraInfo);
+            //bool hasStorage = true;
+            //bool typeIsSolid = true;
+            //IProp<T> pg = ThePropFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
+            //AddProp<T>(propertyName, pg);
+            //return pg;
         }
 
-        protected IProp<T> AddPropObjCompNoValue<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
+        public new IProp<T> AddPropObjCompNoValue<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
             object extraInfo = null)
         {
-            bool hasStorage = true;
-            bool typeIsSolid = true;
-            Func<T,T,bool> comparer = ThePropFactory.GetRefEqualityComparer<T>();
-            IProp<T> pg = ThePropFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
-            AddProp<T>(propertyName, pg);
-            return pg;
+            return base.AddPropObjCompNoValue(propertyName, doIfChanged, doAfterNotify, extraInfo);
+            //bool hasStorage = true;
+            //bool typeIsSolid = true;
+            //Func<T,T,bool> comparer = ThePropFactory.GetRefEqualityComparer<T>();
+            //IProp<T> pg = ThePropFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
+            //AddProp<T>(propertyName, pg);
+            //return pg;
         }
 
-        protected IProp<T> AddPropNoStore<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false,
-            Func<T,T,bool> comparer = null, object extraInfo = null)
+        public new IProp<T> AddPropNoStore<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false,
+            Func<T, T, bool> comparer = null, object extraInfo = null)
         {
-            bool hasStorage = false;
-            bool typeIsSolid = true;
-            IProp<T> pg = ThePropFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
-            AddProp<T>(propertyName, pg);
-            return pg;
+            return base.AddPropNoStore(propertyName, doIfChanged, doAfterNotify, comparer, extraInfo);
+            //bool hasStorage = false;
+            //bool typeIsSolid = true;
+            //IProp<T> pg = ThePropFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
+            //AddProp<T>(propertyName, pg);
+            //return pg;
         }
 
-        protected IProp<T> AddPropObjCompNoStore<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false,
+        public new IProp<T> AddPropObjCompNoStore<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false,
             object extraInfo = null)
         {
-            bool hasStorage = false;
-            bool typeIsSolid = true;
-            Func<T,T,bool> comparer = ThePropFactory.GetRefEqualityComparer<T>();
-            IProp<T> pg = ThePropFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
-            AddProp<T>(propertyName, pg);
-            return pg;
+            return base.AddPropObjCompNoStore(propertyName, doIfChanged, doAfterNotify, extraInfo);
+            //bool hasStorage = false;
+            //bool typeIsSolid = true;
+            //Func<T,T,bool> comparer = ThePropFactory.GetRefEqualityComparer<T>();
+            //IProp<T> pg = ThePropFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
+            //AddProp<T>(propertyName, pg);
+            //return pg;
         }
 
         #endregion

@@ -98,6 +98,7 @@ namespace DRM.PropBag
 
         private delegate string StringFromTDelegate(object value);
 
+        // TODO: Cache these.
         private static TFromStringDelegate GetTheTFromStringDelegate(Type propertyType)
         {
             System.Diagnostics.Debug.WriteLine(string.Format("A TFromString delegate is being created for type: {0}", propertyType.ToString()));
