@@ -6,6 +6,10 @@
 *.user
 *.sln.docstates
 
+# Visual Studio 2015 cache/options directory
+.vs/
+
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
