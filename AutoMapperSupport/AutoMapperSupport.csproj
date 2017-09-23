@@ -45,9 +45,8 @@
   <ItemGroup>
     <Compile Include="ConfiguredMappers.cs" />
     <Compile Include="IPropBagMapperGen.cs" />
-    <Compile Include="PropBagMapper2.cs" />
+    <Compile Include="PropBagMapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <None Include="PropBagMapper.cs" />
     <Compile Include="TypePair.cs" />
   </ItemGroup>
   <ItemGroup>
