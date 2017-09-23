@@ -19,7 +19,12 @@ namespace PropBagLib.Tests
 
         public IPropGen GetProp(string propertyName)
         {
-            return base.GetGenProp(propertyName, null);
+            return base.GetGenProp(propertyName, null, out bool wasRegistered,
+                haveValue: false,
+                value: null,
+                alwaysRegister: false,
+                mustRegister:true,
+                desiredHasStoreValue:ThePropFactory.ProvidesStorage);
         }
 
         public void DoWhenStringChanged(string oldVal, string newVal)

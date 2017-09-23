@@ -80,6 +80,21 @@ namespace DRM.PropBag
             return default(T);
         }
 
+        public virtual object GetDefaultValue(Type propertyType, out bool typeIsSolid)
+        {
+            if (propertyType == null)
+            {
+                throw new InvalidOperationException("Cannot manufacture a default value if the type is specified as null.");
+            }
+            typeIsSolid = true;
+            return Activator.CreateInstance(propertyType);
+        }
+
+        public virtual bool IsTypeSolid(object value, Type propertyType)
+        {
+            return (propertyType != typeof(object));
+        }
+
         public virtual T GetValueFromObject<T>(object value)
         {
             if (value == null)
@@ -113,6 +128,8 @@ namespace DRM.PropBag
 
 
         #region Shared Delegate Creation Logic
+
+        //TODO: Consider caching the delegates that are created here.
 
         static private Type gmtType = typeof(APFGenericMethodTemplates);
 
