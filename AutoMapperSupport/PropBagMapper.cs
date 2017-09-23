@@ -14,7 +14,7 @@ using DRM.PropBag;
 
 namespace DRM.AutoMapperSupport
 {
-    public class PropBagMapper<RegT, PbT> where PbT : IPropBag, new()
+    public class PropBagMapper<RegT, PbT> : IPropBagMapperGen where PbT : IPropBag, new()
     {
         #region Public and Private Members
 
@@ -25,7 +25,12 @@ namespace DRM.AutoMapperSupport
         PropModel _propModel;
         Dictionary<string, Type> _propDefs;
         Type _wrapperType;
-        IMapper _mapper = null;
+        Func<object, object> _regularInstanceCreator;
+
+        public IMapper Mapper { get; set; }
+
+        TypePair _typePair;
+        public TypePair TypePair => _typePair;
 
         #endregion
 
@@ -44,8 +49,9 @@ namespace DRM.AutoMapperSupport
 
             _wrapperType = CreateWrapper(typeDescription);
 
-            var mc = CreateMapperConfig(_wrapperType, regularInstanceCreator);
-            _mapper = mc.CreateMapper();
+            _regularInstanceCreator = regularInstanceCreator;
+
+            _typePair = new TypePair(typeof(RegT), typeof(PbT));
         }
 
         public PropBagMapper(BoundPropBag boundPB) : this(boundPB, null, null) { }
@@ -62,8 +68,9 @@ namespace DRM.AutoMapperSupport
             boundPB.WrapperType = CreateWrapper(typeDescription, moduleBuilderInfo);
             _wrapperType = boundPB.WrapperType;
 
-            var mc = CreateMapperConfig(_wrapperType, regularInstanceCreator);
-            _mapper = mc.CreateMapper();
+            _regularInstanceCreator = regularInstanceCreator;
+
+            _typePair = new TypePair(typeof(RegT), typeof(PbT));
         }
 
         #endregion
@@ -112,6 +119,14 @@ namespace DRM.AutoMapperSupport
             return result;
         }
 
+        #endregion
+
+        public IMapperConfigurationExpression Configure(IMapperConfigurationExpression cfg)
+        {
+            ConfigIt(cfg, _wrapperType, _regularInstanceCreator);
+            return cfg;
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -120,110 +135,83 @@ namespace DRM.AutoMapperSupport
         /// <param name="regularType"></param>
         /// <param name="propDefs"></param>
         /// <returns></returns>
-        public MapperConfiguration CreateMapperConfig(Type wrapperType, Func<object, object> regularInstanceCreator) 
+        public void ConfigIt(IMapperConfigurationExpression cfg, Type wrapperType, Func<object, object> regularInstanceCreator) 
         {
-            //byte dummy = 0xf;
-            //DRM.PropBag.PropBag dummyPropBag = new DRM.PropBag.PropBag(dummy);
-            //object generatedObject = Activator.CreateInstance(emittedType, new object[] { dummyPropBag, propDefs });
+            cfg.CreateMap(typeof(RegT), wrapperType);
 
-            //Type wType = generatedObject.GetType();
-
-            //wrapperType = wType;
-
-
-            //// Loop over all the generated properties, and assign the values from our XML:
-            //PropertyInfo[] properties = newProxyType.GetProperties();
-
-            ////properties[1].SetMethod.Invoke(generatedObject, new object[] { "Can we do it?" });
-
-            //ITypeSafePropBag tspb = (ITypeSafePropBag)generatedObject;
-            //Dictionary<string, ValPlusType> namedValue = ((TypeSafePropBagBase)tspb).NamedValuesWithType;
-            //tspb.SetItWithNoType("A", "Item1");
-
-            //MethodInfo getM = properties[1].GetGetMethod();
-
-            //string item1Val = (string)getM.Invoke(generatedObject, new object[] { });
-
-            //// Create a fresh instance.
-            //generatedObject = Activator.CreateInstance(newProxyType, new object[] { propDefs });
-
-            //MethodInfo setM = properties[1].GetSetMethod();
-            //setM.Invoke(generatedObject, new object[] { "B" });
-
-            //// Create a fresh instance.
-            //generatedObject = Activator.CreateInstance(newProxyType, new object[] { propDefs });
-
-
-            var config = new MapperConfiguration(cfg =>
+            if (regularInstanceCreator != null)
             {
-                cfg
-                    .CreateMap(typeof(RegT), wrapperType)
-                    //.ForMember("ThePropFactory", (mc => mc.Ignore()))
-                    //.ForMember("TypeSafetyMode", (mc => mc.Ignore())))
-                    //.ForMember("NamedValuesWithType", (mc => mc.Ignore()))
-                    //.ForMember("TypeDefs", (mc => mc.Ignore()))
-
-
-                    //.ConstructUsing(src => Activator.CreateInstance(newProxyType, new object[] { propDefs }))
-                    ;
-
-                if (regularInstanceCreator != null)
-                {
-                    cfg.CreateMap(wrapperType, typeof(RegT)).ConstructUsing(regularInstanceCreator);
-                }
-                else
-                {
-                    cfg.CreateMap(wrapperType, typeof(RegT));
-                }
-            });
-
-            config.AssertConfigurationIsValid();
-
-            return config;
-            //var mapper = config.CreateMapper();
-
-            //Source src = new Source
-            //{
-            //    Item1 = "This is it",
-            //    MyInteger = 2
-            //};
-
-            ////src.SetItem1("This is it");
-
-            //var newDest = mapper.Map(src, generatedObject, typeof(Source), wrapperType);
-
-            //ITypeSafePropBag tDest = (ITypeSafePropBag)newDest;
-            //tDest.GetItWithNoType("Item1").ShouldBe("This is it");
-            //tDest.GetItWithNoType("MyInteger").ShouldBe(2);
-
-            ////var newDest2 = mapper.Map<Source, Destination>(src);
-
-            ////Destination destinationUsedAsSource = new Destination();
-            ////destinationUsedAsSource.SetItWithType("Item1", typeof(string), "This is the initial value of src2.Item1");
-            ////destinationUsedAsSource.SetItWithType("MyInteger", typeof(int), -1);
-
-            //Source newSource = (Source)mapper.Map(generatedObject, src, wrapperType, typeof(Source));
-            //newSource.Item1.ShouldBe("This is it");
-            //newSource.MyInteger.ShouldBe(2);
+                cfg.CreateMap(wrapperType, typeof(RegT)).ConstructUsing(regularInstanceCreator);
+            }
+            else
+            {
+                cfg.CreateMap(wrapperType, typeof(RegT));
+            }
         }
 
+
+        #region IPropBagMapperGen implementation
+
+        //public delegate object MapFromX(IPropBag source);
+        //public delegate IPropBag MapToX(object source, IPropBag destination);
+        //public delegate IPropBag MapToNewX(object source);
+
+        //MapFromX MapFrom
+        //{
+        //    get
+        //    {
+        //        return MapFromX;
+        //    }
+        //}
+
+        //MapToX MapTo
+        //{
+        //    get
+        //    {
+        //        return MapToX;
+        //    }
+        //}
+
+        //public MapToNewX MapToNew
+        //{
+        //    get
+        //    {
+        //        return MapToNewX;
+        //    }
+        //}
+
         #endregion
+
+        #region Type Mapper Function
+
+        //public object MapFromX(IPropBag source)
+        //{
+        //    return (RegT)MapFrom((PbT)source);
+        //}
+
+        //public IPropBag MapToX(object source, IPropBag destination)
+        //{
+        //    return MapTo((RegT)source, (PbT)destination);
+        //}
+
+        //public IPropBag MapToNewX(object source)
+        //{
+        //    return (PbT)MapTo((RegT)source);
+        //}
 
         public RegT MapFrom(PbT source)
         {
             object wrappedObject = Activator.CreateInstance(_wrapperType, new object[] { source, _propDefs });
-            return (RegT)_mapper.Map(wrappedObject, _wrapperType, typeof(RegT));
+            return (RegT)Mapper.Map(wrappedObject, _wrapperType, typeof(RegT));
         }
 
-
-
-
-        public void MapTo(RegT source, PbT destination)
+        public PbT MapTo(RegT source, PbT destination)
         {
             object wrappedObject = Activator.CreateInstance(_wrapperType, new object[] { destination, _propDefs });
 
             // Used for debugging only.
-            var rr = _mapper.Map(source, wrappedObject, typeof(RegT), _wrapperType);
+            var rr = Mapper.Map(source, wrappedObject, typeof(RegT), _wrapperType);
+            return destination;
         }
 
         public PbT MapTo(RegT source)
@@ -242,9 +230,11 @@ namespace DRM.AutoMapperSupport
 
             object wrappedObject = Activator.CreateInstance(_wrapperType, new object[] { destination, _propDefs });
 
-            var rr = _mapper.Map(source, wrappedObject, typeof(RegT), _wrapperType);
+            var rr = Mapper.Map(source, wrappedObject, typeof(RegT), _wrapperType);
             return destination;
         }
+
+        #endregion
 
         #region DevelopementWork Get Key Pair
 
