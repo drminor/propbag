@@ -50,7 +50,7 @@ namespace DRM.PropBag.ControlsWPF
             {
                 if(rootProvider.RootObject != null)
                 {
-                    object result = doConvertFrom((string)value, rootProvider.RootObject);
+                    object result = DoConvertFrom((string)value, rootProvider.RootObject);
                     if (result != null) return result;
                 }
                 else
@@ -66,7 +66,7 @@ namespace DRM.PropBag.ControlsWPF
             return base.ConvertFrom(context, culture, value);
         }
 
-        private object doConvertFrom(string s, object xamlRoot)
+        private object DoConvertFrom(string s, object xamlRoot)
         {
             // TODO: create a custom exeception type for this.
             if (s == null) throw new ApplicationException("The XamlRoot is null");
@@ -89,6 +89,7 @@ namespace DRM.PropBag.ControlsWPF
                 if(targetInstance == null)
                     throw new ApplicationException(string.Format("Cannot find a reference to a running instance of {0}, and cannot find a public constructor to use to create a running instance.", strTargetType));
 
+                // TODO: See if we can avoid having to create an instance in order to get the type to inspect.
                 Type targetType = targetInstance.GetType();
                 if (strTargetType != targetType.ToString()) 
                     throw new ApplicationException(string.Format("The {0} doesn't match the {1}", strTargetType, targetType.ToString()));

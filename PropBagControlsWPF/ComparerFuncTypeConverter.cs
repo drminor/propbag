@@ -52,7 +52,7 @@ namespace DRM.PropBag.ControlsWPF
                 if (rootProvider.RootObject != null)
                 {
 
-                    object result = doConvertFrom((string)value);
+                    object result = DoConvertFrom((string)value);
                     if (result != null) return result;
                     return Placeholder;
                 }
@@ -69,7 +69,7 @@ namespace DRM.PropBag.ControlsWPF
             //return base.ConvertFrom(context, culture, value);
         }
 
-        private object doConvertFrom(string s)
+        private object DoConvertFrom(string s)
         {
             // TODO: create a custom exeception type for this.
             if (s == null) throw new ApplicationException("The string to convert is null.");
@@ -113,8 +113,7 @@ namespace DRM.PropBag.ControlsWPF
                 if (formatType == 0)
                 {
                     string targetType = parts[2];
-                    object instance;
-                    MethodInfo mi = GetMIFromClassWithDefaultProp(strPropType, targetType, out instance);
+                    MethodInfo mi = GetMIFromClassWithDefaultProp(strPropType, targetType, out object instance);
 
                     if (mi == null)
                         throw new ApplicationException("Cannot find a class with that name that has a Default property that returns an object that implements the IEqualityComparer<T> interface.");
