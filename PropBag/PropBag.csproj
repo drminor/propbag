@@ -19,7 +19,7 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <WarningLevel>2</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -32,33 +32,76 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Caches\TypeDescBasedTConverterKey.cs" />
+    <Compile Include="Caches\TypeDescBasedTConverterCache.cs" />
+    <Compile Include="ClassGenerator\PropDefRaw.cs" />
+    <Compile Include="ClassGenerator\PropGenerator.cs" />
+    <Compile Include="ClassGenerator\PropModelExtensions.cs" />
+    <Compile Include="ClassGenerator\T4Support.cs" />
+    <Compile Include="ControlModel\NotifyPropertyChangedBase.cs" />
+    <Compile Include="Caches\DelegateCacheProvider.cs" />
+    <Compile Include="ControlModel\TwoTypes.cs" />
+    <Compile Include="DoSetDelegate.cs" />
+    <Compile Include="Factories\AbstractPropFactory.cs" />
+    <Compile Include="ControlModel\PropComparerField.cs" />
+    <Compile Include="ControlModel\PropDoWhenChangedField.cs" />
+    <Compile Include="ControlModel\PropInitialValueField.cs" />
+    <Compile Include="ControlModel\PropItem.cs" />
+    <Compile Include="ControlModel\PropModel.cs" />
+    <Compile Include="Factories\CreatePropDelegate.cs" />
+    <Compile Include="ExtValDelegates.cs" />
+    <Compile Include="Factories\PropFactoryValueConveter.cs" />
+    <Compile Include="LiveClassGenerator\LivePropModelExtensions.cs" />
+    <Compile Include="LiveClassGenerator\PBDispatcher.cs" />
+    <None Include="LiveClassGenerator\PropBagPropertyInfo.cs" />
     <Compile Include="Prop.cs" />
+    <Compile Include="PropBagDyn.cs" />
+    <Compile Include="PropBagExperimental.cs" />
+    <Compile Include="PropBagInterfaces\IPropBag.cs" />
+    <Compile Include="PropBagInterfaces\IPubPropBag.cs" />
+    <Compile Include="PropBagTypeSafetyModeEnum.cs" />
     <Compile Include="PropExternStore.cs" />
-    <Compile Include="PropExtStoreFactory.cs" />
-    <Compile Include="PropFactory.cs" />
+    <Compile Include="Factories\PropExtStoreFactory.cs" />
+    <Compile Include="Factories\PropFactory.cs" />
     <Compile Include="PropGenBase.cs" />
-    <Compile Include="PropTypeBase.cs" />
+    <Compile Include="PropInterfaces\IProp.cs" />
+    <Compile Include="PropInterfaces\IPropGen.cs" />
+    <Compile Include="PropInterfaces\IPropTyped.cs" />
+    <Compile Include="PropTypedBase.cs" />
     <Compile Include="PubPropBag.cs" />
     <Compile Include="PropBag.cs" />
     <Compile Include="PropBagBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RefEqualityComparer.cs" />
+    <Compile Include="XMLModel\PropComparerField.cs" />
+    <Compile Include="XMLModel\PropDoWhenChanged.cs" />
+    <Compile Include="XMLModel\PropInitalValueField.cs" />
+    <Compile Include="XMLModel\PropItem.cs" />
+    <Compile Include="XMLModel\PropModel.cs" />
+    <Compile Include="XMLModel\PropModelReader.cs" />
+    <Compile Include="XMLModel\PropModelStaticText.cs" />
+    <Compile Include="XMLModel\PropModelWriter.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\NotifyPropChangedWithVals\Inpwvc.csproj">
-      <Project>{18580a49-4d08-4b0d-9a2e-4ed38891c63b}</Project>
-      <Name>Inpwvc</Name>
+    <ProjectReference Include="..\TypeSafePropertyBag\TypeSafePropertyBag.csproj">
+      <Project>{bbb1e311-374e-4c91-a313-1667d83767db}</Project>
+      <Name>TypeSafePropertyBag</Name>
     </ProjectReference>
-    <ProjectReference Include="..\PropBagShared\PropBagShared.csproj">
-      <Project>{1544a8f7-3296-4788-97b4-bfd15e6bf914}</Project>
-      <Name>PropBagShared</Name>
-    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="XMLModel\PropBagModel.dtd" />
+    <None Include="XMLModel\PropBagModel.xsd">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

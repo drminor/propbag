@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using DRM.Ipnwvc;
+﻿using DRM.TypeSafePropertyBag;
 using DRM.PropBag;
-
 using NUnit.Framework;
+using System;
 
 namespace PropBagLib.Tests
 {
@@ -32,7 +26,7 @@ namespace PropBagLib.Tests
         }
 
         [OneTimeTearDown]
-        public void destroy()
+        public void Destroy()
         {
             mod1 = null;
         }
@@ -44,9 +38,10 @@ namespace PropBagLib.Tests
         [Test]
         public void ShouldUpdateBool()
         {
-            mod1 = new LooseModel(PropBagTypeSafetyMode.Loose);
-
-            mod1.PropBool = true;
+            mod1 = new LooseModel(PropBagTypeSafetyMode.Loose)
+            {
+                PropBool = true
+            };
             Assert.That(mod1.PropBool, Is.True, "PropBool did not get updated.");
         }
 
@@ -54,7 +49,7 @@ namespace PropBagLib.Tests
         public void ShouldUpdateString()
         {
             mod1 = new LooseModel(PropBagTypeSafetyMode.Loose);
-            mod1.PropStringChanged += mod1_PropStringChanged;
+            mod1.PropStringChanged += Mod1_PropStringChanged;
 
             mod1.PropString = "Test2";
 
@@ -67,9 +62,10 @@ namespace PropBagLib.Tests
         [Test]
         public void ShouldSAndGLooseBool()
         {
-            mod1 = new LooseModel(PropBagTypeSafetyMode.Loose);
-
-            mod1.PropBool = true;
+            mod1 = new LooseModel(PropBagTypeSafetyMode.Loose)
+            {
+                PropBool = true
+            };
 
             bool temp = mod1.PropBool;
             Assert.That(temp, Is.EqualTo(true));
@@ -82,9 +78,9 @@ namespace PropBagLib.Tests
         {
             mod1 = new LooseModel(PropBagTypeSafetyMode.Loose);
 
-            mod1[PROP_NEW] = "string";
+            mod1["System.String", PROP_NEW] = "string";
             Assert.That(mod1.GetTypeOfProperty(PROP_NEW), Is.EqualTo(typeof(string)));
-            Assert.That(mod1[PROP_NEW], Is.EqualTo("string"));
+            Assert.That(mod1["System.String", PROP_NEW], Is.EqualTo("string"));
         }
 
         [Test]
@@ -92,12 +88,12 @@ namespace PropBagLib.Tests
         {
             mod1 = new LooseModel(PropBagTypeSafetyMode.Loose);
 
-            mod1[PROP_NEW] = null;
+            mod1["System.Object", PROP_NEW] = null;
             Assert.That(mod1.GetTypeOfProperty(PROP_NEW), Is.EqualTo(typeof(object)));
 
-            mod1[PROP_NEW] = "string";
+            mod1["System.String", PROP_NEW] = "string";
             Assert.That(mod1.GetTypeOfProperty(PROP_NEW), Is.EqualTo(typeof(string)));
-            Assert.That(mod1[PROP_NEW], Is.EqualTo("string"));
+            Assert.That(mod1["System.String", PROP_NEW], Is.EqualTo("string"));
         }
 
         [Test]
@@ -105,10 +101,10 @@ namespace PropBagLib.Tests
         {
             mod1 = new LooseModel(PropBagTypeSafetyMode.Loose);
 
-            mod1[PROP_NEW] = "string";
-            mod1[PROP_NEW] = null;
+            mod1["System.String", PROP_NEW] = "string";
+            mod1["System.String", PROP_NEW] = null;
             Assert.That(mod1.GetTypeOfProperty(PROP_NEW), Is.EqualTo(typeof(string)));
-            Assert.That(mod1[PROP_NEW], Is.Null);
+            Assert.That(mod1["System.String", PROP_NEW], Is.Null);
         }
 
         [Test]
@@ -117,7 +113,7 @@ namespace PropBagLib.Tests
             mod1 = new LooseModel(PropBagTypeSafetyMode.Loose);
 
             object x;
-            Assert.Throws<KeyNotFoundException>(() => x = mod1["x"]);
+            Assert.Throws<InvalidOperationException>(() => x = mod1["System.String", "x"]);
         }
 
         [Test]
@@ -126,14 +122,29 @@ namespace PropBagLib.Tests
             mod1 = new LooseModel(PropBagTypeSafetyMode.Loose);
 
             object x;
-            Assert.Throws<ArgumentNullException>(() => x = mod1[null]);
+            Assert.Throws<ArgumentNullException>(() => x = mod1["System.String", null]);
+        }
+
+        [Test]
+        public void UpdateViaPropGenAccess()
+        {
+            mod1 = new LooseModel(PropBagTypeSafetyMode.Loose);
+
+            IPropGen pg = mod1.GetProp("PropBool");
+
+            IProp<bool> pt = (IProp<bool>) pg.TypedProp;
+
+            //pt.Value = false;
+
+            //pt.Value = true;
+
         }
 
         #endregion
 
         #region Event Handlers
 
-        void mod1_PropStringChanged(object sender, PropertyChangedWithTValsEventArgs<string> e)
+        void Mod1_PropStringChanged(object sender, PropertyChangedWithTValsEventArgs<string> e)
         {
             IProp<string> prop = (IProp<string>)sender;
             string oldVal = e.OldValue;

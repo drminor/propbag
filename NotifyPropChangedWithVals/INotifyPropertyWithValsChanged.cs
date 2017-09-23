@@ -1,7 +1,7 @@
 ﻿using System;
 
 
-namespace DRM.Ipnwvc
+namespace DRM.Inpcwv
 {
     /// <summary>
     /// Notifies clients that a property value has changed and provides the old and new values in a type-safe manner.

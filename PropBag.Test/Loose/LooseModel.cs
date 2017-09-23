@@ -11,10 +11,15 @@ namespace PropBagLib.Tests
         public string DoWhenStringPropOldVal { get; set; }
         public string DoWhenStringPropNewVal { get; set; }
 
-        public new object this[string key]
+        public new object this[string propertyName, string key]
         {
-            get { return base[key]; }
-            set { base[key] = value; }
+            get { return base[propertyName, key]; }
+            set { base[propertyName, key] = value; }
+        }
+
+        public IPropGen GetProp(string propertyName)
+        {
+            return base.GetGenProp(propertyName, null);
         }
 
         public void DoWhenStringChanged(string oldVal, string newVal)

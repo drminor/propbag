@@ -85,14 +85,14 @@ namespace PropBagLib.Tests
             {
                 SetIt(value, ref _propStringNoStore);
             }
-        }  
+        }
 
         // For Loose Testing
-        public new object this[string key]
-        {
-            get { return base[key]; }
-            set { base[key] = value; }
-        }
+        //public new object this[string propertyName, string key]
+        //{
+        //    get { return base[propertyName, key]; }
+        //    set { base[propertyName, key] = value; }
+        //}
 
         protected void OnPropertyChanged2([CallerMemberName]string propertyName = null)
         {
@@ -104,7 +104,7 @@ namespace PropBagLib.Tests
 
         new public void ClearEventSubscribers()
         {
-            base.PClearEventSubscribers();
+            base.ClearEventSubscribers();
         }
 
     }

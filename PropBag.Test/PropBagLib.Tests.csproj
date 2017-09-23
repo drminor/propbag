@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\NUnit3TestAdapter.3.8.0\build\net35\NUnit3TestAdapter.props" Condition="Exists('..\packages\NUnit3TestAdapter.3.8.0\build\net35\NUnit3TestAdapter.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -11,6 +12,8 @@
     <AssemblyName>PropBag.Test</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -30,12 +33,15 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="nunit.framework, Version=3.7.1.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
-      <HintPath>..\packages\NUnit.3.7.1\lib\net45\nunit.framework.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="AutoMapper, Version=6.1.1.0, Culture=neutral, PublicKeyToken=be96cd2c38ef1005, processorArchitecture=MSIL">
+      <HintPath>..\packages\AutoMapper.6.1.1\lib\net45\AutoMapper.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.framework, Version=3.8.1.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
+      <HintPath>..\packages\NUnit.3.8.1\lib\net45\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -43,6 +49,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CreateAtRunTime\CreateAtRunTimeModel.cs" />
+    <Compile Include="CreateAtRunTime\TestCreateAtRunTime.cs" />
+    <Compile Include="Dynamic\TestDynamic.cs" />
     <Compile Include="ExtStore\ExtData.cs" />
     <Compile Include="ExtStore\ExtStoreModel.cs" />
     <Compile Include="ExtStore\TestExternalStore.cs" />
@@ -52,6 +61,18 @@
       <DependentUpon>ExtStoreModel.props.tt</DependentUpon>
     </Compile>
     <Compile Include="FileUtils.cs" />
+    <Compile Include="OnlyTypedAccess\OnlyTypedAccessModel.props.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>OnlyTypedAccessModel.props.tt</DependentUpon>
+    </Compile>
+    <Compile Include="PerformanceDynamic\PerformanceDynModel.cs" />
+    <Compile Include="PerformanceDynamic\PerformanceDynModel.props.cs">
+      <DependentUpon>PerformanceDynModel.props.tt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="Performance\PerformanceModel.cs" />
     <Compile Include="Performance\PerformanceModel.props.cs">
       <DependentUpon>PerformanceModel.props.tt</DependentUpon>
@@ -61,7 +82,6 @@
     </Compile>
     <Compile Include="Loose\LooseModel.cs" />
     <Compile Include="OnlyTypedAccess\OnlyTypedAccessModel.cs" />
-    <Compile Include="OnlyTypedAccess\OnlyTypedAccessModel.props.cs" />
     <Compile Include="Loose\TestLoose.cs" />
     <Compile Include="OnlyTypedAccess\TestOnlyTypedAccess.cs" />
     <Compile Include="AllPropsRegistered\TestAllPropsRegistered.cs" />
@@ -73,8 +93,21 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="Loose\LooseModel.props.cs" />
+    <Compile Include="PerformanceDynamic\TestPerformanceDynamic.cs" />
     <Compile Include="Performance\TestPerformance.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Content Include="OnlyTypedAccess\OnlyTypedAccessModel_PropDefs.xml" />
+    <Content Include="OnlyTypedAccess\OnlyTypedAccessModel.props.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>OnlyTypedAccessModel.props.cs</LastGenOutput>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="PerformanceDynamic\PerformanceDynModel.props.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>PerformanceDynModel.props.cs</LastGenOutput>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="PerformanceDynamic\PerformanceDynModel_PropDefs.xml" />
     <Content Include="PubPropBag\PubPropBagModel_PropDefs.xml" />
     <Content Include="T4\PropGen_PropDefs.xml">
       <SubType>Designer</SubType>
@@ -99,21 +132,13 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\NotifyPropChangedWithVals\Inpwvc.csproj">
-      <Project>{18580a49-4d08-4b0d-9a2e-4ed38891c63b}</Project>
-      <Name>Inpwvc</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\PropBagModel\PropBagModel.csproj">
-      <Project>{8c801165-03c1-429b-8099-4f5505921da5}</Project>
-      <Name>PropBagModel</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\PropBagShared\PropBagShared.csproj">
-      <Project>{1544a8f7-3296-4788-97b4-bfd15e6bf914}</Project>
-      <Name>PropBagShared</Name>
-    </ProjectReference>
     <ProjectReference Include="..\PropBag\PropBag.csproj">
       <Project>{7387b893-fbdc-4b9c-ac9e-0b56388b46c1}</Project>
       <Name>PropBag</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TypeSafePropertyBag\TypeSafePropertyBag.csproj">
+      <Project>{bbb1e311-374e-4c91-a313-1667d83767db}</Project>
+      <Name>TypeSafePropertyBag</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -129,6 +154,7 @@
       <LastGenOutput>ExtStoreModel.props.cs</LastGenOutput>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="app.config" />
     <None Include="packages.config" />
     <Content Include="PubPropBag\PubPropBagModel.props.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
@@ -148,6 +174,12 @@
     <Content Include="Performance\PerformanceModel_PropDefs.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\NUnit3TestAdapter.3.8.0\build\net35\NUnit3TestAdapter.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\NUnit3TestAdapter.3.8.0\build\net35\NUnit3TestAdapter.props'))" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

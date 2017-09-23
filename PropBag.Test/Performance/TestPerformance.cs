@@ -5,7 +5,7 @@ using NUnit.Framework;
 
 
 using DRM.PropBag;
-using DRM.Ipnwvc;
+using DRM.TypeSafePropertyBag;
 
 namespace PropBagLib.Tests
 {
@@ -28,7 +28,7 @@ namespace PropBagLib.Tests
         }
 
         [TearDown]
-        public void destroy()
+        public void Destroy()
         {
             mod1.ClearEventSubscribers();
             mod1 = null;
@@ -39,8 +39,8 @@ namespace PropBagLib.Tests
         public void SetInt1000Regular()
         {
             mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
-            mod1.PropertyChanged += mod1_PropertyChanged;
-            mod1.PropertyChanged2 += mod1_PropertyChanged2;
+            mod1.PropertyChanged += Mod1_PropertyChanged;
+            mod1.PropertyChanged2 += Mod1_PropertyChanged2;
 
             for (int cntr = 0; cntr < InterationCount - 1; cntr++)
             {
@@ -52,8 +52,8 @@ namespace PropBagLib.Tests
         public void SetInt1000WithType()
         {
             mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
-            mod1.PropertyChanged += mod1_PropertyChanged;
-            mod1.PropertyChanged2 += mod1_PropertyChanged2;
+            mod1.PropertyChanged += Mod1_PropertyChanged;
+            mod1.PropertyChanged2 += Mod1_PropertyChanged2;
 
             for (int cntr = 0; cntr < InterationCount - 1; cntr++)
             {
@@ -62,15 +62,15 @@ namespace PropBagLib.Tests
         }
 
         [Test]
-        public void SetInt1000NoType()
+        public void SetInt1000Index()
         {
             mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.Loose);
-            mod1.PropertyChanged += mod1_PropertyChanged;
-            mod1.PropertyChanged2 += mod1_PropertyChanged2;
+            mod1.PropertyChanged += Mod1_PropertyChanged;
+            mod1.PropertyChanged2 += Mod1_PropertyChanged2;
 
             for (int cntr = 0; cntr < InterationCount - 1; cntr++)
             {
-                mod1["PropInt"] = cntr;
+                mod1["System.Int32","PropInt"] = cntr;
             }
         }
 
@@ -78,8 +78,8 @@ namespace PropBagLib.Tests
         public void SetInt1000WithNoStore()
         {
             mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
-            mod1.PropertyChanged += mod1_PropertyChangedNoStore;
-            mod1.PropertyChanged2 += mod1_PropertyChanged2;
+            mod1.PropertyChanged += Mod1_PropertyChangedNoStore;
+            mod1.PropertyChanged2 += Mod1_PropertyChanged2;
 
             for (int cntr = 0; cntr < InterationCount - 1; cntr++)
             {
@@ -93,8 +93,8 @@ namespace PropBagLib.Tests
         public void SetString1000Regular()
         {
             mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
-            mod1.PropertyChanged += mod1_PropertyChanged;
-            mod1.PropertyChanged2 += mod1_PropertyChanged2;
+            mod1.PropertyChanged += Mod1_PropertyChanged;
+            mod1.PropertyChanged2 += Mod1_PropertyChanged2;
 
             string val;
 
@@ -109,8 +109,8 @@ namespace PropBagLib.Tests
         public void SetString1000WithType()
         {
             mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
-            mod1.PropertyChanged += mod1_PropertyChanged;
-            mod1.PropertyChanged2 += mod1_PropertyChanged2;
+            mod1.PropertyChanged += Mod1_PropertyChanged;
+            mod1.PropertyChanged2 += Mod1_PropertyChanged2;
 
             string val;
 
@@ -125,15 +125,15 @@ namespace PropBagLib.Tests
         public void SetString1000NoType()
         {
             mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.Loose);
-            mod1.PropertyChanged += mod1_PropertyChanged;
-            mod1.PropertyChanged2 += mod1_PropertyChanged2;
+            mod1.PropertyChanged += Mod1_PropertyChanged;
+            mod1.PropertyChanged2 += Mod1_PropertyChanged2;
 
             string val;
 
             for (int cntr = 0; cntr < InterationCount - 1; cntr++)
             {
                 val = cntr.ToString();
-                mod1["PropString"] = val;
+                mod1["System.String","PropString"] = val;
             }
         }
 
@@ -141,8 +141,8 @@ namespace PropBagLib.Tests
         public void SetString1000WithNoStore()
         {
             mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
-            mod1.PropertyChanged += mod1_PropertyChangedNoStore;
-            mod1.PropertyChanged2 += mod1_PropertyChanged2;
+            mod1.PropertyChanged += Mod1_PropertyChangedNoStore;
+            mod1.PropertyChanged2 += Mod1_PropertyChanged2;
 
             string val;
 
@@ -156,7 +156,7 @@ namespace PropBagLib.Tests
         #endregion
 
 
-        void mod1_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        void Mod1_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if (e.PropertyName == "PropInt")
             {
@@ -164,7 +164,7 @@ namespace PropBagLib.Tests
             }
         }
 
-        void mod1_PropertyChangedNoStore(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        void Mod1_PropertyChangedNoStore(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if (e.PropertyName == "PropIntNoStore")
             {
@@ -172,7 +172,7 @@ namespace PropBagLib.Tests
             }
         }
 
-        void mod1_PropertyChanged2(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        void Mod1_PropertyChanged2(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if (e.PropertyName == "PropIntStandard")
             {

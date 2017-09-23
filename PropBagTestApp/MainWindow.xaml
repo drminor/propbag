@@ -1,0 +1,78 @@
+﻿<Window x:Class="PropBagTestApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:pb="clr-namespace:DRM.PropBag.ControlsWPF;assembly=WPFControls"
+        xmlns:propbag="clr-namespace:DRM.PropBag;assembly=PropBag"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:drw="clr-namespace:System.Drawing;assembly=System.Drawing"
+        Title="MainWindow" Height="350" Width="525">
+
+    <Grid Name="TopGrid" >
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        <pb:PropBagTemplate Grid.Row="0" Name="T1" ClassName="MainViewModel" TypeSafetyMode="AllPropsMustBeRegistered">
+            <pb:PropBagTemplate.Namespaces>
+                <pb:NamespaceItem Namespace="System.IO"/>
+            </pb:PropBagTemplate.Namespaces>
+            
+            <pb:PropBagTemplate.Props>
+                <pb:PropItem PropertyName="MyString" PropertyType="sys:String">
+                    <pb:InitialValueField InitialValue="11"/>
+                    <pb:PropDoWhenChangedField DoWhenChangedAction="System.String|PropBagTestApp.MainViewModel|DoWhenMyStringChanges"
+                                DoAfterNotify="False"/>
+                    <pb:PropComparerField ComparerFunc="System.String|0|System.Collections.Generic.EqualityComparer" UseRefEquality="False"/>
+                </pb:PropItem>
+
+                <pb:PropItem PropertyName="MyPoint" PropertyType="drw:Point">
+                    <pb:InitialValueField InitialValue="0,0"/>
+                    <pb:PropDoWhenChangedField DoWhenChangedAction="System.String|PropBagTestApp.MainViewModel|DoWhenMyPointChanges"
+                                DoAfterNotify="False"/>
+                </pb:PropItem>
+
+            </pb:PropBagTemplate.Props>
+        </pb:PropBagTemplate>
+
+        <pb:PropBagTemplate Grid.Row="0" ClassName="MainViewModel2" TypeSafetyMode="AllPropsMustBeRegistered">
+            <pb:PropBagTemplate.Namespaces>
+                <pb:NamespaceItem Namespace="System"/>
+            </pb:PropBagTemplate.Namespaces>
+
+            <pb:PropBagTemplate.Props>
+                <pb:PropItem PropertyName="MyString" PropertyType="sys:String">
+                    <pb:InitialValueField InitialValue="22"/>
+                    <pb:PropDoWhenChangedField DoWhenChangedAction="System.String|PropBagTestApp.MainViewModel|DoWhenMyStringChanges"
+                                DoAfterNotify="False"/>
+                    <pb:PropComparerField UseRefEquality="True"/>
+                </pb:PropItem>
+            </pb:PropBagTemplate.Props>
+        </pb:PropBagTemplate>
+
+
+
+        <Label Grid.Row="1" Content="Label1:"></Label>
+        <TextBox Grid.Row="1" x:Name="txtRealField" Text="{Binding [MyString]}" Width="100" Height="25"></TextBox>
+
+        <Button Grid.Row="2" Content="OK" Height="20" Width="50" Click="Button_Click"></Button>
+        
+        <Grid Name="InsideGrid" Grid.Row="3">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Label Grid.Row="0" Content="Label1:"></Label>
+
+            <TextBox Grid.Row="0" x:Name="txtRealField2" Text="{Binding [MyString]}" Width="100" Height="25"></TextBox>
+
+            <Button Grid.Row="1" Content="OK2" Height="20" Width="50" Click="Button_Click"></Button>
+
+
+        </Grid>
+
+    </Grid>
+
+</Window>

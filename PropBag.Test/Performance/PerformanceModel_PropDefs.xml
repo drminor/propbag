@@ -1,6 +1,10 @@
 ﻿<?xml version="1.0"?>
-<model class-name="TestAllPropsRegistered" namespace="PropBagLib.Tests" type-safety-mode="AllPropsMustBeRegistered" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-xsi:schemaLocation="https://www.swamphillproductions.com/PropBagModel ../../PropBagModel/PropBagModel.xsd">
+<model
+  class-name="TestPerformance"
+  output-namespace="PropBagLib.Tests"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xsi:schemaLocation="https://www.swamphillproductions.com/PropBagModel ../../PropBag/XMLModel/PropBagModel.xsd">
   <namespaces>
     <namespace>System</namespace>
     <namespace>System.Collections.Generic</namespace>

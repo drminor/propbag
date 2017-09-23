@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-using DRM.Ipnwvc;
 
 namespace DRM.PropBag
 {
@@ -13,8 +12,8 @@ namespace DRM.PropBag
     {
         public Prop(T initalValue, bool hasStore = true, bool typeIsSolid = true,
             Action<T, T> doWhenChanged = null, bool doAfterNotify = false,
-            IEqualityComparer<T> comparer = null)
-            : base(typeof(T), typeIsSolid, hasStore, doWhenChanged, doAfterNotify, comparer ?? EqualityComparer<T>.Default)
+            Func<T,T,bool> comparer = null)
+            : base(typeof(T), typeIsSolid, hasStore, doWhenChanged, doAfterNotify, comparer)
         {
             if (hasStore)
             {
@@ -25,8 +24,8 @@ namespace DRM.PropBag
 
         public Prop(bool hasStore = true, bool typeIsSolid = true,
             Action<T, T> doWhenChanged = null, bool doAfterNotify = false,
-            IEqualityComparer<T> comparer = null)
-            : base(typeof(T), typeIsSolid, hasStore, doWhenChanged, doAfterNotify, comparer ?? EqualityComparer<T>.Default)
+            Func<T,T,bool> comparer = null)
+            : base(typeof(T), typeIsSolid, hasStore, doWhenChanged, doAfterNotify, comparer)
         {
             if (hasStore)
             {

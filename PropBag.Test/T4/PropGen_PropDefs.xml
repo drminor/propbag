@@ -1,11 +1,10 @@
 ﻿<?xml version="1.0"?>
 <model
   class-name="PropGen"
-  namespace="PropBagLib.Tests"
-  type-safety-mode="AllPropsMustBeRegistered"
-  defer-method-ref-resolution="true"
+  output-namespace="PropBagLib.Tests"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-xsi:schemaLocation="https://www.swamphillproductions.com/PropBagModel ../../PropBagModel/PropBagModel.xsd">
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xsi:schemaLocation="https://www.swamphillproductions.com/PropBagModel ../../PropBag/XMLModel/PropBagModel.xsd">
   <namespaces>
     <namespace>System</namespace>
     <namespace>System.Collections.Generic</namespace>
@@ -27,7 +26,7 @@ xsi:schemaLocation="https://www.swamphillproductions.com/PropBagModel ../../Prop
       <name>PropStringCallDoAfter</name>
       <type>string</type>
       <initial-value use-undefined="true"/>
-      <comparer>EqualityComparer&lt;string&gt;.Default</comparer>
+      <comparer>EqualityComparer&lt;string&gt;.Default.Equals</comparer>
       <do-when-changed do-after-notify="true">DoWhenStringChanged</do-when-changed>
     </prop>
     <prop>
@@ -36,7 +35,7 @@ xsi:schemaLocation="https://www.swamphillproductions.com/PropBagModel ../../Prop
       <initial-value use-default="true"/>
       <comparer use-reference-equality="true"/>
       <do-when-changed do-after-notify="true">DoWhenStringChanged</do-when-changed>
-    </prop>    
+    </prop>
     <prop>
       <name>PropBool</name>
       <type>bool</type>

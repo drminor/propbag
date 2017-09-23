@@ -7,13 +7,14 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Reflection;
 
-using DRM.Ipnwvc;
+using System.Runtime.CompilerServices;
+using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBag
 {
     public abstract class PropGenBase : IPropGen
     {
-        static private Type GMT_TYPE = typeof(GenericMethodTemplates);
+        //static private Type GMT_TYPE = typeof(GenericMethodTemplates);
 
         public Type Type {get; set;}
 
@@ -30,23 +31,23 @@ namespace DRM.PropBag
 
         //public List<PropertyChangedWithValsHandler> PropChangedWithValsHandlerList { get; set; }
 
-        private GetPropValDelegate _doGet;
-        private GetPropValDelegate DoGetProVal
-        {
-            get
-            {
-                if (_doGet == null)
-                {
-                    _doGet = GetPropGetter(Type);
-                }
-                return _doGet;
-            }
+        //private GetPropValDelegate _doGet;
+        //private GetPropValDelegate DoGetProVal
+        //{
+        //    get
+        //    {
+        //        if (_doGet == null)
+        //        {
+        //            _doGet = GetPropGetter(Type);
+        //        }
+        //        return _doGet;
+        //    }
 
-            set
-            {
-                _doGet = value;
-            }
-        }
+        //    set
+        //    {
+        //        _doGet = value;
+        //    }
+        //}
 
         // Constructor
         public PropGenBase(Type typeOfThisValue, bool typeIsSolid, bool hasStore = true)
@@ -60,14 +61,20 @@ namespace DRM.PropBag
         #region Public Methods and Properties
 
         /// <summary>
-        /// Uses Reflection
+        /// Does not use reflection.
         /// </summary>
         public object Value
         {
             get
             {
-                return DoGetProVal(TypedProp);
+                return TypedProp.TypedValueAsObject;
+                //return DoGetProVal(TypedProp);
             }
+        }
+
+        public ValPlusType ValuePlusType()
+        {
+            return new ValPlusType(Value, Type);
         }
 
         public event PropertyChangedWithValsHandler PropertyChangedWithVals;
@@ -123,20 +130,20 @@ namespace DRM.PropBag
 
         #endregion
 
-        #region Helper Methods for the Generic Method Templates
+        //#region Helper Methods for the Generic Method Templates
 
-        // Delegate declarations.
-        private delegate object GetPropValDelegate(object prop);
+        //// Delegate declarations.
+        //private delegate object GetPropValDelegate(object prop);
 
-        private static GetPropValDelegate GetPropGetter(Type typeOfThisValue)
-        {
-            MethodInfo methInfoGetProp = GMT_TYPE.GetMethod("GetPropValue", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(typeOfThisValue);
-            GetPropValDelegate result = (GetPropValDelegate)Delegate.CreateDelegate(typeof(GetPropValDelegate), methInfoGetProp);
+        //private static GetPropValDelegate GetPropGetter(Type typeOfThisValue)
+        //{
+        //    MethodInfo methInfoGetProp = GMT_TYPE.GetMethod("GetPropValue", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(typeOfThisValue);
+        //    GetPropValDelegate result = (GetPropValDelegate)Delegate.CreateDelegate(typeof(GetPropValDelegate), methInfoGetProp);
 
-            return result;
-        }
+        //    return result;
+        //}
 
-        #endregion
+        //#endregion
 
         public void CleanUp()
         {
@@ -145,17 +152,17 @@ namespace DRM.PropBag
             PropertyChangedWithVals = null;
         }
 
-        #region Generic Method Templates
+        //#region Generic Method Templates
 
-        static class GenericMethodTemplates
-        {
-            private static object GetPropValue<T>(object prop)
-            {
-                return ((IProp<T>)prop).TypedValue;
-            }
-        }
+        //static class GenericMethodTemplates
+        //{
+        //    private static object GetPropValue<T>(object prop)
+        //    {
+        //        return ((IProp<T>)prop).TypedValue;
+        //    }
+        //}
 
-        #endregion
+        //#endregion
 
     }
 }

@@ -1,10 +1,9 @@
 ﻿
 using System.Reflection;
 using DRM.PropBag;
-using DRM.Ipnwvc;
+using DRM.TypeSafePropertyBag;
 using System;
 using System.Collections.Generic;
-using PropBagLib.Tests;
 
 
 namespace PropBagLib.Tests
@@ -27,11 +26,11 @@ namespace PropBagLib.Tests
 		{
 			get
 			{
-				return GetIt<int>();
+				return GetIt<int>(nameof(PropInt3));
 			}
 			set
 			{
-				SetIt<int>(value);
+				SetIt<int>(value, nameof(PropInt3));
 			}
 		}  
 	  
@@ -39,11 +38,11 @@ namespace PropBagLib.Tests
 		{
 			get
 			{
-				return GetIt<int>();
+				return GetIt<int>(nameof(PropInt4));
 			}
 			set
 			{
-				SetIt<int>(value);
+				SetIt<int>(value, nameof(PropInt4));
 			}
 		}  
 	 
@@ -55,11 +54,11 @@ namespace PropBagLib.Tests
 			{
 				add
 				{
-					AddToPropChanged<int>(value);
+					AddToPropChanged<int>(value, nameof(PropInt3Changed));
 				}
 				remove
 				{
-					RemoveFromPropChanged<int>(value);
+					RemoveFromPropChanged<int>(value, nameof(PropInt3Changed));
 				}
 			}
 	  
@@ -67,11 +66,11 @@ namespace PropBagLib.Tests
 			{
 				add
 				{
-					AddToPropChanged<int>(value);
+					AddToPropChanged<int>(value, nameof(PropInt4Changed));
 				}
 				remove
 				{
-					RemoveFromPropChanged<int>(value);
+					RemoveFromPropChanged<int>(value, nameof(PropInt4Changed));
 				}
 			}
 	 
