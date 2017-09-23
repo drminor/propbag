@@ -40,16 +40,6 @@ namespace DRM.PropBag
 
         #endregion
 
-        #region Propety Access Methods
-
-        //public new object this[string typeName, string propertyName]
-        //{
-        //    get { return base[typeName, propertyName]; }
-        //    set { base[typeName, propertyName] = value; }
-        //}
-
-        #endregion
-
         #region Property Management
 
         /// <summary>
