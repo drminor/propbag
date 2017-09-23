@@ -198,3 +198,4 @@ ModelManifest.xml
 /PropBag.Test/T4/PropGen_PropDefs - Copy.xml
 /Old Versions -- Please remove me/PropBag
 /AutoMapperSupport
+*.ide
