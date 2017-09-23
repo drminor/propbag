@@ -9,6 +9,7 @@
 # Visual Studio 2015 cache/options directory
 .vs/
 
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
@@ -191,5 +192,9 @@ GeneratedArtifacts/
 _Pvt_Extensions/
 ModelManifest.xml
 /PropBagModelBuilt
-/Old Versions -- Please remove me/PropBag
 /PropBag.Test/DogTest
+/PropBag.Test/T4/TestSerialization.xml
+/PropBag.Test/T4/PropGen_PropDefs - WorkBase.xml
+/PropBag.Test/T4/PropGen_PropDefs - Copy.xml
+/Old Versions -- Please remove me/PropBag
+/AutoMapperSupport
