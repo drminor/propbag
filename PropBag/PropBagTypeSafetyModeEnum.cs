@@ -54,7 +54,7 @@ namespace DRM.PropBag
         Tight
     }
 
-    internal enum ReadMissingPropPolicyEnum
+    public enum ReadMissingPropPolicyEnum
     {
         NotAllowed,
         Allowed,

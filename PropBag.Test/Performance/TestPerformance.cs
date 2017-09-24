@@ -87,6 +87,21 @@ namespace PropBagLib.Tests
             }
         }
 
+        [Test]
+        public void SetInt1000UsingTypeProp()
+        {
+            mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+            mod1.PropertyChanged += Mod1_PropertyChangedNoStore;
+            mod1.PropertyChanged2 += Mod1_PropertyChanged2;
+
+            IProp<int> typedProp = mod1.GetTypedProp<int>("PropInt");
+
+            for (int cntr = 0; cntr < InterationCount - 1; cntr++)
+            {
+                typedProp.TypedValue = cntr;
+            }
+        }
+
         #region Same Tests but with String type
 
         [Test]

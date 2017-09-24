@@ -12,26 +12,28 @@ using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBag
 {
-    /// <summary>
-    /// A wrapper for an instance of IProp<typeparam name="T"/>.
-    /// </summary>
-    public abstract class PropGenBase : IPropGen
+    public struct PropGen : IPropGen
     {
-        public Type Type {get; set;}
+        public Type Type { get;}
 
-        public IProp TypedProp { get; set; }
+        /// <summary>
+        /// A wrapper for an instance of IProp<typeparam name="T"/>.
+        /// </summary>
 
-        public bool TypeIsSolid { get; set; }
+        public IProp TypedProp { get; }
 
-        public bool HasStore { get; set; }
+        public bool TypeIsSolid { get { return ((IPropGen)TypedProp).TypeIsSolid; } }
+
+        public bool HasStore { get; }
 
         // Constructor
-        public PropGenBase(Type typeOfThisValue, bool typeIsSolid, bool hasStore = true)
+        public PropGen(IPropGen typedPropWrapper)
         {
-            Type = typeOfThisValue;
-            TypedProp = null;
-            TypeIsSolid = typeIsSolid;
-            HasStore = hasStore;
+            TypedProp = typedPropWrapper.TypedProp;
+            Type = typedPropWrapper.Type;
+            HasStore = typedPropWrapper.HasStore;
+            PropertyChangedWithVals = delegate { };
+            _actTable = null;
         }
 
         #region Public Methods and Properties
@@ -44,7 +46,6 @@ namespace DRM.PropBag
             get
             {
                 return TypedProp.TypedValueAsObject;
-                //return DoGetProVal(TypedProp);
             }
         }
 
@@ -55,7 +56,7 @@ namespace DRM.PropBag
 
         public event PropertyChangedWithValsHandler PropertyChangedWithVals;
 
-        private List<Tuple<Action<object, object>, PropertyChangedWithValsHandler>> _actTable = null;
+        private List<Tuple<Action<object, object>, PropertyChangedWithValsHandler>> _actTable;
 
         public void SubscribeToPropChanged(Action<object, object> doOnChange)
         {
@@ -86,10 +87,7 @@ namespace DRM.PropBag
         private Tuple<Action<object, object>, PropertyChangedWithValsHandler> GetHandlerFromAction(Action<object, object> act,
             ref List<Tuple<Action<object, object>, PropertyChangedWithValsHandler>> actTable)
         {
-            if (actTable == null)
-            {
-                return null;
-            }
+            if (actTable == null) return null;
 
             for (int i = 0; i < actTable.Count; i++)
             {
@@ -110,39 +108,12 @@ namespace DRM.PropBag
 
         #endregion
 
-        //#region Helper Methods for the Generic Method Templates
-
-        //// Delegate declarations.
-        //private delegate object GetPropValDelegate(object prop);
-
-        //private static GetPropValDelegate GetPropGetter(Type typeOfThisValue)
-        //{
-        //    MethodInfo methInfoGetProp = GMT_TYPE.GetMethod("GetPropValue", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(typeOfThisValue);
-        //    GetPropValDelegate result = (GetPropValDelegate)Delegate.CreateDelegate(typeof(GetPropValDelegate), methInfoGetProp);
-
-        //    return result;
-        //}
-
-        //#endregion
-
         public void CleanUp()
         {
             if(TypedProp != null) TypedProp.CleanUpTyped();
             _actTable = null;
             PropertyChangedWithVals = null;
         }
-
-        //#region Generic Method Templates
-
-        //static class GenericMethodTemplates
-        //{
-        //    private static object GetPropValue<T>(object prop)
-        //    {
-        //        return ((IProp<T>)prop).TypedValue;
-        //    }
-        //}
-
-        //#endregion
 
     }
 }

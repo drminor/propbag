@@ -15,12 +15,21 @@ namespace DRM.PropBag
     {
         PropBagTypeSafetyMode TypeSafetyMode { get; }
 
+        bool AllPropsMustBeRegistered { get; }
+
+        bool OnlyTypedAccess { get; }
+
+        ReadMissingPropPolicyEnum ReadMissingPropPolicy { get; }
+
+        bool ReturnDefaultForUndefined { get; }
+
         // These are defined by ITypeSafePropBag
         //object GetValWithType(string propertyName, Type propertyType);
         //bool SetItWithType(object value, Type propertyType = null, string propertyName);
         //Type GetTypeOfProperty(string propertyName);
 
         T GetIt<T>(string propertyName);
+        IProp<T> GetTypedProp<T>(string propertyName);
 
         bool SetValWithNoType(string propertyName, object value);
 

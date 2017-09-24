@@ -13,8 +13,10 @@ namespace DRM.PropBag
             get { return false; }
         }
 
+        public PropExtStoreFactory(bool returnDefaultForUndefined) : base(returnDefaultForUndefined) { }
+
         object Stuff;
-        public PropExtStoreFactory(object stuff)
+        public PropExtStoreFactory(object stuff, bool returnDefaultForUndefined) : base(returnDefaultForUndefined)
         {
             // Info to help us set up the getters and setters
             Stuff = stuff;
@@ -36,7 +38,9 @@ namespace DRM.PropBag
             Action<T, T> doWhenChanged = null, bool doAfterNotify = false, Func<T,T,bool> comparer = null)
         {
             if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
-            PropExternStore<T> propWithExtStore = new PropExternStore<T>(propertyName, extraInfo, typeIsSolid, doWhenChanged, doAfterNotify, comparer);
+            GetDefaultValue<T> getDefaultValFunc = this.GetDefaultValue<T>;
+
+            PropExternStore<T> propWithExtStore = new PropExternStore<T>(propertyName, extraInfo, getDefaultValFunc, typeIsSolid: typeIsSolid, doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify, comparer: comparer);
 
             return propWithExtStore;
         }

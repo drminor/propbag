@@ -10,26 +10,33 @@ namespace DRM.PropBag
 {
     public sealed class Prop<T> : PropTypedBase<T>
     {
-        public Prop(T initalValue, bool hasStore = true, bool typeIsSolid = true,
-            Action<T, T> doWhenChanged = null, bool doAfterNotify = false,
-            Func<T,T,bool> comparer = null)
-            : base(typeof(T), typeIsSolid, hasStore, doWhenChanged, doAfterNotify, comparer)
+        public Prop(T initalValue,
+            GetDefaultValue<T> getDefaultValFunc,
+            bool typeIsSolid,
+            bool hasStore,
+            Action<T, T> doWhenChanged = null,
+            bool doAfterNotify = false,
+            Func<T, T, bool> comparer = null)
+            : base(typeof(T), typeIsSolid, hasStore, doWhenChanged, doAfterNotify, comparer, getDefaultValFunc)
         {
             if (hasStore)
             {
                 TypedValue = initalValue;
-                PValueIsDefined = true;
+                _valueIsDefined = true;
             }
         }
 
-        public Prop(bool hasStore = true, bool typeIsSolid = true,
-            Action<T, T> doWhenChanged = null, bool doAfterNotify = false,
-            Func<T,T,bool> comparer = null)
-            : base(typeof(T), typeIsSolid, hasStore, doWhenChanged, doAfterNotify, comparer)
+        public Prop(GetDefaultValue<T> getDefaultValFunc,
+            bool typeIsSolid = true,
+            bool hasStore = true,
+            Action<T, T> doWhenChanged = null,
+            bool doAfterNotify = false,
+            Func<T, T, bool> comparer = null)
+            : base(typeof(T), typeIsSolid, hasStore, doWhenChanged, doAfterNotify, comparer, getDefaultValFunc)
         {
             if (hasStore)
             {
-                PValueIsDefined = false;
+                _valueIsDefined = false;
             }
         }
 
@@ -40,7 +47,14 @@ namespace DRM.PropBag
             {
                 if (HasStore)
                 {
-                    if (!PValueIsDefined) throw new InvalidOperationException("The value of this property has not yet been set.");
+                    if (!_valueIsDefined)
+                    {
+                        if (ReturnDefaultForUndefined)
+                        {
+                            return this.GetDefaultValFunc("Prop object doesn't know the prop's name.");
+                        }
+                        throw new InvalidOperationException("The value of this property has not yet been set.");
+                    }
                     return _value;
                 }
                 else
@@ -53,7 +67,7 @@ namespace DRM.PropBag
                 if (HasStore)
                 {
                     _value = value;
-                    PValueIsDefined = true;
+                    _valueIsDefined = true;
                 }
                 else
                 {
@@ -62,20 +76,19 @@ namespace DRM.PropBag
             }
         }
 
-        private bool PValueIsDefined { get; set; }
-
+        private bool _valueIsDefined;
         override public bool ValueIsDefined
         {
             get
             {
-                return PValueIsDefined;
+                return _valueIsDefined;
             }
         }
 
         override public bool SetValueToUndefined()
         {
-            bool oldSetting = this.PValueIsDefined;
-            PValueIsDefined = false;
+            bool oldSetting = this._valueIsDefined;
+            _valueIsDefined = false;
 
             return oldSetting;
         }

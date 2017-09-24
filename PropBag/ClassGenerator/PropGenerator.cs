@@ -20,37 +20,41 @@ namespace DRM.PropBag.ClassGenerator
     public class PropGenerator<T>
     {
         // This is not being used as yet. If it is used, it should probably be renamed simply: Create
-        static public IProp CreateViaClassGenerator(PropDefRaw def, AbstractPropFactory factory, Type derivedType)
+        static public IProp<T> CreateViaClassGenerator(PropDefRaw def, AbstractPropFactory factory, Type derivedType, out bool typeIsSolid)
         {
             Func<T,T,bool> comparer = GetComp(def.Comparer, def.UseRefEquality, factory);
             Action<T,T> doWhen = GetDoWhen(def.DoWhenChanged, derivedType);
+
+            IProp<T> prop;
+
+            typeIsSolid = def.TypeIsSolid;
 
             if (def.HasStore)
             {
                 if (def.CreateType == PropCreateMethodEnum.noValue)
                 {
-                    factory.CreateWithNoValue<T>(def.PropName, def.ExtraInfo, def.HasStore, def.TypeIsSolid, doWhen, def.DoAfterNotify, comparer);
+                    prop = factory.CreateWithNoValue<T>(def.PropName, def.ExtraInfo, def.HasStore, def.TypeIsSolid, doWhen, def.DoAfterNotify, comparer);
                 }
                 else
                 {
                     T initVal;
                     if (def.CreateType == PropCreateMethodEnum.useDefault)
                     {
-                        initVal = factory.GetDefaultValue<T>();
+                        initVal = factory.GetDefaultValue<T>(def.PropName);
                     }
                     else
                     {
                         initVal = factory.GetValueFromString<T>(def.InitialValue);
                     }
 
-                    factory.Create<T>(initVal, def.PropName, def.ExtraInfo, def.HasStore, def.TypeIsSolid, doWhen, def.DoAfterNotify, comparer);
+                    prop = factory.Create<T>(initVal, def.PropName, def.ExtraInfo, def.HasStore, def.TypeIsSolid, doWhen, def.DoAfterNotify, comparer);
                 }
             }
             else
             {
-                factory.CreateWithNoValue<T>(def.PropName, def.ExtraInfo, def.HasStore, def.TypeIsSolid, doWhen, def.DoAfterNotify, comparer);
+                prop = factory.CreateWithNoValue<T>(def.PropName, def.ExtraInfo, def.HasStore, def.TypeIsSolid, doWhen, def.DoAfterNotify, comparer);
             }
-            return null;
+            return prop;
         }
 
         static Func<T,T,bool> GetComp(string x, bool useRefEquality, AbstractPropFactory factory)
