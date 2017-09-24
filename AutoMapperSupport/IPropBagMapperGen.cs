@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace DRM.AutoMapperSupport
 {
-    public delegate object MapFromX(IPropBag source);
-    public delegate IPropBag MapToX(object source, IPropBag destination);
-    public delegate IPropBag MapToNewX(object source);
+    //public delegate object MapFromX(IPropBag source);
+    //public delegate IPropBag MapToX(object source, IPropBag destination);
+    //public delegate IPropBag MapToNewX(object source);
 
     public interface IPropBagMapperGen
     {

@@ -70,13 +70,7 @@ namespace PropBagTestApp
                 Size = 17.8
             };
 
-            //MapUsingDict();
-
             ReadWithMap(mm, OurData);
-
-            //ourData["ProductId"] = Guid.NewGuid();
-            //ourData["Amount"] = 123;
-            //ourData["Size"] = 2.09111d;
         }
 
         private void BtnSave_Click(object sender, RoutedEventArgs e)

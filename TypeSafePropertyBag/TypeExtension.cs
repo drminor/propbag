@@ -31,6 +31,9 @@ namespace DRM.TypeSafePropertyBag
 
         public static bool IsGenericType(this Type type) => type.GetTypeInfo().IsGenericType;
 
+        //public static bool IsPublic(this MemberInfo memberInfo) => (memberInfo as FieldInfo)?.IsPublic ?? (memberInfo as PropertyInfo).IsPublic();
+
+        public static bool IsValueType(this Type type) => type.GetTypeInfo().IsValueType;
 
         public static IEnumerable<Type> GetTypeInheritance(this Type type)
         {

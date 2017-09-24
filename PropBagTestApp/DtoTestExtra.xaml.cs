@@ -14,6 +14,7 @@ using AutoMapper;
 using System.Collections.Generic;
 using System.Reflection;
 using DRM.PropBag;
+using DRM.AutoMapperSupport;
 
 namespace PropBagTestApp
 {
@@ -22,6 +23,10 @@ namespace PropBagTestApp
     /// </summary>
     public partial class DtoTestExtra : Window
     {
+        Dictionary<string, BoundPropBag> _boundPropBags;
+        PropBagMapperCustom<MyModel, DtoTestViewModelExtra> _pbMapper = null;
+        PropBagMapperCustom<MyModel2, DtoTestViewModelExtra> _pbMapper2 = null;
+        ConfiguredMappers _conMappers = new ConfiguredMappers();
 
         [PropBagInstanceAttribute("OurData", "There is only one ViewModel in this View.")]
         public DtoTestViewModelExtra OurData
@@ -42,7 +47,7 @@ namespace PropBagTestApp
 
             Grid topGrid = (Grid)this.FindName("TopGrid");
 
-            ViewModelGenerator.StandUpViewModels(topGrid, this);
+            _boundPropBags = ViewModelGenerator.StandUpViewModels(topGrid, this);
 
             // This is an example of how to create the binding whose source is a property in the Property Bag
             // to a UI Element in this class' view.
@@ -63,8 +68,8 @@ namespace PropBagTestApp
             MyModel mm = new MyModel
             {
                 ProductId = Guid.NewGuid(),
-                Amount = 145,
-                Size = 17.8
+                Amount = 38,
+                Size = 20.02
             };
 
             ReadWithMap(mm, OurData);
@@ -72,43 +77,47 @@ namespace PropBagTestApp
 
         private void BtnSave_Click(object sender, RoutedEventArgs e)
         {
-            MyModel m1 = SaveWithMap(OurData);
+            PropBagMapperCustom<MyModel, DtoTestViewModelExtra> mapper = GetPropBagMapper("OurData");
+            MyModel m1 = mapper.MapFrom(OurData);
         }
 
         private void ReadWithMap(MyModel mm, DtoTestViewModelExtra vm)
         {
-            IPropBag ip = (IPropBag)vm;
-            IEnumerable<MemberInfo> extraMembers = ip.BuildPropertyInfoList<DtoTestViewModelExtra>();
+            PropBagMapperCustom<MyModel, DtoTestViewModelExtra> mapper = GetPropBagMapper("OurData");
+            mapper.MapTo(mm, vm);
 
-            GetMapper(vm).Map<MyModel, DtoTestViewModelExtra>(mm, vm);
-        }
+            //// Now try creating a new one from mm.
+            DtoTestViewModelExtra test = (DtoTestViewModelExtra)mapper.MapTo(mm);
 
-        private MyModel SaveWithMap(DtoTestViewModelExtra vm)
-        {
-            return GetMapper(vm).Map<DtoTestViewModelExtra, MyModel>(vm);
-        }
-
-        private IMapper _mapper = null;
-        private IMapper GetMapper(DtoTestViewModelExtra vm)
-        {
-            if (_mapper == null)
+            MyModel2 mm2 = new MyModel2
             {
-                IPropBag ip = (IPropBag)vm;
-                IEnumerable<MemberInfo> extraMembers = ip.BuildPropertyInfoList<DtoTestViewModelExtra>();
+                ProductId = Guid.NewGuid(),
+                Amount = 1451,
+                Size = 17.8
+            };
 
-                _mapper = new MapperConfiguration(cfg => {
-                    cfg
-                    .CreateMap<MyModel, DtoTestViewModelExtra>()
-                    //.AddExtraDestintionMembers(extraMembers)
-                    ;
+            _pbMapper2.MapTo(mm2, vm);
+        }
 
-                    cfg
-                    .CreateMap<DtoTestViewModelExtra, MyModel>()
-                    //.AddExtraSourceMembers(extraMembers)
-                    ;
-                }).CreateMapper();
+
+        private PropBagMapperCustom<MyModel, DtoTestViewModelExtra> GetPropBagMapper(string instanceKey)
+        {
+            if (_pbMapper == null)
+            {
+                BoundPropBag boundPB = _boundPropBags[instanceKey];
+
+                _pbMapper = new PropBagMapperCustom<MyModel, DtoTestViewModelExtra>(boundPB);
+                _conMappers.AddMapReq(_pbMapper);
+
+                _pbMapper2 = new PropBagMapperCustom<MyModel2, DtoTestViewModelExtra>(boundPB);
+                _conMappers.AddMapReq(_pbMapper2);
+
+                // Add other type combinations here.
+
+                _conMappers.SealThis();
             }
-            return _mapper;
+
+            return _pbMapper;
         }
 
     }

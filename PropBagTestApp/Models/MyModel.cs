@@ -17,7 +17,7 @@ namespace PropBagTestApp.Models
     public class MyModel2
     {
         public Guid ProductId { get; set; }
-        public long Amount { get; set; }
+        public int Amount { get; set; }
 
         public double Size { get; set; }
     }

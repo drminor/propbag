@@ -209,8 +209,11 @@ namespace DRM.AutoMapperSupport
         {
             object wrappedObject = Activator.CreateInstance(_wrapperType, new object[] { destination, _propDefs });
 
-            // Used for debugging only.
-            var rr = Mapper.Map(source, wrappedObject, typeof(RegT), _wrapperType);
+            // Next Line may be helpful when debugging.
+            //var rr = Mapper.Map(source, wrappedObject, typeof(RegT), _wrapperType);
+
+            Mapper.Map(source, wrappedObject, typeof(RegT), _wrapperType);
+
             return destination;
         }
 

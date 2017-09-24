@@ -24,20 +24,20 @@ namespace DRM.PropBag.LiveClassGenerator
             return result;
         }
 
-        public static string GetFullTypeName(this PropModel pm, string defaultNameSpaceName = null)
-        {
-            if(pm.NamespaceName != null)
-            {
-                return $"{pm.NamespaceName}.{pm.ClassName}";
-            }
+        //public static string GetFullTypeName(this PropModel pm, string defaultNameSpaceName = null)
+        //{
+        //    if(pm.NamespaceName != null)
+        //    {
+        //        return $"{pm.NamespaceName}.{pm.ClassName}";
+        //    }
 
-            if (defaultNameSpaceName != null)
-            {
-                return $"{defaultNameSpaceName}.{pm.ClassName}";
-            }
+        //    if (defaultNameSpaceName != null)
+        //    {
+        //        return $"{defaultNameSpaceName}.{pm.ClassName}";
+        //    }
 
-            return pm.ClassName;
-        }
+        //    return pm.ClassName;
+        //}
 
         /// <summary>
         /// Creates property get and set accessors for the specified Type using the 
