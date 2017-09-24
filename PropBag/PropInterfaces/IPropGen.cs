@@ -22,7 +22,7 @@ namespace DRM.PropBag
         /// Provides access to the non-type specific features of this property.
         /// This allows access to these values without having to cast to the instance to its type (unknown at compile time.)
         /// </summary>
-        IProp TypedProp { get; set; } 
+        IProp TypedProp { get; } 
 
         // Property Changed with typed values support
         event PropertyChangedWithValsHandler PropertyChangedWithVals;

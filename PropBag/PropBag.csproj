@@ -59,6 +59,7 @@
     <Compile Include="ControlModel\PropModel.cs" />
     <Compile Include="Factories\CreatePropDelegate.cs" />
     <Compile Include="ExtValDelegates.cs" />
+    <Compile Include="Factories\IAbstractPropFactory.cs" />
     <Compile Include="Factories\PropFactoryValueConveter.cs" />
     <Compile Include="LiveClassGenerator\LivePropModelExtensions.cs" />
     <Compile Include="LiveClassGenerator\PBDispatcher.cs" />
@@ -72,6 +73,7 @@
     <Compile Include="PropExternStore.cs" />
     <Compile Include="Factories\PropExtStoreFactory.cs" />
     <Compile Include="Factories\PropFactory.cs" />
+    <Compile Include="PropGen.cs" />
     <Compile Include="PropGenBase.cs" />
     <Compile Include="PropInterfaces\IProp.cs" />
     <Compile Include="PropInterfaces\IPropGen.cs" />

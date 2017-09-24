@@ -18,7 +18,7 @@ namespace DRM.PropBag
             if (hasStore)
             {
                 TypedValue = initalValue;
-                PValueIsDefined = true;
+                _valueIsDefined = true;
             }
         }
 
@@ -29,7 +29,7 @@ namespace DRM.PropBag
         {
             if (hasStore)
             {
-                PValueIsDefined = false;
+                _valueIsDefined = false;
             }
         }
 
@@ -40,7 +40,7 @@ namespace DRM.PropBag
             {
                 if (HasStore)
                 {
-                    if (!PValueIsDefined) throw new InvalidOperationException("The value of this property has not yet been set.");
+                    if (!_valueIsDefined) throw new InvalidOperationException("The value of this property has not yet been set.");
                     return _value;
                 }
                 else
@@ -53,7 +53,7 @@ namespace DRM.PropBag
                 if (HasStore)
                 {
                     _value = value;
-                    PValueIsDefined = true;
+                    _valueIsDefined = true;
                 }
                 else
                 {
@@ -62,20 +62,19 @@ namespace DRM.PropBag
             }
         }
 
-        private bool PValueIsDefined { get; set; }
-
+        private bool _valueIsDefined;
         override public bool ValueIsDefined
         {
             get
             {
-                return PValueIsDefined;
+                return _valueIsDefined;
             }
         }
 
         override public bool SetValueToUndefined()
         {
-            bool oldSetting = this.PValueIsDefined;
-            PValueIsDefined = false;
+            bool oldSetting = this._valueIsDefined;
+            _valueIsDefined = false;
 
             return oldSetting;
         }

@@ -8,6 +8,9 @@ namespace DRM.PropBag
 {
     public class PropFactory : AbstractPropFactory
     {
+
+        public PropFactory(bool returnDefaultForUndefined) : base(returnDefaultForUndefined) { }
+
         public override bool ProvidesStorage
         {
             get { return true; }

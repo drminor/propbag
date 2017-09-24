@@ -28,7 +28,7 @@ namespace PropBagLib.Tests
         {
             upCntr = 0;
             object stuff = new object();
-            PropExtStoreFactory factory = new PropExtStoreFactory(stuff);
+            PropExtStoreFactory factory = new PropExtStoreFactory(stuff, returnDefaultForUndefined: false);
 
             mod1 = ExtStoreModel.Create(factory);
 

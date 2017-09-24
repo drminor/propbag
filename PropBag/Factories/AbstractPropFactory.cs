@@ -10,8 +10,15 @@ using System.Globalization;
 
 namespace DRM.PropBag
 {
-    public abstract class AbstractPropFactory
+    public abstract class AbstractPropFactory : IPropFactory
     {
+        public bool ReturnDefaultForUndefined { get; }
+
+        public AbstractPropFactory(bool returnDefaultForUndefined)
+        {
+            ReturnDefaultForUndefined = returnDefaultForUndefined;
+        }
+
         public abstract bool ProvidesStorage { get; }
 
         public abstract IProp<T> Create<T>(

@@ -11,7 +11,7 @@ using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBag
 {
-    public abstract class PropTypedBase<T> : PropGenBase, IProp<T>
+    public abstract class PropTypedBase<T> : PropGenBase, IPropPrivate<T>
     {
         protected PropTypedBase(Type typeOfThisValue, bool typeIsSolid, bool hasStore,
             Action<T, T> doWhenChanged, bool doAfterNotify,

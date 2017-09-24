@@ -13,8 +13,10 @@ namespace DRM.PropBag
             get { return false; }
         }
 
+        public PropExtStoreFactory(bool returnDefaultForUndefined) : base(returnDefaultForUndefined) { }
+
         object Stuff;
-        public PropExtStoreFactory(object stuff)
+        public PropExtStoreFactory(object stuff, bool returnDefaultForUndefined) : base(returnDefaultForUndefined)
         {
             // Info to help us set up the getters and setters
             Stuff = stuff;

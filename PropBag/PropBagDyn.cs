@@ -18,6 +18,14 @@ namespace DRM.PropBag
         public event PropertyChangingEventHandler PropertyChanging;
         public event PropertyChangedWithValsHandler PropertyChangedWithVals;
 
+        public bool AllPropsMustBeRegistered => propBag.AllPropsMustBeRegistered;
+
+        public bool OnlyTypedAccess => propBag.OnlyTypedAccess;
+
+        public ReadMissingPropPolicyEnum ReadMissingPropPolicy => propBag.ReadMissingPropPolicy;
+
+        public bool ReturnDefaultForUndefined => propBag.ReturnDefaultForUndefined;
+
         private PubPropBag propBag;
 
         #region Constructors
@@ -271,6 +279,11 @@ namespace DRM.PropBag
         public T GetIt<T>(string propertyName)
         {
             return propBag.GetIt<T>(propertyName);
+        }
+
+        public IProp<T> GetTypedProp<T>(string propertyName)
+        {
+            return propBag.GetTypedProp<T>(propertyName);
         }
 
         public Type GetTypeOfProperty(string propertyName)
