@@ -10,10 +10,14 @@ namespace DRM.PropBag
 {
     public sealed class Prop<T> : PropTypedBase<T>
     {
-        public Prop(T initalValue, bool hasStore = true, bool typeIsSolid = true,
-            Action<T, T> doWhenChanged = null, bool doAfterNotify = false,
-            Func<T,T,bool> comparer = null)
-            : base(typeof(T), typeIsSolid, hasStore, doWhenChanged, doAfterNotify, comparer)
+        public Prop(T initalValue,
+            GetDefaultValue<T> getDefaultValFunc,
+            bool typeIsSolid,
+            bool hasStore,
+            Action<T, T> doWhenChanged = null,
+            bool doAfterNotify = false,
+            Func<T, T, bool> comparer = null)
+            : base(typeof(T), typeIsSolid, hasStore, doWhenChanged, doAfterNotify, comparer, getDefaultValFunc)
         {
             if (hasStore)
             {
@@ -22,10 +26,13 @@ namespace DRM.PropBag
             }
         }
 
-        public Prop(bool hasStore = true, bool typeIsSolid = true,
-            Action<T, T> doWhenChanged = null, bool doAfterNotify = false,
-            Func<T,T,bool> comparer = null)
-            : base(typeof(T), typeIsSolid, hasStore, doWhenChanged, doAfterNotify, comparer)
+        public Prop(GetDefaultValue<T> getDefaultValFunc,
+            bool typeIsSolid = true,
+            bool hasStore = true,
+            Action<T, T> doWhenChanged = null,
+            bool doAfterNotify = false,
+            Func<T, T, bool> comparer = null)
+            : base(typeof(T), typeIsSolid, hasStore, doWhenChanged, doAfterNotify, comparer, getDefaultValFunc)
         {
             if (hasStore)
             {
@@ -40,7 +47,14 @@ namespace DRM.PropBag
             {
                 if (HasStore)
                 {
-                    if (!_valueIsDefined) throw new InvalidOperationException("The value of this property has not yet been set.");
+                    if (!_valueIsDefined)
+                    {
+                        if (ReturnDefaultForUndefined)
+                        {
+                            return this.GetDefaultValFunc("Prop object doesn't know the prop's name.");
+                        }
+                        throw new InvalidOperationException("The value of this property has not yet been set.");
+                    }
                     return _value;
                 }
                 else

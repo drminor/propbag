@@ -17,9 +17,7 @@ namespace DRM.PropBag
         public Type Type { get;}
 
         /// <summary>
-        /// An instance of IProp<typeparam name="T"/>.
-        /// Our callers could simply cast all instances that inherit from PropGenBase into a IProp<typeparamref name="T"/>
-        /// When they need to access the instanace as a IProp<typeparamref name="T"/>, but this makes it more formal.
+        /// A wrapper for an instance of IProp<typeparam name="T"/>.
         /// </summary>
 
         public IProp TypedProp { get; }
@@ -48,7 +46,6 @@ namespace DRM.PropBag
             get
             {
                 return TypedProp.TypedValueAsObject;
-                //return DoGetProVal(TypedProp);
             }
         }
 
@@ -67,37 +64,35 @@ namespace DRM.PropBag
 
             if (GetHandlerFromAction(doOnChange, ref _actTable) == null)
             {
-                if(_actTable == null)
+                PropertyChangedWithVals += eventHandler;
+                if (_actTable == null)
+                {
                     _actTable = new List<Tuple<Action<object, object>, PropertyChangedWithValsHandler>>();
-
+                }
                 _actTable.Add(new Tuple<Action<object, object>, PropertyChangedWithValsHandler>(doOnChange, eventHandler));
             }
-            PropertyChangedWithVals += eventHandler;
         }
 
         public bool UnSubscribeToPropChanged(Action<object, object> doOnChange)
         {
-            PropertyChangedWithValsHandler eventHander = GetHandlerFromAction(doOnChange, ref _actTable);
+            Tuple<Action<object, object>, PropertyChangedWithValsHandler> actEntry = GetHandlerFromAction(doOnChange, ref _actTable);
 
-            if (eventHander == null) return false;
+            if (actEntry == null) return false;
 
-            PropertyChangedWithVals -= eventHander;
+            PropertyChangedWithVals -= actEntry.Item2;
+            _actTable.Remove(actEntry);
             return true;
         }
 
-        private PropertyChangedWithValsHandler GetHandlerFromAction(Action<object, object> act,
+        private Tuple<Action<object, object>, PropertyChangedWithValsHandler> GetHandlerFromAction(Action<object, object> act,
             ref List<Tuple<Action<object, object>, PropertyChangedWithValsHandler>> actTable)
         {
-            if (actTable == null)
-            {
-                //actTable = new List<Tuple<Action<object, object>, PropertyChangedWithValsHandler>>();
-                return null;
-            }
+            if (actTable == null) return null;
 
             for (int i = 0; i < actTable.Count; i++)
             {
                 Tuple<Action<object, object>, PropertyChangedWithValsHandler> tup = actTable[i];
-                if (tup.Item1 == act) return tup.Item2;
+                if (tup.Item1 == act) return tup;
             }
 
             return null;

@@ -12,42 +12,18 @@ using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBag
 {
+    /// <summary>
+    /// A wrapper for an instance of IProp<typeparam name="T"/>.
+    /// </summary>
     public abstract class PropGenBase : IPropGen
     {
-        //static private Type GMT_TYPE = typeof(GenericMethodTemplates);
-
         public Type Type {get; set;}
 
-        /// <summary>
-        /// An instance of IProp<typeparam name="T"/>.
-        /// Our callers could simply cast all instances that inherit from PropGenBase into a IProp<typeparamref name="T"/>
-        /// When they need to access the instanace as a IProp<typeparamref name="T"/>, but this makes it more formal.
-        /// </summary>
         public IProp TypedProp { get; set; }
 
         public bool TypeIsSolid { get; set; }
 
         public bool HasStore { get; set; }
-
-        //public List<PropertyChangedWithValsHandler> PropChangedWithValsHandlerList { get; set; }
-
-        //private GetPropValDelegate _doGet;
-        //private GetPropValDelegate DoGetProVal
-        //{
-        //    get
-        //    {
-        //        if (_doGet == null)
-        //        {
-        //            _doGet = GetPropGetter(Type);
-        //        }
-        //        return _doGet;
-        //    }
-
-        //    set
-        //    {
-        //        _doGet = value;
-        //    }
-        //}
 
         // Constructor
         public PropGenBase(Type typeOfThisValue, bool typeIsSolid, bool hasStore = true)
@@ -79,42 +55,46 @@ namespace DRM.PropBag
 
         public event PropertyChangedWithValsHandler PropertyChangedWithVals;
 
-        private List<Tuple<Action<object, object>, PropertyChangedWithValsHandler>> actTable = null;
+        private List<Tuple<Action<object, object>, PropertyChangedWithValsHandler>> _actTable = null;
 
         public void SubscribeToPropChanged(Action<object, object> doOnChange)
         {
             PropertyChangedWithValsHandler eventHandler = (s, e) => { doOnChange(e.OldValue, e.NewValue); };
 
-            if (GetHandlerFromAction(doOnChange, ref actTable) == null)
+            if (GetHandlerFromAction(doOnChange, ref _actTable) == null)
             {
                 PropertyChangedWithVals += eventHandler;
-                actTable.Add(new Tuple<Action<object, object>, PropertyChangedWithValsHandler>(doOnChange, eventHandler));
+                if (_actTable == null)
+                {
+                    _actTable = new List<Tuple<Action<object, object>, PropertyChangedWithValsHandler>>();
+                }
+                _actTable.Add(new Tuple<Action<object, object>, PropertyChangedWithValsHandler>(doOnChange, eventHandler));
             }
         }
 
         public bool UnSubscribeToPropChanged(Action<object, object> doOnChange)
         {
-            PropertyChangedWithValsHandler eventHander = GetHandlerFromAction(doOnChange, ref actTable);
+            Tuple<Action<object, object>, PropertyChangedWithValsHandler> actEntry = GetHandlerFromAction(doOnChange, ref _actTable);
 
-            if (eventHander == null) return false;
+            if (actEntry == null) return false;
 
-            PropertyChangedWithVals -= eventHander;
+            PropertyChangedWithVals -= actEntry.Item2;
+            _actTable.Remove(actEntry);
             return true;
         }
 
-        private PropertyChangedWithValsHandler GetHandlerFromAction(Action<object, object> act,
+        private Tuple<Action<object, object>, PropertyChangedWithValsHandler> GetHandlerFromAction(Action<object, object> act,
             ref List<Tuple<Action<object, object>, PropertyChangedWithValsHandler>> actTable)
         {
             if (actTable == null)
             {
-                actTable = new List<Tuple<Action<object, object>, PropertyChangedWithValsHandler>>();
                 return null;
             }
 
             for (int i = 0; i < actTable.Count; i++)
             {
                 Tuple<Action<object, object>, PropertyChangedWithValsHandler> tup = actTable[i];
-                if (tup.Item1 == act) return tup.Item2;
+                if (tup.Item1 == act) return tup;
             }
 
             return null;
@@ -148,7 +128,7 @@ namespace DRM.PropBag
         public void CleanUp()
         {
             if(TypedProp != null) TypedProp.CleanUpTyped();
-            actTable = null;
+            _actTable = null;
             PropertyChangedWithVals = null;
         }
 

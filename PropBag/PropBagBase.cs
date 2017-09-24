@@ -195,7 +195,7 @@ namespace DRM.PropBag
             else
             {
                 // Use the "built-in" property factory, if the caller did not supply one.
-                new PropFactory(ReturnDefaultForUndefined);
+                ThePropFactory = new PropFactory(ReturnDefaultForUndefined);
             }
 
             tVals = new Dictionary<string, PropGen>();
@@ -308,7 +308,7 @@ namespace DRM.PropBag
                         {
                             // TODO: Make the PropFactor handle this entire operation in one step,
                             // so that more responsibility is on the designer of the PropFactory implementation.
-                            object newValue = ThePropFactory.GetDefaultValue(propertyType, out bool typeIsSolid);
+                            object newValue = ThePropFactory.GetDefaultValue(propertyName, propertyType, out bool typeIsSolid);
                             typePropWrapper = ThePropFactory.CreateGenFromObject(propertyType, newValue, propertyName, null, ThePropFactory.ProvidesStorage, typeIsSolid, null, false, null);
                         }
 

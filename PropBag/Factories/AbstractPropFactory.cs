@@ -10,6 +10,9 @@ using System.Globalization;
 
 namespace DRM.PropBag
 {
+
+    public delegate T GetDefaultValue<T>(string propertyName);
+
     public abstract class AbstractPropFactory : IPropFactory
     {
         public bool ReturnDefaultForUndefined { get; }
@@ -82,12 +85,12 @@ namespace DRM.PropBag
             //return RefEqualityComparer<T>.Default;
         }
 
-        public virtual T GetDefaultValue<T>()
+        public virtual T GetDefaultValue<T>(string propertyName)
         {
             return default(T);
         }
 
-        public virtual object GetDefaultValue(Type propertyType, out bool typeIsSolid)
+        public virtual object GetDefaultValue(string propertyName, Type propertyType, out bool typeIsSolid)
         {
             if (propertyType == null)
             {
@@ -194,7 +197,7 @@ namespace DRM.PropBag
             T initVal;
             if (useDefault)
             {
-                initVal = propFactory.GetDefaultValue<T>();
+                initVal = propFactory.GetDefaultValue<T>(propertyName);
             }
             else
             {

@@ -24,7 +24,8 @@ namespace DRM.PropBag
         {
             if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
 
-            IProp<T> prop = new Prop<T>(initialValue, hasStorage, typeIsSolid, doWhenChanged, doAfterNotify, comparer);
+            GetDefaultValue<T> getDefaultValFunc = this.GetDefaultValue<T>;
+            IProp<T> prop = new Prop<T>(initialValue, getDefaultValFunc, typeIsSolid: typeIsSolid, hasStore: hasStorage, doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify, comparer: comparer);
             return prop;
         }
 
@@ -35,7 +36,8 @@ namespace DRM.PropBag
         {
             if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
 
-            IProp<T> prop = new Prop<T>(hasStorage, typeIsSolid, doWhenChanged, doAfterNotify, comparer);
+            GetDefaultValue<T> getDefaultValFunc = this.GetDefaultValue<T>;
+            IProp<T> prop = new Prop<T>(getDefaultValFunc, typeIsSolid: typeIsSolid, hasStore: hasStorage, doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify, comparer: comparer);
             return prop;
         }
 

@@ -1,12 +1,10 @@
-﻿using System;
+﻿using DRM.TypeSafePropertyBag;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-
-using System.Runtime.CompilerServices;
-using DRM.TypeSafePropertyBag;
 
 
 namespace DRM.PropBag
@@ -15,7 +13,7 @@ namespace DRM.PropBag
     {
         protected PropTypedBase(Type typeOfThisValue, bool typeIsSolid, bool hasStore,
             Action<T, T> doWhenChanged, bool doAfterNotify,
-            Func<T,T,bool> comparer)
+            Func<T,T,bool> comparer, GetDefaultValue<T> getDefaultValFunc)
             : base(typeOfThisValue, typeIsSolid, hasStore)
         {
             DoWHenChangedAction = doWhenChanged;
@@ -23,6 +21,7 @@ namespace DRM.PropBag
             Comparer = comparer;
             PropertyChangedWithTVals = null;
             base.TypedProp = this;
+            GetDefaultValFunc = getDefaultValFunc;
         }
 
         abstract public T TypedValue { get; set; }
@@ -51,43 +50,54 @@ namespace DRM.PropBag
 
         public event PropertyChangedWithTValsHandler<T> PropertyChangedWithTVals;
 
-        private List<Tuple<Action<T, T>, PropertyChangedWithTValsHandler<T>>> actTable = null;
+        protected GetDefaultValue<T> GetDefaultValFunc { get; }
+
+        public virtual bool ReturnDefaultForUndefined
+        {
+            get
+            {
+                return GetDefaultValFunc != null;
+            }
+        }
+
+        private List<Tuple<Action<T, T>, PropertyChangedWithTValsHandler<T>>> _actTable = null;
 
         public void SubscribeToPropChanged(Action<T, T> doOnChange)
         {
             PropertyChangedWithTValsHandler<T> eventHandler = (s, e) => { doOnChange(e.OldValue, e.NewValue); };
 
-            if (GetHandlerFromAction(doOnChange, ref actTable) == null)
+            if (GetHandlerFromAction(doOnChange, ref _actTable) == null)
             {
                 PropertyChangedWithTVals += eventHandler;
-                actTable.Add(new Tuple<Action<T,T>,PropertyChangedWithTValsHandler<T>>(doOnChange, eventHandler));
+                if(_actTable == null)
+                {
+                    _actTable = new List<Tuple<Action<T, T>, PropertyChangedWithTValsHandler<T>>>();
+                }
+                _actTable.Add(new Tuple<Action<T,T>,PropertyChangedWithTValsHandler<T>>(doOnChange, eventHandler));
             }
         }
 
         public bool UnSubscribeToPropChanged(Action<T, T> doOnChange)
         {
-            PropertyChangedWithTValsHandler<T> eventHander = GetHandlerFromAction(doOnChange, ref actTable);
+            Tuple<Action<T, T>, PropertyChangedWithTValsHandler<T>> actEntry = GetHandlerFromAction(doOnChange, ref _actTable);
 
-            if (eventHander == null) return false;
+            if (actEntry == null) return false;
 
-            PropertyChangedWithTVals -= eventHander;
-            // TODO: Remove the ActionTable entry.
+            PropertyChangedWithTVals -= actEntry.Item2;
+            _actTable.Remove(actEntry);
+
             return true;
         }
 
-        private PropertyChangedWithTValsHandler<T> GetHandlerFromAction(Action<T, T> act,
+        private Tuple<Action<T, T>, PropertyChangedWithTValsHandler<T>> GetHandlerFromAction(Action<T, T> act,
             ref List<Tuple<Action<T, T>, PropertyChangedWithTValsHandler<T>>> actTable)
         {
-            if (actTable == null)
-            {
-                actTable = new List<Tuple<Action<T, T>, PropertyChangedWithTValsHandler<T>>>();
-                return null;
-            }
+            if (actTable == null) return null;
 
             for (int i = 0; i < actTable.Count; i++)
             {
                 Tuple<Action<T, T>, PropertyChangedWithTValsHandler<T>> tup = actTable[i];
-                if (tup.Item1 == act) return tup.Item2;
+                if (tup.Item1 == act) return tup; //.Item2;
             }
 
             return null;
@@ -107,8 +117,6 @@ namespace DRM.PropBag
                 throw new NotImplementedException();
 
             return Comparer(newValue, TypedValue);
-
-            //return Comparer.Equals(newValue, TypedValue);
         }
 
         public bool Compare(T val1, T val2)
@@ -116,8 +124,6 @@ namespace DRM.PropBag
             if (!ValueIsDefined) return false;
 
             return Comparer(val1, val2);
-
-            //return Comparer.Equals(val1, val2);
         }
 
         public bool UpdateDoWhenChangedAction(Action<T, T> doWhenChangedAction, bool? doAfterNotify)
@@ -144,11 +150,6 @@ namespace DRM.PropBag
         }
 
         public object TypedValueAsObject { get { return (object) TypedValue; } }
-
-        //public NTV ToNTV(string propertyName)
-        //{
-        //    return new NTV(propertyName, Type, TypedValue);
-        //}
 
         public bool CallBacksHappenAfterPubEvents { get { return DoAfterNotify; } }
         public bool HasCallBack { get { return DoWHenChangedAction != null; } }

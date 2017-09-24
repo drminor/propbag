@@ -20,12 +20,14 @@ namespace DRM.PropBag.ClassGenerator
     public class PropGenerator<T>
     {
         // This is not being used as yet. If it is used, it should probably be renamed simply: Create
-        static public IProp<T> CreateViaClassGenerator(PropDefRaw def, AbstractPropFactory factory, Type derivedType)
+        static public IProp<T> CreateViaClassGenerator(PropDefRaw def, AbstractPropFactory factory, Type derivedType, out bool typeIsSolid)
         {
             Func<T,T,bool> comparer = GetComp(def.Comparer, def.UseRefEquality, factory);
             Action<T,T> doWhen = GetDoWhen(def.DoWhenChanged, derivedType);
 
             IProp<T> prop;
+
+            typeIsSolid = def.TypeIsSolid;
 
             if (def.HasStore)
             {
@@ -38,7 +40,7 @@ namespace DRM.PropBag.ClassGenerator
                     T initVal;
                     if (def.CreateType == PropCreateMethodEnum.useDefault)
                     {
-                        initVal = factory.GetDefaultValue<T>();
+                        initVal = factory.GetDefaultValue<T>(def.PropName);
                     }
                     else
                     {
