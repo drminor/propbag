@@ -50,9 +50,6 @@
     <Compile Include="TypePair.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\PropBagControlsWPF\PropBagControlsWPF.csproj">
       <Project>{9BEE9979-9812-4675-8F97-A4DD1E7DBA5F}</Project>
       <Name>PropBagControlsWPF</Name>
@@ -69,6 +66,9 @@
       <Project>{f711fc98-af97-4041-a892-a3af78fa96ad}</Project>
       <Name>WrapperGenLib</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
