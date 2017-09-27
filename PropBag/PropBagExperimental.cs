@@ -5,7 +5,7 @@ using System.Threading;
 using System.Reflection;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-
+using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBag
 {

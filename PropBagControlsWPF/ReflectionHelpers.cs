@@ -27,16 +27,15 @@ namespace DRM.PropBag.ControlsWPF
             return null;
         }
 
-        static public void CreateTargetAndAssign(object propertyHost, PropertyInfo propBagClassProperty,
-            Type propModelType, object propModel)
-        {
-            Type targetType = propBagClassProperty.PropertyType;
-            ConstructorInfo ci = GetPropModelConstructor(targetType, propModelType);
-            object newInstance = ci.Invoke(new object[] { propModel });
+        //static public void CreateTargetAndAssign(object propertyHost, PropertyInfo propBagClassProperty,
+        //    Type propModelType, object propModel)
+        //{
+        //    Type targetType = propBagClassProperty.PropertyType;
+        //    ConstructorInfo ci = GetPropModelConstructor(targetType, propModelType);
+        //    object newInstance = ci.Invoke(new object[] { propModel });
 
-            propBagClassProperty.SetValue(propertyHost, newInstance);
-
-        }
+        //    propBagClassProperty.SetValue(propertyHost, newInstance);
+        //}
 
         /// <summary>
         /// Returns an instance of the class that is returned by the property marked with the PropBagInstanceAttribute attribute.

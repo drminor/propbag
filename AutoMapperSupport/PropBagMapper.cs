@@ -1,129 +1,89 @@
 ﻿using AutoMapper;
 using DRM.PropBag.ControlModel;
-using DRM.WrapperGenLib;
+using DRM.PropBag.ControlsWPF;
+using DRM.PropBag.ViewModelBuilder;
 using System;
 using System.Collections.Generic;
 
-using DRM.PropBag.LiveClassGenerator;
-using System.Reflection.Emit;
-using System.Reflection;
-using System.IO;
-using DRM.PropBag.ControlsWPF;
-using DRM.TypeSafePropertyBag;
-using DRM.PropBag;
 
-namespace DRM.AutoMapperSupport
+namespace DRM.PropBag.AutoMapperSupport
 {
-    public class PropBagMapper<RegT, PbT> : IPropBagMapperGen where PbT : IPropBag, new()
+    public class PropBagMapper<TSource, TDestination>
+        : IPropBagMapper<TSource, TDestination>
     {
         #region Public and Private Members
 
-        // Used to collect all wrapper types for classes that define no value for their outputNamespace,
-        // so that they are kept separate from all those classes that do define a namespace.
-        public const string DEFAULT_NAMESPACE_NAME = "PropBagWrappers";
+        private IMapTypeDefinitionGen SourceTypeDef;
+        private IMapTypeDefinitionGen DestinationTypeDef;
 
-        PropModel _propModel;
-        Dictionary<string, Type> _propDefs;
-        Type _wrapperType;
-        Func<object, object> _regularInstanceCreator;
+        public Type SourceType { get => SourceTypeDef.Type; }
+        public Type DestinationType { get => DestinationTypeDef.Type; }
 
+        public PropModel PropModel { get; }
+        public Type RunTimeType { get; }
         public IMapper Mapper { get; set; }
 
-        TypePair _typePair;
-        public TypePair TypePair => _typePair;
+        public Func<TDestination, TSource> RegularInstanceCreator { get; }
+
+        public bool SupportsMapFrom { get; }
 
         #endregion
 
         #region Constructors
 
-        public PropBagMapper(string newTypeName, Dictionary<string, Type> propDefs) : this(newTypeName, propDefs, null) { }
-
-        public PropBagMapper(string newTypeName, Dictionary<string, Type> propDefs, Func<object, object> regularInstanceCreator)
+        public PropBagMapper(IPropBagMapperKey<TSource, TDestination> mapRequest)
         {
-            _propModel = null;
-            // TODO: NOTE: No special handling is performed here for new Type names that 
-            // have no namespace as do the other constructor.
-            TypeName typeName = new TypeName(newTypeName);
-            IEnumerable<PropertyDescription> propDescs = GetPropertyDescriptions(propDefs);
-            TypeDescription typeDescription = new TypeDescription(typeName, propDescs);
+            if (typeof(TSource) is IPropBag) throw new ApplicationException("The first type, TSource, is expected to be a regular, non-propbag-based type.");
+            if (typeof(TDestination) is IPropBag) throw new ApplicationException("The second type, TDestination, is expected to be a propbag-based type.");
 
-            _wrapperType = CreateWrapper(typeDescription);
+            SourceTypeDef = mapRequest.SourceTypeDef;
+            DestinationTypeDef = mapRequest.DestinationTypeDef;
 
-            _regularInstanceCreator = regularInstanceCreator;
+            PropModel = mapRequest.DestinationTypeDef.PropModel;
+            RunTimeType = mapRequest.DestinationTypeDef.BaseType;
 
-            _typePair = new TypePair(typeof(RegT), typeof(PbT));
-        }
+            RegularInstanceCreator = mapRequest.ConstructSourceFunc;
 
-        public PropBagMapper(BoundPropBag boundPB) : this(boundPB, null, null) { }
-
-        public PropBagMapper(BoundPropBag boundPB, IModuleBuilderInfo moduleBuilderInfo) : this(boundPB, moduleBuilderInfo, null) { }
-
-        public PropBagMapper(BoundPropBag boundPB, IModuleBuilderInfo moduleBuilderInfo, Func<object, object> regularInstanceCreator)
-        {
-            _propModel = boundPB.PropModel;
-            // Use the name of the class that dervives from IPropBag
-            // as the basis of the name of the new wrapper type.
-            TypeDescription typeDescription = BuildTypeDesc(boundPB.DerivingType.Name, boundPB.PropModel, out _propDefs);
-
-            boundPB.WrapperType = CreateWrapper(typeDescription, moduleBuilderInfo);
-            _wrapperType = boundPB.WrapperType;
-
-            _regularInstanceCreator = regularInstanceCreator;
-
-            _typePair = new TypePair(typeof(RegT), typeof(PbT));
+            SupportsMapFrom = true;
         }
 
         #endregion
 
         #region Construction Support
 
-        private TypeDescription BuildTypeDesc(string className, PropModel pm, out Dictionary<string, Type> propDefs)
-        {
-            //string assemblyName = WRAPPER_MODULE_ASSEMBLY_NAME;
-            string namespaceName = pm.NamespaceName ?? DEFAULT_NAMESPACE_NAME;
+        //public static TypeDescription BuildTypeDesc(string className, PropModel pm)
+        //{
+        //    //string assemblyName = WRAPPER_MODULE_ASSEMBLY_NAME;
+        //    string namespaceName = pm.NamespaceName ?? DEFAULT_NAMESPACE_NAME;
 
-            TypeName tn = new TypeName(className, namespaceName); //, assemblyName);
+        //    TypeName tn = new TypeName(className, namespaceName); //, assemblyName);
 
-            propDefs = pm.GetPropertyDefs();
-            IEnumerable<PropertyDescription> propDescs = GetPropertyDescriptions(propDefs);
+        //    IEnumerable<PropertyDescription> propDescs = pm.GetPropertyDescriptions();
 
-            TypeDescription td = new TypeDescription(tn, propDescs);
-            return td;
-        }
+        //    TypeDescription td = new TypeDescription(tn, typeof(PbT), propDescs);
+        //    return td;
+        //}
 
-        public Type CreateWrapper(TypeDescription td, IModuleBuilderInfo modBuilderInfo = null)
-        {
-            // If the caller did not supply a ModuleBuilderInfo object, then use the default one 
-            // provided by the WrapperGenLib
-            IModuleBuilderInfo builderInfoToUse = modBuilderInfo ?? new DefaultModuleBuilderInfoProvider().ModuleBuilderInfo;
+        //public static Type CreateWrapper(TypeDescription td, IModuleBuilderInfo modBuilderInfo = null)
+        //{
+        //    // If the caller did not supply a ModuleBuilderInfo object, then use the default one 
+        //    // provided by the WrapperGenLib
+        //    IModuleBuilderInfo builderInfoToUse = modBuilderInfo ?? new DefaultModuleBuilderInfoProvider().ModuleBuilderInfo;
 
-            Type emittedType = builderInfoToUse.GetWrapperType(td);
+        //    Type emittedType = builderInfoToUse.GetWrapperType(td);
 
-            System.Diagnostics.Debug.WriteLine($"Created Type: {emittedType.FullName}");
+        //    System.Diagnostics.Debug.WriteLine($"Created Type: {emittedType.FullName}");
 
-            return emittedType;
-        }
+        //    return emittedType;
+        //}
 
-        public static IEnumerable<PropertyDescription> GetPropertyDescriptions(IEnumerable<KeyValuePair<string, Type>> propDefs)
-        {
-            List<PropertyDescription> result = new List<PropertyDescription>();
 
-            foreach (KeyValuePair<string, Type> kvp in propDefs)
-            {
-                string propertyName = kvp.Key;
-                Type propertyType = kvp.Value;
-
-                result.Add(new PropertyDescription(propertyName, propertyType));
-            }
-
-            return result;
-        }
 
         #endregion
 
         public IMapperConfigurationExpression Configure(IMapperConfigurationExpression cfg)
         {
-            ConfigIt(cfg, _wrapperType, _regularInstanceCreator);
+            ConfigIt(cfg, RegularInstanceCreator);
             return cfg;
         }
 
@@ -135,22 +95,22 @@ namespace DRM.AutoMapperSupport
         /// <param name="regularType"></param>
         /// <param name="propDefs"></param>
         /// <returns></returns>
-        public void ConfigIt(IMapperConfigurationExpression cfg, Type wrapperType, Func<object, object> regularInstanceCreator) 
+        public void ConfigIt(IMapperConfigurationExpression cfg, Func<TDestination, TSource> regularInstanceCreator) 
         {
-            cfg.CreateMap(typeof(RegT), wrapperType);
+            cfg.CreateMap(typeof(TSource), RunTimeType);
 
             if (regularInstanceCreator != null)
             {
-                cfg.CreateMap(wrapperType, typeof(RegT)).ConstructUsing(regularInstanceCreator);
+                cfg.CreateMap(RunTimeType, typeof(TSource)); //.ConstructUsing(RegularInstanceCreator);
             }
             else
             {
-                cfg.CreateMap(wrapperType, typeof(RegT));
+                cfg.CreateMap(RunTimeType, typeof(TSource));
             }
         }
 
 
-        #region IPropBagMapperGen implementation
+        #region IPropBagMapper implementation
 
         //public delegate object MapFromX(IPropBag source);
         //public delegate IPropBag MapToX(object source, IPropBag destination);
@@ -184,58 +144,87 @@ namespace DRM.AutoMapperSupport
 
         #region Type Mapper Function
 
-        //public object MapFromX(IPropBag source)
-        //{
-        //    return (RegT)MapFrom((PbT)source);
-        //}
-
-        //public IPropBag MapToX(object source, IPropBag destination)
-        //{
-        //    return MapTo((RegT)source, (PbT)destination);
-        //}
-
-        //public IPropBag MapToNewX(object source)
-        //{
-        //    return (PbT)MapTo((RegT)source);
-        //}
-
-        public RegT MapFrom(PbT source)
+        public TDestination MapFrom(TSource s)
         {
-            object wrappedObject = Activator.CreateInstance(_wrapperType, new object[] { source, _propDefs });
-            return (RegT)Mapper.Map(wrappedObject, _wrapperType, typeof(RegT));
+            TDestination wrappedObject = (TDestination) Activator.CreateInstance(RunTimeType, new object[] { PropModel });
+
+            return (TDestination)Mapper.Map(s, wrappedObject, SourceType, RunTimeType);
         }
 
-        public PbT MapTo(RegT source, PbT destination)
+        public TDestination MapFrom(TSource s, TDestination d)
         {
-            object wrappedObject = Activator.CreateInstance(_wrapperType, new object[] { destination, _propDefs });
+            //object proxyObject = Activator.CreateInstance(_wrapperType, new object[] { _propModel });
 
-            // Next Line may be helpful when debugging.
-            //var rr = Mapper.Map(source, wrappedObject, typeof(RegT), _wrapperType);
+            //// Next Line may be helpful when debugging.
+            ////var rr = Mapper.Map(source, wrappedObject, typeof(RegT), _wrapperType);
 
-            Mapper.Map(source, wrappedObject, typeof(RegT), _wrapperType);
+            // Mapper.Map(source, proxyObject, typeof(RegT), _wrapperType);
 
-            return destination;
+            //return (PbT)proxyObject;
+            return (TDestination) Mapper.Map(s, d, SourceType, RunTimeType);
         }
 
-        public PbT MapTo(RegT source)
+        public TSource MapTo(TDestination d)
         {
-            if (_propModel == null) throw new InvalidOperationException($"The version of MapTo that doesn't take a {typeof(PbT)} is not supported. This instance was not created from a BoundPropBagTemplate.");
-
-            PbT destination;
-            try
-            {
-                destination = (PbT)Activator.CreateInstance(typeof(PbT), new object[] { _propModel });
-            }
-            catch
-            {
-                throw new InvalidOperationException($"Cannot create an instance of {typeof(PbT)} that takes a PropModel parameter.");
-            }
-
-            object wrappedObject = Activator.CreateInstance(_wrapperType, new object[] { destination, _propDefs });
-
-            var rr = Mapper.Map(source, wrappedObject, typeof(RegT), _wrapperType);
-            return destination;
+            return (TSource)Mapper.Map(d, RunTimeType, SourceType);
         }
+
+        public TSource MapTo(TDestination d, TSource s)
+        {
+            return (TSource) Mapper.Map(d, s, RunTimeType, SourceType);
+        }
+
+        //public object MapFrom(object source)
+        //{
+        //    //object wrappedObject = Activator.CreateInstance(_wrapperType, new object[] { _propModel });
+        //    //return (RegT)Mapper.Map(wrappedObject, _wrapperType, typeof(RegT));
+        //    return Mapper.Map(source, TypePair.DestinationType, TypePair.SourceType);
+        //}
+
+        //public object MapTo(object source, object destination)
+        //{
+        //    //object proxyObject = Activator.CreateInstance(_wrapperType, new object[] { _propModel });
+
+        //    //// Next Line may be helpful when debugging.
+        //    ////var rr = Mapper.Map(source, wrappedObject, typeof(RegT), _wrapperType);
+
+        //    // Mapper.Map(source, proxyObject, typeof(RegT), _wrapperType);
+
+        //    //return (PbT)proxyObject;
+        //    return Mapper.Map(source, destination, TypePair.SourceType, TypePair.DestinationType);
+        //}
+
+        //public object MapTo(object source)
+        //{
+        //    //if (_propModel == null) throw new InvalidOperationException($"The version of MapTo that doesn't take a {typeof(PbT)} is not supported. This instance was not created from a BoundPropBagTemplate.");
+
+        //    //PbT proxyObject;
+        //    //try
+        //    //{
+        //    //    proxyObject = (PbT)Activator.CreateInstance(_wrapperType, new object[] { _propModel });
+        //    //}
+        //    //catch
+        //    //{
+        //    //    throw new InvalidOperationException($"Cannot create an instance of {typeof(PbT)} that takes a PropModel parameter.");
+        //    //}
+
+        //    ////object wrappedObject = Activator.CreateInstance(_wrapperType, new object[] { destination, _propModel });
+
+        //    //var rr = Mapper.Map(source, proxyObject, typeof(RegT), _wrapperType);
+        //    //return proxyObject;
+
+        //    object newInstance;
+        //    try
+        //    {
+        //        newInstance = Activator.CreateInstance(TypePair.DestinationType, new object[] { PropModel });
+        //    }
+        //    catch
+        //    {
+        //        throw new InvalidOperationException($"Cannot create an instance of {TypePair.DestinationType} that takes a PropModel parameter.");
+        //    }
+
+        //    return Mapper.Map(source, newInstance, TypePair.SourceType, TypePair.DestinationType);
+        //}
 
         #endregion
 

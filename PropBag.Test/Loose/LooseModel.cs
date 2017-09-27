@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 
 using DRM.PropBag;
+using DRM.TypeSafePropertyBag;
 
 namespace PropBagLib.Tests
 {

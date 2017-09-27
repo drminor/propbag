@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 using DRM.TypeSafePropertyBag;
 
-namespace DRM.AutoMapperSupport
+namespace DRM.PropBag.AutoMapperSupport
 {
     class ExtraMembers
     {

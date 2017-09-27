@@ -7,7 +7,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DRM.AutoMapperSupport
+namespace DRM.PropBag.AutoMapperSupport
 {
     /// <summary>
     /// This implementation requires that the Getter and Setter MethodsInfo provided will be called

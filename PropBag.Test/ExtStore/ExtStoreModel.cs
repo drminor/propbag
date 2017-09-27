@@ -39,7 +39,7 @@ namespace PropBagLib.Tests
             }
             set
             {
-                SetIt<int>(value);
+                SetIt<int>(value: value);
             }
         }
 
@@ -51,7 +51,7 @@ namespace PropBagLib.Tests
             }
             set
             {
-                SetIt<string>(value);
+                SetIt<string>(value: value);
             }
         }
 

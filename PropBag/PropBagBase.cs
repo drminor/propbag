@@ -515,7 +515,7 @@ namespace DRM.PropBag
             return setPropDel(value, this, propertyName, genProp);
         }
 
-        public bool SetIt<T>(T value, [CallerMemberName]string propertyName = null)
+        public bool SetIt<T>(T value, string propertyName = null)
         {
             PropGen genProp = GetGenProp(propertyName, typeof(T), out bool wasRegistered,
                 haveValue:true,
@@ -542,7 +542,7 @@ namespace DRM.PropBag
         /// <param name="curValue">The current value of the property, must be specified using the ref keyword.</param>
         /// <param name="propertyName"></param>
         /// <returns>True if the value was updated, otherwise false.</returns>
-        public bool SetIt<T>(T newValue, ref T curValue, [CallerMemberName]string propertyName = null)
+        public bool SetIt<T>(T newValue, ref T curValue, string propertyName = null)
         {
             PropGen genProp = GetGenProp(propertyName, typeof(T), out bool wasRegistered,
                     haveValue: true,
@@ -1190,10 +1190,8 @@ namespace DRM.PropBag
                     LazyThreadSafetyMode.PublicationOnly);
             }
 
-            // TODO: Try changing the type of parameter prop to IPropGen.
             private static bool DoSetBridge<T>(object value, PropBagBase target, string propertyName, IPropGen prop)
             {
-                //IPropGen typedPropWrapper = (IPropGen)prop;
                 return target.DoSet<T>((T)value, propertyName, (IPropPrivate<T>) prop.TypedProp);
             }
 

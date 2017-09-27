@@ -68,7 +68,7 @@ namespace PropBagLib.Tests
             }
             set
             {
-                SetIt<int>(value);
+                SetIt<int>(value: value);
             }
         }
 
@@ -80,7 +80,7 @@ namespace PropBagLib.Tests
             }
             set
             {
-                SetIt<TimeSpan>(value);
+                SetIt<TimeSpan>(value: value);
             }
         }
 
@@ -92,7 +92,7 @@ namespace PropBagLib.Tests
             }
             set
             {
-                SetIt<Uri>(value);
+                SetIt<Uri>(value: value);
             }
         }
 
@@ -104,7 +104,7 @@ namespace PropBagLib.Tests
             }
             set
             {
-                SetIt<Lazy<int>>(value);
+                SetIt<Lazy<int>>(value: value);
             }
         }
 

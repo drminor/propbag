@@ -28,12 +28,12 @@ namespace DRM.PropBag
         //bool SetItWithType(object value, Type propertyType = null, string propertyName);
         //Type GetTypeOfProperty(string propertyName);
 
-        T GetIt<T>(string propertyName);
+        //T GetIt<T>(string propertyName);
         IProp<T> GetTypedProp<T>(string propertyName);
 
         bool SetValWithNoType(string propertyName, object value);
 
-        bool SetIt<T>(T value, string propertyName);
+        //bool SetIt<T>(T value, string propertyName);
         bool SetIt<T>(T newValue, ref T curValue, string propertyName);
 
         bool PropertyExists(string propertyName);

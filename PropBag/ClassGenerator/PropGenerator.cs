@@ -8,6 +8,7 @@ using System.Reflection;
 
 using DRM.PropBag;
 using DRM.PropBag.XMLModel;
+using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBag.ClassGenerator
 {

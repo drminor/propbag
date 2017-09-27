@@ -7,12 +7,12 @@ using System.Collections.Generic;
 
 using DRM.PropBag.ControlModel;
 using DRM.PropBag.ControlsWPF;
-using DRM.PropBag.LiveClassGenerator;
 
-using DRM.TypeSafePropertyBag;
 
 using PropBagTestApp.Models;
-using DRM.AutoMapperSupport;
+using DRM.PropBag.AutoMapperSupport;
+using DRM.PropBag.ViewModelBuilder;
+using AutoMapper;
 
 namespace PropBagTestApp
 {
@@ -21,10 +21,16 @@ namespace PropBagTestApp
     /// </summary>
     public partial class DtoTestEmit : Window
     {
+
+
         Dictionary<string, BoundPropBag> _boundPropBags;
-        PropBagMapper<MyModel, DtoTestViewModelEmit> _pbMapper = null;
-        PropBagMapper<MyModel2, DtoTestViewModelEmit> _pbMapper2 = null;
-        ConfiguredMappers _conMappers = new ConfiguredMappers();
+        //PropBagMapper<MyModel, DtoTestViewModelEmit> _pbMapper = null;
+        //PropBagMapper<MyModel2, DtoTestViewModelEmit> _pbMapper2 = null;
+
+        PropBagMapperKey<MyModel, DtoTestViewModelEmit> _mapperKey;
+        PropBagMapperKey<MyModel2, DtoTestViewModelEmit> _mapperKey2;
+
+        ConfiguredMappers _conMappers;
 
         [PropBagInstanceAttribute("OurData", "There is only one ViewModel in this View.")]
         public DtoTestViewModelEmit OurData
@@ -43,9 +49,15 @@ namespace PropBagTestApp
         {
             InitializeComponent();
 
+            Func<string, Action<IProfileExpression>, Profile> profileGen = (x, y) => new PropBagProfile(x, y);
+            _conMappers = new ConfiguredMappers(new MapperConfigurationProvider().BaseConfigBuilder);
+
             Grid topGrid = (Grid)this.FindName("TopGrid");
 
-            _boundPropBags =  ViewModelGenerator.StandUpViewModels(topGrid, this);
+            _boundPropBags = ViewModelGenerator.StandUpViewModels(topGrid, this);
+
+            DefineMapingKeys("OurData");
+            DefineMappers("OurData");
 
             // This is an example of how to create the binding whose source is a property in the Property Bag
             // to a UI Element in this class' view.
@@ -75,53 +87,73 @@ namespace PropBagTestApp
 
         private void BtnSave_Click(object sender, RoutedEventArgs e)
         {
-            PropBagMapper<MyModel, DtoTestViewModelEmit> mapper = GetPropBagMapper("OurData");
-            MyModel m1 = mapper.MapFrom(OurData);
+            var mapper = (PropBagMapper<MyModel, DtoTestViewModelEmit>) _conMappers.GetMapperToUse(_mapperKey);
+            MyModel m1 = (MyModel)mapper.MapTo(OurData);
         }
 
         private void ReadWithMap(MyModel mm, DtoTestViewModelEmit vm)
         {
-            PropBagMapper<MyModel, DtoTestViewModelEmit> mapper = GetPropBagMapper("OurData");
-            mapper.MapTo(mm, vm);
+            var mapper = (PropBagMapper<MyModel, DtoTestViewModelEmit>)_conMappers.GetMapperToUse(_mapperKey);
 
-            //// Now try creating a new one from mm.
-            //DtoTestViewModelEmit test = (DtoTestViewModelEmit) mapper.MapTo(mm);
+            DtoTestViewModelEmit tt = (DtoTestViewModelEmit)mapper.MapFrom(mm, vm);
 
-            //MyModel2 mm2 = new MyModel2
-            //{
-            //    ProductId = Guid.NewGuid(),
-            //    Amount = 1451,
-            //    Size = 17.8
-            //};
+            // Now try creating a new one from mm.
+            DtoTestViewModelEmit test = (DtoTestViewModelEmit)mapper.MapFrom(mm);
 
-            //_pbMapper2.MapTo(mm2,vm);
+            DefineMappers2("OurData");
 
-        }
-
-
-        private PropBagMapper<MyModel, DtoTestViewModelEmit> GetPropBagMapper(string instanceKey)
-        {
-            //BoundPropBag boundPB = _boundPropBags[instanceKey];
-            //_pbMapper = new PropBagMapper<MyModel, DtoTestViewModelEmit>(boundPB);
-            //return _pbMapper;
-
-            if(_pbMapper == null)
+            MyModel2 mm2 = new MyModel2
             {
-                BoundPropBag boundPB = _boundPropBags[instanceKey];
+                ProductId = Guid.NewGuid(),
+                Amount = 1451,
+                Size = 17.8
+            };
 
-                _pbMapper = new PropBagMapper<MyModel, DtoTestViewModelEmit>(boundPB);
-                _conMappers.AddMapReq(_pbMapper);
-
-                _pbMapper2 = new PropBagMapper<MyModel2, DtoTestViewModelEmit>(boundPB);
-                _conMappers.AddMapReq(_pbMapper2);
-
-                // Add other type combinations here.
-
-                _conMappers.SealThis();
-            }
-
-            return _pbMapper;
+            //var mapper2 = (PropBagMapper<MyModel2, DtoTestViewModelEmit>)_conMappers.GetMapperToUse(_mapperKey2);
+            //mapper2.MapFrom(mm2, vm);
         }
+
+        private void DefineMappers(string instanceKey)
+        {
+            BoundPropBag boundPB = _boundPropBags[instanceKey];
+
+            _conMappers.Register(_mapperKey);
+
+            //_conMappers.Register(mapperKey2);
+
+            //_pbMapper = (PropBagMapper<MyModel, DtoTestViewModelEmit>) _conMappers.GetMapperToUse(_mapperKey);
+            //_pbMapper2 = (PropBagMapper<MyModel2, DtoTestViewModelEmit>) _conMappers.GetMapperToUse(mapperKey2);
+        }
+
+        private void DefineMappers2(string instanceKey)
+        {
+            BoundPropBag boundPB = _boundPropBags[instanceKey];
+
+            //PropBagMapperKey<MyModel, DtoTestViewModelEmit> mapperKey
+            //    = new PropBagMapperKey<MyModel, DtoTestViewModelEmit>(boundPB.PropModel, boundPB.RtViewModelType);
+
+            //_conMappers.Register(mapperKey);
+
+
+            _conMappers.Register(_mapperKey2);
+
+            //_pbMapper = (PropBagMapper<MyModel, DtoTestViewModelEmit>)_conMappers.GetMapperToUse(mapperKey);
+            //_pbMapper2 = (PropBagMapper<MyModel2, DtoTestViewModelEmit>)_conMappers.GetMapperToUse(_mapperKey2);
+
+        }
+
+        private void DefineMapingKeys(string instanceKey)
+        {
+            BoundPropBag boundPB = _boundPropBags[instanceKey];
+
+            _mapperKey
+                = new PropBagMapperKey<MyModel, DtoTestViewModelEmit>(boundPB.PropModel, boundPB.RtViewModelType);
+
+            _mapperKey2
+                = new PropBagMapperKey<MyModel2, DtoTestViewModelEmit>(boundPB.PropModel, boundPB.RtViewModelType);
+        }
+
+
 
     }
 }

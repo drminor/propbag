@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using AutoMapper.Configuration;
 using AutoMapper.ExtraMembers;
 using DRM.TypeSafePropertyBag;
 using System;
@@ -9,59 +10,99 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DRM.AutoMapperSupport
+namespace DRM.PropBag.AutoMapperSupport
 {
     public class ConfiguredMappers
     {
-        private bool _sealed;
-        private LockingConcurrentDictionary<TypePair, IPropBagMapperGen> _propBagMappers;
+        private int pCntr = 0;
+        private LockingConcurrentDictionary<IPropBagMapperKeyGen, IPropBagMapperGen> _unSealedPropBagMappers;
+        private LockingConcurrentDictionary<IPropBagMapperKeyGen, IPropBagMapperGen> _sealedPropBagMappers;
 
-        public ConfiguredMappers()
+        private Func<MapperConfigurationExpression, MapperConfiguration> _baseConfigBuilder;
+
+        public ConfiguredMappers(Func<MapperConfigurationExpression, MapperConfiguration> baseConfigBuilder)
         {
-            _propBagMappers = new LockingConcurrentDictionary<TypePair, IPropBagMapperGen>(GetPropBagMapper);
-            _sealed = false;
+            _baseConfigBuilder = baseConfigBuilder;
+            _unSealedPropBagMappers = new LockingConcurrentDictionary<IPropBagMapperKeyGen, IPropBagMapperGen>(GetPropBagMapper);
+            _sealedPropBagMappers = new LockingConcurrentDictionary<IPropBagMapperKeyGen, IPropBagMapperGen>(GetPropBagMapper);
         }
 
-        public MapperConfiguration SealThis()
+        // TODO: Need to use a lock here, if one has not already been aquired by GetMapperToUse.
+        public MapperConfiguration SealThis(int cntr)
         {
-            var config = new MapperConfiguration(cfg =>
-            {
-                cfg.DefineExtraMemberGetterBuilder(PropertyInfoWT.STRATEGEY_KEY, GetGetterStrategy);
+            MapperConfigurationExpression mce = new MapperConfigurationExpression();
 
-                cfg.DefineExtraMemberSetterBuilder(PropertyInfoWT.STRATEGEY_KEY, GetSetterStrategy);
+            //mce.DefineExtraMemberGetterBuilder(PropertyInfoWT.STRATEGEY_KEY, GetGetterStrategy);
+            //mce.DefineExtraMemberSetterBuilder(PropertyInfoWT.STRATEGEY_KEY, GetSetterStrategy);
 
-                foreach (TypePair key in _propBagMappers.Keys)
-                {
-                    IPropBagMapperGen mapper = _propBagMappers[key];
-                    mapper.Configure(cfg);
-                }
-            });
+            ConfigureTheMappers(mce);
+
+            mce.CreateProfile($"Profile1{cntr.ToString()}", f => { });
+            MapperConfiguration config = _baseConfigBuilder(mce);
 
             // TODO: Handle this
             //config.AssertConfigurationIsValid();
 
-            IMapper compositeMapDef = config.CreateMapper();
-            _sealed = true;
+            IMapper compositeMapper = config.CreateMapper();
 
-            foreach (TypePair key in _propBagMappers.Keys)
-            {
-                IPropBagMapperGen mapper = _propBagMappers[key];
-                mapper.Mapper = compositeMapDef;
-            }
+            ProvisionTheMappers(compositeMapper);
+
+            _unSealedPropBagMappers = new LockingConcurrentDictionary<IPropBagMapperKeyGen, IPropBagMapperGen>(GetPropBagMapper);
+
 
             return config;
         }
 
-        public void AddMapReq(IPropBagMapperGen req)
+        void ConfigureTheMappers(MapperConfigurationExpression cfg)
         {
-            if (_sealed) throw new ApplicationException("Cannot add additional mappers, this configuration is sealed.");
-
-            _propBagMappers[req.TypePair] = req;
+            foreach (IPropBagMapperKeyGen key in _unSealedPropBagMappers.Keys)
+            {
+                IPropBagMapperGen mapper =_sealedPropBagMappers.GetOrAdd(key);
+                mapper.Configure(cfg);
+            }
         }
 
-        private IPropBagMapperGen GetPropBagMapper(TypePair types)
+        void ProvisionTheMappers(IMapper compositeMapper)
         {
-            throw new ApplicationException("This is not supported.");
+            foreach (IPropBagMapperKeyGen key in _sealedPropBagMappers.Keys)
+            {
+                IPropBagMapperGen mapper = _sealedPropBagMappers[key];
+                mapper.Mapper = compositeMapper;
+            }
+        }
+
+        // TODO: Need to aquire a lock here.
+        public void Register(IPropBagMapperKeyGen mapRequest)
+        {
+            if (!_sealedPropBagMappers.ContainsKey(mapRequest))
+            {
+                _unSealedPropBagMappers.GetOrAdd(mapRequest);
+            }
+        }
+
+        // TODO: Need to protect this with a lock.
+        public IPropBagMapperGen GetMapperToUse(IPropBagMapperKeyGen mapRequest)
+        {
+            IPropBagMapperGen result;
+            if (_sealedPropBagMappers.TryGetValue(mapRequest, out result))
+            {
+                return result;
+            }
+
+            if (_unSealedPropBagMappers.TryGetValue(mapRequest, out result))
+            {
+                _unSealedPropBagMappers.GetOrAdd(mapRequest);
+                SealThis(pCntr++);
+                result = _sealedPropBagMappers[mapRequest];
+            }
+
+            return result;
+        }
+
+
+        private IPropBagMapperGen GetPropBagMapper(IPropBagMapperKeyGen key)
+        {
+            return key.CreateMapper(key);
         }
 
         /// <summary>

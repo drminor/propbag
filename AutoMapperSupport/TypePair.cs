@@ -1,16 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Reflection;
-
-using DRM.TypeSafePropertyBag;
 
 ///<remarks>
 /// This was copied whole sale from the AutoMapper project.
 ///</remarks>
 
-namespace DRM.AutoMapperSupport
+namespace DRM.PropBag.AutoMapperSupport
 {
     //[DebuggerDisplay("{RequestedTypes.SourceType.Name}, {RequestedTypes.DestinationType.Name} : {RuntimeTypes.SourceType.Name}, {RuntimeTypes.DestinationType.Name}")]
     //public struct MapRequest : IEquatable<MapRequest>

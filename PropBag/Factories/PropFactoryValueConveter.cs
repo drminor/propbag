@@ -14,6 +14,7 @@ using DRM.PropBag.ControlModel;
 
 
 using System.Windows.Data;
+using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBag
 {

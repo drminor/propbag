@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Reflection;
 using System.ComponentModel;
 using System.Globalization;
+using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBag
 {

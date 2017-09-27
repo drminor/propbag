@@ -48,7 +48,7 @@ namespace PropBagLib.Tests
 		{
 			get
 			{
-				return GetIt<string>(nameof(PropString));
+				return GetIt<string>("PropString");
 			}
 			set
 			{

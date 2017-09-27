@@ -85,6 +85,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="MapperConfigurationProvider.cs" />
     <Compile Include="PropBagModuleBuilderProvider.cs" />
     <Compile Include="DtoTestEmit.xaml.cs">
       <DependentUpon>DtoTestEmit.xaml</DependentUpon>
@@ -106,6 +107,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Models\MyModel.cs" />
+    <Compile Include="PropBagProfle.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -153,10 +155,6 @@
     <ProjectReference Include="..\TypeSafePropertyBag\TypeSafePropertyBag.csproj">
       <Project>{bbb1e311-374e-4c91-a313-1667d83767db}</Project>
       <Name>TypeSafePropertyBag</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\WrapperGenLib\WrapperGenLib.csproj">
-      <Project>{f711fc98-af97-4041-a892-a3af78fa96ad}</Project>
-      <Name>WrapperGenLib</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

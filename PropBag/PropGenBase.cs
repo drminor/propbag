@@ -108,7 +108,16 @@ namespace DRM.PropBag
                 handler(this, new PropertyChangedWithValsEventArgs(propertyName, oldVal, newVal));
         }
 
+        public void CleanUp()
+        {
+            if (TypedProp != null) TypedProp.CleanUpTyped();
+            _actTable = null;
+            PropertyChangedWithVals = null;
+        }
+
         #endregion
+
+
 
         //#region Helper Methods for the Generic Method Templates
 
@@ -125,12 +134,7 @@ namespace DRM.PropBag
 
         //#endregion
 
-        public void CleanUp()
-        {
-            if(TypedProp != null) TypedProp.CleanUpTyped();
-            _actTable = null;
-            PropertyChangedWithVals = null;
-        }
+
 
         //#region Generic Method Templates
 
