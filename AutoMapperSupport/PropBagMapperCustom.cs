@@ -101,8 +101,7 @@ namespace DRM.PropBag.AutoMapperSupport
            Func<TDestination, TSource> regularInstanceCreator) 
         {
 
-            cfg.ShouldMapField = ShouldMap;
-            cfg.ShouldMapProperty = ShouldMap;
+
 
             //cfg.IncludeExtraMembersForType(typeof(Destination), extraMembers);
 
@@ -137,29 +136,7 @@ namespace DRM.PropBag.AutoMapperSupport
 
         #endregion
 
-        #region Extra Member Support
 
-
-
-        public bool ShouldMap(MemberInfo mi)
-        {
-            if(IsPublic(mi)) return true;
-
-            Attribute[] atts = mi.GetCustomAttributes(true) as Attribute[];
-            if (atts == null) return false;
-            Attribute test = atts.FirstOrDefault(a => a is ExtraMemberAttribute);
-
-            return test != null;
-        }
-
-        private bool IsPublic(MemberInfo mi)
-        {
-            if (mi is MethodInfo methInfo) return methInfo.IsPublic;
-            if (mi is PropertyInfo pi) return pi.GetMethod.IsPublic;
-            return false;
-        }
-
-        #endregion
 
         #region IPropBagMapper implementation
 

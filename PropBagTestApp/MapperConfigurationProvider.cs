@@ -11,9 +11,17 @@ namespace PropBagTestApp
 {
     public class MapperConfigurationProvider : MapperConfigurationProviderBase
     {
-        protected override MapperConfiguration BuildBaseConfigAction(MapperConfigurationExpression cfg)
-        {
-            return new MapperConfiguration(cfg);
-        }
+        //protected override MapperConfiguration BuildBaseConfigAction(MapperConfigurationExpression cfg)
+        //{
+        //    // Apply the default operations onf the configuration.
+        //    DefaultConfig(cfg);
+
+        //    // Create a new MapperConfig using the configuration given.
+        //    MapperConfiguration mc = new MapperConfiguration(cfg);
+
+        //    return mc;
+        //}
     }
+
+
 }

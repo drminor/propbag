@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using DRM.PropBag;
 using DRM.PropBag.AutoMapperSupport;
+using AutoMapper.Configuration;
 
 namespace PropBagTestApp
 {
@@ -44,7 +45,10 @@ namespace PropBagTestApp
 
         public DtoTestExtra()
         {
-            _conMappers = new ConfiguredMappers(new MapperConfigurationProvider().BaseConfigBuilder);
+            var configBuilder = new MapperConfigurationProvider().BaseConfigBuilder;
+            var initialMapperConfigExpProvider = new MapperStrategyConfigExpProvider(PropBagMappingStrategyEnum.ExtraMembers);
+
+            _conMappers = new ConfiguredMappers(configBuilder, initialMapperConfigExpProvider);
 
             InitializeComponent();
 
@@ -81,7 +85,7 @@ namespace PropBagTestApp
             ReadWithMap(mm, OurData);
         }
 
-        private void btnRead2_Click(object sender, RoutedEventArgs e)
+        private void BtnRead2_Click(object sender, RoutedEventArgs e)
         {
             MyModel2 mm2 = new MyModel2
             {

@@ -1,14 +1,7 @@
 ﻿using AutoMapper;
 using AutoMapper.Configuration;
-using AutoMapper.ExtraMembers;
 using DRM.TypeSafePropertyBag;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
@@ -19,10 +12,13 @@ namespace DRM.PropBag.AutoMapperSupport
         private LockingConcurrentDictionary<IPropBagMapperKeyGen, IPropBagMapperGen> _sealedPropBagMappers;
 
         private Func<MapperConfigurationExpression, MapperConfiguration> _baseConfigBuilder;
+        private IMapperStrategyConfigExpProvider _initialMapperConfigProvider;
 
-        public ConfiguredMappers(Func<MapperConfigurationExpression, MapperConfiguration> baseConfigBuilder)
+        public ConfiguredMappers(Func<MapperConfigurationExpression, MapperConfiguration> baseConfigBuilder,
+            IMapperStrategyConfigExpProvider initialConfigProvider)
         {
             _baseConfigBuilder = baseConfigBuilder;
+            _initialMapperConfigProvider = initialConfigProvider;
             _unSealedPropBagMappers = new LockingConcurrentDictionary<IPropBagMapperKeyGen, IPropBagMapperKeyGen>(GetPropBagMapperPromise);
             _sealedPropBagMappers = new LockingConcurrentDictionary<IPropBagMapperKeyGen, IPropBagMapperGen>(GetPropBagMapperReal);
         }
@@ -30,15 +26,18 @@ namespace DRM.PropBag.AutoMapperSupport
         // TODO: Need to use a lock here, if one has not already been aquired by GetMapperToUse.
         public MapperConfiguration SealThis(int cntr)
         {
-            MapperConfigurationExpression mce = new MapperConfigurationExpression();
+            MapperConfigurationExpression mce = _initialMapperConfigProvider.InitialConfiguration;
 
-            //mce.DefineExtraMemberGetterBuilder(PropertyInfoWT.STRATEGEY_KEY, GetGetterStrategy);
-            //mce.DefineExtraMemberSetterBuilder(PropertyInfoWT.STRATEGEY_KEY, GetSetterStrategy);
+            mce.AddMemberConfiguration();
 
             ConfigureTheMappers(mce);
 
             System.Diagnostics.Debug.WriteLine($"Creating Profile_{cntr.ToString()}");
-            mce.CreateProfile($"Profile_{cntr.ToString()}", f => { });
+
+            // This next line creates a ProfileConfiguration which can be used like a profile,
+            // it does not, of couse, actaully create a profile.
+            //mce.CreateProfile($"Profile_{cntr.ToString()}", f => { });
+
             MapperConfiguration config = _baseConfigBuilder(mce);
 
             // TODO: Handle this
@@ -67,7 +66,15 @@ namespace DRM.PropBag.AutoMapperSupport
             foreach (IPropBagMapperKeyGen key in _sealedPropBagMappers.Keys)
             {
                 IPropBagMapperGen mapper = _sealedPropBagMappers[key];
-                mapper.Mapper = compositeMapper;
+                if (mapper.Mapper == null)
+                {
+                    mapper.Mapper = compositeMapper;
+                    System.Diagnostics.Debug.WriteLine($"Setting the mapper for Mapper with key = {key}.");
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"The Mapper with key = {key} already has it's mapper set.");
+                }
             }
         }
 
@@ -105,39 +112,6 @@ namespace DRM.PropBag.AutoMapperSupport
         private IPropBagMapperKeyGen GetPropBagMapperPromise(IPropBagMapperKeyGen key)
         {
             return key;
-        }
-
-        /// <summary>
-        /// This assumes that mi will always be a PropertyInfo.
-        /// </summary>
-        /// <param name="mi"></param>
-        /// <param name="sourceType"></param> 
-        /// <returns></returns>
-        public ExtraMemberCallDetails GetGetterStrategy(MemberInfo mi, Expression destination, Type sourceType, IPropertyMap propertyMap)
-        {
-            Expression indexExp = Expression.Constant(new object[] { sourceType });
-
-            Expression[] parameters = new Expression[3] { Expression.Constant(mi), destination, indexExp };
-            return new ExtraMemberCallDetails(ExtraMemberCallDirectionEnum.Get, mi, parameters);
-        }
-
-        // This assumes that mi will always be a PropertyInfo.
-        public ExtraMemberCallDetails GetSetterStrategy(MemberInfo mi, Expression destination, Type sourceType, IPropertyMap propertyMap, ParameterExpression value)
-        {
-            Expression newValue;
-            if (mi is PropertyInfo pi && pi.PropertyType.IsValueType())
-            {
-                newValue = Expression.TypeAs((Expression)value, typeof(object));
-            }
-            else
-            {
-                newValue = value;
-            }
-
-            Expression indexExp = Expression.Constant(new object[] { propertyMap.SourceType });
-
-            Expression[] parameters = new Expression[4] { Expression.Constant(mi), destination, newValue, indexExp };
-            return new ExtraMemberCallDetails(ExtraMemberCallDirectionEnum.Set, mi, parameters);
         }
     }
 }

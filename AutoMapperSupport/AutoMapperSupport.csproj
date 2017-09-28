@@ -42,11 +42,13 @@
   <ItemGroup>
     <Compile Include="ConfiguredMappers.cs" />
     <None Include="ExtraMembers.cs" />
-    <Compile Include="IMapperConfigurationProvider.cs" />
+    <Compile Include="IMapperConfiBuilderProvider.cs" />
+    <Compile Include="IMapperStrategyConfigExpProvider.cs" />
     <Compile Include="IMapTypeDefinition.cs" />
     <Compile Include="IPropBagMapper.cs" />
     <Compile Include="LivePropModelExtensions.cs" />
     <Compile Include="MapperConfigurationProviderBase.cs" />
+    <Compile Include="MapperStrategyConfigExpProvider.cs" />
     <Compile Include="MapTypeDefinition.cs" />
     <Compile Include="PBDispatcher.cs" />
     <Compile Include="PropBagMapperCustom.cs" />

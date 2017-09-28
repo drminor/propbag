@@ -31,6 +31,18 @@ namespace DRM.PropBag.AutoMapperSupport
         public PropModel PropModel { get; }
         public Type BaseType { get; }
 
+        public override string ToString()
+        {
+            if(IsPropBag)
+            {
+                return $"MapTypeDef for IPropBag type: {Type.ToString()}, with {PropModel.Props.Count} properties.";
+            }
+            else
+            {
+                return $"MapTypeDef for 'regular' type: {Type.ToString()}";
+            }
+        }
+
         public override bool Equals(object obj)
         {
             var definition = obj as MapTypeDefinition<T>;

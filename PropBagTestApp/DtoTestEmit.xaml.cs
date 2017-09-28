@@ -12,7 +12,7 @@ using DRM.PropBag.ControlsWPF;
 using PropBagTestApp.Models;
 using DRM.PropBag.AutoMapperSupport;
 using DRM.PropBag.ViewModelBuilder;
-using AutoMapper;
+using AutoMapper.Configuration;
 
 namespace PropBagTestApp
 {
@@ -49,8 +49,11 @@ namespace PropBagTestApp
         {
             InitializeComponent();
 
-            Func<string, Action<IProfileExpression>, Profile> profileGen = (x, y) => new PropBagProfile(x, y);
-            _conMappers = new ConfiguredMappers(new MapperConfigurationProvider().BaseConfigBuilder);
+            var configBuilder = new MapperConfigurationProvider().BaseConfigBuilder;
+            var initialMapperConfigExpProvider = 
+                new MapperStrategyConfigExpProvider(PropBagMappingStrategyEnum.EmitProxy);
+
+            _conMappers = new ConfiguredMappers(configBuilder, initialMapperConfigExpProvider);
 
             Grid topGrid = (Grid)this.FindName("TopGrid");
 
@@ -109,8 +112,8 @@ namespace PropBagTestApp
                 Size = 17.8
             };
 
-            //var mapper2 = (PropBagMapper<MyModel2, DtoTestViewModelEmit>)_conMappers.GetMapperToUse(_mapperKey2);
-            //mapper2.MapFrom(mm2, vm);
+            var mapper2 = (PropBagMapper<MyModel2, DtoTestViewModelEmit>)_conMappers.GetMapperToUse(_mapperKey2);
+            mapper2.MapToDestination(mm2, vm);
         }
 
         private void DefineMappers(string instanceKey)
