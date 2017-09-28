@@ -1,11 +1,10 @@
-﻿using System;
+﻿using DRM.TypeSafePropertyBag;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Threading;
-using System.Reflection;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using DRM.TypeSafePropertyBag;
+using System.Reflection;
+using System.Threading;
 
 namespace DRM.PropBag
 {

@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.Threading;
 using System.Reflection;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using System.Linq;
 
 using DRM.TypeSafePropertyBag;
@@ -14,9 +13,7 @@ using DRM.PropBag.Caches;
 
 namespace DRM.PropBag
 {
-    public delegate IPropGen MissingPropStategy(string propertyName, Type propertyType, out bool wasRegistered,
-            bool haveValue, object value, bool alwaysRegister, bool readMissingDoesRegister);
-
+    
     #region Summary and Remarks
 
     /// <summary>
@@ -40,6 +37,9 @@ namespace DRM.PropBag
 
     public class PropBagBase : IPropBag
     {
+        delegate IPropGen MissingPropStategy(string propertyName, Type propertyType, out bool wasRegistered,
+            bool haveValue, object value, bool alwaysRegister, bool readMissingDoesRegister);
+
         #region Member Declarations
 
         // TO-DOC: Explain that the life time of any sources that listen to the events provided by this class,
@@ -57,9 +57,6 @@ namespace DRM.PropBag
 
         private readonly Dictionary<string, PropGen> tVals;
 
-        //private readonly Dictionary<Type, DoSetDelegate> doSetDelegateDict;
-
-        // TODO: Consider making this part of the the IPropBag or IPubPropBag interface.
         public PropBagTypeSafetyMode TypeSafetyMode { get; protected set; }
 
         /// <summary>
@@ -186,8 +183,6 @@ namespace DRM.PropBag
             {
                 if(ReturnDefaultForUndefined != thePropFactory.ReturnDefaultForUndefined)
                 {
-                    // TODO: Consider making IPropFactory have a way 
-                    // to override the current setting for this value.
                     throw new ApplicationException("The 'ReturnDefaultForUndefined' setting on the specified property factory conflicts with the TypeSafetyMode specified.");
                 }
                 ThePropFactory = thePropFactory;
@@ -276,7 +271,6 @@ namespace DRM.PropBag
         #endregion
 
         #region Property Access Methods
-
 
         private PropGen HandleMissingProp(string propertyName, Type propertyType, out bool wasRegistered,
             bool haveValue, object value, bool alwaysRegister, bool mustRegister)
@@ -819,8 +813,6 @@ namespace DRM.PropBag
             IDictionary<string, ValPlusType> result = list.ToDictionary(pair => pair.Key, pair => pair.Value);
             return result; 
         }
-
-
 
         /// <summary>
         /// Returns all of the values in dictionary of objects, keyed by PropertyName.
