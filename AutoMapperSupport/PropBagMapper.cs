@@ -2,7 +2,6 @@
 using DRM.PropBag.ControlModel;
 using System;
 
-
 namespace DRM.PropBag.AutoMapperSupport
 {
     public class PropBagMapper<TSource, TDestination>
@@ -82,9 +81,9 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public TDestination MapToDestination(TSource s)
         {
-            TDestination wrappedObject = (TDestination) Activator.CreateInstance(RunTimeType, new object[] { PropModel });
+            TDestination proxyViewModel = GetNewDestination(PropModel);
 
-            return (TDestination)Mapper.Map(s, wrappedObject, SourceType, RunTimeType);
+            return (TDestination)Mapper.Map(s, proxyViewModel, SourceType, RunTimeType);
         }
 
         public TDestination MapToDestination(TSource s, TDestination d)
@@ -100,6 +99,20 @@ namespace DRM.PropBag.AutoMapperSupport
         public TSource MapToSource(TDestination d, TSource s)
         {
             return (TSource) Mapper.Map(d, s, RunTimeType, SourceType);
+        }
+
+        private TDestination GetNewDestination(PropModel propModel)
+        {
+            TDestination destination;
+            try
+            {
+                destination = (TDestination)Activator.CreateInstance(RunTimeType, new object[] { propModel });
+                return destination;
+            }
+            catch
+            {
+                throw new InvalidOperationException($"Cannot create an instance of {RunTimeType} that takes a PropModel parameter.");
+            }
         }
 
         #endregion
