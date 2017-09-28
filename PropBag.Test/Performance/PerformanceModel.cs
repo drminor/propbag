@@ -69,7 +69,7 @@ namespace PropBagLib.Tests
             }
             set
             {
-                SetIt<int>(value, ref _propIntNoStore);
+                SetIt<int>(value, ref _propIntNoStore, nameof(PropIntNoStore));
             }
         }  
 
@@ -83,16 +83,9 @@ namespace PropBagLib.Tests
             }
             set
             {
-                SetIt(value, ref _propStringNoStore);
+                SetIt(value, ref _propStringNoStore, nameof(PropStringNoStore));
             }
         }
-
-        // For Loose Testing
-        //public new object this[string propertyName, string key]
-        //{
-        //    get { return base[propertyName, key]; }
-        //    set { base[propertyName, key] = value; }
-        //}
 
         protected void OnPropertyChanged2([CallerMemberName]string propertyName = null)
         {

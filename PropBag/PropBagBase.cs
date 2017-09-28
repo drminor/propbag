@@ -542,7 +542,7 @@ namespace DRM.PropBag
         /// <param name="curValue">The current value of the property, must be specified using the ref keyword.</param>
         /// <param name="propertyName"></param>
         /// <returns>True if the value was updated, otherwise false.</returns>
-        public bool SetIt<T>(T newValue, ref T curValue, string propertyName = null)
+        public bool SetIt<T>(T newValue, ref T curValue, string propertyName)
         {
             PropGen genProp = GetGenProp(propertyName, typeof(T), out bool wasRegistered,
                     haveValue: true,

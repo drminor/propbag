@@ -1,20 +1,15 @@
 ﻿using AutoMapper;
-using AutoMapper.ExtraMembers;
-using DRM.PropBag;
 using DRM.PropBag.ControlModel;
-
-//using DRM.PropBag.ViewModelBuilder;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-
 
 namespace DRM.PropBag.AutoMapperSupport
 {
     public class PropBagMapperCustom<TSource, TDestination>
         : IPropBagMapper<TSource, TDestination>
     {
+
         #region Public and Private Members
 
         IEnumerable<MemberInfo> _extraMembers = new List<MemberInfo>();
@@ -44,43 +39,17 @@ namespace DRM.PropBag.AutoMapperSupport
             SourceTypeDef = mapRequest.SourceTypeDef;
             DestinationTypeDef = mapRequest.DestinationTypeDef;
 
-            PropModel = mapRequest.DestinationTypeDef.PropModel;
-            _extraMembers = GetExtraMembers(PropModel);
+            PropModel = DestinationTypeDef.PropModel;
+            _extraMembers = PropModel.GetExtraMembers(); //GetExtraMembers(PropModel);
 
             RegularInstanceCreator = mapRequest.ConstructSourceFunc;
 
             SupportsMapFrom = true;
         }
 
-    #endregion
+        #endregion
 
-        #region Construction Support
-
-        private List<MemberInfo> GetExtraMembers(PropModel pm)
-        {
-            List<MemberInfo> result = new List<MemberInfo>();
-
-            foreach (PropItem propItem in pm.Props)
-            {
-                string propertyName = propItem.PropertyName;
-                Type propertyType = propItem.PropertyType;
-
-                // TOOD: Use a Static Bridge, to avoid boxing the host variable.
-                //Func<object, string, Type, object> getter =
-                //    new Func<object, string, Type, object>((host, pn, pt) => ((PbT)host).GetValWithType(pn, pt));
-
-                //Action<object, string, Type, object> setter =
-                //    new Action<object, string, Type, object>((host, pn, pt, value) => ((PbT)host).SetValWithType(pn, pt, value));
-
-                //PropertyInfoWT pi = new PropertyInfoWT(propertyName, propertyType, typeof(PbT),
-                //    getter, setter);
-
-                //result.Add(pi);
-
-            }
-
-            return result;
-        }
+        #region Configure Method
 
         public IMapperConfigurationExpression Configure(IMapperConfigurationExpression cfg)
         {
@@ -100,21 +69,7 @@ namespace DRM.PropBag.AutoMapperSupport
             IEnumerable<MemberInfo> extraMembers,
            Func<TDestination, TSource> regularInstanceCreator) 
         {
-
-
-
             //cfg.IncludeExtraMembersForType(typeof(Destination), extraMembers);
-
-            //if(null != cfg.GetExtraGetterStrategy(PropertyInfoWT.STRATEGEY_KEY))
-            //{
-            //    cfg.DefineExtraMemberGetterBuilder(PropertyInfoWT.STRATEGEY_KEY, GetGetterStrategy);
-            //}
-
-            //if (null != cfg.GetExtraSetterSrategry(PropertyInfoWT.STRATEGEY_KEY))
-            //{
-            //    cfg.DefineExtraMemberSetterBuilder(PropertyInfoWT.STRATEGEY_KEY, GetSetterStrategy);
-            //}
-
 
             cfg
                 .CreateMap<TSource, TDestination>()
@@ -136,60 +91,12 @@ namespace DRM.PropBag.AutoMapperSupport
 
         #endregion
 
-
-
-        #region IPropBagMapper implementation
-
-        //public delegate object MapFromX(IPropBag source);
-        //public delegate IPropBag MapToX(object source, IPropBag destination);
-        //public delegate IPropBag MapToNewX(object source);
-
-        //MapFromX MapFrom
-        //{
-        //    get
-        //    {
-        //        return MapFromX;
-        //    }
-        //}
-
-        //MapToX MapTo
-        //{
-        //    get
-        //    {
-        //        return MapToX;
-        //    }
-        //}
-
-        //public MapToNewX MapToNew
-        //{
-        //    get
-        //    {
-        //        return MapToNewX;
-        //    }
-        //}
-
-        #endregion
-
         #region Type Mapper Function
-
-        //public object MapFromX(IPropBag source)
-        //{
-        //    return (RegT)MapFrom((PbT)source);
-        //}
-
-        //public IPropBag MapToX(object source, IPropBag destination)
-        //{
-        //    return MapTo((RegT)source, (PbT)destination);
-        //}
-
-        //public IPropBag MapToNewX(object source)
-        //{
-        //    return (PbT)MapTo((RegT)source);
-        //}
 
         public TDestination MapToDestination(TSource s)
         {
-            return (TDestination)Mapper.Map<TSource, TDestination>(s);
+            TDestination d = GetNewDestination(PropModel);
+            return MapToDestination(s, d);
         }
 
         public TDestination MapToDestination(TSource s, TDestination d)
@@ -207,43 +114,19 @@ namespace DRM.PropBag.AutoMapperSupport
             return (TSource)Mapper.Map<TDestination, TSource>(d, s);
         }
 
-        //public RegT MapFrom(PbT source)
-        //{
-        //    return (RegT)Mapper.Map<PbT, RegT>(source);
-        //}
-
-        //public RegT MapFrom(PbT source, RegT destination)
-        //{
-        //    return (RegT)Mapper.Map<PbT, RegT>(source, destination);
-        //}
-
-        //public PbT MapTo(RegT source, PbT destination)
-        //{
-        //    PbT result = Mapper.Map<RegT, PbT>(source, destination);
-        //    return result;
-        //}
-
-        //public PbT MapTo(RegT source)
-        //{
-        //    if (_propModel == null) throw new InvalidOperationException($"The version of MapTo that doesn't take a {typeof(PbT)} is not supported. This instance was not created from a BoundPropBagTemplate.");
-
-        //    PbT destination = GetNewDestination();
-        //    return MapTo(source, destination);
-        //}
-
-        //private PbT GetNewDestination()
-        //{
-        //    PbT destination;
-        //    try
-        //    {
-        //        destination = (PbT)Activator.CreateInstance(typeof(PbT), new object[] { _propModel });
-        //        return destination;
-        //    }
-        //    catch
-        //    {
-        //        throw new InvalidOperationException($"Cannot create an instance of {typeof(PbT)} that takes a PropModel parameter.");
-        //    }
-        //}
+        private TDestination GetNewDestination(PropModel propModel)
+        {
+            TDestination destination;
+            try
+            {
+                destination = (TDestination)Activator.CreateInstance(typeof(TDestination), new object[] { propModel });
+                return destination;
+            }
+            catch
+            {
+                throw new InvalidOperationException($"Cannot create an instance of {typeof(TDestination)} that takes a PropModel parameter.");
+            }
+        }
 
         #endregion
 
