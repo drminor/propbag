@@ -130,7 +130,9 @@ namespace DRM.PropBag.ControlModel
             {
                 return false;
             }
-            return this.ClassName == other.ClassName && NamespaceName == other.NamespaceName;
+            return this.ClassName == other.ClassName
+                && NamespaceName == other.NamespaceName
+                && Props.Count == other.Props.Count;
         }
 
         public static bool operator ==(PropModel left, PropModel right)

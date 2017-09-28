@@ -43,7 +43,8 @@
     <Compile Include="ConfiguredMappers.cs" />
     <None Include="ExtraMembers.cs" />
     <Compile Include="IMapperConfigurationProvider.cs" />
-    <Compile Include="IPropBagMapperGen.cs" />
+    <Compile Include="IMapTypeDefinition.cs" />
+    <Compile Include="IPropBagMapper.cs" />
     <Compile Include="LivePropModelExtensions.cs" />
     <Compile Include="MapperConfigurationProviderBase.cs" />
     <Compile Include="MapTypeDefinition.cs" />
@@ -51,6 +52,7 @@
     <Compile Include="PropBagMapperCustom.cs" />
     <Compile Include="PropBagMapper.cs" />
     <Compile Include="PropBagMapperKey.cs" />
+    <Compile Include="PropBagMappingStrategyEnum.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyInfoWT.cs" />
     <None Include="TypePair.cs" />

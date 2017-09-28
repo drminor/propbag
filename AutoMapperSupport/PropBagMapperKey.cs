@@ -9,9 +9,12 @@ using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
-    public class PropBagMapperKey<TSource, TDestination> : IPropBagMapperKey<TSource, TDestination>
+    public class PropBagMapperKey<TSource, TDestination> : IPropBagMapperKey<TSource, TDestination>, IEquatable<IPropBagMapperKeyGen>
     {
-        public PropBagMapperKey(PropModel pm, Type baseType, bool useCustom = false, Func<TDestination, TSource> constructSourceFunc = null)
+        public PropBagMapperKey(PropModel pm,
+            Type baseType,
+            PropBagMappingStrategyEnum mappingStrategy,
+            Func<TDestination, TSource> constructSourceFunc = null)
         {
             if (typeof(TSource) is IPropBag) throw new ApplicationException("The first type, TSource, is expected to be a regular, non-propbag-based type.");
             if (typeof(TDestination) is IPropBag) throw new ApplicationException("The second type, TDestination, is expected to be a propbag-based type.");
@@ -22,23 +25,35 @@ namespace DRM.PropBag.AutoMapperSupport
             ConstructSourceFunc = constructSourceFunc;
             ConstructDestinationFunc = null;
 
-            UseCustom = useCustom;
-            if(useCustom)
+            MappingStrategy = mappingStrategy;
+
+            
+            switch (mappingStrategy)
             {
-                CreateMapper = (untypedKey) =>
-                {
-                    IPropBagMapperKey<TSource, TDestination> typedKey = (IPropBagMapperKey<TSource, TDestination>)untypedKey;
-                    return new PropBagMapperCustom<TSource, TDestination>(typedKey);
-                };
+                case PropBagMappingStrategyEnum.ExtraMembers:
+                    {
+                        CreateMapper = (untypedKey) =>
+                        {
+                            IPropBagMapperKey<TSource, TDestination> typedKey = (IPropBagMapperKey<TSource, TDestination>)untypedKey;
+                            return new PropBagMapperCustom<TSource, TDestination>(typedKey);
+                        };
+                        break;
+                    }
+                case PropBagMappingStrategyEnum.EmitProxy:
+                    {
+                        CreateMapper = (untypedKey) =>
+                        {
+                            IPropBagMapperKey<TSource, TDestination> typedKey = (IPropBagMapperKey<TSource, TDestination>)untypedKey;
+                            return new PropBagMapper<TSource, TDestination>(typedKey);
+                        };
+                        break;
+                    }
+                default:
+                    {
+                        throw new ApplicationException($"Unsupported, or unexpected value of {nameof(PropBagMappingStrategyEnum)}.");
+                    }
             }
-            else
-            {
-                CreateMapper = (untypedKey) =>
-                {
-                    IPropBagMapperKey<TSource, TDestination> typedKey = (IPropBagMapperKey<TSource, TDestination>)untypedKey;
-                    return new PropBagMapper<TSource, TDestination>(typedKey);
-                };
-            }
+
           
         }
 
@@ -62,6 +77,11 @@ namespace DRM.PropBag.AutoMapperSupport
             return null != t.GetInterfaces().FirstOrDefault(x => x.Name == "IPropBag");
         }
 
+        bool IEquatable<IPropBagMapperKeyGen>.Equals(IPropBagMapperKeyGen other)
+        {
+            throw new NotImplementedException();
+        }
+
         public Func<IPropBagMapperKeyGen, IPropBagMapperGen> CreateMapper { get; }
 
         public IMapTypeDefinition<TSource> SourceTypeDef { get; }
@@ -72,12 +92,11 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public Func<TSource, TDestination> ConstructDestinationFunc { get; }
 
-        public bool UseCustom { get; set; }
+        public PropBagMappingStrategyEnum MappingStrategy { get; set; }
 
         public IMapTypeDefinitionGen SourceTypeGenDef => SourceTypeDef as IMapTypeDefinitionGen;
 
         public IMapTypeDefinitionGen DestinationTypeGenDef => DestinationTypeDef as IMapTypeDefinitionGen;
-
 
     }
 }

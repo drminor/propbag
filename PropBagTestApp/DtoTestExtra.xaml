@@ -55,8 +55,10 @@
         <Label Grid.Row="2">Size:</Label>
         <TextBox Grid.Row="2" x:Name="Sz" Height="25" Width="100"
                  Text="13" />
-
-        <Button x:Name="btnRead" Grid.Row="3" Content="Read" Height="25" Width="100" Click="BtnRead_Click"></Button>
+        <StackPanel Orientation="Horizontal" Grid.Row="3">
+            <Button x:Name="btnRead" Margin="0,0,20,0" Content="Read" Height="25" Width="100" Click="BtnRead_Click"></Button>
+            <Button x:Name="btnRead2" Content="Read" Height="25" Width="100" Click="btnRead2_Click"></Button>
+        </StackPanel>
         <Button x:Name="btnSave" Grid.Row="4" Content="Save" Height="25" Width="100" Click="BtnSave_Click"></Button>
 
 

@@ -15,7 +15,7 @@ namespace DRM.PropBag.AutoMapperSupport
     public class ConfiguredMappers
     {
         private int pCntr = 0;
-        private LockingConcurrentDictionary<IPropBagMapperKeyGen, IPropBagMapperGen> _unSealedPropBagMappers;
+        private LockingConcurrentDictionary<IPropBagMapperKeyGen, IPropBagMapperKeyGen> _unSealedPropBagMappers;
         private LockingConcurrentDictionary<IPropBagMapperKeyGen, IPropBagMapperGen> _sealedPropBagMappers;
 
         private Func<MapperConfigurationExpression, MapperConfiguration> _baseConfigBuilder;
@@ -23,8 +23,8 @@ namespace DRM.PropBag.AutoMapperSupport
         public ConfiguredMappers(Func<MapperConfigurationExpression, MapperConfiguration> baseConfigBuilder)
         {
             _baseConfigBuilder = baseConfigBuilder;
-            _unSealedPropBagMappers = new LockingConcurrentDictionary<IPropBagMapperKeyGen, IPropBagMapperGen>(GetPropBagMapper);
-            _sealedPropBagMappers = new LockingConcurrentDictionary<IPropBagMapperKeyGen, IPropBagMapperGen>(GetPropBagMapper);
+            _unSealedPropBagMappers = new LockingConcurrentDictionary<IPropBagMapperKeyGen, IPropBagMapperKeyGen>(GetPropBagMapperPromise);
+            _sealedPropBagMappers = new LockingConcurrentDictionary<IPropBagMapperKeyGen, IPropBagMapperGen>(GetPropBagMapperReal);
         }
 
         // TODO: Need to use a lock here, if one has not already been aquired by GetMapperToUse.
@@ -37,7 +37,8 @@ namespace DRM.PropBag.AutoMapperSupport
 
             ConfigureTheMappers(mce);
 
-            mce.CreateProfile($"Profile1{cntr.ToString()}", f => { });
+            System.Diagnostics.Debug.WriteLine($"Creating Profile_{cntr.ToString()}");
+            mce.CreateProfile($"Profile_{cntr.ToString()}", f => { });
             MapperConfiguration config = _baseConfigBuilder(mce);
 
             // TODO: Handle this
@@ -47,8 +48,7 @@ namespace DRM.PropBag.AutoMapperSupport
 
             ProvisionTheMappers(compositeMapper);
 
-            _unSealedPropBagMappers = new LockingConcurrentDictionary<IPropBagMapperKeyGen, IPropBagMapperGen>(GetPropBagMapper);
-
+            _unSealedPropBagMappers.Clear();
 
             return config;
         }
@@ -83,26 +83,28 @@ namespace DRM.PropBag.AutoMapperSupport
         // TODO: Need to protect this with a lock.
         public IPropBagMapperGen GetMapperToUse(IPropBagMapperKeyGen mapRequest)
         {
+            System.Diagnostics.Debug.WriteLine($"");
             IPropBagMapperGen result;
             if (_sealedPropBagMappers.TryGetValue(mapRequest, out result))
             {
                 return result;
             }
 
-            if (_unSealedPropBagMappers.TryGetValue(mapRequest, out result))
-            {
-                _unSealedPropBagMappers.GetOrAdd(mapRequest);
-                SealThis(pCntr++);
-                result = _sealedPropBagMappers[mapRequest];
-            }
+            _unSealedPropBagMappers.GetOrAdd(mapRequest);
+            SealThis(pCntr++);
+            result = _sealedPropBagMappers[mapRequest];
 
             return result;
         }
 
-
-        private IPropBagMapperGen GetPropBagMapper(IPropBagMapperKeyGen key)
+        private IPropBagMapperGen GetPropBagMapperReal(IPropBagMapperKeyGen key)
         {
             return key.CreateMapper(key);
+        }
+
+        private IPropBagMapperKeyGen GetPropBagMapperPromise(IPropBagMapperKeyGen key)
+        {
+            return key;
         }
 
         /// <summary>

@@ -210,21 +210,22 @@ namespace DRM.PropBag.AutoMapperSupport
         //    return (PbT)MapTo((RegT)source);
         //}
 
-        public TDestination MapFrom(TSource s)
+        public TDestination MapToDestination(TSource s)
         {
             return (TDestination)Mapper.Map<TSource, TDestination>(s);
         }
-        public TDestination MapFrom(TSource s, TDestination d)
+
+        public TDestination MapToDestination(TSource s, TDestination d)
         {
             return (TDestination)Mapper.Map<TSource, TDestination>(s, d);
         }
 
-        public TSource MapTo(TDestination d)
+        public TSource MapToSource(TDestination d)
         {
             return (TSource)Mapper.Map<TDestination, TSource>(d);
         }
 
-        public TSource MapTo(TDestination d, TSource s)
+        public TSource MapToSource(TDestination d, TSource s)
         {
             return (TSource)Mapper.Map<TDestination, TSource>(d, s);
         }

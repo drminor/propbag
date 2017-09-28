@@ -88,17 +88,17 @@ namespace PropBagTestApp
         private void BtnSave_Click(object sender, RoutedEventArgs e)
         {
             var mapper = (PropBagMapper<MyModel, DtoTestViewModelEmit>) _conMappers.GetMapperToUse(_mapperKey);
-            MyModel m1 = (MyModel)mapper.MapTo(OurData);
+            MyModel m1 = (MyModel)mapper.MapToSource(OurData);
         }
 
         private void ReadWithMap(MyModel mm, DtoTestViewModelEmit vm)
         {
             var mapper = (PropBagMapper<MyModel, DtoTestViewModelEmit>)_conMappers.GetMapperToUse(_mapperKey);
 
-            DtoTestViewModelEmit tt = (DtoTestViewModelEmit)mapper.MapFrom(mm, vm);
+            DtoTestViewModelEmit tt = (DtoTestViewModelEmit)mapper.MapToDestination(mm, vm);
 
             // Now try creating a new one from mm.
-            DtoTestViewModelEmit test = (DtoTestViewModelEmit)mapper.MapFrom(mm);
+            DtoTestViewModelEmit test = (DtoTestViewModelEmit)mapper.MapToDestination(mm);
 
             DefineMappers2("OurData");
 
@@ -147,10 +147,12 @@ namespace PropBagTestApp
             BoundPropBag boundPB = _boundPropBags[instanceKey];
 
             _mapperKey
-                = new PropBagMapperKey<MyModel, DtoTestViewModelEmit>(boundPB.PropModel, boundPB.RtViewModelType);
+                = new PropBagMapperKey<MyModel, DtoTestViewModelEmit>
+                (boundPB.PropModel, boundPB.RtViewModelType, mappingStrategy: PropBagMappingStrategyEnum.EmitProxy);
 
             _mapperKey2
-                = new PropBagMapperKey<MyModel2, DtoTestViewModelEmit>(boundPB.PropModel, boundPB.RtViewModelType);
+                = new PropBagMapperKey<MyModel2, DtoTestViewModelEmit>
+                (boundPB.PropModel, boundPB.RtViewModelType, mappingStrategy: PropBagMappingStrategyEnum.EmitProxy);
         }
 
 

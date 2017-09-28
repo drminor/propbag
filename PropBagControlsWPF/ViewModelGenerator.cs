@@ -52,9 +52,9 @@ namespace DRM.PropBag.ControlsWPF
                     // as the basis of the name of the new wrapper type.
                     TypeDescription typeDescription = BuildTypeDesc(dtViewModelType, null, pm);
 
-                    IModuleBuilderInfo modelBuilderToUse = modelBuilder ?? new DefaultModuleBuilderInfoProvider().ModuleBuilderInfo;
+                    IModuleBuilderInfo typeEmitter = GetEmitter(modelBuilder);
 
-                    Type proxyType = modelBuilderToUse.GetWrapperType(typeDescription);
+                    Type proxyType = typeEmitter.GetWrapperType(typeDescription);
 
                     //Type[] implementedTypes = proxyType.GetTypeInfo().ImplementedInterfaces.ToArray();
 
@@ -68,6 +68,11 @@ namespace DRM.PropBag.ControlsWPF
                 }
             }
             return boundTemplates;
+        }
+
+        private static IModuleBuilderInfo GetEmitter(IModuleBuilderInfo provided)
+        {
+            return provided ?? new DefaultModuleBuilderInfoProvider().ModuleBuilderInfo;
         }
 
         /// <summary>

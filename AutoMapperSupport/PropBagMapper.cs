@@ -144,14 +144,14 @@ namespace DRM.PropBag.AutoMapperSupport
 
         #region Type Mapper Function
 
-        public TDestination MapFrom(TSource s)
+        public TDestination MapToDestination(TSource s)
         {
             TDestination wrappedObject = (TDestination) Activator.CreateInstance(RunTimeType, new object[] { PropModel });
 
             return (TDestination)Mapper.Map(s, wrappedObject, SourceType, RunTimeType);
         }
 
-        public TDestination MapFrom(TSource s, TDestination d)
+        public TDestination MapToDestination(TSource s, TDestination d)
         {
             //object proxyObject = Activator.CreateInstance(_wrapperType, new object[] { _propModel });
 
@@ -164,12 +164,12 @@ namespace DRM.PropBag.AutoMapperSupport
             return (TDestination) Mapper.Map(s, d, SourceType, RunTimeType);
         }
 
-        public TSource MapTo(TDestination d)
+        public TSource MapToSource(TDestination d)
         {
             return (TSource)Mapper.Map(d, RunTimeType, SourceType);
         }
 
-        public TSource MapTo(TDestination d, TSource s)
+        public TSource MapToSource(TDestination d, TSource s)
         {
             return (TSource) Mapper.Map(d, s, RunTimeType, SourceType);
         }

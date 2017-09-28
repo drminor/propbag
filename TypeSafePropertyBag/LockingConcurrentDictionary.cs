@@ -7,9 +7,16 @@ using System.Threading.Tasks;
 
 /// <remarks>
 /// This was copied whole sale from the AutoMapper project on GitHub.
+/// DRM Added TryRemove.
 /// </remarks>
 
-
+///<summary>
+/// Note: Since this uses the version of GetOrAdd that takes a delegate,
+/// Locks are not held by the ConcurrentDictionary while the delegate is being invoked.
+/// 
+/// TODO: Need to determine that since the Lazy constructor is thread-safe, if the overall
+/// operation is thread-safe.
+///</summary>
 namespace DRM.TypeSafePropertyBag
 {
     public struct LockingConcurrentDictionary<TKey, TValue>
@@ -45,6 +52,19 @@ namespace DRM.TypeSafePropertyBag
         public bool ContainsKey(TKey key) => _dictionary.ContainsKey(key);
 
         public ICollection<TKey> Keys => _dictionary.Keys;
+
+        public bool TryRemoveValue(TKey key, out TValue value)
+        {
+            if (_dictionary.TryRemove(key, out Lazy<TValue> lazy))
+            {
+                value = lazy.Value;
+                return true;
+            }
+            value = default(TValue);
+            return false;
+        }
+
+        public void Clear() => _dictionary.Clear();
     }
 
 }

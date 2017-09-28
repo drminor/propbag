@@ -53,7 +53,7 @@ namespace PropBagTestApp
             _boundPropBags = ViewModelGenerator.StandUpViewModels(topGrid, this);
 
             DefineMapingKeys("OurData");
-            DefineMappers("OurData");
+            DefineMappers();
 
             // This is an example of how to create the binding whose source is a property in the Property Bag
             // to a UI Element in this class' view.
@@ -81,23 +81,8 @@ namespace PropBagTestApp
             ReadWithMap(mm, OurData);
         }
 
-        private void BtnSave_Click(object sender, RoutedEventArgs e)
+        private void btnRead2_Click(object sender, RoutedEventArgs e)
         {
-            var mapper = (PropBagMapperCustom<MyModel, DtoTestViewModelExtra>)_conMappers.GetMapperToUse(_mapperKey);
-            MyModel m1 = (MyModel)mapper.MapTo(OurData);
-        }
-
-        private void ReadWithMap(MyModel mm, DtoTestViewModelExtra vm)
-        {
-            var mapper = (PropBagMapperCustom<MyModel, DtoTestViewModelExtra>)_conMappers.GetMapperToUse(_mapperKey);
-
-            DtoTestViewModelExtra tt = (DtoTestViewModelExtra)mapper.MapFrom(mm, vm);
-
-            // Now try creating a new one from mm.
-            DtoTestViewModelExtra test = (DtoTestViewModelExtra)mapper.MapFrom(mm);
-
-            DefineMappers2("OurData");
-
             MyModel2 mm2 = new MyModel2
             {
                 ProductId = Guid.NewGuid(),
@@ -105,37 +90,41 @@ namespace PropBagTestApp
                 Size = 17.8
             };
 
-            //var mapper2 = (PropBagMapperCustom<MyModel2, DtoTestViewModelExtra>)_conMappers.GetMapperToUse(_mapperKey2);
-            //mapper2.MapFrom(mm2, vm);
+            ReadWithMap2(mm2, OurData);
         }
 
-        private void DefineMappers(string instanceKey)
+        private void BtnSave_Click(object sender, RoutedEventArgs e)
         {
-            BoundPropBag boundPB = _boundPropBags[instanceKey];
+            var mapper = (PropBagMapperCustom<MyModel, DtoTestViewModelExtra>)_conMappers.GetMapperToUse(_mapperKey);
+            MyModel m1 = (MyModel)mapper.MapToSource(OurData);
+        }
 
+        private void ReadWithMap(MyModel mm, DtoTestViewModelExtra vm)
+        {
+            var mapper = (PropBagMapperCustom<MyModel, DtoTestViewModelExtra>)_conMappers.GetMapperToUse(_mapperKey);
+
+            DtoTestViewModelExtra tt = (DtoTestViewModelExtra)mapper.MapToDestination(mm, vm);
+
+            // Now try creating a new one from mm.
+            DtoTestViewModelExtra test = (DtoTestViewModelExtra)mapper.MapToDestination(mm);
+        }
+
+        private void ReadWithMap2(MyModel2 mm2, DtoTestViewModelExtra vm)
+        {
+            DefineMappers2();
+
+            var mapper2 = (PropBagMapperCustom<MyModel2, DtoTestViewModelExtra>)_conMappers.GetMapperToUse(_mapperKey2);
+            DtoTestViewModelExtra tt = (DtoTestViewModelExtra)mapper2.MapToDestination(mm2, vm);
+        }
+
+        private void DefineMappers()
+        {
             _conMappers.Register(_mapperKey);
-
-            //_conMappers.Register(mapperKey2);
-
-            //_pbMapper = (PropBagMapper<MyModel, DtoTestViewModelExtra>) _conMappers.GetMapperToUse(_mapperKey);
-            //_pbMapper2 = (PropBagMapper<MyModel2, DtoTestViewModelExtra>) _conMappers.GetMapperToUse(mapperKey2);
         }
 
-        private void DefineMappers2(string instanceKey)
+        private void DefineMappers2()
         {
-            BoundPropBag boundPB = _boundPropBags[instanceKey];
-
-            //PropBagMapperKey<MyModel, DtoTestViewModelExtra> mapperKey
-            //    = new PropBagMapperKey<MyModel, DtoTestViewModelExtra>(boundPB.PropModel, boundPB.RtViewModelType);
-
-            //_conMappers.Register(mapperKey);
-
-
             _conMappers.Register(_mapperKey2);
-
-            //_pbMapper = (PropBagMapper<MyModel, DtoTestViewModelExtra>)_conMappers.GetMapperToUse(mapperKey);
-            //_pbMapper2 = (PropBagMapper<MyModel2, DtoTestViewModelExtra>)_conMappers.GetMapperToUse(_mapperKey2);
-
         }
 
         private void DefineMapingKeys(string instanceKey)
@@ -143,11 +132,14 @@ namespace PropBagTestApp
             BoundPropBag boundPB = _boundPropBags[instanceKey];
 
             _mapperKey
-                = new PropBagMapperKey<MyModel, DtoTestViewModelExtra>(boundPB.PropModel, boundPB.RtViewModelType, useCustom: true);
+                = new PropBagMapperKey<MyModel, DtoTestViewModelExtra>
+                (boundPB.PropModel, boundPB.RtViewModelType, mappingStrategy: PropBagMappingStrategyEnum.ExtraMembers);
 
             _mapperKey2
-                = new PropBagMapperKey<MyModel2, DtoTestViewModelExtra>(boundPB.PropModel, boundPB.RtViewModelType, useCustom: true);
+                = new PropBagMapperKey<MyModel2, DtoTestViewModelExtra>
+                (boundPB.PropModel, boundPB.RtViewModelType, mappingStrategy: PropBagMappingStrategyEnum.ExtraMembers);
         }
+
 
     }
 }
