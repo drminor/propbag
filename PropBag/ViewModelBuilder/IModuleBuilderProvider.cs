@@ -17,7 +17,7 @@ namespace DRM.PropBag.ViewModelBuilder
         AssemblyBuilder AssemblyBuilder { get; }
         ModuleBuilder ModuleBuilder { get; }
 
-        Type GetWrapperType(TypeDescription typeDescription);
+        Type BuildVmProxyClass(TypeDescription typeDescription);
 
     }
 }

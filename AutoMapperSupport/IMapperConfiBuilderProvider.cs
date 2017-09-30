@@ -3,11 +3,13 @@ using AutoMapper.Configuration;
 using System;
 
 namespace DRM.PropBag.AutoMapperSupport
-{
+{   
     public interface IMapperConfiBuilderProvider
     {
-        Action<MapperConfigurationExpression> ResetMemberConfigAction { get; }
+        Func<Action<IMapperConfigurationExpression>, IConfigurationProvider> BaseConfigBuilder { get; }
 
-        Func<MapperConfigurationExpression, MapperConfiguration> BaseConfigBuilder { get; }
+        Action<IMapperConfigurationExpression> ResetMemberConfigAction { get; }
+
+        Action<IMapperConfigurationExpression> UseDefaultConfigurationAction { get; }
     }
 }

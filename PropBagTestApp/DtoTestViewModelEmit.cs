@@ -7,7 +7,7 @@ namespace PropBagTestApp
     {
         PropModel _pm;
 
-        public DtoTestViewModelEmit() { } // Shows that if no default constructor is available, the one that takes a single byte is use.
+        public DtoTestViewModelEmit() : base(PropBagTypeSafetyMode.None) { } // Shows that if no default constructor is available, the one that takes a single byte is use.
 
         // If it not desirable to provide a public, default, parameterless constructor, 
         // a consructor that takes a single byte can be used instead.
@@ -15,6 +15,8 @@ namespace PropBagTestApp
         // marked with the PropBagInstanceAttribute.
         // An instance of this class must be available so that we create an instance of a Action<T,T> delegate.
         public DtoTestViewModelEmit(byte dummy) : base(dummy) {}
+
+        public DtoTestViewModelEmit(PropBagTypeSafetyMode safetyMode) : base(safetyMode) { }
 
         /// <summary>
         /// Constructor used by View to create with properties

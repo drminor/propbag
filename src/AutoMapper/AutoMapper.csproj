@@ -1,5 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <PropertyGroup>
     <Summary>A convention-based object-object mapper</Summary>
     <Description>A convention-based object-object mapper. AutoMapper uses a fluent configuration API to define an object-object mapping strategy. AutoMapper uses a convention-based matching algorithm to match up source to destination values. Currently, AutoMapper is designed for model projection scenarios to flatten complex object models to DTOs and other simple objects, whose design is better suited for serialization, communication, messaging, or simply an anti-corruption layer between the domain and application layer.</Description>
@@ -17,8 +16,12 @@
     <PackageIconUrl>https://s3.amazonaws.com/automapper/icon.png</PackageIconUrl>
     <PackageProjectUrl>http://automapper.org</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/AutoMapper/AutoMapper/blob/master/LICENSE.txt</PackageLicenseUrl>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>2.0</OldToolsVersion>
   </PropertyGroup>
-
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.1' Or '$(TargetFramework)' == 'netstandard1.3' ">
     <PackageReference Include="System.Linq.Queryable" Version="4.3.0" />
     <PackageReference Include="System.Dynamic.Runtime" Version="4.3.0" />
@@ -30,26 +33,21 @@
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Reflection.Emit" Version="4.3.0" />
   </ItemGroup>
-
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.3' ">
     <PackageReference Include="System.Collections.Specialized" Version="4.3.0" />
   </ItemGroup>
-
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' Or '$(TargetFramework)' == 'net40' ">
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Runtime.Serialization" />
   </ItemGroup>
-
   <ItemGroup>
     <Compile Remove="Execution\PropertyMapFuncHelper.cs" />
     <Compile Remove="Execution\TypeMapPlanBuilder_Original.cs" />
   </ItemGroup>
-
   <ItemGroup>
     <None Include="Execution\PropertyMapFuncHelper.cs" />
   </ItemGroup>
-
   <ItemGroup Condition="'$(TargetFramework)' == 'net45'">
     <PackageReference Include="AgileObjects.NetStandardPolyfills">
       <Version>0.2.1</Version>
@@ -58,7 +56,6 @@
       <Version>1.9.2</Version>
     </PackageReference>
   </ItemGroup>
-
   <ItemGroup Condition="'$(TargetFramework)' == 'net40'">
     <PackageReference Include="AgileObjects.NetStandardPolyfills">
       <Version>0.2.1</Version>
@@ -67,14 +64,4 @@
       <Version>1.9.2</Version>
     </PackageReference>
   </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.3'">
-    <PackageReference Include="AgileObjects.NetStandardPolyfills">
-      <Version>0.2.1</Version>
-    </PackageReference>
-    <PackageReference Include="AgileObjects.ReadableExpressions">
-      <Version>1.9.2</Version>
-    </PackageReference>
-  </ItemGroup>
-
 </Project>

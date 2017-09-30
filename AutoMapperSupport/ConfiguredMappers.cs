@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using AutoMapper.Configuration;
 using DRM.TypeSafePropertyBag;
 using System;
 
@@ -11,34 +10,24 @@ namespace DRM.PropBag.AutoMapperSupport
         private LockingConcurrentDictionary<IPropBagMapperKeyGen, IPropBagMapperKeyGen> _unSealedPropBagMappers;
         private LockingConcurrentDictionary<IPropBagMapperKeyGen, IPropBagMapperGen> _sealedPropBagMappers;
 
-        private Func<MapperConfigurationExpression, MapperConfiguration> _baseConfigBuilder;
-        private IMapperStrategyConfigExpProvider _initialMapperConfigProvider;
+        private Func<Action<IMapperConfigurationExpression>, IConfigurationProvider> _baseConfigBuilder;
+        private IInitializeAMapperConf _mapperConfigInitializerProvider;
 
-        public ConfiguredMappers(Func<MapperConfigurationExpression, MapperConfiguration> baseConfigBuilder,
-            IMapperStrategyConfigExpProvider initialConfigProvider)
+        public ConfiguredMappers(Func<Action<IMapperConfigurationExpression>, IConfigurationProvider> baseConfigBuilder,
+            IInitializeAMapperConf mapperConfigInitializerProvider)
         {
             _baseConfigBuilder = baseConfigBuilder;
-            _initialMapperConfigProvider = initialConfigProvider;
+            _mapperConfigInitializerProvider = mapperConfigInitializerProvider;
             _unSealedPropBagMappers = new LockingConcurrentDictionary<IPropBagMapperKeyGen, IPropBagMapperKeyGen>(GetPropBagMapperPromise);
             _sealedPropBagMappers = new LockingConcurrentDictionary<IPropBagMapperKeyGen, IPropBagMapperGen>(GetPropBagMapperReal);
         }
 
         // TODO: Need to use a lock here, if one has not already been aquired by GetMapperToUse.
-        public MapperConfiguration SealThis(int cntr)
+        public IConfigurationProvider SealThis(int cntr)
         {
-            MapperConfigurationExpression mce = _initialMapperConfigProvider.InitialConfiguration;
-
-            mce.AddMemberConfiguration();
-
-            ConfigureTheMappers(mce);
-
             System.Diagnostics.Debug.WriteLine($"Creating Profile_{cntr.ToString()}");
 
-            // This next line creates a ProfileConfiguration which can be used like a profile,
-            // it does not, of couse, actaully create a profile.
-            //mce.CreateProfile($"Profile_{cntr.ToString()}", f => { });
-
-            MapperConfiguration config = _baseConfigBuilder(mce);
+            IConfigurationProvider config = _baseConfigBuilder(UseInitialConfigAndConfigureTheMappers);
 
             // TODO: Handle this
             //config.AssertConfigurationIsValid();
@@ -52,7 +41,13 @@ namespace DRM.PropBag.AutoMapperSupport
             return config;
         }
 
-        void ConfigureTheMappers(MapperConfigurationExpression cfg)
+        void UseInitialConfigAndConfigureTheMappers(IMapperConfigurationExpression cfg)
+        {
+            _mapperConfigInitializerProvider.InitialConfigurationAction(cfg);
+            ConfigureTheMappers(cfg);
+        }
+
+        void ConfigureTheMappers(IMapperConfigurationExpression cfg)
         {
             foreach (IPropBagMapperKeyGen key in _unSealedPropBagMappers.Keys)
             {

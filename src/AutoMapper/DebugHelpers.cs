@@ -13,11 +13,14 @@ namespace AutoMapper
         {
             string readable = "Not Supported";
 #if NET45
-            readable = a.ToReadableString();
+            //readable = a.ToReadableString();
 #endif
-            Debug.WriteLine(string.Format("Start {0}:", name));
-            Debug.WriteLine(string.Format("{0}", readable));
-            Debug.WriteLine(string.Format("End {0}:", name));
+            if (readable != "Not Supported")
+            {
+                Debug.WriteLine(string.Format("Start {0}:", name));
+                Debug.WriteLine(string.Format("{0}", readable));
+                Debug.WriteLine(string.Format("End {0}:", name));
+            }
         }
     }
 }

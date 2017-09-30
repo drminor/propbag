@@ -14,6 +14,12 @@ using DRM.PropBag.AutoMapperSupport;
 using DRM.PropBag.ViewModelBuilder;
 using AutoMapper.Configuration;
 
+using System.ComponentModel.Design;
+using System.ComponentModel;
+
+using DRM.PropBag;
+using AutoMapper;
+
 namespace PropBagTestApp
 {
     /// <summary>
@@ -21,8 +27,6 @@ namespace PropBagTestApp
     /// </summary>
     public partial class DtoTestEmit : Window
     {
-
-
         Dictionary<string, BoundPropBag> _boundPropBags;
         //PropBagMapper<MyModel, DtoTestViewModelEmit> _pbMapper = null;
         //PropBagMapper<MyModel2, DtoTestViewModelEmit> _pbMapper2 = null;
@@ -30,7 +34,7 @@ namespace PropBagTestApp
         PropBagMapperKey<MyModel, DtoTestViewModelEmit> _mapperKey;
         PropBagMapperKey<MyModel2, DtoTestViewModelEmit> _mapperKey2;
 
-        ConfiguredMappers _conMappers;
+        ConfiguredMappers _autoMappers;
 
         [PropBagInstanceAttribute("OurData", "There is only one ViewModel in this View.")]
         public DtoTestViewModelEmit OurData
@@ -47,17 +51,24 @@ namespace PropBagTestApp
 
         public DtoTestEmit()
         {
+            if (_isInDesignMode.HasValue && _isInDesignMode.Value)
+            {
+                System.Diagnostics.Debug.WriteLine("In Design");
+                OurData = new DtoTestViewModelEmit(PropBagTypeSafetyMode.Tight);
+                OurData.AddProp<int>("RunTimeInt", null, false, null, null, 17);
+                OurData.SetIt<int>(21, "RunTimeInt");
+            }
+
             InitializeComponent();
 
-            var configBuilder = new MapperConfigurationProvider().BaseConfigBuilder;
-            var initialMapperConfigExpProvider = 
-                new MapperStrategyConfigExpProvider(PropBagMappingStrategyEnum.EmitProxy);
-
-            _conMappers = new ConfiguredMappers(configBuilder, initialMapperConfigExpProvider);
+            // Create Proxy Classes dynamically for this View Model to enable AutoMapper mappings.
+            _autoMappers = GetAutoMappers(PropBagMappingStrategyEnum.EmitProxy);
 
             Grid topGrid = (Grid)this.FindName("TopGrid");
 
             _boundPropBags = ViewModelGenerator.StandUpViewModels(topGrid, this);
+
+            _autoMappers = PrepareAutoMappings(PropBagMappingStrategyEnum.EmitProxy);
 
             DefineMapingKeys("OurData");
             DefineMappers("OurData");
@@ -90,13 +101,13 @@ namespace PropBagTestApp
 
         private void BtnSave_Click(object sender, RoutedEventArgs e)
         {
-            var mapper = (PropBagMapper<MyModel, DtoTestViewModelEmit>) _conMappers.GetMapperToUse(_mapperKey);
+            var mapper = (PropBagMapper<MyModel, DtoTestViewModelEmit>) _autoMappers.GetMapperToUse(_mapperKey);
             MyModel m1 = (MyModel)mapper.MapToSource(OurData);
         }
 
         private void ReadWithMap(MyModel mm, DtoTestViewModelEmit vm)
         {
-            var mapper = (PropBagMapper<MyModel, DtoTestViewModelEmit>)_conMappers.GetMapperToUse(_mapperKey);
+            var mapper = (PropBagMapper<MyModel, DtoTestViewModelEmit>)_autoMappers.GetMapperToUse(_mapperKey);
 
             DtoTestViewModelEmit tt = (DtoTestViewModelEmit)mapper.MapToDestination(mm, vm);
 
@@ -112,7 +123,7 @@ namespace PropBagTestApp
                 Size = 17.8
             };
 
-            var mapper2 = (PropBagMapper<MyModel2, DtoTestViewModelEmit>)_conMappers.GetMapperToUse(_mapperKey2);
+            var mapper2 = (PropBagMapper<MyModel2, DtoTestViewModelEmit>)_autoMappers.GetMapperToUse(_mapperKey2);
             mapper2.MapToDestination(mm2, vm);
         }
 
@@ -120,7 +131,7 @@ namespace PropBagTestApp
         {
             BoundPropBag boundPB = _boundPropBags[instanceKey];
 
-            _conMappers.Register(_mapperKey);
+            _autoMappers.Register(_mapperKey);
 
             //_conMappers.Register(mapperKey2);
 
@@ -138,7 +149,7 @@ namespace PropBagTestApp
             //_conMappers.Register(mapperKey);
 
 
-            _conMappers.Register(_mapperKey2);
+            _autoMappers.Register(_mapperKey2);
 
             //_pbMapper = (PropBagMapper<MyModel, DtoTestViewModelEmit>)_conMappers.GetMapperToUse(mapperKey);
             //_pbMapper2 = (PropBagMapper<MyModel2, DtoTestViewModelEmit>)_conMappers.GetMapperToUse(_mapperKey2);
@@ -157,6 +168,52 @@ namespace PropBagTestApp
                 = new PropBagMapperKey<MyModel2, DtoTestViewModelEmit>
                 (boundPB.PropModel, boundPB.RtViewModelType, mappingStrategy: PropBagMappingStrategyEnum.EmitProxy);
         }
+
+        private ConfiguredMappers PrepareAutoMappings(PropBagMappingStrategyEnum mapperStrategy)
+        {
+            Func<Action<IMapperConfigurationExpression>, IConfigurationProvider> configBuilder =
+                new MapperConfigurationProvider().BaseConfigBuilder;
+
+            MapperConfigInitializerProvider configExressionProvider =
+                new MapperConfigInitializerProvider(mapperStrategy);
+
+            ConfiguredMappers result = new ConfiguredMappers(configBuilder, configExressionProvider);
+
+            return result;
+        }
+
+        public static bool? _isInDesignMode;
+
+        public static bool IsInDesignModeStatic
+        {
+            get
+            {
+                if (!_isInDesignMode.HasValue)
+                {
+                    var prop = DesignerProperties.IsInDesignModeProperty;
+                    _isInDesignMode
+                        = (bool)DependencyPropertyDescriptor
+                                        .FromProperty(prop, typeof(FrameworkElement))
+                                        .Metadata.DefaultValue;
+                }
+
+                return _isInDesignMode.Value;
+            }
+        }
+
+        private ConfiguredMappers GetAutoMappers(PropBagMappingStrategyEnum mappingStrategy)
+        {
+            Func<Action<IMapperConfigurationExpression>, IConfigurationProvider> configBuilder
+                = new MapperConfigurationProvider().BaseConfigBuilder;
+
+            MapperConfigInitializerProvider mapperConfigExpression
+                = new MapperConfigInitializerProvider(PropBagMappingStrategyEnum.ExtraMembers);
+
+            ConfiguredMappers result = new ConfiguredMappers(configBuilder, mapperConfigExpression);
+
+            return result;
+        }
+
 
 
 

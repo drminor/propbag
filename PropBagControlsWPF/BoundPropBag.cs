@@ -1,6 +1,7 @@
 ﻿using System;
 using DRM.PropBag.ControlModel;
 using DRM.TypeSafePropertyBag;
+using System.Reflection;
 
 namespace DRM.PropBag.ControlsWPF
 {
@@ -9,12 +10,12 @@ namespace DRM.PropBag.ControlsWPF
     // the set of initial values needs to be pulled out of the PropModel.
     public struct BoundPropBag : IEquatable<BoundPropBag>
     {
-        public BoundPropBag(Type dtViewModelType, PropModel propModel, Type rtViewModelType)
+        public BoundPropBag(Type dtViewModelType, PropModel propModel, Type rtViewModelType, PropertyInfo classAccessor)
         {
-            DtViewModelType = dtViewModelType;
+            DtViewModelType = dtViewModelType; 
             PropModel = propModel;
-
             RtViewModelType = rtViewModelType;
+            ClassAccessor = classAccessor;
         }
 
         /// <summary>
@@ -28,9 +29,16 @@ namespace DRM.PropBag.ControlsWPF
         public PropModel PropModel { get; }
 
         /// <summary>
-        /// Type that is created by Reflection.Emit to provide "native" field, property, method and event accessors.
+        /// Type that is created by Reflection.Emit to provide field, property, method and event accessors
+        /// that can be used by the AutoMapper libary.
+        /// These are discoverable by Reflection -- no intellisense.
         /// </summary>
         public Type RtViewModelType { get; }
+
+        /// <summary>
+        /// The property on the View to which this object can be accessed.
+        /// </summary>
+        public PropertyInfo ClassAccessor { get; }
 
         public override int GetHashCode()
         {

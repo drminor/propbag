@@ -42,7 +42,7 @@ namespace PropBagTestApp
             private static Lazy<ModuleBuilder> _moduleBuilder;
             public ModuleBuilder ModuleBuilder => _moduleBuilder.Value;
 
-            public Type GetWrapperType(TypeDescription td)
+            public Type BuildVmProxyClass(TypeDescription td)
             {
                 Type tt = _emiitedTypes.GetOrAdd(td);
                 return tt;

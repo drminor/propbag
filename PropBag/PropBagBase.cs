@@ -1133,9 +1133,19 @@ namespace DRM.PropBag
 
             if (handler != null)
             {
+                string pn;
+                if(propertyName == "PersonCollection" || propertyName == "SelectedPerson")
+                {
+                    pn = propertyName;
+                }
+                else
+                {
+                    pn = "Item[]";
+
+                }
                 // TOOD:! Fix This!!!
                 propertyName = "Item[]";
-                handler(this, new PropertyChangedEventArgs(propertyName));
+                handler(this, new PropertyChangedEventArgs(pn));
             }
         }
 

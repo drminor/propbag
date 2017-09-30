@@ -5,6 +5,9 @@
         xmlns:pb="clr-namespace:DRM.PropBag.ControlsWPF;assembly=WPFControls"
         xmlns:propbag="clr-namespace:DRM.PropBag;assembly=PropBag"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
         Title="DtoTest" Height="300" Width="300">
     <Window.DataContext>
         <local:DtoTestViewModelEmit/>
@@ -38,6 +41,10 @@
                     <pb:InitialValueField InitialValue="10"/>
                 </pb:PropItem>
 
+                <!--<pb:PropItem PropertyName="RunTimeInt" PropertyType="sys:Int32">
+                    <pb:InitialValueField InitialValue="180"/>
+                </pb:PropItem>-->
+
                 <pb:PropItem PropertyName="Size" PropertyType="sys:Double">
                     <pb:InitialValueField InitialValue="10.4"/>
                 </pb:PropItem>
@@ -56,10 +63,16 @@
 
         <Label Grid.Row="2">Size:</Label>
         <TextBox Grid.Row="2" x:Name="Sz" Height="25" Width="100"
-                 Text="13" />
+                 Text="-1.25" />
 
-        <Button x:Name="btnRead" Grid.Row="3" Content="Read" Height="25" Width="100" Click="BtnRead_Click"></Button>
-        <Button x:Name="btnSave" Grid.Row="4" Content="Save" Height="25" Width="100" Click="BtnSave_Click"></Button>
+        <!--<Label Grid.Row="3">RunTime Int:</Label>
+        <TextBox Grid.Row="3" x:Name="RtInt" Height="25" Width="100"
+                 Text="{Binding Path=[System.Int32\,RunTimeInt], Converter={pb:PropValueConverter}, ConverterParameter={x:Type sys:Int32}}"/>-->
+
+        <StackPanel Orientation="Horizontal" Grid.Row="4">
+            <Button x:Name="btnRead" Content="Read" Margin="0,0,20,0" Height="25" Width="100" Click="BtnRead_Click"></Button>
+            <Button x:Name="btnSave" Content="Save" Height="25" Width="100" Click="BtnSave_Click"></Button>
+        </StackPanel>
 
 
     </Grid>

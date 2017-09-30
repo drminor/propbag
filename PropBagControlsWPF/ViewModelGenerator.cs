@@ -28,10 +28,12 @@ namespace DRM.PropBag.ControlsWPF
         /// the PropBagInstanceAttribute Attribute</param>
         static public Dictionary<string, BoundPropBag> StandUpViewModels(Panel root, FrameworkElement modelHolder, IModuleBuilderInfo modelBuilder = null)
         {
-            //Type propModelType = typeof(DRM.PropBag.ControlModel.PropModel);
-
             IEnumerable<PropBagTemplate> propBagTemplates = root.Children.OfType<PropBagTemplate>();
             Dictionary<string, BoundPropBag> boundTemplates = new Dictionary<string, BoundPropBag>();
+
+            // Use the ModuleBuilder supplied, or if it's null, the default ModuleBuilder
+            // provided by the PropBag AutoMapperSupport library.
+            IModuleBuilderInfo typeEmitter = GetEmitter(modelBuilder);
 
             foreach (PropBagTemplate pbt in propBagTemplates)
             {
@@ -52,27 +54,25 @@ namespace DRM.PropBag.ControlsWPF
                     // as the basis of the name of the new wrapper type.
                     TypeDescription typeDescription = BuildTypeDesc(dtViewModelType, null, pm);
 
-                    IModuleBuilderInfo typeEmitter = GetEmitter(modelBuilder);
-
-                    Type proxyType = typeEmitter.GetWrapperType(typeDescription);
-
-                    //Type[] implementedTypes = proxyType.GetTypeInfo().ImplementedInterfaces.ToArray();
-
+                    Type proxyType = typeEmitter.BuildVmProxyClass(typeDescription);
+#if DEBUG
+                    Type[] implementedTypes = proxyType.GetTypeInfo().ImplementedInterfaces.ToArray();
+#endif
                     IPropBag newInstance = (IPropBag) Activator.CreateInstance(proxyType, new object[] { pm });
 
                     classAccessor.SetValue(modelHolder, newInstance);
 
                     // Record each "live" template.
-                    BoundPropBag boundPB = new BoundPropBag(dtViewModelType, pm, proxyType);
+                    BoundPropBag boundPB = new BoundPropBag(dtViewModelType, pm, proxyType, classAccessor);
                     boundTemplates.Add(pm.InstanceKey, boundPB);
                 }
             }
             return boundTemplates;
         }
 
-        private static IModuleBuilderInfo GetEmitter(IModuleBuilderInfo provided)
+        public static IModuleBuilderInfo GetEmitter(IModuleBuilderInfo provider)
         {
-            return provided ?? new DefaultModuleBuilderInfoProvider().ModuleBuilderInfo;
+            return provider ?? new DefaultModuleBuilderInfoProvider().ModuleBuilderInfo;
         }
 
         /// <summary>
@@ -82,7 +82,7 @@ namespace DRM.PropBag.ControlsWPF
         /// <param name="namespaceName">The namespace to use when creating the proxy.</param>
         /// <param name="pm">The propmodel from which to get the list of properties to define for the proxy.</param>
         /// <returns></returns>
-        private static TypeDescription BuildTypeDesc(Type dtViewModelType, string namespaceName,  PropModel pm)
+        public static TypeDescription BuildTypeDesc(Type dtViewModelType, string namespaceName,  PropModel pm)
         {
             string nsName = namespaceName ?? DEFAULT_NAMESPACE_NAME;
 
@@ -100,7 +100,7 @@ namespace DRM.PropBag.ControlsWPF
             // provided by the WrapperGenLib
             IModuleBuilderInfo builderInfoToUse = modBuilderInfo ?? new DefaultModuleBuilderInfoProvider().ModuleBuilderInfo;
 
-            Type emittedType = builderInfoToUse.GetWrapperType(td);
+            Type emittedType = builderInfoToUse.BuildVmProxyClass(td);
 
             System.Diagnostics.Debug.WriteLine($"Created Type: {emittedType.FullName}");
 

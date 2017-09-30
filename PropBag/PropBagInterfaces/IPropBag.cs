@@ -10,15 +10,15 @@ namespace DRM.PropBag
     /// </summary>
     public interface IPropBag : ITypeSafePropBag, INotifyPropertyChanged, INotifyPropertyChanging, INotifyPropertyChangedWithVals
     {
-        PropBagTypeSafetyMode TypeSafetyMode { get; }
+        //PropBagTypeSafetyMode TypeSafetyMode { get; }
 
-        bool AllPropsMustBeRegistered { get; }
+        //bool AllPropsMustBeRegistered { get; }
 
-        bool OnlyTypedAccess { get; }
+        //bool OnlyTypedAccess { get; }
 
-        ReadMissingPropPolicyEnum ReadMissingPropPolicy { get; }
+        //ReadMissingPropPolicyEnum ReadMissingPropPolicy { get; }
 
-        bool ReturnDefaultForUndefined { get; }
+        //bool ReturnDefaultForUndefined { get; }
 
         // These are defined by ITypeSafePropBag
         //object GetValWithType(string propertyName, Type propertyType);
@@ -48,6 +48,7 @@ namespace DRM.PropBag
         IDictionary<string, object> GetAllPropertyValues();
         IDictionary<string, ValPlusType> GetAllPropNamesAndTypes();
 
+        // Consider removing this since we are using the PBDispatch class.
         object GetValueGen(object host, string propertyName, Type propertyType);
         void SetValueGen(object host, string propertyName, Type propertyType, object value);
 
