@@ -8,17 +8,17 @@ namespace DRM.PropBag
     /// <summary>
     /// Base Property Bag Features
     /// </summary>
-    public interface IPropBag : ITypeSafePropBag, INotifyPropertyChanged, INotifyPropertyChanging, INotifyPropertyChangedWithVals
+    public interface IPropBag : IPropBagMin, INotifyPropertyChanged, INotifyPropertyChanging, INotifyPropertyChangedWithVals
     {
-        //PropBagTypeSafetyMode TypeSafetyMode { get; }
+        PropBagTypeSafetyMode TypeSafetyMode { get; }
 
-        //bool AllPropsMustBeRegistered { get; }
+        bool AllPropsMustBeRegistered { get; }
 
-        //bool OnlyTypedAccess { get; }
+        bool OnlyTypedAccess { get; }
 
-        //ReadMissingPropPolicyEnum ReadMissingPropPolicy { get; }
+        ReadMissingPropPolicyEnum ReadMissingPropPolicy { get; }
 
-        //bool ReturnDefaultForUndefined { get; }
+        bool ReturnDefaultForUndefined { get; }
 
         // These are defined by ITypeSafePropBag
         //object GetValWithType(string propertyName, Type propertyType);
@@ -26,31 +26,33 @@ namespace DRM.PropBag
         //Type GetTypeOfProperty(string propertyName);
 
         //T GetIt<T>(string propertyName);
-        IProp<T> GetTypedProp<T>(string propertyName);
-
-        bool SetValWithNoType(string propertyName, object value);
-
         //bool SetIt<T>(T value, string propertyName);
-        bool SetIt<T>(T newValue, ref T curValue, string propertyName);
 
-        bool PropertyExists(string propertyName);
+        // These are defined by IPropBagMin
+        //IProp<T> GetTypedProp<T>(string propertyName);
 
-        void SubscribeToPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, string propertyName);
-        void UnSubscribeToPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, string propertyName);
+        //bool SetValWithNoType(string propertyName, object value);
 
-        void SubscribeToPropChanged<T>(Action<T, T> doOnChange, string propertyName);
-        bool UnSubscribeToPropChanged<T>(Action<T, T> doOnChange, string propertyName);
 
-        void SubscribeToPropChanged(Action<object, object> doOnChange, string propertyName);
-        bool UnSubscribeToPropChanged(Action<object, object> doOnChange, string propertyName);
+        //bool SetIt<T>(T newValue, ref T curValue, string propertyName);
 
-        IList<string> GetAllPropertyNames();
-        IDictionary<string, object> GetAllPropertyValues();
-        IDictionary<string, ValPlusType> GetAllPropNamesAndTypes();
+        //bool PropertyExists(string propertyName);
 
-        // Consider removing this since we are using the PBDispatch class.
-        object GetValueGen(object host, string propertyName, Type propertyType);
-        void SetValueGen(object host, string propertyName, Type propertyType, object value);
+        //void SubscribeToPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, string propertyName);
+        //void UnSubscribeToPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, string propertyName);
+
+        //void SubscribeToPropChanged<T>(Action<T, T> doOnChange, string propertyName);
+        //bool UnSubscribeToPropChanged<T>(Action<T, T> doOnChange, string propertyName);
+
+        //void SubscribeToPropChanged(Action<object, object> doOnChange, string propertyName);
+        //bool UnSubscribeToPropChanged(Action<object, object> doOnChange, string propertyName);
+
+        //IList<string> GetAllPropertyNames();
+        //IDictionary<string, object> GetAllPropertyValues();
+        //IDictionary<string, ValPlusType> GetAllPropNamesAndTypes();
+
+        //object GetValueGen(object host, string propertyName, Type propertyType);
+        //void SetValueGen(object host, string propertyName, Type propertyType, object value);
 
     }
 

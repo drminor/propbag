@@ -87,7 +87,7 @@ namespace DRM.PropBag.AutoMapperSupport
             //IEnumerable<Type> r = t.GetInterfaces();
             //Type a = t.GetInterfaces().FirstOrDefault(x => x.Name == "IPropBag");
 
-            return null != t.GetInterfaces().FirstOrDefault(x => x.Name == "IPropBag");
+            return null != t.GetInterfaces().FirstOrDefault(x => x.Name == "IPropBag" || x.Name == "IPropBagMin");
         }
 
         public override bool Equals(object obj)
@@ -288,7 +288,7 @@ namespace DRM.PropBag.AutoMapperSupport
             //IEnumerable<Type> r = t.GetInterfaces();
             //Type a = t.GetInterfaces().FirstOrDefault(x => x.Name == "IPropBag");
 
-            return null != t.GetInterfaces().FirstOrDefault(x => x.Name == "IPropBag");
+            return null != t.GetInterfaces().FirstOrDefault(x => x.Name == "IPropBag" || x.Name == "IPropBagMin");
         }
 
         public override bool Equals(object obj)

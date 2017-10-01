@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using DRM.PropBag.ControlModel;
 using System;
+using DRM.PropBag;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
@@ -29,8 +30,8 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public PropBagMapper(IPropBagMapperKey<TSource, TDestination> mapRequest)
         {
-            if (typeof(TSource) is IPropBag) throw new ApplicationException("The first type, TSource, is expected to be a regular, non-propbag-based type.");
-            if (typeof(TDestination) is IPropBag) throw new ApplicationException("The second type, TDestination, is expected to be a propbag-based type.");
+            //if (typeof(TSource) is IPropBag) throw new ApplicationException("The first type, TSource, is expected to be a regular, non-propbag-based type.");
+            //if (typeof(TDestination) is IPropBag) throw new ApplicationException("The second type, TDestination, is expected to be a propbag-based type.");
 
             SourceTypeDef = mapRequest.SourceTypeDef;
             DestinationTypeDef = mapRequest.DestinationTypeDef;

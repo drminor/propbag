@@ -68,7 +68,9 @@ namespace DRM.PropBag.ViewModelBuilder
 
                 }
             }
-            return typeBuilder.CreateType();
+            Type tt = typeBuilder.CreateType();
+            return tt;
+            //return typeBuilder.CreateType();
         }
         
         private static string BuildTypeName(TypeName typeName, int moduleId)

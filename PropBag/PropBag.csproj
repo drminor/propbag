@@ -62,8 +62,10 @@
     <Compile Include="Factories\IAbstractPropFactory.cs" />
     <Compile Include="Factories\PropFactoryValueConveter.cs" />
     <Compile Include="Prop.cs" />
+    <Compile Include="PropBagMin.cs" />
     <Compile Include="PropBagDyn.cs" />
     <Compile Include="PropBagExperimental.cs" />
+    <Compile Include="PropBagInterfaces\IPropBagMin.cs" />
     <Compile Include="PropBagInterfaces\IPropBag.cs" />
     <Compile Include="PropBagInterfaces\IPubPropBag.cs" />
     <Compile Include="PropBagTypeSafetyModeEnum.cs" />
