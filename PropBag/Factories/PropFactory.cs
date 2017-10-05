@@ -10,12 +10,19 @@ namespace DRM.PropBag
     public class PropFactory : AbstractPropFactory
     {
 
-        public PropFactory(bool returnDefaultForUndefined) : base(returnDefaultForUndefined) { }
+        public PropFactory(bool returnDefaultForUndefined, ResolveTypeDelegate typeResolver = null)
+            : base(returnDefaultForUndefined, typeResolver) { }
 
         public override bool ProvidesStorage
         {
             get { return true; }
         }
+
+        // TODO: This is temporary just for testing.
+        //public override Type GetTypeFromName(string typeName)
+        //{
+        //    throw new ApplicationException("All instances of PropFactory need to be supplied with a value of typeResolver.");
+        //}
 
         public override IProp<T> Create<T>(
             T initialValue,
@@ -25,7 +32,7 @@ namespace DRM.PropBag
         {
             if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
 
-            GetDefaultValue<T> getDefaultValFunc = this.GetDefaultValue<T>;
+            GetDefaultValueDelegate<T> getDefaultValFunc = this.GetDefaultValue<T>;
             IProp<T> prop = new Prop<T>(initialValue, getDefaultValFunc, typeIsSolid: typeIsSolid, hasStore: hasStorage, doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify, comparer: comparer);
             return prop;
         }
@@ -37,7 +44,7 @@ namespace DRM.PropBag
         {
             if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
 
-            GetDefaultValue<T> getDefaultValFunc = this.GetDefaultValue<T>;
+            GetDefaultValueDelegate<T> getDefaultValFunc = this.GetDefaultValue<T>;
             IProp<T> prop = new Prop<T>(getDefaultValFunc, typeIsSolid: typeIsSolid, hasStore: hasStorage, doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify, comparer: comparer);
             return prop;
         }

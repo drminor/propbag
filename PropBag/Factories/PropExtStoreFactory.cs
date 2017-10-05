@@ -39,7 +39,7 @@ namespace DRM.PropBag
             Action<T, T> doWhenChanged = null, bool doAfterNotify = false, Func<T,T,bool> comparer = null)
         {
             if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
-            GetDefaultValue<T> getDefaultValFunc = this.GetDefaultValue<T>;
+            GetDefaultValueDelegate<T> getDefaultValFunc = this.GetDefaultValue<T>;
 
             PropExternStore<T> propWithExtStore = new PropExternStore<T>(propertyName, extraInfo, getDefaultValFunc, typeIsSolid: typeIsSolid, doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify, comparer: comparer);
 

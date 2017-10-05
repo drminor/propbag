@@ -12,18 +12,39 @@ using DRM.TypeSafePropertyBag;
 namespace DRM.PropBag
 {
 
-    public delegate T GetDefaultValue<T>(string propertyName);
-
     public abstract class AbstractPropFactory : IPropFactory
     {
         public bool ReturnDefaultForUndefined { get; }
-
-        public AbstractPropFactory(bool returnDefaultForUndefined)
-        {
-            ReturnDefaultForUndefined = returnDefaultForUndefined;
-        }
+        public ResolveTypeDelegate TypeResolver { get; }
 
         public abstract bool ProvidesStorage { get; }
+
+
+        public AbstractPropFactory(bool returnDefaultForUndefined, ResolveTypeDelegate typeResolver = null)
+        {
+            ReturnDefaultForUndefined = returnDefaultForUndefined;
+            TypeResolver = typeResolver ?? this.GetTypeFromName;
+        }
+
+        public virtual Type GetTypeFromName(string typeName)
+        {
+            Type result;
+            try
+            {
+                result = Type.GetType(typeName);
+            }
+            catch (System.Exception e)
+            {
+                throw new InvalidOperationException($"Cannot create a Type instance from the string: {typeName}.", e);
+            }
+
+            if (result == null)
+            {
+                throw new InvalidOperationException($"Cannot create a Type instance from the string: {typeName}.");
+            }
+
+            return result;
+        }
 
         public abstract IProp<T> Create<T>(
             T initialValue,
@@ -75,13 +96,19 @@ namespace DRM.PropBag
             return prop;
         }
 
+        /// <summary>
+        /// Implementors of deriving classes must ensure that the value returned by this 
+        /// method will be the same throughout the lifetime of the factory.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
         public virtual Func<T,T,bool> GetRefEqualityComparer<T>()
         {
             var y = RefEqualityComparer<T>.Default;
 
             DRM.PropBag.RefEqualityComparer<T> x = RefEqualityComparer<T>.Default;
 
-            Func<T, T, bool> result = x.Equals;
+            //Func<T, T, bool> result = x.Equals;
             return x.Equals; // result;
             //return RefEqualityComparer<T>.Default;
         }
@@ -98,6 +125,10 @@ namespace DRM.PropBag
                 throw new InvalidOperationException("Cannot manufacture a default value if the type is specified as null.");
             }
             typeIsSolid = true;
+
+            if (propertyType == typeof(string))
+                return null;
+
             return Activator.CreateInstance(propertyType);
         }
 
@@ -122,7 +153,7 @@ namespace DRM.PropBag
             // value is already of the correct type.
             if (s == typeof(T)) return (T)(object)value;
 
-            object parameter = new ControlModel.TwoTypes(s, typeof(T));
+            object parameter = new ControlModel.TwoTypes(typeof(T), s);
 
             return (T)PropFactoryValueConverter.ConvertBack(value, typeof(T), parameter, CultureInfo.CurrentCulture);
         }
@@ -132,7 +163,7 @@ namespace DRM.PropBag
             if (typeof(T) == typeof(string)) return (T)(object)value;
 
             Type s = typeof(string);
-            object parameter = new ControlModel.TwoTypes(typeof(string), typeof(T));
+            object parameter = new ControlModel.TwoTypes(typeof(T), typeof(string));
 
             return (T) PropFactoryValueConverter.ConvertBack(value, typeof(T), parameter, CultureInfo.CurrentCulture);
         }

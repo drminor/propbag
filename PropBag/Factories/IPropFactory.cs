@@ -8,6 +8,8 @@ namespace DRM.PropBag
         bool ProvidesStorage { get; }
         bool ReturnDefaultForUndefined { get; }
 
+        ResolveTypeDelegate TypeResolver { get; }
+
         IProp<T> Create<T>(T initialValue, string propertyName, object extraInfo = null, bool hasStorage = true, bool typeIsSolid = true, Action<T, T> doWhenChanged = null, bool doAfterNotify = false, Func<T, T, bool> comparer = null);
 
         IPropGen CreateGenFromObject(Type typeOfThisProperty, object value, string propertyName, object extraInfo, bool hasStorage, bool isTypeSolid, Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false);

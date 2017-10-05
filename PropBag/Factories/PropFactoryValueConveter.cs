@@ -34,9 +34,9 @@ namespace DRM.PropBag
 
             if (!tt.IsEmpty)
             {
-                if (targetType == tt.SourceType)
+                if (targetType != tt.SourceType)
                 {
-                    StringFromTDelegate del = GetTheStringFromTDelegate(tt.DestType, tt.SourceType);
+                    StringFromTDelegate del = GetTheStringFromTDelegate(tt.SourceType, tt.DestType);
                     return del(value);
                 }
             }
@@ -52,10 +52,11 @@ namespace DRM.PropBag
             TwoTypes tt = GetFromParam(parameter);
             if (!tt.IsEmpty)
             {
-                if (value.GetType() == tt.SourceType)
+                if (value.GetType() != tt.SourceType)
                 {
-                    TFromStringDelegate del = GetTheTFromStringDelegate(tt.DestType);
-                    return del((string)value);
+                    TFromStringDelegate del = GetTheTFromStringDelegate(tt.SourceType);
+                    string s = value as string;
+                    return del(s);
                 }
             }
 
@@ -75,17 +76,17 @@ namespace DRM.PropBag
             }
 
             // Assume string (TODO: Check This.
-            Type sourceType = typeof(string);
+            Type destinationType = typeof(string);
 
             if (parameter is Type)
             {
-                return new TwoTypes(sourceType, (Type)parameter);
+                return new TwoTypes((Type)parameter, destinationType);
             }
             else
             {
                 if (parameter is IPropGen)
                 {
-                    return new TwoTypes(sourceType, ((IPropGen)parameter).Type);
+                    return new TwoTypes(((IPropGen)parameter).Type, destinationType);
                 }
             }
             return TwoTypes.Empty;
@@ -100,18 +101,30 @@ namespace DRM.PropBag
         private delegate string StringFromTDelegate(object value);
 
         // TODO: Cache these.
-        private static TFromStringDelegate GetTheTFromStringDelegate(Type propertyType)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sourceType">The native or DataContext type from a string representation. The GenericType parameter: T is this type. </param>
+        /// <returns></returns>
+        private static TFromStringDelegate GetTheTFromStringDelegate(Type sourceType)
         {
-            System.Diagnostics.Debug.WriteLine(string.Format("A TFromString delegate is being created for type: {0}", propertyType.ToString()));
+            System.Diagnostics.Debug.WriteLine(string.Format("A TFromString delegate is being created for type: {0}", sourceType.ToString()));
 
-            MethodInfo methInfoGetProp = GMT_TYPE.GetMethod("GetTfromString", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(propertyType);
+            MethodInfo methInfoGetProp = GMT_TYPE.GetMethod("GetTfromString", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(sourceType);
             TFromStringDelegate result = (TFromStringDelegate)Delegate.CreateDelegate(typeof(TFromStringDelegate), methInfoGetProp);
 
             return result;
         }
 
-        private static StringFromTDelegate GetTheStringFromTDelegate(Type propertyType, Type sourceType)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="propertyType">The Type of the property on the view.</param>
+        /// <param name="sourceType">The Type of value in the DataContext, The GenericType parameter: T is this type.</param>
+        /// <returns></returns>
+        private static StringFromTDelegate GetTheStringFromTDelegate(Type sourceType, Type propertyType)
         {
+            // IsConvert is performed when going from native (or T) to string.
             TypeDescBasedTConverterKey key = new TypeDescBasedTConverterKey(sourceType, propertyType, isConvert: true);
 
             StringFromTDelegate result = LookupTypeDescripterConverter(key);
@@ -122,7 +135,8 @@ namespace DRM.PropBag
 
             if (result != null) return result;
 
-            MethodInfo methInfoGetProp = GMT_TYPE.GetMethod("GetStringFromT", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(propertyType);
+            // NOTE: Changed this from PropertyType to SourceType on 10/2/2017 at 11:30 pm
+            MethodInfo methInfoGetProp = GMT_TYPE.GetMethod("GetStringFromT", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(sourceType);
             result = (StringFromTDelegate)Delegate.CreateDelegate(typeof(StringFromTDelegate), methInfoGetProp);
 
             DelegateCacheProvider.TypeDescBasedTConverterCache.Add(key, result);
