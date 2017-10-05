@@ -3,6 +3,17 @@
 namespace DRM.TypeSafePropertyBag
 {
     /// <summary>
+    /// Extends the IProp<typeparamref name="T"/> interface with features
+    /// that are only avaialble within the PubPropBag assembly.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public interface IPropPrivate<T> : IProp<T>
+    {
+        bool DoAfterNotify { get; set; }
+        bool UpdateDoWhenChangedAction(Action<T, T> doWHenChangedAction, bool? doAfterNotify);
+    }
+
+    /// <summary>
     /// All properties have these features based on the type of the property.
     /// Objects that implement this interface are often created by an instance of a class that inherits from AbstractPropFactory.
     /// </summary>
@@ -22,12 +33,6 @@ namespace DRM.TypeSafePropertyBag
 
         void SubscribeToPropChanged(Action<T, T> doOnChange);
         bool UnSubscribeToPropChanged(Action<T, T> doOnChange);
-    }
-
-    public interface IPropPrivate<T> : IProp<T>
-    {
-        bool DoAfterNotify { get; set; }
-        bool UpdateDoWhenChangedAction(Action<T, T> doWHenChangedAction, bool? doAfterNotify);
     }
 
     /// <summary>

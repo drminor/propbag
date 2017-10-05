@@ -47,6 +47,33 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
+        public static bool IsPropGenBased(this Type type)
+        {
+            return null != type.GetInterfaces().FirstOrDefault
+                (
+                x => x.Name == "IPropBag"
+                    || x.Name == "IPropBagMin"
+                );
+        }
+
+        public static bool HasDeclaredProperty(this Type type, string propertyName)
+        {
+            return null != type.GetTypeInfo().GetDeclaredProperty(propertyName);
+        }
+
+        public static PropertyInfo GetDeclaredProperty(this Type type, string propertyName)
+        {
+            return type.GetTypeInfo().GetDeclaredProperty(propertyName);
+        }
+
+        // TODO: Create a Class Atribute for our WrapperGenerator
+        // so that we can more accurately determine this.
+        public static bool IsEmittedProxy(this Type type)
+        {
+            return type.FullName.Contains("1.") || type.FullName.Contains("2.");
+        }
+
+
     }
 
 }
