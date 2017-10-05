@@ -22,11 +22,11 @@ namespace DRM.PropBag.AutoMapperSupport
                 string propertyName = propItem.PropertyName;
                 Type propertyType = propItem.PropertyType;
 
-                Func<object, string, Type, object> getter =
-                    new Func<object, string, Type, object>((host, pn, pt) => PBDispatcher.GetValue(host, pn, pt));
+                Func<ITypeSafePropBag, string, Type, object> getter =
+                    new Func<ITypeSafePropBag, string, Type, object>((host, pn, pt) => PBDispatcher.GetValue(host, pn, pt));
 
-                Action<object, string, Type, object> setter =
-                    new Action<object, string, Type, object>((host, pn, pt, value) => PBDispatcher.SetValue(host, pn, pt, value));
+                Action<ITypeSafePropBag, string, Type, object> setter =
+                    new Action<ITypeSafePropBag, string, Type, object>((host, pn, pt, value) => PBDispatcher.SetValue(host, pn, pt, value));
 
                 PropertyInfoWT pi = new PropertyInfoWT(propertyName, propertyType, typeof(PBDispatcher),
                     getter, setter);

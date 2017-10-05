@@ -72,7 +72,7 @@ namespace DRM.PropBag.AutoMapperSupport
 
         private static IMapTypeDefinition<T> GetTypeDef<T>(PropModel pm, Type baseType)
         {
-            if(IsPropGenBased(typeof(T)))
+            if(typeof(T).IsPropGenBased())
             {
                 return new MapTypeDefinition<T>(pm, baseType);
             }
@@ -82,20 +82,10 @@ namespace DRM.PropBag.AutoMapperSupport
             }
         }
 
-        private static bool IsPropGenBased(Type t)
-        {
-            //IEnumerable<Type> r = t.GetInterfaces();
-            //Type a = t.GetInterfaces().FirstOrDefault(x => x.Name == "IPropBag");
-
-            return null != t.GetInterfaces().FirstOrDefault(x => x.Name == "IPropBag" || x.Name == "IPropBagMin");
-        }
-
         public override bool Equals(object obj)
         {
             return Equals(obj as PropBagMapperKeyGen);
         }
-
-
 
         public override int GetHashCode()
         {

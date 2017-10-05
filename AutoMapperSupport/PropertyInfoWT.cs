@@ -1,4 +1,5 @@
 ﻿using AutoMapper.ExtraMembers;
+using DRM.TypeSafePropertyBag;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -43,14 +44,14 @@ namespace DRM.PropBag.AutoMapperSupport
         //IHaveExtraMembers _bridge;
         //MethodInfo _getter;
         //MethodInfo _setter;
-        Func<object, string, Type, object> _getterFunc;
-        Action<object, string, Type, object> _setterAction;
+        Func<ITypeSafePropBag, string, Type, object> _getterFunc;
+        Action<ITypeSafePropBag, string, Type, object> _setterAction;
         bool _useMethodInfos;
         IEnumerable<Attribute> _attributes;
 
         public PropertyInfoWT(string name, Type propertyType, Type hostType,
-            Func<object, string, Type, object> getterFunc,
-            Action<object, string, Type, object> setterAction,
+            Func<ITypeSafePropBag, string, Type, object> getterFunc,
+            Action<ITypeSafePropBag, string, Type, object> setterAction,
             IEnumerable<Attribute> attributes = null)
         {
             Name = name;
@@ -188,7 +189,7 @@ namespace DRM.PropBag.AutoMapperSupport
             }
             else
             {
-                return _getterFunc(obj, Name, pType);
+                return _getterFunc( (ITypeSafePropBag)obj, Name, pType);
             }
         }
 
@@ -216,7 +217,7 @@ namespace DRM.PropBag.AutoMapperSupport
             }
             else
             {
-                _setterAction(obj, Name, pType, value);
+                _setterAction((ITypeSafePropBag)obj, Name, pType, value);
             }
         }
 

@@ -1,17 +1,18 @@
-﻿using System;
+﻿using DRM.TypeSafePropertyBag;
+using System;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
     public static class PBDispatcher
     {
-        public static object GetValue(object host, string propertyName, Type propertyType)
+        public static object GetValue(ITypeSafePropBag host, string propertyName, Type propertyType)
         {
-            return ((IPropBag)host).GetValWithType(propertyName, propertyType);
+            return host.GetValWithType(propertyName, propertyType);
         }
 
-        public static void SetValue(object host, string propertyName, Type propertyType, object value)
+        public static void SetValue(ITypeSafePropBag host, string propertyName, Type propertyType, object value)
         {
-            ((IPropBag)host).SetValWithType(propertyName, propertyType, value);
+            host.SetValWithType(propertyName, propertyType, value);
         }
     }
 }

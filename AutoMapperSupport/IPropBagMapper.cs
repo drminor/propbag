@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using System;
+using System.Collections.Generic;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
@@ -11,6 +12,10 @@ namespace DRM.PropBag.AutoMapperSupport
 
         TSource MapToSource(TDestination d);
         TSource MapToSource(TDestination d, TSource s);
+
+        IEnumerable<TDestination> MapToDestination(IEnumerable<TSource> listOfSources);
+        IEnumerable<TSource> MapToSource(IEnumerable<TDestination> listOfDestinations);
+
     }
 
     public interface IPropBagMapperGen

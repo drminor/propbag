@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using DRM.PropBag.ControlModel;
 using System;
-using DRM.PropBag;
+
+using System.Collections.Generic;
+using System.Linq;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
@@ -101,6 +103,42 @@ namespace DRM.PropBag.AutoMapperSupport
         {
             return (TSource) Mapper.Map(d, s, RunTimeType, SourceType);
         }
+
+        #endregion
+
+        #region Mapper Functions for Lists
+
+        public IEnumerable<TDestination> MapToDestination(IEnumerable<TSource> listOfSources)
+        {
+            //List<TDestination> result = new List<TDestination>();
+
+            //foreach (TSource s in listOfSources)
+            //{
+            //    TDestination d = this.MapToDestination(s);
+            //    result.Add(d);
+            //}
+
+            //return result;
+
+            return listOfSources.Select(s => MapToDestination(s));
+        }
+
+        public IEnumerable<TSource> MapToSource(IEnumerable<TDestination> listOfDestinations)
+        {
+            //List<TSource> result = new List<TSource>();
+
+            //foreach (TDestination d in listOfDestinations)
+            //{
+            //    TSource s = this.MapToSource(d);
+            //    result.Add(s);
+            //}
+
+            //return result;
+            return listOfDestinations.Select(d => MapToSource(d));
+        }
+        #endregion
+
+        #region Create Instance of TDestination
 
         private TDestination GetNewDestination(PropModel propModel)
         {
