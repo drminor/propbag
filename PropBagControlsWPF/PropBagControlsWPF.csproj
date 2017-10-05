@@ -47,6 +47,9 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Binders\DataSourceChangedEventArgs.cs" />
+    <Compile Include="Binders\DataSourceChangedEventHandler.cs" />
+    <Compile Include="Binders\DataSourceChangeTypeEnum.cs" />
     <Compile Include="BoundPropBag.cs" />
     <Compile Include="ComparerFuncTypeConverter.cs" />
     <Compile Include="DoWhenChangedAction.cs" />
@@ -54,9 +57,13 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>
     <Compile Include="InitialValueField.cs" />
+    <Compile Include="Binders\MyMultiValueConveter.cs" />
     <Compile Include="NamespaceItem.cs" />
     <Compile Include="NamespacesCollection.cs" />
+    <Compile Include="Binders\MyBinder.cs" />
+    <Compile Include="PropBagPropFancyBinder.cs" />
     <Compile Include="PropBagInstanceAttribute.cs" />
+    <Compile Include="PropBagPropBinder.cs" />
     <Compile Include="PropBagTemplate.cs" />
     <Compile Include="PropBagTemplateExtensions.cs" />
     <Compile Include="PropComparerFunc.cs" />

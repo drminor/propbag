@@ -9,6 +9,7 @@ using System.Reflection;
 
 using DRM.PropBag.ControlModel;
 using DRM.PropBag.ViewModelBuilder;
+using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBag.ControlsWPF
 {
@@ -55,19 +56,47 @@ namespace DRM.PropBag.ControlsWPF
                     TypeDescription typeDescription = BuildTypeDesc(dtViewModelType, null, pm);
 
                     Type proxyType = typeEmitter.BuildVmProxyClass(typeDescription);
-#if DEBUG
-                    Type[] implementedTypes = proxyType.GetTypeInfo().ImplementedInterfaces.ToArray();
-#endif
-                    IPropBag newInstance = (IPropBag) Activator.CreateInstance(proxyType, new object[] { pm });
+
+                    var newInstance = GetNewInstance(proxyType, pm);
 
                     classAccessor.SetValue(modelHolder, newInstance);
 
                     // Record each "live" template.
-                    BoundPropBag boundPB = new BoundPropBag(dtViewModelType, pm, proxyType, classAccessor);
+                    BoundPropBag boundPB = new BoundPropBag(pm, dtViewModelType, proxyType, classAccessor);
                     boundTemplates.Add(pm.InstanceKey, boundPB);
                 }
             }
             return boundTemplates;
+        }
+
+        private static ITypeSafePropBag GetNewInstance(Type proxyType, PropModel pm)
+        {
+
+            Type[] implementedTypes = proxyType.GetTypeInfo().ImplementedInterfaces.ToArray();
+            bool isPropBagMin = null != implementedTypes.First(x => x.Name == "IPropBagMin");
+            
+            
+            if(isPropBagMin)
+            {
+                IPropBagMin newInstance = (IPropBagMin)Activator.CreateInstance(proxyType, new object[] { pm });
+                return newInstance;
+            }
+            else
+            {
+                bool isPropBag = null != implementedTypes.First(x => x.Name == "IPropBag"); 
+                if(isPropBag)
+                {
+                    IPropBag newInstance = (IPropBag)Activator.CreateInstance(proxyType, new object[] { pm });
+                    return newInstance;
+                } 
+                else
+                {
+                    throw new ApplicationException("Target view model must derive from IPropBag or IPropBagMin.");
+                }
+
+            }
+
+
         }
 
         public static IModuleBuilderInfo GetEmitter(IModuleBuilderInfo provider)

@@ -10,7 +10,7 @@ namespace DRM.PropBag.ControlsWPF
     // the set of initial values needs to be pulled out of the PropModel.
     public struct BoundPropBag : IEquatable<BoundPropBag>
     {
-        public BoundPropBag(Type dtViewModelType, PropModel propModel, Type rtViewModelType, PropertyInfo classAccessor)
+        public BoundPropBag(PropModel propModel, Type dtViewModelType, Type rtViewModelType, PropertyInfo classAccessor)
         {
             DtViewModelType = dtViewModelType; 
             PropModel = propModel;
