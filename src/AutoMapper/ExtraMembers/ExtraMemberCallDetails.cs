@@ -40,7 +40,6 @@ namespace AutoMapper.ExtraMembers
         private static ExtraMemberCallTypeEnum GetCallType(ExtraMemberCallDirectionEnum callDirection,
             MemberInfo member)
         {
-
             return ExtraMemberCallTypeEnum.PropertySimpleArgs;
         }
 
