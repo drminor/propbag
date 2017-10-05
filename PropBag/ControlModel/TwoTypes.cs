@@ -19,6 +19,11 @@ namespace DRM.PropBag.ControlModel
         private Type _sourceType;
         private Type _destType;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sourceType">The type of value where the data lives, i.e. Binding source or DataContext.</param>
+        /// <param name="destinationType">The type that the binding target, i.e., textbox.text, or dependency property needs.</param>
         public TwoTypes(Type sourceType, Type destinationType) : this()
         {
             IsEmpty = false;
@@ -46,6 +51,9 @@ namespace DRM.PropBag.ControlModel
             }
         }
 
+        /// <summary>
+        /// When used in a binding, this is the type of the property in the DataContext or binding source.
+        /// </summary>
         public Type SourceType
         {
             get
@@ -59,6 +67,9 @@ namespace DRM.PropBag.ControlModel
             }
         }
 
+        /// <summary>
+        /// When used in a binding, this is the binding target's type. (The window control is usually the target.)
+        /// </summary>
         public Type DestType
         {
             get
