@@ -59,8 +59,10 @@
     <Compile Include="ControlModel\PropModel.cs" />
     <Compile Include="Factories\CreatePropDelegate.cs" />
     <Compile Include="ExtValDelegates.cs" />
-    <Compile Include="Factories\IAbstractPropFactory.cs" />
+    <Compile Include="Factories\GetDefaultValueDelegate.cs" />
+    <Compile Include="Factories\IPropFactory.cs" />
     <Compile Include="Factories\PropFactoryValueConveter.cs" />
+    <Compile Include="Factories\ResolveTypeDelegate.cs" />
     <Compile Include="Prop.cs" />
     <Compile Include="PropBagMin.cs" />
     <Compile Include="PropBagDyn.cs" />
@@ -74,9 +76,6 @@
     <Compile Include="Factories\PropFactory.cs" />
     <Compile Include="PropGen.cs" />
     <Compile Include="PropGenBase.cs" />
-    <None Include="PropInterfaces\IProp.cs" />
-    <None Include="PropInterfaces\IPropGen.cs" />
-    <None Include="PropInterfaces\IPropTyped.cs" />
     <Compile Include="PropTypedBase.cs" />
     <Compile Include="PubPropBag.cs" />
     <Compile Include="PropBag.cs" />
@@ -84,6 +83,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RefEqualityComparer.cs" />
     <Compile Include="ViewModelBuilder\AssemblyIdIssuer.cs" />
+    <Compile Include="ViewModelBuilder\AttributeEmitter.cs" />
     <Compile Include="ViewModelBuilder\DefaultModuleBuilderProvider.cs" />
     <Compile Include="ViewModelBuilder\IModuleBuilderProvider.cs" />
     <Compile Include="ViewModelBuilder\PropertyDescription.cs" />
@@ -92,6 +92,7 @@
     <Compile Include="ViewModelBuilder\TypeDescription.cs" />
     <Compile Include="ViewModelBuilder\TypeName.cs" />
     <Compile Include="ViewModelBuilder\VMBuilderPropModelExtensions.cs" />
+    <Compile Include="ViewModelBuilder\WasEmittedAttribute.cs" />
     <Compile Include="ViewModelBuilder\WrapperGenerator.cs" />
     <Compile Include="XMLModel\PropComparerField.cs" />
     <Compile Include="XMLModel\PropDoWhenChanged.cs" />

@@ -13,7 +13,7 @@ namespace DRM.PropBag
     {
         public PropExternStore(string propertyName,
             object extraInfo,
-            GetDefaultValue<T> getDefaultValFunc,
+            GetDefaultValueDelegate<T> getDefaultValFunc,
             bool typeIsSolid = true,
             Action<T, T> doWhenChanged = null,
             bool doAfterNotify = false,

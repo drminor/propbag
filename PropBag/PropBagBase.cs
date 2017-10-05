@@ -53,7 +53,7 @@ namespace DRM.PropBag
         public event PropertyChangingEventHandler PropertyChanging; // = delegate { };
         public event PropertyChangedWithValsHandler PropertyChangedWithVals; // = delegate { };
 
-        public AbstractPropFactory ThePropFactory { get; private set; }
+        public IPropFactory ThePropFactory { get; private set; }
 
         private readonly Dictionary<string, PropGen> tVals;
 
@@ -106,7 +106,7 @@ namespace DRM.PropBag
 
         public PropBagBase(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
 
-        public PropBagBase(PropBagTypeSafetyMode typeSafetyMode, AbstractPropFactory thePropFactory) 
+        public PropBagBase(PropBagTypeSafetyMode typeSafetyMode, IPropFactory thePropFactory) 
         {
             this.TypeSafetyMode = typeSafetyMode;
             switch (typeSafetyMode)
@@ -196,7 +196,7 @@ namespace DRM.PropBag
             tVals = new Dictionary<string, PropGen>();
         }
 
-        public PropBagBase(ControlModel.PropModel pm) : this(pm.TypeSafetyMode, null)
+        public PropBagBase(ControlModel.PropModel pm, IPropFactory propFactory = null) : this(pm.TypeSafetyMode, propFactory)
         {
             foreach (DRM.PropBag.ControlModel.PropItem pi in pm.Props)
             {
@@ -320,7 +320,14 @@ namespace DRM.PropBag
                     }
                 case ReadMissingPropPolicyEnum.NotAllowed:
                     {
-                        throw new InvalidOperationException(string.Format("No property: {0} exists in this PropBag.", propertyName));
+                        if (this.AllPropsMustBeRegistered)
+                        {
+                            throw new InvalidOperationException(string.Format("Property: {0} has not been declared by calling AddProp. Cannot use this method in this case. Declare by calling AddProp.", propertyName));
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException(string.Format("No property: {0} exists in this PropBag.", propertyName));
+                        }
                     }
                 default:
                     {
@@ -330,24 +337,17 @@ namespace DRM.PropBag
             }
         }
 
-        //private IPropGen HandleMissingPropWhenPropMustExist(string propertyName, Type propertyType, out bool wasRegistered,
-        //    bool haveValue, object value, bool alwaysRegister, bool readMissingDoesRegister)
-        //{
-        //    if (alwaysRegister) throw new ApplicationException("Always Register should always be false when calling this method.");
-        //    if (readMissingDoesRegister)
-        //    return HandleMissingProp(propertyName, propertyType, out wasRegistered, haveValue, value, alwaysRegister:false, readMissingDoesRegister: true);
-        //}
-
         public object this[string typeName, string propertyName]
         {
             get
             {
-                return GetValWithType(propertyName, Type.GetType(typeName));
+                Type propertyType = ThePropFactory.TypeResolver(typeName);
+                return GetValWithType(propertyName, propertyType);
             }
             set
             {
-                Type type = Type.GetType(typeName);
-                SetValWithType(propertyName, type, value);
+                Type propertyType = ThePropFactory.TypeResolver(typeName);
+                SetValWithType(propertyName, propertyType, value);
             }
         }
 
@@ -436,10 +436,15 @@ namespace DRM.PropBag
                 throw new InvalidOperationException("Attempt to access property using this method is not allowed when TypeSafetyMode is 'OnlyTypedAccess.'");
             }
 
+            // For Set operations where a type is given, 
+            // Register the property if it does not exist, unless the TypeSafetyMode
+            // setting is AllPropsMustBe (explictly) registered.
+            bool alwaysRegister = !AllPropsMustBeRegistered;
+
             PropGen genProp = GetGenProp(propertyName, propertyType, out bool wasRegistered,
                     haveValue: true,
                     value: value,
-                    alwaysRegister: true,
+                    alwaysRegister: alwaysRegister,
                     mustRegister: false,
                     desiredHasStoreValue:ThePropFactory.ProvidesStorage);
 
@@ -509,12 +514,17 @@ namespace DRM.PropBag
             return setPropDel(value, this, propertyName, genProp);
         }
 
-        public bool SetIt<T>(T value, string propertyName = null)
+        public bool SetIt<T>(T value, string propertyName)
         {
+            // For Set operations where a type is given, 
+            // Register the property if it does not exist, unless the TypeSafetyMode
+            // setting is AllPropsMustBe (explictly) registered.
+            bool alwaysRegister = !AllPropsMustBeRegistered;
+
             PropGen genProp = GetGenProp(propertyName, typeof(T), out bool wasRegistered,
                 haveValue:true,
                 value:value,
-                alwaysRegister:true,
+                alwaysRegister:alwaysRegister,
                 mustRegister:false,
                 desiredHasStoreValue: ThePropFactory.ProvidesStorage);
 
@@ -538,10 +548,15 @@ namespace DRM.PropBag
         /// <returns>True if the value was updated, otherwise false.</returns>
         public bool SetIt<T>(T newValue, ref T curValue, string propertyName)
         {
+            // For Set operations where a type is given, 
+            // Register the property if it does not exist, unless the TypeSafetyMode
+            // setting is AllPropsMustBe (explictly) registered.
+            bool alwaysRegister = !AllPropsMustBeRegistered;
+
             PropGen genProp = GetGenProp(propertyName, typeof(T), out bool wasRegistered,
                     haveValue: true,
                     value:newValue,
-                    alwaysRegister:true,
+                    alwaysRegister:alwaysRegister,
                     mustRegister:false,
                     desiredHasStoreValue: false);
 
@@ -931,22 +946,7 @@ namespace DRM.PropBag
             }
             catch (KeyNotFoundException)
             {
-                if(this.AllPropsMustBeRegistered)
-                { 
-                    throw new InvalidOperationException(string.Format("Property: {0} has not been declared by calling AddProp. Cannot use this method in this case. Declare by calling AddProp.", propertyName));
-                }
-                else
-                {
-                    genProp = this.HandleMissingProp(propertyName, propertyType, out wasRegistered, haveValue, value, alwaysRegister, mustRegister);
-                    //if (misisngPropHandler == null)
-                    //{
-                    //    genProp = HandleMissingProp(propertyName, propertyType, false, out wasRegistered);
-                    //}
-                    //else
-                    //{
-                    //    genProp = misisngPropHandler(propertyName, propertyType, out wasRegistered);
-                    //}
-                }
+                genProp = this.HandleMissingProp(propertyName, propertyType, out wasRegistered, haveValue, value, alwaysRegister, mustRegister);
             }
 
             if (desiredHasStoreValue.HasValue && desiredHasStoreValue.Value != genProp.HasStore)
@@ -1109,7 +1109,14 @@ namespace DRM.PropBag
         protected string GetPropNameFromEventProp(string x)
         {
             //PropStringChanged
-            return x.Substring(0, x.Length - 7);
+            if (x.Length > 7 && x.EndsWith("Changed", StringComparison.InvariantCultureIgnoreCase))
+            {
+                return x.Substring(0, x.Length - 7);
+            }
+            else
+            {
+                return x;
+            }
         }
 
         public object GetValueGen(object host, string propertyName, Type propertyType)
@@ -1173,17 +1180,12 @@ namespace DRM.PropBag
 
         #region Generic Method Support
 
-        //private DoSetDelegate GetPropSetterDelegate(IPropGen genProp)
-        //{
-        //    return DelegateCacheProvider.DoSetDelegateCache.GetOrAdd(genProp.Type);
-        //}
-
         // Method Templates for Property Bag
         internal static class GenericMethodTemplates
         {
             static Lazy<MethodInfo> theSingleGenericDoSetBridgeMethodInfo;
 
-            public static MethodInfo GenericDoSetBridgeMethodInfo { get { return theSingleGenericDoSetBridgeMethodInfo.Value; } }
+            static MethodInfo GenericDoSetBridgeMethodInfo { get { return theSingleGenericDoSetBridgeMethodInfo.Value; } }
 
             static GenericMethodTemplates()
             {
@@ -1192,7 +1194,7 @@ namespace DRM.PropBag
                     LazyThreadSafetyMode.PublicationOnly);
             }
 
-            private static bool DoSetBridge<T>(object value, PropBagBase target, string propertyName, IPropGen prop)
+            static bool DoSetBridge<T>(object value, PropBagBase target, string propertyName, IPropGen prop)
             {
                 return target.DoSet<T>((T)value, propertyName, (IPropPrivate<T>) prop.TypedProp);
             }

@@ -13,7 +13,7 @@ namespace DRM.PropBag
     {
         protected PropTypedBase(Type typeOfThisValue, bool typeIsSolid, bool hasStore,
             Action<T, T> doWhenChanged, bool doAfterNotify,
-            Func<T,T,bool> comparer, GetDefaultValue<T> getDefaultValFunc)
+            Func<T,T,bool> comparer, GetDefaultValueDelegate<T> getDefaultValFunc)
             : base(typeOfThisValue, typeIsSolid, hasStore)
         {
             DoWHenChangedAction = doWhenChanged;
@@ -50,7 +50,7 @@ namespace DRM.PropBag
 
         public event PropertyChangedWithTValsHandler<T> PropertyChangedWithTVals;
 
-        protected GetDefaultValue<T> GetDefaultValFunc { get; }
+        protected GetDefaultValueDelegate<T> GetDefaultValFunc { get; }
 
         public virtual bool ReturnDefaultForUndefined
         {

@@ -11,7 +11,7 @@ namespace DRM.PropBag
     public sealed class Prop<T> : PropTypedBase<T>
     {
         public Prop(T initalValue,
-            GetDefaultValue<T> getDefaultValFunc,
+            GetDefaultValueDelegate<T> getDefaultValFunc,
             bool typeIsSolid,
             bool hasStore,
             Action<T, T> doWhenChanged = null,
@@ -26,7 +26,7 @@ namespace DRM.PropBag
             }
         }
 
-        public Prop(GetDefaultValue<T> getDefaultValFunc,
+        public Prop(GetDefaultValueDelegate<T> getDefaultValFunc,
             bool typeIsSolid = true,
             bool hasStore = true,
             Action<T, T> doWhenChanged = null,
