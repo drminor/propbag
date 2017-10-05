@@ -39,7 +39,7 @@ namespace PropBagLib.Tests
             }
             set
             {
-                SetIt<int>(value: value);
+                SetIt<int>(value: value, propertyName: nameof(PropInt));
             }
         }
 
@@ -51,7 +51,7 @@ namespace PropBagLib.Tests
             }
             set
             {
-                SetIt<string>(value: value);
+                SetIt<string>(value: value, propertyName: nameof(PropString));
             }
         }
 

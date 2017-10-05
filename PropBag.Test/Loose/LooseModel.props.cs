@@ -68,7 +68,7 @@ namespace PropBagLib.Tests
             }
             set
             {
-                SetIt<int>(value: value);
+                SetIt<int>(value: value, propertyName: nameof(PropInt));
             }
         }
 
@@ -80,7 +80,7 @@ namespace PropBagLib.Tests
             }
             set
             {
-                SetIt<TimeSpan>(value: value);
+                SetIt<TimeSpan>(value: value, propertyName: nameof(PropTimeSpan));
             }
         }
 
@@ -92,7 +92,7 @@ namespace PropBagLib.Tests
             }
             set
             {
-                SetIt<Uri>(value: value);
+                SetIt<Uri>(value: value, propertyName: nameof(PropUri));
             }
         }
 
@@ -104,7 +104,7 @@ namespace PropBagLib.Tests
             }
             set
             {
-                SetIt<Lazy<int>>(value: value);
+                SetIt<Lazy<int>>(value: value, propertyName: nameof(PropLazyInt));
             }
         }
 
