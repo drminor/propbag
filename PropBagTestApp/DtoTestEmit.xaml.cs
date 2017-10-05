@@ -36,6 +36,21 @@ namespace PropBagTestApp
 
         ConfiguredMappers _autoMappers;
 
+        public static readonly DependencyProperty PropertyNameProperty =
+            DependencyProperty.Register("PropertyN", typeof(string), typeof(DtoTestEmit));
+
+        public string PropertyN
+        {
+            get
+            {
+                return (string)this.GetValue(PropertyNameProperty);
+            }
+            set
+            {
+                this.SetValue(PropertyNameProperty, value);
+            }
+        }
+
         [PropBagInstanceAttribute("OurData", "There is only one ViewModel in this View.")]
         public DtoTestViewModelEmit OurData
         {
@@ -54,19 +69,22 @@ namespace PropBagTestApp
             if (_isInDesignMode.HasValue && _isInDesignMode.Value)
             {
                 System.Diagnostics.Debug.WriteLine("In Design");
-                OurData = new DtoTestViewModelEmit(PropBagTypeSafetyMode.Tight);
-                OurData.AddProp<int>("RunTimeInt", null, false, null, null, 17);
-                OurData.SetIt<int>(21, "RunTimeInt");
+                //OurData = new DtoTestViewModelEmit(PropBagTypeSafetyMode.Tight);
+                //OurData.AddProp<int>("RunTimeInt", null, false, null, null, 17);
+                //OurData.SetIt<int>(21, "RunTimeInt");
             }
 
+            //OurData = new DtoTestViewModelEmit();
             InitializeComponent();
 
             // Create Proxy Classes dynamically for this View Model to enable AutoMapper mappings.
-            _autoMappers = GetAutoMappers(PropBagMappingStrategyEnum.EmitProxy);
+            //_autoMappers = GetAutoMappers(PropBagMappingStrategyEnum.EmitProxy);
 
             Grid topGrid = (Grid)this.FindName("TopGrid");
 
             _boundPropBags = ViewModelGenerator.StandUpViewModels(topGrid, this);
+
+            OurData.SetIt<MyModel4>(new MyModel4 { MyString = "hello" }, "Deep");
 
             _autoMappers = PrepareAutoMappings(PropBagMappingStrategyEnum.EmitProxy);
 
@@ -77,14 +95,14 @@ namespace PropBagTestApp
             // to a UI Element in this class' view.
             // This same binding could have been created in XAML.
 
-            Binding c = new Binding("[System.Double, Size]")
-            {
-                Converter = new PropValueConverter(),
-                ConverterParameter = new TwoTypes(typeof(string), typeof(double)),
-                TargetNullValue = string.Empty
-            };
-            TextBox tb = (TextBox)this.FindName("Sz");
-            tb.SetBinding(TextBox.TextProperty, c);
+            //Binding c = new Binding("[System.Double, Size]")
+            //{
+            //    Converter = new PropValueConverter(),
+            //    ConverterParameter = new TwoTypes(typeof(double), typeof(string)),
+            //    TargetNullValue = string.Empty
+            //};
+            //TextBox tb = (TextBox)this.FindName("Sz");
+            //tb.SetBinding(TextBox.TextProperty, c);
         }
 
         private void BtnRead_Click(object sender, RoutedEventArgs e)

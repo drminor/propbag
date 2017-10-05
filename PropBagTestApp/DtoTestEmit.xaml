@@ -1,17 +1,17 @@
-﻿<Window x:Class="PropBagTestApp.DtoTestEmit"
+﻿<Window x:Class="PropBagTestApp.DtoTestEmit" x:Name="_window"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:PropBagTestApp"
         xmlns:pb="clr-namespace:DRM.PropBag.ControlsWPF;assembly=WPFControls"
-        xmlns:propbag="clr-namespace:DRM.PropBag;assembly=PropBag"
+        xmlns:mod="clr-namespace:PropBagTestApp.Models"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="DtoTest" Height="300" Width="300">
-    <Window.DataContext>
+        Title="DtoTest" Height="300" Width="500">
+    <!--<Window.DataContext>
         <local:DtoTestViewModelEmit/>
-    </Window.DataContext>
+    </Window.DataContext>-->
     <Grid Name="TopGrid">
         
         <Grid.RowDefinitions>
@@ -23,7 +23,7 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
 
-        <pb:PropBagTemplate Grid.Row="5" Name="T1" Width="0" Height="0"
+        <pb:PropBagTemplate Grid.Row="5" Name="T1" Width="0" Height="0" 
                 ClassName="DtoTestViewModelEmitBase" InstanceKey="OurData" TypeSafetyMode="AllPropsMustBeRegistered"
                 OutPutNameSpace="PropBagTestApp.ViewModels">
             <pb:PropBagTemplate.Namespaces>
@@ -31,7 +31,7 @@
             </pb:PropBagTemplate.Namespaces>
 
             <pb:PropBagTemplate.Props>
-                <pb:PropItem PropertyName="ProductId" PropertyType="sys:Guid">
+                <pb:PropItem  PropertyName="ProductId" PropertyType="sys:Guid">
                     <pb:InitialValueField SetToEmptyString="True"/>
                     <pb:PropDoWhenChangedField DoWhenChangedAction="System.Guid|PropBagTestApp.DtoTestViewModelEmit|OurData|DoWhenProductIdChanges"
                                 DoAfterNotify="False"/>
@@ -49,21 +49,34 @@
                     <pb:InitialValueField InitialValue="10.4"/>
                 </pb:PropItem>
 
+                <pb:PropItem PropertyName="Deep" PropertyType="mod:MyModel4">
+                    <pb:InitialValueField SetToNull="True"/>
+                </pb:PropItem>
+
             </pb:PropBagTemplate.Props>
         </pb:PropBagTemplate>
         
         <Label Grid.Row="0">ProductId:</Label>
         <TextBox Grid.Row="0" x:Name="PId" Height="25" Width="100"
-                 Text="{Binding Path=[System.Guid\,ProductId], Converter={pb:PropValueConverter}, ConverterParameter={x:Type sys:Guid}}"/>
+                 Text="{pb:Binding Path=ProductId, SourceType={x:Type sys:Guid}}"/>
 
         <Label Grid.Row="1">Amount:</Label>
-        <TextBox Grid.Row="1" x:Name="Amt" Height="25" Width="100"
-                 Text="{Binding Path=[System.Int32\, Amount], Converter={pb:PropValueConverter},
-                         ConverterParameter={pb:TwoTypes {x:Type sys:String}, {x:Type sys:Int32}}}"/>
+        <TextBox Grid.Row="1" x:Name="Amt" Height="25" Width="100" 
+                 Text="{pb:Binding Path=Amount, SourceType={x:Type sys:Int32}}"/>
 
-        <Label Grid.Row="2">Size:</Label>
-        <TextBox Grid.Row="2" x:Name="Sz" Height="25" Width="100"
-                 Text="-1.25" />
+        <StackPanel Orientation="Horizontal" Grid.Row="2">
+            <Label>Size:</Label>
+            <TextBox  x:Name="Sz" Height="25" Width="100" Margin="0,0,20,0"
+                     Text="{pb:Binding Path=Size, SourceType={x:Type sys:Double}}" />
+
+            <Label>Test Double:</Label>
+            <TextBox x:Name="TestDouble" Height="25" Width="100"
+                     Text="{pb:Binding Path=TestDouble, SourceType={x:Type sys:Double}}" />
+
+            <Label>Deep String:</Label>
+            <TextBox x:Name="Deep" Height="25" Width="100"
+                     Text="{pb:Binding Path=Deep.MyString, SourceType={x:Type sys:String}}" />
+        </StackPanel>
 
         <!--<Label Grid.Row="3">RunTime Int:</Label>
         <TextBox Grid.Row="3" x:Name="RtInt" Height="25" Width="100"

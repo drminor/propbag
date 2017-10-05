@@ -1,9 +1,10 @@
 ﻿using DRM.PropBag;
 using DRM.PropBag.ControlModel;
+using System.Windows;
 
 namespace PropBagTestApp
 {
-    public class DtoTestViewModelEmit : PubPropBag
+    public class DtoTestViewModelEmit : PropBagMin
     {
         PropModel _pm;
 
@@ -27,9 +28,34 @@ namespace PropBagTestApp
             // Save a reference to the model used to defined our properties.
             _pm = pm;
         }
+
         private void DoWhenProductIdChanges(bool oldVal, bool newVal)
         {
             System.Diagnostics.Debug.WriteLine("ProductId was changed.");
         }
+
+        int _testP;
+        public int TestP
+        {
+           get { return _testP; } 
+            set
+            {
+                _testP = value;
+                OnPropertyChanged("TestP");
+            }
+        }
+
+        double _testDouble;
+        public double TestDouble
+        {
+            get { return _testDouble; }
+            set
+            {
+                _testDouble = value;
+                OnPropertyChanged("TestDouble");
+            }
+        }
+
+
     }
 }

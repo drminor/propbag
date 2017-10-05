@@ -1,21 +1,13 @@
-﻿using System;
+﻿using AutoMapper;
+using DRM.PropBag.AutoMapperSupport;
+using DRM.PropBag.ControlModel;
+using DRM.PropBag.ControlsWPF;
+using PropBagTestApp.Models;
+using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-
-
-using DRM.PropBag.ControlModel;
-using DRM.PropBag.ControlsWPF;
-
-
-using PropBagTestApp.Models;
-
-using AutoMapper;
-using System.Collections.Generic;
-using System.Reflection;
-using DRM.PropBag;
-using DRM.PropBag.AutoMapperSupport;
-using AutoMapper.Configuration;
 
 namespace PropBagTestApp
 {
@@ -64,7 +56,7 @@ namespace PropBagTestApp
             Binding c = new Binding("[System.Double, Size]")
             {
                 Converter = new PropValueConverter(),
-                ConverterParameter = new TwoTypes(typeof(string), typeof(double)),
+                ConverterParameter = new TwoTypes(typeof(double), typeof(string)),
                 TargetNullValue = string.Empty
             };
             TextBox tb = (TextBox)this.FindName("Sz");

@@ -47,7 +47,7 @@ namespace PropBagTestApp
             Binding c = new Binding("[System.Double, Size]")
             {
                 Converter = new PropValueConverter(),
-                ConverterParameter = new TwoTypes(typeof(string), typeof(double)),
+                ConverterParameter = new TwoTypes(typeof(double), typeof(string)),
                 TargetNullValue = string.Empty
             };
             TextBox tb = (TextBox)this.FindName("Sz");

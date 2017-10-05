@@ -21,4 +21,19 @@ namespace PropBagTestApp.Models
 
         public double Size { get; set; }
     }
+
+    public class MyModel3
+    {
+        public Guid ProductId { get; set; }
+        public int Amount { get; set; }
+
+        public double Size { get; set; }
+
+        public MyModel4 Deep { get; set; }
+    }
+
+    public class MyModel4
+    {
+        public string MyString { get; set; }
+    }
 }
