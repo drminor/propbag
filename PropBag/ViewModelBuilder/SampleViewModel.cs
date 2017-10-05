@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using DRM.PropBag.ControlModel;
 using DRM.TypeSafePropertyBag;
 
+
 namespace DRM.PropBag.ViewModelBuilder
 {
     public class SampleViewModel : PropBagBase

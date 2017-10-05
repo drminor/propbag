@@ -50,6 +50,10 @@ namespace DRM.PropBag.ViewModelBuilder
             BuildPropSetter(_setterBuilder, name, propertyType);
 
             _propertyBuilder.SetSetMethod(_setterBuilder);
+
+            CustomAttributeBuilder attributeBuilder = new AttributeEmitter().CreateAttributeBuilder(new WasEmittedAttribute(DateTime.Now.ToString()));
+            _propertyBuilder.SetCustomAttribute(attributeBuilder);
+
         }
 
         private void BuildPropGetter(MethodBuilder getter, string name, Type pType)

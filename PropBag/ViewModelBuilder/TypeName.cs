@@ -17,7 +17,8 @@ namespace DRM.PropBag.ViewModelBuilder
             Name = name;
             NamespaceName = namespaceName;
             //AssemblyName = assemblyName;
-            _fullName = $"{NamespaceName}.{Name}";
+            
+            _fullName = namespaceName == null ? Name : $"{NamespaceName}.{Name}";
         }
 
         public string Name { get; }
