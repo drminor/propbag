@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using DRM.TypeSafePropertyBag;
+using DRM.PropBag;
 
 namespace DRM.PropBag.Caches
 {
@@ -15,7 +16,10 @@ namespace DRM.PropBag.Caches
         #region Private Backing Members
 
         static Lazy<TypeDescBasedTConverterCache> theSingleTypeDescBasedTConverterCache;
+
         static Lazy<LockingConcurrentDictionary<Type, DoSetDelegate>> theSingleDoSetDelegateCache;
+        static Lazy<LockingConcurrentDictionary<Type, DoSetDelegateMin>> theSingleDoSetDelegateCacheMin;
+
 
         #endregion
 
@@ -34,6 +38,11 @@ namespace DRM.PropBag.Caches
             get { return theSingleDoSetDelegateCache.Value; }
         }
 
+        internal static LockingConcurrentDictionary<Type, DoSetDelegateMin> DoSetDelegateCacheMin
+        {
+            get { return theSingleDoSetDelegateCacheMin.Value; }
+        }
+
         #endregion
 
         #region The Static Constructor
@@ -46,12 +55,21 @@ namespace DRM.PropBag.Caches
             theSingleTypeDescBasedTConverterCache = new Lazy<TypeDescBasedTConverterCache>(() => new TypeDescBasedTConverterCache(), LazyThreadSafetyMode.PublicationOnly);
 
 
-            // Do Set Delegate Cache
-            Func<Type, DoSetDelegate> valueFactory = DRM.PropBag.PropBagBase.GenericMethodTemplates.GetDoSetDelegate;
+            // Do Set Delegate Cache for PropBagBase
+            Func<Type, DoSetDelegate> valueFactory = PropBagBase.GenericMethodTemplates.GetDoSetDelegate;
             theSingleDoSetDelegateCache = 
                 new Lazy<LockingConcurrentDictionary<Type, DoSetDelegate>>
                 (
                     () => new LockingConcurrentDictionary<Type, DoSetDelegate>(valueFactory),
+                    LazyThreadSafetyMode.PublicationOnly
+                );
+
+            // Do Set Delegate Cache for PropBagMin
+            Func<Type, DoSetDelegateMin> valueFactoryMin = PropBagMin.GenericMethodTemplates.GetDoSetDelegate;
+            theSingleDoSetDelegateCacheMin =
+                new Lazy<LockingConcurrentDictionary<Type, DoSetDelegateMin>>
+                (
+                    () => new LockingConcurrentDictionary<Type, DoSetDelegateMin>(valueFactoryMin),
                     LazyThreadSafetyMode.PublicationOnly
                 );
         }
