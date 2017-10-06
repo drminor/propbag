@@ -273,7 +273,7 @@ namespace DRM.PropBag
         #region Property Access Methods
 
         private PropGen HandleMissingProp(string propertyName, Type propertyType, out bool wasRegistered,
-            bool haveValue, object value, bool alwaysRegister, bool mustRegister)
+            bool haveValue, object value, bool alwaysRegister, bool mustBeRegistered)
         {
             // If always register (because we are being called from a set operation,
             // then override the ReadMissingPolicy in place (used for get operations.)
@@ -283,7 +283,7 @@ namespace DRM.PropBag
             {
                 case ReadMissingPropPolicyEnum.Allowed:
                     {
-                        if(mustRegister)
+                        if(mustBeRegistered)
                             goto case ReadMissingPropPolicyEnum.NotAllowed;
                         else
                             goto case ReadMissingPropPolicyEnum.Register;
@@ -351,7 +351,7 @@ namespace DRM.PropBag
             }
         }
 
-        public object GetValWithType(string propertyName, Type propertyType)
+        public IPropGen GetPropGen(string propertyName, Type propertyType = null)
         {
             if (propertyType == null && OnlyTypedAccess)
             {
@@ -365,10 +365,10 @@ namespace DRM.PropBag
                 haveValue: false,
                 value: null,
                 alwaysRegister: false,
-                mustRegister: false,
-                desiredHasStoreValue:ThePropFactory.ProvidesStorage);
+                mustBeRegistered: false,
+                desiredHasStoreValue: ThePropFactory.ProvidesStorage);
 
-            if(!wasRegistered)
+            if (!wasRegistered)
             {
                 if (propertyType != null)
                 {
@@ -387,9 +387,23 @@ namespace DRM.PropBag
                 }
             }
 
+            return genProp;
+        }
+
+        public object GetValWithType(string propertyName, Type propertyType)
+        {
+            IPropGen pg = GetPropGen(propertyName, propertyType);
 
             // This uses reflection.
-            return genProp.Value;
+            return pg.Value;
+        }
+
+        public ValPlusType GetValPlusType(string propertyName, Type propertyType)
+        {
+            IPropGen pg = GetPropGen(propertyName, propertyType);
+
+            // This uses reflection.
+            return pg.ValuePlusType();
         }
 
         public T GetIt<T>(string propertyName)
@@ -409,7 +423,7 @@ namespace DRM.PropBag
                 haveValue: false,
                 value: null,
                 alwaysRegister: false,
-                mustRegister: false,
+                mustBeRegistered: false,
                 desiredHasStoreValue:ThePropFactory.ProvidesStorage);
 
             if (wasRegistered)
@@ -450,7 +464,7 @@ namespace DRM.PropBag
                     haveValue: true,
                     value: value,
                     alwaysRegister: alwaysRegister,
-                    mustRegister: false,
+                    mustBeRegistered: false,
                     desiredHasStoreValue:ThePropFactory.ProvidesStorage);
 
             // No point in calling DoSet, it would find that the value is the same and do nothing.
@@ -528,7 +542,7 @@ namespace DRM.PropBag
                 haveValue:true,
                 value:value,
                 alwaysRegister: alwaysRegister,
-                mustRegister:false,
+                mustBeRegistered:false,
                 desiredHasStoreValue: ThePropFactory.ProvidesStorage);
 
             // No point in calling DoSet, it would find that the value is the same and do nothing.
@@ -560,7 +574,7 @@ namespace DRM.PropBag
                     haveValue: true,
                     value:newValue,
                     alwaysRegister: alwaysRegister,
-                    mustRegister:false,
+                    mustBeRegistered:false,
                     desiredHasStoreValue: false);
 
             // No point in calling DoSet, it would find that the value is the same and do nothing.
@@ -601,7 +615,7 @@ namespace DRM.PropBag
                     haveValue: false,
                     value: null,
                     alwaysRegister: false,
-                    mustRegister: true,
+                    mustBeRegistered: true,
                     desiredHasStoreValue: ThePropFactory.ProvidesStorage);
 
             genProp.SubscribeToPropChanged(doOnChange);
@@ -614,7 +628,7 @@ namespace DRM.PropBag
                     haveValue: false,
                     value: null,
                     alwaysRegister: false,
-                    mustRegister: true,
+                    mustBeRegistered: true,
                     desiredHasStoreValue: ThePropFactory.ProvidesStorage);
 
             return genProp.UnSubscribeToPropChanged(doOnChange);
@@ -634,7 +648,7 @@ namespace DRM.PropBag
                     haveValue: false,
                     value: null,
                     alwaysRegister: false,
-                    mustRegister: true,
+                    mustBeRegistered: true,
                     desiredHasStoreValue: ThePropFactory.ProvidesStorage);
 
             IProp<T> prop = (IProp<T>) genProp.TypedProp;
@@ -705,7 +719,7 @@ namespace DRM.PropBag
                 haveValue: false,
                 value: null,
                 alwaysRegister: false,
-                mustRegister: true,
+                mustBeRegistered: true,
                 desiredHasStoreValue: ThePropFactory.ProvidesStorage);
                 
             return pGen.Type;
@@ -935,11 +949,11 @@ namespace DRM.PropBag
 
         protected PropGen GetGenProp(string propertyName, Type propertyType, 
             out bool wasRegistered, bool haveValue, object value,
-            bool alwaysRegister, bool mustRegister, bool? desiredHasStoreValue)
+            bool alwaysRegister, bool mustBeRegistered, bool? desiredHasStoreValue)
         {
             if (propertyName == null) throw new ArgumentNullException("propertyName", "PropertyName is null on call to GetValue.");
 
-            Debug.Assert(!(alwaysRegister && mustRegister), "Both alwaysRegister and mustRegister cannot be true.");
+            Debug.Assert(!(alwaysRegister && mustBeRegistered), "Both alwaysRegister and mustBeRegistered cannot be true.");
 
             PropGen genProp;
             try
@@ -949,7 +963,7 @@ namespace DRM.PropBag
             }
             catch (KeyNotFoundException)
             {
-                genProp = this.HandleMissingProp(propertyName, propertyType, out wasRegistered, haveValue, value, alwaysRegister, mustRegister);
+                genProp = this.HandleMissingProp(propertyName, propertyType, out wasRegistered, haveValue, value, alwaysRegister, mustBeRegistered);
             }
 
             if (desiredHasStoreValue.HasValue && desiredHasStoreValue.Value != genProp.HasStore)

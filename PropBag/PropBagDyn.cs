@@ -276,6 +276,16 @@ namespace DRM.PropBag
             return propBag.GetValWithType(propertyName, propertyType);
         }
 
+        public IPropGen GetPropGen(string propertyName, Type propertyType)
+        {
+            return propBag.GetPropGen(propertyName, propertyType);
+        }
+
+        public ValPlusType GetValPlusType(string propertyName, Type propertyType)
+        {
+            return propBag.GetValPlusType(propertyName, propertyType);
+        }
+
         public T GetIt<T>(string propertyName)
         {
             return propBag.GetIt<T>(propertyName);

@@ -20,6 +20,8 @@ namespace DRM.PropBag
         //bool SetIt<T>(T value, string propertyName);
 
         IProp<T> GetTypedProp<T>(string propertyName);
+        IPropGen GetPropGen(string propertyName, Type propertyType);
+        ValPlusType GetValPlusType(string propertyName, Type propertyType);
 
         bool SetValWithNoType(string propertyName, object value);
 
