@@ -24,7 +24,7 @@ namespace PropBagLib.Tests
                 haveValue: false,
                 value: null,
                 alwaysRegister: false,
-                mustRegister:true,
+                mustBeRegistered:true,
                 desiredHasStoreValue:ThePropFactory.ProvidesStorage);
         }
 
