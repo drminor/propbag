@@ -72,7 +72,7 @@ namespace DRM.PropBag.AutoMapperSupport
 
         private static IMapTypeDefinition<T> GetTypeDef<T>(PropModel pm, Type baseType)
         {
-            if(typeof(T).IsPropGenBased())
+            if(typeof(T).IsPropBagBased())
             {
                 return new MapTypeDefinition<T>(pm, baseType);
             }
