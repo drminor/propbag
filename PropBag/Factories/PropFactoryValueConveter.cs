@@ -12,7 +12,7 @@ using System.ComponentModel.Design.Serialization;
 using DRM.PropBag.Caches;
 using DRM.PropBag.ControlModel;
 
-
+using System.Windows;
 using System.Windows.Data;
 using DRM.TypeSafePropertyBag;
 
@@ -30,66 +30,66 @@ namespace DRM.PropBag
                 if (value == null) return string.Empty;
             }
 
-            TwoTypes tt = GetFromParam(parameter);
+            // The parameter, if only specifying one type, is specifying the type
+            // of the native (i.e., source) object.
+            TwoTypes tt = GetFromParam(parameter, typeof(string));
 
-            if (!tt.IsEmpty)
+            if (tt.IsEmpty) throw new InvalidOperationException("Type information was not available.");
+
+            if (targetType != tt.SourceType)
             {
-                if (targetType != tt.SourceType)
-                {
-                    StringFromTDelegate del = GetTheStringFromTDelegate(tt.SourceType, tt.DestType);
-                    return del(value);
-                }
+                StringFromTDelegate del = GetTheStringFromTDelegate(tt.SourceType, tt.DestType);
+                return del(value);
             }
-
-            return null;
+            return value;
         }
 
         // Value is a string, we need to create a native object.
         public static object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value == null && !targetType.IsValueType) return null;
-            
-            TwoTypes tt = GetFromParam(parameter);
-            if (!tt.IsEmpty)
+
+            // The parameter, if only specifying one type, is specifying the type
+            // of the native (i.e., source) object.
+
+            System.Diagnostics.Debug.Assert(value == null || typeof(string).IsAssignableFrom(value.GetType()), $"PropFactory expected string input on convert back, but type was {value.GetType()}.");
+            TwoTypes tt = GetFromParam(parameter, typeof(string));
+
+            if (tt.IsEmpty) throw new InvalidOperationException("Type information was not available.");
+
+            if (value.GetType() != tt.SourceType)
             {
-                if (value.GetType() != tt.SourceType)
-                {
-                    TFromStringDelegate del = GetTheTFromStringDelegate(tt.SourceType);
-                    string s = value as string;
-                    return del(s);
-                }
+                TFromStringDelegate del = GetTheTFromStringDelegate(tt.SourceType);
+                string s = value as string;
+                return del(s);
             }
 
-            return null;
+            return value;
         }
 
-        private static TwoTypes GetFromParam(object parameter)
+        private static TwoTypes GetFromParam(object parameter, Type destinationType = null)
         {
             if (parameter == null)
             {
                 return TwoTypes.Empty;
             }
-
-            if (parameter is TwoTypes)
-            {
+            else if(parameter is TwoTypes)
+            { 
                 return (TwoTypes)parameter;
             }
-
-            // Assume string (TODO: Check This.
-            Type destinationType = typeof(string);
-
-            if (parameter is Type)
+            else if(parameter is Type && destinationType != null)
             {
                 return new TwoTypes((Type)parameter, destinationType);
             }
+            else if(parameter is IPropGen && destinationType != null)
+            {
+                return new TwoTypes(((IPropGen)parameter).Type, destinationType);
+            }
             else
             {
-                if (parameter is IPropGen)
-                {
-                    return new TwoTypes(((IPropGen)parameter).Type, destinationType);
-                }
+                return TwoTypes.Empty;
             }
-            return TwoTypes.Empty;
+
         }
 
 
