@@ -47,13 +47,16 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        public static bool IsPropGenBased(this Type type)
+        public static bool IsPropBagBased(this Type type)
         {
-            return null != type.GetInterfaces().FirstOrDefault
+            Type[] interfaces = type.GetInterfaces();
+
+            bool result = null != type.GetInterfaces().FirstOrDefault
                 (
-                x => x.Name == "IPropBag"
-                    || x.Name == "IPropBagMin"
+                x => x.Name == "IPropBagMin"
                 );
+
+            return result;
         }
 
         public static bool HasDeclaredProperty(this Type type, string propertyName)
