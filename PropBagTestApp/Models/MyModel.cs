@@ -61,6 +61,11 @@ namespace PropBagTestApp.Models
 
     public class MyModel4 : INotifyPropertyChanged
     {
+        public MyModel4()
+        {
+            MyString = "Brand New.";
+        }
+
         string _myString;
         public string MyString
         {

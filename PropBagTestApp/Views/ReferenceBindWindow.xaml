@@ -1,0 +1,54 @@
+﻿<Window x:Class="PropBagTestApp.View.ReferenceBindWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:pb="clr-namespace:DRM.PropBag.ControlsWPF;assembly=WPFControls"
+        xmlns:ob="clr-namespace:DRM.PropBag.ControlsWPF.Binders;assembly=WPFControls"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="ReferenceBindWindow" Height="300" Width="500">
+    
+        <!--<Window.DataContext>
+            <mod:ReferenceBindModel/>
+        </Window.DataContext>-->
+    
+<Grid Name="TopGrid">
+
+    <Grid.RowDefinitions>
+        <RowDefinition/>
+        <RowDefinition/>
+        <RowDefinition/>
+        <RowDefinition/>
+    </Grid.RowDefinitions>
+
+    <Label Grid.Row="0">ProductId:</Label>
+    <TextBox Grid.Row="0" x:Name="PId" Height="25" Width="100"
+                 Text="{ob:Binding Path=ProductId, SourceType={x:Type sys:Guid}}"/>
+
+    <Label Grid.Row="1">Amount:</Label>
+    <TextBox Grid.Row="1" x:Name="Amt" Height="25" Width="100" 
+                 Text="{ob:Binding Path=Amount, SourceType={x:Type sys:Int32}}"/>
+
+    <StackPanel Orientation="Horizontal" Grid.Row="2">
+        <Label>Size:</Label>
+        <TextBox x:Name="Sz" Height="25" Width="100" Margin="0,0,20,0"
+                     Text="{ob:Binding Path=Size, SourceType={x:Type sys:Double}}"/>
+
+        <Label>Test Double:</Label>
+        <TextBox x:Name="TestDouble" Height="25" Width="100"
+                     Text="{ob:Binding Path=TestDouble, SourceType={x:Type sys:Double}}"/>
+
+        <Label>Deep String:</Label>
+        <TextBox x:Name="Deep" Height="25" Width="100"
+                     Text="{ob:Binding Path=Deep.MyString, SourceType={x:Type sys:String}}"/>
+    </StackPanel>
+
+    <StackPanel Orientation="Horizontal" Grid.Row="3">
+        <Button x:Name="btnRead" Content="Read" Margin="0,0,20,0" Height="25" Width="100" Click="BtnRead_Click"></Button>
+        <Button x:Name="btnSave" Content="Save" Height="25" Width="100" Click="BtnSave_Click" ></Button>
+    </StackPanel>
+
+
+</Grid>
+</Window>

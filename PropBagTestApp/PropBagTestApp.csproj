@@ -59,6 +59,14 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ViewModels\ReferenceBindViewModelPB.cs" />
+    <Compile Include="ViewModels\ReferenceBindViewModel.cs" />
+    <Compile Include="Views\ReferenceBindWindow.xaml.cs">
+      <DependentUpon>ReferenceBindWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ReferenceBindWindowPB_Simple.xaml.cs">
+      <DependentUpon>ReferenceBindWindowPB_Simple.xaml</DependentUpon>
+    </Compile>
     <Page Include="DtoTestEmit.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -98,6 +106,18 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="PropBagTemplates\ReferenceBindViewModelPB.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\ReferenceBindWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ReferenceBindWindowPB_Simple.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Models\MyModel.cs" />
