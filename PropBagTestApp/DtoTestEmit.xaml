@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:PropBagTestApp"
         xmlns:pb="clr-namespace:DRM.PropBag.ControlsWPF;assembly=WPFControls"
+        xmlns:ob="clr-namespace:DRM.PropBag.ControlsWPF.Binders;assembly=WPFControls"
         xmlns:mod="clr-namespace:PropBagTestApp.Models"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -58,24 +59,24 @@
         
         <Label Grid.Row="0">ProductId:</Label>
         <TextBox Grid.Row="0" x:Name="PId" Height="25" Width="100"
-                 Text="{pb:Binding Path=ProductId, SourceType={x:Type sys:Guid}}"/>
+                 Text="{ob:Binding Path=ProductId, SourceType={x:Type sys:Guid}}"/>
 
         <Label Grid.Row="1">Amount:</Label>
         <TextBox Grid.Row="1" x:Name="Amt" Height="25" Width="100" 
-                 Text="{pb:Binding Path=Amount, SourceType={x:Type sys:Int32}}"/>
+                 Text="{ob:Binding Path=Amount, SourceType={x:Type sys:Int32}}"/>
 
         <StackPanel Orientation="Horizontal" Grid.Row="2">
             <Label>Size:</Label>
             <TextBox  x:Name="Sz" Height="25" Width="100" Margin="0,0,20,0"
-                     Text="{pb:Binding Path=Size, SourceType={x:Type sys:Double}}" />
+                     Text="{ob:Binding Path=Size, SourceType={x:Type sys:Double}}" />
 
             <Label>Test Double:</Label>
             <TextBox x:Name="TestDouble" Height="25" Width="100"
-                     Text="{pb:Binding Path=TestDouble, SourceType={x:Type sys:Double}}" />
+                     Text="{ob:Binding Path=TestDouble, SourceType={x:Type sys:Double}}" />
 
             <Label>Deep String:</Label>
             <TextBox x:Name="Deep" Height="25" Width="100"
-                     Text="{pb:Binding Path=Deep.MyString, SourceType={x:Type sys:String}}" />
+                     Text="{ob:Binding Path=Deep2.MyString, SourceType={x:Type sys:String}}" />
         </StackPanel>
 
         <!--<Label Grid.Row="3">RunTime Int:</Label>

@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Data;
 
@@ -67,6 +63,30 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
             object value = values[values.Length - 1];
 
+            BindingBase bb = this[values.Length - 1];
+            if(bb is Binding b)
+            {
+                if(b.Converter == null)
+                {
+                    if (value != null)
+                    {
+                        try
+                        {
+                            if (!targetType.IsAssignableFrom(value.GetType()))
+                            {
+                                TypeConverter tc = TypeDescriptor.GetConverter(value);
+                                value = tc.ConvertTo(value, targetType);
+                                return value;
+                            }
+                        }
+                        catch
+                        {
+                            return Binding.DoNothing;
+                        }
+                    }
+                }
+            }
+
             return value;
         }
 
@@ -78,6 +98,32 @@ namespace DRM.PropBag.ControlsWPF.Binders
             {
                 result[i] = Binding.DoNothing;
             }
+
+            BindingBase bb = this[targetTypes.Length - 1];
+            if (bb is Binding b)
+            {
+                if (b.Converter == null)
+                {
+                    if (value != null)
+                    {
+                        try
+                        {
+                            Type targetType = targetTypes[targetTypes.Length - 1];
+                            Type sourceType = value.GetType();
+                            if (!sourceType.IsAssignableFrom(targetType))
+                            {
+                                TypeConverter tc = TypeDescriptor.GetConverter(targetType);
+                                value = tc.ConvertTo(value, targetType);
+                            }
+                        } 
+                        catch
+                        {
+                            value = Binding.DoNothing;
+                        }
+                    }
+                }
+            }
+
             result[result.Length - 1] = value;
 
             return result;

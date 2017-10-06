@@ -1,5 +1,6 @@
 ﻿using DRM.PropBag;
 using DRM.PropBag.ControlModel;
+using PropBagTestApp.Models;
 using System.Windows;
 
 namespace PropBagTestApp
@@ -53,6 +54,17 @@ namespace PropBagTestApp
             {
                 _testDouble = value;
                 OnPropertyChanged("TestDouble");
+            }
+        }
+
+        MyModel4 _deep2;
+        public MyModel4 Deep2
+        {
+            get { return _deep2; }
+            set
+            {
+                _deep2 = value;
+                OnPropertyChanged("Deep2");
             }
         }
 
