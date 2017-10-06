@@ -68,7 +68,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
             return _multiBinding.ProvideValue(serviceProvider) as MultiBindingExpression;
         }
 
-        object IMultiValueConverter.Convert(object[] values, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        public object Convert(object[] values, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             //DependencyObject targetObject = values[1] as DependencyObject;
 
@@ -108,7 +108,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
             return value;
         }
 
-        object[] IMultiValueConverter.ConvertBack(object value, Type[] targetTypes, object parameter, System.Globalization.CultureInfo culture)
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, System.Globalization.CultureInfo culture)
         {
             object[] result = new object[targetTypes.Length];
 

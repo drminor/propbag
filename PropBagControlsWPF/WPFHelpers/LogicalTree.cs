@@ -38,6 +38,26 @@ namespace DRM.PropBag.ControlsWPF.WPFHelpers
             return result;
         }
 
+        public static object GetDataContextNoTrav(DependencyObject depObj)
+        {
+            object result;
+
+            DependencyObject parent;
+            if (depObj is FrameworkElement fe)
+            {
+                result = GetDataContextInt(fe, out parent);
+            }
+            else if (depObj is FrameworkContentElement fce)
+            {
+                result = GetDataContextInt(fce, out parent);
+            }
+            else
+            {
+                result = null;
+            }
+            return result;
+        }
+
         private static object GetDataContextInt(FrameworkElement fe, out DependencyObject parent)
         {
             parent = fe.Parent;

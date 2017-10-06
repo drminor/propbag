@@ -61,9 +61,9 @@
     <Compile Include="NamespaceItem.cs" />
     <Compile Include="NamespacesCollection.cs" />
     <Compile Include="Binders\MyBinder.cs" />
-    <Compile Include="PropBagPropFancyBinder.cs" />
+    <None Include="Binders\PropBagPropFancyBinder.cs" />
     <Compile Include="PropBagInstanceAttribute.cs" />
-    <Compile Include="PropBagPropBinder.cs" />
+    <None Include="Binders\PropBagPropBinder.cs" />
     <Compile Include="PropBagTemplate.cs" />
     <Compile Include="PropBagTemplateExtensions.cs" />
     <Compile Include="PropComparerFunc.cs" />
