@@ -4,6 +4,8 @@ using DRM.PropBag.ControlsWPF;
 using DRM.PropBag.ControlsWPF.WPFHelpers;
 
 using PropBagTestApp.ViewModels;
+using PropBagTestApp.Models;
+
 using System;
 using System.Windows;
 
@@ -20,7 +22,7 @@ namespace PropBagTestApp.View
 
             PropBagTemplate pbt = PropBagTemplateResources.GetPropBagTemplate("ReferenceBindViewModelPB");
             PropModel pm = pbt.GetPropBagModel();
-            PropFactory pf = new PropFactory(false, GetTypeFromName);
+            PropFactory pf = new PropFactory(false, ReferenceBindViewModelPB.GetTypeFromName);
 
             ReferenceBindViewModelPB rbvm = new ReferenceBindViewModelPB(pm, pf);
 
@@ -36,41 +38,25 @@ namespace PropBagTestApp.View
             //m.Size = 30.3;
             //m.ProductId = Guid.NewGuid();
             //m.TestDouble = 0.01;
-            //m.Deep = new MyModel4() { MyString = "hello" };
+
+
+            MyModel4 mod4 = new MyModel4() { MyString = "hello" };
+            m.SetIt<MyModel4>(mod4, "Deep");
         }
 
         private void BtnSave_Click(object sender, RoutedEventArgs e)
         {
             ReferenceBindViewModelPB m = (ReferenceBindViewModelPB)this.DataContext;
 
-            double size =  m.GetIt<double>("Size");
+            double size = m.GetIt<double>("Size");
 
 
             System.Diagnostics.Debug.WriteLine($"Size = {size}.");
             //System.Diagnostics.Debug.WriteLine($"Deep.MyString = {m.Deep.MyString}.");
         }
-
-
-        public static Type GetTypeFromName(string typeName)
-        {
-            Type result;
-            try
-            {
-                result = Type.GetType(typeName);
-            }
-            catch (System.Exception e)
-            {
-                throw new InvalidOperationException($"Cannot create a Type instance from the string: {typeName}.", e);
-            }
-
-            if (result == null)
-            {
-                throw new InvalidOperationException($"Cannot create a Type instance from the string: {typeName}.");
-            }
-
-            return result;
-        }
     }
+
+
 
 
 }

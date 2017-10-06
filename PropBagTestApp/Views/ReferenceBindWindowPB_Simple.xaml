@@ -41,9 +41,9 @@
                      Text="{ob:Binding Path=TestDouble, SourceType={x:Type sys:Double}, Mode=TwoWay}"/>
 
 
-            <!--<Label>Deep String:</Label>
-            <TextBox x:Name="Deep" Height="25" Width="100"
-                     Text="{ob:Binding Path=Deep.MyString, SourceType={x:Type sys:String}}"/>-->
+            <Label>Deep String:</Label>
+            <TextBox x:Name="Deep2" Height="25" Width="100"
+                     Text="{ob:Binding Path=Deep.MyString, SourceType={x:Type sys:String}, Mode=TwoWay}"/>
         </StackPanel>
 
         <StackPanel Orientation="Horizontal" Grid.Row="3">

@@ -1169,7 +1169,9 @@ namespace DRM.PropBag
                     || propertyName == "SelectedPerson2"
                     || propertyName == "PersonCollectionVM"
                     || propertyName == "TestP"
-                    || propertyName == "TestDouble")
+                    || propertyName == "TestDouble"
+                    || propertyName == "Deep" 
+                    || propertyName == "MyString")
                 {
                     pn = propertyName;
                 }
