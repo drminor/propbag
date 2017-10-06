@@ -101,7 +101,7 @@ namespace DRM.PropBag
             tVals = null;
         }
 
-        //public PropBagBase() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered, null) { }
+        // TODO: Consider making these next three contructors public.
         protected PropBagMin() : this(PropBagTypeSafetyMode.None, null) { }
 
         protected PropBagMin(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
