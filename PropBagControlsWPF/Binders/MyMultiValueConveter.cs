@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Data;
@@ -8,58 +10,72 @@ namespace DRM.PropBag.ControlsWPF.Binders
     public class MyMultiValueConverter : IMultiValueConverter
     {
 
-        public MultiBinding MultiBinding { get; }
-        BindingMode _mode;
+        private MultiBinding _multiBinding;
+
+        //public int NumberOfSupportBindings { get; private set; }
+
+        public BindingMode Mode
+        {
+            get
+            {
+                return _multiBinding.Mode;
+            }
+        }
 
         public MyMultiValueConverter(BindingMode mode = BindingMode.Default)
         {
-            _mode = mode;
-            MultiBinding = new MultiBinding
+            _multiBinding = new MultiBinding
             {
+                Mode = mode,
                 Converter = this
             };
 
-            // binding to evaluate data context
-            Add(new Binding { Mode = BindingMode.OneWay });
+            //// binding to evaluate data context
+            //Add(new Binding
+            //{
+            //    Mode = BindingMode.OneWay
+            //});
 
-            // binding to evaluate target element
-            Add(new Binding
-            {
-                Mode = BindingMode.OneWay,
-                RelativeSource = new RelativeSource(RelativeSourceMode.Self)
-            });
+            //// binding to evaluate target element
+            //Add(new Binding
+            //{
+            //    Mode = BindingMode.OneWay,
+            //    RelativeSource = new RelativeSource(RelativeSourceMode.Self)
+            //});
+
+            //NumberOfSupportBindings = 2;
         }
 
         public BindingBase this[int index]
         {
             get
             {
-                return MultiBinding.Bindings[index];
+                return _multiBinding.Bindings[index];
             }
             set
             {
-                MultiBinding.Bindings[index] = value;
+                _multiBinding.Bindings[index] = value;
             }
         }
 
         public void Add(BindingBase binding)
         {
-            MultiBinding.Bindings.Add(binding);
+            _multiBinding.Bindings.Add(binding);
         }
 
         public MultiBindingExpression GetMultiBindingExpression(IServiceProvider serviceProvider)
         {
-            return MultiBinding.ProvideValue(serviceProvider) as MultiBindingExpression;
+            return _multiBinding.ProvideValue(serviceProvider) as MultiBindingExpression;
         }
 
         object IMultiValueConverter.Convert(object[] values, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            DependencyObject targetObject = values[1] as DependencyObject;
+            //DependencyObject targetObject = values[1] as DependencyObject;
 
-            if (targetObject == null)
-            {
-                return null;
-            }
+            //if (targetObject == null)
+            //{
+            //    return null;
+            //}
 
             object value = values[values.Length - 1];
 
@@ -68,6 +84,8 @@ namespace DRM.PropBag.ControlsWPF.Binders
             {
                 if(b.Converter == null)
                 {
+                    // If no converter specified by the view designer
+                    // then we need to convert the value.
                     if (value != null)
                     {
                         try
@@ -104,6 +122,8 @@ namespace DRM.PropBag.ControlsWPF.Binders
             {
                 if (b.Converter == null)
                 {
+                    // If no converter specified by the view designer
+                    // then we need to convert the value.
                     if (value != null)
                     {
                         try

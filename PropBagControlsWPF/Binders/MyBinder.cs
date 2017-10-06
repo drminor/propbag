@@ -17,7 +17,7 @@ using System.Windows.Markup;
 using DRM.PropBag.ControlsWPF.WPFHelpers;
 
 /// <remarks>
-/// This is a heavily-modified version of the code available from
+/// This is loosely based on the code available from
 /// https://www.codeproject.com/Articles/356294/Using-path-parameters-when-binding-data-in-WPF
 /// Written by Michael Soloduha.
 /// License: "The Code Project Open License (CPOL)
@@ -30,40 +30,31 @@ namespace DRM.PropBag.ControlsWPF.Binders
     {
         #region Member Declarations
 
-        MyMultiValueConverter _mainMultiBinding;
-        List<ObservableSource> _dataSourceChangeListeners;
-
-        MultiBindingExpression _multiBindingExpression;
         DependencyObject _targetObject;
         DependencyProperty _targetProperty;
 
-        string _path;
-        Type _sourceType; // Type of the source property
-
-        object _source;
-        string _elementName;
-        RelativeSource _relativeSource;
-        BindingMode _mode;
+        List<ObservableSource> _dataSourceChangeListeners;
 
         /// <summary>
         /// Type of the binding source, i.e., DataContext
         /// </summary>
-        public Type SourceRootType
+        private Type SourceRootType
         {
             get
             {
-                return _dataSourceChangeListeners?[0]?.Type;
+                return _dataSourceChangeListeners.Count > 0 ? _dataSourceChangeListeners[0].Type : null;
             }
         }
 
         /// <summary>
         /// True if binding source implements IPropBag
         /// </summary>
-        public bool? IsPropBagBased
+        private bool? IsPropBagBased
         {
             get
             {
-                return _dataSourceChangeListeners?[0]?.IsPropGenBased;
+                //return SourceType?.IsPropGenBased();
+                return _dataSourceChangeListeners.Count > 0 ? _dataSourceChangeListeners[0].IsPropBagBased : null;
             }
         }
 
@@ -75,64 +66,30 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
         public BindingExtension(string path)
         {
-            _path = path;
-            _sourceType = null;
-            _source = null;
-            _elementName = null;
-            _mode = BindingMode.Default;
-
-            _dataSourceChangeListeners = new List<ObservableSource>();
+            Path = path;
+            SourceType = null;
+            Source = null;
+            ElementName = null;
+            Mode = BindingMode.Default;
         }
-
-        //public BindingExtension(string path, Type sourceType, object source, string elementName = null)
-        //{
-        //    _path = path;
-        //    _sourceType = sourceType;
-        //    _source = source;
-        //    _elementName = elementName;
-        //    _mode = BindingMode.Default;
-        //}
 
         #endregion
 
         #region Public Properties
 
         [DefaultValue(null), ConstructorArgument("path")]
-        public string Path
-        {
-            get { return _path; }
-            set { _path = value; }
-        }
+        public string Path { get; set; }
 
-        public string ElementName
-        {
-            get { return _elementName; }
-            set { _elementName = value; }
-        }
+        public string ElementName { get; set; }
 
-        public object Source
-        {
-            get { return _source; }
-            set { _source = value; }
-        }
+        public object Source { get; set; }
 
-        public RelativeSource RelativeSource
-        {
-            get { return _relativeSource; }
-            set { _relativeSource = value; }
-        }
+        public RelativeSource RelativeSource { get; set; }
 
-        public Type SourceType
-        {
-            get { return _sourceType; }
-            set { _sourceType = value; }
-        }
+        public Type SourceType { get; set; }
 
-        public BindingMode Mode
-        {
-            get { return _mode; }
-            set { _mode = value; }
-        }
+        public BindingMode Mode { get; set; }
+
 
         #endregion
 
@@ -140,46 +97,42 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
         public override object ProvideValue(IServiceProvider serviceProvider)
         {
-            if (serviceProvider == null) return this;
-
-            if (!SetOurEnv(serviceProvider)) return this;
-
-            // create wpf binding
-            _mainMultiBinding = new MyMultiValueConverter(_mode);
-
-            if (!GetSourceRoot(Source, ElementName, _targetObject,
-                _relativeSource, serviceProvider, out ObservableSource os))
+            if (SourceType == null)
             {
-                // TODO Consider throwing an exception.
-                return null;
+                throw new InvalidOperationException("The SourceType must be specified.");
             }
 
-            if (os.Data == null) return null;
+            // Get the Target Object and Target Property
+            if (!SetOurEnv(serviceProvider))
+                return this;
 
-            os.DataSourceChanged += DataSourceHasChanged;
-
-            // Save the event source.
-            _dataSourceChangeListeners.Add(os);
+            // Used to listen to changes to the sources of data
+            // for each step in the path.
+            _dataSourceChangeListeners = GetPathListeners(serviceProvider,
+                _targetObject, Source, ElementName, RelativeSource);
 
             BindingBase bb = GetTheBinding(Path, _dataSourceChangeListeners);
 
-            _mainMultiBinding.Add(bb);
-
-            // return the expression 
-            // provided by the multi-binding
-            _multiBindingExpression = _mainMultiBinding.GetMultiBindingExpression(serviceProvider);
-
-            foreach(ObservableSource oss in _dataSourceChangeListeners)
+            foreach (ObservableSource oss in _dataSourceChangeListeners)
             {
                 oss.ReleaseData();
             }
 
-            return _multiBindingExpression;
-            //return null;
+            // create wpf binding
+            MyMultiValueConverter mValueConverter = new MyMultiValueConverter(Mode);
+
+            mValueConverter.Add(bb);
+
+            // return the expression provided by the multi-binding
+            MultiBindingExpression exp = mValueConverter.GetMultiBindingExpression(serviceProvider);
+
+            return exp;
         }
 
         private bool SetOurEnv(IServiceProvider serviceProvider)
         {
+            if (serviceProvider == null) return false;
+
             IProvideValueTarget provideValueTarget = serviceProvider.GetService(typeof(IProvideValueTarget)) as IProvideValueTarget;
             if (provideValueTarget == null) return false;
 
@@ -190,6 +143,40 @@ namespace DRM.PropBag.ControlsWPF.Binders
             return true;
         }
 
+        #endregion
+
+        #region Path Analysis
+
+        private List<ObservableSource> GetPathListeners(IServiceProvider serviceProvider,
+            DependencyObject targetObject,
+            object source,
+            string elementName,
+            RelativeSource relativeSource)
+        {
+            List<ObservableSource> result =  new List<ObservableSource>();
+
+            ObservableSource os = GetSourceRoot(serviceProvider, targetObject, source,
+                elementName, relativeSource);
+
+            if (os != null)
+            {
+                os.DataSourceChanged += DataSourceHasChanged;
+
+                // Save the event source.
+                result.Add(os);
+                System.Diagnostics.Debug.WriteLine($"Listner was created for {_targetProperty.ToString()}.");
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"No DataSouce found, therefore, no listner was created for {_targetProperty.ToString()}.");
+            }
+
+            return result;
+        }
+        #endregion
+
+        #region Build Bindings
+
         private BindingBase GetTheBinding(string path, List<ObservableSource> dsChangeListeners)
         {
             string[] pathNameComponents = path.Split('.');
@@ -197,10 +184,19 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
             if (pathNameComponents.Length > 1)
             {
-                System.Diagnostics.Debug.WriteLine("Handling a two parter.");
+                throw new ApplicationException("Path cannot have more than two components.");
+                //System.Diagnostics.Debug.WriteLine("Handling a two parter.");
             }
 
-            ObservableSource parentElementSource = dsChangeListeners[0];
+            ObservableSource parentElementSource;
+            if (dsChangeListeners.Count > 0)
+            {
+                parentElementSource = dsChangeListeners?[0];
+            }
+            else
+            {
+                parentElementSource = null;
+            }
 
             int compCount = pathNameComponents.Length;
 
@@ -215,96 +211,78 @@ namespace DRM.PropBag.ControlsWPF.Binders
             }
 
             // Now build a binding for the last component.
-            string pathElement = pathNameComponents[pathNameComponents.Length - 1];
+            //string pathElement = pathNameComponents[pathNameComponents.Length - 1];
 
-            BindingBase ourBinding = CreateBindingForPathElement(pathElement, _targetObject,
+            BindingBase ourBinding = CreateBindingForPathElement(path, _targetObject,
                 _targetProperty, parentElementSource, SourceType);
+
+            BindingExpressionBase bExp = BindingOperations.SetBinding(_targetObject, _targetProperty, ourBinding);
 
             return ourBinding;
         }
 
+        #endregion
+
+        #region Data Source Changed Handing
+
         private void DataSourceHasChanged(object sender, DataSourceChangedEventArgs e)
         {
-            BindingBase b = GetTheBinding(Path, _dataSourceChangeListeners);
+            ObservableSource os = (ObservableSource)sender;
 
-            //Collection<BindingBase> x = _mainMultiBinding.MultiBinding.Bindings;
+            int stepNo =_dataSourceChangeListeners.IndexOf(os);
 
-            //BindingBase y = x.Last();
-            //Binding z = (Binding)y;
+            if(stepNo == -1)
+            {
+                System.Diagnostics.Debug.WriteLine($"Could not find stepNo on DataSourceChanged in PropBagControlsWPF.Binders.MyBinder.");
+                throw new InvalidOperationException("Could not get stepno.");
+            }
 
-            //x[x.Count - 1] = b;
+            
 
-            //y = x.Last();
-            //z = (Binding)y;
+            BindingBase newBinding = CreateBindingForPathElement(Path, _targetObject,
+                _targetProperty, os, SourceType);
+
+            Binding oldBinding = BindingOperations.GetBinding(_targetObject, _targetProperty);
+
+            if (oldBinding != null)
+            {
+                BindingOperations.ClearBinding(_targetObject, _targetProperty);
+            }
+
+            BindingExpressionBase bExp = BindingOperations.SetBinding(_targetObject, _targetProperty, newBinding);
+
         }
 
         #endregion
 
-        #region Custom Binding Work
-
-        private Type GetTypeOfParentElement(string pathElement, object source)
-        {
-            Type result;
-
-            bool isPropBagBased = IsPropBagBased.HasValue && IsPropBagBased.Value;
-            if (isPropBagBased)
-            {
-                // TODO: implement a surrogate for System.Reflection for IPropBagMin.
-                result = null;
-            }
-            else
-            {
-                // Attempt to use reflection to get the type of the intervening
-                // path components.
-                result = GetTypeOfPathElement(pathElement, source);
-            }
-
-            return result;
-        }
-
-        private Type GetTypeOfPathElement(string pathElement, object source)
-        {
-            if (source == null)
-                return null;
-
-            Type h = source.GetType();
-            PropertyInfo pi = h.GetDeclaredProperty(pathElement);
-            if(pi == null)
-            {
-                throw new InvalidOperationException($"{pathElement} does not exist on data source: {source.ToString()}.");
-            }
-            try
-            {
-                return pi.PropertyType;
-            } 
-            catch
-            {
-                throw new InvalidOperationException($"Cannot get the type from {pathElement} on source: {source.ToString()}.");
-            }
-        }
+        #region Create Binding For an Element
 
         // TODO: Create a struct with Path, Source, ElementName, Converter, etc.
         // and all such required to build a binding.
-        private BindingBase CreateBindingForPathElement(string pathElement,
+        private BindingBase CreateBindingForPathElement(string path,
             DependencyObject targetObject, DependencyProperty targetProperty,
             ObservableSource obSrc, Type sourceType)
         {
-            Binding binding;
+            Binding binding = null;
             Type propertyType = targetProperty.PropertyType;
 
             bool isPropBagBased = IsPropBagBased.HasValue && IsPropBagBased.Value;
 
-            if (isPropBagBased && !IsMemberReal(pathElement, sourceType))
+            //isPropBagBased = true;
+
+            //if (isPropBagBased && !IsMemberReal(path, sourceType))
+            if(isPropBagBased)
             {
                 // We are going to assume that it has (or soon will be) registered
                 // as a "virtual" IProp<T>
 
                 System.Diagnostics.Debug.Assert(sourceType != null, "The SourceType should never be null here.");
 
-                string path = $"[{sourceType.FullName},{pathElement}]";
+                //string newPath = sourceType.FullName + "\\," + path;
+                string newPath = $"[{sourceType.FullName},{path}]";
                 binding = new Binding
                 {
-                    Path = new PropertyPath(path),
+                    Path = new PropertyPath(newPath),
                     Converter = new PropValueConverter(),
                     ConverterParameter = new TwoTypes(sourceType, propertyType)
                 };
@@ -312,19 +290,19 @@ namespace DRM.PropBag.ControlsWPF.Binders
             else
             {
                 Type srcType = sourceType ?? typeof(object);
-                binding = CreateDefaultBinding(pathElement, srcType, propertyType);
+                binding = CreateDefaultBinding(path, srcType, propertyType);
             }
 
-            BindingExpressionBase bExp = BindingOperations.SetBinding(targetObject, targetProperty, binding);
+            System.Diagnostics.Debug.Assert(binding != null, "CreateBindingForPathElement is returning a null binding.");
 
             return binding;
         }
 
-        private Binding CreateDefaultBinding(string pathElement, Type sourceType, Type propertyType)
+        private Binding CreateDefaultBinding(string path, Type sourceType, Type propertyType)
         {
             Binding binding = new Binding
             {
-                Path = new PropertyPath(pathElement),
+                Path = new PropertyPath(path),
                 Converter = new PropValueConverter(),
                 ConverterParameter = new TwoTypes(sourceType, propertyType)
             };
@@ -332,28 +310,34 @@ namespace DRM.PropBag.ControlsWPF.Binders
             return binding;
         }
 
-        private bool GetSourceRoot(object source,
-            string elementName,
+        #endregion
+
+        #region GetSource Support
+
+        private ObservableSource GetSourceRoot(IServiceProvider serviceProvider,
             DependencyObject targetObject,
-            RelativeSource relativeSource,
-            IServiceProvider serviceProvider,
-            out ObservableSource obSrc)
+            object source,
+            string elementName,
+            RelativeSource relativeSource)
         {
+            ObservableSource obSrc;
+
             if (source != null && GetSourceFromSource(source, out obSrc))
             {
-                return true;
+                return obSrc;
             }
             else if(relativeSource != null && GetSourceFromRelativeSource(targetObject, relativeSource, out obSrc))
             {
-                return true;
+                return obSrc;
             }
             else if(elementName != null && GetSourceFromELementName(targetObject, elementName, out obSrc))
             {
-                return true;
+                return obSrc;
             }
             else
             {
-                return GetDefaultSource(targetObject, out obSrc);
+                GetDefaultSource(targetObject, out obSrc);
+                return obSrc;
             }
 
         }
@@ -456,16 +440,26 @@ namespace DRM.PropBag.ControlsWPF.Binders
             } 
             else
             {
-                obSrc = new ObservableSource(foundNode);
+                if(foundNode is FrameworkElement fe)
+                {
+                    obSrc = new ObservableSource(fe);
+                }
+                else if(foundNode is FrameworkContentElement fce)
+                {
+                    obSrc = new ObservableSource(fce);
+                }
+                else
+                {
+                    throw new ApplicationException("Found node in MyBinder.ObservableSource was neither a FrameworkElement or a FrameworkContentElement.");
+                }
+
                 return true;
             }
         }
 
-        private Type GetTypeOfSourceRoot(ObservableSource obSrc)
-        {
-            Type t = obSrc.Data.GetType();
-            return t;
-        }
+        #endregion
+
+        #region Type Processing
 
         // TODO: This needs to use a PropModel
         // Note: This is only called for types that derive from IPropBagMin.
@@ -506,9 +500,50 @@ namespace DRM.PropBag.ControlsWPF.Binders
             }
         }
 
-        private bool PropertyExists(string pathElement, Type declaringType)
+        //private bool PropertyExists(string pathElement, Type declaringType)
+        //{
+        //    return null != declaringType.GetDeclaredProperty(pathElement);
+        //}
+
+        //private Type GetTypeOfParentElement(string pathElement, object source)
+        //{
+        //    Type result;
+
+        //    bool isPropBagBased = IsPropBagBased.HasValue && IsPropBagBased.Value;
+        //    if (isPropBagBased)
+        //    {
+        //        // TODO: implement a surrogate for System.Reflection for IPropBagMin.
+        //        result = null;
+        //    }
+        //    else
+        //    {
+        //        // Attempt to use reflection to get the type of the intervening
+        //        // path components.
+        //        result = GetTypeOfPathElement(pathElement, source);
+        //    }
+
+        //    return result;
+        //}
+
+        private Type GetTypeOfPathElement(string pathElement, object source)
         {
-            return null != declaringType.GetDeclaredProperty(pathElement);
+            if (source == null)
+                return null;
+
+            Type h = source.GetType();
+            PropertyInfo pi = h.GetDeclaredProperty(pathElement);
+            if (pi == null)
+            {
+                throw new InvalidOperationException($"{pathElement} does not exist on data source: {source.ToString()}.");
+            }
+            try
+            {
+                return pi.PropertyType;
+            }
+            catch
+            {
+                throw new InvalidOperationException($"Cannot get the type from {pathElement} on source: {source.ToString()}.");
+            }
         }
 
         #endregion
@@ -517,7 +552,10 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
         public class ObservableSource
         {
-            #region Member Declarations
+            #region Public Members
+
+            public event DataSourceChangedEventHandler DataSourceChanged = delegate { };
+
             object _data;
             public object Data
             {
@@ -538,38 +576,47 @@ namespace DRM.PropBag.ControlsWPF.Binders
                 }
             }
 
-            public event DataSourceChangedEventHandler DataSourceChanged = delegate {};
-            #endregion
+            private Type GetTypeOfData(object data)
+            {
+                if (data == null)
+                {
+                    return null;
+                }
+                else
+                {
+                    return data.GetType();
+                }
+            }
 
-            #region Public Members
-
-            //private Type type;
+            private Type _type;
             public Type Type
             {
                 get
                 {
-                    if(Data == null)
+                    if (_type == null)
                     {
-                        return null;
+                        _type = GetTypeOfData(Data);
                     }
-                    else
-                    {
-                        // TODO: Can we cache this value?
-                        return Data.GetType();
-                    }
+                    return _type;
                 }
             }
 
-            public bool? IsPropGenBased
+            public bool? IsPropBagBased
             {
                 get
                 {
-                    return Type?.IsPropGenBased();
+                    return Type?.IsPropBagBased();
                 }
             }
 
             public void ReleaseData()
             {
+                // Make sure we get the type, before we let go of our reference.
+                if(_type == null)
+                {
+                    _type = GetTypeOfData(Data);
+                }
+
                 Data = null;
             }
 
@@ -586,21 +633,19 @@ namespace DRM.PropBag.ControlsWPF.Binders
             {
                 Data = fe.DataContext;
 
-                //DependencyObject depObj = fe as DependencyObject;
-               
-                fe.DataContextChanged += Fe_DataContextChanged;
+                // TOOD: Verify that these already use weak events.
+                fe.DataContextChanged += Fe_or_fce_DataContextChanged;
             }
 
             public ObservableSource(FrameworkContentElement fce)
             {
                 Data = fce.DataContext;
 
-                //DependencyObject depObj = fe as DependencyObject;
-
-                fce.DataContextChanged += Fe_DataContextChanged;
+                // TOOD: Verify that these already use weak events.
+                fce.DataContextChanged += Fe_or_fce_DataContextChanged;
             }
 
-            private void Fe_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+            private void Fe_or_fce_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
             {
                 OnDataSourceChanged(DataSourceChangeTypeEnum.Refresh);
             }
@@ -639,17 +684,22 @@ namespace DRM.PropBag.ControlsWPF.Binders
             #region From DataSourceProvider
             public ObservableSource(DataSourceProvider dsp)
             {
+                // TODO: do we really need the data,
+                // or just its type.
                 Data = dsp;
-                dsp.DataChanged += Dsp_DataChanged;
+
+                WeakEventManager<DataSourceProvider, EventArgs>
+                    .AddHandler(dsp, "DataChanged", OnPlainEvent);
             }
 
-            private void Dsp_DataChanged(object sender, EventArgs e)
+            private void OnPlainEvent(object source, EventArgs args)
             {
                 OnDataSourceChanged(DataSourceChangeTypeEnum.Refresh);
             }
             #endregion
 
             #region From Dependency Object
+            // TODO: Remove this, or make it work using DependencyObject call backs.
             public ObservableSource(DependencyObject depObj)
             {
                 Data = depObj;
@@ -671,10 +721,11 @@ namespace DRM.PropBag.ControlsWPF.Binders
             #endregion Raise Event Helpers
         }
 
-        #endregion Observable Source nested class
+
+    #endregion Observable Source nested class
 
 
-    }
+}
 
 }
 

@@ -76,6 +76,7 @@
     <Compile Include="TwoTypeMarkupExtension.cs" />
     <Compile Include="ViewModelGenerator.cs" />
     <Compile Include="WPFHelpers\LogicalTree.cs" />
+    <Compile Include="WPFHelpers\PropBagTemplateResources.cs" />
     <Page Include="Themes\Generic.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
