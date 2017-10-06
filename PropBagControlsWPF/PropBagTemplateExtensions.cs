@@ -48,29 +48,24 @@ namespace DRM.PropBag.ControlsWPF
 
                 foreach (Control uc in pi.Items)
                 {
-                    if (uc is InitialValueField)
+                    if (uc is InitialValueField ivf)
                     {
-                        InitialValueField ivf = (InitialValueField)uc;
-                        rpi.InitialValueField = 
+                        rpi.InitialValueField =
                             new ControlModel.PropInitialValueField(ivf.InitialValue, ivf.SetToDefault, ivf.SetToUndefined, ivf.SetToNull, ivf.SetToEmptyString);
                         continue;
                     }
 
-                    if (uc is PropDoWhenChangedField)
+                    if (uc is PropDoWhenChangedField dwc)
                     {
-                        PropDoWhenChangedField dwc = (PropDoWhenChangedField)uc;
-
                         ControlModel.PropDoWhenChangedField rdwc =
                             new ControlModel.PropDoWhenChangedField(dwc.DoWhenChangedAction.DoWhenChanged, dwc.DoAfterNotify);
 
-                        rpi.DoWhenChangedField = rdwc; 
+                        rpi.DoWhenChangedField = rdwc;
                         continue;
                     }
 
-                    if (uc is PropComparerField)
+                    if (uc is PropComparerField pcf)
                     {
-                        PropComparerField pcf = (PropComparerField)uc;
-
                         ControlModel.PropComparerField rpcf =
                             new ControlModel.PropComparerField(pcf.ComparerFunc.Comparer, pcf.UseRefEquality);
 
