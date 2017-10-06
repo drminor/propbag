@@ -29,18 +29,32 @@ namespace DRM.PropBag.ControlsWPF
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             System.Diagnostics.Debug.WriteLine("Calling Convert from PropValueConverter.");
-            object result =  PropFactoryValueConverter.Convert(value, targetType, parameter, culture);
-
-            return result;
+            try
+            {
+                object result = PropFactoryValueConverter.Convert(value, targetType, parameter, culture);
+                return result;
+            }
+            catch
+            {
+                return Binding.DoNothing;
+            }
         }
 
         // Value is a string, we need to create a native object.
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             System.Diagnostics.Debug.WriteLine("Calling ConvertBack from PropValueConverter.");
-            object result = PropFactoryValueConverter.ConvertBack(value, targetType, parameter, culture);
 
-            return result;
+            try
+            {
+                object result = PropFactoryValueConverter.ConvertBack(value, targetType, parameter, culture);
+                return result;
+            }
+            catch
+            {
+                return Binding.DoNothing;
+            }
+
         }
     }
 }

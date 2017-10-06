@@ -43,10 +43,11 @@ namespace DRM.PropBag.ControlsWPF
 
         public override object ProvideValue(IServiceProvider serviceProvider)
         {
-            if(SourceType == typeof(Int32))
-            {
-                int a = 0;
-            }
+            //if(SourceType == typeof(Int32))
+            //{
+            //    int a = 0;
+            //}
+
             if (SourceType == null || DestType == null)
                 throw new ArgumentException("Type argument is not specified");
 
