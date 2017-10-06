@@ -30,6 +30,11 @@ namespace DRM.PropBag.ControlsWPF.WPFHelpers
             }
             while (result == null && parent != null);
 
+            if(object.ReferenceEquals(foundNode, depObj))
+            {
+                System.Diagnostics.Debug.WriteLine("Logical Tree did not have to traverse any ancestors.");
+            }
+
             return result;
         }
 
