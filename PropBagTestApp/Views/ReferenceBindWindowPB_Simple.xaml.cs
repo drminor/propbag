@@ -49,10 +49,10 @@ namespace PropBagTestApp.View
             ReferenceBindViewModelPB m = (ReferenceBindViewModelPB)this.DataContext;
 
             double size = m.GetIt<double>("Size");
-
+            string myString = m.GetIt<MyModel4>("Deep").MyString;
 
             System.Diagnostics.Debug.WriteLine($"Size = {size}.");
-            //System.Diagnostics.Debug.WriteLine($"Deep.MyString = {m.Deep.MyString}.");
+            System.Diagnostics.Debug.WriteLine($"Deep.MyString = {myString}.");
         }
     }
 
