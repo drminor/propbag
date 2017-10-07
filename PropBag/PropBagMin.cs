@@ -587,7 +587,7 @@ namespace DRM.PropBag
                 // Save the value before the update.
                 T oldValue = curValue;
 
-                OnPropertyChanging(propertyName);
+                OnPropertyChanging(ThePropFactory.IndexerName);
 
                 // Make the update.
                 curValue = newValue;
@@ -894,7 +894,7 @@ namespace DRM.PropBag
                 prop.TypedValue = newValue;
 
                 // Raise the standard PropertyChanged event
-                OnPropertyChanged(propertyName);
+                OnPropertyChanged(ThePropFactory.IndexerName);
                 return true; // If it was originally unasigned, then it will always be updated.
             }
             else
@@ -906,7 +906,7 @@ namespace DRM.PropBag
                     // Save the value before the update.
                     T oldValue = prop.TypedValue;
 
-                    OnPropertyChanging(propertyName);
+                    OnPropertyChanging(ThePropFactory.IndexerName);
 
                     // Make the update.
                     prop.TypedValue = newValue;
@@ -923,7 +923,7 @@ namespace DRM.PropBag
             if (prop.DoAfterNotify)
             {
                 // Raise the standard PropertyChanged event
-                OnPropertyChanged(propertyName);
+                OnPropertyChanged(ThePropFactory.IndexerName);
 
                 // The typed, PropertyChanged event defined on the individual property.
                 prop.OnPropertyChangedWithTVals(propertyName, oldVal, newValue);
@@ -943,7 +943,7 @@ namespace DRM.PropBag
                 prop.DoWhenChanged(oldVal, newValue);
 
                 // Raise the standard PropertyChanged event
-                OnPropertyChanged(propertyName);
+                OnPropertyChanged(ThePropFactory.IndexerName);
 
                 // The typed, PropertyChanged event defined on the individual property.
                 prop.OnPropertyChangedWithTVals(propertyName, oldVal, newValue);
@@ -1166,26 +1166,26 @@ namespace DRM.PropBag
 
             if (handler != null)
             {
-                string pn;
-                if(propertyName == "PersonCollection"
-                    || propertyName == "SelectedPerson"
-                    || propertyName == "SelectedPerson2"
-                    || propertyName == "PersonCollectionVM"
-                    || propertyName == "TestP"
-                    || propertyName == "TestDouble")
-                    //|| propertyName == "Deep" 
-                    //|| propertyName == "MyString")
-                {
-                    pn = propertyName;
-                }
-                else
-                {
-                    pn = "Item[]";
+                //string pn;
+                //if(propertyName == "PersonCollection"
+                //    || propertyName == "SelectedPerson"
+                //    || propertyName == "SelectedPerson2"
+                //    || propertyName == "PersonCollectionVM"
+                //    || propertyName == "TestP"
+                //    || propertyName == "TestDouble")
+                //    //|| propertyName == "Deep" 
+                //    //|| propertyName == "MyString")
+                //{
+                //    pn = propertyName;
+                //}
+                //else
+                //{
+                //    pn = "Item[]";
 
-                }
-                // TOOD:! Fix This!!!
-                propertyName = "Item[]";
-                handler(this, new PropertyChangedEventArgs(pn));
+                //}
+                //// TOOD:! Fix This!!!
+                //propertyName = "Item[]";
+                handler(this, new PropertyChangedEventArgs(propertyName));
             }
         }
 
@@ -1196,7 +1196,7 @@ namespace DRM.PropBag
             if (handler != null)
             {
                 // TOOD:! Fix This!!!
-                propertyName = "Item[]";
+                //propertyName = "Item[]";
                 handler(this, new PropertyChangingEventArgs(propertyName));
             }
         }

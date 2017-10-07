@@ -19,11 +19,18 @@ namespace DRM.PropBag
 
         public abstract bool ProvidesStorage { get; }
 
+        /// <summary>
+        /// This is a const string property of System.Windows.Data.Binding,
+        /// we are making it an overridable property in case other frameworks use something else.
+        /// </summary>
+        public virtual string IndexerName { get; }
+
 
         public AbstractPropFactory(bool returnDefaultForUndefined, ResolveTypeDelegate typeResolver = null)
         {
             ReturnDefaultForUndefined = returnDefaultForUndefined;
             TypeResolver = typeResolver ?? this.GetTypeFromName;
+            IndexerName = "Item[]";
         }
 
         public virtual Type GetTypeFromName(string typeName)

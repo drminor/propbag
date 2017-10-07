@@ -7,6 +7,7 @@ namespace DRM.PropBag
     {
         bool ProvidesStorage { get; }
         bool ReturnDefaultForUndefined { get; }
+        string IndexerName { get; }
 
         ResolveTypeDelegate TypeResolver { get; }
 
