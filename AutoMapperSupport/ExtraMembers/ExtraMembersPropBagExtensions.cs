@@ -1,44 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
-using DRM.TypeSafePropertyBag;
-using DRM.PropBag;
-using DRM.PropBag.ControlModel;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
-    /// <summary>
-    /// Extends objects that implement the DRM.PropBag.IPropBag interface.
-    /// </summary>
-    public static class LivePropModelExtensions
+    public static class ExtraMembersPropBagExtensions
     {
-
-        public static IEnumerable<MemberInfo> GetExtraMembers(this PropModel pm)
-        {
-            List<MemberInfo> result = new List<MemberInfo>();
-
-            foreach (PropItem propItem in pm.Props)
-            {
-                string propertyName = propItem.PropertyName;
-                Type propertyType = propItem.PropertyType;
-
-                Func<ITypeSafePropBag, string, Type, object> getter =
-                    new Func<ITypeSafePropBag, string, Type, object>((host, pn, pt) => PBDispatcher.GetValue(host, pn, pt));
-
-                Action<ITypeSafePropBag, string, Type, object> setter =
-                    new Action<ITypeSafePropBag, string, Type, object>((host, pn, pt, value) => PBDispatcher.SetValue(host, pn, pt, value));
-
-                PropertyInfoWT pi = new PropertyInfoWT(propertyName, propertyType, typeof(PBDispatcher),
-                    getter, setter);
-
-                result.Add(pi);
-
-            }
-
-            return result;
-        }
-
-
         /// <summary>
         /// Creates property get and set accessors for the specified Type using the 
         /// information from the registered properties of this IPropBag instance.
@@ -64,7 +33,7 @@ namespace DRM.PropBag.AutoMapperSupport
         //        //MethodInfo getterMethodInfo = typeof(IPropBag).GetMethod("GetIt", BindingFlags.Public | BindingFlags.Instance);
 
         //        //MethodInfo getter = typeof(PBDispatcher).GetMethod("GetValue", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-                
+
         //        //Action<object,object> setter =
         //        //    new Action<object, object>((host, value) => ((IPropBag)host).SetItWithType(value, propertyType, propertyName));
 
@@ -83,7 +52,7 @@ namespace DRM.PropBag.AutoMapperSupport
         //        //ProxyPropertyInfo pi = new ProxyPropertyInfo(propertyName, propertyType, typeof(T),
         //        //    propBag, getter, setter);
 
-                
+
         //        //ProxyPropertyInfo pi = new ProxyPropertyInfo(propertyName, propertyType, targetType,
         //        //    getter, setter);
 
@@ -119,7 +88,5 @@ namespace DRM.PropBag.AutoMapperSupport
 
         //    return result;
         //}
-
-
     }
 }

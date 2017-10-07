@@ -3,16 +3,20 @@ using DRM.TypeSafePropertyBag;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
     /// <summary>
-    /// This implementation requires that the Getter and Setter MethodsInfo provided will be called
-    /// on an instance (instead of being static methods).
+    /// 
+    /// TODO: Either update this documentation, or provide support for accepting
+    /// MethodInfo(s).
+    /// 
+    /// 
+    /// This implementation allows the Getter and Setter MethodsInfo provided to be called
+    /// on an instance that implements ITypeSafePropBag or be static methods, in which case
+    /// the obj parameter is ignored.
+    /// 
     /// 
     /// The Getter must have a signature of Func&lt;object, Type, object> where the first parameter reference the instance on which the 
     /// method will be called, the second parameter is the type of an object which is intended to receive the value produced 

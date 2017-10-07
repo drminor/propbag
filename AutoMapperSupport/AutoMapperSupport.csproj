@@ -42,26 +42,28 @@
   <ItemGroup>
     <Compile Include="ConfiguredMappers.cs" />
     <Compile Include="ConfiguredMappersProvider.cs" />
+    <Compile Include="ExtraMembers\ExtraMembersPropBagExtensions.cs" />
+    <Compile Include="ExtraMembers\MapperConfigForExtraMembers.cs" />
     <Compile Include="IMapperConfiBuilderProvider.cs" />
     <Compile Include="IInitializeAMapperConfig.cs" />
     <Compile Include="IMapTypeDefinition.cs" />
     <Compile Include="IPropBagMapper.cs" />
     <Compile Include="IPropBagMapperKey.cs" />
-    <Compile Include="LivePropModelExtensions.cs" />
+    <Compile Include="ExtraMembers\ExtraMembersPropModelExtensions.cs" />
     <Compile Include="MapperConfigurationProvider.cs" />
     <Compile Include="MapperConfigurationProviderBase.cs" />
     <Compile Include="MapperConfigInitializerProvider.cs" />
     <Compile Include="MapTypeDefinition.cs" />
-    <Compile Include="PBDispatcher.cs" />
-    <Compile Include="PropBagMapperCustom.cs" />
+    <Compile Include="ExtraMembers\PBDispatcher.cs" />
+    <Compile Include="ExtraMembers\PropBagMapperCustom.cs" />
     <Compile Include="PropBagMapper.cs" />
     <Compile Include="PropBagMapperKey.cs" />
     <Compile Include="PropBagMappingStrategyEnum.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PropertyInfoWT.cs" />
-    <Compile Include="ProxyEmit\ProxyRequest.cs" />
-    <Compile Include="ProxyEmit\ProxyTypeCache.cs" />
-    <Compile Include="ProxyEmit\ViewModelProxy.cs" />
+    <Compile Include="ExtraMembers\PropertyInfoWT.cs" />
+    <None Include="ProxyEmit\ProxyRequest.cs" />
+    <None Include="ProxyEmit\ProxyTypeCache.cs" />
+    <None Include="ProxyEmit\ViewModelProxy.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\PropBagControlsWPF\PropBagControlsWPF.csproj">
@@ -84,8 +86,6 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="ExtraMembers\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

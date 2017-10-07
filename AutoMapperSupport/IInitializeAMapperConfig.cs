@@ -13,7 +13,4 @@ namespace DRM.PropBag.AutoMapperSupport
         Action<IMapperConfigurationExpression> InitialConfigurationAction { get; }
     }
 
-
-
-
 }
