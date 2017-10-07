@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Data;
 
 namespace PropBagTestApp.ViewModels
 {
@@ -15,6 +16,23 @@ namespace PropBagTestApp.ViewModels
         {
             System.Diagnostics.Debug.WriteLine("ReferenceBindViewModel is being created.");
             Deep = new MyModel4();
+        }
+
+        string _under = "new";
+        public string this[string a, string b]
+        {
+            get
+            {
+                return _under;
+            }
+            set
+            {
+                if (_under != value)
+                {
+                    _under = value;
+                    OnPropertyChanged(Binding.IndexerName);
+                }
+            }
         }
 
         Guid _productId;

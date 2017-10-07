@@ -4,14 +4,15 @@
         xmlns:pb="clr-namespace:DRM.PropBag.ControlsWPF;assembly=WPFControls"
         xmlns:ob="clr-namespace:DRM.PropBag.ControlsWPF.Binders;assembly=WPFControls"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:vmod="clr-namespace:PropBagTestApp.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Title="ReferenceBindWindow" Height="300" Width="500">
     
-        <!--<Window.DataContext>
-            <mod:ReferenceBindModel/>
-        </Window.DataContext>-->
+        <Window.DataContext>
+        <vmod:ReferenceBindViewModel/>
+        </Window.DataContext>
     
 <Grid Name="TopGrid">
 
@@ -23,10 +24,14 @@
     </Grid.RowDefinitions>
 
     <Label Grid.Row="0">ProductId:</Label>
-    <TextBox Grid.Row="0" x:Name="PId" Height="25" Width="100"
+    <TextBox Grid.Row="0" x:Name="PId" Height="25" Width="100" Visibility="Hidden"
                  Text="{ob:Binding Path=ProductId, SourceType={x:Type sys:Guid}}"/>
 
-    <Label Grid.Row="1">Amount:</Label>
+    <TextBox Grid.Row="0" x:Name="IndexTest" Height="25" Width="100"
+            Text="{ob:Binding Path=[(sys:String)Guid\,(sys:String)ProductId],
+            SourceType={x:Type sys:String}, Mode=TwoWay}"/>
+
+        <Label Grid.Row="1">Amount:</Label>
     <TextBox Grid.Row="1" x:Name="Amt" Height="25" Width="100" 
                  Text="{ob:Binding Path=Amount, SourceType={x:Type sys:Int32}}"/>
 

@@ -1,7 +1,10 @@
 ﻿<Application x:Class="PropBagTestApp.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             StartupUri="DtoTestExtra.xaml">
+  
+                    StartupUri="Views\ReferenceBindWindow.xaml">
+    
+        <!--StartupUri="DtoTestExtra.xaml">-->
 
     <!--StartupUri="Views\ReferenceBindWindowPB_Simple.xaml">-->
 
