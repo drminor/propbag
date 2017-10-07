@@ -11,7 +11,7 @@ namespace DRM.PropBag
 {
     #region Summary and Remarks
 
-    /// <summary>
+    /// <remarks>
     /// The contents of this code file were designed and created by David R. Minor, Pittsboro, NC.
     /// I have chosen to provide others free access to this intellectual property using the terms set forth
     /// by the well known Code Project Open License.
@@ -20,10 +20,15 @@ namespace DRM.PropBag
     /// or a similar text which covers all of the points made here, be included along with a copy of cpol.htm
     /// in the set of artifacts deployed with any product
     /// wherein this source code, or a derivative thereof, is used.
-    /// </summary>
+    /// </remarks>
 
     #endregion
 
+
+    ///<summary>
+    /// Currently this class does nothing but provide a wrapper around PropBagBase,
+    /// It is ready for expermentation, however.
+    ///</summary>
     public class PropBagExperimental : PropBagBase, IPropBag
     {
         #region Constructor
@@ -34,81 +39,12 @@ namespace DRM.PropBag
 
         public PropBagExperimental(PropBagTypeSafetyMode typeSafetyMode) : base(typeSafetyMode) {}
 
-        public PropBagExperimental(PropBagTypeSafetyMode typeSafetyMode, AbstractPropFactory thePropFactory) : base(typeSafetyMode, thePropFactory) {}
+        public PropBagExperimental(PropBagTypeSafetyMode typeSafetyMode, IPropFactory thePropFactory) : base(typeSafetyMode, thePropFactory) {}
 
-        public PropBagExperimental(DRM.PropBag.ControlModel.PropModel pm) : base(pm) { }
-
-        #endregion
-
-        #region Propety Access Methods 
-
-        //public IPropGen GetGenProp(string propertyName)
-        //{
-        //    return base.GetGenProp(propertyName, ThePropFactory.ProvidesStorage);
-        //}
-
-        //public NTV this[string propertyName]
-        //{
-        //    get
-        //    {
-        //        IPropGen pg = GetGenProp(propertyName, true);
-        //        return new NTV(propertyName, pg.Type, ((IProp)pg).TypedValueAsObject);
-        //    }
-        //    set
-        //    {
-        //        SetIt(value.Value, value.PropName);
-        //    }
-        //}
-
-        //public void SetValue(IPropGen pg, string propertyName)
-        //{
-        //    IProp ip = pg.TypedProp;
-        //    object v = ip.TypedValueAsObject;
-        //    SetIt(v, propertyName);
-        //}
-
-        //public new object this[string typeName, string propertyName]
-        //{
-        //    get { return base[typeName, propertyName]; }
-        //    set { base[typeName, propertyName] = value; }
-        //}
-
-        //new protected object GetIt(string propertyName)
-        //{
-        //    return base.GetIt(propertyName);
-        //}
-
-        //new protected T GetIt<T>(string propertyName)
-        //{
-        //    return base.GetIt<T>(propertyName);
-        //}
-
-        //new protected void SetIt(object value, string propertyName, Type propertyType = null)
-        //{
-        //    base.SetIt(value, propertyName, propertyType);
-        //}
-
-        //new protected void SetIt<T>(T value, string propertyName)
-        //{
-        //    base.SetIt<T>(value, propertyName);
-        //}
-
-        /// <summary>
-        /// For use when the Property Bag's internal storage is not appropriate. This allows
-        /// the property implementor to use a backing store of their choice.
-        /// The property must be registered with a call to AddPropNoStore.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="newValue">The new value to use to update the property. No operation will be performed if this value is the same as the current value.</param>
-        /// <param name="curValue">The current value of the property, must be specified using the ref keyword.</param>
-        /// <param name="propertyName"></param>
-        /// <returns>True if the value was updated, otherwise false.</returns>
-        //new protected bool SetIt<T>(T newValue, ref T curValue, [CallerMemberName]string propertyName = null)
-        //{
-        //    return base.SetIt<T>(newValue, ref curValue, propertyName);
-        //}
+        public PropBagExperimental(DRM.PropBag.ControlModel.PropModel pm, IPropFactory propFactory = null) : base(pm, propFactory) { }
 
         #endregion
+
 
         #region Property Management 
 
@@ -194,31 +130,6 @@ namespace DRM.PropBag
 
         #endregion
 
-        //#region Methods to Raise Events
 
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        ///// <param name="propertyName">Use "Item[]" if you want to notify the WPF binding system that one of the PropBag properties has changed.</param>
-        //new protected void OnPropertyChanged([CallerMemberName]string propertyName = null)
-        //{
-        //    base.OnPropertyChanged(propertyName);
-        //}
-
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        ///// <param name="propertyName">Use "Item[]" if you want to notify the WPF binding system that one of the PropBag properties is changing.</param>
-        //new protected void OnPropertyChanging([CallerMemberName]string propertyName = null)
-        //{
-        //    base.OnPropertyChanging(propertyName);
-        //}
-
-        //new protected void OnPropertyChangedWithVals(object oldVal, object newVal, [CallerMemberName]string propertyName = null)
-        //{
-        //    base.OnPropertyChangedWithVals(propertyName, oldVal, newVal);
-        //}
-
-        //#endregion
     }
 }

@@ -296,15 +296,11 @@ namespace DRM.PropBag
                         IPropGen typePropWrapper;
                         if(haveValue)
                         {
-                            // TODO: Make the PropFactor handle this entire operation in one step,
-                            // so that more responsibility is on the designer of the PropFactory implementation.
                             bool typeIsSolid = ThePropFactory.IsTypeSolid(value, propertyType);
                             typePropWrapper = ThePropFactory.CreateGenFromObject(propertyType, value, propertyName, null, ThePropFactory.ProvidesStorage, typeIsSolid, null, false, null);
                         } 
                         else
                         {
-                            // TODO: Make the PropFactor handle this entire operation in one step,
-                            // so that more responsibility is on the designer of the PropFactory implementation.
                             object newValue = ThePropFactory.GetDefaultValue(propertyName, propertyType, out bool typeIsSolid);
                             typePropWrapper = ThePropFactory.CreateGenFromObject(propertyType, newValue, propertyName, null, ThePropFactory.ProvidesStorage, typeIsSolid, null, false, null);
                         }
@@ -713,6 +709,17 @@ namespace DRM.PropBag
         public bool PropertyExists(string propertyName)
         {
             return tVals.ContainsKey(propertyName);
+        }
+
+        public bool TryGetTypeOfProperty(string propertyName, out Type type)
+        {
+            if(tVals.TryGetValue(propertyName, out PropGen value))
+            {
+                type = value.Type;
+                return true;
+            }
+            type = null;
+            return false;
         }
 
         public System.Type GetTypeOfProperty(string propertyName)

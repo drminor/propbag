@@ -296,6 +296,12 @@ namespace DRM.PropBag
             return propBag.GetTypedProp<T>(propertyName);
         }
 
+        public bool TryGetTypeOfProperty(string propertyName, out Type type)
+        {
+            return propBag.TryGetTypeOfProperty(propertyName, out type);
+        }
+
+
         public Type GetTypeOfProperty(string propertyName)
         {
             return propBag.GetTypeOfProperty(propertyName);

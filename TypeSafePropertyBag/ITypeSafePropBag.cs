@@ -6,6 +6,8 @@ namespace DRM.TypeSafePropertyBag
     {
         Type GetTypeOfProperty(string propertyName);
 
+        bool TryGetTypeOfProperty(string propertyName, out Type type);
+
         object GetValWithType(string propertyName, Type propertyType);
 
         bool SetValWithType(string propertyName, Type propertyType, object value);
