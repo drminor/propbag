@@ -270,7 +270,7 @@ namespace DRM.PropBag
 
         #endregion
 
-        #region Property Access Methods
+        #region Missing Prop Handler
 
         private PropGen HandleMissingProp(string propertyName, Type propertyType, out bool wasRegistered,
             bool haveValue, object value, bool alwaysRegister, bool mustBeRegistered)
@@ -337,6 +337,10 @@ namespace DRM.PropBag
             }
         }
 
+        #endregion
+
+        #region Property Access Methods
+
         public object this[string typeName, string propertyName]
         {
             get
@@ -392,9 +396,8 @@ namespace DRM.PropBag
 
         public object GetValWithType(string propertyName, Type propertyType)
         {
-            IPropGen pg = GetPropGen(propertyName, propertyType);
+            PropGen pg = (PropGen) GetPropGen(propertyName, propertyType);
 
-            // This uses reflection.
             return pg.Value;
         }
 
@@ -1169,9 +1172,9 @@ namespace DRM.PropBag
                     || propertyName == "SelectedPerson2"
                     || propertyName == "PersonCollectionVM"
                     || propertyName == "TestP"
-                    || propertyName == "TestDouble"
-                    || propertyName == "Deep" 
-                    || propertyName == "MyString")
+                    || propertyName == "TestDouble")
+                    //|| propertyName == "Deep" 
+                    //|| propertyName == "MyString")
                 {
                     pn = propertyName;
                 }
