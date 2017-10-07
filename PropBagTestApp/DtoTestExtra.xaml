@@ -45,12 +45,13 @@
         
         <Label Grid.Row="0">ProductId:</Label>
         <TextBox Grid.Row="0" x:Name="PId" Height="25" Width="100"
-                 Text="{Binding Path=[System.Guid\,ProductId], Converter={pb:PropValueConverter}, ConverterParameter={x:Type sys:Guid}}"/>
+                 Text="{Binding Path=[System.Guid\,ProductId], Converter={pb:PropValueConverter},
+            ConverterParameter={x:Type sys:Guid}}"/>
 
         <Label Grid.Row="1">Amount:</Label>
         <TextBox Grid.Row="1" x:Name="Amt" Height="25" Width="100"
                  Text="{Binding Path=[System.Int32\, Amount], Converter={pb:PropValueConverter},
-                         ConverterParameter={pb:TwoTypes {x:Type sys:String}, {x:Type sys:Int32}}}"/>
+                         ConverterParameter={pb:TwoTypes {x:Type sys:Int32}, {x:Type sys:String}}}"/>
 
         <Label Grid.Row="2">Size:</Label>
         <TextBox Grid.Row="2" x:Name="Sz" Height="25" Width="100"

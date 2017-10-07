@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 
 using System.ComponentModel;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
 
@@ -68,6 +69,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
             return _multiBinding.ProvideValue(serviceProvider) as MultiBindingExpression;
         }
 
+
         public object Convert(object[] values, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             //DependencyObject targetObject = values[1] as DependencyObject;
@@ -80,9 +82,9 @@ namespace DRM.PropBag.ControlsWPF.Binders
             object value = values[values.Length - 1];
 
             BindingBase bb = this[values.Length - 1];
-            if(bb is Binding b)
+            if (bb is Binding b)
             {
-                if(b.Converter == null)
+                if (b.Converter == null)
                 {
                     // If no converter specified by the view designer
                     // then we need to convert the value.
@@ -107,6 +109,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
             return value;
         }
+
 
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, System.Globalization.CultureInfo culture)
         {
@@ -135,7 +138,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
                                 TypeConverter tc = TypeDescriptor.GetConverter(targetType);
                                 value = tc.ConvertTo(value, targetType);
                             }
-                        } 
+                        }
                         catch
                         {
                             value = Binding.DoNothing;
