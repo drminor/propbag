@@ -222,9 +222,9 @@ namespace DRM.PropBag.ControlsWPF.Binders
         {
             Binding binding = new Binding
             {
-                Path = path,
-                Converter = new PropValueConverter(),
-                ConverterParameter = new TwoTypes(sourceType, propertyType)
+                Path = path
+                //, Converter = new PropValueConverter(),
+                //, ConverterParameter = new TwoTypes(sourceType, propertyType)
             };
 
             return binding;

@@ -101,7 +101,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
             if (!SetOurEnv(serviceProvider))
                 return this;
 
-            MyBindingInfo bindingInfo = new MyBindingInfo(Path, Mode);
+            MyBindingInfo bindingInfo = GatherBindingInfo(Path, Mode);
 
             MyBinderEngine mb = new MyBinderEngine(bindingInfo, SourceType, _targetObject, _targetProperty);
 
@@ -127,9 +127,9 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
         #region Binding Info
 
-        private MyBindingInfo GatherBindingInfo()
+        private MyBindingInfo GatherBindingInfo(PropertyPath path, BindingMode mode)
         {
-            MyBindingInfo result = new MyBindingInfo(Path, Mode)
+            MyBindingInfo result = new MyBindingInfo(path, mode)
             {
                 ElementName = ElementName,
                 Source = Source,
