@@ -8,7 +8,7 @@ namespace DRM.PropBag.ControlsWPF
 {
     public static class PropBagTemplateExtensions
     {
-        static public PropModel GetPropBagModel(this DRM.PropBag.ControlsWPF.PropBagTemplate theModel)
+        static public PropModel GetPropModel(this PropBagTemplate theModel)
         {
             string className = theModel.ClassName;
             string instanceKey = theModel.InstanceKey;

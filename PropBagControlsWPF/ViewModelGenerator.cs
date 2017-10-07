@@ -39,7 +39,7 @@ namespace DRM.PropBag.ControlsWPF
             foreach (PropBagTemplate pbt in propBagTemplates)
             {
                 // Build a control model from the XAML contents of the template.
-                DRM.PropBag.ControlModel.PropModel pm = pbt.GetPropBagModel();
+                DRM.PropBag.ControlModel.PropModel pm = pbt.GetPropModel();
                 if (pm != null)
                 {
                     // Get a reference to the property that access the class that needs to be created.
