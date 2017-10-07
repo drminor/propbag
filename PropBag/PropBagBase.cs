@@ -86,7 +86,7 @@ namespace DRM.PropBag
         /// a method from the System.Reflection namespace.
         /// </summary>
         /// <param name="dummy"></param>
-        public PropBagBase(byte dummy)
+        protected PropBagBase(byte dummy)
         {
             this.TypeSafetyMode = PropBagTypeSafetyMode.None;
 
@@ -100,11 +100,11 @@ namespace DRM.PropBag
         }
 
         //public PropBagBase() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered, null) { }
-        public PropBagBase() : this(PropBagTypeSafetyMode.None, null) { }
+        protected PropBagBase() : this(PropBagTypeSafetyMode.None, null) { }
 
-        public PropBagBase(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
+        protected PropBagBase(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
 
-        public PropBagBase(PropBagTypeSafetyMode typeSafetyMode, IPropFactory thePropFactory) 
+        protected PropBagBase(PropBagTypeSafetyMode typeSafetyMode, IPropFactory thePropFactory) 
         {
             this.TypeSafetyMode = typeSafetyMode;
             switch (typeSafetyMode)
@@ -194,7 +194,7 @@ namespace DRM.PropBag
             tVals = new Dictionary<string, PropGen>();
         }
 
-        public PropBagBase(ControlModel.PropModel pm, IPropFactory propFactory = null) : this(pm.TypeSafetyMode, propFactory)
+        protected PropBagBase(ControlModel.PropModel pm, IPropFactory propFactory = null) : this(pm.TypeSafetyMode, propFactory)
         {
             foreach (DRM.PropBag.ControlModel.PropItem pi in pm.Props)
             {
@@ -268,7 +268,7 @@ namespace DRM.PropBag
 
         #endregion
 
-        #region Property Access Methods
+        #region Missing Prop Handler
 
         private PropGen HandleMissingProp(string propertyName, Type propertyType, out bool wasRegistered,
             bool haveValue, object value, bool alwaysRegister, bool mustBeRegistered)
@@ -335,6 +335,10 @@ namespace DRM.PropBag
             }
         }
 
+        #endregion
+
+        #region Property Access Methods
+
         public object this[string typeName, string propertyName]
         {
             get
@@ -390,9 +394,8 @@ namespace DRM.PropBag
 
         public object GetValWithType(string propertyName, Type propertyType)
         {
-            IPropGen pg = GetPropGen(propertyName, propertyType);
+            PropGen pg = (PropGen) GetPropGen(propertyName, propertyType);
 
-            // This uses reflection.
             return pg.Value;
         }
 
@@ -521,7 +524,6 @@ namespace DRM.PropBag
             }
 
             // This uses reflection on first access.
-            //DoSetDelegate setPropDel = GetPropSetterDelegate(genProp);
             DoSetDelegate setPropDel = DelegateCacheProvider.DoSetDelegateCache.GetOrAdd(genProp.Type);
             return setPropDel(value, this, propertyName, genProp);
         }
@@ -948,7 +950,7 @@ namespace DRM.PropBag
         {
             if (propertyName == null) throw new ArgumentNullException("propertyName", "PropertyName is null on call to GetValue.");
 
-            Debug.Assert(!(alwaysRegister && mustBeRegistered), "Both alwaysRegister and mustRegister cannot be true.");
+            Debug.Assert(!(alwaysRegister && mustBeRegistered), "Both alwaysRegister and mustBeRegistered cannot be true.");
 
             PropGen genProp;
             try
@@ -1121,7 +1123,7 @@ namespace DRM.PropBag
         protected string GetPropNameFromEventProp(string x)
         {
             //PropStringChanged
-            if (x.Length > 7 && x.EndsWith("Changed", StringComparison.InvariantCultureIgnoreCase))
+            if(x.Length > 7 && x.EndsWith("Changed", StringComparison.InvariantCultureIgnoreCase))
             {
                 return x.Substring(0, x.Length - 7);
             }
@@ -1153,7 +1155,14 @@ namespace DRM.PropBag
             if (handler != null)
             {
                 string pn;
-                if(propertyName == "PersonCollection" || propertyName == "SelectedPerson")
+                if(propertyName == "PersonCollection"
+                    || propertyName == "SelectedPerson"
+                    || propertyName == "SelectedPerson2"
+                    || propertyName == "PersonCollectionVM"
+                    || propertyName == "TestP"
+                    || propertyName == "TestDouble")
+                    //|| propertyName == "Deep" 
+                    //|| propertyName == "MyString")
                 {
                     pn = propertyName;
                 }

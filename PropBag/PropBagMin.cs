@@ -1,15 +1,13 @@
-﻿using System;
+﻿using DRM.PropBag.Caches;
+using DRM.PropBag.ControlModel;
+using DRM.TypeSafePropertyBag;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Threading;
-using System.Reflection;
 using System.Diagnostics;
 using System.Linq;
-
-using DRM.TypeSafePropertyBag;
-
-using DRM.PropBag.ControlModel;
-using DRM.PropBag.Caches;
+using System.Reflection;
+using System.Threading;
 
 namespace DRM.PropBag
 {
@@ -82,13 +80,19 @@ namespace DRM.PropBag
 
         #region Constructor
 
+        // PropBagMin reduces the number of public constructors that derived classes 
+        // must implement to hide the ones here in this class being inherited.
+
+        // Customers of dervived classes usually use the parameter-less constructor or one that
+        // takes a PropModel.
+
         /// <summary>
         /// This is constructor creates an instance with minimal resources, and is not operational.
         /// It can be called in those cases where an instance is required as a target to use when calling
         /// a method from the System.Reflection namespace.
         /// </summary>
         /// <param name="dummy"></param>
-        public PropBagMin(byte dummy)
+        protected PropBagMin(byte dummy)
         {
             this.TypeSafetyMode = PropBagTypeSafetyMode.None;
 
@@ -101,7 +105,6 @@ namespace DRM.PropBag
             tVals = null;
         }
 
-        // TODO: Consider making these next three contructors public.
         protected PropBagMin() : this(PropBagTypeSafetyMode.None, null) { }
 
         protected PropBagMin(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
@@ -453,11 +456,6 @@ namespace DRM.PropBag
                 throw new InvalidOperationException("Attempt to access property using this method is not allowed when TypeSafetyMode is 'OnlyTypedAccess.'");
             }
 
-            //if(propertyType == null && value.GetType().FullName.StartsWith("MS.Internal"))
-            //{
-            //    value = null;
-            //}
-
             // For Set operations where a type is given, 
             // Register the property if it does not exist, unless the TypeSafetyMode
             // setting is AllPropsMustBe (explictly) registered.
@@ -530,6 +528,7 @@ namespace DRM.PropBag
                 }
             }
 
+            // This uses reflection on first access.
             DoSetDelegateMin setPropDel = DelegateCacheProvider.DoSetDelegateCacheMin.GetOrAdd(genProp.Type);
             return setPropDel(value, this, propertyName, genProp);
         }
@@ -544,7 +543,7 @@ namespace DRM.PropBag
             PropGen genProp = GetGenProp(propertyName, typeof(T), out bool wasRegistered,
                 haveValue:true,
                 value:value,
-                alwaysRegister: alwaysRegister,
+                alwaysRegister:alwaysRegister,
                 mustBeRegistered:false,
                 desiredHasStoreValue: ThePropFactory.ProvidesStorage);
 
@@ -576,7 +575,7 @@ namespace DRM.PropBag
             PropGen genProp = GetGenProp(propertyName, typeof(T), out bool wasRegistered,
                     haveValue: true,
                     value:newValue,
-                    alwaysRegister: alwaysRegister,
+                    alwaysRegister:alwaysRegister,
                     mustBeRegistered:false,
                     desiredHasStoreValue: false);
 
@@ -1114,15 +1113,9 @@ namespace DRM.PropBag
             {
                 return curType.IsAssignableFrom(newType);
             }
-            else if(newType.UnderlyingSystemType == curType.UnderlyingSystemType)
-            {
-                return true;
-            }
             else
             {
-                if (newType.FullName.Contains("MS.Internal"))
-                    return true;
-                return curType.IsAssignableFrom(newType);
+                return newType.UnderlyingSystemType == curType.UnderlyingSystemType;
             }
 
         }
@@ -1138,7 +1131,7 @@ namespace DRM.PropBag
             if(x.Length > 7 && x.EndsWith("Changed", StringComparison.InvariantCultureIgnoreCase))
             {
                 return x.Substring(0, x.Length - 7);
-            } 
+            }
             else
             {
                 return x;

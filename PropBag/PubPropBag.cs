@@ -27,15 +27,20 @@ namespace DRM.PropBag
     {
         #region Constructor
 
-        public PubPropBag() { }
+        public PubPropBag()
+            : base() { }
 
-        public PubPropBag(byte dummy) : base(dummy) { }
+        public PubPropBag(byte dummy)
+            : base(dummy) { }
 
-        public PubPropBag(PropBagTypeSafetyMode typeSafetyMode) : base(typeSafetyMode) {} 
+        public PubPropBag(PropBagTypeSafetyMode typeSafetyMode)
+            : base(typeSafetyMode) {} 
 
-        public PubPropBag(PropBagTypeSafetyMode typeSafetyMode, AbstractPropFactory thePropFactory) : base(typeSafetyMode, thePropFactory) { }
+        public PubPropBag(PropBagTypeSafetyMode typeSafetyMode, IPropFactory thePropFactory)
+            : base(typeSafetyMode, thePropFactory) { }
 
-        public PubPropBag(DRM.PropBag.ControlModel.PropModel pm) : base(pm) { }
+        public PubPropBag(DRM.PropBag.ControlModel.PropModel pm, IPropFactory propFactory = null)
+            : base(pm, propFactory) { }
 
         #endregion
 
