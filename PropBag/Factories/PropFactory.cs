@@ -10,9 +10,10 @@ namespace DRM.PropBag
     public class PropFactory : AbstractPropFactory
     {
 
-        public PropFactory(bool returnDefaultForUndefined, ResolveTypeDelegate typeResolver = null)
-            : base(returnDefaultForUndefined, typeResolver) { }
+        public PropFactory(bool returnDefaultForUndefined, ResolveTypeDelegate typeResolver = null,
+            IConvertValues valueConverter = null) : base(returnDefaultForUndefined, typeResolver, valueConverter) { }
 
+        
         public override bool ProvidesStorage
         {
             get { return true; }

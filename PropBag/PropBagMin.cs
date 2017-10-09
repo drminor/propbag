@@ -301,8 +301,11 @@ namespace DRM.PropBag
                         } 
                         else
                         {
-                            object newValue = ThePropFactory.GetDefaultValue(propertyName, propertyType, out bool typeIsSolid);
-                            typePropWrapper = ThePropFactory.CreateGenFromObject(propertyType, newValue, propertyName, null, ThePropFactory.ProvidesStorage, typeIsSolid, null, false, null);
+                            //object newValue = ThePropFactory.GetDefaultValue(propertyType, propertyName);
+
+                            // On 10/8/17: Changed to use NoValue, instead of trying to generate a default value.
+                            typePropWrapper = ThePropFactory.CreateGenWithNoValue(propertyType, propertyName, 
+                                null, ThePropFactory.ProvidesStorage, true, null, false, null);
                         }
 
                         PropGen propGen = new PropGen(typePropWrapper);

@@ -10,7 +10,7 @@ using DRM.PropBag;
 
 namespace DRM.PropBag.Caches
 {
-    public class DelegateCacheProvider
+    public static class DelegateCacheProvider
     {
 
         #region Private Backing Members
@@ -28,7 +28,6 @@ namespace DRM.PropBag.Caches
         // TypeDesc<T>-based Converter Cache
         public static TypeDescBasedTConverterCache TypeDescBasedTConverterCache
         {
-            // TODO: Use the LockingConcurrentDictionary for this cache.
             get { return theSingleTypeDescBasedTConverterCache.Value; }
         }
 
@@ -78,7 +77,7 @@ namespace DRM.PropBag.Caches
         #region Instance Constructors
 
         // Mark as private to disallow instances of this class to be created.
-        private DelegateCacheProvider() { }
+        //private DelegateCacheProvider() { }
         
         #endregion
     }

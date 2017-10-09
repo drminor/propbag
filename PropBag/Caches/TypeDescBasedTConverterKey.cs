@@ -11,23 +11,55 @@ using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBag.Caches
 {
-    public class TypeDescBasedTConverterKey
+    public class TypeDescBasedTConverterKey : IEquatable<TypeDescBasedTConverterKey>
     {
-        static TDBasedTConverterEquComparer singleInstanceOfOurComparer = null;
+        public TypeDescBasedTConverterKey(Type sourceType, Type targetType, bool isConvert)
+        {
+            SourceType = sourceType ?? throw new ArgumentNullException(nameof(sourceType));
+            TargetType = targetType ?? throw new ArgumentNullException(nameof(targetType));
+            IsConvert = isConvert;
+        }
+
+        public static TDBasedTConverterEquComparer singleInstanceOfOurComparer = null;
 
         public Type SourceType { get; private set; }
         public Type TargetType { get; private set; }
         public bool IsConvert { get; private set; } // True if this for the Convert method, otherwise False for the ConvertBack method.
 
-        // Disalow use of default constructor.
-        private TypeDescBasedTConverterKey() { } 
-
-        public TypeDescBasedTConverterKey(Type sourceType, Type targetType, bool isConvert) 
+        public override bool Equals(object obj)
         {
-            SourceType = sourceType;
-            TargetType = targetType;
-            IsConvert = isConvert;
+            return Equals(obj as TypeDescBasedTConverterKey);
         }
+
+        public bool Equals(TypeDescBasedTConverterKey other)
+        {
+            return other != null &&
+                   EqualityComparer<Type>.Default.Equals(SourceType, other.SourceType) &&
+                   EqualityComparer<Type>.Default.Equals(TargetType, other.TargetType) &&
+                   IsConvert == other.IsConvert;
+        }
+
+        public override int GetHashCode()
+        {
+            var hashCode = -1646958984;
+            hashCode = hashCode * -1521134295 + EqualityComparer<Type>.Default.GetHashCode(SourceType);
+            hashCode = hashCode * -1521134295 + EqualityComparer<Type>.Default.GetHashCode(TargetType);
+            hashCode = hashCode * -1521134295 + IsConvert.GetHashCode();
+            return hashCode;
+        }
+
+        public static bool operator ==(TypeDescBasedTConverterKey key1, TypeDescBasedTConverterKey key2)
+        {
+            return EqualityComparer<TypeDescBasedTConverterKey>.Default.Equals(key1, key2);
+        }
+
+        public static bool operator !=(TypeDescBasedTConverterKey key1, TypeDescBasedTConverterKey key2)
+        {
+            return !(key1 == key2);
+        }
+
+        //Disalow use of default constructor.
+        private TypeDescBasedTConverterKey() { }
 
         /// <summary>
         /// Returns a new instance of a Equality Comparer for this type.
@@ -53,12 +85,14 @@ namespace DRM.PropBag.Caches
     {
         public bool Equals(TypeDescBasedTConverterKey x, TypeDescBasedTConverterKey y)
         {
-            return (x.SourceType.Equals(y.SourceType) && x.TargetType.Equals(y.TargetType) && x.IsConvert == y.IsConvert);
+            return x.Equals(y);
+            //return (x.SourceType.Equals(y.SourceType) && x.TargetType.Equals(y.TargetType) && x.IsConvert == y.IsConvert);
         }
 
         public int GetHashCode(TypeDescBasedTConverterKey obj)
         {
-            return GenerateHash.CustomHash(obj.SourceType.GetHashCode(), obj.TargetType.GetHashCode(), obj.IsConvert ? 98000 : 99001);
+            return obj.GetHashCode();
+            //return GenerateHash.CustomHash(obj.SourceType.GetHashCode(), obj.TargetType.GetHashCode(), obj.IsConvert ? 98000 : 99001);
         }
     }
 }

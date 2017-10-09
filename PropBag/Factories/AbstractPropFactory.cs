@@ -17,6 +17,8 @@ namespace DRM.PropBag
         public bool ReturnDefaultForUndefined { get; }
         public ResolveTypeDelegate TypeResolver { get; }
 
+        public IConvertValues ValueConverter { get; }
+
         public abstract bool ProvidesStorage { get; }
 
         /// <summary>
@@ -26,10 +28,18 @@ namespace DRM.PropBag
         public virtual string IndexerName { get; }
 
 
-        public AbstractPropFactory(bool returnDefaultForUndefined, ResolveTypeDelegate typeResolver = null)
+        public AbstractPropFactory(bool returnDefaultForUndefined, 
+            ResolveTypeDelegate typeResolver = null,
+            IConvertValues valueConverter = null)
         {
             ReturnDefaultForUndefined = returnDefaultForUndefined;
+
+            // Use our default implementation, if the caller did not supply one.
             TypeResolver = typeResolver ?? this.GetTypeFromName;
+
+            // Use our default implementation, if the caller did not supply one.
+            ValueConverter = valueConverter ?? new PropFactoryValueConverter();
+
             IndexerName = "Item[]";
         }
 
@@ -120,23 +130,24 @@ namespace DRM.PropBag
             //return RefEqualityComparer<T>.Default;
         }
 
-        public virtual T GetDefaultValue<T>(string propertyName)
+        public virtual T GetDefaultValue<T>(string propertyName = null)
         {
-            return default(T);
+            return ValueConverter.GetDefaultValue<T>(propertyName);
+            //return default(T);
         }
 
-        public virtual object GetDefaultValue(string propertyName, Type propertyType, out bool typeIsSolid)
+        public virtual object GetDefaultValue(Type propertyType, string propertyName = null)
         {
-            if (propertyType == null)
-            {
-                throw new InvalidOperationException("Cannot manufacture a default value if the type is specified as null.");
-            }
-            typeIsSolid = true;
+            return ValueConverter.GetDefaultValue(propertyType, propertyName);
+            //if (propertyType == null)
+            //{
+            //    throw new InvalidOperationException($"Cannot manufacture a default value if the type is specified as null for property: {propertyName}.");
+            //}
 
-            if (propertyType == typeof(string))
-                return null;
+            //if (propertyType == typeof(string))
+            //    return null;
 
-            return Activator.CreateInstance(propertyType);
+            //return Activator.CreateInstance(propertyType);
         }
 
         public virtual bool IsTypeSolid(object value, Type propertyType)
@@ -146,33 +157,37 @@ namespace DRM.PropBag
 
         public virtual T GetValueFromObject<T>(object value)
         {
+            Type t = typeof(T);
             if (value == null)
             {
-                if (typeof(T).IsValueType) throw new InvalidCastException("Cannot set an object that have a ValueType to null.");
+                if (t.IsValueType) throw new InvalidCastException("Cannot set an object that have a ValueType to null.");
                 return (T)(object)null;
             }
 
             // value is already of the correct type.
-            if (typeof(T) == typeof(object)) return (T)(object)value;
+            if (t == typeof(object)) return (T)(object)value;
 
             Type s = value.GetType();
 
             // value is already of the correct type.
-            if (s == typeof(T)) return (T)(object)value;
+            if (s == t) return (T)(object)value;
 
-            object parameter = new ControlModel.TwoTypes(typeof(T), s);
+            object parameter = new ControlModel.TwoTypes(t, s);
 
-            return (T)PropFactoryValueConverter.ConvertBack(value, typeof(T), parameter, CultureInfo.CurrentCulture);
+            return (T)ValueConverter.ConvertBack(value, t, parameter, CultureInfo.CurrentCulture);
         }
 
         public virtual T GetValueFromString<T>(string value)
         {
-            if (typeof(T) == typeof(string)) return (T)(object)value;
-
+            Type t = typeof(T);
             Type s = typeof(string);
-            object parameter = new ControlModel.TwoTypes(typeof(T), typeof(string));
 
-            return (T) PropFactoryValueConverter.ConvertBack(value, typeof(T), parameter, CultureInfo.CurrentCulture);
+            if (t == s)
+                return (T)(object)value;
+
+            object parameter = new ControlModel.TwoTypes(t, s);
+
+            return (T)ValueConverter.ConvertBack(value, t, parameter, CultureInfo.CurrentCulture);
         }
 
 
@@ -247,7 +262,7 @@ namespace DRM.PropBag
                 (Action<T, T>)doWhenChanged, doAfterNotify, compr);
         }
 
-        public static IProp<T> CreatePropWithNoValue<T>(AbstractPropFactory propFactory,
+        private static IProp<T> CreatePropWithNoValue<T>(AbstractPropFactory propFactory,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid,
             Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false)

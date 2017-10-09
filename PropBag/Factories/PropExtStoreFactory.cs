@@ -17,7 +17,8 @@ namespace DRM.PropBag
         public PropExtStoreFactory(bool returnDefaultForUndefined) : base(returnDefaultForUndefined) { }
 
         object Stuff;
-        public PropExtStoreFactory(object stuff, bool returnDefaultForUndefined) : base(returnDefaultForUndefined)
+        public PropExtStoreFactory(object stuff, bool returnDefaultForUndefined, ResolveTypeDelegate typeResolver = null,
+            IConvertValues valueConverter = null) : base(returnDefaultForUndefined, typeResolver, valueConverter)
         {
             // Info to help us set up the getters and setters
             Stuff = stuff;

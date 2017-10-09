@@ -18,17 +18,27 @@ using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBag
 {
-    public class PropFactoryValueConverter 
+    public class PropFactoryValueConverter : IConvertValues
     {
-        static private Type GMT_TYPE = typeof(GenericMethodTemplatesPropConv);
+        //static private Type GMT_TYPE = typeof(GenericMethodTemplatesPropConv);
+
+        TypeDescBasedTConverterCache _converter;
+
+        public PropFactoryValueConverter()
+        {
+            _converter = DelegateCacheProvider.TypeDescBasedTConverterCache;
+        }
 
         // Value is native object, we need to return a targetType (hopefully a string at this point.)
-        public static object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (targetType == typeof(string))
             {
                 if (value == null) return string.Empty;
             }
+
+            System.Diagnostics.Debug.Assert(value == null || targetType.IsAssignableFrom(typeof(string)), $"PropFactory expected target type to be string, but was type: {targetType}.");
+
 
             // The parameter, if only specifying one type, is specifying the type
             // of the native (i.e., source) object.
@@ -38,14 +48,14 @@ namespace DRM.PropBag
 
             if (targetType != tt.SourceType)
             {
-                StringFromTDelegate del = GetTheStringFromTDelegate(tt.SourceType, tt.DestType);
+                StringFromTDelegate del = _converter.GetTheStringFromTDelegate(tt.SourceType, tt.DestType);
                 return del(value);
             }
             return value;
         }
 
         // Value is a string, we need to create a native object.
-        public static object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value == null && !targetType.IsValueType) return null;
 
@@ -59,7 +69,7 @@ namespace DRM.PropBag
 
             if (value.GetType() != tt.SourceType)
             {
-                TFromStringDelegate del = GetTheTFromStringDelegate(tt.SourceType);
+                TFromStringDelegate del = _converter.GetTheTFromStringDelegate(tt.SourceType, tt.DestType);
                 string s = value as string;
                 return del(s);
             }
@@ -67,7 +77,25 @@ namespace DRM.PropBag
             return value;
         }
 
-        private static TwoTypes GetFromParam(object parameter, Type destinationType = null)
+        public T GetDefaultValue<T>(string propertyName = null)
+        {
+            return default(T);
+        }
+
+        public object GetDefaultValue(Type propertyType, string propertyName = null)
+        {
+            if (propertyType == null)
+            {
+                throw new InvalidOperationException($"Cannot manufacture a default value if the type is specified as null for property: {propertyName}.");
+            }
+
+            if (propertyType == typeof(string))
+                return null;
+
+            return Activator.CreateInstance(propertyType);
+        }
+
+        private TwoTypes GetFromParam(object parameter, Type destinationType = null)
         {
             if (parameter == null)
             {
@@ -89,90 +117,103 @@ namespace DRM.PropBag
             {
                 return TwoTypes.Empty;
             }
-
         }
 
 
         #region Helper Methods for the Generic Method Templates
 
-        // Delegate declarations.
-        private delegate object TFromStringDelegate(string strVal);
 
-        private delegate string StringFromTDelegate(object value);
 
-        // TODO: Cache these.
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="sourceType">The native or DataContext type from a string representation. The GenericType parameter: T is this type. </param>
-        /// <returns></returns>
-        private static TFromStringDelegate GetTheTFromStringDelegate(Type sourceType)
-        {
-            System.Diagnostics.Debug.WriteLine(string.Format("A TFromString delegate is being created for type: {0}", sourceType.ToString()));
+        //// Delegate declarations.
+        //private delegate object TFromStringDelegate(string strVal);
 
-            MethodInfo methInfoGetProp = GMT_TYPE.GetMethod("GetTfromString", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(sourceType);
-            TFromStringDelegate result = (TFromStringDelegate)Delegate.CreateDelegate(typeof(TFromStringDelegate), methInfoGetProp);
+        //private delegate string StringFromTDelegate(object value);
 
-            return result;
-        }
+        ///// <summary>
+        ///// 
+        ///// </summary>
+        ///// <param name="sourceType">The native or DataContext type from a string representation. The GenericType parameter: T is this type. </param>
+        ///// <returns></returns>
+        //private static TFromStringDelegate GetTheTFromStringDelegate(Type sourceType, Type propertyType)
+        //{
+        //    // IsConvert is performed when going from native (or T) to string.
+        //    TypeDescBasedTConverterKey key = new TypeDescBasedTConverterKey(sourceType, propertyType, isConvert: false);
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="propertyType">The Type of the property on the view.</param>
-        /// <param name="sourceType">The Type of value in the DataContext, The GenericType parameter: T is this type.</param>
-        /// <returns></returns>
-        private static StringFromTDelegate GetTheStringFromTDelegate(Type sourceType, Type propertyType)
-        {
-            // IsConvert is performed when going from native (or T) to string.
-            TypeDescBasedTConverterKey key = new TypeDescBasedTConverterKey(sourceType, propertyType, isConvert: true);
+        //    TFromStringDelegate result = (TFromStringDelegate) LookupTypeDescripterConverter(key);
 
-            StringFromTDelegate result = LookupTypeDescripterConverter(key);
+        //    System.Diagnostics.Debug.WriteLine(
+        //        string.Format("A TFromString delegate is being requested for type: {0} and was {1}",
+        //            propertyType.ToString(), result == null ? "not found." : "found."));
 
-            System.Diagnostics.Debug.WriteLine(
-                string.Format("A StringFromT delegate is being requested for type: {0} and was {1}",
-                    propertyType.ToString(), result == null ? "not found." : "found."));
+        //    if (result != null) return result;
 
-            if (result != null) return result;
+        //    //System.Diagnostics.Debug.WriteLine(string.Format("A TFromString delegate is being created for type: {0}", sourceType.ToString()));
 
-            // NOTE: Changed this from PropertyType to SourceType on 10/2/2017 at 11:30 pm
-            MethodInfo methInfoGetProp = GMT_TYPE.GetMethod("GetStringFromT", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(sourceType);
-            result = (StringFromTDelegate)Delegate.CreateDelegate(typeof(StringFromTDelegate), methInfoGetProp);
+        //    MethodInfo methInfoGetProp = GMT_TYPE.GetMethod("GetTfromString", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(sourceType);
+        //    result = (TFromStringDelegate)Delegate.CreateDelegate(typeof(TFromStringDelegate), methInfoGetProp);
 
-            DelegateCacheProvider.TypeDescBasedTConverterCache.Add(key, result);
+        //    DelegateCacheProvider.TypeDescBasedTConverterCache.Add(key, result);
 
-            return result;
-        }
+        //    return result;
+        //}
 
-        private static StringFromTDelegate LookupTypeDescripterConverter(TypeDescBasedTConverterKey key)
-        {
-            if (DelegateCacheProvider.TypeDescBasedTConverterCache.ContainsKey(key))
-            {
-                return (StringFromTDelegate)DelegateCacheProvider.TypeDescBasedTConverterCache[key];
-            }
+        ///// <summary>
+        ///// 
+        ///// </summary>
+        ///// <param name="propertyType">The Type of the property on the view.</param>
+        ///// <param name="sourceType">The Type of value in the DataContext, The GenericType parameter: T is this type.</param>
+        ///// <returns></returns>
+        //private static StringFromTDelegate GetTheStringFromTDelegate(Type sourceType, Type propertyType)
+        //{
+        //    // IsConvert is performed when going from native (or T) to string.
+        //    TypeDescBasedTConverterKey key = new TypeDescBasedTConverterKey(sourceType, propertyType, isConvert: true);
 
-            return null;
-        }
+        //    StringFromTDelegate result = (StringFromTDelegate) LookupTypeDescripterConverter(key);
+
+        //    System.Diagnostics.Debug.WriteLine(
+        //        string.Format("A StringFromT delegate is being requested for type: {0} and was {1}",
+        //            propertyType.ToString(), result == null ? "not found." : "found."));
+
+        //    if (result != null) return result;
+
+        //    // NOTE: Changed this from PropertyType to SourceType on 10/2/2017 at 11:30 pm
+        //    MethodInfo methInfoGetProp = GMT_TYPE.GetMethod("GetStringFromT", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(sourceType);
+        //    result = (StringFromTDelegate)Delegate.CreateDelegate(typeof(StringFromTDelegate), methInfoGetProp);
+
+        //    DelegateCacheProvider.TypeDescBasedTConverterCache.Add(key, result);
+
+        //    return result;
+        //}
+
+        //private static Delegate LookupTypeDescripterConverter(TypeDescBasedTConverterKey key)
+        //{
+        //    if (DelegateCacheProvider.TypeDescBasedTConverterCache.ContainsKey(key))
+        //    {
+        //        return DelegateCacheProvider.TypeDescBasedTConverterCache[key];
+        //    }
+
+        //    return null;
+        //}
 
         #endregion
     }
 
     #region Generic Method Templates
 
-    static class GenericMethodTemplatesPropConv
-    {
-        private static object GetTfromString<T>(string strVal)
-        {
-            TypeConverter tc = TypeDescriptor.GetConverter(typeof(T));
-            return (T)(tc.ConvertFromString(strVal));
-        }
+    //static class GenericMethodTemplatesPropConv
+    //{
+    //    private static object GetTfromString<T>(string strVal)
+    //    {
+    //        TypeConverter tc = TypeDescriptor.GetConverter(typeof(T));
+    //        return (T)(tc.ConvertFromString(strVal));
+    //    }
 
-        private static string GetStringFromT<T>(object value)
-        {
-            TypeConverter tc = TypeDescriptor.GetConverter(typeof(T));
-            return tc.ConvertToInvariantString((T)value);
-        }
-    }
+    //    private static string GetStringFromT<T>(object value)
+    //    {
+    //        TypeConverter tc = TypeDescriptor.GetConverter(typeof(T));
+    //        return tc.ConvertToInvariantString((T)value);
+    //    }
+    //}
 
     #endregion
 }

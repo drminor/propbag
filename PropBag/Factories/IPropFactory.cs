@@ -13,6 +13,8 @@ namespace DRM.PropBag
 
         IProp<T> Create<T>(T initialValue, string propertyName, object extraInfo = null, bool hasStorage = true, bool typeIsSolid = true, Action<T, T> doWhenChanged = null, bool doAfterNotify = false, Func<T, T, bool> comparer = null);
 
+        IProp<T> CreateWithNoValue<T>(string propertyName, object extraInfo = null, bool hasStorage = true, bool typeIsSolid = true, Action<T, T> doWhenChanged = null, bool doAfterNotify = false, Func<T, T, bool> comparer = null);
+
         IPropGen CreateGenFromObject(Type typeOfThisProperty, object value, string propertyName, object extraInfo, bool hasStorage, bool isTypeSolid, Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false);
 
         IPropGen CreateGenFromString(Type typeOfThisProperty, string value, bool useDefault, string propertyName, object extraInfo, bool hasStorage, bool isTypeSolid, Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false);
@@ -21,18 +23,18 @@ namespace DRM.PropBag
 
         IPropGen CreatePropInferType(object value, string propertyName, object extraInfo, bool hasStorage);
 
-        IProp<T> CreateWithNoValue<T>(string propertyName, object extraInfo = null, bool hasStorage = true, bool typeIsSolid = true, Action<T, T> doWhenChanged = null, bool doAfterNotify = false, Func<T, T, bool> comparer = null);
-
-        object GetDefaultValue(string propertyName, Type propertyType, out bool typeIsSolid);
-
-        T GetDefaultValue<T>(string propertyName);
-
         Func<T, T, bool> GetRefEqualityComparer<T>();
+
+        object GetDefaultValue(Type propertyType, string propertyName = null);
+
+        T GetDefaultValue<T>(string propertyName = null);
 
         T GetValueFromObject<T>(object value);
 
         T GetValueFromString<T>(string value);
 
         bool IsTypeSolid(object value, Type propertyType);
+
+        IConvertValues ValueConverter { get; }
     }
 }
