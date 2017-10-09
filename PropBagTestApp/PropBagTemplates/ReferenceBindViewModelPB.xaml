@@ -4,6 +4,8 @@
                     xmlns:sys="clr-namespace:System;assembly=mscorlib"
                     xmlns:mod="clr-namespace:PropBagTestApp.Models">
 
+
+
     <pb:PropBagTemplate x:Key="ReferenceBindViewModelPB"
             ClassName="ReferenceBindViewModelPB"
             InstanceKey="ReferenceBindViewModelPB"
@@ -14,6 +16,11 @@
         </pb:PropBagTemplate.Namespaces>
 
         <pb:PropBagTemplate.Props>
+
+            <!--=  TODO: Make this work when setting to default value or some given string. -->
+            <pb:PropItem  PropertyName="FirstCollection" PropertyType="CollectionViewSource">
+                <pb:InitialValueField SetToUndefined="True"/>
+            </pb:PropItem>
 
             <pb:PropItem  PropertyName="ProductId" PropertyType="sys:Guid">
                 <pb:InitialValueField SetToEmptyString="True"/>

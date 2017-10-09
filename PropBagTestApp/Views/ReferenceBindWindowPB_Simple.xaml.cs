@@ -8,6 +8,7 @@ using PropBagTestApp.Models;
 
 using System;
 using System.Windows;
+using System.Windows.Data;
 
 namespace PropBagTestApp.View
 {
@@ -21,16 +22,20 @@ namespace PropBagTestApp.View
             InitializeComponent();
 
             PropBagTemplate pbt = PropBagTemplateResources.GetPropBagTemplate("ReferenceBindViewModelPB");
-            PropModel pm = pbt.GetPropBagModel();
-            PropFactory pf = new PropFactory(false, ReferenceBindViewModelPB.GetTypeFromName);
+            PropModel pm = pbt.GetPropModel();
+            IPropFactory pf = SettingsExtensions.ThePropFactory;
 
             ReferenceBindViewModelPB rbvm = new ReferenceBindViewModelPB(pm, pf);
+
+            MyModel4 mod4 = new MyModel4() { MyString = "Start" };
+            rbvm.SetIt<MyModel4>(mod4, "Deep");
 
             this.DataContext = rbvm;
         }
 
         private void BtnRead_Click(object sender, RoutedEventArgs e)
         {
+            //CollectionViewSource aa = new CollectionViewSource();
             ReferenceBindViewModelPB m = (ReferenceBindViewModelPB)this.DataContext;
 
             m.SetIt<int>(42, "Amount");
@@ -49,7 +54,8 @@ namespace PropBagTestApp.View
             ReferenceBindViewModelPB m = (ReferenceBindViewModelPB)this.DataContext;
 
             double size = m.GetIt<double>("Size");
-            string myString = m.GetIt<MyModel4>("Deep").MyString;
+
+            string myString = m.GetIt<MyModel4>("Deep")?.MyString;
 
             System.Diagnostics.Debug.WriteLine($"Size = {size}.");
             System.Diagnostics.Debug.WriteLine($"Deep.MyString = {myString}.");

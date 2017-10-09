@@ -12,7 +12,7 @@ namespace PropBagTestApp.ViewModels
     public class ReferenceBindViewModelPB : PropBagMin
     {
 
-        public ReferenceBindViewModelPB() : base(PropBagTypeSafetyMode.None, new PropFactory(true, GetTypeFromName))
+        public ReferenceBindViewModelPB() : base(PropBagTypeSafetyMode.HonorUndefined, SettingsExtensions.ThePropFactory)
         {
             System.Diagnostics.Debug.WriteLine("ReferenceBindViewModelPB is being created no params - with Type Factory.");
         }
@@ -37,40 +37,6 @@ namespace PropBagTestApp.ViewModels
             : base(typeSafetyMode, thePropFactory)
         {
         }
-
-        //public new object this[string typeName, string propertyName]
-        //{
-        //    get
-        //    {
-        //        return base[typeName, propertyName];
-        //    }
-        //    set
-        //    {
-        //        base[typeName, propertyName] = value;
-        //    }
-        //}
-
-        public static Type GetTypeFromName(string typeName)
-        {
-            Type result;
-            try
-            {
-                result = Type.GetType(typeName);
-            }
-            catch (System.Exception e)
-            {
-                throw new InvalidOperationException($"Cannot create a Type instance from the string: {typeName}.", e);
-            }
-
-            if (result == null)
-            {
-                throw new InvalidOperationException($"Cannot create a Type instance from the string: {typeName}.");
-            }
-
-            return result;
-        }
     }
-
-
 }
 

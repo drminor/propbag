@@ -57,7 +57,7 @@ namespace PropBagTestApp
         public DtoTestEmit()
         {
 
-            if (_isInDesignMode.HasValue && _isInDesignMode.Value)
+            if (SettingsExtensions.InDesignMode())
             {
                 System.Diagnostics.Debug.WriteLine("In Design");
                 //OurData = new DtoTestViewModelEmit(PropBagTypeSafetyMode.Tight);
@@ -191,25 +191,7 @@ namespace PropBagTestApp
             return result;
         }
 
-        public static bool? _isInDesignMode;
-
-        public static bool IsInDesignModeStatic
-        {
-            get
-            {
-                if (!_isInDesignMode.HasValue)
-                {
-                    var prop = DesignerProperties.IsInDesignModeProperty;
-                    _isInDesignMode
-                        = (bool)DependencyPropertyDescriptor
-                                        .FromProperty(prop, typeof(FrameworkElement))
-                                        .Metadata.DefaultValue;
-                }
-
-                return _isInDesignMode.Value;
-            }
-        }
-
+        // TODO: Update to use SettingsExtensions
         private ConfiguredMappers GetAutoMappers(PropBagMappingStrategyEnum mappingStrategy)
         {
             Func<Action<IMapperConfigurationExpression>, IConfigurationProvider> configBuilder

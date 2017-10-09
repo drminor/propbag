@@ -10,9 +10,9 @@
         mc:Ignorable="d"
         Title="ReferenceBindWindow" Height="300" Width="500">
     
-        <Window.DataContext>
+        <!--<Window.DataContext>
         <vmod:ReferenceBindViewModel/>
-        </Window.DataContext>
+        </Window.DataContext>-->
     
 <Grid Name="TopGrid">
 

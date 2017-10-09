@@ -59,6 +59,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="AppAutoMapperSupport\AutoMapperHelpers.cs" />
+    <Compile Include="AppAutoMapperSupport\SettingsExtensions.cs" />
     <Compile Include="ViewModels\ReferenceBindViewModelPB.cs" />
     <Compile Include="ViewModels\ReferenceBindViewModel.cs" />
     <Compile Include="Views\ReferenceBindWindow.xaml.cs">
@@ -87,8 +89,8 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MapperConfigurationProvider.cs" />
-    <Compile Include="PropBagModuleBuilderProvider.cs" />
+    <Compile Include="AppAutoMapperSupport\MapperConfigurationProvider.cs" />
+    <Compile Include="AppAutoMapperSupport\PropBagModuleBuilderProvider.cs" />
     <Compile Include="DtoTestEmit.xaml.cs">
       <DependentUpon>DtoTestEmit.xaml</DependentUpon>
     </Compile>
@@ -121,7 +123,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Models\MyModel.cs" />
-    <Compile Include="PropBagProfle.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

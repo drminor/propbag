@@ -1,7 +1,15 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="uri:settings" CurrentProfile="(Default)">
-  <Profiles>
-    <Profile Name="(Default)" />
-  </Profiles>
-  <Settings />
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="PropBagTestApp.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="MappingStrategy" Type="DRM.PropBag.AutoMapperSupport.PropBagMappingStrategyEnum" Scope="Application">
+      <Value Profile="(Default)">EmitProxy</Value>
+    </Setting>
+    <Setting Name="MapperConfigurationProvider" Type="DRM.PropBag.AutoMapperSupport.MapperConfigurationProvider" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="ModuleBuilderInfoProvider" Type="DRM.PropBag.ViewModelBuilder.DefaultModuleBuilderInfoProvider" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+  </Settings>
 </SettingsFile>
