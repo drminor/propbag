@@ -24,8 +24,16 @@ namespace DRM.TypeSafePropertyBag
         private readonly ConcurrentDictionary<TKey, Lazy<TValue>> _dictionary;
         private readonly Func<TKey, Lazy<TValue>> _valueFactory;
 
-        public LockingConcurrentDictionary(Func<TKey, TValue> valueFactory)
+        public LockingConcurrentDictionary(Func<TKey, TValue> valueFactory, IEqualityComparer<TKey> comparer = null)
         {
+            if(comparer != null)
+            {
+                _dictionary = new ConcurrentDictionary<TKey, Lazy<TValue>>(comparer);
+            }
+            else
+            {
+                _dictionary = new ConcurrentDictionary<TKey, Lazy<TValue>>();
+            }
             _dictionary = new ConcurrentDictionary<TKey, Lazy<TValue>>();
             _valueFactory = key => new Lazy<TValue>(() => valueFactory(key));
         }
