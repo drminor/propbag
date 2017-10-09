@@ -1,15 +1,9 @@
-﻿using System;
+﻿using DRM.PropBag.Caches;
+using System;
 using System.ComponentModel;
 using System.Globalization;
-
 using System.Reflection;
-//using System.ComponentModel.Design.Serialization;
 
-using DRM.PropBag.Caches;
-
-
-//using System.Windows.Markup;
-//using System.Windows.Data;
 
 namespace DRM.PropBag.ControlModel
 {
