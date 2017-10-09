@@ -7,6 +7,13 @@ namespace DRM.PropBag.ControlsWPF
 {
     public class PropValueConverter : MarkupExtension, IValueConverter
     {
+        static IConvertValues ValueConverter { get; }
+
+        static PropValueConverter()
+        {
+            ValueConverter = new PropFactoryValueConverter();
+        }
+
         public override object ProvideValue(IServiceProvider serviceProvider)
         {
             return this;
@@ -18,7 +25,7 @@ namespace DRM.PropBag.ControlsWPF
             System.Diagnostics.Debug.WriteLine("Calling Convert from PropValueConverter.");
             try
             {
-                object result = PropFactoryValueConverter.Convert(value, targetType, parameter, culture);
+                object result = ValueConverter.Convert(value, targetType, parameter, culture);
                 return result;
             }
             catch
@@ -34,7 +41,7 @@ namespace DRM.PropBag.ControlsWPF
 
             try
             {
-                object result = PropFactoryValueConverter.ConvertBack(value, targetType, parameter, culture);
+                object result = ValueConverter.ConvertBack(value, targetType, parameter, culture);
                 return result;
             }
             catch

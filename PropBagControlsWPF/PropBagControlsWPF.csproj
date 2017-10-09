@@ -50,8 +50,8 @@
     <Compile Include="Binders\DataSourceChangedEventArgs.cs" />
     <Compile Include="Binders\DataSourceChangedEventHandler.cs" />
     <Compile Include="Binders\DataSourceChangeTypeEnum.cs" />
-    <Compile Include="Binders\MyBinderEngine.cs" />
-    <Compile Include="Binders\MyBinderInfo.cs" />
+    <Compile Include="Binders\MyBindingEngine.cs" />
+    <Compile Include="Binders\MyBindingInfo.cs" />
     <Compile Include="Binders\SourceKindEnum.cs" />
     <Compile Include="BoundPropBag.cs" />
     <Compile Include="ComparerFuncTypeConverter.cs" />

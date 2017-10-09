@@ -15,8 +15,6 @@ namespace DRM.PropBag.ControlsWPF
 {
     public class ViewModelGenerator
     {
-        public const string DEFAULT_NAMESPACE_NAME = "PropBagWrappers";
-
         /// <summary>
         /// Processes each PropBagTemplate by creating the class instance, registering the properties
         /// an assigning the new instance to the property marked with the PropBagInstanceAttribute Attribute
@@ -53,7 +51,7 @@ namespace DRM.PropBag.ControlsWPF
 
                     // Use the name of the class that dervives from IPropBag
                     // as the basis of the name of the new wrapper type.
-                    TypeDescription typeDescription = BuildTypeDesc(dtViewModelType, null, pm);
+                    TypeDescription typeDescription = pm.BuildTypeDesc(dtViewModelType);
 
                     Type proxyType = typeEmitter.BuildVmProxyClass(typeDescription);
 
@@ -71,10 +69,7 @@ namespace DRM.PropBag.ControlsWPF
 
         private static ITypeSafePropBag GetNewInstance(Type proxyType, PropModel pm)
         {
-
-            Type[] implementedTypes = proxyType.GetTypeInfo().ImplementedInterfaces.ToArray();
-            bool isPropBagMin = null != implementedTypes.First(x => x.Name == "IPropBagMin");
-            
+            bool isPropBagMin = proxyType.IsPropBagBased();
             
             if(isPropBagMin)
             {
@@ -83,44 +78,13 @@ namespace DRM.PropBag.ControlsWPF
             }
             else
             {
-                bool isPropBag = null != implementedTypes.First(x => x.Name == "IPropBag"); 
-                if(isPropBag)
-                {
-                    IPropBag newInstance = (IPropBag)Activator.CreateInstance(proxyType, new object[] { pm });
-                    return newInstance;
-                } 
-                else
-                {
-                    throw new ApplicationException("Target view model must derive from IPropBag or IPropBagMin.");
-                }
-
+                throw new ApplicationException("Target view model must derive from IPropBag or IPropBagMin.");
             }
-
-
         }
 
         public static IModuleBuilderInfo GetEmitter(IModuleBuilderInfo provider)
         {
             return provider ?? new DefaultModuleBuilderInfoProvider().ModuleBuilderInfo;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="dtViewModelType">The type (usually known at compile-time for which the proxy is being created.</param>
-        /// <param name="namespaceName">The namespace to use when creating the proxy.</param>
-        /// <param name="pm">The propmodel from which to get the list of properties to define for the proxy.</param>
-        /// <returns></returns>
-        public static TypeDescription BuildTypeDesc(Type dtViewModelType, string namespaceName,  PropModel pm)
-        {
-            string nsName = namespaceName ?? DEFAULT_NAMESPACE_NAME;
-
-            TypeName tn = new TypeName(dtViewModelType.Name, nsName);
-
-            IEnumerable<PropertyDescription> propDescs = pm.GetPropertyDescriptions();
-
-            TypeDescription td = new TypeDescription(tn, dtViewModelType, propDescs);
-            return td;
         }
 
         private static Type CreateWrapper(TypeDescription td, IModuleBuilderInfo modBuilderInfo = null)
