@@ -61,6 +61,7 @@
     <Compile Include="ExtValDelegates.cs" />
     <Compile Include="Factories\GetDefaultValueDelegate.cs" />
     <Compile Include="Factories\IPropFactory.cs" />
+    <Compile Include="Factories\IConvertValues.cs" />
     <Compile Include="Factories\PropFactoryValueConveter.cs" />
     <Compile Include="Factories\ResolveTypeDelegate.cs" />
     <Compile Include="Prop.cs" />
