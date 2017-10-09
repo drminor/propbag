@@ -1,0 +1,43 @@
+
+A Top-Level VM serves one or more Views.
+
+
+Those views need one or more
+	. Objects acessed via properties.
+	. List of Objects access via observable collections.
+	. Selected Props to Support Current??
+
+The Top-Level VM can be composed (i.e., contain)
+	a list of View-VM adapters, aka a VM.
+
+
+The view should be able to supply the information
+required to build the Properties and Lists that 
+compose the View-VM adapters the Top-Level VM 
+needs to produce.
+
+A VM designer should be able to take these Objects (stand-alone or in a list)
+and configure mappings to the available data sources / models.
+
+-------------
+
+PropModel does a good job of
+	. defining property accessor for
+		- primitive objects (strings, ints.)
+		- user defined POCO structs and classes
+
+Need to add
+	. Observable Collection
+	- Collection View 
+	- Collection View Source (XAML)
+
+Need to support a desinger creating the AutoMapper mappings
+between a PropModel and a (data) Model for a particular View-VM adapter.
+
+
+
+
+
+
+
+
