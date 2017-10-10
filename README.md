@@ -66,6 +66,8 @@ A application designer should be able to take the Object definitions (stand-alon
 
 These mapping routines should be able to be specified in a declarative style.
 
+# Goals
+
 This project intends to provide services to an application designer to support the creation of View Models on demand where a signficant amount of the configuration is specified before hand in a declartive style.
 
 Visual Studio Extensions can be used to create Design-Time editors and these editors can be used to edit these "ViewModel Specification" files.
