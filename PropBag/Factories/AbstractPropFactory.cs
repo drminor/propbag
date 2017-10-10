@@ -130,13 +130,13 @@ namespace DRM.PropBag
             //return RefEqualityComparer<T>.Default;
         }
 
-        public virtual T GetDefaultValue<T>(string propertyName = null)
+        public T GetDefaultValue<T>(string propertyName = null)
         {
             return ValueConverter.GetDefaultValue<T>(propertyName);
             //return default(T);
         }
 
-        public virtual object GetDefaultValue(Type propertyType, string propertyName = null)
+        public object GetDefaultValue(Type propertyType, string propertyName = null)
         {
             return ValueConverter.GetDefaultValue(propertyType, propertyName);
             //if (propertyType == null)
@@ -251,7 +251,7 @@ namespace DRM.PropBag
             T initVal;
             if (useDefault)
             {
-                initVal = propFactory.GetDefaultValue<T>(propertyName);
+                initVal = propFactory.ValueConverter.GetDefaultValue<T>(propertyName);
             }
             else
             {
