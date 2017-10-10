@@ -31,6 +31,8 @@ namespace DRM.TypeSafePropertyBag
         event PropertyChangedWithTValsHandler<T> PropertyChangedWithTVals;
         void OnPropertyChangedWithTVals(string propertyName, T oldVal, T newVal);
 
+        // TODO: Consider moving these to the IPropPrivate<T> interface.
+        // and using the WeakEventManager style.
         void SubscribeToPropChanged(Action<T, T> doOnChange);
         bool UnSubscribeToPropChanged(Action<T, T> doOnChange);
     }
