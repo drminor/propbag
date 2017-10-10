@@ -9,6 +9,8 @@ using System.Reflection;
 
 using System.Runtime.CompilerServices;
 using DRM.TypeSafePropertyBag;
+using System.ComponentModel;
+using System.Windows;
 
 namespace DRM.PropBag
 {
@@ -22,6 +24,8 @@ namespace DRM.PropBag
 
         public IProp TypedProp { get; }
 
+        public bool IsEmpty => TypedProp != null;
+
         public bool TypeIsSolid { get { return ((IPropGen)TypedProp).TypeIsSolid; } }
 
         public bool HasStore { get; }
@@ -29,10 +33,21 @@ namespace DRM.PropBag
         // Constructor
         public PropGen(IPropGen typedPropWrapper)
         {
-            TypedProp = typedPropWrapper.TypedProp;
-            Type = typedPropWrapper.Type;
-            HasStore = typedPropWrapper.HasStore;
-            PropertyChangedWithVals = delegate { };
+            if(typedPropWrapper == null)
+            {
+                TypedProp = null;
+                Type = null;
+                HasStore = false;
+            }
+            else
+            {
+                TypedProp = typedPropWrapper.TypedProp;
+                Type = typedPropWrapper.Type;
+                HasStore = typedPropWrapper.HasStore;
+            }
+
+            PropertyChangedWithVals = null; // = delegate { };
+            //PropertyChanged = null;
             _actTable = null;
         }
 
@@ -55,6 +70,7 @@ namespace DRM.PropBag
         }
 
         public event PropertyChangedWithValsHandler PropertyChangedWithVals;
+        //public event PropertyChangedEventHandler PropertyChanged;
 
         private List<Tuple<Action<object, object>, PropertyChangedWithValsHandler>> _actTable;
 
@@ -115,5 +131,17 @@ namespace DRM.PropBag
             PropertyChangedWithVals = null;
         }
 
+        //public void OnPropertyChanged(string propertyName)
+        //{
+        //    PropertyChangedEventHandler handler = Interlocked.CompareExchange(ref PropertyChanged, null, null);
+
+        //    if (handler != null)
+        //        handler(this, new PropertyChangedEventArgs(propertyName));
+        //}
+
+        //public void SubscribeToPropChanged(EventHandler<PropertyChangedEventArgs> handler)
+        //{
+        //    WeakEventManager<INotifyPropertyChanged, PropertyChangedEventArgs>.AddHandler(this, "PropertyChanged", handler);
+        //}
     }
 }
