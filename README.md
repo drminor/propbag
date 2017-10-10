@@ -1,10 +1,18 @@
+
+# propbag
+Type-safe property bag with INotifyPropertyChanged support.
+
+# A Method for creating, at least in part, a WPF View Model in a declarative style.
+
 Views are created in large part using a declarative style thanks to tools like
+
+
 AngularJs/BootStrap UI and Windows Presentation Foundation, to name a few.
 
 Data Models are specified using a declarative style thanks to Standard Query Language (SQL) 
 and their attendant Data Definition Languages (DDLs).
 
-There are few facilities that allow one to build a view model from a declaration.
+However, there are few facilities that allow one to build a view model from a declaration.
 
 This project started with the simple goal of automating the process of writing the
 code necessary to support the INotifyPropertyChanged contract for implementing property
