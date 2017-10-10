@@ -47,12 +47,18 @@ After a few interactions, or sprints, an implementation of a "TypeSafePropertyBa
 
 For some notes on performance and other considerations, please see the section at the end: "Some notes on performance and other considerations."
 
-I then began to envision how this class may be used to create MVVM-based applications in general. 
+I then began to envision how this class may be used to create MVVM-based applications in general. And what follows is some of my initial thoughts.
+
 A Top-Level VM serves one or more Views.
+
 Those views need one or more
+
 	. Objects accessed via properties
+
 	. List of Objects accessed via an observable collection or a CollectionView
+
 	Note: These objects will often be user defined types (UDTs).
+
  
 The Top-Level VM can be composed (i.e., contain) a list of View to ViewModel adapters, or in other words a (mini) ViewModel.
 
