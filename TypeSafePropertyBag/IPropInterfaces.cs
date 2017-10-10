@@ -52,6 +52,7 @@ namespace DRM.TypeSafePropertyBag
         /// This allows access to these values without having to cast to the instance to its type (unknown at compile time.)
         /// </summary>
         IProp TypedProp { get; }
+        bool IsEmpty { get; }
 
         // Property Changed with typed values support
         event PropertyChangedWithValsHandler PropertyChangedWithVals;
