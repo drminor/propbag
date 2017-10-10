@@ -11,7 +11,7 @@ namespace DRM.TypeSafePropertyBag
     /// Provides typed value change information for the <see cref="INotifyPropertyChanged.PropertyChanged"/> event.
     /// </summary>
     /// <typeparam name="T">The type of the property that changed.</typeparam>
-    public class PropertyChangedWithTValsEventArgs<T> : PropertyChangedEventArgs
+    public class PropertyChangedWithTValsEventArgs<T> : PropertyChangedWithValsEventArgs
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="PropertyChangedEventArgs{T}"/> class.
@@ -19,7 +19,7 @@ namespace DRM.TypeSafePropertyBag
         /// <param name="propertyName">Name of the property.</param>
         /// <param name="oldValue">The old value of the property.</param>
         /// <param name="newValue">The new value of the property.</param>
-        public PropertyChangedWithTValsEventArgs(string propertyName, T oldValue, T newValue) : base(propertyName)
+        public PropertyChangedWithTValsEventArgs(string propertyName, T oldValue, T newValue) : base(propertyName, oldValue, newValue)
         {
             OldValue = oldValue;
             NewValue = newValue;
@@ -28,12 +28,34 @@ namespace DRM.TypeSafePropertyBag
         /// <summary>
         /// Gets the old value of the property.
         /// </summary>
-        public T OldValue { get; private set; }
+        public virtual new T OldValue
+        {
+            get
+            {
+                return (T)base.OldValue;
+            }
+
+            protected set
+            {
+                base.OldValue = value;
+            }
+        }
 
         /// <summary>
         /// Gets the new value of the property.
         /// </summary>
-        public T NewValue { get; private set; }
+        public virtual new T NewValue
+        {
+            get
+            {
+                return (T)base.NewValue;
+            }
+
+            protected set
+            {
+                base.NewValue = value;
+            }
+        }
     }
 
     /// <summary>
@@ -57,11 +79,11 @@ namespace DRM.TypeSafePropertyBag
         /// <summary>
         /// Gets the old value of the property.
         /// </summary>
-        public object OldValue { get; private set; }
+        public virtual object OldValue { get; protected set; }
 
         /// <summary>
         /// Gets the new value of the property.
         /// </summary>
-        public object NewValue { get; private set; }
+        public virtual object NewValue { get; protected set; }
     }
 }
