@@ -86,8 +86,7 @@ namespace DRM.PropBag.AutoMapperSupport
         public IPropBagMapperGen GetMapperToUse(IPropBagMapperKeyGen mapRequest)
         {
             System.Diagnostics.Debug.WriteLine($"");
-            IPropBagMapperGen result;
-            if (_sealedPropBagMappers.TryGetValue(mapRequest, out result))
+            if (_sealedPropBagMappers.TryGetValue(mapRequest, out IPropBagMapperGen result))
             {
                 return result;
             }
