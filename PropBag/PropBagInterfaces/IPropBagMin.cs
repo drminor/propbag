@@ -23,6 +23,15 @@ namespace DRM.PropBag
         IPropGen GetPropGen(string propertyName, Type propertyType);
         ValPlusType GetValPlusType(string propertyName, Type propertyType);
 
+        bool TryGetPropGen(string propertyName, Type propertyType, out IPropGen propGen);
+        IPropGen this[int index] { get; }
+
+
+        int IndexOfProp(string propertyName, Type propertyType);
+
+        object this[string typeName, string propertyName] { get; }
+
+
         bool SetValWithNoType(string propertyName, object value);
 
 

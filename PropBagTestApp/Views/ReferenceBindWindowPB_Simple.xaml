@@ -43,7 +43,7 @@
 
             <Label>Deep String:</Label>
             <TextBox x:Name="Deep2" Height="25" Width="100"
-                     Text="{ob:Binding Path=Deep.MyString, SourceType={x:Type sys:String}, Mode=TwoWay}"/>
+                     Text="{ob:Binding Path=Deep.MyString, SourceType={x:Type sys:String}, Mode=OneWay}"/>
         </StackPanel>
 
         <StackPanel Orientation="Horizontal" Grid.Row="3">

@@ -19,7 +19,7 @@ namespace PropBagLib.Tests
 
         bool varToEnsureWorkIsDone = false;
 
-        const int InterationCount = 1000000;
+        const int InterationCount = 100000;
 
 
         [SetUp]

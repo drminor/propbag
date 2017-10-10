@@ -241,6 +241,14 @@ namespace DRM.PropBag
             return propBag.GetAllPropNamesAndTypes();
         }
 
+        public IPropGen this[int index]
+        {
+            get
+            {
+                return propBag[index];
+            }
+        }
+
         public object this[string propertyName]
         {
             get
@@ -250,6 +258,19 @@ namespace DRM.PropBag
             set
             {
                 SetValWithType(propertyName, null, value);
+            }
+        }
+
+        public object this[Type type, string propertyName]
+        {
+            get
+            {
+                return GetValWithType(propertyName, Type.GetType(propertyName));
+            }
+            set
+            {
+                //Type type = Type.GetType(typeName);
+                SetValWithType(propertyName, type, value);
             }
         }
 
@@ -274,6 +295,11 @@ namespace DRM.PropBag
         public object GetValWithType(string propertyName, Type propertyType = null)
         {
             return propBag.GetValWithType(propertyName, propertyType);
+        }
+
+        public bool TryGetPropGen(string propertyName, Type propertyType, out IPropGen propGen)
+        {
+            return propBag.TryGetPropGen(propertyName, propertyType, out propGen);
         }
 
         public IPropGen GetPropGen(string propertyName, Type propertyType)
@@ -405,6 +431,11 @@ namespace DRM.PropBag
         public void SetValueGen(object host, string propertyName, Type propertyType, object value)
         {
             ((IPropBag)host).SetValWithType(propertyName, propertyType, value);
+        }
+
+        public int IndexOfProp(string propertyName, Type propertyType)
+        {
+            throw new NotImplementedException();
         }
     }
 

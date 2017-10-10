@@ -19,6 +19,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{F93D2783-82C5-46F0-A50A-3925ADE7B367}"
 	ProjectSection(SolutionItems) = preProject
+		Documentaton\BigPicture.txt = Documentaton\BigPicture.txt
 		Documentaton\Documentation.md = Documentaton\Documentation.md
 	EndProjectSection
 EndProject
@@ -31,8 +32,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoMapperSupport", "AutoMapperSupport\AutoMapperSupport.csproj", "{10CF1C6F-F877-49A8-8678-6947F55E6920}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoMapper", "src\AutoMapper\AutoMapper.csproj", "{8CBA8A56-9B60-4430-9D54-9A523BAF1E14}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MVVMApplication", "MVVMApplication-vikramvee\MVVMApplication.csproj", "{B0FEC234-ABF6-4EF3-8E87-E675FD220163}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -68,10 +67,6 @@ Global
 		{8CBA8A56-9B60-4430-9D54-9A523BAF1E14}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8CBA8A56-9B60-4430-9D54-9A523BAF1E14}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8CBA8A56-9B60-4430-9D54-9A523BAF1E14}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B0FEC234-ABF6-4EF3-8E87-E675FD220163}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B0FEC234-ABF6-4EF3-8E87-E675FD220163}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B0FEC234-ABF6-4EF3-8E87-E675FD220163}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B0FEC234-ABF6-4EF3-8E87-E675FD220163}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

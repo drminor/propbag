@@ -12,6 +12,10 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Data;
 
+using MS.Internal.Data;
+using System.Collections.ObjectModel;
+using System.Windows.Controls;
+
 namespace DRM.PropBag.ControlsWPF.Binders
 {
     public class MyBindingEngine
@@ -211,15 +215,28 @@ namespace DRM.PropBag.ControlsWPF.Binders
                 // If this is the terminal node, use the source type given to us.
                 // if its one of the intervening nodes use the type discovered by the parent Observable source.
                 Type nodeType = (nPtr == compCount - 1) ? sourceType : dsChangeListeners[nPtr + 1]?.Type;
-                nodeType = nodeType ?? typeof(object);
 
                 // Is the parent PropBagBased?
                 isPropBagBased = IsThisNodePropBagBased(dsChangeListeners[nPtr]);
 
+
                 if (nPtr > 0) sb.Append(".");
                 if (isPropBagBased)
                 {
-                    sb.Append($"[{nodeType.FullName},{node}]");
+                    if(nodeType != null)
+                    {
+                        //IPropBagMin parent = (IPropBagMin)dsChangeListeners[nPtr].Data;
+
+                        //int idx = parent.IndexOfProp(node, nodeType);
+                        //sb.Append($"[{idx}]");
+                        nodeType = nodeType ?? typeof(object);
+                        sb.Append($"[{nodeType.FullName},{node}]");
+                    }
+                    else
+                    {
+                        nodeType = nodeType ?? typeof(object);
+                        sb.Append($"[{nodeType.FullName},{node}]");
+                    }
                 }
                 else
                 {
@@ -637,12 +654,30 @@ namespace DRM.PropBag.ControlsWPF.Binders
                             {
                                 IPropBagMin pb = (IPropBagMin)Data;
 
+                                
+
                                 if (pb.TryGetTypeOfProperty(propertyName, out Type pt))
                                 {
                                     Lazy<object> data = new Lazy<object>(() =>
                                     {
-                                        IPropGen pg = pb.GetPropGen(propertyName, pt);
-                                        return pg.Value;
+                                        // TODO: need to Get method to set value.
+                                        if (pb.TryGetPropGen(propertyName, null, out IPropGen iPg))
+                                        {
+                                            if(iPg is PropGen)
+                                            {
+                                                return ((PropGen)iPg).TypedProp?.TypedValueAsObject;
+                                            } 
+                                            else
+                                            {
+                                                //IPropGen pg = pb.GetPropGen(propertyName, pt);
+                                                return iPg?.TypedProp?.TypedValueAsObject;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            return null;
+                                        }
+
                                     });
 
                                     return new ObservableSource(data, pt);
@@ -786,6 +821,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
             #endregion Constructors and their handlers
 
             #region Raise Event Helpers
+
             private void OnDataSourceChanged(DataSourceChangeTypeEnum changeType)
             {
                 DataSourceChangedEventHandler handler = Interlocked.CompareExchange(ref DataSourceChanged, null, null);
@@ -795,6 +831,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
                     handler(this, new DataSourceChangedEventArgs(changeType));
                 }
             }
+
             #endregion Raise Event Helpers
 
             #region Type Support
@@ -825,5 +862,79 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
         #endregion Observable Source nested class
 
+        //internal class MyExp : BindingExpressionBase, IWeakEventListener
+        //{
+        //    BindingExpression b;
+
+        //    internal override void ChangeSourcesForChild(BindingExpressionBase bindingExpression, WeakDependencySource[] newSources)
+        //    {
+        //        throw new NotImplementedException();
+        //    }
+
+        //    internal override bool CheckValidationRules(BindingGroup bindingGroup, ValidationStep validationStep)
+        //    {
+        //        throw new NotImplementedException();
+        //    }
+
+        //    internal override object ConvertProposedValue(object rawValue)
+        //    {
+        //        throw new NotImplementedException();
+        //    }
+
+        //    internal override object GetSourceItem(object newValue)
+        //    {
+        //        throw new NotImplementedException();
+        //    }
+
+        //    internal override void HandlePropertyInvalidation(DependencyObject d, DependencyPropertyChangedEventArgs args)
+        //    {
+        //        throw new NotImplementedException();
+        //    }
+
+        //    internal override void InvalidateChild(BindingExpressionBase bindingExpression)
+        //    {
+        //        throw new NotImplementedException();
+        //    }
+
+        //    internal override bool ObtainConvertedProposedValue(BindingGroup bindingGroup)
+        //    {
+        //        throw new NotImplementedException();
+        //    }
+
+        //    internal override void ReplaceChild(BindingExpressionBase bindingExpression)
+        //    {
+        //        throw new NotImplementedException();
+        //    }
+
+        //    internal override void StoreValueInBindingGroup(object value, BindingGroup bindingGroup)
+        //    {
+        //        throw new NotImplementedException();
+        //    }
+
+        //    internal override void UpdateBindingGroup(BindingGroup bg)
+        //    {
+        //        throw new NotImplementedException();
+        //    }
+
+        //    internal override object UpdateSource(object convertedValue)
+        //    {
+        //        throw new NotImplementedException();
+        //    }
+
+        //    internal override bool UpdateSource(BindingGroup bindingGroup)
+        //    {
+        //        throw new NotImplementedException();
+        //    }
+
+        //    internal override bool ValidateAndConvertProposedValue(out Collection<ProposedValue> values)
+        //    {
+        //        throw new NotImplementedException();
+        //    }
+        //}
+
     }
+
+
+
+
 }

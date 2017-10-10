@@ -12,7 +12,7 @@ namespace DRM.PropBag
     /// </summary>
     public interface IPubPropBag : IPropBag
     {
-        object this[string typeName, string propertyName] { get; set; }
+        //object this[string typeName, string propertyName] { get; set; }
 
         IProp<T> AddProp<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
             Func<T,T,bool> comparer = null, object extraInfo = null, T initalValue = default(T));
