@@ -6,15 +6,18 @@ Views are created in large part using a declarative style thanks to tools like A
 Data Models are specified using a declarative style thanks to Standard Query Language (SQL) and their attendant Data Definition Languages (DDLs).
 
 However, there are few facilities that allow one to build a view model from a declaration.
-This project started with the simple goal of automating the process of writing the code necessary to support the INotifyPropertyChanged contract for implementing property accessors.
 
-As you are probably keenly aware, each setter needs to raise the PropertyChanged event if the setter updates the existing value.
+This project started with the simple goal of streamlining the process of writing property accessors that support the INotifyPropertyChanged contract.
 
-Reading the article found here: http://northhorizon.net/2011/the-right-way-to-do-inotifypropertychanged written by Daniel Moore, made me realize that by providing a standard call back on each property, one can build the property accessor declarations in a standard way and consistent way for every property: the custom code that would normally be placed in the getter or setter can now be placed in event handlers that respond to events that raised in a standard manner by the property getter and setter routines.
+As you are probably keenly aware, each setter needs to raise the PropertyChanged event if the existing value is updated.
+
+Reading the article found here: http://northhorizon.net/2011/the-right-way-to-do-inotifypropertychanged written by Daniel Moore, made me realize that by providing a standard call back on each property, one can build the property accessor declarations in a consistent way for every property: the custom code that would normally be placed in the getter or setter can now be placed in event handlers wired to the events declared on these 	properties.
 
 This project grew to include the following objectives:
 1. Provide a mechanism by which a new class or an existing class be augmented, with one or more property accessors at either compile time or at run-time.
+
 2. The definition of these properties should be able to be specified in a declarative manner, be able to be written to file, and used later to new up these classes.
+
 3. Include in the definition of these properties the following details:
 	. The delegate (i.e. Action) to call when the property changes,
 	. The initial value the property should have,
@@ -78,7 +81,7 @@ b.	Code will be produced using T-4 templates that augment the 'real' class using
 c.	Classes provided by this framework will stand in the place of the 'real' ViewModel classes. This strategy is using the interceptor pattern: calls normally fielded by the 'real' ViewModel class will instead be fielded by the service class and then passed to the 'real' ViewModel class.
 The application designer no longer has to write the property declarations and is now able to write the application logic in routines that are called by the service. How these event handlers are wired is determined by the application designer as she declares what properties should be created and what event handlers should be created for each.
 
-#Next Steps
+# Next Steps
 
 Much of what is described has been implemented.
 
@@ -120,6 +123,7 @@ PropModel does a good job of
 3. Need to add the ability to specify data validation rules as part of the property definitions. This probably needs to be done in a separate project so one can use the PropBag implementation and then "plug-in" different validation implementations.
 
 3.5 Need to ensure that update loops are not formed if A updates B, and then B updates C, which updates A. The prospect of theses loops greatly increases when validation is being performed.
+
 4. Need to add a GUI-based interactive designer for creating and testing AutoMapper mapping configurations for the mapping between a PropModel and a (data) Model for a particular View-VM adapter.
 
 -------------------------------------------------------------
