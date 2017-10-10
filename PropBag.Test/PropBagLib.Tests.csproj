@@ -109,6 +109,11 @@
     <Content Include="T4\PropGen_PropDefs.xml">
       <SubType>Designer</SubType>
     </Content>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
     <Compile Include="PubPropBag\PubPropBagModel.props.cs">
       <DependentUpon>PubPropBagModel.props.tt</DependentUpon>
       <AutoGen>True</AutoGen>
@@ -129,6 +134,10 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AutoMapperSupport\AutoMapperSupport.csproj">
+      <Project>{10cf1c6f-f877-49a8-8678-6947f55e6920}</Project>
+      <Name>AutoMapperSupport</Name>
+    </ProjectReference>
     <ProjectReference Include="..\PropBag\PropBag.csproj">
       <Project>{7387b893-fbdc-4b9c-ac9e-0b56388b46c1}</Project>
       <Name>PropBag</Name>
@@ -158,6 +167,10 @@
       <LastGenOutput>PubPropBagModel.props.cs</LastGenOutput>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
     <None Include="T4\PropGen.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>PropGen.cs</LastGenOutput>
