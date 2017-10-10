@@ -66,13 +66,15 @@ A application designer should be able to take the Object definitions (stand-alon
 
 These mapping routines should be able to be specified in a declarative style.
 
-This project intends to provide services to a Top-Level VM so that the Top-Level VM can instantiate one or more or View-ViewModel adapters using a combination of 'real' ViewModel classes created by the designer and the specifications recorded in an XAML resource or regular XML file.
+This project intends to provide services to an application designer to support the creation of View Models on demand where a signficant amount of the configuration is specified before hand in a declartive style.
 
-This project also intends to provide services to assist the application designer to build the data mapping routines using a interactive GUI.
+Visual Studio Extensions can be used to create Design-Time editors and these editors can be used to edit these "ViewModel Specification" files.
 
-So far several strategies have been tested. Each involves the following steps:
+This project also intends to provide services to assist the application designer in building the data mapping configurations required by AutoMapper using a interactive GUI that can assist in the editing of the mappings using visual cues and then test those mappings at design time.
 
-1. The application designer produces an XAML resource file or an XML file that describes and identifies the view models that are needed and some information about what those view models should contain. (It is envisioned that via the use of Visual Studio 	extensions that this will be fairly straight forward process and one in which the tooling will be able to greatly assist.)
+So far three strategies have been investigated for creating classes that can then be used by the AutoMapper facilities. Each involves the following steps:
+
+1. The application designer produces an XAML resource file or an XML file that describes and identifies the view models that are needed and some information about what those view models should contain. (It is envisioned that via the use of Visual Studio extensions that this will be fairly straight forward process and one in which the tooling will be able to greatly assist.)
 
 2. The application designer creates and 'real' ViewModel class that uses a base class provided by this framework. The application designer will include in this class application logic that is outside what this service can provide and will be accessed mainly through event handlers. The manner in which these event handlers are wired will be specified by the application designer and recorded in the XAML or regular XML file.
 
