@@ -105,7 +105,6 @@ The next steps fall into one of two categories: Performance Improvements and Add
 Performance Improvements:
 
 1.	A better Binding implementation.
-2.	
 	I am working on a version of the custom Binding Extension that will avoid boxing operations by performing the 	subscription to PropertyChange events on both the source and target and performing the updates in code, basically bypassing the built-in binder.
 
 2. A better AutoMapper implementation.
@@ -114,12 +113,12 @@ Performance Improvements:
 Additional Services:
 
 PropModel does a good job of
-	. defining property accessor for
+	- defining property accessor for
 	- primitive objects (strings, ints.)
 	- user defined POCO structs and classes
 
 1. Need to add
-	. Observable Collection
+	- Observable Collection
 	- Collection View 
 	- Collection View Source (XAML)
 	- and investigate what additional (meta) data can be recorded to help construct the VM.
@@ -149,7 +148,7 @@ One may ask: "Why not just use T-4 templates in every case? In fact if code requ
 
 That is a fair and good question. My answer is that T-4 templates fall short regarding the following concerns:
 
-1. The process of creating, versioning, and updating T-4 templates is not trivial. Each time you want to update how a class is created you must update the T-4 template or better yet create a new version. It very easy to have different parts of a single large project use classes being created from different versions of the same T-4 template "family." 	 And this in some situations will make identifying sources of program malfunctions more difficult. 	 In contrast using a class library is simpler to version correctly. I'm not saying that versioning T-4 templates  is impossible, in fact if done right, they are tied to a dedicated class library and share the exact same  versioning as the class library to which they are attached. In real world cases where customers are helping manage the software artifact this is becomes a big "You have to do it right." situation.
+1. The process of creating, versioning, and updating T-4 templates is not trivial. Each time you want to update how a class is created you must update the T-4 template or better yet create a new version. It very easy to have different parts of a single large project use classes being created from different versions of the same T-4 template "family." 	 And this in some situations will make identifying sources of program malfunctions more difficult. 	 In contrast using a class library is simpler to version correctly. I'm not saying that versioning T-4 templates  is impossible, in fact if done right, they are tied to a dedicated class library and share the exact same versioning as that class library. In real world cases where customers are helping manage the software artifacts this is becomes a big "You have to do it right" situation.
 
 2. T-4 templates require a skill to write and debug that is fairly special.
 
