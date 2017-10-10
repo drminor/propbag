@@ -35,15 +35,13 @@ Our implementation however requires that each property be assigned a type for it
 
 This problem was solved by having the structure used to hold the property information, implement a type-invariant interface and a second interface that takes a single generic type parameter. This generic type parameter of course being specified by the type of property for which this property information structure was provisioned.
 
-Now the object can be used by the DictionaryDictionary&lt;TKey, TValue&gt; through its type-invariant interface: IPropGen and through its typed-interface: IProp&lt;T&gt; when access to the property's value is required and type-safety must be enforced.
+Now the object can be used by the Dictionary&lt;TKey, TValue&gt; through its type-invariant interface: IPropGen and through its typed-interface: IProp&lt;T&gt; when access to the property's value is required and type-safety must be enforced.
 
 The ability to access a property's value when the type of that property is only known at run-time is not trivial. If one knows the type at compile time, one can create an instance of some class that implements IProp&lt;T&gt; and then easily access the value in a type-safe manner. To provide type-safe access when the type is not known a compile-time, this implementation defines open delegates for each type of access operation and then creates a closed version of these as needed for each different property type.
 
-The creation of these typed delegates is fairly expensive in terms of CPU usage and so an application domain-wide cache is employed to avoid creating these unnecessarily. I discovered this technique by reading this article written by Jon Skeet:
+The creation of these typed delegates is fairly expensive in terms of CPU usage and so an application domain-wide cache is employed to avoid creating these unnecessarily. I discovered this technique by reading this article written by Jon Skeet: https://codeblog.jonskeet.uk/2008/08/09/making-reflection-fly-and-exploring-delegates
 
-https://codeblog.jonskeet.uk/2008/08/09/making-reflection-fly-and-exploring-delegates
-
-After a few interactions, or sprints, an implementation of a "TypeSafePropertyBag" was created that has more than satisfactory performance for all but the most data intensive applications and meets each of the objectives outlined above.
+After a few sprints, an implementation of a "TypeSafePropertyBag" was created that has satisfactory performance for all but the most data-intensive applications and meets each of the objectives outlined above.
 
 For some notes on performance and other considerations, please see the section at the end: "Some notes on performance and other considerations."
 
