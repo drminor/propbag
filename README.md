@@ -29,15 +29,15 @@ At the heart of the solution provided by this project lies a "Type Safe Property
 
 This property bag is implemented as a dictionary where each value is the dictionary is accessed by a string key: the property name, and each value in the dictionary is a class that stores the property's value and the attendant (meta) data needed by the property bag to perform the functions mentioned above.
 
-The Dictionary<TKey,TValue> from the Base Class Library is used, and as you may recall this collection class requires that all values stored therein must be the same type, namely the type specified in the second generic type parameter: TValue.
+The DictionaryDictionary&lt;TKey, TValue&gt; from the Base Class Library is used, and as you may recall this collection class requires that all values stored therein must be the same type, namely the type specified in the second generic type parameter: TValue.
 
 Our implementation however requires that each property be assigned a type for its own purposes.
 
 This problem was solved by having the structure used to hold the property information, implement a type-invariant interface and a second interface that takes a single generic type parameter. This generic type parameter of course being specified by the type of property for which this property information structure was provisioned.
 
-Now the object can be used by the Dictionary<TKey, TValue> through its type-invariant interface: IPropGen and through its typed-interface: IProp<T> when access to the property's value is required and type-safety must be enforced.
+Now the object can be used by the DictionaryDictionary&lt;TKey, TValue&gt; through its type-invariant interface: IPropGen and through its typed-interface: IProp&lt;T&gt; when access to the property's value is required and type-safety must be enforced.
 
-The ability to access a property's value when the type of that property is only known at run-time is not trivial. If one knows the type at compile time, one can create an instance of some class that implements IProp<T> and then easily access the value in a type-safe manner. To provide type-safe access when the type is not known a compile-time, this implementation defines open delegates for each type of access operation and then creates a closed version of these as needed for each different property type.
+The ability to access a property's value when the type of that property is only known at run-time is not trivial. If one knows the type at compile time, one can create an instance of some class that implements IProp&lt;T&gt; and then easily access the value in a type-safe manner. To provide type-safe access when the type is not known a compile-time, this implementation defines open delegates for each type of access operation and then creates a closed version of these as needed for each different property type.
 
 The creation of these typed delegates is fairly expensive in terms of CPU usage and so an application domain-wide cache is employed to avoid creating these unnecessarily. I discovered this technique by reading this article written by Jon Skeet:
 
@@ -108,7 +108,7 @@ Performance Improvements:
 	I am working on a version of the custom Binding Extension that will avoid boxing operations by performing the 	subscription to PropertyChange events on both the source and target and performing the updates in code, basically bypassing the built-in binder.
 
 2. A better AutoMapper implementation.
-	The current implementation uses the standard late-bound property invoke style of access. 	It should be possible to provide an implementation that directly accesses the IPropGen 	objects, or better yet uses the IProp<T> interface.
+	The current implementation uses the standard late-bound property invoke style of access. 	It should be possible to provide an implementation that directly accesses the IPropGen 	objects, or better yet uses the IProp&lt;T&gt; interface.
 
 Additional Services:
 
@@ -138,7 +138,7 @@ The speed at which properties are accessed and events raised by this implementat
 
 At this point you may be asking the question: "Wait a minute, I thought that the DynamicObject class introduced with the .NET Framework v 4.0 provides a solution for adding properties at run time. Couldn't a facility that reads a property specification file be used to create properties dynamically using the DynamicObject?"
 
-The DynamicObject does allow one to define properties at run-time, but it does not inheritly provide a way to do this in a type-safe manner. The DynamicObject allows one to access the newly created properties naturally using the primitive dot operator (as in MyObject.MyProperty), it however only allows one to specify how this operator is executed and how one goes about binding to the target, it does not however provide the object to actually store the target value of this binding. Typical implementations use a Dictionary<TKey, TValue> where the TValue is simply System.Object and this is does not provide any level of type safety. In order to provide type-safety, you need something very similar to what this implementation does.
+The DynamicObject does allow one to define properties at run-time, but it does not inheritly provide a way to do this in a type-safe manner. The DynamicObject allows one to access the newly created properties naturally using the primitive dot operator (as in MyObject.MyProperty), it however only allows one to specify how this operator is executed and how one goes about binding to the target, it does not however provide the object to actually store the target value of this binding. Typical implementations use a Dictionary&lt;TKey, TValue&gt; where the TValue is simply System.Object and this is does not provide any level of type safety. In order to provide type-safety, you need something very similar to what this implementation does.
 
 This implementation does not provide the ability to access the property values using the natural dot notation. Instead you must use an indexer or method that takes the name of the property and when type-safety is required the property's type on each get and set access.
 
