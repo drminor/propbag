@@ -69,6 +69,20 @@ namespace DRM.TypeSafePropertyBag
             return type.GetTypeInfo().GetDeclaredProperty(propertyName);
         }
 
+        public static MemberInfo FindMember(this Type type, string propertyName)
+        {
+            MemberInfo[] members = type.GetTypeInfo().GetMembers();
+
+            MemberInfo result = members.FirstOrDefault((x => x.Name == propertyName));
+
+            return result;
+        }
+
+        public static FieldInfo GetDeclaredField(this Type type, string fieldName)
+        {
+            return type.GetTypeInfo().GetDeclaredField(fieldName);
+        }
+
         // TODO: Create a Class Atribute for our WrapperGenerator
         // so that we can more accurately determine this.
         public static bool IsEmittedProxy(this Type type)
