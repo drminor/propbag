@@ -21,16 +21,18 @@ namespace PropBagTestApp.View
         {
             InitializeComponent();
 
-            PropBagTemplate pbt = PropBagTemplateResources.GetPropBagTemplate("ReferenceBindViewModelPB");
-            PropModel pm = pbt.GetPropModel();
-            IPropFactory pf = SettingsExtensions.ThePropFactory;
+            //PropBagTemplate pbt = PropBagTemplateResources.GetPropBagTemplate("ReferenceBindViewModelPB");
+            //PropModel pm = pbt.GetPropModel();
+            //IPropFactory pf = SettingsExtensions.ThePropFactory;
 
-            ReferenceBindViewModelPB rbvm = new ReferenceBindViewModelPB(pm, pf);
+            //ReferenceBindViewModelPB rbvm = new ReferenceBindViewModelPB(pm, pf);
+
+            ReferenceBindViewModelPB rbvm = (ReferenceBindViewModelPB)this.DataContext;
 
             MyModel4 mod4 = new MyModel4() { MyString = "Start" };
             rbvm.SetIt<MyModel4>(mod4, "Deep");
 
-            this.DataContext = rbvm;
+            //this.DataContext = rbvm;
         }
 
         private void BtnRead_Click(object sender, RoutedEventArgs e)
