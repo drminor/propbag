@@ -6,7 +6,9 @@
         DependencyObject,
         PropertyObject,
         CollectionObject,
-        DataSourceProvider
+        DataSourceProvider,
+        Empty,
+        TerminalNode
     }
 
 }
