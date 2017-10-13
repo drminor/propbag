@@ -23,7 +23,7 @@ namespace DRM.PropBag
 
         public IProp TypedProp { get; set; }
 
-        public bool IsEmpty => TypedProp != null;
+        public bool IsEmpty => TypedProp == null;
 
         public bool TypeIsSolid { get; set; }
 

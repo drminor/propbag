@@ -14,7 +14,7 @@ using System.Windows;
 
 namespace DRM.PropBag
 {
-    public struct PropGen : IPropGen
+    public class PropGen : IPropGen
     {
         public Type Type { get;}
 
@@ -24,7 +24,7 @@ namespace DRM.PropBag
 
         public IProp TypedProp { get; }
 
-        public bool IsEmpty => TypedProp != null;
+        public bool IsEmpty => TypedProp == null;
 
         public bool TypeIsSolid { get { return ((IPropGen)TypedProp).TypeIsSolid; } }
 

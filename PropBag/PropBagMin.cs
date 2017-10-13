@@ -414,7 +414,14 @@ namespace DRM.PropBag
                 neverCreate: false,
                 desiredHasStoreValue: ThePropFactory.ProvidesStorage);
 
-            return tVals.IndexOfKey(propertyName);
+            if (genProp.IsEmpty)
+            {
+                return -1;
+            }
+            else
+            {
+                return tVals.IndexOfKey(propertyName);
+            }
         }
 
         private void ReportInvalidAccess(string propertyName, string methodName)
@@ -439,7 +446,7 @@ namespace DRM.PropBag
                 neverCreate: true,
                 desiredHasStoreValue: ThePropFactory.ProvidesStorage);
 
-            return true;
+            return !propGen.IsEmpty;
         }
 
         // Public wrapper aroud GetPropGen
@@ -521,7 +528,16 @@ namespace DRM.PropBag
             if (wasRegistered)
                 return (IPropPrivate<T>)genProp.TypedProp;
             else
-                return CheckTypeInfo<T>(genProp, propertyName, tVals);
+            {
+                if(!genProp.IsEmpty)
+                {
+                    return CheckTypeInfo<T>(genProp, propertyName, tVals);
+                }
+                else
+                {
+                    return null;
+                }
+            }
         }
 
         public bool SetValWithNoType(string propertyName, object value)
@@ -745,7 +761,14 @@ namespace DRM.PropBag
                     neverCreate: true,
                     desiredHasStoreValue: ThePropFactory.ProvidesStorage);
 
-            return genProp.UnSubscribeToPropChanged(doOnChange);
+            if (!genProp.IsEmpty)
+            {
+                return genProp.UnSubscribeToPropChanged(doOnChange);
+            }
+            else
+            {
+                return false;
+            }
         }
 
         // Allow callers to easily subscribe to PropertyChangedWithTVals.
@@ -753,7 +776,10 @@ namespace DRM.PropBag
         {
             IProp<T> prop = GetTypedPropPrivate<T>(propertyName, mustBeRegistered: true);
 
-            prop.SubscribeToPropChanged(doOnChange);
+            if(prop != null)
+            {
+                prop.SubscribeToPropChanged(doOnChange);
+            }
         }
 
         public bool UnSubscribeToPropChanged<T>(Action<T, T> doOnChange, string propertyName)
@@ -783,7 +809,10 @@ namespace DRM.PropBag
             // This wll throw an InvalidOperationException if the property does not exist.
             IProp<T> prop = GetTypedPropPrivate<T>(propertyName, mustBeRegistered: true);
 
-            prop.PropertyChangedWithTVals += eventHandler;
+            if (prop != null)
+            {
+                prop.PropertyChangedWithTVals += eventHandler;
+            }
         }
 
         public void UnSubscribeToPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, string propertyName)
@@ -794,7 +823,10 @@ namespace DRM.PropBag
 
             IProp<T> prop = GetTypedPropPrivate<T>(propertyName, mustBeRegistered: false, neverCreate: true);
 
-            if (prop != null) prop.PropertyChangedWithTVals -= eventHandler;
+            if (prop != null)
+            {
+                prop.PropertyChangedWithTVals -= eventHandler;
+            }
         }
 
         /// <summary>
@@ -832,6 +864,7 @@ namespace DRM.PropBag
             return tVals.ContainsKey(propertyName);
         }
 
+        // TODO: Note this bypasses the HandleMissingProp treatment. Is this OK?
         public bool TryGetTypeOfProperty(string propertyName, out Type type)
         {
             if (tVals.TryGetValue(propertyName, out PropGen value))
@@ -853,7 +886,7 @@ namespace DRM.PropBag
                 neverCreate: true,
                 desiredHasStoreValue: ThePropFactory.ProvidesStorage);
 
-            return pGen.Type;
+            return pGen?.Type;
         }
 
         #endregion
@@ -1110,7 +1143,7 @@ namespace DRM.PropBag
                 genProp = this.HandleMissingProp(propertyName, propertyType, out wasRegistered, haveValue, value, alwaysRegister, mustBeRegistered, neverCreate);
             }
 
-            if (desiredHasStoreValue.HasValue && desiredHasStoreValue.Value != genProp.HasStore)
+            if (!genProp.IsEmpty && desiredHasStoreValue.HasValue && desiredHasStoreValue.Value != genProp.HasStore)
             {
                 if (desiredHasStoreValue.Value)
                     //Caller needs property to have a backing store.
