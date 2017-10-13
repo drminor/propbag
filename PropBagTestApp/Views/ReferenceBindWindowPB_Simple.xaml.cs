@@ -27,8 +27,8 @@ namespace PropBagTestApp.View
 
             ReferenceBindViewModelPB rbvm = new ReferenceBindViewModelPB(pm, pf);
 
-            //MyModel4 mod4 = new MyModel4() { MyString = "Start" };
-            //rbvm.SetIt<MyModel4>(mod4, "Deep");
+            MyModel4 mod4 = new MyModel4() { MyString = "Start" };
+            rbvm.SetIt<MyModel4>(mod4, "Deep");
 
             this.DataContext = rbvm;
         }
