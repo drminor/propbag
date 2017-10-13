@@ -79,6 +79,8 @@ namespace DRM.PropBag.ControlsWPF.Binders
             //    return null;
             //}
 
+            if (values.Length == 0) return null;
+
             object value = values[values.Length - 1];
 
             BindingBase bb = this[values.Length - 1];
@@ -113,6 +115,11 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, System.Globalization.CultureInfo culture)
         {
+            if(targetTypes.Length == 0)
+            {
+                return new object[0];
+            }
+
             object[] result = new object[targetTypes.Length];
 
             for (int i = 0; i < result.Length - 1; i++)

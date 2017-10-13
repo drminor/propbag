@@ -22,6 +22,9 @@ namespace DRM.PropBag.ControlsWPF.Binders
         DependencyObject _targetObject;
         DependencyProperty _targetProperty;
 
+        /// <summary>
+        /// Used to listen to changes to the sources of data for each step in the path.
+        /// </summary>
         List<ObservableSource> _dataSourceChangeListeners;
 
         private const string ROOT_PATH_ELEMENT = "root";
@@ -79,14 +82,12 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
             _dataSourceChangeListeners = PreparePathListeners(_bindingInfo, _sourceType);
 
-            // Used to listen to changes to the sources of data
-            // for each step in the path.
             _resolvedOsCount = InitPathListeners(_dataSourceChangeListeners,_targetObject, _bindingInfo);
 
             BindingBase bb = GetTheBinding(_targetObject, _targetProperty, _dataSourceChangeListeners,
                 _sourceType, _bindingInfo);
 
-            if (_dataSourceChangeListeners.Count > 0)
+            if (_dataSourceChangeListeners.Count > 1)
             {
                 try
                 {
@@ -101,6 +102,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
                     // Ignore the exception, we don't really need to set the binding.
                     // TODO: Is there anyway to avoid getting to here?
                     System.Diagnostics.Debug.WriteLine("Attempt to SetBinding failed.");
+                    bb = null; // Set it to null, so that it will not be used.
                 }
             }
             else
@@ -109,15 +111,14 @@ namespace DRM.PropBag.ControlsWPF.Binders
             }
             System.Diagnostics.Debug.WriteLine("This binding is the one that our MultiValueConverter is using.");
 
-            //foreach (ObservableSource oss in _dataSourceChangeListeners)
-            //{
-            //    oss.ReleaseData();
-            //}
 
             // create wpf binding
             MyMultiValueConverter mValueConverter = new MyMultiValueConverter(_bindingInfo.Mode);
 
-            mValueConverter.Add(bb);
+            if(bb != null)
+            {
+                mValueConverter.Add(bb);
+            }
 
             // return the expression provided by the multi-binding
             MultiBindingExpression exp = mValueConverter.GetMultiBindingExpression(serviceProvider);
@@ -139,7 +140,6 @@ namespace DRM.PropBag.ControlsWPF.Binders
             {
                 return $"{depObj.ToString()}";
             }
-
         }
 
         private void SetDefaultConverter()
@@ -451,6 +451,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
                 //return CreateDefaultBinding(bInfo, sourceType, propertyType);
                 //PropertyPath pathSelf = new PropertyPath("", new object[0]);
                 //return CreateBinding(bInfo.PropertyPath, bInfo, false, typeof(object), propertyType);
+                return null;
             }
 
             StringBuilder sb = new StringBuilder();
@@ -591,25 +592,35 @@ namespace DRM.PropBag.ControlsWPF.Binders
                 BindingOperations.ClearBinding(_targetObject, _targetProperty);
             }
 
-            try
+            if(newBinding != null)
             {
-                BindingExpressionBase bExp = BindingOperations.SetBinding(_targetObject,
-                    _targetProperty, newBinding);
+                try
+                {
+                    BindingExpressionBase bExp = BindingOperations.SetBinding(_targetObject,
+                        _targetProperty, newBinding);
 
-                System.Diagnostics.Debug.WriteLine($" {_targetProperty.Name} on object: {GetNameFromDepObject(_targetObject)}.");
-            }
-            catch
-            {
-                System.Diagnostics.Debug.WriteLine("Attempt to SetBinding failed.");
-            }
+                    System.Diagnostics.Debug.WriteLine($" {_targetProperty.Name} on object: {GetNameFromDepObject(_targetObject)}.");
+                }
+                catch
+                {
+                    System.Diagnostics.Debug.WriteLine("Attempt to SetBinding failed.");
+                }
 
-            if (oldBinding != null)
-            {
-                System.Diagnostics.Debug.WriteLine("MyBinder set a new binding on some target that is replacing an existing binding.");
+                if (oldBinding != null)
+                {
+                    System.Diagnostics.Debug.WriteLine("MyBinder set a new binding on some target that is replacing an existing binding.");
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine("MyBinder set a new binding on some target that had no binding previously.");
+                }
             }
             else
             {
-                System.Diagnostics.Debug.WriteLine("MyBinder set a new binding on some target that had no binding previously.");
+                if (oldBinding != null)
+                {
+                    System.Diagnostics.Debug.WriteLine("MyBinder removed binding on some target and replaced it with no binding.");
+                }
             }
 
 
