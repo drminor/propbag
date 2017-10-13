@@ -28,15 +28,15 @@ namespace PropBagTestApp.ViewModels
 
         }
 
-        public ReferenceBindViewModelPB(PropBagTypeSafetyMode typeSafetyMode)
-            : base(typeSafetyMode)
-        {
-        }
+        //public ReferenceBindViewModelPB(PropBagTypeSafetyMode typeSafetyMode)
+        //    : base(typeSafetyMode)
+        //{
+        //}
 
-        public ReferenceBindViewModelPB(PropBagTypeSafetyMode typeSafetyMode, IPropFactory thePropFactory)
-            : base(typeSafetyMode, thePropFactory)
-        {
-        }
+        //public ReferenceBindViewModelPB(PropBagTypeSafetyMode typeSafetyMode, IPropFactory thePropFactory)
+        //    : base(typeSafetyMode, thePropFactory)
+        //{
+        //}
     }
 }
 
