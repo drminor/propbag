@@ -52,6 +52,7 @@
     <Compile Include="Binders\DataSourceChangeTypeEnum.cs" />
     <Compile Include="Binders\MyBindingEngine.cs" />
     <Compile Include="Binders\MyBindingInfo.cs" />
+    <Compile Include="Binders\ObservableSourceStatusEnum.cs" />
     <Compile Include="Binders\SourceKindEnum.cs" />
     <Compile Include="BoundPropBag.cs" />
     <Compile Include="ComparerFuncTypeConverter.cs" />
@@ -64,9 +65,7 @@
     <Compile Include="NamespaceItem.cs" />
     <Compile Include="NamespacesCollection.cs" />
     <Compile Include="Binders\MyBinder.cs" />
-    <None Include="Binders\PropBagPropFancyBinder.cs" />
     <Compile Include="PropBagInstanceAttribute.cs" />
-    <None Include="Binders\PropBagPropBinder.cs" />
     <Compile Include="PropBagTemplate.cs" />
     <Compile Include="PropBagTemplateExtensions.cs" />
     <Compile Include="PropComparerFunc.cs" />
