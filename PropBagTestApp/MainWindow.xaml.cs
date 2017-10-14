@@ -28,10 +28,10 @@ namespace PropBagTestApp
     public partial class MainWindow : Window
     {
         [PropBagInstanceAttribute("MainViewModel")]
-        public MainViewModel ourData { get; set; }
+        public MainViewModel OurData { get; set; }
 
         [PropBagInstanceAttribute("MainViewModel2")]
-        private MainViewModel ourData2 { get; set; }
+        private MainViewModel OurData2 { get; set; }
 
         
         public MainWindow()
@@ -42,10 +42,10 @@ namespace PropBagTestApp
 
             ViewModelGenerator.StandUpViewModels(topGrid, this);
 
-            topGrid.DataContext = ourData;
+            topGrid.DataContext = OurData;
 
             Grid insideGrid = (Grid)this.FindName("InsideGrid");
-            insideGrid.DataContext = ourData2;
+            insideGrid.DataContext = OurData2;
         }
 
 
