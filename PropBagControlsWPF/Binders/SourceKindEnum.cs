@@ -3,10 +3,9 @@
     public enum SourceKindEnum
     {
         DataContext,
-        DependencyObject,
+        DataSourceProvider,
         PropertyObject,
         CollectionObject,
-        DataSourceProvider,
         Empty,
         TerminalNode
     }

@@ -15,7 +15,7 @@ using System.Windows.Data;
 using System.Windows.Markup;
 
 /// <remarks>
-/// This is loosely based on the code available from
+/// This was inspired from the code available at
 /// https://www.codeproject.com/Articles/356294/Using-path-parameters-when-binding-data-in-WPF
 /// Written by Michael Soloduha.
 /// License: "The Code Project Open License (CPOL)
@@ -23,7 +23,7 @@ using System.Windows.Markup;
 
 namespace DRM.PropBag.ControlsWPF.Binders
 {
-    [MarkupExtensionReturnType(typeof(object)), Localizability(LocalizationCategory.None, Modifiability = Modifiability.Unmodifiable, Readability = Readability.Unreadable)]
+    [MarkupExtensionReturnType(typeof(IMultiValueConverter)), Localizability(LocalizationCategory.None, Modifiability = Modifiability.Unmodifiable, Readability = Readability.Unreadable)]
     public class BindingExtension : MarkupExtension
     {
         #region Member Declarations
@@ -83,6 +83,9 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
         public bool ValidatesOnDataErrors { get; set; }
         public bool ValidatesOnExceptions { get; set; }
+        public bool ValidatesOnNotifyDataErrors { get; set; }
+
+        public int Delay { get; set; }
 
         public string XPath { get; set; }
 
@@ -141,7 +144,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
                 ConverterCulture = ConverterCulture,
                 ConverterParameter = ConverterParameter,
 
-                FallBackVallue = FallBackVallue,
+                FallBackValue = FallBackVallue,
                 IsAsync = IsAsync,
 
                 NotifyOnSourceUpdated = NotifyOnSourceUpdated,
@@ -155,6 +158,14 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
                 ValidatesOnDataErrors = ValidatesOnDataErrors,
                 ValidatesOnExceptions = ValidatesOnExceptions,
+                ValidatesOnNotifyDataErrors = ValidatesOnNotifyDataErrors,
+
+                
+                UpdateSourceExceptionFilter = null,
+                ValidationRules = null,
+                
+
+                Delay = Delay,
 
                 XPath = XPath
             };

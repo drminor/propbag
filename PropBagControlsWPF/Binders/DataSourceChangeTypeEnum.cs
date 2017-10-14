@@ -18,6 +18,12 @@
         /// of its DataContext property now points to a different object,
         /// or a DataSourceProvider has signaled that it's data now returns a different object.
         /// </summary>
-        DataContextUpdated
+        DataContextUpdated,
+
+        /// <summary>
+        /// Used internaly to begin listening to the FrameworkElement's DataContextChanged
+        /// or the DataSourceProvider, DataChanged event.
+        /// </summary>
+        Initializing
     }
 }
