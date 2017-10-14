@@ -27,8 +27,15 @@ namespace DRM.PropBag.Caches
         public StringFromTDelegate GetTheStringFromTDelegate(Type sourceType, Type propertyType)
         {
             TypeDescBasedTConverterKey key = new TypeDescBasedTConverterKey(sourceType, propertyType, isConvert: true);
+#if DEBUG
+            bool inCache = _converters.ContainsKey(key);
             Delegate result = _converters.GetOrAdd(key);
-
+            System.Diagnostics.Debug.WriteLine(
+                string.Format("A StringFromT delegate is being requested for type: {0} and was {1}",
+                    propertyType.ToString(), inCache ? "found." : "not found."));
+#else
+            Delegate result = _converters.GetOrAdd(key);
+#endif
             if (result == null) return null;
             return (StringFromTDelegate)result;
         }
@@ -36,8 +43,16 @@ namespace DRM.PropBag.Caches
         public TFromStringDelegate GetTheTFromStringDelegate(Type sourceType, Type propertyType)
         {
             TypeDescBasedTConverterKey key = new TypeDescBasedTConverterKey(sourceType, propertyType, isConvert: false);
-            Delegate result = _converters.GetOrAdd(key);
 
+#if DEBUG
+            bool inCache = _converters.ContainsKey(key);
+            Delegate result = _converters.GetOrAdd(key);
+            System.Diagnostics.Debug.WriteLine(
+                string.Format("A TFromString delegate is being requested for type: {0} and was {1}",
+                    sourceType.ToString(), inCache ? "found." : "not found."));
+#else
+            Delegate result = _converters.GetOrAdd(key);
+#endif
             if (result == null) return null;
             return (TFromStringDelegate)result;
         }
@@ -71,10 +86,6 @@ namespace DRM.PropBag.Caches
             MethodInfo methInfoGetProp = GMT_TYPE.GetMethod("GetStringFromT", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(sourceType);
             StringFromTDelegate result = (StringFromTDelegate)Delegate.CreateDelegate(typeof(StringFromTDelegate), methInfoGetProp);
 
-            System.Diagnostics.Debug.WriteLine(
-                string.Format("A StringFromT delegate is being requested for type: {0} and was {1}",
-                    propertyType.ToString(), result == null ? "not found." : "found."));
-
             return result;
         }
 
@@ -89,10 +100,6 @@ namespace DRM.PropBag.Caches
 
             MethodInfo methInfoGetProp = GMT_TYPE.GetMethod("GetTfromString", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(sourceType);
             TFromStringDelegate result = (TFromStringDelegate)Delegate.CreateDelegate(typeof(TFromStringDelegate), methInfoGetProp);
-
-            System.Diagnostics.Debug.WriteLine(
-                string.Format("A TFromString delegate is being requested for type: {0} and was {1}",
-                    sourceType.ToString(), result == null ? "not found." : "found."));
 
             return result;
         }
