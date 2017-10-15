@@ -81,6 +81,32 @@ namespace PropBagTestApp.View
             System.Diagnostics.Debug.WriteLine($"TestDouble = {testDouble}.");
             System.Diagnostics.Debug.WriteLine($"Deep.MyString = {myString}.");
         }
+
+        private void BtnRemoveDc_Click(object sender, RoutedEventArgs e)
+        {
+            if(this.DataContext == null)
+            {
+                this.DataContext = GetNewViewModel();
+            }
+            else
+            {
+                this.DataContext = null;
+            }
+        }
+         
+        private ReferenceBindViewModelPB GetNewViewModel()
+        {
+            PropBagTemplate pbt = PropBagTemplateResources.GetPropBagTemplate("ReferenceBindViewModelPB");
+            PropModel pm = pbt.GetPropModel();
+            IPropFactory pf = SettingsExtensions.ThePropFactory;
+
+            ReferenceBindViewModelPB rbvm = new ReferenceBindViewModelPB(pm, pf);
+
+            MyModel4 mod4 = new MyModel4() { MyString = "Start" };
+            rbvm.SetIt<MyModel4>(mod4, "Deep");
+
+            return rbvm;
+        }
     }
 
 

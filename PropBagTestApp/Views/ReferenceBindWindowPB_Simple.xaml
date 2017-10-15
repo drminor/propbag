@@ -48,7 +48,8 @@
 
         <StackPanel Orientation="Horizontal" Grid.Row="3">
             <Button x:Name="btnRead" Content="Read" Margin="0,0,20,0" Height="25" Width="100" Click="BtnRead_Click"></Button>
-            <Button x:Name="btnSave" Content="Save" Height="25" Width="100" Click="BtnSave_Click" ></Button>
+            <Button x:Name="btnSave" Content="Save" Margin="0,0,20,0" Height="25" Width="100" Click="BtnSave_Click" ></Button>
+            <Button x:Name="btnRemoveDc" Content="RemoveDc" Height="25" Width="100" Click="BtnRemoveDc_Click"></Button>
         </StackPanel>
 
 
