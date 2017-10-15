@@ -52,7 +52,10 @@
     <Compile Include="Binders\DataSourceChangeTypeEnum.cs" />
     <Compile Include="Binders\MyBindingEngine.cs" />
     <Compile Include="Binders\MyBindingInfo.cs" />
+    <Compile Include="Binders\ObservableSource.cs" />
+    <Compile Include="Binders\ObservableSourceProvider.cs" />
     <Compile Include="Binders\ObservableSourceStatusEnum.cs" />
+    <Compile Include="Binders\OSSExtensions.cs" />
     <Compile Include="Binders\SourceKindEnum.cs" />
     <Compile Include="BoundPropBag.cs" />
     <Compile Include="ComparerFuncTypeConverter.cs" />
