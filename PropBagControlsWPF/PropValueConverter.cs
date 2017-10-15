@@ -7,17 +7,39 @@ namespace DRM.PropBag.ControlsWPF
 {
     public class PropValueConverter : MarkupExtension, IValueConverter
     {
-        static IConvertValues ValueConverter { get; }
+        #region Static Constructor and Properties
+
+        static IConvertValues ValueConverter_Default { get; }
 
         static PropValueConverter()
         {
-            ValueConverter = new PropFactoryValueConverter();
+            ValueConverter_Default = new PropFactoryValueConverter();
         }
 
-        public override object ProvideValue(IServiceProvider serviceProvider)
+        #endregion
+
+        #region Instance Constructor and Properties
+
+        IConvertValues _valueConverter;
+        public IConvertValues ValueConverter
         {
-            return this;
+            get
+            {
+                if (_valueConverter == null)
+                {
+                    _valueConverter = ValueConverter_Default;
+                }
+                return _valueConverter;
+            }
+            set
+            {
+                _valueConverter = value;
+            }
         }
+
+        #endregion
+
+        public override object ProvideValue(IServiceProvider serviceProvider) { return this; }
 
         // Value is native object, we need to return a targetType (hopefully a string at this point.)
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)

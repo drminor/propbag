@@ -68,11 +68,9 @@ namespace DRM.PropBag.ControlsWPF.Binders
         /// </summary>
         public Collection<System.Windows.Controls.ValidationRule> ValidationRules { get; set; }
 
+        public Func<MyBindingInfo, string, Type, Type, object> ConverterParameterBuilder { get; set; }
 
-
-        public Func<MyBindingInfo, Type, Type, object> ConverterParameterBuilder { get; set; }
-
-        private object GetConverterParameter(MyBindingInfo bInfo, Type t1, Type t2)
+        private object GetConverterParameter(MyBindingInfo bInfo, string pathElement, Type t1, Type t2)
         {
             return bInfo.ConverterParameter;
         }

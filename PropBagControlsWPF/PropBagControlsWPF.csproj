@@ -50,12 +50,14 @@
     <Compile Include="Binders\DataSourceChangedEventArgs.cs" />
     <Compile Include="Binders\DataSourceChangedEventHandler.cs" />
     <Compile Include="Binders\DataSourceChangeTypeEnum.cs" />
+    <Compile Include="Binders\DirectConverterParameter.cs" />
     <Compile Include="Binders\MyBindingEngine.cs" />
     <Compile Include="Binders\MyBindingInfo.cs" />
     <Compile Include="Binders\ObservableSource.cs" />
     <Compile Include="Binders\ObservableSourceProvider.cs" />
     <Compile Include="Binders\ObservableSourceStatusEnum.cs" />
     <Compile Include="Binders\OSSExtensions.cs" />
+    <Compile Include="Binders\PropDirectConverter.cs" />
     <Compile Include="Binders\SourceKindEnum.cs" />
     <Compile Include="BoundPropBag.cs" />
     <Compile Include="ComparerFuncTypeConverter.cs" />

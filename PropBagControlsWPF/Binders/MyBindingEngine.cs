@@ -43,7 +43,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
         #region Public Properties
 
         public Lazy<IValueConverter> DefaultConverter { get; set; }
-        public Func<MyBindingInfo, Type, Type, object> DefaultConverterParameterBuilder { get; set; }
+        public Func<MyBindingInfo, string, Type, Type, object> DefaultConverterParameterBuilder { get; set; }
         public string BinderName { get; set; }
 
         #endregion
@@ -115,7 +115,8 @@ namespace DRM.PropBag.ControlsWPF.Binders
         }
 
         private MultiBindingExpression GetStandardMultiConverterExp(IServiceProvider serviceProvider, 
-            DependencyObject targetObject, DependencyProperty targetProperty, Type sourceType, MyBindingInfo bInfo)
+            DependencyObject targetObject, DependencyProperty targetProperty, Type sourceType, 
+            MyBindingInfo bInfo)
         {
             // create wpf binding
             MyMultiValueConverter mValueConverter = new MyMultiValueConverter(_bindingInfo.Mode);
@@ -123,9 +124,20 @@ namespace DRM.PropBag.ControlsWPF.Binders
             // TODO: Check This. If we do not set a default Converter will WPF provide a default implementation?
             SetDefaultConverter();
 
-            Binding binding = CreateDefaultBinding(bInfo.PropertyPath, bInfo, sourceType, targetProperty.PropertyType);
+            string pathElement = GetTerminalPathElement(bInfo.PropertyPath);
+
+            Binding binding = CreateDefaultBinding(bInfo.PropertyPath, bInfo, pathElement, sourceType, targetProperty.PropertyType);
 
             return WrapBindingInMultiValueConverter(serviceProvider, binding, binding.Mode);
+        }
+
+        private string GetTerminalPathElement(PropertyPath path)
+        {
+            if (path.Path == null) return ".";
+
+            string[] components = GetPathComponents(path, out int count);
+
+            return components[components.Length - 1];
         }
 
         private MultiBindingExpression WrapBindingInMultiValueConverter(IServiceProvider serviceProvider,
@@ -170,14 +182,22 @@ namespace DRM.PropBag.ControlsWPF.Binders
                 {
                     throw new InvalidOperationException("The DefaultParameterBuilder has been given a value, but the DefaultConverter is unassigned.");
                 }
-                DefaultConverter = new Lazy<IValueConverter>(() => new PropValueConverter());
-                DefaultConverterParameterBuilder = OurDefaultConverterParameterBuilder;
+                //DefaultConverter = new Lazy<IValueConverter>(() => new PropValueConverter());
+                //DefaultConverterParameterBuilder = OurDefaultConverterParameterBuilder;
+
+                DefaultConverter = new Lazy<IValueConverter>(() => new PropDirectConverter());
+                DefaultConverterParameterBuilder = PropDirectParameterBuilder;
             }
         }
 
-        private object OurDefaultConverterParameterBuilder(MyBindingInfo bInfo, Type sourceType, Type propertyType)
+        private object OurDefaultConverterParameterBuilder(MyBindingInfo bInfo, string propertyName, Type sourceType, Type propertyType)
         {
             return new TwoTypes(sourceType, propertyType);
+        }
+
+        private object PropDirectParameterBuilder(MyBindingInfo bInfo, string propertyName, Type sourceType, Type propertyType)
+        {
+            return new DirectConverterParameter(propertyName, sourceType, propertyType);
         }
 
         private bool SourceIsDependencyObject(MyBindingInfo bInfo)
@@ -462,11 +482,29 @@ namespace DRM.PropBag.ControlsWPF.Binders
             return result;
         }
 
-        private string GetNewPath(OSList pathListeners)
+        private string GetNewPath(OSList pathListeners, bool usePropDirect)
         {
-            string result = null;
+            int numOfListeners = pathListeners.Count;
 
-            for (int nPtr = 1; nPtr < pathListeners.Count; nPtr++)
+            if(numOfListeners < 2)
+            {
+                return ".";
+            }
+
+            int deep;
+            if (usePropDirect && pathListeners[numOfListeners - 2].IsPropBagBased)
+            {
+                // Bind to the last parent (we will use the PropDirectConverter.)
+                deep = numOfListeners - 1;
+            }
+            else
+            {
+                // Use the complete path.
+                deep = numOfListeners;
+            }
+
+            string result = null;
+            for (int nPtr = 1; nPtr < deep; nPtr++)
             {
                 if (result != null) result += ".";
                 result += pathListeners[nPtr].NewPathElement;
@@ -567,27 +605,29 @@ namespace DRM.PropBag.ControlsWPF.Binders
         {
             System.Diagnostics.Debug.Assert(sourceType != null, "The SourceType should never be null here.");
 
-            Type propertyType = targetProperty.PropertyType;
-
-            //int readyPathListeners = 0; // GetNumResolvedOS2(pathListeners);
-
             // One node:    1 parent;
             // Two nodes:   1 parent, 1 intervening object
             // Three nodes: 1 parent, 2 intervening objects
             // The next to last node, must have data, in order to avoid binding warnings.
-            ObservableSource lastParent = pathListeners[pathListeners.Count - 2];
-            string strNewPath = GetNewPath(pathListeners);
+
+            ObservableSource lastParent = pathListeners.Count > 1 ? pathListeners[pathListeners.Count - 2] : pathListeners[0];
+
+            isCustom = lastParent.IsPropBagBased;
+            string strNewPath = GetNewPath(pathListeners, false); // For diagnostics, report the full path.
             ObservableSourceStatusEnum lastParentStatus = lastParent.Status;
             System.Diagnostics.Debug.WriteLine($"Path = {bInfo.PropertyPath.Path}, NewPath = {strNewPath}, " +
                 $"Terminal Node Status = {lastParentStatus}.");
 
             if (lastParentStatus.IsReadyOrWatching())
             {
+                strNewPath = GetNewPath(pathListeners, isCustom);
+
                 // TODO: What about the original PropertyPath parameters?
                 PropertyPath newPath = new PropertyPath(strNewPath);
+                string terminalPathElement = pathListeners[pathListeners.Count - 1].PathElement;
+                Type propertyType = targetProperty.PropertyType;
 
-                isCustom = lastParent.IsPropBagBased;
-                return CreateBinding(newPath, bInfo, isCustom, sourceType, propertyType);
+                return CreateBinding(newPath, bInfo, terminalPathElement, isCustom, sourceType, propertyType);
             } 
             else
             {
@@ -599,14 +639,13 @@ namespace DRM.PropBag.ControlsWPF.Binders
             }
         }
 
-        private Binding CreateBinding(PropertyPath newPath, MyBindingInfo bInfo, bool isPropBagBased, Type sourceType, Type propertyType)
+        private Binding CreateBinding(PropertyPath newPath, MyBindingInfo bInfo, string pathElement, bool isPropBagBased, Type sourceType, Type propertyType)
         {
             Binding result;
 
-
             if (isPropBagBased)
             {
-                IValueConverter converter = GetConverter(bInfo, isPropBagBased, sourceType, propertyType, out object converterParameter);
+                IValueConverter converter = GetConverter(bInfo, pathElement, isPropBagBased, sourceType, propertyType, out object converterParameter);
 
                 result = new Binding
                 {
@@ -614,16 +653,10 @@ namespace DRM.PropBag.ControlsWPF.Binders
                     Converter = converter,
                     ConverterParameter = converterParameter,
                 };
-
-                //System.Diagnostics.Debug.WriteLine("CREATING PropBag BINDING");
-                //System.Diagnostics.Debug.Write($"From {newPath.Path} to... ");
             }
             else
             {
-                result = CreateDefaultBinding(newPath, bInfo, sourceType, propertyType);
-
-                //System.Diagnostics.Debug.WriteLine("CREATING standard BINDING");
-                //System.Diagnostics.Debug.Write($"From {newPath.Path} to... ");
+                result = CreateDefaultBinding(newPath, bInfo, pathElement, sourceType, propertyType);
             }
 
             ApplyStandardBindingParams(ref result, bInfo);
@@ -631,14 +664,13 @@ namespace DRM.PropBag.ControlsWPF.Binders
             return result;
         }
 
-        private Binding CreateDefaultBinding(PropertyPath newPath, MyBindingInfo bInfo, Type sourceType, Type propertyType)
+        private Binding CreateDefaultBinding(PropertyPath newPath, MyBindingInfo bInfo, string pathElement, Type sourceType, Type propertyType)
         {
-
             Binding binding = new Binding
             {
                 Path = newPath,
                 Converter = bInfo.Converter,
-                ConverterParameter = bInfo.ConverterParameterBuilder(bInfo, sourceType, propertyType),
+                ConverterParameter = bInfo.ConverterParameterBuilder(bInfo, pathElement, sourceType, propertyType),
                 ConverterCulture = bInfo.ConverterCulture,
         };
 
@@ -677,17 +709,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
         }
 
-        //private bool IsThisNodePropBagBased(ObservableSource os)
-        //{
-        //    if (os == null)
-        //    {
-        //        System.Diagnostics.Debug.WriteLine("Returning false for IsThisNodePropBagBased because the ObservableSource is null.");
-        //        return false;
-        //    }
-        //    return os.IsPropBagBased;
-        //}
-
-        private IValueConverter GetConverter(MyBindingInfo bInfo, bool isPropBagBased,
+        private IValueConverter GetConverter(MyBindingInfo bInfo, string pathElement, bool isPropBagBased,
             Type sourceType, Type propertyType, out object converterParameter)
         {
 
@@ -695,25 +717,25 @@ namespace DRM.PropBag.ControlsWPF.Binders
             {
                 if (bInfo.Converter != null)
                 {
-                    converterParameter = bInfo.ConverterParameterBuilder(bInfo, sourceType, propertyType);
+                    converterParameter = bInfo.ConverterParameterBuilder(bInfo, pathElement, sourceType, propertyType);
                     return bInfo.Converter;
                 }
                 else
                 {
-                    converterParameter = DefaultConverterParameterBuilder(bInfo, sourceType, propertyType);
+                    converterParameter = DefaultConverterParameterBuilder(bInfo, pathElement, sourceType, propertyType);
                     return DefaultConverter.Value;
                 }
             }
             else
             {
-                converterParameter = bInfo.ConverterParameterBuilder(bInfo, sourceType, propertyType);
+                converterParameter = bInfo.ConverterParameterBuilder(bInfo, pathElement, sourceType, propertyType);
                 return bInfo.Converter;
             }
         }
 
         #endregion
 
-        #region Data Source Changed Handing
+        #region Data Source Changed Handling
 
         private void DataSourceHasChanged(object sender, DataSourceChangedEventArgs e)
         {
@@ -768,11 +790,9 @@ namespace DRM.PropBag.ControlsWPF.Binders
                     System.Diagnostics.Debug.WriteLine($"{BinderName} removed binding on some target and replaced it with no binding.");
                 }
             }
-
-
         }
 
-#endregion
+        #endregion
 
         #region GetSource Support
 
