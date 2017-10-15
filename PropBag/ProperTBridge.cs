@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace DRM.PropBag
 {
-    // Yet another way to provide Type-safe access when the Type is not know at
+    // Yet another way to provide Type-safe access when the Type is not known at
     // runtime. 
     public class ProperTBridge<T> : IProperTBridge
     {
