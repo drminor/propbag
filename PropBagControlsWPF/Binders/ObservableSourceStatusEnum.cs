@@ -16,4 +16,5 @@ namespace DRM.PropBag.ControlsWPF.Binders
         IsWatchingPropAndColl,
         Undetermined // This is used for DataSourceProviders
     }
+
 }
