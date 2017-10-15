@@ -64,6 +64,7 @@
     <Compile Include="Factories\IConvertValues.cs" />
     <Compile Include="Factories\PropFactoryValueConveter.cs" />
     <Compile Include="Factories\ResolveTypeDelegate.cs" />
+    <Compile Include="IProperTBridge.cs" />
     <Compile Include="Prop.cs" />
     <Compile Include="PropBagMin.cs" />
     <Compile Include="PropBagDyn.cs" />
@@ -77,6 +78,7 @@
     <Compile Include="Factories\PropFactory.cs" />
     <Compile Include="PropGen.cs" />
     <Compile Include="PropGenBase.cs" />
+    <Compile Include="ProperTBridge.cs" />
     <Compile Include="PropTypedBase.cs" />
     <Compile Include="PubPropBag.cs" />
     <Compile Include="PropBag.cs" />
