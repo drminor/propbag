@@ -1,4 +1,5 @@
 ﻿using DRM.PropBag.Caches;
+using DRM.TypeSafePropertyBag;
 using System;
 using System.ComponentModel;
 using System.Globalization;
@@ -74,6 +75,30 @@ namespace DRM.PropBag.ControlModel
             private set
             {
                 _destType = value;
+            }
+        }
+
+        public static TwoTypes FromMkUpExtParam(object parameter, Type destinationType = null)
+        {
+            if (parameter == null)
+            {
+                return TwoTypes.Empty;
+            }
+            else if (parameter is TwoTypes)
+            {
+                return (TwoTypes)parameter;
+            }
+            else if (parameter is Type && destinationType != null)
+            {
+                return new TwoTypes((Type)parameter, destinationType);
+            }
+            else if (parameter is IPropGen && destinationType != null)
+            {
+                return new TwoTypes(((IPropGen)parameter).Type, destinationType);
+            }
+            else
+            {
+                return TwoTypes.Empty;
             }
         }
     }
