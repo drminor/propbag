@@ -232,10 +232,15 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
                 ObservableSourceProvider osp = GetSourceRoot(targetObject, bInfo.Source, ROOT_PATH_ELEMENT);
 
+                if(osp == null)
+                {
+                    throw new InvalidOperationException($"{BinderName} could not locate a data source.");
+                }
+
                 status = ReplaceListener(pathListeners, ROOT_INDEX, ref osp, this.DataSourceHasChanged,
                     out parentOs);
 
-                if(!parentOs.IsListeningForNewDC)
+                if(parentOs?.IsListeningForNewDC != true)
                 {
                     throw new InvalidOperationException($"{BinderName} could not locate a data source.");
                 }
@@ -289,9 +294,9 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
                 if(!matched || !(nodeIndex < pathListeners.Count - 1))
                 {
+                    // Action is not required if
                     // The updated property is not part of our path,
-                    // Or our child in the terminal node,
-                    // there is nothing for us to do here.
+                    // or our child in the terminal node,
                     return bindingInfoChanged; 
                 }
 
@@ -307,10 +312,15 @@ namespace DRM.PropBag.ControlsWPF.Binders
                 {
                     string prevValueForNewPathElement = child.NewPathElement;
                     ObservableSourceProvider newChildProvider = parentOs.GetChild(child.PathElement);
-                    if(newChildProvider.Data == null)
+
+                    if(newChildProvider?.Data == null)
                     {
                         // Still no data ??
                         System.Diagnostics.Debug.WriteLine("Child was null and is still null.");
+
+                        ResetPathListeners(pathListeners, ++nodeIndex);
+
+                        bindingInfoChanged = true;
                         return bindingInfoChanged;
                     }
 
@@ -318,15 +328,18 @@ namespace DRM.PropBag.ControlsWPF.Binders
                         ReplaceListener(pathListeners, nodeIndex, ref newChildProvider,
                         this.DataSourceHasChanged, out ObservableSource newChild);
 
-                    string newPathElement = GetNewPathElement(newChild.PathElement, newChild.Type, parentOs.IsPropBagBased);
-                    newChild.NewPathElement = newPathElement;
+                    if(newChild != null)
+                    {
+                        string newPathElement = GetNewPathElement(newChild.PathElement, newChild.Type, parentOs.IsPropBagBased);
+                        newChild.NewPathElement = newPathElement;
 
-                    bindingInfoChanged = (newPathElement != prevValueForNewPathElement);
+                        bindingInfoChanged = (newPathElement != prevValueForNewPathElement);
+                    }
                 }
 
                 // If the child was updated, begin processing our grand children.
                 parentOs = pathListeners[nodeIndex];
-                status = parentOs.Status;
+                status = parentOs?.Status ?? ObservableSourceStatusEnum.NoType;
             }
             else
             {
@@ -334,7 +347,6 @@ namespace DRM.PropBag.ControlsWPF.Binders
             }
 
             // Now, starting at step: stepNo + 1, replace or refresh each listener. 
-
 
             int nPtr = nodeIndex + 1;
             for (; nPtr < pathListeners.Count - 1 && status.IsReadyOrWatching(); nPtr++)
@@ -357,10 +369,14 @@ namespace DRM.PropBag.ControlsWPF.Binders
                 status = ReplaceListener(pathListeners, nPtr, ref osp, this.DataSourceHasChanged,
                     out ObservableSource os);
 
-                string newPathElement = GetNewPathElement(pathElement, os.Type, parentOs.IsPropBagBased);
-                os.NewPathElement = newPathElement;
+                if(os != null)
+                {
+                    string newPathElement = GetNewPathElement(pathElement, os.Type, parentOs.IsPropBagBased);
+                    os.NewPathElement = newPathElement;
 
-                bindingInfoChanged = (newPathElement != prevValueForNewPathElement);
+                    bindingInfoChanged = (newPathElement != prevValueForNewPathElement);
+                }
+                // Note: if os is null, status will be "NoType", i.e. not ready.
 
                 if (status == ObservableSourceStatusEnum.Ready)
                 {
@@ -373,7 +389,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
                 }
 
                 parentOs = os;
-                status = os.Status;
+                //status = os.Status; -- Not needed, ReplaceListener sets this variable.
             }
 
             if (nPtr == pathListeners.Count - 1)
@@ -497,7 +513,14 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
             ObservableSource oldListener = pathListeners[index];
 
-            newListener = newListenerProvider.CreateObservableSource(); newListenerProvider = null;
+            if(newListenerProvider != null)
+            {
+                newListener = newListenerProvider.CreateObservableSource(); newListenerProvider = null;
+            }
+            else
+            {
+                newListener = null;
+            }
 
             bool wasListening = oldListener?.IsListeningForNewDC == true;
 
@@ -541,6 +564,9 @@ namespace DRM.PropBag.ControlsWPF.Binders
                 isListening = newListener.IsListeningForNewDC;
             }
 
+            // TODO: Although this (and PrepareListeners) is the only code that sets in item
+            // in the _dataSourceChangeListeners,
+            // we probably should encapsulate this list in a class.
             pathListeners[index] = newListener;
 
 #if DEBUG
@@ -845,6 +871,8 @@ namespace DRM.PropBag.ControlsWPF.Binders
             //}
 
             //return true;
+            string fwElementName = GetNameFromDepObject(targetObject);
+            System.Diagnostics.Debug.WriteLine($"Fetching DataContext from {fwElementName}.");
 
             object dc = LogicalTree.GetDataContext(targetObject, out DependencyObject foundNode);
 
