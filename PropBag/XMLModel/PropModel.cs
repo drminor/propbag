@@ -1,12 +1,11 @@
-﻿using System;
+﻿using DRM.PropBag;
+using DRM.TypeSafePropertyBag;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
 using System.Xml.Serialization;
-
-using DRM.PropBag;
 
 namespace DRM.PropBag.XMLModel
 {
