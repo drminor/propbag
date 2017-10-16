@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using DRM.TypeSafePropertyBag;
+using System.Windows;
 using System.Windows.Controls;
 
 namespace DRM.PropBag.ControlsWPF

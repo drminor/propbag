@@ -43,17 +43,22 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GenerateHash.cs" />
+    <Compile Include="IConvertValues.cs" />
     <Compile Include="INotifyPropertyWithValsChanged.cs" />
     <Compile Include="IOrderedDictionary.cs" />
+    <Compile Include="IPropFactory.cs" />
     <Compile Include="ITypeSafePropBag.cs" />
     <Compile Include="LockingConcurrentDictionary.cs" />
     <Compile Include="OrderedDictionary.cs" />
+    <Compile Include="PropBagTypeSafetyModeEnum.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyChangedWithValsEventArgs.cs" />
     <Compile Include="PropertyChangedWithValsHandler.cs" />
     <Compile Include="IPropInterfaces.cs" />
+    <Compile Include="ResolveTypeDelegate.cs" />
     <Compile Include="TypedWeakReference.cs" />
     <Compile Include="TypeExtension.cs" />
+    <Compile Include="TypeSafePropBagMetaData.cs" />
     <Compile Include="ValPlusType.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

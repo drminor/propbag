@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DRM.PropBag
+﻿namespace DRM.TypeSafePropertyBag
 {
     public enum PropBagTypeSafetyMode
     {
@@ -54,10 +48,32 @@ namespace DRM.PropBag
         Tight
     }
 
+    // TODO: Consider creating a WriteMissingPropPolicyEnum.
     public enum ReadMissingPropPolicyEnum
     {
+        /// <summary>
+        /// Reading from a missing property, including TryGetValue, TryGetTypeOfProperty
+        /// and GetTypeOfProperty will throw an InvalidOperationException.
+        /// Used for TypeSafetyModes: Tight, AllPropsMustBeRegistered, OnlyTypedAccess.
+        /// </summary>
         NotAllowed,
+
+        /// <summary>
+        /// Reading the value from a missing property will throw an InvalidOperationException.
+        /// Using a TryGetValue, or TryGetTypeOfProperty operation will return false.
+        /// Using GetTypeOfProperty will return null.
+
+        /// Used for TypeSafetyModes: Loose, None and HonorUndefined.
+        /// </summary>
         Allowed,
+
+        /// <summary>
+        /// Reading a missing property will cause that property to be created with it's default value.
+        /// Using a TryGetValue, or TryGetTypeOfProperty operation will return false.
+        /// Using GetTypeOfProperty will return null.
+        /// 
+        /// Used for TypeSafetyModes: RegisterOnGetLoose and RegisterOnGetSafe.
+        /// </summary>
         Register
     }
 

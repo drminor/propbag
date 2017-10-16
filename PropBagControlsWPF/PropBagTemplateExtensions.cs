@@ -3,6 +3,7 @@
 using System.Windows.Controls;
 
 using DRM.PropBag.ControlModel;
+using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBag.ControlsWPF
 {

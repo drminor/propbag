@@ -60,10 +60,7 @@
     <Compile Include="Factories\CreatePropDelegate.cs" />
     <Compile Include="ExtValDelegates.cs" />
     <Compile Include="Factories\GetDefaultValueDelegate.cs" />
-    <Compile Include="Factories\IPropFactory.cs" />
-    <Compile Include="Factories\IConvertValues.cs" />
     <Compile Include="Factories\PropFactoryValueConveter.cs" />
-    <Compile Include="Factories\ResolveTypeDelegate.cs" />
     <Compile Include="Prop.cs" />
     <Compile Include="PropBagMin.cs" />
     <Compile Include="PropBagDyn.cs" />
@@ -71,7 +68,6 @@
     <Compile Include="PropBagInterfaces\IPropBagMin.cs" />
     <Compile Include="PropBagInterfaces\IPropBag.cs" />
     <Compile Include="PropBagInterfaces\IPubPropBag.cs" />
-    <Compile Include="PropBagTypeSafetyModeEnum.cs" />
     <Compile Include="PropExternStore.cs" />
     <Compile Include="Factories\PropExtStoreFactory.cs" />
     <Compile Include="Factories\PropFactory.cs" />
