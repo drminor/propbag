@@ -9,6 +9,7 @@ using PropBagTestApp.Models;
 using System;
 using System.Windows;
 using System.Windows.Data;
+using DRM.TypeSafePropertyBag;
 
 namespace PropBagTestApp.View
 {

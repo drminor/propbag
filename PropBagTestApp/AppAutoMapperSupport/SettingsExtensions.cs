@@ -1,6 +1,7 @@
 ﻿using DRM.PropBag;
 using DRM.PropBag.AutoMapperSupport;
 using DRM.PropBag.ViewModelBuilder;
+using DRM.TypeSafePropertyBag;
 using PropBagTestApp.Properties;
 using System;
 using System.ComponentModel;

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using DRM.PropBag.ControlModel;
 using DRM.PropBag.ControlsWPF;
 using DRM.PropBag.ControlsWPF.WPFHelpers;
+using DRM.TypeSafePropertyBag;
 
 namespace PropBagTestApp.ViewModels
 {

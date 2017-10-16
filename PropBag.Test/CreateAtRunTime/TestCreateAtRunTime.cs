@@ -8,6 +8,7 @@ using NUnit.Framework;
 
 using DRM.PropBag;
 using DRM.PropBag.ControlModel;
+using DRM.TypeSafePropertyBag;
 
 namespace PropBagLib.Tests
 {

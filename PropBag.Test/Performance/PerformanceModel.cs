@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using System.Threading;
-using System.Runtime.CompilerServices;
-
+﻿using DRM.PropBag;
+using DRM.TypeSafePropertyBag;
 using System.ComponentModel;
-
-using DRM.PropBag;
+using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace PropBagLib.Tests
 {

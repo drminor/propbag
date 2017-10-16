@@ -5,11 +5,10 @@
                     xmlns:mod="clr-namespace:PropBagTestApp.Models">
 
 
-
     <pb:PropBagTemplate x:Key="ReferenceBindViewModelPB"
             ClassName="ReferenceBindViewModelPB"
             InstanceKey="ReferenceBindViewModelPB"
-            TypeSafetyMode="Tight"
+                        TypeSafetyMode="Tight"
             OutPutNameSpace="PropBagTestApp.ViewModels">
         <pb:PropBagTemplate.Namespaces>
             <pb:NamespaceItem Namespace="PropBagTestApp.Model"/>
