@@ -1,4 +1,5 @@
 ﻿using DRM.PropBag.ControlModel;
+using DRM.PropBag.ControlsWPF.WPFHelpers;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -713,7 +714,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
         #endregion
 
-        #region Data Source Changed Handing
+        #region Data Source Changed Handling
 
         private void DataSourceHasChanged(object sender, DataSourceChangedEventArgs e)
         {
@@ -830,59 +831,58 @@ namespace DRM.PropBag.ControlsWPF.Binders
             //// End just for debug
 
 
-            if (targetObject is FrameworkElement fe)
-            {
-                osp = new ObservableSourceProvider(fe, pathElement);
-            }
-            else if (targetObject is FrameworkContentElement fce)
-            {
-                osp = new ObservableSourceProvider(fce, pathElement);
-            }
-            else
-            {
-                throw new ApplicationException($"targetObject in {BinderName}.ObservableSourceProvider was neither a FrameworkElement or a FrameworkContentElement.");
-            }
-
-            return true;
-
-            ////object dc = LogicalTree.GetDataContext(targetObject, out DependencyObject foundNode);
-
-            //// Changed to use foundNode on 10/10/17 @ 12:15 PM.
-            //if (dc == null)
+            //if (targetObject is FrameworkElement fe)
             //{
-            //    if (foundNode is FrameworkElement fe)
-            //    {
-            //        osp = new ObservableSourceProvider(fe, node);
-            //        return true;
-            //    }
-            //    else if (foundNode is FrameworkContentElement fce)
-            //    {
-            //        osp = new ObservableSourceProvider(fce, node);
-            //        return true;
-            //    }
-            //    else
-            //    {
-            //        osp = null;
-            //        return false;
-            //    }
+            //    osp = new ObservableSourceProvider(fe, pathElement);
+            //}
+            //else if (targetObject is FrameworkContentElement fce)
+            //{
+            //    osp = new ObservableSourceProvider(fce, pathElement);
             //}
             //else
             //{
-            //    if (foundNode is FrameworkElement fe)
-            //    {
-            //        osp = new ObservableSourceProvider(fe, node);
-            //    }
-            //    else if (foundNode is FrameworkContentElement fce)
-            //    {
-            //        osp = new ObservableSourceProvider(fce, node);
-            //    }
-            //    else
-            //    {
-            //        throw new ApplicationException($"Found node in {BinderName}.ObservableSourceProvider was neither a FrameworkElement or a FrameworkContentElement.");
-            //    }
-
-            //    return true;
+            //    throw new ApplicationException($"targetObject in {BinderName}.ObservableSourceProvider was neither a FrameworkElement or a FrameworkContentElement.");
             //}
+
+            //return true;
+
+            object dc = LogicalTree.GetDataContext(targetObject, out DependencyObject foundNode);
+
+            // Changed to use foundNode on 10/10/17 @ 12:15 PM.
+            if (dc == null)
+            {
+                if (foundNode is FrameworkElement fe)
+                {
+                    osp = new ObservableSourceProvider(fe, pathElement);
+                    return true;
+                }
+                else if (foundNode is FrameworkContentElement fce)
+                {
+                    osp = new ObservableSourceProvider(fce, pathElement);
+                    return true;
+                }
+                else
+                {
+                    throw new ApplicationException($"Found node in {BinderName}.ObservableSourceProvider was neither a FrameworkElement or a FrameworkContentElement.");
+                }
+            }
+            else
+            {
+                if (foundNode is FrameworkElement fe)
+                {
+                    osp = new ObservableSourceProvider(fe, pathElement);
+                }
+                else if (foundNode is FrameworkContentElement fce)
+                {
+                    osp = new ObservableSourceProvider(fce, pathElement);
+                }
+                else
+                {
+                    throw new ApplicationException($"Found node in {BinderName}.ObservableSourceProvider was neither a FrameworkElement or a FrameworkContentElement.");
+                }
+
+                return true;
+            }
         }
 
         #endregion
