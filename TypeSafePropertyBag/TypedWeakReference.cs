@@ -1,14 +1,17 @@
 ﻿using System;
 
-// This should be removed -- since  WeakReference<T> can be used instead.
+// This should be removed since  WeakReference<T> can be used instead.
+// This does not work for structs -- the same as for WeakReference<T>.
 
-namespace DRM.TypeSafePropertyBag
+// This does allow one to change the value of TrackRessurection, where WeakReference<T>
+// does not.
+
+namespace DRM.TypeSafePropertyBag.NotUsed
 {
     public class TypedWeakReference<T> where T : class
     {
         bool _track;
         WeakReference _wr;
-
 
         public TypedWeakReference(T value, bool trackResurrection = false)
         {
