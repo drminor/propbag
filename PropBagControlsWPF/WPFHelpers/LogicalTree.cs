@@ -1,75 +1,169 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Reflection;
+using System.Threading;
 using System.Windows;
+using System.Windows.Data;
 
 namespace DRM.PropBag.ControlsWPF.WPFHelpers
 {
     public class LogicalTree
     {
-        public static object GetDataContext(DependencyObject depObj, out DependencyObject foundNode)
+        #region Get DataContext from FrameworkElement
+
+        // TODO: What may be needed here is
+        // If this is being used to create a binding to set the DataContext
+        // Then:
+        //      Use the nodes, parent.
+        // Else:
+        //      Use this node.
+        public static DependencyObject GetDataContext(DependencyObject depObj, bool excludeNodesWithDcBinding, bool inspectAncestors = true)
         {
-            object result = null;
-            DependencyObject parent = depObj;
-            foundNode = depObj;
+            bool hasDataContext = false;
+            DependencyObject curObj = depObj;
+            DependencyObject foundNode = depObj;
 
             do
             {
-                foundNode = parent;
+                foundNode = curObj;
 
-                if (parent is FrameworkElement fe)
+                if (curObj is FrameworkElement fe)
                 {
-                    result = GetDataContextInt(fe, out parent);
+                    hasDataContext = HasDataContext(fe, out curObj, excludeNodesWithDcBinding: true);
                 }
-                else if(parent is FrameworkContentElement fce)
+                else if(curObj is FrameworkContentElement fce)
                 {
-                    result = GetDataContextInt(fce, out parent);
+                    hasDataContext = HasDataContext(fce, out curObj, excludeNodesWithDcBinding: true);
                 }
             }
-            while (result == null && parent != null);
+            while (!hasDataContext && curObj != null && inspectAncestors);
 
             if(object.ReferenceEquals(foundNode, depObj))
             {
                 System.Diagnostics.Debug.WriteLine("Logical Tree did not have to traverse any ancestors.");
             }
 
-            return result;
+            return foundNode;
         }
 
-        public static object GetDataContextNoTrav(DependencyObject depObj)
+        public static bool HasDataContext(DependencyObject depObj, out DependencyObject parent, bool excludeNodesWithDcBinding)
         {
-            object result;
-
-            DependencyObject parent;
             if (depObj is FrameworkElement fe)
             {
-                result = GetDataContextInt(fe, out parent);
+                parent = fe.Parent;
+                return fe.DataContext != null && (!excludeNodesWithDcBinding || !HasDcBinding(depObj));
             }
             else if (depObj is FrameworkContentElement fce)
             {
-                result = GetDataContextInt(fce, out parent);
+                parent = fce.Parent;
+                return  fce.DataContext != null && (!excludeNodesWithDcBinding || !HasDcBinding(depObj));
             }
             else
             {
-                result = null;
+                parent = LogicalTreeHelper.GetParent(depObj);
+                return false;
             }
-            return result;
         }
 
-        private static object GetDataContextInt(FrameworkElement fe, out DependencyObject parent)
+        public static bool HasDcBinding(DependencyObject depObj)
         {
-            parent = fe.Parent;
-            return fe.DataContext;
+            if (depObj is FrameworkElement fe)
+            {
+                BindingExpression be = fe.GetBindingExpression(FeDataContextDpPropProvider.Value);
+                return be != null;
+            }
+            else if (depObj is FrameworkContentElement fce)
+            {
+                BindingExpression be = fce.GetBindingExpression(FceDataContextDpPropProvider.Value);
+                return be != null;
+            }
+            else
+            {
+                throw new InvalidOperationException("DepObj must be a FrameworkElement or a FrameworkContentElement.");
+            }
         }
 
-        private static object GetDataContextInt(FrameworkContentElement fce, out DependencyObject parent)
+        public static bool GetDcFromFrameworkElement(object feOrFce, out object dc, out Type type)
         {
-            parent = fce.Parent;
-            return fce.DataContext;
+            type = null;
+            if (feOrFce is FrameworkElement fe)
+            {
+                dc = fe.DataContext;
+                if (dc != null)
+                {
+                    type = dc.GetType();
+                }
+                return true;
+            }
+            else if (feOrFce is FrameworkContentElement fce)
+            {
+                dc = fce.DataContext;
+                if (dc != null)
+                {
+                    type = dc.GetType();
+                }
+                return true;
+            }
+            else
+            {
+                dc = null;
+                return false;
+            }
         }
 
 
+        #endregion
+
+        #region Dependency Property Support
+
+        public static Lazy<DependencyProperty> FeDataContextDpPropProvider =
+            new Lazy<DependencyProperty>(
+                () => GetDependencyPropertyByName(typeof(FrameworkElement), "DataContextProperty"),
+                LazyThreadSafetyMode.PublicationOnly);
+
+        public static Lazy<DependencyProperty> FceDataContextDpPropProvider =
+            new Lazy<DependencyProperty>(
+                () => GetDependencyPropertyByName(typeof(FrameworkContentElement), "DataContextProperty"),
+                LazyThreadSafetyMode.PublicationOnly);
+
+        public static DependencyProperty GetDependencyPropertyByName(DependencyObject depObj, string dpName)
+        {
+            return GetDependencyPropertyByName(depObj.GetType(), dpName);
+        }
+
+        public static DependencyProperty GetDependencyPropertyByName(Type depObj, string dpName)
+        {
+            DependencyProperty dp = null;
+
+            //FieldInfo[] allFs = depObj.GetFields();
+
+            var fieldInfo = depObj.GetField(dpName, BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
+            if (fieldInfo != null)
+            {
+                dp = fieldInfo.GetValue(null) as DependencyProperty;
+            }
+
+            return dp;
+        }
+        #endregion
+
+        #region Miscellaneous
+
+        public static string GetNameFromDepObject(DependencyObject depObj)
+        {
+            if (depObj is FrameworkElement fe)
+            {
+                return fe.Name;
+            }
+            else if (depObj is FrameworkContentElement fce)
+            {
+                return $"(fce:) {fce.Name}";
+            }
+            else
+            {
+                return $"{depObj.ToString()}";
+            }
+        }
+
+        #endregion
     }
 }

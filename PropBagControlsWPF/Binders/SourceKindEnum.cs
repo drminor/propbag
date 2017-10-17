@@ -3,6 +3,7 @@
     public enum SourceKindEnum
     {
         DataContext,
+        DataContextBinder, // Used when the binding target is the DataContext property.
         DataSourceProvider,
         PropertyObject,
         CollectionObject,
@@ -10,4 +11,19 @@
         TerminalNode
     }
 
-}
+    public enum PathConnectorTypeEnum
+    {
+        Dot,
+        Slash,
+
+        DotIndexer,
+        SlashIndexer,
+
+        DotAttached,
+        SlashAttached,
+
+        DotIndexerAttached,
+        SlashIndexerAttached
+    }
+
+ }

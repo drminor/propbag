@@ -1,4 +1,5 @@
-﻿using DRM.TypeSafePropertyBag;
+﻿using DRM.PropBag.ControlsWPF.WPFHelpers;
+using DRM.TypeSafePropertyBag;
 using System;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -15,6 +16,9 @@ namespace DRM.PropBag.ControlsWPF.Binders
         #region Public events and properties
 
         public event DataSourceChangedEventHandler DataSourceChanged = null; // delegate { };
+
+        public string BinderName { get; private set; }
+        public PathConnectorTypeEnum PathOperator { get; private set; }
 
         string _pathElement;
         public string PathElement
@@ -42,6 +46,36 @@ namespace DRM.PropBag.ControlsWPF.Binders
         // and the Data is the result of accessing DSP.Data.
 
         private bool _fcOrFce;
+
+        private WeakReference<DependencyObject> _wrAnchorElement;
+        private DependencyObject AnchorElement
+        {
+            get
+            {
+                if (_wrAnchorElement == null) return null;
+
+                if(_wrAnchorElement.TryGetTarget(out DependencyObject target) == true)
+                {
+                    return target;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            set
+            {
+                if(value != null)
+                {
+                    _wrAnchorElement = new WeakReference<DependencyObject>(value);
+                }
+                else
+                {
+                    _wrAnchorElement = null;
+                }
+            }
+        }
+
         private WeakReference _wrContainer;
         private object Container
         {
@@ -271,15 +305,6 @@ namespace DRM.PropBag.ControlsWPF.Binders
             }
         }
 
-        //public bool IsPossiblyPropBagBased
-        //{
-        //    get
-        //    {
-        //        Type test = Type;
-        //        return test == null ? true : test.IsPropBagBased();
-        //    }
-        //}
-
         #endregion
 
         #region Public Methods
@@ -414,7 +439,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
                 }
                 else
                 {
-                    return new ObservableSourceProvider(pathElement, newType);
+                    return new ObservableSourceProvider(pathElement, newType, PathConnectorTypeEnum.Dot, BinderName);
                 }
             }
             else
@@ -423,7 +448,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
                 if (data.TryGetTypeOfProperty(pathElement, out newType))
                 {
                     // Create an ObservableSource with SourceKind = TerminalNode.
-                    return new ObservableSourceProvider(pathElement, newType);
+                    return new ObservableSourceProvider(pathElement, newType, PathConnectorTypeEnum.Dot, BinderName);
                 }
                 else
                 {
@@ -449,7 +474,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
                 Type pt = GetTypeOfPathElement(pathElement, type, this.PathElement);
 
                 // Create an ObservableSource with SourceKind = TerminalNode.
-                return new ObservableSourceProvider(pathElement, pt);
+                return new ObservableSourceProvider(pathElement, pt, PathConnectorTypeEnum.Dot, BinderName);
             }
         }
 
@@ -591,19 +616,19 @@ namespace DRM.PropBag.ControlsWPF.Binders
             // Property Changed
             if (typeof(INotifyPropertyChanged).IsAssignableFrom(type))
             {
-                return new ObservableSourceProvider(data as INotifyPropertyChanged, pathElement);
+                return new ObservableSourceProvider(data as INotifyPropertyChanged, pathElement, PathConnectorTypeEnum.Dot, BinderName);
             }
 
             // Collection Changed
             else if (typeof(INotifyCollectionChanged).IsAssignableFrom(type))
             {
-                return new ObservableSourceProvider(data as INotifyCollectionChanged, pathElement);
+                return new ObservableSourceProvider(data as INotifyCollectionChanged, pathElement, PathConnectorTypeEnum.Dot, BinderName);
             }
 
             // DataSourceProvider
             else if (typeof(DataSourceProvider).IsAssignableFrom(type))
             {
-                return new ObservableSourceProvider(data as DataSourceProvider, pathElement);
+                return new ObservableSourceProvider(data as DataSourceProvider, pathElement, PathConnectorTypeEnum.Dot, BinderName);
             }
 
             throw new InvalidOperationException("Cannot create child: it does not implement INotifyPropertyChanged, INotifyCollectionChanged, nor is it, or dervive from, a DataSourceProvider.");
@@ -611,33 +636,10 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
         private bool GetDcFromFrameworkElement(object feOrFce, out object dc, out Type type, out ObservableSourceStatusEnum status)
         {
-            type = null;
-            status = ObservableSourceStatusEnum.NoType;
-            if (feOrFce is FrameworkElement fe)
-            {
-                dc = fe.DataContext;
-                if (dc != null)
-                {
-                    type = dc.GetType();
-                }
-                status = Status.SetReady(dc != null);
-                return true;
-            }
-            else if (feOrFce is FrameworkContentElement fce)
-            {
-                dc = fce.DataContext;
-                if (dc != null)
-                {
-                    type = dc.GetType();
-                }
-                status = Status.SetReady(dc != null);
-                return true;
-            }
-            else
-            {
-                dc = null;
-                return false;
-            }
+            bool found = LogicalTree.GetDcFromFrameworkElement(feOrFce, out dc, out type);
+            status = Status.SetReady(dc != null);
+
+            return found;
         }
 
         private void AddSubscriptions(object dc)
@@ -672,6 +674,8 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
         private void RemoveSubscriptions(object dc)
         {
+            if (dc == null) return;
+
             bool removedIt = false;
             if (dc is INotifyPropertyChanged pc)
             {
@@ -700,23 +704,26 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
         #region Constructors and their handlers
 
-        private ObservableSource(SourceKindEnum sourceKind, string pathElement, bool isListening)
+        private ObservableSource(string pathElement, PathConnectorTypeEnum pathOperator, bool isListening, string binderName)
         {
-            this.SourceKind = sourceKind;
             PathElement = pathElement;
+            PathOperator = pathOperator;
             IsListeningForNewDC = isListening;
+            BinderName = binderName;
 
-            _wrData = null;
+            _wrAnchorElement = null;
             _wrContainer = null;
+            _wrData = null;
 
             NewPathElement = null;
             Type = null;
         }
 
         #region Empty 
-        public ObservableSource(string pathElement)
-            : this(SourceKindEnum.Empty, pathElement, false)
+        public ObservableSource(string pathElement, string binderName)
+            : this(pathElement, PathConnectorTypeEnum.Dot, false, binderName)
         {
+            SourceKind = SourceKindEnum.Empty;
             Data = null;
             Type = null;
             Status = ObservableSourceStatusEnum.NoType;
@@ -724,9 +731,10 @@ namespace DRM.PropBag.ControlsWPF.Binders
         #endregion
 
         #region Terminal Node 
-        public ObservableSource(string pathElement, Type type)
-            : this(SourceKindEnum.TerminalNode, pathElement, false)
+        public ObservableSource(string pathElement, Type type, PathConnectorTypeEnum pathConnectorType, string binderName)
+            : this(pathElement, pathConnectorType, false, binderName)
         {
+            SourceKind = SourceKindEnum.TerminalNode;
             Data = null;
             Type = type;
             Status = ObservableSourceStatusEnum.HasType;
@@ -735,55 +743,86 @@ namespace DRM.PropBag.ControlsWPF.Binders
         #endregion
 
         #region From Framework Element and Framework Content Element
-        public ObservableSource(FrameworkElement fe, string pathElement)
-            : this(SourceKindEnum.DataContext, pathElement, true)
+        public ObservableSource(FrameworkElement fe, string pathElement, bool targetIsAsDc, PathConnectorTypeEnum pathConnectorType, string binderName)
+            : this(pathElement, pathConnectorType, true, binderName)
         {
-            Container = fe;
-            Data = fe.DataContext;
+            SourceKind = targetIsAsDc ? SourceKindEnum.DataContextBinder : SourceKindEnum.DataContext;
+            AnchorElement = fe;
 
-            // TOOD: Verify that these already use weak events.
-            fe.DataContextChanged += Fe_or_fce_DataContextChanged;
-
-            if (fe.DataContext != null)
-            {
-                Type = fe.DataContext.GetType();
-            }
-            Status = Status.SetReady(fe.DataContext != null);
+            InitializeFromFcOrFce(fe, pathElement, pathConnectorType, targetIsAsDc, binderName);
         }
 
-        public ObservableSource(FrameworkContentElement fce, string pathElement)
-            : this(SourceKindEnum.DataContext, pathElement, true)
+        public ObservableSource(FrameworkContentElement fce, string pathElement, bool targetIsAsDc, PathConnectorTypeEnum pathConnectorType, string binderName)
+            : this(pathElement, pathConnectorType, true, binderName)
         {
-            Container = fce;
-            Data = fce.DataContext;
 
-            // TOOD: Verify that these already use weak events.
-            fce.DataContextChanged += Fe_or_fce_DataContextChanged;
+            AnchorElement = fce;
 
-            if (fce.DataContext != null)
-            {
-                Type = fce.DataContext.GetType();
-            }
-            Status = Status.SetReady(fce.DataContext != null);
+            InitializeFromFcOrFce(fce, pathElement, pathConnectorType, targetIsAsDc, binderName);
         }
 
         private void Fe_or_fce_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             OnDataSourceChanged(DataSourceChangeTypeEnum.DataContextUpdated);
         }
+
+        private void InitializeFromFcOrFce(DependencyObject targetObject, string pathElement, PathConnectorTypeEnum pathConnectorType, bool targetIsADc, string binderName)
+        {
+            string fwElementName = LogicalTree.GetNameFromDepObject(targetObject);
+            System.Diagnostics.Debug.WriteLine($"Fetching DataContext from {fwElementName}.");
+
+            DependencyObject foundNode = LogicalTree.GetDataContext(targetObject, excludeNodesWithDcBinding: targetIsADc, inspectAncestors: true);
+
+            if(foundNode == null)
+            {
+                foundNode = targetObject;
+                System.Diagnostics.Debug.WriteLine("No DataContext was found while creating the ObservableSource -- using the original target object to begin listening.");
+            }
+
+            if (foundNode is FrameworkElement fe)
+            {
+                Container = fe;
+                Data = fe.DataContext;
+
+                fe.DataContextChanged += Fe_or_fce_DataContextChanged;
+
+                if (fe.DataContext != null)
+                {
+                    Type = fe.DataContext.GetType();
+                }
+                Status = Status.SetReady(fe.DataContext != null);
+            }
+            else if (foundNode is FrameworkContentElement fce)
+            {
+                Container = fce;
+                Data = fce.DataContext;
+
+                fce.DataContextChanged += Fe_or_fce_DataContextChanged;
+
+                if (fce.DataContext != null)
+                {
+                    Type = fce.DataContext.GetType();
+                }
+                Status = Status.SetReady(fce.DataContext != null);
+            }
+            else
+            {
+                throw new ApplicationException($"Found node in {binderName}.ObservableSourceProvider was neither a FrameworkElement or a FrameworkContentElement.");
+            }
+
+        }
+
         #endregion
 
         #region From INotifyPropertyChanged
-        public ObservableSource(INotifyPropertyChanged itRaisesPropChanged, string pathElement)
-            : this(SourceKindEnum.PropertyObject, pathElement, false)
+        public ObservableSource(INotifyPropertyChanged itRaisesPropChanged, string pathElement, PathConnectorTypeEnum pathConnectorType, string binderName)
+            : this(pathElement, pathConnectorType, false, binderName)
         {
+            SourceKind = SourceKindEnum.PropertyObject;
             Data = itRaisesPropChanged ?? throw new ArgumentNullException($"{nameof(itRaisesPropChanged)} was null when constructing Observable Source.");
             Type = itRaisesPropChanged.GetType();
 
             Status = ObservableSourceStatusEnum.Ready;
-
-            //WeakEventManager<INotifyPropertyChanged, PropertyChangedEventArgs>
-            //    .AddHandler(itRaisesPropChanged, "PropertyChanged", OnPCEvent);
         }
 
         private void OnPCEvent(object source, PropertyChangedEventArgs args)
@@ -793,9 +832,10 @@ namespace DRM.PropBag.ControlsWPF.Binders
         #endregion
 
         #region From INotifyCollection Changed
-        public ObservableSource(INotifyCollectionChanged itRaisesCollectionChanged, string pathElement)
-            : this(SourceKindEnum.CollectionObject, pathElement, false)
+        public ObservableSource(INotifyCollectionChanged itRaisesCollectionChanged, string pathElement, PathConnectorTypeEnum pathConnectorType, string binderName)
+            : this(pathElement, pathConnectorType, false, binderName)
         {
+            SourceKind = SourceKindEnum.CollectionObject;
             Data = itRaisesCollectionChanged ?? throw new ArgumentNullException($"{nameof(itRaisesCollectionChanged)} was null when constructing Observable Source.");
             Type = itRaisesCollectionChanged.GetType();
 
@@ -812,15 +852,15 @@ namespace DRM.PropBag.ControlsWPF.Binders
         #endregion
 
         #region From DataSourceProvider
-        public ObservableSource(DataSourceProvider dsp, string pathElement)
-            : this(SourceKindEnum.DataSourceProvider, pathElement, true)
+        public ObservableSource(DataSourceProvider dsp, string pathElement, PathConnectorTypeEnum pathConnectorType, string binderName)
+            : this(pathElement, pathConnectorType, true, binderName)
         {
+            SourceKind = SourceKindEnum.DataSourceProvider;
             Container = dsp;
             Data = null;
             Type = null;
 
-            WeakEventManager<DataSourceProvider, EventArgs>
-                .AddHandler(dsp, "DataChanged", OnPlainEvent);
+            WeakEventManager<DataSourceProvider, EventArgs>.AddHandler(dsp, "DataChanged", OnPlainEvent);
 
             Status = ObservableSourceStatusEnum.Undetermined;
         }

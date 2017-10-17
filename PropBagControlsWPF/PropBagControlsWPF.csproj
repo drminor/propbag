@@ -50,11 +50,13 @@
     <Compile Include="Binders\DataSourceChangedEventArgs.cs" />
     <Compile Include="Binders\DataSourceChangedEventHandler.cs" />
     <Compile Include="Binders\DataSourceChangeTypeEnum.cs" />
-    <Compile Include="Binders\MyBindingEngine.cs" />
+    <Compile Include="Binders\DummyValueConverter.cs" />
+    <Compile Include="Binders\MyBindingEngineBase.cs" />
     <Compile Include="Binders\MyBindingInfo.cs" />
     <Compile Include="Binders\ObservableSource.cs" />
     <Compile Include="Binders\ObservableSourceProvider.cs" />
     <Compile Include="Binders\ObservableSourceStatusEnum.cs" />
+    <Compile Include="Binders\OSCollection.cs" />
     <Compile Include="Binders\OSSExtensions.cs" />
     <Compile Include="Binders\SourceKindEnum.cs" />
     <Compile Include="BoundPropBag.cs" />
@@ -65,6 +67,7 @@
     </Compile>
     <Compile Include="InitialValueField.cs" />
     <Compile Include="Binders\MyMultiValueConveter.cs" />
+    <Compile Include="Binders\MyBindingEngine.cs" />
     <Compile Include="NamespaceItem.cs" />
     <Compile Include="NamespacesCollection.cs" />
     <Compile Include="Binders\MyBinder.cs" />

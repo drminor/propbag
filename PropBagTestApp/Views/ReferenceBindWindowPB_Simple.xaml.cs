@@ -22,24 +22,23 @@ namespace PropBagTestApp.View
         {
             InitializeComponent();
 
-            //PropBagTemplate pbt = PropBagTemplateResources.GetPropBagTemplate("ReferenceBindViewModelPB");
-            //PropModel pm = pbt.GetPropModel();
-            //IPropFactory pf = SettingsExtensions.ThePropFactory;
-
-            //ReferenceBindViewModelPB rbvm = new ReferenceBindViewModelPB(pm, pf);
-
             ReferenceBindViewModelPB rbvm = (ReferenceBindViewModelPB)this.DataContext;
 
             MyModel4 mod4 = new MyModel4() { MyString = "Start" };
             rbvm.SetIt<MyModel4>(mod4, "Deep");
-
-            //this.DataContext = rbvm;
         }
 
         private void BtnRead_Click(object sender, RoutedEventArgs e)
         {
             //CollectionViewSource aa = new CollectionViewSource();
             ReferenceBindViewModelPB m = (ReferenceBindViewModelPB)this.DataContext;
+
+            if (m == null)
+            {
+                m = GetNewViewModel();
+                this.DataContext = m;
+
+            }
 
             m.SetIt<int>(21, "Amount");
             //m.Amount = 21;
@@ -69,6 +68,11 @@ namespace PropBagTestApp.View
         private void BtnSave_Click(object sender, RoutedEventArgs e)
         {
             ReferenceBindViewModelPB m = (ReferenceBindViewModelPB)this.DataContext;
+            if(m == null)
+            {
+                System.Diagnostics.Debug.WriteLine("The DataContext is null.");
+                return;
+            }
 
             int amount = m.GetIt<int>("Amount");
             double size = m.GetIt<double>("Size");
