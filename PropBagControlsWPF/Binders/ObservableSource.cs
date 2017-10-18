@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Data;
 
 namespace DRM.PropBag.ControlsWPF.Binders
@@ -45,29 +46,27 @@ namespace DRM.PropBag.ControlsWPF.Binders
         // For an ObservableSource of SourceKind: DataSourceProvider, the Container is the DSP
         // and the Data is the result of accessing DSP.Data.
 
-        private bool _fcOrFce;
+        private bool _isTargetADc;
 
-        private WeakReference<DependencyObject> _wrAnchorElement;
-        private DependencyObject AnchorElement
+        private WeakReference _wrAnchorElement;
+        private Object AnchorElement
         {
             get
             {
-                if (_wrAnchorElement == null) return null;
-
-                if(_wrAnchorElement.TryGetTarget(out DependencyObject target) == true)
+                if (_wrAnchorElement == null || !_wrAnchorElement.IsAlive)
                 {
-                    return target;
+                    return null;
                 }
                 else
                 {
-                    return null;
+                    return _wrAnchorElement.Target;
                 }
             }
             set
             {
-                if(value != null)
+                if (value != null)
                 {
-                    _wrAnchorElement = new WeakReference<DependencyObject>(value);
+                    _wrAnchorElement = new WeakReference(value);
                 }
                 else
                 {
@@ -81,98 +80,79 @@ namespace DRM.PropBag.ControlsWPF.Binders
         {
             get
             {
-                //if (_containerWasNull) return null;
-                if (_wrContainer == null) return null;
-                if (SourceKind == SourceKindEnum.DataContext)
+                if(!(SourceKind == SourceKindEnum.FrameworkElement 
+                    || SourceKind == SourceKindEnum.FrameworkContentElement
+                    || SourceKind == SourceKindEnum.DataSourceProvider
+                    || SourceKind == SourceKindEnum.DataGridColumn))
                 {
-                    if (_wrContainer.IsAlive)
-                    {
-                        if (_fcOrFce)
-                        {
-                            FrameworkContentElement fce = (FrameworkContentElement)_wrContainer.Target;
-                            return fce;
-                        }
-                        else
-                        {
-                            FrameworkElement fe = (FrameworkElement)_wrContainer.Target;
-                            return fe;
-                        }
-                    }
-                    else
-                    {
-                        return null;
-                    }
+                    throw new InvalidOperationException("Attempting to get the value for Container " +
+                        "when the SourceKind is not FrameworkElement, FrameworkContentElement, " +
+                        "DataSourceProvider of DataGridColumn is not a valid operation.");
                 }
-                else if (SourceKind == SourceKindEnum.DataSourceProvider)
-                {
-                    if (_wrContainer.IsAlive)
-                    {
-                        DataSourceProvider dsp = (DataSourceProvider)_wrContainer.Target;
-                        return dsp;
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                }
-                else
-                {
-                    // TODO: Fix this up.
-                    throw new InvalidOperationException("Attempting to get the value for Container is not valid when the SourceKind is not DataContext or DataSourceProvider.");
-                }
+
+                if (_wrContainer == null || !_wrContainer.IsAlive) return null;
+                return _wrContainer.Target;
             }
             set
             {
-                if (SourceKind == SourceKindEnum.DataContext)
+                if (!(SourceKind == SourceKindEnum.FrameworkElement
+                    || SourceKind == SourceKindEnum.FrameworkContentElement
+                    || SourceKind == SourceKindEnum.DataSourceProvider
+                    || SourceKind == SourceKindEnum.DataGridColumn))
                 {
-                    if (value == null)
-                    {
-                        //_containerWasNull = true;
-                        _wrContainer = null;
-                        _fcOrFce = false;
-                    }
-                    else
-                    {
-                        //_containerWasNull = false;
-                        _wrContainer = new WeakReference(value);
-                        if (value is FrameworkElement)
-                        {
-                            _fcOrFce = false;
-                        }
-                        else if (value is FrameworkContentElement)
-                        {
-                            _fcOrFce = true;
-                        }
-                        else
-                        {
-                            throw new InvalidOperationException("Only FrameworkElements and FrameworkContentElements can be use to set the value of the container for an ObservableSource with SourceKind = DataContext.");
-                        }
-                    }
+                    throw new InvalidOperationException("Attempting to get the value for Container " +
+                        "when the SourceKind is not FrameworkElement, FrameworkContentElement, " +
+                        "DataSourceProvider of DataGridColumn is not a valid operation.");
                 }
-                else if (SourceKind == SourceKindEnum.DataSourceProvider)
+
+                if (value == null)
                 {
-                    if (value == null)
-                    {
-                        //_containerWasNull = true;
-                        _wrContainer = null;
-                    }
-                    else
-                    {
-                        //_containerWasNull = false;
-                        _wrContainer = new WeakReference(value);
-                        if (!(value is DataSourceProvider))
-                        {
-                            throw new InvalidOperationException("Only DataSourceProviders can be used to set the value of the container for an ObservableSource with SourceKind = DataSourceProvider.");
-                        }
-                    }
-                    _fcOrFce = false;
+                    _wrContainer = null;
                 }
                 else
                 {
-                    // TODO: Fix this up.
-                    throw new InvalidOperationException("Attempting to set the value for Container is not valid when the SourceKind is not DataContext or DataSourceProvider.");
+                    if(!DoesDataHaveCorrectType(value, SourceKind, out Type type))
+                    {
+                        throw new InvalidOperationException($"Values of type {type} cannot be used to set the Container of an ObservableSource.");
+                    }
+                    _wrContainer = new WeakReference(value);
                 }
 
+            }
+        }
+
+        private bool DoesDataHaveCorrectType(object data, SourceKindEnum sourceKind, out Type type)
+        {
+            if (data == null)
+            {
+                type = null;
+                return true;
+            }
+
+            switch(sourceKind)
+            {
+                case SourceKindEnum.DataGridColumn:
+                    {
+                        return typeof(DataGridColumn).IsAssignableFrom(type = data.GetType());
+                    }
+                case SourceKindEnum.DataSourceProvider:
+                    {
+                        return typeof(DataSourceProvider).IsAssignableFrom(type = data.GetType());
+                    }
+                case SourceKindEnum.FrameworkContentElement:
+                    {
+                        return typeof(FrameworkContentElement).IsAssignableFrom(type = data.GetType());
+                    }
+                case SourceKindEnum.FrameworkElement:
+                    {
+                        return typeof(FrameworkElement).IsAssignableFrom(type = data.GetType());
+                    }
+                default:
+                    {
+                        // TODO: Check this.
+                        type = data.GetType();
+                        return true;
+                    }
             }
         }
 
@@ -208,9 +188,9 @@ namespace DRM.PropBag.ControlsWPF.Binders
                         }
                     }
                 }
-                else //if(SourceKind != SourceKindEnum.DependencyObject && SourceKind != SourceKindEnum.Empty && SourceKind != SourceKindEnum.TerminalNode)
+                else
                 {
-                    if (_wrData == null || !(_wrData.IsAlive))
+                    if (_wrData == null || !_wrData.IsAlive)
                     {
                         return null;
                     }
@@ -219,10 +199,6 @@ namespace DRM.PropBag.ControlsWPF.Binders
                         return _wrData.Target;
                     }
                 }
-                //else
-                //{
-                //    throw new InvalidOperationException("Only PropertyChanged is supported.");
-                //}
             }
             private set
             {
@@ -325,9 +301,10 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
         public void UpdateData(string binderInstanceName)
         {
-            if (!(SourceKind == SourceKindEnum.DataContext || SourceKind == SourceKindEnum.DataSourceProvider))
+            if (!(SourceKind == SourceKindEnum.FrameworkElement || SourceKind == SourceKindEnum.FrameworkContentElement || SourceKind == SourceKindEnum.DataSourceProvider || SourceKind == SourceKindEnum.DataGridColumn))
             {
-                throw new InvalidOperationException($"Only ObservableSources with SourceKind = {nameof(SourceKindEnum.DataContext)} or {nameof(SourceKindEnum.DataSourceProvider)} can have their data updated.");
+                // TODO: Update this.
+                throw new InvalidOperationException($"Only ObservableSources with SourceKind = {nameof(SourceKindEnum.FrameworkElement)} or {nameof(SourceKindEnum.DataSourceProvider)} can have their data updated.");
             }
 
             object oldData = Data;
@@ -366,7 +343,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
             }
 
             // TODO: consolidate this -- they use the same logic.
-            if (this.SourceKind == SourceKindEnum.DataContext)
+            if (SourceKind == SourceKindEnum.FrameworkElement || SourceKind == SourceKindEnum.FrameworkContentElement)
             {
                 // Remove existing subscriptions if any for the existing Data.
                 if (oldData != null && IsDcListening)
@@ -535,7 +512,17 @@ namespace DRM.PropBag.ControlsWPF.Binders
                         AddSubscriptions(Data);
                         break;
                     }
-                case SourceKindEnum.DataContext:
+                case SourceKindEnum.FrameworkElement:
+                    {
+                        AddSubscriptions(Data);
+                        break;
+                    }
+                case SourceKindEnum.FrameworkContentElement:
+                    {
+                        AddSubscriptions(Data);
+                        break;
+                    }
+                case SourceKindEnum.DataGridColumn:
                     {
                         AddSubscriptions(Data);
                         break;
@@ -578,7 +565,17 @@ namespace DRM.PropBag.ControlsWPF.Binders
                         RemoveSubscriptions(Data);
                         break;
                     }
-                case SourceKindEnum.DataContext:
+                case SourceKindEnum.FrameworkElement:
+                    {
+                        RemoveSubscriptions(Data);
+                        break;
+                    }
+                case SourceKindEnum.FrameworkContentElement:
+                    {
+                        RemoveSubscriptions(Data);
+                        break;
+                    }
+                case SourceKindEnum.DataGridColumn:
                     {
                         RemoveSubscriptions(Data);
                         break;
@@ -717,6 +714,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
             NewPathElement = null;
             Type = null;
+            _isTargetADc = false;
         }
 
         #region Empty 
@@ -746,7 +744,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
         public ObservableSource(FrameworkElement fe, string pathElement, bool targetIsAsDc, PathConnectorTypeEnum pathConnectorType, string binderName)
             : this(pathElement, pathConnectorType, true, binderName)
         {
-            SourceKind = targetIsAsDc ? SourceKindEnum.DataContextBinder : SourceKindEnum.DataContext;
+            SourceKind = SourceKindEnum.FrameworkElement;
             AnchorElement = fe;
 
             InitializeFromFcOrFce(fe, pathElement, pathConnectorType, targetIsAsDc, binderName);
@@ -755,7 +753,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
         public ObservableSource(FrameworkContentElement fce, string pathElement, bool targetIsAsDc, PathConnectorTypeEnum pathConnectorType, string binderName)
             : this(pathElement, pathConnectorType, true, binderName)
         {
-
+            SourceKind = SourceKindEnum.FrameworkContentElement;
             AnchorElement = fce;
 
             InitializeFromFcOrFce(fce, pathElement, pathConnectorType, targetIsAsDc, binderName);
@@ -810,8 +808,43 @@ namespace DRM.PropBag.ControlsWPF.Binders
                 throw new ApplicationException($"Found node in {binderName}.ObservableSourceProvider was neither a FrameworkElement or a FrameworkContentElement.");
             }
 
+            _isTargetADc = targetIsADc;
         }
 
+        #endregion
+
+        #region From DataGridColumn
+        public ObservableSource(DataGridColumn dgc, string pathElement, PathConnectorTypeEnum pathConnectorType, string binderName)
+            : this(pathElement, pathConnectorType, true, binderName)
+        {
+            AnchorElement = dgc;
+            SourceKind = SourceKindEnum.DataGridColumn;
+
+            System.Diagnostics.Debug.WriteLine($"Fetching DataContext for DataGridColumn.");
+
+            DataGrid dataGrid = LogicalTree.GetDataGridOwner(dgc);
+
+            if (dataGrid == null)
+            {
+                Data = null;
+                Type = null;
+                Status = Status.SetReady(false);
+            }
+            else
+            {
+                if (dataGrid is FrameworkElement fe)
+                {
+                    InitializeFromFcOrFce(fe, pathElement, pathConnectorType, false, binderName);
+                }
+                else
+                {
+                    Data = null;
+                    Type = null;
+                    Status = Status.SetReady(false);
+                }
+            }
+
+        }
         #endregion
 
         #region From INotifyPropertyChanged

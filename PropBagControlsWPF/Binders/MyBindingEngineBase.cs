@@ -24,8 +24,9 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
         protected MyBindingInfo _bindingInfo { get; set; }
 
-        protected DependencyObject _targetObject { get; set; }
-        protected object _targetProperty { get; set; }
+        //protected DependencyObject _targetObject { get; set; }
+        //protected object _targetProperty { get; set; }
+        protected BindingTarget _bindingTarget { get; set; }
 
         /// <summary>
         /// Used to listen to changes to the sources of data for each step in the path.
@@ -41,19 +42,18 @@ namespace DRM.PropBag.ControlsWPF.Binders
         #region Public Properties
 
         public Lazy<IValueConverter> DefaultConverter { get; set; }
-        public Func<MyBindingInfo, Type, Type, object> DefaultConverterParameterBuilder { get; set; }
+        public Func<MyBindingInfo, string, Type, Type, object> DefaultConverterParameterBuilder { get; set; }
         public string BinderName { get; set; }
 
         #endregion
 
         #region Constructor
 
-        public MyBindingEngineBase(MyBindingInfo bindingInfo, Type sourceType, DependencyObject targetObject, DependencyProperty targetProperty, string binderInstanceName = DEFAULT_BINDER_NAME)
+        public MyBindingEngineBase(MyBindingInfo bindingInfo, Type sourceType, BindingTarget bindingTarget, string binderInstanceName = DEFAULT_BINDER_NAME)
         {
             _bindingInfo = bindingInfo;
             _sourceType = sourceType ?? throw new ArgumentNullException(nameof(sourceType));
-            _targetObject = targetObject ?? throw new ArgumentNullException(nameof(targetObject));
-            _targetProperty = targetProperty ?? throw new ArgumentNullException(nameof(targetProperty));
+            _bindingTarget = bindingTarget ?? throw new ArgumentNullException(nameof(bindingTarget));
 
             BinderName = binderInstanceName;
 
@@ -68,39 +68,59 @@ namespace DRM.PropBag.ControlsWPF.Binders
         {
             if(SourceIsDependencyObject(_bindingInfo))
             {
-                if(_targetProperty is DependencyProperty dp)
+                if(_bindingTarget.IsDependencyProperty)
                 {
-                    return GetStandardMultiConverterExp(serviceProvider, _targetObject, dp, _sourceType, _bindingInfo);
+                    // TODO: Consider simply creating and setting a standard Binding.
+                    return ProvideStandardMultiBindingExp(serviceProvider, _bindingTarget, _sourceType, _bindingInfo);
                 }
-                throw new InvalidCastException("The target property must be  dependency property.");
             }
 
             SetDefaultConverter();
 
             _dataSourceChangeListeners = PreparePathListeners(_bindingInfo, _sourceType);
 
-            InitPathListeners(_dataSourceChangeListeners,_targetObject, _bindingInfo);
+            InitPathListeners(_dataSourceChangeListeners, _bindingTarget, _bindingInfo);
 
-            Binding binding = CreateTheBinding(_targetObject, _targetProperty, _dataSourceChangeListeners,
+            Binding binding = CreateTheBinding(_bindingTarget.DependencyObject, _bindingTarget.PropertyType, _dataSourceChangeListeners,
                 _sourceType, _bindingInfo, out bool isCustom);
 
-            if(binding != null)
-            { 
+            if (_bindingTarget.IsDependencyProperty)
+            {
+                MultiBindingExpression exp = BuildMultiBindingExpression(serviceProvider, binding, isCustom);
+                return exp;
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine("Returning a binder -- the target property is a PropertyInfo.");
+                return binding;
+            }
+        }
+
+        public Binding ProvideTheBindingDirectly()
+        {
+            SetDefaultConverter();
+
+            _dataSourceChangeListeners = PreparePathListeners(_bindingInfo, _sourceType);
+
+            InitPathListeners(_dataSourceChangeListeners, _bindingTarget, _bindingInfo);
+
+            Binding binding = CreateTheBinding(_bindingTarget.DependencyObject, _bindingTarget.PropertyType, _dataSourceChangeListeners,
+                _sourceType, _bindingInfo, out bool isCustom);
+
+            return binding;
+        }
+
+        protected virtual MultiBindingExpression BuildMultiBindingExpression(IServiceProvider serviceProvider,
+            Binding binding, bool isCustom)
+        {
+            if (binding != null)
+            {
                 try
                 {
-                    //BindingExpressionBase bExp =
-                    //    BindingOperations.SetBinding(_targetObject, _targetProperty, binding);
-                    if (_targetProperty is DependencyProperty dp)
-                    {
-                        BindingExpressionBase bExp = SetTheBinding(_targetObject, dp, binding);
-                        string bType = isCustom ? "PropBag-Based" : "Standard";
-                        System.Diagnostics.Debug.WriteLine($"CREATING {bType} BINDING from {binding.Path.Path} to {dp.Name} on object: {LogicalTree.GetNameFromDepObject(_targetObject)}.");
-                        System.Diagnostics.Debug.WriteLine("This binding is the one that our MultiValueConverter is using.");
-                    }
-                    else
-                    {
-                        throw new InvalidCastException("The target property must be  dependency property.");
-                    }
+                    BindingExpressionBase bExp = SetTheBinding(_bindingTarget.DependencyObject, _bindingTarget.DependencyProperty, binding);
+                    string bType = isCustom ? "PropBag-Based" : "Standard";
+                    System.Diagnostics.Debug.WriteLine($"CREATING {bType} BINDING from {binding.Path.Path} to {_bindingTarget.PropertyName} on object: {_bindingTarget.ObjectName}.");
+                    System.Diagnostics.Debug.WriteLine("This binding is the one that our MultiValueConverter is using.");
                 }
                 catch
                 {
@@ -123,8 +143,16 @@ namespace DRM.PropBag.ControlsWPF.Binders
             return exp;
         }
 
-        protected virtual MultiBindingExpression GetStandardMultiConverterExp(IServiceProvider serviceProvider, 
-            DependencyObject targetObject, DependencyProperty targetProperty, Type sourceType, MyBindingInfo bInfo)
+        protected virtual BindingExpression ProvideStandardBindingExp(IServiceProvider serviceProvider,
+            BindingTarget bindingTarget, Type sourceType, MyBindingInfo bInfo)
+
+        {
+            throw new NotImplementedException();
+        }
+
+
+        protected virtual MultiBindingExpression ProvideStandardMultiBindingExp(IServiceProvider serviceProvider, 
+            BindingTarget bindingTarget, Type sourceType, MyBindingInfo bInfo)
         {
             // create wpf binding
             MyMultiValueConverter mValueConverter = new MyMultiValueConverter(_bindingInfo.Mode);
@@ -132,7 +160,9 @@ namespace DRM.PropBag.ControlsWPF.Binders
             // TODO: Check This. If we do not set a default Converter will WPF provide a default implementation?
             SetDefaultConverter();
 
-            Binding binding = CreateDefaultBinding(bInfo.PropertyPath, bInfo, sourceType, targetProperty.PropertyType);
+            Binding binding = CreateDefaultBinding(bInfo.PropertyPath, bInfo, sourceType, bindingTarget.PropertyType);
+
+            // TODO: Should we SetTheBinding here? We need to test this.
 
             return WrapBindingInMultiValueConverter(serviceProvider, binding, binding.Mode);
         }
@@ -168,7 +198,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
             }
         }
 
-        protected virtual IValueConverter GetConverter(MyBindingInfo bInfo, bool isPropBagBased,
+        protected virtual IValueConverter GetConverter(MyBindingInfo bInfo, string pathElement, bool isPropBagBased,
             Type sourceType, Type propertyType, out object converterParameter)
         {
 
@@ -176,30 +206,30 @@ namespace DRM.PropBag.ControlsWPF.Binders
             {
                 if (bInfo.Converter != null)
                 {
-                    converterParameter = bInfo.ConverterParameterBuilder(bInfo, sourceType, propertyType);
+                    converterParameter = bInfo.ConverterParameterBuilder(bInfo, pathElement, sourceType, propertyType);
                     return bInfo.Converter;
                 }
                 else
                 {
-                    converterParameter = DefaultConverterParameterBuilder(bInfo, sourceType, propertyType);
+                    converterParameter = DefaultConverterParameterBuilder(bInfo, pathElement, sourceType, propertyType);
                     return DefaultConverter.Value;
                 }
             }
             else
             {
-                converterParameter = bInfo.ConverterParameterBuilder(bInfo, sourceType, propertyType);
+                converterParameter = bInfo.ConverterParameterBuilder(bInfo, pathElement, sourceType, propertyType);
                 return bInfo.Converter;
             }
         }
 
-        protected virtual object OurDefaultConverterParameterBuilder(MyBindingInfo bInfo, Type sourceType, Type propertyType)
+        protected virtual object OurDefaultConverterParameterBuilder(MyBindingInfo bInfo, string pathElement, Type sourceType, Type propertyType)
         {
             return new TwoTypes(sourceType, propertyType);
         }
 
-        protected virtual ObservableSourceProvider GetSourceRoot(DependencyObject targetObject, object targetProperty, object source, string binderName = DEFAULT_BINDER_NAME, string pathElement = ROOT_PATH_ELEMENT)
+        protected virtual ObservableSourceProvider GetSourceRoot(BindingTarget bindingTarget, object source, string binderName = DEFAULT_BINDER_NAME, string pathElement = ROOT_PATH_ELEMENT)
         {
-            ObservableSourceProvider osp = ObservableSourceProvider.GetSourceRoot(targetObject, targetProperty, source, pathElement, binderName);
+            ObservableSourceProvider osp = ObservableSourceProvider.GetSourceRoot(bindingTarget, source, pathElement, binderName);
             return osp;
         }
 
@@ -223,18 +253,18 @@ namespace DRM.PropBag.ControlsWPF.Binders
             return new OSCollection(ROOT_PATH_ELEMENT, nodes, sourceType, BinderName);
         }
 
-        protected bool InitPathListeners(OSCollection pathListeners, DependencyObject targetObject, MyBindingInfo bInfo)
+        protected bool InitPathListeners(OSCollection pathListeners, BindingTarget bindingTarget, MyBindingInfo bInfo)
         {
             DataSourceChangedEventArgs dsChangedEventArgs = new DataSourceChangedEventArgs(
                 DataSourceChangeTypeEnum.Initializing);
 
             return RefreshPathListeners(dsChangedEventArgs, pathListeners, 
-                pathListeners[ROOT_INDEX], targetObject, _targetProperty, bInfo);
+                pathListeners[ROOT_INDEX], bindingTarget, bInfo);
         }
 
         protected bool RefreshPathListeners(DataSourceChangedEventArgs changeInfo, 
             OSCollection pathListeners, ObservableSource signalingOs,
-            DependencyObject targetObject, object targetProperty, MyBindingInfo bInfo)
+            BindingTarget bindingTarget, MyBindingInfo bInfo)
         {
             // Assume that this operation will not require the binding to be updated,
             // until proven otherwise.
@@ -258,7 +288,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
                 System.Diagnostics.Debug.Assert(nodeIndex == ROOT_INDEX, $"The node index should refer to the ObservableSource for " +
                     $"the root when DataSourceChangeType = {nameof(DataSourceChangeTypeEnum.Initializing)}.");
 
-                ObservableSourceProvider osp = GetSourceRoot(targetObject, targetProperty, bInfo.Source, BinderName);
+                ObservableSourceProvider osp = GetSourceRoot(bindingTarget, bInfo.Source, BinderName);
 
                 if(osp == null)
                 {
@@ -485,15 +515,10 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
         #region Build Bindings
 
-        protected Binding CreateTheBinding(DependencyObject targetObject, object targetProperty,
+        protected Binding CreateTheBinding(DependencyObject targetObject, Type propertyType,
             OSCollection pathListeners, Type sourceType, MyBindingInfo bInfo, out bool isCustom)
         {
             System.Diagnostics.Debug.Assert(sourceType != null, "The SourceType should never be null here.");
-
-            // TODO: Check this
-            Type propertyType = targetProperty is DependencyProperty ? ((DependencyProperty)targetProperty).PropertyType : typeof(string);
-
-            //int readyPathListeners = 0; // GetNumResolvedOS2(pathListeners);
 
             // One node:    1 parent;
             // Two nodes:   1 parent, 1 intervening object
@@ -529,7 +554,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
             if (isPropBagBased)
             {
-                IValueConverter converter = GetConverter(bInfo, isPropBagBased, sourceType, propertyType, out object converterParameter);
+                IValueConverter converter = GetConverter(bInfo, newPath.Path, isPropBagBased, sourceType, propertyType, out object converterParameter);
 
                 result = new Binding
                 {
@@ -554,7 +579,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
             {
                 Path = newPath,
                 Converter = bInfo.Converter,
-                ConverterParameter = bInfo.ConverterParameterBuilder(bInfo, sourceType, propertyType),
+                ConverterParameter = bInfo.ConverterParameterBuilder(bInfo, newPath.Path, sourceType, propertyType),
                 ConverterCulture = bInfo.ConverterCulture,
         };
             ApplyStandardBindingParams(ref binding, bInfo);
@@ -624,14 +649,14 @@ namespace DRM.PropBag.ControlsWPF.Binders
         {
             ObservableSource os = (ObservableSource)sender;
 
-            bool bindingInfoChanged = RefreshPathListeners(e, _dataSourceChangeListeners, os, _targetObject, _targetProperty, _bindingInfo);
+            bool bindingInfoChanged = RefreshPathListeners(e, _dataSourceChangeListeners, os, _bindingTarget, _bindingInfo);
 
             //BindingBase oldBinding = BindingOperations.GetBindingBase(_targetObject, _targetProperty);
 
             BindingBase oldBinding;
-            if (_targetProperty is DependencyProperty dp)
+            if (_bindingTarget.IsDependencyProperty)
             {
-                oldBinding = GetTheBindingBase(_targetObject, dp);
+                oldBinding = GetTheBindingBase(_bindingTarget.DependencyObject, _bindingTarget.DependencyProperty);
             }
             else
             {
@@ -645,12 +670,12 @@ namespace DRM.PropBag.ControlsWPF.Binders
                 return;
             }
 
-            Binding newBinding = CreateTheBinding(_targetObject, _targetProperty, _dataSourceChangeListeners,
+            Binding newBinding = CreateTheBinding(_bindingTarget.DependencyObject, _bindingTarget.PropertyType, _dataSourceChangeListeners,
                 _sourceType, _bindingInfo, out bool isCustom);
 
-            if (hadBinding && _targetProperty is DependencyProperty dp2)
+            if (hadBinding && _bindingTarget.IsDependencyProperty)
             {
-                ClearTheBinding(_targetObject, dp2);
+                ClearTheBinding(_bindingTarget.DependencyObject, _bindingTarget.DependencyProperty);
             }
 
             if (newBinding != null)
@@ -661,13 +686,12 @@ namespace DRM.PropBag.ControlsWPF.Binders
                     //BindingExpressionBase bExp = BindingOperations.SetBinding(_targetObject,
                     //    _targetProperty, newBinding);
 
-                    if(_targetProperty is DependencyProperty dp3)
+                    if(_bindingTarget.IsDependencyProperty)
                     {
-                        BindingExpressionBase bExp = SetTheBinding(_targetObject, dp3, newBinding);
+                        BindingExpressionBase bExp = SetTheBinding(_bindingTarget.DependencyObject, _bindingTarget.DependencyProperty, newBinding);
                         string bType = isCustom ? "PropBag-Based" : "Standard";
-                        System.Diagnostics.Debug.WriteLine($"CREATING {bType} BINDING from {newBinding.Path.Path} to {dp3.Name} on object: {LogicalTree.GetNameFromDepObject(_targetObject)}.");
+                        System.Diagnostics.Debug.WriteLine($"CREATING {bType} BINDING from {newBinding.Path.Path} to {_bindingTarget.PropertyName} on object: {_bindingTarget.ObjectName}.");
                     }
-
                 }
                 catch
                 {

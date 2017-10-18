@@ -47,9 +47,11 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Binders\BindingTarget.cs" />
     <Compile Include="Binders\DataSourceChangedEventArgs.cs" />
     <Compile Include="Binders\DataSourceChangedEventHandler.cs" />
     <Compile Include="Binders\DataSourceChangeTypeEnum.cs" />
+    <Compile Include="Binders\DependencyPropertyListener.cs" />
     <Compile Include="Binders\DummyValueConverter.cs" />
     <Compile Include="Binders\MyBindingEngineBase.cs" />
     <Compile Include="Binders\MyBindingInfo.cs" />

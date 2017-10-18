@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Threading;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Data;
 
 namespace DRM.PropBag.ControlsWPF.WPFHelpers
@@ -162,6 +163,17 @@ namespace DRM.PropBag.ControlsWPF.WPFHelpers
             {
                 return $"{depObj.ToString()}";
             }
+        }
+
+        private static Type Data_Grid_Column_Type = typeof(DataGridColumn).GetType();
+        public static PropertyInfo Data_Grid_Owner_Property_Info = Data_Grid_Column_Type.GetProperty("DataGridOwner", BindingFlags.Instance | BindingFlags.NonPublic);
+
+        public static PropertyInfo Data_Grid_Column_Binding_Property_Info = Data_Grid_Column_Type.GetProperty("Binding", BindingFlags.Instance | BindingFlags.Public);
+
+
+        public static DataGrid GetDataGridOwner(DataGridColumn dgc)
+        {
+            return Data_Grid_Owner_Property_Info.GetValue(dgc, null) as DataGrid;
         }
 
         #endregion

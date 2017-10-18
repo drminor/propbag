@@ -3,6 +3,7 @@ using System;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Data;
 
 namespace DRM.PropBag.ControlsWPF.Binders
@@ -13,9 +14,11 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
         public string PathElement { get; private set; }
         public object Data { get; private set; }
+        public bool IsTargetADc { get; private set; }
         public Type Type { get; private set; }
         public SourceKindEnum SourceKind { get; private set; }
         public PathConnectorTypeEnum PathConnectorType { get; private set; }
+
         public string BinderName { get; private set; }
 
         #endregion
@@ -26,23 +29,14 @@ namespace DRM.PropBag.ControlsWPF.Binders
         {
             switch (this.SourceKind)
             {
-                case SourceKindEnum.Empty: return new ObservableSource(this.PathElement, this.BinderName);
-                case SourceKindEnum.TerminalNode: return new ObservableSource(this.PathElement, this.Type, this.PathConnectorType, this.BinderName);
-                case SourceKindEnum.DataContext:
-                    {
-                        if (this.Data is FrameworkElement fe) return new ObservableSource(fe, this.PathElement, targetIsAsDc: false, pathConnectorType: this.PathConnectorType, binderName: this.BinderName);
-                        if (this.Data is FrameworkContentElement fce) return new ObservableSource(fce, this.PathElement, targetIsAsDc: false, pathConnectorType: this.PathConnectorType, binderName: this.BinderName);
-                        throw new InvalidOperationException("ObservableSourceProvider of SourceKind = DataContext is neither FrameworkElement or FrameworkContentElement.");
-                    }
-                case SourceKindEnum.DataContextBinder:
-                    {
-                        if (this.Data is FrameworkElement fe) return new ObservableSource(fe, this.PathElement, targetIsAsDc: false, pathConnectorType: this.PathConnectorType, binderName: this.BinderName);
-                        if (this.Data is FrameworkContentElement fce) return new ObservableSource(fce, this.PathElement, targetIsAsDc: false, pathConnectorType: this.PathConnectorType, binderName: this.BinderName);
-                        throw new InvalidOperationException("ObservableSourceProvider of SourceKind = DataContext is neither FrameworkElement or FrameworkContentElement.");
-                    }
-                case SourceKindEnum.PropertyObject: return new ObservableSource((INotifyPropertyChanged)this.Data, this.PathElement, this.PathConnectorType, this.BinderName);
-                case SourceKindEnum.CollectionObject: return new ObservableSource((INotifyCollectionChanged)this.Data, this.PathElement, this.PathConnectorType, this.BinderName);
-                case SourceKindEnum.DataSourceProvider: return new ObservableSource((DataSourceProvider)this.Data, this.PathElement, this.PathConnectorType, this.BinderName);
+                case SourceKindEnum.Empty: return new ObservableSource(PathElement, BinderName);
+                case SourceKindEnum.TerminalNode: return new ObservableSource(PathElement, Type, PathConnectorType, BinderName);
+                case SourceKindEnum.FrameworkElement: return new ObservableSource((FrameworkElement)Data, PathElement, IsTargetADc, PathConnectorType, BinderName);
+                case SourceKindEnum.FrameworkContentElement: return new ObservableSource((FrameworkContentElement)Data, PathElement, IsTargetADc, PathConnectorType, BinderName);
+                case SourceKindEnum.DataGridColumn: return new ObservableSource((DataGridColumn)Data, PathElement, PathConnectorType, BinderName);
+                case SourceKindEnum.PropertyObject: return new ObservableSource((INotifyPropertyChanged)Data, PathElement, PathConnectorType, BinderName);
+                case SourceKindEnum.CollectionObject: return new ObservableSource((INotifyCollectionChanged)Data, PathElement, PathConnectorType, BinderName);
+                case SourceKindEnum.DataSourceProvider: return new ObservableSource((DataSourceProvider)Data, PathElement, PathConnectorType, BinderName);
                 default: throw new InvalidOperationException("That Source Kind is not recognized.");
             }
         }
@@ -51,7 +45,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
         #region GetSource Support
 
-        public static ObservableSourceProvider GetSourceRoot(DependencyObject targetObject, object targetProperty,
+        public static ObservableSourceProvider GetSourceRoot(BindingTarget bindingTarget,
             object source, string pathElement, string binderName)
         {
             if (source != null && GetSourceFromSource(source, pathElement, binderName, out ObservableSourceProvider osp))
@@ -60,7 +54,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
             }
             else
             {
-                GetDefaultSource(targetObject, targetProperty, pathElement, binderName, out osp);
+                GetDefaultSource(bindingTarget, pathElement, binderName, out osp);
                 return osp;
             }
         }
@@ -89,43 +83,30 @@ namespace DRM.PropBag.ControlsWPF.Binders
             }
         }
 
-        public static bool GetDefaultSource(DependencyObject targetObject, object targetProperty, string pathElement, 
+        public static bool GetDefaultSource(BindingTarget bindingTarget, string pathElement, 
             string binderName, out ObservableSourceProvider osp)
         {
-            if(!CheckTargetProperty(targetProperty, out bool targetIsADc))
-            {
-                throw new InvalidOperationException("The target property must be a dependency property, or a property accessor that provides access to a DataContext.");
-            }
+            bool targetIsADc = bindingTarget.IsDataContext;
 
-            if(targetObject is FrameworkElement fe)
+            if(bindingTarget.DependencyObject is FrameworkElement fe)
             {
                 osp = new ObservableSourceProvider(fe, pathElement, targetIsADc, PathConnectorTypeEnum.Dot, binderName);
                 return true;
             }
-            else if(targetObject is FrameworkContentElement fce)
+            else if(bindingTarget.DependencyObject is FrameworkContentElement fce)
             {
                 osp = new ObservableSourceProvider(fce, pathElement, targetIsADc, PathConnectorTypeEnum.Dot, binderName);
                 return true;
+            }
+            else if(bindingTarget.DependencyObject is DataGridColumn dgc)
+            {
+                osp = new ObservableSourceProvider(dgc, pathElement, PathConnectorTypeEnum.Dot, binderName);
+                return false;
             }
             else
             {
                 osp = null;
                 return false;
-            }
-        }
-
-        // TODO: Fix this; We are assuming that all target properties that are not a DependencyProperty, must be a CLR property for getting/setting the DataContext.
-        private static bool CheckTargetProperty(object targetProperty, out bool targetIsADc)
-        {
-            if(targetProperty is DependencyObject depObj)
-            {
-                targetIsADc = false;
-                return true;
-            }
-            else
-            {
-                targetIsADc = true;
-                return true;
             }
         }
 
@@ -140,6 +121,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
             PathElement = pathElement;
             PathConnectorType = pathConnectorType;
             BinderName = binderName;
+            IsTargetADc = false;
         }
 
 
@@ -159,7 +141,9 @@ namespace DRM.PropBag.ControlsWPF.Binders
         {
             Data = fe;
             Type = null;
-            SourceKind = targetIsADc ? SourceKindEnum.DataContextBinder : SourceKindEnum.DataContext;
+            SourceKind = SourceKindEnum.FrameworkElement;
+            IsTargetADc = targetIsADc;
+            
         }
 
         public ObservableSourceProvider(FrameworkContentElement fce, string pathElement, bool targetIsADc, PathConnectorTypeEnum pathConnectorType, string binderName)
@@ -167,7 +151,15 @@ namespace DRM.PropBag.ControlsWPF.Binders
         {
             Data = fce;
             Type = null;
-            SourceKind = targetIsADc ? SourceKindEnum.DataContextBinder : SourceKindEnum.DataContext;
+            SourceKind = SourceKindEnum.FrameworkContentElement;
+            IsTargetADc = targetIsADc;
+        }
+
+        public ObservableSourceProvider(DataGridColumn dgc, string pathElement, PathConnectorTypeEnum pathConnector, string binderName)
+        {
+            Data = dgc;
+            Type = null;
+            SourceKind = SourceKindEnum.DataGridColumn;
         }
 
         #endregion

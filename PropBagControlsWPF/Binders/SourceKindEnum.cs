@@ -2,8 +2,9 @@
 {
     public enum SourceKindEnum
     {
-        DataContext,
-        DataContextBinder, // Used when the binding target is the DataContext property.
+        FrameworkElement,
+        FrameworkContentElement,
+        DataGridColumn,
         DataSourceProvider,
         PropertyObject,
         CollectionObject,

@@ -23,13 +23,16 @@ using System.Windows.Markup;
 
 namespace DRM.PropBag.ControlsWPF.Binders
 {
-    [MarkupExtensionReturnType(typeof(IMultiValueConverter)), Localizability(LocalizationCategory.None, Modifiability = Modifiability.Unmodifiable, Readability = Readability.Unreadable)]
+    [MarkupExtensionReturnType(typeof(object)), Localizability(LocalizationCategory.None, Modifiability = Modifiability.Unmodifiable, Readability = Readability.Unreadable)]
     public class BindingExtension : MarkupExtension
     {
         #region Member Declarations
 
-        DependencyObject _targetObject;
-        DependencyProperty _targetProperty;
+        //DependencyObject _targetObject;
+        //DependencyProperty _targetProperty;
+        //PropertyInfo _targProp;
+
+        BindingTarget _bindingTarget;
 
         #endregion
 
@@ -52,8 +55,6 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
         [DefaultValue(null), ConstructorArgument("path")]
         public PropertyPath Path { get; set; }
-
-        //public PropertyPath PropertyPath { get; set; }
 
         public Type SourceType { get; set; }
 
@@ -91,7 +92,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
         #endregion
 
-        #region Provide Value Implementation
+        #region Provide Value
 
         public override object ProvideValue(IServiceProvider serviceProvider)
         {
@@ -101,32 +102,58 @@ namespace DRM.PropBag.ControlsWPF.Binders
             }
 
             // Get the Target Object and Target Property
-            if (!SetOurEnv(serviceProvider))
+            if (!SetOurEnv(serviceProvider, out _bindingTarget))
+            {
                 return this;
+            }
 
             MyBindingInfo bindingInfo = GatherBindingInfo(Path, Mode);
 
-            MyBindingEngine mb = new MyBindingEngine(bindingInfo, SourceType, _targetObject, _targetProperty);
+            MyBindingEngine mb = new MyBindingEngine(bindingInfo, SourceType, _bindingTarget);
 
             return mb.ProvideValue(serviceProvider);
 
         }
 
-        private bool SetOurEnv(IServiceProvider serviceProvider)
+        private bool SetOurEnv(IServiceProvider serviceProvider, out BindingTarget bindingTarget)
         {
+            bindingTarget = null;
+
             if (serviceProvider == null) return false;
 
             IProvideValueTarget provideValueTarget = serviceProvider.GetService(typeof(IProvideValueTarget)) as IProvideValueTarget;
             if (provideValueTarget == null) return false;
 
-            _targetObject = provideValueTarget.TargetObject as DependencyObject;
-            if (_targetObject == null) return false;
+            DependencyObject targetObject = provideValueTarget.TargetObject as DependencyObject;
+            if (targetObject == null) return false;
 
-            _targetProperty = provideValueTarget.TargetProperty as DependencyProperty;
-            return true;
+            if(provideValueTarget.TargetProperty is DependencyProperty dp)
+            {
+                bindingTarget = new BindingTarget(targetObject, dp);
+                return true;
+            }
+            else if(provideValueTarget.TargetProperty is PropertyInfo pi)
+            {
+                bindingTarget = new BindingTarget(targetObject, pi);
+                return true;
+            }
+            else
+            {
+                throw new InvalidOperationException("The target of the binding must be a DependencyProperty or a PropertyInfo.");
+            }
         }
 
         #endregion
+
+        public Binding GetBinding(BindingTarget bindingTarget)
+        {
+            MyBindingInfo bindingInfo = GatherBindingInfo(Path, Mode);
+
+            MyBindingEngine mb = new MyBindingEngine(bindingInfo, SourceType, _bindingTarget);
+
+            return mb.ProvideTheBindingDirectly();
+
+        }
 
         #region Binding Info
 
@@ -159,11 +186,9 @@ namespace DRM.PropBag.ControlsWPF.Binders
                 ValidatesOnDataErrors = ValidatesOnDataErrors,
                 ValidatesOnExceptions = ValidatesOnExceptions,
                 ValidatesOnNotifyDataErrors = ValidatesOnNotifyDataErrors,
-
                 
                 UpdateSourceExceptionFilter = null,
                 ValidationRules = null,
-                
 
                 Delay = Delay,
 
