@@ -318,22 +318,10 @@ namespace DRM.PropBag.ControlsWPF.Binders
                 System.Diagnostics.Debug.Assert(nodeIndex == ROOT_INDEX, $"The node index should refer to the ObservableSource for" +
                     $" the root when DataSourceChangeType = {nameof(DataSourceChangeTypeEnum.DataContextUpdated)}.");
 
-                //ObservableSourceStatusEnum originalStatus = parentOs.Status;
-                //// Ask the root to remove its handlers, if any, from the DataContext just replaced.
-                //parentOs.StopListeningToSource();
-
-                //// Ask the root to begin listening to its new DataContext, or its new Data provided by its DataSourceProvider.
-                //parentOs.UpdateData();
-
                 status = parentOs.Status;
-                //bindingInfoChanged = true;
 
-                //if (status.NoLongerReady(originalStatus))
-                //{
                 pathListeners.ResetListeners(ROOT_INDEX + 1, this.DataSourceHasChanged);
                 bindingInfoChanged = true;
-                //return bindingInfoChanged;
-                //}
             }
 
             // Handle Collection Change

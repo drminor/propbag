@@ -40,6 +40,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
         public string NewPathElement { get; set; }
 
+        // TODO: Check to see if the Container is really needed here?
         // For a FrameworkElement kind of ObservableSource:
         // The AnchorElement is the (original) targetObject.
         // The Container is the element being watched, either the targetObject or its parent.

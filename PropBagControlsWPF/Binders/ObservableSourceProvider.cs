@@ -199,4 +199,6 @@ namespace DRM.PropBag.ControlsWPF.Binders
         #endregion Constructors
     }
 
+
+
 }

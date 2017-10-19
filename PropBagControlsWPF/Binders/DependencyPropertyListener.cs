@@ -25,6 +25,9 @@ namespace DRM.PropBag.ControlsWPF.Binders
         }
     }
 
+    /// <summary>
+    /// Uses a Proxy DependencyProperty on which to add a new call back event.
+    /// </summary>
     public sealed class DependencyPropertyListener : DependencyObject, IDisposable
     {
         private static readonly ConcurrentDictionary<DependencyProperty, PropertyPath> Cache = 

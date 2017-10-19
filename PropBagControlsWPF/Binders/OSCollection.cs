@@ -4,7 +4,6 @@ using System.Linq;
 
 namespace DRM.PropBag.ControlsWPF.Binders
 {
-
     public class OSCollection : List<ObservableSource>
     {
         public OSCollection(string rootElementName, string[] pathElements, Type sourceType, string binderName)
