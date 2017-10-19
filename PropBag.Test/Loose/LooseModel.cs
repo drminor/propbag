@@ -26,7 +26,7 @@ namespace PropBagLib.Tests
                 alwaysRegister: false,
                 mustBeRegistered:true,
                 neverCreate:false,
-                desiredHasStoreValue:ThePropFactory.ProvidesStorage);
+                desiredHasStoreValue:true);
         }
 
         public void DoWhenStringChanged(string oldVal, string newVal)

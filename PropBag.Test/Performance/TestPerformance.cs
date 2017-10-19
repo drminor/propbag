@@ -64,7 +64,7 @@ namespace PropBagLib.Tests
         [Test]
         public void SetInt1000Index()
         {
-            mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.Loose);
+            mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.None);
             mod1.PropertyChanged += Mod1_PropertyChanged;
             mod1.PropertyChanged2 += Mod1_PropertyChanged2;
 
@@ -139,7 +139,7 @@ namespace PropBagLib.Tests
         [Test]
         public void SetString1000NoType()
         {
-            mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.Loose);
+            mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.None);
             mod1.PropertyChanged += Mod1_PropertyChanged;
             mod1.PropertyChanged2 += Mod1_PropertyChanged2;
 

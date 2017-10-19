@@ -79,7 +79,7 @@ namespace PropBagLib.Tests
         [Test]
         public void SetInt1000NoTypeDyn()
         {
-            mod1Dyn = PerformanceDynModel.Create(PropBagTypeSafetyMode.Loose);
+            mod1Dyn = PerformanceDynModel.Create(PropBagTypeSafetyMode.None);
             mod1 = mod1Dyn as PerformanceDynModel;
             mod1.PropertyChanged += Mod1_PropertyChanged;
             mod1.PropertyChanged2 += Mod1_PropertyChanged2;
@@ -161,7 +161,7 @@ namespace PropBagLib.Tests
         [Test]
         public void SetString1000IndexDyn()
         {
-            mod1Dyn = PerformanceDynModel.Create(PropBagTypeSafetyMode.Loose);
+            mod1Dyn = PerformanceDynModel.Create(PropBagTypeSafetyMode.None);
             mod1 = mod1Dyn as PerformanceDynModel;
             mod1.PropertyChanged += Mod1_PropertyChanged;
             mod1.PropertyChanged2 += Mod1_PropertyChanged2;

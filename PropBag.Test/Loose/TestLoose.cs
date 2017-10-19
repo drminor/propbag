@@ -38,7 +38,7 @@ namespace PropBagLib.Tests
         [Test]
         public void ShouldUpdateBool()
         {
-            mod1 = new LooseModel(PropBagTypeSafetyMode.Loose)
+            mod1 = new LooseModel(PropBagTypeSafetyMode.None)
             {
                 PropBool = true
             };
@@ -48,7 +48,7 @@ namespace PropBagLib.Tests
         [Test]
         public void ShouldUpdateString()
         {
-            mod1 = new LooseModel(PropBagTypeSafetyMode.Loose);
+            mod1 = new LooseModel(PropBagTypeSafetyMode.None);
             mod1.PropStringChanged += Mod1_PropStringChanged;
 
             mod1.PropString = "Test2";
@@ -62,7 +62,7 @@ namespace PropBagLib.Tests
         [Test]
         public void ShouldSAndGLooseBool()
         {
-            mod1 = new LooseModel(PropBagTypeSafetyMode.Loose)
+            mod1 = new LooseModel(PropBagTypeSafetyMode.None)
             {
                 PropBool = true
             };
@@ -76,7 +76,7 @@ namespace PropBagLib.Tests
         [Test]
         public void ShouldSAndGLooseUseNewProp()
         {
-            mod1 = new LooseModel(PropBagTypeSafetyMode.Loose);
+            mod1 = new LooseModel(PropBagTypeSafetyMode.None);
 
             mod1["System.String", PROP_NEW] = "string";
             Assert.That(mod1.GetTypeOfProperty(PROP_NEW), Is.EqualTo(typeof(string)));
@@ -86,7 +86,7 @@ namespace PropBagLib.Tests
         [Test]
         public void ShouldSAndGLooseUseNew1stNullNotOk()
         {
-            mod1 = new LooseModel(PropBagTypeSafetyMode.Loose);
+            mod1 = new LooseModel(PropBagTypeSafetyMode.None);
 
             mod1["System.Object", PROP_NEW] = null;
             Assert.That(mod1.GetTypeOfProperty(PROP_NEW), Is.EqualTo(typeof(object)));
@@ -99,7 +99,7 @@ namespace PropBagLib.Tests
         [Test]
         public void ShouldSAndGLooseUseNew2ndNullOk()
         {
-            mod1 = new LooseModel(PropBagTypeSafetyMode.Loose);
+            mod1 = new LooseModel(PropBagTypeSafetyMode.None);
 
             mod1["System.String", PROP_NEW] = "string";
             mod1["System.String", PROP_NEW] = null;
@@ -110,7 +110,7 @@ namespace PropBagLib.Tests
         [Test]
         public void ShouldGetKeyNotFoundEx()
         {
-            mod1 = new LooseModel(PropBagTypeSafetyMode.Loose);
+            mod1 = new LooseModel(PropBagTypeSafetyMode.None);
 
             object x;
             Assert.Throws<InvalidOperationException>(() => x = mod1["System.String", "x"]);
@@ -119,7 +119,7 @@ namespace PropBagLib.Tests
         [Test]
         public void ShouldGetArgumentNullEx()
         {
-            mod1 = new LooseModel(PropBagTypeSafetyMode.Loose);
+            mod1 = new LooseModel(PropBagTypeSafetyMode.None);
 
             object x;
             Assert.Throws<ArgumentNullException>(() => x = mod1["System.String", null]);
@@ -128,7 +128,7 @@ namespace PropBagLib.Tests
         [Test]
         public void UpdateViaPropGenAccess()
         {
-            mod1 = new LooseModel(PropBagTypeSafetyMode.Loose);
+            mod1 = new LooseModel(PropBagTypeSafetyMode.None);
 
             IPropGen pg = mod1.GetProp("PropBool");
 
