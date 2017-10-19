@@ -6,6 +6,8 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Data;
+using DRM.TypeSafePropertyBag;
+
 
 namespace DRM.PropBag.ControlsWPF.Binders
 {
@@ -288,7 +290,8 @@ namespace DRM.PropBag.ControlsWPF.Binders
                 System.Diagnostics.Debug.Assert(nodeIndex == ROOT_INDEX, $"The node index should refer to the ObservableSource for " +
                     $"the root when DataSourceChangeType = {nameof(DataSourceChangeTypeEnum.Initializing)}.");
 
-                ObservableSourceProvider osp = GetSourceRoot(bindingTarget, bInfo.Source, BinderName);
+                string rootElementName = GetRootPathElementName(pathListeners);
+                ObservableSourceProvider osp = GetSourceRoot(bindingTarget, bInfo.Source, BinderName, rootElementName);
 
                 if(osp == null)
                 {
@@ -319,7 +322,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
                 parentOs.StopListeningToSource();
 
                 // Ask the root to begin listening to its new DataContext, or its new Data provided by its DataSourceProvider.
-                parentOs.UpdateData(BinderName);
+                parentOs.UpdateData();
 
                 status = parentOs.Status;
                 bindingInfoChanged = true;
@@ -485,6 +488,11 @@ namespace DRM.PropBag.ControlsWPF.Binders
             return bindingInfoChanged;
         }
 
+        protected virtual string GetRootPathElementName(OSCollection pathListeners)
+        {
+            return $"{ROOT_PATH_ELEMENT}+for+{pathListeners?[1]?.PathElement}.";
+        }       
+
         protected virtual string GetNewPathElement(string pathElement, Type nodeType, bool isParentAPropBag)
         {
             string result;
@@ -532,6 +540,24 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
             if (lastParentStatus.IsReadyOrWatching())
             {
+                // Check to see if DataContext holds source property.
+                // When a DataContext is set via a binding, in some cases,
+                // bindings that rely on that DataContext may get set
+                // before the binding that provides the correct DataContext is set.
+
+                ObservableSource root = pathListeners[ROOT_INDEX];
+                if (root.SourceKind == SourceKindEnum.FrameworkElement || root.SourceKind == SourceKindEnum.FrameworkContentElement)
+                {
+                    string firstChildPathElement = pathListeners[ROOT_INDEX + 1].NewPathElement;
+                    if (!root.Type.HasDeclaredProperty(firstChildPathElement))
+                    {
+                        System.Diagnostics.Debug.WriteLine($"No Binding is being created. Data is present, but doesn't contain source property: {firstChildPathElement}.");
+                        isCustom = false;
+                        return null;
+                    }
+                }
+
+
                 // TODO: What about the original PropertyPath parameters?
                 PropertyPath newPath = new PropertyPath(strNewPath);
 

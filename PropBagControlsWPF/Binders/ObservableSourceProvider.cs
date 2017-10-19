@@ -1,5 +1,4 @@
-﻿using DRM.PropBag.ControlsWPF.WPFHelpers;
-using System;
+﻿using System;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Windows;
@@ -86,16 +85,16 @@ namespace DRM.PropBag.ControlsWPF.Binders
         public static bool GetDefaultSource(BindingTarget bindingTarget, string pathElement, 
             string binderName, out ObservableSourceProvider osp)
         {
-            bool targetIsADc = bindingTarget.IsDataContext;
+            bool isTargetADc = bindingTarget.IsDataContext;
 
             if(bindingTarget.DependencyObject is FrameworkElement fe)
             {
-                osp = new ObservableSourceProvider(fe, pathElement, targetIsADc, PathConnectorTypeEnum.Dot, binderName);
+                osp = new ObservableSourceProvider(fe, pathElement, isTargetADc, PathConnectorTypeEnum.Dot, binderName);
                 return true;
             }
             else if(bindingTarget.DependencyObject is FrameworkContentElement fce)
             {
-                osp = new ObservableSourceProvider(fce, pathElement, targetIsADc, PathConnectorTypeEnum.Dot, binderName);
+                osp = new ObservableSourceProvider(fce, pathElement, isTargetADc, PathConnectorTypeEnum.Dot, binderName);
                 return true;
             }
             else if(bindingTarget.DependencyObject is DataGridColumn dgc)
@@ -136,23 +135,23 @@ namespace DRM.PropBag.ControlsWPF.Binders
         #endregion
 
         #region From Framework Element and Framework Content Element
-        public ObservableSourceProvider(FrameworkElement fe, string pathElement, bool targetIsADc, PathConnectorTypeEnum pathConnectorType, string binderName)
+        public ObservableSourceProvider(FrameworkElement fe, string pathElement, bool isTargetADc, PathConnectorTypeEnum pathConnectorType, string binderName)
             : this(pathElement, pathConnectorType, binderName)
         {
             Data = fe;
             Type = null;
             SourceKind = SourceKindEnum.FrameworkElement;
-            IsTargetADc = targetIsADc;
+            IsTargetADc = isTargetADc;
             
         }
 
-        public ObservableSourceProvider(FrameworkContentElement fce, string pathElement, bool targetIsADc, PathConnectorTypeEnum pathConnectorType, string binderName)
+        public ObservableSourceProvider(FrameworkContentElement fce, string pathElement, bool isTargetADc, PathConnectorTypeEnum pathConnectorType, string binderName)
             : this(pathElement, pathConnectorType, binderName)
         {
             Data = fce;
             Type = null;
             SourceKind = SourceKindEnum.FrameworkContentElement;
-            IsTargetADc = targetIsADc;
+            IsTargetADc = isTargetADc;
         }
 
         public ObservableSourceProvider(DataGridColumn dgc, string pathElement, PathConnectorTypeEnum pathConnector, string binderName)

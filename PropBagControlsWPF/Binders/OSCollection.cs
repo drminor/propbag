@@ -73,16 +73,16 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
                 for (int nPtr = 1; nPtr < Count; nPtr++)
                 {
-                    result += GetConnectedPathElement(result == null, this[nPtr].PathOperator, this[nPtr].NewPathElement);
+                    result += GetConnectedPathElement(result == null, this[nPtr].PathConnector, this[nPtr].NewPathElement);
                 }
 
                 return result ?? ".";
             }
         }
 
-        public string Path2 => string.Join(null, this.Skip(1).Select((x, idx) => GetConnectedPathElement(idx == 0, x.PathOperator, x.PathElement)));
+        public string Path2 => string.Join(null, this.Skip(1).Select((x, idx) => GetConnectedPathElement(idx == 0, x.PathConnector, x.PathElement)));
 
-        public string NewPath2 => string.Join(null, this.Skip(1).Select((x, idx) => GetConnectedPathElement(idx == 0, x.PathOperator, x.NewPathElement)));
+        public string NewPath2 => string.Join(null, this.Skip(1).Select((x, idx) => GetConnectedPathElement(idx == 0, x.PathConnector, x.NewPathElement)));
 
         private string GetConnectedPathElement(bool isFirst, PathConnectorTypeEnum po, string pathElement)
         {

@@ -11,17 +11,32 @@ namespace DRM.PropBag.ControlsWPF.WPFHelpers
     {
         #region Get DataContext from FrameworkElement
 
-        // TODO: What may be needed here is
         // If this is being used to create a binding to set the DataContext
         // Then:
-        //      Use the nodes, parent.
+        //      Start with the node's parent.
         // Else:
-        //      Use this node.
-        public static DependencyObject GetDataContext(DependencyObject depObj, bool excludeNodesWithDcBinding, bool inspectAncestors = true)
+        //      Start with this node.
+        public static DependencyObject GetDataContext(DependencyObject depObj, 
+            out bool foundIt,
+            bool startWithParent = false, bool inspectAncestors = true, 
+            bool stopOnNodeWithBoundDc = true)
         {
+            //if (stopOnNodeWithBoundDc && !inspectAncestors) throw new InvalidOperationException("Can't stop on NodeWithBoundDc, if inspectAncestors is false.");
+
             bool hasDataContext = false;
-            DependencyObject curObj = depObj;
-            DependencyObject foundNode = depObj;
+            DependencyObject curObj;
+            DependencyObject foundNode;
+            bool dataContextPropIsBound;
+            bool shouldStopDueToDcIsPropBound = false;
+
+            if (startWithParent)
+            {
+                curObj = LogicalTreeHelper.GetParent(depObj);
+            }
+            else
+            {
+                curObj = depObj;
+            }
 
             do
             {
@@ -29,37 +44,102 @@ namespace DRM.PropBag.ControlsWPF.WPFHelpers
 
                 if (curObj is FrameworkElement fe)
                 {
-                    hasDataContext = HasDataContext(fe, out curObj, excludeNodesWithDcBinding: true);
+                    hasDataContext = HasDataContext(fe, out curObj, out dataContextPropIsBound);
                 }
                 else if(curObj is FrameworkContentElement fce)
                 {
-                    hasDataContext = HasDataContext(fce, out curObj, excludeNodesWithDcBinding: true);
+                    hasDataContext = HasDataContext(fce, out curObj, out dataContextPropIsBound);
                 }
+                else
+                {
+                    // I beleive that every node returned by Fe.Parent / Fce.Parent is a FrameworkElement or a FrameworkContentElement.
+                    // but just in case...
+                    curObj = LogicalTreeHelper.GetParent(curObj);
+                    dataContextPropIsBound = false;
+                    hasDataContext = false;
+                }
+
+                shouldStopDueToDcIsPropBound = stopOnNodeWithBoundDc && dataContextPropIsBound;
+
             }
-            while (!hasDataContext && curObj != null && inspectAncestors);
+            while (!hasDataContext && curObj != null && !shouldStopDueToDcIsPropBound && inspectAncestors);
 
             if(object.ReferenceEquals(foundNode, depObj))
             {
                 System.Diagnostics.Debug.WriteLine("Logical Tree did not have to traverse any ancestors.");
             }
-
+            foundIt = hasDataContext;
             return foundNode;
         }
 
-        public static bool HasDataContext(DependencyObject depObj, out DependencyObject parent, bool excludeNodesWithDcBinding)
+        public static DependencyObject GetDataContextWithBoundDc(DependencyObject depObj,
+            out bool foundIt,
+                bool startWithParent = false)
+        {
+            bool dataContextPropIsBound;
+            DependencyObject curObj;
+            DependencyObject foundNode;
+
+            if (startWithParent)
+            {
+                curObj = LogicalTreeHelper.GetParent(depObj);
+            }
+            else
+            {
+                curObj = depObj;
+            }
+
+            do
+            {
+                foundNode = curObj;
+
+                if (curObj is FrameworkElement fe)
+                {
+                    bool dummy = HasDataContext(fe, out curObj, out dataContextPropIsBound);
+                }
+                else if (curObj is FrameworkContentElement fce)
+                {
+                    bool dummy = HasDataContext(fce, out curObj, out dataContextPropIsBound);
+                }
+                else
+                {
+                    // I beleive that every node returned by Fe.Parent / Fce.Parent is a FrameworkElement or a FrameworkContentElement.
+                    // but just in case...
+                    curObj = LogicalTreeHelper.GetParent(curObj);
+                    dataContextPropIsBound = false;
+                }
+
+            }
+            while (!dataContextPropIsBound && curObj != null);
+
+            if (object.ReferenceEquals(foundNode, depObj))
+            {
+                System.Diagnostics.Debug.WriteLine("Logical Tree did not have to traverse any ancestors.");
+            }
+            foundIt = dataContextPropIsBound;
+            return foundNode;
+        }
+
+
+        public static bool HasDataContext(DependencyObject depObj, 
+            out DependencyObject parent, out bool dataContextPropIsBound)
         {
             if (depObj is FrameworkElement fe)
             {
                 parent = fe.Parent;
-                return fe.DataContext != null && (!excludeNodesWithDcBinding || !HasDcBinding(depObj));
+
+                dataContextPropIsBound = fe.GetBindingExpression(FeDataContextDpPropProvider.Value) != null;
+                return fe.DataContext != null; 
             }
             else if (depObj is FrameworkContentElement fce)
             {
                 parent = fce.Parent;
-                return  fce.DataContext != null && (!excludeNodesWithDcBinding || !HasDcBinding(depObj));
+                dataContextPropIsBound = fce.GetBindingExpression(FceDataContextDpPropProvider.Value) != null;
+                return fce.DataContext != null; 
             }
             else
             {
+                dataContextPropIsBound = false;
                 parent = LogicalTreeHelper.GetParent(depObj);
                 return false;
             }
