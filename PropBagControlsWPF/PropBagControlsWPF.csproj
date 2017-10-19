@@ -60,6 +60,7 @@
     <Compile Include="Binders\ObservableSourceStatusEnum.cs" />
     <Compile Include="Binders\OSCollection.cs" />
     <Compile Include="Binders\OSSExtensions.cs" />
+    <Compile Include="Binders\SelectedItemConverter.cs" />
     <Compile Include="Binders\SourceKindEnum.cs" />
     <Compile Include="BoundPropBag.cs" />
     <Compile Include="ComparerFuncTypeConverter.cs" />

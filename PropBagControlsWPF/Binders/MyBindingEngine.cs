@@ -10,7 +10,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
     public class MyBindingEngine : MyBindingEngineBase
     {
         public MyBindingEngine(MyBindingInfo bindingInfo, Type sourceType, BindingTarget bindingTarget, string binderInstanceName = "pbb:Binder")
-            : base(bindingInfo, sourceType, bindingTarget, binderInstanceName)
+            : base(bindingTarget, bindingInfo, sourceType, binderInstanceName)
         {
         }
     }

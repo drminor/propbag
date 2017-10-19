@@ -4,7 +4,6 @@ using System.Linq;
 
 namespace DRM.PropBag.ControlsWPF.Binders
 {
-
     public class OSCollection : List<ObservableSource>
     {
         public OSCollection(string rootElementName, string[] pathElements, Type sourceType, string binderName)
@@ -65,24 +64,28 @@ namespace DRM.PropBag.ControlsWPF.Binders
             }
         }
 
-        public string NewPath
+        public string GetNewPath(bool justForDiag = false)
         {
-            get
+            string result = null;
+
+            for (int nPtr = 1; nPtr < Count; nPtr++)
             {
-                string result = null;
+                string test = GetConnectedPathElement(result == null, this[nPtr].PathConnector, this[nPtr].NewPathElement);
 
-                for (int nPtr = 1; nPtr < Count; nPtr++)
+                if (test == null)
                 {
-                    result += GetConnectedPathElement(result == null, this[nPtr].PathOperator, this[nPtr].NewPathElement);
+                    if(!justForDiag)
+                        System.Diagnostics.Debug.WriteLine("A new path component is null; resplacing with '.'.");
                 }
-
-                return result ?? ".";
+                result += test;
             }
+
+            return result ?? ".";
         }
 
-        public string Path2 => string.Join(null, this.Skip(1).Select((x, idx) => GetConnectedPathElement(idx == 0, x.PathOperator, x.PathElement)));
+        public string Path2 => string.Join(null, this.Skip(1).Select((x, idx) => GetConnectedPathElement(idx == 0, x.PathConnector, x.PathElement)));
 
-        public string NewPath2 => string.Join(null, this.Skip(1).Select((x, idx) => GetConnectedPathElement(idx == 0, x.PathOperator, x.NewPathElement)));
+        public string NewPath2 => string.Join(null, this.Skip(1).Select((x, idx) => GetConnectedPathElement(idx == 0, x.PathConnector, x.NewPathElement)));
 
         private string GetConnectedPathElement(bool isFirst, PathConnectorTypeEnum po, string pathElement)
         {
@@ -90,7 +93,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
             {
                 switch (po)
                 {
-                    case PathConnectorTypeEnum.Dot: return pathElement ?? ".";
+                    case PathConnectorTypeEnum.Dot: return pathElement;
                     case PathConnectorTypeEnum.Slash: return pathElement ?? ".";
                     case PathConnectorTypeEnum.DotIndexer: return $"[{pathElement}]";
                     case PathConnectorTypeEnum.SlashIndexer: return $"[{pathElement}]";
@@ -107,7 +110,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
                 //    throw new ArgumentNullException("The PathElement cannot be null except for paths with only one component.");
                 //}
 
-                pathElement = pathElement ?? "Not Yet Determined.";
+                //pathElement = pathElement ?? "Not Yet Determined.";
 
                 switch (po)
                 {

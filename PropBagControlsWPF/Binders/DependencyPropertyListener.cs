@@ -11,7 +11,9 @@ namespace DRM.PropBag.ControlsWPF.Binders
     using System.Windows;
     using System.Windows.Data;
 
-
+    /// <summary>
+    /// Extends the DependencyObject type by adding the PropertyChanged method. 
+    /// </summary>
     public static class Observe
     {
         public static IDisposable PropertyChanged(
@@ -23,6 +25,9 @@ namespace DRM.PropBag.ControlsWPF.Binders
         }
     }
 
+    /// <summary>
+    /// Uses a Proxy DependencyProperty on which to add a new call back event.
+    /// </summary>
     public sealed class DependencyPropertyListener : DependencyObject, IDisposable
     {
         private static readonly ConcurrentDictionary<DependencyProperty, PropertyPath> Cache = 
