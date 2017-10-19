@@ -23,6 +23,7 @@ namespace DRM.PropBag.ControlsWPF.WPFHelpers
             try
             {
                 PropBagTemplate result = PropBagTemplates[instanceKey];
+                //if(result.ClassName != instanceKey && result.)
                 return result;
             }
             catch
@@ -48,13 +49,20 @@ namespace DRM.PropBag.ControlsWPF.WPFHelpers
 
             foreach (ResourceDictionary rd in resources.MergedDictionaries)
             {
-                foreach (object o in rd.Keys)
+                foreach (object objKey in rd.Keys)
                 {
-                    object rde = rd[o];
+                    object rde = rd[objKey];
 
                     if (rde is PropBagTemplate)
                     {
                         PropBagTemplate pbTemplate = rde as PropBagTemplate;
+
+                        string strKey = (string)objKey;
+
+                        if(strKey != pbTemplate.InstanceKey && strKey != pbTemplate.ClassName)
+                        {
+                            System.Diagnostics.Debug.WriteLine("PBTemplate Resource Warning: ResourceKey does not match the ClassName or the InstanceKey.");
+                        }
                         // Add using the Instance Key
                         result.Add(pbTemplate.InstanceKey, pbTemplate);
                     }
