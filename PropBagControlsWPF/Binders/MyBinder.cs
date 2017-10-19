@@ -109,6 +109,11 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
             MyBindingInfo bindingInfo = GatherBindingInfo(Path, Mode);
 
+            if(bindingInfo.Converter != null)
+            {
+                int aa = 0;
+            }
+
             MyBindingEngine mb = new MyBindingEngine(bindingInfo, SourceType, _bindingTarget);
 
             return mb.ProvideValue(serviceProvider);

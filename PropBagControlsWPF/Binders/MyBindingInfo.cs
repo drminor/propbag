@@ -30,7 +30,18 @@ namespace DRM.PropBag.ControlsWPF.Binders
         public string BindingGroupName { get; set; }
         public bool BindsDirectlyToSource { get; set; }
 
-        public IValueConverter Converter { get; set; }
+        IValueConverter _converter;
+        public IValueConverter Converter
+        {
+            get
+            {
+                return _converter;
+            }
+            set
+            {
+                _converter = value;
+            }
+        }
         public CultureInfo ConverterCulture { get; set; }
         public object ConverterParameter { get; set; }
 
@@ -68,9 +79,9 @@ namespace DRM.PropBag.ControlsWPF.Binders
         /// </summary>
         public Collection<System.Windows.Controls.ValidationRule> ValidationRules { get; set; }
 
-        public Func<MyBindingInfo, string, Type, Type, object> ConverterParameterBuilder { get; set; }
+        public Func<BindingTarget, MyBindingInfo, Type, string, object> ConverterParameterBuilder { get; set; }
 
-        private object GetConverterParameter(MyBindingInfo bInfo, string pathElement, Type t1, Type t2)
+        private object GetConverterParameter(BindingTarget bindingTarget, MyBindingInfo bInfo, Type sourceType, string pathElement)
         {
             return bInfo.ConverterParameter;
         }
