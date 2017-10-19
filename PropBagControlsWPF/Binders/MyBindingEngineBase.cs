@@ -91,10 +91,14 @@ namespace DRM.PropBag.ControlsWPF.Binders
                 MultiBindingExpression exp = BuildMultiBindingExpression(serviceProvider, binding, isCustom);
                 return exp;
             }
-            else
+            else if (_bindingTarget.IsProperty) 
             {
                 System.Diagnostics.Debug.WriteLine("Returning a binder -- the target property is a PropertyInfo.");
                 return binding;
+            }
+            else
+            {
+                throw new InvalidOperationException("The Binding Target was neither a DataContext, a DependencyProperty or a System.Reflection.PropertyInfo. Cannot provide a binding or binding expression.");
             }
         }
 
@@ -258,7 +262,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
         protected bool InitPathListeners(OSCollection pathListeners, BindingTarget bindingTarget, MyBindingInfo bInfo)
         {
             DataSourceChangedEventArgs dsChangedEventArgs = new DataSourceChangedEventArgs(
-                DataSourceChangeTypeEnum.Initializing);
+                DataSourceChangeTypeEnum.Initializing, dataWasChanged:true);
 
             return RefreshPathListeners(dsChangedEventArgs, pathListeners, 
                 pathListeners[ROOT_INDEX], bindingTarget, bInfo);
@@ -298,9 +302,6 @@ namespace DRM.PropBag.ControlsWPF.Binders
                     throw new InvalidOperationException($"{BinderName} could not locate a data source.");
                 }
 
-                //status = ReplaceListener(pathListeners, ROOT_INDEX, ref osp, this.DataSourceHasChanged,
-                //    out parentOs);
-
                 status = pathListeners.ReplaceListener(ROOT_INDEX, ref osp, this.DataSourceHasChanged,
                     out parentOs);
 
@@ -317,22 +318,22 @@ namespace DRM.PropBag.ControlsWPF.Binders
                 System.Diagnostics.Debug.Assert(nodeIndex == ROOT_INDEX, $"The node index should refer to the ObservableSource for" +
                     $" the root when DataSourceChangeType = {nameof(DataSourceChangeTypeEnum.DataContextUpdated)}.");
 
-                ObservableSourceStatusEnum originalStatus = parentOs.Status;
-                // Ask the root to remove its handlers, if any, from the DataContext just replaced.
-                parentOs.StopListeningToSource();
+                //ObservableSourceStatusEnum originalStatus = parentOs.Status;
+                //// Ask the root to remove its handlers, if any, from the DataContext just replaced.
+                //parentOs.StopListeningToSource();
 
-                // Ask the root to begin listening to its new DataContext, or its new Data provided by its DataSourceProvider.
-                parentOs.UpdateData();
+                //// Ask the root to begin listening to its new DataContext, or its new Data provided by its DataSourceProvider.
+                //parentOs.UpdateData();
 
                 status = parentOs.Status;
-                bindingInfoChanged = true;
+                //bindingInfoChanged = true;
 
-                if (status.NoLongerReady(originalStatus))
-                {
-                    pathListeners.ResetListeners(1, this.DataSourceHasChanged);
-                    //ResetPathListeners(pathListeners, 1);
-                    return bindingInfoChanged;
-                }
+                //if (status.NoLongerReady(originalStatus))
+                //{
+                pathListeners.ResetListeners(ROOT_INDEX + 1, this.DataSourceHasChanged);
+                bindingInfoChanged = true;
+                //return bindingInfoChanged;
+                //}
             }
 
             // Handle Collection Change
@@ -475,6 +476,10 @@ namespace DRM.PropBag.ControlsWPF.Binders
                         lastNode.NewPathElement = newPathElement;
                         bindingInfoChanged = true;
                     }
+                    if(!status.IsWatching())
+                    {
+                        parentOs.BeginListeningToSource();
+                    }
                 }
             }
             else
@@ -533,7 +538,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
             // Three nodes: 1 parent, 2 intervening objects
             // The next to last node, must have data, in order to avoid binding warnings.
             ObservableSource lastParent = pathListeners[pathListeners.Count - 2];
-            string strNewPath = pathListeners.NewPath;
+            string strNewPath = pathListeners.GetNewPath(justForDiag:false);
             ObservableSourceStatusEnum lastParentStatus = lastParent.Status;
             System.Diagnostics.Debug.WriteLine($"Path = {bInfo.PropertyPath.Path}, NewPath = {strNewPath}, " +
                 $"Terminal Node Status = {lastParentStatus}.");
@@ -548,15 +553,14 @@ namespace DRM.PropBag.ControlsWPF.Binders
                 ObservableSource root = pathListeners[ROOT_INDEX];
                 if (root.SourceKind == SourceKindEnum.FrameworkElement || root.SourceKind == SourceKindEnum.FrameworkContentElement)
                 {
-                    string firstChildPathElement = pathListeners[ROOT_INDEX + 1].NewPathElement;
-                    if (!root.Type.HasDeclaredProperty(firstChildPathElement))
+                    string firstChildPathElement = pathListeners[ROOT_INDEX + 1].PathElement;
+                    if (!root.DoesChildExist(firstChildPathElement))
                     {
                         System.Diagnostics.Debug.WriteLine($"No Binding is being created. Data is present, but doesn't contain source property: {firstChildPathElement}.");
                         isCustom = false;
                         return null;
                     }
                 }
-
 
                 // TODO: What about the original PropertyPath parameters?
                 PropertyPath newPath = new PropertyPath(strNewPath);
@@ -673,12 +677,6 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
         protected virtual void DataSourceHasChanged(object sender, DataSourceChangedEventArgs e)
         {
-            ObservableSource os = (ObservableSource)sender;
-
-            bool bindingInfoChanged = RefreshPathListeners(e, _dataSourceChangeListeners, os, _bindingTarget, _bindingInfo);
-
-            //BindingBase oldBinding = BindingOperations.GetBindingBase(_targetObject, _targetProperty);
-
             BindingBase oldBinding;
             if (_bindingTarget.IsDependencyProperty)
             {
@@ -690,6 +688,14 @@ namespace DRM.PropBag.ControlsWPF.Binders
             }
 
             bool hadBinding = oldBinding != null;
+
+            if(!e.DataWasUpdated && oldBinding != null)
+            {
+                return;
+            }
+
+            ObservableSource os = (ObservableSource)sender;
+            bool bindingInfoChanged = RefreshPathListeners(e, _dataSourceChangeListeners, os, _bindingTarget, _bindingInfo);
 
             if (!bindingInfoChanged && oldBinding != null)
             {

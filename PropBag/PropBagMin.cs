@@ -858,14 +858,14 @@ namespace DRM.PropBag
             {
                 throw new InvalidOperationException("PropertyExists is not allowed when the TypeSafetyMode is set to 'Locked.'");
             }
-            //if(propertyName.StartsWith("[") && propertyName.EndsWith("]"))
-            //{
-            //    int pos = propertyName.IndexOf(',');
-            //    if(pos > 0)
-            //    {
-            //        propertyName = propertyName.Substring(pos + 1, propertyName.Length - (pos + 2)).Trim();
-            //    }
-            //}
+            if (propertyName.StartsWith("[") && propertyName.EndsWith("]"))
+            {
+                int pos = propertyName.IndexOf(',');
+                if (pos > 0)
+                {
+                    propertyName = propertyName.Substring(pos + 1, propertyName.Length - (pos + 2)).Trim();
+                }
+            }
             return tVals.ContainsKey(propertyName);
         }
 

@@ -154,7 +154,8 @@ namespace DRM.PropBag.ControlsWPF.Binders
             IsTargetADc = isTargetADc;
         }
 
-        public ObservableSourceProvider(DataGridColumn dgc, string pathElement, PathConnectorTypeEnum pathConnector, string binderName)
+        public ObservableSourceProvider(DataGridColumn dgc, string pathElement, PathConnectorTypeEnum pathConnectorType, string binderName)
+            : this(pathElement, pathConnectorType, binderName)
         {
             Data = dgc;
             Type = null;

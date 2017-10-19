@@ -11,7 +11,9 @@ namespace DRM.PropBag.ControlsWPF.Binders
     using System.Windows;
     using System.Windows.Data;
 
-
+    /// <summary>
+    /// Extends the DependencyObject type by adding the PropertyChanged method. 
+    /// </summary>
     public static class Observe
     {
         public static IDisposable PropertyChanged(

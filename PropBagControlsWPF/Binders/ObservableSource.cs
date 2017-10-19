@@ -40,11 +40,19 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
         public string NewPathElement { get; set; }
 
-        // For an ObservableSource of SourceKind: DataContext, the Container is the FrameworkElement
+        // For a FrameworkElement kind of ObservableSource:
+        // The AnchorElement is the (original) targetObject.
+        // The Container is the element being watched, either the targetObject or its parent.
         // and the Data is the DataContext.
 
-        // For an ObservableSource of SourceKind: DataSourceProvider, the Container is the DSP
+        // For a DataSouceProvider kind of ObservableSource:
+        // The Container is the DSP
         // and the Data is the result of accessing DSP.Data.
+
+        // For a DataGridColumn kind of ObservableSource:
+        // The Container is the DependencyPropertyListener
+        // The AnchorElement is the DataGridColumn, which is being watched.
+        // and the Data is the DataContext.
 
         private WeakReference _wrAnchorElement;
         private Object AnchorElement
@@ -84,8 +92,11 @@ namespace DRM.PropBag.ControlsWPF.Binders
                     || SourceKind == SourceKindEnum.DataGridColumn))
                 {
                     throw new InvalidOperationException("Attempting to get the value for Container " +
-                        "when the SourceKind is not FrameworkElement, FrameworkContentElement, " +
-                        "DataSourceProvider of DataGridColumn is not a valid operation.");
+                        $"is not suppoted when the ObservableSouce is not of SourceKind: " +
+                        $"{nameof(SourceKindEnum.FrameworkElement)}, " +
+                        $"{nameof(SourceKindEnum.FrameworkContentElement)}, " +
+                        $"{nameof(SourceKindEnum.DataSourceProvider)} " +
+                        $"or {nameof(SourceKindEnum.DataGridColumn)}.");
                 }
 
                 if (_wrContainer == null || !_wrContainer.IsAlive) return null;
@@ -99,8 +110,11 @@ namespace DRM.PropBag.ControlsWPF.Binders
                     || SourceKind == SourceKindEnum.DataGridColumn))
                 {
                     throw new InvalidOperationException("Attempting to get the value for Container " +
-                        "when the SourceKind is not FrameworkElement, FrameworkContentElement, " +
-                        "DataSourceProvider of DataGridColumn is not a valid operation.");
+                        $"is not suppoted when the ObservableSouce is not of SourceKind: " +
+                        $"{nameof(SourceKindEnum.FrameworkElement)}, " +
+                        $"{nameof(SourceKindEnum.FrameworkContentElement)}, " +
+                        $"{nameof(SourceKindEnum.DataSourceProvider)} " +
+                        $"or {nameof(SourceKindEnum.DataGridColumn)}.");
                 }
 
                 if (value == null)
@@ -131,7 +145,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
             {
                 case SourceKindEnum.DataGridColumn:
                     {
-                        return typeof(DataGridColumn).IsAssignableFrom(type = data.GetType());
+                        return typeof(DependencyPropertyListener).IsAssignableFrom(type = data.GetType());
                     }
                 case SourceKindEnum.DataSourceProvider:
                     {
@@ -299,54 +313,59 @@ namespace DRM.PropBag.ControlsWPF.Binders
             }
         }
 
-        public void UpdateData()
+        //public void UpdateData()
+        //{
+        //    if (!(SourceKind == SourceKindEnum.FrameworkElement || SourceKind == SourceKindEnum.FrameworkContentElement || SourceKind == SourceKindEnum.DataSourceProvider || SourceKind == SourceKindEnum.DataGridColumn))
+        //    {
+        //        throw new InvalidOperationException($"Only ObservableSources with SourceKind =" +
+        //            $" {nameof(SourceKindEnum.FrameworkElement)} or " +
+        //            $"{nameof(SourceKindEnum.FrameworkContentElement)} " +
+        //            $"{nameof(SourceKindEnum.DataSourceProvider)} " + 
+        //            $"can have their data updated.");
+        //    }
+
+        //    object newData;
+        //    Type newType = null;
+        //    ObservableSourceStatusEnum newStatus = ObservableSourceStatusEnum.NoType;
+
+        //    if (SourceKind == SourceKindEnum.DataSourceProvider)
+        //    {
+        //        newData = ((DataSourceProvider)Container).Data;
+        //        if (newData != null)
+        //        {
+        //            newType = newData.GetType();
+        //        }
+
+        //        newStatus = Status.SetReady(newData != null);
+        //    }
+        //    else
+        //    {
+        //        DependencyObject anchor = (DependencyObject)this.AnchorElement;
+        //        if (!GetDcFromFrameworkElement(anchor, out newData, out newType, out newStatus))
+        //        {
+        //            throw new ApplicationException($"TargetObject in {this.BinderName}.ObservableSource was neither a FrameworkElement or a FrameworkContentElement.");
+        //        }
+        //    }
+
+        //    UpdateData(newData, newType, newStatus);
+        //}
+
+        private bool UpdateData(object newData, Type newType, ObservableSourceStatusEnum newStatus)
         {
-            if (!(SourceKind == SourceKindEnum.FrameworkElement || SourceKind == SourceKindEnum.FrameworkContentElement || SourceKind == SourceKindEnum.DataSourceProvider || SourceKind == SourceKindEnum.DataGridColumn))
-            {
-                throw new InvalidOperationException($"Only ObservableSources with SourceKind =" +
-                    $" {nameof(SourceKindEnum.FrameworkElement)} or " +
-                    $"{nameof(SourceKindEnum.FrameworkContentElement)} " +
-                    $"{nameof(SourceKindEnum.DataSourceProvider)} " + 
-                    $"can have their data updated.");
-            }
-
-            object newData;
-            Type newType = null;
-            ObservableSourceStatusEnum newStatus = ObservableSourceStatusEnum.NoType;
-
-            if (SourceKind == SourceKindEnum.DataSourceProvider)
-            {
-                newData = ((DataSourceProvider)Container).Data;
-                if (newData != null)
-                {
-                    newType = newData.GetType();
-                }
-
-                newStatus = Status.SetReady(newData != null);
-            }
-            else
-            {
-                DependencyObject anchor = (DependencyObject)this.AnchorElement;
-                if (!GetDcFromFrameworkElement(anchor, out newData, out newType, out newStatus))
-                {
-                    throw new ApplicationException($"TargetObject in {this.BinderName}.ObservableSource was neither a FrameworkElement or a FrameworkContentElement.");
-                }
-            }
-
-            UpdateData(newData, newType, newStatus);
-        }
-
-        private void UpdateData(object newData, Type newType, ObservableSourceStatusEnum newStatus)
-        {
-            if (!(SourceKind == SourceKindEnum.FrameworkElement || SourceKind == SourceKindEnum.FrameworkContentElement || SourceKind == SourceKindEnum.DataSourceProvider || SourceKind == SourceKindEnum.DataGridColumn))
+            if (!(SourceKind == SourceKindEnum.FrameworkElement
+                || SourceKind == SourceKindEnum.FrameworkContentElement
+                || SourceKind == SourceKindEnum.DataSourceProvider
+                || SourceKind == SourceKindEnum.DataGridColumn))
             {
                 throw new InvalidOperationException($"Only ObservableSources with SourceKind =" +
                     $" {nameof(SourceKindEnum.FrameworkElement)} or " +
                     $"{nameof(SourceKindEnum.FrameworkContentElement)} " +
                     $"{nameof(SourceKindEnum.DataSourceProvider)} " +
+                    $"{nameof(SourceKindEnum.DataGridColumn)} " +
                     $"can have their data updated.");
             }
 
+            bool changed;
             object oldData = Data;
 
             if (oldData != null && newData != null)
@@ -354,11 +373,21 @@ namespace DRM.PropBag.ControlsWPF.Binders
                 if (object.ReferenceEquals(oldData, newData))
                 {
                     System.Diagnostics.Debug.WriteLine("Update ObservableSource found identical data already present.");
+                    changed = false;
                 }
                 else
                 {
                     System.Diagnostics.Debug.WriteLine("Update ObservableSource found (different) data already present.");
+                    changed = true;
                 }
+            }
+            else if(!(oldData == null && newData == null) && (oldData == null || newData == null))
+            {
+                changed = true;
+            }
+            else
+            {
+                changed = false;
             }
 
             // Remove existing subscriptions if any for the existing Data.
@@ -370,6 +399,38 @@ namespace DRM.PropBag.ControlsWPF.Binders
             Data = newData;
             Type = newType;
             Status = newStatus;
+
+            return changed;
+        }
+
+        public bool DoesChildExist(string pathElement)
+        {
+            if (SourceKind == SourceKindEnum.Empty || SourceKind == SourceKindEnum.TerminalNode)
+            {
+                throw new ApplicationException($"The Observable is empty or is the TerminalNode, calling DoesChildExist is not supported.");
+            }
+
+            Type parentType = this.Type;
+            if (parentType == null) return false;
+
+            if (IsPropBagBased)
+            {
+                return DoesChildExist_PropBag((IPropBagMin)Data, parentType, pathElement);
+            }
+            else
+            {
+                return DoesChildExist_Clr(Data, parentType, pathElement);
+            }
+        }
+
+        public bool DoesChildExist_PropBag(IPropBagMin data, Type type, string pathElement)
+        {
+            return data.PropertyExists(pathElement);
+        }
+
+        public bool DoesChildExist_Clr(object data, Type type, string pathElement)
+        {
+            return type.HasDeclaredProperty(pathElement);
         }
 
         public ObservableSourceProvider GetChild(string pathElement)
@@ -385,6 +446,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
             if (IsPropBagBased)
             {
                 return GetChildFromPropBag((IPropBagMin)Data, parentType, pathElement);
+
             }
             else
             {
@@ -665,7 +727,10 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
             if (!addedIt)
             {
-                throw new ApplicationException("Cannot create subscriptions. Object does not implement INotifyPropertyChanged, nor does it implement INotifyCollectionChanged.");
+                string msg = "Cannot create subscriptions. Object does not implement INotifyPropertyChanged, " +
+                    "nor does it implement INotifyCollectionChanged.";
+                System.Diagnostics.Debug.WriteLine(msg);
+                //throw new ApplicationException(msg);
             }
             Status = workStatus;
         }
@@ -748,7 +813,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
             SourceKind = SourceKindEnum.FrameworkElement;
             AnchorElement = fe;
 
-            UpdateWatcherAndData(fe, pathElement, isTargetADc, binderName);
+            UpdateWatcherAndData_Fe(fe, pathElement, isTargetADc, binderName);
         }
 
         public ObservableSource(FrameworkContentElement fce, string pathElement, bool isTargetADc, PathConnectorTypeEnum pathConnectorType, string binderName)
@@ -757,47 +822,84 @@ namespace DRM.PropBag.ControlsWPF.Binders
             SourceKind = SourceKindEnum.FrameworkContentElement;
             AnchorElement = fce;
 
-            UpdateWatcherAndData(fce, pathElement, isTargetADc, binderName);
+            UpdateWatcherAndData_Fe(fce, pathElement, isTargetADc, binderName);
         }
 
-        private void Fe_or_fce_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        private void DataContextChanged_Fe(object sender, DependencyPropertyChangedEventArgs e)
         {
             DependencyObject feOrFce = (DependencyObject)this.AnchorElement;
             
-            UpdateWatcherAndData(feOrFce, this.PathElement, this.IsTargetADc, this.BinderName);
+            bool changed = UpdateWatcherAndData_Fe(feOrFce, this.PathElement, this.IsTargetADc, this.BinderName);
 
             // TODO: Determine if a real change has occured,
             // and then raise only if real.
-            OnDataSourceChanged(DataSourceChangeTypeEnum.DataContextUpdated);
+            OnDataSourceChanged(DataSourceChangeTypeEnum.DataContextUpdated, changed);
         }
 
-        private void UpdateWatcherAndData(DependencyObject targetObject, string pathElement, 
-            bool isTargetADc, string binderName)
+        private void SubscribeTo_FcOrFce(DependencyObject newDepObj, DependencyObject oldDepObj, DependencyPropertyChangedEventHandler handler)
         {
-            if(pathElement.Contains("PersonList"))
+            // TODO: Remove the handler from the existing container.
+
+            if(oldDepObj != null)
             {
-                System.Diagnostics.Debug.WriteLine($"DIAG: Fetching DataContext for {pathElement}.");
+                if(oldDepObj is FrameworkElement oldFe)
+                {
+                    oldFe.DataContextChanged -= handler;
+                }
+                else
+                {
+                    ((FrameworkContentElement)newDepObj).DataContextChanged += handler;
+                }
             }
 
-            this.IsTargetADc = isTargetADc;
+            if(newDepObj != null)
+            {
+                if (newDepObj is FrameworkElement fe)
+                {
+                    fe.DataContextChanged += handler;
+                }
+                else
+                {
+                    ((FrameworkContentElement)newDepObj).DataContextChanged += handler;
+                }
+            }
+        }
 
-            // If the target of this binding, watch the TargetObject's parent, otherwise watch the TargetObject for DataContext updates
-            DependencyObject container = isTargetADc ? LogicalTreeHelper.GetParent(targetObject) : targetObject;
-            SubScribeToFcOrFce(container, Fe_or_fce_DataContextChanged);
-
-            Container = container;
+        private bool UpdateWatcherAndData_Fe(DependencyObject targetObject, string pathElement,
+            bool isTargetADc, string binderName)
+        {
+            if (SourceKind != SourceKindEnum.FrameworkElement && SourceKind != SourceKindEnum.FrameworkContentElement)
+            {
+                throw new InvalidOperationException($"Cannot call {nameof(UpdateWatcherAndData_Fe)} " +
+                    $"if the ObservableSource does not have a SourceKind of {nameof(SourceKindEnum.FrameworkElement)} " +
+                    $"or {nameof(SourceKindEnum.FrameworkContentElement)}.");
+            }
 
             string fwElementName = LogicalTree.GetNameFromDepObject(targetObject);
             System.Diagnostics.Debug.WriteLine($"Fetching DataContext to use from: {fwElementName} for pathElement: {pathElement}.");
 
-            // Now see if we can find a data context.
-            DependencyObject foundNode = LogicalTree.GetDataContext(targetObject, out bool foundIt, 
-                startWithParent: isTargetADc, inspectAncestors: true, stopOnNodeWithBoundDc:true);
+            this.IsTargetADc = isTargetADc;
 
-            if(!foundIt)
+            // If this binding sets a DataContext, watch the TargetObject's parent, otherwise watch the TargetObject for DataContext updates
+
+            // TODO: May want to make sure that the value of Container is a DependencyObject.
+            DependencyObject curContainer = (DependencyObject)Container;
+            DependencyObject container = isTargetADc ? LogicalTreeHelper.GetParent(targetObject) : targetObject;
+
+            if(!object.ReferenceEquals(curContainer, container))
             {
-                UpdateData(null, null, ObservableSourceStatusEnum.NoType);
-                return;
+                SubscribeTo_FcOrFce(container, curContainer, DataContextChanged_Fe);
+                Container = container;
+            }
+
+            // Now see if we can find a data context.
+            DependencyObject foundNode = LogicalTree.GetDataContext(targetObject, out bool foundIt,
+                startWithParent: isTargetADc, inspectAncestors: true, stopOnNodeWithBoundDc: true);
+
+            if (!foundIt)
+            {
+                bool changed = UpdateData(null, null, ObservableSourceStatusEnum.NoType);
+                return changed;
             }
 
             if (!object.ReferenceEquals(targetObject, foundNode))
@@ -813,7 +915,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
             DependencyObject foundNodeWithBoundDc = LogicalTree.GetDataContextWithBoundDc(targetObject,
                 out bool foundOneWithBoundDc, startWithParent: isTargetADc);
 
-            if(foundOneWithBoundDc)
+            if (foundOneWithBoundDc)
             {
                 System.Diagnostics.Debug.WriteLine("Some parent has a DataContext that is set via a Binding Markup.");
             }
@@ -822,13 +924,15 @@ namespace DRM.PropBag.ControlsWPF.Binders
             {
                 Type newType = fe.DataContext?.GetType();
                 ObservableSourceStatusEnum newStatus = Status.SetReady(fe.DataContext != null);
-                UpdateData(fe.DataContext, newType, newStatus);
+                bool changed = UpdateData(fe.DataContext, newType, newStatus);
+                return changed;
             }
             else if (foundNode is FrameworkContentElement fce)
             {
                 Type newType = fce.DataContext?.GetType();
                 ObservableSourceStatusEnum newStatus = Status.SetReady(fce.DataContext != null);
-                UpdateData(fce.DataContext, newType, newStatus);
+                bool changed = UpdateData(fce.DataContext, newType, newStatus);
+                return changed;
             }
             else
             {
@@ -836,17 +940,6 @@ namespace DRM.PropBag.ControlsWPF.Binders
             }
         }
 
-        private void SubScribeToFcOrFce(DependencyObject depObj, DependencyPropertyChangedEventHandler handler)
-        {
-            if(depObj is FrameworkElement fe)
-            {
-                fe.DataContextChanged += handler;
-            }
-            else
-            {
-                ((FrameworkContentElement)depObj).DataContextChanged += handler;
-            }
-        }
 
         #endregion
 
@@ -857,31 +950,70 @@ namespace DRM.PropBag.ControlsWPF.Binders
             AnchorElement = dgc;
             SourceKind = SourceKindEnum.DataGridColumn;
 
-            System.Diagnostics.Debug.WriteLine($"Fetching DataContext for DataGridColumn.");
+            SubscribeTo_Dg(dgc, DisplayIndexChanged_Dg);
+
+            UpdateData_Dg(dgc, pathElement, binderName);
+
+        }
+
+        private void DisplayIndexChanged_Dg(DependencyPropertyChangedEventArgs e)
+        {
+            DataGridColumn dgc = (DataGridColumn)this.AnchorElement;
+
+            bool changed = UpdateData_Dg(dgc, this.PathElement, this.BinderName);
+
+            // TODO: Determine if a real change has occured by comparing the value of Status before and afer the call 
+            // to DgUpdateData and then raise only if appropriate.
+
+            if (Status == ObservableSourceStatusEnum.Ready)
+            {
+                OnDataSourceChanged(DataSourceChangeTypeEnum.DataContextUpdated, changed);
+            }
+        }
+
+        private bool UpdateData_Dg(DataGridColumn dgc, string pathElement, string binderName)
+        {
+            if (SourceKind != SourceKindEnum.DataGridColumn)
+            {
+                throw new InvalidOperationException($"Cannot call {nameof(UpdateData_Dg)} " +
+                    $"if the ObservableSource is not of SourceKind: {nameof(SourceKindEnum.DataGridColumn)}.");
+            }
+
+            System.Diagnostics.Debug.WriteLine($"Fetching DataGrid for a DataGridColumn for {pathElement}.");
 
             DataGrid dataGrid = LogicalTree.GetDataGridOwner(dgc);
 
-            if (dataGrid == null)
+            Type newType = dataGrid?.GetType();
+            ObservableSourceStatusEnum newStatus = Status.SetReady(dataGrid != null);
+
+            bool changed = UpdateData(dataGrid?.SelectedItems, newType, newStatus);
+            return changed;
+        }
+
+        private void SubscribeTo_Dg(DataGridColumn dcg, Action<DependencyPropertyChangedEventArgs> action)
+        {
+            object anchor = AnchorElement;
+
+            if (anchor != null && anchor is DataGridColumn currentDgc)
             {
-                Data = null;
-                Type = null;
-                Status = Status.SetReady(false);
+                if (Container != null && Container is IDisposable disp)
+                {
+                    // Free up the previous DependencyPropertyListener.
+                    disp.Dispose();
+                }
+            }
+
+            if(action != null)
+            {
+                DependencyProperty dispIndex = LogicalTree.DataGridColumn_DisplayIndex_DpPropProvider.Value;
+                Container = dcg.PropertyChanged(dispIndex, action);
             }
             else
             {
-                if (dataGrid is FrameworkElement fe)
-                {
-                    // TODO: Fix Me!!!
-                    //InitializeFromFcOrFce(fe, pathElement, pathConnectorType, false, binderName);
-                }
-                else
-                {
-                    Data = null;
-                    Type = null;
-                    Status = Status.SetReady(false);
-                }
+                Container = null;
             }
         }
+
         #endregion
 
         #region From INotifyPropertyChanged
@@ -937,7 +1069,9 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
         private void OnDataSourceProvider_DataChanged(object source, EventArgs args)
         {
-            OnDataSourceChanged(DataSourceChangeTypeEnum.DataContextUpdated);
+            // TODO: Has something changed.
+            bool changed = true;
+            OnDataSourceChanged(DataSourceChangeTypeEnum.DataContextUpdated, changed);
         }
         #endregion
 
@@ -945,13 +1079,13 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
         #region Raise Event Helpers
 
-        private void OnDataSourceChanged(DataSourceChangeTypeEnum changeType)
+        private void OnDataSourceChanged(DataSourceChangeTypeEnum changeType, bool changed)
         {
             DataSourceChangedEventHandler handler = Interlocked.CompareExchange(ref DataSourceChanged, null, null);
 
             if (handler != null)
             {
-                handler(this, new DataSourceChangedEventArgs(changeType));
+                handler(this, new DataSourceChangedEventArgs(changeType, changed));
             }
         }
 

@@ -206,6 +206,11 @@ namespace DRM.PropBag.ControlsWPF.WPFHelpers
                 () => GetDependencyPropertyByName(typeof(FrameworkContentElement), "DataContextProperty"),
                 LazyThreadSafetyMode.PublicationOnly);
 
+        public static Lazy<DependencyProperty> DataGridColumn_DisplayIndex_DpPropProvider =
+            new Lazy<DependencyProperty>(
+                () => GetDependencyPropertyByName(typeof(DataGridColumn), "DisplayIndexProperty"),
+                LazyThreadSafetyMode.PublicationOnly);
+
         public static DependencyProperty GetDependencyPropertyByName(DependencyObject depObj, string dpName)
         {
             return GetDependencyPropertyByName(depObj.GetType(), dpName);
@@ -227,6 +232,18 @@ namespace DRM.PropBag.ControlsWPF.WPFHelpers
         }
         #endregion
 
+
+        #region CLR Property Support
+
+        private static Type Data_Grid_Column_Type = typeof(DataGridColumn);
+
+        public static PropertyInfo Data_Grid_ColumnOwner_Property_Info = Data_Grid_Column_Type.GetProperty("DataGridOwner", BindingFlags.Instance | BindingFlags.NonPublic);
+
+        public static PropertyInfo Data_Grid_Column_Binding_Property_Info = Data_Grid_Column_Type.GetProperty("BindingProperty", BindingFlags.Instance | BindingFlags.Public);
+
+
+        #endregion
+
         #region Miscellaneous
 
         public static string GetNameFromDepObject(DependencyObject depObj)
@@ -245,15 +262,36 @@ namespace DRM.PropBag.ControlsWPF.WPFHelpers
             }
         }
 
-        private static Type Data_Grid_Column_Type = typeof(DataGridColumn).GetType();
-        public static PropertyInfo Data_Grid_Owner_Property_Info = Data_Grid_Column_Type.GetProperty("DataGridOwner", BindingFlags.Instance | BindingFlags.NonPublic);
-
-        public static PropertyInfo Data_Grid_Column_Binding_Property_Info = Data_Grid_Column_Type.GetProperty("Binding", BindingFlags.Instance | BindingFlags.Public);
+        // TODO: Move these to the region above: Dependency Property Support
 
 
         public static DataGrid GetDataGridOwner(DataGridColumn dgc)
         {
-            return Data_Grid_Owner_Property_Info.GetValue(dgc, null) as DataGrid;
+
+            PropertyInfo[] testPropertyList = Data_Grid_Column_Type.GetProperties(BindingFlags.NonPublic | BindingFlags.Instance);
+            object attempt;
+
+            try
+            {
+                attempt = Data_Grid_ColumnOwner_Property_Info.GetValue(dgc, null);
+            }
+            catch
+            {
+                return null;
+            }
+
+            if(attempt == null)
+            {
+                return null;
+            }
+            else if(attempt is DataGrid dg)
+            {
+                return dg;
+            }
+            else
+            {
+                return null;
+            }
         }
 
         #endregion
