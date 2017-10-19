@@ -247,7 +247,7 @@ namespace DRM.PropBag
                     bool useDefault = pi.InitialValueField.SetToDefault;
                     string value;
 
-
+                    // TODO: Fix this??
                     if (pi.InitialValueField.SetToEmptyString && pi.PropertyType == typeof(Guid))
                     {
                         const string EMPTY_GUID = "00000000-0000-0000-0000-000000000000";
@@ -462,8 +462,6 @@ namespace DRM.PropBag
                 neverCreate: false,
                 desiredHasStoreValue: ThePropFactory.ProvidesStorage);
 
-            if (genProp.IsEmpty) return genProp;
-
             if (!wasRegistered)
             {
                 if (propertyType != null)
@@ -489,24 +487,12 @@ namespace DRM.PropBag
         public object GetValWithType(string propertyName, Type propertyType)
         {
             PropGen pg = (PropGen)GetPropGen(propertyName, propertyType);
-
-            if(pg.IsEmpty)
-            {
-                ReportAccessToMissing(propertyName, nameof(GetValWithType));
-            }
-
             return pg.Value;
         }
 
         public ValPlusType GetValPlusType(string propertyName, Type propertyType)
         {
             IPropGen pg = GetPropGen(propertyName, propertyType);
-
-            if (pg.IsEmpty)
-            {
-                ReportAccessToMissing(propertyName, nameof(GetValWithType));
-            }
-
             return pg.ValuePlusType();
         }
 
@@ -857,6 +843,10 @@ namespace DRM.PropBag
 
         public bool PropertyExists(string propertyName)
         {
+            if (TypeSafetyMode == PropBagTypeSafetyMode.Locked)
+            {
+                throw new InvalidOperationException("PropertyExists is not allowed when the TypeSafetyMode is set to 'Locked.'");
+            }
             return tVals.ContainsKey(propertyName);
         }
 
@@ -877,7 +867,6 @@ namespace DRM.PropBag
                 type = null;
                 return false;
             }
-
         }
 
         public System.Type GetTypeOfProperty(string propertyName)
@@ -1066,6 +1055,7 @@ namespace DRM.PropBag
 
                 // Raise the standard PropertyChanged event
                 OnPropertyChanged(ThePropFactory.IndexerName);
+                OnPropertyChangedIndividual(propertyName);
                 return true; // If it was originally unasigned, then it will always be updated.
             }
             else

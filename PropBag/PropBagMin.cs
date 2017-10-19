@@ -256,7 +256,7 @@ namespace DRM.PropBag
                     bool useDefault = pi.InitialValueField.SetToDefault;
                     string value;
 
-
+                    // TODO: Fix this??
                     if (pi.InitialValueField.SetToEmptyString && pi.PropertyType == typeof(Guid))
                     {
                         const string EMPTY_GUID = "00000000-0000-0000-0000-000000000000";
@@ -433,16 +433,7 @@ namespace DRM.PropBag
 
         public bool TryGetPropGen(string propertyName, Type propertyType, out IPropGen propGen)
         {
-            bool mustBeRegistered;
-            if (TypeSafetyMode == PropBagTypeSafetyMode.Tight || TypeSafetyMode == PropBagTypeSafetyMode.AllPropsMustBeRegistered
-                || TypeSafetyMode == PropBagTypeSafetyMode.OnlyTypedAccess)
-            {
-                mustBeRegistered = true;
-            }
-            else
-            {
-                mustBeRegistered = false;
-            }
+            bool mustBeRegistered = TypeSafetyMode == PropBagTypeSafetyMode.Locked;
 
             propGen = GetPropGen(propertyName, propertyType, out bool wasRegistered,
                 haveValue: false,
@@ -478,7 +469,7 @@ namespace DRM.PropBag
                 haveValue: false,
                 value: null,
                 alwaysRegister: false,
-                mustBeRegistered: false,
+                mustBeRegistered: true,
                 neverCreate: false,
                 desiredHasStoreValue: ThePropFactory.ProvidesStorage);
 
@@ -507,25 +498,23 @@ namespace DRM.PropBag
         public object GetValWithType(string propertyName, Type propertyType)
         {
             PropGen pg = (PropGen)GetPropGen(propertyName, propertyType);
-
             return pg.Value;
         }
 
         public ValPlusType GetValPlusType(string propertyName, Type propertyType)
         {
             IPropGen pg = GetPropGen(propertyName, propertyType);
-
             return pg.ValuePlusType();
         }
 
         public T GetIt<T>(string propertyName)
         {
-            return GetTypedPropPrivate<T>(propertyName, mustBeRegistered: false).TypedValue;
+            return GetTypedPropPrivate<T>(propertyName, mustBeRegistered: true).TypedValue;
         }
 
         public IProp<T> GetTypedProp<T>(string propertyName)
         {
-            return (IProp<T>)GetTypedPropPrivate<T>(propertyName, mustBeRegistered: false);
+            return (IProp<T>)GetTypedPropPrivate<T>(propertyName, mustBeRegistered: true);
         }
 
         private IPropPrivate<T> GetTypedPropPrivate<T>(string propertyName, bool mustBeRegistered, bool neverCreate = false)
@@ -580,12 +569,13 @@ namespace DRM.PropBag
             // Register the property if it does not exist, unless the TypeSafetyMode
             // setting is AllPropsMustBe (explictly) registered.
             bool alwaysRegister = !AllPropsMustBeRegistered;
+            bool mustBeRegistered = AllPropsMustBeRegistered;
 
             PropGen genProp = GetPropGen(propertyName, propertyType, out bool wasRegistered,
                     haveValue: true,
                     value: value,
                     alwaysRegister: alwaysRegister,
-                    mustBeRegistered: false,
+                    mustBeRegistered: mustBeRegistered,
                     neverCreate: false,
                     desiredHasStoreValue: ThePropFactory.ProvidesStorage);
 
@@ -660,12 +650,13 @@ namespace DRM.PropBag
             // Register the property if it does not exist, unless the TypeSafetyMode
             // setting is AllPropsMustBe (explictly) registered.
             bool alwaysRegister = !AllPropsMustBeRegistered;
+            bool mustBeRegistered = AllPropsMustBeRegistered;
 
             PropGen genProp = GetPropGen(propertyName, typeof(T), out bool wasRegistered,
                 haveValue: true,
                 value: value,
                 alwaysRegister: alwaysRegister,
-                mustBeRegistered: false,
+                mustBeRegistered: mustBeRegistered,
                 neverCreate: false,
                 desiredHasStoreValue: ThePropFactory.ProvidesStorage);
 
@@ -693,12 +684,13 @@ namespace DRM.PropBag
             // Register the property if it does not exist, unless the TypeSafetyMode
             // setting is AllPropsMustBe (explictly) registered.
             bool alwaysRegister = !AllPropsMustBeRegistered;
+            bool mustBeRegistered = AllPropsMustBeRegistered;
 
             PropGen genProp = GetPropGen(propertyName, typeof(T), out bool wasRegistered,
                     haveValue: true,
                     value: newValue,
                     alwaysRegister: alwaysRegister,
-                    mustBeRegistered: false,
+                    mustBeRegistered: mustBeRegistered,
                     neverCreate: false,
                     desiredHasStoreValue: false);
 
@@ -862,6 +854,10 @@ namespace DRM.PropBag
 
         public bool PropertyExists(string propertyName)
         {
+            if (TypeSafetyMode == PropBagTypeSafetyMode.Locked)
+            {
+                throw new InvalidOperationException("PropertyExists is not allowed when the TypeSafetyMode is set to 'Locked.'");
+            }
             return tVals.ContainsKey(propertyName);
         }
 
@@ -872,9 +868,7 @@ namespace DRM.PropBag
                 type = value.Type;
                 return true;
             }
-            else if (TypeSafetyMode == PropBagTypeSafetyMode.Tight
-                 || TypeSafetyMode == PropBagTypeSafetyMode.AllPropsMustBeRegistered
-                 || TypeSafetyMode == PropBagTypeSafetyMode.OnlyTypedAccess)
+            else if (TypeSafetyMode == PropBagTypeSafetyMode.Locked)
             {
                 type = null;
                 return ReportAccessToMissing(propertyName, nameof(TryGetTypeOfProperty));
@@ -884,7 +878,6 @@ namespace DRM.PropBag
                 type = null;
                 return false;
             }
-
         }
 
         public System.Type GetTypeOfProperty(string propertyName)
@@ -901,20 +894,15 @@ namespace DRM.PropBag
             {
                 return pGen.Type;
             }
-            else if(TypeSafetyMode == PropBagTypeSafetyMode.Tight
-                || TypeSafetyMode == PropBagTypeSafetyMode.AllPropsMustBeRegistered
-                || TypeSafetyMode == PropBagTypeSafetyMode.OnlyTypedAccess)
+            else if(TypeSafetyMode == PropBagTypeSafetyMode.Locked)
             {
                 wasRegistered = false;
                 return ReportAccessToMissing(propertyName, nameof(GetTypeOfProperty)).GetType();
-                //System.Diagnostics.Debug.Assert(false, "ReportAccessToMissing did not throw an exception.");
-                //return null;
             }
             else
             {
                 return null;
             }
-
         }
 
         #endregion
@@ -1035,7 +1023,7 @@ namespace DRM.PropBag
                 tVals.Select(x => new KeyValuePair<string, ValPlusType>(x.Key, x.Value.ValuePlusType())).ToList();
 
             IDictionary<string, ValPlusType> result = list.ToDictionary(pair => pair.Key, pair => pair.Value);
-            return result;
+            return result; 
         }
 
         /// <summary>
@@ -1149,7 +1137,6 @@ namespace DRM.PropBag
                 OnPropertyChangedWithVals(propertyName, oldVal, newValue);
             }
         }
-
 
         protected PropGen GetPropGen(string propertyName, Type propertyType,
             out bool wasRegistered, bool haveValue, object value,
