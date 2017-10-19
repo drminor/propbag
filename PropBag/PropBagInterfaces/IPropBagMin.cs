@@ -13,27 +13,26 @@ namespace DRM.PropBag
 
         // These are defined by ITypeSafePropBag
         //object GetValWithType(string propertyName, Type propertyType);
-        //bool SetItWithType(object value, Type propertyType = null, string propertyName);
-        //Type GetTypeOfProperty(string propertyName);
+        //bool SetValWithType(string propertyName, Type propertyType, object value);
 
         //T GetIt<T>(string propertyName);
         //bool SetIt<T>(T value, string propertyName);
+
+        //Type GetTypeOfProperty(string propertyName);
+        //bool TryGetTypeOfProperty(string propertyName, out Type type);
 
         IProp<T> GetTypedProp<T>(string propertyName);
         IPropGen GetPropGen(string propertyName, Type propertyType);
         ValPlusType GetValPlusType(string propertyName, Type propertyType);
 
         bool TryGetPropGen(string propertyName, Type propertyType, out IPropGen propGen);
-        IPropGen this[int index] { get; }
+        //IPropGen this[int index] { get; }
 
-
-        int IndexOfProp(string propertyName, Type propertyType);
+        //int IndexOfProp(string propertyName, Type propertyType);
 
         object this[string typeName, string propertyName] { get; }
 
-
         bool SetValWithNoType(string propertyName, object value);
-
 
         bool SetIt<T>(T newValue, ref T curValue, string propertyName);
 
