@@ -41,6 +41,7 @@ namespace PropBagTestApp.View
             }
 
             m.SetIt<int>(21, "Amount");
+            int tttt = m.GetIt<int>("Amount");
             //m.Amount = 21;
 
             m.SetIt<double>(30.3, "Size");

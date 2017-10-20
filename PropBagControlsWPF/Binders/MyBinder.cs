@@ -24,11 +24,11 @@ using System.Xaml;
 
 namespace DRM.PropBag.ControlsWPF.Binders
 {
-    [MarkupExtensionReturnType(typeof(BindingExpressionBase)), 
+    [MarkupExtensionReturnType(typeof(object)), 
         Localizability(LocalizationCategory.None,
         Modifiability = Modifiability.Unmodifiable,
         Readability = Readability.Unreadable)]
-    [RuntimeNamePropertyAttribute("BindingInstanceName")]
+    //[RuntimeNamePropertyAttribute("BindingInstanceName")]
     public class BindingExtension : MarkupExtension
     {
         #region Member Declarations

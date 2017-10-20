@@ -37,7 +37,7 @@ namespace DRM.PropBag
                 if (value == null) return string.Empty;
             }
 
-            System.Diagnostics.Debug.Assert(value == null || targetType.IsAssignableFrom(typeof(string)), $"PropFactory expected target type to be string, but was type: {targetType}.");
+            //System.Diagnostics.Debug.Assert(value == null || targetType.IsAssignableFrom(typeof(string)), $"PropFactory expected target type to be string, but was type: {targetType}.");
 
             // The parameter, if only specifying one type, is specifying the type
             // of the native (i.e., source) object.
@@ -47,17 +47,24 @@ namespace DRM.PropBag
             {
                 throw new InvalidOperationException("Type information was not available.");
             }
-            else if (targetType == tt.SourceType || targetType == typeof(object))
+            else if (targetType == tt.SourceType/* || targetType == typeof(object)*/)
             {
                 return value;
             }
-            else if (targetType.IsAssignableFrom(tt.SourceType))
+            if(tt.DestType == typeof(object))
             {
-                System.Diagnostics.Debug.WriteLine($"Target Type: {targetType} is assignable from the SourceType specified in the binding parameters: {tt.SourceType}.");
-                System.Diagnostics.Debug.Assert(targetType.IsAssignableFrom(value.GetType()), $"Target Type: { targetType} is not assignable from the run-time type of the value to be converted: {value.GetType()}.");
                 return value;
             }
-            else if (targetType != typeof(string))
+
+            Type vType = value.GetType();
+
+            if (vType == tt.DestType ||  tt.DestType.IsAssignableFrom(vType))
+            {
+                System.Diagnostics.Debug.WriteLine($"The Destination Type specified in the binding parameter is assignable from the run-time type of the value being converted: {vType}.");
+                System.Diagnostics.Debug.Assert(tt.DestType.IsAssignableFrom(value.GetType()), $"DestinationType: { tt.DestType } is not assignable from the run-time type of the value to be converted: {value.GetType()}.");
+                return value;
+            }
+            else if (tt.DestType != typeof(string))
             {
                 throw new NotImplementedException("Converting to a type other than a string is not supported.");
             }
@@ -86,7 +93,7 @@ namespace DRM.PropBag
             if (value == null && !targetType.IsValueType) return null;
             //System.Diagnostics.Debug.Assert(value == null || typeof(string).IsAssignableFrom(value.GetType()), $"PropFactory expected string input on convert back, but type was {value.GetType()}.");
 
-            if (targetType == typeof(object)) return value;
+            //if (targetType == typeof(object)) return value;
 #else
             if (value == null && !targetType.IsValueType) return null;
             if (targetType == typeof(object)) return value;
@@ -99,7 +106,7 @@ namespace DRM.PropBag
 
             Type sourceRunTimeType = value.GetType();
 
-            if (sourceRunTimeType != targetType)
+            if (sourceRunTimeType != tt.SourceType)
             {
                 if(sourceRunTimeType != typeof(string))
                 {

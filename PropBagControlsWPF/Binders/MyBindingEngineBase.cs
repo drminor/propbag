@@ -130,8 +130,9 @@ namespace DRM.PropBag.ControlsWPF.Binders
                 }
                 else
                 {
-                    BindingExpressionBase bExpBase = BuildBindingExpressionBase(serviceProvider, binding, isCustom);
-                    return bExpBase;
+                    return binding;
+                    //BindingExpressionBase bExpBase = BuildBindingExpressionBase(serviceProvider, binding, isCustom);
+                    //return bExpBase;
                 }
 
             }
@@ -146,14 +147,15 @@ namespace DRM.PropBag.ControlsWPF.Binders
             }
         }
 
-        protected virtual BindingExpressionBase ProvideStandardBindingExp(IServiceProvider serviceProvider,
+        protected virtual object ProvideStandardBindingExp(IServiceProvider serviceProvider,
             BindingTarget bindingTarget, MyBindingInfo bInfo, Type sourceType)
         {
             Binding binding = CreateDefaultBinding(bindingTarget, bInfo, sourceType, bInfo.PropertyPath);
+            return binding;
 
-            BindingExpressionBase bExp = BuildBindingExpressionBase(serviceProvider, binding, isCustom: false);
+            //BindingExpressionBase bExp = BuildBindingExpressionBase(serviceProvider, binding, isCustom: false);
 
-            return bExp;
+            //return bExp;
         }
 
         protected virtual MultiBindingExpression ProvideStandardMultiBindingExp(IServiceProvider serviceProvider,
@@ -817,6 +819,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
                     if(BindingTarget.IsDependencyProperty)
                     {
+                        ClearTheBinding(BindingTarget.DependencyObject, BindingTarget.DependencyProperty);
                         BindingExpressionBase bExp = SetTheBinding(BindingTarget.DependencyObject, BindingTarget.DependencyProperty, newBinding);
                         string bType = isCustom ? "PropBag-Based" : "Standard";
                         System.Diagnostics.Debug.WriteLine($"CREATING {bType} BINDING from {newBinding.Path.Path} to {BindingTarget.PropertyName} on object: {BindingTarget.ObjectName}.");
