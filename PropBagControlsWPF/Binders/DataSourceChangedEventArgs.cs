@@ -7,7 +7,6 @@ namespace DRM.PropBag.ControlsWPF.Binders
     {
         /// <summary>
         /// Reports how the DataSource was changed.
-        /// Currently this is always set to refresh.
         /// </summary>
         public DataSourceChangeTypeEnum ChangeType { get; private set; }
         public bool DataWasUpdated { get; private set; }

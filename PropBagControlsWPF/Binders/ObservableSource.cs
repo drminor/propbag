@@ -40,20 +40,20 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
         public string NewPathElement { get; set; }
 
-        // TODO: Check to see if the Container is really needed here?
         // For a FrameworkElement kind of ObservableSource:
         // The AnchorElement is the (original) targetObject.
         // The Container is the element being watched, either the targetObject or its parent.
-        // and the Data is the DataContext.
+        // The DepPropListener hold the PropertyListener listening for DataContextChanged events on the Container element.
+        // and the Data is the DataContext of the AnchorElement.
 
         // For a DataSouceProvider kind of ObservableSource:
         // The Container is the DSP
         // and the Data is the result of accessing DSP.Data.
 
         // For a DataGridColumn kind of ObservableSource:
-        // The Container is the DependencyPropertyListener
         // The AnchorElement is the DataGridColumn, which is being watched.
-        // and the Data is the DataContext.
+        // The DepPropListener hold the PropertyListener listening for DisplayIndexChanged events on the DataGridColumn element.
+        // and the Data is the ItemsSource of the DataGridColumn's parent DataGrid.
 
         private WeakReference _wrAnchorElement;
         private Object AnchorElement
@@ -78,6 +78,31 @@ namespace DRM.PropBag.ControlsWPF.Binders
                 else
                 {
                     _wrAnchorElement = null;
+                }
+            }
+        }
+
+        private WeakReference<IDisposable> _wrDepPropListener;
+        private IDisposable DepPropListener
+        {
+            get
+            {
+                if(_wrDepPropListener != null)
+                {
+                    if(_wrDepPropListener.TryGetTarget(out IDisposable depPropListener))
+                    {
+                        return depPropListener;
+                    }
+                }
+                return null;
+            }
+            set
+            {
+                IDisposable old = DepPropListener;
+                if (old != null) old.Dispose();
+                if(value != null)
+                {
+                    _wrDepPropListener = new WeakReference<IDisposable>(value);
                 }
             }
         }
@@ -826,10 +851,10 @@ namespace DRM.PropBag.ControlsWPF.Binders
             UpdateWatcherAndData_Fe(fce, pathElement, isTargetADc, binderName);
         }
 
-        private void DataContextChanged_Fe(object sender, DependencyPropertyChangedEventArgs e)
+        private void DataContextChanged_Fe(DependencyPropertyChangedEventArgs e)
         {
             DependencyObject feOrFce = (DependencyObject)this.AnchorElement;
-            
+
             bool changed = UpdateWatcherAndData_Fe(feOrFce, this.PathElement, this.IsTargetADc, this.BinderName);
 
             // TODO: Determine if a real change has occured,
@@ -837,32 +862,35 @@ namespace DRM.PropBag.ControlsWPF.Binders
             OnDataSourceChanged(DataSourceChangeTypeEnum.DataContextUpdated, changed);
         }
 
-        private void SubscribeTo_FcOrFce(DependencyObject newDepObj, DependencyObject oldDepObj, DependencyPropertyChangedEventHandler handler)
+        //private void DataContextChanged_Fe(object sender, DependencyPropertyChangedEventArgs e)
+        //{
+        //    DependencyObject feOrFce = (DependencyObject)this.AnchorElement;
+            
+        //    bool changed = UpdateWatcherAndData_Fe(feOrFce, this.PathElement, this.IsTargetADc, this.BinderName);
+
+        //    // TODO: Determine if a real change has occured,
+        //    // and then raise only if real.
+        //    OnDataSourceChanged(DataSourceChangeTypeEnum.DataContextUpdated, changed);
+        //}
+
+        private void SubscribeTo_FcOrFce(DependencyObject newDepObj, Action<DependencyPropertyChangedEventArgs> action)
         {
-            // TODO: Remove the handler from the existing container.
+            // TODO: Create a new version of DependencyPropertyListener
+            // that takes an existing event source so that we can make these event subscriptions use a Weak Reference.
 
-            if(oldDepObj != null)
+            if(newDepObj is FrameworkElement fe)
             {
-                if(oldDepObj is FrameworkElement oldFe)
-                {
-                    oldFe.DataContextChanged -= handler;
-                }
-                else
-                {
-                    ((FrameworkContentElement)newDepObj).DataContextChanged += handler;
-                }
+                DependencyProperty dataContextProp = LogicalTree.FeDataContextDpPropProvider.Value;
+                DepPropListener = fe.PropertyChanged(dataContextProp, action);
             }
-
-            if(newDepObj != null)
+            else if(newDepObj is FrameworkContentElement fce)
             {
-                if (newDepObj is FrameworkElement fe)
-                {
-                    fe.DataContextChanged += handler;
-                }
-                else
-                {
-                    ((FrameworkContentElement)newDepObj).DataContextChanged += handler;
-                }
+                DependencyProperty dataContextProp = LogicalTree.FceDataContextDpPropProvider.Value;
+                DepPropListener = fce.PropertyChanged(dataContextProp, action);
+            }
+            else
+            {
+                // TODO: Throw an InvalidOperationException.
             }
         }
 
@@ -885,12 +913,12 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
             // TODO: May want to make sure that the value of Container is a DependencyObject.
             DependencyObject curContainer = (DependencyObject)Container;
-            DependencyObject container = isTargetADc ? LogicalTreeHelper.GetParent(targetObject) : targetObject;
+            DependencyObject newContainer = isTargetADc ? LogicalTreeHelper.GetParent(targetObject) : targetObject;
 
-            if(!object.ReferenceEquals(curContainer, container))
+            if(!object.ReferenceEquals(curContainer, newContainer))
             {
-                SubscribeTo_FcOrFce(container, curContainer, DataContextChanged_Fe);
-                Container = container;
+                SubscribeTo_FcOrFce(newContainer, DataContextChanged_Fe);
+                Container = newContainer;
             }
 
             // Now see if we can find a data context.
@@ -993,26 +1021,29 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
         private void SubscribeTo_Dg(DataGridColumn dcg, Action<DependencyPropertyChangedEventArgs> action)
         {
-            object anchor = AnchorElement;
+            DependencyProperty dispIndex = LogicalTree.DataGridColumn_DisplayIndex_DpPropProvider.Value;
+            DepPropListener = dcg.PropertyChanged(dispIndex, action);
 
-            if (anchor != null && anchor is DataGridColumn currentDgc)
-            {
-                if (Container != null && Container is IDisposable disp)
-                {
-                    // Free up the previous DependencyPropertyListener.
-                    disp.Dispose();
-                }
-            }
+            //object anchor = AnchorElement;
 
-            if(action != null)
-            {
-                DependencyProperty dispIndex = LogicalTree.DataGridColumn_DisplayIndex_DpPropProvider.Value;
-                Container = dcg.PropertyChanged(dispIndex, action);
-            }
-            else
-            {
-                Container = null;
-            }
+            //if (anchor != null && anchor is DataGridColumn currentDgc)
+            //{
+            //    if (Container != null && Container is IDisposable disp)
+            //    {
+            //        // Free up the previous DependencyPropertyListener.
+            //        disp.Dispose();
+            //    }
+            //}
+
+            //if(action != null)
+            //{
+            //    DependencyProperty dispIndex = LogicalTree.DataGridColumn_DisplayIndex_DpPropProvider.Value;
+            //    Container = dcg.PropertyChanged(dispIndex, action);
+            //}
+            //else
+            //{
+            //    Container = null;
+            //}
         }
 
         #endregion
