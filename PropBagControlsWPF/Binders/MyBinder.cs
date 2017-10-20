@@ -13,6 +13,7 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Markup;
+using System.Xaml;
 
 /// <remarks>
 /// This was inspired from the code available at
@@ -23,14 +24,14 @@ using System.Windows.Markup;
 
 namespace DRM.PropBag.ControlsWPF.Binders
 {
-    [MarkupExtensionReturnType(typeof(object)), Localizability(LocalizationCategory.None, Modifiability = Modifiability.Unmodifiable, Readability = Readability.Unreadable)]
+    [MarkupExtensionReturnType(typeof(BindingExpressionBase)), 
+        Localizability(LocalizationCategory.None,
+        Modifiability = Modifiability.Unmodifiable,
+        Readability = Readability.Unreadable)]
+    [RuntimeNamePropertyAttribute("BindingInstanceName")]
     public class BindingExtension : MarkupExtension
     {
         #region Member Declarations
-
-        //DependencyObject _targetObject;
-        //DependencyProperty _targetProperty;
-        //PropertyInfo _targProp;
 
         BindingTarget _bindingTarget;
 
@@ -43,10 +44,15 @@ namespace DRM.PropBag.ControlsWPF.Binders
         public BindingExtension(PropertyPath path)
         {
             Path = path;
+
             SourceType = null;
+            UseMultiBinding = true;
+
             Source = null;
             ElementName = null;
             Mode = BindingMode.Default;
+
+            BindingInstanceName = Guid.NewGuid().ToString();
         }
 
         #endregion
@@ -56,7 +62,9 @@ namespace DRM.PropBag.ControlsWPF.Binders
         [DefaultValue(null), ConstructorArgument("path")]
         public PropertyPath Path { get; set; }
 
+        public string BindingInstanceName { get; private set; }
         public Type SourceType { get; set; }
+        public bool UseMultiBinding { get; set; }
 
         public string ElementName { get; set; }
         public object Source { get; set; }
@@ -109,15 +117,9 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
             MyBindingInfo bindingInfo = GatherBindingInfo(Path, Mode);
 
-            if(bindingInfo.Converter != null)
-            {
-                int aa = 0;
-            }
-
-            MyBindingEngine mb = new MyBindingEngine(bindingInfo, SourceType, _bindingTarget);
+            MyBindingEngine mb = new MyBindingEngine(bindingInfo, SourceType, _bindingTarget, UseMultiBinding);
 
             return mb.ProvideValue(serviceProvider);
-
         }
 
         private bool SetOurEnv(IServiceProvider serviceProvider, out BindingTarget bindingTarget)
@@ -128,6 +130,12 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
             IProvideValueTarget provideValueTarget = serviceProvider.GetService(typeof(IProvideValueTarget)) as IProvideValueTarget;
             if (provideValueTarget == null) return false;
+
+            IXamlSchemaContextProvider schemaProvider = serviceProvider.GetService(typeof(IXamlSchemaContextProvider)) as IXamlSchemaContextProvider;
+
+            // Currently working on getting the xmlns prefix used for this instance.
+            //string ns = GetXmlnsPrefix(schemaProvider, this.GetType());
+
 
             DependencyObject targetObject = provideValueTarget.TargetObject as DependencyObject;
             if (targetObject == null) return false;
@@ -148,13 +156,39 @@ namespace DRM.PropBag.ControlsWPF.Binders
             }
         }
 
+        //private string GetXmlnsPrefix(IXamlSchemaContextProvider schemaProvider, Type type)
+        //{
+        //    string ourName = type.Name;
+        //    XamlSchemaContext context = schemaProvider.SchemaContext;
+
+        //    IEnumerable<string> namespaces = context.GetAllXamlNamespaces();
+
+        //    foreach(string ns in namespaces)
+        //    {
+        //        ICollection<XamlType> xamlTypes = context.GetAllXamlTypes(ns);
+
+        //        foreach(XamlType xt in xamlTypes)
+        //        {
+        //            if(xt.IsMarkupExtension)
+        //            {
+        //                if(xt.Name == ourName)
+        //                {
+        //                    return ns;
+        //                }
+        //            }
+        //        }
+        //    }
+
+        //    return null;
+        //}
+
         #endregion
 
         public Binding GetBinding(BindingTarget bindingTarget)
         {
             MyBindingInfo bindingInfo = GatherBindingInfo(Path, Mode);
 
-            MyBindingEngine mb = new MyBindingEngine(bindingInfo, SourceType, _bindingTarget);
+            MyBindingEngine mb = new MyBindingEngine(bindingInfo, SourceType, _bindingTarget, UseMultiBinding);
 
             return mb.ProvideTheBindingDirectly();
 

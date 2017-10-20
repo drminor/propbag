@@ -9,8 +9,8 @@ namespace DRM.PropBag.ControlsWPF.Binders
     /// </summary>
     public class MyBindingEngine : MyBindingEngineBase
     {
-        public MyBindingEngine(MyBindingInfo bindingInfo, Type sourceType, BindingTarget bindingTarget, string binderInstanceName = "pbb:Binder")
-            : base(bindingTarget, bindingInfo, sourceType, binderInstanceName)
+        public MyBindingEngine(MyBindingInfo bindingInfo, Type sourceType, BindingTarget bindingTarget, bool useMultiBinding = true, string binderInstanceName = "pbb:Binder")
+            : base(bindingTarget, bindingInfo, sourceType, useMultiBinding, binderInstanceName)
         {
         }
     }
