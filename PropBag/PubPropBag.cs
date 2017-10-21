@@ -10,7 +10,7 @@ namespace DRM.PropBag
 {
     #region Summary and Remarks
 
-    /// <summary>
+    /// <remarks>
     /// The contents of this code file were designed and created by David R. Minor, Pittsboro, NC.
     /// I have chosen to provide others free access to this intellectual property using the terms set forth
     /// by the well known Code Project Open License.
@@ -19,10 +19,14 @@ namespace DRM.PropBag
     /// or a similar text which covers all of the points made here, be included along with a copy of cpol.htm
     /// in the set of artifacts deployed with any product
     /// wherein this source code, or a derivative thereof, is used.
-    /// </summary>
+    /// </remarks>
 
     #endregion
 
+    ///<summary>
+    /// This class implements IPubPropBag, which allows customers of classes that dervive from this class
+    /// the ability to add and remove properties. 
+    ///</summary>
     public class PubPropBag : PropBag, IPubPropBag
     {
         #region Constructor
@@ -56,74 +60,41 @@ namespace DRM.PropBag
         /// <param name="doAfterNotify"></param>
         /// <param name="comparer">A instance of a class that implements IEqualityComparer and thus an Equals method.</param>
         /// <param name="initalValue"></param>
-        public new IProp<T> AddProp<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
+        new public IProp<T> AddProp<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
             Func<T,T,bool> comparer = null, object extraInfo = null, T initialValue = default(T))
         {
             return base.AddProp<T>(propertyName, doIfChanged, doAfterNotify, comparer, extraInfo, initialValue);
-            //bool hasStorage = true;
-            //bool typeIsSolid = true;
-            //IProp<T> pg = ThePropFactory.Create<T>(initialValue, propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
-            //AddProp<T>(propertyName, pg);
-            //return pg;
         }
 
         // TODO: Consider removing this method and adding a parameter to AddProp named "UseRefEquality."
-        public new IProp<T> AddPropObjComp<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
+        new public IProp<T> AddPropObjComp<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
             object extraInfo = null, T initialValue = default(T))
         {
             return base.AddPropObjComp(propertyName, doIfChanged, doAfterNotify, extraInfo, initialValue);
-            //bool hasStorage = true;
-            //bool typeIsSolid = true;
-            //Func<T,T,bool> comparer = ThePropFactory.GetRefEqualityComparer<T>();
-            //IProp<T> pg = ThePropFactory.Create<T>(initialValue, propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
-            //AddProp<T>(propertyName, pg);
-            //return pg;
         }
 
-        public new IProp<T> AddPropNoValue<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
+        new public IProp<T> AddPropNoValue<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
             Func<T,T,bool> comparer = null, object extraInfo = null)
         {
             return base.AddPropNoValue(propertyName, doIfChanged, doAfterNotify, comparer, extraInfo);
-            //bool hasStorage = true;
-            //bool typeIsSolid = true;
-            //IProp<T> pg = ThePropFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
-            //AddProp<T>(propertyName, pg);
-            //return pg;
         }
 
-        public new IProp<T> AddPropObjCompNoValue<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
+        new public IProp<T> AddPropObjCompNoValue<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
             object extraInfo = null)
         {
             return base.AddPropObjCompNoValue(propertyName, doIfChanged, doAfterNotify, extraInfo);
-            //bool hasStorage = true;
-            //bool typeIsSolid = true;
-            //Func<T,T,bool> comparer = ThePropFactory.GetRefEqualityComparer<T>();
-            //IProp<T> pg = ThePropFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
-            //AddProp<T>(propertyName, pg);
-            //return pg;
         }
 
-        public new IProp<T> AddPropNoStore<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false,
+        new public IProp<T> AddPropNoStore<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false,
             Func<T,T,bool> comparer = null, object extraInfo = null)
         {
             return base.AddPropNoStore(propertyName, doIfChanged, doAfterNotify, comparer, extraInfo);
-            //bool hasStorage = false;
-            //bool typeIsSolid = true;
-            //IProp<T> pg = ThePropFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
-            //AddProp<T>(propertyName, pg);
-            //return pg;
         }
 
-        public new IProp<T> AddPropObjCompNoStore<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false,
+        new public IProp<T> AddPropObjCompNoStore<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false,
             object extraInfo = null)
         {
             return base.AddPropObjCompNoStore(propertyName, doIfChanged, doAfterNotify, extraInfo);
-            //bool hasStorage = false;
-            //bool typeIsSolid = true;
-            //Func<T,T,bool> comparer = ThePropFactory.GetRefEqualityComparer<T>();
-            //IProp<T> pg = ThePropFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
-            //AddProp<T>(propertyName, pg);
-            //return pg;
         }
 
         new public void RemoveProp(string propertyName)
