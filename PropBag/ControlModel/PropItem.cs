@@ -10,47 +10,49 @@ namespace DRM.PropBag.ControlModel
 {
     public class PropItem : NotifyPropertyChangedBase
     {
-        string pn;
-        Type pt;
-        PropInitialValueField ivf;
-        PropComparerField cf;
-        PropDoWhenChangedField dwc;
+        string _propertyName;
+        Type _propertyType;
+        PropInitialValueField _propInitialValueField;
+        PropComparerField _propComparerField;
+        PropDoWhenChangedField _propDoWhenChangedField;
 
-        bool hs;
-        bool tis;
-        string ei;
+        bool _hasStore;
+        bool _typeIsSolid;
+        string _extraInfo;
 
         [XmlElement("name")]
-        public string PropertyName { get {return pn;}  set { SetIfDifferent<string>(ref pn, value); } }
+        public string PropertyName { get {return _propertyName;}  set { SetIfDifferent<string>(ref _propertyName, value); } }
 
         [XmlElement("type")]
-        public Type PropertyType { get { return pt; } set { pt = value; } }
+        public Type PropertyType { get { return _propertyType; } set { _propertyType = value; } }
 
         [XmlElement("initial-value")]
-        public PropInitialValueField InitialValueField { get { return ivf; }
-            set { SetIfDifferent<PropInitialValueField>(ref ivf, value); }
+        public PropInitialValueField InitialValueField { get { return _propInitialValueField; }
+            set { SetIfDifferent<PropInitialValueField>(ref _propInitialValueField, value); }
         }
 
         [XmlElement("comparer")]
-        public PropComparerField ComparerField { get { return cf; }
-            set { SetIfDifferent<PropComparerField>(ref cf, value); }
+        public PropComparerField ComparerField { get { return _propComparerField; }
+            set { SetIfDifferent<PropComparerField>(ref _propComparerField, value); }
         }
 
         [XmlElement("do-when-changed")]
-        public PropDoWhenChangedField DoWhenChangedField { get { return dwc; }
-            set { SetIfDifferent<PropDoWhenChangedField>(ref dwc, value); }
+        public PropDoWhenChangedField DoWhenChangedField { get { return _propDoWhenChangedField; }
+            set { SetIfDifferent<PropDoWhenChangedField>(ref _propDoWhenChangedField, value); }
         }
 
         [XmlAttribute(AttributeName = "caller-provides-storage")]
-        public bool HasStore { get { return hs; } set { SetIfDifferent<bool>(ref hs, value); } }
+        public bool HasStore { get { return _hasStore; } set { SetIfDifferent<bool>(ref _hasStore, value); } }
 
         [XmlIgnore]
-        public bool TypeIsSolid { get { return tis; } set { SetIfDifferent<bool>(ref tis, value); } }
+        public bool TypeIsSolid { get { return _typeIsSolid; } set { SetIfDifferent<bool>(ref _typeIsSolid, value); } }
 
         [XmlIgnore]
-        public string ExtraInfo { get { return ei; } set { SetIfDifferent<string>(ref ei, value); } }
+        public string ExtraInfo { get { return _extraInfo; } set { SetIfDifferent<string>(ref _extraInfo, value); } }
 
         public PropItem() : this(null, null) { }
+
+        public PropItem(Type type, string name) : this(type, name, null, true, true, null, null, null) { }
 
         public PropItem(Type type, string name,
             string extraInfo = null, bool hasStore = true,
