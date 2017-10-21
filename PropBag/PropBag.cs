@@ -498,8 +498,7 @@ namespace DRM.PropBag
                         }
                         else
                         {
-                            // TODO, we probably need to be more creative when determining the type of this new value.
-                            newType = value.GetType();
+                            newType = PropFactory.GetTypeFromValue(value);
                         }
 
                         if (MakeTypeSolid(ref genProp, newType, propertyName))
@@ -523,8 +522,7 @@ namespace DRM.PropBag
                     }
                     else
                     {
-                        // Object.GetType() is sufficent here, since AreTypesSame will handle comparison nuances.
-                        newType = value.GetType();
+                        newType = PropFactory.GetTypeFromValue(value);
                     }
 
                     if (!AreTypesSame(newType, genProp.Type))
@@ -535,13 +533,14 @@ namespace DRM.PropBag
             }
             else
             {
+                // Check to make sure that we are not attempting to set the value of a ValueType to null.
                 if (genProp.TypeIsSolid && genProp.Type.IsValueType)
                 {
                     throw new InvalidOperationException(string.Format("Cannot set property: {0} to null, it is a value type.", propertyName));
                 }
             }
 
-            // This uses reflection on first access.
+            // TODO: Make the PropFactory supply this service.
             DoSetDelegate setPropDel = DelegateCacheProvider.DoSetDelegateCache.GetOrAdd(genProp.Type);
             return setPropDel(value, this, propertyName, genProp);
         }

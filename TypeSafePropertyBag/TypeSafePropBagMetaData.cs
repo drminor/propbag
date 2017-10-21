@@ -6,8 +6,6 @@ namespace DRM.TypeSafePropertyBag
     {
         private TypeSafePropBagMetaData() { } // Disallow use of parameterless constructor.
 
-
-
         public TypeSafePropBagMetaData(string className, string classFullName, PropBagTypeSafetyMode typeSafetyMode, IPropFactory thePropFactory)
         {
             ClassName = className ?? throw new ArgumentNullException(nameof(className));
@@ -114,15 +112,14 @@ namespace DRM.TypeSafePropertyBag
                         break;
                     }
                 default:
-                    throw new ApplicationException("Unexpected value for typeSafetyMode parameter.");
-
+                    throw new ApplicationException($"Unexpected value for the {nameof(typeSafetyMode)} parameter was found during the creation of a {nameof(TypeSafePropBagMetaData)}.");
             }
 
         }
 
         // In order to verify that a given class that implements IPropFactory has a value of 'ReturnDefaultForUndefined'
         // that is compatible with the specified TypeSafetyMode and
-        // the since it is true that instances of TypeSafePropBagMetaData calculate the value of 'ReturnDefaultForUndefined'
+        // since it is true that instances of TypeSafePropBagMetaData calculate the value of 'ReturnDefaultForUndefined'
         // from a value of TypeSafetyMode,
         // and since the caller cannot (easily) create an instance of a TypeSafePropBagMetaData, 
         // this helper class (which can create empty instances of a TypeSafePropBagMetaData) 
