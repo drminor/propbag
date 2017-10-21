@@ -441,7 +441,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
             if (IsPropBagBased)
             {
-                return DoesChildExist_PropBag((IPropBagMin)Data, parentType, pathElement);
+                return DoesChildExist_PropBag((IPropBag)Data, parentType, pathElement);
             }
             else
             {
@@ -449,7 +449,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
             }
         }
 
-        public bool DoesChildExist_PropBag(IPropBagMin data, Type type, string pathElement)
+        public bool DoesChildExist_PropBag(IPropBag data, Type type, string pathElement)
         {
             return data.PropertyExists(pathElement);
         }
@@ -471,7 +471,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
             if (IsPropBagBased)
             {
-                return GetChildFromPropBag((IPropBagMin)Data, parentType, pathElement);
+                return GetChildFromPropBag((IPropBag)Data, parentType, pathElement);
 
             }
             else
@@ -480,7 +480,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
             }
         }
 
-        private ObservableSourceProvider GetChildFromPropBag(IPropBagMin data, Type type, string pathElement)
+        private ObservableSourceProvider GetChildFromPropBag(IPropBag data, Type type, string pathElement)
         {
             object newData;
             Type newType;

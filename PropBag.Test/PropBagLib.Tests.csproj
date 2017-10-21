@@ -63,13 +63,13 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>OnlyTypedAccessModel.props.tt</DependentUpon>
     </Compile>
-    <Compile Include="PerformanceDynamic\PerformanceDynModel.cs" />
-    <Compile Include="PerformanceDynamic\PerformanceDynModel.props.cs">
+    <None Include="PerformanceDynamic\PerformanceDynModel.cs" />
+    <None Include="PerformanceDynamic\PerformanceDynModel.props.cs">
       <DependentUpon>PerformanceDynModel.props.tt</DependentUpon>
       <AutoGen>True</AutoGen>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <DesignTime>True</DesignTime>
-    </Compile>
+    </None>
     <Compile Include="Performance\PerformanceModel.cs" />
     <Compile Include="Performance\PerformanceModel.props.cs">
       <DependentUpon>PerformanceModel.props.tt</DependentUpon>
@@ -90,7 +90,7 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="Loose\LooseModel.props.cs" />
-    <Compile Include="PerformanceDynamic\TestPerformanceDynamic.cs" />
+    <None Include="PerformanceDynamic\TestPerformanceDynamic.cs" />
     <Compile Include="Performance\TestPerformance.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Content Include="OnlyTypedAccess\OnlyTypedAccessModel_PropDefs.xml" />

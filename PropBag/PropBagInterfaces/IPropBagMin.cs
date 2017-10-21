@@ -8,9 +8,8 @@ namespace DRM.PropBag
     /// <summary>
     /// Base Property Bag Features
     /// </summary>
-    public interface IPropBagMin : ITypeSafePropBag, INotifyPropertyChanged, INotifyPropertyChanging, INotifyPropertyChangedWithVals
+    public interface IPropBag : ITypeSafePropBag, INotifyPropertyChanged, INotifyPropertyChanging, INotifyPropertyChangedWithVals
     {
-
         // These are defined by ITypeSafePropBag
         //object GetValWithType(string propertyName, Type propertyType);
         //bool SetValWithType(string propertyName, Type propertyType, object value);
@@ -21,8 +20,8 @@ namespace DRM.PropBag
         //Type GetTypeOfProperty(string propertyName);
         //bool TryGetTypeOfProperty(string propertyName, out Type type);
 
-        IProp<T> GetTypedProp<T>(string propertyName);
-        IPropGen GetPropGen(string propertyName, Type propertyType);
+        //IProp<T> GetTypedProp<T>(string propertyName);
+        //IPropGen GetPropGen(string propertyName, Type propertyType);
         ValPlusType GetValPlusType(string propertyName, Type propertyType);
 
         bool TryGetPropGen(string propertyName, Type propertyType, out IPropGen propGen);
@@ -38,13 +37,13 @@ namespace DRM.PropBag
 
         bool PropertyExists(string propertyName);
 
-        void SubscribeToPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, string propertyName);
-        void UnSubscribeToPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, string propertyName);
+        bool SubscribeToPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, string propertyName);
+        bool UnSubscribeToPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, string propertyName);
 
-        void SubscribeToPropChanged<T>(Action<T, T> doOnChange, string propertyName);
+        bool SubscribeToPropChanged<T>(Action<T, T> doOnChange, string propertyName);
         bool UnSubscribeToPropChanged<T>(Action<T, T> doOnChange, string propertyName);
 
-        void SubscribeToPropChanged(Action<object, object> doOnChange, string propertyName);
+        bool SubscribeToPropChanged(Action<object, object> doOnChange, string propertyName);
         bool UnSubscribeToPropChanged(Action<object, object> doOnChange, string propertyName);
 
         IList<string> GetAllPropertyNames();
@@ -52,8 +51,8 @@ namespace DRM.PropBag
         IDictionary<string, ValPlusType> GetAllPropNamesAndTypes();
 
         // Consider removing this since we are using the PBDispatch class.
-        object GetValueGen(object host, string propertyName, Type propertyType);
-        void SetValueGen(object host, string propertyName, Type propertyType, object value);
+        //object GetValueGen(object host, string propertyName, Type propertyType);
+        //void SetValueGen(object host, string propertyName, Type propertyType, object value);
 
     }
 

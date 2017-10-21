@@ -53,7 +53,7 @@ namespace DRM.TypeSafePropertyBag
 
             bool result = null != type.GetInterfaces().FirstOrDefault
                 (
-                x => x.Name == "IPropBagMin"
+                x => x.Name == "IPropBag"
                 );
 
             return result;

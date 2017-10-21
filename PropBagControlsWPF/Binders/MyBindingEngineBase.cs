@@ -322,7 +322,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
             {
                 // If no converter specified and the target is SelectedItem,
                 // use the SelectedItemConverter.
-                if (bInfo.Converter == null && bindingTarget.DependencyProperty.Name == "SelectedItem")
+                if (bInfo.Converter == null && bindingTarget.DependencyProperty?.Name == "SelectedItem")
                 {
                     converterParameter = null;
                     return new SelectedItemConverter();

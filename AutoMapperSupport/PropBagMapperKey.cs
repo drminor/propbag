@@ -7,7 +7,6 @@ using AutoMapper;
 using DRM.PropBag.ControlModel;
 
 using DRM.TypeSafePropertyBag;
-
 namespace DRM.PropBag.AutoMapperSupport
 {
     public class PropBagMapperKey<TSource, TDestination> : PropBagMapperKeyGen, IPropBagMapperKey<TSource, TDestination>, IEquatable<IPropBagMapperKey<TSource, TDestination>>, IEquatable<PropBagMapperKey<TSource, TDestination>>
@@ -29,8 +28,11 @@ namespace DRM.PropBag.AutoMapperSupport
                   GetTypeDef<TSource>(pm, baseType) as IMapTypeDefinitionGen,
                   GetTypeDef<TDestination>(pm, baseType) as IMapTypeDefinitionGen, GetCreaterFunc(mappingStrategy))
         {
-            if (typeof(TSource) is IPropBag) throw new ApplicationException("The first type, TSource, is expected to be a regular, non-propbag-based type.");
-            if (typeof(TDestination) is IPropBag) throw new ApplicationException("The second type, TDestination, is expected to be a propbag-based type.");
+            Type tDest = typeof(TDestination);
+
+
+            if (typeof(TSource).IsPropBagBased()) throw new ApplicationException("The first type, TSource, is expected to be a regular, i.e., non-propbag-based type.");
+            if (! (typeof(TDestination).IsPropBagBased())) throw new ApplicationException("The second type, TDestination, is expected to be a propbag-based type.");
 
             SourceTypeDef = base.SourceTypeGenDef as IMapTypeDefinition<TSource>; //GetTypeDef<TSource>(pm, baseType);
             DestinationTypeDef = base.DestinationTypeGenDef as IMapTypeDefinition<TDestination>; // GetTypeDef<TDestination>(pm, baseType);
@@ -278,7 +280,8 @@ namespace DRM.PropBag.AutoMapperSupport
             //IEnumerable<Type> r = t.GetInterfaces();
             //Type a = t.GetInterfaces().FirstOrDefault(x => x.Name == "IPropBag");
 
-            return null != t.GetInterfaces().FirstOrDefault(x => x.Name == "IPropBag" || x.Name == "IPropBagMin");
+            // TODO: Consider using ITypeSafePropBag instead of IPropBag
+            return null != t.GetInterfaces().FirstOrDefault(x => x.Name == "IPropBag");
         }
 
         public override bool Equals(object obj)

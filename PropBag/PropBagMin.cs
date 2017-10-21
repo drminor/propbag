@@ -35,7 +35,7 @@ namespace DRM.PropBag
 
     #endregion
 
-    public class PropBagMin : IPropBagMin
+    public class PropBagMin : IPropBag
     {
         delegate IPropGen MissingPropStategy(string propertyName, Type propertyType, out bool wasRegistered,
             bool haveValue, object value, bool alwaysRegister, bool readMissingDoesRegister);
@@ -723,48 +723,60 @@ namespace DRM.PropBag
 
         #region Subscribe to Property Changed Event Helpers
 
-        public void SubscribeToPropChanged(EventHandler<PropertyChangedEventArgs> handler,
+        public bool SubscribeToPropChanged(EventHandler<PropertyChangedEventArgs> handler,
             string propertyName, Type propertyType)
         {
+            bool mustBeRegistered = AllPropsMustBeRegistered;
             IPropGen genProp = GetPropGen(propertyName, propertyType, out bool wasRegistered,
                 haveValue: false,
                 value: null,
                 alwaysRegister: false,
-                mustBeRegistered: true,
-                neverCreate: true,
+                mustBeRegistered: mustBeRegistered,
+                neverCreate: false,
                 desiredHasStoreValue: ThePropFactory.ProvidesStorage);
 
-            if (genProp != null)
+            if (!genProp.IsEmpty)
             {
                 WeakEventManager<INotifyPropertyChanged, PropertyChangedEventArgs>.
                     AddHandler(this, "PropertyChangedIndividual", handler);
+                return true;
             }
+            return false;
         }
 
         // This is used to allow the caller to get notified only when a particular property is changed with values.
-        // It can be used in any of the three modes, but is especially handy for Loose mode.
-        public void SubscribeToPropChanged(Action<object, object> doOnChange, string propertyName)
+        // It can be used in any for any TypeSafetyMode, but is especially handy when the TypeSafetyMode = 'none.'
+        public bool SubscribeToPropChanged(Action<object, object> doOnChange, string propertyName)
         {
+            bool mustBeRegistered = AllPropsMustBeRegistered;
+
             IPropGen genProp = GetPropGen(propertyName, null, out bool wasRegistered,
                     haveValue: false,
                     value: null,
                     alwaysRegister: false,
-                    mustBeRegistered: true,
+                    mustBeRegistered: mustBeRegistered,
                     neverCreate: false,
                     desiredHasStoreValue: ThePropFactory.ProvidesStorage);
 
-            genProp.SubscribeToPropChanged(doOnChange);
-
+            if (!genProp.IsEmpty)
+            {
+                // TODO: Help the caller subscribe using a WeakReference
+                genProp.SubscribeToPropChanged(doOnChange);
+                return true;
+            }
+            return false;
         }
 
         public bool UnSubscribeToPropChanged(Action<object, object> doOnChange, string propertyName)
         {
+            bool mustBeRegistered = AllPropsMustBeRegistered;
+
             IPropGen genProp = GetPropGen(propertyName, null, out bool wasRegistered,
                     haveValue: false,
                     value: null,
                     alwaysRegister: false,
-                    mustBeRegistered: false,
-                    neverCreate: true,
+                    mustBeRegistered: mustBeRegistered,
+                    neverCreate: false,
                     desiredHasStoreValue: ThePropFactory.ProvidesStorage);
 
             if (!genProp.IsEmpty)
@@ -774,25 +786,26 @@ namespace DRM.PropBag
         }
 
         // Allow callers to easily subscribe to PropertyChangedWithTVals.
-        public void SubscribeToPropChanged<T>(Action<T, T> doOnChange, string propertyName)
+        public bool SubscribeToPropChanged<T>(Action<T, T> doOnChange, string propertyName)
         {
-            IProp<T> prop = GetTypedPropPrivate<T>(propertyName, mustBeRegistered: true);
+            bool mustBeRegistered = AllPropsMustBeRegistered;
 
-            prop.SubscribeToPropChanged(doOnChange);
+            IProp<T> prop = GetTypedPropPrivate<T>(propertyName, mustBeRegistered: mustBeRegistered, neverCreate: false);
+            
+            if(prop != null)
+            {
+                prop.SubscribeToPropChanged(doOnChange);
+                return true;
+            }
+            return false;
+
         }
 
         public bool UnSubscribeToPropChanged<T>(Action<T, T> doOnChange, string propertyName)
         {
-            //IPropGen genProp = GetGenProp(propertyName, null, out bool wasRegistered,
-            //        haveValue: false,
-            //        value: null,
-            //        alwaysRegister: false,
-            //        mustBeRegistered: true,
-            //        desiredHasStoreValue: ThePropFactory.ProvidesStorage);
+            bool mustBeRegistered = AllPropsMustBeRegistered;
 
-            //IProp<T> prop = (IProp<T>)genProp.TypedProp;
-
-            IProp<T> prop = GetTypedPropPrivate<T>(propertyName, mustBeRegistered: false, neverCreate: true);
+            IProp<T> prop = GetTypedPropPrivate<T>(propertyName, mustBeRegistered: mustBeRegistered, neverCreate: true);
 
             if (prop != null)
                 return prop.UnSubscribeToPropChanged(doOnChange);
@@ -800,39 +813,32 @@ namespace DRM.PropBag
                 return false;
         }
 
-        public void SubscribeToPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, string propertyName)
+        public bool SubscribeToPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, string propertyName)
         {
-            // This will create the property if it does not exist with an undefined initial value.
-            //IProp<T> prop = GetPropDef<T>(propertyName);
+            bool mustBeRegistered = AllPropsMustBeRegistered;
 
-            // This wll throw an InvalidOperationException if the property does not exist.
-            IProp<T> prop = GetTypedPropPrivate<T>(propertyName, mustBeRegistered: true);
+            IProp<T> prop = GetTypedPropPrivate<T>(propertyName, mustBeRegistered: mustBeRegistered, neverCreate:false);
 
-            prop.PropertyChangedWithTVals += eventHandler;
+            if(prop != null)
+            {
+                prop.PropertyChangedWithTVals += eventHandler;
+                return true;
+            }
+            return false;
         }
 
-        public void UnSubscribeToPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, string propertyName)
+        public bool UnSubscribeToPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, string propertyName)
         {
-            //IPropGen genProp = GetGenProp(propertyName);
+            bool mustBeRegistered = AllPropsMustBeRegistered;
 
-            //IProp<T> prop = CheckTypeInfo<T>(genProp, propertyName, tVals);
+            IProp<T> prop = GetTypedPropPrivate<T>(propertyName, mustBeRegistered: mustBeRegistered, neverCreate: true);
 
-            IProp<T> prop = GetTypedPropPrivate<T>(propertyName, mustBeRegistered: false, neverCreate: true);
-
-            if (prop != null) prop.PropertyChangedWithTVals -= eventHandler;
-        }
-
-        /// <summary>
-        /// Uses the name of the property or event accessor of the calling method to indentify the property,
-        /// if the propertyName argument is not specifed.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="eventHandler"></param>
-        /// <param name="eventPropertyName"></param>
-        protected void AddToPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, string eventPropertyName)
-        {
-            string propertyName = GetPropNameFromEventProp(eventPropertyName);
-            SubscribeToPropChanged<T>(eventHandler, propertyName);
+            if (prop != null)
+            {
+                prop.PropertyChangedWithTVals -= eventHandler;
+                return true;
+            }
+            return false;
         }
 
         /// <summary>
@@ -842,15 +848,33 @@ namespace DRM.PropBag
         /// <typeparam name="T"></typeparam>
         /// <param name="eventHandler"></param>
         /// <param name="eventPropertyName"></param>
-        protected void RemoveFromPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, string eventPropertyName)
+        protected bool AddToPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, string eventPropertyName)
         {
             string propertyName = GetPropNameFromEventProp(eventPropertyName);
-            UnSubscribeToPropChanged<T>(eventHandler, propertyName);
+            return SubscribeToPropChanged<T>(eventHandler, propertyName);
+        }
+
+        /// <summary>
+        /// Uses the name of the property or event accessor of the calling method to indentify the property,
+        /// if the propertyName argument is not specifed.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="eventHandler"></param>
+        /// <param name="eventPropertyName"></param>
+        protected bool RemoveFromPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, string eventPropertyName)
+        {
+            string propertyName = GetPropNameFromEventProp(eventPropertyName);
+            return UnSubscribeToPropChanged<T>(eventHandler, propertyName);
         }
 
         #endregion
 
         #region Public Methods
+
+        public TypeSafePropBagMetaData GetMetaData()
+        {
+            return new TypeSafePropBagMetaData(this.ClassName, this.FullClassName, this.TypeSafetyMode, this.ThePropFactory);
+        }
 
         public bool PropertyExists(string propertyName)
         {

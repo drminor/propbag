@@ -8,17 +8,17 @@ namespace DRM.PropBag
     /// <summary>
     /// Base Property Bag Features
     /// </summary>
-    public interface IPropBag : IPropBagMin, INotifyPropertyChanged, INotifyPropertyChanging, INotifyPropertyChangedWithVals
+    public interface IPropBag_Old : IPropBag, INotifyPropertyChanged, INotifyPropertyChanging, INotifyPropertyChangedWithVals
     {
-        PropBagTypeSafetyMode TypeSafetyMode { get; }
+        //PropBagTypeSafetyMode TypeSafetyMode { get; }
 
-        bool AllPropsMustBeRegistered { get; }
+        //bool AllPropsMustBeRegistered { get; }
 
-        bool OnlyTypedAccess { get; }
+        //bool OnlyTypedAccess { get; }
 
-        ReadMissingPropPolicyEnum ReadMissingPropPolicy { get; }
+        //ReadMissingPropPolicyEnum ReadMissingPropPolicy { get; }
 
-        bool ReturnDefaultForUndefined { get; }
+        //bool ReturnDefaultForUndefined { get; }
 
         // These are defined by ITypeSafePropBag
         //object GetValWithType(string propertyName, Type propertyType);

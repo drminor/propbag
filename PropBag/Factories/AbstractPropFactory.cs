@@ -150,9 +150,21 @@ namespace DRM.PropBag
             //return Activator.CreateInstance(propertyType);
         }
 
+        public Type GetTypeFromValue(object value)
+        {
+            return value?.GetType();
+        }
+
         public virtual bool IsTypeSolid(object value, Type propertyType)
         {
-            return (propertyType != typeof(object));
+            if(propertyType == null)
+            {
+                return (value != null && GetTypeFromValue(value) != typeof(object));
+            }
+            else
+            {
+                return true;
+            }
         }
 
         public virtual T GetValueFromObject<T>(object value)

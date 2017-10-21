@@ -16,14 +16,14 @@ namespace PropBagTestApp
 {
     static class AutoMapperHelpers
     {
-        public static T GetNewViewModel<T>(string instanceKey, IPropFactory propFactory) where T : IPropBagMin
+        public static T GetNewViewModel<T>(string instanceKey, IPropFactory propFactory) where T : IPropBag
         {
             PropBagTemplate pbt = PropBagTemplateResources.GetPropBagTemplate(instanceKey);
 
             return GetNewViewModel<T>(pbt, propFactory);
         }
 
-        public static T GetNewViewModel<T>(PropBagTemplate pbt, IPropFactory propFactory) where T : IPropBagMin
+        public static T GetNewViewModel<T>(PropBagTemplate pbt, IPropFactory propFactory) where T : IPropBag
         {
             PropModel pm = pbt.GetPropModel();
 

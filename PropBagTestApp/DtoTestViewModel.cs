@@ -3,7 +3,7 @@ using DRM.PropBag.ControlModel;
 
 namespace PropBagTestApp
 {
-    public class DtoTestViewModel : PropBagDyn
+    public class DtoTestViewModel : PropBag
     {
         PropModel _pm;
 

@@ -9,6 +9,7 @@ namespace DRM.TypeSafePropertyBag
         string IndexerName { get; }
 
         ResolveTypeDelegate TypeResolver { get; }
+        IConvertValues ValueConverter { get; }
 
         IProp<T> Create<T>(T initialValue, string propertyName, object extraInfo = null, bool hasStorage = true, bool typeIsSolid = true, Action<T, T> doWhenChanged = null, bool doAfterNotify = false, Func<T, T, bool> comparer = null);
 
@@ -32,8 +33,9 @@ namespace DRM.TypeSafePropertyBag
 
         T GetValueFromString<T>(string value);
 
+        Type GetTypeFromValue(object value);
+
         bool IsTypeSolid(object value, Type propertyType);
 
-        IConvertValues ValueConverter { get; }
     }
 }

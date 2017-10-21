@@ -73,12 +73,12 @@ namespace DRM.PropBag.ControlsWPF
             
             if(isPropBagMin)
             {
-                IPropBagMin newInstance = (IPropBagMin)Activator.CreateInstance(proxyType, new object[] { pm });
+                IPropBag newInstance = (IPropBag)Activator.CreateInstance(proxyType, new object[] { pm });
                 return newInstance;
             }
             else
             {
-                throw new ApplicationException("Target view model must derive from IPropBag or IPropBagMin.");
+                throw new ApplicationException("Target view model must derive from IPropBag.");
             }
         }
 
