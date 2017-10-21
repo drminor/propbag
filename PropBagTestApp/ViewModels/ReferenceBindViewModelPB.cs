@@ -12,7 +12,7 @@ using DRM.TypeSafePropertyBag;
 
 namespace PropBagTestApp.ViewModels
 {
-    public class ReferenceBindViewModelPB : PropBagMin
+    public class ReferenceBindViewModelPB : PropBag
     {
 
         public ReferenceBindViewModelPB()

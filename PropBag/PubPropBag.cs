@@ -23,7 +23,7 @@ namespace DRM.PropBag
 
     #endregion
 
-    public class PubPropBag : PropBagBase, IPubPropBag
+    public class PubPropBag : PropBag, IPubPropBag
     {
         #region Constructor
 

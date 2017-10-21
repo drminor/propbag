@@ -7,7 +7,5 @@ using System.Threading.Tasks;
 
 namespace DRM.PropBag
 {
-    internal delegate bool DoSetDelegate(object value, PropBagBase target, string propertyName, IPropGen prop);
-    internal delegate bool DoSetDelegateMin(object value, PropBagMin target, string propertyName, IPropGen prop);
-
+    internal delegate bool DoSetDelegate(object value, PropBag target, string propertyName, IPropGen prop);
 }

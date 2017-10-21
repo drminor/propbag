@@ -6,6 +6,8 @@ namespace DRM.TypeSafePropertyBag
     {
         private TypeSafePropBagMetaData() { } // Disallow use of parameterless constructor.
 
+
+
         public TypeSafePropBagMetaData(string className, string classFullName, PropBagTypeSafetyMode typeSafetyMode, IPropFactory thePropFactory)
         {
             ClassName = className ?? throw new ArgumentNullException(nameof(className));
@@ -17,7 +19,7 @@ namespace DRM.TypeSafePropertyBag
                 out ReadMissingPropPolicyEnum readMissingPropPolicy,
                 out bool returnDefaultForUndefined);
 
-            AllPropsMustBeRegistered = AllPropsMustBeRegistered;
+            AllPropsMustBeRegistered = allPropsMustBeRegistered;
             OnlyTypedAccess = onlyTypedAccess;
             ReadMissingPropPolicy = readMissingPropPolicy;
             ReturnDefaultForUndefined = returnDefaultForUndefined;
@@ -45,9 +47,14 @@ namespace DRM.TypeSafePropertyBag
 
         public virtual bool ReturnDefaultForUndefined { get; }
 
+        protected virtual bool GetReturnDefaultForUndefined(PropBagTypeSafetyMode typeSafetyMode)
+            => typeSafetyMode == PropBagTypeSafetyMode.None || typeSafetyMode == PropBagTypeSafetyMode.RegisterOnGetLoose;
+
         protected void SetPolicyProperties(PropBagTypeSafetyMode typeSafetyMode, out bool allPropsMustBeRegistered,
             out bool onlyTypedAccess, out ReadMissingPropPolicyEnum readMissingPropPolicy, out bool returnDefaultForUndefined)
         {
+            returnDefaultForUndefined = GetReturnDefaultForUndefined(typeSafetyMode);
+
             switch (typeSafetyMode)
             {
                 case PropBagTypeSafetyMode.Locked:
@@ -55,7 +62,6 @@ namespace DRM.TypeSafePropertyBag
                         allPropsMustBeRegistered = true;
                         onlyTypedAccess = true;
                         readMissingPropPolicy = ReadMissingPropPolicyEnum.NotAllowed;
-                        returnDefaultForUndefined = false;
                         break;
                     }
                 case PropBagTypeSafetyMode.Tight:
@@ -63,7 +69,6 @@ namespace DRM.TypeSafePropertyBag
                         allPropsMustBeRegistered = true;
                         onlyTypedAccess = true;
                         readMissingPropPolicy = ReadMissingPropPolicyEnum.Allowed;
-                        returnDefaultForUndefined = false;
                         break;
                     }
                 case PropBagTypeSafetyMode.AllPropsMustBeRegistered:
@@ -71,7 +76,6 @@ namespace DRM.TypeSafePropertyBag
                         allPropsMustBeRegistered = true;
                         onlyTypedAccess = false;
                         readMissingPropPolicy = ReadMissingPropPolicyEnum.Allowed;
-                        returnDefaultForUndefined = false;
                         break;
                     }
                 case PropBagTypeSafetyMode.OnlyTypedAccess:
@@ -79,7 +83,6 @@ namespace DRM.TypeSafePropertyBag
                         allPropsMustBeRegistered = false;
                         onlyTypedAccess = true;
                         readMissingPropPolicy = ReadMissingPropPolicyEnum.Allowed;
-                        returnDefaultForUndefined = false;
                         break;
                     }
                 case PropBagTypeSafetyMode.HonorUndefined:
@@ -87,7 +90,6 @@ namespace DRM.TypeSafePropertyBag
                         allPropsMustBeRegistered = false;
                         onlyTypedAccess = false;
                         readMissingPropPolicy = ReadMissingPropPolicyEnum.Allowed;
-                        returnDefaultForUndefined = false;
                         break;
                     }
                 case PropBagTypeSafetyMode.None:
@@ -95,7 +97,6 @@ namespace DRM.TypeSafePropertyBag
                         allPropsMustBeRegistered = false;
                         onlyTypedAccess = false;
                         readMissingPropPolicy = ReadMissingPropPolicyEnum.Allowed;
-                        returnDefaultForUndefined = true;
                         break;
                     }
                 case PropBagTypeSafetyMode.RegisterOnGetLoose:
@@ -103,7 +104,6 @@ namespace DRM.TypeSafePropertyBag
                         allPropsMustBeRegistered = false;
                         onlyTypedAccess = false;
                         readMissingPropPolicy = ReadMissingPropPolicyEnum.Register;
-                        returnDefaultForUndefined = true;
                         break;
                     }
                 case PropBagTypeSafetyMode.RegisterOnGetSafe:
@@ -111,7 +111,6 @@ namespace DRM.TypeSafePropertyBag
                         allPropsMustBeRegistered = false;
                         onlyTypedAccess = true;
                         readMissingPropPolicy = ReadMissingPropPolicyEnum.Register;
-                        returnDefaultForUndefined = false;
                         break;
                     }
                 default:
@@ -119,6 +118,24 @@ namespace DRM.TypeSafePropertyBag
 
             }
 
+        }
+
+        // In order to verify that a given class that implements IPropFactory has a value of 'ReturnDefaultForUndefined'
+        // that is compatible with the specified TypeSafetyMode and
+        // the since it is true that instances of TypeSafePropBagMetaData calculate the value of 'ReturnDefaultForUndefined'
+        // from a value of TypeSafetyMode,
+        // and since the caller cannot (easily) create an instance of a TypeSafePropBagMetaData, 
+        // this helper class (which can create empty instances of a TypeSafePropBagMetaData) 
+        // is provided to fill this gap.
+
+        // If someone derives a class from TypeSafePropBagMetaData, they should also provide a new class
+        // to provide this service.
+        public static class Helper
+        {
+            public static bool GetReturnDefaultForUndefined(PropBagTypeSafetyMode typeSafetyMode)
+            {
+                return new TypeSafePropBagMetaData().GetReturnDefaultForUndefined(typeSafetyMode);
+            }
         }
     }
 }

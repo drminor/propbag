@@ -9,7 +9,7 @@ using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBag.ViewModelBuilder
 {
-    public class SampleViewModel : PropBagBase
+    public class SampleViewModel : PropBag
     {
         public SampleViewModel(byte dummy)
             : base(dummy) { } // Don't call init, instances created here are not supposed to be operational.

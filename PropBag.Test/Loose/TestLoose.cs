@@ -79,8 +79,12 @@ namespace PropBagLib.Tests
             mod1 = new LooseModel(PropBagTypeSafetyMode.None);
 
             mod1["System.String", PROP_NEW] = "string";
-            Assert.That(mod1.GetTypeOfProperty(PROP_NEW), Is.EqualTo(typeof(string)));
-            Assert.That(mod1["System.String", PROP_NEW], Is.EqualTo("string"));
+
+            string s = (string)mod1["System.String", PROP_NEW];
+            Type vType = mod1.GetTypeOfProperty(PROP_NEW);
+
+            Assert.That(s, Is.EqualTo("string"));
+            Assert.That(vType, Is.EqualTo(typeof(string)));
         }
 
         [Test]
@@ -91,9 +95,7 @@ namespace PropBagLib.Tests
             mod1["System.Object", PROP_NEW] = null;
             Assert.That(mod1.GetTypeOfProperty(PROP_NEW), Is.EqualTo(typeof(object)));
 
-            mod1["System.String", PROP_NEW] = "string";
-            Assert.That(mod1.GetTypeOfProperty(PROP_NEW), Is.EqualTo(typeof(string)));
-            Assert.That(mod1["System.String", PROP_NEW], Is.EqualTo("string"));
+            Assert.Throws<ApplicationException>(() => mod1["System.String", PROP_NEW] = "string");
         }
 
         [Test]
@@ -103,8 +105,12 @@ namespace PropBagLib.Tests
 
             mod1["System.String", PROP_NEW] = "string";
             mod1["System.String", PROP_NEW] = null;
-            Assert.That(mod1.GetTypeOfProperty(PROP_NEW), Is.EqualTo(typeof(string)));
-            Assert.That(mod1["System.String", PROP_NEW], Is.Null);
+
+            string s = (string)mod1["System.String", PROP_NEW];
+            Type vType = mod1.GetTypeOfProperty(PROP_NEW);
+
+            Assert.That(vType, Is.EqualTo(typeof(string)));
+            Assert.That(s, Is.Null);
         }
 
         [Test]
@@ -130,9 +136,9 @@ namespace PropBagLib.Tests
         {
             mod1 = new LooseModel(PropBagTypeSafetyMode.None);
 
-            IPropGen pg = mod1.GetProp("PropBool");
+            IPropGen pg = mod1.GetPropGen("PropBool");
 
-            IProp<bool> pt = (IProp<bool>) pg.TypedProp;
+            IProp<bool> pt = (IProp<bool>)pg.TypedProp;
 
             //pt.Value = false;
 

@@ -34,7 +34,7 @@ namespace DRM.PropBag
 
     #endregion
 
-    public class PropBagBase : IPropBag
+    public class PropBag : IPropBag
     {
         //delegate IPropGen MissingPropStategy(string propertyName, Type propertyType, out bool wasRegistered,
         //    bool haveValue, object value, bool alwaysRegister, bool readMissingDoesRegister);
@@ -112,7 +112,7 @@ namespace DRM.PropBag
         /// a method from the System.Reflection namespace.
         /// </summary>
         /// <param name="dummy"></param>
-        protected PropBagBase(byte dummy, string className = null, string fullClassName = null)
+        protected PropBag(byte dummy, string className = null, string fullClassName = null)
         {
             this.TypeSafetyMode = PropBagTypeSafetyMode.None;
 
@@ -121,42 +121,36 @@ namespace DRM.PropBag
             OurMetaData = new TypeSafePropBagMetaData(className, fullClassName, this.TypeSafetyMode, this.PropFactory);
         }
 
-        //public PropBagBase() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered, null) { }
-        protected PropBagBase() : this(PropBagTypeSafetyMode.None, null) { }
+        protected PropBag() : this(PropBagTypeSafetyMode.None, null) { }
 
-        protected PropBagBase(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
+        protected PropBag(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
 
-        protected PropBagBase(PropBagTypeSafetyMode typeSafetyMode, IPropFactory thePropFactory) 
+        protected PropBag(PropBagTypeSafetyMode typeSafetyMode, IPropFactory thePropFactory) 
         {
             this.TypeSafetyMode = typeSafetyMode;
 
-            // Fix Me!!
-            bool returnDefaultForUndefined = true;
+            bool returnDefaultForUndefined = TypeSafePropBagMetaData.Helper.GetReturnDefaultForUndefined(typeSafetyMode);
 
-            // Use the "built-in" property factory, if the caller did not supply one.
-            this.PropFactory = thePropFactory ?? new PropFactory(returnDefaultForUndefined);
+            if (thePropFactory != null)
+            {
+                if (thePropFactory.ReturnDefaultForUndefined != returnDefaultForUndefined)
+                {
+                    throw new ApplicationException("The 'ReturnDefaultForUndefined' setting on the specified property factory conflicts with the TypeSafetyMode specified.");
+                }
+                PropFactory = thePropFactory;
+            }
+            else
+            {
+                // Use the "built-in" property factory, if the caller did not supply one.
+                PropFactory = new PropFactory(returnDefaultForUndefined);
+            }
 
             this.OurMetaData = new TypeSafePropBagMetaData(CName, FullCName, this.TypeSafetyMode, this.PropFactory);
-
-            //if (thePropFactory != null)
-            //{
-            //    if (ReturnDefaultForUndefined != thePropFactory.ReturnDefaultForUndefined)
-            //    {
-            //        throw new ApplicationException("The 'ReturnDefaultForUndefined' setting on the specified property factory conflicts with the TypeSafetyMode specified.");
-            //    }
-            //    PropFactory = thePropFactory;
-            //}
-            //else
-            //{
-            //    // Use the "built-in" property factory, if the caller did not supply one.
-            //    PropFactory = new PropFactory(ReturnDefaultForUndefined);
-            //}
-
 
             tVals = new Dictionary<string, PropGen>();
         }
 
-        protected PropBagBase(ControlModel.PropModel pm, IPropFactory propFactory = null) : this(pm.TypeSafetyMode, propFactory)
+        protected PropBag(ControlModel.PropModel pm, IPropFactory propFactory = null) : this(pm.TypeSafetyMode, propFactory)
         {
             foreach (DRM.PropBag.ControlModel.PropItem pi in pm.Props)
             {
@@ -209,23 +203,6 @@ namespace DRM.PropBag
                 }
                 AddProp(pi.PropertyName, pg);
             }
-        }
-
-        protected void ClearEventSubscribers()
-        {
-            foreach (var x in tVals.Values)
-            {
-                x.CleanUp();
-            }
-        }
-
-        protected void ClearAll()
-        {
-            // TODO: Fix Me.
-            //DelegateCacheProvider.DoSetDelegateCache.Clear();
-            //doSetDelegateDict.Clear();
-            ClearEventSubscribers();
-            tVals.Clear();
         }
 
         #endregion
@@ -980,6 +957,23 @@ namespace DRM.PropBag
             return prop.UpdateDoWhenChangedAction(doWhenChanged, doAfterNotify);
         }
 
+        protected void ClearAll()
+        {
+            // TODO: Fix Me.
+            //DelegateCacheProvider.DoSetDelegateCache.Clear();
+            //doSetDelegateDict.Clear();
+            ClearEventSubscribers();
+            tVals.Clear();
+        }
+
+        protected void ClearEventSubscribers()
+        {
+            foreach (var x in tVals.Values)
+            {
+                x.CleanUp();
+            }
+        }
+
         /// <summary>
         /// Makes a copy of the core list.
         /// </summary>
@@ -1316,7 +1310,7 @@ namespace DRM.PropBag
                     LazyThreadSafetyMode.PublicationOnly);
             }
 
-            static bool DoSetBridge<T>(object value, PropBagBase target, string propertyName, IPropGen prop)
+            static bool DoSetBridge<T>(object value, PropBag target, string propertyName, IPropGen prop)
             {
                 return target.DoSet<T>((T)value, propertyName, (IPropPrivate<T>)prop.TypedProp);
             }

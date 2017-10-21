@@ -62,11 +62,9 @@
     <Compile Include="Factories\GetDefaultValueDelegate.cs" />
     <Compile Include="Factories\PropFactoryValueConveter.cs" />
     <Compile Include="Prop.cs" />
-    <Compile Include="PropBagMin.cs" />
     <None Include="PropBagDyn.cs" />
     <Compile Include="PropBagExperimental.cs" />
     <Compile Include="PropBagInterfaces\IPropBagMin.cs" />
-    <None Include="PropBagInterfaces\IPropBag_Old.cs" />
     <Compile Include="PropBagInterfaces\IPubPropBag.cs" />
     <Compile Include="PropExternStore.cs" />
     <Compile Include="Factories\PropExtStoreFactory.cs" />
@@ -75,7 +73,6 @@
     <Compile Include="PropGenBase.cs" />
     <Compile Include="PropTypedBase.cs" />
     <Compile Include="PubPropBag.cs" />
-    <Compile Include="PropBag.cs" />
     <Compile Include="PropBagBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RefEqualityComparer.cs" />

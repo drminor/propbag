@@ -6,7 +6,7 @@ using System.Windows;
 
 namespace PropBagTestApp
 {
-    public class DtoTestViewModelEmit : PropBagMin
+    public class DtoTestViewModelEmit : PropBag
     {
         PropModel _pm;
 

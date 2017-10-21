@@ -18,8 +18,6 @@ namespace DRM.PropBag.Caches
         static Lazy<TypeDescBasedTConverterCache> theSingleTypeDescBasedTConverterCache;
 
         static Lazy<LockingConcurrentDictionary<Type, DoSetDelegate>> theSingleDoSetDelegateCache;
-        static Lazy<LockingConcurrentDictionary<Type, DoSetDelegateMin>> theSingleDoSetDelegateCacheMin;
-
 
         #endregion
 
@@ -37,11 +35,6 @@ namespace DRM.PropBag.Caches
             get { return theSingleDoSetDelegateCache.Value; }
         }
 
-        internal static LockingConcurrentDictionary<Type, DoSetDelegateMin> DoSetDelegateCacheMin
-        {
-            get { return theSingleDoSetDelegateCacheMin.Value; }
-        }
-
         #endregion
 
         #region The Static Constructor
@@ -55,20 +48,11 @@ namespace DRM.PropBag.Caches
 
 
             // Do Set Delegate Cache for PropBagBase
-            Func<Type, DoSetDelegate> valueFactory = PropBagBase.GenericMethodTemplates.GetDoSetDelegate;
+            Func<Type, DoSetDelegate> valueFactory = PropBag.GenericMethodTemplates.GetDoSetDelegate;
             theSingleDoSetDelegateCache = 
                 new Lazy<LockingConcurrentDictionary<Type, DoSetDelegate>>
                 (
                     () => new LockingConcurrentDictionary<Type, DoSetDelegate>(valueFactory),
-                    LazyThreadSafetyMode.PublicationOnly
-                );
-
-            // Do Set Delegate Cache for PropBagMin
-            Func<Type, DoSetDelegateMin> valueFactoryMin = PropBagMin.GenericMethodTemplates.GetDoSetDelegate;
-            theSingleDoSetDelegateCacheMin =
-                new Lazy<LockingConcurrentDictionary<Type, DoSetDelegateMin>>
-                (
-                    () => new LockingConcurrentDictionary<Type, DoSetDelegateMin>(valueFactoryMin),
                     LazyThreadSafetyMode.PublicationOnly
                 );
         }

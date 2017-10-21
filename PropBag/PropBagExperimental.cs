@@ -29,7 +29,7 @@ namespace DRM.PropBag
     /// Currently this class does nothing but provide a wrapper around PropBagBase,
     /// It is ready for expermentation, however.
     ///</summary>
-    public class PropBagExperimental : PropBagBase
+    public class PropBagExperimental : PropBag
     {
         #region Constructor
 
