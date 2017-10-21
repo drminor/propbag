@@ -53,49 +53,30 @@ namespace DRM.PropBag
         public event PropertyChangedWithValsHandler PropertyChangedWithVals; // = delegate { };
         public event PropertyChangedEventHandler PropertyChangedIndividual;
 
-        // Fix Me!!
-        private readonly string CName = "No Class Name";
-        private readonly string FullCName = "NoNameSpace.NoClassName";
-
         private PropBagTypeSafetyMode TypeSafetyMode { get; }
         private IPropFactory PropFactory { get; }
         private TypeSafePropBagMetaData OurMetaData { get; }
 
         private readonly Dictionary<string, PropGen> tVals;
 
-        //public string ClassName
-        //{
-        //    get
-        //    {
-        //        Type thisType = this.GetType();
-        //        return thisType.GetTypeInfo().Name;
-        //    }
-        //}
+        private string ClassName
+        {
+            get
+            {
+                Type thisType = this.GetType();
+                return thisType.GetTypeInfo().Name;
+            }
+        }
 
-        //public string FullClassName
-        //{
-        //    get
-        //    {
-        //        Type thisType = this.GetType();
-        //        return thisType.GetTypeInfo().FullName;
-        //    }
-        //}
+        private string FullClassName
+        {
+            get
+            {
+                Type thisType = this.GetType();
+                return thisType.GetTypeInfo().FullName;
+            }
+        }
 
-
-
-        ///// <summary>
-        ///// If true, attempting to set a property for which no call to AddProp has been made, will cause an exception to thrown.
-        ///// </summary>
-        //public bool AllPropsMustBeRegistered { get; }
-
-        ///// <summary>
-        ///// If not true, attempting to set a property, not previously set with a call to AddProp or SetIt<typeparamref name="T"/>, will cause an exception to be thrown.
-        ///// </summary>
-        //public bool OnlyTypedAccess { get; }
-
-        //public ReadMissingPropPolicyEnum ReadMissingPropPolicy { get; }
-
-        //public bool ReturnDefaultForUndefined { get; }
 
         /// <summary>
         /// Used to create Delegates when the type of the value is not known at run time.
@@ -112,13 +93,13 @@ namespace DRM.PropBag
         /// a method from the System.Reflection namespace.
         /// </summary>
         /// <param name="dummy"></param>
-        protected PropBag(byte dummy, string className = null, string fullClassName = null)
+        protected PropBag(byte dummy)
         {
             this.TypeSafetyMode = PropBagTypeSafetyMode.None;
 
             this.PropFactory = null;
             tVals = null;
-            OurMetaData = new TypeSafePropBagMetaData(className, fullClassName, this.TypeSafetyMode, this.PropFactory);
+            OurMetaData = new TypeSafePropBagMetaData(ClassName, FullClassName, this.TypeSafetyMode, this.PropFactory);
         }
 
         protected PropBag() : this(PropBagTypeSafetyMode.None, null) { }
@@ -145,13 +126,22 @@ namespace DRM.PropBag
                 PropFactory = new PropFactory(returnDefaultForUndefined);
             }
 
-            this.OurMetaData = new TypeSafePropBagMetaData(CName, FullCName, this.TypeSafetyMode, this.PropFactory);
+            this.OurMetaData = new TypeSafePropBagMetaData(ClassName, FullClassName, this.TypeSafetyMode, this.PropFactory);
 
             tVals = new Dictionary<string, PropGen>();
         }
 
         protected PropBag(ControlModel.PropModel pm, IPropFactory propFactory = null) : this(pm.TypeSafetyMode, propFactory)
         {
+
+            string cName = this.ClassName;
+            string pCName = pm.ClassName;
+
+            if (cName != pCName)
+            {
+                System.Diagnostics.Debug.WriteLine($"CLR class name: {cName} does not match PropModdel class name: {pCName}.");
+            }
+
             foreach (DRM.PropBag.ControlModel.PropItem pi in pm.Props)
             {
                 object ei = pi.ExtraInfo;

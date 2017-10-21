@@ -14,7 +14,7 @@ using System.Windows;
 
 namespace DRM.PropBag
 {
-    public class PropGen : IPropGen
+    public struct PropGen : IPropGen
     {
         public Type Type { get;}
 
