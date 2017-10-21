@@ -49,6 +49,7 @@
     <Compile Include="ClassGenerator\T4Support.cs" />
     <Compile Include="ControlModel\NotifyPropertyChangedBase.cs" />
     <Compile Include="Caches\DelegateCacheProvider.cs" />
+    <Compile Include="ControlModel\CollectionItem.cs" />
     <Compile Include="ControlModel\TwoTypes.cs" />
     <Compile Include="DoSetDelegate.cs" />
     <Compile Include="Factories\AbstractPropFactory.cs" />
@@ -61,6 +62,7 @@
     <Compile Include="ExtValDelegates.cs" />
     <Compile Include="Factories\GetDefaultValueDelegate.cs" />
     <Compile Include="Factories\PropFactoryValueConveter.cs" />
+    <Compile Include="IListSourceProvider\ListSourceBase.cs" />
     <Compile Include="Prop.cs" />
     <None Include="PropBagDyn.cs" />
     <Compile Include="PropBagExperimental.cs" />
@@ -109,6 +111,7 @@
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
