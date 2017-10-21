@@ -103,8 +103,7 @@ namespace DRM.PropBag
             }
             else
             {
-                // TODO, we probably need to be more creative when determining the type of this new value.
-                typeOfThisValue = value.GetType();
+                typeOfThisValue = GetTypeFromValue(value);
                 typeIsSolid = true;
             }
 
@@ -179,6 +178,7 @@ namespace DRM.PropBag
             // value is already of the correct type.
             if (t == typeof(object)) return (T)(object)value;
 
+            // TODO: Consider calling  Type s = PropFactory.GetTypeFromValue(value);
             Type s = value.GetType();
 
             // value is already of the correct type.

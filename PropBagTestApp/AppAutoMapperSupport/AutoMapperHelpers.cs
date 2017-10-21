@@ -14,6 +14,12 @@ using DRM.TypeSafePropertyBag;
 
 namespace PropBagTestApp
 {
+    // TODO: Convert this static class to an instance class that takes the 
+    // the MappingStrategy, the ConfiguredMappers cache and the ModuleBuilderInfo settings in 
+    // its constructor.
+    // So that the source of these services can be determined at run-time so that we can test the units that
+    // rely on this service in isolation.
+
     static class AutoMapperHelpers
     {
         public static T GetNewViewModel<T>(string instanceKey, IPropFactory propFactory) where T : IPropBag

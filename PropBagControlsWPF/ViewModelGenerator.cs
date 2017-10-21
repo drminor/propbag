@@ -13,6 +13,9 @@ using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBag.ControlsWPF
 {
+    // TODO: Convert these to methods from static to instance so that the
+    // source of these services can be determined at run-time so that we can test the units that
+    // rely on this service in isolation.
     public class ViewModelGenerator
     {
         /// <summary>

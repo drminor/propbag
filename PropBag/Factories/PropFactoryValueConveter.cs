@@ -24,9 +24,10 @@ namespace DRM.PropBag
 
         TypeDescBasedTConverterCache _converter;
 
-        public PropFactoryValueConverter()
+        public PropFactoryValueConverter(TypeDescBasedTConverterCache converterCache)
         {
-            _converter = DelegateCacheProvider.TypeDescBasedTConverterCache;
+            // If the caller does not supply a value, use our default implementation.
+            _converter = converterCache ?? DelegateCacheProvider.TypeDescBasedTConverterCache;
         }
 
         // Value is native object, we need to return a targetType (hopefully a string at this point.)
