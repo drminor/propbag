@@ -13,7 +13,7 @@ using DRM.PropBag.Caches;
 using DRM.PropBag.ControlModel;
 
 using System.Windows;
-using System.Windows.Data;
+//using System.Windows.Data;
 using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBag

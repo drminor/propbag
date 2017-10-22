@@ -38,7 +38,7 @@ namespace DRM.PropBag
             TypeResolver = typeResolver ?? this.GetTypeFromName;
 
             // Use our default implementation, if the caller did not supply one.
-            ValueConverter = valueConverter ?? new PropFactoryValueConverter();
+            ValueConverter = valueConverter ?? new PropFactoryValueConverter(null);
 
             IndexerName = "Item[]";
         }

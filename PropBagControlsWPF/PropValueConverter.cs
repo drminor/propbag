@@ -14,7 +14,7 @@ namespace DRM.PropBag.ControlsWPF
 
         static PropValueConverter()
         {
-            ValueConverter_Default = new PropFactoryValueConverter();
+            ValueConverter_Default = new PropFactoryValueConverter(null);
         }
 
         #endregion
