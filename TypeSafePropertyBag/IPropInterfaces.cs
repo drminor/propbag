@@ -10,7 +10,7 @@ namespace DRM.TypeSafePropertyBag
     public interface IPropPrivate<T> : IProp<T>
     {
         bool DoAfterNotify { get; set; }
-        bool UpdateDoWhenChangedAction(Action<T, T> doWHenChangedAction, bool? doAfterNotify);
+        bool UpdateDoWhenChangedAction(Action<T, T> doWhenChangedAction, bool? doAfterNotify);
     }
 
     /// <summary>
@@ -35,6 +35,8 @@ namespace DRM.TypeSafePropertyBag
         // and using the WeakEventManager style.
         void SubscribeToPropChanged(Action<T, T> doOnChange);
         bool UnSubscribeToPropChanged(Action<T, T> doOnChange);
+
+        Attribute[] Attributes { get; }
     }
 
     /// <summary>
