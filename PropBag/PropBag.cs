@@ -1,5 +1,6 @@
 ﻿using DRM.PropBag.Caches;
 using DRM.PropBag.ControlModel;
+using DRM.PropBag.TypeDescriptorExtensions;
 using DRM.TypeSafePropertyBag;
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Windows;
+//using System.Windows;
 
 namespace DRM.PropBag
 {
@@ -298,7 +300,7 @@ namespace DRM.PropBag
 
         #region Property Access Methods
 
-        public IPropGen this[int index] => throw new NotImplementedException();
+        //public IPropGen this[int index] => throw new NotImplementedException();
 
         public object this[string typeName, string propertyName]
         {
@@ -310,6 +312,18 @@ namespace DRM.PropBag
             set
             {
                 Type propertyType = PropFactory.TypeResolver(typeName);
+                SetValWithType(propertyName, propertyType, value);
+            }
+        }
+
+        public object this[Type propertyType, string propertyName]
+        {
+            get
+            {
+                return GetValWithType(propertyName, propertyType);
+            }
+            set
+            {
                 SetValWithType(propertyName, propertyType, value);
             }
         }
@@ -638,6 +652,7 @@ namespace DRM.PropBag
 
             if (!genProp.IsEmpty)
             {
+
                 WeakEventManager<INotifyPropertyChanged, PropertyChangedEventArgs>.
                     AddHandler(this, "PropertyChangedIndividual", handler);
                 return true;
@@ -1279,6 +1294,80 @@ namespace DRM.PropBag
 
             if (handler != null)
                 handler(this, new PropertyChangedWithValsEventArgs(propertyName, oldVal, newVal));
+        }
+
+        #endregion
+
+        #region ICustomTypeDescriptor Support
+
+        public AttributeCollection GetAttributes()
+        {
+            return AttributeCollection.Empty;
+        }
+
+        public string GetClassName()
+        {
+            return this.OurMetaData.ClassName;
+        }
+
+        public string GetComponentName()
+        {
+            return this.OurMetaData.ClassName;
+        }
+
+        public TypeConverter GetConverter()
+        {
+            throw new NotImplementedException();
+        }
+
+        public EventDescriptor GetDefaultEvent()
+        {
+            throw new NotImplementedException();
+        }
+
+        public PropertyDescriptor GetDefaultProperty()
+        {
+            throw new NotImplementedException();
+        }
+
+        public object GetEditor(Type editorBaseType)
+        {
+            throw new NotImplementedException();
+        }
+
+        public EventDescriptorCollection GetEvents()
+        {
+            throw new NotImplementedException();
+        }
+
+        public EventDescriptorCollection GetEvents(Attribute[] attributes)
+        {
+            throw new NotImplementedException();
+        }
+         
+        //PropBagTypeDescriptor<PropBag> pbTypeDescriptor;
+        PropertyDescriptorCollection _properties;
+         PropertyDescriptorCollection ICustomTypeDescriptor.GetProperties()
+        {
+            if(_properties == null)
+            {
+                PropBagTypeDescriptor<PropBag> pbTypeDescriptor = new PropBagTypeDescriptor<PropBag>(this, "PropBag - Base-Test");
+                PropertyDescriptor[] propDescriptors = pbTypeDescriptor.BuildPropDescriptors(this);
+
+                _properties = new PropertyDescriptorCollection(propDescriptors);
+            }
+            return _properties;
+        }
+
+         PropertyDescriptorCollection ICustomTypeDescriptor.GetProperties(Attribute[] attributes)
+        {
+            System.Diagnostics.Debug.WriteLine("GetProperties was called with attributes filter.");
+            return ((ICustomTypeDescriptor)this).GetProperties();
+        }
+
+        public object GetPropertyOwner(PropertyDescriptor pd)
+        {
+            throw new NotImplementedException();
         }
 
         #endregion
