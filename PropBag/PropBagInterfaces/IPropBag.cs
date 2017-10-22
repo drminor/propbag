@@ -8,7 +8,7 @@ namespace DRM.PropBag
     /// <summary>
     /// Base Property Bag Features
     /// </summary>
-    public interface IPropBag : ITypeSafePropBag, INotifyPropertyChanged, INotifyPropertyChanging, INotifyPropertyChangedWithVals
+    public interface IPropBag : ITypeSafePropBag, ICustomTypeDescriptor, INotifyPropertyChanged, INotifyPropertyChanging, INotifyPropertyChangedWithVals
     {
         // These are defined by ITypeSafePropBag
         //object GetValWithType(string propertyName, Type propertyType);
@@ -29,7 +29,8 @@ namespace DRM.PropBag
 
         //int IndexOfProp(string propertyName, Type propertyType);
 
-        object this[string typeName, string propertyName] { get; }
+        object this[string typeName, string propertyName] { get; set; }
+        object this[Type type, string propertyName] { get; set; }
 
         bool SetValWithNoType(string propertyName, object value);
 
