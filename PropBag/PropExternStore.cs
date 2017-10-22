@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace DRM.PropBag
 {
     // TODO: The ExternStore" contract does not define a way for the external store to create undefined values.
-    public sealed class PropExternStore<T> : PropTypedBase<T>
+    public class PropExternStore<T> : PropTypedBase<T>
     {
         public PropExternStore(string propertyName,
             object extraInfo,

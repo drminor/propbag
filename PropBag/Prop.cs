@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace DRM.PropBag
 {
-    public sealed class Prop<T> : PropTypedBase<T>
+    public class Prop<T> : PropTypedBase<T>
     {
         public Prop(T initalValue,
             GetDefaultValueDelegate<T> getDefaultValFunc,
@@ -21,7 +21,7 @@ namespace DRM.PropBag
         {
             if (hasStore)
             {
-                TypedValue = initalValue;
+                _value = initalValue;
                 _valueIsDefined = true;
             }
         }

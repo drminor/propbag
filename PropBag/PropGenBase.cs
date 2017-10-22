@@ -29,6 +29,15 @@ namespace DRM.PropBag
 
         public bool HasStore { get; private set; }
 
+        Attribute[] _attributes = new Attribute[] { };
+        public virtual Attribute[] Attributes
+        {
+            get
+            {
+                return _attributes;
+            }
+        }
+
         // Constructor
         public PropGenBase(Type typeOfThisValue, bool typeIsSolid, bool hasStore = true)
         {
