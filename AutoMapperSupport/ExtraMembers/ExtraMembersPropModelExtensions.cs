@@ -1,9 +1,8 @@
-﻿using System;
+﻿using DRM.PropBag.ControlModel;
+using DRM.TypeSafePropertyBag;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
-using DRM.TypeSafePropertyBag;
-using DRM.PropBag;
-using DRM.PropBag.ControlModel;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
