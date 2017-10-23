@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using DRM.PropBag;
 using DRM.TypeSafePropertyBag;
 
-namespace DRM.PropBag.TypeDescriptorExtensions
+namespace DRM.PropBag.TypeDescriptors
 {
     public class MyTypeDescriptorBase
     {

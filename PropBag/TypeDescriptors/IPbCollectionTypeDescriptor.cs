@@ -5,11 +5,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DRM.PropBag.TypeDescriptorExtensions
+namespace DRM.PropBag.TypeDescriptors
 {
-    public interface IPropBagTypeDescriptor : IMyTypeDescriptor
+    public interface IPbCollectionTypeDescriptor : IMyTypeDescriptor
     {
-
 
     }
 }

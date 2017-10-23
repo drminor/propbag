@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DRM.PropBag.TypeDescriptorExtensions
+namespace DRM.PropBag.TypeDescriptors
 {
 
 //    public delegate void AddValueChangedDelegate(object component, EventHandler handler);

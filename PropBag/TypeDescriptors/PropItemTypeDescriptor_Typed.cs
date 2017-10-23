@@ -1,26 +1,26 @@
-﻿using DRM.PropBag.ControlModel;
-using DRM.TypeSafePropertyBag;
-using System;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DRM.PropBag.TypeDescriptorExtensions
+using DRM.PropBag;
+using DRM.TypeSafePropertyBag;
+
+namespace DRM.PropBag.TypeDescriptors
 {
-    public class PropBagTypeDescriptor<BagT> : PropertyDescriptor, IPropBagTypeDescriptor where BagT : IPropBag
+    // ToDo: This is not used.
+    public class PropItemTypeDescriptor_Typed<T, PT, BagT> : PropertyDescriptor, IPropItemTypeDescriptor where PT : class, IProp<T> where BagT : class, IPropBag
     {
         #region Private Members
 
-        IPropBag _propBag;
-        PropModel _propModel;
-        IPropFactory _propFactory;
+        BagT _propBag;
+        PT _propItem;
         TypeDescriptorConfig _tdConfig;
 
         PropertyDescriptorCollection _children;
-
-        TypeSafePropBagMetaData _metadata;
 
         #endregion
 
@@ -28,7 +28,6 @@ namespace DRM.PropBag.TypeDescriptorExtensions
 
         public override Type ComponentType => _tdConfig.ComponentType;
         public override bool IsReadOnly => _tdConfig.IsReadOnly;
-        public override string Name => _tdConfig.Name;
         public override Type PropertyType => _tdConfig.PropertyType;
 
         public override bool SupportsChangeEvents => _tdConfig.SupportsChangeEvents;
@@ -37,77 +36,33 @@ namespace DRM.PropBag.TypeDescriptorExtensions
 
         #region Constructors
 
-        public PropBagTypeDescriptor(PropModel propModel, IPropFactory propFactory, string propertyName = null)
-            : base(propertyName ?? propModel.ClassName, new Attribute[] { })
-        {
-            _propModel = propModel;
-            _propFactory = propFactory;
+        //public PropItemTypeDescriptor_Typed(string propertyName, Type propertyType, Attribute[] attributes)
+        //    : base(propertyName, attributes)
+        //{
+        //    _propBag = null;
+        //    _propItem = null;
 
-            _tdConfig = new TypeDescriptorConfig(new Attribute[] { }, typeof(object), true, propertyName, typeof(PropBag), true);
+        //    _tdConfig = new TypeDescriptorConfig(attributes, typeof(IPropBag), false, propertyName, propertyType, true);
 
-            _children = this.GetChildProperties();
+        //    _children = this.GetChildProperties();
+        //}
 
-            PropertyDescriptor[] propDescriptors = BuildPropDescriptors(_propModel, _propFactory);
-
-            foreach (PropertyDescriptor pDesc in propDescriptors)
-            {
-                _children.Add(pDesc);
-            }
-        }
-
-        public PropBagTypeDescriptor(IPropBag propBag, string propertyName = null)
-            //: base(propertyName ?? (propBag.GetMetaData()).ClassName, new Attribute[] { })
-            : base(propertyName, new Attribute[] { })
+        public PropItemTypeDescriptor_Typed(string propertyName, BagT propBag, PT propItem)
+            : base(propertyName, propItem.Attributes)
         {
             _propBag = propBag;
+            _propItem = propItem;
 
-            TypeSafePropBagMetaData metadata = propBag.GetMetaData();
-
-            propertyName = propertyName ?? metadata.ClassName;
-            _tdConfig = new TypeDescriptorConfig(new Attribute[] { }, typeof(object), true, propertyName, typeof(PropBag), true);
+            _tdConfig = new TypeDescriptorConfig(_propItem.Attributes, typeof(PropBag), false, propertyName, _propItem.Type, true);
 
             _children = this.GetChildProperties();
         }
 
         #endregion
 
-
-        public PropertyDescriptor[] BuildPropDescriptors(PropModel pm, IPropFactory pf)
+        public void Add(PropertyDescriptor pd)
         {
-            PropertyDescriptor[] descriptors = new PropertyDescriptor[pm.Props.Count];
-
-            List<PropItem> propItems = pm.Props.ToList();
-
-            for (int pdPtr = 0; pdPtr < propItems.Count; pdPtr++)
-            {
-                PropItem pItem = propItems[pdPtr];
-
-                PropItemTypeDescriptor<IPropBag> propItemTypeDesc =
-                    new PropItemTypeDescriptor<IPropBag>(pItem.PropertyName, pItem.PropertyType, new Attribute[] { });
-
-                descriptors[pdPtr] = propItemTypeDesc;
-            }
-
-            return descriptors;
-        }
-
-        public PropertyDescriptor[] BuildPropDescriptors(IPropBag propBag)
-        {
-            List<KeyValuePair<string, ValPlusType>> propDefs = propBag.GetAllPropNamesAndTypes().ToList();
-
-            PropertyDescriptor[] descriptors = new PropertyDescriptor[propDefs.Count];
-
-            for (int pdPtr = 0; pdPtr < propDefs.Count; pdPtr++)
-            {
-                KeyValuePair<string, ValPlusType> kvp = propDefs[pdPtr];
-
-                PropItemTypeDescriptor<IPropBag> propItemTypeDesc = 
-                    new PropItemTypeDescriptor<IPropBag>(kvp.Key, kvp.Value.Type, new Attribute[] { });
-
-                descriptors[pdPtr] = propItemTypeDesc;
-            }
-
-            return descriptors;
+            _children.Add(pd);
         }
 
         #region PropertyDescriptor Method Overrides
@@ -119,7 +74,12 @@ namespace DRM.PropBag.TypeDescriptorExtensions
 
         public override object GetValue(object component)
         {
-            throw new NotImplementedException();
+            return _propItem.TypedValue;
+
+            //if (_propItem != null)
+            //    return _propItem.TypedValue;
+            //else
+            //    return ((BagT)component)[_tdConfig.PropertyType, Name];
         }
 
         public override void ResetValue(object component)
@@ -129,7 +89,12 @@ namespace DRM.PropBag.TypeDescriptorExtensions
 
         public override void SetValue(object component, object value)
         {
-            throw new NotImplementedException();
+            _propItem.TypedValue = (T)value;
+
+            //if (_propItem != null)
+            //    _propItem.TypedValue = (T)value;
+            //else
+            //    ((BagT)component)[_tdConfig.PropertyType, Name] = (T)value;
         }
 
         public override bool ShouldSerializeValue(object component)
@@ -141,7 +106,7 @@ namespace DRM.PropBag.TypeDescriptorExtensions
         #endregion
 
         #region PropertyDescriptor Method Replacements
-
+        //
         // Summary:
         //     Returns a System.ComponentModel.PropertyDescriptorCollection for a given object
         //     using a specified array of attributes as a filter.
