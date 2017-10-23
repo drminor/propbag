@@ -881,12 +881,12 @@ namespace DRM.PropBag.ControlsWPF.Binders
             if(newDepObj is FrameworkElement fe)
             {
                 DependencyProperty dataContextProp = LogicalTree.FeDataContextDpPropProvider.Value;
-                DepPropListener = fe.PropertyChanged(dataContextProp, action);
+                DepPropListener = fe.ListenToProperty(dataContextProp, action);
             }
             else if(newDepObj is FrameworkContentElement fce)
             {
                 DependencyProperty dataContextProp = LogicalTree.FceDataContextDpPropProvider.Value;
-                DepPropListener = fce.PropertyChanged(dataContextProp, action);
+                DepPropListener = fce.ListenToProperty(dataContextProp, action);
             }
             else
             {
@@ -953,7 +953,17 @@ namespace DRM.PropBag.ControlsWPF.Binders
             {
                 Type newType = fe.DataContext?.GetType();
                 ObservableSourceStatusEnum newStatus = Status.SetReady(fe.DataContext != null);
+
                 bool changed = UpdateData(fe.DataContext, newType, newStatus);
+                //if(newType.IsIListSource())
+                //{
+                //    changed = UpdateData(((IListSource)fe.DataContext).GetList(), newType, newStatus);
+                //}
+                //else
+                //{
+                //    changed = UpdateData(fe.DataContext, newType, newStatus);
+                //}
+
                 return changed;
             }
             else if (foundNode is FrameworkContentElement fce)
@@ -1022,7 +1032,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
         private void SubscribeTo_Dg(DataGridColumn dcg, Action<DependencyPropertyChangedEventArgs> action)
         {
             DependencyProperty dispIndex = LogicalTree.DataGridColumn_DisplayIndex_DpPropProvider.Value;
-            DepPropListener = dcg.PropertyChanged(dispIndex, action);
+            DepPropListener = dcg.ListenToProperty(dispIndex, action);
 
             //object anchor = AnchorElement;
 
