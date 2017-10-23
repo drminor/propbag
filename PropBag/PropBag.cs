@@ -1,16 +1,16 @@
 ﻿using DRM.PropBag.Caches;
 using DRM.PropBag.ControlModel;
-using DRM.PropBag.TypeDescriptorExtensions;
 using DRM.TypeSafePropertyBag;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Windows;
-//using System.Windows;
 
 namespace DRM.PropBag
 {
@@ -36,7 +36,7 @@ namespace DRM.PropBag
 
     #endregion
 
-    public class PropBag : IPropBag
+    public partial class PropBag : IPropBag
     {
         //delegate IPropGen MissingPropStategy(string propertyName, Type propertyType, out bool wasRegistered,
         //    bool haveValue, object value, bool alwaysRegister, bool readMissingDoesRegister);
@@ -798,6 +798,7 @@ namespace DRM.PropBag
             {
                 throw new InvalidOperationException("PropertyExists is not allowed when the TypeSafetyMode is set to 'Locked.'");
             }
+
             if (propertyName.StartsWith("[") && propertyName.EndsWith("]"))
             {
                 int pos = propertyName.IndexOf(',');
@@ -1298,76 +1299,34 @@ namespace DRM.PropBag
 
         #endregion
 
-        #region ICustomTypeDescriptor Support
+        #region IListSource Support
 
-        public AttributeCollection GetAttributes()
+        public bool TryGetPropType(string propertyName, out PropTypeEnum propType)
         {
-            return AttributeCollection.Empty;
-        }
-
-        public string GetClassName()
-        {
-            return this.OurMetaData.ClassName;
-        }
-
-        public string GetComponentName()
-        {
-            return this.OurMetaData.ClassName;
-        }
-
-        public TypeConverter GetConverter()
-        {
-            throw new NotImplementedException();
-        }
-
-        public EventDescriptor GetDefaultEvent()
-        {
-            throw new NotImplementedException();
-        }
-
-        public PropertyDescriptor GetDefaultProperty()
-        {
-            throw new NotImplementedException();
-        }
-
-        public object GetEditor(Type editorBaseType)
-        {
-            throw new NotImplementedException();
-        }
-
-        public EventDescriptorCollection GetEvents()
-        {
-            throw new NotImplementedException();
-        }
-
-        public EventDescriptorCollection GetEvents(Attribute[] attributes)
-        {
-            throw new NotImplementedException();
-        }
-         
-        //PropBagTypeDescriptor<PropBag> pbTypeDescriptor;
-        PropertyDescriptorCollection _properties;
-         PropertyDescriptorCollection ICustomTypeDescriptor.GetProperties()
-        {
-            if(_properties == null)
+            if (tVals.TryGetValue(propertyName, out PropGen value))
             {
-                PropBagTypeDescriptor<PropBag> pbTypeDescriptor = new PropBagTypeDescriptor<PropBag>(this, "PropBag - Base-Test");
-                PropertyDescriptor[] propDescriptors = pbTypeDescriptor.BuildPropDescriptors(this);
-
-                _properties = new PropertyDescriptorCollection(propDescriptors);
+                propType = value.TypedProp.PropType;
+                return true;
             }
-            return _properties;
+            else
+            {
+                propType = PropTypeEnum.Prop;
+                return false;
+            }
         }
 
-         PropertyDescriptorCollection ICustomTypeDescriptor.GetProperties(Attribute[] attributes)
+        public bool TryGetListSource(string propertyName, Type itemType, out IListSource listSource)
         {
-            System.Diagnostics.Debug.WriteLine("GetProperties was called with attributes filter.");
-            return ((ICustomTypeDescriptor)this).GetProperties();
-        }
-
-        public object GetPropertyOwner(PropertyDescriptor pd)
-        {
-            throw new NotImplementedException();
+            if (tVals.TryGetValue(propertyName, out PropGen value))
+            {
+                listSource = value.TypedProp.ListSource;
+                return true;
+            }
+            else
+            {
+                listSource = null;
+                return false;
+            }
         }
 
         #endregion
@@ -1377,14 +1336,22 @@ namespace DRM.PropBag
         // Method Templates for Property Bag
         internal static class GenericMethodTemplates
         {
-            static Lazy<MethodInfo> theSingleGenericDoSetBridgeMethodInfo;
+            #region DoSetBridge
 
+            static Lazy<MethodInfo> theSingleGenericDoSetBridgeMethodInfo;
             static MethodInfo GenericDoSetBridgeMethodInfo { get { return theSingleGenericDoSetBridgeMethodInfo.Value; } }
+
+            static Lazy<MethodInfo> theSingleGenGetTypedCollMethodInfo;
+            static MethodInfo GenGetTypedCollMethodInfo { get { return theSingleGenGetTypedCollMethodInfo.Value; } }
 
             static GenericMethodTemplates()
             {
                 theSingleGenericDoSetBridgeMethodInfo = new Lazy<MethodInfo>(() =>
                     GMT_TYPE.GetMethod("DoSetBridge", BindingFlags.Static | BindingFlags.NonPublic),
+                    LazyThreadSafetyMode.PublicationOnly);
+
+                theSingleGenGetTypedCollMethodInfo = new Lazy<MethodInfo>(() =>
+                    GMT_TYPE.GetMethod("GetTypedCollection", BindingFlags.Static | BindingFlags.NonPublic),
                     LazyThreadSafetyMode.PublicationOnly);
             }
 
@@ -1400,6 +1367,22 @@ namespace DRM.PropBag
 
                 return result;
             }
+
+            static IList GetTypedCollection<T>(PropBag source, string propertyName)
+            {
+                ObservableCollection<T> result = source.GetIt<ObservableCollection<T>>(propertyName);
+                return result;
+            }
+
+            public static GetTypedCollectionDelegate GetTheGetTypedCollectionDelegate(Type typeOfThisValue)
+            {
+                MethodInfo methInfoSetProp = GenericMethodTemplates.GenGetTypedCollMethodInfo.MakeGenericMethod(typeOfThisValue);
+                GetTypedCollectionDelegate result = (GetTypedCollectionDelegate)Delegate.CreateDelegate(typeof(GetTypedCollectionDelegate), methInfoSetProp);
+
+                return result;
+            }
+
+            #endregion
         }
 
         #endregion

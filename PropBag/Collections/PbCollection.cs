@@ -8,7 +8,7 @@ using System.ComponentModel;
 using System.Collections;
 using DRM.PropBag.ControlModel;
 using DRM.TypeSafePropertyBag;
-using DRM.PropBag.TypeDescriptorExtensions;
+using DRM.PropBag.TypeDescriptors;
 using System.Collections.Specialized;
 
 namespace DRM.PropBag.Collections

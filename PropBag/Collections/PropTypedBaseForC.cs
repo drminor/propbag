@@ -10,11 +10,13 @@ using System.Threading;
 
 namespace DRM.PropBag
 {
-    public abstract class PropTypedBase<T> : PropGenBase, IPropPrivate<T>
+    // This provides base support for classes that implement ICProp<CT,T> : IProp<T> where CT: IEnumerable<T>
+    // The typeOfThisValue paramarter should be the collection type, for example IList<T>
+    public abstract class PropTypedBaseForC<CT> : PropGenBase, IPropPrivate<CT>
     {
-        protected PropTypedBase(Type typeOfThisValue, bool typeIsSolid, bool hasStore,
-            Action<T, T> doWhenChanged, bool doAfterNotify,
-            Func<T,T,bool> comparer, GetDefaultValueDelegate<T> getDefaultValFunc)
+        protected PropTypedBaseForC(Type typeOfThisValue, bool typeIsSolid, bool hasStore,
+            Action<CT, CT> doWhenChanged, bool doAfterNotify,
+            Func<CT, CT, bool> comparer, GetDefaultValueDelegate<CT> getDefaultValFunc)
             : base(typeOfThisValue, typeIsSolid, hasStore)
         {
             DoWHenChangedAction = doWhenChanged;
@@ -30,33 +32,33 @@ namespace DRM.PropBag
 
         abstract public IListSource ListSource { get; }
 
-        abstract public T TypedValue { get; set; }
+        abstract public CT TypedValue { get; set; }
 
         abstract public bool ValueIsDefined { get; }
 
         abstract public bool SetValueToUndefined();
 
-        protected Func<T,T,bool> Comparer { get; set; }
+        protected Func<CT, CT, bool> Comparer { get; set; }
 
-        private Action<T, T> _doWhenChangedAction;
-        protected Action<T, T> DoWHenChangedAction {
+        private Action<CT, CT> _doWhenChangedAction;
+        protected Action<CT, CT> DoWHenChangedAction {
             get { return _doWhenChangedAction;  }
             set { _doWhenChangedAction = value; }
         }
 
         public bool DoAfterNotify { get; set; }
 
-        public void DoWhenChanged(T oldVal, T newVal)
+        public void DoWhenChanged(CT oldVal, CT newVal)
         {
-            Action<T,T> doWhenAction = Interlocked.CompareExchange(ref _doWhenChangedAction, null, null);
+            Action<CT,CT> doWhenAction = Interlocked.CompareExchange(ref _doWhenChangedAction, null, null);
 
             if (doWhenAction != null)
                 doWhenAction(oldVal, newVal);
         }
 
-        public event PropertyChangedWithTValsHandler<T> PropertyChangedWithTVals;
+        public event PropertyChangedWithTValsHandler<CT> PropertyChangedWithTVals;
 
-        protected GetDefaultValueDelegate<T> GetDefaultValFunc { get; }
+        protected GetDefaultValueDelegate<CT> GetDefaultValFunc { get; }
 
         public virtual bool ReturnDefaultForUndefined
         {
@@ -66,26 +68,26 @@ namespace DRM.PropBag
             }
         }
 
-        private List<Tuple<Action<T, T>, PropertyChangedWithTValsHandler<T>>> _actTable = null;
+        private List<Tuple<Action<CT, CT>, PropertyChangedWithTValsHandler<CT>>> _actTable = null;
 
-        public void SubscribeToPropChanged(Action<T, T> doOnChange)
+        public void SubscribeToPropChanged(Action<CT, CT> doOnChange)
         {
-            PropertyChangedWithTValsHandler<T> eventHandler = (s, e) => { doOnChange(e.OldValue, e.NewValue); };
+            PropertyChangedWithTValsHandler<CT> eventHandler = (s, e) => { doOnChange(e.OldValue, e.NewValue); };
 
             if (GetHandlerFromAction(doOnChange, ref _actTable) == null)
             {
                 PropertyChangedWithTVals += eventHandler;
                 if(_actTable == null)
                 {
-                    _actTable = new List<Tuple<Action<T, T>, PropertyChangedWithTValsHandler<T>>>();
+                    _actTable = new List<Tuple<Action<CT, CT>, PropertyChangedWithTValsHandler<CT>>>();
                 }
-                _actTable.Add(new Tuple<Action<T,T>,PropertyChangedWithTValsHandler<T>>(doOnChange, eventHandler));
+                _actTable.Add(new Tuple<Action<CT, CT>, PropertyChangedWithTValsHandler<CT>>(doOnChange, eventHandler));
             }
         }
 
-        public bool UnSubscribeToPropChanged(Action<T, T> doOnChange)
+        public bool UnSubscribeToPropChanged(Action<CT, CT> doOnChange)
         {
-            Tuple<Action<T, T>, PropertyChangedWithTValsHandler<T>> actEntry = GetHandlerFromAction(doOnChange, ref _actTable);
+            Tuple<Action<CT, CT>, PropertyChangedWithTValsHandler<CT>> actEntry = GetHandlerFromAction(doOnChange, ref _actTable);
 
             if (actEntry == null) return false;
 
@@ -95,29 +97,29 @@ namespace DRM.PropBag
             return true;
         }
 
-        private Tuple<Action<T, T>, PropertyChangedWithTValsHandler<T>> GetHandlerFromAction(Action<T, T> act,
-            ref List<Tuple<Action<T, T>, PropertyChangedWithTValsHandler<T>>> actTable)
+        private Tuple<Action<CT, CT>, PropertyChangedWithTValsHandler<CT>> GetHandlerFromAction(Action<CT, CT> act,
+            ref List<Tuple<Action<CT, CT>, PropertyChangedWithTValsHandler<CT>>> actTable)
         {
             if (actTable == null) return null;
 
             for (int i = 0; i < actTable.Count; i++)
             {
-                Tuple<Action<T, T>, PropertyChangedWithTValsHandler<T>> tup = actTable[i];
+                Tuple<Action<CT, CT>, PropertyChangedWithTValsHandler<CT>> tup = actTable[i];
                 if (tup.Item1 == act) return tup; //.Item2;
             }
 
             return null;
         }
 
-        public void OnPropertyChangedWithTVals(string propertyName, T oldVal, T newVal)
+        public void OnPropertyChangedWithTVals(string propertyName, CT oldVal, CT newVal)
         {
-            PropertyChangedWithTValsHandler<T> handler = Interlocked.CompareExchange(ref PropertyChangedWithTVals, null, null);
+            PropertyChangedWithTValsHandler<CT> handler = Interlocked.CompareExchange(ref PropertyChangedWithTVals, null, null);
 
             if (handler != null)
-                handler(this, new PropertyChangedWithTValsEventArgs<T>(propertyName, oldVal, newVal));
+                handler(this, new PropertyChangedWithTValsEventArgs<CT>(propertyName, oldVal, newVal));
         }
 
-        public bool CompareTo(T newValue)
+        public bool CompareTo(CT newValue)
         {
             if (!HasStore)
                 throw new NotImplementedException();
@@ -125,14 +127,14 @@ namespace DRM.PropBag
             return Comparer(newValue, TypedValue);
         }
 
-        public bool Compare(T val1, T val2)
+        public bool Compare(CT val1, CT val2)
         {
             if (!ValueIsDefined) return false;
 
             return Comparer(val1, val2);
         }
 
-        public bool UpdateDoWhenChangedAction(Action<T, T> doWhenChangedAction, bool? doAfterNotify)
+        public bool UpdateDoWhenChangedAction(Action<CT, CT> doWhenChangedAction, bool? doAfterNotify)
         {
             bool hadOnePreviously = doWhenChangedAction != null;
 

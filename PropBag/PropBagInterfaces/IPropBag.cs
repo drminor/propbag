@@ -1,4 +1,5 @@
-﻿using DRM.TypeSafePropertyBag;
+﻿using DRM.PropBag.Collections;
+using DRM.TypeSafePropertyBag;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -38,6 +39,10 @@ namespace DRM.PropBag
 
         bool PropertyExists(string propertyName);
 
+        bool TryGetPropType(string propertyName, out PropTypeEnum propType);
+
+        bool TryGetListSource(string propertyName, Type itemType, out IListSource listSource);
+
         bool SubscribeToPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, string propertyName);
         bool UnSubscribeToPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, string propertyName);
 
@@ -47,11 +52,12 @@ namespace DRM.PropBag
         bool SubscribeToPropChanged(Action<object, object> doOnChange, string propertyName);
         bool UnSubscribeToPropChanged(Action<object, object> doOnChange, string propertyName);
 
+        // Consider moving these to the TypeSafePropBagMetaData class.
         IList<string> GetAllPropertyNames();
         IDictionary<string, object> GetAllPropertyValues();
         IDictionary<string, ValPlusType> GetAllPropNamesAndTypes();
 
-        // Consider removing this since we are using the PBDispatch class.
+        // Consider removing these since we are using the PBDispatch class.
         //object GetValueGen(object host, string propertyName, Type propertyType);
         //void SetValueGen(object host, string propertyName, Type propertyType, object value);
 
