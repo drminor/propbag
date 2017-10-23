@@ -1,7 +1,36 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Data;
+using System.Runtime.Serialization;
+using System.Xml.Serialization;
 
 namespace DRM.TypeSafePropertyBag
 {
+    // Typically implemented by TypedTableBase<T> Class
+    public interface IDTPropPrivate<CT,T> : ICPropPrivate<CT,T> where CT: IEnumerable<T>
+    {
+        DataTable DataTable { get; }
+    }
+
+    // Typically implemented by TypedTableBase<T> Class
+    public interface IDTProp<CT,T> : ICProp<CT,T> where CT: IEnumerable<T>
+    {
+        DataTable ReadOnlyDataTable { get; }
+    }
+
+    public interface ICPropPrivate<CT,T> : ICProp<CT,T>, IPropPrivate<T> where CT: IEnumerable<T>
+    {
+        ObservableCollection<T> ObservableCollection { get; }
+        void SetListSource(IListSource value);
+    }
+
+    public interface ICProp<CT,T> : IProp<T> where CT: IEnumerable<T>
+    {
+        ReadOnlyObservableCollection<T> ReadOnlyObservableCollection { get; }
+    }
+
     /// <summary>
     /// Extends the IProp<typeparamref name="T"/> interface with features
     /// that are only avaialble within the PubPropBag assembly.
@@ -68,15 +97,16 @@ namespace DRM.TypeSafePropertyBag
         ValPlusType ValuePlusType();
 
         void CleanUp();
-
     }
 
     /// <summary>
     /// These are the non-type specific features that every instance of IProp<typeparamref name="T"/> implement.
-    /// These features are often implemented by an instance of a class that inherits from AbstractPropFactory.
     /// </summary>
     public interface IProp
     {
+        PropTypeEnum PropType { get; }
+        IListSource ListSource { get; }
+
         object TypedValueAsObject { get; }
         bool ValueIsDefined { get; }
 

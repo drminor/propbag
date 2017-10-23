@@ -59,6 +59,18 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
+        public static bool IsIListSource(this Type type)
+        {
+            Type[] interfaces = type.GetInterfaces();
+
+            bool result = null != type.GetInterfaces().FirstOrDefault
+                (
+                x => x.Name == "IListSource"
+                );
+
+            return result;
+        }
+
         public static bool HasDeclaredProperty(this Type type, string propertyName)
         {
             return null != type.GetTypeInfo().GetDeclaredProperty(propertyName);

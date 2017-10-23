@@ -55,6 +55,7 @@
     <Compile Include="PropertyChangedWithValsEventArgs.cs" />
     <Compile Include="PropertyChangedWithValsHandler.cs" />
     <Compile Include="IPropInterfaces.cs" />
+    <Compile Include="PropTypeEnum.cs" />
     <Compile Include="ResolveTypeDelegate.cs" />
     <Compile Include="TypedWeakReference.cs" />
     <Compile Include="TypeExtension.cs" />
