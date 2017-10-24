@@ -14,7 +14,7 @@ namespace DRM.PropBag
     {
         protected PropTypedBase(Type typeOfThisValue, bool typeIsSolid, bool hasStore,
             Action<T, T> doWhenChanged, bool doAfterNotify,
-            Func<T,T,bool> comparer, GetDefaultValueDelegate<T> getDefaultValFunc)
+            Func<T,T,bool> comparer, GetDefaultValueDelegate<T> getDefaultValFunc, PropTypeEnum propType = PropTypeEnum.Prop)
             : base(typeOfThisValue, typeIsSolid, hasStore)
         {
             DoWHenChangedAction = doWhenChanged;
@@ -23,7 +23,7 @@ namespace DRM.PropBag
             PropertyChangedWithTVals = null;
             base.TypedProp = this;
             GetDefaultValFunc = getDefaultValFunc;
-            PropType = PropTypeEnum.Prop;
+            PropType = propType;
         }
 
         public PropTypeEnum PropType { get; private set; }
@@ -121,6 +121,9 @@ namespace DRM.PropBag
         {
             if (!HasStore)
                 throw new NotImplementedException();
+
+            //// Added this behavior on 10/23/2017.
+            //if (!ValueIsDefined) return false;
 
             return Comparer(newValue, TypedValue);
         }

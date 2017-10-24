@@ -20,13 +20,13 @@ namespace DRM.TypeSafePropertyBag
         DataTable ReadOnlyDataTable { get; }
     }
 
-    public interface ICPropPrivate<CT,T> : ICProp<CT,T>, IPropPrivate<T> where CT: IEnumerable<T>
+    public interface ICPropPrivate<CT,T> : ICProp<CT,T>, IPropPrivate<CT> where CT: IEnumerable<T>
     {
         ObservableCollection<T> ObservableCollection { get; }
         void SetListSource(IListSource value);
     }
 
-    public interface ICProp<CT,T> : IProp<T> where CT: IEnumerable<T>
+    public interface ICProp<CT,T> : IProp<CT> where CT: IEnumerable<T>
     {
         ReadOnlyObservableCollection<T> ReadOnlyObservableCollection { get; }
     }

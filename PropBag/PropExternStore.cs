@@ -15,9 +15,9 @@ namespace DRM.PropBag
             object extraInfo,
             GetDefaultValueDelegate<T> getDefaultValFunc,
             bool typeIsSolid = true,
+            Func<T, T, bool> comparer = null,
             Action<T, T> doWhenChanged = null,
-            bool doAfterNotify = false,
-            Func<T, T, bool> comparer = null)
+            bool doAfterNotify = false)
             : base(typeof(T), typeIsSolid, false, doWhenChanged, doAfterNotify, comparer, getDefaultValFunc)
         {
             Tag = Guid.NewGuid(); // tag;

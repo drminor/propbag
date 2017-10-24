@@ -14,9 +14,9 @@ namespace DRM.PropBag
             GetDefaultValueDelegate<T> getDefaultValFunc,
             bool typeIsSolid,
             bool hasStore,
+            Func<T, T, bool> comparer,
             Action<T, T> doWhenChanged = null,
-            bool doAfterNotify = false,
-            Func<T, T, bool> comparer = null)
+            bool doAfterNotify = false)
             : base(typeof(T), typeIsSolid, hasStore, doWhenChanged, doAfterNotify, comparer, getDefaultValFunc)
         {
             if (hasStore)
@@ -27,11 +27,11 @@ namespace DRM.PropBag
         }
 
         public Prop(GetDefaultValueDelegate<T> getDefaultValFunc,
-            bool typeIsSolid = true,
-            bool hasStore = true,
+            bool typeIsSolid,
+            bool hasStore,
+            Func<T, T, bool> comparer,
             Action<T, T> doWhenChanged = null,
-            bool doAfterNotify = false,
-            Func<T, T, bool> comparer = null)
+            bool doAfterNotify = false)
             : base(typeof(T), typeIsSolid, hasStore, doWhenChanged, doAfterNotify, comparer, getDefaultValFunc)
         {
             if (hasStore)

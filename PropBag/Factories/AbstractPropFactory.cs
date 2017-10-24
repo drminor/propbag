@@ -11,9 +11,10 @@ using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBag
 {
-
     public abstract class AbstractPropFactory : IPropFactory
     {
+        #region Public Properties
+
         public bool ReturnDefaultForUndefined { get; }
         public ResolveTypeDelegate TypeResolver { get; }
 
@@ -27,6 +28,9 @@ namespace DRM.PropBag
         /// </summary>
         public virtual string IndexerName { get; }
 
+        #endregion
+
+        #region Constructor
 
         public AbstractPropFactory(bool returnDefaultForUndefined, 
             ResolveTypeDelegate typeResolver = null,
@@ -43,25 +47,25 @@ namespace DRM.PropBag
             IndexerName = "Item[]";
         }
 
-        public virtual Type GetTypeFromName(string typeName)
-        {
-            Type result;
-            try
-            {
-                result = Type.GetType(typeName);
-            }
-            catch (System.Exception e)
-            {
-                throw new InvalidOperationException($"Cannot create a Type instance from the string: {typeName}.", e);
-            }
+        #endregion
 
-            if (result == null)
-            {
-                throw new InvalidOperationException($"Cannot create a Type instance from the string: {typeName}.");
-            }
+        #region Collection-type property creators
 
-            return result;
-        }
+        public abstract ICPropPrivate<CT, T> Create<CT, T>(
+            CT initialValue,
+            string propertyName, object extraInfo = null,
+            bool hasStorage = true, bool typeIsSolid = true,
+            Action<CT, CT> doWhenChanged = null, bool doAfterNotify = false, Func<CT, CT, bool> comparer = null) where CT : IEnumerable<T>;
+
+
+        public abstract ICPropPrivate<CT, T> CreateWithNoValue<CT, T>(
+            string propertyName, object extraInfo = null,
+            bool hasStorage = true, bool typeIsSolid = true,
+            Action<CT, CT> doWhenChanged = null, bool doAfterNotify = false, Func<CT, CT, bool> comparer = null) where CT : IEnumerable<T>;
+
+        #endregion
+
+        #region Propety-type property creators
 
         public abstract IProp<T> Create<T>(
             T initialValue,
@@ -111,6 +115,10 @@ namespace DRM.PropBag
                 hasStorage, typeIsSolid, null, false, null, false);
             return prop;
         }
+
+        #endregion
+
+        #region Default Value and Type Support
 
         /// <summary>
         /// Implementors of deriving classes must ensure that the value returned by this 
@@ -202,6 +210,27 @@ namespace DRM.PropBag
             return (T)ValueConverter.ConvertBack(value, t, parameter, CultureInfo.CurrentCulture);
         }
 
+        public virtual Type GetTypeFromName(string typeName)
+        {
+            Type result;
+            try
+            {
+                result = Type.GetType(typeName);
+            }
+            catch (System.Exception e)
+            {
+                throw new InvalidOperationException($"Cannot create a Type instance from the string: {typeName}.", e);
+            }
+
+            if (result == null)
+            {
+                throw new InvalidOperationException($"Cannot create a Type instance from the string: {typeName}.");
+            }
+
+            return result;
+        }
+
+        #endregion
 
         #region Shared Delegate Creation Logic
 

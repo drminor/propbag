@@ -7,9 +7,12 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 
-
 namespace DRM.PropBag
 {
+
+    // ToDo: Make the PropFactory supply a default comparer that is suitable for collections.
+    // and then remove this class, since the regular PropTypedBase<T> can be used.
+
     // This provides base support for classes that implement ICProp<CT,T> : IProp<T> where CT: IEnumerable<T>
     // The typeOfThisValue paramarter should be the collection type, for example IList<T>
     public abstract class PropTypedBaseForC<CT> : PropGenBase, IPropPrivate<CT>
@@ -119,19 +122,27 @@ namespace DRM.PropBag
                 handler(this, new PropertyChangedWithTValsEventArgs<CT>(propertyName, oldVal, newVal));
         }
 
+        // TODO: Figure how to compare two ObservableCollections<T>
         public bool CompareTo(CT newValue)
         {
             if (!HasStore)
                 throw new NotImplementedException();
 
-            return Comparer(newValue, TypedValue);
+            //return Comparer(newValue, TypedValue);
+            return object.ReferenceEquals(newValue, TypedValue);
         }
 
+        // TODO: Figure how to compare two ObservableCollections<T>
         public bool Compare(CT val1, CT val2)
         {
-            if (!ValueIsDefined) return false;
+            // Added this guard on 10/23/2017.
+            if (!HasStore)
+                throw new NotImplementedException();
 
-            return Comparer(val1, val2);
+            //if (!ValueIsDefined) return false;
+
+            //return Comparer(val1, val2);
+            return object.ReferenceEquals(val1, val2);
         }
 
         public bool UpdateDoWhenChangedAction(Action<CT, CT> doWhenChangedAction, bool? doAfterNotify)

@@ -61,23 +61,23 @@ namespace DRM.PropBag
 
         private readonly Dictionary<string, PropGen> tVals;
 
-        private string ClassName
-        {
-            get
-            {
-                Type thisType = this.GetType();
-                return thisType.GetTypeInfo().Name;
-            }
-        }
+        //private string ClassName
+        //{
+        //    get
+        //    {
+        //        Type thisType = this.GetType();
+        //        return thisType.GetTypeInfo().Name;
+        //    }
+        //}
 
-        private string FullClassName
-        {
-            get
-            {
-                Type thisType = this.GetType();
-                return thisType.GetTypeInfo().FullName;
-            }
-        }
+        //private string FullClassName
+        //{
+        //    get
+        //    {
+        //        Type thisType = this.GetType();
+        //        return thisType.GetTypeInfo().FullName;
+        //    }
+        //}
 
 
         /// <summary>

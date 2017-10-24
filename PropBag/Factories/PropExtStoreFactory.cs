@@ -24,6 +24,31 @@ namespace DRM.PropBag
             Stuff = stuff;
         }
 
+        #region Collection-type property creators
+
+        public override ICPropPrivate<CT, T> Create<CT, T>(
+            CT initialValue,
+            string propertyName, object extraInfo = null,
+            bool hasStorage = true, bool typeIsSolid = true,
+            Action<CT, CT> doWhenChanged = null, bool doAfterNotify = false, Func<CT, CT, bool> comparer = null)
+        {
+            ICPropPrivate<CT, T> prop = null;
+            return prop;
+        }
+
+        public override ICPropPrivate<CT, T> CreateWithNoValue<CT, T>(
+            string propertyName, object extraInfo = null,
+            bool hasStorage = true, bool typeIsSolid = true,
+            Action<CT, CT> doWhenChanged = null, bool doAfterNotify = false, Func<CT, CT, bool> comparer = null)
+        {
+            ICPropPrivate<CT, T> prop = null;
+            return prop;
+        }
+
+        #endregion
+
+        #region Propety-type property creators
+
         public override IProp<T> Create<T>(T initialValue,
             string propertyName, object extraInfo = null,
             bool dummy = true, bool typeIsSolid = true,
@@ -42,7 +67,7 @@ namespace DRM.PropBag
             if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
             GetDefaultValueDelegate<T> getDefaultValFunc = this.GetDefaultValue<T>;
 
-            PropExternStore<T> propWithExtStore = new PropExternStore<T>(propertyName, extraInfo, getDefaultValFunc, typeIsSolid: typeIsSolid, doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify, comparer: comparer);
+            PropExternStore<T> propWithExtStore = new PropExternStore<T>(propertyName, extraInfo, getDefaultValFunc, typeIsSolid: typeIsSolid, comparer: comparer, doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify);
 
             return propWithExtStore;
         }
@@ -76,6 +101,8 @@ namespace DRM.PropBag
 
             return prop;
         }
+
+        #endregion
 
     }
 

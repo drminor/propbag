@@ -1,4 +1,5 @@
-﻿using DRM.TypeSafePropertyBag;
+﻿using DRM.PropBag.Collections;
+using DRM.TypeSafePropertyBag;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,15 +10,16 @@ namespace DRM.PropBag
 {
     public class PropFactory : AbstractPropFactory
     {
-
-        public PropFactory(bool returnDefaultForUndefined, ResolveTypeDelegate typeResolver = null,
-            IConvertValues valueConverter = null) : base(returnDefaultForUndefined, typeResolver, valueConverter) { }
-
-        
         public override bool ProvidesStorage
         {
             get { return true; }
         }
+
+        public PropFactory(bool returnDefaultForUndefined,
+            ResolveTypeDelegate typeResolver = null,
+            IConvertValues valueConverter = null)
+        : base(returnDefaultForUndefined, typeResolver, valueConverter) { }
+
 
         // TODO: This is temporary just for testing.
         //public override Type GetTypeFromName(string typeName)
@@ -25,6 +27,42 @@ namespace DRM.PropBag
         //    throw new ApplicationException("All instances of PropFactory need to be supplied with a value of typeResolver.");
         //}
 
+
+        #region Collection-type property creators
+
+        public override ICPropPrivate<CT, T> Create<CT, T>(
+            CT initialValue,
+            string propertyName, object extraInfo = null,
+            bool hasStorage = true, bool typeIsSolid = true,
+            Action<CT, CT> doWhenChanged = null, bool doAfterNotify = false, Func<CT, CT, bool> comparer = null)
+        {
+            if (comparer == null) comparer = EqualityComparer<CT>.Default.Equals;
+            GetDefaultValueDelegate<CT> getDefaultValFunc = ValueConverter.GetDefaultValue<CT>;
+
+            ICPropPrivate<CT, T> prop = new CProp<CT, T>(initialValue, getDefaultValFunc, typeIsSolid, hasStorage,
+                comparer, doWhenChanged, doAfterNotify);
+            return prop;
+        }
+
+        public override ICPropPrivate<CT, T> CreateWithNoValue<CT, T>(
+            string propertyName, object extraInfo = null,
+            bool hasStorage = true, bool typeIsSolid = true,
+            Action<CT, CT> doWhenChanged = null, bool doAfterNotify = false, Func<CT, CT, bool> comparer = null)
+        {
+            if (comparer == null) comparer = EqualityComparer<CT>.Default.Equals;
+
+            GetDefaultValueDelegate<CT> getDefaultValFunc = ValueConverter.GetDefaultValue<CT>; // this.GetDefaultValue<T>;
+
+            ICPropPrivate<CT, T> prop = new CProp<CT, T>(getDefaultValFunc, typeIsSolid, hasStorage,
+                comparer, doWhenChanged, doAfterNotify);
+            return prop;
+        }
+
+        #endregion
+
+        #region Propety-type property creators
+
+        // TODO: Need to create IPropPrivate<T> 
         public override IProp<T> Create<T>(
             T initialValue,
             string propertyName, object extraInfo = null,
@@ -34,7 +72,7 @@ namespace DRM.PropBag
             if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
 
             GetDefaultValueDelegate<T> getDefaultValFunc = ValueConverter.GetDefaultValue<T>; // this.GetDefaultValue<T>;
-            IProp<T> prop = new Prop<T>(initialValue, getDefaultValFunc, typeIsSolid: typeIsSolid, hasStore: hasStorage, doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify, comparer: comparer);
+            IProp<T> prop = new Prop<T>(initialValue, getDefaultValFunc, typeIsSolid: typeIsSolid, hasStore: hasStorage, comparer: comparer, doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify);
             return prop;
         }
 
@@ -46,7 +84,7 @@ namespace DRM.PropBag
             if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
 
             GetDefaultValueDelegate<T> getDefaultValFunc = ValueConverter.GetDefaultValue<T>; // this.GetDefaultValue<T>;
-            IProp<T> prop = new Prop<T>(getDefaultValFunc, typeIsSolid: typeIsSolid, hasStore: hasStorage, doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify, comparer: comparer);
+            IProp<T> prop = new Prop<T>(getDefaultValFunc, typeIsSolid: typeIsSolid, hasStore: hasStorage, comparer: comparer, doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify);
             return prop;
         }
 
@@ -84,6 +122,8 @@ namespace DRM.PropBag
                 doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify, comparer: comparer, useRefEquality: useRefEquality);
             return prop;
         }
+
+        #endregion
 
     }
 

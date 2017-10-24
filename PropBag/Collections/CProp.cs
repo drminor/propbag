@@ -11,16 +11,17 @@ using System.Collections;
 
 namespace DRM.PropBag.Collections
 {
-    public class CProp<CT,T> : PropTypedBase<T>, ICPropPrivate<CT,T> where CT: IEnumerable<T>
+    public class CProp<CT,T> : PropTypedBase<CT>, ICPropPrivate<CT,T> where CT: IEnumerable<T>
     {
-        public CProp(T initalValue,
-            GetDefaultValueDelegate<T> getDefaultValFunc,
+        public CProp(CT initalValue,
+            GetDefaultValueDelegate<CT> getDefaultValFunc,
             bool typeIsSolid,
             bool hasStore,
-            Action<T, T> doWhenChanged = null,
-            bool doAfterNotify = false,
-            Func<T, T, bool> comparer = null)
-            : base(typeof(T), typeIsSolid, hasStore, doWhenChanged, doAfterNotify, comparer, getDefaultValFunc)
+            Func<CT, CT, bool> comparer,
+            Action<CT, CT> doWhenChanged = null,
+            bool doAfterNotify = false)
+            : base(typeof(CT), typeIsSolid, hasStore, doWhenChanged, doAfterNotify, comparer,
+                  getDefaultValFunc, PropTypeEnum.ObservableCollection)
         {
             if (hasStore)
             {
@@ -29,13 +30,13 @@ namespace DRM.PropBag.Collections
             }
         }
 
-        public CProp(GetDefaultValueDelegate<T> getDefaultValFunc,
-            bool typeIsSolid = true,
-            bool hasStore = true,
-            Action<T, T> doWhenChanged = null,
-            bool doAfterNotify = false,
-            Func<T, T, bool> comparer = null)
-            : base(typeof(T), typeIsSolid, hasStore, doWhenChanged, doAfterNotify, comparer, getDefaultValFunc)
+        public CProp(GetDefaultValueDelegate<CT> getDefaultValFunc,
+            bool typeIsSolid,
+            bool hasStore,
+            Func<CT, CT, bool> comparer,
+            Action<CT, CT> doWhenChanged = null,
+            bool doAfterNotify = false)
+            : base(typeof(CT), typeIsSolid, hasStore, doWhenChanged, doAfterNotify, comparer, getDefaultValFunc)
         {
             if (hasStore)
             {
@@ -43,8 +44,8 @@ namespace DRM.PropBag.Collections
             }
         }
 
-        T _value;
-        override public T TypedValue
+        CT _value;
+        override public CT TypedValue
         {
             get
             {
@@ -95,8 +96,6 @@ namespace DRM.PropBag.Collections
 
             return oldSetting;
         }
-
-
 
         #region ICProp<CT, T> Implementation
 
@@ -159,32 +158,52 @@ namespace DRM.PropBag.Collections
             {
                 if (_listSource == null)
                 {
-                    _listSource = new PbListSource(MakeIListWrapper, null);
+                    ICPropPrivate<IEnumerable<T>, T> thisProp = (ICPropPrivate<IEnumerable<T>, T>)this;
+                    _listSource = new PbListSource(MakeIListWrapper, thisProp);
                 }
                 return _listSource;
             }
         }
 
+        // Note: component is not used in this implementation: it is included in the interface
+        // because some implementations may need additional input.
         private IList MakeIListWrapper(object component)
         {
-            return new ObservableCollection<T>();
+            if(component is ICPropPrivate<IEnumerable<T>, T> typedComponent)
+            {
+                return ListSourceProvider.GetTheList(typedComponent);
+            }
+            else
+            {
+                // This implementation does not use the component parameter.
+                return ListSourceProvider.GetTheList(null);
+            }
         }
 
+        // Note: component is not used in this implementation: it is included in the interface
+        // because some implementations may need additional input.
         private ObservableCollection<T> GetValueAsObsColl(ICPropPrivate<IEnumerable<T>, T> component)
         {
-            //return ObservableCollection;
-            return new ObservableCollection<T>();
-            //T value = TypedValue;
+            CT value = TypedValue;
+            if(value == null)
+            {
+                return new ObservableCollection<T>();
+            }
+            else if(typeof(CT) is ObservableCollection<T>)
+            {
+                ObservableCollection<T> result = value as ObservableCollection<T>;
+                return result;
+            }
+            else
+            {
+                ObservableCollection<T> result = new ObservableCollection<T>();
 
-            //ObservableCollection<object> result = new ObservableCollection<object>();
-
-            //foreach (var x in value)
-            //{
-            //    result.Add(x);
-            //}
-
-            //return result;
-
+                foreach(T item in value)
+                {
+                    result.Add(item);
+                }
+                return result;
+            }
         }
 
         #endregion
