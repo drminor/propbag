@@ -1,17 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using DRM.TypeSafePropertyBag;
+using System;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace DRM.PropBag.ControlsWPF
 {
@@ -34,6 +24,22 @@ namespace DRM.PropBag.ControlsWPF
             set
             {
                 this.SetValue(PropertyNameProperty, value);
+            }
+        }
+
+        public static readonly DependencyProperty PropKindProperty =
+            DependencyProperty.Register("PropKind", typeof(PropKindEnum), typeof(PropBagTemplate),
+                new PropertyMetadata(PropKindEnum.Prop));
+
+        public PropKindEnum PropKind
+        {
+            get
+            {
+                return (PropKindEnum)this.GetValue(PropKindProperty);
+            }
+            set
+            {
+                this.SetValue(PropKindProperty, value);
             }
         }
 
@@ -101,9 +107,7 @@ namespace DRM.PropBag.ControlsWPF
 
         override protected void OnVisualChildrenChanged(DependencyObject added, DependencyObject removed)
         {
-            int index;
-            bool tooMany;
-            if (!DoAllChildrenHaveTheCorrectType(this.Items, out index, out tooMany))
+            if (!DoAllChildrenHaveTheCorrectType(this.Items, out int index, out bool tooMany))
             {
                 string elementType = ((Control)this.Items[index]).ToString();
                 string elementName = ((Control)this.Items[index]).Name;
@@ -133,6 +137,7 @@ namespace DRM.PropBag.ControlsWPF
             int initValueFieldCount = 0;
             int doWhenChangedFieldCount = 0;
             int comparerFieldCount = 0;
+            int typeInfoFieldCount = 0;
 
             for (int i = 0; i < chils.Count; i++)
             {
@@ -157,6 +162,14 @@ namespace DRM.PropBag.ControlsWPF
                 if (item is PropComparerField)
                 {
                     if (++comparerFieldCount < 2) continue;
+                    tooMany = true;
+                    index = i;
+                    return false;
+                }
+
+                if (item is PropTypeInfoField)
+                {
+                    if (++typeInfoFieldCount < 2) continue;
                     tooMany = true;
                     index = i;
                     return false;

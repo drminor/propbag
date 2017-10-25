@@ -59,7 +59,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="AppAutoMapperSupport\AutoMapperHelpers.cs" />
+    <None Include="AppAutoMapperSupport\AutoMapperHelpers.cs" />
     <Compile Include="AppAutoMapperSupport\SettingsExtensions.cs" />
     <Compile Include="ViewModels\ReferenceBindViewModelPB.cs" />
     <Compile Include="ViewModels\ReferenceBindViewModel.cs" />

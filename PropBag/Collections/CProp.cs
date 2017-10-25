@@ -21,12 +21,13 @@ namespace DRM.PropBag.Collections
             Action<CT, CT> doWhenChanged = null,
             bool doAfterNotify = false)
             : base(typeof(CT), typeIsSolid, hasStore, doWhenChanged, doAfterNotify, comparer,
-                  getDefaultValFunc, PropTypeEnum.ObservableCollection)
+                  getDefaultValFunc, PropKindEnum.Collection)
         {
             if (hasStore)
             {
                 _value = initalValue;
                 _valueIsDefined = true;
+                //PropKind = PropKindEnum.Collection;
             }
         }
 
@@ -36,12 +37,13 @@ namespace DRM.PropBag.Collections
             Func<CT, CT, bool> comparer,
             Action<CT, CT> doWhenChanged = null,
             bool doAfterNotify = false)
-            : base(typeof(CT), typeIsSolid, hasStore, doWhenChanged, doAfterNotify, comparer, getDefaultValFunc)
+            : base(typeof(CT), typeIsSolid, hasStore, doWhenChanged, doAfterNotify, comparer, getDefaultValFunc, PropKindEnum.Collection)
         {
             if (hasStore)
             {
                 _valueIsDefined = false;
             }
+            //PropKind = PropKindEnum.Collection;
         }
 
         CT _value;
@@ -72,6 +74,7 @@ namespace DRM.PropBag.Collections
                 {
                     _value = value;
                     _valueIsDefined = true;
+                    // TODO: Update our IList
                 }
                 else
                 {
@@ -103,8 +106,8 @@ namespace DRM.PropBag.Collections
         {
             get
             {
-                ICPropPrivate<IEnumerable<T>, T> thisProp = (ICPropPrivate <IEnumerable<T>, T >) this;
-                return ListSourceProvider.GetTheReadOnlyList(thisProp);
+                //ICPropPrivate<IEnumerable<T>, T> thisProp = (ICPropPrivate <IEnumerable<T>, T >) this;
+                return ListSourceProvider.GetTheReadOnlyList(null);
             }
         }
 
@@ -116,8 +119,8 @@ namespace DRM.PropBag.Collections
         {
             get
             {
-                ICPropPrivate<IEnumerable<T>, T> thisProp = (ICPropPrivate<IEnumerable<T>, T>)this;
-                return ListSourceProvider.GetTheList(thisProp);
+                //ICPropPrivate<IEnumerable<T>, T> thisProp = (ICPropPrivate<IEnumerable<T>, T>)this;
+                return ListSourceProvider.GetTheList(null);
             }
         }
 
@@ -137,20 +140,6 @@ namespace DRM.PropBag.Collections
 
         #region IListSource Support
 
-        PbListSourceProvider<IEnumerable<T>, ICPropPrivate<IEnumerable<T>, T>, T> _listSourceProvider;
-        private PbListSourceProvider<IEnumerable<T>, ICPropPrivate<IEnumerable<T>, T>, T> ListSourceProvider
-        {
-            get
-            {
-                if(_listSourceProvider == null)
-                {
-                    _listSourceProvider = new PbListSourceProvider<IEnumerable<T>, ICPropPrivate<IEnumerable<T>, T>, T>(
-                        observableCollectionGetter: GetValueAsObsColl);
-                }
-                return _listSourceProvider;
-            }
-        }
-
         PbListSource _listSource;
         override public IListSource ListSource
         {
@@ -158,8 +147,8 @@ namespace DRM.PropBag.Collections
             {
                 if (_listSource == null)
                 {
-                    ICPropPrivate<IEnumerable<T>, T> thisProp = (ICPropPrivate<IEnumerable<T>, T>)this;
-                    _listSource = new PbListSource(MakeIListWrapper, thisProp);
+                    //ICPropPrivate<IEnumerable<T>, T> thisProp = (ICPropPrivate<IEnumerable<T>, T>)this;
+                    _listSource = new PbListSource(MakeIListWrapper, null);
                 }
                 return _listSource;
             }
@@ -169,14 +158,29 @@ namespace DRM.PropBag.Collections
         // because some implementations may need additional input.
         private IList MakeIListWrapper(object component)
         {
-            if(component is ICPropPrivate<IEnumerable<T>, T> typedComponent)
+            return ListSourceProvider.GetTheList(null);
+            //if (component is ICPropPrivate<IEnumerable<T>, T> typedComponent)
+            //{
+            //    return ListSourceProvider.GetTheList(typedComponent);
+            //}
+            //else
+            //{
+            //    // This implementation does not use the component parameter.
+            //    return ListSourceProvider.GetTheList(null);
+            //}
+        }
+
+        PbListSourceProvider<IEnumerable<T>, ICPropPrivate<IEnumerable<T>, T>, T> _listSourceProvider;
+        private PbListSourceProvider<IEnumerable<T>, ICPropPrivate<IEnumerable<T>, T>, T> ListSourceProvider
+        {
+            get
             {
-                return ListSourceProvider.GetTheList(typedComponent);
-            }
-            else
-            {
-                // This implementation does not use the component parameter.
-                return ListSourceProvider.GetTheList(null);
+                if (_listSourceProvider == null)
+                {
+                    _listSourceProvider = new PbListSourceProvider<IEnumerable<T>, ICPropPrivate<IEnumerable<T>, T>, T>(
+                        observableCollectionGetter: GetValueAsObsColl);
+                }
+                return _listSourceProvider;
             }
         }
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 
 namespace DRM.TypeSafePropertyBag
@@ -18,5 +19,7 @@ namespace DRM.TypeSafePropertyBag
         object GetDefaultValue(Type propertyType, string propertyName = null);
 
         T GetDefaultValue<T>(string propertyName = null);
+
+        CT GetDefaultValue<CT, T>(string propertyName = null) where CT : class, IEnumerable<T>;
     }
 }

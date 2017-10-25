@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 
+// ToDo: Consider moving all types in the DRM.PropBag.ControlModel namespace back to the DRM.PropBag namespace.
 namespace DRM.PropBag.ControlModel
 {
     public class PropModel : NotifyPropertyChangedBase, IEquatable<PropModel>

@@ -14,7 +14,7 @@ namespace DRM.PropBag
     {
         protected PropTypedBase(Type typeOfThisValue, bool typeIsSolid, bool hasStore,
             Action<T, T> doWhenChanged, bool doAfterNotify,
-            Func<T,T,bool> comparer, GetDefaultValueDelegate<T> getDefaultValFunc, PropTypeEnum propType = PropTypeEnum.Prop)
+            Func<T,T,bool> comparer, GetDefaultValueDelegate<T> getDefaultValFunc, PropKindEnum propType = PropKindEnum.Prop)
             : base(typeOfThisValue, typeIsSolid, hasStore)
         {
             DoWHenChangedAction = doWhenChanged;
@@ -23,10 +23,14 @@ namespace DRM.PropBag
             PropertyChangedWithTVals = null;
             base.TypedProp = this;
             GetDefaultValFunc = getDefaultValFunc;
-            PropType = propType;
+            PropKind = propType;
         }
 
-        public PropTypeEnum PropType { get; private set; }
+        public PropKindEnum PropKind
+        {
+            get;
+            protected set;
+        }
 
         abstract public IListSource ListSource { get; }
 

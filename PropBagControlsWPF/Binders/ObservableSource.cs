@@ -495,7 +495,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
                 else
                 {
                     newData = iPg?.TypedProp?.TypedValueAsObject;
-                    newType = iPg?.Type;
+                    newType = iPg?.TypedProp?.Type;
                 }
 
                 if (newData != null)

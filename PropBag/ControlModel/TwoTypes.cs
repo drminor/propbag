@@ -94,7 +94,7 @@ namespace DRM.PropBag.ControlModel
             }
             else if (parameter is IPropGen && destinationType != null)
             {
-                return new TwoTypes(((IPropGen)parameter).Type, destinationType);
+                return new TwoTypes(((IPropGen)parameter).TypedProp.Type, destinationType);
             }
             else
             {

@@ -42,7 +42,7 @@ namespace DRM.PropBag
             else
             {
                 TypedProp = typedPropWrapper.TypedProp;
-                Type = typedPropWrapper.Type;
+                Type = typedPropWrapper.TypedProp.Type;
                 HasStore = typedPropWrapper.HasStore;
             }
 

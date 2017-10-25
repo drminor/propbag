@@ -140,7 +140,7 @@ namespace PropBagTestApp
                 = new MapperConfigurationProvider().BaseConfigBuilder;
 
             MapperConfigInitializerProvider mapperConfigExpression
-                = new MapperConfigInitializerProvider(PropBagMappingStrategyEnum.ExtraMembers);
+                = new MapperConfigInitializerProvider(mappingStrategy);
 
             ConfiguredMappers result = new ConfiguredMappers(configBuilder, mapperConfigExpression);
 

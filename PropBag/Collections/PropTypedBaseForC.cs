@@ -28,10 +28,10 @@ namespace DRM.PropBag
             PropertyChangedWithTVals = null;
             base.TypedProp = this;
             GetDefaultValFunc = getDefaultValFunc;
-            PropType = PropTypeEnum.Prop;
+            PropKind = PropKindEnum.Prop;
         }
 
-        public PropTypeEnum PropType { get; private set; }
+        public PropKindEnum PropKind { get; private set; }
 
         abstract public IListSource ListSource { get; }
 

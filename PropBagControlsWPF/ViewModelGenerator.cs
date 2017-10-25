@@ -10,6 +10,7 @@ using System.Reflection;
 using DRM.PropBag.ControlModel;
 using DRM.PropBag.ViewModelBuilder;
 using DRM.TypeSafePropertyBag;
+using DRM.PropBag.ControlsWPF.WPFHelpers;
 
 namespace DRM.PropBag.ControlsWPF
 {
@@ -40,7 +41,11 @@ namespace DRM.PropBag.ControlsWPF
             foreach (PropBagTemplate pbt in propBagTemplates)
             {
                 // Build a control model from the XAML contents of the template.
-                DRM.PropBag.ControlModel.PropModel pm = pbt.GetPropModel();
+                IPropModelProvider propModelProvider = new PropModelProvider(new PropBagTemplateProvider());
+
+                // TODO: we need another service that only takes PBT's and doesn't need a PBPProvider.
+                PropModel pm = propModelProvider.GetPropModel(pbt);
+
                 if (pm != null)
                 {
                     // Get a reference to the property that access the class that needs to be created.
@@ -54,7 +59,7 @@ namespace DRM.PropBag.ControlsWPF
 
                     // Use the name of the class that dervives from IPropBag
                     // as the basis of the name of the new wrapper type.
-                    TypeDescription typeDescription = pm.BuildTypeDesc(dtViewModelType);
+                    TypeDescription typeDescription = new TypeDescriptionProvider().BuildTypeDesc(pm, dtViewModelType);
 
                     Type proxyType = typeEmitter.BuildVmProxyClass(typeDescription);
 

@@ -11,6 +11,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Windows;
 using DRM.TypeSafePropertyBag;
+using PropBagTestApp.ViewModels;
 
 namespace PropBagTestApp
 {
@@ -39,11 +40,11 @@ namespace PropBagTestApp
 
 
         // TODO: Consider supporting finding the PBT requied for a mapper by class name.
-        public static PropBagMapper<TSource, TDestination> GetMapper<TSource, TDestination>(string instanceKey)
+        public static IPropBagMapper<TSource, TDestination> GetMapper<TSource, TDestination>(string instanceKey)
         {
-            PropBagMappingStrategyEnum mappingStrategy = SettingsExtensions.MappingStrategy;
-            PropBagMapper<TSource, TDestination> result = null;
+            IPropBagMapper<TSource, TDestination> result = null;
 
+            PropBagMappingStrategyEnum mappingStrategy = SettingsExtensions.MappingStrategy;
             ConfiguredMappers mappersCache = SettingsExtensions.ConfiguredMappers;
             IModuleBuilderInfo propBagProxyBuilder = SettingsExtensions.PropBagProxyBuilder;
 
@@ -59,28 +60,61 @@ namespace PropBagTestApp
 
             PropModel propModel = bpTemplate.GetPropModel();
 
-            TypeDescription typeDescription = propModel.BuildTypeDesc(dtViewModelType);
-
-            if (typeDescription == null)
+            // Extra Members
+            if (mappingStrategy == PropBagMappingStrategyEnum.ExtraMembers)
             {
-                System.Diagnostics.Debug.WriteLine($"Could not build a TypeDescription from the PropMode with instance key = {instanceKey}.");
-                return result;
+                // TODO!: DO WE NEED THIS?
+                TypeDescription typeDescription = propModel.BuildTypeDesc(dtViewModelType);
+
+                if (typeDescription == null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Could not build a TypeDescription from the PropMode with instance key = {instanceKey}.");
+                    return result;
+                }
+
+                Type rtViewModelType = propBagProxyBuilder.BuildVmProxyClass(typeDescription);
+                // END -- DO WE NEED THIS?
+
+                //Type rtViewModelType = typeof(TDestination); //typeof(ReferenceBindViewModelPB);
+
+                IPropBagMapperKey<TSource, TDestination> mapperRequest
+                    = new PropBagMapperKey<TSource, TDestination>(propModel, rtViewModelType, mappingStrategy);
             }
 
-            Type rtViewModelType = propBagProxyBuilder.BuildVmProxyClass(typeDescription);
+            // Emit Proxy
+            else if (mappingStrategy == PropBagMappingStrategyEnum.EmitProxy)
+            {
+                TypeDescription typeDescription = propModel.BuildTypeDesc(dtViewModelType);
 
-            PropBagMapperKey<TSource, TDestination> mapperRequest
-                = new PropBagMapperKey<TSource, TDestination>
-                    (propModel, rtViewModelType, mappingStrategy);
+                if (typeDescription == null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Could not build a TypeDescription from the PropMode with instance key = {instanceKey}.");
+                    return result;
+                }
 
-            mappersCache.Register(mapperRequest);
+                Type rtViewModelType = propBagProxyBuilder.BuildVmProxyClass(typeDescription);
 
-            result = (PropBagMapper<TSource, TDestination>)mappersCache.GetMapperToUse(mapperRequest);
-            if(result == null)
+                IPropBagMapperKey<TSource, TDestination> mapperRequest
+                    = new PropBagMapperKey<TSource, TDestination>(propModel, rtViewModelType, mappingStrategy);
+
+                mappersCache.Register(mapperRequest);
+                result = (IPropBagMapper<TSource, TDestination>)mappersCache.GetMapperToUse(mapperRequest);
+            }
+
+            // Emit Wrapper
+            //else if(mappingStrategy == PropBagMappingStrategyEnum.EmitWrapper)
+            //{
+
+            //}
+            else
+            {
+                throw new InvalidOperationException($"The mapping strategy: {mappingStrategy} is not recognized or is not supported.");
+            }
+
+            if (result == null)
             {
                 System.Diagnostics.Debug.WriteLine($"Could not get an AutoMapper for <{typeof(TSource)},{typeof(TDestination)}>");
             }
-
             return result;
         }
 

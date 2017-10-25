@@ -17,14 +17,15 @@ namespace DRM.PropBag.Collections
             Component = component;
         }
 
+        public virtual IList GetList()
+        {
+            return GetList(Component);
+        }
+
         protected virtual IList GetList(object component)
         {
             return ListGetter(Component);
         }
 
-        public virtual IList GetList()
-        {
-            return GetList(Component);
-        }
     }
 }

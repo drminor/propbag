@@ -50,7 +50,27 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type local:PropComparerField}">
-                    <ContentControl Name="PropComparerFieldConent"/>
+                    <ContentControl Name="PropComparerFieldContent"/>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="{x:Type local:PropDoWhenChangedField}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type local:PropDoWhenChangedField}">
+                    <ContentControl Name="PropDoWhenChangedFieldContent"/>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="{x:Type local:PropTypeInfoField}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type local:PropTypeInfoField}">
+                    <ContentControl Name="PropTypeInfoFieldContent"/>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

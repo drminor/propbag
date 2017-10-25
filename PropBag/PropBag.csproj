@@ -54,9 +54,10 @@
     <Compile Include="Collections\CProp.cs" />
     <Compile Include="Collections\PbAbstractListSource.cs" />
     <Compile Include="Collections\PropTypedBaseForC.cs" />
+    <Compile Include="ControlModel\WellKnownCollectionTypeEnum.cs" />
     <Compile Include="ControlModel\NotifyPropertyChangedBase.cs" />
     <Compile Include="Caches\DelegateCacheProvider.cs" />
-    <Compile Include="ControlModel\CollectionItem.cs" />
+    <Compile Include="ControlModel\PropTypeInfoField.cs" />
     <Compile Include="ControlModel\TwoTypes.cs" />
     <Compile Include="DoSetDelegate.cs" />
     <Compile Include="Factories\AbstractPropFactory.cs" />
@@ -103,8 +104,9 @@
     <Compile Include="ViewModelBuilder\PropertyEmitter.cs" />
     <Compile Include="ViewModelBuilder\SampleViewModel.cs" />
     <Compile Include="ViewModelBuilder\TypeDescription.cs" />
+    <Compile Include="ViewModelBuilder\TypeDescriptionProvider.cs" />
     <Compile Include="ViewModelBuilder\TypeName.cs" />
-    <Compile Include="ViewModelBuilder\VMBuilderPropModelExtensions.cs" />
+    <None Include="ViewModelBuilder\VMBuilderPropModelExtensions.cs" />
     <Compile Include="ViewModelBuilder\WasEmittedAttribute.cs" />
     <Compile Include="ViewModelBuilder\WrapperGenerator.cs" />
     <Compile Include="XMLModel\PropComparerField.cs" />

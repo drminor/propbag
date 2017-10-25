@@ -25,7 +25,7 @@ namespace PropBagTestApp.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("EmitProxy")]
+        [global::System.Configuration.DefaultSettingValueAttribute("ExtraMembers")]
         public global::DRM.PropBag.AutoMapperSupport.PropBagMappingStrategyEnum MappingStrategy {
             get {
                 return ((global::DRM.PropBag.AutoMapperSupport.PropBagMappingStrategyEnum)(this["MappingStrategy"]));

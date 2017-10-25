@@ -61,23 +61,23 @@ namespace DRM.PropBag
 
         private readonly Dictionary<string, PropGen> tVals;
 
-        //private string ClassName
-        //{
-        //    get
-        //    {
-        //        Type thisType = this.GetType();
-        //        return thisType.GetTypeInfo().Name;
-        //    }
-        //}
+        private string ClassName
+        {
+            get
+            {
+                Type thisType = this.GetType();
+                return thisType.GetTypeInfo().Name;
+            }
+        }
 
-        //private string FullClassName
-        //{
-        //    get
-        //    {
-        //        Type thisType = this.GetType();
-        //        return thisType.GetTypeInfo().FullName;
-        //    }
-        //}
+        private string FullClassName
+        {
+            get
+            {
+                Type thisType = this.GetType();
+                return thisType.GetTypeInfo().FullName;
+            }
+        }
 
 
         /// <summary>
@@ -108,7 +108,7 @@ namespace DRM.PropBag
 
         protected PropBag(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
 
-        protected PropBag(PropBagTypeSafetyMode typeSafetyMode, IPropFactory thePropFactory) 
+        protected PropBag(PropBagTypeSafetyMode typeSafetyMode, IPropFactory thePropFactory)
         {
             this.TypeSafetyMode = typeSafetyMode;
 
@@ -135,7 +135,11 @@ namespace DRM.PropBag
 
         protected PropBag(ControlModel.PropModel pm, IPropFactory propFactory = null) : this(pm.TypeSafetyMode, propFactory)
         {
+            Hydrate(pm);
+        }
 
+        protected virtual void Hydrate(PropModel pm)
+        {
             string cName = this.ClassName;
             string pCName = pm.ClassName;
 
@@ -146,6 +150,10 @@ namespace DRM.PropBag
 
             foreach (DRM.PropBag.ControlModel.PropItem pi in pm.Props)
             {
+                if(pi.PropertyName == "PersonList")
+                {
+                    System.Diagnostics.Debug.WriteLine("Here we are.");
+                }
                 object ei = pi.ExtraInfo;
 
                 Delegate comparer;
@@ -186,18 +194,20 @@ namespace DRM.PropBag
                     }
 
                     pg = PropFactory.CreateGenFromString(pi.PropertyType, value, useDefault, pi.PropertyName, ei, pi.HasStore, pi.TypeIsSolid,
-                        pi.DoWhenChangedField.DoWhenChangedAction, pi.DoWhenChangedField.DoAfterNotify, comparer, useRefEquality);
+                        pi.PropKind, pi.DoWhenChangedField.DoWhenChangedAction, pi.DoWhenChangedField.DoAfterNotify, comparer, useRefEquality, pi.ItemType);
                 }
                 else
                 {
                     pg = PropFactory.CreateGenWithNoValue(pi.PropertyType, pi.PropertyName, ei, pi.HasStore, pi.TypeIsSolid,
-                        pi.DoWhenChangedField.DoWhenChangedAction, pi.DoWhenChangedField.DoAfterNotify, comparer, useRefEquality);
+                        pi.PropKind, pi.DoWhenChangedField.DoWhenChangedAction, pi.DoWhenChangedField.DoAfterNotify, comparer, useRefEquality, pi.ItemType);
                 }
                 AddProp(pi.PropertyName, pg);
             }
         }
 
         #endregion
+
+
 
         #region Missing Prop Handler
 
@@ -250,6 +260,7 @@ namespace DRM.PropBag
                     }
                 case ReadMissingPropPolicyEnum.Register:
                     {
+                        // TODO: Must determine the PropKind for this new property.
                         IPropGen typedPropWrapper;
 
                         if (haveValue)
@@ -257,7 +268,7 @@ namespace DRM.PropBag
                             bool typeIsSolid = PropFactory.IsTypeSolid(value, propertyType);
 
                             typedPropWrapper = PropFactory.CreateGenFromObject(propertyType, value,
-                                propertyName, null, PropFactory.ProvidesStorage, typeIsSolid, null, false, null);
+                                propertyName, null, PropFactory.ProvidesStorage, typeIsSolid, PropKindEnum.Prop, null, false, null);
                         }
                         else
                         {
@@ -269,7 +280,7 @@ namespace DRM.PropBag
 
                             // On 10/8/17: Changed to use NoValue, instead of trying to generate a default value.
                             typedPropWrapper = PropFactory.CreateGenWithNoValue(propertyType, propertyName,
-                                null, PropFactory.ProvidesStorage, typeIsSolid, null, false, null);
+                                null, PropFactory.ProvidesStorage, typeIsSolid, PropKindEnum.Prop, null, false, null);
                         }
 
                         PropGen propGen = new PropGen(typedPropWrapper);
@@ -841,7 +852,7 @@ namespace DRM.PropBag
 
             if (!pGen.IsEmpty)
             {
-                return pGen.Type;
+                return pGen.TypedProp.Type;
             }
             else if(TypeSafetyMode == PropBagTypeSafetyMode.Locked)
             {
@@ -1187,8 +1198,9 @@ namespace DRM.PropBag
             {
                 // Next statement uses reflection.
                 object curValue = genProp.Value;
+                PropKindEnum propKind = genProp.TypedProp.PropKind;
 
-                IPropGen typedPropWrapper = PropFactory.CreateGenFromObject(newType, curValue, propertyName, null, true, true, null, false, null, false);
+                IPropGen typedPropWrapper = PropFactory.CreateGenFromObject(newType, curValue, propertyName, null, true, true, propKind, null, false, null, false);
 
                 //genProp.UpdateWithSolidType(newType, curValue);
                 genProp = new PropGen(typedPropWrapper);
@@ -1301,16 +1313,16 @@ namespace DRM.PropBag
 
         #region IListSource Support
 
-        public bool TryGetPropType(string propertyName, out PropTypeEnum propType)
+        public bool TryGetPropType(string propertyName, out PropKindEnum propType)
         {
             if (tVals.TryGetValue(propertyName, out PropGen value))
             {
-                propType = value.TypedProp.PropType;
+                propType = value.TypedProp.PropKind;
                 return true;
             }
             else
             {
-                propType = PropTypeEnum.Prop;
+                propType = PropKindEnum.Prop;
                 return false;
             }
         }

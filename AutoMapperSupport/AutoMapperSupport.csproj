@@ -40,6 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AutoMapperProvider.cs" />
     <Compile Include="ConfiguredMappers.cs" />
     <Compile Include="ConfiguredMappersProvider.cs" />
     <Compile Include="ExtraMembers\ExtraMembersPropBagExtensions.cs" />

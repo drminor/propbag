@@ -1,4 +1,7 @@
 ﻿using DRM.TypeSafePropertyBag;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -172,6 +175,23 @@ namespace DRM.PropBag.ControlsWPF
         //        this.SetValue(PropsProperty, value);
         //    }
         //}
+
+        public string FullClassName
+        {
+            get
+            {
+                IEnumerable<string> namespaces = this.Namespaces.Select(x => x.Namespace.Trim());
+                return GetFullClassName(null, this.ClassName.Trim());
+            }
+        }
+
+        private string GetFullClassName(IEnumerable<string> namespaces, string className)
+        {
+            string separator = ".";
+            string result = $"{string.Join(separator, namespaces)}{separator}{className}";
+
+            return result;
+        }
         
     }
 }

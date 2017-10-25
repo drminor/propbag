@@ -45,7 +45,10 @@ namespace DRM.PropBag.Collections
 
         public ObservableCollection<T> GetTheList(ICPropPrivate<CT, T> component)
         {
-            if (IsReadOnly) throw new InvalidOperationException("This list is readonly.");
+            if (IsReadOnly)
+            {
+                //throw new InvalidOperationException("This list is readonly.");
+            }
 
             if (_theList == null)
             {

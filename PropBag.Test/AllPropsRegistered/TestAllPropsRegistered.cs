@@ -48,6 +48,18 @@ namespace PropBagLib.Tests
         [Test]
         public void TestAllRegSetBool()
         {
+            ////Dictionary<int, int> testD = null;
+
+            //Type typDestDType = typeof(Dictionary<int, int>);
+
+            //string strDestDType = typDestDType.FullName;
+
+            //strDestDType = "System.Collections.Generic.Dictionary`2[[System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089],[System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]]";
+            //strDestDType = "System.Collections.Generic.Dictionary`2[[System.Int32],[System.Int32]]";
+
+            //Type tt = Type.GetType(strDestDType);
+
+
             mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
 
             //mod1.reg

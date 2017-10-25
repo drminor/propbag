@@ -88,39 +88,85 @@ namespace DRM.PropBag
             return prop;
         }
 
+        #endregion
+
+        #region Generic property creators
+
         public override IPropGen CreateGenFromObject(Type typeOfThisProperty,
             object value,
             string propertyName, object extraInfo,
-            bool hasStorage, bool isTypeSolid,
-            Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false)
+            bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
+            Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null)
         {
-            CreatePropFromObjectDelegate propCreator = GetPropCreator(typeOfThisProperty);
-            IPropGen prop = (IPropGen)propCreator(this, value, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid, 
-                doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify, comparer: comparer, useRefEquality: useRefEquality);
-            return prop;
+            if (propKind == PropKindEnum.Prop)
+            {
+                CreatePropFromObjectDelegate propCreator = GetPropCreator(typeOfThisProperty);
+                IPropGen prop = (IPropGen)propCreator(this, value, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
+                    doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify, comparer: comparer, useRefEquality: useRefEquality);
+                return prop;
+            }
+            else if (propKind == PropKindEnum.Collection)
+            {
+                CreateCPropFromObjectDelegate propCreator = GetCPropCreator(typeOfThisProperty, itemType);
+                IPropGen prop = (IPropGen)propCreator(this, value, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
+                    doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify, comparer: comparer, useRefEquality: useRefEquality);
+                return prop;
+            }
+            else
+            {
+                throw new InvalidOperationException($"PropKind = {propKind} is not recognized or is not supported.");
+            }
         }
 
         public override IPropGen CreateGenFromString(Type typeOfThisProperty,
             string value, bool useDefault,
             string propertyName, object extraInfo,
-            bool hasStorage, bool isTypeSolid,
-            Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false)
+            bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
+            Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null)
         {
-            CreatePropFromStringDelegate propCreator = GetPropFromStringCreator(typeOfThisProperty);
-            IPropGen prop = (IPropGen)propCreator(this, value, useDefault, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
-                doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify, comparer: comparer, useRefEquality: useRefEquality);
-            return prop;
+            if (propKind == PropKindEnum.Prop)
+            {
+                CreatePropFromStringDelegate propCreator = GetPropFromStringCreator(typeOfThisProperty);
+                IPropGen prop = (IPropGen)propCreator(this, value, useDefault, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
+                    doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify, comparer: comparer, useRefEquality: useRefEquality);
+                return prop;
+            } 
+            else if(propKind == PropKindEnum.Collection)
+            {
+                CreateCPropFromStringDelegate propCreator = GetCPropFromStringCreator(typeOfThisProperty, itemType);
+                IPropGen prop = (IPropGen)propCreator(this, value, useDefault, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
+                    doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify, comparer: comparer, useRefEquality: useRefEquality);
+                return prop;
+            }
+            else
+            {
+                throw new InvalidOperationException($"PropKind = {propKind} is not recognized or is not supported.");
+            }
         }
 
         public override IPropGen CreateGenWithNoValue(Type typeOfThisProperty,
             string propertyName, object extraInfo,
-            bool hasStorage, bool isTypeSolid,
-            Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false)
+            bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
+            Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null)
         {
-            CreatePropWithNoValueDelegate propCreator = GetPropWithNoValueCreator(typeOfThisProperty);
-            IPropGen prop = (IPropGen)propCreator(this, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
-                doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify, comparer: comparer, useRefEquality: useRefEquality);
-            return prop;
+            if (propKind == PropKindEnum.Prop)
+            {
+                CreatePropWithNoValueDelegate propCreator = GetPropWithNoValueCreator(typeOfThisProperty);
+                IPropGen prop = (IPropGen)propCreator(this, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
+                    doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify, comparer: comparer, useRefEquality: useRefEquality);
+                return prop;
+            }
+            else if (propKind == PropKindEnum.Collection)
+            {
+                CreateCPropWithNoValueDelegate propCreator = GetCPropWithNoValueCreator(typeOfThisProperty, itemType);
+                IPropGen prop = (IPropGen)propCreator(this, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
+                    doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify, comparer: comparer, useRefEquality: useRefEquality);
+                return prop;
+            }
+            else
+            {
+                throw new InvalidOperationException($"PropKind = {propKind} is not recognized or is not supported.");
+            }
         }
 
         #endregion

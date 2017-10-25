@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace DRM.TypeSafePropertyBag
 {
-    public enum PropTypeEnum
+    public enum PropKindEnum
     {
         Prop,
-        ObservableCollection,
+        Collection,
         DataTable
     }
 }

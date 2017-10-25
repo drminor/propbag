@@ -15,6 +15,7 @@ using DRM.PropBag.ControlModel;
 using System.Windows;
 //using System.Windows.Data;
 using DRM.TypeSafePropertyBag;
+using System.Collections.ObjectModel;
 
 namespace DRM.PropBag
 {
@@ -124,6 +125,18 @@ namespace DRM.PropBag
         public T GetDefaultValue<T>(string propertyName = null)
         {
             return default(T);
+        }
+
+        public CT GetDefaultValue<CT, T>(string propertyName = null) where CT : class, IEnumerable<T>
+        {
+            if(typeof(CT) == typeof(ObservableCollection<T>))
+            {
+                return new ObservableCollection<T>() as CT;
+            }
+            else
+            {
+                return default(CT);
+            }
         }
 
         public object GetDefaultValue(Type propertyType, string propertyName = null)

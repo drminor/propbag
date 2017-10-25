@@ -39,7 +39,7 @@ namespace DRM.PropBag
 
         bool PropertyExists(string propertyName);
 
-        bool TryGetPropType(string propertyName, out PropTypeEnum propType);
+        bool TryGetPropType(string propertyName, out PropKindEnum propType);
 
         bool TryGetListSource(string propertyName, Type itemType, out IListSource listSource);
 

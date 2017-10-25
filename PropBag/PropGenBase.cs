@@ -51,7 +51,7 @@ namespace DRM.PropBag
 
         public PropGenBase(IPropGen typedPropWrapper)
         {
-            Type = typedPropWrapper.Type;
+            Type = typedPropWrapper.TypedProp.Type;
             TypedProp = typedPropWrapper.TypedProp;
             TypeIsSolid = typedPropWrapper.TypeIsSolid;
             HasStore = typedPropWrapper.HasStore;

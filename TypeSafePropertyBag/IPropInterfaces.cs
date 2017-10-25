@@ -74,7 +74,6 @@ namespace DRM.TypeSafePropertyBag
     /// </summary>
     public interface IPropGen
     {
-        Type Type { get; }
         bool TypeIsSolid { get; }
         bool HasStore { get; }
 
@@ -104,7 +103,9 @@ namespace DRM.TypeSafePropertyBag
     /// </summary>
     public interface IProp
     {
-        PropTypeEnum PropType { get; }
+        Type Type { get; }
+
+        PropKindEnum PropKind { get; }
         IListSource ListSource { get; }
 
         object TypedValueAsObject { get; }

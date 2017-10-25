@@ -23,7 +23,7 @@ namespace PropBagLib.Tests
         }
 
         [TearDown]
-        public void destroy()
+        public void Destroy()
         {
             mod1 = null;
         }
@@ -35,7 +35,7 @@ namespace PropBagLib.Tests
 
             PropModel pm = new PropModel("CreateAtRunTimeModel", "main", "PropBagLib.Tests", deriveFromPubPropBag: false, typeSafetyMode: PropBagTypeSafetyMode.AllPropsMustBeRegistered, deferMethodRefResolution: true);
 
-            PropItem pi = new PropItem(typeof(string), "PropString", null, true, true, new PropInitialValueField("Initial Value"), null, null);
+            PropItem pi = new PropItem(typeof(string), "PropString", true, true, PropKindEnum.Prop, null, new PropInitialValueField("Initial Value"), null, null, null);
 
             pm.Props.Add(pi);
 

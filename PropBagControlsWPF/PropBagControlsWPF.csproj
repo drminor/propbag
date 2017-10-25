@@ -47,6 +47,7 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Activators\ViewModelActivator.cs" />
     <Compile Include="Binders\BindingTarget.cs" />
     <Compile Include="Binders\DataSourceChangedEventArgs.cs" />
     <Compile Include="Binders\DataSourceChangedEventHandler.cs" />
@@ -81,15 +82,19 @@
     <Compile Include="PropBagTemplateExtensions.cs" />
     <Compile Include="PropComparerFunc.cs" />
     <Compile Include="PropComparerField.cs" />
+    <Compile Include="Activators\PropModelProvider.cs" />
+    <Compile Include="PropTypeInfoField.cs" />
     <Compile Include="PropDoWhenChangedField.cs" />
     <Compile Include="PropItem.cs" />
     <Compile Include="PropsCollection.cs" />
+    <Compile Include="PropTypeInfoCollection.cs" />
     <Compile Include="PropValueConverter.cs" />
     <Compile Include="ReflectionHelpers.cs" />
     <Compile Include="TwoTypeMarkupExtension.cs" />
     <Compile Include="ViewModelGenerator.cs" />
+    <Compile Include="Activators\IPropBagTemplateProvider.cs" />
     <Compile Include="WPFHelpers\LogicalTree.cs" />
-    <Compile Include="WPFHelpers\PropBagTemplateResources.cs" />
+    <Compile Include="Activators\PropBagTemplateProvider.cs" />
     <Page Include="Themes\Generic.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
