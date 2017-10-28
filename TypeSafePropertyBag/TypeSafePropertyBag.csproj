@@ -49,8 +49,9 @@
     <Compile Include="IPropFactory.cs" />
     <Compile Include="ITypeSafePropBag.cs" />
     <Compile Include="LockingConcurrentDictionary.cs" />
+    <Compile Include="ReadMissingPropPolicyEnum.cs" />
     <Compile Include="OrderedDictionary.cs" />
-    <Compile Include="PropBagTypeSafetyModeEnum.cs" />
+    <Compile Include="PropBagTypeSafetyMode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyChangedWithValsEventArgs.cs" />
     <Compile Include="PropertyChangedWithValsHandler.cs" />
