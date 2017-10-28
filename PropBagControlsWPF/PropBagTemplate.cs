@@ -19,12 +19,12 @@ namespace DRM.PropBag.ControlsWPF
 
         public PropBagTemplate()
         {
-            this.Namespaces = new NamespacesCollection();
-            this.Props = new PropsCollection();
+            //this.Namespaces = new NamespacesCollection();
+            //this.Props = new PropsCollection();
         }
 
         static DependencyProperty DeriveFromPubPropBagProperty =
-            DependencyProperty.Register("DeriveFromPubPropBag", typeof(bool), typeof(PropItem), new PropertyMetadata(true));
+            DependencyProperty.Register("DeriveFromPubPropBag", typeof(bool), typeof(PropBagTemplate), new PropertyMetadata(true));
 
         public bool DeriveFromPubPropBag
         {
@@ -70,7 +70,8 @@ namespace DRM.PropBag.ControlsWPF
         }
 
         public static readonly DependencyProperty OutPutNameSpaceProperty =
-            DependencyProperty.Register("OutPutNameSpace", typeof(string), typeof(PropBagTemplate), new PropertyMetadata(null));
+            DependencyProperty.Register("OutPutNameSpace", typeof(string), typeof(PropBagTemplate),
+                new PropertyMetadata(null));
 
         public string OutPutNameSpace
         {
@@ -85,7 +86,8 @@ namespace DRM.PropBag.ControlsWPF
         }
 
         public static readonly DependencyProperty TypeSafetyModeProperty =
-            DependencyProperty.Register("TypeSafetyMode", typeof(PropBagTypeSafetyMode), typeof(PropBagTemplate), new PropertyMetadata(PropBagTypeSafetyMode.AllPropsMustBeRegistered));
+            DependencyProperty.Register("TypeSafetyMode", typeof(PropBagTypeSafetyMode), typeof(PropBagTemplate),
+                new PropertyMetadata(PropBagTypeSafetyMode.None));
 
         public PropBagTypeSafetyMode TypeSafetyMode
         {
@@ -100,7 +102,7 @@ namespace DRM.PropBag.ControlsWPF
         }
 
         static DependencyProperty DeferMethodRefResolutionProperty =
-            DependencyProperty.Register("DeferMethodRefResolution", typeof(bool), typeof(PropItem), new PropertyMetadata(true));
+            DependencyProperty.Register("DeferMethodRefResolution", typeof(bool), typeof(PropBagTemplate), new PropertyMetadata(true));
 
         public bool DeferMethodRefResolution
         {
@@ -115,7 +117,7 @@ namespace DRM.PropBag.ControlsWPF
         }
 
         static DependencyProperty RequireExplicitInitialValueProperty =
-            DependencyProperty.Register("RequireExplicitInitialValue", typeof(bool), typeof(PropItem), new PropertyMetadata(true));
+            DependencyProperty.Register("RequireExplicitInitialValue", typeof(bool), typeof(PropBagTemplate), new PropertyMetadata(true));
 
         public bool RequireExplicitInitialValue
         {
@@ -131,7 +133,7 @@ namespace DRM.PropBag.ControlsWPF
 
         // TODO: need to create a typeconverter for AbstractPropFactory.
         static DependencyProperty PropFactoryProperty =
-            DependencyProperty.Register("PropFactory", typeof(AbstractPropFactory), typeof(PropItem), new PropertyMetadata(null));
+            DependencyProperty.Register("PropFactory", typeof(AbstractPropFactory), typeof(PropBagTemplate), new PropertyMetadata(null));
 
         public AbstractPropFactory PropFactory
         {
@@ -145,36 +147,35 @@ namespace DRM.PropBag.ControlsWPF
             }
         }
 
-        //public static readonly DependencyProperty NamespacesProperty =
-        //    DependencyProperty.Register("Namespaces", typeof(NamespacesCollection), typeof(PropBagTemplate), new PropertyMetadata(new NamespacesCollection()));
+        public static readonly DependencyProperty NamespacesProperty =
+            DependencyProperty.Register("Namespaces", typeof(NamespacesCollection), typeof(PropBagTemplate), new PropertyMetadata(new NamespacesCollection()));
 
-        public NamespacesCollection Namespaces { get; set; }
-        //{
-        //    get
-        //    {
-        //        return (NamespacesCollection)this.GetValue(NamespacesProperty);
-        //    }
-        //    set
-        //    {
-        //        this.SetValue(NamespacesProperty, value);
-        //    }
-        //}
+        public NamespacesCollection Namespaces
+        { 
+            get
+            {
+                return (NamespacesCollection) this.GetValue(NamespacesProperty);
+            }
+            set
+            {
+                this.SetValue(NamespacesProperty, value);
+            }
+        }
 
+        public static readonly DependencyProperty PropsProperty =
+            DependencyProperty.Register("Props", typeof(PropsCollection), typeof(PropBagTemplate), new PropertyMetadata(new PropsCollection()));
 
-        //public static readonly DependencyProperty PropsProperty =
-        //    DependencyProperty.Register("Props", typeof(PropsCollection), typeof(PropBagTemplate), new PropertyMetadata(new PropsCollection()));
-
-        public PropsCollection Props { get; set; }
-        //{
-        //    get
-        //    {
-        //        return (PropsCollection)this.GetValue(PropsProperty);
-        //    }
-        //    set
-        //    {
-        //        this.SetValue(PropsProperty, value);
-        //    }
-        //}
+        public PropsCollection Props
+        {
+            get
+            {
+                return (PropsCollection)this.GetValue(PropsProperty);
+            }
+            set
+            {
+                this.SetValue(PropsProperty, value);
+            }
+        }
 
         public string FullClassName
         {
@@ -192,6 +193,6 @@ namespace DRM.PropBag.ControlsWPF
 
             return result;
         }
-        
     }
 }
+

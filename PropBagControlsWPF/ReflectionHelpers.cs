@@ -108,7 +108,7 @@ namespace DRM.PropBag.ControlsWPF
             Type pt = propDef.PropertyType;
             if (HasDefaultPublicConstructor(pt))
             {
-                return Activator.CreateInstance(pt, null);
+                return System.Activator.CreateInstance(pt, null);
             }
             else
             {
@@ -116,7 +116,7 @@ namespace DRM.PropBag.ControlsWPF
                 {
                     // Ok, lets create a new one using the special constructor which takes a byte value of 0xFF.
                     byte flags = PropBagTemplate.TEST_FLAG;
-                    result = Activator.CreateInstance(pt, new object[] { flags });
+                    result = System.Activator.CreateInstance(pt, new object[] { flags });
                     return result;
                 }
                 else

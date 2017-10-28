@@ -46,8 +46,7 @@ namespace DRM.PropBag.ControlsWPF
                 return Placeholder;
             }
 
-            IRootObjectProvider rootProvider = context.GetService(typeof(IRootObjectProvider)) as IRootObjectProvider;
-            if (rootProvider != null && value is String)
+            if (context.GetService(typeof(IRootObjectProvider)) is IRootObjectProvider rootProvider && value is String)
             {
                 if (rootProvider.RootObject != null)
                 {

@@ -1,5 +1,4 @@
 ﻿using DRM.PropBag.ControlModel;
-using DRM.PropBag.ControlsWPF.WPFHelpers;
 using DRM.TypeSafePropertyBag;
 using System;
 using System.Data;
@@ -41,7 +40,7 @@ namespace DRM.PropBag.ControlsWPF
                     PropModel pm = GetPropModel(pbt);
                     return pm;
                 }
-                else if (_propBagTemplateProvider == null)
+                else if (HasPbtLookupResources)
                 {
                     throw new InvalidOperationException($"A call providing only a ResourceKey can only be done, " +
                         $"if this PropModelProvider was supplied with a PropBagTemplateProvider upon construction. " +
@@ -66,7 +65,7 @@ namespace DRM.PropBag.ControlsWPF
         {
             try
             {
-                if (_propBagTemplateProvider != null)
+                if (HasPbtLookupResources)
                 {
                     PropBagTemplate pbt = _propBagTemplateProvider.GetPropBagTemplate(resourceKey);
                     PropModel pm = GetPropModel(pbt);

@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using System.Windows;
 
-namespace DRM.PropBag.ControlsWPF.WPFHelpers
+namespace DRM.PropBag.ControlsWPF
 {
     public class PropBagTemplateProvider : IPropBagTemplateProvider
     {
         private ResourceDictionary _resources;
 
-        public bool HasPbtLookupResources => true;
         public bool CanFindPropBagTemplateWithJustKey => _resources != null;
         
         #region Constructor

@@ -63,7 +63,8 @@ namespace DRM.PropBag.ControlsWPF
         }
 
         public static readonly DependencyProperty CollectionTypeProperty =
-            DependencyProperty.Register("TypeSafetyMode", typeof(WellKnownCollectionTypeEnum?), typeof(PropTypeInfoField), new PropertyMetadata((WellKnownCollectionTypeEnum?) null));
+            DependencyProperty.Register("CollectionType", typeof(WellKnownCollectionTypeEnum?), typeof(PropTypeInfoField),
+                new PropertyMetadata((WellKnownCollectionTypeEnum?) null));
 
         public WellKnownCollectionTypeEnum? CollectionType
         { 

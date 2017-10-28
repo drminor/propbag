@@ -28,7 +28,7 @@ namespace DRM.PropBag.ControlsWPF
         }
 
         public static readonly DependencyProperty PropKindProperty =
-            DependencyProperty.Register("PropKind", typeof(PropKindEnum), typeof(PropBagTemplate),
+            DependencyProperty.Register("PropKind", typeof(PropKindEnum), typeof(PropItem),
                 new PropertyMetadata(PropKindEnum.Prop));
 
         public PropKindEnum PropKind
@@ -109,8 +109,20 @@ namespace DRM.PropBag.ControlsWPF
         {
             if (!DoAllChildrenHaveTheCorrectType(this.Items, out int index, out bool tooMany))
             {
-                string elementType = ((Control)this.Items[index]).ToString();
-                string elementName = ((Control)this.Items[index]).Name;
+                string elementType;
+                string elementName;
+                object itm = this.Items[index];
+                if (itm is Control ctl)
+                {
+                    elementType = ctl.GetType().ToString();
+                    elementName = ctl.Name;
+                }
+                else
+                {
+                    elementType = "Not Determined.";
+                    elementName = itm.ToString();
+                }
+
 
                 if (tooMany)
                 {

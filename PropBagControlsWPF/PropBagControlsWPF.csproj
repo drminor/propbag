@@ -47,7 +47,6 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Activators\ViewModelActivator.cs" />
     <Compile Include="Binders\BindingTarget.cs" />
     <Compile Include="Binders\DataSourceChangedEventArgs.cs" />
     <Compile Include="Binders\DataSourceChangedEventHandler.cs" />
@@ -79,7 +78,6 @@
     <Compile Include="Binders\MyBinder.cs" />
     <Compile Include="PropBagInstanceAttribute.cs" />
     <Compile Include="PropBagTemplate.cs" />
-    <Compile Include="PropBagTemplateExtensions.cs" />
     <Compile Include="PropComparerFunc.cs" />
     <Compile Include="PropComparerField.cs" />
     <Compile Include="Activators\PropModelProvider.cs" />

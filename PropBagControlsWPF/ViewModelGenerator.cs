@@ -1,16 +1,12 @@
-﻿using System;
-using System.Linq;
-using System.Collections.Generic;
-using System.Windows;
-using System.Windows.Controls;
-
-using System.Reflection;
-
-
-using DRM.PropBag.ControlModel;
+﻿using DRM.PropBag.ControlModel;
 using DRM.PropBag.ViewModelBuilder;
 using DRM.TypeSafePropertyBag;
-using DRM.PropBag.ControlsWPF.WPFHelpers;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Windows;
+using System.Windows.Controls;
 
 namespace DRM.PropBag.ControlsWPF
 {
@@ -41,10 +37,9 @@ namespace DRM.PropBag.ControlsWPF
             foreach (PropBagTemplate pbt in propBagTemplates)
             {
                 // Build a control model from the XAML contents of the template.
-                IPropModelProvider propModelProvider = new PropModelProvider(new PropBagTemplateProvider());
 
                 // TODO: we need another service that only takes PBT's and doesn't need a PBPProvider.
-                PropModel pm = propModelProvider.GetPropModel(pbt);
+                PropModel pm = new PropModelProvider().GetPropModel(pbt);
 
                 if (pm != null)
                 {
@@ -81,7 +76,7 @@ namespace DRM.PropBag.ControlsWPF
             
             if(isPropBagMin)
             {
-                IPropBag newInstance = (IPropBag)Activator.CreateInstance(proxyType, new object[] { pm });
+                IPropBag newInstance = (IPropBag)System.Activator.CreateInstance(proxyType, new object[] { pm });
                 return newInstance;
             }
             else
