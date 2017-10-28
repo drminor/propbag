@@ -156,16 +156,5 @@ namespace DRM.PropBag.AutoMapperSupport
 
         #endregion
 
-        #region DevelopementWork Get Key Pair
-
-        //private static void GetKeys()
-        //{
-        //    FileStream fs = new FileStream(@"C:\Users\david_000\Source\keyPair.snk", FileMode.Open);
-        //    StrongNameKeyPair kp = new StrongNameKeyPair(fs);
-        //    fs.Close();
-        //}
-
-        #endregion
-
     }
 }

@@ -15,7 +15,6 @@ namespace DRM.PropBag.AutoMapperSupport
 
         IEnumerable<TDestination> MapToDestination(IEnumerable<TSource> listOfSources);
         IEnumerable<TSource> MapToSource(IEnumerable<TDestination> listOfDestinations);
-
     }
 
     public interface IPropBagMapperGen
@@ -24,8 +23,8 @@ namespace DRM.PropBag.AutoMapperSupport
         Type DestinationType { get; }
 
         bool SupportsMapFrom { get; }
-        IMapperConfigurationExpression Configure(IMapperConfigurationExpression cfg);
-        IMapper Mapper { get; set; }
+        //IMapperConfigurationExpression Configure(IMapperConfigurationExpression cfg);
+        IMapper Mapper { get; }
     }
 
 }

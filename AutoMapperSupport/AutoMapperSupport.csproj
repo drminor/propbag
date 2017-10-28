@@ -40,24 +40,29 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AutoMapperProvider.cs" />
-    <Compile Include="ConfiguredMappers.cs" />
-    <Compile Include="ConfiguredMappersProvider.cs" />
-    <Compile Include="ExtraMembers\ExtraMembersPropBagExtensions.cs" />
-    <Compile Include="ExtraMembers\MapperConfigForExtraMembers.cs" />
-    <Compile Include="IMapperConfiBuilderProvider.cs" />
-    <Compile Include="IInitializeAMapperConfig.cs" />
+    <Compile Include="SimplePropBagMapper.cs" />
+    <None Include="AutoMapperProvider_OLD.cs" />
+    <None Include="ConfiguredMappers_OLD.cs" />
+    <None Include="ConfiguredMappersProvider_OLD.cs" />
+    <Compile Include="Config\StandardConfigFinalStep.cs" />
+    <Compile Include="Config\ExtraMembersConfigInitialStep.cs" />
+    <Compile Include="Config\IMapperConfigurationStepWithTypes.cs" />
+    <Compile Include="Config\IMapperConfigurationStep.cs" />
+    <Compile Include="Config\IConfigureAMapper.cs" />
+    <Compile Include="Config\MapperConfigStarter_Empty.cs" />
+    <Compile Include="Config\MapperConfigStarter_Default.cs" />
+    <Compile Include="Config\IGetInitialMapperConfig.cs" />
+    <Compile Include="Config\SimpleMapperConfiger.cs" />
+    <Compile Include="Config\ExtraMembersConfigFinalStep.cs" />
     <Compile Include="IMapTypeDefinition.cs" />
     <Compile Include="IPropBagMapper.cs" />
     <Compile Include="IPropBagMapperKey.cs" />
-    <Compile Include="ExtraMembers\ExtraMembersPropModelExtensions.cs" />
-    <Compile Include="MapperConfigurationProvider.cs" />
-    <Compile Include="MapperConfigurationProviderBase.cs" />
-    <Compile Include="MapperConfigInitializerProvider.cs" />
+    <Compile Include="ExtraMembers\ExtraMembersProvider.cs" />
     <Compile Include="MapTypeDefinition.cs" />
     <Compile Include="ExtraMembers\PBDispatcher.cs" />
     <Compile Include="ExtraMembers\PropBagMapperCustom.cs" />
-    <Compile Include="PropBagMapper.cs" />
+    <Compile Include="AbstractPropBagMapper.cs" />
+    <None Include="PropBagMapper_OLD.cs" />
     <Compile Include="PropBagMapperKey.cs" />
     <Compile Include="PropBagMappingStrategyEnum.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -82,6 +87,10 @@
     <ProjectReference Include="..\TypeSafePropertyBag\TypeSafePropertyBag.csproj">
       <Project>{bbb1e311-374e-4c91-a313-1667d83767db}</Project>
       <Name>TypeSafePropertyBag</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ViewModelTools\ViewModelTools.csproj">
+      <Project>{A149EAD5-06A9-47C8-8853-1D329D553EA7}</Project>
+      <Name>ViewModelTools</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

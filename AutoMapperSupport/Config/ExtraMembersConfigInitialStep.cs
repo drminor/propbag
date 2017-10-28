@@ -9,9 +9,9 @@ using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
-    public class MapperConfigForExtraMembers : IInitializeAMapperConf
+    public class ExtraMembersConfigInitialStep : IMapperConfigurationStep
     {
-        public Action<IMapperConfigurationExpression> InitialConfigurationAction
+        public Action<IMapperConfigurationExpression> ConfigurationStep
         {
             get
             {
@@ -19,8 +19,7 @@ namespace DRM.PropBag.AutoMapperSupport
             }
         }
 
-        // TODO: Move to new static class in ExtraMembers folder.
-        public static void BuildExtraMemberConfig(IMapperConfigurationExpression cfg)
+        public void BuildExtraMemberConfig(IMapperConfigurationExpression cfg)
         {
             cfg.DefineExtraMemberGetterBuilder(PropertyInfoWT.STRATEGEY_KEY, GetGetterStrategy);
             cfg.DefineExtraMemberSetterBuilder(PropertyInfoWT.STRATEGEY_KEY, GetSetterStrategy);
@@ -29,14 +28,13 @@ namespace DRM.PropBag.AutoMapperSupport
             cfg.ShouldMapProperty = ShouldMap;
         }
 
-
         /// <summary>
         /// This assumes that mi will always be a PropertyInfo.
         /// </summary>
         /// <param name="mi"></param>
         /// <param name="sourceType"></param> 
         /// <returns></returns>
-        public static ExtraMemberCallDetails GetGetterStrategy(MemberInfo mi, Expression destination, Type sourceType, IPropertyMap propertyMap)
+        public ExtraMemberCallDetails GetGetterStrategy(MemberInfo mi, Expression destination, Type sourceType, IPropertyMap propertyMap)
         {
             Expression indexExp = Expression.Constant(new object[] { sourceType });
 
@@ -45,7 +43,7 @@ namespace DRM.PropBag.AutoMapperSupport
         }
 
         // This assumes that mi will always be a PropertyInfo.
-        public static ExtraMemberCallDetails GetSetterStrategy(MemberInfo mi, Expression destination, Type sourceType, IPropertyMap propertyMap, ParameterExpression value)
+        public ExtraMemberCallDetails GetSetterStrategy(MemberInfo mi, Expression destination, Type sourceType, IPropertyMap propertyMap, ParameterExpression value)
         {
             Expression newValue;
             if (mi is PropertyInfo pi && pi.PropertyType.IsValueType())
@@ -63,7 +61,7 @@ namespace DRM.PropBag.AutoMapperSupport
             return new ExtraMemberCallDetails(ExtraMemberCallDirectionEnum.Set, mi, parameters);
         }
 
-        public static bool ShouldMap(MemberInfo mi)
+        public bool ShouldMap(MemberInfo mi)
         {
             if (IsPublic(mi)) return true;
 
@@ -74,7 +72,7 @@ namespace DRM.PropBag.AutoMapperSupport
             return test != null;
         }
 
-        private static bool IsPublic(MemberInfo mi)
+        private bool IsPublic(MemberInfo mi)
         {
             if (mi is MethodInfo methInfo) return methInfo.IsPublic;
             if (mi is PropertyInfo pi) return pi.GetMethod.IsPublic;
