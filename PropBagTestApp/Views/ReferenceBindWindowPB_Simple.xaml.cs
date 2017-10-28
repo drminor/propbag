@@ -1,20 +1,13 @@
-﻿using DRM.PropBag;
+﻿using AutoMapper;
+using DRM.PropBag.AutoMapperSupport;
 using DRM.PropBag.ControlModel;
 using DRM.PropBag.ControlsWPF;
-using DRM.PropBag.ControlsWPF.WPFHelpers;
-
-using PropBagTestApp.ViewModels;
+using DRM.PropBag.ViewModelBuilder;
 using PropBagTestApp.Models;
-
+using PropBagTestApp.ViewModels;
 using System;
 using System.Windows;
-using System.Windows.Data;
-using DRM.TypeSafePropertyBag;
-using DRM.PropBag.AutoMapperSupport;
-using System.Collections.Generic;
-using AutoMapper;
-using System.Windows.Controls;
-using DRM.PropBag.ViewModelBuilder;
+
 
 namespace PropBagTestApp.View
 {
@@ -68,47 +61,47 @@ namespace PropBagTestApp.View
 
             ReadWithMap(mm, vm);
 
-            if (vm == null)
-            {
-                vm = GetNewViewModel();
-                this.DataContext = vm;
-            }
+            //if (vm == null)
+            //{
+            //    vm = GetNewViewModel();
+            //    this.DataContext = vm;
+            //}
         }
 
         private void BtnRead_Click_OLD(object sender, RoutedEventArgs e)
         {
             //CollectionViewSource aa = new CollectionViewSource();
-            ReferenceBindViewModelPB vm = (ReferenceBindViewModelPB)this.DataContext;
+            //ReferenceBindViewModelPB vm = (ReferenceBindViewModelPB)this.DataContext;
 
-            if (vm == null)
-            {
-                vm = GetNewViewModel();
-                this.DataContext = vm;
-            }
+            //if (vm == null)
+            //{
+            //    vm = GetNewViewModel();
+            //    this.DataContext = vm;
+            //}
 
-            vm.SetIt<int>(21, "Amount");
-            int tttt = vm.GetIt<int>("Amount");
-            //m.Amount = 21;
+            //vm.SetIt<int>(21, "Amount");
+            //int tttt = vm.GetIt<int>("Amount");
+            ////m.Amount = 21;
 
-            vm.SetIt<double>(30.3, "Size");
-            //m.Size = 30.3;
+            //vm.SetIt<double>(30.3, "Size");
+            ////m.Size = 30.3;
 
-            vm.SetIt<Guid>(Guid.NewGuid(), "ProductId");
-            //m.ProductId = Guid.NewGuid();
+            //vm.SetIt<Guid>(Guid.NewGuid(), "ProductId");
+            ////m.ProductId = Guid.NewGuid();
 
-            vm.SetIt<double>(0.01, "TestDouble");
-            //m.TestDouble = 0.01;
+            //vm.SetIt<double>(0.01, "TestDouble");
+            ////m.TestDouble = 0.01;
 
-            MyModel4 r = vm.GetIt<MyModel4>("Deep");
-            if (r != null)
-            {
-                r.MyString = "Jacob2";
-            }
-            else
-            {
-                MyModel4 mod4 = new MyModel4() { MyString = "Jacob" };
-                vm.SetIt<MyModel4>(mod4, "Deep");
-            }
+            //MyModel4 r = vm.GetIt<MyModel4>("Deep");
+            //if (r != null)
+            //{
+            //    r.MyString = "Jacob2";
+            //}
+            //else
+            //{
+            //    MyModel4 mod4 = new MyModel4() { MyString = "Jacob" };
+            //    vm.SetIt<MyModel4>(mod4, "Deep");
+            //}
 
         }
 
@@ -138,7 +131,7 @@ namespace PropBagTestApp.View
         {
             if(this.DataContext == null)
             {
-                this.DataContext = GetNewViewModel();
+                //this.DataContext = GetNewViewModel();
             }
             else
             {
@@ -204,39 +197,86 @@ namespace PropBagTestApp.View
         //    return result;
         //}
 
-        private ReferenceBindViewModelPB GetNewViewModel()
-        {
-            PropModel pm = _propModelProvider.GetPropModel("ReferenceBindViewModelPB");
-            IPropFactory pf = SettingsExtensions.ThePropFactory;
+        //private ReferenceBindViewModelPB GetNewViewModel()
+        //{
+        //    //PropModel pm = _propModelProvider.GetPropModel("ReferenceBindViewModelPB");
+        //    //IPropFactory pf = SettingsExtensions.ThePropFactory;
 
-            ReferenceBindViewModelPB rbvm = new ReferenceBindViewModelPB(pm, pf);
+        //    //ReferenceBindViewModelPB rbvm = new ReferenceBindViewModelPB(pm, pf);
 
-            MyModel4 mod4 = new MyModel4() { MyString = "Start" };
-            rbvm.SetIt<MyModel4>(mod4, "Deep");
+        //    //MyModel4 mod4 = new MyModel4() { MyString = "Start" };
+        //    //rbvm.SetIt<MyModel4>(mod4, "Deep");
 
-            return rbvm;
-        }
+        //    //return rbvm;
+        //}
 
         private AutoMapperProvider InitializeAutoMappers(IPropModelProvider propModelProvider)
         {
+            // Select one of a few well-know strategies for 
+            // 1. Createing new instances of IPropBag-based ViewModels
+            // 2. It is used by AutoMapper support to inform how to
+            //      a. Create new target instances,
+            //      b. How to get Type info.
+            //      c. How to create code that does the mapping.
             PropBagMappingStrategyEnum mappingStrategy = PropBagMappingStrategyEnum.ExtraMembers;
 
+            // This allows us to keep a library of base Mapper configurations.
             Func<Action<IMapperConfigurationExpression>, IConfigurationProvider> configBuilder
                 = new MapperConfigurationProvider().BaseConfigBuilder;
 
+            // This is provided by the caller for a particular mapping application.
             MapperConfigInitializerProvider mapperConfigExpression = new MapperConfigInitializerProvider(mappingStrategy);
 
+            // Provides a service to locate, cache mappers -- thereby optimizing the resources provided by and consumed by AutoMapping.
             ConfiguredMappers configuredMappers = new ConfiguredMappers(configBuilder, mapperConfigExpression);
 
 
-
+            // Used only by some ModuleBuilders.
             TypeDescriptionProvider typeDescriptionProvider = new TypeDescriptionProvider();
 
+            // Used by some ViewModel Activators to emit types, i.e., modules.
             IModuleBuilderInfoProvider x = new DefaultModuleBuilderInfoProvider();
             IModuleBuilderInfo mbi = x.ModuleBuilderInfo;
 
+            // One big ball of AutoMapping services.
             AutoMapperProvider autoMapperProvider = new AutoMapperProvider(mappingStrategy, propModelProvider,
                 configuredMappers, mbi, typeDescriptionProvider);
+
+            //-------------------------
+
+            // Other Dependencies that could be managed, but not part of AutoMapper, per say.
+            // 1. Type Converter Cache used by most, if not all IPropFactory.
+            // 2. DoSetDelegate Cache -- basically baked into IPropBag -- not many different options
+            // 3. PropCreation Delegate Cache --  only used by IPropFactory this is not critical now, but could become so 
+            // 4. Event Listeners that could managed better if done as a central service -- used by PropBag and the Binding engine.
+
+            //------------------------ 
+
+            //******************
+
+            // Services that we need to focus on now.
+            // 1. ViewModel creation 
+            // 2. PropFactory boot strapping
+            // 3. Proxy Model creation (we should be able to use 95% of the same services as those provided for ViewModel
+            //          creation, in fact, ProxModel creation is probably the driver and ViewModel can benefit from
+            //          novel techniqes explored here.
+            // 4. Creating a language for ViewModel configuration.
+            // 5. Creating services that allow for data flow behavior to be declared and executed without having
+            //          to write code.
+            // 6. Creating ViewModel sinks for data coming from the View dynamically, ReactiveUI has a 
+            //          a way of doing this from the ViewModel to the View, can we build a facility to allow the reverse?
+            // 
+            // 7. Allowing the View to affect the behavior of the ViewModel dynamically.
+            // 8. Design-time support including AutoMapper mapping configuration and testing.
+            //******************
+
+            // +++++++++++++++++++
+
+            // Other services that should be addressed
+            // 1. Building TypeDescriptors / Type Descriptions / PropertyInfo / Custom MetaData for reflection.
+            // 2. XML Serialization services for saving / hydrating IPropBag objects.
+            // 
+            // +++++++++++++++++++
 
             return autoMapperProvider;
         }
