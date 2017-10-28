@@ -15,7 +15,7 @@ namespace PropBagTestApp
         //public static ConfiguredMappers ConfiguredMappers { get; private set; }
         //public static IModuleBuilderInfo PropBagProxyBuilder { get; private set; }
         //public static PropBagMappingStrategyEnum MappingStrategy { get; private set; }
-        //public static IPropFactory ThePropFactory { get; }
+        public static IPropFactory ThePropFactory { get; }
 
         static SettingsExtensions()
         {
@@ -26,8 +26,8 @@ namespace PropBagTestApp
             //// Use the settings to initialize our static properties.
             //theAppsSettings.GetSettings();
 
-            //// Create a shared Prop Factory
-            //ThePropFactory = new PropFactory(false, GetTypeFromName);
+            // Create a shared Prop Factory
+            ThePropFactory = new PropFactory(false, GetTypeFromName);
         }
 
         //public static void GetSettings(this Settings settings)
