@@ -149,7 +149,7 @@ namespace DRM.PropBag
             if (propertyType == typeof(string))
                 return null;
 
-            return Activator.CreateInstance(propertyType);
+            return System.Activator.CreateInstance(propertyType);
         }
     }
 

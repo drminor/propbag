@@ -1,4 +1,5 @@
-﻿using DRM.TypeSafePropertyBag;
+﻿using DRM.PropBag;
+using DRM.TypeSafePropertyBag;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

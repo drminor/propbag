@@ -41,6 +41,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ControlModel\IPropModelProvider.cs" />
     <Compile Include="Caches\TypeDescBasedTConverterKey.cs" />
     <Compile Include="Caches\TypeDescBasedTConverterCache.cs" />
     <Compile Include="ClassGenerator\PropDefRaw.cs" />
@@ -69,7 +70,7 @@
     <Compile Include="Factories\CreatePropDelegate.cs" />
     <Compile Include="ExtValDelegates.cs" />
     <Compile Include="Factories\GetDefaultValueDelegate.cs" />
-    <Compile Include="Factories\PropFactoryValueConveter.cs" />
+    <Compile Include="Factories\PropFactoryValueConverter.cs" />
     <Compile Include="Prop.cs" />
     <Compile Include="PropBag.CustomTypeDescriptor.cs" />
     <None Include="PropBagDyn.cs" />
