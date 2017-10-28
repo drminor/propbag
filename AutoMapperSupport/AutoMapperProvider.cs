@@ -1,16 +1,9 @@
-﻿using DRM.PropBag;
-using DRM.PropBag.AutoMapperSupport;
-using DRM.PropBag.ControlModel;
-using DRM.PropBag.ControlsWPF;
+﻿using DRM.PropBag.ControlModel;
 using DRM.PropBag.ViewModelBuilder;
 
-using DRM.PropBag.ControlsWPF.WPFHelpers;
-
 using System;
-using DRM.TypeSafePropertyBag;
 
-
-namespace PropBagTestApp
+namespace DRM.PropBag.AutoMapperSupport
 {
     public class AutoMapperProvider
     {
@@ -38,10 +31,10 @@ namespace PropBagTestApp
             _mappersCache = mappersCache ?? throw new ArgumentNullException(nameof(mappersCache));
             _propBagProxyBuilder = propBagProxyBuilder ?? throw new ArgumentNullException(nameof(propBagProxyBuilder));
 
-            if(!propModelProvider.CanFindPropBagTemplateWithJustKey)
-            {
-                throw new ArgumentException("The PropModelProvider must have been created with a ResourceDictionary or other similar resource.");
-            }
+            //if(!propModelProvider.CanFindPropBagTemplateWithJustKey)
+            //{
+            //    throw new ArgumentException("The PropModelProvider must have been created with a ResourceDictionary or other similar resource.");
+            //}
         }
 
         #endregion
