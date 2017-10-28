@@ -61,15 +61,22 @@ namespace DRM.ViewModelTools
 
         public T GetNewViewModel(PropModel propModel, IPropFactory propFactory, Type baseType)
         {
-            if (!baseType.IsPropBagBased())
+            if(baseType == null)
+            {
+                T result = GetNewViewModel(propModel, propFactory);
+                return result;
+            } 
+            else if (!baseType.IsPropBagBased())
             {
                 throw new InvalidOperationException($"Type: {baseType.Name} must derive from IPropBag.");
             }
+            else
+            {
+                // TODO: verify that baseType derives from T.
 
-            // TODO: verify that baseType derives from T.
-
-            T result = (T)Activator.CreateInstance(baseType, propModel, propFactory);
-            return result;
+                T result = (T)Activator.CreateInstance(baseType, propModel, propFactory);
+                return result;
+            }
         }
 
         // BaseType + ClassName (BaseType known at compile time.)
