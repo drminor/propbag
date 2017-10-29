@@ -123,15 +123,15 @@ namespace PropBagTestApp
 
         private void DefineMapingKeys(string instanceKey)
         {
-            BoundPropBag boundPB = _boundPropBags[instanceKey];
+            //BoundPropBag boundPB = _boundPropBags[instanceKey];
 
-            _mapperKey
-                = new PropBagMapperKey<MyModel, DtoTestViewModelExtra>
-                (boundPB.PropModel, boundPB.RtViewModelType, mappingStrategy: PropBagMappingStrategyEnum.ExtraMembers);
+            //_mapperKey
+            //    = new PropBagMapperKey<MyModel, DtoTestViewModelExtra>
+            //    (boundPB.PropModel, boundPB.RtViewModelType, mappingStrategy: PropBagMappingStrategyEnum.ExtraMembers);
 
-            _mapperKey2
-                = new PropBagMapperKey<MyModel2, DtoTestViewModelExtra>
-                (boundPB.PropModel, boundPB.RtViewModelType, mappingStrategy: PropBagMappingStrategyEnum.ExtraMembers);
+            //_mapperKey2
+            //    = new PropBagMapperKey<MyModel2, DtoTestViewModelExtra>
+            //    (boundPB.PropModel, boundPB.RtViewModelType, mappingStrategy: PropBagMappingStrategyEnum.ExtraMembers);
         }
         
         //private ConfiguredMappers GetAutoMappers(PropBagMappingStrategyEnum mappingStrategy)

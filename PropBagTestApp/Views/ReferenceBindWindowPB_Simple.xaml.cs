@@ -31,6 +31,7 @@ namespace PropBagTestApp.View
             _propModelProvider = new PropModelProvider(propBagTemplateProvider);
 
             //_autoMapperProvider = InitializeAutoMappers(_propModelProvider);
+            _mapper = null;
 
             InitializeComponent();
 
