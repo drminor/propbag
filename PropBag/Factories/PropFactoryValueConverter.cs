@@ -106,19 +106,30 @@ namespace DRM.PropBag
             if (tt.IsEmpty) throw new InvalidOperationException("Type information was not available.");
 #endif
 
-            Type sourceRunTimeType = value.GetType();
-
-            if (sourceRunTimeType != tt.SourceType)
+            if(value == null)
             {
-                if(sourceRunTimeType != typeof(string))
+                if(targetType.IsValueType)
                 {
-                    throw new NotImplementedException("Converting from a type other than a string is not yet supported.");
+                    return GetDefaultValue(targetType, "ConvertBackOp");
                 }
-
-                TFromStringDelegate del = _converter.GetTheTFromStringDelegate(tt.SourceType, tt.DestType);
-                string s = value as string;
-                return del(s);
             }
+            else
+            {
+                Type sourceRunTimeType = value?.GetType();
+
+                if (sourceRunTimeType != tt.SourceType)
+                {
+                    if (sourceRunTimeType != typeof(string))
+                    {
+                        throw new NotImplementedException("Converting from a type other than a string is not yet supported.");
+                    }
+
+                    TFromStringDelegate del = _converter.GetTheTFromStringDelegate(tt.SourceType, tt.DestType);
+                    string s = value as string;
+                    return del(s);
+                }
+            }
+
             return value;
         }
 
