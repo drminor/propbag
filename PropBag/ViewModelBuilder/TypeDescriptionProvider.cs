@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DRM.PropBag.ViewModelBuilder
+namespace DRM.PropBag.ViewModelBuilder.OLD
 {
     public class TypeDescriptionProvider
     {

@@ -56,7 +56,9 @@ namespace DRM.PropBag
         public event PropertyChangedEventHandler PropertyChangedIndividual;
 
         private PropBagTypeSafetyMode TypeSafetyMode { get; }
-        private IPropFactory PropFactory { get; }
+
+        // DRM; Changed to protected and added set accessor on 10/29/17
+        protected IPropFactory PropFactory { get; set; }
         private TypeSafePropBagMetaData OurMetaData { get; }
 
         private readonly Dictionary<string, PropGen> tVals;
@@ -206,8 +208,6 @@ namespace DRM.PropBag
         }
 
         #endregion
-
-
 
         #region Missing Prop Handler
 
