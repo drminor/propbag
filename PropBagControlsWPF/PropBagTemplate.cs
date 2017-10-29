@@ -89,6 +89,7 @@ namespace DRM.PropBag.ControlsWPF
             DependencyProperty.Register("TypeSafetyMode", typeof(PropBagTypeSafetyMode), typeof(PropBagTemplate),
                 new PropertyMetadata(PropBagTypeSafetyMode.None));
 
+        
         public PropBagTypeSafetyMode TypeSafetyMode
         {
             get

@@ -91,7 +91,7 @@
     <Compile Include="PropValueConverter.cs" />
     <Compile Include="ReflectionHelpers.cs" />
     <Compile Include="TwoTypeMarkupExtension.cs" />
-    <Compile Include="ViewModelGenerator.cs" />
+    <None Include="ViewModelGenerator_OLD.cs" />
     <Compile Include="Activators\IPropBagTemplateProvider.cs" />
     <Compile Include="WPFHelpers\LogicalTree.cs" />
     <Compile Include="Activators\PropBagTemplateProvider.cs" />
