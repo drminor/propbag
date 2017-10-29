@@ -1,12 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
-using DRM.PropBag.ControlModel;
 
-using DRM.TypeSafePropertyBag;
 namespace DRM.PropBag.AutoMapperSupport
 {
     // TODO: check to see if we really needing to use the base class: PropBagMapperKeyGen
