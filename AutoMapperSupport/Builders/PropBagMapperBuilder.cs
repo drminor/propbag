@@ -8,9 +8,10 @@ namespace DRM.PropBag.AutoMapperSupport
     {
         private IConfigureAMapper<TSource, TDestination> MapperConfiguration { get; }
 
-        private IViewModelActivator<TDestination> VmActivator { get; }
+        private IViewModelActivator VmActivator { get; }
 
-        public PropBagMapperBuilder(IConfigureAMapper<TSource, TDestination> mapperConfiguration, IViewModelActivator<TDestination> vmActivator)
+        public PropBagMapperBuilder(IConfigureAMapper<TSource, TDestination> mapperConfiguration,
+            IViewModelActivator vmActivator)
         {
             MapperConfiguration = mapperConfiguration;
             VmActivator = vmActivator;
