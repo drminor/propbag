@@ -25,7 +25,7 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public Func<IPropBagMapperKeyGen, IPropBagMapperGen> MapperCreator => PropBagMapperBuilder.GenMapperCreator;
 
-        public IConfigureAMapper<TSource, TDestination> MappingConfiguration { get; }
+        //public IConfigureAMapper<TSource, TDestination> MappingConfiguration { get; }
 
         #endregion
 
@@ -55,7 +55,7 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public PropBagMapperKey(
             IBuildPropBagMapper<TSource, TDestination> propBagMapperBuilder,
-            IConfigureAMapper<TSource, TDestination> mappingConfiguration,
+            //IConfigureAMapper<TSource, TDestination> mappingConfiguration,
             IMapTypeDefinition<TSource> sourceMapTypeDef,
             IMapTypeDefinition<TDestination> destinationMapTypeDef,
             Func<TDestination, TSource> sourceConstructor = null,
@@ -63,7 +63,7 @@ namespace DRM.PropBag.AutoMapperSupport
             : base(propBagMapperBuilder.GenMapperCreator, sourceMapTypeDef, destinationMapTypeDef)
         {
             PropBagMapperBuilder = propBagMapperBuilder;
-            MappingConfiguration = mappingConfiguration;
+            //MappingConfiguration = mappingConfiguration;
 
             if (sourceMapTypeDef.IsPropBag) throw new ApplicationException
                     ("The first type, TSource, is expected to be a regular, i.e., non-propbag-based type.");
@@ -79,18 +79,6 @@ namespace DRM.PropBag.AutoMapperSupport
         }
 
         #endregion
-
-        //private static IMapTypeDefinition<T> GetTypeDef<T>(PropModel pm, Type baseType)
-        //{
-        //    if (typeof(T).IsPropBagBased())
-        //    {
-        //        return new MapTypeDefinition<T>(pm, baseType);
-        //    }
-        //    else
-        //    {
-        //        return new MapTypeDefinition<T>();
-        //    }
-        //}
 
         #region IEquatable Support and Object Overrides
         public override bool Equals(object obj)
