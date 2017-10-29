@@ -66,6 +66,8 @@
     <Compile Include="ComparerFuncTypeConverter.cs" />
     <Compile Include="Binders\DepPropChangedEventArgs.cs" />
     <Compile Include="Binders\DepPropChangedTypeConverter.cs" />
+    <Compile Include="Converters\EnumValueConverter.cs" />
+    <Compile Include="Converters\LocalizableDescriptionAttribute.cs" />
     <Compile Include="DoWhenChangedAction.cs" />
     <Compile Include="DuoActionTypeConverter.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
