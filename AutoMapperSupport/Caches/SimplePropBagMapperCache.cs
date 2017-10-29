@@ -4,7 +4,7 @@ using System;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
-    public class SimplePropBagMapperCache
+    public class SimplePropBagMapperCache : ICachePropBagMappers
     {
         private int pCntr = 0;
         private LockingConcurrentDictionary<IPropBagMapperKeyGen, IPropBagMapperKeyGen> _unSealedPropBagMappers;
@@ -21,7 +21,7 @@ namespace DRM.PropBag.AutoMapperSupport
                 (GetPropBagMapperReal);
         }
 
-        public void Register(IPropBagMapperKeyGen mapRequest)
+        public void RegisterMapperRequest(IPropBagMapperKeyGen mapRequest)
         {
             if (!_sealedPropBagMappers.ContainsKey(mapRequest))
             {
@@ -29,7 +29,7 @@ namespace DRM.PropBag.AutoMapperSupport
             }
         }
 
-        public IPropBagMapperGen GetMapperToUse(IPropBagMapperKeyGen mapRequest)
+        public IPropBagMapperGen GetMapper(IPropBagMapperKeyGen mapRequest)
         {
             if (_sealedPropBagMappers.TryGetValue(mapRequest, out IPropBagMapperGen result))
             {
