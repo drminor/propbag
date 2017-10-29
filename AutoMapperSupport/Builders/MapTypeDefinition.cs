@@ -1,9 +1,7 @@
 ﻿using DRM.PropBag.ControlModel;
+using DRM.TypeSafePropertyBag;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
@@ -14,7 +12,7 @@ namespace DRM.PropBag.AutoMapperSupport
             Type = typeof(T);
             IsPropBag = false;
             PropModel = null;
-            BaseType = null;
+            NewWrapperType = null;
         }
 
         public MapTypeDefinition(PropModel pm, Type baseType)
@@ -22,14 +20,26 @@ namespace DRM.PropBag.AutoMapperSupport
             Type = typeof(T);
             IsPropBag = true;
             PropModel = pm;
-            BaseType = baseType;
+            NewWrapperType = baseType;
         }
 
         public Type Type { get; }
 
         public bool IsPropBag { get; }
         public PropModel PropModel { get; }
-        public Type BaseType { get; }
+        public Type NewWrapperType { get; }
+
+        private static IMapTypeDefinition<T> GetTypeDef(PropModel pm, Type baseType)
+        {
+            if (typeof(T).IsPropBagBased())
+            {
+                return new MapTypeDefinition<T>(pm, baseType);
+            }
+            else
+            {
+                return new MapTypeDefinition<T>();
+            }
+        }
 
         public override string ToString()
         {
@@ -50,7 +60,7 @@ namespace DRM.PropBag.AutoMapperSupport
                    EqualityComparer<Type>.Default.Equals(Type, definition.Type) &&
                    IsPropBag == definition.IsPropBag &&
                    EqualityComparer<PropModel>.Default.Equals(PropModel, definition.PropModel) &&
-                   EqualityComparer<Type>.Default.Equals(BaseType, definition.BaseType);
+                   EqualityComparer<Type>.Default.Equals(NewWrapperType, definition.NewWrapperType);
         }
 
         bool IEquatable<MapTypeDefinition<T>>.Equals(MapTypeDefinition<T> other)
@@ -59,7 +69,7 @@ namespace DRM.PropBag.AutoMapperSupport
                    EqualityComparer<Type>.Default.Equals(Type, other.Type) &&
                    IsPropBag == other.IsPropBag &&
                    EqualityComparer<PropModel>.Default.Equals(PropModel, other.PropModel) &&
-                   EqualityComparer<Type>.Default.Equals(BaseType, other.BaseType);
+                   EqualityComparer<Type>.Default.Equals(NewWrapperType, other.NewWrapperType);
         }
 
         #region IEquatable<MapTypeDefinition<T>>
@@ -73,7 +83,7 @@ namespace DRM.PropBag.AutoMapperSupport
             hashCode = hashCode * -1521134295 + EqualityComparer<Type>.Default.GetHashCode(Type);
             hashCode = hashCode * -1521134295 + IsPropBag.GetHashCode();
             hashCode = hashCode * -1521134295 + EqualityComparer<PropModel>.Default.GetHashCode(PropModel);
-            hashCode = hashCode * -1521134295 + EqualityComparer<Type>.Default.GetHashCode(BaseType);
+            hashCode = hashCode * -1521134295 + EqualityComparer<Type>.Default.GetHashCode(NewWrapperType);
             return hashCode;
         }
 
@@ -85,7 +95,7 @@ namespace DRM.PropBag.AutoMapperSupport
                    EqualityComparer<Type>.Default.Equals(Type, other.Type) &&
                    IsPropBag == other.IsPropBag &&
                    EqualityComparer<PropModel>.Default.Equals(PropModel, other.PropModel) &&
-                   EqualityComparer<Type>.Default.Equals(BaseType, other.BaseType);
+                   EqualityComparer<Type>.Default.Equals(NewWrapperType, other.NewWrapperType);
         }
 
         #endregion

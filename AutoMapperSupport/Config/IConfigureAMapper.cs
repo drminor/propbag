@@ -4,15 +4,21 @@ using System.Collections.Generic;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
-    public interface IConfigureAMapper
+    public interface IConfigureAMapper<TSource, TDestination> : IConfigureAMapperGen where TDestination : class, IPropBag
+    {
+        IMapperConfigurationStep<TSource, TDestination> FinalConfigStep { get; }
+
+        IConfigurationProvider GetConfigurationProvider(IPropBagMapperKey<TSource, TDestination> propBagMapperKey);
+    }
+
+    public interface IConfigureAMapperGen
     {
         bool SupportsMapFrom { get; }
-        IGetInitialMapperConfig MapperConfigStarter { get; }
-        IList<IMapperConfigurationStep> ConfigurationSteps { get; }
+        IList<IMapperConfigurationStepGen> ConfigurationSteps { get; }
 
-        void Add(IMapperConfigurationStep step);
+        void Add(IMapperConfigurationStepGen step);
         void Clear();
 
-        IConfigurationProvider ConfigurationProvider { get; }
+        IConfigurationProvider GetConfigurationProviderGen();
     }
 }

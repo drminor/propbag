@@ -6,9 +6,9 @@ using System.Reflection;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
-    public class ExtraMembersConfigFinalStep<TSource, TDestination> : IMapperConfigurationStepWithTypes<TSource, TDestination>
+    public class ExtraMembersConfigFinalStep<TSource, TDestination> : IMapperConfigurationStep<TSource, TDestination>
     {
-        public Action<IPropBagMapperKey<TSource, TDestination>,IMapperConfigurationExpression> ConfigurationStep
+        public Action<IPropBagMapperKey<TSource, TDestination>, IMapperConfigurationExpression> ConfigurationStep
         {
             get
             {
@@ -22,7 +22,7 @@ namespace DRM.PropBag.AutoMapperSupport
 
             IEnumerable<MemberInfo> extraMembers = new ExtraMembersProvider().GetExtraMembers(propModel);
 
-            Func<TDestination, TSource> regularInstanceCreator = mapRequest.ConstructSourceFunc;
+            Func<TDestination, TSource> regularInstanceCreator = mapRequest.SourceConstructor;
 
             //cfg.IncludeExtraMembersForType(typeof(Destination), extraMembers);
 

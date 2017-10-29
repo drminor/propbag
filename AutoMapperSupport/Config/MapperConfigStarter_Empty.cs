@@ -1,14 +1,11 @@
-﻿using AutoMapper;
+﻿using System;
+using AutoMapper;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
-    public class MapperConfigStarter_Empty : IGetInitialMapperConfig
+    public class MapperConfigStarter_Empty : IMapperConfigurationStepGen
     {
-        public IConfigurationProvider GetNewBaseConfiguration()
-        {
-            IConfigurationProvider result = new MapperConfiguration(ResetMemberConfiguration);
-            return result;
-        }
+        public Action<IMapperConfigurationExpression> ConfigurationStep => ResetMemberConfiguration;
 
         private void ResetMemberConfiguration(IMapperConfigurationExpression cfg)
         {

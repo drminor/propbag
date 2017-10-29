@@ -9,7 +9,7 @@ using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
-    public class ExtraMembersConfigInitialStep : IMapperConfigurationStep
+    public class ExtraMembersConfigInitialStep : IMapperConfigurationStepGen
     {
         public Action<IMapperConfigurationExpression> ConfigurationStep
         {

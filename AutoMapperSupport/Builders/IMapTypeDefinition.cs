@@ -1,4 +1,5 @@
 ﻿using DRM.PropBag.ControlModel;
+using DRM.TypeSafePropertyBag;
 using System;
 
 namespace DRM.PropBag.AutoMapperSupport
@@ -13,6 +14,8 @@ namespace DRM.PropBag.AutoMapperSupport
 
         bool IsPropBag { get; }
         PropModel PropModel { get; }
-        Type BaseType { get; }
+        Type NewWrapperType { get; }
+        //IPropFactory PropFactory { get; }
+
     }
 }

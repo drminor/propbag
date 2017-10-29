@@ -1,161 +1,41 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
-using DRM.PropBag.ControlModel;
 
-using DRM.TypeSafePropertyBag;
 namespace DRM.PropBag.AutoMapperSupport
 {
-    // TODO: check to see if we really needing to use the base class: PropBagMapperKeyGen
-
-    public class PropBagMapperKey<TSource, TDestination> : PropBagMapperKeyGen,
-        IPropBagMapperKey<TSource, TDestination>, 
-        IEquatable<IPropBagMapperKey<TSource, TDestination>>,
-        IEquatable<PropBagMapperKey<TSource, TDestination>>
-    {
-        public IMapTypeDefinition<TSource> SourceTypeDef { get; }
-
-        public IMapTypeDefinition<TDestination> DestinationTypeDef { get; }
-
-        public Func<TDestination, TSource> ConstructSourceFunc { get; }
-
-        public Func<TSource, TDestination> ConstructDestinationFunc { get; }
-
-        public PropBagMapperKey(PropModel pm,
-            Type baseType,
-            PropBagMappingStrategyEnum mappingStrategy,
-            Func<TDestination, TSource> constructSourceFunc = null,
-            Func<TSource, TDestination> constructDestinationFunc = null)
-            : base(mappingStrategy,
-                  GetTypeDef<TSource>(pm, baseType) as IMapTypeDefinitionGen,
-                  GetTypeDef<TDestination>(pm, baseType) as IMapTypeDefinitionGen, GetCreaterFunc(mappingStrategy))
-        {
-            Type tDest = typeof(TDestination);
-
-
-            if (typeof(TSource).IsPropBagBased()) throw new ApplicationException("The first type, TSource, is expected to be a regular, i.e., non-propbag-based type.");
-            if (! (typeof(TDestination).IsPropBagBased())) throw new ApplicationException("The second type, TDestination, is expected to be a propbag-based type.");
-
-            SourceTypeDef = base.SourceTypeGenDef as IMapTypeDefinition<TSource>; //GetTypeDef<TSource>(pm, baseType);
-            DestinationTypeDef = base.DestinationTypeGenDef as IMapTypeDefinition<TDestination>; // GetTypeDef<TDestination>(pm, baseType);
-
-            ConstructSourceFunc = constructSourceFunc;
-            ConstructDestinationFunc = constructDestinationFunc;
-        }
-
-        private static Func<IPropBagMapperKeyGen, IPropBagMapperGen> GetCreaterFunc(PropBagMappingStrategyEnum mappingStrategy)
-        {
-            Func<IPropBagMapperKeyGen, IPropBagMapperGen> result;
-            switch (mappingStrategy)
-            {
-                case PropBagMappingStrategyEnum.ExtraMembers:
-                    {
-                        result = (untypedKey) =>
-                        {
-                            IPropBagMapperKey<TSource, TDestination> typedKey = (IPropBagMapperKey<TSource, TDestination>)untypedKey;
-                            return new PropBagMapperCustom<TSource, TDestination>(typedKey);
-                        };
-                        break;
-                    }
-                case PropBagMappingStrategyEnum.EmitProxy:
-                    {
-                        result = (untypedKey) =>
-                        {
-                            IPropBagMapperKey<TSource, TDestination> typedKey = (IPropBagMapperKey<TSource, TDestination>)untypedKey;
-                            // TODO: Fix Me.
-                            // return new SimplePropBagMapper<TSource, TDestination>(typedKey);
-                            return new PropBagMapperCustom<TSource, TDestination>(typedKey);
-
-                        };
-                        break;
-                    }
-                default:
-                    {
-                        throw new ApplicationException($"Unsupported, or unexpected value of {nameof(PropBagMappingStrategyEnum)}.");
-                    }
-            }
-            return result;
-        }
-
-        private static IMapTypeDefinition<T> GetTypeDef<T>(PropModel pm, Type baseType)
-        {
-            if(typeof(T).IsPropBagBased())
-            {
-                return new MapTypeDefinition<T>(pm, baseType);
-            }
-            else
-            {
-                return new MapTypeDefinition<T>();
-            }
-        }
-
-        public override bool Equals(object obj)
-        {
-            return Equals(obj as PropBagMapperKeyGen);
-        }
-
-        public override int GetHashCode()
-        {
-            var hashCode = 1780333077;
-            hashCode = hashCode * -1521134295 + base.GetHashCode();
-            hashCode = hashCode * -1521134295 + EqualityComparer<IMapTypeDefinition<TSource>>.Default.GetHashCode(SourceTypeDef);
-            hashCode = hashCode * -1521134295 + EqualityComparer<IMapTypeDefinition<TDestination>>.Default.GetHashCode(DestinationTypeDef);
-            return hashCode;
-        }
-
-        public override string ToString()
-        {
-            return base.ToString();
-        }
-
-        // TODO: Implement Equals for PropBagMapperKey
-        public bool Equals(PropBagMapperKey<TSource, TDestination> other)
-        {
-            throw new NotImplementedException();
-        }
-
-        // TODO: Implement Equals for IPropBagMapperKey
-        public bool Equals(IPropBagMapperKey<TSource, TDestination> other)
-        {
-            throw new NotImplementedException();
-        }
-
-        public static bool operator ==(PropBagMapperKey<TSource, TDestination> key1, PropBagMapperKey<TSource, TDestination> key2)
-        {
-            return EqualityComparer<PropBagMapperKey<TSource, TDestination>>.Default.Equals(key1, key2);
-        }
-
-        public static bool operator !=(PropBagMapperKey<TSource, TDestination> key1, PropBagMapperKey<TSource, TDestination> key2)
-        {
-            return !(key1 == key2);
-        }
-    }
-
     public class PropBagMapperKeyGen : IPropBagMapperKeyGen, IEquatable<IPropBagMapperKeyGen>, IEquatable<PropBagMapperKeyGen>
     {
-        public PropBagMappingStrategyEnum MappingStrategy { get; }
+        #region Private Members
+        private Func<IPropBagMapperKeyGen, IPropBagMapperGen> MapperCreator { get; }
+        #endregion
 
+        #region Public Properties
         public IMapTypeDefinitionGen SourceTypeGenDef { get; set; }
-
         public IMapTypeDefinitionGen DestinationTypeGenDef { get; set; }
+        #endregion
 
-        public Func<IPropBagMapperKeyGen, IPropBagMapperGen> CreateMapper { get; }
-
-
-        public PropBagMapperKeyGen(PropBagMappingStrategyEnum mappingStrategy,
+        #region Constructor
+        public PropBagMapperKeyGen(
+            Func<IPropBagMapperKeyGen, IPropBagMapperGen> mapperCreator,
             IMapTypeDefinitionGen sourceTypeGenDef,
-            IMapTypeDefinitionGen destinationTypeGenDef,
-            Func<IPropBagMapperKeyGen, IPropBagMapperGen> createMapper)
+            IMapTypeDefinitionGen destinationTypeGenDef)
         {
-            MappingStrategy = mappingStrategy;
             SourceTypeGenDef = sourceTypeGenDef;
             DestinationTypeGenDef = destinationTypeGenDef;
-            CreateMapper = createMapper;
+            MapperCreator = mapperCreator;
+        }
+        #endregion
+
+        #region Public Methods
+
+        public IPropBagMapperGen CreateMapper()
+        {
+            return MapperCreator(this);
         }
 
+        #endregion
+
+        #region IEquatable Support and Object Overrides
         public override bool Equals(object obj)
         {
             return Equals(obj as PropBagMapperKeyGen);
@@ -164,7 +44,7 @@ namespace DRM.PropBag.AutoMapperSupport
         public bool Equals(PropBagMapperKeyGen other)
         {
             return other != null &&
-                   MappingStrategy == other.MappingStrategy &&
+                   //MappingStrategy == other.MappingStrategy &&
                    EqualityComparer<IMapTypeDefinitionGen>.Default.Equals(SourceTypeGenDef, other.SourceTypeGenDef) &&
                    EqualityComparer<IMapTypeDefinitionGen>.Default.Equals(DestinationTypeGenDef, other.DestinationTypeGenDef);
         }
@@ -172,7 +52,7 @@ namespace DRM.PropBag.AutoMapperSupport
         public bool Equals(IPropBagMapperKeyGen other)
         {
             return other != null &&
-                   MappingStrategy == other.MappingStrategy &&
+                   //MappingStrategy == other.MappingStrategy &&
                    EqualityComparer<IMapTypeDefinitionGen>.Default.Equals(SourceTypeGenDef, other.SourceTypeGenDef) &&
                    EqualityComparer<IMapTypeDefinitionGen>.Default.Equals(DestinationTypeGenDef, other.DestinationTypeGenDef);
         }
@@ -180,7 +60,7 @@ namespace DRM.PropBag.AutoMapperSupport
         public override int GetHashCode()
         {
             var hashCode = 1973524047;
-            hashCode = hashCode * -1521134295 + MappingStrategy.GetHashCode();
+            //hashCode = hashCode * -1521134295 + MappingStrategy.GetHashCode();
             hashCode = hashCode * -1521134295 + EqualityComparer<IMapTypeDefinitionGen>.Default.GetHashCode(SourceTypeGenDef);
             hashCode = hashCode * -1521134295 + EqualityComparer<IMapTypeDefinitionGen>.Default.GetHashCode(DestinationTypeGenDef);
             return hashCode;
@@ -200,6 +80,7 @@ namespace DRM.PropBag.AutoMapperSupport
         {
             return !(gen1 == gen2);
         }
+        #endregion
     }
 
     // Old version, works just as well without explicitly inheriting from class that implements IPropBagMapperKeyGen

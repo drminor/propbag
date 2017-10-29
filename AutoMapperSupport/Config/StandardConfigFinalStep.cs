@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
-    public class StandardConfigFinalStep<TSource, TDestination> : IMapperConfigurationStepWithTypes<TSource, TDestination>
+    public class StandardConfigFinalStep<TSource, TDestination> : IMapperConfigurationStep<TSource, TDestination>
     {
         public Action<IPropBagMapperKey<TSource, TDestination>,IMapperConfigurationExpression> ConfigurationStep
         {
@@ -20,11 +20,9 @@ namespace DRM.PropBag.AutoMapperSupport
         {
             PropModel propModel = mapRequest.DestinationTypeDef.PropModel;
 
-            IEnumerable<MemberInfo> extraMembers = new ExtraMembersProvider().GetExtraMembers(propModel);
+            Func<TDestination, TSource> regularInstanceCreator = mapRequest.SourceConstructor;
 
-            Func<TDestination, TSource> regularInstanceCreator = mapRequest.ConstructSourceFunc;
-
-            Type newWrapperType = mapRequest.DestinationTypeDef.BaseType;
+            Type newWrapperType = mapRequest.DestinationTypeDef.NewWrapperType;
 
             cfg.CreateMap(typeof(TSource), newWrapperType);
 

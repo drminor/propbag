@@ -10,16 +10,19 @@ namespace DRM.PropBag.AutoMapperSupport
     {
         IMapTypeDefinition<TSource> SourceTypeDef { get; }
         IMapTypeDefinition<TDestination> DestinationTypeDef { get; }
-        Func<TDestination, TSource> ConstructSourceFunc { get; }
-        Func<TSource, TDestination> ConstructDestinationFunc { get; }
+        Func<TDestination, TSource> SourceConstructor { get; }
+        Func<TSource, TDestination> DestinationConstructor { get; }
+
+        Func<IPropBagMapperKeyGen, IPropBagMapperGen> MapperCreator { get; }
+
     }
 
     public interface IPropBagMapperKeyGen
     {
-        PropBagMappingStrategyEnum MappingStrategy { get; }
+        //PropBagMappingStrategyEnum MappingStrategy { get; }
         IMapTypeDefinitionGen SourceTypeGenDef { get; }
         IMapTypeDefinitionGen DestinationTypeGenDef { get; }
 
-        Func<IPropBagMapperKeyGen, IPropBagMapperGen> CreateMapper { get; }
+        IPropBagMapperGen CreateMapper();
     }
 }
