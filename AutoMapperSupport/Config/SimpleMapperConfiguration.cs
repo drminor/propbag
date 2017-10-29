@@ -19,7 +19,7 @@ namespace DRM.PropBag.AutoMapperSupport.Config
 
         public IConfigurationProvider GetConfigurationProvider(IPropBagMapperKey<TSource, TDestination> propBagMapperKey)
         {
-            IConfigurationProvider result = MapperConfigBuilder.GetNewBaseConfiguration(this);
+            IConfigurationProvider result = MapperConfigBuilder.GetNewConfiguration(this);
             return result;
         }
     }

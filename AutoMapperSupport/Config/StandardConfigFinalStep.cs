@@ -4,7 +4,8 @@ using System;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
-    public class StandardConfigFinalStep<TSource, TDestination> : IMapperConfigurationStep<TSource, TDestination>
+    public class StandardConfigFinalStep<TSource, TDestination>
+        : IMapperConfigurationStep<TSource, TDestination> where TDestination : class, IPropBag
     {
         public Action<IPropBagMapperKey<TSource, TDestination>,IMapperConfigurationExpression> ConfigurationStep
         {

@@ -2,7 +2,7 @@
 
 namespace DRM.PropBag.AutoMapperSupport
 {
-    public interface IPropBagMapperKey<TSource, TDestination> : IPropBagMapperKeyGen
+    public interface IPropBagMapperKey<TSource, TDestination> : IPropBagMapperKeyGen where TDestination: class, IPropBag
     {
         IMapTypeDefinition<TSource> SourceTypeDef { get; }
         IMapTypeDefinition<TDestination> DestinationTypeDef { get; }
@@ -11,6 +11,7 @@ namespace DRM.PropBag.AutoMapperSupport
 
         Func<IPropBagMapperKeyGen, IPropBagMapperGen> MapperCreator { get; }
 
+        IConfigureAMapper<TSource, TDestination> MappingConfiguration { get; }
     }
 
     public interface IPropBagMapperKeyGen

@@ -15,7 +15,7 @@ namespace DRM.PropBag.AutoMapperSupport
 
         }
 
-        public IConfigurationProvider GetNewBaseConfiguration(
+        public IConfigurationProvider GetNewConfiguration(
             IConfigureAMapper<TSource, TDestination> configs,
             IPropBagMapperKey<TSource, TDestination> mapRequest)
         {
@@ -32,7 +32,7 @@ namespace DRM.PropBag.AutoMapperSupport
             return result;
         }
 
-        public IConfigurationProvider GetNewBaseConfiguration(
+        public IConfigurationProvider GetNewConfiguration(
             IConfigureAMapper<TSource, TDestination> configs,
             IPropBagMapperKey<TSource, TDestination> mapRequest,
             IMapperConfigurationStepGen configStarter)

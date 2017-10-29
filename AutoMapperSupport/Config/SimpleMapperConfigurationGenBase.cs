@@ -21,7 +21,7 @@ namespace DRM.PropBag.AutoMapperSupport.Config
         // and the steps performed, there is no reason to re-evaluate.
         public IConfigurationProvider GetConfigurationProviderGen()
         {
-            IConfigurationProvider mapperProfile = MapperConfigBuilderGen.GetNewBaseConfiguration(this);
+            IConfigurationProvider mapperProfile = MapperConfigBuilderGen.GetNewConfiguration(this);
             return mapperProfile;
         }
 

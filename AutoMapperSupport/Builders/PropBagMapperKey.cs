@@ -25,6 +25,8 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public Func<IPropBagMapperKeyGen, IPropBagMapperGen> MapperCreator => PropBagMapperBuilder.GenMapperCreator;
 
+        public IConfigureAMapper<TSource, TDestination> MappingConfiguration { get; }
+
         #endregion
 
         #region Constructor
@@ -53,6 +55,7 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public PropBagMapperKey(
             IBuildPropBagMapper<TSource, TDestination> propBagMapperBuilder,
+            IConfigureAMapper<TSource, TDestination> mappingConfiguration,
             IMapTypeDefinition<TSource> sourceMapTypeDef,
             IMapTypeDefinition<TDestination> destinationMapTypeDef,
             Func<TDestination, TSource> sourceConstructor = null,
@@ -60,6 +63,7 @@ namespace DRM.PropBag.AutoMapperSupport
             : base(propBagMapperBuilder.GenMapperCreator, sourceMapTypeDef, destinationMapTypeDef)
         {
             PropBagMapperBuilder = propBagMapperBuilder;
+            MappingConfiguration = mappingConfiguration;
 
             if (sourceMapTypeDef.IsPropBag) throw new ApplicationException
                     ("The first type, TSource, is expected to be a regular, i.e., non-propbag-based type.");

@@ -21,10 +21,12 @@ namespace DRM.PropBag.AutoMapperSupport
         public IPropBagMapper<TSource, TDestination> GenerateMapper(IPropBagMapperKey<TSource, TDestination> mapRequest)
         {
             // TODO: Get IMapper from mapRequest.
-            IMapper mm = null;
+            IConfigurationProvider configProvider = MapperConfiguration.GetConfigurationProvider(mapRequest);
 
-            IPropBagMapper<TSource, TDestination> result 
-                = new SimplePropBagMapper<TSource, TDestination>(mapRequest, mm, VmActivator);
+            IMapper autoMapper = configProvider.CreateMapper();
+
+            IPropBagMapper <TSource, TDestination> result 
+                = new SimplePropBagMapper<TSource, TDestination>(mapRequest, autoMapper, VmActivator);
 
             return result;
         }

@@ -46,7 +46,7 @@ namespace DRM.PropBag.AutoMapperSupport
 
         #endregion
 
-        public IConfigurationProvider GetNewBaseConfiguration(IConfigureAMapperGen configs)
+        public IConfigurationProvider GetNewConfiguration(IConfigureAMapperGen configs)
         {
             // Keep the existing ConfigStarter setting.
             Configs = configs;
@@ -57,7 +57,7 @@ namespace DRM.PropBag.AutoMapperSupport
             return result;
         }
 
-        public IConfigurationProvider GetNewBaseConfiguration(IConfigureAMapperGen configs, IMapperConfigurationStepGen configStarter)
+        public IConfigurationProvider GetNewConfiguration(IConfigureAMapperGen configs, IMapperConfigurationStepGen configStarter)
         {
             Configs = configs;
             ConfigStarter = configStarter;

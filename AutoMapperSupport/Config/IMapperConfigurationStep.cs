@@ -8,7 +8,7 @@ namespace DRM.PropBag.AutoMapperSupport
         Action<IMapperConfigurationExpression> ConfigurationStep { get; }
     }
 
-    public interface IMapperConfigurationStep<TSource, TDestination>
+    public interface IMapperConfigurationStep<TSource, TDestination> where TDestination : class, IPropBag
     {
         Action<IPropBagMapperKey<TSource, TDestination>, IMapperConfigurationExpression> ConfigurationStep { get; }
     }
