@@ -6,14 +6,14 @@ namespace DRM.TypeWrapper
     public class WrapperTypeLocalCache : ICacheWrapperTypes
     {
         //IEmitWrapperType _emitterEngine;
-        IModuleBuilderInfo _moduleBuilderInfo;
+        //IModuleBuilderInfo _moduleBuilderInfo;
 
         LockingConcurrentDictionary<TypeDescription, Type> _emittedTypes;
 
-        public WrapperTypeLocalCache(IEmitWrapperType emitterEngine, IModuleBuilderInfo moduleBuilderInfo)
+        public WrapperTypeLocalCache(IEmitWrapperType emitterEngine)
         {
             //_emitterEngine = emitterEngine;
-            _moduleBuilderInfo = moduleBuilderInfo;
+            //_moduleBuilderInfo = moduleBuilderInfo;
             _emittedTypes = new LockingConcurrentDictionary<TypeDescription, Type>(emitterEngine.EmitWrapperType);
         }
 
