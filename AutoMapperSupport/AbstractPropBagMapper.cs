@@ -31,14 +31,14 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public bool SupportsMapFrom { get; }
 
-        IViewModelActivator<TDestination> _vmActivator;
+        IViewModelActivator _vmActivator;
 
         #endregion
 
         #region Constructor
 
         public AbstractPropBagMapper(IPropBagMapperKey<TSource, TDestination> mapRequest,
-            IMapper mapper, IViewModelActivator<TDestination> vmActivator)
+            IMapper mapper, IViewModelActivator vmActivator)
         {
             _mapRequest = mapRequest;
 
@@ -119,7 +119,7 @@ namespace DRM.PropBag.AutoMapperSupport
             TDestination destination;
             try
             {
-                destination = _vmActivator.GetNewViewModel(propModel, propFactory, newWrappedType);
+                destination = (TDestination) _vmActivator.GetNewViewModel(propModel, propFactory, newWrappedType);
                 //destination = (TDestination)Activator.CreateInstance(RunTimeType, new object[] { propModel });
                 return destination;
             }

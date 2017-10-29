@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
+using System;
 
-namespace DRM.PropBag.AutoMapperSupport.Config
+namespace DRM.PropBag.AutoMapperSupport
 {
     public class SimpleMapperConfiguration<TSource, TDestination>
         : SimpleMapperConfigurationGenBase, IConfigureAMapper<TSource, TDestination> where TDestination : class, IPropBag
@@ -10,7 +11,7 @@ namespace DRM.PropBag.AutoMapperSupport.Config
         // Here we return this value as a (typed) IBuildMapperConfiguration.
         private IBuildMapperConfigurations<TSource, TDestination> MapperConfigBuilder => (IBuildMapperConfigurations<TSource, TDestination>)base.MapperConfigBuilderGen;
 
-        public IMapperConfigurationStep<TSource, TDestination> FinalConfigStep { get; set; }
+        public Action<IPropBagMapperKey<TSource, TDestination>, IMapperConfigurationExpression> FinalConfigAction { get; set; }
 
         public SimpleMapperConfiguration(IBuildMapperConfigurations<TSource, TDestination> mapperConfigBuilder)
             : base(mapperConfigBuilder)

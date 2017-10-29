@@ -6,7 +6,7 @@ namespace DRM.PropBag.AutoMapperSupport
 {
     public interface IConfigureAMapper<TSource, TDestination> : IConfigureAMapperGen where TDestination : class, IPropBag
     {
-        IMapperConfigurationStep<TSource, TDestination> FinalConfigStep { get; }
+        Action<IPropBagMapperKey<TSource, TDestination>, IMapperConfigurationExpression> FinalConfigAction { get; set; }
 
         IConfigurationProvider GetConfigurationProvider(IPropBagMapperKey<TSource, TDestination> propBagMapperKey);
     }

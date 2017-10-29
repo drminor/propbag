@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using System.Collections.Generic;
 
-namespace DRM.PropBag.AutoMapperSupport.Config
+namespace DRM.PropBag.AutoMapperSupport
 {
     public abstract class SimpleMapperConfigurationGenBase : IConfigureAMapperGen
     {

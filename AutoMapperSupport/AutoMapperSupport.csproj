@@ -40,7 +40,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Builders\IMapTypeDefinitionProvider.cs" />
     <Compile Include="Builders\PropBagMapperKeyGen.cs" />
+    <Compile Include="Builders\SimpleMapTypeDefinitionProvider.cs" />
     <Compile Include="Caches\SimplePropBagMapperCache.cs" />
     <Compile Include="Caches\ICachePropBagMappers.cs" />
     <Compile Include="Config\SimpleMapperConfigurationBuilderGenBase.cs" />
@@ -49,7 +51,7 @@
     <Compile Include="Builders\IBuildPropBagMapper.cs" />
     <Compile Include="Builders\PropBagMapperBuilder.cs" />
     <Compile Include="SimplePropBagMapper.cs" />
-    <None Include="AutoMapperProvider_OLD.cs" />
+    <Compile Include="AutoMapperProvider.cs" />
     <Compile Include="Config\StandardConfigFinalStep.cs" />
     <Compile Include="Config\ExtraMembersConfigInitialStep.cs" />
     <Compile Include="Config\IMapperConfigurationStep.cs" />
@@ -83,6 +85,10 @@
       <Project>{bbb1e311-374e-4c91-a313-1667d83767db}</Project>
       <Name>TypeSafePropertyBag</Name>
     </ProjectReference>
+    <ProjectReference Include="..\TypeWrapper\TypeWrapper.csproj">
+      <Project>{7C45D001-90D6-4521-82AE-41F9492F8ECE}</Project>
+      <Name>TypeWrapper</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ViewModelTools\ViewModelTools.csproj">
       <Project>{A149EAD5-06A9-47C8-8853-1D329D553EA7}</Project>
       <Name>ViewModelTools</Name>
@@ -90,6 +96,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <Compile Include="PropBagMappingStrategyEnum.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

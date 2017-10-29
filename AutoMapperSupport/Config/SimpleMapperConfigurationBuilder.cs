@@ -27,7 +27,7 @@ namespace DRM.PropBag.AutoMapperSupport
             // in configs.
             Action<IMapperConfigurationExpression> compositeGenAction = base.Action;
 
-            IConfigurationProvider result = GetNewBaseConfiguration(compositeGenAction, configs.FinalConfigStep.ConfigurationStep, mapRequest);
+            IConfigurationProvider result = GetNewConfiguration(compositeGenAction, configs.FinalConfigAction, mapRequest);
 
             return result;
         }
@@ -46,12 +46,12 @@ namespace DRM.PropBag.AutoMapperSupport
             // in configs.
             Action<IMapperConfigurationExpression> compositeGenAction = base.Action;
 
-            IConfigurationProvider result = GetNewBaseConfiguration(compositeGenAction, configs.FinalConfigStep.ConfigurationStep, mapRequest);
+            IConfigurationProvider result = GetNewConfiguration(compositeGenAction, configs.FinalConfigAction, mapRequest);
 
             return result;
         }
 
-        private IConfigurationProvider GetNewBaseConfiguration(
+        private IConfigurationProvider GetNewConfiguration(
             Action<IMapperConfigurationExpression> compositeGenAction,
             Action<IPropBagMapperKey<TSource, TDestination>, IMapperConfigurationExpression> finalAction,
             IPropBagMapperKey<TSource, TDestination> mapRequest)
