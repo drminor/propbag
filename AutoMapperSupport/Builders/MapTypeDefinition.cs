@@ -1,5 +1,4 @@
 ﻿using DRM.PropBag.ControlModel;
-using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
 using System.Collections.Generic;
 
@@ -7,6 +6,14 @@ namespace DRM.PropBag.AutoMapperSupport
 {
     public class MapTypeDefinition<T> : IMapTypeDefinition<T>, IEquatable<IMapTypeDefinitionGen>, IEquatable<MapTypeDefinition<T>>
     {
+        public Type Type { get; }
+
+        public bool IsPropBag { get; }
+        public PropModel PropModel { get; }
+        public Type NewWrapperType { get; }
+
+        #region Constructors
+
         public MapTypeDefinition()
         {
             Type = typeof(T);
@@ -23,23 +30,21 @@ namespace DRM.PropBag.AutoMapperSupport
             NewWrapperType = baseType;
         }
 
-        public Type Type { get; }
+        #endregion
 
-        public bool IsPropBag { get; }
-        public PropModel PropModel { get; }
-        public Type NewWrapperType { get; }
+        //private IMapTypeDefinition<T> GetTypeDef(PropModel pm, Type baseType)
+        //{
+        //    if (typeof(T).IsPropBagBased())
+        //    {
+        //        return new MapTypeDefinition<T>(pm, baseType);
+        //    }
+        //    else
+        //    {
+        //        return new MapTypeDefinition<T>();
+        //    }
+        //}
 
-        private static IMapTypeDefinition<T> GetTypeDef(PropModel pm, Type baseType)
-        {
-            if (typeof(T).IsPropBagBased())
-            {
-                return new MapTypeDefinition<T>(pm, baseType);
-            }
-            else
-            {
-                return new MapTypeDefinition<T>();
-            }
-        }
+        #region IEquatable Support and Object Overrides
 
         public override string ToString()
         {
@@ -118,6 +123,8 @@ namespace DRM.PropBag.AutoMapperSupport
             return !(definition1 == definition2);
         }
 
-        #endregion
+        #endregion operators
+
+        #endregion IEquatable Support and Object Overrides
     }
 }
