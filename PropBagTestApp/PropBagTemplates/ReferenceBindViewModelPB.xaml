@@ -2,12 +2,20 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib"
                     xmlns:mod="clr-namespace:PropBagTestApp.Models"
-                    xmlns:pb="clr-namespace:DRM.PropBag.ControlsWPF;assembly=WPFControls">
+                    xmlns:pb="clr-namespace:DRM.PropBag.ControlsWPF;assembly=WPFControls"
+                    xmlns:convs="clr-namespace:DRM.PropBag.ControlsWPF.Converters;assembly=WPFControls">
 
-        <pb:PropBagTemplate x:Key="ReferenceBindViewModelPB2"
+
+    <!--TypeSafetyMode="None"
+                TypeSafetyMode="{Binding Mode=OneWay, Converter={StaticResource enumItemsConverter}}"
+
+    -->
+
+    <convs:EnumToFriendlyNameConverter x:Key="enumItemsConverter"/>
+
+    <pb:PropBagTemplate x:Key="ReferenceBindViewModelPB"
             ClassName="ReferenceBindViewModelPB"
             InstanceKey="ReferenceBindViewModelPB"
-                            
             OutPutNameSpace="PropBagTestApp.ViewModels">
 
         <pb:PropBagTemplate.Namespaces>

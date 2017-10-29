@@ -1,8 +1,5 @@
 ﻿using DRM.PropBag;
-using DRM.PropBag.AutoMapperSupport;
-using DRM.PropBag.ViewModelBuilder;
 using DRM.TypeSafePropertyBag;
-using PropBagTestApp.Properties;
 using System;
 using System.ComponentModel;
 using System.Windows;
@@ -27,7 +24,8 @@ namespace PropBagTestApp
             //theAppsSettings.GetSettings();
 
             // Create a shared Prop Factory
-            ThePropFactory = new PropFactory(false, GetTypeFromName);
+            ThePropFactory = new PropFactory(returnDefaultForUndefined: true,
+                typeResolver: GetTypeFromName, valueConverter: null);
         }
 
         //public static void GetSettings(this Settings settings)

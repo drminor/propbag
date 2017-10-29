@@ -17,12 +17,12 @@ namespace PropBagTestApp
     /// </summary>
     public partial class DtoTestEmit : Window
     {
-        Dictionary<string, BoundPropBag> _boundPropBags;
+        //Dictionary<string, BoundPropBag> _boundPropBags;
         //PropBagMapper<MyModel, DtoTestViewModelEmit> _pbMapper = null;
         //PropBagMapper<MyModel2, DtoTestViewModelEmit> _pbMapper2 = null;
 
-        PropBagMapperKey<MyModel, DtoTestViewModelEmit> _mapperKey;
-        PropBagMapperKey<MyModel2, DtoTestViewModelEmit> _mapperKey2;
+        //PropBagMapperKey<MyModel, DtoTestViewModelEmit> _mapperKey;
+        //PropBagMapperKey<MyModel2, DtoTestViewModelEmit> _mapperKey2;
 
         //ConfiguredMappers _autoMappers;
 
@@ -73,7 +73,7 @@ namespace PropBagTestApp
 
             Grid topGrid = (Grid)this.FindName("TopGrid");
 
-            _boundPropBags = ViewModelGenerator.StandUpViewModels(topGrid, this);
+            //_boundPropBags = ViewModelGenerator.StandUpViewModels(topGrid, this);
 
             OurData.SetIt<MyModel4>(new MyModel4 { MyString = "hello" }, "Deep");
 

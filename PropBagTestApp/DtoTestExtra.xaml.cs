@@ -16,9 +16,9 @@ namespace PropBagTestApp
     /// </summary>
     public partial class DtoTestExtra : Window
     {
-        Dictionary<string, BoundPropBag> _boundPropBags;
-        PropBagMapperKey<MyModel, DtoTestViewModelExtra> _mapperKey;
-        PropBagMapperKey<MyModel2, DtoTestViewModelExtra> _mapperKey2;
+        //Dictionary<string, BoundPropBag> _boundPropBags;
+        //PropBagMapperKey<MyModel, DtoTestViewModelExtra> _mapperKey;
+        //PropBagMapperKey<MyModel2, DtoTestViewModelExtra> _mapperKey2;
 
         //ConfiguredMappers _autoMappers;
 
@@ -44,7 +44,7 @@ namespace PropBagTestApp
 
             Grid topGrid = (Grid)this.FindName("TopGrid");
 
-            _boundPropBags = ViewModelGenerator.StandUpViewModels(topGrid, this);
+            //_boundPropBags = ViewModelGenerator.StandUpViewModels(topGrid, this);
 
             DefineMapingKeys("OurData");
             DefineMappers();
