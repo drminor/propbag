@@ -6,12 +6,12 @@ using System;
 
 namespace DRM.ViewModelTools
 {
-    public class ViewModelActivatorStandard<T> : IViewModelActivator<T> where T : class, IPropBag
+    public class ViewModelActivatorStandard : IViewModelActivator
     {
         #region Private Members
         private IPropModelProvider _propModelProvider { get; }
 
-        private string NO_PBT_CONVERSION_SERVICE_MSG = $"The {nameof(ViewModelActivatorStandard<T>)} has no PropModelProvider." +
+        private string NO_PBT_CONVERSION_SERVICE_MSG = $"The {nameof(ViewModelActivatorStandard)} has no PropModelProvider." +
                     $"All calls must provide a PropModel.";
         #endregion
 
@@ -35,65 +35,33 @@ namespace DRM.ViewModelTools
 
         #region IViewModelActivator interface
 
-        public T GetNewViewModel(string resourceKey, IPropFactory propFactory)
+        // BaseType + ResourceKey (BaseType known only at run time.
+        public object GetNewViewModel(string resourceKey, IPropFactory propFactory, Type typeToCreate)
         {
             PropModel propModel = GetPropModel(resourceKey);
-
-            T result = GetNewViewModel(propModel, propFactory);
-
+            object result = GetNewViewModel(propModel, propFactory, typeToCreate);
             return result;
         }
 
-        public T GetNewViewModel(PropModel propModel, IPropFactory propFactory)
+        // BaseType + PropModel (BaseType known only at run time.
+        public object GetNewViewModel(PropModel propModel, IPropFactory propFactory, Type typeToCreate)
         {
-            T result = (T)Activator.CreateInstance(typeof(T), propModel, propFactory);
+            object result = Activator.CreateInstance(typeToCreate, propModel, propFactory);
             return result;
         }
 
-        public T GetNewViewModel(string resourceKey, IPropFactory propFactory, Type baseType)
+        // BaseType + ResourceKey (BaseType known at compile time.)
+        public BT GetNewViewModel<BT>(string resourceKey, IPropFactory propFactory) where BT : class, IPropBag
         {
             PropModel propModel = GetPropModel(resourceKey);
-
-            IViewModelActivator<T> us = (IViewModelActivator<T>)this;
-            T result = us.GetNewViewModel(propModel, propFactory, baseType);
-
-            return result;
-        }
-
-        public T GetNewViewModel(PropModel propModel, IPropFactory propFactory, Type baseType)
-        {
-            if(baseType == null)
-            {
-                T result = GetNewViewModel(propModel, propFactory);
-                return result;
-            } 
-            else if (!baseType.IsPropBagBased())
-            {
-                throw new InvalidOperationException($"Type: {baseType.Name} must derive from IPropBag.");
-            }
-            else
-            {
-                // TODO: verify that baseType derives from T.
-
-                T result = (T)Activator.CreateInstance(baseType, propModel, propFactory);
-                return result;
-            }
-        }
-
-        // BaseType + ClassName (BaseType known at compile time.)
-        T IViewModelActivator<T>.GetNewViewModel<BT>(string resourceKey, IPropFactory propFactory)
-        {
-            PropModel propModel = GetPropModel(resourceKey);
-
-            IViewModelActivator<T> us = (IViewModelActivator<T>)this;
-            T result = us.GetNewViewModel<BT>(propModel, propFactory);
+            BT result = GetNewViewModel<BT>(propModel, propFactory);
             return result;
         }
 
         // BaseType + PropModel (BaseType known at compile time.)
-        T IViewModelActivator<T>.GetNewViewModel<BT>(PropModel propModel, IPropFactory propFactory)
+        public BT GetNewViewModel<BT>(PropModel propModel, IPropFactory propFactory) where BT : class, IPropBag
         {
-            T result = (T)Activator.CreateInstance(typeof(BT), propModel, propFactory);
+            BT result = (BT)Activator.CreateInstance(typeof(BT), propModel, propFactory);
             return result;
         }
 

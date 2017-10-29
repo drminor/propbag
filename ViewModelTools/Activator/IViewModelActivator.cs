@@ -5,7 +5,25 @@ using System;
 
 namespace DRM.ViewModelTools
 {
-    public interface IViewModelActivator<T> where T : class, IPropBag
+    public interface IViewModelActivator
+    {
+        //bool HasPbtLookupResources { get; }
+        //bool CanFindPropBagTemplateWithJustKey { get; }
+        //object GetNewViewModel(ResourceDictionary rd, string resourceKey, IPropFactory propFactory);
+        //object GetNewViewModel(PropBagTemplate pbt, IPropFactory propFactory);
+
+        // Create new Type that is derived from a Type known only at run time.
+        object GetNewViewModel(string resourceKey, IPropFactory propFactory, Type typeToCreate);
+        object GetNewViewModel(PropModel propModel, IPropFactory propFactory, Type typeToCreate);
+
+        // Create new Type that is derived from a Type know at compile time.
+        BT GetNewViewModel<BT>(string resourceKey, IPropFactory propFactory) where BT : class, IPropBag;
+        BT GetNewViewModel<BT>(PropModel propModel, IPropFactory propFactory) where BT : class, IPropBag;
+
+
+    }
+
+    public interface IViewModelActivator_OLD<T> where T : class, IPropBag
     {
         //bool HasPbtLookupResources { get; }
         //bool CanFindPropBagTemplateWithJustKey { get; }

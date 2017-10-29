@@ -7,14 +7,14 @@ using System;
 
 namespace DRM.ViewModelTools
 {
-    public class ViewModelActivatorEmitProxy<T> : IViewModelActivator<T> where T : class, IPropBag
+    public class ViewModelActivatorEmitProxy : IViewModelActivator 
     {
         #region Private Members
         private IPropModelProvider _propModelProvider { get; }
         private ICacheWrapperTypes _wrapperTypeCachingService { get; }
         ICacheTypeDescriptions _typeDescCachingService { get; }
 
-        private string NO_PBT_CONVERSION_SERVICE_MSG = $"The {nameof(ViewModelActivatorStandard<T>)} has no PropModelProvider." +
+        private string NO_PBT_CONVERSION_SERVICE_MSG = $"The {nameof(ViewModelActivatorEmitProxy)} has no PropModelProvider." +
                     $"All calls must provide a PropModel.";
         #endregion
 
@@ -49,66 +49,44 @@ namespace DRM.ViewModelTools
 
         #region IViewModelActivator interface
 
-        public T GetNewViewModel(string resourceKey, IPropFactory propFactory)
+        public object GetNewViewModel(string resourceKey, IPropFactory propFactory, Type typeToCreate)
         {
             PropModel propModel = GetPropModel(resourceKey);
 
-            T result = GetNewViewModel(propModel, propFactory);
+            object result = GetNewViewModel(propModel, propFactory, typeToCreate);
 
             return result;
         }
 
-        public T GetNewViewModel(PropModel propModel, IPropFactory propFactory)
+        public object GetNewViewModel(PropModel propModel, IPropFactory propFactory, Type typeToCreate)
         {
-            TypeDescription td = _typeDescCachingService.GetOrAdd(new NewTypeRequest(propModel, typeof(T), null));
-
-            T result = _wrapperTypeCachingService.GetOrAdd(td) as T;
-
-            return result;
-        }
-
-        public T GetNewViewModel(string resourceKey, IPropFactory propFactory, Type baseType)
-        {
-            PropModel propModel = GetPropModel(resourceKey);
-
-            IViewModelActivator<T> us = (IViewModelActivator<T>)this;
-            T result = us.GetNewViewModel(propModel, propFactory, baseType);
-
-            return result;
-        }
-
-        public T GetNewViewModel(PropModel propModel, IPropFactory propFactory, Type baseType)
-        {
-            if (!baseType.IsPropBagBased())
+            if (!typeToCreate.IsPropBagBased())
             {
-                throw new InvalidOperationException($"Type: {baseType.Name} must derive from IPropBag.");
+                throw new InvalidOperationException($"Type: {typeToCreate.Name} must derive from IPropBag.");
             }
 
-            // TODO: verify that baseType derives from T.
+            TypeDescription td = _typeDescCachingService.GetOrAdd(new NewTypeRequest(propModel, typeToCreate, null));
 
-            TypeDescription td = _typeDescCachingService.GetOrAdd(new NewTypeRequest(propModel, baseType, null));
-
-            T result = _wrapperTypeCachingService.GetOrAdd(td) as T;
+            object result = _wrapperTypeCachingService.GetOrAdd(td);
 
             return result;
         }
 
         // BaseType + ClassName (BaseType known at compile time.)
-        T IViewModelActivator<T>.GetNewViewModel<BT>(string resourceKey, IPropFactory propFactory)
+        public BT GetNewViewModel<BT>(string resourceKey, IPropFactory propFactory) where BT : class, IPropBag
         {
             PropModel propModel = GetPropModel(resourceKey);
 
-            IViewModelActivator<T> us = (IViewModelActivator<T>)this;
-            T result = us.GetNewViewModel<BT>(propModel, propFactory);
+            BT result = GetNewViewModel<BT>(propModel, propFactory);
             return result;
         }
 
         // BaseType + PropModel (BaseType known at compile time.)
-        T IViewModelActivator<T>.GetNewViewModel<BT>(PropModel propModel, IPropFactory propFactory)
+        public BT GetNewViewModel<BT>(PropModel propModel, IPropFactory propFactory) where BT : class, IPropBag
         {
             TypeDescription td = _typeDescCachingService.GetOrAdd(new NewTypeRequest(propModel, typeof(BT), null));
 
-            T result = _wrapperTypeCachingService.GetOrAdd(td) as T;
+            BT result = _wrapperTypeCachingService.GetOrAdd(td) as BT;
 
             return result;
         }
