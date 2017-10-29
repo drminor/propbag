@@ -9,6 +9,9 @@ namespace DRM.PropBag.AutoMapperSupport
         Action<IPropBagMapperKey<TSource, TDestination>, IMapperConfigurationExpression> FinalConfigAction { get; set; }
 
         IConfigurationProvider GetConfigurationProvider(IPropBagMapperKey<TSource, TDestination> propBagMapperKey);
+
+        IConfigurationProvider GetConfigurationProvider(IPropBagMapperKey<TSource, TDestination> propBagMapperKey,
+            IMapperConfigurationStepGen configStarter);
     }
 
     public interface IConfigureAMapperGen
