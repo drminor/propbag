@@ -3,7 +3,7 @@ using System.Threading;
 using System.Reflection.Emit;
 using System.Reflection;
 
-using DRM.TypeSafePropertyBag;
+using DRM.TypeSafePropertyBag.Fundamentals;
 
 namespace DRM.PropBag.ViewModelBuilder
 {

@@ -1,5 +1,5 @@
 ﻿using DRM.PropBag.ControlModel;
-using DRM.TypeSafePropertyBag;
+using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
 using System.Collections.Generic;
 

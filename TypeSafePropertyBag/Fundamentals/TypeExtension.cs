@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 
 
-namespace DRM.TypeSafePropertyBag
+namespace DRM.TypeSafePropertyBag.Fundamentals
 {
     public static class TypeExtension
     {

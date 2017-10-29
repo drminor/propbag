@@ -1,6 +1,7 @@
 ﻿using DRM.PropBag;
 using DRM.PropBag.ControlModel;
 using DRM.TypeSafePropertyBag;
+using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
 
 namespace DRM.ViewModelTools

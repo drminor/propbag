@@ -2,6 +2,7 @@
 using DRM.PropBag.ControlModel;
 using DRM.TypeSafePropertyBag;
 using System.Reflection;
+using System.Collections.Generic;
 
 namespace DRM.PropBag.ControlsWPF
 {
@@ -40,14 +41,20 @@ namespace DRM.PropBag.ControlsWPF
         /// </summary>
         public PropertyInfo ClassAccessor { get; }
 
-        public override int GetHashCode()
-        {
-            return GenerateHash.CustomHash(DtViewModelType.GetHashCode(), PropModel.GetHashCode());
-        }
-
         public override bool Equals(object other) => other is BoundPropBag && Equals((BoundPropBag)other);
 
         public bool Equals(BoundPropBag other) => DtViewModelType == other.DtViewModelType && PropModel == other.PropModel;
+
+        public override int GetHashCode()
+        {
+            var hashCode = -1462822583;
+            hashCode = hashCode * -1521134295 + base.GetHashCode();
+            hashCode = hashCode * -1521134295 + EqualityComparer<Type>.Default.GetHashCode(DtViewModelType);
+            hashCode = hashCode * -1521134295 + PropModel.GetHashCode();
+            hashCode = hashCode * -1521134295 + EqualityComparer<Type>.Default.GetHashCode(RtViewModelType);
+            hashCode = hashCode * -1521134295 + EqualityComparer<PropertyInfo>.Default.GetHashCode(ClassAccessor);
+            return hashCode;
+        }
 
         public static bool operator ==(BoundPropBag left, BoundPropBag right) => left.Equals(right);
 

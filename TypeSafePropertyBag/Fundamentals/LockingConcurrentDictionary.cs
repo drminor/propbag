@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 /// TODO: Need to determine that since the Lazy constructor is thread-safe, if the overall
 /// operation is thread-safe.
 ///</summary>
-namespace DRM.TypeSafePropertyBag
+namespace DRM.TypeSafePropertyBag.Fundamentals
 {
     public struct LockingConcurrentDictionary<TKey, TValue>
     {

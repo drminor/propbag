@@ -5,8 +5,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-using DRM.TypeSafePropertyBag;
-using DRM.PropBag;
+using DRM.TypeSafePropertyBag.Fundamentals;
+//using DRM.PropBag;
 
 namespace DRM.PropBag.Caches
 {

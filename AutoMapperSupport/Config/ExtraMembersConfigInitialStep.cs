@@ -1,11 +1,10 @@
 ﻿using AutoMapper;
 using AutoMapper.ExtraMembers;
+using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-
-using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBag.AutoMapperSupport
 {

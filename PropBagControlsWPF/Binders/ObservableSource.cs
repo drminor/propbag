@@ -1,5 +1,6 @@
 ﻿using DRM.PropBag.ControlsWPF.WPFHelpers;
 using DRM.TypeSafePropertyBag;
+using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
 using System.Collections.Specialized;
 using System.ComponentModel;
