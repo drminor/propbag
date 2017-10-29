@@ -46,6 +46,9 @@ namespace DRM.PropBag.AutoMapperSupport
             DestinationType = mapRequest.DestinationTypeDef.Type;
             RunTimeType = mapRequest.DestinationTypeDef.NewWrapperType; // TODO: Work on this!!
 
+            _propModel = mapRequest.DestinationTypeDef.PropModel;
+            _propFactory = mapRequest.DestinationTypeDef.PropFactory;
+
             Mapper = mapper;
             _vmActivator = vmActivator;
 

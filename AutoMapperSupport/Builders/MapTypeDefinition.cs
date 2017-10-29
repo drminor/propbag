@@ -1,4 +1,5 @@
 ﻿using DRM.PropBag.ControlModel;
+using DRM.TypeSafePropertyBag;
 using System;
 using System.Collections.Generic;
 
@@ -11,23 +12,27 @@ namespace DRM.PropBag.AutoMapperSupport
         public bool IsPropBag { get; }
         public PropModel PropModel { get; }
         public Type NewWrapperType { get; }
+        public IPropFactory PropFactory { get; }
 
         #region Constructors
 
+        // For non-IPropBag based types.
         public MapTypeDefinition()
         {
             Type = typeof(T);
             IsPropBag = false;
             PropModel = null;
             NewWrapperType = null;
+            PropFactory = null;
         }
 
-        public MapTypeDefinition(PropModel pm, Type baseType)
+        public MapTypeDefinition(PropModel pm, IPropFactory propFactory, Type baseType)
         {
             Type = typeof(T);
             IsPropBag = true;
             PropModel = pm;
             NewWrapperType = baseType;
+            PropFactory = propFactory;
         }
 
         #endregion

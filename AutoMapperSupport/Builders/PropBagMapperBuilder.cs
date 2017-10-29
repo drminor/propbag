@@ -21,7 +21,6 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public IPropBagMapper<TSource, TDestination> GenerateMapper(IPropBagMapperKey<TSource, TDestination> mapRequest)
         {
-            // TODO: Get IMapper from mapRequest.
             IConfigurationProvider configProvider = MapperConfiguration.GetConfigurationProvider(mapRequest);
 
             IMapper autoMapper = configProvider.CreateMapper();

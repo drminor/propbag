@@ -43,6 +43,12 @@ namespace DRM.PropBag.AutoMapperSupport
             _standardActivator = standardActivator ?? throw new ArgumentNullException(nameof(standardActivator));
             _emitProxyActivator = emitProxyActivator ?? throw new ArgumentNullException(nameof(emitProxyActivator));
             _mappersCachingService = mappersCachingService ?? throw new ArgumentNullException(nameof(mappersCachingService));
+            _defaultPropFactory = defaultPropFactory;
+
+            if (_defaultPropFactory == null)
+            {
+                System.Diagnostics.Debug.WriteLine($"{nameof(AutoMapperProvider)} was not given a default IPropFactory.");
+            }
         }
 
         #endregion
@@ -74,6 +80,11 @@ namespace DRM.PropBag.AutoMapperSupport
             return typedMapperRequest;
         }
 
+        public IPropBagMapper<TSource,TDestination> GetMapper<TSource, TDestination>(IPropBagMapperKey<TSource, TDestination> mapRequest) where TDestination : class, IPropBag
+        {
+            return (IPropBagMapper<TSource, TDestination>)_mappersCachingService.GetMapper(mapRequest);
+        }
+
         public void RegisterMapperRequest(IPropBagMapperKeyGen mapRequest)
         {
             _mappersCachingService.RegisterMapperRequest(mapRequest);
@@ -96,15 +107,18 @@ namespace DRM.PropBag.AutoMapperSupport
             ) where TDestination : class, IPropBag
         {
             #region Mapper Configuration Work
+            IMapperConfigurationStepGen configStarter = new MapperConfigStarter_Default();
+
+
             IBuildMapperConfigurations<TSource, TDestination> configBuilder
                 = new SimpleMapperConfigurationBuilder<TSource, TDestination>
-                (new MapperConfigStarter_Default());
+                (); //(configStarter); // Uses the same configStarter for all builds.
 
             IConfigureAMapper<TSource, TDestination> mappingConf
                 = new SimpleMapperConfiguration<TSource, TDestination>
-                (configBuilder)
+                (configBuilder, configStarter) // Uses the configStarter for just this build.
                 {
-                    FinalConfigAction = new StandardConfigFinalStep<TSource, TDestination>().ConfigurationStep
+                    FinalConfigAction = new StandardConfigFinalStep<TSource, TDestination>().ConfigurationStep,
                 };
 
             PropBagMapperBuilder<TSource, TDestination> mapperBuilder
@@ -112,8 +126,11 @@ namespace DRM.PropBag.AutoMapperSupport
                 (mapperConfiguration: mappingConf, vmActivator: _standardActivator);
             #endregion
 
-            IMapTypeDefinition<TSource> sourceMapTypeDef = _mapTypeDefinitionProvider.GetTypeDescription<TSource>(propModel, typeToWrap, null);
-            IMapTypeDefinition<TDestination> destinationMapTypeDef = _mapTypeDefinitionProvider.GetTypeDescription<TDestination>(propModel, typeToWrap, null);
+            IMapTypeDefinition<TSource> sourceMapTypeDef = _mapTypeDefinitionProvider.GetTypeDescription<TSource>
+                (propModel, propFactory, typeToWrap, null);
+
+            IMapTypeDefinition<TDestination> destinationMapTypeDef = _mapTypeDefinitionProvider.GetTypeDescription<TDestination>
+                (propModel, propFactory, typeToWrap, null);
 
             IPropBagMapperKey<TSource, TDestination> result = new PropBagMapperKey<TSource, TDestination>
                 (propBagMapperBuilder: mapperBuilder,

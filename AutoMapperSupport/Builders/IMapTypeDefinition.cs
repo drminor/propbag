@@ -1,4 +1,5 @@
 ﻿using DRM.PropBag.ControlModel;
+using DRM.TypeSafePropertyBag;
 using System;
 
 namespace DRM.PropBag.AutoMapperSupport
@@ -7,6 +8,7 @@ namespace DRM.PropBag.AutoMapperSupport
     {
     }
 
+    // ToDo: Document these members.
     public interface IMapTypeDefinitionGen : IEquatable<IMapTypeDefinitionGen>
     {
         Type Type { get; }
@@ -14,7 +16,7 @@ namespace DRM.PropBag.AutoMapperSupport
         bool IsPropBag { get; }
         PropModel PropModel { get; }
         Type NewWrapperType { get; }
-        //IPropFactory PropFactory { get; }
+        IPropFactory PropFactory { get; }
 
     }
 }

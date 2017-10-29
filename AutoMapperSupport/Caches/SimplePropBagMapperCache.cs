@@ -1,9 +1,11 @@
 ﻿using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
+using System.Runtime.Remoting.Contexts;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
-    public class SimplePropBagMapperCache : ICachePropBagMappers
+    //[Synchronization()]
+    public class SimplePropBagMapperCache : /*ContextBoundObject,*/ ICachePropBagMappers
     {
         private int pCntr = 0;
         private LockingConcurrentDictionary<IPropBagMapperKeyGen, IPropBagMapperKeyGen> _unSealedPropBagMappers;
