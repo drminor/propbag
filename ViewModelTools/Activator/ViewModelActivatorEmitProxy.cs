@@ -24,7 +24,9 @@ namespace DRM.ViewModelTools
 
         #region Constructor 
 
-        public ViewModelActivatorEmitProxy(ICacheWrapperTypes wrapperTypeCachingService, ICacheTypeDescriptions typeDescCachingService)
+        public ViewModelActivatorEmitProxy(
+            ICacheWrapperTypes wrapperTypeCachingService,
+            ICacheTypeDescriptions typeDescCachingService)
         {
             _wrapperTypeCachingService = wrapperTypeCachingService ?? throw new ArgumentNullException(nameof(wrapperTypeCachingService));
             _typeDescCachingService = typeDescCachingService ?? throw new ArgumentNullException(nameof(typeDescCachingService));
@@ -33,7 +35,9 @@ namespace DRM.ViewModelTools
             System.Diagnostics.Debug.WriteLine(NO_PBT_CONVERSION_SERVICE_MSG);
         }
 
-        public ViewModelActivatorEmitProxy(ICacheWrapperTypes wrapperTypeCachingService, ICacheTypeDescriptions typeDescCachingService,
+        public ViewModelActivatorEmitProxy(
+            ICacheWrapperTypes wrapperTypeCachingService,
+            ICacheTypeDescriptions typeDescCachingService,
             IPropModelProvider propModelProvider)
         {
             _wrapperTypeCachingService = wrapperTypeCachingService ?? throw new ArgumentNullException(nameof(wrapperTypeCachingService));
