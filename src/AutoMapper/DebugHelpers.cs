@@ -13,7 +13,7 @@ namespace AutoMapper
         {
             string readable = "Not Supported";
 #if NET45
-            //readable = a.ToReadableString();
+            readable = a.ToReadableString();
 #endif
             if (readable != "Not Supported")
             {
