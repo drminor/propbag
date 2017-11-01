@@ -16,28 +16,28 @@ namespace DRM.ViewModelTools
         object GetNewViewModel(string resourceKey, IPropFactory propFactory, Type typeToCreate);
         object GetNewViewModel(PropModel propModel, IPropFactory propFactory, Type typeToCreate);
 
-        // Create new Type that is derived from a Type know at compile time.
+        // Create new Type that is derived from a Type known at compile time.
         BT GetNewViewModel<BT>(string resourceKey, IPropFactory propFactory) where BT : class, IPropBag;
         BT GetNewViewModel<BT>(PropModel propModel, IPropFactory propFactory) where BT : class, IPropBag;
 
 
     }
 
-    public interface IViewModelActivator_OLD<T> where T : class, IPropBag
-    {
-        //bool HasPbtLookupResources { get; }
-        //bool CanFindPropBagTemplateWithJustKey { get; }
-        //T GetNewViewModel(ResourceDictionary rd, string resourceKey, IPropFactory propFactory);
-        //T GetNewViewModel(PropBagTemplate pbt, IPropFactory propFactory);
+    //public interface IViewModelActivator_OLD<T> where T : class, IPropBag
+    //{
+    //    //bool HasPbtLookupResources { get; }
+    //    //bool CanFindPropBagTemplateWithJustKey { get; }
+    //    //T GetNewViewModel(ResourceDictionary rd, string resourceKey, IPropFactory propFactory);
+    //    //T GetNewViewModel(PropBagTemplate pbt, IPropFactory propFactory);
 
-        T GetNewViewModel(string resourceKey, IPropFactory propFactory);
-        T GetNewViewModel(PropModel propModel, IPropFactory propFactory);
+    //    T GetNewViewModel(string resourceKey, IPropFactory propFactory);
+    //    T GetNewViewModel(PropModel propModel, IPropFactory propFactory);
 
-        T GetNewViewModel<BT>(string resourceKey, IPropFactory propFactory) where BT : class, IPropBag;
-        T GetNewViewModel<BT>(PropModel propModel, IPropFactory propFactory) where BT : class, IPropBag;
+    //    T GetNewViewModel<BT>(string resourceKey, IPropFactory propFactory) where BT : class, IPropBag;
+    //    T GetNewViewModel<BT>(PropModel propModel, IPropFactory propFactory) where BT : class, IPropBag;
 
-        T GetNewViewModel(string resourceKey, IPropFactory propFactory, Type baseType);
-        T GetNewViewModel(PropModel propModel, IPropFactory propFactory, Type baseType);
+    //    T GetNewViewModel(string resourceKey, IPropFactory propFactory, Type baseType);
+    //    T GetNewViewModel(PropModel propModel, IPropFactory propFactory, Type baseType);
 
-    }
+    //}
 }
