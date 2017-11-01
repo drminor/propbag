@@ -11,7 +11,7 @@ namespace PropBagLib.Tests
 
 		public LooseModel(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
 
-		public LooseModel(PropBagTypeSafetyMode typeSafetyMode, AbstractPropFactory factory) : base(typeSafetyMode, factory)
+		public LooseModel(PropBagTypeSafetyMode typeSafetyMode, IPropFactory factory) : base(typeSafetyMode, factory)
         {
             AddProp<object>("PropObject");
             AddProp<string>("PropString");

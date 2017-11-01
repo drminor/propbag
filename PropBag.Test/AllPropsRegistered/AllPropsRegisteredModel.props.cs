@@ -4,7 +4,6 @@ using DRM.PropBag;
 using DRM.TypeSafePropertyBag;
 using System;
 using System.Collections.Generic;
-using PropBagLib.Tests;
 
 
 namespace PropBagLib.Tests
@@ -15,7 +14,7 @@ namespace PropBagLib.Tests
 
 		public AllPropsRegisteredModel(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
 
-		public AllPropsRegisteredModel(PropBagTypeSafetyMode typeSafetyMode, AbstractPropFactory factory) : base(typeSafetyMode, factory)
+		public AllPropsRegisteredModel(PropBagTypeSafetyMode typeSafetyMode, IPropFactory factory) : base(typeSafetyMode, factory)
 		{
 	        AddProp<object>("PropObject", null, false, null);
 	        AddProp<string>("PropString", GetDelegate<string>("DoWhenStringChanged"), false, null);
@@ -48,7 +47,7 @@ namespace PropBagLib.Tests
 		{
 			get
 			{
-				return GetIt<string>("PropString");
+				return GetIt<string>(nameof(PropString));
 			}
 			set
 			{

@@ -14,7 +14,7 @@ namespace PropBagLib.Tests
 
 		public ExtStoreModel(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
 
-		public ExtStoreModel(PropBagTypeSafetyMode typeSafetyMode, AbstractPropFactory factory) : base(typeSafetyMode, factory)
+		public ExtStoreModel(PropBagTypeSafetyMode typeSafetyMode, IPropFactory factory) : base(typeSafetyMode, factory)
 		{
 	        AddProp<int>("PropInt3", null, false, null);
 	        AddProp<int>("PropInt4", null, false, null);

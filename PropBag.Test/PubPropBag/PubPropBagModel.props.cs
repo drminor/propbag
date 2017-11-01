@@ -14,7 +14,7 @@ namespace PropBagLib.Tests
 
 		public PubPropBagModel(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
 
-		public PubPropBagModel(PropBagTypeSafetyMode typeSafetyMode, AbstractPropFactory factory) : base(typeSafetyMode, factory)
+		public PubPropBagModel(PropBagTypeSafetyMode typeSafetyMode, IPropFactory factory) : base(typeSafetyMode, factory)
 		{
 	        AddProp<object>("PropObject", null, false, null);
 	        AddProp<string>("PropString", GetDelegate<string>("DoWhenStringChanged"), false, null);

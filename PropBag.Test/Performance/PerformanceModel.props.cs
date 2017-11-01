@@ -15,7 +15,7 @@ namespace PropBagLib.Tests
 
 		public PerformanceModel(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
 
-		public PerformanceModel(PropBagTypeSafetyMode typeSafetyMode, AbstractPropFactory factory) : base(typeSafetyMode, factory)
+		public PerformanceModel(PropBagTypeSafetyMode typeSafetyMode, IPropFactory factory) : base(typeSafetyMode, factory)
 		{
 	        AddProp<object>("PropObject", null, false, null);
 	        AddProp<string>("PropString", null, false, null, null, "");

@@ -12,7 +12,7 @@ namespace PropBagLib.Tests
     public partial class ExtStoreModel 
     {
 
-        static public ExtStoreModel Create(AbstractPropFactory factory)
+        static public ExtStoreModel Create(IPropFactory factory)
         {
 
             ExtStoreModel esm = new ExtStoreModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered, factory);

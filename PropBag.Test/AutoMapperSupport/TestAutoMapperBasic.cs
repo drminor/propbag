@@ -36,9 +36,10 @@ namespace PropBagLib.Tests.AutoMapperSupport
         [Test]
         public void CanRegisterMod3ToDestinationMapper()
         {
-            PropModel propModel = GetPropModelForDestinationModel();
-            Type typeToWrap = typeof(PropBag);
             IPropFactory propFactory = _propFactory_V1;
+
+            PropModel propModel = GetPropModelForDestinationModel(propFactory);
+            Type typeToWrap = typeof(PropBag);
             string configPackageName = "Emit_Proxy";
 
             IPropBagMapperKey<MyModel3, DestinationModel> mapperRequest =
@@ -53,14 +54,48 @@ namespace PropBagLib.Tests.AutoMapperSupport
             Assert.That(mapperRequest, Is.Not.Null, "mapperRequest should be non-null.");
         }
 
+        [Test]
+        public void CanGetMapperForMod3ToDestination()
+        {
+            IPropFactory propFactory = _propFactory_V1;
+
+            PropModel propModel = GetPropModelForDestinationModel(propFactory);
+            Type typeToWrap = typeof(PropBag);
+            string configPackageName = "Emit_Proxy";
+
+            IPropBagMapperKey<MyModel3, DestinationModel> mapperRequest =
+                _amp.RegisterMapperRequest<MyModel3, DestinationModel>
+                (
+                    propModel: propModel,
+                    typeToWrap: typeToWrap,
+                    propFactory: propFactory,
+                    configPackageName: configPackageName
+                    );
+
+            Assert.That(mapperRequest, Is.Not.Null, "mapperRequest should be non-null.");
+
+            IPropBagMapper<MyModel3, DestinationModel> mapper = _amp.GetMapper<MyModel3, DestinationModel>(mapperRequest);
+
+            Assert.That(mapper, Is.Not.Null, "mapper should be non-null");
 
 
-        private PropModel GetPropModelForDestinationModel()
+        }
+
+
+        #region Private Support Methods
+
+        private PropModel GetPropModelForDestinationModel(IPropFactory propFactory)
         {
             PropModel result = new PropModel(className: "DestinationModel", instanceKey: "DestinationModel",
                 namespaceName: "DummyNamespace", deriveFromPubPropBag: false, 
                 typeSafetyMode: PropBagTypeSafetyMode.Tight, 
                 deferMethodRefResolution: false, requireExplicitInitialValue: true);
+
+            //result.Namespaces.Add("System");
+            result.Namespaces.Add("DRM.PropBag");
+            result.Namespaces.Add("DRM.TypeSafePropertyBag");
+
+            result.PropFactory = propFactory;
 
             // ProductId (Guid - default)
             PropInitialValueField pivf = new PropInitialValueField(initialValue: null,
@@ -70,7 +105,6 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 hasStore: true, typeIsSolid: true, propKind: PropKindEnum.Prop,
                 propTypeInfoField: null, initialValueField: pivf,
                 doWhenChanged: null, extraInfo: null, comparer: null, itemType: null);
-
             result.Props.Add(propItem);
 
             // Amount (int - default)
@@ -81,6 +115,8 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 hasStore: true, typeIsSolid: true, propKind: PropKindEnum.Prop,
                 propTypeInfoField: null, initialValueField: pivf,
                 doWhenChanged: null, extraInfo: null, comparer: null, itemType: null);
+            result.Props.Add(propItem);
+
 
             // Size (double - default)
             pivf = new PropInitialValueField(initialValue: null,
@@ -90,6 +126,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 hasStore: true, typeIsSolid: true, propKind: PropKindEnum.Prop,
                 propTypeInfoField: null, initialValueField: pivf,
                 doWhenChanged: null, extraInfo: null, comparer: null, itemType: null);
+            result.Props.Add(propItem);
 
             // Deep (MyModel4 - null)
             pivf = new PropInitialValueField(initialValue: null,
@@ -99,10 +136,12 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 hasStore: true, typeIsSolid: true, propKind: PropKindEnum.Prop,
                 propTypeInfoField: null, initialValueField: pivf,
                 doWhenChanged: null, extraInfo: null, comparer: null, itemType: null);
+            result.Props.Add(propItem);
 
             return result;
         }
 
+        #endregion
 
     }
 }

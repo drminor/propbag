@@ -15,7 +15,7 @@ namespace PropBagLib.Tests
 
 		public PropGen(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
 
-		public PropGen(PropBagTypeSafetyMode typeSafetyMode, AbstractPropFactory factory) : base(typeSafetyMode, factory)
+		public PropGen(PropBagTypeSafetyMode typeSafetyMode, IPropFactory factory) : base(typeSafetyMode, factory)
 		{
 	        AddProp<object>("PropObject", null, false, null);
 	        AddProp<string>("PropString", GetDelegate<string>("DoWhenStringChanged"), false, null);

@@ -9,13 +9,13 @@ using PropBagLib.Tests;
 
 namespace PropBagLib.Tests
 {
-	public partial class PerformanceDynModel : PropBagDyn
-    {
+	public partial class PerformanceDynModel : PubPropBag
+	{
 		public PerformanceDynModel() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered, null) { }
 
 		public PerformanceDynModel(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
 
-		public PerformanceDynModel(PropBagTypeSafetyMode typeSafetyMode, AbstractPropFactory factory) : base(typeSafetyMode, factory)
+		public PerformanceDynModel(PropBagTypeSafetyMode typeSafetyMode, IPropFactory factory) : base(typeSafetyMode, factory)
 		{
 	        AddProp<object>("PropObject", null, false, null);
 	        AddProp<string>("PropString", null, false, null, null, "");
