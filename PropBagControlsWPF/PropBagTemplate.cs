@@ -1,6 +1,8 @@
 ﻿using DRM.TypeSafePropertyBag;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -86,20 +88,64 @@ namespace DRM.PropBag.ControlsWPF
         }
 
         public static readonly DependencyProperty TypeSafetyModeProperty =
-            DependencyProperty.Register("TypeSafetyMode", typeof(PropBagTypeSafetyMode), typeof(PropBagTemplate),
-                new PropertyMetadata(PropBagTypeSafetyMode.None));
+            DependencyProperty.Register
+            (
+                "TypeSafetyMode",
+                typeof(PropBagTypeSafetyMode),
+                typeof(PropBagTemplate),
+                new PropertyMetadata
+                (
+                    PropBagTypeSafetyMode.None,
+                    new PropertyChangedCallback(OnTypeSafetyModeChanged)
+                    //, new CoerceValueCallback(CoerceTypeSafetyMode)
+                )
+            );
 
-        
         public PropBagTypeSafetyMode TypeSafetyMode
         {
             get
             {
-                return (PropBagTypeSafetyMode)this.GetValue(TypeSafetyModeProperty);
+                object test = this.GetValue(TypeSafetyModeProperty);
+                return (PropBagTypeSafetyMode)CoerceTypeSafetyMode(this, test);
             }
             set
             {
-                this.SetValue(TypeSafetyModeProperty, value);
+                object test = CoerceTypeSafetyMode(this, value);
+                this.SetValue(TypeSafetyModeProperty, test);
             }
+        }
+
+        private static void OnTypeSafetyModeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            object o = e.OldValue;
+            object n = e.NewValue;
+        }
+
+        private static object CoerceTypeSafetyMode(DependencyObject d, object value)
+        {
+            if(value != null)
+            {
+                Type vType = value.GetType();
+
+                if (vType == typeof(string))
+                {
+                    EnumConverter enumConverter = new EnumConverter(typeof(PropBagTypeSafetyMode));
+                    object test = enumConverter.ConvertFromString((string)value);
+                    if (test is PropBagTypeSafetyMode pbtsm)
+                    {
+                        return pbtsm;
+                    }
+                }
+                else
+                {
+                    if (vType == typeof(PropBagTypeSafetyMode))
+                    {
+                        return value;
+                    }
+                }
+            }
+
+            return PropBagTypeSafetyMode.None;
         }
 
         static DependencyProperty DeferMethodRefResolutionProperty =
@@ -148,33 +194,36 @@ namespace DRM.PropBag.ControlsWPF
             }
         }
 
-        public static readonly DependencyProperty NamespacesProperty =
-            DependencyProperty.Register("Namespaces", typeof(NamespacesCollection), typeof(PropBagTemplate), new PropertyMetadata(new NamespacesCollection()));
+        //public static readonly DependencyProperty NamespacesProperty =
+        //    DependencyProperty.Register("Namespaces", typeof(NamespacesCollection), typeof(PropBagTemplate), new PropertyMetadata(new NamespacesCollection()));
 
+        NamespacesCollection _namespaces;
         public NamespacesCollection Namespaces
-        { 
+        {
             get
             {
-                return (NamespacesCollection) this.GetValue(NamespacesProperty);
-            }
-            set
-            {
-                this.SetValue(NamespacesProperty, value);
+                if(_namespaces == null)
+                {
+                    _namespaces = new NamespacesCollection();
+                }
+                return _namespaces;
             }
         }
 
-        public static readonly DependencyProperty PropsProperty =
-            DependencyProperty.Register("Props", typeof(PropsCollection), typeof(PropBagTemplate), new PropertyMetadata(new PropsCollection()));
 
+        //public static readonly DependencyProperty PropsProperty =
+        //    DependencyProperty.Register("Props", typeof(PropsCollection), typeof(PropBagTemplate), new PropertyMetadata(new PropsCollection()));
+
+        PropsCollection _props;
         public PropsCollection Props
         {
             get
             {
-                return (PropsCollection)this.GetValue(PropsProperty);
-            }
-            set
-            {
-                this.SetValue(PropsProperty, value);
+                if(_props == null)
+                {
+                    _props = new PropsCollection();
+                }
+                return _props;
             }
         }
 

@@ -1,15 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using System.Reflection;
 using System.ComponentModel.Design.Serialization;
-
-using DRM.PropBag.ControlModel;
+using System.Globalization;
+using System.Reflection;
 using System.Xaml;
 
 namespace DRM.PropBag.ControlsWPF
@@ -45,10 +38,9 @@ namespace DRM.PropBag.ControlsWPF
                 return PlaceholderDelegate;
             }
 
-            IRootObjectProvider rootProvider = context.GetService(typeof(IRootObjectProvider)) as IRootObjectProvider;
-            if (rootProvider != null && value is String)
+            if (context.GetService(typeof(IRootObjectProvider)) is IRootObjectProvider rootProvider && value is String)
             {
-                if(rootProvider.RootObject != null)
+                if (rootProvider.RootObject != null)
                 {
                     object result = DoConvertFrom((string)value, rootProvider.RootObject);
                     if (result != null) return result;

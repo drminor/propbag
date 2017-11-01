@@ -62,12 +62,12 @@
     <Compile Include="Binders\OSSExtensions.cs" />
     <Compile Include="Binders\SelectedItemConverter.cs" />
     <Compile Include="Binders\SourceKindEnum.cs" />
-    <Compile Include="BoundPropBag.cs" />
+    <None Include="BoundPropBag_OLD.cs" />
     <Compile Include="ComparerFuncTypeConverter.cs" />
     <Compile Include="Binders\DepPropChangedEventArgs.cs" />
     <Compile Include="Binders\DepPropChangedTypeConverter.cs" />
-    <Compile Include="Converters\EnumValueConverter.cs" />
-    <Compile Include="Converters\LocalizableDescriptionAttribute.cs" />
+    <None Include="Converters\EnumValueConverter.cs" />
+    <None Include="Converters\LocalizableDescriptionAttribute.cs" />
     <Compile Include="DoWhenChangedAction.cs" />
     <Compile Include="DuoActionTypeConverter.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -90,7 +90,7 @@
     <Compile Include="PropTypeInfoCollection.cs" />
     <Compile Include="PropValueConverter.cs" />
     <Compile Include="ReflectionHelpers.cs" />
-    <Compile Include="TwoTypeMarkupExtension.cs" />
+    <Compile Include="TwoTypesMarkupExtension.cs" />
     <None Include="ViewModelGenerator_OLD.cs" />
     <Compile Include="Activators\IPropBagTemplateProvider.cs" />
     <Compile Include="WPFHelpers\LogicalTree.cs" />
