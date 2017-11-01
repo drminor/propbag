@@ -47,9 +47,8 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 (
                     propModel: propModel,
                     typeToWrap: typeToWrap,
-                    propFactory: propFactory,
                     configPackageName: configPackageName
-                    );
+                );
 
             Assert.That(mapperRequest, Is.Not.Null, "mapperRequest should be non-null.");
         }
@@ -68,9 +67,8 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 (
                     propModel: propModel,
                     typeToWrap: typeToWrap,
-                    propFactory: propFactory,
                     configPackageName: configPackageName
-                    );
+                );
 
             Assert.That(mapperRequest, Is.Not.Null, "mapperRequest should be non-null.");
 

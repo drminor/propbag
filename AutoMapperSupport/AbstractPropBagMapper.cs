@@ -15,8 +15,6 @@ namespace DRM.PropBag.AutoMapperSupport
         #region Public and Private Members
 
         IPropBagMapperKey<TSource, TDestination> _mapRequest;
-        //private IMapTypeDefinitionGen SourceTypeDef;
-        //private IMapTypeDefinitionGen DestinationTypeDef;
 
         public Type SourceType { get; }
         public Type DestinationType { get; }
@@ -24,7 +22,7 @@ namespace DRM.PropBag.AutoMapperSupport
         public PropModel PropModel { get; }
         public Type RunTimeType { get; }
 
-        IPropFactory PropFactory { get; } //= new PropFactory(true, null, null);
+        IPropFactory PropFactory { get; }
         public IMapper Mapper { get; }
 
         //public Func<TDestination, TSource> RegularInstanceCreator { get; }
@@ -40,16 +38,15 @@ namespace DRM.PropBag.AutoMapperSupport
         public AbstractPropBagMapper(IPropBagMapperKey<TSource, TDestination> mapRequest,
             IMapper mapper, IViewModelActivator vmActivator)
         {
-            _mapRequest = mapRequest;
+            //_mapRequest = mapRequest;
 
             SourceType = mapRequest.SourceTypeDef.Type;
             DestinationType = mapRequest.DestinationTypeDef.Type;
 
             // TODO: Work on this!!
-            RunTimeType = mapRequest.DestinationTypeDef.NewWrapperType; 
-
-            PropModel = mapRequest.DestinationTypeDef.PropModel;
-            //PropFactory = mapRequest.DestinationTypeDef.PropFactory;
+            RunTimeType = mapRequest.DestinationTypeDef?.NewWrapperType; 
+            PropModel = mapRequest.DestinationTypeDef?.PropModel;
+            PropFactory = mapRequest.DestinationTypeDef?.PropFactory;
 
             Mapper = mapper;
             _vmActivator = vmActivator;
@@ -134,8 +131,6 @@ namespace DRM.PropBag.AutoMapperSupport
         }
 
         #endregion
-
-
 
     }
 }

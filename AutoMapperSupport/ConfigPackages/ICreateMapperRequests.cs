@@ -10,8 +10,8 @@ namespace DRM.PropBag.AutoMapperSupport
             (
             PropModel propModel,
             Type typeToWrap,
-            IPropFactory propFactory,
-            IHaveAMapperConfigurationStep configStarterForThisRequest
+            IHaveAMapperConfigurationStep configStarterForThisRequest,
+            IPropFactory propFactory = null
             ) where TDestination : class, IPropBag;
     }
 }

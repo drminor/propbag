@@ -139,12 +139,11 @@ namespace PropBagTestApp.View
                 {
                     IPropBagMapperKey<MyModel, ReferenceBindViewModelPB> mapperRequest
                         = JustSayNo.AutoMapperProvider.RegisterMapperRequest<MyModel, ReferenceBindViewModelPB>
-                     (
-                         PERSON_VM_INSTANCE_KEY,
-                         typeof(ReferenceBindViewModelPB),
-                         null,
-                         configPackageName: "emit_proxy"
-                     );
+                    (
+                        PERSON_VM_INSTANCE_KEY,
+                        typeof(ReferenceBindViewModelPB),
+                        configPackageName: "emit_proxy"
+                    );
 
                     _mapper = JustSayNo.AutoMapperProvider.GetMapper(mapperRequest);
                 }

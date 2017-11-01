@@ -12,7 +12,10 @@ namespace DRM.PropBag.AutoMapperSupport
         public bool IsPropBag { get; }
         public PropModel PropModel { get; }
         public Type NewWrapperType { get; }
-        //public IPropFactory PropFactory { get; }
+
+        IPropFactory _propFactory { get; }
+        // If specified, Use the one provided by the caller to use for this mapping operation.
+        public IPropFactory PropFactory => _propFactory ?? PropModel.PropFactory;
 
         #region Constructors
 
@@ -23,16 +26,16 @@ namespace DRM.PropBag.AutoMapperSupport
             IsPropBag = false;
             PropModel = null;
             NewWrapperType = null;
-            //PropFactory = null;
+            _propFactory = null;
         }
 
-        public MapTypeDefinition(PropModel pm/*, IPropFactory propFactory*/, Type baseType)
+        public MapTypeDefinition(PropModel pm, IPropFactory propFactory, Type baseType)
         {
             Type = typeof(T);
             IsPropBag = true;
             PropModel = pm;
             NewWrapperType = baseType;
-            //PropFactory = propFactory;
+            _propFactory = propFactory;
         }
 
         #endregion

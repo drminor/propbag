@@ -7,12 +7,12 @@ namespace DRM.PropBag.AutoMapperSupport
 {
     public abstract class AbstractConfigPackage : ICreateMapperRequests
     {
-        public virtual IPropBagMapperKey<TSource, TDestination> CreateMapperRequest<TSource, TDestination> 
+        public virtual IPropBagMapperKey<TSource, TDestination> CreateMapperRequest<TSource, TDestination>
             (
             PropModel propModel,
             Type typeToWrap,
-            IPropFactory propFactory,
-            IHaveAMapperConfigurationStep configStarterForThisRequest
+            IHaveAMapperConfigurationStep configStarterForThisRequest,
+            IPropFactory propFactory = null
             ) where TDestination : class, IPropBag
         {
             if (propModel == null) throw new ArgumentNullException($"{nameof(propModel)}");
@@ -50,10 +50,10 @@ namespace DRM.PropBag.AutoMapperSupport
             IMapTypeDefinitionProvider mapTypeDefinitionProvider = GetMapTypeDefinitionProvider();
 
             IMapTypeDefinition<TSource> sourceMapTypeDef = mapTypeDefinitionProvider.GetTypeDescription<TSource>
-                (propModel, typeToWrap, null);
+                (propModel, propFactory, typeToWrap, null);
 
             IMapTypeDefinition<TDestination> destinationMapTypeDef = mapTypeDefinitionProvider.GetTypeDescription<TDestination>
-                (propModel, typeToWrap, null);
+                (propModel, propFactory, typeToWrap, null);
 
             IPropBagMapperKey<TSource, TDestination> result = new PropBagMapperKey<TSource, TDestination>
                 (

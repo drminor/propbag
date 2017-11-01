@@ -56,10 +56,10 @@ namespace DRM.PropBag.AutoMapperSupport
             (
             string resourceKey,
             Type typeToWrap,
-            IPropFactory propFactory,
             string configPackageName,
             IHaveAMapperConfigurationStep configStarterForThisRequest = null
-
+,
+            IPropFactory propFactory = null
             ) where TDestination : class, IPropBag
         {
             PropModel propModel = GetPropModel(resourceKey);
@@ -69,10 +69,10 @@ namespace DRM.PropBag.AutoMapperSupport
                 (
                     propModel,
                     typeToWrap,
-                    propFactory,
                     configPackageName,
                     configStarterForThisRequest
-                    );
+,
+                    propFactory);
 
             return typedMapperRequest;
         }
@@ -81,10 +81,9 @@ namespace DRM.PropBag.AutoMapperSupport
             (
             PropModel propModel,
             Type typeToWrap,
-            IPropFactory propFactory,
             string configPackageName,
-            IHaveAMapperConfigurationStep configStarterForThisRequest = null
-
+            IHaveAMapperConfigurationStep configStarterForThisRequest = null,
+            IPropFactory propFactory = null
             ) where TDestination : class, IPropBag
         {
             ICreateMapperRequests configPackage = GetRequestCreator(configPackageName);
@@ -93,10 +92,10 @@ namespace DRM.PropBag.AutoMapperSupport
                 (
                 propModel,
                 typeToWrap,
-                propFactory ?? _defaultPropFactory ?? throw new InvalidOperationException("No PropFactory was provided and no Default PropFactory was specified upon construction."),
                 configPackage,
                 configStarterForThisRequest
-                );
+,
+                propFactory ?? _defaultPropFactory ?? throw new InvalidOperationException("No PropFactory was provided and no Default PropFactory was specified upon construction."));
 
             this.RegisterMapperRequest(typedMapperRequest);
 
@@ -126,18 +125,18 @@ namespace DRM.PropBag.AutoMapperSupport
             (
             PropModel propModel,
             Type typeToWrap,
-            IPropFactory propFactory,
             ICreateMapperRequests requestCreator,
-            IHaveAMapperConfigurationStep configStarterForThisRequest
+            IHaveAMapperConfigurationStep configStarterForThisRequest,
+            IPropFactory propFactory
             ) where TDestination : class, IPropBag
         {
             return requestCreator.CreateMapperRequest<TSource, TDestination>
                 (
                 propModel,
                 typeToWrap,
-                propFactory,
                 configStarterForThisRequest
-                );
+,
+                propFactory);
         }
 
         //private IPropBagMapperKey<TSource, TDestination> CreateTypedMapperRequest<TSource, TDestination>
@@ -202,14 +201,14 @@ namespace DRM.PropBag.AutoMapperSupport
             }
         }
 
-        private PropModel GetPropModel(string resourceKey)
+        private PropModel GetPropModel(string resourceKey, IPropFactory propFactory = null)
         {
             if (!HasPbTConversionService)
             {
                 throw new InvalidOperationException(NO_PBT_CONVERSION_SERVICE_MSG);
             }
 
-            PropModel propModel = _propModelProvider.GetPropModel(resourceKey);
+            PropModel propModel = _propModelProvider.GetPropModel(resourceKey, propFactory);
             return propModel;
         }
 
