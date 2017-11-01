@@ -12,7 +12,7 @@ namespace DRM.PropBag.AutoMapperSupport
         public bool IsPropBag { get; }
         public PropModel PropModel { get; }
         public Type NewWrapperType { get; }
-        public IPropFactory PropFactory { get; }
+        //public IPropFactory PropFactory { get; }
 
         #region Constructors
 
@@ -23,16 +23,16 @@ namespace DRM.PropBag.AutoMapperSupport
             IsPropBag = false;
             PropModel = null;
             NewWrapperType = null;
-            PropFactory = null;
+            //PropFactory = null;
         }
 
-        public MapTypeDefinition(PropModel pm, IPropFactory propFactory, Type baseType)
+        public MapTypeDefinition(PropModel pm/*, IPropFactory propFactory*/, Type baseType)
         {
             Type = typeof(T);
             IsPropBag = true;
             PropModel = pm;
             NewWrapperType = baseType;
-            PropFactory = propFactory;
+            //PropFactory = propFactory;
         }
 
         #endregion
@@ -49,6 +49,7 @@ namespace DRM.PropBag.AutoMapperSupport
         //    }
         //}
 
+        // TODO: Check the IEquatable support for MapTypeDefinition.
         #region IEquatable Support and Object Overrides
 
         public override string ToString()

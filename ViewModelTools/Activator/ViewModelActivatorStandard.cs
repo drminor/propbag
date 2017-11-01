@@ -35,22 +35,22 @@ namespace DRM.ViewModelTools
         #region IViewModelActivator interface
 
         // BaseType + ResourceKey (BaseType known only at run time.
-        public object GetNewViewModel(string resourceKey, IPropFactory propFactory, Type typeToCreate)
+        public object GetNewViewModel(string resourceKey, Type typeToCreate, IPropFactory propFactory = null)
         {
             PropModel propModel = GetPropModel(resourceKey);
-            object result = GetNewViewModel(propModel, propFactory, typeToCreate);
+            object result = GetNewViewModel(propModel, typeToCreate, propFactory);
             return result;
         }
 
         // BaseType + PropModel (BaseType known only at run time.
-        public object GetNewViewModel(PropModel propModel, IPropFactory propFactory, Type typeToCreate)
+        public object GetNewViewModel(PropModel propModel, Type typeToCreate, IPropFactory propFactory = null)
         {
             object result = Activator.CreateInstance(typeToCreate, propModel, propFactory);
             return result;
         }
 
         // BaseType + ResourceKey (BaseType known at compile time.)
-        public BT GetNewViewModel<BT>(string resourceKey, IPropFactory propFactory) where BT : class, IPropBag
+        public BT GetNewViewModel<BT>(string resourceKey, IPropFactory propFactory = null) where BT : class, IPropBag
         {
             PropModel propModel = GetPropModel(resourceKey);
             BT result = GetNewViewModel<BT>(propModel, propFactory);
@@ -58,7 +58,7 @@ namespace DRM.ViewModelTools
         }
 
         // BaseType + PropModel (BaseType known at compile time.)
-        public BT GetNewViewModel<BT>(PropModel propModel, IPropFactory propFactory) where BT : class, IPropBag
+        public BT GetNewViewModel<BT>(PropModel propModel, IPropFactory propFactory = null) where BT : class, IPropBag
         {
             BT result = (BT)Activator.CreateInstance(typeof(BT), propModel, propFactory);
             return result;

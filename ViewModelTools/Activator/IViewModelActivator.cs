@@ -13,14 +13,12 @@ namespace DRM.ViewModelTools
         //object GetNewViewModel(PropBagTemplate pbt, IPropFactory propFactory);
 
         // Create new Type that is derived from a Type known only at run time.
-        object GetNewViewModel(string resourceKey, IPropFactory propFactory, Type typeToCreate);
-        object GetNewViewModel(PropModel propModel, IPropFactory propFactory, Type typeToCreate);
+        object GetNewViewModel(string resourceKey, Type typeToCreate, IPropFactory propFactory = null);
+        object GetNewViewModel(PropModel propModel, Type typeToCreate, IPropFactory propFactory = null);
 
         // Create new Type that is derived from a Type known at compile time.
-        BT GetNewViewModel<BT>(string resourceKey, IPropFactory propFactory) where BT : class, IPropBag;
-        BT GetNewViewModel<BT>(PropModel propModel, IPropFactory propFactory) where BT : class, IPropBag;
-
-
+        BT GetNewViewModel<BT>(string resourceKey, IPropFactory propFactory = null) where BT : class, IPropBag;
+        BT GetNewViewModel<BT>(PropModel propModel, IPropFactory propFactory = null) where BT : class, IPropBag;
     }
 
     //public interface IViewModelActivator_OLD<T> where T : class, IPropBag

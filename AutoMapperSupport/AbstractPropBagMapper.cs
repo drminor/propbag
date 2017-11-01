@@ -44,10 +44,12 @@ namespace DRM.PropBag.AutoMapperSupport
 
             SourceType = mapRequest.SourceTypeDef.Type;
             DestinationType = mapRequest.DestinationTypeDef.Type;
-            RunTimeType = mapRequest.DestinationTypeDef.NewWrapperType; // TODO: Work on this!!
+
+            // TODO: Work on this!!
+            RunTimeType = mapRequest.DestinationTypeDef.NewWrapperType; 
 
             PropModel = mapRequest.DestinationTypeDef.PropModel;
-            PropFactory = mapRequest.DestinationTypeDef.PropFactory;
+            //PropFactory = mapRequest.DestinationTypeDef.PropFactory;
 
             Mapper = mapper;
             _vmActivator = vmActivator;
@@ -121,7 +123,7 @@ namespace DRM.PropBag.AutoMapperSupport
         {
             try
             {
-                var newViewModel = _vmActivator.GetNewViewModel(propModel, propFactory, newWrappedType);
+                var newViewModel = _vmActivator.GetNewViewModel(propModel, newWrappedType, propFactory);
                 return newViewModel as TDestination;
             }
             catch (System.Exception e2)

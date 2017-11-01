@@ -87,7 +87,9 @@ namespace PropBagLib.Tests.AutoMapperSupport
         private PropModel GetPropModelForDestinationModel(IPropFactory propFactory)
         {
             PropModel result = new PropModel(className: "DestinationModel", instanceKey: "DestinationModel",
-                namespaceName: "DummyNamespace", deriveFromPubPropBag: false, 
+                namespaceName: "DummyNamespace",
+                propFactory: propFactory,
+                deriveFromPubPropBag: false, 
                 typeSafetyMode: PropBagTypeSafetyMode.Tight, 
                 deferMethodRefResolution: false, requireExplicitInitialValue: true);
 

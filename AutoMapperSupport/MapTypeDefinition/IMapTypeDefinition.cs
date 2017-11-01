@@ -31,11 +31,11 @@ namespace DRM.PropBag.AutoMapperSupport
         /// </summary>
         PropModel PropModel { get; }
 
-        // TODO: Do we need to keep this and keep the PropFactory property of PropModel.
-        /// <summary>
-        /// The PropFactory to use when constructing new instances.
-        /// </summary>
-        IPropFactory PropFactory { get; }
+        //// TODO: Do we need to keep this and keep the PropFactory property of PropModel.
+        ///// <summary>
+        ///// The PropFactory to use when constructing new instances.
+        ///// </summary>
+        //IPropFactory PropFactory { get; }
 
         /// <summary>
         /// When a Proxy or Wrapper Type must be created to support the mapping operation, this holds the

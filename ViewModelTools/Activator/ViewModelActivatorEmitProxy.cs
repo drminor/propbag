@@ -49,15 +49,15 @@ namespace DRM.ViewModelTools
 
         #region IViewModelActivator interface
 
-        public object GetNewViewModel(string resourceKey, IPropFactory propFactory, Type typeToCreate)
+        public object GetNewViewModel(string resourceKey, Type typeToCreate, IPropFactory propFactory = null)
         {
             PropModel propModel = GetPropModel(resourceKey);
 
-            object result = GetNewViewModel(propModel, propFactory, typeToCreate);
+            object result = GetNewViewModel(propModel, typeToCreate, propFactory);
             return result;
         }
 
-        public object GetNewViewModel(PropModel propModel, IPropFactory propFactory, Type typeToCreate)
+        public object GetNewViewModel(PropModel propModel, Type typeToCreate, IPropFactory propFactory = null)
         {
             if (!typeToCreate.IsPropBagBased())
             {
@@ -72,7 +72,7 @@ namespace DRM.ViewModelTools
         }
 
         // BaseType + ClassName (BaseType known at compile time.)
-        public BT GetNewViewModel<BT>(string resourceKey, IPropFactory propFactory) where BT : class, IPropBag
+        public BT GetNewViewModel<BT>(string resourceKey, IPropFactory propFactory = null) where BT : class, IPropBag
         {
             PropModel propModel = GetPropModel(resourceKey);
 
@@ -81,7 +81,7 @@ namespace DRM.ViewModelTools
         }
 
         // BaseType + PropModel (BaseType known at compile time.)
-        public BT GetNewViewModel<BT>(PropModel propModel, IPropFactory propFactory) where BT : class, IPropBag
+        public BT GetNewViewModel<BT>(PropModel propModel, IPropFactory propFactory = null) where BT : class, IPropBag
         {
             TypeDescription td = _typeDescCachingService.GetOrAdd(new NewTypeRequest(propModel, typeof(BT), null));
             Type newWrapperType = _wrapperTypeCachingService.GetOrAdd(td);

@@ -75,9 +75,11 @@ namespace DRM.PropBag.ControlModel
 
         public bool IsClassDefined => ClassName != DEFAULT_CLASS_NAME;
 
-        public PropModel() : this(DEFAULT_CLASS_NAME, null, null) { }
+        public PropModel() : this(DEFAULT_CLASS_NAME, null, null, null) { }
 
+        // TODO: Get rid of the instanceKey parameter -- it shouldn't be used during construction.
         public PropModel(string className, string instanceKey, string namespaceName,
+            IPropFactory propFactory,
             bool deriveFromPubPropBag = false,
             PropBagTypeSafetyMode typeSafetyMode = PropBagTypeSafetyMode.AllPropsMustBeRegistered,
             bool deferMethodRefResolution = true,

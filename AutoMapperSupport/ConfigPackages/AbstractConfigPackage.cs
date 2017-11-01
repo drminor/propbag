@@ -50,10 +50,10 @@ namespace DRM.PropBag.AutoMapperSupport
             IMapTypeDefinitionProvider mapTypeDefinitionProvider = GetMapTypeDefinitionProvider();
 
             IMapTypeDefinition<TSource> sourceMapTypeDef = mapTypeDefinitionProvider.GetTypeDescription<TSource>
-                (propModel, propFactory, typeToWrap, null);
+                (propModel, typeToWrap, null);
 
             IMapTypeDefinition<TDestination> destinationMapTypeDef = mapTypeDefinitionProvider.GetTypeDescription<TDestination>
-                (propModel, propFactory, typeToWrap, null);
+                (propModel, typeToWrap, null);
 
             IPropBagMapperKey<TSource, TDestination> result = new PropBagMapperKey<TSource, TDestination>
                 (

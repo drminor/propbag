@@ -16,6 +16,7 @@ namespace DRM.PropBag.ControlsWPF
 
         #region Constructors
 
+        // TODO: Consider adding support for a default IPropFactory.
         public PropModelProvider()
         {
             _propBagTemplateProvider = null;
@@ -30,14 +31,14 @@ namespace DRM.PropBag.ControlsWPF
 
         #region PropBagTemplate Locator Support
 
-        public PropModel GetPropModel(string resourceKey)
+        public PropModel GetPropModel(string resourceKey, IPropFactory propFactory = null)
         {
             try
             {
                 if (CanFindPropBagTemplateWithJustKey)
                 {
                     PropBagTemplate pbt = _propBagTemplateProvider.GetPropBagTemplate(resourceKey);
-                    PropModel pm = GetPropModel(pbt);
+                    PropModel pm = GetPropModel(pbt, propFactory);
                     return pm;
                 }
                 else if (HasPbtLookupResources)
@@ -61,14 +62,14 @@ namespace DRM.PropBag.ControlsWPF
             }
         }
 
-        public PropModel GetPropModel(ResourceDictionary rd, string resourceKey)
+        public PropModel GetPropModel(ResourceDictionary rd, string resourceKey, IPropFactory propFactory = null)
         {
             try
             {
                 if (HasPbtLookupResources)
                 {
                     PropBagTemplate pbt = _propBagTemplateProvider.GetPropBagTemplate(resourceKey);
-                    PropModel pm = GetPropModel(pbt);
+                    PropModel pm = GetPropModel(pbt, propFactory);
                     return pm;
                 }
                 else
@@ -88,7 +89,7 @@ namespace DRM.PropBag.ControlsWPF
 
         #region Parsing Logic
 
-        public PropModel GetPropModel(PropBagTemplate pbt)
+        public PropModel GetPropModel(PropBagTemplate pbt, IPropFactory propFactory = null)
         {
             string className = pbt.ClassName;
             string instanceKey = pbt.InstanceKey;
@@ -102,11 +103,11 @@ namespace DRM.PropBag.ControlsWPF
                 new PropModel(className,
                     instanceKey,
                     outputNamespace,
+                    propFactory ?? pbt.PropFactory, // Use the PropFactory supplied by the caller if not null.
                     deriveFromPubPropBag,
                     typeSafetyMode,
                     deferMethodRefResolution,
                     requireExplicitInitialValue);
-
 
             int namespacesCount = pbt.Namespaces == null ? 0 : pbt.Namespaces.Count;
             for (int nsPtr = 0; nsPtr < namespacesCount; nsPtr++)
