@@ -4,13 +4,13 @@ using System;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
-    public class PropBagMapperBuilder<TSource, TDestination> : IBuildPropBagMapper<TSource, TDestination> where TDestination : class, IPropBag
+    public class SimplePropBagMapperBuilder<TSource, TDestination> : IBuildPropBagMapper<TSource, TDestination> where TDestination : class, IPropBag
     {
         private IConfigureAMapper<TSource, TDestination> MapperConfiguration { get; }
 
         private IViewModelActivator VmActivator { get; }
 
-        public PropBagMapperBuilder(IConfigureAMapper<TSource, TDestination> mapperConfiguration,
+        public SimplePropBagMapperBuilder(IConfigureAMapper<TSource, TDestination> mapperConfiguration,
             IViewModelActivator vmActivator)
         {
             MapperConfiguration = mapperConfiguration;
