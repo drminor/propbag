@@ -57,7 +57,7 @@ namespace PropBagTestApp
         public DtoTestEmit()
         {
 
-            if (SettingsExtensions.InDesignMode())
+            if (JustSayNo.InDesignMode())
             {
                 System.Diagnostics.Debug.WriteLine("In Design");
                 //OurData = new DtoTestViewModelEmit(PropBagTypeSafetyMode.Tight);

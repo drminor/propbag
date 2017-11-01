@@ -1,16 +1,11 @@
-﻿using AutoMapper;
-using DRM.PropBag.AutoMapperSupport;
+﻿using DRM.PropBag.AutoMapperSupport;
 using DRM.PropBag.ControlModel;
 using DRM.PropBag.ControlsWPF;
-using DRM.TypeSafePropertyBag;
-using DRM.TypeWrapper;
-using DRM.TypeWrapper.TypeDesc;
 using DRM.ViewModelTools;
 using PropBagTestApp.Models;
 using PropBagTestApp.ViewModels;
 using System;
 using System.Windows;
-
 
 namespace PropBagTestApp.View
 {
@@ -20,36 +15,16 @@ namespace PropBagTestApp.View
     public partial class ReferenceBindWindowPB_Simple : Window
     {
 
-        IPropModelProvider _propModelProvider;
-        AutoMapperProvider _autoMapperProvider;
-
-        //Dictionary<string, BoundPropBag> _boundPropBags;
-        //PropBagMapperKey<MyModel, ReferenceBindViewModelPB> _mapperKey;
-        ////PropBagMapperKey<MyModel2, DtoTestViewModelExtra> _mapperKey2;
-
-
         public ReferenceBindWindowPB_Simple()
         {
-            IPropBagTemplateProvider propBagTemplateProvider = new PropBagTemplateProvider(Application.Current.Resources);
-            _propModelProvider = new PropModelProvider(propBagTemplateProvider);
-
-            _autoMapperProvider = InitializeAutoMappers(_propModelProvider);
             _mapper = null;
 
             InitializeComponent();
-
-            //Grid topGrid = (Grid)this.FindName("TopGrid");
-
-            //_boundPropBags = ViewModelGenerator.StandUpViewModels(topGrid, this);
-
 
             ReferenceBindViewModelPB rbvm = (ReferenceBindViewModelPB)this.DataContext;
 
             MyModel4 mod4 = new MyModel4() { MyString = "Start" };
             rbvm.SetIt<MyModel4>(mod4, "Deep");
-
-            //DefineMapingKeys("ReferenceBindViewModelPB");
-            //DefineMappers();
         }
 
         private void BtnRead_Click(object sender, RoutedEventArgs e)
@@ -145,9 +120,7 @@ namespace PropBagTestApp.View
 
         private void ReadWithMap(MyModel mm, ReferenceBindViewModelPB vm)
         {
-            //var mapper = (PropBagMapperCustom<MyModel, ReferenceBindViewModelPB>)_autoMappers.GetMapperToUse(_mapperKey);
-
-            var mapper = Mapper;
+            var mapper = Mapper; 
 
             ReferenceBindViewModelPB tt = (ReferenceBindViewModelPB)mapper.MapToDestination(mm, vm);
 
@@ -164,156 +137,21 @@ namespace PropBagTestApp.View
             {
                 if (_mapper == null)
                 {
-                    var mapperRequest = _autoMapperProvider.RegisterMapperRequest<MyModel, ReferenceBindViewModelPB>
-                        (PERSON_VM_INSTANCE_KEY, typeof(ReferenceBindViewModelPB), null);
+                    IPropBagMapperKey<MyModel, ReferenceBindViewModelPB> mapperRequest
+                        = JustSayNo.AutoMapperProvider.RegisterMapperRequest<MyModel, ReferenceBindViewModelPB>
+                     (
+                         PERSON_VM_INSTANCE_KEY,
+                         typeof(ReferenceBindViewModelPB),
+                         null,
+                         configPackageName: "emit_proxy"
+                     );
 
-                    _mapper =  _autoMapperProvider.GetMapper(mapperRequest);
+                    _mapper = JustSayNo.AutoMapperProvider.GetMapper(mapperRequest);
                 }
                 return _mapper;
             }
         }
 
-        //private void DefineMappers()
-        //{
-        //    _autoMappers.Register(_mapperKey);
-        //}
 
-        //private void DefineMapingKeys(string instanceKey)
-        //{
-        //    BoundPropBag boundPB = _boundPropBags[instanceKey];
-
-        //    _mapperKey
-        //        = new PropBagMapperKey<MyModel, ReferenceBindViewModelPB>
-        //        (boundPB.PropModel, boundPB.RtViewModelType, mappingStrategy: PropBagMappingStrategyEnum.ExtraMembers);
-
-        //    //_mapperKey2
-        //    //    = new PropBagMapperKey<MyModel2, ReferenceBindViewModelPB>
-        //    //    (boundPB.PropModel, boundPB.RtViewModelType, mappingStrategy: PropBagMappingStrategyEnum.ExtraMembers);
-        //}
-
-        //private ConfiguredMappers GetAutoMappers(PropBagMappingStrategyEnum mappingStrategy)
-        //{
-        //    Func<Action<IMapperConfigurationExpression>, IConfigurationProvider> configBuilder
-        //        = new MapperConfigurationProvider().BaseConfigBuilder;
-
-        //    MapperConfigInitializerProvider mapperConfigExpression
-        //        = new MapperConfigInitializerProvider(mappingStrategy);
-
-        //    ConfiguredMappers result = new ConfiguredMappers(configBuilder, mapperConfigExpression);
-
-        //    return result;
-        //}
-
-        //private ReferenceBindViewModelPB GetNewViewModel()
-        //{
-        //    //PropModel pm = _propModelProvider.GetPropModel("ReferenceBindViewModelPB");
-        //    //IPropFactory pf = SettingsExtensions.ThePropFactory;
-
-        //    //ReferenceBindViewModelPB rbvm = new ReferenceBindViewModelPB(pm, pf);
-
-        //    //MyModel4 mod4 = new MyModel4() { MyString = "Start" };
-        //    //rbvm.SetIt<MyModel4>(mod4, "Deep");
-
-        //    //return rbvm;
-        //}
-
-        private AutoMapperProvider InitializeAutoMappers(IPropModelProvider propModelProvider)
-        {
-            // Select one of a few well-know strategies for 
-            // 1. Createing new instances of IPropBag-based ViewModels
-            // 2. It is used by AutoMapper support to inform how to
-            //      a. Create new target instances,
-            //      b. How to get Type info.
-            //      c. How to create code that does the mapping.
-            //PropBagMappingStrategyEnum mappingStrategy = PropBagMappingStrategyEnum.ExtraMembers;
-
-            IMapTypeDefinitionProvider mapTypeDefinitionProvider = new SimpleMapTypeDefinitionProvider();
-
-            IViewModelActivator standardActivator = new ViewModelActivatorStandard(propModelProvider);
-
-            // -- Build EmitProxy style of ViewModel Activator
-            // -- Build WrapperType Caching Service
-            // Used by some ViewModel Activators to emit types, i.e., modules.
-            IModuleBuilderInfo moduleBuilderInfo = new SimpleModuleBuilderInfo();
-
-            IEmitWrapperType emitWrapperType = new SimpleWrapperTypeEmitter(mbInfo: moduleBuilderInfo);
-
-            ICacheWrapperTypes wrapperTypeCachingService = new WrapperTypeLocalCache
-                (
-                emitterEngine: emitWrapperType
-                );
-
-            // -- Build TypeDesc Caching Service
-            // Used only by some ModuleBuilders.
-            ITypeDescriptionProvider typeDescriptionProvider = new SimpleTypeDescriptionProvider();
-
-            ICacheTypeDescriptions typeDescCachingService = new TypeDescriptionLocalCache
-                (
-                typeDescriptionProvider: typeDescriptionProvider
-                );
-
-            IViewModelActivator emitProxyActivator = new ViewModelActivatorEmitProxy
-                (
-                wrapperTypeCachingService: wrapperTypeCachingService,
-                typeDescCachingService: typeDescCachingService,
-                propModelProvider: propModelProvider
-                );
-
-            ICachePropBagMappers mappersCachingService = new SimplePropBagMapperCache();
-
-            IPropFactory propFactory = SettingsExtensions.ThePropFactory;
-
-            AutoMapperProvider autoMapperProvider = new AutoMapperProvider
-                (
-                propModelProvider,
-                mapTypeDefinitionProvider: mapTypeDefinitionProvider,
-                standardActivator: standardActivator,
-                emitProxyActivator: emitProxyActivator,
-                mappersCachingService: mappersCachingService,
-                defaultPropFactory: propFactory
-                );
-
-            return autoMapperProvider;
-        }
-
-        #region NOTES
-
-        //-------------------------
-
-        // Other Dependencies that could be managed, but not part of AutoMapper, per say.
-        // 1. Type Converter Cache used by most, if not all IPropFactory.
-        // 2. DoSetDelegate Cache -- basically baked into IPropBag -- not many different options
-        // 3. PropCreation Delegate Cache --  only used by IPropFactory this is not critical now, but could become so 
-        // 4. Event Listeners that could managed better if done as a central service -- used by PropBag and the Binding engine.
-
-        //------------------------ 
-
-        //******************
-
-        // Services that we need to focus on now.
-        // 1. ViewModel creation 
-        // 2. PropFactory boot strapping
-        // 3. Proxy Model creation (we should be able to use 95% of the same services as those provided for ViewModel
-        //          creation, in fact, ProxModel creation is probably the driver and ViewModel can benefit from
-        //          novel techniqes explored here.
-        // 4. Creating a language for ViewModel configuration.
-        // 5. Creating services that allow for data flow behavior to be declared and executed without having
-        //          to write code.
-        // 6. Creating ViewModel sinks for data coming from the View dynamically, ReactiveUI has a 
-        //          a way of doing this from the ViewModel to the View, can we build a facility to allow the reverse?
-        // 
-        // 7. Allowing the View to affect the behavior of the ViewModel dynamically.
-        // 8. Design-time support including AutoMapper mapping configuration and testing.
-        //******************
-
-        // +++++++++++++++++++
-
-        // Other services that should be addressed
-        // 1. Building TypeDescriptors / Type Descriptions / PropertyInfo / Custom MetaData for reflection.
-        // 2. XML Serialization services for saving / hydrating IPropBag objects.
-        // 
-        // +++++++++++++++++++
-
-        #endregion
     }
 }

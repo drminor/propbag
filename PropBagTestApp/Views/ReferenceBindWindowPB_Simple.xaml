@@ -5,12 +5,12 @@
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:mod="clr-namespace:PropBagTestApp.ViewModels"
+        xmlns:vmod="clr-namespace:PropBagTestApp.ViewModels"
         mc:Ignorable="d"
         Title="ReferenceBindWindow" Height="300" Width="500">
 
     <Window.DataContext>
-        <mod:ReferenceBindViewModelPB/>
+        <vmod:ReferenceBindViewModelPB/>
     </Window.DataContext>
 
     <Grid Name="TopGrid">

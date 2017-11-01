@@ -3,17 +3,16 @@
                     xmlns:sys="clr-namespace:System;assembly=mscorlib"
                     xmlns:mod="clr-namespace:PropBagTestApp.Models"
                     xmlns:pb="clr-namespace:DRM.PropBag.ControlsWPF;assembly=WPFControls"
-                    xmlns:convs="clr-namespace:DRM.PropBag.ControlsWPF.Converters;assembly=WPFControls">
+                    xmlns:tspb="clr-namespace:DRM.TypeSafePropertyBag;assembly=TypeSafePropertyBag">
 
 
-    <!--TypeSafetyMode="None"
-                TypeSafetyMode="{Binding Mode=OneWay, Converter={StaticResource enumItemsConverter}}"
+    <!--<ObjectDataProvider x:Key="TypeSafetyModeEnum" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
+        <ObjectDataProvider.MethodParameters>
+            <x:Type TypeName="tspb:PropBagTypeSafetyMode"/>
+        </ObjectDataProvider.MethodParameters>
+    </ObjectDataProvider>-->
 
-    -->
-
-    <convs:EnumToFriendlyNameConverter x:Key="enumItemsConverter"/>
-
-    <pb:PropBagTemplate x:Key="ReferenceBindViewModelPB"
+    <pb:PropBagTemplate x:Key="ReferenceBindViewModelPB" TypeSafetyMode="AllPropsMustBeRegistered" 
             ClassName="ReferenceBindViewModelPB"
             InstanceKey="ReferenceBindViewModelPB"
             OutPutNameSpace="PropBagTestApp.ViewModels">
@@ -38,6 +37,10 @@
 
             <pb:PropItem PropertyName="TestDouble" PropertyType="sys:Double">
                 <pb:InitialValueField InitialValue="56.1"/>
+            </pb:PropItem>
+
+            <pb:PropItem PropertyName="Deep" PropertyType="mod:MyModel4">
+                <pb:InitialValueField SetToNull="True"/>
             </pb:PropItem>
 
 
