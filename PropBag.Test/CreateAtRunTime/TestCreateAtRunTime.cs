@@ -1,14 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using NUnit.Framework;
-
-using DRM.PropBag;
+﻿
 using DRM.PropBag.ControlModel;
 using DRM.TypeSafePropertyBag;
+using NUnit.Framework;
 
 namespace PropBagLib.Tests
 {
