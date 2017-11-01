@@ -20,7 +20,7 @@ namespace DRM.PropBag.ControlModel
         string cn;
         string ik;
         string ns;
-        PropBagTypeSafetyMode tsm;
+        PropBagTypeSafetyMode tsm = PropBagTypeSafetyMode.Tight;
         bool dmrr;
         bool reiv;
         AbstractPropFactory pf;
