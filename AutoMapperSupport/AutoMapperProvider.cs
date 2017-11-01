@@ -33,7 +33,7 @@ namespace DRM.PropBag.AutoMapperSupport
             ICachePropBagMappers mappersCachingService,
             IPropFactory defaultPropFactory)
         {
-            _propModelProvider = propModelProvider ?? throw new ArgumentNullException(nameof(propModelProvider));
+            _propModelProvider = propModelProvider; // ?? throw new ArgumentNullException(nameof(propModelProvider));
             _mapTypeDefinitionProvider = mapTypeDefinitionProvider ?? throw new ArgumentNullException(nameof(mapTypeDefinitionProvider));
             _mappersCachingService = mappersCachingService ?? throw new ArgumentNullException(nameof(mappersCachingService));
             _defaultPropFactory = defaultPropFactory;
@@ -62,6 +62,20 @@ namespace DRM.PropBag.AutoMapperSupport
         {
             PropModel propModel = GetPropModel(resourceKey);
 
+            IPropBagMapperKey<TSource, TDestination> typedMapperRequest =
+                RegisterMapperRequest<TSource, TDestination>(propModel, typeToWrap, propFactory, configPackageName);
+
+            return typedMapperRequest;
+        }
+
+        public IPropBagMapperKey<TSource, TDestination> RegisterMapperRequest<TSource, TDestination>
+            (
+            PropModel propModel,
+            Type typeToWrap,
+            IPropFactory propFactory,
+            string configPackageName
+            ) where TDestination : class, IPropBag
+        {
             ICreateMapperRequests configPackage = GetRequestCreator(configPackageName);
 
             IPropBagMapperKey<TSource, TDestination> typedMapperRequest = CreateTypedMapperRequest<TSource, TDestination>
@@ -112,7 +126,6 @@ namespace DRM.PropBag.AutoMapperSupport
                 configStarterForThisRequest: null
                 );
         }
-
 
         //private IPropBagMapperKey<TSource, TDestination> CreateTypedMapperRequest<TSource, TDestination>
         //    (
