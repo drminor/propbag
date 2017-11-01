@@ -27,7 +27,7 @@ namespace DRM.TypeWrapper
             Type interfaceType = typeDescription.BaseType;
             Type[] implementedTypes = interfaceType.GetTypeInfo().ImplementedInterfaces.ToArray();
 
-            System.Diagnostics.Debug.WriteLine(name, "Emitting Class Wrapper for type");
+            System.Diagnostics.Debug.WriteLine(name, $"Emitting new wrapper type: {name} based on: {interfaceType}.");
 
             TypeBuilder typeBuilder = moduleBuilderInfo.ModuleBuilder.DefineType
                 (
