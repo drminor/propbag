@@ -42,7 +42,7 @@ namespace DRM.ViewModelTools
         {
             _wrapperTypeCachingService = wrapperTypeCachingService ?? throw new ArgumentNullException(nameof(wrapperTypeCachingService));
             _typeDescCachingService = typeDescCachingService ?? throw new ArgumentNullException(nameof(typeDescCachingService));
-            _propModelProvider = propModelProvider ?? throw new ArgumentNullException("propModelProvider");
+            _propModelProvider = propModelProvider; // ?? throw new ArgumentNullException("propModelProvider");
         }
 
         #endregion
@@ -54,7 +54,6 @@ namespace DRM.ViewModelTools
             PropModel propModel = GetPropModel(resourceKey);
 
             object result = GetNewViewModel(propModel, propFactory, typeToCreate);
-
             return result;
         }
 
@@ -66,9 +65,9 @@ namespace DRM.ViewModelTools
             }
 
             TypeDescription td = _typeDescCachingService.GetOrAdd(new NewTypeRequest(propModel, typeToCreate, null));
+            Type newWrapperType = _wrapperTypeCachingService.GetOrAdd(td);
 
-            object result = _wrapperTypeCachingService.GetOrAdd(td);
-
+            object result = Activator.CreateInstance(newWrapperType, propModel, propFactory);
             return result;
         }
 
@@ -85,9 +84,9 @@ namespace DRM.ViewModelTools
         public BT GetNewViewModel<BT>(PropModel propModel, IPropFactory propFactory) where BT : class, IPropBag
         {
             TypeDescription td = _typeDescCachingService.GetOrAdd(new NewTypeRequest(propModel, typeof(BT), null));
+            Type newWrapperType = _wrapperTypeCachingService.GetOrAdd(td);
 
-            BT result = _wrapperTypeCachingService.GetOrAdd(td) as BT;
-
+            BT result = (BT)Activator.CreateInstance(newWrapperType, propModel, propFactory);
             return result;
         }
 
