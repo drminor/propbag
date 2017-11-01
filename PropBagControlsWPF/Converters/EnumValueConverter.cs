@@ -28,8 +28,7 @@ namespace DRM.PropBag.ControlsWPF.Converters
         /// <summary>
         /// Convert value for binding from source object
         /// </summary>
-        public object Convert(object value, Type targetType,
-                object parameter, CultureInfo culture)
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             // To get around the stupid WPF designer bug
             if (value != null)
@@ -40,14 +39,10 @@ namespace DRM.PropBag.ControlsWPF.Converters
                 if (fi != null)
                 {
                     var attributes =
-                        (LocalizableDescriptionAttribute[])
-            fi.GetCustomAttributes(typeof
-            (LocalizableDescriptionAttribute), false);
+                        (LocalizableDescriptionAttribute[]) fi.GetCustomAttributes(typeof(LocalizableDescriptionAttribute), false);
 
-                    return ((attributes.Length > 0) &&
-                            (!String.IsNullOrEmpty(attributes[0].Description)))
-                                ?
-                                    attributes[0].Description
+                    return ((attributes.Length > 0) && (!String.IsNullOrEmpty(attributes[0].Description)))
+                                ? attributes[0].Description
                                 : value.ToString();
                 }
             }
@@ -58,11 +53,11 @@ namespace DRM.PropBag.ControlsWPF.Converters
         /// <summary>
         /// ConvertBack value from binding back to source object
         /// </summary>
-        public object ConvertBack(object value, Type targetType,
-            object parameter, CultureInfo culture)
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             throw new Exception("Cant convert back");
         }
+
         #endregion
     }
 }
