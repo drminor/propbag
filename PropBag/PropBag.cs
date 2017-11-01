@@ -106,23 +106,36 @@ namespace DRM.PropBag
             OurMetaData = new TypeSafePropBagMetaData(ClassName, FullClassName, this.TypeSafetyMode, this.PropFactory);
         }
 
-        protected PropBag() : this(PropBagTypeSafetyMode.None, null) { }
+        protected PropBag()
+            : this(PropBagTypeSafetyMode.None, null) { }
 
-        protected PropBag(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
+        protected PropBag(PropBagTypeSafetyMode typeSafetyMode)
+            : this(typeSafetyMode, null) { }
 
-        protected PropBag(PropBagTypeSafetyMode typeSafetyMode, IPropFactory thePropFactory)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pm"></param>
+        /// <param name="propFactory">The PropFactory to use instead of the one specified by the PropModel.</param>
+        protected PropBag(ControlModel.PropModel pm, IPropFactory propFactory = null)
+            : this(pm.TypeSafetyMode, propFactory ?? pm.PropFactory)
+        {
+            Hydrate(pm);
+        }
+
+        protected PropBag(PropBagTypeSafetyMode typeSafetyMode, IPropFactory propFactory)
         {
             this.TypeSafetyMode = typeSafetyMode;
 
             bool returnDefaultForUndefined = TypeSafePropBagMetaData.Helper.GetReturnDefaultForUndefined(typeSafetyMode);
 
-            if (thePropFactory != null)
+            if (propFactory != null)
             {
-                if (thePropFactory.ReturnDefaultForUndefined != returnDefaultForUndefined)
+                if (propFactory.ReturnDefaultForUndefined != returnDefaultForUndefined)
                 {
                     throw new ApplicationException("The 'ReturnDefaultForUndefined' setting on the specified property factory conflicts with the TypeSafetyMode specified.");
                 }
-                PropFactory = thePropFactory;
+                PropFactory = propFactory;
             }
             else
             {
@@ -133,11 +146,6 @@ namespace DRM.PropBag
             this.OurMetaData = new TypeSafePropBagMetaData(ClassName, FullClassName, this.TypeSafetyMode, this.PropFactory);
 
             tVals = new Dictionary<string, PropGen>();
-        }
-
-        protected PropBag(ControlModel.PropModel pm, IPropFactory propFactory = null) : this(pm.TypeSafetyMode, propFactory)
-        {
-            Hydrate(pm);
         }
 
         protected virtual void Hydrate(PropModel pm)
@@ -973,7 +981,7 @@ namespace DRM.PropBag
             return prop.UpdateDoWhenChangedAction(doWhenChanged, doAfterNotify);
         }
 
-        protected void ClearAll()
+        protected void ClearAllProps()
         {
             // TODO: Fix Me.
             //DelegateCacheProvider.DoSetDelegateCache.Clear();
