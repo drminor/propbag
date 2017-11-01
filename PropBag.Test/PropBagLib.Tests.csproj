@@ -46,6 +46,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AutoMapperSupport\AutoMapperHelpers.cs" />
+    <Compile Include="AutoMapperSupport\DestinationModel.cs" />
+    <Compile Include="AutoMapperSupport\MyModel.cs" />
+    <Compile Include="AutoMapperSupport\TestAutoMapperBasic.cs" />
     <Compile Include="CreateAtRunTime\CreateAtRunTimeModel.cs" />
     <Compile Include="CreateAtRunTime\TestCreateAtRunTime.cs" />
     <Compile Include="Dynamic\TestDynamic.cs" />
@@ -138,13 +142,29 @@
       <Project>{10cf1c6f-f877-49a8-8678-6947f55e6920}</Project>
       <Name>AutoMapperSupport</Name>
     </ProjectReference>
+    <ProjectReference Include="..\PropBagControlsWPF\PropBagControlsWPF.csproj">
+      <Project>{9bee9979-9812-4675-8f97-a4dd1e7dba5f}</Project>
+      <Name>PropBagControlsWPF</Name>
+    </ProjectReference>
     <ProjectReference Include="..\PropBag\PropBag.csproj">
       <Project>{7387b893-fbdc-4b9c-ac9e-0b56388b46c1}</Project>
       <Name>PropBag</Name>
     </ProjectReference>
+    <ProjectReference Include="..\src\AutoMapper\AutoMapper.csproj">
+      <Project>{8cba8a56-9b60-4430-9d54-9a523baf1e14}</Project>
+      <Name>AutoMapper</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TypeSafePropertyBag\TypeSafePropertyBag.csproj">
       <Project>{bbb1e311-374e-4c91-a313-1667d83767db}</Project>
       <Name>TypeSafePropertyBag</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TypeWrapper\TypeWrapper.csproj">
+      <Project>{7c45d001-90d6-4521-82ae-41f9492f8ece}</Project>
+      <Name>TypeWrapper</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ViewModelTools\ViewModelTools.csproj">
+      <Project>{a149ead5-06a9-47c8-8853-1d329d553ea7}</Project>
+      <Name>ViewModelTools</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
