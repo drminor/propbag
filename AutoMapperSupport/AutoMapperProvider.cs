@@ -18,9 +18,6 @@ namespace DRM.PropBag.AutoMapperSupport
 
         IMapTypeDefinitionProvider _mapTypeDefinitionProvider { get; }
 
-        IViewModelActivator _standardActivator;
-        IViewModelActivator _emitProxyActivator;
-
         ICachePropBagMappers _mappersCachingService { get; }
 
         IPropFactory _defaultPropFactory { get; }
@@ -33,15 +30,11 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public AutoMapperProvider(IPropModelProvider propModelProvider,
             IMapTypeDefinitionProvider mapTypeDefinitionProvider,
-            IViewModelActivator standardActivator,
-            IViewModelActivator emitProxyActivator,
             ICachePropBagMappers mappersCachingService,
             IPropFactory defaultPropFactory)
         {
             _propModelProvider = propModelProvider ?? throw new ArgumentNullException(nameof(propModelProvider));
             _mapTypeDefinitionProvider = mapTypeDefinitionProvider ?? throw new ArgumentNullException(nameof(mapTypeDefinitionProvider));
-            _standardActivator = standardActivator ?? throw new ArgumentNullException(nameof(standardActivator));
-            _emitProxyActivator = emitProxyActivator ?? throw new ArgumentNullException(nameof(emitProxyActivator));
             _mappersCachingService = mappersCachingService ?? throw new ArgumentNullException(nameof(mappersCachingService));
             _defaultPropFactory = defaultPropFactory;
 
@@ -63,16 +56,20 @@ namespace DRM.PropBag.AutoMapperSupport
             (
             string resourceKey,
             Type typeToWrap,
-            IPropFactory propFactory
+            IPropFactory propFactory,
+            string configPackageName
             ) where TDestination : class, IPropBag
         {
             PropModel propModel = GetPropModel(resourceKey);
+
+            ICreateMapperRequests configPackage = GetRequestCreator(configPackageName);
 
             IPropBagMapperKey<TSource, TDestination> typedMapperRequest = CreateTypedMapperRequest<TSource, TDestination>
                 (
                 propModel,
                 typeToWrap,
-                propFactory ?? _defaultPropFactory ?? throw new InvalidOperationException("No PropFactory was provided and no Default PropFactory was specified upon construction.")
+                propFactory ?? _defaultPropFactory ?? throw new InvalidOperationException("No PropFactory was provided and no Default PropFactory was specified upon construction."),
+                configPackage
                 );
 
             this.RegisterMapperRequest(typedMapperRequest);
@@ -103,44 +100,80 @@ namespace DRM.PropBag.AutoMapperSupport
             (
             PropModel propModel,
             Type typeToWrap,
-            IPropFactory propFactory
+            IPropFactory propFactory,
+            ICreateMapperRequests requestCreator
             ) where TDestination : class, IPropBag
         {
-            #region Mapper Configuration Work
-            IMapperConfigurationStepGen configStarter = new MapperConfigStarter_Default();
+            return requestCreator.CreateMapperRequest<TSource, TDestination>
+                (
+                propModel,
+                typeToWrap,
+                propFactory,
+                configStarterForThisRequest: null
+                );
+        }
 
 
-            IBuildMapperConfigurations<TSource, TDestination> configBuilder
-                = new SimpleMapperConfigurationBuilder<TSource, TDestination>
-                (); //(configStarter); // Uses the same configStarter for all builds.
+        //private IPropBagMapperKey<TSource, TDestination> CreateTypedMapperRequest<TSource, TDestination>
+        //    (
+        //    PropModel propModel,
+        //    Type typeToWrap,
+        //    IPropFactory propFactory
+        //    ) where TDestination : class, IPropBag
+        //{
+        //    #region Mapper Configuration Work
+        //    IMapperConfigurationStepGen configStarter = new MapperConfigStarter_Default();
 
-            IConfigureAMapper<TSource, TDestination> mappingConf
-                = new SimpleMapperConfiguration<TSource, TDestination>
-                (configBuilder, configStarter) // Uses the configStarter for just this build.
-                {
-                    FinalConfigAction = new StandardConfigFinalStep<TSource, TDestination>().ConfigurationStep,
-                };
+        //    IBuildMapperConfigurations<TSource, TDestination> configBuilder
+        //        = new SimpleMapperConfigurationBuilder<TSource, TDestination>
+        //        (configStarter); // Uses the same configStarter for all builds.
 
-            PropBagMapperBuilder<TSource, TDestination> mapperBuilder
-                = new PropBagMapperBuilder<TSource, TDestination>
-                (mapperConfiguration: mappingConf, vmActivator: _standardActivator);
-            #endregion
+        //    IConfigureAMapper<TSource, TDestination> mappingConf
+        //        = new SimpleMapperConfiguration<TSource, TDestination>
+        //        (configBuilder) //, configStarter) // Uses the configStarter for just this build.
+        //        {
+        //            FinalConfigAction = new StandardConfigFinalStep<TSource, TDestination>().ConfigurationStep,
+        //        };
 
-            IMapTypeDefinition<TSource> sourceMapTypeDef = _mapTypeDefinitionProvider.GetTypeDescription<TSource>
-                (propModel, propFactory, typeToWrap, null);
+        //    SimplePropBagMapperBuilder<TSource, TDestination> mapperBuilder
+        //        = new SimplePropBagMapperBuilder<TSource, TDestination>
+        //        (mapperConfiguration: mappingConf, vmActivator: viewModelActivator);
+        //    #endregion
 
-            IMapTypeDefinition<TDestination> destinationMapTypeDef = _mapTypeDefinitionProvider.GetTypeDescription<TDestination>
-                (propModel, propFactory, typeToWrap, null);
+        //    IMapTypeDefinition<TSource> sourceMapTypeDef = _mapTypeDefinitionProvider.GetTypeDescription<TSource>
+        //        (propModel, propFactory, typeToWrap, null);
 
-            IPropBagMapperKey<TSource, TDestination> result = new PropBagMapperKey<TSource, TDestination>
-                (propBagMapperBuilder: mapperBuilder,
-                //mappingConfiguration: mappingConf,
-                sourceMapTypeDef: sourceMapTypeDef,
-                destinationMapTypeDef: destinationMapTypeDef,
-                sourceConstructor: null,
-                destinationConstructor: null);
+        //    IMapTypeDefinition<TDestination> destinationMapTypeDef = _mapTypeDefinitionProvider.GetTypeDescription<TDestination>
+        //        (propModel, propFactory, typeToWrap, null);
 
-            return result;
+        //    IPropBagMapperKey<TSource, TDestination> result = new PropBagMapperKey<TSource, TDestination>
+        //        (propBagMapperBuilder: mapperBuilder,
+        //        //mappingConfiguration: mappingConf,
+        //        sourceMapTypeDef: sourceMapTypeDef,
+        //        destinationMapTypeDef: destinationMapTypeDef,
+        //        sourceConstructor: null,
+        //        destinationConstructor: null);
+
+        //    return result;
+        //}
+
+        private ICreateMapperRequests GetRequestCreator(string configPackageName)
+        {
+            switch (configPackageName.ToLower())
+            {
+                case "extra_members":
+                    {
+                        return new ConfigPackage_ExtraMembers();
+                    }
+                case "emit_proxy":
+                    {
+                        return new ConfigPackage_EmitProxy();
+                    }
+                default:
+                    {
+                        throw new InvalidOperationException($"The configPackageName: {configPackageName} is not recognized.");
+                    }
+            }
         }
 
         private PropModel GetPropModel(string resourceKey)

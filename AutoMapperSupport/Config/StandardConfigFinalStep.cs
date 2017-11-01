@@ -4,6 +4,12 @@ using System;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
+    /// <summary>
+    /// For use with EmitProxy. EmitProxy produces "real" properties, so no custom AutoMapper support
+    /// is required.
+    /// </summary>
+    /// <typeparam name="TSource"></typeparam>
+    /// <typeparam name="TDestination"></typeparam>
     public class StandardConfigFinalStep<TSource, TDestination>
         : IMapperConfigurationStep<TSource, TDestination> where TDestination : class, IPropBag
     {

@@ -21,10 +21,10 @@ namespace DRM.PropBag.AutoMapperSupport
         public Type SourceType { get; }
         public Type DestinationType { get; }
 
-        public PropModel _propModel { get; }
+        public PropModel PropModel { get; }
         public Type RunTimeType { get; }
 
-        IPropFactory _propFactory = new PropFactory(true, null, null);
+        IPropFactory PropFactory { get; } //= new PropFactory(true, null, null);
         public IMapper Mapper { get; }
 
         //public Func<TDestination, TSource> RegularInstanceCreator { get; }
@@ -46,8 +46,8 @@ namespace DRM.PropBag.AutoMapperSupport
             DestinationType = mapRequest.DestinationTypeDef.Type;
             RunTimeType = mapRequest.DestinationTypeDef.NewWrapperType; // TODO: Work on this!!
 
-            _propModel = mapRequest.DestinationTypeDef.PropModel;
-            _propFactory = mapRequest.DestinationTypeDef.PropFactory;
+            PropModel = mapRequest.DestinationTypeDef.PropModel;
+            PropFactory = mapRequest.DestinationTypeDef.PropFactory;
 
             Mapper = mapper;
             _vmActivator = vmActivator;
@@ -61,7 +61,7 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public TDestination MapToDestination(TSource s)
         {
-            TDestination proxyViewModel = GetNewDestination(_propModel, _propFactory, RunTimeType);
+            TDestination proxyViewModel = GetNewDestination(PropModel, PropFactory, RunTimeType);
 
             return (TDestination)Mapper.Map(s, proxyViewModel, SourceType, RunTimeType);
         }
@@ -119,17 +119,15 @@ namespace DRM.PropBag.AutoMapperSupport
 
         private TDestination GetNewDestination(PropModel propModel, IPropFactory propFactory, Type newWrappedType)
         {
-            TDestination destination;
             try
             {
-                destination = (TDestination) _vmActivator.GetNewViewModel(propModel, propFactory, newWrappedType);
-                //destination = (TDestination)Activator.CreateInstance(RunTimeType, new object[] { propModel });
-                return destination;
+                var newViewModel = _vmActivator.GetNewViewModel(propModel, propFactory, newWrappedType);
+                return newViewModel as TDestination;
             }
-            catch
+            catch (System.Exception e2)
             {
                 Type targetType = newWrappedType ?? typeof(TDestination);
-                throw new InvalidOperationException($"Cannot create an instance of {targetType} that takes a PropModel parameter.");
+                throw new InvalidOperationException($"Cannot create an instance of {targetType} that takes a PropModel parameter.", e2);
             }
         }
 

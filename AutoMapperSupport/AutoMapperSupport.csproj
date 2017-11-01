@@ -40,16 +40,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Builders\IMapTypeDefinitionProvider.cs" />
+    <Compile Include="ConfigPackages\ConfigPackage_EmitProxy.cs" />
+    <Compile Include="ConfigPackages\ConfigPackage_ExtraMembers.cs" />
+    <Compile Include="ConfigPackages\ICreateMapperRequests.cs" />
+    <Compile Include="MapTypeDefinition\IMapTypeDefinitionProvider.cs" />
     <Compile Include="Builders\PropBagMapperKeyGen.cs" />
-    <Compile Include="Builders\SimpleMapTypeDefinitionProvider.cs" />
+    <Compile Include="MapTypeDefinition\SimpleMapTypeDefinitionProvider.cs" />
+    <Compile Include="Caches\ICacheConfigPackages.cs" />
     <Compile Include="Caches\SimplePropBagMapperCache.cs" />
     <Compile Include="Caches\ICachePropBagMappers.cs" />
+    <Compile Include="ConfigPackages\AbstractConfigPackage.cs" />
     <Compile Include="Config\SimpleMapperConfigurationBuilderGenBase.cs" />
     <Compile Include="Config\SimpleMapperConfigurationBuilder.cs" />
     <Compile Include="Config\SimpleMapperConfigurationGenBase.cs" />
     <Compile Include="Builders\IBuildPropBagMapper.cs" />
-    <Compile Include="Builders\PropBagMapperBuilder.cs" />
+    <Compile Include="Builders\SimplePropBagMapperBuilder.cs" />
     <Compile Include="SimplePropBagMapper.cs" />
     <Compile Include="AutoMapperProvider.cs" />
     <Compile Include="Config\StandardConfigFinalStep.cs" />
@@ -61,11 +66,11 @@
     <Compile Include="Config\IBuildMapperConfigurations.cs" />
     <Compile Include="Config\SimpleMapperConfiguration.cs" />
     <Compile Include="Config\ExtraMembersConfigFinalStep.cs" />
-    <Compile Include="Builders\IMapTypeDefinition.cs" />
+    <Compile Include="MapTypeDefinition\IMapTypeDefinition.cs" />
     <Compile Include="IPropBagMapper.cs" />
     <Compile Include="Builders\IPropBagMapperKey.cs" />
     <Compile Include="ExtraMembers\ExtraMembersProvider.cs" />
-    <Compile Include="Builders\MapTypeDefinition.cs" />
+    <Compile Include="MapTypeDefinition\MapTypeDefinition.cs" />
     <Compile Include="ExtraMembers\PBDispatcher.cs" />
     <Compile Include="AbstractPropBagMapper.cs" />
     <Compile Include="Builders\PropBagMapperKey.cs" />
