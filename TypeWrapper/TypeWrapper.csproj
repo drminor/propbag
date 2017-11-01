@@ -50,13 +50,13 @@
     <Compile Include="PropertyEmitter.cs" />
     <Compile Include="SimpleModuleBuilderInfo.cs" />
     <Compile Include="SimpleWrapperTypeEmitter.cs" />
-    <Compile Include="TypeDesc\ICacheTypeDescriptions.cs" />
+    <Compile Include="Caches\ICacheTypeDescriptions.cs" />
     <Compile Include="TypeDesc\ITypeDescriptionProvider.cs" />
     <Compile Include="TypeDesc\NewTypeRequest.cs" />
     <Compile Include="TypeDesc\PropertyDescription.cs" />
     <Compile Include="TypeDesc\SimpleTypeDescriptionProvider.cs" />
     <Compile Include="TypeDesc\TypeDescription.cs" />
-    <Compile Include="TypeDesc\TypeDescriptionLocalCache.cs" />
+    <Compile Include="Caches\TypeDescriptionLocalCache.cs" />
     <Compile Include="TypeDesc\TypeName.cs" />
     <Compile Include="WasEmittedAttribute.cs" />
   </ItemGroup>
