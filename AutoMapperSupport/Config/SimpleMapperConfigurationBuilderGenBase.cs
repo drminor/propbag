@@ -5,7 +5,7 @@ namespace DRM.PropBag.AutoMapperSupport
 {
     public class SimpleMapperConfigurationBuilderGenBase : IBuildMapperConfigurationsGen
     {
-        protected IMapperConfigurationStepGen ConfigStarter { get; set; }
+        protected IHaveAMapperConfigurationStep ConfigStarter { get; set; }
 
         protected IConfigureAMapperGen Configs { get; set; }
 
@@ -18,7 +18,7 @@ namespace DRM.PropBag.AutoMapperSupport
                 {
                     _action = ConfigStarter?.ConfigurationStep ?? NoOpAction;
 
-                    foreach (IMapperConfigurationStepGen step in Configs.ConfigurationSteps)
+                    foreach (IHaveAMapperConfigurationStep step in Configs.ConfigurationSteps)
                     {
                         _action += step.ConfigurationStep;
                     }
@@ -37,7 +37,7 @@ namespace DRM.PropBag.AutoMapperSupport
         {
         }
 
-        public SimpleMapperConfigurationBuilderGenBase(IMapperConfigurationStepGen configStarter)
+        public SimpleMapperConfigurationBuilderGenBase(IHaveAMapperConfigurationStep configStarter)
         {
             ConfigStarter = configStarter;
             _action = null;
@@ -57,7 +57,7 @@ namespace DRM.PropBag.AutoMapperSupport
             return result;
         }
 
-        public IConfigurationProvider GetNewConfiguration(IConfigureAMapperGen configs, IMapperConfigurationStepGen configStarter)
+        public IConfigurationProvider GetNewConfiguration(IConfigureAMapperGen configs, IHaveAMapperConfigurationStep configStarter)
         {
             Configs = configs;
             ConfigStarter = configStarter;

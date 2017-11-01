@@ -43,6 +43,7 @@
     <Compile Include="ConfigPackages\ConfigPackage_EmitProxy.cs" />
     <Compile Include="ConfigPackages\ConfigPackage_ExtraMembers.cs" />
     <Compile Include="ConfigPackages\ICreateMapperRequests.cs" />
+    <Compile Include="Config\IMapperConfigurationFinalAction.cs" />
     <Compile Include="MapTypeDefinition\IMapTypeDefinitionProvider.cs" />
     <Compile Include="Builders\PropBagMapperKeyGen.cs" />
     <Compile Include="MapTypeDefinition\SimpleMapTypeDefinitionProvider.cs" />
@@ -59,7 +60,7 @@
     <Compile Include="AutoMapperProvider.cs" />
     <Compile Include="Config\StandardConfigFinalStep.cs" />
     <Compile Include="Config\ExtraMembersConfigInitialStep.cs" />
-    <Compile Include="Config\IMapperConfigurationStep.cs" />
+    <Compile Include="Config\IHaveAMapperConfigurationStep.cs" />
     <Compile Include="Config\IConfigureAMapper.cs" />
     <Compile Include="Config\MapperConfigStarter_Empty.cs" />
     <Compile Include="Config\MapperConfigStarter_Default.cs" />

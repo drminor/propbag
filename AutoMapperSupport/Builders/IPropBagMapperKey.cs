@@ -6,17 +6,16 @@ namespace DRM.PropBag.AutoMapperSupport
     {
         IMapTypeDefinition<TSource> SourceTypeDef { get; }
         IMapTypeDefinition<TDestination> DestinationTypeDef { get; }
+
         Func<TDestination, TSource> SourceConstructor { get; }
         Func<TSource, TDestination> DestinationConstructor { get; }
 
         Func<IPropBagMapperKeyGen, IPropBagMapperGen> MapperCreator { get; }
-
         //IConfigureAMapper<TSource, TDestination> MappingConfiguration { get; }
     }
 
     public interface IPropBagMapperKeyGen
     {
-        //PropBagMappingStrategyEnum MappingStrategy { get; }
         IMapTypeDefinitionGen SourceTypeGenDef { get; }
         IMapTypeDefinitionGen DestinationTypeGenDef { get; }
 

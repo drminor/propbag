@@ -14,10 +14,10 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public Action<IPropBagMapperKey<TSource, TDestination>, IMapperConfigurationExpression> FinalConfigAction { get; set; }
 
-        public IMapperConfigurationStepGen ConfigStarter { get; set; }
+        public IHaveAMapperConfigurationStep ConfigStarter { get; set; }
 
         #region Constructor
-        public SimpleMapperConfiguration(IBuildMapperConfigurations<TSource, TDestination> mapperConfigBuilder, IMapperConfigurationStepGen configStarter = null)
+        public SimpleMapperConfiguration(IBuildMapperConfigurations<TSource, TDestination> mapperConfigBuilder, IHaveAMapperConfigurationStep configStarter = null)
             : base(mapperConfigBuilder)
         {
             ConfigStarter = configStarter;
@@ -30,7 +30,7 @@ namespace DRM.PropBag.AutoMapperSupport
         }
 
         public IConfigurationProvider GetConfigurationProvider(IPropBagMapperKey<TSource, TDestination> propBagMapperKey,
-            IMapperConfigurationStepGen configStarter)
+            IHaveAMapperConfigurationStep configStarter)
         {
             IConfigurationProvider result = MapperConfigBuilder.GetNewConfiguration(this, propBagMapperKey);
             return result;

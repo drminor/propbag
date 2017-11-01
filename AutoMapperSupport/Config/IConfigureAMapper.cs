@@ -11,15 +11,15 @@ namespace DRM.PropBag.AutoMapperSupport
         IConfigurationProvider GetConfigurationProvider(IPropBagMapperKey<TSource, TDestination> propBagMapperKey);
 
         IConfigurationProvider GetConfigurationProvider(IPropBagMapperKey<TSource, TDestination> propBagMapperKey,
-            IMapperConfigurationStepGen configStarter);
+            IHaveAMapperConfigurationStep configStarter);
     }
 
     public interface IConfigureAMapperGen
     {
         bool SupportsMapFrom { get; }
-        IList<IMapperConfigurationStepGen> ConfigurationSteps { get; }
+        IList<IHaveAMapperConfigurationStep> ConfigurationSteps { get; }
 
-        void Add(IMapperConfigurationStepGen step);
+        void Add(IHaveAMapperConfigurationStep step);
         void Clear();
 
         IConfigurationProvider GetConfigurationProviderGen();

@@ -5,15 +5,16 @@ using System;
 namespace DRM.PropBag.AutoMapperSupport
 {
     /// <summary>
-    /// For use with EmitProxy. EmitProxy produces "real" properties, so no custom AutoMapper support
-    /// is required.
+    /// For use with EmitProxy. EmitProxy produces "real" properties,
+    /// so no custom AutoMapper support is required.
     /// </summary>
     /// <typeparam name="TSource"></typeparam>
     /// <typeparam name="TDestination"></typeparam>
     public class StandardConfigFinalStep<TSource, TDestination>
-        : IMapperConfigurationStep<TSource, TDestination> where TDestination : class, IPropBag
+        : IMapperConfigurationFinalAction<TSource, TDestination> where TDestination : class, IPropBag
     {
-        public Action<IPropBagMapperKey<TSource, TDestination>,IMapperConfigurationExpression> ConfigurationStep
+
+        public Action<IPropBagMapperKey<TSource, TDestination>,IMapperConfigurationExpression> ActionStep
         {
             get
             {

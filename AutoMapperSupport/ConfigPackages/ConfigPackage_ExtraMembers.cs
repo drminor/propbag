@@ -4,7 +4,7 @@ namespace DRM.PropBag.AutoMapperSupport
 {
     public class ConfigPackage_ExtraMembers : AbstractConfigPackage
     {
-        public override IMapperConfigurationStepGen GetConfigStarter()
+        public override IHaveAMapperConfigurationStep GetConfigStarter()
         {
             return new MapperConfigStarter_Default();
         }
@@ -14,7 +14,7 @@ namespace DRM.PropBag.AutoMapperSupport
             return new ViewModelActivatorStandard();
         }
 
-        public override IMapperConfigurationStep<TSource, TDestination> GetFinalConfigAction<TSource, TDestination>()
+        public override IMapperConfigurationFinalAction<TSource, TDestination> GetFinalConfigAction<TSource, TDestination>()
         {
             return new ExtraMembersConfigFinalStep<TSource, TDestination>();
         }

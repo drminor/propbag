@@ -6,7 +6,7 @@ namespace DRM.PropBag.AutoMapperSupport
 {
     public class ConfigPackage_EmitProxy : AbstractConfigPackage
     {
-        public override IMapperConfigurationStepGen GetConfigStarter()
+        public override IHaveAMapperConfigurationStep GetConfigStarter()
         {
             return new MapperConfigStarter_Default();
         }
@@ -16,7 +16,7 @@ namespace DRM.PropBag.AutoMapperSupport
             return GetEmitProxyActivator();
         }
 
-        public override IMapperConfigurationStep<TSource, TDestination> GetFinalConfigAction<TSource, TDestination>()
+        public override IMapperConfigurationFinalAction<TSource, TDestination> GetFinalConfigAction<TSource, TDestination>()
         {
             return new StandardConfigFinalStep<TSource, TDestination>();
         }

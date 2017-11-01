@@ -12,7 +12,7 @@ namespace DRM.PropBag.AutoMapperSupport
             PropModel propModel,
             Type typeToWrap,
             IPropFactory propFactory,
-            IMapperConfigurationStepGen configStarterForThisRequest
+            IHaveAMapperConfigurationStep configStarterForThisRequest
             ) where TDestination : class, IPropBag
         {
             if (propModel == null) throw new ArgumentNullException($"{nameof(propModel)}");
@@ -21,7 +21,7 @@ namespace DRM.PropBag.AutoMapperSupport
 
             #region Mapper Configuration Work
 
-            IMapperConfigurationStepGen configStarterForAllBuilds = GetConfigStarter();
+            IHaveAMapperConfigurationStep configStarterForAllBuilds = GetConfigStarter();
 
             if(configStarterForAllBuilds != null && configStarterForThisRequest != null)
             {
@@ -36,7 +36,7 @@ namespace DRM.PropBag.AutoMapperSupport
                 = new SimpleMapperConfiguration<TSource, TDestination>
                 (configBuilder, configStarterForThisRequest) // The configStarter for just this build.
                 {
-                    FinalConfigAction = GetFinalConfigAction<TSource, TDestination>().ConfigurationStep
+                    FinalConfigAction = GetFinalConfigAction<TSource, TDestination>().ActionStep
                 };
 
             IViewModelActivator viewModelActivator = GetViewModelActivator();
@@ -56,21 +56,23 @@ namespace DRM.PropBag.AutoMapperSupport
                 (propModel, propFactory, typeToWrap, null);
 
             IPropBagMapperKey<TSource, TDestination> result = new PropBagMapperKey<TSource, TDestination>
-                (propBagMapperBuilder: mapperBuilder,
+                (
+                propBagMapperBuilder: mapperBuilder,
                 //mappingConfiguration: mappingConf,
                 sourceMapTypeDef: sourceMapTypeDef,
                 destinationMapTypeDef: destinationMapTypeDef,
                 sourceConstructor: null,
-                destinationConstructor: null);
+                destinationConstructor: null
+                );
 
             return result;
         }
 
-        public abstract IMapperConfigurationStepGen GetConfigStarter();
+        public abstract IHaveAMapperConfigurationStep GetConfigStarter();
 
         public abstract IViewModelActivator GetViewModelActivator();
 
-        public abstract IMapperConfigurationStep<TSource, TDestination>
+        public abstract IMapperConfigurationFinalAction<TSource, TDestination>
             GetFinalConfigAction<TSource, TDestination>() where TDestination : class, IPropBag;
 
         public virtual IMapTypeDefinitionProvider GetMapTypeDefinitionProvider()

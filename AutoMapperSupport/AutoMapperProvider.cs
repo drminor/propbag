@@ -57,13 +57,22 @@ namespace DRM.PropBag.AutoMapperSupport
             string resourceKey,
             Type typeToWrap,
             IPropFactory propFactory,
-            string configPackageName
+            string configPackageName,
+            IHaveAMapperConfigurationStep configStarterForThisRequest = null
+
             ) where TDestination : class, IPropBag
         {
             PropModel propModel = GetPropModel(resourceKey);
 
             IPropBagMapperKey<TSource, TDestination> typedMapperRequest =
-                RegisterMapperRequest<TSource, TDestination>(propModel, typeToWrap, propFactory, configPackageName);
+                RegisterMapperRequest<TSource, TDestination>
+                (
+                    propModel,
+                    typeToWrap,
+                    propFactory,
+                    configPackageName,
+                    configStarterForThisRequest
+                    );
 
             return typedMapperRequest;
         }
@@ -73,7 +82,9 @@ namespace DRM.PropBag.AutoMapperSupport
             PropModel propModel,
             Type typeToWrap,
             IPropFactory propFactory,
-            string configPackageName
+            string configPackageName,
+            IHaveAMapperConfigurationStep configStarterForThisRequest = null
+
             ) where TDestination : class, IPropBag
         {
             ICreateMapperRequests configPackage = GetRequestCreator(configPackageName);
@@ -83,7 +94,8 @@ namespace DRM.PropBag.AutoMapperSupport
                 propModel,
                 typeToWrap,
                 propFactory ?? _defaultPropFactory ?? throw new InvalidOperationException("No PropFactory was provided and no Default PropFactory was specified upon construction."),
-                configPackage
+                configPackage,
+                configStarterForThisRequest
                 );
 
             this.RegisterMapperRequest(typedMapperRequest);
@@ -115,7 +127,8 @@ namespace DRM.PropBag.AutoMapperSupport
             PropModel propModel,
             Type typeToWrap,
             IPropFactory propFactory,
-            ICreateMapperRequests requestCreator
+            ICreateMapperRequests requestCreator,
+            IHaveAMapperConfigurationStep configStarterForThisRequest
             ) where TDestination : class, IPropBag
         {
             return requestCreator.CreateMapperRequest<TSource, TDestination>
@@ -123,7 +136,7 @@ namespace DRM.PropBag.AutoMapperSupport
                 propModel,
                 typeToWrap,
                 propFactory,
-                configStarterForThisRequest: null
+                configStarterForThisRequest
                 );
         }
 

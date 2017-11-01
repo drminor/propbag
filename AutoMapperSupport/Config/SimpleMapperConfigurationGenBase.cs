@@ -9,12 +9,12 @@ namespace DRM.PropBag.AutoMapperSupport
 
         protected IBuildMapperConfigurationsGen MapperConfigBuilderGen { get; }
 
-        public IList<IMapperConfigurationStepGen> ConfigurationSteps { get; }
+        public IList<IHaveAMapperConfigurationStep> ConfigurationSteps { get; }
 
         public SimpleMapperConfigurationGenBase(IBuildMapperConfigurationsGen mapperConfigBuilderGen)
         {
             MapperConfigBuilderGen = mapperConfigBuilderGen;
-            ConfigurationSteps = new List<IMapperConfigurationStepGen>();
+            ConfigurationSteps = new List<IHaveAMapperConfigurationStep>();
         }
 
         // TODO: Make this use the singleton pattern -- once the base has been provided,
@@ -25,7 +25,7 @@ namespace DRM.PropBag.AutoMapperSupport
             return mapperProfile;
         }
 
-        public void Add(IMapperConfigurationStepGen step)
+        public void Add(IHaveAMapperConfigurationStep step)
         {
             ConfigurationSteps.Add(step);
         }

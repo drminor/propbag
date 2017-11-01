@@ -7,9 +7,9 @@ using System.Reflection;
 namespace DRM.PropBag.AutoMapperSupport
 {
     public class ExtraMembersConfigFinalStep<TSource, TDestination>
-        : IMapperConfigurationStep<TSource, TDestination> where TDestination : class, IPropBag
+        : IMapperConfigurationFinalAction<TSource, TDestination> where TDestination : class, IPropBag
     {
-        public Action<IPropBagMapperKey<TSource, TDestination>, IMapperConfigurationExpression> ConfigurationStep
+        public Action<IPropBagMapperKey<TSource, TDestination>, IMapperConfigurationExpression> ActionStep
         {
             get
             {

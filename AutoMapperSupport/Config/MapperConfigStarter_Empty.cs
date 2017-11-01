@@ -3,7 +3,7 @@ using AutoMapper;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
-    public class MapperConfigStarter_Empty : IMapperConfigurationStepGen
+    public class MapperConfigStarter_Empty : IHaveAMapperConfigurationStep
     {
         public Action<IMapperConfigurationExpression> ConfigurationStep => ResetMemberConfiguration;
 

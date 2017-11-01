@@ -10,7 +10,7 @@ namespace DRM.PropBag.AutoMapperSupport
         {
         }
 
-        public SimpleMapperConfigurationBuilder(IMapperConfigurationStepGen configStarter) : base(configStarter)
+        public SimpleMapperConfigurationBuilder(IHaveAMapperConfigurationStep configStarter) : base(configStarter)
         {
 
         }
@@ -35,7 +35,7 @@ namespace DRM.PropBag.AutoMapperSupport
         public IConfigurationProvider GetNewConfiguration(
             IConfigureAMapper<TSource, TDestination> configs,
             IPropBagMapperKey<TSource, TDestination> mapRequest,
-            IMapperConfigurationStepGen configStarter)
+            IHaveAMapperConfigurationStep configStarter)
         {
             // Reset all to force new evaluation of configs.
             base.Configs = configs;

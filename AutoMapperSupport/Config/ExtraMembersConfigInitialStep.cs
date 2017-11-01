@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
-    public class ExtraMembersConfigInitialStep : IMapperConfigurationStepGen
+    public class ExtraMembersConfigInitialStep : IHaveAMapperConfigurationStep
     {
         public Action<IMapperConfigurationExpression> ConfigurationStep
         {
