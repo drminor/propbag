@@ -40,8 +40,8 @@ namespace DRM.PropBag
         public PubPropBag(PropBagTypeSafetyMode typeSafetyMode)
             : base(typeSafetyMode) {} 
 
-        public PubPropBag(PropBagTypeSafetyMode typeSafetyMode, IPropFactory thePropFactory)
-            : base(typeSafetyMode, thePropFactory) { }
+        public PubPropBag(PropBagTypeSafetyMode typeSafetyMode, IPropFactory propFactory)
+            : base(typeSafetyMode, propFactory) { }
 
         public PubPropBag(DRM.PropBag.ControlModel.PropModel pm, IPropFactory propFactory = null)
             : base(pm, propFactory) { }
@@ -115,9 +115,9 @@ namespace DRM.PropBag
             return base.RegisterDoWhenChanged(doWhenChanged, doAfterNotify, propertyName);
         }
 
-        new public void ClearAll()
+        new public void ClearAllProps()
         {
-            base.ClearAll();
+            base.ClearAllProps();
         }
 
         new public void ClearEventSubscribers()

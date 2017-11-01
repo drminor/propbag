@@ -367,7 +367,7 @@ namespace DRM.PropBag
         #region Collection-Type Methods
 
         // From Object
-        private static ICPropPrivate<CT, T> CreateCPropFromObject<CT,T>(AbstractPropFactory propFactory,
+        private static ICPropPrivate<CT, T> CreateCPropFromObject<CT,T>(IPropFactory propFactory,
             object value,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid,
@@ -425,7 +425,7 @@ namespace DRM.PropBag
         #region Property-Type Methods
 
         // From Object
-        private static IProp<T> CreatePropFromObject<T>(AbstractPropFactory propFactory,
+        private static IProp<T> CreatePropFromObject<T>(IPropFactory propFactory,
             object value,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid,
@@ -438,7 +438,7 @@ namespace DRM.PropBag
         }
 
         // From String
-        private static IProp<T> CreatePropFromString<T>(AbstractPropFactory propFactory,
+        private static IProp<T> CreatePropFromString<T>(IPropFactory propFactory,
             string value, bool useDefault,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid,
@@ -459,7 +459,7 @@ namespace DRM.PropBag
         }
 
         // With No Value
-        private static IProp<T> CreatePropWithNoValue<T>(AbstractPropFactory propFactory,
+        private static IProp<T> CreatePropWithNoValue<T>(IPropFactory propFactory,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid,
             Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false)

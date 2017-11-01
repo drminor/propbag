@@ -180,13 +180,13 @@ namespace DRM.PropBag.ControlsWPF
 
         // TODO: need to create a typeconverter for AbstractPropFactory.
         static DependencyProperty PropFactoryProperty =
-            DependencyProperty.Register("PropFactory", typeof(AbstractPropFactory), typeof(PropBagTemplate), new PropertyMetadata(null));
+            DependencyProperty.Register("PropFactory", typeof(IPropFactory), typeof(PropBagTemplate), new PropertyMetadata(null));
 
-        public AbstractPropFactory PropFactory
+        public IPropFactory PropFactory
         {
             get
             {
-                return (AbstractPropFactory)this.GetValue(PropFactoryProperty);
+                return (IPropFactory)this.GetValue(PropFactoryProperty);
             }
             set
             {

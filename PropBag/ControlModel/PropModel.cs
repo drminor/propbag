@@ -23,7 +23,7 @@ namespace DRM.PropBag.ControlModel
         PropBagTypeSafetyMode tsm = PropBagTypeSafetyMode.Tight;
         bool dmrr;
         bool reiv;
-        AbstractPropFactory pf;
+        IPropFactory pf;
 
         ObservableCollection<string> _namespaces;
         ObservableCollection<PropItem> _props;
@@ -55,7 +55,7 @@ namespace DRM.PropBag.ControlModel
         // TODO: This is not Serializable, consider providing string representation as a proxy
         // Perhaps we should simply not serialize instances of PropBag Control Models.
         [XmlIgnore]
-        public AbstractPropFactory PropFactory { get { return pf; } set { SetAlways<AbstractPropFactory>(ref pf, value); } }
+        public IPropFactory PropFactory { get { return pf; } set { SetAlways<IPropFactory>(ref pf, value); } }
 
         [XmlArray("namespaces")]
         [XmlArrayItem("namespace")]

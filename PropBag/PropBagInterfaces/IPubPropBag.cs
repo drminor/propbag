@@ -8,7 +8,7 @@ using DRM.TypeSafePropertyBag;
 namespace DRM.PropBag
 {
     /// <summary>
-    /// Adds GetIt, SetIt, and AddProp methods to IPropBag.
+    /// Adds AddProp, RemoveProp and ClearAllProps to IPropBag.
     /// </summary>
     public interface IPubPropBag : IPropBag
     {
@@ -37,7 +37,7 @@ namespace DRM.PropBag
         bool RegisterDoWhenChanged<T>(string propertyName, Action<T, T> doWhenChanged,
             bool doAfterNotify = false);
 
-        void ClearAll();
+        void ClearAllProps();
 
         void ClearEventSubscribers();
     }

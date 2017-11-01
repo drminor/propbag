@@ -9,20 +9,30 @@ namespace DRM.PropBag
 {
     public class PropExtStoreFactory : AbstractPropFactory
     {
+        object Stuff { get; }
+
         public override bool ProvidesStorage
         {
             get { return false; }
         }
 
-        public PropExtStoreFactory(bool returnDefaultForUndefined) : base(returnDefaultForUndefined) { }
+        #region Constructors
 
-        object Stuff;
-        public PropExtStoreFactory(object stuff, bool returnDefaultForUndefined, ResolveTypeDelegate typeResolver = null,
-            IConvertValues valueConverter = null) : base(returnDefaultForUndefined, typeResolver, valueConverter)
+        public PropExtStoreFactory(bool returnDefaultForUndefined)
+            : this(null, returnDefaultForUndefined)
+        {
+        }
+
+        public PropExtStoreFactory(object stuff, bool returnDefaultForUndefined,
+            ResolveTypeDelegate typeResolver = null,
+            IConvertValues valueConverter = null)
+            : base(returnDefaultForUndefined, typeResolver, valueConverter)
         {
             // Info to help us set up the getters and setters
             Stuff = stuff;
         }
+
+        #endregion
 
         #region Collection-type property creators
 
@@ -107,7 +117,6 @@ namespace DRM.PropBag
         }
 
         #endregion
-
     }
 
 }
