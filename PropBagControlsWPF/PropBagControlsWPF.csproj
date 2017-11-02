@@ -63,35 +63,34 @@
     <Compile Include="Binders\SelectedItemConverter.cs" />
     <Compile Include="Binders\SourceKindEnum.cs" />
     <None Include="BoundPropBag_OLD.cs" />
-    <Compile Include="ComparerFuncTypeConverter.cs" />
+    <Compile Include="Converters\ComparerFuncTypeConverter.cs" />
     <Compile Include="Binders\DepPropChangedEventArgs.cs" />
     <Compile Include="Binders\DepPropChangedTypeConverter.cs" />
     <None Include="Converters\EnumValueConverter.cs" />
     <None Include="Converters\LocalizableDescriptionAttribute.cs" />
-    <Compile Include="DoWhenChangedAction.cs" />
-    <Compile Include="DuoActionTypeConverter.cs">
+    <Compile Include="Template\DoWhenChangedAction.cs" />
+    <Compile Include="Converters\DuoActionTypeConverter.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>
-    <Compile Include="InitialValueField.cs" />
+    <Compile Include="Template\InitialValueField.cs" />
     <Compile Include="Binders\MyMultiValueConveter.cs" />
     <Compile Include="Binders\MyBindingEngine.cs" />
-    <Compile Include="NamespaceItem.cs" />
-    <Compile Include="NamespacesCollection.cs" />
+    <Compile Include="Template\NamespaceItem.cs" />
+    <Compile Include="Template\NamespacesCollection.cs" />
     <Compile Include="Binders\MyBinder.cs" />
     <Compile Include="PropBagInstanceAttribute.cs" />
-    <Compile Include="PropBagTemplate.cs" />
-    <Compile Include="PropComparerFunc.cs" />
-    <Compile Include="PropComparerField.cs" />
+    <Compile Include="Template\PropBagTemplate.cs" />
+    <Compile Include="Template\PropComparerFunc.cs" />
+    <Compile Include="Template\PropComparerField.cs" />
     <Compile Include="Activators\PropModelProvider.cs" />
-    <Compile Include="PropTypeInfoField.cs" />
-    <Compile Include="PropDoWhenChangedField.cs" />
-    <Compile Include="PropItem.cs" />
-    <Compile Include="PropsCollection.cs" />
-    <Compile Include="PropTypeInfoCollection.cs" />
-    <Compile Include="PropValueConverter.cs" />
+    <Compile Include="Template\PropTypeInfoField.cs" />
+    <Compile Include="Template\PropDoWhenChangedField.cs" />
+    <Compile Include="Template\PropItem.cs" />
+    <Compile Include="Template\PropsCollection.cs" />
+    <Compile Include="Template\PropTypeInfoCollection.cs" />
+    <Compile Include="Converters\PropValueConverter.cs" />
     <Compile Include="ReflectionHelpers.cs" />
     <Compile Include="TwoTypesMarkupExtension.cs" />
-    <None Include="ViewModelGenerator_OLD.cs" />
     <Compile Include="Activators\IPropBagTemplateProvider.cs" />
     <Compile Include="WPFHelpers\LogicalTree.cs" />
     <Compile Include="Activators\PropBagTemplateProvider.cs" />
@@ -134,6 +133,7 @@
       <Name>TypeSafePropertyBag</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

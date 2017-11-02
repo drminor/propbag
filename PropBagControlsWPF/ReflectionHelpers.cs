@@ -1,41 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using System.Reflection;
 
 namespace DRM.PropBag.ControlsWPF
 {
-
     public class ReflectionHelpers
     {
         public const string DEFAULT_INSTANCE_KEY = "main";
-
-        static public PropertyInfo GetPropBagClassProperty(Type declaringType, string className, string instanceKey)
-        {
-            PropertyInfo[] propDefs = declaringType.GetProperties(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
-
-            for (int pPtr = 0; pPtr < propDefs.Length; pPtr++)
-            {
-                if (IsPropBagInstanceWithCorrectType(propDefs[pPtr], className, instanceKey))
-                {
-                    return propDefs[pPtr];
-                }
-            }
-            return null;
-        }
-
-        //static public void CreateTargetAndAssign(object propertyHost, PropertyInfo propBagClassProperty,
-        //    Type propModelType, object propModel)
-        //{
-        //    Type targetType = propBagClassProperty.PropertyType;
-        //    ConstructorInfo ci = GetPropModelConstructor(targetType, propModelType);
-        //    object newInstance = ci.Invoke(new object[] { propModel });
-
-        //    propBagClassProperty.SetValue(propertyHost, newInstance);
-        //}
 
         /// <summary>
         /// Returns an instance of the class that is returned by the property marked with the PropBagInstanceAttribute attribute.
@@ -57,6 +28,20 @@ namespace DRM.PropBag.ControlsWPF
             return null;
         }
 
+        static public PropertyInfo GetPropBagClassProperty(Type declaringType, string className, string instanceKey)
+        {
+            PropertyInfo[] propDefs = declaringType.GetProperties(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+
+            for (int pPtr = 0; pPtr < propDefs.Length; pPtr++)
+            {
+                if (IsPropBagInstanceWithCorrectType(propDefs[pPtr], className, instanceKey))
+                {
+                    return propDefs[pPtr];
+                }
+            }
+            return null;
+        }
+
         static public bool IsPropBagInstanceWithCorrectType(PropertyInfo propDef, string strTargetType, string instanceKey)
         {
             //IEnumerable<System.Attribute> list = propDef.GetCustomAttributes();
@@ -68,33 +53,6 @@ namespace DRM.PropBag.ControlsWPF
             PropBagInstanceAttribute pbia = (PropBagInstanceAttribute)att;
             return (pbia.InstanceKey == instanceKey);
             //return DoNameSpacesMatch(pbia.PropBagTemplate, strTargetType);
-        }
-
-        static public bool DoNameSpacesMatch(string ns1, string ns2)
-        {
-            int cnt1 = ns1.Count(x => x == '.');
-            int cnt2 = ns2.Count(x => x == '.');
-
-            if (cnt1 == cnt2)
-            {
-                return string.Equals(ns1, ns2, StringComparison.OrdinalIgnoreCase);
-            }
-            else
-            {
-                if (cnt1 < cnt2)
-                {
-                    //var x = ns2.Split('.').Skip(cnt2 - cnt1);
-                    //var y = string.Join<string>(".", x);
-
-                    string localizedNs2 = string.Join(".", ns2.Split('.').Skip(cnt2 - cnt1));
-                    return string.Equals(ns1, localizedNs2, StringComparison.OrdinalIgnoreCase);
-                }
-                else
-                {
-                    string localizedNs1 = string.Join(".", ns1.Split('.').Skip(cnt1 - cnt2));
-                    return string.Equals(localizedNs1, ns2, StringComparison.OrdinalIgnoreCase);
-                }
-            }
         }
 
         static public object GetRunningInstance(PropertyInfo propDef, object propsParent)
@@ -151,6 +109,20 @@ namespace DRM.PropBag.ControlsWPF
             //types[0] = propModelType;
             return targetType.GetConstructor(types);
         }
+
+        #region NOT USED
+
+        //static public void CreateTargetAndAssign(object propertyHost, PropertyInfo propBagClassProperty,
+        //    Type propModelType, object propModel)
+        //{
+        //    Type targetType = propBagClassProperty.PropertyType;
+        //    ConstructorInfo ci = GetPropModelConstructor(targetType, propModelType);
+        //    object newInstance = ci.Invoke(new object[] { propModel });
+
+        //    propBagClassProperty.SetValue(propertyHost, newInstance);
+        //}
+
+        #endregion
 
     }
 }
