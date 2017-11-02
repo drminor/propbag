@@ -100,14 +100,12 @@ namespace DRM.PropBag.ControlsWPF
             bool requireExplicitInitialValue = pbt.RequireExplicitInitialValue;
 
             PropModel result =
-                new PropModel(className,
-                    instanceKey,
-                    outputNamespace,
-                    propFactory ?? pbt.PropFactory, // Use the PropFactory supplied by the caller if not null.
-                    deriveFromPubPropBag,
-                    typeSafetyMode,
-                    deferMethodRefResolution,
-                    requireExplicitInitialValue);
+                new PropModel(className, /*instanceKey,*/ outputNamespace,
+                DeriveFromClassModeEnum.PropBag, typeToWrap: null, wrapperTypeInfoField: null,
+                    propFactory: propFactory ?? pbt.PropFactory, // Use the PropFactory supplied by the caller if not null.
+                    typeSafetyMode: typeSafetyMode,
+                    deferMethodRefResolution: deferMethodRefResolution,
+                    requireExplicitInitialValue: requireExplicitInitialValue);
 
             int namespacesCount = pbt.Namespaces == null ? 0 : pbt.Namespaces.Count;
             for (int nsPtr = 0; nsPtr < namespacesCount; nsPtr++)

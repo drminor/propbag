@@ -163,12 +163,18 @@ namespace PropBagLib.Tests.AutoMapperSupport
 
         private PropModel GetPropModelForDestinationModel(IPropFactory propFactory)
         {
-            PropModel result = new PropModel(className: "DestinationModel", instanceKey: "DestinationModel",
-                namespaceName: "DummyNamespace",
-                propFactory: propFactory,
-                deriveFromPubPropBag: false, 
-                typeSafetyMode: PropBagTypeSafetyMode.Tight, 
-                deferMethodRefResolution: false, requireExplicitInitialValue: true);
+
+            PropModel result = new PropModel
+                (
+                className: "DestinationModel",
+                namespaceName: "PropBagLib.Tests.AutoMapperSupport",
+                deriveFromClassMode: DeriveFromClassModeEnum.PropBag,
+                typeToWrap: null,
+                wrapperTypeInfoField: null,
+                propFactory: null,
+                typeSafetyMode: PropBagTypeSafetyMode.Tight,
+                deferMethodRefResolution: true,
+                requireExplicitInitialValue: true);
 
             //result.Namespaces.Add("System");
             result.Namespaces.Add("DRM.PropBag");

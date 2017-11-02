@@ -41,6 +41,8 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ControlModel\DeriveFromClassField_NotUsed.cs" />
+    <Compile Include="ControlModel\DeriveFromClassModeEnum.cs" />
     <Compile Include="ControlModel\IPropModelProvider.cs" />
     <Compile Include="Caches\TypeDescBasedTConverterKey.cs" />
     <Compile Include="Caches\TypeDescBasedTConverterCache.cs" />
@@ -58,7 +60,7 @@
     <Compile Include="ControlModel\WellKnownCollectionTypeEnum.cs" />
     <Compile Include="ControlModel\NotifyPropertyChangedBase.cs" />
     <Compile Include="Caches\DelegateCacheProvider.cs" />
-    <Compile Include="ControlModel\PropTypeInfoField.cs" />
+    <Compile Include="ControlModel\TypeInfoField.cs" />
     <Compile Include="ControlModel\TwoTypes.cs" />
     <Compile Include="DoSetDelegate.cs" />
     <Compile Include="Factories\AbstractPropFactory.cs" />
@@ -73,6 +75,7 @@
     <Compile Include="Factories\PropFactoryValueConverter.cs" />
     <Compile Include="Props\Prop.cs" />
     <Compile Include="PropBag.CustomTypeDescriptor.cs" />
+    <None Include="Documentation\TypeInfoField.md" />
     <None Include="PropBagDyn.cs" />
     <None Include="PropBagExperimental.cs" />
     <Compile Include="TypeDescriptors\IMyTypeDescriptor.cs" />

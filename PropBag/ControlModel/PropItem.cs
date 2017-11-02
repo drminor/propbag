@@ -15,7 +15,7 @@ namespace DRM.PropBag.ControlModel
         PropKindEnum _propKind;
         Type _propertyType; // Also used to store the collection type.
         Type _itemType;
-        PropTypeInfoField _propTypeInfoField;
+        TypeInfoField _propTypeInfoField;
         PropInitialValueField _propInitialValueField;
         PropComparerField _propComparerField;
         PropDoWhenChangedField _propDoWhenChangedField;
@@ -33,6 +33,9 @@ namespace DRM.PropBag.ControlModel
         [XmlElement("type")]
         public Type PropertyType { get { return _propertyType; } set { _propertyType = value; } }
 
+        /// <summary>
+        /// Alias for PropertyType, helpful when this PropItem defines a Collection.
+        /// </summary>
         [XmlIgnore]
         public Type CollectionType { get { return _propertyType; } set { _propertyType = value; } }
 
@@ -40,10 +43,10 @@ namespace DRM.PropBag.ControlModel
         public Type ItemType { get { return _itemType; } set { _itemType = value; } }
 
         [XmlElement("type-info")]
-        public PropTypeInfoField PropTypeInfoField
+        public TypeInfoField PropTypeInfoField
         {
             get { return _propTypeInfoField; }
-            set { SetIfDifferent<PropTypeInfoField>(ref _propTypeInfoField, value); }
+            set { SetIfDifferent<TypeInfoField>(ref _propTypeInfoField, value); }
         }
 
         [XmlElement("initial-value")]
@@ -76,7 +79,7 @@ namespace DRM.PropBag.ControlModel
         //    null, null, null, null) { }
 
         public PropItem(Type type, string name, bool hasStore, bool typeIsSolid, PropKindEnum propKind,
-            PropTypeInfoField propTypeInfoField = null,
+            TypeInfoField propTypeInfoField = null,
             PropInitialValueField initialValueField = null,
             PropDoWhenChangedField doWhenChanged = null,
             string extraInfo = null, PropComparerField comparer = null, Type itemType = null)

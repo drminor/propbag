@@ -13,50 +13,65 @@ namespace DRM.PropBag.ControlModel
 {
     public class PropModel : NotifyPropertyChangedBase, IEquatable<PropModel>
     {
-
         public const string DEFAULT_CLASS_NAME = "UndefinedClassName";
 
-        bool dfppb;
+        #region Activation Info
+        //bool dfppb;
+        //[XmlAttribute(AttributeName = "derive-from-pub-prop-bag")]
+        //public bool DeriveFromPubPropBag { get { return dfppb; } set { SetIfDifferent<bool>(ref dfppb, value); } }
+
+        DeriveFromClassModeEnum _deriveFromClassMode;
+        [XmlAttribute(AttributeName = "derive-from-class-mode")]
+        public DeriveFromClassModeEnum DeriveFromClassMode
+        { get { return _deriveFromClassMode; } set { SetIfDifferentVT<DeriveFromClassModeEnum>(ref _deriveFromClassMode, value); } }
+
+        Type _typeToWrap;
+        [XmlElement("type")]
+        public Type TypeToWrap { get { return _typeToWrap; } set { _typeToWrap = value; } }
+
+        TypeInfoField _wrapperTypeInfoField;
+        [XmlElement("type-info")]
+        public TypeInfoField WrapperTypeInfoField
+        {
+            get { return _wrapperTypeInfoField; }
+            set { SetIfDifferent<TypeInfoField>(ref _wrapperTypeInfoField, value); }
+        }
+
         string cn;
-        string ik;
-        string ns;
-        PropBagTypeSafetyMode tsm = PropBagTypeSafetyMode.Tight;
-        bool dmrr;
-        bool reiv;
-        IPropFactory pf;
-
-        ObservableCollection<string> _namespaces;
-        ObservableCollection<PropItem> _props;
-
-        [XmlAttribute(AttributeName = "derive-from-pub-prop-bag")]
-        public bool DeriveFromPubPropBag { get { return dfppb; } set { SetIfDifferent<bool>(ref dfppb, value); } }
-
         [XmlAttribute(AttributeName = "class-name")]
         public string ClassName { get { return cn; } set { SetIfDifferent<string>(ref cn, value); } }
 
-        [XmlIgnore]
-        public string InstanceKey { get { return ik; } set { SetIfDifferent<string>(ref ik, value); } }
+        //string ik;
+        //[XmlIgnore]
+        //public string InstanceKey { get { return ik; } set { SetIfDifferent<string>(ref ik, value); } }
 
+        string ns;
         [XmlAttribute(AttributeName = "output-namespace")]
         public string NamespaceName { get { return ns; } set { SetIfDifferent<string>(ref ns, value); } }
 
+        #endregion
+
+        PropBagTypeSafetyMode tsm = PropBagTypeSafetyMode.Tight;
         [XmlAttribute(AttributeName = "type-safety-mode")]
         public PropBagTypeSafetyMode TypeSafetyMode
         { get { return tsm; } set { SetIfDifferentVT<PropBagTypeSafetyMode>(ref tsm, value); } }
 
-
+        bool dmrr;
         [XmlAttribute(AttributeName = "defer-method-ref-resolution")]
         public bool DeferMethodRefResolution { get { return dmrr; } set { SetIfDifferent<bool>(ref dmrr, value); } }
 
+        bool reiv;
         [XmlAttribute(AttributeName = "require-explicit-initial-value")]
         public bool RequireExplicitInitialValue { get { return reiv; } set { SetIfDifferent<bool>(ref reiv, value); } }
 
 
         // TODO: This is not Serializable, consider providing string representation as a proxy
         // Perhaps we should simply not serialize instances of PropBag Control Models.
+        IPropFactory pf;
         [XmlIgnore]
         public IPropFactory PropFactory { get { return pf; } set { SetAlways<IPropFactory>(ref pf, value); } }
 
+        ObservableCollection<string> _namespaces;
         [XmlArray("namespaces")]
         [XmlArrayItem("namespace")]
         public ObservableCollection<string> Namespaces
@@ -65,6 +80,7 @@ namespace DRM.PropBag.ControlModel
             set { this.SetCollection<ObservableCollection<string>, string>(ref _namespaces, value); }
         }
 
+        ObservableCollection<PropItem> _props;
         [XmlArray("props")]
         [XmlArrayItem("prop")]
         public ObservableCollection<PropItem> Props
@@ -75,20 +91,35 @@ namespace DRM.PropBag.ControlModel
 
         public bool IsClassDefined => ClassName != DEFAULT_CLASS_NAME;
 
-        public PropModel() : this(DEFAULT_CLASS_NAME, null, null, null) { }
+        public PropModel() : this(DEFAULT_CLASS_NAME,
+            null,
+            DeriveFromClassModeEnum.PropBag,
+            typeof(PropBag),
+            null,
+            null,
+            PropBagTypeSafetyMode.AllPropsMustBeRegistered,
+            deferMethodRefResolution: false,
+            requireExplicitInitialValue: false) { }
+
 
         // TODO: Get rid of the instanceKey parameter -- it shouldn't be used during construction.
-        public PropModel(string className, string instanceKey, string namespaceName,
+        public PropModel(string className, /*string instanceKey, */string namespaceName,
+            DeriveFromClassModeEnum deriveFromClassMode,
+            Type typeToWrap,
+            TypeInfoField wrapperTypeInfoField,
             IPropFactory propFactory,
-            bool deriveFromPubPropBag = false,
+            //bool deriveFromPubPropBag = false,
             PropBagTypeSafetyMode typeSafetyMode = PropBagTypeSafetyMode.AllPropsMustBeRegistered,
             bool deferMethodRefResolution = true,
             bool requireExplicitInitialValue = true)
         {
-            DeriveFromPubPropBag = deriveFromPubPropBag;
             ClassName = className;
-            InstanceKey = instanceKey;
+            //InstanceKey = instanceKey;
             NamespaceName = namespaceName;
+            DeriveFromClassMode = DeriveFromClassMode;
+            TypeToWrap = typeToWrap;
+            WrapperTypeInfoField = wrapperTypeInfoField;
+            //DeriveFromPubPropBag = deriveFromPubPropBag;
             TypeSafetyMode = typeSafetyMode;
             DeferMethodRefResolution = deferMethodRefResolution;
             RequireExplicitInitialValue = requireExplicitInitialValue;
@@ -97,6 +128,7 @@ namespace DRM.PropBag.ControlModel
             Props = new ObservableCollection<PropItem>();
         }
 
+        // TODO:!! Update the GetHashCode for DRM.PropBag.ControlModel.PropModel
         public override int GetHashCode()
         {
             return ClassName.GetHashCode();
