@@ -54,12 +54,13 @@ namespace DRM.PropBag
         public event PropertyChangedWithValsHandler PropertyChangedWithVals; // = delegate { };
         public event PropertyChangedEventHandler PropertyChangedIndividual;
 
+        // DRM: Changed to protected and added set accessor on 10/29/17; DRM: removed set accessor on 11/2/17.
+        protected IPropFactory PropFactory { get; /*set; */}
+
+        protected string FullClassName => OurMetaData.FullClassName;
+
         private PropBagTypeSafetyMode TypeSafetyMode { get; }
-
-        // DRM; Changed to protected and added set accessor on 10/29/17
-        protected IPropFactory PropFactory { get; set; }
         private TypeSafePropBagMetaData OurMetaData { get; }
-
         private readonly Dictionary<string, PropGen> tVals;
 
         #endregion
