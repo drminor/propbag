@@ -10,23 +10,24 @@ namespace DRM.PropBag.AutoMapperSupport
     /// </summary>
     /// <typeparam name="TSource"></typeparam>
     /// <typeparam name="TDestination"></typeparam>
-    public class StandardConfigFinalStep<TSource, TDestination>
-        : IMapperConfigurationFinalAction<TSource, TDestination> where TDestination : class, IPropBag
+    public class EmitProxyConfigFinalStep<TSource, TDestination>
+        : ICreateMappingExpressions<TSource, TDestination> where TDestination : class, IPropBag
     {
+        public bool RequiresProxyType => true;
 
         public Action<IPropBagMapperKey<TSource, TDestination>,IMapperConfigurationExpression> ActionStep
         {
             get
             {
-                return BuildStandardConfig;
+                return BuildEmitProxyConfig;
             }
         }
 
-        public void BuildStandardConfig(IPropBagMapperKey<TSource, TDestination> mapRequest, IMapperConfigurationExpression cfg)
+        public void BuildEmitProxyConfig(IPropBagMapperKey<TSource, TDestination> mapRequest, IMapperConfigurationExpression cfg)
         {
             PropModel propModel = mapRequest.DestinationTypeDef.PropModel;
 
-            Func<TDestination, TSource> regularInstanceCreator = mapRequest.SourceConstructor;
+            Func<TDestination, TSource> regularInstanceCreator = mapRequest.MappingConfiguration.SourceConstructor;
 
             Type newWrapperType = mapRequest.DestinationTypeDef.NewWrapperType;
 

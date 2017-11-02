@@ -3,7 +3,9 @@ using System;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
-    public class SimpleMapperConfigurationBuilderGenBase : IBuildMapperConfigurationsGen
+    // TODO: replace this class with a method, or two in the SimpleMapperConfigurationBuilder class.
+
+    public class SimpleMapperConfigurationBuilderGenBase /*: IBuildMapperConfigurationsGen*/
     {
         protected IHaveAMapperConfigurationStep ConfigStarter { get; set; }
 
@@ -46,27 +48,27 @@ namespace DRM.PropBag.AutoMapperSupport
 
         #endregion
 
-        public IConfigurationProvider GetNewConfiguration(IConfigureAMapperGen configs)
-        {
-            // Keep the existing ConfigStarter setting.
-            Configs = configs;
-            _action = null;
+        //public IConfigurationProvider GetNewConfiguration(IConfigureAMapperGen configs)
+        //{
+        //    // Keep the existing ConfigStarter setting.
+        //    Configs = configs;
+        //    _action = null;
 
-            IConfigurationProvider result = new MapperConfiguration(Action);
+        //    IConfigurationProvider result = new MapperConfiguration(Action);
 
-            return result;
-        }
+        //    return result;
+        //}
 
-        public IConfigurationProvider GetNewConfiguration(IConfigureAMapperGen configs, IHaveAMapperConfigurationStep configStarter)
-        {
-            Configs = configs;
-            ConfigStarter = configStarter;
-            _action = null;
+        //public IConfigurationProvider GetNewConfiguration(IConfigureAMapperGen configs, IHaveAMapperConfigurationStep configStarter)
+        //{
+        //    Configs = configs;
+        //    ConfigStarter = configStarter;
+        //    _action = null;
 
-            IConfigurationProvider result = new MapperConfiguration(Action);
+        //    IConfigurationProvider result = new MapperConfiguration(Action);
 
-            return result;
-        }
+        //    return result;
+        //}
 
         private void NoOpAction(IMapperConfigurationExpression cfg)
         {

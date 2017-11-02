@@ -2,19 +2,21 @@
 
 namespace DRM.PropBag.AutoMapperSupport
 {
-    public interface IBuildMapperConfigurations<TSource, TDestination> : IBuildMapperConfigurationsGen where TDestination : class, IPropBag
+    public interface IBuildMapperConfigurations<TSource, TDestination> /*: IBuildMapperConfigurationsGen*/ where TDestination : class, IPropBag
     {
-        IConfigurationProvider GetNewConfiguration(IConfigureAMapper<TSource, TDestination> configs,
-            IPropBagMapperKey<TSource, TDestination> mapRequest);
-
-        IConfigurationProvider GetNewConfiguration(IConfigureAMapper<TSource, TDestination> configs,
-            IPropBagMapperKey<TSource, TDestination> mapRequest,
-            IHaveAMapperConfigurationStep configStarter);
+        IConfigurationProvider GetNewConfiguration
+            (
+            //IConfigureAMapper<TSource, TDestination> configs,
+            IPropBagMapperKey<TSource, TDestination> mapRequest/*, IHaveAMapperConfigurationStep configStarter = null*/
+            );
     }
 
     public interface IBuildMapperConfigurationsGen
     {
-        IConfigurationProvider GetNewConfiguration(IConfigureAMapperGen configs);
-        IConfigurationProvider GetNewConfiguration(IConfigureAMapperGen configs, IHaveAMapperConfigurationStep configStarter);
+        //IConfigurationProvider GetNewConfiguration
+        //    (
+        //    IConfigureAMapperGen configs,
+        //    IHaveAMapperConfigurationStep configStarter = null
+        //    );
     }
 }

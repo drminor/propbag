@@ -7,8 +7,11 @@ using System.Reflection;
 namespace DRM.PropBag.AutoMapperSupport
 {
     public class ExtraMembersConfigFinalStep<TSource, TDestination>
-        : IMapperConfigurationFinalAction<TSource, TDestination> where TDestination : class, IPropBag
+        : ICreateMappingExpressions<TSource, TDestination> where TDestination : class, IPropBag
     {
+
+        public bool RequiresProxyType => false;
+
         public Action<IPropBagMapperKey<TSource, TDestination>, IMapperConfigurationExpression> ActionStep
         {
             get
@@ -23,7 +26,7 @@ namespace DRM.PropBag.AutoMapperSupport
 
             IEnumerable<MemberInfo> extraMembers = new ExtraMembersProvider().GetExtraMembers(propModel);
 
-            Func<TDestination, TSource> regularInstanceCreator = mapRequest.SourceConstructor;
+            Func<TDestination, TSource> regularInstanceCreator = mapRequest.MappingConfiguration.SourceConstructor;
 
             //cfg.IncludeExtraMembersForType(typeof(Destination), extraMembers);
 
