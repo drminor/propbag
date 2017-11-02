@@ -1,4 +1,5 @@
 ﻿using DRM.PropBag;
+using DRM.PropBag.ControlModel;
 using DRM.TypeSafePropertyBag;
 using System;
 
@@ -18,6 +19,12 @@ namespace PropBagLib.Tests.AutoMapperSupport
             AddProp<int>("Amount", null, false, null, null, 0);
             AddProp<double>("Size", null, false, null, null, 10.1);
             AddProp<MyModel4>("Deep", null, false, null, null, null);
+        }
+
+        public DestinationModel(PropModel propModel, IPropFactory propFactory)
+            : base(propModel, propFactory)
+        {
+
         }
 
     }

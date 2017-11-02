@@ -8,19 +8,25 @@ namespace PropBagLib.Tests.AutoMapperSupport
 {
     public class AutoMapperHelpers
     {
-        public AutoMapperProvider InitializeAutoMappers(IPropModelProvider propModelProvider,
-            IPropFactory defaultPropFactory)
+        public AutoMapperProvider InitializeAutoMappers(IPropModelProvider propModelProvider)
         {
+            IPropBagMapperBuilderProvider propBagMapperBuilderProvider
+                = new SimplePropBagMapperBuilderProvider
+                (
+                    wrapperTypeCreator: null,
+                    viewModelActivator: null
+                );
+
             IMapTypeDefinitionProvider mapTypeDefinitionProvider = new SimpleMapTypeDefinitionProvider();
 
             ICachePropBagMappers mappersCachingService = new SimplePropBagMapperCache();
 
             AutoMapperProvider autoMapperProvider = new AutoMapperProvider
                 (
-                propModelProvider: propModelProvider,
                 mapTypeDefinitionProvider: mapTypeDefinitionProvider,
                 mappersCachingService: mappersCachingService,
-                defaultPropFactory: defaultPropFactory
+                mapperBuilderProvider: propBagMapperBuilderProvider,
+                propModelProvider: propModelProvider
                 );
 
             return autoMapperProvider;
@@ -60,7 +66,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 //IPropModelProvider propModelProvider = PropModelProvider_V1;
 
                 IPropFactory propFactory = PropFactory_V1;
-                _autoMapperProvider_V1 = new AutoMapperHelpers().InitializeAutoMappers(null, propFactory);
+                _autoMapperProvider_V1 = new AutoMapperHelpers().InitializeAutoMappers(propModelProvider: null);
             }
             return _autoMapperProvider_V1;
         }

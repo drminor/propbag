@@ -30,11 +30,11 @@ namespace PropBagLib.Tests.AutoMapperSupport
         [Test]
         public void AutoMapperSupport_V1_ShouldBeSetup()
         {
-            bool doesAmpHavePbTConversionServices = _amp.HasPbTConversionService;
+            bool doesAmpHavePbTConversionServices = _amp.HasPropModelLookupService;
         }
 
         [Test]
-        public void CanRegisterMod3ToDestinationMapper()
+        public void CanRegisterMod3ToDestinationMapper_Proxy()
         {
             IPropFactory propFactory = _propFactory_V1;
 
@@ -54,7 +54,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
         }
 
         [Test]
-        public void CanGetMapperForMod3ToDestination()
+        public void CanGetMapperForMod3ToDestination_Proxy()
         {
             IPropFactory propFactory = _propFactory_V1;
 
@@ -76,7 +76,86 @@ namespace PropBagLib.Tests.AutoMapperSupport
 
             Assert.That(mapper, Is.Not.Null, "mapper should be non-null");
 
+            MyModel4 dp = new MyModel4
+            {
+                MyString = "This is a good thing."
+            };
 
+            MyModel3 testSource = new MyModel3
+            {
+                Amount = 11,
+                Size = 22.22,
+                ProductId = Guid.Empty,
+                Deep = dp
+            };
+
+
+            DestinationModel testDest = mapper.MapToDestination(testSource);
+
+            IPropBagMapperKey<MyModel3, DestinationModel> mapperRequest2 =
+                _amp.RegisterMapperRequest<MyModel3, DestinationModel>
+                (
+                    propModel: propModel,
+                    typeToWrap: typeToWrap,
+                    configPackageName: configPackageName
+                );
+
+            IPropBagMapper<MyModel3, DestinationModel> mapper2 = _amp.GetMapper<MyModel3, DestinationModel>(mapperRequest2);
+
+            DestinationModel testDest2 = mapper.MapToDestination(testSource);
+
+        }
+
+        [Test]
+        public void CanGetMapperForMod3ToDestination_Extra()
+        {
+            IPropFactory propFactory = _propFactory_V1;
+
+            PropModel propModel = GetPropModelForDestinationModel(propFactory);
+            Type typeToWrap = typeof(DestinationModel); // typeof(PropBag);
+            string configPackageName = "Extra_Members"; // "Emit_Proxy";
+
+            IPropBagMapperKey<MyModel3, DestinationModel> mapperRequest =
+                _amp.RegisterMapperRequest<MyModel3, DestinationModel>
+                (
+                    propModel: propModel,
+                    typeToWrap: typeToWrap,
+                    configPackageName: configPackageName
+                );
+
+            Assert.That(mapperRequest, Is.Not.Null, "mapperRequest should be non-null.");
+
+            IPropBagMapper<MyModel3, DestinationModel> mapper = _amp.GetMapper<MyModel3, DestinationModel>(mapperRequest);
+
+            Assert.That(mapper, Is.Not.Null, "mapper should be non-null");
+
+            MyModel4 dp = new MyModel4
+            {
+                MyString = "This is a good thing."
+            };
+
+            MyModel3 testSource = new MyModel3
+            {
+                Amount = 11,
+                Size = 22.22,
+                ProductId = Guid.Empty,
+                Deep = dp
+            };
+
+
+            DestinationModel testDest = mapper.MapToDestination(testSource);
+
+            IPropBagMapperKey<MyModel3, DestinationModel> mapperRequest2 =
+                _amp.RegisterMapperRequest<MyModel3, DestinationModel>
+                (
+                    propModel: propModel,
+                    typeToWrap: typeToWrap,
+                    configPackageName: configPackageName
+                );
+
+            IPropBagMapper<MyModel3, DestinationModel> mapper2 = _amp.GetMapper<MyModel3, DestinationModel>(mapperRequest2);
+
+            DestinationModel testDest2 = mapper.MapToDestination(testSource);
         }
 
 

@@ -128,7 +128,7 @@ namespace PropBagTestApp.View
             ReferenceBindViewModelPB test = (ReferenceBindViewModelPB)mapper.MapToDestination(mm);
         }
 
-        private readonly string PERSON_VM_INSTANCE_KEY = "ReferenceBindViewModelPB";
+        private readonly string REFERENCE_BIND_VM_RES_KEY = "ReferenceBindViewModelPB";
 
         private IPropBagMapper<MyModel, ReferenceBindViewModelPB> _mapper;
         private IPropBagMapper<MyModel, ReferenceBindViewModelPB> Mapper
@@ -140,7 +140,7 @@ namespace PropBagTestApp.View
                     IPropBagMapperKey<MyModel, ReferenceBindViewModelPB> mapperRequest
                         = JustSayNo.AutoMapperProvider.RegisterMapperRequest<MyModel, ReferenceBindViewModelPB>
                     (
-                        PERSON_VM_INSTANCE_KEY,
+                        REFERENCE_BIND_VM_RES_KEY,
                         typeof(ReferenceBindViewModelPB),
                         configPackageName: "emit_proxy"
                     );
