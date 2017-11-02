@@ -25,12 +25,16 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public IPropBagMapper<TSource, TDestination> GenerateMapper(IPropBagMapperKey<TSource, TDestination> mapRequest)
         {
-            //TODO: See if we can support both Source and Destination PropBag-Based types.
+
             if (mapRequest.MappingConfiguration.RequiresWrappperTypeEmitServices)
             {
+                // TODO: Is this really the responsibility of the PropBagMapperBuilder,
+                // or can we hand this off to the IBuildMapperConfigurations interface?
                 // Create the Proxy/Wrapper type if it does not already exist.
                 PropModel propModel = mapRequest.DestinationTypeDef.PropModel;
 
+                // TODO: Can we avoid setting the NewWrapperType on the existing instance
+                // of the mapRequest?
                 Type newWrapperType = WrapperTypeCreator.GetWrapperType<TDestination>(propModel) as Type;
                 mapRequest.DestinationTypeDef.NewWrapperType = newWrapperType;
             }
