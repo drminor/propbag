@@ -71,7 +71,7 @@
     <Compile Include="ExtValDelegates.cs" />
     <Compile Include="Factories\GetDefaultValueDelegate.cs" />
     <Compile Include="Factories\PropFactoryValueConverter.cs" />
-    <Compile Include="Prop.cs" />
+    <Compile Include="Props\Prop.cs" />
     <Compile Include="PropBag.CustomTypeDescriptor.cs" />
     <None Include="PropBagDyn.cs" />
     <None Include="PropBagExperimental.cs" />
@@ -81,12 +81,12 @@
     <Compile Include="TypeDescriptors\IPbCollectionTypeDescriptor.cs" />
     <Compile Include="PropBagInterfaces\IPropBag.cs" />
     <Compile Include="PropBagInterfaces\IPubPropBag.cs" />
-    <Compile Include="PropExternStore.cs" />
+    <Compile Include="Props\PropExternStore.cs" />
     <Compile Include="Factories\PropExtStoreFactory.cs" />
     <Compile Include="Factories\PropFactory.cs" />
-    <Compile Include="PropGen.cs" />
-    <Compile Include="PropGenBase.cs" />
-    <Compile Include="PropTypedBase.cs" />
+    <Compile Include="Props\PropGen.cs" />
+    <Compile Include="Props\PropGenBase.cs" />
+    <Compile Include="Props\PropTypedBase.cs" />
     <Compile Include="PubPropBag.cs" />
     <Compile Include="PropBag.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
