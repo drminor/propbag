@@ -5,27 +5,29 @@ using System;
 
 namespace DRM.ViewModelTools
 {
-    public class ViewModelActivatorStandard : IViewModelActivator
+    public class SimpleViewModelActivator : IViewModelActivator
     {
         #region Private Members
+
+        private string NO_PROPMODEL_LOOKUP_SERVICES = $"The {nameof(SimpleViewModelActivator)} has no PropModelProvider." +
+                    $"All calls must provide a PropModel.";
+
         private IPropModelProvider _propModelProvider { get; }
 
-        private string NO_PBT_CONVERSION_SERVICE_MSG = $"The {nameof(ViewModelActivatorStandard)} has no PropModelProvider." +
-                    $"All calls must provide a PropModel.";
         #endregion
 
         #region Public Properties
-        public bool HasPbTConversionService => (_propModelProvider != null);
+        public bool HasPropModelLookupService => (_propModelProvider != null);
         #endregion
 
         #region Constructor 
 
-        public ViewModelActivatorStandard()
+        public SimpleViewModelActivator()
         {
-            System.Diagnostics.Debug.WriteLine(NO_PBT_CONVERSION_SERVICE_MSG);
+            System.Diagnostics.Debug.WriteLine(NO_PROPMODEL_LOOKUP_SERVICES);
         }
 
-        public ViewModelActivatorStandard(IPropModelProvider propModelProvider)
+        public SimpleViewModelActivator(IPropModelProvider propModelProvider)
         {
             _propModelProvider = propModelProvider ?? throw new ArgumentNullException("propModelProvider");
         }
@@ -45,34 +47,46 @@ namespace DRM.ViewModelTools
         // BaseType + PropModel (BaseType known only at run time.
         public object GetNewViewModel(PropModel propModel, Type typeToCreate, IPropFactory propFactory = null)
         {
-            object result = Activator.CreateInstance(typeToCreate, propModel, propFactory);
+            object[] parameters = new object[] { propModel, propFactory };
+            object result = Activator.CreateInstance(typeToCreate, parameters);
             return result;
         }
 
         // BaseType + ResourceKey (BaseType known at compile time.)
-        public BT GetNewViewModel<BT>(string resourceKey, IPropFactory propFactory = null) where BT : class, IPropBag
+        public object GetNewViewModel<BT>(string resourceKey, IPropFactory propFactory = null) where BT : class, IPropBag
         {
             PropModel propModel = GetPropModel(resourceKey);
-            BT result = GetNewViewModel<BT>(propModel, propFactory);
+            object result = GetNewViewModel<BT>(propModel, propFactory);
             return result;
         }
 
         // BaseType + PropModel (BaseType known at compile time.)
-        public BT GetNewViewModel<BT>(PropModel propModel, IPropFactory propFactory = null) where BT : class, IPropBag
+        public object GetNewViewModel<BT>(PropModel propModel, IPropFactory propFactory = null) where BT : class, IPropBag
         {
-            BT result = (BT)Activator.CreateInstance(typeof(BT), propModel, propFactory);
+            object[] parameters = new object[] { propModel, propFactory };
+            object result = Activator.CreateInstance(typeof(BT), parameters);
             return result;
         }
 
         private PropModel GetPropModel(string resourceKey)
         {
-            if (!HasPbTConversionService)
+            if (!HasPropModelLookupService)
             {
-                throw new InvalidOperationException(NO_PBT_CONVERSION_SERVICE_MSG);
+                throw new InvalidOperationException(NO_PROPMODEL_LOOKUP_SERVICES);
             }
 
             PropModel propModel = _propModelProvider.GetPropModel(resourceKey);
             return propModel;
+        }
+
+        public Type GetWrapperType(PropModel propModel, Type typeToCreate)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Type GetWrapperType<BT>(PropModel propModel) where BT: class, IPropBag
+        {
+            throw new NotImplementedException();
         }
 
         #endregion

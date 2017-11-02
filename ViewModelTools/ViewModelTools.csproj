@@ -40,10 +40,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Activator\ViewModelActivatorEmitProxy.cs" />
+    <None Include="Activator\ViewModelActivatorEmitProxy_OLD.cs" />
+    <Compile Include="TypeCreators\SimpleWrapperTypeCreator.cs" />
     <None Include="Activator\ViewModelActivator_OLD.cs" />
     <Compile Include="Activator\IViewModelActivator.cs" />
-    <Compile Include="Activator\ViewModelActivatorStandard.cs" />
+    <Compile Include="Activator\SimpleViewModelActivator.cs" />
+    <Compile Include="TypeCreators\ICreateWrapperType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -16,7 +16,7 @@ namespace DRM.PropBag.ControlsWPF
         private IPropBagTemplateProvider _propBagTemplateProvider { get; }
         private string NO_FIND_PBT_WITH_JUST_KEY_MSG = null;
         private string NO_PBT_LOOKUP_RESOURCES_MSG = null;
-        private string NO_PBT_CONVERSION_SERVICE_MSG = null;
+        private string NO_PROPMODEL_LOOKUP_SERVICES = null;
 
         public bool CanFindPropBagTemplateWithJustKey => (_propModelProvider?.CanFindPropBagTemplateWithJustKey != false) || _propBagTemplateProvider?.CanFindPropBagTemplateWithJustKey != false;
         public bool HasPbtLookupResources => (_propModelProvider?.HasPbtLookupResources != false || _propBagTemplateProvider != null);
@@ -57,7 +57,7 @@ namespace DRM.PropBag.ControlsWPF
             }
             if(!HasPbTConversionService)
             {
-                throw new InvalidCastException(NO_PBT_CONVERSION_SERVICE_MSG);
+                throw new InvalidCastException(NO_PROPMODEL_LOOKUP_SERVICES);
             }
 
             // Fetch the propModel using just the ResourceKey
@@ -76,7 +76,7 @@ namespace DRM.PropBag.ControlsWPF
             }
             if (!HasPbTConversionService)
             {
-                throw new InvalidCastException(NO_PBT_CONVERSION_SERVICE_MSG);
+                throw new InvalidCastException(NO_PROPMODEL_LOOKUP_SERVICES);
             }
 
             // Fetch the propModel using just the ResourceKey
@@ -91,7 +91,7 @@ namespace DRM.PropBag.ControlsWPF
         {
             if (!HasPbTConversionService)
             {
-                throw new InvalidCastException(NO_PBT_CONVERSION_SERVICE_MSG);
+                throw new InvalidCastException(NO_PROPMODEL_LOOKUP_SERVICES);
             }
 
             PropModel propModel = _propModelProvider.GetPropModel(pbt);
@@ -209,7 +209,7 @@ namespace DRM.PropBag.ControlsWPF
             // Prepare Exception Message in case "A ResourceDictionary and ResourceKey are supplied, but no PBT Service available.
             if (!HasPbTConversionService)
             {
-                NO_PBT_CONVERSION_SERVICE_MSG = $"The {nameof(ViewModelActivator<T>)} has no PropModelProvider." +
+                NO_PROPMODEL_LOOKUP_SERVICES = $"The {nameof(ViewModelActivator<T>)} has no PropModelProvider." +
                     $"All calls must provide a PropModel.";
             }
 

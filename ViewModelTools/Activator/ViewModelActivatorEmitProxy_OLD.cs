@@ -14,12 +14,13 @@ namespace DRM.ViewModelTools
         private ICacheWrapperTypes _wrapperTypeCachingService { get; }
         ICacheTypeDescriptions _typeDescCachingService { get; }
 
-        private string NO_PBT_CONVERSION_SERVICE_MSG = $"The {nameof(ViewModelActivatorEmitProxy)} has no PropModelProvider." +
+        private string NO_PROPMODEL_LOOKUP_SERVICES = $"The {nameof(ViewModelActivatorEmitProxy)} has no PropModelProvider." +
                     $"All calls must provide a PropModel.";
         #endregion
 
         #region Public Properties
         public bool HasPbTConversionService => (_propModelProvider != null);
+        public bool HasTypeCreationService => true;
         #endregion
 
         #region Constructor 
@@ -32,7 +33,7 @@ namespace DRM.ViewModelTools
             _typeDescCachingService = typeDescCachingService ?? throw new ArgumentNullException(nameof(typeDescCachingService));
             _propModelProvider = null;
 
-            System.Diagnostics.Debug.WriteLine(NO_PBT_CONVERSION_SERVICE_MSG);
+            System.Diagnostics.Debug.WriteLine(NO_PROPMODEL_LOOKUP_SERVICES);
         }
 
         public ViewModelActivatorEmitProxy(
@@ -59,47 +60,34 @@ namespace DRM.ViewModelTools
 
         public object GetNewViewModel(PropModel propModel, Type typeToCreate, IPropFactory propFactory = null)
         {
-            if (!typeToCreate.IsPropBagBased())
-            {
-                throw new InvalidOperationException($"Type: {typeToCreate.Name} must derive from IPropBag.");
-            }
-
-            TypeDescription td = _typeDescCachingService.GetOrAdd(new NewTypeRequest(propModel, typeToCreate, null));
-            Type newWrapperType = _wrapperTypeCachingService.GetOrAdd(td);
+            Type newWrapperType = GetWrapperType(propModel, typeToCreate);
 
             object result = Activator.CreateInstance(newWrapperType, propModel, propFactory);
             return result;
         }
 
         // BaseType + ClassName (BaseType known at compile time.)
-        public BT GetNewViewModel<BT>(string resourceKey, IPropFactory propFactory = null) where BT : class, IPropBag
+        public object GetNewViewModel<BT>(string resourceKey, IPropFactory propFactory = null) where BT : class, IPropBag
         {
             PropModel propModel = GetPropModel(resourceKey);
 
-            BT result = GetNewViewModel<BT>(propModel, propFactory);
+            object result = GetNewViewModel<BT>(propModel, propFactory);
             return result;
         }
 
         // BaseType + PropModel (BaseType known at compile time.)
-        public BT GetNewViewModel<BT>(PropModel propModel, IPropFactory propFactory = null) where BT : class, IPropBag
+        public object GetNewViewModel<BT>(PropModel propModel, IPropFactory propFactory = null) where BT : class, IPropBag
         {
-            TypeDescription td = _typeDescCachingService.GetOrAdd(new NewTypeRequest(propModel, typeof(BT), null));
-            Type newWrapperType = _wrapperTypeCachingService.GetOrAdd(td);
+            //TypeDescription td = _typeDescCachingService.GetOrAdd(new NewTypeRequest(propModel, typeof(BT), null));
+            //Type newWrapperType = _wrapperTypeCachingService.GetOrAdd(td);
 
-            BT result = (BT)Activator.CreateInstance(newWrapperType, propModel, propFactory);
+            Type newWrapperType = GetWrapperType<BT>(propModel);
+
+            object result = Activator.CreateInstance(newWrapperType, propModel, propFactory);
             return result;
         }
 
-        private PropModel GetPropModel(string resourceKey)
-        {
-            if (!HasPbTConversionService)
-            {
-                throw new InvalidOperationException(NO_PBT_CONVERSION_SERVICE_MSG);
-            }
 
-            PropModel propModel = _propModelProvider.GetPropModel(resourceKey);
-            return propModel;
-        }
 
         #endregion
     }
