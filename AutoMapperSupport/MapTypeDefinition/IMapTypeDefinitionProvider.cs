@@ -6,6 +6,6 @@ namespace DRM.PropBag.AutoMapperSupport
 {
     public interface IMapTypeDefinitionProvider
     {
-        IMapTypeDefinition<T> GetTypeDescription<T>(PropModel propModel, IPropFactory propFactory, Type typeToWrap, string className);
+        IMapTypeDefinition<T> GetTypeDescription<T>(PropModel propModel, Type typeToWrap, string className, IPropFactory propFactory);
     }
 }
