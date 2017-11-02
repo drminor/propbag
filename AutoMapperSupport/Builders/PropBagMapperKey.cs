@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
-    // TODO: check to see if we really needing to use the base class: PropBagMapperKeyGen
+    // TODO: check to see if we really need to use the base class: PropBagMapperKeyGen
 
     public class PropBagMapperKey<TSource, TDestination> : PropBagMapperKeyGen,
         IPropBagMapperKey<TSource, TDestination>, 
@@ -20,62 +20,34 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public IMapTypeDefinition<TSource> SourceTypeDef { get; }
         public IMapTypeDefinition<TDestination> DestinationTypeDef { get; }
-        public Func<TDestination, TSource> SourceConstructor { get; }
-        public Func<TSource, TDestination> DestinationConstructor { get; }
+        //public Func<TDestination, TSource> SourceConstructor { get; }
+        //public Func<TSource, TDestination> DestinationConstructor { get; }
 
-        public Func<IPropBagMapperKeyGen, IPropBagMapperGen> MapperCreator => PropBagMapperBuilder.GenMapperCreator;
+        //public Func<IPropBagMapperKeyGen, IPropBagMapperGen> MapperCreator => PropBagMapperBuilder.GenMapperCreator;
 
-        //public IConfigureAMapper<TSource, TDestination> MappingConfiguration { get; }
+        public IConfigureAMapper<TSource, TDestination> MappingConfiguration { get; }
 
         #endregion
 
         #region Constructor
 
-        //public PropBagMapperKey(PropModel pm, Type baseType,
-        //    IBuildPropBagMapper<TSource, TDestination> propBagMapperBuilder,
-        //    Func<TDestination, TSource> constructSourceFunc = null,
-        //    Func<TSource, TDestination> constructDestinationFunc = null)
-        //    : base(
-        //          GetTypeDef<TSource>(pm, baseType) as IMapTypeDefinitionGen,
-        //          GetTypeDef<TDestination>(pm, baseType) as IMapTypeDefinitionGen,
-        //          propBagMapperBuilder.GenMapperCreator)
-        //{
-        //    Type tDest = typeof(TDestination);
-        //    PropBagMapperBuilder = propBagMapperBuilder;
-
-        //    if (typeof(TSource).IsPropBagBased()) throw new ApplicationException("The first type, TSource, is expected to be a regular, i.e., non-propbag-based type.");
-        //    if (! (typeof(TDestination).IsPropBagBased())) throw new ApplicationException("The second type, TDestination, is expected to be a propbag-based type.");
-
-        //    SourceTypeDef = base.SourceTypeGenDef as IMapTypeDefinition<TSource>; //GetTypeDef<TSource>(pm, baseType);
-        //    DestinationTypeDef = base.DestinationTypeGenDef as IMapTypeDefinition<TDestination>; // GetTypeDef<TDestination>(pm, baseType);
-
-        //    SourceConstructor = constructSourceFunc;
-        //    DestinationConstructor = constructDestinationFunc;
-        //}
-
         public PropBagMapperKey(
             IBuildPropBagMapper<TSource, TDestination> propBagMapperBuilder,
-            //IConfigureAMapper<TSource, TDestination> mappingConfiguration,
+            IConfigureAMapper<TSource, TDestination> mappingConfiguration,
             IMapTypeDefinition<TSource> sourceMapTypeDef,
-            IMapTypeDefinition<TDestination> destinationMapTypeDef,
-            Func<TDestination, TSource> sourceConstructor = null,
-            Func<TSource, TDestination> destinationConstructor = null)
+            IMapTypeDefinition<TDestination> destinationMapTypeDef)
             : base(propBagMapperBuilder.GenMapperCreator, sourceMapTypeDef, destinationMapTypeDef)
         {
             PropBagMapperBuilder = propBagMapperBuilder;
-            //MappingConfiguration = mappingConfiguration;
-
-            if (sourceMapTypeDef.IsPropBag) throw new ApplicationException
-                    ("The first type, TSource, is expected to be a regular, i.e., non-propbag-based type.");
-
-            if (!destinationMapTypeDef.IsPropBag) throw new ApplicationException
-                    ("The second type, TDestination, is expected to be a propbag-based type.");
+            MappingConfiguration = mappingConfiguration;
 
             SourceTypeDef = sourceMapTypeDef;
             DestinationTypeDef = destinationMapTypeDef;
 
-            SourceConstructor = sourceConstructor;
-            DestinationConstructor = destinationConstructor;
+            //SourceConstructor = mappingConfiguration.SourceConstructor;
+            //DestinationConstructor = mappingConfiguration.DestinationConstructor;
+
+            PropBagMapperBuilder.Validate(this);
         }
 
         #endregion
@@ -89,27 +61,34 @@ namespace DRM.PropBag.AutoMapperSupport
         public override int GetHashCode()
         {
             var hashCode = 1780333077;
-            hashCode = hashCode * -1521134295 + base.GetHashCode();
+            //hashCode = hashCode * -1521134295 + base.GetHashCode();
             hashCode = hashCode * -1521134295 + EqualityComparer<IMapTypeDefinition<TSource>>.Default.GetHashCode(SourceTypeDef);
             hashCode = hashCode * -1521134295 + EqualityComparer<IMapTypeDefinition<TDestination>>.Default.GetHashCode(DestinationTypeDef);
             return hashCode;
         }
+
 
         public override string ToString()
         {
             return base.ToString();
         }
 
-        // TODO: Implement Equals for PropBagMapperKey
-        public bool Equals(PropBagMapperKey<TSource, TDestination> other)
-        {
-            throw new NotImplementedException();
-        }
-
-        // TODO: Implement Equals for IPropBagMapperKey
         public bool Equals(IPropBagMapperKey<TSource, TDestination> other)
         {
-            throw new NotImplementedException();
+            if (other == null) return false;
+            if ( (this.DestinationTypeDef.Equals(other.DestinationTypeDef)) && this.SourceTypeDef.Equals(other.SourceTypeDef))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public bool Equals(PropBagMapperKey<TSource, TDestination> other)
+        {
+            return ( ((IPropBagMapperKey<TSource, TDestination>)this).Equals(other) );
         }
 
         public static bool operator ==(PropBagMapperKey<TSource, TDestination> key1, PropBagMapperKey<TSource, TDestination> key2)
