@@ -7,11 +7,12 @@ namespace DRM.PropBag.AutoMapperSupport
 {
     public class MapTypeDefinition<T> : IMapTypeDefinition<T>, IEquatable<IMapTypeDefinitionGen>, IEquatable<MapTypeDefinition<T>>
     {
-        public Type Type { get; }
+        public Type TargetType { get; }
 
         public bool IsPropBag { get; }
         public PropModel PropModel { get; }
-        public Type NewWrapperType { get; }
+        public Type TypeToWrap { get; }
+        public Type NewWrapperType { get; set; }
 
         IPropFactory _propFactory { get; }
         // If specified, Use the one provided by the caller to use for this mapping operation.
@@ -22,19 +23,21 @@ namespace DRM.PropBag.AutoMapperSupport
         // For non-IPropBag based types.
         public MapTypeDefinition()
         {
-            Type = typeof(T);
+            TargetType = typeof(T);
             IsPropBag = false;
             PropModel = null;
+            TypeToWrap = null;
             NewWrapperType = null;
             _propFactory = null;
         }
 
-        public MapTypeDefinition(PropModel pm, IPropFactory propFactory, Type baseType)
+        public MapTypeDefinition(PropModel pm, IPropFactory propFactory, Type typeToWrap)
         {
-            Type = typeof(T);
+            TargetType = typeof(T);
             IsPropBag = true;
             PropModel = pm;
-            NewWrapperType = baseType;
+            TypeToWrap = typeToWrap;
+            NewWrapperType = null;
             _propFactory = propFactory;
         }
 
@@ -59,31 +62,27 @@ namespace DRM.PropBag.AutoMapperSupport
         {
             if(IsPropBag)
             {
-                return $"MapTypeDef for IPropBag type: {Type.ToString()}, with {PropModel.Props.Count} properties.";
+                return $"MapTypeDef for IPropBag type: {TargetType.ToString()}, with {PropModel.Props.Count} properties.";
             }
             else
             {
-                return $"MapTypeDef for 'regular' type: {Type.ToString()}";
+                return $"MapTypeDef for 'regular' type: {TargetType.ToString()}";
             }
         }
 
         public override bool Equals(object obj)
         {
             var definition = obj as MapTypeDefinition<T>;
-            return definition != null &&
-                   EqualityComparer<Type>.Default.Equals(Type, definition.Type) &&
-                   IsPropBag == definition.IsPropBag &&
-                   EqualityComparer<PropModel>.Default.Equals(PropModel, definition.PropModel) &&
-                   EqualityComparer<Type>.Default.Equals(NewWrapperType, definition.NewWrapperType);
+            return definition != null
+                && EqualityComparer<Type>.Default.Equals(TargetType, definition.TargetType)
+                && EqualityComparer<Type>.Default.Equals(TypeToWrap, definition.TypeToWrap);
         }
 
         bool IEquatable<MapTypeDefinition<T>>.Equals(MapTypeDefinition<T> other)
         {
-            return other != null &&
-                   EqualityComparer<Type>.Default.Equals(Type, other.Type) &&
-                   IsPropBag == other.IsPropBag &&
-                   EqualityComparer<PropModel>.Default.Equals(PropModel, other.PropModel) &&
-                   EqualityComparer<Type>.Default.Equals(NewWrapperType, other.NewWrapperType);
+            return other != null
+                && EqualityComparer<Type>.Default.Equals(TargetType, other.TargetType)
+                && EqualityComparer<Type>.Default.Equals(TypeToWrap, other.TypeToWrap);
         }
 
         #region IEquatable<MapTypeDefinition<T>>
@@ -91,25 +90,21 @@ namespace DRM.PropBag.AutoMapperSupport
 
         #endregion
 
-        public override int GetHashCode()
-        {
-            var hashCode = 1110551584;
-            hashCode = hashCode * -1521134295 + EqualityComparer<Type>.Default.GetHashCode(Type);
-            hashCode = hashCode * -1521134295 + IsPropBag.GetHashCode();
-            hashCode = hashCode * -1521134295 + EqualityComparer<PropModel>.Default.GetHashCode(PropModel);
-            hashCode = hashCode * -1521134295 + EqualityComparer<Type>.Default.GetHashCode(NewWrapperType);
-            return hashCode;
-        }
-
         #region IEquatable<IMapTypeDefinitionGen>
 
         bool IEquatable<IMapTypeDefinitionGen>.Equals(IMapTypeDefinitionGen other)
         {
-            return other != null &&
-                   EqualityComparer<Type>.Default.Equals(Type, other.Type) &&
-                   IsPropBag == other.IsPropBag &&
-                   EqualityComparer<PropModel>.Default.Equals(PropModel, other.PropModel) &&
-                   EqualityComparer<Type>.Default.Equals(NewWrapperType, other.NewWrapperType);
+            return other != null
+                && EqualityComparer<Type>.Default.Equals(TargetType, other.TargetType)
+                && EqualityComparer<Type>.Default.Equals(TypeToWrap, other.TypeToWrap);
+        }
+
+        public override int GetHashCode()
+        {
+            var hashCode = 970652040;
+            hashCode = hashCode * -1521134295 + EqualityComparer<Type>.Default.GetHashCode(TargetType);
+            hashCode = hashCode * -1521134295 + EqualityComparer<Type>.Default.GetHashCode(TypeToWrap);
+            return hashCode;
         }
 
         #endregion

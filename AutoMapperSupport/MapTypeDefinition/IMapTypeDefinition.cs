@@ -17,9 +17,9 @@ namespace DRM.PropBag.AutoMapperSupport
     {
         /// <summary>
         /// The type of object that will serve as the source or destination in
-        /// Mapping operations.
+        /// Mapping operations. This is the type parameter in the Generic IMapTypeDefinition[T]
         /// </summary>
-        Type Type { get; }
+        Type TargetType { get; }
 
         /// <summary>
         /// True if Type (the above Type property) implements the IPropBag interface.
@@ -33,14 +33,20 @@ namespace DRM.PropBag.AutoMapperSupport
 
         /// <summary>
         /// The PropFactory to use when constructing new instances.
-        /// Overrides the PropFactory setting on the PropModel, if any.
+        /// If set, it overrides the PropFactory setting on the PropModel.
         /// </summary>
         IPropFactory PropFactory { get; }
+
+        /// <summary>
+        /// The Type for which the proxy will stand in, or the Wrapper will wrap.
+        /// This type must implement IPropBag and is usually PropBag or the same as the target type above.
+        /// </summary>
+        Type TypeToWrap { get; }
 
         /// <summary>
         /// When a Proxy or Wrapper Type must be created to support the mapping operation, this holds the
         /// new emitted type.
         /// </summary>
-        Type NewWrapperType { get; }
+        Type NewWrapperType { get; set; }
     }
 }
