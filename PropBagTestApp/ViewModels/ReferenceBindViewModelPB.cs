@@ -7,11 +7,8 @@ namespace PropBagTestApp.ViewModels
     public class ReferenceBindViewModelPB : PropBag
     {
 
-        public ReferenceBindViewModelPB() : this
-            (
-                JustSayNo.PropModelProvider.GetPropModel("ReferenceBindViewModelPB"),
-                JustSayNo.ThePropFactory
-            )
+        public ReferenceBindViewModelPB()
+            : this (JustSayNo.PropModelProvider.GetPropModel("ReferenceBindViewModelPB"))
         {
             System.Diagnostics.Debug.WriteLine
                 (
@@ -27,8 +24,7 @@ namespace PropBagTestApp.ViewModels
         //{
         //}
 
-        public ReferenceBindViewModelPB(PropModel pm, IPropFactory propFactory)
-            : base(pm, propFactory)
+        public ReferenceBindViewModelPB(PropModel pm) : base(pm)
         {
 
         }

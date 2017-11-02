@@ -37,33 +37,33 @@ namespace DRM.ViewModelTools
         #region IViewModelActivator interface
 
         // BaseType + ResourceKey (BaseType known only at run time.
-        public object GetNewViewModel(string resourceKey, Type typeToCreate, IPropFactory propFactory = null)
+        public object GetNewViewModel(string resourceKey, Type typeToCreate, string fullClassName = null, IPropFactory propFactory = null)
         {
             PropModel propModel = GetPropModel(resourceKey);
-            object result = GetNewViewModel(propModel, typeToCreate, propFactory);
+            object result = GetNewViewModel(propModel, typeToCreate, fullClassName, propFactory);
             return result;
         }
 
         // BaseType + PropModel (BaseType known only at run time.
-        public object GetNewViewModel(PropModel propModel, Type typeToCreate, IPropFactory propFactory = null)
+        public object GetNewViewModel(PropModel propModel, Type typeToCreate, string fullClassName = null, IPropFactory propFactory = null)
         {
-            object[] parameters = new object[] { propModel, propFactory };
+            object[] parameters = new object[] { propModel, fullClassName, propFactory };
             object result = Activator.CreateInstance(typeToCreate, parameters);
             return result;
         }
 
         // BaseType + ResourceKey (BaseType known at compile time.)
-        public object GetNewViewModel<BT>(string resourceKey, IPropFactory propFactory = null) where BT : class, IPropBag
+        public object GetNewViewModel<BT>(string resourceKey, string fullClassName = null, IPropFactory propFactory = null) where BT : class, IPropBag
         {
             PropModel propModel = GetPropModel(resourceKey);
-            object result = GetNewViewModel<BT>(propModel, propFactory);
+            object result = GetNewViewModel<BT>(propModel, fullClassName, propFactory);
             return result;
         }
 
         // BaseType + PropModel (BaseType known at compile time.)
-        public object GetNewViewModel<BT>(PropModel propModel, IPropFactory propFactory = null) where BT : class, IPropBag
+        public object GetNewViewModel<BT>(PropModel propModel, string fullClassName = null, IPropFactory propFactory = null) where BT : class, IPropBag
         {
-            object[] parameters = new object[] { propModel, propFactory };
+            object[] parameters = new object[] { propModel, fullClassName, propFactory };
             object result = Activator.CreateInstance(typeof(BT), parameters);
             return result;
         }

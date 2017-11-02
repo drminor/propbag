@@ -38,13 +38,17 @@ namespace DRM.PropBag
             : base(dummy) { }
 
         public PubPropBag(PropBagTypeSafetyMode typeSafetyMode)
-            : base(typeSafetyMode) {} 
+            : base(typeSafetyMode) { }
 
-        public PubPropBag(PropBagTypeSafetyMode typeSafetyMode, IPropFactory propFactory)
+        // TODO: remove this constructor.
+        protected PubPropBag(PropBagTypeSafetyMode typeSafetyMode, IPropFactory propFactory)
             : base(typeSafetyMode, propFactory) { }
 
-        public PubPropBag(DRM.PropBag.ControlModel.PropModel pm, IPropFactory propFactory = null)
-            : base(pm, propFactory) { }
+        public PubPropBag(PropBagTypeSafetyMode typeSafetyMode, string fullClassName = null, IPropFactory propFactory = null)
+            : base(typeSafetyMode, fullClassName, propFactory) { }
+
+        public PubPropBag(DRM.PropBag.ControlModel.PropModel pm, string fullClassName = null, IPropFactory propFactory = null)
+            : base(pm, fullClassName, propFactory) { }
 
         #endregion
 

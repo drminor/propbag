@@ -1,14 +1,15 @@
 ﻿using System;
-
+using System.Collections.Generic;
+using System.Linq;
 namespace DRM.TypeSafePropertyBag
 {
     public class TypeSafePropBagMetaData
     {
         private TypeSafePropBagMetaData() { } // Disallow use of parameterless constructor.
 
-        public TypeSafePropBagMetaData(string className, string classFullName, PropBagTypeSafetyMode typeSafetyMode, IPropFactory thePropFactory)
+        public TypeSafePropBagMetaData(string classFullName, PropBagTypeSafetyMode typeSafetyMode, IPropFactory thePropFactory)
         {
-            ClassName = className ?? throw new ArgumentNullException(nameof(className));
+            //ClassName = className ?? throw new ArgumentNullException(nameof(className));
             ClassFullName = classFullName ?? throw new ArgumentNullException(nameof(classFullName));
             TypeSafetyMode = typeSafetyMode;
             ThePropFactory = thePropFactory ?? throw new ArgumentNullException(nameof(thePropFactory));
@@ -23,7 +24,18 @@ namespace DRM.TypeSafePropertyBag
             ReturnDefaultForUndefined = returnDefaultForUndefined;
         }
 
-        public string ClassName { get; }
+        string _className;
+        public string ClassName
+        {
+            get
+            {
+                if(_className == null)
+                {
+                    _className = GetClassNameFromFullName(ClassFullName);
+                }
+                return _className;
+            }
+        }
 
         public string ClassFullName { get; }
 
@@ -133,6 +145,19 @@ namespace DRM.TypeSafePropertyBag
             {
                 return new TypeSafePropBagMetaData().GetReturnDefaultForUndefined(typeSafetyMode);
             }
+        }
+
+        private string GetClassNameFromFullName(string fullName)
+        {
+            if (fullName == null)
+            {
+                return null;
+            }
+
+            IEnumerable<string> temp = fullName.Split('.');
+            string lastTerm = temp.Last();
+
+            return lastTerm;
         }
     }
 }

@@ -15,10 +15,10 @@ namespace DRM.PropBag
             get { return true; }
         }
 
-        public PropFactory(bool returnDefaultForUndefined,
+        public PropFactory(/*bool returnDefaultForUndefined,*/
             ResolveTypeDelegate typeResolver = null,
             IConvertValues valueConverter = null)
-        : base(returnDefaultForUndefined, typeResolver, valueConverter) { }
+        : base(/*returnDefaultForUndefined, */typeResolver, valueConverter) { }
 
 
         // TODO: This is temporary just for testing.

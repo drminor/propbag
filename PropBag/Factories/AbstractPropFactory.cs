@@ -16,7 +16,7 @@ namespace DRM.PropBag
     {
         #region Public Properties
 
-        public bool ReturnDefaultForUndefined { get; }
+        //public bool ReturnDefaultForUndefined { get; }
         public ResolveTypeDelegate TypeResolver { get; }
 
         public IConvertValues ValueConverter { get; }
@@ -33,11 +33,14 @@ namespace DRM.PropBag
 
         #region Constructor
 
-        public AbstractPropFactory(bool returnDefaultForUndefined,
+        public AbstractPropFactory
+            (
+            //bool returnDefaultForUndefined,
             ResolveTypeDelegate typeResolver = null,
-            IConvertValues valueConverter = null)
+            IConvertValues valueConverter = null
+            )
         {
-            ReturnDefaultForUndefined = returnDefaultForUndefined;
+            //ReturnDefaultForUndefined = returnDefaultForUndefined;
 
             // Use our default implementation, if the caller did not supply one.
             TypeResolver = typeResolver ?? this.GetTypeFromName;
@@ -434,7 +437,7 @@ namespace DRM.PropBag
             T initialValue = propFactory.GetValueFromObject<T>(value);
 
             return propFactory.Create<T>(initialValue, propertyName, extraInfo, hasStorage, isTypeSolid,
-                (Action<T, T>)doWhenChanged, doAfterNotify, GetComparerForCollections<T>(comparer, propFactory, useRefEquality));
+                (Action<T, T>)doWhenChanged, doAfterNotify, GetComparerForProps<T>(comparer, propFactory, useRefEquality));
         }
 
         // From String
@@ -455,7 +458,7 @@ namespace DRM.PropBag
             }
 
             return propFactory.Create<T>(initialValue, propertyName, extraInfo, hasStorage, isTypeSolid,
-                (Action<T, T>)doWhenChanged, doAfterNotify, GetComparerForCollections<T>(comparer, propFactory, useRefEquality));
+                (Action<T, T>)doWhenChanged, doAfterNotify, GetComparerForProps<T>(comparer, propFactory, useRefEquality));
         }
 
         // With No Value
@@ -465,7 +468,7 @@ namespace DRM.PropBag
             Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false)
         {
             return propFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, isTypeSolid,
-                (Action<T, T>)doWhenChanged, doAfterNotify, GetComparerForCollections<T>(comparer, propFactory, useRefEquality));
+                (Action<T, T>)doWhenChanged, doAfterNotify, GetComparerForProps<T>(comparer, propFactory, useRefEquality));
         }
 
         private static Func<T, T, bool> GetComparerForProps<T>(Delegate comparer, IPropFactory propFactory, bool useRefEquality)

@@ -145,12 +145,7 @@ namespace PropBagTestApp
 
         static JustSayNo() 
         {
-            ThePropFactory = new PropFactory
-                (
-                    returnDefaultForUndefined: false,
-                    typeResolver: GetTypeFromName,
-                    valueConverter: null
-                );
+            ThePropFactory = new PropFactory(typeResolver: GetTypeFromName, valueConverter: null);
 
             IPropBagTemplateProvider propBagTemplateProvider
                 = new PropBagTemplateProvider(Application.Current.Resources);

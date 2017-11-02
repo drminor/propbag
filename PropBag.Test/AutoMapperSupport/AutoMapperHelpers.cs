@@ -52,7 +52,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
             {
                 if(_propFactory_V1 == null)
                 {
-                    _propFactory_V1 = new PropFactory(false, GetTypeFromName, null);
+                    _propFactory_V1 = new PropFactory(typeResolver: GetTypeFromName, valueConverter: null);
                 }
                 return _propFactory_V1;
             }

@@ -10,11 +10,9 @@ namespace PropBagLib.Tests
 {
 	public partial class ExtStoreModel : PropBag
 	{
-		public ExtStoreModel() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered, null) { }
+		//public ExtStoreModel() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered) { }
 
-		public ExtStoreModel(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
-
-		public ExtStoreModel(PropBagTypeSafetyMode typeSafetyMode, IPropFactory factory) : base(typeSafetyMode, factory)
+		public ExtStoreModel(PropBagTypeSafetyMode typeSafetyMode, IPropFactory factory) : base(typeSafetyMode, null, factory)
 		{
 	        AddProp<int>("PropInt3", null, false, null);
 	        AddProp<int>("PropInt4", null, false, null);

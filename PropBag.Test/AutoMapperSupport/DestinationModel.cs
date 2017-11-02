@@ -8,12 +8,12 @@ namespace PropBagLib.Tests.AutoMapperSupport
     public partial class DestinationModel : PropBag
     {
         public DestinationModel()
-            : this(PropBagTypeSafetyMode.Tight, new AutoMapperHelpers().PropFactory_V1)
+            : this(PropBagTypeSafetyMode.Tight)
         {
         }
 
-        public DestinationModel(PropBagTypeSafetyMode typeSafetyMode, IPropFactory factory)
-            : base(typeSafetyMode, factory)
+        public DestinationModel(PropBagTypeSafetyMode typeSafetyMode)
+            : base(typeSafetyMode)
 		{
             AddProp<Guid>("ProductId", null, false, null, null, Guid.NewGuid());
             AddProp<int>("Amount", null, false, null, null, 0);
@@ -21,10 +21,9 @@ namespace PropBagLib.Tests.AutoMapperSupport
             AddProp<MyModel4>("Deep", null, false, null, null, null);
         }
 
-        public DestinationModel(PropModel propModel, IPropFactory propFactory)
-            : base(propModel, propFactory)
+        public DestinationModel(PropModel propModel, string fullClassName, IPropFactory propFactory)
+            : base(propModel, fullClassName, propFactory)
         {
-
         }
 
     }

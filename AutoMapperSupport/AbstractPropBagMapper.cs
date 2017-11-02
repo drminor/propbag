@@ -59,7 +59,7 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public TDestination MapToDestination(TSource s)
         {
-            TDestination proxyViewModel = GetNewDestination(PropModel, PropFactory, RunTimeType);
+            TDestination proxyViewModel = GetNewDestination(PropModel, RunTimeType, PropFactory, fullClassName: null);
 
             return (TDestination)Mapper.Map(s, proxyViewModel, SourceType, RunTimeType);
         }
@@ -115,11 +115,11 @@ namespace DRM.PropBag.AutoMapperSupport
 
         #region Create Instance of TDestination
 
-        private TDestination GetNewDestination(PropModel propModel, IPropFactory propFactory, Type destinationTypeOrProxy)
+        private TDestination GetNewDestination(PropModel propModel, Type destinationTypeOrProxy, IPropFactory propFactory, string fullClassName)
         {
             try
             {
-                var newViewModel = _vmActivator.GetNewViewModel(propModel, destinationTypeOrProxy, propFactory);
+                var newViewModel = _vmActivator.GetNewViewModel(propModel, destinationTypeOrProxy, fullClassName, propFactory);
                 return newViewModel as TDestination;
             }
             catch (System.Exception e2)

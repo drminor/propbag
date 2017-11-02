@@ -6,7 +6,7 @@ namespace DRM.TypeSafePropertyBag
     public interface IPropFactory
     {
         bool ProvidesStorage { get; }
-        bool ReturnDefaultForUndefined { get; }
+        //bool ReturnDefaultForUndefined { get; }
         string IndexerName { get; }
 
         ResolveTypeDelegate TypeResolver { get; }

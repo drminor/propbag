@@ -14,7 +14,6 @@ using System.Windows;
 
 namespace DRM.PropBag
 {
-
     #region Summary and Remarks
 
     /// <summary>
@@ -63,30 +62,6 @@ namespace DRM.PropBag
 
         private readonly Dictionary<string, PropGen> tVals;
 
-        private string ClassName
-        {
-            get
-            {
-                Type thisType = this.GetType();
-                return thisType.GetTypeInfo().Name;
-            }
-        }
-
-        private string FullClassName
-        {
-            get
-            {
-                Type thisType = this.GetType();
-                return thisType.GetTypeInfo().FullName;
-            }
-        }
-
-
-        /// <summary>
-        /// Used to create Delegates when the type of the value is not known at run time.
-        /// </summary>
-        static private Type GMT_TYPE = typeof(GenericMethodTemplates);
-
         #endregion
 
         #region Constructor
@@ -99,31 +74,34 @@ namespace DRM.PropBag
         /// <param name="dummy"></param>
         protected PropBag(byte dummy)
         {
-            this.TypeSafetyMode = PropBagTypeSafetyMode.None;
-
-            this.PropFactory = null;
+            TypeSafetyMode = PropBagTypeSafetyMode.None;
+            PropFactory = null;
             tVals = null;
-            OurMetaData = new TypeSafePropBagMetaData(ClassName, FullClassName, this.TypeSafetyMode, this.PropFactory);
+            OurMetaData = BuildMetaData(this.TypeSafetyMode, classFullName: null, propFactory: null);
         }
 
         protected PropBag()
-            : this(PropBagTypeSafetyMode.None, null) { }
+            : this(PropBagTypeSafetyMode.None, null, null) { }
 
         protected PropBag(PropBagTypeSafetyMode typeSafetyMode)
-            : this(typeSafetyMode, null) { }
+            : this(typeSafetyMode, null, null) { }
+
+        // TODO: remove this constructor.
+        protected PropBag(PropBagTypeSafetyMode typeSafetyMode, IPropFactory propFactory)
+            : this(typeSafetyMode, null, propFactory) { }
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="pm"></param>
         /// <param name="propFactory">The PropFactory to use instead of the one specified by the PropModel.</param>
-        protected PropBag(ControlModel.PropModel pm, IPropFactory propFactory = null)
-            : this(pm.TypeSafetyMode, propFactory ?? pm.PropFactory)
+        protected PropBag(ControlModel.PropModel pm, string fullClassName = null, IPropFactory propFactory = null)
+            : this(pm.TypeSafetyMode, fullClassName, propFactory ?? pm.PropFactory)
         {
             Hydrate(pm);
         }
 
-        protected PropBag(PropBagTypeSafetyMode typeSafetyMode, IPropFactory propFactory)
+        protected PropBag(PropBagTypeSafetyMode typeSafetyMode, string fullClassName = null, IPropFactory propFactory = null)
         {
             this.TypeSafetyMode = typeSafetyMode;
 
@@ -131,26 +109,45 @@ namespace DRM.PropBag
 
             if (propFactory != null)
             {
-                if (propFactory.ReturnDefaultForUndefined != returnDefaultForUndefined)
-                {
-                    throw new ApplicationException("The 'ReturnDefaultForUndefined' setting on the specified property factory conflicts with the TypeSafetyMode specified.");
-                }
+                //if (propFactory.ReturnDefaultForUndefined != returnDefaultForUndefined)
+                //{
+                //    throw new ApplicationException("The 'ReturnDefaultForUndefined' setting on the specified property factory conflicts with the TypeSafetyMode specified.");
+                //}
                 PropFactory = propFactory;
             }
             else
             {
                 // Use the "built-in" property factory, if the caller did not supply one.
-                PropFactory = new PropFactory(returnDefaultForUndefined);
+                PropFactory = new PropFactory(typeResolver: null, valueConverter: null);
             }
 
-            this.OurMetaData = new TypeSafePropBagMetaData(ClassName, FullClassName, this.TypeSafetyMode, this.PropFactory);
+            OurMetaData = BuildMetaData(TypeSafetyMode, fullClassName, PropFactory);
 
             tVals = new Dictionary<string, PropGen>();
         }
 
+        protected virtual TypeSafePropBagMetaData BuildMetaData(PropBagTypeSafetyMode typeSafetyMode, string classFullName, IPropFactory propFactory)
+        {
+            classFullName = classFullName ?? GetFullTypeNameOfThisInstance();
+            TypeSafePropBagMetaData result = new TypeSafePropBagMetaData(classFullName, typeSafetyMode, propFactory);
+            return result;
+        }
+
+        protected virtual string GetFullTypeNameOfThisInstance()
+        {
+            string fullClassName = this.GetType().FullName; // this.GetType.GetTypeInfo().FullName;
+            return fullClassName;
+        }
+
+        private string GetClassNameOfThisInstance()
+        {
+            string className = this.GetType().Name; //this.GetType().GetTypeInfo().Name;
+            return className;
+        }
+
         protected virtual void Hydrate(PropModel pm)
         {
-            string cName = this.ClassName;
+            string cName = GetClassNameOfThisInstance();
             string pCName = pm.ClassName;
 
             if (cName != pCName)
@@ -1352,6 +1349,11 @@ namespace DRM.PropBag
         #endregion
 
         #region Generic Method Support
+
+        /// <summary>
+        /// Used to create Delegates when the type of the value is not known at run time.
+        /// </summary>
+        static private Type GMT_TYPE = typeof(GenericMethodTemplates);
 
         // Method Templates for Property Bag
         internal static class GenericMethodTemplates
