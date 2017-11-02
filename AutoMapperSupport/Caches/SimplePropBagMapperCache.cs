@@ -1,6 +1,9 @@
 ﻿using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
+using System.Collections.Generic;
 using System.Runtime.Remoting.Contexts;
+
+using System.Linq;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
@@ -22,11 +25,23 @@ namespace DRM.PropBag.AutoMapperSupport
                 (GetPropBagMapperReal);
         }
 
-        public void RegisterMapperRequest(IPropBagMapperKeyGen mapRequest)
+        // TODO: Make this return the matched mapRequest, if one was found.
+        // The matched version may contain more information such as the newWraperType.
+
+        public IPropBagMapperKeyGen RegisterMapperRequest(IPropBagMapperKeyGen mapRequest)
         {
-            if (!_sealedPropBagMappers.ContainsKey(mapRequest))
+
+            if (_sealedPropBagMappers.ContainsKey(mapRequest))
+            {
+                ICollection<IPropBagMapperKeyGen> keys = _sealedPropBagMappers.Keys;
+
+                IPropBagMapperKeyGen existingKey = keys.FirstOrDefault(x => x.DestinationTypeGenDef.Equals(mapRequest.DestinationTypeGenDef));
+                return existingKey;
+            }
+            else
             {
                 _unSealedPropBagMappers.GetOrAdd(mapRequest);
+                return mapRequest;
             }
         }
 
@@ -38,8 +53,17 @@ namespace DRM.PropBag.AutoMapperSupport
             }
 
             _unSealedPropBagMappers.GetOrAdd(mapRequest);
+
+            IPropBagMapperKeyGen save = mapRequest;
+
             int numberInThisBatch = SealThis(pCntr++);
-            result = _sealedPropBagMappers[mapRequest];
+
+            bool ttest = save.Equals(mapRequest);
+
+            if(!_sealedPropBagMappers.TryGetValue(mapRequest, out result))
+            {
+                result = null;
+            }
 
             return result;
         }
@@ -54,7 +78,7 @@ namespace DRM.PropBag.AutoMapperSupport
                 IPropBagMapperGen mapper = _sealedPropBagMappers.GetOrAdd(key);
                 if (!(_unSealedPropBagMappers.TryRemoveValue(key, out IPropBagMapperKeyGen dummyKey)))
                 {
-                    throw new ApplicationException("Couldn't remove mappper request from list of registered, pending to be created, mapper requests.");
+                    System.Diagnostics.Debug.WriteLine("Couldn't remove mappper request from list of registered, pending to be created, mapper requests.");
                 }
                 result++;
             }

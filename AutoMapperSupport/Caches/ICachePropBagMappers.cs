@@ -2,7 +2,7 @@
 {
     public interface ICachePropBagMappers
     {
-        void RegisterMapperRequest(IPropBagMapperKeyGen mapRequest);
+        IPropBagMapperKeyGen RegisterMapperRequest(IPropBagMapperKeyGen mapRequest);
 
         IPropBagMapperGen GetMapper(IPropBagMapperKeyGen mapRequest);
     }
