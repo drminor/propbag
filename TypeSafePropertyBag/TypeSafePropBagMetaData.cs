@@ -7,10 +7,10 @@ namespace DRM.TypeSafePropertyBag
     {
         private TypeSafePropBagMetaData() { } // Disallow use of parameterless constructor.
 
-        public TypeSafePropBagMetaData(string classFullName, PropBagTypeSafetyMode typeSafetyMode, IPropFactory thePropFactory)
+        public TypeSafePropBagMetaData(string fullClassName, PropBagTypeSafetyMode typeSafetyMode, IPropFactory thePropFactory)
         {
             //ClassName = className ?? throw new ArgumentNullException(nameof(className));
-            ClassFullName = classFullName ?? throw new ArgumentNullException(nameof(classFullName));
+            FullClassName = fullClassName ?? throw new ArgumentNullException(nameof(fullClassName));
             TypeSafetyMode = typeSafetyMode;
             ThePropFactory = thePropFactory ?? throw new ArgumentNullException(nameof(thePropFactory));
 
@@ -31,13 +31,13 @@ namespace DRM.TypeSafePropertyBag
             {
                 if(_className == null)
                 {
-                    _className = GetClassNameFromFullName(ClassFullName);
+                    _className = GetClassNameFromFullName(FullClassName);
                 }
                 return _className;
             }
         }
 
-        public string ClassFullName { get; }
+        public string FullClassName { get; }
 
         public PropBagTypeSafetyMode TypeSafetyMode { get; protected set; }
 
