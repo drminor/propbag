@@ -41,8 +41,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Builders\IPropBagMapperBuilderProvider.cs" />
-    <None Include="ConfigPackages\ConfigPackage_EmitProxy_OLD.cs" />
-    <None Include="ConfigPackages\ConfigPackage_ExtraMembers_OLD.cs" />
     <Compile Include="Builders\SimplePropBagMapperBuilderProvider.cs" />
     <Compile Include="ConfigPackages\ConfigPackage_EmitProxy.cs" />
     <Compile Include="ConfigPackages\ConfigPackage_ExtraMembers.cs" />
@@ -55,7 +53,6 @@
     <Compile Include="Caches\ICacheConfigPackages.cs" />
     <Compile Include="Caches\SimplePropBagMapperCache.cs" />
     <Compile Include="Caches\ICachePropBagMappers.cs" />
-    <None Include="ConfigPackages\AbstractConfigPackage_OLD.cs" />
     <Compile Include="Config\SimpleMapperConfigurationBuilderGenBase.cs" />
     <Compile Include="Config\SimpleMapperConfigurationBuilder.cs" />
     <Compile Include="Config\AbstractMapperConfigGen.cs" />
