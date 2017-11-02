@@ -102,6 +102,33 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
             return type.FullName.Contains("1.") || type.FullName.Contains("2.");
         }
 
+        static public bool DoNameSpacesMatch(string ns1, string ns2)
+        {
+            int cnt1 = ns1.Count(x => x == '.');
+            int cnt2 = ns2.Count(x => x == '.');
+
+            if (cnt1 == cnt2)
+            {
+                return string.Equals(ns1, ns2, StringComparison.OrdinalIgnoreCase);
+            }
+            else
+            {
+                if (cnt1 < cnt2)
+                {
+                    //var x = ns2.Split('.').Skip(cnt2 - cnt1);
+                    //var y = string.Join<string>(".", x);
+
+                    string localizedNs2 = string.Join(".", ns2.Split('.').Skip(cnt2 - cnt1));
+                    return string.Equals(ns1, localizedNs2, StringComparison.OrdinalIgnoreCase);
+                }
+                else
+                {
+                    string localizedNs1 = string.Join(".", ns1.Split('.').Skip(cnt1 - cnt2));
+                    return string.Equals(localizedNs1, ns2, StringComparison.OrdinalIgnoreCase);
+                }
+            }
+        }
+
 
     }
 
