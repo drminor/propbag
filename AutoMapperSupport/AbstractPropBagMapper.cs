@@ -14,7 +14,7 @@ namespace DRM.PropBag.AutoMapperSupport
     {
         #region Public and Private Members
 
-        IPropBagMapperKey<TSource, TDestination> _mapRequest;
+        //IPropBagMapperKey<TSource, TDestination> _mapRequest;
 
         public Type SourceType { get; }
         public Type DestinationType { get; }
@@ -40,13 +40,12 @@ namespace DRM.PropBag.AutoMapperSupport
         {
             //_mapRequest = mapRequest;
 
-            SourceType = mapRequest.SourceTypeDef.Type;
-            DestinationType = mapRequest.DestinationTypeDef.Type;
+            SourceType = mapRequest.SourceTypeDef.TargetType;
+            DestinationType = mapRequest.DestinationTypeDef.TargetType;
 
-            // TODO: Work on this!!
-            RunTimeType = mapRequest.DestinationTypeDef?.NewWrapperType; 
-            PropModel = mapRequest.DestinationTypeDef?.PropModel;
-            PropFactory = mapRequest.DestinationTypeDef?.PropFactory;
+            RunTimeType = mapRequest.DestinationTypeDef.NewWrapperType ?? DestinationType; 
+            PropModel = mapRequest.DestinationTypeDef.PropModel;
+            PropFactory = mapRequest.DestinationTypeDef.PropFactory;
 
             Mapper = mapper;
             _vmActivator = vmActivator;
@@ -116,16 +115,16 @@ namespace DRM.PropBag.AutoMapperSupport
 
         #region Create Instance of TDestination
 
-        private TDestination GetNewDestination(PropModel propModel, IPropFactory propFactory, Type newWrappedType)
+        private TDestination GetNewDestination(PropModel propModel, IPropFactory propFactory, Type destinationTypeOrProxy)
         {
             try
             {
-                var newViewModel = _vmActivator.GetNewViewModel(propModel, newWrappedType, propFactory);
+                var newViewModel = _vmActivator.GetNewViewModel(propModel, destinationTypeOrProxy, propFactory);
                 return newViewModel as TDestination;
             }
             catch (System.Exception e2)
             {
-                Type targetType = newWrappedType ?? typeof(TDestination);
+                Type targetType = destinationTypeOrProxy ?? typeof(TDestination);
                 throw new InvalidOperationException($"Cannot create an instance of {targetType} that takes a PropModel parameter.", e2);
             }
         }

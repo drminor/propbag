@@ -1,23 +1,28 @@
-﻿using DRM.ViewModelTools;
+﻿using System.Collections.Generic;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
-    public class ConfigPackage_ExtraMembers : AbstractConfigPackage
+    public class ConfigPackage_ExtraMembers : IProvideAMapperConfiguration
     {
-        public override IHaveAMapperConfigurationStep GetConfigStarter()
+        public IConfigureAMapper<TSource, TDestination> GetTheMapperConfig<TSource, TDestination>() where TDestination : class, IPropBag
         {
-            return new MapperConfigStarter_Default();
-        }
+            List<IHaveAMapperConfigurationStep> configSteps = new List<IHaveAMapperConfigurationStep>
+            {
+                new MapperConfigStarter_Default(),
+                new ExtraMembersConfigInitialStep()
+            };
 
-        public override IViewModelActivator GetViewModelActivator()
-        {
-            return new ViewModelActivatorStandard();
+            IConfigureAMapper<TSource, TDestination> result = new SimpleMapperConfigTyped<TSource, TDestination>
+            (
+                configSteps: configSteps,
+                finalConfigActionProvider: new ExtraMembersConfigFinalStep<TSource, TDestination>(),
+                sourceConstructor: null,
+                destinationConstructor: null,
+                configStarter: null,
+                requiresWrappperTypeEmitServices: false
+            );
+                
+            return result;
         }
-
-        public override IMapperConfigurationFinalAction<TSource, TDestination> GetFinalConfigAction<TSource, TDestination>()
-        {
-            return new ExtraMembersConfigFinalStep<TSource, TDestination>();
-        }
-
     }
 }

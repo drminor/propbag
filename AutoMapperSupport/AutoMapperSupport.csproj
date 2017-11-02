@@ -40,32 +40,37 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Builders\IPropBagMapperBuilderProvider.cs" />
+    <None Include="ConfigPackages\ConfigPackage_EmitProxy_OLD.cs" />
+    <None Include="ConfigPackages\ConfigPackage_ExtraMembers_OLD.cs" />
+    <Compile Include="Builders\SimplePropBagMapperBuilderProvider.cs" />
     <Compile Include="ConfigPackages\ConfigPackage_EmitProxy.cs" />
     <Compile Include="ConfigPackages\ConfigPackage_ExtraMembers.cs" />
     <Compile Include="ConfigPackages\ICreateMapperRequests.cs" />
-    <Compile Include="Config\IMapperConfigurationFinalAction.cs" />
+    <Compile Include="ConfigPackages\IProvideAMapperConfiguration.cs" />
+    <Compile Include="Config\ICreateMappingExpressions.cs" />
     <Compile Include="MapTypeDefinition\IMapTypeDefinitionProvider.cs" />
     <Compile Include="Builders\PropBagMapperKeyGen.cs" />
     <Compile Include="MapTypeDefinition\SimpleMapTypeDefinitionProvider.cs" />
     <Compile Include="Caches\ICacheConfigPackages.cs" />
     <Compile Include="Caches\SimplePropBagMapperCache.cs" />
     <Compile Include="Caches\ICachePropBagMappers.cs" />
-    <Compile Include="ConfigPackages\AbstractConfigPackage.cs" />
+    <None Include="ConfigPackages\AbstractConfigPackage_OLD.cs" />
     <Compile Include="Config\SimpleMapperConfigurationBuilderGenBase.cs" />
     <Compile Include="Config\SimpleMapperConfigurationBuilder.cs" />
-    <Compile Include="Config\SimpleMapperConfigurationGenBase.cs" />
+    <Compile Include="Config\AbstractMapperConfigGen.cs" />
     <Compile Include="Builders\IBuildPropBagMapper.cs" />
     <Compile Include="Builders\SimplePropBagMapperBuilder.cs" />
     <Compile Include="SimplePropBagMapper.cs" />
     <Compile Include="AutoMapperProvider.cs" />
-    <Compile Include="Config\StandardConfigFinalStep.cs" />
+    <Compile Include="Config\EmitProxyConfigFinalStep.cs" />
     <Compile Include="Config\ExtraMembersConfigInitialStep.cs" />
     <Compile Include="Config\IHaveAMapperConfigurationStep.cs" />
     <Compile Include="Config\IConfigureAMapper.cs" />
     <Compile Include="Config\MapperConfigStarter_Empty.cs" />
     <Compile Include="Config\MapperConfigStarter_Default.cs" />
     <Compile Include="Config\IBuildMapperConfigurations.cs" />
-    <Compile Include="Config\SimpleMapperConfiguration.cs" />
+    <Compile Include="Config\SimpleMapperConfigTyped.cs" />
     <Compile Include="Config\ExtraMembersConfigFinalStep.cs" />
     <Compile Include="MapTypeDefinition\IMapTypeDefinition.cs" />
     <Compile Include="IPropBagMapper.cs" />
@@ -101,6 +106,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Documentation\Roles and Dependencies.md" />
+    <None Include="Documentation\ServiceNotes.md" />
     <None Include="packages.config" />
     <Compile Include="PropBagMappingStrategyEnum.cs" />
   </ItemGroup>

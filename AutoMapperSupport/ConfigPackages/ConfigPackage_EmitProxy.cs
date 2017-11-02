@@ -1,56 +1,26 @@
-﻿using DRM.TypeWrapper;
-using DRM.TypeWrapper.TypeDesc;
-using DRM.ViewModelTools;
+﻿using System.Collections.Generic;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
-    public class ConfigPackage_EmitProxy : AbstractConfigPackage
+    public class ConfigPackage_EmitProxy : IProvideAMapperConfiguration
     {
-        public override IHaveAMapperConfigurationStep GetConfigStarter()
+        public IConfigureAMapper<TSource, TDestination> GetTheMapperConfig<TSource, TDestination>() where TDestination : class, IPropBag
         {
-            return new MapperConfigStarter_Default();
-        }
+            List<IHaveAMapperConfigurationStep> configSteps = new List<IHaveAMapperConfigurationStep>
+            {
+                new MapperConfigStarter_Default()
+            };
 
-        public override IViewModelActivator GetViewModelActivator()
-        {
-            return GetEmitProxyActivator();
-        }
-
-        public override IMapperConfigurationFinalAction<TSource, TDestination> GetFinalConfigAction<TSource, TDestination>()
-        {
-            return new StandardConfigFinalStep<TSource, TDestination>();
-        }
-
-        // -- Build EmitProxy style of ViewModel Activator
-        private IViewModelActivator GetEmitProxyActivator()
-        {
-            // -- Build WrapperType Caching Service
-            // Used by some ViewModel Activators to emit types, i.e., modules.
-            IModuleBuilderInfo moduleBuilderInfo = new SimpleModuleBuilderInfo();
-
-            IEmitWrapperType emitWrapperType = new SimpleWrapperTypeEmitter(mbInfo: moduleBuilderInfo);
-
-            ICacheWrapperTypes wrapperTypeCachingService = new WrapperTypeLocalCache
-                (
-                emitterEngine: emitWrapperType
-                );
-
-            // -- Build TypeDesc Caching Service
-            // Used only by some ModuleBuilders.
-            ITypeDescriptionProvider typeDescriptionProvider = new SimpleTypeDescriptionProvider();
-
-            ICacheTypeDescriptions typeDescCachingService = new TypeDescriptionLocalCache
-                (
-                typeDescriptionProvider: typeDescriptionProvider
-                );
-
-            IViewModelActivator result = new ViewModelActivatorEmitProxy
-                (
-                wrapperTypeCachingService: wrapperTypeCachingService,
-                typeDescCachingService: typeDescCachingService//,
-                //propModelProvider: null
-                );
-
+            IConfigureAMapper<TSource, TDestination> result = new SimpleMapperConfigTyped<TSource, TDestination>
+            (
+                configSteps: configSteps,
+                finalConfigActionProvider: new EmitProxyConfigFinalStep<TSource, TDestination>(),
+                sourceConstructor: null,
+                destinationConstructor: null,
+                configStarter: null,
+                requiresWrappperTypeEmitServices: true
+            );
+                
             return result;
         }
     }

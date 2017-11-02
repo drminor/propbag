@@ -2,6 +2,7 @@
 using DRM.TypeSafePropertyBag;
 using DRM.ViewModelTools;
 using System;
+using System.Collections.Generic;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
@@ -16,8 +17,8 @@ namespace DRM.PropBag.AutoMapperSupport
             ) where TDestination : class, IPropBag
         {
             if (propModel == null) throw new ArgumentNullException($"{nameof(propModel)}");
-            if (typeToWrap == null) throw new ArgumentNullException($"{nameof(typeToWrap)}");
-            if (propFactory == null) throw new ArgumentNullException($"{nameof(propFactory)}");
+            //if (typeToWrap == null) throw new ArgumentNullException($"{nameof(typeToWrap)}");
+            //if (propFactory == null) throw new ArgumentNullException($"{nameof(propFactory)}");
 
             #region Mapper Configuration Work
 
@@ -34,31 +35,38 @@ namespace DRM.PropBag.AutoMapperSupport
 
             IConfigureAMapper<TSource, TDestination> mappingConf
                 = new SimpleMapperConfiguration<TSource, TDestination>
-                (configBuilder, configStarterForThisRequest) // The configStarter for just this build.
-                {
-                    FinalConfigAction = GetFinalConfigAction<TSource, TDestination>().ActionStep
-                };
+                (
+                    configBuilder,
+                    GetFinalConfigAction<TSource, TDestination>(),
+                    this.RequiresWrappperTypeEmitServices, // Let the Mapping Configuration know if we require a ProxType to be created.
+                    new List<IHaveAMapperConfigurationStep>(), // This will be fixed soon.
+                    configStarterForThisRequest // The configStarter for just this build.
+                );
+
 
             IViewModelActivator viewModelActivator = GetViewModelActivator();
 
-            SimplePropBagMapperBuilder<TSource, TDestination> mapperBuilder
+            ICreateWrapperType wrapperTypeCreator = GetWrapperTypeCreator();
+
+
+            IBuildPropBagMapper<TSource, TDestination> mapperBuilder
                 = new SimplePropBagMapperBuilder<TSource, TDestination>
-                (mapperConfiguration: mappingConf, vmActivator: viewModelActivator);
+                (mapperConfiguration: mappingConf, wrapperTypeCreator: wrapperTypeCreator, viewModelActivator: viewModelActivator);
 
             #endregion
 
-            IMapTypeDefinitionProvider mapTypeDefinitionProvider = GetMapTypeDefinitionProvider();
+            //IMapTypeDefinitionProvider mapTypeDefinitionProvider = GetMapTypeDefinitionProvider();
 
             IMapTypeDefinition<TSource> sourceMapTypeDef = mapTypeDefinitionProvider.GetTypeDescription<TSource>
-                (propModel, propFactory, typeToWrap, null);
+                (propModel, typeToWrap, null, propFactory);
 
             IMapTypeDefinition<TDestination> destinationMapTypeDef = mapTypeDefinitionProvider.GetTypeDescription<TDestination>
-                (propModel, propFactory, typeToWrap, null);
+                (propModel, typeToWrap, null, propFactory);
 
             IPropBagMapperKey<TSource, TDestination> result = new PropBagMapperKey<TSource, TDestination>
                 (
                 propBagMapperBuilder: mapperBuilder,
-                //mappingConfiguration: mappingConf,
+                mappingConfiguration: mappingConf,
                 sourceMapTypeDef: sourceMapTypeDef,
                 destinationMapTypeDef: destinationMapTypeDef,
                 sourceConstructor: null,
@@ -70,10 +78,14 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public abstract IHaveAMapperConfigurationStep GetConfigStarter();
 
-        public abstract IViewModelActivator GetViewModelActivator();
+        //public abstract IViewModelActivator GetViewModelActivator();
 
-        public abstract IMapperConfigurationFinalAction<TSource, TDestination>
+        //public abstract ICreateWrapperType GetWrapperTypeCreator();
+
+        public abstract ICreateMappingExpressions<TSource, TDestination>
             GetFinalConfigAction<TSource, TDestination>() where TDestination : class, IPropBag;
+
+        public abstract bool RequiresWrappperTypeEmitServices { get; }
 
         public virtual IMapTypeDefinitionProvider GetMapTypeDefinitionProvider()
         {
