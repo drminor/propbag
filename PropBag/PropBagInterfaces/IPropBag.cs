@@ -57,6 +57,10 @@ namespace DRM.PropBag
         IDictionary<string, object> GetAllPropertyValues();
         IDictionary<string, ValPlusType> GetAllPropNamesAndTypes();
 
+        // Consider removing this property, and having it be accessible only through the 
+        // property declared as: protected TypeSafePropBagMetaData OurMetaData { get; }
+        string FullClassName { get; }
+
         // Consider removing these since we are using the PBDispatch class.
         //object GetValueGen(object host, string propertyName, Type propertyType);
         //void SetValueGen(object host, string propertyName, Type propertyType, object value);

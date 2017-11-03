@@ -57,10 +57,10 @@ namespace DRM.PropBag
         // DRM: Changed to protected and added set accessor on 10/29/17; DRM: removed set accessor on 11/2/17.
         protected IPropFactory PropFactory { get; /*set; */}
 
-        protected string FullClassName => OurMetaData.FullClassName;
+        public string FullClassName => OurMetaData.FullClassName;
 
         private PropBagTypeSafetyMode TypeSafetyMode { get; }
-        private TypeSafePropBagMetaData OurMetaData { get; }
+        protected TypeSafePropBagMetaData OurMetaData { get; }
         private readonly Dictionary<string, PropGen> tVals;
 
         #endregion
@@ -96,7 +96,7 @@ namespace DRM.PropBag
         /// </summary>
         /// <param name="pm"></param>
         /// <param name="propFactory">The PropFactory to use instead of the one specified by the PropModel.</param>
-        protected PropBag(ControlModel.PropModel pm, string fullClassName = null, IPropFactory propFactory = null)
+        public PropBag(ControlModel.PropModel pm, string fullClassName = null, IPropFactory propFactory = null)
             : this(pm.TypeSafetyMode, fullClassName, propFactory ?? pm.PropFactory)
         {
             Hydrate(pm);

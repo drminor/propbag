@@ -1,4 +1,5 @@
-﻿using DRM.TypeSafePropertyBag;
+﻿using DRM.PropBag.ControlModel;
+using DRM.TypeSafePropertyBag;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -47,8 +48,9 @@ namespace DRM.PropBag
         public PubPropBag(PropBagTypeSafetyMode typeSafetyMode, string fullClassName = null, IPropFactory propFactory = null)
             : base(typeSafetyMode, fullClassName, propFactory) { }
 
-        public PubPropBag(DRM.PropBag.ControlModel.PropModel pm, string fullClassName = null, IPropFactory propFactory = null)
+        public PubPropBag(PropModel pm, string fullClassName = null, IPropFactory propFactory = null)
             : base(pm, fullClassName, propFactory) { }
+
 
         #endregion
 
