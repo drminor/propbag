@@ -16,7 +16,6 @@ namespace DRM.PropBag.ControlsWPF
 
         #region Constructors
 
-        // TODO: Consider adding support for a default IPropFactory.
         public PropModelProvider()
         {
             _propBagTemplateProvider = null;
@@ -58,7 +57,7 @@ namespace DRM.PropBag.ControlsWPF
             }
             catch (System.Exception e)
             {
-                throw new ApplicationException("Resource was not found.", e);
+                throw new ApplicationException($"PropBagTemplate for ResourceKey = {resourceKey} was not found.", e);
             }
         }
 
@@ -91,21 +90,20 @@ namespace DRM.PropBag.ControlsWPF
 
         public PropModel GetPropModel(PropBagTemplate pbt, IPropFactory propFactory = null)
         {
-            string className = pbt.ClassName;
-            string instanceKey = pbt.InstanceKey;
-            string outputNamespace = pbt.OutPutNameSpace;
-            bool deriveFromPubPropBag = pbt.DeriveFromPubPropBag;
-            PropBagTypeSafetyMode typeSafetyMode = pbt.TypeSafetyMode;
-            bool deferMethodRefResolution = pbt.DeferMethodRefResolution;
-            bool requireExplicitInitialValue = pbt.RequireExplicitInitialValue;
+            DeriveFromClassModeEnum deriveFrom = DeriveFromClassModeEnum.PropBag;
 
-            PropModel result =
-                new PropModel(className, /*instanceKey,*/ outputNamespace,
-                DeriveFromClassModeEnum.PropBag, typeToWrap: null, wrapperTypeInfoField: null,
-                    propFactory: propFactory ?? pbt.PropFactory, // Use the PropFactory supplied by the caller if not null.
-                    typeSafetyMode: typeSafetyMode,
-                    deferMethodRefResolution: deferMethodRefResolution,
-                    requireExplicitInitialValue: requireExplicitInitialValue);
+            PropModel result = new PropModel
+                (
+                className: pbt.ClassName,
+                namespaceName: pbt.OutPutNameSpace,
+                deriveFrom: deriveFrom,
+                typeToWrap: null,
+                wrapperTypeInfoField: null,
+                propFactory: propFactory ?? pbt.PropFactory, // Use the PropFactory supplied by the caller if not null.
+                typeSafetyMode: pbt.TypeSafetyMode,
+                deferMethodRefResolution: pbt.DeferMethodRefResolution,
+                requireExplicitInitialValue: pbt.RequireExplicitInitialValue
+                );
 
             int namespacesCount = pbt.Namespaces == null ? 0 : pbt.Namespaces.Count;
             for (int nsPtr = 0; nsPtr < namespacesCount; nsPtr++)
