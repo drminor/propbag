@@ -122,6 +122,7 @@ namespace DRM.PropBag.ControlModel
             DeriveFromClassMode = deriveFrom;
             TypeToWrap = typeToWrap;
             WrapperTypeInfoField = wrapperTypeInfoField;
+            PropFactory = propFactory;
             TypeSafetyMode = typeSafetyMode;
             DeferMethodRefResolution = deferMethodRefResolution;
             RequireExplicitInitialValue = requireExplicitInitialValue;
