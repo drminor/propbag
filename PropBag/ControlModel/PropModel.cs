@@ -13,7 +13,7 @@ namespace DRM.PropBag.ControlModel
 {
     public class PropModel : NotifyPropertyChangedBase, IEquatable<PropModel>
     {
-        public const string DEFAULT_CLASS_NAME = "UndefinedClassName";
+        #region Properties
 
         #region Activation Info
         //bool dfppb;
@@ -89,37 +89,39 @@ namespace DRM.PropBag.ControlModel
             set { this.SetCollection<ObservableCollection<PropItem>, PropItem>(ref _props, value); }
         }
 
-        public bool IsClassDefined => ClassName != DEFAULT_CLASS_NAME;
+        //public bool IsClassDefined => ClassName != DEFAULT_CLASS_NAME;
 
-        public PropModel() : this(DEFAULT_CLASS_NAME,
-            null,
-            DeriveFromClassModeEnum.PropBag,
-            typeof(PropBag),
-            null,
-            null,
-            PropBagTypeSafetyMode.AllPropsMustBeRegistered,
-            deferMethodRefResolution: false,
-            requireExplicitInitialValue: false) { }
+        #endregion
+
+        #region Constructors
+
+        //public const string DEFAULT_CLASS_NAME = "UndefinedClassName";
+
+        //public PropModel() : this(DEFAULT_CLASS_NAME,
+        //    null,
+        //    DeriveFromClassModeEnum.PropBag,
+        //    typeof(PropBag),
+        //    null,
+        //    null,
+        //    PropBagTypeSafetyMode.AllPropsMustBeRegistered,
+        //    deferMethodRefResolution: false,
+        //    requireExplicitInitialValue: false) { }
 
 
-        // TODO: Get rid of the instanceKey parameter -- it shouldn't be used during construction.
-        public PropModel(string className, /*string instanceKey, */string namespaceName,
-            DeriveFromClassModeEnum deriveFromClassMode,
+        public PropModel(string className, string namespaceName,
+            DeriveFromClassModeEnum deriveFrom,
             Type typeToWrap,
             TypeInfoField wrapperTypeInfoField,
             IPropFactory propFactory,
-            //bool deriveFromPubPropBag = false,
             PropBagTypeSafetyMode typeSafetyMode = PropBagTypeSafetyMode.AllPropsMustBeRegistered,
             bool deferMethodRefResolution = true,
             bool requireExplicitInitialValue = true)
         {
             ClassName = className;
-            //InstanceKey = instanceKey;
             NamespaceName = namespaceName;
-            DeriveFromClassMode = DeriveFromClassMode;
+            DeriveFromClassMode = deriveFrom;
             TypeToWrap = typeToWrap;
             WrapperTypeInfoField = wrapperTypeInfoField;
-            //DeriveFromPubPropBag = deriveFromPubPropBag;
             TypeSafetyMode = typeSafetyMode;
             DeferMethodRefResolution = deferMethodRefResolution;
             RequireExplicitInitialValue = requireExplicitInitialValue;
@@ -127,6 +129,98 @@ namespace DRM.PropBag.ControlModel
             Namespaces = new ObservableCollection<string>();
             Props = new ObservableCollection<PropItem>();
         }
+
+        #endregion
+
+        #region Type and Namespace support
+
+        Type _targetType;
+        public Type TargetType
+        {
+            get
+            {
+                if(_targetType == null)
+                {
+                    _targetType = GetTargetType(this.DeriveFromClassMode, this.TypeToWrap, this.WrapperTypeInfoField);
+                }
+                return _targetType;
+            }
+        }
+
+        private Type GetTargetType(DeriveFromClassModeEnum deriveFrom, Type typeToWrap, TypeInfoField typeInfofield)
+        {
+            Type result;
+
+            switch (deriveFrom)
+            {
+                case DeriveFromClassModeEnum.PropBag:
+                    {
+                        result = typeof(PropBag);
+                        break;
+                    }
+                case DeriveFromClassModeEnum.PubPropBag:
+                    {
+                        result = typeof(PubPropBag);
+                        break;
+                    }
+                case DeriveFromClassModeEnum.Custom:
+                    {
+                        // TODO: This needs (lots) more work.
+                        result = typeToWrap;
+                        break;
+                    }
+                default:
+                    {
+                        throw new InvalidOperationException($"{deriveFrom} is not recognized or is not supported.");
+                    }
+            }
+
+            return result;
+        }
+        
+        public string FullClassName
+        {
+            get
+            {
+                return GetFullClassName(this.NamespaceName, this.ClassName.Trim());
+            }
+        }
+
+        private string GetFullClassName(string namespaceName, string className)
+        {
+            if (namespaceName == null)
+            {
+                return className;
+            }
+            else if(ClassName == null || className.Length == 0)
+            {
+                throw new InvalidOperationException("The className cannot be null or empty.");
+            }
+            else
+            {
+                string separator = ".";
+                string result = $"{namespaceName}{separator}{className}";
+                return result;
+            }
+        }
+
+        //private string GetFullClassName(IEnumerable<string> namespaces, string className)
+        //{
+        //    if(namespaces == null)
+        //    {
+        //        return className;
+        //    }
+        //    else
+        //    {
+        //        string separator = ".";
+        //        string result = $"{string.Join(separator, namespaces)}{separator}{className}";
+        //        return result;
+        //    }
+        //}
+
+        #endregion
+
+        #region IEquatable support and Object overrides
 
         // TODO:!! Update the GetHashCode for DRM.PropBag.ControlModel.PropModel
         public override int GetHashCode()
@@ -196,7 +290,6 @@ namespace DRM.PropBag.ControlModel
             return !(left == right);
         }
 
-
-
+        #endregion
     }
 }
