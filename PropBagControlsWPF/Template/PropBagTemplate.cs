@@ -232,16 +232,24 @@ namespace DRM.PropBag.ControlsWPF
             get
             {
                 IEnumerable<string> namespaces = this.Namespaces.Select(x => x.Namespace.Trim());
-                return GetFullClassName(null, this.ClassName.Trim());
+                return GetFullClassName(namespaces, this.ClassName.Trim());
             }
         }
 
         private string GetFullClassName(IEnumerable<string> namespaces, string className)
         {
-            string separator = ".";
-            string result = $"{string.Join(separator, namespaces)}{separator}{className}";
+            if(namespaces == null)
+            {
+                return className;
+            }
+            else
+            {
+                string separator = ".";
+                string result = $"{string.Join(separator, namespaces)}{separator}{className}";
 
-            return result;
+                return result;
+            }
+
         }
     }
 }
