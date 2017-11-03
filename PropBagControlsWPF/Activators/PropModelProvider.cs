@@ -1,9 +1,15 @@
 ﻿using DRM.PropBag.ControlModel;
 using DRM.TypeSafePropertyBag;
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Data;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+
 
 namespace DRM.PropBag.ControlsWPF
 {
@@ -95,7 +101,14 @@ namespace DRM.PropBag.ControlsWPF
         public PropModel GetPropModel(PropBagTemplate pbt, IPropFactory propFactory = null)
         {
             // TODO: Make the PBT provide a deriveFrom value.
-            DeriveFromClassModeEnum deriveFrom = DeriveFromClassModeEnum.PropBag;
+            //DeriveFromClassModeEnum deriveFrom = DeriveFromClassModeEnum.PropBag;
+
+            DeriveFromClassModeEnum deriveFrom = pbt.DeriveFromClassMode;
+            Type typeToWrap = pbt.TypeToWrap;
+            PropTypeInfoField wrapperTypeInfoField = GetWrapperTypeInfo(pbt);
+
+            Type typeToWrap_alt = GetTypeFromInfoField(wrapperTypeInfoField, PropKindEnum.Prop, typeToWrap, out Type itemTypeDummy);
+
 
             IPropFactory propFactoryToUse = propFactory ?? pbt.PropFactory ?? _fallBackPropFactory ??
                 throw new InvalidOperationException($"Could not get a value for the PropFactory when fetching the PropModel: {pbt.FullClassName}");
@@ -105,8 +118,7 @@ namespace DRM.PropBag.ControlsWPF
                 className: pbt.ClassName,
                 namespaceName: pbt.OutPutNameSpace,
                 deriveFrom: deriveFrom,
-                typeToWrap: null,
-                wrapperTypeInfoField: null,
+                typeToWrap: typeToWrap,
                 propFactory: propFactoryToUse,
                 typeSafetyMode: pbt.TypeSafetyMode,
                 deferMethodRefResolution: pbt.DeferMethodRefResolution,
@@ -180,6 +192,12 @@ namespace DRM.PropBag.ControlsWPF
 
             }
             return result;
+        }
+
+        private PropTypeInfoField GetWrapperTypeInfo(PropBagTemplate pbt)
+        {
+            PropTypeInfoField ptif = pbt.Items.OfType<PropTypeInfoField>().FirstOrDefault();
+            return ptif;
         }
 
         private Type GetTypeFromInfoField(PropTypeInfoField tif, PropKindEnum propKind,

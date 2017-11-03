@@ -1,6 +1,6 @@
-﻿using DRM.TypeSafePropertyBag;
+﻿using DRM.PropBag.ControlModel;
+using DRM.TypeSafePropertyBag;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -11,8 +11,9 @@ namespace DRM.PropBag.ControlsWPF
 {
     public class PropBagTemplate : ItemsControl
     {
-
         public static byte TEST_FLAG = 0xff;
+
+        #region Constructors
 
         static PropBagTemplate()
         {
@@ -21,24 +22,75 @@ namespace DRM.PropBag.ControlsWPF
 
         public PropBagTemplate()
         {
-            //this.Namespaces = new NamespacesCollection();
-            //this.Props = new PropsCollection();
         }
 
-        static DependencyProperty DeriveFromPubPropBagProperty =
-            DependencyProperty.Register("DeriveFromPubPropBag", typeof(bool), typeof(PropBagTemplate), new PropertyMetadata(true));
+        #endregion
 
-        public bool DeriveFromPubPropBag
+        #region Activation Info
+
+        //static DependencyProperty DeriveFromPubPropBagProperty =
+        //    DependencyProperty.Register("DeriveFromPubPropBag", typeof(bool), typeof(PropBagTemplate), new PropertyMetadata(true));
+
+        //public bool DeriveFromPubPropBag
+        //{
+        //    get
+        //    {
+        //        return (bool)this.GetValue(DeriveFromPubPropBagProperty);
+        //    }
+        //    set
+        //    {
+        //        this.SetValue(DeriveFromPubPropBagProperty, value);
+        //    }
+        //}
+
+        public static readonly DependencyProperty DeriveFromClassModeProperty =
+            DependencyProperty.Register
+            (
+                "DeriveFromClassMode",
+                typeof(DeriveFromClassModeEnum),
+                typeof(PropBagTemplate),
+                new PropertyMetadata
+                (
+                    DeriveFromClassModeEnum.PropBag
+                )
+            );
+
+        public DeriveFromClassModeEnum DeriveFromClassMode
         {
             get
             {
-                return (bool)this.GetValue(DeriveFromPubPropBagProperty);
+                object test = this.GetValue(DeriveFromClassModeProperty);
+                return (DeriveFromClassModeEnum)test; //  CoerceTypeSafetyMode(this, test);
             }
             set
             {
-                this.SetValue(DeriveFromPubPropBagProperty, value);
+                //object test = CoerceTypeSafetyMode(this, value);
+                this.SetValue(TypeSafetyModeProperty, value);
             }
         }
+
+        public static readonly DependencyProperty TypeToWrapProperty =
+            DependencyProperty.Register("TypeToWrap", typeof(Type), typeof(PropBagTemplate));
+
+        public Type TypeToWrap
+        {
+            get
+            {
+                return (Type)this.GetValue(TypeToWrapProperty);
+            }
+            set
+            {
+                this.SetValue(TypeToWrapProperty, value);
+            }
+        }
+
+        //TypeInfoField _wrapperTypeInfoField;
+        //[XmlElement("type-info")]
+        //public TypeInfoField WrapperTypeInfoField
+        //{
+        //    get { return _wrapperTypeInfoField; }
+        //    set { SetIfDifferent<TypeInfoField>(ref _wrapperTypeInfoField, value); }
+        //}
 
         public static readonly DependencyProperty ClassNameProperty =
         DependencyProperty.Register("ClassName", typeof(string), typeof(PropBagTemplate), new PropertyMetadata(null));
@@ -55,21 +107,21 @@ namespace DRM.PropBag.ControlsWPF
             }
         }
 
-        public static readonly DependencyProperty InstanceKeyProperty =
-            DependencyProperty.Register("InstanceKey", typeof(string), typeof(PropBagTemplate),
-                new PropertyMetadata(DRM.PropBag.ControlsWPF.ReflectionHelpers.DEFAULT_INSTANCE_KEY));
+        //public static readonly DependencyProperty InstanceKeyProperty =
+        //    DependencyProperty.Register("InstanceKey", typeof(string), typeof(PropBagTemplate),
+        //        new PropertyMetadata(DRM.PropBag.ControlsWPF.ReflectionHelpers.DEFAULT_INSTANCE_KEY));
 
-        public string InstanceKey
-        {
-            get
-            {
-                return (string)this.GetValue(InstanceKeyProperty);
-            }
-            set
-            {
-                this.SetValue(InstanceKeyProperty, value);
-            }
-        }
+        //public string InstanceKey
+        //{
+        //    get
+        //    {
+        //        return (string)this.GetValue(InstanceKeyProperty);
+        //    }
+        //    set
+        //    {
+        //        this.SetValue(InstanceKeyProperty, value);
+        //    }
+        //}
 
         public static readonly DependencyProperty OutPutNameSpaceProperty =
             DependencyProperty.Register("OutPutNameSpace", typeof(string), typeof(PropBagTemplate),
@@ -86,6 +138,10 @@ namespace DRM.PropBag.ControlsWPF
                 this.SetValue(OutPutNameSpaceProperty, value);
             }
         }
+
+        #endregion
+
+        #region Other Properties
 
         public static readonly DependencyProperty TypeSafetyModeProperty =
             DependencyProperty.Register
@@ -227,6 +283,10 @@ namespace DRM.PropBag.ControlsWPF
             }
         }
 
+        #endregion
+
+        #region Type Support
+
         public string FullClassName
         {
             get
@@ -251,6 +311,8 @@ namespace DRM.PropBag.ControlsWPF
             }
 
         }
+
+        #endregion
     }
 }
 

@@ -24,8 +24,10 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
 
+        <!--InstanceKey="OurData"-->
+
         <pb:PropBagTemplate Grid.Row="5" Name="T1" Width="0" Height="0" 
-                ClassName="DtoTestViewModelEmitBase" InstanceKey="OurData" TypeSafetyMode="AllPropsMustBeRegistered"
+                ClassName="DtoTestViewModelEmitBase"  TypeSafetyMode="AllPropsMustBeRegistered"
                 OutPutNameSpace="PropBagTestApp.ViewModels">
             <pb:PropBagTemplate.Namespaces>
                 <pb:NamespaceItem Namespace="System.IO"/>

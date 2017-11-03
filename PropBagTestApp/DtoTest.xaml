@@ -20,7 +20,9 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
 
-        <pb:PropBagTemplate Grid.Row="5" Name="T1" ClassName="DtoTestViewModel" InstanceKey="OurData" TypeSafetyMode="AllPropsMustBeRegistered">
+        <!--InstanceKey="OurData"-->
+
+        <pb:PropBagTemplate Grid.Row="5" Name="T1" ClassName="DtoTestViewModel"  TypeSafetyMode="AllPropsMustBeRegistered">
             <pb:PropBagTemplate.Namespaces>
                 <pb:NamespaceItem Namespace="System.IO"/>
             </pb:PropBagTemplate.Namespaces>

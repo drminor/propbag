@@ -26,8 +26,12 @@ namespace PropBagLib.Tests
         public void Test1()
         {
 
-            PropModel pm = new PropModel("CreateAtRunTimeModel", "PropBagLib.Tests",
-                DeriveFromClassModeEnum.PropBag, null, null,
+            PropModel pm = new PropModel
+                (
+                className: "CreateAtRunTimeModel",
+                namespaceName: "PropBagLib.Tests",
+                deriveFrom: DeriveFromClassModeEnum.PropBag,
+                typeToWrap: null, 
                 propFactory: null,
                 typeSafetyMode: PropBagTypeSafetyMode.AllPropsMustBeRegistered,
                 deferMethodRefResolution: true,

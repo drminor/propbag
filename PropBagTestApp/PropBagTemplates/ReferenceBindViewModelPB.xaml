@@ -14,7 +14,7 @@
 
     <pb:PropBagTemplate x:Key="ReferenceBindViewModelPB" TypeSafetyMode="AllPropsMustBeRegistered" 
             ClassName="ReferenceBindViewModelPB"
-            InstanceKey="ReferenceBindViewModelPB"
+
             OutPutNameSpace="PropBagTestApp.ViewModels">
 
         <pb:PropBagTemplate.Namespaces>

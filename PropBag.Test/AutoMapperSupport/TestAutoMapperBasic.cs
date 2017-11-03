@@ -170,7 +170,6 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 namespaceName: "PropBagLib.Tests.AutoMapperSupport",
                 deriveFrom: DeriveFromClassModeEnum.PropBag,
                 typeToWrap: null,
-                wrapperTypeInfoField: null,
                 propFactory: null,
                 typeSafetyMode: PropBagTypeSafetyMode.Tight,
                 deferMethodRefResolution: true,

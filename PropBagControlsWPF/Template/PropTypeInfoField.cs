@@ -123,8 +123,6 @@ namespace DRM.PropBag.ControlsWPF
             }
         }
 
-
-
         public PropTypeInfoCollection Children { get; set; }
 
     }

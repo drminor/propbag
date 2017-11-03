@@ -51,6 +51,8 @@ namespace DRM.PropBag.ControlModel
 
         #endregion
 
+        #region Other Properties
+
         PropBagTypeSafetyMode tsm = PropBagTypeSafetyMode.Tight;
         [XmlAttribute(AttributeName = "type-safety-mode")]
         public PropBagTypeSafetyMode TypeSafetyMode
@@ -91,7 +93,9 @@ namespace DRM.PropBag.ControlModel
 
         //public bool IsClassDefined => ClassName != DEFAULT_CLASS_NAME;
 
-        #endregion
+        #endregion Other Properties
+
+        #endregion Dependency Properties
 
         #region Constructors
 
@@ -111,7 +115,6 @@ namespace DRM.PropBag.ControlModel
         public PropModel(string className, string namespaceName,
             DeriveFromClassModeEnum deriveFrom,
             Type typeToWrap,
-            TypeInfoField wrapperTypeInfoField,
             IPropFactory propFactory,
             PropBagTypeSafetyMode typeSafetyMode = PropBagTypeSafetyMode.AllPropsMustBeRegistered,
             bool deferMethodRefResolution = true,
@@ -121,7 +124,6 @@ namespace DRM.PropBag.ControlModel
             NamespaceName = namespaceName;
             DeriveFromClassMode = deriveFrom;
             TypeToWrap = typeToWrap;
-            WrapperTypeInfoField = wrapperTypeInfoField;
             PropFactory = propFactory;
             TypeSafetyMode = typeSafetyMode;
             DeferMethodRefResolution = deferMethodRefResolution;
