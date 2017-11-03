@@ -7,7 +7,7 @@ namespace DRM.ViewModelTools
 {
     public interface IViewModelActivator
     {
-        //bool HasTypeCreationService { get; }
+        bool HasPropModelLookupService { get; }
 
         // Create new Type that is derived from a Type known only at run time.
         object GetNewViewModel(string resourceKey, Type typeToCreate, string fullClassName = null, IPropFactory propFactory = null);
