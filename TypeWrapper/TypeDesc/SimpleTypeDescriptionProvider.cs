@@ -27,7 +27,7 @@ namespace DRM.TypeWrapper.TypeDesc
 
         public TypeDescription GetTypeDescription(NewTypeRequest newTypeRequest)
         {
-            string nsName = newTypeRequest.PropModel.NamespaceName; // ?? DEFAULT_NAMESPACE_NAME;
+            string nsName = newTypeRequest.PropModel.NamespaceName; //  ?? DEFAULT_NAMESPACE_NAME;
 
             TypeName tn = new TypeName(newTypeRequest.TypeToWrap.Name, nsName);
 
