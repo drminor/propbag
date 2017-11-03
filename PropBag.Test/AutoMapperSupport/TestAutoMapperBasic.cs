@@ -168,7 +168,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 (
                 className: "DestinationModel",
                 namespaceName: "PropBagLib.Tests.AutoMapperSupport",
-                deriveFromClassMode: DeriveFromClassModeEnum.PropBag,
+                deriveFrom: DeriveFromClassModeEnum.PropBag,
                 typeToWrap: null,
                 wrapperTypeInfoField: null,
                 propFactory: null,
