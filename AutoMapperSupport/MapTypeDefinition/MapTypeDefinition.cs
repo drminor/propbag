@@ -43,18 +43,6 @@ namespace DRM.PropBag.AutoMapperSupport
 
         #endregion
 
-        //private IMapTypeDefinition<T> GetTypeDef(PropModel pm, Type baseType)
-        //{
-        //    if (typeof(T).IsPropBagBased())
-        //    {
-        //        return new MapTypeDefinition<T>(pm, baseType);
-        //    }
-        //    else
-        //    {
-        //        return new MapTypeDefinition<T>();
-        //    }
-        //}
-
         // TODO: Check the IEquatable support for MapTypeDefinition.
         #region IEquatable Support and Object Overrides
 
