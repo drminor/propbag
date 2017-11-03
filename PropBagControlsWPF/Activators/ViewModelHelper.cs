@@ -12,10 +12,6 @@ namespace DRM.PropBag.ControlsWPF
         IPropModelProvider PropModelProvider { get; }
         IViewModelActivator ViewModelActivator { get; }
 
-        //// TODO: Ultimately this should be removed -- the PropModelProvider should make sure that every PropModel has a PropFactory.
-        //// Or better yet, solve the "The Default PropFactory Cannot Resolve Local Types" problem.
-        //IPropFactory FallBackPropFactory { get; }
-
         #endregion
 
         #region Constructors
@@ -23,7 +19,6 @@ namespace DRM.PropBag.ControlsWPF
         public ViewModelHelper(IPropModelProvider propModelProvider)
         {
             PropModelProvider = propModelProvider ?? throw new ArgumentNullException(nameof(propModelProvider));
-            //FallBackPropFactory = fallBackPropFactory ?? throw new ArgumentNullException(nameof(fallBackPropFactory));
 
             ViewModelActivator = new SimpleViewModelActivator(propModelProvider);
         }
@@ -38,12 +33,6 @@ namespace DRM.PropBag.ControlsWPF
         public object GetNewViewModel(string resourceKey, IPropFactory propFactory = null)
         {
             PropModel pm = PropModelProvider.GetPropModel(resourceKey);
-
-            // If the PropModel just fetched does not have a propFactory
-            // then use the one provided by the caller.
-            //pm.PropFactory = pm.PropFactory ?? propFactory;
-
-            //IPropFactory thePropFactoryToUse = propFactory ?? pm.PropFactory ?? FallBackPropFactory;
 
             Type typeToCreate = pm.TargetType;
             string fullClassName = pm.FullClassName;
