@@ -1,6 +1,7 @@
 ﻿using DRM.PropBag;
 using DRM.PropBag.ControlModel;
 using DRM.TypeSafePropertyBag;
+using PropBagTestApp.Infra;
 
 namespace PropBagTestApp.ViewModels
 {

@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Controls;
 
 using DRM.PropBag.ControlsWPF.Binders;
+using PropBagTestApp.Infra;
 
 namespace PropBagTestApp
 {

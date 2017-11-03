@@ -7,7 +7,7 @@ using System;
 using System.ComponentModel;
 using System.Windows;
 
-namespace PropBagTestApp
+namespace PropBagTestApp.Infra
 {
     public class AutoMapperHelpers
     {

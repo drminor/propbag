@@ -2,6 +2,7 @@
 using DRM.PropBag.ControlModel;
 using DRM.PropBag.ControlsWPF;
 using DRM.ViewModelTools;
+using PropBagTestApp.Infra;
 using PropBagTestApp.Models;
 using PropBagTestApp.ViewModels;
 using System;

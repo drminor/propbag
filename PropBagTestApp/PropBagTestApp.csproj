@@ -61,6 +61,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Infra\AutoMapperHelpers.cs" />
+    <Compile Include="Infra\DataContextProvider.cs" />
     <Compile Include="ViewModels\ReferenceBindViewModelPB.cs" />
     <Compile Include="ViewModels\ReferenceBindViewModel.cs" />
     <Compile Include="Views\ReferenceBindWindow.xaml.cs">
