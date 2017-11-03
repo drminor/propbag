@@ -7,8 +7,8 @@ namespace DRM.PropBag.ControlsWPF
     {
         bool CanFindPropBagTemplateWithJustKey { get; }
 
-        PropBagTemplate GetPropBagTemplate(string instanceKey);
-        PropBagTemplate GetPropBagTemplate(ResourceDictionary resources, string instanceKey);
+        PropBagTemplate GetPropBagTemplate(string resourceKey);
+        PropBagTemplate GetPropBagTemplate(ResourceDictionary resources, string resourceKey);
         Dictionary<string, PropBagTemplate> GetPropBagTemplates(ResourceDictionary resources);
     }
 }
