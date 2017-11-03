@@ -10,20 +10,24 @@ namespace DRM.PropBag.ControlsWPF
     public class PropModelProvider : IPropModelProvider
     {
         private IPropBagTemplateProvider _propBagTemplateProvider;
+        private IPropFactory _fallBackPropFactory;
 
         public bool CanFindPropBagTemplateWithJustKey => _propBagTemplateProvider?.CanFindPropBagTemplateWithJustKey != false;
         public bool HasPbtLookupResources => _propBagTemplateProvider != null;
 
+        // TODO: Ultimately, this should be removed -- all PropBagTemplates should specify a PropModel.
+        public bool HasPropFactory => _fallBackPropFactory != null;
+
         #region Constructors
 
-        public PropModelProvider()
+        public PropModelProvider(IPropFactory fallBackPropFactory = null) : this(propBagTemplateProvider: null, fallBackPropFactory: fallBackPropFactory)
         {
-            _propBagTemplateProvider = null;
         }
 
-        public PropModelProvider(IPropBagTemplateProvider propBagTemplateProvider) 
+        public PropModelProvider(IPropBagTemplateProvider propBagTemplateProvider, IPropFactory fallBackPropFactory = null) 
         {
             _propBagTemplateProvider = propBagTemplateProvider;
+            _fallBackPropFactory = fallBackPropFactory;
         }
 
         #endregion
@@ -90,7 +94,11 @@ namespace DRM.PropBag.ControlsWPF
 
         public PropModel GetPropModel(PropBagTemplate pbt, IPropFactory propFactory = null)
         {
+            // TODO: Make the PBT provide a deriveFrom value.
             DeriveFromClassModeEnum deriveFrom = DeriveFromClassModeEnum.PropBag;
+
+            IPropFactory propFactoryToUse = propFactory ?? pbt.PropFactory ?? _fallBackPropFactory ??
+                throw new InvalidOperationException($"Could not get a value for the PropFactory when fetching the PropModel: {pbt.FullClassName}");
 
             PropModel result = new PropModel
                 (
@@ -99,7 +107,7 @@ namespace DRM.PropBag.ControlsWPF
                 deriveFrom: deriveFrom,
                 typeToWrap: null,
                 wrapperTypeInfoField: null,
-                propFactory: propFactory ?? pbt.PropFactory, // Use the PropFactory supplied by the caller if not null.
+                propFactory: propFactoryToUse,
                 typeSafetyMode: pbt.TypeSafetyMode,
                 deferMethodRefResolution: pbt.DeferMethodRefResolution,
                 requireExplicitInitialValue: pbt.RequireExplicitInitialValue
