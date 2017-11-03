@@ -140,6 +140,7 @@ namespace PropBagTestApp
     public static class JustSayNo // To using Static-based config providers.
     {
         public static PropModelProvider PropModelProvider { get; }
+        public static ViewModelHelper ViewModelHelper { get; }
         public static AutoMapperProvider AutoMapperProvider { get; }
         public static IPropFactory ThePropFactory { get; }
 
@@ -150,7 +151,9 @@ namespace PropBagTestApp
             IPropBagTemplateProvider propBagTemplateProvider
                 = new PropBagTemplateProvider(Application.Current.Resources);
 
-            PropModelProvider = new PropModelProvider(propBagTemplateProvider);
+            PropModelProvider = new PropModelProvider(propBagTemplateProvider, ThePropFactory);
+
+            ViewModelHelper = new ViewModelHelper(PropModelProvider);
 
             AutoMapperProvider = new AutoMapperHelpers().InitializeAutoMappers(PropModelProvider);
         }
