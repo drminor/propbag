@@ -46,18 +46,18 @@ namespace DRM.TypeSafePropertyBag
         /// <summary>
         /// If true, attempting to set a property for which no call to AddProp has been made, will cause an exception to thrown.
         /// </summary>
-        public virtual bool AllPropsMustBeRegistered { get; }
+        public bool AllPropsMustBeRegistered { get; }
 
         /// <summary>
         /// If not true, attempting to set a property, not previously set with a call to AddProp or SetIt<typeparamref name="T"/>, will cause an exception to be thrown.
         /// </summary>
-        public virtual bool OnlyTypedAccess { get; }
+        public bool OnlyTypedAccess { get; }
 
-        public virtual ReadMissingPropPolicyEnum ReadMissingPropPolicy { get; }
+        public ReadMissingPropPolicyEnum ReadMissingPropPolicy { get; }
 
-        public virtual bool ReturnDefaultForUndefined { get; }
+        public bool ReturnDefaultForUndefined { get; }
 
-        protected virtual bool GetReturnDefaultForUndefined(PropBagTypeSafetyMode typeSafetyMode)
+        protected bool GetReturnDefaultForUndefined(PropBagTypeSafetyMode typeSafetyMode)
             => typeSafetyMode == PropBagTypeSafetyMode.None || typeSafetyMode == PropBagTypeSafetyMode.RegisterOnGetLoose;
 
         protected void SetPolicyProperties(PropBagTypeSafetyMode typeSafetyMode, out bool allPropsMustBeRegistered,

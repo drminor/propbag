@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data;
-using System.Runtime.Serialization;
-using System.Xml.Serialization;
 
 namespace DRM.TypeSafePropertyBag
 {
@@ -57,7 +55,7 @@ namespace DRM.TypeSafePropertyBag
         void DoWhenChanged(T oldVal, T newVal);
 
         // Property Changed with typed values support
-        event PropertyChangedWithTValsHandler<T> PropertyChangedWithTVals;
+        event EventHandler<PropertyChangedWithTValsEventArgs<T>> PropertyChangedWithTVals;
         void OnPropertyChangedWithTVals(string propertyName, T oldVal, T newVal);
 
         // TODO: Consider moving these to the IPropPrivate<T> interface.
@@ -85,7 +83,7 @@ namespace DRM.TypeSafePropertyBag
         bool IsEmpty { get; }
 
         // Property Changed with typed values support
-        event PropertyChangedWithValsHandler PropertyChangedWithVals;
+        event EventHandler<PropertyChangedWithValsEventArgs> PropertyChangedWithVals;
         void OnPropertyChangedWithVals(string propertyName, object oldVal, object newVal);
 
         void SubscribeToPropChanged(Action<object, object> doOnChange);

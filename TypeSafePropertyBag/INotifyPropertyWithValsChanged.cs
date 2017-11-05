@@ -11,7 +11,7 @@ namespace DRM.TypeSafePropertyBag
         /// <summary>
         /// Occurs when a property value changes.
         /// </summary>
-        event PropertyChangedWithTValsHandler<T> PropertyChangedWithTVals;
+        event EventHandler<PropertyChangedWithTValsEventArgs<T>> PropertyChangedWithTVals;
     }
 
     /// <summary>
@@ -22,7 +22,7 @@ namespace DRM.TypeSafePropertyBag
         /// <summary>
         /// Occurs when a property value changes.
         /// </summary>
-        event PropertyChangedWithValsHandler PropertyChangedWithVals;
+        event EventHandler<PropertyChangedWithValsEventArgs> PropertyChangedWithVals;
 
     }
 }

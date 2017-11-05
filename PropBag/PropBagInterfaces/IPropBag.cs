@@ -43,8 +43,8 @@ namespace DRM.PropBag
 
         bool TryGetListSource(string propertyName, Type itemType, out IListSource listSource);
 
-        bool SubscribeToPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, string propertyName);
-        bool UnSubscribeToPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, string propertyName);
+        bool SubscribeToPropChanged<T>(EventHandler<PropertyChangedWithTValsEventArgs<T>> eventHandler, string propertyName);
+        bool UnSubscribeToPropChanged<T>(EventHandler<PropertyChangedWithTValsEventArgs<T>> eventHandler, string propertyName);
 
         bool SubscribeToPropChanged<T>(Action<T, T> doOnChange, string propertyName);
         bool UnSubscribeToPropChanged<T>(Action<T, T> doOnChange, string propertyName);

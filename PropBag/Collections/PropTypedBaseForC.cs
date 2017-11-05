@@ -59,7 +59,7 @@ namespace DRM.PropBag
                 doWhenAction(oldVal, newVal);
         }
 
-        public event PropertyChangedWithTValsHandler<CT> PropertyChangedWithTVals;
+        public event EventHandler<PropertyChangedWithTValsEventArgs<CT>> PropertyChangedWithTVals;
 
         protected GetDefaultValueDelegate<CT> GetDefaultValFunc { get; }
 
@@ -71,26 +71,26 @@ namespace DRM.PropBag
             }
         }
 
-        private List<Tuple<Action<CT, CT>, PropertyChangedWithTValsHandler<CT>>> _actTable = null;
+        private List< Tuple<  Action<CT, CT>, EventHandler<PropertyChangedWithTValsEventArgs<CT>> >> _actTable = null;
 
         public void SubscribeToPropChanged(Action<CT, CT> doOnChange)
         {
-            PropertyChangedWithTValsHandler<CT> eventHandler = (s, e) => { doOnChange(e.OldValue, e.NewValue); };
+            EventHandler<PropertyChangedWithTValsEventArgs<CT>> eventHandler = (s, e) => { doOnChange(e.OldValue, e.NewValue); };
 
             if (GetHandlerFromAction(doOnChange, ref _actTable) == null)
             {
                 PropertyChangedWithTVals += eventHandler;
                 if(_actTable == null)
                 {
-                    _actTable = new List<Tuple<Action<CT, CT>, PropertyChangedWithTValsHandler<CT>>>();
+                    _actTable = new List<Tuple<Action<CT, CT>, EventHandler<PropertyChangedWithTValsEventArgs<CT>> >>();
                 }
-                _actTable.Add(new Tuple<Action<CT, CT>, PropertyChangedWithTValsHandler<CT>>(doOnChange, eventHandler));
+                _actTable.Add(new Tuple<Action<CT, CT>, EventHandler<PropertyChangedWithTValsEventArgs<CT>> >(doOnChange, eventHandler));
             }
         }
 
         public bool UnSubscribeToPropChanged(Action<CT, CT> doOnChange)
         {
-            Tuple<Action<CT, CT>, PropertyChangedWithTValsHandler<CT>> actEntry = GetHandlerFromAction(doOnChange, ref _actTable);
+            Tuple<Action<CT, CT>, EventHandler<PropertyChangedWithTValsEventArgs<CT>> > actEntry = GetHandlerFromAction(doOnChange, ref _actTable);
 
             if (actEntry == null) return false;
 
@@ -100,14 +100,14 @@ namespace DRM.PropBag
             return true;
         }
 
-        private Tuple<Action<CT, CT>, PropertyChangedWithTValsHandler<CT>> GetHandlerFromAction(Action<CT, CT> act,
-            ref List<Tuple<Action<CT, CT>, PropertyChangedWithTValsHandler<CT>>> actTable)
+        private Tuple<Action<CT, CT>, EventHandler<PropertyChangedWithTValsEventArgs<CT>> > GetHandlerFromAction(Action<CT, CT> act,
+            ref List< Tuple<  Action<CT,CT>, EventHandler<PropertyChangedWithTValsEventArgs<CT>> >> actTable)
         {
             if (actTable == null) return null;
 
             for (int i = 0; i < actTable.Count; i++)
             {
-                Tuple<Action<CT, CT>, PropertyChangedWithTValsHandler<CT>> tup = actTable[i];
+                Tuple<Action<CT, CT>, EventHandler<PropertyChangedWithTValsEventArgs<CT>> > tup = actTable[i];
                 if (tup.Item1 == act) return tup; //.Item2;
             }
 
@@ -116,7 +116,7 @@ namespace DRM.PropBag
 
         public void OnPropertyChangedWithTVals(string propertyName, CT oldVal, CT newVal)
         {
-            PropertyChangedWithTValsHandler<CT> handler = Interlocked.CompareExchange(ref PropertyChangedWithTVals, null, null);
+            EventHandler<PropertyChangedWithTValsEventArgs<CT>> handler = Interlocked.CompareExchange(ref PropertyChangedWithTVals, null, null);
 
             if (handler != null)
                 handler(this, new PropertyChangedWithTValsEventArgs<CT>(propertyName, oldVal, newVal));

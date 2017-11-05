@@ -15,9 +15,9 @@ namespace DRM.TypeSafePropertyBag
     //     A PropBagLib.PropertyChangedWithValsEventArgs that contains the event
     //     data.
 
-    public delegate void PropertyChangedWithTValsHandler<T>(object sender, PropertyChangedWithTValsEventArgs<T> e);
+    //public delegate void PropertyChangedWithTValsHandler<T>(object sender, PropertyChangedWithTValsEventArgs<T> e);
 
-    public delegate void PropertyChangedWithValsHandler(object sender, PropertyChangedWithValsEventArgs e);
+    //public delegate void PropertyChangedWithValsHandler(object sender, PropertyChangedWithValsEventArgs e);
 
 }
  

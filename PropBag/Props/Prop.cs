@@ -93,7 +93,7 @@ namespace DRM.PropBag
             return oldSetting;
         }
 
-        override public IListSource ListSource => throw new NotSupportedException("This PropBag property is not a collection or datatable PropType.");
+        override public IListSource ListSource => throw new NotSupportedException($"This PropBag property is of PropKind = {PropKind}. It cannot provide a ListSource.");
 
     }
 }

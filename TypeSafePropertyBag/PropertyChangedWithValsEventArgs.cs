@@ -1,9 +1,5 @@
-﻿using System.ComponentModel;
-
-/// <remarks>
-/// This code is heavily based on code developed by Daniel Moore in his WPF Igniter project.
-/// https://github.com/danielmoore/WpfIgniter
-/// </remarks>
+﻿using System;
+using System.ComponentModel;
 
 namespace DRM.TypeSafePropertyBag
 {
@@ -19,7 +15,8 @@ namespace DRM.TypeSafePropertyBag
         /// <param name="propertyName">Name of the property.</param>
         /// <param name="oldValue">The old value of the property.</param>
         /// <param name="newValue">The new value of the property.</param>
-        public PropertyChangedWithTValsEventArgs(string propertyName, T oldValue, T newValue) : base(propertyName, oldValue, newValue)
+        public PropertyChangedWithTValsEventArgs(string propertyName, T oldValue, T newValue)
+            : base(propertyName, typeof(T), oldValue, newValue)
         {
             OldValue = oldValue;
             NewValue = newValue;
@@ -28,7 +25,7 @@ namespace DRM.TypeSafePropertyBag
         /// <summary>
         /// Gets the old value of the property.
         /// </summary>
-        public virtual new T OldValue
+        public new T OldValue
         {
             get
             {
@@ -44,7 +41,7 @@ namespace DRM.TypeSafePropertyBag
         /// <summary>
         /// Gets the new value of the property.
         /// </summary>
-        public virtual new T NewValue
+        public new T NewValue
         {
             get
             {
@@ -69,21 +66,24 @@ namespace DRM.TypeSafePropertyBag
         /// <param name="propertyName">Name of the property.</param>
         /// <param name="oldValue">The old value of the property.</param>
         /// <param name="newValue">The new value of the property.</param>
-        public PropertyChangedWithValsEventArgs(string propertyName, object oldValue, object newValue)
+        public PropertyChangedWithValsEventArgs(string propertyName, Type propertyType, object oldValue, object newValue)
             : base(propertyName)
         {
             OldValue = oldValue;
             NewValue = newValue;
+            PropertyType = propertyType;
         }
+
+        public Type PropertyType { get; }
 
         /// <summary>
         /// Gets the old value of the property.
         /// </summary>
-        public virtual object OldValue { get; protected set; }
+        public object OldValue { get; protected set; }
 
         /// <summary>
         /// Gets the new value of the property.
         /// </summary>
-        public virtual object NewValue { get; protected set; }
+        public object NewValue { get; protected set; }
     }
 }

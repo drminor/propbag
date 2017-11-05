@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
 using System.Threading;
 using System.Reflection;
-
 using System.Runtime.CompilerServices;
 using DRM.TypeSafePropertyBag;
 using System.ComponentModel;
@@ -19,6 +17,18 @@ namespace DRM.PropBag
     /// </summary>
     public abstract class PropGenBase : IPropGen
     {
+        #region Private Members
+
+        Attribute[] _attributes;
+
+        List<Tuple<Action<object, object>, EventHandler<PropertyChangedWithValsEventArgs>>> _actTableGen = null;
+
+        #endregion
+
+        #region Public Members
+
+        public abstract event EventHandler<PropertyChangedWithValsEventArgs>  PropertyChangedWithVals;
+
         public Type Type { get; private set;}
 
         public IProp TypedProp { get; set; }
@@ -29,7 +39,7 @@ namespace DRM.PropBag
 
         public bool HasStore { get; private set; }
 
-        Attribute[] _attributes = new Attribute[] { };
+
         public virtual Attribute[] Attributes
         {
             get
@@ -37,29 +47,6 @@ namespace DRM.PropBag
                 return _attributes;
             }
         }
-
-        // Constructor
-        public PropGenBase(Type typeOfThisValue, bool typeIsSolid, bool hasStore = true)
-        {
-            Type = typeOfThisValue;
-            TypedProp = null;
-            TypeIsSolid = typeIsSolid;
-            HasStore = hasStore;
-            PropertyChangedWithVals = null; // = delegate { };
-            _actTable = null;
-        }
-
-        public PropGenBase(IPropGen typedPropWrapper)
-        {
-            Type = typedPropWrapper.TypedProp.Type;
-            TypedProp = typedPropWrapper.TypedProp;
-            TypeIsSolid = typedPropWrapper.TypeIsSolid;
-            HasStore = typedPropWrapper.HasStore;
-            PropertyChangedWithVals = null; // = delegate { };
-            _actTable = null;
-        }
-
-        #region Public Methods and Properties
 
         /// <summary>
         /// Does not use reflection.
@@ -73,44 +60,80 @@ namespace DRM.PropBag
             }
         }
 
+        #endregion
+
+        #region Constructors
+
+        public PropGenBase(Type typeOfThisValue, bool typeIsSolid, bool hasStore = true)
+        {
+            Type = typeOfThisValue;
+            TypedProp = null;
+            TypeIsSolid = typeIsSolid;
+            HasStore = hasStore;
+            //PropertyChangedWithVals = null; // = delegate { };
+            _actTableGen = null;
+            _attributes = new Attribute[] { };
+        }
+
+        public PropGenBase(IPropGen typedPropWrapper)
+        {
+            Type = typedPropWrapper.TypedProp.Type;
+            TypedProp = typedPropWrapper.TypedProp;
+            TypeIsSolid = typedPropWrapper.TypeIsSolid;
+            HasStore = typedPropWrapper.HasStore;
+            //PropertyChangedWithVals = null; // = delegate { };
+            _actTableGen = null;
+            _attributes = new Attribute[] { };
+        }
+
+        #endregion
+
+        #region Public Methods
+
         public ValPlusType ValuePlusType()
         {
             return new ValPlusType(Value, Type);
         }
 
-        public event PropertyChangedWithValsHandler PropertyChangedWithVals;
-        //public event PropertyChangedEventHandler PropertyChanged;
+        public void CleanUp()
+        {
+            if (TypedProp != null) TypedProp.CleanUpTyped();
+            _actTableGen = null;
+            //PropertyChangedWithVals = null;
+        }
 
-        private List<Tuple<Action<object, object>, PropertyChangedWithValsHandler>> _actTable = null;
+        #endregion
+
+        #region Generic PropertyChangedWithVals support
 
         public void SubscribeToPropChanged(Action<object, object> doOnChange)
         {
-            PropertyChangedWithValsHandler eventHandler = (s, e) => { doOnChange(e.OldValue, e.NewValue); };
+            EventHandler<PropertyChangedWithValsEventArgs> eventHandler = (s, e) => { doOnChange(e.OldValue, e.NewValue); };
 
-            if (GetHandlerFromAction(doOnChange, ref _actTable) == null)
+            if (GetHandlerFromAction(doOnChange, ref _actTableGen) == null)
             {
                 PropertyChangedWithVals += eventHandler;
-                if (_actTable == null)
+                if (_actTableGen == null)
                 {
-                    _actTable = new List<Tuple<Action<object, object>, PropertyChangedWithValsHandler>>();
+                    _actTableGen = new List<Tuple<Action<object, object>, EventHandler<PropertyChangedWithValsEventArgs>>>();
                 }
-                _actTable.Add(new Tuple<Action<object, object>, PropertyChangedWithValsHandler>(doOnChange, eventHandler));
+                _actTableGen.Add(new Tuple<Action<object, object>, EventHandler<PropertyChangedWithValsEventArgs>>(doOnChange, eventHandler));
             }
         }
 
         public bool UnSubscribeToPropChanged(Action<object, object> doOnChange)
         {
-            Tuple<Action<object, object>, PropertyChangedWithValsHandler> actEntry = GetHandlerFromAction(doOnChange, ref _actTable);
+            Tuple<Action<object, object>, EventHandler<PropertyChangedWithValsEventArgs>> actEntry = GetHandlerFromAction(doOnChange, ref _actTableGen);
 
             if (actEntry == null) return false;
 
             PropertyChangedWithVals -= actEntry.Item2;
-            _actTable.Remove(actEntry);
+            _actTableGen.Remove(actEntry);
             return true;
         }
 
-        private Tuple<Action<object, object>, PropertyChangedWithValsHandler> GetHandlerFromAction(Action<object, object> act,
-            ref List<Tuple<Action<object, object>, PropertyChangedWithValsHandler>> actTable)
+        private Tuple<Action<object, object>, EventHandler<PropertyChangedWithValsEventArgs>> GetHandlerFromAction(Action<object, object> act,
+            ref List<Tuple<Action<object, object>, EventHandler<PropertyChangedWithValsEventArgs>>> actTable)
         {
             if (actTable == null)
             {
@@ -119,45 +142,22 @@ namespace DRM.PropBag
 
             for (int i = 0; i < actTable.Count; i++)
             {
-                Tuple<Action<object, object>, PropertyChangedWithValsHandler> tup = actTable[i];
+                Tuple<Action<object, object>, EventHandler<PropertyChangedWithValsEventArgs>> tup = actTable[i];
                 if (tup.Item1 == act) return tup;
             }
 
             return null;
         }
 
-        public void OnPropertyChangedWithVals(string propertyName, object oldVal, object newVal)
-        {
-            PropertyChangedWithValsHandler handler = Interlocked.CompareExchange(ref PropertyChangedWithVals, null, null);
-
-            if (handler != null)
-                handler(this, new PropertyChangedWithValsEventArgs(propertyName, oldVal, newVal));
-        }
-
-        public void CleanUp()
-        {
-            if (TypedProp != null) TypedProp.CleanUpTyped();
-            _actTable = null;
-            PropertyChangedWithVals = null;
-        }
-
-        //public virtual void SubscribeToPropChanged(INotifyPropertyChanged source, string eventName, EventHandler<PropertyChangedEventArgs> handler)
-        //{
-        //    WeakEventManager<INotifyPropertyChanged, PropertyChangedEventArgs>.AddHandler(source, eventName, handler);
-        //}
-
-        //public void OnPropertyChanged(string propertyName)
-        //{
-        //    PropertyChangedEventHandler handler = Interlocked.CompareExchange(ref PropertyChanged, null, null);
-
-        //    if (handler != null)
-        //        handler(this, new PropertyChangedEventArgs(propertyName));
-
-        //}
 
         #endregion
 
+        #region Raise Events
 
+        public abstract void OnPropertyChangedWithVals(string propertyName, object oldVal, object newVal);
+
+
+        #endregion
 
         //#region Helper Methods for the Generic Method Templates
 
@@ -187,6 +187,5 @@ namespace DRM.PropBag
         //}
 
         //#endregion
-
     }
 }
