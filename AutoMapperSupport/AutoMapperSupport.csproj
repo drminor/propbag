@@ -47,6 +47,7 @@
     <Compile Include="ConfigPackages\ICreateMapperRequests.cs" />
     <Compile Include="ConfigPackages\IProvideAMapperConfiguration.cs" />
     <Compile Include="Config\ICreateMappingExpressions.cs" />
+    <Compile Include="IProvideAutoMappers.cs" />
     <Compile Include="MapTypeDefinition\IMapTypeDefinitionProvider.cs" />
     <Compile Include="Builders\PropBagMapperKeyGen.cs" />
     <Compile Include="MapTypeDefinition\SimpleMapTypeDefinitionProvider.cs" />
@@ -59,7 +60,7 @@
     <Compile Include="Builders\IBuildPropBagMapper.cs" />
     <Compile Include="Builders\SimplePropBagMapperBuilder.cs" />
     <Compile Include="SimplePropBagMapper.cs" />
-    <Compile Include="AutoMapperProvider.cs" />
+    <Compile Include="SimpleAutoMapperProvider.cs" />
     <Compile Include="Config\EmitProxyConfigFinalStep.cs" />
     <Compile Include="Config\ExtraMembersConfigInitialStep.cs" />
     <Compile Include="Config\IHaveAMapperConfigurationStep.cs" />
