@@ -64,10 +64,10 @@
         </Setter>
     </Style>
 
-    <Style TargetType="{x:Type local:PropTypeInfoField}">
+    <Style TargetType="{x:Type local:TypeInfoField}">
         <Setter Property="Template">
             <Setter.Value>
-                <ControlTemplate TargetType="{x:Type local:PropTypeInfoField}">
+                <ControlTemplate TargetType="{x:Type local:TypeInfoField}">
                     <ContentControl Name="PropTypeInfoFieldContent"/>
                 </ControlTemplate>
             </Setter.Value>

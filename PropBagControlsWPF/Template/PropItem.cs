@@ -179,7 +179,7 @@ namespace DRM.PropBag.ControlsWPF
                     return false;
                 }
 
-                if (item is PropTypeInfoField)
+                if (item is TypeInfoField)
                 {
                     if (++typeInfoFieldCount < 2) continue;
                     tooMany = true;

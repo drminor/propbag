@@ -9,8 +9,7 @@ namespace DRM.PropBag.ControlsWPF
 {
     public class DuoActionTypeConverter : TypeConverter
     {
-        static private Type GMT_TYPE = typeof(GenericMethodTemplates);
-
+        #region Public Methods 
 
         public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
         {
@@ -58,6 +57,35 @@ namespace DRM.PropBag.ControlsWPF
             return base.ConvertFrom(context, culture, value);
         }
 
+        public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+        {
+            return destinationType == typeof(InstanceDescriptor) || destinationType == typeof(string) || base.CanConvertTo(context, destinationType);
+        }
+
+        // Overrides the ConvertTo method of TypeConverter.
+        // We need to return a string.
+        public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
+        {
+            if (destinationType == typeof(string))
+            {
+                if (value is Delegate)
+                {
+                    MethodInfo mi = ((Delegate)value).GetMethodInfo();
+                    string pt = mi.GetParameters()[0].ParameterType.FullName.ToString();
+                    return string.Format("{0}|{1}|{2}", pt, mi.DeclaringType, mi.Name);
+                }
+            }
+            else
+            {
+                //int a = 0;
+            }
+            return base.ConvertTo(context, culture, value, destinationType);
+        }
+
+        #endregion
+
+        #region Private Methods
+
         private object DoConvertFrom(string s, object xamlRoot)
         {
             // TODO: create a custom exeception type for this.
@@ -78,12 +106,12 @@ namespace DRM.PropBag.ControlsWPF
                 // This property will be marked with the PropBagInstanceAttribute and will have
                 // the TargetType's class name as its PropBagTemplate value.
                 object targetInstance = ReflectionHelpers.GetTargetInstance(xamlRoot, strTargetType, instanceKey);
-                if(targetInstance == null)
+                if (targetInstance == null)
                     throw new ApplicationException(string.Format("Cannot find a reference to a running instance of {0}, and cannot find a public constructor to use to create a running instance.", strTargetType));
 
                 // TODO: See if we can avoid having to create an instance in order to get the type to inspect.
                 Type targetType = targetInstance.GetType();
-                if (strTargetType != targetType.ToString()) 
+                if (strTargetType != targetType.ToString())
                     throw new ApplicationException(string.Format("The {0} doesn't match the {1}", strTargetType, targetType.ToString()));
 
                 Type propType = Type.GetType(strPropType);
@@ -92,7 +120,7 @@ namespace DRM.PropBag.ControlsWPF
                 Delegate d = ActionGetter(targetInstance, targetType, methodName);
                 return new DoWhenChangedAction(d);
 
-            } 
+            }
             catch (Exception ee)
             {
                 // This for testing.
@@ -132,30 +160,7 @@ namespace DRM.PropBag.ControlsWPF
             return new Tuple<string, string, string, string>(strPropType, strTargetType, instanceKey, methodName);
         }
 
-        public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
-        {
-            return destinationType == typeof(InstanceDescriptor) || destinationType == typeof(string) || base.CanConvertTo(context, destinationType);
-        }
 
-        // Overrides the ConvertTo method of TypeConverter.
-        // We need to return a string.
-        public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
-        {
-            if (destinationType == typeof(string))
-            {
-                if (value is Delegate)
-                {
-                    MethodInfo mi = ((Delegate)value).GetMethodInfo();
-                    string pt = mi.GetParameters()[0].ParameterType.FullName.ToString();
-                    return string.Format("{0}|{1}|{2}", pt, mi.DeclaringType, mi.Name);
-                }
-            }
-            else
-            {
-                //int a = 0;
-            }
-            return base.ConvertTo(context, culture, value, destinationType);
-        }
 
         //public override bool IsValid(ITypeDescriptorContext context, object value)
         //{
@@ -172,7 +177,11 @@ namespace DRM.PropBag.ControlsWPF
             }
         }
 
+        #endregion
+
         #region Helper Methods for the Generic Method Templates
+
+        static private Type GMT_TYPE = typeof(GenericMethodTemplates);
 
         // Delegate declarations.
         private delegate Delegate GetActionRefDelegate(object owningInstance, Type ownerType, string methodName);
@@ -186,43 +195,43 @@ namespace DRM.PropBag.ControlsWPF
         }
 
         #endregion
-    }
 
-    #region Generic Method Templates
+        #region Generic Method Templates
 
-    static class GenericMethodTemplates
-    {
-        private static Delegate GetActionRefDelegate<T>(object owningInstance, Type ownerType, string methodName)
+        static class GenericMethodTemplates
         {
-            MethodInfo mi = ownerType.GetMethod(methodName, BindingFlags.Instance | BindingFlags.NonPublic);
-
-            if (!IsDuoAction<T>(mi)) return null;
-
-            Action<T, T> del = (Action<T, T>)Delegate.CreateDelegate(typeof(Action<T, T>), owningInstance, mi);
-
-            return del;
-        }
-
-
-        static private bool IsDuoAction<T>(MethodInfo mi)
-        {
-            if (mi.ReturnType != typeof(void))
+            private static Delegate GetActionRefDelegate<T>(object owningInstance, Type ownerType, string methodName)
             {
-                // Must return void.
-                return false;
+                MethodInfo mi = ownerType.GetMethod(methodName, BindingFlags.Instance | BindingFlags.NonPublic);
+
+                if (!IsDuoAction<T>(mi)) return null;
+
+                Action<T, T> del = (Action<T, T>)Delegate.CreateDelegate(typeof(Action<T, T>), owningInstance, mi);
+
+                return del;
             }
 
-            ParameterInfo[] parms = mi.GetParameters();
 
-            if ((parms.Length != 2) || (parms[0].ParameterType != typeof(T)) || (parms[1].ParameterType != typeof(T)))
+            static private bool IsDuoAction<T>(MethodInfo mi)
             {
-                // Must have two parameters of the specified type.
-                return false;
+                if (mi.ReturnType != typeof(void))
+                {
+                    // Must return void.
+                    return false;
+                }
+
+                ParameterInfo[] parms = mi.GetParameters();
+
+                if ((parms.Length != 2) || (parms[0].ParameterType != typeof(T)) || (parms[1].ParameterType != typeof(T)))
+                {
+                    // Must have two parameters of the specified type.
+                    return false;
+                }
+                return true;
             }
-            return true;
+
         }
 
+        #endregion
     }
-
-    #endregion
 }

@@ -5,35 +5,34 @@ using System.Windows.Controls;
 
 namespace DRM.PropBag.ControlsWPF
 {
-    public class PropTypeInfoField : ItemsControl
+    public class TypeInfoField : ItemsControl
     {
-        static PropTypeInfoField()
+        static TypeInfoField()
         {
-            DefaultStyleKeyProperty.OverrideMetadata(typeof(PropTypeInfoField), new FrameworkPropertyMetadata(typeof(PropTypeInfoField)));
+            DefaultStyleKeyProperty.OverrideMetadata(typeof(TypeInfoField), new FrameworkPropertyMetadata(typeof(TypeInfoField)));
         }
 
-        public PropTypeInfoField()
+        public TypeInfoField()
         {
-            this.Children = new PropTypeInfoCollection();
         }
 
-        public static readonly DependencyProperty PropertyTypeProperty =
-            DependencyProperty.Register("PropertyType", typeof(Type), typeof(PropTypeInfoField));
+        public static readonly DependencyProperty MemberTypeProperty =
+            DependencyProperty.Register("MemberType", typeof(Type), typeof(TypeInfoField));
 
-        public Type PropertyType
+        public Type MemberType
         {
             get
             {
-                return (Type)this.GetValue(PropertyTypeProperty);
+                return (Type)this.GetValue(MemberTypeProperty);
             }
             set
             {
-                this.SetValue(PropertyTypeProperty, value);
+                this.SetValue(MemberTypeProperty, value);
             }
         }
 
         public static readonly DependencyProperty TypeNameProperty =
-            DependencyProperty.Register("TypeName", typeof(string), typeof(PropTypeInfoField), new PropertyMetadata(null));
+            DependencyProperty.Register("TypeName", typeof(string), typeof(TypeInfoField), new PropertyMetadata(null));
 
         public string TypeName
         {
@@ -48,7 +47,7 @@ namespace DRM.PropBag.ControlsWPF
         }
 
         public static readonly DependencyProperty FullyQualifiedTypeNameProperty =
-            DependencyProperty.Register("FullyQualifiedTypeName", typeof(string), typeof(PropTypeInfoField), new PropertyMetadata(null));
+            DependencyProperty.Register("FullyQualifiedTypeName", typeof(string), typeof(TypeInfoField), new PropertyMetadata(null));
 
         public string FullyQualifiedTypeName
         {
@@ -63,7 +62,7 @@ namespace DRM.PropBag.ControlsWPF
         }
 
         public static readonly DependencyProperty CollectionTypeProperty =
-            DependencyProperty.Register("CollectionType", typeof(WellKnownCollectionTypeEnum?), typeof(PropTypeInfoField),
+            DependencyProperty.Register("CollectionType", typeof(WellKnownCollectionTypeEnum?), typeof(TypeInfoField),
                 new PropertyMetadata((WellKnownCollectionTypeEnum?) null));
 
         public WellKnownCollectionTypeEnum? CollectionType
@@ -79,7 +78,7 @@ namespace DRM.PropBag.ControlsWPF
         }
 
         public static readonly DependencyProperty TypeParameter1Property =
-            DependencyProperty.Register("TypeParameter1", typeof(Type), typeof(PropTypeInfoField));
+            DependencyProperty.Register("TypeParameter1", typeof(Type), typeof(TypeInfoField));
 
         public Type TypeParameter1
         {
@@ -94,7 +93,7 @@ namespace DRM.PropBag.ControlsWPF
         }
 
         public static readonly DependencyProperty TypeParameter2Property =
-            DependencyProperty.Register("TypeParameter2", typeof(Type), typeof(PropTypeInfoField));
+            DependencyProperty.Register("TypeParameter2", typeof(Type), typeof(TypeInfoField));
 
         public Type TypeParameter2
         {
@@ -109,7 +108,7 @@ namespace DRM.PropBag.ControlsWPF
         }
 
         public static readonly DependencyProperty TypeParameter3Property =
-            DependencyProperty.Register("TypeParameter3", typeof(Type), typeof(PropTypeInfoField));
+            DependencyProperty.Register("TypeParameter3", typeof(Type), typeof(TypeInfoField));
 
         public Type TypeParameter3
         {
@@ -123,7 +122,19 @@ namespace DRM.PropBag.ControlsWPF
             }
         }
 
-        public PropTypeInfoCollection Children { get; set; }
+        TypeInfoCollection _childern;
+        public TypeInfoCollection TypeParameters
+        {
+            get
+            {
+                if(_childern == null)
+                {
+                    _childern = new TypeInfoCollection();
+                }
+                return _childern;
+            }
+
+        }
 
     }
 }

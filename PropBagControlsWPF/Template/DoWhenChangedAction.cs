@@ -13,12 +13,16 @@ namespace DRM.PropBag.ControlsWPF
     {
         public Delegate DoWhenChanged { get; set; }
 
+        #region Constructors
+
         public DoWhenChangedAction() : this(null) { }
 
         public DoWhenChangedAction(Delegate act)
         {
             DoWhenChanged = act;
         }
+
+        #endregion
 
         public bool Equals(DoWhenChangedAction other)
         {

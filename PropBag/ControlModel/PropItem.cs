@@ -59,9 +59,11 @@ namespace DRM.PropBag.ControlModel
             set { SetIfDifferent<PropComparerField>(ref _propComparerField, value); }
         }
 
+        // TODO fix the IEquatable for the DoWhenChangedField.
         [XmlElement("do-when-changed")]
-        public PropDoWhenChangedField DoWhenChangedField { get { return _propDoWhenChangedField; }
-            set { SetIfDifferent<PropDoWhenChangedField>(ref _propDoWhenChangedField, value); }
+        public PropDoWhenChangedField DoWhenChangedField { 
+            get { return _propDoWhenChangedField; }
+            set { _propDoWhenChangedField = value; }
         }
 
         [XmlAttribute(AttributeName = "caller-provides-storage")]

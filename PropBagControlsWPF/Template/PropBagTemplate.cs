@@ -28,21 +28,6 @@ namespace DRM.PropBag.ControlsWPF
 
         #region Activation Info
 
-        //static DependencyProperty DeriveFromPubPropBagProperty =
-        //    DependencyProperty.Register("DeriveFromPubPropBag", typeof(bool), typeof(PropBagTemplate), new PropertyMetadata(true));
-
-        //public bool DeriveFromPubPropBag
-        //{
-        //    get
-        //    {
-        //        return (bool)this.GetValue(DeriveFromPubPropBagProperty);
-        //    }
-        //    set
-        //    {
-        //        this.SetValue(DeriveFromPubPropBagProperty, value);
-        //    }
-        //}
-
         public static readonly DependencyProperty DeriveFromClassModeProperty =
             DependencyProperty.Register
             (
@@ -69,28 +54,20 @@ namespace DRM.PropBag.ControlsWPF
             }
         }
 
-        public static readonly DependencyProperty TypeToWrapProperty =
-            DependencyProperty.Register("TypeToWrap", typeof(Type), typeof(PropBagTemplate));
+        public static readonly DependencyProperty TargetTypeProperty =
+            DependencyProperty.Register("TargetType", typeof(Type), typeof(PropBagTemplate));
 
-        public Type TypeToWrap
+        public Type TargetType
         {
             get
             {
-                return (Type)this.GetValue(TypeToWrapProperty);
+                return (Type)this.GetValue(TargetTypeProperty);
             }
             set
             {
-                this.SetValue(TypeToWrapProperty, value);
+                this.SetValue(TargetTypeProperty, value);
             }
         }
-
-        //TypeInfoField _wrapperTypeInfoField;
-        //[XmlElement("type-info")]
-        //public TypeInfoField WrapperTypeInfoField
-        //{
-        //    get { return _wrapperTypeInfoField; }
-        //    set { SetIfDifferent<TypeInfoField>(ref _wrapperTypeInfoField, value); }
-        //}
 
         public static readonly DependencyProperty ClassNameProperty =
         DependencyProperty.Register("ClassName", typeof(string), typeof(PropBagTemplate), new PropertyMetadata(null));
@@ -106,22 +83,6 @@ namespace DRM.PropBag.ControlsWPF
                 this.SetValue(ClassNameProperty, value);
             }
         }
-
-        //public static readonly DependencyProperty InstanceKeyProperty =
-        //    DependencyProperty.Register("InstanceKey", typeof(string), typeof(PropBagTemplate),
-        //        new PropertyMetadata(DRM.PropBag.ControlsWPF.ReflectionHelpers.DEFAULT_INSTANCE_KEY));
-
-        //public string InstanceKey
-        //{
-        //    get
-        //    {
-        //        return (string)this.GetValue(InstanceKeyProperty);
-        //    }
-        //    set
-        //    {
-        //        this.SetValue(InstanceKeyProperty, value);
-        //    }
-        //}
 
         public static readonly DependencyProperty OutPutNameSpaceProperty =
             DependencyProperty.Register("OutPutNameSpace", typeof(string), typeof(PropBagTemplate),

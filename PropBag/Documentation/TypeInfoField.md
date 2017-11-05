@@ -23,7 +23,7 @@
     
     
     TypeInfoField
-        Attribute: PropertyType (Type)
+        Attribute: MemberType (Type)
         Attribute: TypeName (string)
         Attribute: FullyQualifiedTypeName: (string)
         Attribute: CollectionType: (WellKnownCollectionTypeEnum)

@@ -100,15 +100,11 @@ namespace DRM.PropBag.ControlsWPF
 
         public PropModel GetPropModel(PropBagTemplate pbt, IPropFactory propFactory = null)
         {
-            // TODO: Make the PBT provide a deriveFrom value.
-            //DeriveFromClassModeEnum deriveFrom = DeriveFromClassModeEnum.PropBag;
-
             DeriveFromClassModeEnum deriveFrom = pbt.DeriveFromClassMode;
-            Type typeToWrap = pbt.TypeToWrap;
-            PropTypeInfoField wrapperTypeInfoField = GetWrapperTypeInfo(pbt);
+            Type targetType = pbt.TargetType;
 
-            Type typeToWrap_alt = GetTypeFromInfoField(wrapperTypeInfoField, PropKindEnum.Prop, typeToWrap, out Type itemTypeDummy);
-
+            //TypeInfoField wrapperTypeInfoField = GetWrapperTypeInfo(pbt);
+            //Type targetTypeFromWTInfoField = GetTypeFromInfoField(wrapperTypeInfoField, PropKindEnum.Prop, targetType, out Type itemTypeDummy);
 
             IPropFactory propFactoryToUse = propFactory ?? pbt.PropFactory ?? _fallBackPropFactory ??
                 throw new InvalidOperationException($"Could not get a value for the PropFactory when fetching the PropModel: {pbt.FullClassName}");
@@ -118,7 +114,7 @@ namespace DRM.PropBag.ControlsWPF
                 className: pbt.ClassName,
                 namespaceName: pbt.OutPutNameSpace,
                 deriveFrom: deriveFrom,
-                typeToWrap: typeToWrap,
+                targetType: targetType,
                 propFactory: propFactoryToUse,
                 typeSafetyMode: pbt.TypeSafetyMode,
                 deferMethodRefResolution: pbt.DeferMethodRefResolution,
@@ -130,6 +126,8 @@ namespace DRM.PropBag.ControlsWPF
             {
                 result.Namespaces.Add(pbt.Namespaces[nsPtr].Namespace);
             }
+
+            DoWhenChangedHelper doWhenChangedHelper = new DoWhenChangedHelper();
 
             int propsCount = pbt.Props == null ? 0 : pbt.Props.Count;
 
@@ -148,7 +146,7 @@ namespace DRM.PropBag.ControlsWPF
                 {
                     // ToDo: Find and process this field first, and then enter the enclosing foreach loop.
                     // because one day, some of the other processing may depend on the PropertyType.
-                    if (uc is PropTypeInfoField tif)
+                    if (uc is TypeInfoField tif)
                     {
                         Type propertyType = GetTypeFromInfoField(tif, pi.PropKind, pi.PropertyType, out Type itemType);
                         if (pi.PropKind == PropKindEnum.Collection)
@@ -173,8 +171,19 @@ namespace DRM.PropBag.ControlsWPF
 
                     else if (uc is PropDoWhenChangedField dwc)
                     {
+
+                        Func<object, Delegate> doWhenChangedGetter = null;
+                        
+                        if(dwc.MethodName != null)
+                        {
+                            doWhenChangedGetter = doWhenChangedHelper.GetTheDoWhenChangedActionGetter(dwc, rpi.PropertyType);
+                        }
+
                         ControlModel.PropDoWhenChangedField rdwc =
-                            new ControlModel.PropDoWhenChangedField(dwc.DoWhenChangedAction.DoWhenChanged, dwc.DoAfterNotify);
+                            new ControlModel.PropDoWhenChangedField(dwc.DoWhenChangedAction.DoWhenChanged,
+                            dwc.DoAfterNotify, dwc.MethodIsLocal, dwc.DeclaringType, dwc.FullClassName, 
+                            dwc.InstanceKey, dwc.MethodName,
+                            doWhenChangedGetter);
 
                         rpi.DoWhenChangedField = rdwc;
                     }
@@ -194,13 +203,13 @@ namespace DRM.PropBag.ControlsWPF
             return result;
         }
 
-        private PropTypeInfoField GetWrapperTypeInfo(PropBagTemplate pbt)
+        private TypeInfoField GetWrapperTypeInfo(PropBagTemplate pbt)
         {
-            PropTypeInfoField ptif = pbt.Items.OfType<PropTypeInfoField>().FirstOrDefault();
+            TypeInfoField ptif = pbt.Items.OfType<TypeInfoField>().FirstOrDefault();
             return ptif;
         }
 
-        private Type GetTypeFromInfoField(PropTypeInfoField tif, PropKindEnum propKind,
+        private Type GetTypeFromInfoField(TypeInfoField tif, PropKindEnum propKind,
             Type propertyType, out Type itemType)
         {
             itemType = null;
@@ -227,7 +236,7 @@ namespace DRM.PropBag.ControlsWPF
             }
         }
 
-        private Type GetTypeFromCollInfoField(PropTypeInfoField tif, out Type itemType)
+        private Type GetTypeFromCollInfoField(TypeInfoField tif, out Type itemType)
         {
             WellKnownCollectionTypeEnum collectionType = tif.CollectionType ?? WellKnownCollectionTypeEnum.Enumerable;
 
@@ -243,23 +252,41 @@ namespace DRM.PropBag.ControlsWPF
                 //    }
                 case WellKnownCollectionTypeEnum.ObservableCollection:
                     {
-                        foreach (object uc in tif.Items)
-                        {
-                            if (uc is PropTypeInfoCollection ptiCollection)
-                            {
-                                if (ptiCollection.Count > 0)
-                                {
-                                    PropTypeInfoField fChild = ptiCollection[0];
-                                    itemType = fChild.PropertyType;
-                                    return GetObsCollType(itemType);
-                                }
-                            }
+                        // Consider using the MemberType property of the "root" TypeInfoField itself.
+                        TypeInfoCollection tps;
+                        TypeInfoField child;
 
-                            else if (uc is PropTypeInfoField child)
+                        // Use our type parameter arguments 1-3
+                        if(tif.TypeParameter1 != null)
+                        {
+                            itemType = tif.TypeParameter1;
+                            return GetObsCollType(itemType);
+                        }
+
+                        // Use our child Type Parameters
+                        else if(tif.TypeParameters != null && tif.TypeParameters.Count > 0)
+                        {
+                            child = tif.TypeParameters[0];
+                            itemType = child.MemberType;
+                            return GetObsCollType(itemType);
+                        }
+
+                        // Use a child control of type TypeInfoCollection
+                        else if (null != (tps = tif.Items.OfType<TypeInfoCollection>().FirstOrDefault()))
+                        {
+                            if (tps.Count > 0)
                             {
-                                itemType = child.PropertyType;
+                                child = tps[0];
+                                itemType = child.MemberType;
                                 return GetObsCollType(itemType);
                             }
+                        }
+
+                        // Use a child control of type TypeInfoField
+                        else if (null != (child = tif.Items.OfType<TypeInfoField>().FirstOrDefault()))
+                        {
+                            itemType = child.MemberType;
+                            return GetObsCollType(itemType);
                         }
 
                         throw new ArgumentException("Cannot find a PropTypeInfoField for this collection.");

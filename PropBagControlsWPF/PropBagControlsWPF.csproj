@@ -47,6 +47,7 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Activators\DoWhenChangedHelper.cs" />
     <Compile Include="Activators\ViewModelHelper.cs" />
     <Compile Include="Binders\BindingTarget.cs" />
     <Compile Include="Binders\DataSourceChangedEventArgs.cs" />
@@ -63,12 +64,14 @@
     <Compile Include="Binders\OSSExtensions.cs" />
     <Compile Include="Binders\SelectedItemConverter.cs" />
     <Compile Include="Binders\SourceKindEnum.cs" />
+    <Compile Include="WPFHelpers\RelayCommand.cs" />
     <None Include="BoundPropBag_OLD.cs" />
     <Compile Include="Converters\ComparerFuncTypeConverter.cs" />
     <Compile Include="Binders\DepPropChangedEventArgs.cs" />
     <Compile Include="Binders\DepPropChangedTypeConverter.cs" />
     <None Include="Converters\EnumValueConverter.cs" />
     <None Include="Converters\LocalizableDescriptionAttribute.cs" />
+    <Compile Include="Mapper\MapperRequest.cs" />
     <Compile Include="Template\DoWhenChangedAction.cs" />
     <Compile Include="Converters\DuoActionTypeConverter.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -84,11 +87,11 @@
     <Compile Include="Template\PropComparerFunc.cs" />
     <Compile Include="Template\PropComparerField.cs" />
     <Compile Include="Activators\PropModelProvider.cs" />
-    <Compile Include="Template\PropTypeInfoField.cs" />
+    <Compile Include="Template\TypeInfoField.cs" />
     <Compile Include="Template\PropDoWhenChangedField.cs" />
     <Compile Include="Template\PropItem.cs" />
     <Compile Include="Template\PropsCollection.cs" />
-    <Compile Include="Template\PropTypeInfoCollection.cs" />
+    <Compile Include="Template\TypeInfoCollection.cs" />
     <Compile Include="Converters\PropValueConverter.cs" />
     <Compile Include="ReflectionHelpers.cs" />
     <Compile Include="TwoTypesMarkupExtension.cs" />

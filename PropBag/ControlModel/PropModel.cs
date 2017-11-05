@@ -25,9 +25,9 @@ namespace DRM.PropBag.ControlModel
         public DeriveFromClassModeEnum DeriveFromClassMode
         { get { return _deriveFromClassMode; } set { SetIfDifferentVT<DeriveFromClassModeEnum>(ref _deriveFromClassMode, value); } }
 
-        Type _typeToWrap;
+        Type _targetType;
         [XmlElement("type")]
-        public Type TypeToWrap { get { return _typeToWrap; } set { _typeToWrap = value; } }
+        public Type TargetType { get { return _targetType; } set { _targetType = value; } }
 
         TypeInfoField _wrapperTypeInfoField;
         [XmlElement("type-info")]
@@ -114,7 +114,7 @@ namespace DRM.PropBag.ControlModel
 
         public PropModel(string className, string namespaceName,
             DeriveFromClassModeEnum deriveFrom,
-            Type typeToWrap,
+            Type targetType,
             IPropFactory propFactory,
             PropBagTypeSafetyMode typeSafetyMode = PropBagTypeSafetyMode.AllPropsMustBeRegistered,
             bool deferMethodRefResolution = true,
@@ -123,7 +123,7 @@ namespace DRM.PropBag.ControlModel
             ClassName = className;
             NamespaceName = namespaceName;
             DeriveFromClassMode = deriveFrom;
-            TypeToWrap = typeToWrap;
+            TargetType = targetType;
             PropFactory = propFactory;
             TypeSafetyMode = typeSafetyMode;
             DeferMethodRefResolution = deferMethodRefResolution;
@@ -137,16 +137,16 @@ namespace DRM.PropBag.ControlModel
 
         #region Type and Namespace support
 
-        Type _targetType;
-        public Type TargetType
+        Type _typeToCreate;
+        public Type TypeToCreate
         {
             get
             {
-                if(_targetType == null)
+                if(_typeToCreate == null)
                 {
-                    _targetType = GetTargetType(this.DeriveFromClassMode, this.TypeToWrap, this.WrapperTypeInfoField);
+                    _typeToCreate = GetTargetType(this.DeriveFromClassMode, this.TargetType, this.WrapperTypeInfoField);
                 }
-                return _targetType;
+                return _typeToCreate;
             }
         }
 

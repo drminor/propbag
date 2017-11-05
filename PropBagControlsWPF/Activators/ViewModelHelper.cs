@@ -34,7 +34,7 @@ namespace DRM.PropBag.ControlsWPF
         {
             PropModel pm = PropModelProvider.GetPropModel(resourceKey);
 
-            Type typeToCreate = pm.TargetType;
+            Type typeToCreate = pm.TypeToCreate;
             string fullClassName = pm.FullClassName;
 
             object result = ViewModelActivator.GetNewViewModel
