@@ -8,7 +8,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
 {
     public class AutoMapperHelpers
     {
-        public AutoMapperProvider InitializeAutoMappers(IPropModelProvider propModelProvider)
+        public SimpleAutoMapperProvider InitializeAutoMappers(IPropModelProvider propModelProvider)
         {
             IPropBagMapperBuilderProvider propBagMapperBuilderProvider
                 = new SimplePropBagMapperBuilderProvider
@@ -21,7 +21,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
 
             ICachePropBagMappers mappersCachingService = new SimplePropBagMapperCache();
 
-            AutoMapperProvider autoMapperProvider = new AutoMapperProvider
+            SimpleAutoMapperProvider autoMapperProvider = new SimpleAutoMapperProvider
                 (
                 mapTypeDefinitionProvider: mapTypeDefinitionProvider,
                 mappersCachingService: mappersCachingService,
@@ -58,8 +58,8 @@ namespace PropBagLib.Tests.AutoMapperSupport
             }
         }
 
-        AutoMapperProvider _autoMapperProvider_V1;
-        public AutoMapperProvider GetAutoMapperSetup_V1() 
+        SimpleAutoMapperProvider _autoMapperProvider_V1;
+        public SimpleAutoMapperProvider GetAutoMapperSetup_V1() 
         {
             if(_autoMapperProvider_V1 == null)
             {

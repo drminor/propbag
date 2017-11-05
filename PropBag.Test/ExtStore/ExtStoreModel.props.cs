@@ -10,9 +10,11 @@ namespace PropBagLib.Tests
 {
 	public partial class ExtStoreModel : PropBag
 	{
-		//public ExtStoreModel() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered) { }
+		public ExtStoreModel() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered, null) { }
 
-		public ExtStoreModel(PropBagTypeSafetyMode typeSafetyMode, IPropFactory factory) : base(typeSafetyMode, null, factory)
+		public ExtStoreModel(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
+
+		public ExtStoreModel(PropBagTypeSafetyMode typeSafetyMode, IPropFactory factory) : base(typeSafetyMode, factory)
 		{
 	        AddProp<int>("PropInt3", null, false, null);
 	        AddProp<int>("PropInt4", null, false, null);
@@ -48,7 +50,7 @@ namespace PropBagLib.Tests
 
 	#region PropetyChangedWithTVals Event Declarations
 		  
-			public event PropertyChangedWithTValsHandler<int> PropInt3Changed
+			public event EventHandler<PropertyChangedWithTValsEventArgs<int>> PropInt3Changed
 			{
 				add
 				{
@@ -60,7 +62,7 @@ namespace PropBagLib.Tests
 				}
 			}
 	  
-			public event PropertyChangedWithTValsHandler<int> PropInt4Changed
+			public event EventHandler<PropertyChangedWithTValsEventArgs<int>> PropInt4Changed
 			{
 				add
 				{

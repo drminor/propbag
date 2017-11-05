@@ -31,7 +31,7 @@ namespace PropBagLib.Tests
                 className: "CreateAtRunTimeModel",
                 namespaceName: "PropBagLib.Tests",
                 deriveFrom: DeriveFromClassModeEnum.PropBag,
-                typeToWrap: null, 
+                targetType: null, 
                 propFactory: null,
                 typeSafetyMode: PropBagTypeSafetyMode.AllPropsMustBeRegistered,
                 deferMethodRefResolution: true,

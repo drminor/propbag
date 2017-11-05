@@ -10,7 +10,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
     [TestFixtureAttribute]
     public class TestAutoMapperBasic
     {
-        AutoMapperProvider _amp;
+        SimpleAutoMapperProvider _amp;
         IPropFactory _propFactory_V1;
 
         [OneTimeSetUp]
@@ -46,7 +46,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 _amp.RegisterMapperRequest<MyModel3, DestinationModel>
                 (
                     propModel: propModel,
-                    typeToWrap: typeToWrap,
+                    targetType: typeToWrap,
                     configPackageName: configPackageName
                 );
 
@@ -66,7 +66,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 _amp.RegisterMapperRequest<MyModel3, DestinationModel>
                 (
                     propModel: propModel,
-                    typeToWrap: typeToWrap,
+                    targetType: typeToWrap,
                     configPackageName: configPackageName
                 );
 
@@ -96,7 +96,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 _amp.RegisterMapperRequest<MyModel3, DestinationModel>
                 (
                     propModel: propModel,
-                    typeToWrap: typeToWrap,
+                    targetType: typeToWrap,
                     configPackageName: configPackageName
                 );
 
@@ -119,7 +119,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 _amp.RegisterMapperRequest<MyModel3, DestinationModel>
                 (
                     propModel: propModel,
-                    typeToWrap: typeToWrap,
+                    targetType: typeToWrap,
                     configPackageName: configPackageName
                 );
 
@@ -149,7 +149,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 _amp.RegisterMapperRequest<MyModel3, DestinationModel>
                 (
                     propModel: propModel,
-                    typeToWrap: typeToWrap,
+                    targetType: typeToWrap,
                     configPackageName: configPackageName
                 );
 
@@ -169,7 +169,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 className: "DestinationModel",
                 namespaceName: "PropBagLib.Tests.AutoMapperSupport",
                 deriveFrom: DeriveFromClassModeEnum.PropBag,
-                typeToWrap: null,
+                targetType: null,
                 propFactory: null,
                 typeSafetyMode: PropBagTypeSafetyMode.Tight,
                 deferMethodRefResolution: true,
@@ -226,6 +226,38 @@ namespace PropBagLib.Tests.AutoMapperSupport
         }
 
         #endregion
+
+        #region GET SIZE
+
+        private void GetSizeX()
+        {
+            long StopBytes = 0;
+            object myFoo;
+
+            long StartBytes = System.GC.GetTotalMemory(true);
+            myFoo = new object();
+            StopBytes = System.GC.GetTotalMemory(true);
+
+            string result = "Size is " + ((long)(StopBytes - StartBytes)).ToString();
+
+            GC.KeepAlive(myFoo); // This ensure a reference to object keeps object in memory
+        }
+
+        private void GetSizeY()
+        {
+
+            //long size = 0;
+            //object o = new object();
+            //using (Stream s = new MemoryStream())
+            //{
+            //    BinaryFormatter formatter = new BinaryFormatter();
+            //    formatter.Serialize(s, o);
+            //    size = s.Length;
+            //}
+        }
+
+        #endregion
+
 
     }
 }

@@ -2,20 +2,15 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib"
                     xmlns:mod="clr-namespace:PropBagTestApp.Models"
-                    xmlns:pb="clr-namespace:DRM.PropBag.ControlsWPF;assembly=WPFControls"
-                    xmlns:tspb="clr-namespace:DRM.TypeSafePropertyBag;assembly=TypeSafePropertyBag">
+                    xmlns:vmod="clr-namespace:PropBagTestApp.ViewModels"
+                    xmlns:pb="clr-namespace:DRM.PropBag.ControlsWPF;assembly=WPFControls">
 
 
-    <!--<ObjectDataProvider x:Key="TypeSafetyModeEnum" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
-        <ObjectDataProvider.MethodParameters>
-            <x:Type TypeName="tspb:PropBagTypeSafetyMode"/>
-        </ObjectDataProvider.MethodParameters>
-    </ObjectDataProvider>-->
-
-    <pb:PropBagTemplate x:Key="ReferenceBindViewModelPB" TypeSafetyMode="AllPropsMustBeRegistered" 
+    <pb:PropBagTemplate x:Key="ReferenceBindViewModelPB"
             ClassName="ReferenceBindViewModelPB"
-
-            OutPutNameSpace="PropBagTestApp.ViewModels">
+            TargetType="{x:Type vmod:ReferenceBindViewModelPB}"
+            OutPutNameSpace="PropBagTestApp.ViewModels"
+            TypeSafetyMode="AllPropsMustBeRegistered" >
 
         <pb:PropBagTemplate.Namespaces>
             <pb:NamespaceItem Namespace="PropBagTestApp.Models"/>
@@ -42,7 +37,6 @@
             <pb:PropItem PropertyName="Deep" PropertyType="mod:MyModel4">
                 <pb:InitialValueField SetToNull="True"/>
             </pb:PropItem>
-
 
         </pb:PropBagTemplate.Props>
 

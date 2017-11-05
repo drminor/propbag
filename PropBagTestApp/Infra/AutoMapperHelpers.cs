@@ -11,7 +11,7 @@ namespace PropBagTestApp.Infra
 {
     public class AutoMapperHelpers
     {
-        public AutoMapperProvider InitializeAutoMappers(IPropModelProvider propModelProvider)
+        public SimpleAutoMapperProvider InitializeAutoMappers(IPropModelProvider propModelProvider)
         {
             IPropBagMapperBuilderProvider propBagMapperBuilderProvider
                 = new SimplePropBagMapperBuilderProvider
@@ -24,7 +24,7 @@ namespace PropBagTestApp.Infra
 
             ICachePropBagMappers mappersCachingService = new SimplePropBagMapperCache();
 
-            AutoMapperProvider autoMapperProvider = new AutoMapperProvider
+            SimpleAutoMapperProvider autoMapperProvider = new SimpleAutoMapperProvider
                 (
                 mapTypeDefinitionProvider: mapTypeDefinitionProvider,
                 mappersCachingService: mappersCachingService,
@@ -141,7 +141,7 @@ namespace PropBagTestApp.Infra
     {
         public static PropModelProvider PropModelProvider { get; }
         public static ViewModelHelper ViewModelHelper { get; }
-        public static AutoMapperProvider AutoMapperProvider { get; }
+        public static SimpleAutoMapperProvider AutoMapperProvider { get; }
         public static IPropFactory ThePropFactory { get; }
 
         static JustSayNo() 

@@ -168,7 +168,7 @@ namespace PropBagLib.Tests
 
 	#region PropetyChangedWithTVals Event Declarations
 		  
-			public event PropertyChangedWithTValsHandler<object> PropObjectChanged
+			public event EventHandler<PropertyChangedWithTValsEventArgs<object>> PropObjectChanged
 			{
 				add
 				{
@@ -180,7 +180,7 @@ namespace PropBagLib.Tests
 				}
 			}
 	  
-			public event PropertyChangedWithTValsHandler<string> PropStringChanged
+			public event EventHandler<PropertyChangedWithTValsEventArgs<string>> PropStringChanged
 			{
 				add
 				{
@@ -192,7 +192,7 @@ namespace PropBagLib.Tests
 				}
 			}
 	  
-			public event PropertyChangedWithTValsHandler<string> PropStringCallDoAfterChanged
+			public event EventHandler<PropertyChangedWithTValsEventArgs<string>> PropStringCallDoAfterChanged
 			{
 				add
 				{
@@ -204,7 +204,7 @@ namespace PropBagLib.Tests
 				}
 			}
 	  
-			public event PropertyChangedWithTValsHandler<string> PropStringUseRefCompChanged
+			public event EventHandler<PropertyChangedWithTValsEventArgs<string>> PropStringUseRefCompChanged
 			{
 				add
 				{
@@ -216,7 +216,7 @@ namespace PropBagLib.Tests
 				}
 			}
 	  
-			public event PropertyChangedWithTValsHandler<bool> PropBoolChanged
+			public event EventHandler<PropertyChangedWithTValsEventArgs<bool>> PropBoolChanged
 			{
 				add
 				{
@@ -228,7 +228,7 @@ namespace PropBagLib.Tests
 				}
 			}
 	  
-			public event PropertyChangedWithTValsHandler<int> PropIntChanged
+			public event EventHandler<PropertyChangedWithTValsEventArgs<int>> PropIntChanged
 			{
 				add
 				{
@@ -240,7 +240,7 @@ namespace PropBagLib.Tests
 				}
 			}
 	  
-			public event PropertyChangedWithTValsHandler<TimeSpan> PropTimeSpanChanged
+			public event EventHandler<PropertyChangedWithTValsEventArgs<TimeSpan>> PropTimeSpanChanged
 			{
 				add
 				{
@@ -252,7 +252,7 @@ namespace PropBagLib.Tests
 				}
 			}
 	  
-			public event PropertyChangedWithTValsHandler<Uri> PropUriChanged
+			public event EventHandler<PropertyChangedWithTValsEventArgs<Uri>> PropUriChanged
 			{
 				add
 				{
@@ -264,7 +264,7 @@ namespace PropBagLib.Tests
 				}
 			}
 	  
-			public event PropertyChangedWithTValsHandler<Lazy<int>> PropLazyIntChanged
+			public event EventHandler<PropertyChangedWithTValsEventArgs<Lazy<int>>> PropLazyIntChanged
 			{
 				add
 				{
@@ -276,7 +276,7 @@ namespace PropBagLib.Tests
 				}
 			}
 	  
-			public event PropertyChangedWithTValsHandler<Nullable<int>> PropNullableIntChanged
+			public event EventHandler<PropertyChangedWithTValsEventArgs<Nullable<int>>> PropNullableIntChanged
 			{
 				add
 				{
@@ -288,7 +288,7 @@ namespace PropBagLib.Tests
 				}
 			}
 	  
-			public event PropertyChangedWithTValsHandler<ICollection<int>> PropICollectionIntChanged
+			public event EventHandler<PropertyChangedWithTValsEventArgs<ICollection<int>>> PropICollectionIntChanged
 			{
 				add
 				{
