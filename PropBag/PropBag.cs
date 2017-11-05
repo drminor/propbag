@@ -51,7 +51,7 @@ namespace DRM.PropBag
         // alternative could be that they are initialized on first assignment.
         public event PropertyChangedEventHandler PropertyChanged; // = delegate { };
         public event PropertyChangingEventHandler PropertyChanging; // = delegate { };
-        public event PropertyChangedWithValsHandler PropertyChangedWithVals; // = delegate { };
+        public event EventHandler<PropertyChangedWithValsEventArgs> PropertyChangedWithVals; // = delegate { };
         public event PropertyChangedEventHandler PropertyChangedIndividual;
 
         // DRM: Changed to protected and added set accessor on 10/29/17; DRM: removed set accessor on 11/2/17.
@@ -60,7 +60,7 @@ namespace DRM.PropBag
         public string FullClassName => OurMetaData.FullClassName;
 
         private PropBagTypeSafetyMode TypeSafetyMode { get; }
-        protected TypeSafePropBagMetaData OurMetaData { get; }
+        protected virtual TypeSafePropBagMetaData OurMetaData { get; }
         private readonly Dictionary<string, PropGen> tVals;
 
         #endregion
@@ -127,14 +127,14 @@ namespace DRM.PropBag
             tVals = new Dictionary<string, PropGen>();
         }
 
-        protected virtual TypeSafePropBagMetaData BuildMetaData(PropBagTypeSafetyMode typeSafetyMode, string classFullName, IPropFactory propFactory)
+        protected TypeSafePropBagMetaData BuildMetaData(PropBagTypeSafetyMode typeSafetyMode, string classFullName, IPropFactory propFactory)
         {
             classFullName = classFullName ?? GetFullTypeNameOfThisInstance();
             TypeSafePropBagMetaData result = new TypeSafePropBagMetaData(classFullName, typeSafetyMode, propFactory);
             return result;
         }
 
-        protected virtual string GetFullTypeNameOfThisInstance()
+        protected string GetFullTypeNameOfThisInstance()
         {
             string fullClassName = this.GetType().FullName; // this.GetType.GetTypeInfo().FullName;
             return fullClassName;
@@ -146,14 +146,14 @@ namespace DRM.PropBag
             return className;
         }
 
-        protected virtual void Hydrate(PropModel pm)
+        protected void Hydrate(PropModel pm)
         {
             string cName = GetClassNameOfThisInstance();
             string pCName = pm.ClassName;
 
             if (cName != pCName)
             {
-                System.Diagnostics.Debug.WriteLine($"CLR class name: {cName} does not match PropModdel class name: {pCName}.");
+                System.Diagnostics.Debug.WriteLine($"CLR class name: {cName} does not match PropModel class name: {pCName}.");
             }
 
             foreach (DRM.PropBag.ControlModel.PropItem pi in pm.Props)
@@ -183,6 +183,15 @@ namespace DRM.PropBag
                     pi.InitialValueField = PropInitialValueField.UndefinedInitialValueField;
                 }
 
+                Delegate doWhenChangedAction = pi.DoWhenChangedField?.DoWhenChangedAction;
+
+                if(doWhenChangedAction == null && (pi?.DoWhenChangedField?.DoWhenActionGetter != null))
+                {
+                    Func<object, Delegate> rr = pi.DoWhenChangedField.DoWhenActionGetter;
+
+                    doWhenChangedAction = rr(this);
+                }
+
                 IPropGen pg;
 
                 if (pi.HasStore && !pi.InitialValueField.SetToUndefined)
@@ -202,12 +211,12 @@ namespace DRM.PropBag
                     }
 
                     pg = PropFactory.CreateGenFromString(pi.PropertyType, value, useDefault, pi.PropertyName, ei, pi.HasStore, pi.TypeIsSolid,
-                        pi.PropKind, pi.DoWhenChangedField.DoWhenChangedAction, pi.DoWhenChangedField.DoAfterNotify, comparer, useRefEquality, pi.ItemType);
+                        pi.PropKind, doWhenChangedAction, pi.DoWhenChangedField.DoAfterNotify, comparer, useRefEquality, pi.ItemType);
                 }
                 else
                 {
                     pg = PropFactory.CreateGenWithNoValue(pi.PropertyType, pi.PropertyName, ei, pi.HasStore, pi.TypeIsSolid,
-                        pi.PropKind, pi.DoWhenChangedField.DoWhenChangedAction, pi.DoWhenChangedField.DoAfterNotify, comparer, useRefEquality, pi.ItemType);
+                        pi.PropKind, doWhenChangedAction, pi.DoWhenChangedField.DoAfterNotify, comparer, useRefEquality, pi.ItemType);
                 }
                 AddProp(pi.PropertyName, pg);
             }
@@ -669,7 +678,6 @@ namespace DRM.PropBag
 
             if (!genProp.IsEmpty)
             {
-
                 WeakEventManager<INotifyPropertyChanged, PropertyChangedEventArgs>.
                     AddHandler(this, "PropertyChangedIndividual", handler);
                 return true;
@@ -746,7 +754,8 @@ namespace DRM.PropBag
                 return false;
         }
 
-        public bool SubscribeToPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, string propertyName)
+        // TODO: Implement our own WeakEventManager for Delegates that have a single Type Parameter.
+        public bool SubscribeToPropChanged<T>(EventHandler<PropertyChangedWithTValsEventArgs<T>> eventHandler, string propertyName)
         {
             bool mustBeRegistered = OurMetaData.AllPropsMustBeRegistered;
 
@@ -754,13 +763,22 @@ namespace DRM.PropBag
 
             if(prop != null)
             {
+                PropertyChangedEventManager p;
+
+                //WeakEventManager<IProp<T>, PropertyChangedWithTValsEventArgs<T>>.
+                //    AddHandler(prop, "PropertyChangedWithTVals", eventHandler);
                 prop.PropertyChangedWithTVals += eventHandler;
                 return true;
             }
+
+
+    //        WeakEventManager<INotifyPropertyChanged, PropertyChangedEventArgs>.
+    //AddHandler(this, "PropertyChangedIndividual", handler);
+    //        return true;
             return false;
         }
 
-        public bool UnSubscribeToPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, string propertyName)
+        public bool UnSubscribeToPropChanged<T>(EventHandler<PropertyChangedWithTValsEventArgs<T>> eventHandler, string propertyName)
         {
             bool mustBeRegistered = OurMetaData.AllPropsMustBeRegistered;
 
@@ -781,7 +799,7 @@ namespace DRM.PropBag
         /// <typeparam name="T"></typeparam>
         /// <param name="eventHandler"></param>
         /// <param name="eventPropertyName"></param>
-        protected bool AddToPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, string eventPropertyName)
+        protected bool AddToPropChanged<T>(EventHandler<PropertyChangedWithTValsEventArgs<T>> eventHandler, string eventPropertyName)
         {
             string propertyName = GetPropNameFromEventProp(eventPropertyName);
             return SubscribeToPropChanged<T>(eventHandler, propertyName);
@@ -794,7 +812,7 @@ namespace DRM.PropBag
         /// <typeparam name="T"></typeparam>
         /// <param name="eventHandler"></param>
         /// <param name="eventPropertyName"></param>
-        protected bool RemoveFromPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, string eventPropertyName)
+        protected bool RemoveFromPropChanged<T>(EventHandler<PropertyChangedWithTValsEventArgs<T>> eventHandler, string eventPropertyName)
         {
             string propertyName = GetPropNameFromEventProp(eventPropertyName);
             return UnSubscribeToPropChanged<T>(eventHandler, propertyName);
@@ -1089,8 +1107,8 @@ namespace DRM.PropBag
                 // The un-typed, PropertyChanged event defined on the individual property.
                 prop.OnPropertyChangedWithVals(propertyName, oldVal, newValue);
 
-                // The un-typed, PropertyChanged shared event.
-                OnPropertyChangedWithVals(propertyName, oldVal, newValue);
+                //// The un-typed, PropertyChanged shared event.
+                //OnPropertyChangedWithVals(propertyName, oldVal, newValue);
 
                 // then perform the call back.
                 prop.DoWhenChanged(oldVal, newValue);
@@ -1112,8 +1130,8 @@ namespace DRM.PropBag
                 // The un-typed, PropertyChanged event defined on the individual property.
                 prop.OnPropertyChangedWithVals(propertyName, oldVal, newValue);
 
-                // The un-typed, PropertyChanged shared event.
-                OnPropertyChangedWithVals(propertyName, oldVal, newValue);
+                //// The un-typed, PropertyChanged shared event.
+                //OnPropertyChangedWithVals(propertyName, oldVal, newValue);
             }
         }
 
@@ -1307,13 +1325,13 @@ namespace DRM.PropBag
             }
         }
 
-        protected void OnPropertyChangedWithVals(string propertyName, object oldVal, object newVal)
-        {
-            PropertyChangedWithValsHandler handler = Interlocked.CompareExchange(ref PropertyChangedWithVals, null, null);
+        //protected void OnPropertyChangedWithVals(string propertyName, object oldVal, object newVal)
+        //{
+        //    PropertyChangedWithValsHandler handler = Interlocked.CompareExchange(ref PropertyChangedWithVals, null, null);
 
-            if (handler != null)
-                handler(this, new PropertyChangedWithValsEventArgs(propertyName, oldVal, newVal));
-        }
+        //    if (handler != null)
+        //        handler(this, new PropertyChangedWithValsEventArgs(propertyName, oldVal, newVal));
+        //}
 
         #endregion
 
@@ -1359,8 +1377,6 @@ namespace DRM.PropBag
         // Method Templates for Property Bag
         internal static class GenericMethodTemplates
         {
-            #region DoSetBridge
-
             static Lazy<MethodInfo> theSingleGenericDoSetBridgeMethodInfo;
             static MethodInfo GenericDoSetBridgeMethodInfo { get { return theSingleGenericDoSetBridgeMethodInfo.Value; } }
 
@@ -1405,7 +1421,6 @@ namespace DRM.PropBag
                 return result;
             }
 
-            #endregion
         }
 
         #endregion
