@@ -6,8 +6,8 @@ namespace DRM.PropBag.Collections
 {
     public abstract class PbAbstractListSource : IListSource
     {
-        protected virtual Func<object, IList> ListGetter { get; set;}
-        protected virtual object Component { get; set; }
+        protected Func<object, IList> ListGetter { get; /*set;*/}
+        protected object Component { get; /*set;*/ }
 
         public virtual bool ContainsListCollection => false;
 

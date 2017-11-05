@@ -93,7 +93,7 @@ namespace DRM.PropBag.Collections
 
         #region ITypedList members
 
-        PropertyDescriptorCollection ITypedList.GetItemProperties(PropertyDescriptor[] listAccessors)
+        public PropertyDescriptorCollection GetItemProperties(PropertyDescriptor[] listAccessors)
         {
             if (listAccessors != null) throw new NotSupportedException("PbCollection does not support the use of listAccessors.");
 
@@ -101,7 +101,7 @@ namespace DRM.PropBag.Collections
             return propDescriptors;
         }
 
-        string ITypedList.GetListName(PropertyDescriptor[] listAccessors)
+        public string GetListName(PropertyDescriptor[] listAccessors)
         {
             if (listAccessors != null) throw new NotSupportedException("PbCollection does not support the use of listAccessors.");
 
