@@ -56,7 +56,6 @@
     <Compile Include="Collections\PbCollection.cs" />
     <Compile Include="Collections\CProp.cs" />
     <Compile Include="Collections\PbAbstractListSource.cs" />
-    <Compile Include="Collections\PropTypedBaseForC.cs" />
     <Compile Include="ControlModel\MapperRequest.cs" />
     <Compile Include="ControlModel\WellKnownCollectionTypeEnum.cs" />
     <Compile Include="ControlModel\NotifyPropertyChangedBase.cs" />
@@ -64,9 +63,10 @@
     <Compile Include="ControlModel\TypeInfoField.cs" />
     <Compile Include="ControlModel\TwoTypes.cs" />
     <Compile Include="DoSetDelegate.cs" />
-    <Compile Include="EventManagement\Class1.cs" />
     <Compile Include="EventManagement\IWeakEventListener.cs" />
     <Compile Include="EventManagement\PropertyChangedEventManager.cs" />
+    <Compile Include="EventManagement\SimpleEventManager.cs" />
+    <Compile Include="EventManagement\SimpleEventManagerProvider.cs" />
     <Compile Include="Factories\AbstractPropFactory.cs" />
     <Compile Include="ControlModel\PropComparerField.cs" />
     <Compile Include="ControlModel\PropDoWhenChangedField.cs" />

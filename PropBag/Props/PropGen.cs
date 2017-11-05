@@ -127,9 +127,9 @@ namespace DRM.PropBag
 
         #endregion
 
-        public void CleanUp()
+        public void CleanUp(bool doTypedCleanup)
         {
-            if(TypedProp != null) TypedProp.CleanUpTyped();
+            if(doTypedCleanup && TypedProp != null) TypedProp.CleanUpTyped();
             _actTable = null;
             PropertyChangedWithVals = null;
         }

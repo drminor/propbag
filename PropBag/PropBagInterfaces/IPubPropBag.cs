@@ -32,7 +32,8 @@ namespace DRM.PropBag
         IProp<T> AddPropObjCompNoStore<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false,
             object extraInfo = null);
 
-        void RemoveProp(string propertyName);
+        void RemoveProp(string propertyName, Type propertyType);
+        void RemoveProp<T>(string propertyName);
 
         bool RegisterDoWhenChanged<T>(string propertyName, Action<T, T> doWhenChanged,
             bool doAfterNotify = false);

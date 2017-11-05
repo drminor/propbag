@@ -103,9 +103,14 @@ namespace DRM.PropBag
             return base.AddPropObjCompNoStore(propertyName, doIfChanged, doAfterNotify, extraInfo);
         }
 
-        new public void RemoveProp(string propertyName)
+        new public void RemoveProp(string propertyName, Type propertyType)
         {
-            base.RemoveProp(propertyName);
+            base.RemoveProp(propertyName, propertyType);
+        }
+
+        new public void RemoveProp<T>(string propertyName)
+        {
+            base.RemoveProp<T>(propertyName);
         }
 
         /// <summary>

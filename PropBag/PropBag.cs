@@ -459,7 +459,25 @@ namespace DRM.PropBag
 
         private IPropPrivate<T> GetTypedPropPrivate<T>(string propertyName, bool mustBeRegistered, bool neverCreate = false)
         {
+            PropGen genProp = GetGenPropPrivate<T>(propertyName, mustBeRegistered, neverCreate);
+
+            if (!genProp.IsEmpty)
+            {
+                return (IPropPrivate<T>)genProp.TypedProp;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        private PropGen GetGenPropPrivate<T>(string propertyName, bool mustBeRegistered, bool neverCreate = false)
+        {
             bool hasStore = PropFactory.ProvidesStorage;
+
+            // TODO: Make this use a different version of GetPropGen: one that takes advantage of the 
+            // compile-time type knowlege -- especially if we have to register the property in HandleMissing.
+
             PropGen genProp = GetPropGen(propertyName, typeof(T), out bool wasRegistered,
                 haveValue: false,
                 value: null,
@@ -469,17 +487,14 @@ namespace DRM.PropBag
                 desiredHasStoreValue: PropFactory.ProvidesStorage);
 
             if (wasRegistered)
-                return (IPropPrivate<T>)genProp.TypedProp;
+                return genProp;
             else
             {
-                if(!genProp.IsEmpty)
+                if (!genProp.IsEmpty)
                 {
-                    return CheckTypeInfo<T>(genProp, propertyName, tVals);
+                    CheckTypeInfo<T>(genProp, propertyName, tVals);
                 }
-                else
-                {
-                    return null;
-                }
+                return genProp;
             }
         }
 
@@ -665,6 +680,35 @@ namespace DRM.PropBag
 
         #region Subscribe to Property Changed Event Helpers
 
+        public bool SubscribeToPropChanged(EventHandler<PropertyChangedWithValsEventArgs> eventHandler, string propertyName)
+        {
+            throw new NotImplementedException();
+
+            //bool mustBeRegistered = OurMetaData.AllPropsMustBeRegistered;
+
+            //IPropGen genProp = GetPropGen(propertyName, null, out bool wasRegistered,
+            //        haveValue: false,
+            //        value: null,
+            //        alwaysRegister: false,
+            //        mustBeRegistered: mustBeRegistered,
+            //        neverCreate: false,
+            //        desiredHasStoreValue: PropFactory.ProvidesStorage);
+
+            //if (!genProp.IsEmpty)
+            //{
+            //    // TODO: Help the caller subscribe using a WeakReference
+            //    genProp.SubscribeToPropChanged(doOnChange);
+            //    return true;
+            //}
+            //return false;
+        }
+
+        public bool UnSubscribeToPropChanged(EventHandler<PropertyChangedWithValsEventArgs> eventHandler, string propertyName)
+        {
+            throw new NotImplementedException();
+        }
+
+
         public bool SubscribeToPropChanged(EventHandler<PropertyChangedEventArgs> handler,
             string propertyName, Type propertyType)
         {
@@ -764,6 +808,8 @@ namespace DRM.PropBag
 
             if(prop != null)
             {
+                //prop.GetTheEventManger().AddHandler()
+
                 PropertyChangedEventManager p;
 
                 //WeakEventManager<IProp<T>, PropertyChangedWithTValsEventArgs<T>>.
@@ -846,6 +892,7 @@ namespace DRM.PropBag
             return tVals.ContainsKey(propertyName);
         }
 
+        // TODO: PropBagTypeSafetyMode.Locked is not honored here.
         public bool TryGetTypeOfProperty(string propertyName, out Type type)
         {
             if (tVals.TryGetValue(propertyName, out PropGen value))
@@ -971,6 +1018,7 @@ namespace DRM.PropBag
         {
             PropGen pg = new PropGen(prop);
             tVals.Add(propertyName, pg);
+            //prop.DoWhenChanged = 
         }
 
         protected void AddProp(string propertyName, IPropGen typedPropWrapper)
@@ -979,9 +1027,50 @@ namespace DRM.PropBag
             tVals.Add(propertyName, pg);
         }
 
-        protected void RemoveProp(string propertyName)
+        protected void RemoveProp(string propertyName, Type propertyType)
         {
-            tVals.Remove(propertyName);
+            if (propertyType == null && OurMetaData.OnlyTypedAccess)
+            {
+                ReportNonTypedAccess(propertyName, nameof(SetValWithType));
+            }
+
+            bool mustBeRegistered = TypeSafetyMode == PropBagTypeSafetyMode.Locked;
+
+            IPropGen pGen = GetPropGen(propertyName, null, out bool wasRegistered,
+                haveValue: false,
+                value: null,
+                alwaysRegister: false,
+                mustBeRegistered: false,
+                neverCreate: true,
+                desiredHasStoreValue: PropFactory.ProvidesStorage);
+
+            if (!pGen.IsEmpty)
+            {
+                pGen.CleanUp(doTypedCleanup: false);
+                tVals.Remove(propertyName);
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"Could not remove property: {propertyName}.");
+            }
+
+        }
+        
+        protected void RemoveProp<T>(string propertyName)
+        {
+            bool mustBeRegistered = TypeSafetyMode == PropBagTypeSafetyMode.Locked;
+
+            PropGen genProp = GetGenPropPrivate<T>(propertyName, mustBeRegistered: mustBeRegistered, neverCreate: true);
+
+            if(!genProp.IsEmpty)
+            {
+                genProp.CleanUp(doTypedCleanup: true);
+                tVals.Remove(propertyName);
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"Could not remove property: {propertyName}.");
+            }
         }
 
         /// <summary>
@@ -1011,7 +1100,7 @@ namespace DRM.PropBag
         {
             foreach (var x in tVals.Values)
             {
-                x.CleanUp();
+                x.CleanUp(doTypedCleanup: true);
             }
         }
 

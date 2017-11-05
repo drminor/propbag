@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
+using DRM.TypeSafePropertyBag.EventManagement;
 
 namespace DRM.PropBag
 {
@@ -23,6 +24,7 @@ namespace DRM.PropBag
 
         public override event EventHandler<PropertyChangedWithValsEventArgs> PropertyChangedWithVals;
 
+
         public PropKindEnum PropKind { get; private set; }
 
         abstract public IListSource ListSource { get; }
@@ -34,10 +36,10 @@ namespace DRM.PropBag
         protected Func<T, T, bool> Comparer { get; set; }
 
         private Action<T, T> _doWhenChangedAction;
-        protected Action<T, T> DoWHenChangedAction
+        public Action<T, T> DoWHenChangedAction
         {
             get { return _doWhenChangedAction; }
-            set { _doWhenChangedAction = value; }
+            private set { _doWhenChangedAction = value; }
         }
 
         public bool DoAfterNotify { get; set; }
@@ -125,11 +127,13 @@ namespace DRM.PropBag
             return hadOnePreviously;
         }
 
+        // TODO: See if our value implements IDisposable, and if so, dispose it.
         public void CleanUpTyped()
         {
             Comparer = null;
             DoWHenChangedAction = null;
             PropertyChangedWithTVals = null;
+            PropertyChangedWithVals = null;
         }
 
         #endregion
@@ -195,6 +199,12 @@ namespace DRM.PropBag
 
             if (handler != null)
                 handler(this, new PropertyChangedWithValsEventArgs(propertyName, this.Type, oldVal, newVal));
+        }
+
+        // TODOXX:
+        public IEventManager<INotifyPropertyChangedWithTVals<T>, PropertyChangedWithTValsEventArgs<T>> GetTheEventManger()
+        {
+            throw new NotImplementedException();
         }
 
         #endregion

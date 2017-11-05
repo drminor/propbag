@@ -95,11 +95,10 @@ namespace DRM.PropBag
             return new ValPlusType(Value, Type);
         }
 
-        public void CleanUp()
+        public void CleanUp(bool doTypedCleanUp)
         {
-            if (TypedProp != null) TypedProp.CleanUpTyped();
+            if (doTypedCleanUp && TypedProp != null) TypedProp.CleanUpTyped();
             _actTableGen = null;
-            //PropertyChangedWithVals = null;
         }
 
         #endregion

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DRM.TypeSafePropertyBag.EventManagement;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -37,6 +38,7 @@ namespace DRM.TypeSafePropertyBag
     public interface IPropPrivate<T> : IProp<T>
     {
         bool DoAfterNotify { get; set; }
+        Action<T, T> DoWHenChangedAction { get; }
         bool UpdateDoWhenChangedAction(Action<T, T> doWhenChangedAction, bool? doAfterNotify);
     }
 
@@ -45,7 +47,7 @@ namespace DRM.TypeSafePropertyBag
     /// Objects that implement this interface are often created by an instance of a class that inherits from AbstractPropFactory.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public interface IProp<T> : IPropGen, IProp
+    public interface IProp<T> : IPropGen, IProp, INotifyPropertyChangedWithTVals<T>, IProvideATypedEventManager<T>
     {
         T TypedValue { get; set; }
 
@@ -55,7 +57,7 @@ namespace DRM.TypeSafePropertyBag
         void DoWhenChanged(T oldVal, T newVal);
 
         // Property Changed with typed values support
-        event EventHandler<PropertyChangedWithTValsEventArgs<T>> PropertyChangedWithTVals;
+        //event EventHandler<PropertyChangedWithTValsEventArgs<T>> PropertyChangedWithTVals;
         void OnPropertyChangedWithTVals(string propertyName, T oldVal, T newVal);
 
         // TODO: Consider moving these to the IPropPrivate<T> interface.
@@ -70,7 +72,7 @@ namespace DRM.TypeSafePropertyBag
     /// Classes that implement the IPropBag interface, keep a list of properties, each of which implements this interface.
     /// These features are managed by the PropBag, and not by classes that inherit from AbstractProp.
     /// </summary>
-    public interface IPropGen
+    public interface IPropGen : INotifyPropertyChangedWithVals
     {
         bool TypeIsSolid { get; }
         bool HasStore { get; }
@@ -83,7 +85,7 @@ namespace DRM.TypeSafePropertyBag
         bool IsEmpty { get; }
 
         // Property Changed with typed values support
-        event EventHandler<PropertyChangedWithValsEventArgs> PropertyChangedWithVals;
+        //event EventHandler<PropertyChangedWithValsEventArgs> PropertyChangedWithVals;
         void OnPropertyChangedWithVals(string propertyName, object oldVal, object newVal);
 
         void SubscribeToPropChanged(Action<object, object> doOnChange);
@@ -93,7 +95,7 @@ namespace DRM.TypeSafePropertyBag
 
         ValPlusType ValuePlusType();
 
-        void CleanUp();
+        void CleanUp(bool doTypedCleanup);
     }
 
     /// <summary>

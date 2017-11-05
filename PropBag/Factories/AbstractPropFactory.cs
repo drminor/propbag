@@ -9,6 +9,7 @@ using System.ComponentModel;
 using System.Globalization;
 using DRM.TypeSafePropertyBag;
 using System.Collections.ObjectModel;
+using DRM.TypeSafePropertyBag.EventManagement;
 
 namespace DRM.PropBag
 {
@@ -362,7 +363,24 @@ namespace DRM.PropBag
 
         #endregion Property-Type Methods
 
-        #endregion Shared Delegate Creation Logic
+        #endregion Shared Delegate Creation
+
+        #region Event Management
+
+        //public IEventManager<TEventSource, TEventArgs> GetTheEventManager<TEventSource, TEventArgs>() where TEventArgs : EventArgs
+        //{
+        //    IEventManager<TEventSource, TEventArgs> result = new SimpleEventManager();
+        //    return result;
+        //}
+
+        public IEventManager<INotifyPropertyChangedWithVals, PropertyChangedWithValsEventArgs>
+            GetTheEventManager<INotifyPropertyChangedWithVals, PropertyChangedWithValsEventArgs>() where PropertyChangedWithValsEventArgs : EventArgs
+        {
+            var x = new SimpleEventManager();
+            return (IEventManager<INotifyPropertyChangedWithVals, PropertyChangedWithValsEventArgs>)x;
+        }
+
+        #endregion
     }
 
     static class APFGenericMethodTemplates
