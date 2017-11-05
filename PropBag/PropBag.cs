@@ -54,6 +54,7 @@ namespace DRM.PropBag
         public event EventHandler<PropertyChangedWithValsEventArgs> PropertyChangedWithVals; // = delegate { };
         public event PropertyChangedEventHandler PropertyChangedIndividual;
 
+
         // DRM: Changed to protected and added set accessor on 10/29/17; DRM: removed set accessor on 11/2/17.
         protected IPropFactory PropFactory { get; /*set; */}
 
@@ -1307,7 +1308,7 @@ namespace DRM.PropBag
         // Raise Standard Events
         protected void OnPropertyChanged(string propertyName)
         {
-            PropertyChangedEventHandler handler = Interlocked.CompareExchange(ref PropertyChanged, null, null);
+           PropertyChangedEventHandler handler = Interlocked.CompareExchange(ref PropertyChanged, null, null);
 
             if (handler != null)
             {
@@ -1325,13 +1326,13 @@ namespace DRM.PropBag
             }
         }
 
-        //protected void OnPropertyChangedWithVals(string propertyName, object oldVal, object newVal)
-        //{
-        //    PropertyChangedWithValsHandler handler = Interlocked.CompareExchange(ref PropertyChangedWithVals, null, null);
+        protected void OnPropertyChangedWithVals(string propertyName, Type propertyType, object oldVal, object newVal)
+        {
+            EventHandler<PropertyChangedWithValsEventArgs> handler = Interlocked.CompareExchange(ref PropertyChangedWithVals, null, null);
 
-        //    if (handler != null)
-        //        handler(this, new PropertyChangedWithValsEventArgs(propertyName, oldVal, newVal));
-        //}
+            if (handler != null)
+                handler(this, new PropertyChangedWithValsEventArgs(propertyName, propertyType, oldVal, newVal));
+        }
 
         #endregion
 

@@ -24,7 +24,7 @@ namespace DRM.TypeSafePropertyBag
 
     public interface INotifyPropertyChanged<TEventArgs> where TEventArgs : EventArgs
     {
-        event EventHandler<TEventArgs> PropertyChanged;
+        event EventHandler<TEventArgs> PropertyChangedWithVals;
     }
 
     /// <summary>
@@ -47,7 +47,7 @@ namespace DRM.TypeSafePropertyBag
         /// <summary>
         /// Occurs when a property value changes.
         /// </summary>
-        event EventHandler<PropertyChangedWithValsEventArgs> PropertyChangedWithVals;
+        //event EventHandler<PropertyChangedWithValsEventArgs> PropertyChangedWithVals;
 
     }
 }

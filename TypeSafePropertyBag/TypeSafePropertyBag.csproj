@@ -45,7 +45,7 @@
     <Compile Include="Fundamentals\GenerateHash.cs" />
     <Compile Include="Fundamentals\PropertyObserver.cs" />
     <Compile Include="IConvertValues.cs" />
-    <Compile Include="INotifyPropertyWithValsChanged.cs" />
+    <Compile Include="INotifyPropertyChangedWithVals.cs" />
     <None Include="CommonGenius.Collections\IOrderedDictionary.cs" />
     <Compile Include="IPropFactory.cs" />
     <Compile Include="ITypeSafePropBag.cs" />
