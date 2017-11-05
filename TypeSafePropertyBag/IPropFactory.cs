@@ -16,11 +16,11 @@ namespace DRM.TypeSafePropertyBag
         #region Collection-Type Methods Methods
 
         ICPropPrivate<CT, T> Create<CT, T>(CT initialValue, string propertyName, object extraInfo = null,
-            bool hasStorage = true, bool typeIsSolid = true, Action<CT, CT> doWhenChanged = null, bool doAfterNotify = false,
+            bool hasStorage = true, bool typeIsSolid = true, EventHandler<PropertyChangedWithTValsEventArgs<CT>> doWhenChangedX = null, bool doAfterNotify = false,
             Func<CT, CT, bool> comparer = null) where CT : IEnumerable<T>;
 
         ICPropPrivate<CT, T> CreateWithNoValue<CT, T>(string propertyName, object extraInfo = null,
-            bool hasStorage = true, bool typeIsSolid = true, Action<CT, CT> doWhenChanged = null, bool doAfterNotify = false,
+            bool hasStorage = true, bool typeIsSolid = true, EventHandler<PropertyChangedWithTValsEventArgs<CT>> doWhenChangedX = null, bool doAfterNotify = false,
             Func<CT, CT, bool> comparer = null) where CT : IEnumerable<T>;
 
         #endregion
@@ -28,11 +28,11 @@ namespace DRM.TypeSafePropertyBag
         #region Property-Type Methods
 
         IProp<T> Create<T>(T initialValue, string propertyName, object extraInfo = null, 
-            bool hasStorage = true, bool typeIsSolid = true, Action<T, T> doWhenChanged = null, bool doAfterNotify = false,
+            bool hasStorage = true, bool typeIsSolid = true, EventHandler<PropertyChangedWithTValsEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false,
             Func<T, T, bool> comparer = null);
 
         IProp<T> CreateWithNoValue<T>(string propertyName, object extraInfo = null, 
-            bool hasStorage = true, bool typeIsSolid = true, Action<T, T> doWhenChanged = null, bool doAfterNotify = false
+            bool hasStorage = true, bool typeIsSolid = true, EventHandler<PropertyChangedWithTValsEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false
             , Func<T, T, bool> comparer = null);
 
         #endregion

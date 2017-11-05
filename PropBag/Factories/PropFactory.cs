@@ -34,27 +34,27 @@ namespace DRM.PropBag
             CT initialValue,
             string propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
-            Action<CT, CT> doWhenChanged = null, bool doAfterNotify = false, Func<CT, CT, bool> comparer = null)
+            EventHandler<PropertyChangedWithTValsEventArgs<CT>> doWhenChangedX = null, bool doAfterNotify = false, Func<CT, CT, bool> comparer = null)
         {
             if (comparer == null) comparer = EqualityComparer<CT>.Default.Equals;
             GetDefaultValueDelegate<CT> getDefaultValFunc = ValueConverter.GetDefaultValue<CT>;
 
             ICPropPrivate<CT, T> prop = new CProp<CT, T>(initialValue, getDefaultValFunc, typeIsSolid, hasStorage,
-                comparer, doWhenChanged, doAfterNotify);
+                comparer, doWhenChangedX, doAfterNotify);
             return prop;
         }
 
         public override ICPropPrivate<CT, T> CreateWithNoValue<CT, T>(
             string propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
-            Action<CT, CT> doWhenChanged = null, bool doAfterNotify = false, Func<CT, CT, bool> comparer = null)
+            EventHandler<PropertyChangedWithTValsEventArgs<CT>> doWhenChangedX = null, bool doAfterNotify = false, Func<CT, CT, bool> comparer = null)
         {
             if (comparer == null) comparer = EqualityComparer<CT>.Default.Equals;
 
             GetDefaultValueDelegate<CT> getDefaultValFunc = ValueConverter.GetDefaultValue<CT>; // this.GetDefaultValue<T>;
 
             ICPropPrivate<CT, T> prop = new CProp<CT, T>(getDefaultValFunc, typeIsSolid, hasStorage,
-                comparer, doWhenChanged, doAfterNotify);
+                comparer, doWhenChangedX, doAfterNotify);
             return prop;
         }
 
@@ -67,24 +67,27 @@ namespace DRM.PropBag
             T initialValue,
             string propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
-            Action<T, T> doWhenChanged = null, bool doAfterNotify = false, Func<T,T,bool> comparer = null)
+            EventHandler<PropertyChangedWithTValsEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false, Func<T,T,bool> comparer = null)
         {
             if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
 
             GetDefaultValueDelegate<T> getDefaultValFunc = ValueConverter.GetDefaultValue<T>; // this.GetDefaultValue<T>;
-            IProp<T> prop = new Prop<T>(initialValue, getDefaultValFunc, typeIsSolid: typeIsSolid, hasStore: hasStorage, comparer: comparer, doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify);
+            IProp<T> prop = new Prop<T>(initialValue, getDefaultValFunc, typeIsSolid: typeIsSolid,
+                hasStore: hasStorage, comparer: comparer, doWhenChangedX: doWhenChangedX, doAfterNotify: doAfterNotify);
             return prop;
         }
 
         public override IProp<T> CreateWithNoValue<T>(
             string propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
-            Action<T, T> doWhenChanged = null, bool doAfterNotify = false, Func<T,T,bool> comparer = null)
+            EventHandler<PropertyChangedWithTValsEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false, Func<T,T,bool> comparer = null)
         {
             if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
 
             GetDefaultValueDelegate<T> getDefaultValFunc = ValueConverter.GetDefaultValue<T>; // this.GetDefaultValue<T>;
-            IProp<T> prop = new Prop<T>(getDefaultValFunc, typeIsSolid: typeIsSolid, hasStore: hasStorage, comparer: comparer, doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify);
+            IProp<T> prop = new Prop<T>(getDefaultValFunc, typeIsSolid: typeIsSolid,
+                hasStore: hasStorage, comparer: comparer, doWhenChangedX: doWhenChangedX,
+                doAfterNotify: doAfterNotify);
             return prop;
         }
 

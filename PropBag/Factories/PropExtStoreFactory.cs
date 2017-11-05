@@ -40,7 +40,7 @@ namespace DRM.PropBag
             CT initialValue,
             string propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
-            Action<CT, CT> doWhenChanged = null, bool doAfterNotify = false, Func<CT, CT, bool> comparer = null)
+            EventHandler<PropertyChangedWithTValsEventArgs<CT>> doWhenChangedX = null, bool doAfterNotify = false, Func<CT, CT, bool> comparer = null)
         {
             ICPropPrivate<CT, T> prop = null;
             return prop;
@@ -49,7 +49,7 @@ namespace DRM.PropBag
         public override ICPropPrivate<CT, T> CreateWithNoValue<CT, T>(
             string propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
-            Action<CT, CT> doWhenChanged = null, bool doAfterNotify = false, Func<CT, CT, bool> comparer = null)
+            EventHandler<PropertyChangedWithTValsEventArgs<CT>> doWhenChangedX = null, bool doAfterNotify = false, Func<CT, CT, bool> comparer = null)
         {
             ICPropPrivate<CT, T> prop = null;
             return prop;
@@ -62,7 +62,7 @@ namespace DRM.PropBag
         public override IProp<T> Create<T>(T initialValue,
             string propertyName, object extraInfo = null,
             bool dummy = true, bool typeIsSolid = true,
-            Action<T, T> doWhenChanged = null, bool doAfterNotify = false, Func<T,T,bool> comparer = null)
+            EventHandler<PropertyChangedWithTValsEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false, Func<T,T,bool> comparer = null)
         {
             throw new InvalidOperationException("External Store Factory doesn't know how to create properties with inital values.");
 
@@ -72,12 +72,16 @@ namespace DRM.PropBag
         public override IProp<T> CreateWithNoValue<T>(
             string propertyName, object extraInfo = null,
             bool dummy = true, bool typeIsSolid = true,
-            Action<T, T> doWhenChanged = null, bool doAfterNotify = false, Func<T,T,bool> comparer = null)
+            EventHandler<PropertyChangedWithTValsEventArgs<T>> doWhenChangedX = null,
+            //EventHandler<PropertyChangedWithTValsEventArgs<T>> doWhenChangedX = null,
+            bool doAfterNotify = false, Func<T,T,bool> comparer = null)
         {
             if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
             GetDefaultValueDelegate<T> getDefaultValFunc = this.GetDefaultValue<T>;
 
-            PropExternStore<T> propWithExtStore = new PropExternStore<T>(propertyName, extraInfo, getDefaultValFunc, typeIsSolid: typeIsSolid, comparer: comparer, doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify);
+            PropExternStore<T> propWithExtStore = new PropExternStore<T>(propertyName,
+                extraInfo, getDefaultValFunc, typeIsSolid: typeIsSolid, comparer: comparer,
+                doWhenChangedX: doWhenChangedX, doAfterNotify: doAfterNotify);
 
             return propWithExtStore;
         }

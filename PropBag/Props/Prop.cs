@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DRM.TypeSafePropertyBag;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -15,9 +16,10 @@ namespace DRM.PropBag
             bool typeIsSolid,
             bool hasStore,
             Func<T, T, bool> comparer,
-            Action<T, T> doWhenChanged = null,
+            EventHandler<PropertyChangedWithTValsEventArgs<T>> doWhenChangedX = null,
+            //Action<T, T> doWhenChanged = null,
             bool doAfterNotify = false)
-            : base(typeof(T), typeIsSolid, hasStore, doWhenChanged, doAfterNotify, comparer, getDefaultValFunc)
+            : base(typeof(T), typeIsSolid, hasStore, doWhenChangedX, doAfterNotify, comparer, getDefaultValFunc)
         {
             if (hasStore)
             {
@@ -30,9 +32,10 @@ namespace DRM.PropBag
             bool typeIsSolid,
             bool hasStore,
             Func<T, T, bool> comparer,
-            Action<T, T> doWhenChanged = null,
+            EventHandler<PropertyChangedWithTValsEventArgs<T>> doWhenChangedX = null,
+            //Action<T, T> doWhenChanged = null,
             bool doAfterNotify = false)
-            : base(typeof(T), typeIsSolid, hasStore, doWhenChanged, doAfterNotify, comparer, getDefaultValFunc)
+            : base(typeof(T), typeIsSolid, hasStore, doWhenChangedX, doAfterNotify, comparer, getDefaultValFunc)
         {
             if (hasStore)
             {

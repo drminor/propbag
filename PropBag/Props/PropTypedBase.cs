@@ -59,14 +59,17 @@ namespace DRM.PropBag
         #region Consructors
 
         protected PropTypedBase(Type typeOfThisValue, bool typeIsSolid, bool hasStore,
-            Action<T, T> doWhenChanged, bool doAfterNotify,
+            EventHandler<PropertyChangedWithTValsEventArgs<T>> doWhenChangedX,
+            //Action<T, T> doWhenChanged,
+            bool doAfterNotify,
             Func<T,T,bool> comparer, GetDefaultValueDelegate<T> getDefaultValFunc, PropKindEnum propType = PropKindEnum.Prop)
             : base(typeOfThisValue, typeIsSolid, hasStore)
         {
-            DoWHenChangedAction = doWhenChanged;
+
+            //DoWHenChangedAction = doWhenChanged;
             DoAfterNotify = doAfterNotify;
             Comparer = comparer;
-            PropertyChangedWithTVals = null;
+            PropertyChangedWithTVals = doWhenChangedX;
             base.TypedProp = this;
             GetDefaultValFunc = getDefaultValFunc;
             PropKind = propType;

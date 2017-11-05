@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DRM.TypeSafePropertyBag;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -16,9 +17,10 @@ namespace DRM.PropBag
             GetDefaultValueDelegate<T> getDefaultValFunc,
             bool typeIsSolid = true,
             Func<T, T, bool> comparer = null,
-            Action<T, T> doWhenChanged = null,
+            EventHandler<PropertyChangedWithTValsEventArgs<T>> doWhenChangedX = null,
+            //Action<T, T> doWhenChanged = null,
             bool doAfterNotify = false)
-            : base(typeof(T), typeIsSolid, false, doWhenChanged, doAfterNotify, comparer, getDefaultValFunc)
+            : base(typeof(T), typeIsSolid, false, doWhenChangedX, doAfterNotify, comparer, getDefaultValFunc)
         {
             Tag = Guid.NewGuid(); // tag;
             Getter = null; // getter;

@@ -60,27 +60,26 @@ namespace DRM.PropBag
             CT initialValue,
             string propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
-            Action<CT, CT> doWhenChanged = null, bool doAfterNotify = false, Func<CT, CT, bool> comparer = null) where CT : IEnumerable<T>;
+            EventHandler<PropertyChangedWithTValsEventArgs<CT>> doWhenChangedX = null, bool doAfterNotify = false, Func<CT, CT, bool> comparer = null) where CT : IEnumerable<T>;
 
         public abstract ICPropPrivate<CT, T> CreateWithNoValue<CT, T>(
             string propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
-            Action<CT, CT> doWhenChanged = null, bool doAfterNotify = false, Func<CT, CT, bool> comparer = null) where CT : IEnumerable<T>;
+            EventHandler<PropertyChangedWithTValsEventArgs<CT>> doWhenChangedX = null, bool doAfterNotify = false, Func<CT, CT, bool> comparer = null) where CT : IEnumerable<T>;
 
         #endregion
 
         #region Propety-type property creators
-
         public abstract IProp<T> Create<T>(
             T initialValue,
             string propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
-            Action<T, T> doWhenChanged = null, bool doAfterNotify = false, Func<T, T, bool> comparer = null);
+            EventHandler<PropertyChangedWithTValsEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false, Func<T, T, bool> comparer = null);
 
         public abstract IProp<T> CreateWithNoValue<T>(
             string propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
-            Action<T, T> doWhenChanged = null, bool doAfterNotify = false, Func<T, T, bool> comparer = null);
+            EventHandler<PropertyChangedWithTValsEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false, Func<T, T, bool> comparer = null);
 
         #endregion
 
@@ -392,12 +391,12 @@ namespace DRM.PropBag
             object value,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid,
-            Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false) where CT : class, IEnumerable<T>
+            EventHandler<PropertyChangedWithTValsEventArgs<CT>> doWhenChangedX, bool doAfterNotify, Delegate comparer, bool useRefEquality = false) where CT : class, IEnumerable<T>
         {
             CT initialValue = propFactory.GetValueFromObject<CT>(value);
 
             return propFactory.Create<CT,T>(initialValue, propertyName, extraInfo, hasStorage, isTypeSolid,
-                (Action<CT, CT>)doWhenChanged, doAfterNotify, GetComparerForCollections<CT>(comparer, propFactory, useRefEquality));
+                doWhenChangedX, doAfterNotify, GetComparerForCollections<CT>(comparer, propFactory, useRefEquality));
         }
 
         // From String
@@ -405,7 +404,7 @@ namespace DRM.PropBag
             string value, bool useDefault,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid,
-            Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = true) where CT : class,IEnumerable<T>
+            EventHandler<PropertyChangedWithTValsEventArgs<CT>> doWhenChangedX, bool doAfterNotify, Delegate comparer, bool useRefEquality = true) where CT : class,IEnumerable<T>
         {
             CT initialValue;
             if (useDefault)
@@ -418,7 +417,7 @@ namespace DRM.PropBag
             }
 
             return propFactory.Create<CT, T>(initialValue, propertyName, extraInfo, hasStorage, isTypeSolid,
-                (Action<CT, CT>)doWhenChanged, doAfterNotify, GetComparerForCollections<CT>(comparer, propFactory, useRefEquality));
+                doWhenChangedX, doAfterNotify, GetComparerForCollections<CT>(comparer, propFactory, useRefEquality));
         }
 
         // With No Value
@@ -426,10 +425,10 @@ namespace DRM.PropBag
             bool useDefault,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid,
-            Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = true) where CT : class, IEnumerable<T>
+            EventHandler<PropertyChangedWithTValsEventArgs<CT>> doWhenChangedX, bool doAfterNotify, Delegate comparer, bool useRefEquality = true) where CT : class, IEnumerable<T>
         {
             return propFactory.CreateWithNoValue<CT, T>(propertyName, extraInfo, hasStorage, isTypeSolid,
-                (Action<CT, CT>)doWhenChanged, doAfterNotify, GetComparerForCollections<CT>(comparer, propFactory, useRefEquality));
+                doWhenChangedX, doAfterNotify, GetComparerForCollections<CT>(comparer, propFactory, useRefEquality));
         }
 
         private static Func<CT, CT, bool> GetComparerForCollections<CT>(Delegate comparer, IPropFactory propFactory, bool useRefEquality)
@@ -450,12 +449,12 @@ namespace DRM.PropBag
             object value,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid,
-            Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false)
+            EventHandler<PropertyChangedWithTValsEventArgs<T>> doWhenChangedX, bool doAfterNotify, Delegate comparer, bool useRefEquality = false)
         {
             T initialValue = propFactory.GetValueFromObject<T>(value);
 
             return propFactory.Create<T>(initialValue, propertyName, extraInfo, hasStorage, isTypeSolid,
-                (Action<T, T>)doWhenChanged, doAfterNotify, GetComparerForProps<T>(comparer, propFactory, useRefEquality));
+                doWhenChangedX, doAfterNotify, GetComparerForProps<T>(comparer, propFactory, useRefEquality));
         }
 
         // From String
@@ -463,7 +462,7 @@ namespace DRM.PropBag
             string value, bool useDefault,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid,
-            Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false)
+            EventHandler<PropertyChangedWithTValsEventArgs<T>> doWhenChangedX, bool doAfterNotify, Delegate comparer, bool useRefEquality = false)
         {
             T initialValue;
             if (useDefault)
@@ -476,17 +475,17 @@ namespace DRM.PropBag
             }
 
             return propFactory.Create<T>(initialValue, propertyName, extraInfo, hasStorage, isTypeSolid,
-                (Action<T, T>)doWhenChanged, doAfterNotify, GetComparerForProps<T>(comparer, propFactory, useRefEquality));
+                doWhenChangedX, doAfterNotify, GetComparerForProps<T>(comparer, propFactory, useRefEquality));
         }
 
         // With No Value
         private static IProp<T> CreatePropWithNoValue<T>(IPropFactory propFactory,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid,
-            Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false)
+            EventHandler<PropertyChangedWithTValsEventArgs<T>> doWhenChangedX, bool doAfterNotify, Delegate comparer, bool useRefEquality = false)
         {
             return propFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, isTypeSolid,
-                (Action<T, T>)doWhenChanged, doAfterNotify, GetComparerForProps<T>(comparer, propFactory, useRefEquality));
+                doWhenChangedX, doAfterNotify, GetComparerForProps<T>(comparer, propFactory, useRefEquality));
         }
 
         private static Func<T, T, bool> GetComparerForProps<T>(Delegate comparer, IPropFactory propFactory, bool useRefEquality)
