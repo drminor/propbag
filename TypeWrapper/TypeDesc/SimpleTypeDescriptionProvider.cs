@@ -6,15 +6,10 @@ namespace DRM.TypeWrapper.TypeDesc
 {
     public class SimpleTypeDescriptionProvider : ITypeDescriptionProvider
     {
-        //// TODO: This "service" should never guess, or provide an output namespace.
-        //// We need to remove this const string.
-        //public const string DEFAULT_NAMESPACE_NAME = "BAD.BAD.FROM.SimpleTypeDescriptionProvider";
-
         private string _defaultNamespaceName { get; }
 
-        public SimpleTypeDescriptionProvider() //string defaultNamespaceName = DEFAULT_NAMESPACE_NAME)
+        public SimpleTypeDescriptionProvider()
         {
-           // _defaultNamespaceName = defaultNamespaceName;
         }
 
         public TypeDescription GetTypeDescription(PropModel propModel, Type typeToWrap, string className)
@@ -27,7 +22,7 @@ namespace DRM.TypeWrapper.TypeDesc
 
         public TypeDescription GetTypeDescription(NewTypeRequest newTypeRequest)
         {
-            string nsName = newTypeRequest.PropModel.NamespaceName; //  ?? DEFAULT_NAMESPACE_NAME;
+            string nsName = newTypeRequest.PropModel.NamespaceName;
 
             TypeName tn = new TypeName(newTypeRequest.TypeToWrap.Name, nsName);
 
