@@ -25,9 +25,6 @@ namespace DRM.PropBag.AutoMapperSupport
                 (GetPropBagMapperReal);
         }
 
-        // TODO: Make this return the matched mapRequest, if one was found.
-        // The matched version may contain more information such as the newWraperType.
-
         public IPropBagMapperKeyGen RegisterMapperRequest(IPropBagMapperKeyGen mapRequest)
         {
 
@@ -35,6 +32,7 @@ namespace DRM.PropBag.AutoMapperSupport
             {
                 ICollection<IPropBagMapperKeyGen> keys = _sealedPropBagMappers.Keys;
 
+                // TODO: This is relatively resource intensive, perhaps there's a better way.
                 IPropBagMapperKeyGen existingKey = keys.FirstOrDefault(x => x.DestinationTypeGenDef.Equals(mapRequest.DestinationTypeGenDef));
                 return existingKey;
             }
