@@ -384,7 +384,7 @@ namespace PropBagLib.Tests
         public void TestSubscribePropChangedGen()
         {
             mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
-            mod1.SubscribeToPropChanged(DoWhenPropIntChangesGen, "PropInt");
+            mod1.SubscribeToPropChanged(doOnChange: DoWhenPropIntChangesGen, propertyName: "PropInt");
 
             mod1.PropInt = 0;
             mod1.PropInt = 1;
@@ -392,7 +392,7 @@ namespace PropBagLib.Tests
             Assert.That(genObjOldVal, Is.EqualTo(0), "The old value should have been 0.");
             Assert.That(genObjNewVal, Is.EqualTo(1), "The new value should have been 1.");
 
-            mod1.UnSubscribeToPropChanged(DoWhenPropIntChangesGen, "PropInt");
+            mod1.UnSubscribeToPropChanged(doOnChange: DoWhenPropIntChangesGen, propertyName: "PropInt");
             mod1.PropInt = 2;
 
             Assert.That(genObjOldVal, Is.EqualTo(0), "The old value should have been 0. The action did not get unscribed.");
