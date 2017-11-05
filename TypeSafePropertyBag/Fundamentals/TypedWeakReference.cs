@@ -6,7 +6,7 @@
 // This does allow one to change the value of TrackRessurection, where WeakReference<T>
 // does not.
 
-namespace DRM.TypeSafePropertyBag.NotUsed
+namespace DRM.TypeSafePropertyBag.Fundamentals.NotUsed
 {
     public class TypedWeakReference<T> where T : class
     {
