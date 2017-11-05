@@ -1124,32 +1124,17 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
         private void OnDataSourceChanged(DataSourceChangeTypeEnum changeType, bool changed)
         {
-            DataSourceChangedEventHandler handler = Interlocked.CompareExchange(ref DataSourceChanged, null, null);
-
-            if (handler != null)
-            {
-                handler(this, new DataSourceChangedEventArgs(changeType, changed));
-            }
+            Interlocked.CompareExchange(ref DataSourceChanged, null, null)?.Invoke(this, new DataSourceChangedEventArgs(changeType, changed));
         }
 
         private void OnDataSourceChanged(string propertyName)
         {
-            DataSourceChangedEventHandler handler = Interlocked.CompareExchange(ref DataSourceChanged, null, null);
-
-            if (handler != null)
-            {
-                handler(this, new DataSourceChangedEventArgs(propertyName));
-            }
+            Interlocked.CompareExchange(ref DataSourceChanged, null, null)?.Invoke(this, new DataSourceChangedEventArgs(propertyName));
         }
 
         private void OnDataSourceChanged(CollectionChangeAction action, object element)
         {
-            DataSourceChangedEventHandler handler = Interlocked.CompareExchange(ref DataSourceChanged, null, null);
-
-            if (handler != null)
-            {
-                handler(this, new DataSourceChangedEventArgs(action, element));
-            }
+            Interlocked.CompareExchange(ref DataSourceChanged, null, null)?.Invoke(this, new DataSourceChangedEventArgs(action, element));
         }
 
         #endregion Raise Event Helpers
