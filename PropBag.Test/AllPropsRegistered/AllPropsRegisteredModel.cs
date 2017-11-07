@@ -22,19 +22,19 @@ namespace PropBagLib.Tests
         //    set { base[propertyName, key] = value; }
         //}
 
-        public void DoWhenStringChanged(object sender, PropertyChangedWithTValsEventArgs<string> e)
+        public void DoWhenStringChanged(object sender, PCTypedEventArgs<string> e)
         {
             DoWhenStringChanged_WasCalled = true;
             DoWhenStringPropOldVal = e.OldValue;
             DoWhenStringPropNewVal = e.NewValue;
         }
 
-        private void DoWhenNullIntChanged(object sender, PropertyChangedWithTValsEventArgs<Nullable<int>> e)
+        private void DoWhenNullIntChanged(object sender, PCTypedEventArgs<Nullable<int>> e)
         {
             DoWhenNullIntChanged_WasCalled = true;
         }
 
-        private void DoWhenICollectionIntChanged(object sender, PropertyChangedWithTValsEventArgs<ICollection<int>> e)
+        private void DoWhenICollectionIntChanged(object sender, PCTypedEventArgs<ICollection<int>> e)
         {
             DoWhenICollectionIntChanged_WasCalled = true;
         }

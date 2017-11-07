@@ -9,34 +9,34 @@ using System.Windows;
 
 namespace DRM.PropBag
 {
-    public class SimpleEventManager : IEventManager<INotifyPropertyChangedWithVals, PropertyChangedWithValsEventArgs> 
+    public class SimpleEventManager : IEventManager<INotifyPCGen, PCGenEventArgs> 
     {
         public SimpleEventManager() { }
 
-        public void AddHandler(INotifyPropertyChangedWithVals source, string eventName, EventHandler<PropertyChangedWithValsEventArgs> handler)
+        public void AddHandler(INotifyPCGen source, string eventName, EventHandler<PCGenEventArgs> handler)
         {
-            WeakEventManager<INotifyPropertyChangedWithVals, PropertyChangedWithValsEventArgs>.AddHandler(source, eventName, handler);
+            WeakEventManager<INotifyPCGen, PCGenEventArgs>.AddHandler(source, eventName, handler);
         }
 
-        public void RemoveHandler(INotifyPropertyChangedWithVals source, string eventName, EventHandler<PropertyChangedWithValsEventArgs> handler)
+        public void RemoveHandler(INotifyPCGen source, string eventName, EventHandler<PCGenEventArgs> handler)
         {
-            WeakEventManager<INotifyPropertyChangedWithVals, PropertyChangedWithValsEventArgs>.RemoveHandler(source, eventName, handler);
+            WeakEventManager<INotifyPCGen, PCGenEventArgs>.RemoveHandler(source, eventName, handler);
         }
     }
 
     public class SimpleTypedEventManager<T> 
-        : IEventManager<INotifyPropertyChangedWithTVals<T>, PropertyChangedWithTValsEventArgs<T>>
+        : IEventManager<INotifyPCTyped<T>, PCTypedEventArgs<T>>
     {
         public SimpleTypedEventManager() { }
 
-        public void AddHandler(INotifyPropertyChangedWithTVals<T> source, string eventName, EventHandler<PropertyChangedWithTValsEventArgs<T>> handler)
+        public void AddHandler(INotifyPCTyped<T> source, string eventName, EventHandler<PCTypedEventArgs<T>> handler)
         {
-            WeakEventManager<INotifyPropertyChangedWithTVals<T>, PropertyChangedWithTValsEventArgs<T>>.AddHandler(source, eventName, handler);
+            WeakEventManager<INotifyPCTyped<T>, PCTypedEventArgs<T>>.AddHandler(source, eventName, handler);
         }
 
-        public void RemoveHandler(INotifyPropertyChangedWithTVals<T> source, string eventName, EventHandler<PropertyChangedWithTValsEventArgs<T>> handler)
+        public void RemoveHandler(INotifyPCTyped<T> source, string eventName, EventHandler<PCTypedEventArgs<T>> handler)
         {
-            WeakEventManager<INotifyPropertyChangedWithTVals<T>, PropertyChangedWithTValsEventArgs<T>>.RemoveHandler(source, eventName, handler);
+            WeakEventManager<INotifyPCTyped<T>, PCTypedEventArgs<T>>.RemoveHandler(source, eventName, handler);
         }
 
     }

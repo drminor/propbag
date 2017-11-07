@@ -60,12 +60,12 @@ namespace DRM.PropBag
             CT initialValue,
             string propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
-            EventHandler<PropertyChangedWithTValsEventArgs<CT>> doWhenChangedX = null, bool doAfterNotify = false, Func<CT, CT, bool> comparer = null) where CT : IEnumerable<T>;
+            EventHandler<PCTypedEventArgs<CT>> doWhenChangedX = null, bool doAfterNotify = false, Func<CT, CT, bool> comparer = null) where CT : IEnumerable<T>;
 
         public abstract ICPropPrivate<CT, T> CreateWithNoValue<CT, T>(
             string propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
-            EventHandler<PropertyChangedWithTValsEventArgs<CT>> doWhenChangedX = null, bool doAfterNotify = false, Func<CT, CT, bool> comparer = null) where CT : IEnumerable<T>;
+            EventHandler<PCTypedEventArgs<CT>> doWhenChangedX = null, bool doAfterNotify = false, Func<CT, CT, bool> comparer = null) where CT : IEnumerable<T>;
 
         #endregion
 
@@ -74,12 +74,12 @@ namespace DRM.PropBag
             T initialValue,
             string propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
-            EventHandler<PropertyChangedWithTValsEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false, Func<T, T, bool> comparer = null);
+            EventHandler<PCTypedEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false, Func<T, T, bool> comparer = null);
 
         public abstract IProp<T> CreateWithNoValue<T>(
             string propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
-            EventHandler<PropertyChangedWithTValsEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false, Func<T, T, bool> comparer = null);
+            EventHandler<PCTypedEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false, Func<T, T, bool> comparer = null);
 
         #endregion
 
@@ -89,18 +89,18 @@ namespace DRM.PropBag
             object value,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
-            EventHandler<PropertyChangedWithValsEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null);
+            EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null);
 
         public abstract IPropGen CreateGenFromString(Type typeOfThisProperty,
             string value, bool useDefault,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
-            EventHandler<PropertyChangedWithValsEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null);
+            EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null);
 
         public abstract IPropGen CreateGenWithNoValue(Type typeOfThisProperty,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
-            EventHandler<PropertyChangedWithValsEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null);
+            EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null);
 
         //public virtual IPropGen CreatePropInferType(object value, string propertyName, object extraInfo, bool hasStorage)
         //{
@@ -391,11 +391,11 @@ namespace DRM.PropBag
             object value,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid,
-            EventHandler<PropertyChangedWithValsEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false) where CT : class, IEnumerable<T>
+            EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false) where CT : class, IEnumerable<T>
         {
             CT initialValue = propFactory.GetValueFromObject<CT>(value);
 
-            EventHandler<PropertyChangedWithTValsEventArgs<CT>> doWhenChangedX = GetTypedDoWhenChanged<CT>(doWhenChanged);
+            EventHandler<PCTypedEventArgs<CT>> doWhenChangedX = GetTypedDoWhenChanged<CT>(doWhenChanged);
 
             return propFactory.Create<CT,T>(initialValue, propertyName, extraInfo, hasStorage, isTypeSolid,
                 doWhenChangedX, doAfterNotify, GetComparerForCollections<CT>(comparer, propFactory, useRefEquality));
@@ -406,7 +406,7 @@ namespace DRM.PropBag
             string value, bool useDefault,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid,
-            EventHandler<PropertyChangedWithValsEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = true) where CT : class,IEnumerable<T>
+            EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = true) where CT : class,IEnumerable<T>
         {
             CT initialValue;
             if (useDefault)
@@ -417,7 +417,7 @@ namespace DRM.PropBag
             {
                 initialValue = propFactory.GetValueFromString<CT,T>(value);
             }
-            EventHandler<PropertyChangedWithTValsEventArgs<CT>> doWhenChangedX = GetTypedDoWhenChanged<CT>(doWhenChanged);
+            EventHandler<PCTypedEventArgs<CT>> doWhenChangedX = GetTypedDoWhenChanged<CT>(doWhenChanged);
 
             return propFactory.Create<CT, T>(initialValue, propertyName, extraInfo, hasStorage, isTypeSolid,
                 doWhenChangedX, doAfterNotify, GetComparerForCollections<CT>(comparer, propFactory, useRefEquality));
@@ -428,9 +428,9 @@ namespace DRM.PropBag
             bool useDefault,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid,
-            EventHandler<PropertyChangedWithValsEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = true) where CT : class, IEnumerable<T>
+            EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = true) where CT : class, IEnumerable<T>
         {
-            EventHandler<PropertyChangedWithTValsEventArgs<CT>> doWhenChangedX = GetTypedDoWhenChanged<CT>(doWhenChanged);
+            EventHandler<PCTypedEventArgs<CT>> doWhenChangedX = GetTypedDoWhenChanged<CT>(doWhenChanged);
 
             return propFactory.CreateWithNoValue<CT, T>(propertyName, extraInfo, hasStorage, isTypeSolid,
                 doWhenChangedX, doAfterNotify, GetComparerForCollections<CT>(comparer, propFactory, useRefEquality));
@@ -454,11 +454,11 @@ namespace DRM.PropBag
             object value,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid,
-            EventHandler<PropertyChangedWithValsEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false)
+            EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false)
         {
             T initialValue = propFactory.GetValueFromObject<T>(value);
 
-            EventHandler<PropertyChangedWithTValsEventArgs<T>> doWhenChangedX = GetTypedDoWhenChanged<T>(doWhenChanged);
+            EventHandler<PCTypedEventArgs<T>> doWhenChangedX = GetTypedDoWhenChanged<T>(doWhenChanged);
 
             return propFactory.Create<T>(initialValue, propertyName, extraInfo, hasStorage, isTypeSolid,
                 doWhenChangedX, doAfterNotify, GetComparerForProps<T>(comparer, propFactory, useRefEquality));
@@ -469,7 +469,7 @@ namespace DRM.PropBag
             string value, bool useDefault,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid,
-            EventHandler<PropertyChangedWithValsEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false)
+            EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false)
         {
             T initialValue;
             if (useDefault)
@@ -481,7 +481,7 @@ namespace DRM.PropBag
                 initialValue = propFactory.GetValueFromString<T>(value);
             }
 
-            EventHandler<PropertyChangedWithTValsEventArgs<T>> doWhenChangedX = GetTypedDoWhenChanged<T>(doWhenChanged);
+            EventHandler<PCTypedEventArgs<T>> doWhenChangedX = GetTypedDoWhenChanged<T>(doWhenChanged);
 
             return propFactory.Create<T>(initialValue, propertyName, extraInfo, hasStorage, isTypeSolid,
                 doWhenChangedX, doAfterNotify, GetComparerForProps<T>(comparer, propFactory, useRefEquality));
@@ -491,17 +491,17 @@ namespace DRM.PropBag
         // that calls the first.
 
         // Also remember that if the source delegate has multiple targets that the Target and Method properties only return the values for the last target in the invocation list. 
-        private static EventHandler<PropertyChangedWithTValsEventArgs<T>> GetTypedDoWhenChanged<T>(EventHandler<PropertyChangedWithValsEventArgs> doWhenChanged)
+        private static EventHandler<PCTypedEventArgs<T>> GetTypedDoWhenChanged<T>(EventHandler<PCGenEventArgs> doWhenChanged)
         {
-            EventHandler<PropertyChangedWithTValsEventArgs<T>> result;
+            EventHandler<PCTypedEventArgs<T>> result;
             if (doWhenChanged == null)
             {
                 result = null;
             }
             else
             {
-                result = (EventHandler<PropertyChangedWithTValsEventArgs<T>>)Delegate.CreateDelegate(typeof(
-                    EventHandler<PropertyChangedWithTValsEventArgs<T>>), doWhenChanged.Target, doWhenChanged.Method);
+                result = (EventHandler<PCTypedEventArgs<T>>)Delegate.CreateDelegate(typeof(
+                    EventHandler<PCTypedEventArgs<T>>), doWhenChanged.Target, doWhenChanged.Method);
 
                 // This creates a new delegate which calls the first one.
                 //var x = new EventHandler<PropertyChangedWithTValsEventArgs<T>>(doWhenChanged);
@@ -514,9 +514,9 @@ namespace DRM.PropBag
         private static IProp<T> CreatePropWithNoValue<T>(IPropFactory propFactory,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid,
-            EventHandler<PropertyChangedWithValsEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false)
+            EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false)
         {
-            EventHandler<PropertyChangedWithTValsEventArgs<T>> doWhenChangedX = GetTypedDoWhenChanged<T>(doWhenChanged);
+            EventHandler<PCTypedEventArgs<T>> doWhenChangedX = GetTypedDoWhenChanged<T>(doWhenChanged);
 
             return propFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, isTypeSolid,
                 doWhenChangedX, doAfterNotify, GetComparerForProps<T>(comparer, propFactory, useRefEquality));

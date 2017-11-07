@@ -168,7 +168,7 @@ namespace PropBagLib.Tests
 
 	#region PropetyChangedWithTVals Event Declarations
 		  
-			public event EventHandler<PropertyChangedWithTValsEventArgs<object>> PropObjectChanged
+			public event EventHandler<PCTypedEventArgs<object>> PropObjectChanged
 			{
 				add
 				{
@@ -180,7 +180,7 @@ namespace PropBagLib.Tests
 				}
 			}
 	  
-			public event EventHandler<PropertyChangedWithTValsEventArgs<string>> PropStringChanged
+			public event EventHandler<PCTypedEventArgs<string>> PropStringChanged
 			{
 				add
 				{
@@ -192,7 +192,7 @@ namespace PropBagLib.Tests
 				}
 			}
 	  
-			public event EventHandler<PropertyChangedWithTValsEventArgs<string>> PropStringCallDoAfterChanged
+			public event EventHandler<PCTypedEventArgs<string>> PropStringCallDoAfterChanged
 			{
 				add
 				{
@@ -204,7 +204,7 @@ namespace PropBagLib.Tests
 				}
 			}
 	  
-			public event EventHandler<PropertyChangedWithTValsEventArgs<string>> PropStringUseRefCompChanged
+			public event EventHandler<PCTypedEventArgs<string>> PropStringUseRefCompChanged
 			{
 				add
 				{
@@ -216,7 +216,7 @@ namespace PropBagLib.Tests
 				}
 			}
 	  
-			public event EventHandler<PropertyChangedWithTValsEventArgs<bool>> PropBoolChanged
+			public event EventHandler<PCTypedEventArgs<bool>> PropBoolChanged
 			{
 				add
 				{
@@ -228,7 +228,7 @@ namespace PropBagLib.Tests
 				}
 			}
 	  
-			public event EventHandler<PropertyChangedWithTValsEventArgs<int>> PropIntChanged
+			public event EventHandler<PCTypedEventArgs<int>> PropIntChanged
 			{
 				add
 				{
@@ -240,7 +240,7 @@ namespace PropBagLib.Tests
 				}
 			}
 	  
-			public event EventHandler<PropertyChangedWithTValsEventArgs<TimeSpan>> PropTimeSpanChanged
+			public event EventHandler<PCTypedEventArgs<TimeSpan>> PropTimeSpanChanged
 			{
 				add
 				{
@@ -252,7 +252,7 @@ namespace PropBagLib.Tests
 				}
 			}
 	  
-			public event EventHandler<PropertyChangedWithTValsEventArgs<Uri>> PropUriChanged
+			public event EventHandler<PCTypedEventArgs<Uri>> PropUriChanged
 			{
 				add
 				{
@@ -264,7 +264,7 @@ namespace PropBagLib.Tests
 				}
 			}
 	  
-			public event EventHandler<PropertyChangedWithTValsEventArgs<Lazy<int>>> PropLazyIntChanged
+			public event EventHandler<PCTypedEventArgs<Lazy<int>>> PropLazyIntChanged
 			{
 				add
 				{
@@ -276,7 +276,7 @@ namespace PropBagLib.Tests
 				}
 			}
 	  
-			public event EventHandler<PropertyChangedWithTValsEventArgs<Nullable<int>>> PropNullableIntChanged
+			public event EventHandler<PCTypedEventArgs<Nullable<int>>> PropNullableIntChanged
 			{
 				add
 				{
@@ -288,7 +288,7 @@ namespace PropBagLib.Tests
 				}
 			}
 	  
-			public event EventHandler<PropertyChangedWithTValsEventArgs<ICollection<int>>> PropICollectionIntChanged
+			public event EventHandler<PCTypedEventArgs<ICollection<int>>> PropICollectionIntChanged
 			{
 				add
 				{
@@ -308,14 +308,14 @@ namespace PropBagLib.Tests
 		/// </summary>
 		/// <param name="methodName">Some public or non-public instance method in this class.</param>
 		/// <returns>The name, unchanged, if the method exists, otherwise null.</returns>
-		EventHandler<PropertyChangedWithTValsEventArgs<T>> GetDelegate<T>(string methodName)
+		EventHandler<PCTypedEventArgs<T>> GetDelegate<T>(string methodName)
 		{
 		    Type pp = this.GetType();
 		    MethodInfo mi = pp.GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 		
 		    if (mi == null) return null;
 		
-		    EventHandler<PropertyChangedWithTValsEventArgs<T>> result = (EventHandler<PropertyChangedWithTValsEventArgs<T>>)mi.CreateDelegate(typeof(EventHandler<PropertyChangedWithTValsEventArgs<T>>), this);
+		    EventHandler<PCTypedEventArgs<T>> result = (EventHandler<PCTypedEventArgs<T>>)mi.CreateDelegate(typeof(EventHandler<PCTypedEventArgs<T>>), this);
 		
 		    return result;
 		}

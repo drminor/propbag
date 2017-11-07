@@ -56,7 +56,7 @@ namespace PropBagLib.Tests
         }
 
 
-        public event EventHandler<PropertyChangedWithTValsEventArgs<int>> PropIntChanged
+        public event EventHandler<PCTypedEventArgs<int>> PropIntChanged
         {
             add
             {
@@ -68,7 +68,7 @@ namespace PropBagLib.Tests
             }
         }
 
-        public event EventHandler<PropertyChangedWithTValsEventArgs<string>> PropStringChanged
+        public event EventHandler<PCTypedEventArgs<string>> PropStringChanged
         {
             add
             {

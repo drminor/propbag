@@ -50,7 +50,7 @@ namespace PropBagLib.Tests
 
 	#region PropetyChangedWithTVals Event Declarations
 		  
-			public event EventHandler<PropertyChangedWithTValsEventArgs<int>> PropInt3Changed
+			public event EventHandler<PCTypedEventArgs<int>> PropInt3Changed
 			{
 				add
 				{
@@ -62,7 +62,7 @@ namespace PropBagLib.Tests
 				}
 			}
 	  
-			public event EventHandler<PropertyChangedWithTValsEventArgs<int>> PropInt4Changed
+			public event EventHandler<PCTypedEventArgs<int>> PropInt4Changed
 			{
 				add
 				{
@@ -82,14 +82,14 @@ namespace PropBagLib.Tests
 		/// </summary>
 		/// <param name="methodName">Some public or non-public instance method in this class.</param>
 		/// <returns>The name, unchanged, if the method exists, otherwise null.</returns>
-		EventHandler<PropertyChangedWithTValsEventArgs<T>> GetDelegate<T>(string methodName)
+		EventHandler<PCTypedEventArgs<T>> GetDelegate<T>(string methodName)
 		{
 		    Type pp = this.GetType();
 		    MethodInfo mi = pp.GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 		
 		    if (mi == null) return null;
 		
-		    EventHandler<PropertyChangedWithTValsEventArgs<T>> result = (EventHandler<PropertyChangedWithTValsEventArgs<T>>)mi.CreateDelegate(typeof(EventHandler<PropertyChangedWithTValsEventArgs<T>>), this);
+		    EventHandler<PCTypedEventArgs<T>> result = (EventHandler<PCTypedEventArgs<T>>)mi.CreateDelegate(typeof(EventHandler<PCTypedEventArgs<T>>), this);
 		
 		    return result;
 		}

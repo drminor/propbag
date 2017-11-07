@@ -18,7 +18,7 @@ namespace DRM.PropBag.Collections
             bool typeIsSolid,
             bool hasStore,
             Func<CT, CT, bool> comparer,
-            EventHandler<PropertyChangedWithTValsEventArgs<CT>> doWhenChangedX = null,
+            EventHandler<PCTypedEventArgs<CT>> doWhenChangedX = null,
             //Action<CT, CT> doWhenChanged = null,
             bool doAfterNotify = false)
             : base(typeof(CT), typeIsSolid, hasStore, doWhenChangedX, doAfterNotify, comparer,
@@ -36,7 +36,7 @@ namespace DRM.PropBag.Collections
             bool typeIsSolid,
             bool hasStore,
             Func<CT, CT, bool> comparer,
-            EventHandler<PropertyChangedWithTValsEventArgs<CT>> doWhenChangedX = null,
+            EventHandler<PCTypedEventArgs<CT>> doWhenChangedX = null,
             //Action<CT, CT> doWhenChanged = null,
             bool doAfterNotify = false)
             : base(typeof(CT), typeIsSolid, hasStore, doWhenChangedX, doAfterNotify, comparer, getDefaultValFunc, PropKindEnum.Collection)

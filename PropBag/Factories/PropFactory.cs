@@ -34,7 +34,7 @@ namespace DRM.PropBag
             CT initialValue,
             string propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
-            EventHandler<PropertyChangedWithTValsEventArgs<CT>> doWhenChangedX = null, bool doAfterNotify = false, Func<CT, CT, bool> comparer = null)
+            EventHandler<PCTypedEventArgs<CT>> doWhenChangedX = null, bool doAfterNotify = false, Func<CT, CT, bool> comparer = null)
         {
             if (comparer == null) comparer = EqualityComparer<CT>.Default.Equals;
             GetDefaultValueDelegate<CT> getDefaultValFunc = ValueConverter.GetDefaultValue<CT>;
@@ -47,7 +47,7 @@ namespace DRM.PropBag
         public override ICPropPrivate<CT, T> CreateWithNoValue<CT, T>(
             string propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
-            EventHandler<PropertyChangedWithTValsEventArgs<CT>> doWhenChangedX = null, bool doAfterNotify = false, Func<CT, CT, bool> comparer = null)
+            EventHandler<PCTypedEventArgs<CT>> doWhenChangedX = null, bool doAfterNotify = false, Func<CT, CT, bool> comparer = null)
         {
             if (comparer == null) comparer = EqualityComparer<CT>.Default.Equals;
 
@@ -67,7 +67,7 @@ namespace DRM.PropBag
             T initialValue,
             string propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
-            EventHandler<PropertyChangedWithTValsEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false, Func<T,T,bool> comparer = null)
+            EventHandler<PCTypedEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false, Func<T,T,bool> comparer = null)
         {
             if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
 
@@ -80,7 +80,7 @@ namespace DRM.PropBag
         public override IProp<T> CreateWithNoValue<T>(
             string propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
-            EventHandler<PropertyChangedWithTValsEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false, Func<T,T,bool> comparer = null)
+            EventHandler<PCTypedEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false, Func<T,T,bool> comparer = null)
         {
             if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
 
@@ -99,7 +99,7 @@ namespace DRM.PropBag
             object value,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
-            EventHandler<PropertyChangedWithValsEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null)
+            EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null)
         {
             if (propKind == PropKindEnum.Prop)
             {
@@ -125,7 +125,7 @@ namespace DRM.PropBag
             string value, bool useDefault,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
-            EventHandler<PropertyChangedWithValsEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null)
+            EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null)
         {
             if (propKind == PropKindEnum.Prop)
             {
@@ -150,7 +150,7 @@ namespace DRM.PropBag
         public override IPropGen CreateGenWithNoValue(Type typeOfThisProperty,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
-            EventHandler<PropertyChangedWithValsEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null)
+            EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null)
         {
             if (propKind == PropKindEnum.Prop)
             {

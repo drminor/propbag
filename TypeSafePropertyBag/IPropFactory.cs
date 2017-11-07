@@ -17,12 +17,12 @@ namespace DRM.TypeSafePropertyBag
 
         ICPropPrivate<CT, T> Create<CT, T>(CT initialValue, string propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
-            EventHandler<PropertyChangedWithTValsEventArgs<CT>> doWhenChangedX = null, bool doAfterNotify = false,
+            EventHandler<PCTypedEventArgs<CT>> doWhenChangedX = null, bool doAfterNotify = false,
             Func<CT, CT, bool> comparer = null) where CT : IEnumerable<T>;
 
         ICPropPrivate<CT, T> CreateWithNoValue<CT, T>(string propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
-            EventHandler<PropertyChangedWithTValsEventArgs<CT>> doWhenChangedX = null, bool doAfterNotify = false,
+            EventHandler<PCTypedEventArgs<CT>> doWhenChangedX = null, bool doAfterNotify = false,
             Func<CT, CT, bool> comparer = null) where CT : IEnumerable<T>;
 
         #endregion
@@ -30,11 +30,11 @@ namespace DRM.TypeSafePropertyBag
         #region Property-Type Methods
 
         IProp<T> Create<T>(T initialValue, string propertyName, object extraInfo = null, 
-            bool hasStorage = true, bool typeIsSolid = true, EventHandler<PropertyChangedWithTValsEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false,
+            bool hasStorage = true, bool typeIsSolid = true, EventHandler<PCTypedEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false,
             Func<T, T, bool> comparer = null);
 
         IProp<T> CreateWithNoValue<T>(string propertyName, object extraInfo = null, 
-            bool hasStorage = true, bool typeIsSolid = true, EventHandler<PropertyChangedWithTValsEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false
+            bool hasStorage = true, bool typeIsSolid = true, EventHandler<PCTypedEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false
             , Func<T, T, bool> comparer = null);
 
         #endregion
@@ -43,17 +43,17 @@ namespace DRM.TypeSafePropertyBag
 
         IPropGen CreateGenFromObject(Type typeOfThisProperty, object value, string propertyName, object extraInfo, 
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
-            EventHandler<PropertyChangedWithValsEventArgs> doWhenChanged, bool doAfterNotify,
+            EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify,
             Delegate comparer, bool useRefEquality = false, Type collectionType = null);
 
         IPropGen CreateGenFromString(Type typeOfThisProperty, string value, bool useDefault, string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
-            EventHandler<PropertyChangedWithValsEventArgs> doWhenChanged, bool doAfterNotify,
+            EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify,
             Delegate comparer, bool useRefEquality = false, Type collectionType = null);
 
         IPropGen CreateGenWithNoValue(Type typeOfThisProperty, string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
-            EventHandler<PropertyChangedWithValsEventArgs> doWhenChanged, bool doAfterNotify,
+            EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify,
             Delegate comparer, bool useRefEquality = false, Type collectionType = null);
 
         //IPropGen CreatePropInferType(object value, string propertyName, object extraInfo, bool hasStorage);

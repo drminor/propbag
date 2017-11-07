@@ -150,7 +150,7 @@ namespace PropBagLib.Tests
 
         #region Event Handlers
 
-        void Mod1_PropStringChanged(object sender, PropertyChangedWithTValsEventArgs<string> e)
+        void Mod1_PropStringChanged(object sender, PCTypedEventArgs<string> e)
         {
             IProp<string> prop = (IProp<string>)sender;
             string oldVal = e.OldValue;

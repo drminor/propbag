@@ -17,7 +17,7 @@ namespace DRM.PropBag
             GetDefaultValueDelegate<T> getDefaultValFunc,
             bool typeIsSolid = true,
             Func<T, T, bool> comparer = null,
-            EventHandler<PropertyChangedWithTValsEventArgs<T>> doWhenChangedX = null,
+            EventHandler<PCTypedEventArgs<T>> doWhenChangedX = null,
             //Action<T, T> doWhenChanged = null,
             bool doAfterNotify = false)
             : base(typeof(T), typeIsSolid, false, doWhenChangedX, doAfterNotify, comparer, getDefaultValFunc)

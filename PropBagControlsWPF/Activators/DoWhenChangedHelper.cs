@@ -6,7 +6,7 @@ namespace DRM.PropBag.ControlsWPF
 {
     public class DoWhenChangedHelper
     {
-        public Func<object, EventHandler<PropertyChangedWithValsEventArgs>> GetTheDoWhenChangedActionGetter(PropDoWhenChangedField pdwcf, Type propertyType)
+        public Func<object, EventHandler<PCGenEventArgs>> GetTheDoWhenChangedActionGetter(PropDoWhenChangedField pdwcf, Type propertyType)
         {
             Type declaringType = pdwcf.DeclaringType ?? throw new ArgumentNullException(nameof(declaringType));
 
@@ -14,12 +14,12 @@ namespace DRM.PropBag.ControlsWPF
 
             GetActionRefDelegate ActionGetter = GetTheGetActionRefDelegate(propertyType);
 
-            Func<object, EventHandler<PropertyChangedWithValsEventArgs>> actionGetter = GetTheDoWhenChangedDelegate;
+            Func<object, EventHandler<PCGenEventArgs>> actionGetter = GetTheDoWhenChangedDelegate;
             return actionGetter;
 
-            EventHandler<PropertyChangedWithValsEventArgs> GetTheDoWhenChangedDelegate(object host)
+            EventHandler<PCGenEventArgs> GetTheDoWhenChangedDelegate(object host)
             {
-                EventHandler<PropertyChangedWithValsEventArgs> result = ActionGetter(host, declaringType, methodName);
+                EventHandler<PCGenEventArgs> result = ActionGetter(host, declaringType, methodName);
                 return result;
             }
         }
@@ -29,7 +29,7 @@ namespace DRM.PropBag.ControlsWPF
         static private Type GMT_TYPE = typeof(GenericMethodTemplates);
 
         // Delegate declarations.
-        private delegate EventHandler<PropertyChangedWithValsEventArgs> GetActionRefDelegate(object owningInstance, Type ownerType, string methodName);
+        private delegate EventHandler<PCGenEventArgs> GetActionRefDelegate(object owningInstance, Type ownerType, string methodName);
 
         private static GetActionRefDelegate GetTheGetActionRefDelegate(Type propertyType)
         {
@@ -88,9 +88,9 @@ namespace DRM.PropBag.ControlsWPF
 
                 if (!IsDuoAction<T>(mi)) return null;
 
-                EventHandler<PropertyChangedWithTValsEventArgs<T>> del
-                    = (EventHandler<PropertyChangedWithTValsEventArgs<T>>)
-                    Delegate.CreateDelegate(typeof(EventHandler<PropertyChangedWithTValsEventArgs<T>>), owningInstance, mi);
+                EventHandler<PCTypedEventArgs<T>> del
+                    = (EventHandler<PCTypedEventArgs<T>>)
+                    Delegate.CreateDelegate(typeof(EventHandler<PCTypedEventArgs<T>>), owningInstance, mi);
 
                 return del;
             }
@@ -119,14 +119,14 @@ namespace DRM.PropBag.ControlsWPF
         #endregion
 
         // TOOD: Update the .props.tt T4 Template with this.
-        private EventHandler<PropertyChangedWithTValsEventArgs<T>> GetDelegate<T>(string methodName)
+        private EventHandler<PCTypedEventArgs<T>> GetDelegate<T>(string methodName)
         {
             Type pp = this.GetType();
             MethodInfo mi = pp.GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
             if (mi == null) return null;
 
-            EventHandler<PropertyChangedWithTValsEventArgs<T>> result = (EventHandler<PropertyChangedWithTValsEventArgs<T>>)mi.CreateDelegate(typeof(EventHandler<PropertyChangedWithTValsEventArgs<T>>), this);
+            EventHandler<PCTypedEventArgs<T>> result = (EventHandler<PCTypedEventArgs<T>>)mi.CreateDelegate(typeof(EventHandler<PCTypedEventArgs<T>>), this);
 
             return result;
         }

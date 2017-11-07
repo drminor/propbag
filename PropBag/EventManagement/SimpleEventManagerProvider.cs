@@ -21,7 +21,7 @@ namespace DRM.PropBag
 
     public class SimpleTypedEventManagerProvider<T> : IProvideATypedEventManager<T>
     {
-        public IEventManager<INotifyPropertyChangedWithTVals<T>, PropertyChangedWithTValsEventArgs<T>> GetTheEventManger()
+        public IEventManager<INotifyPCTyped<T>, PCTypedEventArgs<T>> GetTheEventManger()
         {
             var result = new SimpleTypedEventManager<T>();
             return result;

@@ -48,7 +48,7 @@ namespace DRM.TypeSafePropertyBag
     /// Objects that implement this interface are often created by an instance of a class that inherits from AbstractPropFactory.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public interface IProp<T> : IPropGen, IProp, INotifyPropertyChangedWithTVals<T>, IProvideATypedEventManager<T>
+    public interface IProp<T> : IPropGen, IProp, INotifyPCTyped<T>, IProvideATypedEventManager<T>
     {
         T TypedValue { get; set; }
 
@@ -73,7 +73,7 @@ namespace DRM.TypeSafePropertyBag
     /// Classes that implement the IPropBag interface, keep a list of properties, each of which implements this interface.
     /// These features are managed by the PropBag, and not by classes that inherit from AbstractProp.
     /// </summary>
-    public interface IPropGen : INotifyPropertyChangedWithVals
+    public interface IPropGen : INotifyPCGen
     {
         bool TypeIsSolid { get; }
         bool HasStore { get; }

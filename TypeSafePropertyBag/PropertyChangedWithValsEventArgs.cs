@@ -4,18 +4,18 @@ using System.ComponentModel;
 namespace DRM.TypeSafePropertyBag
 {
     /// <summary>
-    /// Provides typed value change information for the <see cref="INotifyPropertyChanged.PropertyChanged"/> event.
+    /// Provides typed value change information for the <see cref="INotifyPropertyChangedWithTVals<typeparamref name="T"/>.PropertyChanged"/> event.
     /// </summary>
     /// <typeparam name="T">The type of the property that changed.</typeparam>
-    public class PropertyChangedWithTValsEventArgs<T> : PropertyChangedWithValsEventArgs
+    public class PCTypedEventArgs<T> : PCGenEventArgs
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="PropertyChangedEventArgs{T}"/> class.
+        /// Initializes a new instance of the <see cref="PCTypedEventArgs<typeparamref name="T"/> class.
         /// </summary>
         /// <param name="propertyName">Name of the property.</param>
         /// <param name="oldValue">The old value of the property.</param>
         /// <param name="newValue">The new value of the property.</param>
-        public PropertyChangedWithTValsEventArgs(string propertyName, T oldValue, T newValue)
+        public PCTypedEventArgs(string propertyName, T oldValue, T newValue)
             : base(propertyName, typeof(T), oldValue, newValue)
         {
             OldValue = oldValue;
@@ -56,22 +56,54 @@ namespace DRM.TypeSafePropertyBag
     }
 
     /// <summary>
-    /// Provides un-typed value change information for the <see cref="INotifyPropertyChanged.PropertyChanged"/> event.
+    /// Provides un-typed value change information for the <see cref="INotifyPCGen.PropertyChanged"/> event.
+    /// Object instances of this class are used as a generic proxy for instances of <see cref="PCTypedEventArgs<typeparamref name="T"/>.
     /// </summary>
-    public class PropertyChangedWithValsEventArgs : PropertyChangedEventArgs
+    public class PCGenEventArgs : PropertyChangedEventArgs
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="PropertyChangedEventArgs{T}"/> class.
+        /// Initializes a new instance of the <see cref="PCGenEventArgs"/> class.
         /// </summary>
         /// <param name="propertyName">Name of the property.</param>
         /// <param name="oldValue">The old value of the property.</param>
         /// <param name="newValue">The new value of the property.</param>
-        public PropertyChangedWithValsEventArgs(string propertyName, Type propertyType, object oldValue, object newValue)
+        public PCGenEventArgs(string propertyName, Type propertyType, object oldValue, object newValue)
             : base(propertyName)
         {
             OldValue = oldValue;
             NewValue = newValue;
             PropertyType = propertyType;
+        }
+
+        public Type PropertyType { get; }
+
+        /// <summary>
+        /// Gets the old value of the property.
+        /// </summary>
+        public object OldValue { get; protected set; }
+
+        /// <summary>
+        /// Gets the new value of the property.
+        /// </summary>
+        public object NewValue { get; protected set; }
+    }
+
+    /// <summary>
+    /// Provides value change information for the <see cref="INotifyPropertyChanged.PropertyChanged"/> event.
+    /// </summary>
+    public class PCObjectEventArgs : PropertyChangedEventArgs
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PCObjectEventArgs"/> class.
+        /// </summary>
+        /// <param name="propertyName">Name of the property.</param>
+        /// <param name="oldValue">The old value of the property.</param>
+        /// <param name="newValue">The new value of the property.</param>
+        public PCObjectEventArgs(string propertyName, object oldValue, object newValue)
+            : base(propertyName)
+        {
+            OldValue = oldValue;
+            NewValue = newValue;
         }
 
         public Type PropertyType { get; }

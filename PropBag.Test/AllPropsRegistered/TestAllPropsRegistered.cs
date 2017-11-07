@@ -136,6 +136,9 @@ namespace PropBagLib.Tests
             Assert.That(mod1.DoWhenStringChanged_WasCalled, Is.True, "Expecting internal DoWhenPropStringChanged not to have been called.");
         }
 
+        // TODO: The IProp<T> implementations, now take the DoWhenChanged and add it
+        // to the "regular" list of event subscribers. There is no longer any support for
+        // DoAfterNotify. Fix or remove the whole DoAfterNotify "business."
         [Test]
         public void TestDoWhenPropStringChangedAfter()
         {
@@ -150,7 +153,7 @@ namespace PropBagLib.Tests
 
             mod1.PropStringCallDoAfterChanged += Mod1_PropStringChanged;
             mod1.PropertyChanged += Mod1_PropertyChanged;
-            mod1.PropertyChangedWithVals += Mod1_PropertyChangedWithVals;
+            mod1.PropertyChangedWithGenVals += Mod1_PropertyChangedWithVals;
             mod1.PropertyChanging += Mod1_PropertyChanging;
 
             // TODO: Need to also test "mod1.PropStringCallDoAfterChanged += mod1_PropStringChanged;"
@@ -356,7 +359,7 @@ namespace PropBagLib.Tests
         public void TestPropertyChangedWithVals()
         {
             mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
-            mod1.PropertyChangedWithVals += Mod1_PropertyChangedWithVals;
+            mod1.PropertyChangedWithGenVals += Mod1_PropertyChangedWithVals;
 
             mod1.PropInt = 0;
             mod1.PropInt = 1;
@@ -365,7 +368,7 @@ namespace PropBagLib.Tests
             Assert.That(genObjNewVal, Is.EqualTo(1), "The old value should have been 1.");
         }
 
-        void Mod1_PropertyChangedWithVals(object sender, PropertyChangedWithValsEventArgs e)
+        void Mod1_PropertyChangedWithVals(object sender, PCGenEventArgs e)
         {
             object sendr = sender;
             string prpName = e.PropertyName;
@@ -384,7 +387,7 @@ namespace PropBagLib.Tests
         public void TestSubscribePropChangedGen()
         {
             mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
-            mod1.SubscribeToPropChanged(doOnChange: DoWhenPropIntChangesGen, propertyName: "PropInt");
+            mod1.SubscribeToPropChanged(handler: DoWhenPropIntChangesGen, propertyName: "PropInt", propertyType: typeof(int));
 
             mod1.PropInt = 0;
             mod1.PropInt = 1;
@@ -392,7 +395,7 @@ namespace PropBagLib.Tests
             Assert.That(genObjOldVal, Is.EqualTo(0), "The old value should have been 0.");
             Assert.That(genObjNewVal, Is.EqualTo(1), "The new value should have been 1.");
 
-            mod1.UnSubscribeToPropChanged(doOnChange: DoWhenPropIntChangesGen, propertyName: "PropInt");
+            mod1.UnSubscribeToPropChanged(eventHandler: DoWhenPropIntChangesGen, propertyName: "PropInt", propertyType: typeof(int));
             mod1.PropInt = 2;
 
             Assert.That(genObjOldVal, Is.EqualTo(0), "The old value should have been 0. The action did not get unscribed.");
@@ -427,10 +430,10 @@ namespace PropBagLib.Tests
             Assert.That(typedNewVal, Is.EqualTo(1), "The new value should have been 1.");
         }
 
-        void DoWhenPropIntChangesTyped(int oldVal, int newValue)
+        void DoWhenPropIntChangesTyped(object sender, PCTypedEventArgs<int> e)
         {
-            typedOldVal = oldVal;
-            typedNewVal = newValue;
+            typedOldVal = e.OldValue;
+            typedNewVal = e.NewValue;
         }
 
         #endregion
@@ -461,7 +464,7 @@ namespace PropBagLib.Tests
 
         #region Event Handlers
 
-        void Mod1_PropStringChanged(object sender, PropertyChangedWithTValsEventArgs<string> e)
+        void Mod1_PropStringChanged(object sender, PCTypedEventArgs<string> e)
         {
             propStringOldVal = e.OldValue;
             propStringNewVal = e.NewValue;
@@ -471,7 +474,7 @@ namespace PropBagLib.Tests
             doWhenStringChangedWasCalled = mod1.DoWhenStringChanged_WasCalled;
         }
 
-        void Mod1_PropStringUseRefCompChanged(object sender, PropertyChangedWithTValsEventArgs<string> e)
+        void Mod1_PropStringUseRefCompChanged(object sender, PCTypedEventArgs<string> e)
         {
             propStringOldVal = e.OldValue;
             propStringNewVal = e.NewValue;
@@ -481,7 +484,7 @@ namespace PropBagLib.Tests
             doWhenStringChangedWasCalled = mod1.DoWhenStringChanged_WasCalled;
         }
 
-        void Mod1_PropNullableIntChanged(object sender, PropertyChangedWithTValsEventArgs<int?> e)
+        void Mod1_PropNullableIntChanged(object sender, PCTypedEventArgs<int?> e)
         {
             Nullable<int> oldVal = e.OldValue;
             Nullable<int> newValue = e.NewValue;
@@ -489,7 +492,7 @@ namespace PropBagLib.Tests
             propNullableInt_WasUpdated = true;
         }
 
-        void Mod1_PropICollectionIntChanged(object sender, PropertyChangedWithTValsEventArgs<ICollection<int>> e)
+        void Mod1_PropICollectionIntChanged(object sender, PCTypedEventArgs<ICollection<int>> e)
         {
             ICollection<int> oldValue = e.OldValue;
             ICollection<int> newValue = e.NewValue;

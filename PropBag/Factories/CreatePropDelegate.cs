@@ -14,20 +14,20 @@ namespace DRM.PropBag
         object value,
         string propertyName, object extraInfo,
         bool hasStorage, bool isTypeSolid,
-        EventHandler<PropertyChangedWithValsEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality);
+        EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality);
 
     // From String
     public delegate object CreateCPropFromStringDelegate(IPropFactory propFactory,
         string value, bool useDefault,
         string propertyName, object extraInfo,
         bool hasStorage, bool isTypeSolid,
-        EventHandler<PropertyChangedWithValsEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality);
+        EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality);
 
     // With No Value
     public delegate object CreateCPropWithNoValueDelegate(IPropFactory propFactory,
         string propertyName, object extraInfo,
         bool hasStorage, bool isTypeSolid,
-        EventHandler<PropertyChangedWithValsEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality);
+        EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality);
     #endregion
 
     #region Property-Type Methods
@@ -37,20 +37,20 @@ namespace DRM.PropBag
         object value,
         string propertyName, object extraInfo,
         bool hasStorage, bool isTypeSolid,
-        EventHandler<PropertyChangedWithValsEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality);
+        EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality);
 
     // From String
     public delegate object CreatePropFromStringDelegate(IPropFactory propFactory,
         string value, bool useDefault,
         string propertyName, object extraInfo,
         bool hasStorage, bool isTypeSolid,
-        EventHandler<PropertyChangedWithValsEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality);
+        EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality);
 
     // With No Value
     public delegate object CreatePropWithNoValueDelegate(IPropFactory propFactory,
         string propertyName, object extraInfo,
         bool hasStorage, bool isTypeSolid,
-        EventHandler<PropertyChangedWithValsEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality);
+        EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality);
 
     #endregion
 }

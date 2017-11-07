@@ -12,7 +12,7 @@ namespace DRM.TypeSafePropertyBag.EventManagement
 
     public interface IProvideATypedEventManager<T>
     {
-        IEventManager<INotifyPropertyChangedWithTVals<T>, PropertyChangedWithTValsEventArgs<T>>
+        IEventManager<INotifyPCTyped<T>, PCTypedEventArgs<T>>
             GetTheEventManger();
     }
 }

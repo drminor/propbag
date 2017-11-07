@@ -24,7 +24,7 @@ namespace DRM.PropBag.ClassGenerator
         static public IProp<T> CreateViaClassGenerator(PropDefRaw def, AbstractPropFactory factory, Type derivedType, out bool typeIsSolid)
         {
             Func<T,T,bool> comparer = GetComp(def.Comparer, def.UseRefEquality, factory);
-            EventHandler<PropertyChangedWithTValsEventArgs<T>> doWhenChangedX = GetDoWhen(def.DoWhenChanged, derivedType);
+            EventHandler<PCTypedEventArgs<T>> doWhenChangedX = GetDoWhen(def.DoWhenChanged, derivedType);
 
             IProp<T> prop;
 
@@ -66,14 +66,14 @@ namespace DRM.PropBag.ClassGenerator
             return null;
         }
 
-        static EventHandler<PropertyChangedWithTValsEventArgs<T>> GetDoWhen(string x, Type d)
+        static EventHandler<PCTypedEventArgs<T>> GetDoWhen(string x, Type d)
         {
             MethodInfo mi = d.GetMethod(x, BindingFlags.Instance | BindingFlags.NonPublic).MakeGenericMethod(typeof(T));
             //Type delType = typeof(Action<T,T>)
 
             Type dd = mi.GetRuntimeBaseDefinition().GetType();
 
-            EventHandler<PropertyChangedWithTValsEventArgs<T>> result = (EventHandler<PropertyChangedWithTValsEventArgs<T>>)mi.CreateDelegate(dd);
+            EventHandler<PCTypedEventArgs<T>> result = (EventHandler<PCTypedEventArgs<T>>)mi.CreateDelegate(dd);
 
             return result;
         }

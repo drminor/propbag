@@ -16,7 +16,7 @@ namespace DRM.PropBag
             bool typeIsSolid,
             bool hasStore,
             Func<T, T, bool> comparer,
-            EventHandler<PropertyChangedWithTValsEventArgs<T>> doWhenChangedX = null,
+            EventHandler<PCTypedEventArgs<T>> doWhenChangedX = null,
             //Action<T, T> doWhenChanged = null,
             bool doAfterNotify = false)
             : base(typeof(T), typeIsSolid, hasStore, doWhenChangedX, doAfterNotify, comparer, getDefaultValFunc)
@@ -32,7 +32,7 @@ namespace DRM.PropBag
             bool typeIsSolid,
             bool hasStore,
             Func<T, T, bool> comparer,
-            EventHandler<PropertyChangedWithTValsEventArgs<T>> doWhenChangedX = null,
+            EventHandler<PCTypedEventArgs<T>> doWhenChangedX = null,
             //Action<T, T> doWhenChanged = null,
             bool doAfterNotify = false)
             : base(typeof(T), typeIsSolid, hasStore, doWhenChangedX, doAfterNotify, comparer, getDefaultValFunc)

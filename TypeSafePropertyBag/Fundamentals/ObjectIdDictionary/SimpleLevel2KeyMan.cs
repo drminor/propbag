@@ -21,6 +21,19 @@ namespace DRM.TypeSafePropertyBag.Fundamentals.ObjectIdDictionary
             return result;
         }
 
+        public bool TryGetFromCooked(uint bot, out string rawBot)
+        {
+            if (_cookedDict.TryGetValue(bot, out rawBot))
+            {
+                return true;
+            }
+            else
+            {
+                rawBot = null;
+                return false;
+            }
+        }
+
         public uint FromRaw(string rawBot)
         {
             uint result = _rawDict[rawBot];
@@ -49,7 +62,6 @@ namespace DRM.TypeSafePropertyBag.Fundamentals.ObjectIdDictionary
         }
 
         private long m_Counter = 0;
-
         public uint NextCookedVal
         {
             get

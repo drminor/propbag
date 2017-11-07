@@ -110,7 +110,7 @@ namespace PropBagLib.Tests
 
         #region PropetyChangedWithTVals Event Declarations
 
-        public event EventHandler<PropertyChangedWithTValsEventArgs<object>> PropObjectChanged
+        public event EventHandler<PCTypedEventArgs<object>> PropObjectChanged
         {
             add
             {
@@ -122,7 +122,7 @@ namespace PropBagLib.Tests
             }
         }
 
-        public event EventHandler<PropertyChangedWithTValsEventArgs<string>> PropStringChanged
+        public event EventHandler<PCTypedEventArgs<string>> PropStringChanged
         {
             add
             {
@@ -134,7 +134,7 @@ namespace PropBagLib.Tests
             }
         }
 
-        public event EventHandler<PropertyChangedWithTValsEventArgs<bool>> PropBoolChanged
+        public event EventHandler<PCTypedEventArgs<bool>> PropBoolChanged
         {
             add
             {
@@ -146,7 +146,7 @@ namespace PropBagLib.Tests
             }
         }
 
-        public event EventHandler<PropertyChangedWithTValsEventArgs<int>> PropIntChanged
+        public event EventHandler<PCTypedEventArgs<int>> PropIntChanged
         {
             add
             {
@@ -158,7 +158,7 @@ namespace PropBagLib.Tests
             }
         }
 
-        public event EventHandler<PropertyChangedWithTValsEventArgs<TimeSpan>> PropTimeSpanChanged
+        public event EventHandler<PCTypedEventArgs<TimeSpan>> PropTimeSpanChanged
         {
             add
             {
@@ -170,7 +170,7 @@ namespace PropBagLib.Tests
             }
         }
 
-        public event EventHandler<PropertyChangedWithTValsEventArgs<Uri>> PropUriChanged
+        public event EventHandler<PCTypedEventArgs<Uri>> PropUriChanged
         {
             add
             {
@@ -182,7 +182,7 @@ namespace PropBagLib.Tests
             }
         }
 
-        public event EventHandler<PropertyChangedWithTValsEventArgs<Lazy<int>>> PropLazyIntChanged
+        public event EventHandler<PCTypedEventArgs<Lazy<int>>> PropLazyIntChanged
         {
             add
             {

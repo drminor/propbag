@@ -14,15 +14,15 @@ namespace DRM.PropBag
     {
         #region Private Members
 
-        private List<  Tuple<  Action<T, T>, EventHandler<PropertyChangedWithTValsEventArgs<T>>   >   > _actTable = null;
+        private List<  Tuple<  Action<T, T>, EventHandler<PCTypedEventArgs<T>>   >   > _actTable = null;
 
         #endregion
 
         #region Public Members
 
-        public event EventHandler<PropertyChangedWithTValsEventArgs<T>> PropertyChangedWithTVals;
+        public event EventHandler<PCTypedEventArgs<T>> PropertyChangedWithTVals;
 
-        public override event EventHandler<PropertyChangedWithValsEventArgs> PropertyChangedWithVals;
+        public override event EventHandler<PCGenEventArgs> PropertyChangedWithGenVals;
 
 
         public PropKindEnum PropKind { get; private set; }
@@ -59,7 +59,7 @@ namespace DRM.PropBag
         #region Consructors
 
         protected PropTypedBase(Type typeOfThisValue, bool typeIsSolid, bool hasStore,
-            EventHandler<PropertyChangedWithTValsEventArgs<T>> doWhenChangedX,
+            EventHandler<PCTypedEventArgs<T>> doWhenChangedX,
             //Action<T, T> doWhenChanged,
             bool doAfterNotify,
             Func<T,T,bool> comparer, GetDefaultValueDelegate<T> getDefaultValFunc, PropKindEnum propType = PropKindEnum.Prop)
@@ -136,7 +136,7 @@ namespace DRM.PropBag
             Comparer = null;
             DoWHenChangedAction = null;
             PropertyChangedWithTVals = null;
-            PropertyChangedWithVals = null;
+            PropertyChangedWithGenVals = null;
         }
 
         #endregion
@@ -145,22 +145,22 @@ namespace DRM.PropBag
 
         public void SubscribeToPropChanged(Action<T, T> doOnChange)
         {
-            EventHandler<PropertyChangedWithTValsEventArgs<T>> eventHandler = (s, e) => { doOnChange(e.OldValue, e.NewValue); };
+            EventHandler<PCTypedEventArgs<T>> eventHandler = (s, e) => { doOnChange(e.OldValue, e.NewValue); };
 
             if (GetHandlerFromAction(doOnChange, ref _actTable) == null)
             {
                 PropertyChangedWithTVals += eventHandler;
                 if (_actTable == null)
                 {
-                    _actTable = new List<Tuple<Action<T, T>, EventHandler<PropertyChangedWithTValsEventArgs<T>>  >>();
+                    _actTable = new List<Tuple<Action<T, T>, EventHandler<PCTypedEventArgs<T>>  >>();
                 }
-                _actTable.Add(new Tuple<Action<T, T>, EventHandler<PropertyChangedWithTValsEventArgs<T>> >(doOnChange, eventHandler));
+                _actTable.Add(new Tuple<Action<T, T>, EventHandler<PCTypedEventArgs<T>> >(doOnChange, eventHandler));
             }
         }
 
         public bool UnSubscribeToPropChanged(Action<T, T> doOnChange)
         {
-            Tuple<Action<T, T>, EventHandler<PropertyChangedWithTValsEventArgs<T>>> actEntry = GetHandlerFromAction(doOnChange, ref _actTable);
+            Tuple<Action<T, T>, EventHandler<PCTypedEventArgs<T>>> actEntry = GetHandlerFromAction(doOnChange, ref _actTable);
 
             if (actEntry == null) return false;
 
@@ -170,14 +170,14 @@ namespace DRM.PropBag
             return true;
         }
 
-        private Tuple<Action<T, T>, EventHandler<PropertyChangedWithTValsEventArgs<T>>> GetHandlerFromAction(Action<T, T> act,
-            ref List< Tuple<  Action<T, T>, EventHandler<PropertyChangedWithTValsEventArgs<T>> >> actTable)
+        private Tuple<Action<T, T>, EventHandler<PCTypedEventArgs<T>>> GetHandlerFromAction(Action<T, T> act,
+            ref List< Tuple<  Action<T, T>, EventHandler<PCTypedEventArgs<T>> >> actTable)
         {
             if (actTable == null) return null;
 
             for (int i = 0; i < actTable.Count; i++)
             {
-                Tuple<Action<T, T>, EventHandler<PropertyChangedWithTValsEventArgs<T>>> tup = actTable[i];
+                Tuple<Action<T, T>, EventHandler<PCTypedEventArgs<T>>> tup = actTable[i];
                 if (tup.Item1 == act) return tup; //.Item2;
             }
 
@@ -190,22 +190,22 @@ namespace DRM.PropBag
 
         public void OnPropertyChangedWithTVals(string propertyName, T oldVal, T newVal)
         {
-            EventHandler<PropertyChangedWithTValsEventArgs<T>> handler = Interlocked.CompareExchange(ref PropertyChangedWithTVals, null, null);
+            EventHandler<PCTypedEventArgs<T>> handler = Interlocked.CompareExchange(ref PropertyChangedWithTVals, null, null);
 
             if (handler != null)
-                handler(this, new PropertyChangedWithTValsEventArgs<T>(propertyName, oldVal, newVal));
+                handler(this, new PCTypedEventArgs<T>(propertyName, oldVal, newVal));
         }
 
         public override void OnPropertyChangedWithVals(string propertyName, object oldVal, object newVal)
         {
-            EventHandler<PropertyChangedWithValsEventArgs> handler = Interlocked.CompareExchange(ref PropertyChangedWithVals, null, null);
+            EventHandler<PCGenEventArgs> handler = Interlocked.CompareExchange(ref PropertyChangedWithGenVals, null, null);
 
             if (handler != null)
-                handler(this, new PropertyChangedWithValsEventArgs(propertyName, this.Type, oldVal, newVal));
+                handler(this, new PCGenEventArgs(propertyName, this.Type, oldVal, newVal));
         }
 
         // TODOXX:
-        public IEventManager<INotifyPropertyChangedWithTVals<T>, PropertyChangedWithTValsEventArgs<T>> GetTheEventManger()
+        public IEventManager<INotifyPCTyped<T>, PCTypedEventArgs<T>> GetTheEventManger()
         {
             throw new NotImplementedException();
         }
