@@ -16,6 +16,8 @@ namespace DRM.PropBag
 {
     public struct PropGen : IPropGen
     {
+        public ulong PropId { get; }
+
         public Type Type { get;}
 
         /// <summary>
@@ -31,19 +33,21 @@ namespace DRM.PropBag
         public bool HasStore { get; }
 
         // Constructor
-        public PropGen(IPropGen typedPropWrapper)
+        public PropGen(IPropGen typedPropWrapper, ulong? propId)
         {
             if(typedPropWrapper == null)
             {
                 TypedProp = null;
                 Type = null;
                 HasStore = false;
+                PropId = 0;
             }
             else
             {
                 TypedProp = typedPropWrapper.TypedProp;
                 Type = typedPropWrapper.TypedProp.Type;
                 HasStore = typedPropWrapper.HasStore;
+                PropId = propId.Value;
             }
 
             PropertyChangedWithGenVals = null; // = delegate { };

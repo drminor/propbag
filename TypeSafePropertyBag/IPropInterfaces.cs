@@ -75,6 +75,7 @@ namespace DRM.TypeSafePropertyBag
     /// </summary>
     public interface IPropGen : INotifyPCGen
     {
+        //ulong PropId { get; }
         bool TypeIsSolid { get; }
         bool HasStore { get; }
 
@@ -89,8 +90,8 @@ namespace DRM.TypeSafePropertyBag
         //event EventHandler<PropertyChangedWithValsEventArgs> PropertyChangedWithVals;
         void OnPropertyChangedWithVals(string propertyName, object oldVal, object newVal);
 
-        void SubscribeToPropChanged(Action<object, object> doOnChange);
-        bool UnSubscribeToPropChanged(Action<object, object> doOnChange);
+        //void SubscribeToPropChanged(Action<object, object> doOnChange);
+        //bool UnSubscribeToPropChanged(Action<object, object> doOnChange);
 
         object Value { get; }
 

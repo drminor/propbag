@@ -271,7 +271,7 @@ namespace DRM.PropBag
             if (neverCreate)
             {
                 wasRegistered = false;
-                return new PropGen(null);
+                return new PropGen(null, null);
             }
 
             if (alwaysRegister)
@@ -295,7 +295,7 @@ namespace DRM.PropBag
                         else
                         {
                             wasRegistered = false;
-                            return new PropGen(null);
+                            return new PropGen(null, null);
                         }
                     }
                 case ReadMissingPropPolicyEnum.Register:
@@ -323,9 +323,9 @@ namespace DRM.PropBag
                                 null, PropFactory.ProvidesStorage, typeIsSolid, PropKindEnum.Prop, null, false, null);
                         }
 
-                        PropGen propGen = new PropGen(typedPropWrapper);
+                        //PropGen propGen = new PropGen(typedPropWrapper);
 
-                        AddProp(propertyName, propGen);
+                        PropGen propGen = AddProp(propertyName, typedPropWrapper);
 
                         wasRegistered = true;
                         return propGen;
@@ -447,8 +447,8 @@ namespace DRM.PropBag
                     {
                         MakeTypeSolid(ref genProp, propertyType, propertyName);
 
-                        ulong cKey = _compKeyManager.Join(_ourObjectId, propertyName);
-                        _theStore[cKey] = genProp;
+                        //ulong cKey = _compKeyManager.Join(_ourObjectId, propertyName);
+                        _theStore[genProp.PropId] = genProp;
 
                         //tVals[propertyName] = genProp;
                     }
@@ -590,8 +590,8 @@ namespace DRM.PropBag
                         if (MakeTypeSolid(ref genProp, newType, propertyName))
                         {
                             // TODO: implement try update.
-                            ulong cKey = _compKeyManager.Join(_ourObjectId, propertyName);
-                            _theStore[cKey] = genProp;
+                            //ulong cKey = _compKeyManager.Join(_ourObjectId, propertyName);
+                            _theStore[genProp.PropId] = genProp;
 
                             //tVals[propertyName] = genProp;
                         }
@@ -1100,28 +1100,29 @@ namespace DRM.PropBag
 
         protected void AddProp<T>(string propertyName, IProp<T> prop)
         {
-            PropGen propGen = new PropGen(prop);
+            ulong cKey = GetNewCKey(propertyName);
+            PropGen propGen = new PropGen(prop, cKey);
 
             //tVals.Add(propertyName, propGen);
-
-            uint l2Key = _level2KeyManager.Add(propertyName);
-            if (!_theStore.TryAdd(_ourObjectId, l2Key, propGen))
+            if (!_theStore.TryAdd(cKey, propGen))
             {
                 throw new ApplicationException("Could not add the new propGen to the store.");
             }
             //prop.DoWhenChanged = 
         }
 
-        protected void AddProp(string propertyName, IPropGen typedPropWrapper)
+        protected PropGen AddProp(string propertyName, IPropGen typedPropWrapper)
         {
-            PropGen propGen = new PropGen(typedPropWrapper);
-            //tVals.Add(propertyName, propGen);
+            ulong cKey = GetNewCKey(propertyName);
 
-            uint l2Key = _level2KeyManager.Add(propertyName);
-            if (!_theStore.TryAdd(_ourObjectId, l2Key, propGen))
+            PropGen propGen = new PropGen(typedPropWrapper, cKey);
+
+            //tVals.Add(propertyName, propGen);
+            if (!_theStore.TryAdd(cKey, propGen))
             {
                 throw new ApplicationException("Could not add the new propGen to the store.");
             }
+            return propGen;
         }
 
         protected void RemoveProp(string propertyName, Type propertyType)
@@ -1239,12 +1240,6 @@ namespace DRM.PropBag
 
             IDictionary <string, ValPlusType> result = list.ToDictionary(pair => pair.Key, pair => pair.Value);
             return result; 
-        }
-
-        private string GetPropNameFromCKey(ulong cKey)
-        {
-            ulong objectId = _compKeyManager.Split(cKey, out string propertyName);
-            return propertyName;
         }
 
         /// <summary>
@@ -1416,8 +1411,7 @@ namespace DRM.PropBag
                 {
                     if (MakeTypeSolid(ref genProp, typeof(T), propertyName))
                     {
-                        ulong cKey = _compKeyManager.Join(_ourObjectId, propertyName);
-                        dict[cKey] = genProp;
+                        dict[genProp.PropId] = genProp;
                     }
                 }
                 catch (InvalidCastException ice)
@@ -1469,7 +1463,7 @@ namespace DRM.PropBag
                 IPropGen typedPropWrapper = PropFactory.CreateGenFromObject(newType, curValue, propertyName, null, true, true, propKind, null, false, null, false);
 
                 //genProp.UpdateWithSolidType(newType, curValue);
-                genProp = new PropGen(typedPropWrapper);
+                genProp = new PropGen(typedPropWrapper, genProp.PropId);
                 return true;
             }
             else
@@ -1522,14 +1516,35 @@ namespace DRM.PropBag
             }
         }
 
-        public object GetValueGen(object host, string propertyName, Type propertyType)
+        //public object GetValueGen(object host, string propertyName, Type propertyType)
+        //{
+        //    return ((IPropBag)host).GetValWithType(propertyName, propertyType);
+        //}
+
+        //public void SetValueGen(object host, string propertyName, Type propertyType, object value)
+        //{
+        //    ((IPropBag)host).SetValWithType(propertyName, propertyType, value);
+        //}
+
+        #endregion
+
+        #region Composite Key Support
+
+        private string GetPropNameFromCKey(ulong cKey)
         {
-            return ((IPropBag)host).GetValWithType(propertyName, propertyType);
+            ulong objectId = _compKeyManager.Split(cKey, out string propertyName);
+            return propertyName;
         }
 
-        public void SetValueGen(object host, string propertyName, Type propertyType, object value)
+        private ulong GetNewCKey(string propertyName)
         {
-            ((IPropBag)host).SetValWithType(propertyName, propertyType, value);
+            // Register new propertyName and get a Level2 key.
+            uint l2Key = _level2KeyManager.Add(propertyName);
+
+            // Create a combined (L1) Key
+            ulong cKey = _compKeyManager.Join(_ourObjectId, l2Key);
+
+            return cKey;
         }
 
         #endregion

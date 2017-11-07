@@ -55,7 +55,7 @@
     <Compile Include="Collections\PbListSourceProvider.cs" />
     <Compile Include="Collections\PbListSource.cs" />
     <Compile Include="Collections\PbCollection.cs" />
-    <Compile Include="Collections\CProp.cs" />
+    <Compile Include="Props\CProp.cs" />
     <Compile Include="Collections\PbAbstractListSource.cs" />
     <Compile Include="ControlModel\MapperRequest.cs" />
     <Compile Include="ControlModel\WellKnownCollectionTypeEnum.cs" />

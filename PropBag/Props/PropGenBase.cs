@@ -21,7 +21,7 @@ namespace DRM.PropBag
 
         Attribute[] _attributes;
 
-        List<Tuple<Action<object, object>, EventHandler<PCGenEventArgs>>> _actTableGen = null;
+        //List<Tuple<Action<object, object>, EventHandler<PCGenEventArgs>>> _actTableGen = null;
 
         #endregion
 
@@ -71,19 +71,20 @@ namespace DRM.PropBag
             TypeIsSolid = typeIsSolid;
             HasStore = hasStore;
             //PropertyChangedWithVals = null; // = delegate { };
-            _actTableGen = null;
+            //_actTableGen = null;
             _attributes = new Attribute[] { };
+            //PropId = propId;
         }
 
-        public PropGenBase(IPropGen typedPropWrapper)
+        public PropGenBase(IPropGen typedPropWrapper, ulong propId)
         {
             Type = typedPropWrapper.TypedProp.Type;
             TypedProp = typedPropWrapper.TypedProp;
             TypeIsSolid = typedPropWrapper.TypeIsSolid;
             HasStore = typedPropWrapper.HasStore;
-            //PropertyChangedWithVals = null; // = delegate { };
-            _actTableGen = null;
+            //_actTableGen = null;
             _attributes = new Attribute[] { };
+            //PropId = propId;
         }
 
         #endregion
@@ -98,55 +99,55 @@ namespace DRM.PropBag
         public void CleanUp(bool doTypedCleanUp)
         {
             if (doTypedCleanUp && TypedProp != null) TypedProp.CleanUpTyped();
-            _actTableGen = null;
+            //_actTableGen = null;
         }
 
         #endregion
 
         #region Generic PropertyChangedWithVals support
 
-        public void SubscribeToPropChanged(Action<object, object> doOnChange)
-        {
-            EventHandler<PCGenEventArgs> eventHandler = (s, e) => { doOnChange(e.OldValue, e.NewValue); };
+        //public void SubscribeToPropChanged(Action<object, object> doOnChange)
+        //{
+        //    EventHandler<PCGenEventArgs> eventHandler = (s, e) => { doOnChange(e.OldValue, e.NewValue); };
 
-            if (GetHandlerFromAction(doOnChange, ref _actTableGen) == null)
-            {
-                PropertyChangedWithGenVals += eventHandler;
-                if (_actTableGen == null)
-                {
-                    _actTableGen = new List<Tuple<Action<object, object>, EventHandler<PCGenEventArgs>>>();
-                }
-                _actTableGen.Add(new Tuple<Action<object, object>, EventHandler<PCGenEventArgs>>(doOnChange, eventHandler));
-            }
-        }
+        //    if (GetHandlerFromAction(doOnChange, ref _actTableGen) == null)
+        //    {
+        //        PropertyChangedWithGenVals += eventHandler;
+        //        if (_actTableGen == null)
+        //        {
+        //            _actTableGen = new List<Tuple<Action<object, object>, EventHandler<PCGenEventArgs>>>();
+        //        }
+        //        _actTableGen.Add(new Tuple<Action<object, object>, EventHandler<PCGenEventArgs>>(doOnChange, eventHandler));
+        //    }
+        //}
 
-        public bool UnSubscribeToPropChanged(Action<object, object> doOnChange)
-        {
-            Tuple<Action<object, object>, EventHandler<PCGenEventArgs>> actEntry = GetHandlerFromAction(doOnChange, ref _actTableGen);
+        //public bool UnSubscribeToPropChanged(Action<object, object> doOnChange)
+        //{
+        //    Tuple<Action<object, object>, EventHandler<PCGenEventArgs>> actEntry = GetHandlerFromAction(doOnChange, ref _actTableGen);
 
-            if (actEntry == null) return false;
+        //    if (actEntry == null) return false;
 
-            PropertyChangedWithGenVals -= actEntry.Item2;
-            _actTableGen.Remove(actEntry);
-            return true;
-        }
+        //    PropertyChangedWithGenVals -= actEntry.Item2;
+        //    _actTableGen.Remove(actEntry);
+        //    return true;
+        //}
 
-        private Tuple<Action<object, object>, EventHandler<PCGenEventArgs>> GetHandlerFromAction(Action<object, object> act,
-            ref List<Tuple<Action<object, object>, EventHandler<PCGenEventArgs>>> actTable)
-        {
-            if (actTable == null)
-            {
-                return null;
-            }
+        //private Tuple<Action<object, object>, EventHandler<PCGenEventArgs>> GetHandlerFromAction(Action<object, object> act,
+        //    ref List<Tuple<Action<object, object>, EventHandler<PCGenEventArgs>>> actTable)
+        //{
+        //    if (actTable == null)
+        //    {
+        //        return null;
+        //    }
 
-            for (int i = 0; i < actTable.Count; i++)
-            {
-                Tuple<Action<object, object>, EventHandler<PCGenEventArgs>> tup = actTable[i];
-                if (tup.Item1 == act) return tup;
-            }
+        //    for (int i = 0; i < actTable.Count; i++)
+        //    {
+        //        Tuple<Action<object, object>, EventHandler<PCGenEventArgs>> tup = actTable[i];
+        //        if (tup.Item1 == act) return tup;
+        //    }
 
-            return null;
-        }
+        //    return null;
+        //}
 
 
         #endregion
@@ -154,7 +155,6 @@ namespace DRM.PropBag
         #region Raise Events
 
         public abstract void OnPropertyChangedWithVals(string propertyName, object oldVal, object newVal);
-
 
         #endregion
 
