@@ -9,7 +9,7 @@ namespace DRM.PropBag
     /// <summary>
     /// Base Property Bag Features
     /// </summary>
-    public interface IPropBag : ITypeSafePropBag, ICustomTypeDescriptor, INotifyPropertyChanged, INotifyPropertyChanging, INotifyPropertyChangedWithVals
+    public interface IPropBag : ITypeSafePropBag, ICustomTypeDescriptor, INotifyPropertyChanged, INotifyPropertyChanging, INotifyPCGen
     {
         // These are defined by ITypeSafePropBag
         //object GetValWithType(string propertyName, Type propertyType);
@@ -38,17 +38,24 @@ namespace DRM.PropBag
         bool TryGetPropType(string propertyName, out PropKindEnum propType);
         bool TryGetListSource(string propertyName, Type itemType, out IListSource listSource);
 
-        bool SubscribeToPropChanged<T>(EventHandler<PropertyChangedWithTValsEventArgs<T>> eventHandler, string propertyName);
-        bool UnSubscribeToPropChanged<T>(EventHandler<PropertyChangedWithTValsEventArgs<T>> eventHandler, string propertyName);
+        bool SubscribeToPropChanged(EventHandler<PropertyChangedEventArgs> handler, string propertyName, Type propertyType);
+        bool UnsubscribeToPropChanged(EventHandler<PropertyChangedEventArgs> handler, string propertyName, Type propertyType);
 
-        bool SubscribeToPropChanged(EventHandler<PropertyChangedWithValsEventArgs> eventHandler, string propertyName);
-        bool UnSubscribeToPropChanged(EventHandler<PropertyChangedWithValsEventArgs> eventHandler, string propertyName);
+        bool SubscribeToPropChanged<T>(EventHandler<PCTypedEventArgs<T>> eventHandler, string propertyName);
+        bool UnSubscribeToPropChanged<T>(EventHandler<PCTypedEventArgs<T>> eventHandler, string propertyName);
 
-        bool SubscribeToPropChanged<T>(Action<T, T> doOnChange, string propertyName);
-        bool UnSubscribeToPropChanged<T>(Action<T, T> doOnChange, string propertyName);
+        bool SubscribeToPropChanged(EventHandler<PCGenEventArgs> eventHandler, string propertyName, Type propertyType);
+        bool UnSubscribeToPropChanged(EventHandler<PCGenEventArgs> eventHandler, string propertyName, Type propertyType);
 
-        bool SubscribeToPropChanged(Action<object, object> doOnChange, string propertyName);
-        bool UnSubscribeToPropChanged(Action<object, object> doOnChange, string propertyName);
+        bool SubscribeToPropChanged(EventHandler<PCObjectEventArgs> eventHandler, string propertyName);
+        bool UnSubscribeToPropChanged(EventHandler<PCObjectEventArgs> eventHandler, string propertyName);
+
+
+        //bool SubscribeToPropChanged<T>(Action<T, T> doOnChange, string propertyName);
+        //bool UnSubscribeToPropChanged<T>(Action<T, T> doOnChange, string propertyName);
+
+        //bool SubscribeToPropChanged(Action<object, object> doOnChange, string propertyName);
+        //bool UnSubscribeToPropChanged(Action<object, object> doOnChange, string propertyName);
 
         string FullClassName { get; }
 
