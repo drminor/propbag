@@ -74,6 +74,17 @@ namespace DRM.TypeSafePropertyBag.Fundamentals.ObjectIdDictionary
         #endregion
     }
 
+    public interface IProvideObjectIds<CompT, L1T, L2T, L2TRaw> : IIssueL1Keys<L1T>
+    {
+        ICKeyMan<CompT, L1T, L2T, L2TRaw> CompKeyManager { get; }
+        IL2KeyMan<L2T, L2TRaw> Leve2KeyManager { get; }
+    }
+
+    public interface IIssueL1Keys<L1T>
+    {
+        L1T NextL1Key { get; }
+    }
+
     public interface ICKeyMan<CompT, L1T, L2T, L2TRaw>
     {
         CompT Join(L1T top, L2T bot);
@@ -91,15 +102,10 @@ namespace DRM.TypeSafePropertyBag.Fundamentals.ObjectIdDictionary
         bool TryGetFromRaw(L2TRaw rawBot, out L2T bot);
 
         L2TRaw FromCooked(L2T bot);
-
+        bool TryGetFromCooked(L2T raw, out L2TRaw rawBot);
 
         L2T Add(L2TRaw rawBot);
     }
-
-    //public interface IProvideObjectIds<CompT, L1T, L2T, L2TRaw> : IHaveAnL1Key<L1T>, L2KeyMan<L2T, L2TRaw>
-    //{
-
-    //}
 
     //public interface IHaveAnL1Key<L1T>
     //{
