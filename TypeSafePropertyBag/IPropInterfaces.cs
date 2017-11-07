@@ -39,6 +39,7 @@ namespace DRM.TypeSafePropertyBag
     {
         bool DoAfterNotify { get; set; }
         Action<T, T> DoWHenChangedAction { get; }
+
         bool UpdateDoWhenChangedAction(Action<T, T> doWhenChangedAction, bool? doAfterNotify);
     }
 

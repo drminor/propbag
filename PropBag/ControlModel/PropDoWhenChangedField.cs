@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DRM.TypeSafePropertyBag;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,8 +9,8 @@ namespace DRM.PropBag.ControlModel
 {
     public class PropDoWhenChangedField : NotifyPropertyChangedBase, IEquatable<PropDoWhenChangedField>
     {
-        Delegate _dwc;
-        public Delegate DoWhenChangedAction { get { return _dwc; } set { SetIfDifferentDelegate<Delegate>(ref _dwc, value, nameof(DoWhenChangedAction)); } }
+        EventHandler<PropertyChangedWithValsEventArgs> _dwc;
+        public EventHandler<PropertyChangedWithValsEventArgs> DoWhenChangedAction { get { return _dwc; } set { SetIfDifferentDelegate<EventHandler<PropertyChangedWithValsEventArgs>>(ref _dwc, value, nameof(DoWhenChangedAction)); } }
 
         bool _dan;
         public bool DoAfterNotify { get { return _dan; } set { SetIfDifferent<bool>(ref _dan, value, nameof(DoAfterNotify)); } }
@@ -37,11 +38,11 @@ namespace DRM.PropBag.ControlModel
         //    DoAfterNotify = doAfterNotify;
         //}
 
-        public Func<object, Delegate> DoWhenActionGetter { get; }
+        public Func<object, EventHandler<PropertyChangedWithValsEventArgs>> DoWhenActionGetter { get; }
 
-        public PropDoWhenChangedField(Delegate doWhenChangedAction, bool doAfterNotify, bool methodIsLocal,
-            Type declaringType, string fullClassName, string instanceKey, string methodName,
-            Func<object, Delegate> doWhenChangedActionGetter)
+        public PropDoWhenChangedField(EventHandler<PropertyChangedWithValsEventArgs> doWhenChangedAction, bool doAfterNotify,
+            bool methodIsLocal, Type declaringType, string fullClassName, string instanceKey, string methodName,
+            Func<object, EventHandler<PropertyChangedWithValsEventArgs>> doWhenChangedActionGetter)
         {
             DoWhenChangedAction = doWhenChangedAction;
             DoAfterNotify = doAfterNotify;

@@ -41,6 +41,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ObjectIdIssuer.cs" />
     <Compile Include="ControlModel\DeriveFromClassField_NotUsed.cs" />
     <Compile Include="ControlModel\DeriveFromClassModeEnum.cs" />
     <Compile Include="ControlModel\IPropModelProvider.cs" />

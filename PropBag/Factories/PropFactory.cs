@@ -99,7 +99,7 @@ namespace DRM.PropBag
             object value,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
-            Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null)
+            EventHandler<PropertyChangedWithValsEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null)
         {
             if (propKind == PropKindEnum.Prop)
             {
@@ -125,7 +125,7 @@ namespace DRM.PropBag
             string value, bool useDefault,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
-            Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null)
+            EventHandler<PropertyChangedWithValsEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null)
         {
             if (propKind == PropKindEnum.Prop)
             {
@@ -150,7 +150,7 @@ namespace DRM.PropBag
         public override IPropGen CreateGenWithNoValue(Type typeOfThisProperty,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
-            Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null)
+            EventHandler<PropertyChangedWithValsEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null)
         {
             if (propKind == PropKindEnum.Prop)
             {

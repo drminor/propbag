@@ -6,12 +6,13 @@ namespace DRM.TypeSafePropertyBag
     // also implement the INotifyPropertyChanged<TEventArgs> where TEventArgs : EventArgs
     // which would look like this.
     //     INotifyPropertyChangedWithTVals<T> : INotifyPropertyChanged<PropertyChangedWithTValsEventArgs<T>> 
-
+    // I have tried this and it doesn't seem to be very useful. Every delegate is unique,
+    // and one cannot provide a delegate, even one with the same signature, in place of another.
 
     /// <summary>
     /// Notifies clients that a property value has changed and provides the old and new values in a type-safe manner.
     /// </summary>
-    public interface INotifyPropertyChangedWithTVals<T>
+    public interface INotifyPropertyChangedWithTVals<T> 
     {
         /// <summary>
         /// Occurs when a property value changes.

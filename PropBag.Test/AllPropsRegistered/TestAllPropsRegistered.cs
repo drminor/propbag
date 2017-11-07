@@ -441,10 +441,7 @@ namespace PropBagLib.Tests
         public void TestPublicPropBag()
         {
             PubPropBag ppb = new PubPropBag(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
-
             ppb.AddProp<int>("PropInt");
-
-
         }
         #endregion
 

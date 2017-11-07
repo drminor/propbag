@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-
-using System.Reflection;
-
+﻿
 using DRM.PropBag;
 using DRM.TypeSafePropertyBag;
+using System;
+using System.Collections.Generic;
 
 namespace PropBagLib.Tests
 {
@@ -24,19 +22,19 @@ namespace PropBagLib.Tests
         //    set { base[propertyName, key] = value; }
         //}
 
-        public void DoWhenStringChanged(string oldVal, string newVal)
+        public void DoWhenStringChanged(object sender, PropertyChangedWithTValsEventArgs<string> e)
         {
             DoWhenStringChanged_WasCalled = true;
-            DoWhenStringPropOldVal = oldVal;
-            DoWhenStringPropNewVal = newVal;
+            DoWhenStringPropOldVal = e.OldValue;
+            DoWhenStringPropNewVal = e.NewValue;
         }
 
-        private void DoWhenNullIntChanged(Nullable<int> oldVal, Nullable<int> newVal)
+        private void DoWhenNullIntChanged(object sender, PropertyChangedWithTValsEventArgs<Nullable<int>> e)
         {
             DoWhenNullIntChanged_WasCalled = true;
         }
 
-        private void DoWhenICollectionIntChanged(ICollection<int> oldVal, ICollection<int> newVal)
+        private void DoWhenICollectionIntChanged(object sender, PropertyChangedWithTValsEventArgs<ICollection<int>> e)
         {
             DoWhenICollectionIntChanged_WasCalled = true;
         }

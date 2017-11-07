@@ -172,7 +172,7 @@ namespace DRM.PropBag.ControlsWPF
                     else if (uc is PropDoWhenChangedField dwc)
                     {
 
-                        Func<object, Delegate> doWhenChangedGetter = null;
+                        Func<object, EventHandler<PropertyChangedWithValsEventArgs>> doWhenChangedGetter = null;
                         
                         if(dwc.MethodName != null)
                         {

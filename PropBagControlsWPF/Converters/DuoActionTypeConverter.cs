@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DRM.TypeSafePropertyBag;
+using System;
 using System.ComponentModel;
 using System.ComponentModel.Design.Serialization;
 using System.Globalization;
@@ -117,7 +118,7 @@ namespace DRM.PropBag.ControlsWPF
                 Type propType = Type.GetType(strPropType);
                 GetActionRefDelegate ActionGetter = GetTheGetActionRefDelegate(propType);
 
-                Delegate d = ActionGetter(targetInstance, targetType, methodName);
+                EventHandler<PropertyChangedWithValsEventArgs> d = ActionGetter(targetInstance, targetType, methodName);
                 return new DoWhenChangedAction(d);
 
             }
@@ -172,8 +173,9 @@ namespace DRM.PropBag.ControlsWPF
         {
             get
             {
-                Action<string, string> act = (x, y) => new object();
-                return new DoWhenChangedAction(act);
+                //Action<string, string> act = (x, y) => new object();
+
+                return new DoWhenChangedAction();
             }
         }
 
@@ -184,7 +186,7 @@ namespace DRM.PropBag.ControlsWPF
         static private Type GMT_TYPE = typeof(GenericMethodTemplates);
 
         // Delegate declarations.
-        private delegate Delegate GetActionRefDelegate(object owningInstance, Type ownerType, string methodName);
+        private delegate EventHandler<PropertyChangedWithValsEventArgs> GetActionRefDelegate(object owningInstance, Type ownerType, string methodName);
 
         private static GetActionRefDelegate GetTheGetActionRefDelegate(Type propertyType)
         {

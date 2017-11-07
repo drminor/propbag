@@ -94,7 +94,7 @@ namespace DRM.PropBag
             object value,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
-            Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null)
+            EventHandler<PropertyChangedWithValsEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null)
         {
             throw new InvalidOperationException("External Store Factory doesn't know how to create properties with inital values.");
         }
@@ -103,7 +103,7 @@ namespace DRM.PropBag
             string value, bool useDefault,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
-            Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null)
+            EventHandler<PropertyChangedWithValsEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null)
         {
             throw new InvalidOperationException("External Store Factory doesn't know how to create properties with inital values.");
         }
@@ -111,7 +111,7 @@ namespace DRM.PropBag
         public override IPropGen CreateGenWithNoValue(Type typeOfThisProperty,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
-            Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null)
+            EventHandler<PropertyChangedWithValsEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null)
         {
             CreatePropWithNoValueDelegate propCreator = GetPropWithNoValueCreator(typeOfThisProperty);
             IPropGen prop = (IPropGen)propCreator(this, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,

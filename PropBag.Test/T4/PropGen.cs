@@ -308,14 +308,14 @@ namespace PropBagLib.Tests
 		/// </summary>
 		/// <param name="methodName">Some public or non-public instance method in this class.</param>
 		/// <returns>The name, unchanged, if the method exists, otherwise null.</returns>
-		private Action<T, T> GetDelegate<T>(string methodName)
+		EventHandler<PropertyChangedWithTValsEventArgs<T>> GetDelegate<T>(string methodName)
 		{
 		    Type pp = this.GetType();
 		    MethodInfo mi = pp.GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 		
 		    if (mi == null) return null;
 		
-		    Action<T, T> result = (Action<T, T>)mi.CreateDelegate(typeof(Action<T, T>), this);
+		    EventHandler<PropertyChangedWithTValsEventArgs<T>> result = (EventHandler<PropertyChangedWithTValsEventArgs<T>>)mi.CreateDelegate(typeof(EventHandler<PropertyChangedWithTValsEventArgs<T>>), this);
 		
 		    return result;
 		}

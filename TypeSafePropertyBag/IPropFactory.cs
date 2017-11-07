@@ -16,11 +16,13 @@ namespace DRM.TypeSafePropertyBag
         #region Collection-Type Methods Methods
 
         ICPropPrivate<CT, T> Create<CT, T>(CT initialValue, string propertyName, object extraInfo = null,
-            bool hasStorage = true, bool typeIsSolid = true, EventHandler<PropertyChangedWithTValsEventArgs<CT>> doWhenChangedX = null, bool doAfterNotify = false,
+            bool hasStorage = true, bool typeIsSolid = true,
+            EventHandler<PropertyChangedWithTValsEventArgs<CT>> doWhenChangedX = null, bool doAfterNotify = false,
             Func<CT, CT, bool> comparer = null) where CT : IEnumerable<T>;
 
         ICPropPrivate<CT, T> CreateWithNoValue<CT, T>(string propertyName, object extraInfo = null,
-            bool hasStorage = true, bool typeIsSolid = true, EventHandler<PropertyChangedWithTValsEventArgs<CT>> doWhenChangedX = null, bool doAfterNotify = false,
+            bool hasStorage = true, bool typeIsSolid = true,
+            EventHandler<PropertyChangedWithTValsEventArgs<CT>> doWhenChangedX = null, bool doAfterNotify = false,
             Func<CT, CT, bool> comparer = null) where CT : IEnumerable<T>;
 
         #endregion
@@ -40,15 +42,18 @@ namespace DRM.TypeSafePropertyBag
         #region Generic property creators 
 
         IPropGen CreateGenFromObject(Type typeOfThisProperty, object value, string propertyName, object extraInfo, 
-            bool hasStorage, bool isTypeSolid, PropKindEnum propKind, Delegate doWhenChanged, bool doAfterNotify,
+            bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
+            EventHandler<PropertyChangedWithValsEventArgs> doWhenChanged, bool doAfterNotify,
             Delegate comparer, bool useRefEquality = false, Type collectionType = null);
 
         IPropGen CreateGenFromString(Type typeOfThisProperty, string value, bool useDefault, string propertyName, object extraInfo,
-            bool hasStorage, bool isTypeSolid, PropKindEnum propKind, Delegate doWhenChanged, bool doAfterNotify,
+            bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
+            EventHandler<PropertyChangedWithValsEventArgs> doWhenChanged, bool doAfterNotify,
             Delegate comparer, bool useRefEquality = false, Type collectionType = null);
 
         IPropGen CreateGenWithNoValue(Type typeOfThisProperty, string propertyName, object extraInfo,
-            bool hasStorage, bool isTypeSolid, PropKindEnum propKind, Delegate doWhenChanged, bool doAfterNotify,
+            bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
+            EventHandler<PropertyChangedWithValsEventArgs> doWhenChanged, bool doAfterNotify,
             Delegate comparer, bool useRefEquality = false, Type collectionType = null);
 
         //IPropGen CreatePropInferType(object value, string propertyName, object extraInfo, bool hasStorage);

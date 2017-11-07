@@ -28,11 +28,11 @@ namespace PropBagLib.Tests
             set { base[propertyName, key] = value; }
         }
 
-        public void DoWhenStringChanged(string oldVal, string newVal)
+        public void DoWhenStringChanged(object sender, PropertyChangedWithTValsEventArgs<string> e)
         {
             DoWhenStringChanged_WasCalled = true;
-            DoWhenStringPropOldVal = oldVal;
-            DoWhenStringPropNewVal = newVal;
+            DoWhenStringPropOldVal = e.OldValue;
+            DoWhenStringPropNewVal = e.NewValue;
         }
 
     }

@@ -45,6 +45,11 @@
     <Compile Include="EventManagement\IEventManager.cs" />
     <Compile Include="EventManagement\IProvideAnEventManager.cs" />
     <Compile Include="Fundamentals\GenerateHash.cs" />
+    <Compile Include="Fundamentals\ObjectIdDictionary\IObjectIdDictionary.cs" />
+    <Compile Include="Fundamentals\ObjectIdDictionary\AbstractObjectIdDictionary.cs" />
+    <Compile Include="Fundamentals\ObjectIdDictionary\SimpleCompKeyMan.cs" />
+    <Compile Include="Fundamentals\ObjectIdDictionary\SimpleLevel2KeyMan.cs" />
+    <Compile Include="Fundamentals\ObjectIdDictionary\SimpleObjectIdDictionary.cs" />
     <Compile Include="Fundamentals\PropertyObserver.cs" />
     <Compile Include="IConvertValues.cs" />
     <Compile Include="INotifyPropertyChangedWithVals.cs" />
