@@ -38,6 +38,13 @@ namespace DRM.PropBag
             }
         }
 
+        public override object TypedValueAsObject => (object)TypedValue;
+
+        public override ValPlusType GetValuePlusType()
+        {
+            return new ValPlusType(TypedValue, Type);
+        }
+
         override public bool ValueIsDefined
         {
             get

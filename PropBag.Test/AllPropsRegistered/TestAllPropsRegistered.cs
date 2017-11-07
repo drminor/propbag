@@ -387,7 +387,7 @@ namespace PropBagLib.Tests
         public void TestSubscribePropChangedGen()
         {
             mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
-            mod1.SubscribeToPropChanged(handler: DoWhenPropIntChangesGen, propertyName: "PropInt", propertyType: typeof(int));
+            mod1.SubscribeToPropChanged(eventHandler: DoWhenPropIntChangesGen, propertyName: "PropInt", propertyType: typeof(int));
 
             mod1.PropInt = 0;
             mod1.PropInt = 1;
@@ -402,10 +402,10 @@ namespace PropBagLib.Tests
             Assert.That(genObjNewVal, Is.EqualTo(1), "The new value should have been 1.");
         }
 
-        void DoWhenPropIntChangesGen(object oldVal, object newValue)
+        void DoWhenPropIntChangesGen(object sender, PCGenEventArgs e)
         {
-            genObjOldVal = oldVal;
-            genObjNewVal = newValue;
+            genObjOldVal = e.OldValue;
+            genObjNewVal = e.NewValue;
         }
 
         int typedOldVal;

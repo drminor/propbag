@@ -41,17 +41,17 @@ namespace DRM.TypeSafePropertyBag
 
         #region Generic property creators 
 
-        IPropGen CreateGenFromObject(Type typeOfThisProperty, object value, string propertyName, object extraInfo, 
+        IProp CreateGenFromObject(Type typeOfThisProperty, object value, string propertyName, object extraInfo, 
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
             EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify,
             Delegate comparer, bool useRefEquality = false, Type collectionType = null);
 
-        IPropGen CreateGenFromString(Type typeOfThisProperty, string value, bool useDefault, string propertyName, object extraInfo,
+        IProp CreateGenFromString(Type typeOfThisProperty, string value, bool useDefault, string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
             EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify,
             Delegate comparer, bool useRefEquality = false, Type collectionType = null);
 
-        IPropGen CreateGenWithNoValue(Type typeOfThisProperty, string propertyName, object extraInfo,
+        IProp CreateGenWithNoValue(Type typeOfThisProperty, string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
             EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify,
             Delegate comparer, bool useRefEquality = false, Type collectionType = null);

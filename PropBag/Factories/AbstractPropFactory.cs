@@ -85,19 +85,19 @@ namespace DRM.PropBag
 
         #region Generic property creators
 
-        public abstract IPropGen CreateGenFromObject(Type typeOfThisProperty,
+        public abstract IProp CreateGenFromObject(Type typeOfThisProperty,
             object value,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
             EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null);
 
-        public abstract IPropGen CreateGenFromString(Type typeOfThisProperty,
+        public abstract IProp CreateGenFromString(Type typeOfThisProperty,
             string value, bool useDefault,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
             EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null);
 
-        public abstract IPropGen CreateGenWithNoValue(Type typeOfThisProperty,
+        public abstract IProp CreateGenWithNoValue(Type typeOfThisProperty,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
             EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null);

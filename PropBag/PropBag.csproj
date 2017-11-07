@@ -93,7 +93,7 @@
     <Compile Include="Factories\PropExtStoreFactory.cs" />
     <Compile Include="Factories\PropFactory.cs" />
     <Compile Include="Props\PropGen.cs" />
-    <Compile Include="Props\PropGenBase.cs" />
+    <Compile Include="Props\PropBase.cs" />
     <Compile Include="Props\PropTypedBase.cs" />
     <Compile Include="PubPropBag.cs" />
     <Compile Include="PropBag.cs" />

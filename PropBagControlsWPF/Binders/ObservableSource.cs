@@ -488,16 +488,8 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
             if (data.TryGetPropGen(pathElement, null, out IPropGen iPg))
             {
-                if (iPg is PropGen)
-                {
-                    newData = ((PropGen)iPg).TypedProp?.TypedValueAsObject;
-                    newType = ((PropGen)iPg).Type;
-                }
-                else
-                {
-                    newData = iPg?.TypedProp?.TypedValueAsObject;
-                    newType = iPg?.TypedProp?.Type;
-                }
+                newData = iPg?.TypedProp?.TypedValueAsObject;
+                newType = iPg?.TypedProp?.Type;
 
                 if (newData != null)
                 {

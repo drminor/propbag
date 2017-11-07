@@ -95,7 +95,7 @@ namespace DRM.PropBag
 
         #region Generic property creators
 
-        public override IPropGen CreateGenFromObject(Type typeOfThisProperty,
+        public override IProp CreateGenFromObject(Type typeOfThisProperty,
             object value,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
@@ -104,14 +104,14 @@ namespace DRM.PropBag
             if (propKind == PropKindEnum.Prop)
             {
                 CreatePropFromObjectDelegate propCreator = GetPropCreator(typeOfThisProperty);
-                IPropGen prop = (IPropGen)propCreator(this, value, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
+                IProp prop = (IProp)propCreator(this, value, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
                     doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify, comparer: comparer, useRefEquality: useRefEquality);
                 return prop;
             }
             else if (propKind == PropKindEnum.Collection)
             {
                 CreateCPropFromObjectDelegate propCreator = GetCPropCreator(typeOfThisProperty, itemType);
-                IPropGen prop = (IPropGen)propCreator(this, value, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
+                IProp prop = (IProp)propCreator(this, value, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
                     doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify, comparer: comparer, useRefEquality: useRefEquality);
                 return prop;
             }
@@ -121,7 +121,7 @@ namespace DRM.PropBag
             }
         }
 
-        public override IPropGen CreateGenFromString(Type typeOfThisProperty,
+        public override IProp CreateGenFromString(Type typeOfThisProperty,
             string value, bool useDefault,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
@@ -130,14 +130,14 @@ namespace DRM.PropBag
             if (propKind == PropKindEnum.Prop)
             {
                 CreatePropFromStringDelegate propCreator = GetPropFromStringCreator(typeOfThisProperty);
-                IPropGen prop = (IPropGen)propCreator(this, value, useDefault, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
+                IProp prop = (IProp)propCreator(this, value, useDefault, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
                     doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify, comparer: comparer, useRefEquality: useRefEquality);
                 return prop;
             } 
             else if(propKind == PropKindEnum.Collection)
             {
                 CreateCPropFromStringDelegate propCreator = GetCPropFromStringCreator(typeOfThisProperty, itemType);
-                IPropGen prop = (IPropGen)propCreator(this, value, useDefault, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
+                IProp prop = (IProp)propCreator(this, value, useDefault, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
                     doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify, comparer: comparer, useRefEquality: useRefEquality);
                 return prop;
             }
@@ -147,7 +147,7 @@ namespace DRM.PropBag
             }
         }
 
-        public override IPropGen CreateGenWithNoValue(Type typeOfThisProperty,
+        public override IProp CreateGenWithNoValue(Type typeOfThisProperty,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
             EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null)
@@ -155,14 +155,14 @@ namespace DRM.PropBag
             if (propKind == PropKindEnum.Prop)
             {
                 CreatePropWithNoValueDelegate propCreator = GetPropWithNoValueCreator(typeOfThisProperty);
-                IPropGen prop = (IPropGen)propCreator(this, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
+                IProp prop = (IProp)propCreator(this, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
                     doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify, comparer: comparer, useRefEquality: useRefEquality);
                 return prop;
             }
             else if (propKind == PropKindEnum.Collection)
             {
                 CreateCPropWithNoValueDelegate propCreator = GetCPropWithNoValueCreator(typeOfThisProperty, itemType);
-                IPropGen prop = (IPropGen)propCreator(this, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
+                IProp prop = (IProp)propCreator(this, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
                     doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify, comparer: comparer, useRefEquality: useRefEquality);
                 return prop;
             }

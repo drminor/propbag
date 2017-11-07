@@ -52,8 +52,8 @@ namespace DRM.PropBag
         // alternative could be that they are initialized on first assignment.
         public event PropertyChangedEventHandler PropertyChanged; // = delegate { };
         public event PropertyChangingEventHandler PropertyChanging; // = delegate { };
-        public event EventHandler<PCGenEventArgs> PropertyChangedWithGenVals = delegate { };
-        public event PropertyChangedEventHandler PropertyChangedIndividual;
+        public event EventHandler<PCGenEventArgs> PropertyChangedWithGenVals; // = delegate { };
+        public event EventHandler<PropertyChangedEventArgs> PropertyChangedIndividual;
 
 
         // DRM: Changed to protected and added set accessor on 10/29/17; DRM: removed set accessor on 11/2/17.
@@ -217,7 +217,7 @@ namespace DRM.PropBag
                     doWhenChangedAction = rr(this);
                 }
 
-                IPropGen pg;
+                IProp pg;
 
                 if (pi.HasStore && !pi.InitialValueField.SetToUndefined)
                 {
@@ -301,13 +301,13 @@ namespace DRM.PropBag
                 case ReadMissingPropPolicyEnum.Register:
                     {
                         // TODO: Must determine the PropKind for this new property.
-                        IPropGen typedPropWrapper;
+                        IProp genericTypedProp;
 
                         if (haveValue)
                         {
                             bool typeIsSolid = PropFactory.IsTypeSolid(value, propertyType);
 
-                            typedPropWrapper = PropFactory.CreateGenFromObject(propertyType, value,
+                            genericTypedProp = PropFactory.CreateGenFromObject(propertyType, value,
                                 propertyName, null, PropFactory.ProvidesStorage, typeIsSolid, PropKindEnum.Prop, null, false, null);
                         }
                         else
@@ -319,13 +319,13 @@ namespace DRM.PropBag
                             bool typeIsSolid = true;
 
                             // On 10/8/17: Changed to use NoValue, instead of trying to generate a default value.
-                            typedPropWrapper = PropFactory.CreateGenWithNoValue(propertyType, propertyName,
+                            genericTypedProp = PropFactory.CreateGenWithNoValue(propertyType, propertyName,
                                 null, PropFactory.ProvidesStorage, typeIsSolid, PropKindEnum.Prop, null, false, null);
                         }
 
-                        //PropGen propGen = new PropGen(typedPropWrapper);
+                        //PropGen propGen = new PropGen(genericTypedProp);
 
-                        PropGen propGen = AddProp(propertyName, typedPropWrapper);
+                        PropGen propGen = AddProp(propertyName, genericTypedProp);
 
                         wasRegistered = true;
                         return propGen;
@@ -443,7 +443,7 @@ namespace DRM.PropBag
             {
                 if (propertyType != null)
                 {
-                    if (!genProp.TypeIsSolid)
+                    if (!genProp.TypedProp.TypeIsSolid)
                     {
                         MakeTypeSolid(ref genProp, propertyType, propertyName);
 
@@ -454,9 +454,9 @@ namespace DRM.PropBag
                     }
                     else
                     {
-                        if (propertyType != genProp.Type)
+                        if (propertyType != genProp.TypedProp.Type)
                         {
-                            throw new InvalidOperationException(string.Format("Attempting to get property: {0} whose type is {1}, with a call whose type parameter is {2} is invalid.", propertyName, genProp.Type.ToString(), propertyType.ToString()));
+                            throw new InvalidOperationException(string.Format("Attempting to get property: {0} whose type is {1}, with a call whose type parameter is {2} is invalid.", propertyName, genProp.TypedProp.Type.ToString(), propertyType.ToString()));
                         }
                     }
                 }
@@ -572,7 +572,7 @@ namespace DRM.PropBag
 
             if (value != null)
             {
-                if (!genProp.TypeIsSolid)
+                if (!genProp.TypedProp.TypeIsSolid)
                 {
                     try
                     {
@@ -615,24 +615,24 @@ namespace DRM.PropBag
                         newType = PropFactory.GetTypeFromValue(value);
                     }
 
-                    if (!AreTypesSame(newType, genProp.Type))
+                    if (!AreTypesSame(newType, genProp.TypedProp.Type))
                     {
-                        throw new ApplicationException(string.Format("Attempting to set property: {0} whose type is {1}, with a call whose type parameter is {2} is invalid.", propertyName, genProp.Type.ToString(), newType.ToString()));
+                        throw new ApplicationException(string.Format("Attempting to set property: {0} whose type is {1}, with a call whose type parameter is {2} is invalid.", propertyName, genProp.TypedProp.Type.ToString(), newType.ToString()));
                     }
                 }
             }
             else
             {
                 // Check to make sure that we are not attempting to set the value of a ValueType to null.
-                if (genProp.TypeIsSolid && genProp.Type.IsValueType)
+                if (genProp.TypedProp.TypeIsSolid && genProp.TypedProp.Type.IsValueType)
                 {
                     throw new InvalidOperationException(string.Format("Cannot set property: {0} to null, it is a value type.", propertyName));
                 }
             }
 
             // TODO: Make the PropFactory supply this service.
-            DoSetDelegate setPropDel = DelegateCacheProvider.DoSetDelegateCache.GetOrAdd(genProp.Type);
-            return setPropDel(value, this, propertyName, genProp);
+            DoSetDelegate setPropDel = DelegateCacheProvider.DoSetDelegateCache.GetOrAdd(genProp.TypedProp.Type);
+            return setPropDel(value, this, propertyName, genProp.TypedProp);
         }
 
         public bool SetIt<T>(T value, string propertyName)
@@ -731,7 +731,7 @@ namespace DRM.PropBag
 
             if (!genProp.IsEmpty)
             {
-                WeakEventManager<INotifyPropertyChanged, PropertyChangedEventArgs>.
+                WeakEventManager<INotifyPCIndividual, PropertyChangedEventArgs>.
                     AddHandler(this, "PropertyChangedIndividual", handler);
                 return true;
             }
@@ -981,7 +981,7 @@ namespace DRM.PropBag
             if(_theStore.TryGetValue(_ourObjectId, propertyName, out PropGen value))
             //if (tVals.TryGetValue(propertyName, out PropGen value))
             {
-                type = value.Type;
+                type = value.TypedProp.Type;
                 return true;
             }
             else if (TypeSafetyMode == PropBagTypeSafetyMode.Locked)
@@ -1111,11 +1111,11 @@ namespace DRM.PropBag
             //prop.DoWhenChanged = 
         }
 
-        protected PropGen AddProp(string propertyName, IPropGen typedPropWrapper)
+        protected PropGen AddProp(string propertyName, IProp genericTypedProp)
         {
             ulong cKey = GetNewCKey(propertyName);
 
-            PropGen propGen = new PropGen(typedPropWrapper, cKey);
+            PropGen propGen = new PropGen(genericTypedProp, cKey);
 
             //tVals.Add(propertyName, propGen);
             if (!_theStore.TryAdd(cKey, propGen))
@@ -1389,7 +1389,7 @@ namespace DRM.PropBag
                 genProp = this.HandleMissingProp(propertyName, propertyType, out wasRegistered, haveValue, value, alwaysRegister, mustBeRegistered, neverCreate);
             }
 
-            if (!genProp.IsEmpty && desiredHasStoreValue.HasValue && desiredHasStoreValue.Value != genProp.HasStore)
+            if (!genProp.IsEmpty && desiredHasStoreValue.HasValue && desiredHasStoreValue.Value != genProp.TypedProp.HasStore)
             {
                 if (desiredHasStoreValue.Value)
                     //Caller needs property to have a backing store.
@@ -1405,7 +1405,7 @@ namespace DRM.PropBag
 
         private IPropPrivate<T> CheckTypeInfo<T>(PropGen genProp, string propertyName, IDictionary<ulong, PropGen> dict)
         {
-            if (!genProp.TypeIsSolid)
+            if (!genProp.TypedProp.TypeIsSolid)
             {
                 try
                 {
@@ -1421,9 +1421,9 @@ namespace DRM.PropBag
             }
             else
             {
-                if (!AreTypesSame(typeof(T), genProp.Type))
+                if (!AreTypesSame(typeof(T), genProp.TypedProp.Type))
                 {
-                    throw new ApplicationException(string.Format("Attempting to set property: {0} whose type is {1}, with a call whose type parameter is {2} is invalid.", propertyName, genProp.Type.ToString(), typeof(T).ToString()));
+                    throw new ApplicationException(string.Format("Attempting to set property: {0} whose type is {1}, with a call whose type parameter is {2} is invalid.", propertyName, genProp.TypedProp.Type.ToString(), typeof(T).ToString()));
                 }
             }
 
@@ -1454,16 +1454,16 @@ namespace DRM.PropBag
 
             // We are using strict equality here, since we have the oportunity to update the type to anything
             // that is assignable from a value of type object (which is everything.)
-            if (newType != genProp.Type)
+            if (newType != genProp.TypedProp.Type)
             {
                 // Next statement uses reflection.
                 object curValue = genProp.Value;
                 PropKindEnum propKind = genProp.TypedProp.PropKind;
 
-                IPropGen typedPropWrapper = PropFactory.CreateGenFromObject(newType, curValue, propertyName, null, true, true, propKind, null, false, null, false);
+                IProp genericTypedProp = PropFactory.CreateGenFromObject(newType, curValue, propertyName, null, true, true, propKind, null, false, null, false);
 
                 //genProp.UpdateWithSolidType(newType, curValue);
-                genProp = new PropGen(typedPropWrapper, genProp.PropId);
+                genProp = new PropGen(genericTypedProp, genProp.PropId);
                 return true;
             }
             else
@@ -1553,7 +1553,7 @@ namespace DRM.PropBag
 
         protected void OnPropertyChangedIndividual(string propertyName)
         {
-            PropertyChangedEventHandler handler = Interlocked.CompareExchange(ref PropertyChangedIndividual, null, null);
+            EventHandler<PropertyChangedEventArgs> handler = Interlocked.CompareExchange(ref PropertyChangedIndividual, null, null);
 
             if (handler != null)
             {
@@ -1673,9 +1673,9 @@ namespace DRM.PropBag
                     LazyThreadSafetyMode.PublicationOnly);
             }
 
-            static bool DoSetBridge<T>(object value, PropBag target, string propertyName, IPropGen prop)
+            static bool DoSetBridge<T>(object value, PropBag target, string propertyName, IProp prop)
             {
-                return target.DoSet<T>((T)value, propertyName, (IPropPrivate<T>)prop.TypedProp);
+                return target.DoSet<T>((T)value, propertyName, (IPropPrivate<T>)prop);
             }
 
             public static DoSetDelegate GetDoSetDelegate(Type typeOfThisValue)

@@ -9,7 +9,7 @@ namespace DRM.PropBag
     /// <summary>
     /// Base Property Bag Features
     /// </summary>
-    public interface IPropBag : ITypeSafePropBag, ICustomTypeDescriptor, INotifyPropertyChanged, INotifyPropertyChanging, INotifyPCGen
+    public interface IPropBag : ITypeSafePropBag, ICustomTypeDescriptor, INotifyPropertyChanged, INotifyPropertyChanging, INotifyPCGen, INotifyPCIndividual
     {
         // These are defined by ITypeSafePropBag
         //object GetValWithType(string propertyName, Type propertyType);

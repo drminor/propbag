@@ -90,7 +90,7 @@ namespace DRM.PropBag
 
         #region Generic Prop Creators
 
-        public override IPropGen CreateGenFromObject(Type typeOfThisProperty,
+        public override IProp CreateGenFromObject(Type typeOfThisProperty,
             object value,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
@@ -99,7 +99,7 @@ namespace DRM.PropBag
             throw new InvalidOperationException("External Store Factory doesn't know how to create properties with inital values.");
         }
 
-        public override IPropGen CreateGenFromString(Type typeOfThisProperty,
+        public override IProp CreateGenFromString(Type typeOfThisProperty,
             string value, bool useDefault,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
@@ -108,13 +108,13 @@ namespace DRM.PropBag
             throw new InvalidOperationException("External Store Factory doesn't know how to create properties with inital values.");
         }
 
-        public override IPropGen CreateGenWithNoValue(Type typeOfThisProperty,
+        public override IProp CreateGenWithNoValue(Type typeOfThisProperty,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
             EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null)
         {
             CreatePropWithNoValueDelegate propCreator = GetPropWithNoValueCreator(typeOfThisProperty);
-            IPropGen prop = (IPropGen)propCreator(this, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
+            IProp prop = (IProp)propCreator(this, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
                 doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify, comparer: comparer, useRefEquality: useRefEquality);
 
             return prop;

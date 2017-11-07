@@ -15,7 +15,7 @@ namespace DRM.PropBag
     /// <summary>
     /// A wrapper for an instance of IProp<typeparam name="T"/>.
     /// </summary>
-    public abstract class PropGenBase : IPropGen
+    public abstract class PropBase : IProp
     {
         #region Private Members
 
@@ -27,13 +27,19 @@ namespace DRM.PropBag
 
         #region Public Members
 
-        public abstract event EventHandler<PCGenEventArgs>  PropertyChangedWithGenVals;
+        //public abstract event EventHandler<PCGenEventArgs>  PropertyChangedWithGenVals;
+        public event EventHandler<PCGenEventArgs> PropertyChangedWithGenVals;
+
+
+        public PropKindEnum PropKind { get; private set; }
+
+        public abstract bool ValueIsDefined { get; }
+
+        public abstract IListSource ListSource { get; }
 
         public Type Type { get; private set;}
 
         public IProp TypedProp { get; set; }
-
-        public bool IsEmpty => TypedProp == null;
 
         public bool TypeIsSolid { get; set; }
 
@@ -48,61 +54,97 @@ namespace DRM.PropBag
             }
         }
 
-        /// <summary>
-        /// Does not use reflection.
-        /// </summary>
-        public object Value
-        {
-            get
-            {
-                return TypedProp.TypedValueAsObject;
-                //return DoGetProVal(TypedProp);
-            }
-        }
-
         #endregion
 
         #region Constructors
 
-        public PropGenBase(Type typeOfThisValue, bool typeIsSolid, bool hasStore = true)
+        public PropBase(PropKindEnum propKind, Type typeOfThisValue, bool typeIsSolid, bool hasStore = true)
         {
+            PropKind = propKind;
             Type = typeOfThisValue;
-            TypedProp = null;
             TypeIsSolid = typeIsSolid;
             HasStore = hasStore;
-            //PropertyChangedWithVals = null; // = delegate { };
-            //_actTableGen = null;
             _attributes = new Attribute[] { };
-            //PropId = propId;
-        }
-
-        public PropGenBase(IPropGen typedPropWrapper, ulong propId)
-        {
-            Type = typedPropWrapper.TypedProp.Type;
-            TypedProp = typedPropWrapper.TypedProp;
-            TypeIsSolid = typedPropWrapper.TypeIsSolid;
-            HasStore = typedPropWrapper.HasStore;
-            //_actTableGen = null;
-            _attributes = new Attribute[] { };
-            //PropId = propId;
         }
 
         #endregion
 
         #region Public Methods
 
-        public ValPlusType ValuePlusType()
+        /// <summary>
+        /// Does not use reflection.
+        /// </summary>
+        public abstract object TypedValueAsObject { get; }
+
+        public abstract ValPlusType GetValuePlusType();
+
+        public bool CallBacksHappenAfterPubEvents { get; }
+
+        public bool HasCallBack { get; }
+
+        public bool HasChangedWithTValSubscribers { get; }
+
+        #endregion
+
+        #region Public Methods and Properties
+
+        //public event PropertyChangedEventHandler PropertyChanged;
+
+        private List<Tuple<Action<object, object>, EventHandler<PCGenEventArgs>>> _actTable;
+
+        public void SubscribeToPropChanged(Action<object, object> doOnChange)
         {
-            return new ValPlusType(Value, Type);
+            EventHandler<PCGenEventArgs> eventHandler = (s, e) => { doOnChange(e.OldValue, e.NewValue); };
+
+            if (GetHandlerFromAction(doOnChange, ref _actTable) == null)
+            {
+                PropertyChangedWithGenVals += eventHandler;
+                if (_actTable == null)
+                {
+                    _actTable = new List<Tuple<Action<object, object>, EventHandler<PCGenEventArgs>>>();
+                }
+                _actTable.Add(new Tuple<Action<object, object>, EventHandler<PCGenEventArgs>>(doOnChange, eventHandler));
+            }
         }
 
-        public void CleanUp(bool doTypedCleanUp)
+        public bool UnSubscribeToPropChanged(Action<object, object> doOnChange)
         {
-            if (doTypedCleanUp && TypedProp != null) TypedProp.CleanUpTyped();
-            //_actTableGen = null;
+            Tuple<Action<object, object>, EventHandler<PCGenEventArgs>> actEntry = GetHandlerFromAction(doOnChange, ref _actTable);
+
+            if (actEntry == null) return false;
+
+            PropertyChangedWithGenVals -= actEntry.Item2;
+            _actTable.Remove(actEntry);
+            return true;
+        }
+
+        private Tuple<Action<object, object>, EventHandler<PCGenEventArgs>> GetHandlerFromAction(Action<object, object> act,
+            ref List<Tuple<Action<object, object>, EventHandler<PCGenEventArgs>>> actTable)
+        {
+            if (actTable == null) return null;
+
+            for (int i = 0; i < actTable.Count; i++)
+            {
+                Tuple<Action<object, object>, EventHandler<PCGenEventArgs>> tup = actTable[i];
+                if (tup.Item1 == act) return tup;
+            }
+
+            return null;
+        }
+
+        public void OnPropertyChangedWithVals(string propertyName, object oldVal, object newVal)
+        {
+            EventHandler<PCGenEventArgs> handler = Interlocked.CompareExchange(ref PropertyChangedWithGenVals, null, null);
+
+            if (handler != null)
+            {
+                Type propertyType = this.Type;
+                handler(this, new PCGenEventArgs(propertyName, propertyType, oldVal, newVal));
+            }
         }
 
         #endregion
+
 
         #region Generic PropertyChangedWithVals support
 
@@ -152,11 +194,15 @@ namespace DRM.PropBag
 
         #endregion
 
-        #region Raise Events
 
-        public abstract void OnPropertyChangedWithVals(string propertyName, object oldVal, object newVal);
+        public void CleanUpTyped()
+        {
+            PropertyChangedWithGenVals = null;
+        }
 
-        #endregion
+        public abstract bool SetValueToUndefined();
+
+
 
         //#region Helper Methods for the Generic Method Templates
 

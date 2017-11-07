@@ -10,7 +10,7 @@ using DRM.TypeSafePropertyBag.EventManagement;
 
 namespace DRM.PropBag
 {
-    public abstract class PropTypedBase<T> : PropGenBase, IPropPrivate<T>
+    public abstract class PropTypedBase<T> : PropBase, IPropPrivate<T>
     {
         #region Private Members
 
@@ -22,16 +22,9 @@ namespace DRM.PropBag
 
         public event EventHandler<PCTypedEventArgs<T>> PropertyChangedWithTVals;
 
-        public override event EventHandler<PCGenEventArgs> PropertyChangedWithGenVals;
-
-
-        public PropKindEnum PropKind { get; private set; }
-
-        abstract public IListSource ListSource { get; }
+        //public override event EventHandler<PCGenEventArgs> PropertyChangedWithGenVals;
 
         abstract public T TypedValue { get; set; }
-
-        abstract public bool ValueIsDefined { get; }
 
         protected Func<T, T, bool> Comparer { get; set; }
 
@@ -44,15 +37,15 @@ namespace DRM.PropBag
 
         public bool DoAfterNotify { get; set; }
 
-        public virtual bool ReturnDefaultForUndefined => GetDefaultValFunc != null;
 
         protected GetDefaultValueDelegate<T> GetDefaultValFunc { get; }
+        public virtual bool ReturnDefaultForUndefined => GetDefaultValFunc != null;
 
-        public object TypedValueAsObject { get { return (object)TypedValue; } }
+        //public object TypedValueAsObject { get { return (object)TypedValue; } }
 
-        public bool CallBacksHappenAfterPubEvents { get { return DoAfterNotify; } }
-        public bool HasCallBack { get { return DoWHenChangedAction != null; } }
-        public bool HasChangedWithTValSubscribers { get { return PropertyChangedWithTVals != null; } }
+        //public bool CallBacksHappenAfterPubEvents { get { return DoAfterNotify; } }
+        //public bool HasCallBack { get { return DoWHenChangedAction != null; } }
+        //public bool HasChangedWithTValSubscribers { get { return PropertyChangedWithTVals != null; } }
 
         #endregion
 
@@ -62,24 +55,20 @@ namespace DRM.PropBag
             EventHandler<PCTypedEventArgs<T>> doWhenChangedX,
             //Action<T, T> doWhenChanged,
             bool doAfterNotify,
-            Func<T,T,bool> comparer, GetDefaultValueDelegate<T> getDefaultValFunc, PropKindEnum propType = PropKindEnum.Prop)
-            : base(typeOfThisValue, typeIsSolid, hasStore)
+            Func<T,T,bool> comparer, GetDefaultValueDelegate<T> getDefaultValFunc, PropKindEnum propKind = PropKindEnum.Prop)
+            : base(propKind, typeOfThisValue, typeIsSolid, hasStore)
         {
 
             //DoWHenChangedAction = doWhenChanged;
             DoAfterNotify = doAfterNotify;
             Comparer = comparer;
             PropertyChangedWithTVals = doWhenChangedX;
-            base.TypedProp = this;
             GetDefaultValFunc = getDefaultValFunc;
-            PropKind = propType;
         }
 
         #endregion
 
         #region Public Methods
-
-        abstract public bool SetValueToUndefined();
 
         public void DoWhenChanged(T oldVal, T newVal)
         {
@@ -131,58 +120,58 @@ namespace DRM.PropBag
         }
 
         // TODO: See if our value implements IDisposable, and if so, dispose it.
-        public void CleanUpTyped()
+        public new void CleanUpTyped()
         {
             Comparer = null;
             DoWHenChangedAction = null;
             PropertyChangedWithTVals = null;
-            PropertyChangedWithGenVals = null;
+            base.CleanUpTyped();
         }
 
         #endregion
 
         #region Typed PropertyChangedWithVals support
 
-        public void SubscribeToPropChanged(Action<T, T> doOnChange)
-        {
-            EventHandler<PCTypedEventArgs<T>> eventHandler = (s, e) => { doOnChange(e.OldValue, e.NewValue); };
+        //public void SubscribeToPropChanged(Action<T, T> doOnChange)
+        //{
+        //    EventHandler<PCTypedEventArgs<T>> eventHandler = (s, e) => { doOnChange(e.OldValue, e.NewValue); };
 
-            if (GetHandlerFromAction(doOnChange, ref _actTable) == null)
-            {
-                PropertyChangedWithTVals += eventHandler;
-                if (_actTable == null)
-                {
-                    _actTable = new List<Tuple<Action<T, T>, EventHandler<PCTypedEventArgs<T>>  >>();
-                }
-                _actTable.Add(new Tuple<Action<T, T>, EventHandler<PCTypedEventArgs<T>> >(doOnChange, eventHandler));
-            }
-        }
+        //    if (GetHandlerFromAction(doOnChange, ref _actTable) == null)
+        //    {
+        //        PropertyChangedWithTVals += eventHandler;
+        //        if (_actTable == null)
+        //        {
+        //            _actTable = new List<Tuple<Action<T, T>, EventHandler<PCTypedEventArgs<T>>  >>();
+        //        }
+        //        _actTable.Add(new Tuple<Action<T, T>, EventHandler<PCTypedEventArgs<T>> >(doOnChange, eventHandler));
+        //    }
+        //}
 
-        public bool UnSubscribeToPropChanged(Action<T, T> doOnChange)
-        {
-            Tuple<Action<T, T>, EventHandler<PCTypedEventArgs<T>>> actEntry = GetHandlerFromAction(doOnChange, ref _actTable);
+        //public bool UnSubscribeToPropChanged(Action<T, T> doOnChange)
+        //{
+        //    Tuple<Action<T, T>, EventHandler<PCTypedEventArgs<T>>> actEntry = GetHandlerFromAction(doOnChange, ref _actTable);
 
-            if (actEntry == null) return false;
+        //    if (actEntry == null) return false;
 
-            PropertyChangedWithTVals -= actEntry.Item2;
-            _actTable.Remove(actEntry);
+        //    PropertyChangedWithTVals -= actEntry.Item2;
+        //    _actTable.Remove(actEntry);
 
-            return true;
-        }
+        //    return true;
+        //}
 
-        private Tuple<Action<T, T>, EventHandler<PCTypedEventArgs<T>>> GetHandlerFromAction(Action<T, T> act,
-            ref List< Tuple<  Action<T, T>, EventHandler<PCTypedEventArgs<T>> >> actTable)
-        {
-            if (actTable == null) return null;
+        //private Tuple<Action<T, T>, EventHandler<PCTypedEventArgs<T>>> GetHandlerFromAction(Action<T, T> act,
+        //    ref List< Tuple<  Action<T, T>, EventHandler<PCTypedEventArgs<T>> >> actTable)
+        //{
+        //    if (actTable == null) return null;
 
-            for (int i = 0; i < actTable.Count; i++)
-            {
-                Tuple<Action<T, T>, EventHandler<PCTypedEventArgs<T>>> tup = actTable[i];
-                if (tup.Item1 == act) return tup; //.Item2;
-            }
+        //    for (int i = 0; i < actTable.Count; i++)
+        //    {
+        //        Tuple<Action<T, T>, EventHandler<PCTypedEventArgs<T>>> tup = actTable[i];
+        //        if (tup.Item1 == act) return tup; //.Item2;
+        //    }
 
-            return null;
-        }
+        //    return null;
+        //}
 
         #endregion
 
@@ -196,13 +185,13 @@ namespace DRM.PropBag
                 handler(this, new PCTypedEventArgs<T>(propertyName, oldVal, newVal));
         }
 
-        public override void OnPropertyChangedWithVals(string propertyName, object oldVal, object newVal)
-        {
-            EventHandler<PCGenEventArgs> handler = Interlocked.CompareExchange(ref PropertyChangedWithGenVals, null, null);
+        //public override void OnPropertyChangedWithVals(string propertyName, object oldVal, object newVal)
+        //{
+        //    EventHandler<PCGenEventArgs> handler = Interlocked.CompareExchange(ref PropertyChangedWithGenVals, null, null);
 
-            if (handler != null)
-                handler(this, new PCGenEventArgs(propertyName, this.Type, oldVal, newVal));
-        }
+        //    if (handler != null)
+        //        handler(this, new PCGenEventArgs(propertyName, this.Type, oldVal, newVal));
+        //}
 
         // TODOXX:
         public IEventManager<INotifyPCTyped<T>, PCTypedEventArgs<T>> GetTheEventManger()

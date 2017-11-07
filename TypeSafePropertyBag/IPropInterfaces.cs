@@ -48,7 +48,7 @@ namespace DRM.TypeSafePropertyBag
     /// Objects that implement this interface are often created by an instance of a class that inherits from AbstractPropFactory.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public interface IProp<T> : IPropGen, IProp, INotifyPCTyped<T>, IProvideATypedEventManager<T>
+    public interface IProp<T> : IProp, INotifyPCTyped<T>, IProvideATypedEventManager<T>
     {
         T TypedValue { get; set; }
 
@@ -63,8 +63,8 @@ namespace DRM.TypeSafePropertyBag
 
         // TODO: Consider moving these to the IPropPrivate<T> interface.
         // and using the WeakEventManager style.
-        void SubscribeToPropChanged(Action<T, T> doOnChange);
-        bool UnSubscribeToPropChanged(Action<T, T> doOnChange);
+        //void SubscribeToPropChanged(Action<T, T> doOnChange);
+        //bool UnSubscribeToPropChanged(Action<T, T> doOnChange);
 
         Attribute[] Attributes { get; }
     }
@@ -73,25 +73,16 @@ namespace DRM.TypeSafePropertyBag
     /// Classes that implement the IPropBag interface, keep a list of properties, each of which implements this interface.
     /// These features are managed by the PropBag, and not by classes that inherit from AbstractProp.
     /// </summary>
-    public interface IPropGen : INotifyPCGen
+    public interface IPropGen 
     {
-        //ulong PropId { get; }
-        bool TypeIsSolid { get; }
-        bool HasStore { get; }
+        ulong PropId { get; }
+        bool IsEmpty { get; }
 
         /// <summary>
         /// Provides access to the non-type specific features of this property.
         /// This allows access to these values without having to cast to the instance to its type (unknown at compile time.)
         /// </summary>
         IProp TypedProp { get; }
-        bool IsEmpty { get; }
-
-        // Property Changed with typed values support
-        //event EventHandler<PropertyChangedWithValsEventArgs> PropertyChangedWithVals;
-        void OnPropertyChangedWithVals(string propertyName, object oldVal, object newVal);
-
-        //void SubscribeToPropChanged(Action<object, object> doOnChange);
-        //bool UnSubscribeToPropChanged(Action<object, object> doOnChange);
 
         object Value { get; }
 
@@ -103,14 +94,18 @@ namespace DRM.TypeSafePropertyBag
     /// <summary>
     /// These are the non-type specific features that every instance of IProp<typeparamref name="T"/> implement.
     /// </summary>
-    public interface IProp
+    public interface IProp : INotifyPCGen
     {
-        Type Type { get; }
-
         PropKindEnum PropKind { get; }
+        Type Type { get; }
+        bool TypeIsSolid { get; }
+        bool HasStore { get; }
+
         IListSource ListSource { get; }
 
         object TypedValueAsObject { get; }
+        ValPlusType GetValuePlusType();
+
         bool ValueIsDefined { get; }
 
         /// <summary>
@@ -118,6 +113,15 @@ namespace DRM.TypeSafePropertyBag
         /// </summary>
         /// <returns>True, if the value was defined at the time this call was made.</returns>
         bool SetValueToUndefined();
+
+
+        // Property Changed with typed values support
+        //event EventHandler<PropertyChangedWithValsEventArgs> PropertyChangedWithVals;
+        void OnPropertyChangedWithVals(string propertyName, object oldVal, object newVal);
+
+        //void SubscribeToPropChanged(Action<object, object> doOnChange);
+        //bool UnSubscribeToPropChanged(Action<object, object> doOnChange);
+
 
         bool CallBacksHappenAfterPubEvents { get; }
         bool HasCallBack { get; }
