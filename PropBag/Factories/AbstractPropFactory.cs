@@ -10,6 +10,7 @@ using System.Globalization;
 using DRM.TypeSafePropertyBag;
 using System.Collections.ObjectModel;
 using DRM.TypeSafePropertyBag.EventManagement;
+using DRM.PropBag.EventManagement;
 
 namespace DRM.PropBag
 {
@@ -372,12 +373,12 @@ namespace DRM.PropBag
         //    return result;
         //}
 
-        public IEventManager<INotifyPropertyChangedWithVals, PropertyChangedWithValsEventArgs>
-            GetTheEventManager<INotifyPropertyChangedWithVals, PropertyChangedWithValsEventArgs>() where PropertyChangedWithValsEventArgs : EventArgs
-        {
-            var x = new SimpleEventManager();
-            return (IEventManager<INotifyPropertyChangedWithVals, PropertyChangedWithValsEventArgs>)x;
-        }
+        //public IEventManager<INotifyPropertyChangedWithVals, PropertyChangedWithValsEventArgs>
+        //    GetTheEventManager<INotifyPropertyChangedWithVals, PropertyChangedWithValsEventArgs>() where PropertyChangedWithValsEventArgs : EventArgs
+        //{
+        //    var x = new SimpleEventManager();
+        //    return (IEventManager<INotifyPropertyChangedWithVals, PropertyChangedWithValsEventArgs>)x;
+        //}
 
         #endregion
     }

@@ -1,6 +1,7 @@
-﻿using System;
+﻿using DRM.TypeSafePropertyBag;
+using System;
 
-namespace DRM.TypeSafePropertyBag.EventManagement
+namespace DRM.PropBag.EventManagement
 {
     public interface IProvideAnEventManager
     {

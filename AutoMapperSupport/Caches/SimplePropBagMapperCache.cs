@@ -1,7 +1,5 @@
 ﻿using DRM.TypeSafePropertyBag.Fundamentals;
-using System;
 using System.Collections.Generic;
-using System.Runtime.Remoting.Contexts;
 
 using System.Linq;
 
@@ -93,71 +91,6 @@ namespace DRM.PropBag.AutoMapperSupport
         {
             return key;
         }
-
-        #region OLD
-        //public int SealThis_OLD(int cntr)
-        //{
-        //    System.Diagnostics.Debug.WriteLine($"Creating Profile_{cntr.ToString()}");
-
-        //    int result = 0;
-        //    foreach (IPropBagMapperKeyGen key in _unSealedPropBagMappers.Keys)
-        //    {
-        //        IPropBagMapperGen mapper = _sealedPropBagMappers.GetOrAdd(key);
-        //        if (!(_unSealedPropBagMappers.TryRemoveValue(key, out IPropBagMapperKeyGen dummyKey)))
-        //        {
-        //            throw new ApplicationException("Couldn't remove mappper request from list of registered, pending to be created, mapper requests.");
-        //        }
-        //        result++;
-        //    }
-        //    return result;
-
-        //    //IConfigurationProvider config = _baseConfigBuilder(UseInitialConfigAndConfigureTheMappers);
-
-        //    //// TODO: Handle this
-        //    ////config.AssertConfigurationIsValid();
-
-        //    //IMapper compositeMapper = config.CreateMapper();
-
-        //    //ProvisionTheMappers(compositeMapper);
-
-        //    //_unSealedPropBagMappers.Clear();
-
-        //    //return config;
-        //    //return null;
-        //}
-
-        //void UseInitialConfigAndConfigureTheMappers(IMapperConfigurationExpression cfg)
-        //{
-        //    _mapperConfigInitializerProvider.InitialConfigurationAction(cfg);
-        //    ConfigureTheMappers(cfg);
-        //}
-
-        //void ConfigureTheMappers(IMapperConfigurationExpression cfg)
-        //{
-        //    foreach (IPropBagMapperKeyGen key in _unSealedPropBagMappers.Keys)
-        //    {
-        //        IPropBagMapperGen mapper = _sealedPropBagMappers.GetOrAdd(key);
-        //        mapper.Configure(cfg);
-        //    }
-        //}
-
-        //void ProvisionTheMappers(IMapper compositeMapper)
-        //{
-        //    foreach (IPropBagMapperKeyGen key in _sealedPropBagMappers.Keys)
-        //    {
-        //        IPropBagMapperGen mapper = _sealedPropBagMappers[key];
-        //        if (mapper.Mapper == null)
-        //        {
-        //            mapper.Mapper = compositeMapper;
-        //            System.Diagnostics.Debug.WriteLine($"Setting the mapper for Mapper with key = {key}.");
-        //        }
-        //        else
-        //        {
-        //            System.Diagnostics.Debug.WriteLine($"The Mapper with key = {key} already has it's mapper set.");
-        //        }
-        //    }
-        //}
-        #endregion
 
     }
 }

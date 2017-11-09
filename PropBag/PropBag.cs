@@ -1,6 +1,8 @@
 ﻿using DRM.PropBag.Caches;
 using DRM.PropBag.ControlModel;
+using DRM.PropBag.EventManagement;
 using DRM.TypeSafePropertyBag;
+using DRM.TypeSafePropertyBag.EventManagement;
 using DRM.TypeSafePropertyBag.Fundamentals.ObjectIdDictionary;
 using System;
 using System.Collections;
@@ -55,7 +57,6 @@ namespace DRM.PropBag
         public event EventHandler<PCGenEventArgs> PropertyChangedWithGenVals; // = delegate { };
         public event EventHandler<PropertyChangedEventArgs> PropertyChangedIndividual;
 
-
         // DRM: Changed to protected and added set accessor on 10/29/17; DRM: removed set accessor on 11/2/17.
         protected IPropFactory PropFactory { get; /*set; */}
 
@@ -64,12 +65,14 @@ namespace DRM.PropBag
         private PropBagTypeSafetyMode TypeSafetyMode { get; }
         protected virtual TypeSafePropBagMetaData OurMetaData { get; }
 
-        private readonly Dictionary<string, PropGen> tVals;
+        //private readonly Dictionary<string, PropGen> tVals;
 
         private uint _ourObjectId;
         private IL2KeyMan<uint, string> _level2KeyManager;
         private ICKeyMan<ulong, uint, uint, string> _compKeyManager;
         private readonly IObjectIdDictionary<ulong, uint, uint, string, PropGen> _theStore;
+
+        private SimpleSubscriptionManager<IPropGen> _subscriptionManager;
 
         #endregion
 
@@ -85,7 +88,7 @@ namespace DRM.PropBag
         {
             TypeSafetyMode = PropBagTypeSafetyMode.None;
             PropFactory = null;
-            tVals = null;
+            //tVals = null;
             _theStore = null;
             OurMetaData = BuildMetaData(this.TypeSafetyMode, classFullName: null, propFactory: null);
         }
@@ -136,7 +139,9 @@ namespace DRM.PropBag
             _ourObjectId = (uint) ObjectIdIssuer.NextObjectId;
             _theStore = ProvisonTheStore(out _level2KeyManager, out _compKeyManager);
 
-            tVals = new Dictionary<string, PropGen>();
+            _subscriptionManager = new SimpleSubscriptionManager<IPropGen>(_compKeyManager);
+
+            //tVals = new Dictionary<string, PropGen>();
         }
 
         private IObjectIdDictionary<ulong, uint, uint, string, PropGen> ProvisonTheStore(
@@ -635,6 +640,20 @@ namespace DRM.PropBag
             return setPropDel(value, this, propertyName, genProp.TypedProp);
         }
 
+        public bool SetIt<T>(T value, ulong cKey)
+        {
+            PropGen genProp = GetPropGen<T>(cKey, desiredHasStoreValue: PropFactory.ProvidesStorage);
+
+            uint objectKey = _compKeyManager.Split(cKey, out string propertyName);
+
+            if (objectKey != _ourObjectId)
+                throw new AccessViolationException($"CKey: {cKey} does not belong to IPropBag: {FullClassName} with ObjectId: {_ourObjectId}.");
+
+            IPropPrivate<T> prop = CheckTypeInfo<T>(genProp, propertyName, _theStore);
+
+            return DoSet(value, propertyName, prop);
+        }
+
         public bool SetIt<T>(T value, string propertyName)
         {
             // For Set operations where a type is given, 
@@ -766,41 +785,44 @@ namespace DRM.PropBag
         // TODO: Implement our own WeakEventManager for Delegates that have a single Type Parameter.
         public bool SubscribeToPropChanged<T>(EventHandler<PCTypedEventArgs<T>> eventHandler, string propertyName)
         {
-            bool mustBeRegistered = OurMetaData.AllPropsMustBeRegistered;
+            SimpleExKey exKey = (SimpleExKey) _compKeyManager.Join(_ourObjectId, propertyName);
+            PropGen genProp = GetPropGen<T>(exKey.CKey, desiredHasStoreValue: PropFactory.ProvidesStorage);
 
-            IProp<T> prop = GetTypedPropPrivate<T>(propertyName, mustBeRegistered: mustBeRegistered, neverCreate: false);
+            IPropPrivate<T> prop = CheckTypeInfo<T>(genProp, propertyName, _theStore);
 
             if (prop != null)
             {
-                //prop.GetTheEventManger().AddHandler()
+                ISubscriptionKeyGen subscriptionRequest =
+                    new SubscriptionKey<T>(exKey, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
 
-                PropertyChangedEventManager p;
-
-                //WeakEventManager<IProp<T>, PropertyChangedWithTValsEventArgs<T>>.
-                //    AddHandler(prop, "PropertyChangedWithTVals", eventHandler);
-                prop.PropertyChangedWithTVals += eventHandler;
-                return true;
+                ISubscriptionGen newSubscription = _subscriptionManager.AddSubscription(subscriptionRequest, out bool wasAdded);
+                return wasAdded;
             }
-
-
-            //        WeakEventManager<INotifyPropertyChanged, PropertyChangedEventArgs>.
-            //AddHandler(this, "PropertyChangedIndividual", handler);
-            //        return true;
-            return false;
+            else
+            {
+                return false;
+            }
         }
 
         public bool UnSubscribeToPropChanged<T>(EventHandler<PCTypedEventArgs<T>> eventHandler, string propertyName)
         {
-            bool mustBeRegistered = OurMetaData.AllPropsMustBeRegistered;
+            SimpleExKey exKey = (SimpleExKey)_compKeyManager.Join(_ourObjectId, propertyName);
+            PropGen genProp = GetPropGen<T>(exKey.CKey, desiredHasStoreValue: PropFactory.ProvidesStorage);
 
-            IProp<T> prop = GetTypedPropPrivate<T>(propertyName, mustBeRegistered: mustBeRegistered, neverCreate: true);
+            IPropPrivate<T> prop = CheckTypeInfo<T>(genProp, propertyName, _theStore);
 
             if (prop != null)
             {
-                prop.PropertyChangedWithTVals -= eventHandler;
-                return true;
+                ISubscriptionKeyGen subscriptionRequest =
+                    new SubscriptionKey<T>(exKey, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
+
+                bool wasRemoved = _subscriptionManager.RemoveSubscription(subscriptionRequest);
+                return wasRemoved;
             }
-            return false;
+            else
+            {
+                return false;
+            }
         }
 
         /// <summary>
@@ -1317,6 +1339,15 @@ namespace DRM.PropBag
 
         private void DoNotifyWork<T>(T oldVal, T newValue, string propertyName, IPropPrivate<T> prop)
         {
+            PCTypedEventBase<T> pCTypedEventBase = new PCTypedEventBase<T>(_subscriptionManager);
+
+            // TOOD: Make the caller provide this value -- there's no reason for it to (re)calculated here.
+            SimpleExKey exKey = (SimpleExKey) _compKeyManager.Join(_ourObjectId, propertyName);
+
+            SubscriberCollection sc = _subscriptionManager.GetSubscriptions(exKey);
+
+            IEnumerable<ISubscriptionGen> typedSubs = sc.Where(x => x.SubscriptionKind == SubscriptionKind.TypedHandler);
+
             if (prop.DoAfterNotify)
             {
                 // Raise the standard PropertyChanged event
@@ -1325,8 +1356,10 @@ namespace DRM.PropBag
                 // Raise the individual PropertyChanged event
                 OnPropertyChangedIndividual(propertyName);
 
-                // The typed, PropertyChanged event defined on the individual property.
-                prop.OnPropertyChangedWithTVals(propertyName, oldVal, newValue);
+                // Replaced by the _subscriptionManager!
+                //// The typed, PropertyChanged event defined on the individual property.
+                //prop.OnPropertyChangedWithTVals(propertyName, oldVal, newValue);
+                prop.RaiseEventsForParent(typedSubs, this, propertyName, oldVal, newValue);
 
                 // The un-typed, PropertyChanged event defined on the individual property.
                 prop.OnPropertyChangedWithVals(propertyName, oldVal, newValue);
@@ -1348,8 +1381,10 @@ namespace DRM.PropBag
                 // Raise the individual PropertyChanged event
                 OnPropertyChangedIndividual(propertyName);
 
-                // The typed, PropertyChanged event defined on the individual property.
-                prop.OnPropertyChangedWithTVals(propertyName, oldVal, newValue);
+                // Replaced by the _subscriptionManager!
+                //// The typed, PropertyChanged event defined on the individual property.
+                //prop.OnPropertyChangedWithTVals(propertyName, oldVal, newValue);
+                prop.RaiseEventsForParent(typedSubs, this, propertyName, oldVal, newValue);
 
                 // The un-typed, PropertyChanged event defined on the individual property.
                 prop.OnPropertyChangedWithVals(propertyName, oldVal, newValue);
@@ -1545,6 +1580,28 @@ namespace DRM.PropBag
             ulong cKey = _compKeyManager.Join(_ourObjectId, l2Key);
 
             return cKey;
+        }
+
+        protected PropGen GetPropGen<T>(ulong cKey, bool? desiredHasStoreValue)
+        {
+            PropGen genProp;
+
+            if (!_theStore.TryGetValue(cKey, out genProp))
+            {
+                throw new KeyNotFoundException("That cKey was not found.");
+            }
+
+            if (!genProp.IsEmpty && desiredHasStoreValue.HasValue && desiredHasStoreValue.Value != genProp.TypedProp.HasStore)
+            {
+                string propertyName = GetPropNameFromCKey(cKey);
+                if (desiredHasStoreValue.Value)
+                    //Caller needs property to have a backing store.
+                    throw new InvalidOperationException(string.Format("Property: {0} has no backing store held by this instance of PropBag. This operation can only be performed on properties for which a backing store is held by this instance.", propertyName));
+                else
+                    throw new InvalidOperationException(string.Format("Property: {0} has a backing store held by this instance of PropBag. This operation can only be performed on properties for which no backing store is kept by this instance.", propertyName));
+            }
+
+            return genProp;
         }
 
         #endregion

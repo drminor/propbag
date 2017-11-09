@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DRM.TypeSafePropertyBag.EventManagement
+namespace DRM.PropBag.EventManagement
 {
     public interface IEventManager<TEventSource, TEventArgs> where TEventArgs : EventArgs
     {

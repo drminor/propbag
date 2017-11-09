@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace DRM.PropBag
+namespace DRM.PropBag.EventManagement
 {
     public class SimpleEventManager : IEventManager<INotifyPCGen, PCGenEventArgs> 
     {

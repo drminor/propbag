@@ -48,7 +48,7 @@ namespace DRM.TypeSafePropertyBag
     /// Objects that implement this interface are often created by an instance of a class that inherits from AbstractPropFactory.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public interface IProp<T> : IProp, INotifyPCTyped<T>, IProvideATypedEventManager<T>
+    public interface IProp<T> : IProp, INotifyPCTyped<T> //, IProvideATypedEventManager<T>
     {
         T TypedValue { get; set; }
 
@@ -59,36 +59,19 @@ namespace DRM.TypeSafePropertyBag
 
         // Property Changed with typed values support
         //event EventHandler<PropertyChangedWithTValsEventArgs<T>> PropertyChangedWithTVals;
-        void OnPropertyChangedWithTVals(string propertyName, T oldVal, T newVal);
+        //void OnPropertyChangedWithTVals(string propertyName, T oldVal, T newVal);
 
         // TODO: Consider moving these to the IPropPrivate<T> interface.
         // and using the WeakEventManager style.
         //void SubscribeToPropChanged(Action<T, T> doOnChange);
         //bool UnSubscribeToPropChanged(Action<T, T> doOnChange);
 
+        //void RaiseEvents(IEnumerable<ISubscriptionGen> typedSubs);
+        void RaiseEventsForParent(IEnumerable<ISubscriptionGen> typedSubs, object parent, 
+            string propertyName, object oldVal, object newVal);
+
+
         Attribute[] Attributes { get; }
-    }
-
-    /// <summary>
-    /// Classes that implement the IPropBag interface, keep a list of properties, each of which implements this interface.
-    /// These features are managed by the PropBag, and not by classes that inherit from AbstractProp.
-    /// </summary>
-    public interface IPropGen 
-    {
-        ulong PropId { get; }
-        bool IsEmpty { get; }
-
-        /// <summary>
-        /// Provides access to the non-type specific features of this property.
-        /// This allows access to these values without having to cast to the instance to its type (unknown at compile time.)
-        /// </summary>
-        IProp TypedProp { get; }
-
-        object Value { get; }
-
-        ValPlusType ValuePlusType();
-
-        void CleanUp(bool doTypedCleanup);
     }
 
     /// <summary>
@@ -128,5 +111,27 @@ namespace DRM.TypeSafePropertyBag
         bool HasChangedWithTValSubscribers { get; }
 
         void CleanUpTyped();
+    }
+
+    /// <summary>
+    /// Classes that implement the IPropBag interface, keep a list of properties, each of which implements this interface.
+    /// These features are managed by the PropBag, and not by classes that inherit from AbstractProp.
+    /// </summary>
+    public interface IPropGen
+    {
+        ulong PropId { get; }
+        bool IsEmpty { get; }
+
+        /// <summary>
+        /// Provides access to the non-type specific features of this property.
+        /// This allows access to these values without having to cast to the instance to its type (unknown at compile time.)
+        /// </summary>
+        IProp TypedProp { get; }
+
+        object Value { get; }
+
+        ValPlusType ValuePlusType();
+
+        void CleanUp(bool doTypedCleanup);
     }
 }

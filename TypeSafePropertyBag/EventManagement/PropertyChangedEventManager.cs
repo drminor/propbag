@@ -14,7 +14,7 @@ using System.Windows;
 
 ///</remarks>
 
-namespace DRM.PropBag.EventManagement.NotUsed
+namespace DRM.TypeSafePropertyBag.EventManagement.NotUsed
 {
     /// <summary>
     /// Provides an implementation so that you can use the "weak event listener" pattern
@@ -106,8 +106,7 @@ namespace DRM.PropBag.EventManagement.NotUsed
                 // We have the listeners. Deal with them
                 foreach (WeakReference item in list)
                 {
-                    IWeakEventListener eventItem = item.Target as IWeakEventListener;
-                    if (eventItem != null && item.IsAlive)
+                    if (item.Target is IWeakEventListener eventItem && item.IsAlive)
                     {
                         eventItem.ReceiveWeakEvent(this.GetType(), sender, args);
                     }
@@ -140,8 +139,10 @@ namespace DRM.PropBag.EventManagement.NotUsed
                 }
                 else
                 {
-                    List<WeakReference> list = new List<WeakReference>();
-                    list.Add(reference);
+                    List<WeakReference> list = new List<WeakReference>
+                    {
+                        reference
+                    };
                     _list.Add(propertyName, list);
                 }
                 // Now, start listening to source

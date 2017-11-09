@@ -42,8 +42,18 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="EventManagement\IEventManager.cs" />
-    <Compile Include="EventManagement\IProvideAnEventManager.cs" />
+    <Compile Include="EventManagement\PCTypedEventBase.cs" />
+    <Compile Include="EventManagement\PropertyChangedEventManager.cs" />
+    <Compile Include="Fundamentals\IWeakEventListener.cs" />
+    <Compile Include="Fundamentals\ObjectIdDictionary\SimpleExKey.cs" />
+    <Compile Include="Subscriptions\CollectionOfSubscriberCollections.cs" />
+    <Compile Include="Subscriptions\ICacheSubscriptions.cs" />
+    <Compile Include="Subscriptions\IPropBag.cs" />
+    <Compile Include="Subscriptions\ISubscription.cs" />
+    <Compile Include="Subscriptions\ISubscriptionKey.cs" />
+    <Compile Include="Subscriptions\SimpleSubscriptionManager.cs" />
+    <Compile Include="Subscriptions\SubscriberCollection.cs" />
+    <Compile Include="Subscriptions\Subscription.cs" />
     <Compile Include="Fundamentals\GenerateHash.cs" />
     <Compile Include="Fundamentals\ObjectIdDictionary\IObjectIdDictionary.cs" />
     <Compile Include="Fundamentals\ObjectIdDictionary\AbstractObjectIdDictionary.cs" />
@@ -62,12 +72,16 @@
     <Compile Include="PropBagTypeSafetyMode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyChangedWithValsEventArgs.cs" />
-    <Compile Include="PropertyChangedWithValsHandler.cs" />
     <Compile Include="IPropInterfaces.cs" />
     <Compile Include="PropKindEnum.cs" />
     <Compile Include="ResolveTypeDelegate.cs" />
     <Compile Include="Fundamentals\TypedWeakReference.cs" />
     <Compile Include="Fundamentals\TypeExtension.cs" />
+    <Compile Include="Subscriptions\SubscriptionKeyGen.cs" />
+    <Compile Include="Subscriptions\SubscriptionKey.cs" />
+    <Compile Include="Subscriptions\SubscriptionKind.cs" />
+    <Compile Include="Subscriptions\SubscriptionPriorityGroup.cs" />
+    <Compile Include="Subscriptions\SubscriptionTargetKind.cs" />
     <Compile Include="TypeSafePropBagMetaData.cs" />
     <Compile Include="ValPlusType.cs" />
   </ItemGroup>

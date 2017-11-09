@@ -14,15 +14,13 @@ namespace DRM.PropBag
     {
         #region Private Members
 
-        private List<  Tuple<  Action<T, T>, EventHandler<PCTypedEventArgs<T>>   >   > _actTable = null;
+        //private List<  Tuple<  Action<T, T>, EventHandler<PCTypedEventArgs<T>>   >   > _actTable = null;
 
         #endregion
 
         #region Public Members
 
         public event EventHandler<PCTypedEventArgs<T>> PropertyChangedWithTVals;
-
-        //public override event EventHandler<PCGenEventArgs> PropertyChangedWithGenVals;
 
         abstract public T TypedValue { get; set; }
 
@@ -36,7 +34,6 @@ namespace DRM.PropBag
         }
 
         public bool DoAfterNotify { get; set; }
-
 
         protected GetDefaultValueDelegate<T> GetDefaultValFunc { get; }
         public virtual bool ReturnDefaultForUndefined => GetDefaultValFunc != null;
@@ -55,7 +52,9 @@ namespace DRM.PropBag
             EventHandler<PCTypedEventArgs<T>> doWhenChangedX,
             //Action<T, T> doWhenChanged,
             bool doAfterNotify,
-            Func<T,T,bool> comparer, GetDefaultValueDelegate<T> getDefaultValFunc, PropKindEnum propKind = PropKindEnum.Prop)
+            Func<T,T,bool> comparer,
+            GetDefaultValueDelegate<T> getDefaultValFunc,
+            PropKindEnum propKind = PropKindEnum.Prop)
             : base(propKind, typeOfThisValue, typeIsSolid, hasStore)
         {
 
@@ -123,7 +122,7 @@ namespace DRM.PropBag
         public new void CleanUpTyped()
         {
             Comparer = null;
-            DoWHenChangedAction = null;
+            //DoWHenChangedAction = null;
             PropertyChangedWithTVals = null;
             base.CleanUpTyped();
         }
@@ -177,6 +176,18 @@ namespace DRM.PropBag
 
         #region Raise Events
 
+        public void RaiseEventsForParent(IEnumerable<ISubscriptionGen> typedSubs, object parent,
+            string propertyName, object oldVal, object newVal)
+        {
+            PCTypedEventArgs<T> eArgs = new PCTypedEventArgs<T>(propertyName, (T)oldVal, (T)newVal);
+
+            foreach (Subscription<T> sspt in typedSubs)
+            {
+                sspt.TypedHandler(parent, eArgs);
+            }
+        }
+
+
         public void OnPropertyChangedWithTVals(string propertyName, T oldVal, T newVal)
         {
             EventHandler<PCTypedEventArgs<T>> handler = Interlocked.CompareExchange(ref PropertyChangedWithTVals, null, null);
@@ -193,11 +204,11 @@ namespace DRM.PropBag
         //        handler(this, new PCGenEventArgs(propertyName, this.Type, oldVal, newVal));
         //}
 
-        // TODOXX:
-        public IEventManager<INotifyPCTyped<T>, PCTypedEventArgs<T>> GetTheEventManger()
-        {
-            throw new NotImplementedException();
-        }
+        //// TODOXX:
+        //public IEventManager<INotifyPCTyped<T>, PCTypedEventArgs<T>> GetTheEventManger()
+        //{
+        //    throw new NotImplementedException();
+        //}
 
         #endregion
     }

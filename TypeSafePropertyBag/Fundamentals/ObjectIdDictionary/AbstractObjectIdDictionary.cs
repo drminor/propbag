@@ -5,9 +5,9 @@ using System.Collections.Generic;
 
 namespace DRM.TypeSafePropertyBag.Fundamentals.ObjectIdDictionary
 {
-    public class AbstractObjectIdDictionary<CompT, L1T, L2T, L2TRaw, TValue> :
-        ConcurrentDictionary<CompT, TValue>,
-        IObjectIdDictionary<CompT, L1T, L2T, L2TRaw, TValue>
+    public class AbstractObjectIdDictionary<CompT, L1T, L2T, L2TRaw, PropDataT> :
+        ConcurrentDictionary<CompT, PropDataT>,
+        IObjectIdDictionary<CompT, L1T, L2T, L2TRaw, PropDataT> where PropDataT : IPropGen
     {
         #region Private Memebers
 
@@ -38,11 +38,11 @@ namespace DRM.TypeSafePropertyBag.Fundamentals.ObjectIdDictionary
         {
             //ICollection<KeyValuePair<CompT, TValue>> r = (ICollection<KeyValuePair<CompT, TValue>>) this;
 
-            var thisAsCollection = this as ICollection<KeyValuePair<CompT, TValue>>;
+            var thisAsCollection = this as ICollection<KeyValuePair<CompT, PropDataT>>;
 
-            List<KeyValuePair<CompT, TValue>> toRemove = new List<KeyValuePair<CompT, TValue>>();
+            List<KeyValuePair<CompT, PropDataT>> toRemove = new List<KeyValuePair<CompT, PropDataT>>();
 
-            foreach (KeyValuePair<CompT, TValue> kvp in thisAsCollection)
+            foreach (KeyValuePair<CompT, PropDataT> kvp in thisAsCollection)
             {
                 L1T foundTop = CompKeyManager.Split(kvp.Key, out L2T bot);
                 if (foundTop.Equals(top))
@@ -52,7 +52,7 @@ namespace DRM.TypeSafePropertyBag.Fundamentals.ObjectIdDictionary
             }
 
             int result = 0;
-            foreach (KeyValuePair<CompT, TValue> kvp in toRemove)
+            foreach (KeyValuePair<CompT, PropDataT> kvp in toRemove)
             {
                 thisAsCollection.Remove(kvp);
                 result++;
@@ -64,19 +64,19 @@ namespace DRM.TypeSafePropertyBag.Fundamentals.ObjectIdDictionary
 
         #region Level 2 Cooked 
 
-        public TValue GetOrAdd(L1T top, L2T bot, TValue value)
+        public PropDataT GetOrAdd(L1T top, L2T bot, PropDataT value)
         {
             CompT key = CompKeyManager.Join(top, bot);
             return GetOrAdd(key, value);
         }
 
-        public bool TryAdd(L1T top, L2T bot, TValue value)
+        public bool TryAdd(L1T top, L2T bot, PropDataT value)
         {
             CompT key = CompKeyManager.Join(top, bot);
             return TryAdd(key, value);
         }
 
-        public bool TryGetValue(L1T top, L2T bot, out TValue value)
+        public bool TryGetValue(L1T top, L2T bot, out PropDataT value)
         {
             CompT key = CompKeyManager.Join(top, bot);
             return TryGetValue(key, out value);
@@ -89,7 +89,7 @@ namespace DRM.TypeSafePropertyBag.Fundamentals.ObjectIdDictionary
             return result;
         }
 
-        public bool TryRemove(L1T top, L2T bot, out TValue value)
+        public bool TryRemove(L1T top, L2T bot, out PropDataT value)
         {
             CompT key = CompKeyManager.Join(top, bot);
             return TryRemove(key, out value);
@@ -99,19 +99,19 @@ namespace DRM.TypeSafePropertyBag.Fundamentals.ObjectIdDictionary
 
         #region Level 2 Raw
 
-        public bool TryAdd(L1T top, L2TRaw rawBot, TValue value)
+        public bool TryAdd(L1T top, L2TRaw rawBot, PropDataT value)
         {
             CompT key = CompKeyManager.Join(top, Level2KeyManager.FromRaw(rawBot));
             return TryAdd(key, value);
         }
 
-        public TValue GetOrAdd(L1T top, L2TRaw rawBot, TValue value)
+        public PropDataT GetOrAdd(L1T top, L2TRaw rawBot, PropDataT value)
         {
             CompT key = CompKeyManager.Join(top, Level2KeyManager.FromRaw(rawBot));
             return GetOrAdd(key, value);
         }
 
-        public bool TryGetValue(L1T top, L2TRaw rawBot, out TValue value)
+        public bool TryGetValue(L1T top, L2TRaw rawBot, out PropDataT value)
         {
             bool result;
             if(CompKeyManager.TryJoin(top, rawBot, out CompT comp))
@@ -121,7 +121,7 @@ namespace DRM.TypeSafePropertyBag.Fundamentals.ObjectIdDictionary
             }
             else
             {
-                value = default(TValue);
+                value = default(PropDataT);
                 return false;
             }
         }
@@ -133,7 +133,7 @@ namespace DRM.TypeSafePropertyBag.Fundamentals.ObjectIdDictionary
             return result;
         }
 
-        public bool TryRemove(L1T top, L2TRaw rawBot, out TValue value)
+        public bool TryRemove(L1T top, L2TRaw rawBot, out PropDataT value)
         {
             CompT key = CompKeyManager.Join(top, Level2KeyManager.FromRaw(rawBot));
             return TryRemove(key, out value);

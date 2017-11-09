@@ -4,7 +4,7 @@ using DRM.TypeSafePropertyBag.EventManagement;
 
 namespace DRM.TypeSafePropertyBag
 {
-    public interface IPropFactory : IProvideAnEventManager
+    public interface IPropFactory //: IProvideAnEventManager
     {
         bool ProvidesStorage { get; }
         //bool ReturnDefaultForUndefined { get; }

@@ -54,6 +54,10 @@ namespace PropBagLib.Tests
             mod1.PropString = "Test2";
 
             string temp = mod1.PropString;
+
+            // Added this statement on 11/9/2017.
+            mod1.PropStringChanged -= Mod1_PropStringChanged;
+
             Assert.That(temp, Is.EqualTo("Test2"));
             Assert.That(mod1.PropString, Is.EqualTo("Test2"));
             Assert.That(propString_WasUpdated, Is.EqualTo(true), "PropStringChangeWasCalled = false");
@@ -152,9 +156,16 @@ namespace PropBagLib.Tests
 
         void Mod1_PropStringChanged(object sender, PCTypedEventArgs<string> e)
         {
-            IProp<string> prop = (IProp<string>)sender;
+            var x = sender;
+
+            if(x is LooseModel lm)
+            {
+                System.Diagnostics.Debug.WriteLine("It is a LooseModel -- it works!");
+            }
+
             string oldVal = e.OldValue;
             string newVal = e.NewValue;
+
             propString_WasUpdated = true;
         }
 

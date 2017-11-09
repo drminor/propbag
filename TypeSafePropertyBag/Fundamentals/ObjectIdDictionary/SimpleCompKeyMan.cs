@@ -30,36 +30,45 @@ namespace DRM.TypeSafePropertyBag.Fundamentals.ObjectIdDictionary
             return result;
         }
 
-        public ulong Join(uint top, string rawBot)
+        public IExplodedKey<ulong, uint, uint> Join(uint top, string rawBot)
         {
-            ulong result = Join(top, Level2KeyMan.FromRaw(rawBot));
+            uint bot = Level2KeyMan.FromRaw(rawBot);
+            ulong cKey = Join(top, bot);
+
+            IExplodedKey<ulong, uint, uint> result = new SimpleExKey(cKey, top, bot);
+
             return result;
         }
 
-        public bool TryJoin(uint top, string rawBot, out ulong comp)
+        public bool TryJoin(uint top, string rawBot, out ulong cKey)
         {
             if (Level2KeyMan.TryGetFromRaw(rawBot, out uint bot))
             {
-                comp = Join(top, Level2KeyMan.FromRaw(rawBot));
+                cKey = Join(top, Level2KeyMan.FromRaw(rawBot));
                 return true;
             }
             else
             {
-                comp = 0;
+                cKey = 0;
                 return false;
             }
         }
 
-
-        public uint Split(ulong comp, out uint bot)
+        public IExplodedKey<ulong, uint, uint> Split(ulong cKey)
         {
-            bot = (uint)(comp & _botMask);
+            uint top = Split(cKey, out uint bot);
+            return new SimpleExKey(cKey, top, bot);
+        }
 
-            uint result = (uint)((comp >> _botFieldLen) & _topMask);
+        public uint Split(ulong cKey, out uint bot)
+        {
+            bot = (uint)(cKey & _botMask);
+
+            uint result = (uint)((cKey >> _botFieldLen) & _topMask);
             return result;
         }
 
-        public uint Split(ulong comp, out string rawBot)
+        public uint Split(ulong cKey, out string rawBot)
         {
             uint result = Split(_topMask, out uint bot);
             rawBot = Level2KeyMan.FromCooked(bot);

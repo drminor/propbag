@@ -120,8 +120,7 @@ namespace DRM.TypeSafePropertyBag.Fundamentals.NotUsed
 
             if (managerType == typeof(PropertyChangedEventManager))
             {
-                PropertyChangedEventArgs args = e as PropertyChangedEventArgs;
-                if (args != null && sender is TPropertySource)
+                if (e is PropertyChangedEventArgs args && sender is TPropertySource)
                 {
                     string propertyName = args.PropertyName;
                     TPropertySource propertySource = (TPropertySource)sender;
@@ -137,8 +136,7 @@ namespace DRM.TypeSafePropertyBag.Fundamentals.NotUsed
                     }
                     else
                     {
-                        Action<TPropertySource> handler;
-                        if (_propertyNameToHandlerMap.TryGetValue(propertyName, out handler))
+                        if (_propertyNameToHandlerMap.TryGetValue(propertyName, out Action<TPropertySource> handler))
                         {
                             handler(propertySource);
 
