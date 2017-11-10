@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace DRM.TypeSafePropertyBag.Fundamentals.ObjectIdDictionary
+namespace DRM.TypeSafePropertyBag.Fundamentals
 {
     public struct SimpleExKey : IExplodedKey<ulong, uint, uint>, IEquatable<SimpleExKey>
     {

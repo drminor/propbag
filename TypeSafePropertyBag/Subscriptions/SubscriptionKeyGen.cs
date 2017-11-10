@@ -1,4 +1,4 @@
-﻿using DRM.TypeSafePropertyBag.Fundamentals.ObjectIdDictionary;
+﻿using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -86,7 +86,6 @@ namespace DRM.TypeSafePropertyBag.EventManagement
         {
             ExKey = exKey;
             SubscriptionKind = kind;
-            SubscriptionTargetKind = SubscriptionTargetKind.Standard;
             SubscriptionPriorityGroup = subscriptionPriorityGroup;
 
             StandardHandler = null;
@@ -108,15 +107,14 @@ namespace DRM.TypeSafePropertyBag.EventManagement
         {
             ExKey = exKey;
             SubscriptionKind = SubscriptionKind.ObjectAction;
-            SubscriptionTargetKind = SubscriptionTargetKind.Standard;
             SubscriptionPriorityGroup = subscriptionPriorityGroup;
 
             StandardHandler = null;
             GenHandler = null;
             UseTargetAndMethod = false;
-            GenDoWhenChanged = genAction;
+            GenDoWhenChanged = genAction ?? throw new ArgumentNullException(nameof(genAction));
             Action = null;
-            Target = genAction.Target;
+            Target = genAction.Target ?? throw new InvalidOperationException($"The value for Target on the GenAction action, cannot be null.");
             Method = genAction.Method;
 
             SubscriptionTargetKind = GetKindOfTarget(genAction.Target, keepRef);
@@ -130,7 +128,6 @@ namespace DRM.TypeSafePropertyBag.EventManagement
         {
             ExKey = exKey;
             SubscriptionKind = SubscriptionKind.ActionNoParams;
-            SubscriptionTargetKind = SubscriptionTargetKind.Standard;
             SubscriptionPriorityGroup = subscriptionPriorityGroup;
 
             StandardHandler = null;
@@ -150,7 +147,7 @@ namespace DRM.TypeSafePropertyBag.EventManagement
 
         private SubscriptionTargetKind GetKindOfTarget(object target, bool keepRef)
         {
-            if(target is IPropBag)
+            if(target.GetType().IsPropBagBased())
             {
                 return SubscriptionTargetKind.PropBag;
             }

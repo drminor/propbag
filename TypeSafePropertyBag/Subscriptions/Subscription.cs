@@ -1,4 +1,4 @@
-﻿using DRM.TypeSafePropertyBag.Fundamentals.ObjectIdDictionary;
+﻿using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
 using System.ComponentModel;
 

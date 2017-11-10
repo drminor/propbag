@@ -48,7 +48,6 @@
     <Compile Include="Fundamentals\ObjectIdDictionary\SimpleExKey.cs" />
     <Compile Include="Subscriptions\CollectionOfSubscriberCollections.cs" />
     <Compile Include="Subscriptions\ICacheSubscriptions.cs" />
-    <Compile Include="Subscriptions\IPropBag.cs" />
     <Compile Include="Subscriptions\ISubscription.cs" />
     <Compile Include="Subscriptions\ISubscriptionKey.cs" />
     <Compile Include="Subscriptions\SimpleSubscriptionManager.cs" />

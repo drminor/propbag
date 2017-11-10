@@ -1,4 +1,4 @@
-﻿using DRM.TypeSafePropertyBag.Fundamentals.ObjectIdDictionary;
+﻿using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -95,7 +95,10 @@ namespace DRM.TypeSafePropertyBag.EventManagement
 
         public bool TryGetSubscription(uint l2Key, out ISubscriptionGen subscription)
         {
-            subscription = _subs.FirstOrDefault((x => x.ExKey.Level2Key == l2Key));
+            lock (_sync)
+            {
+                subscription = _subs.FirstOrDefault((x => x.ExKey.Level2Key == l2Key));
+            }
 
             if(subscription == null)
             {
@@ -118,7 +121,7 @@ namespace DRM.TypeSafePropertyBag.EventManagement
         public IEnumerator<ISubscriptionGen> GetEnumerator()
         {
             lock (_sync)
-                return _subs.ToList().GetEnumerator();
+                return _subs.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()

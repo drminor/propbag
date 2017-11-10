@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace DRM.TypeSafePropertyBag.Fundamentals.ObjectIdDictionary
+namespace DRM.TypeSafePropertyBag.Fundamentals
 {
-    public class SimpleCompKeyMan : ICKeyMan<ulong, uint, uint, string>
+    public class SimpleCompKeyMan : ICKeyMan<SimpleExKey, ulong, uint, uint, string>
     {
         IL2KeyMan<uint, string> Level2KeyMan { get; }
         int _botFieldLen;
@@ -22,29 +22,49 @@ namespace DRM.TypeSafePropertyBag.Fundamentals.ObjectIdDictionary
 
         }
 
-        public ulong Join(uint top, uint bot)
+        // Join and split exploded key from L1 and L2
+        //ExKeyT Join(L1T top, L2T bot);
+        public SimpleExKey Join(uint top, uint bot)
         {
-            ulong result = top;
-            result = result << _botFieldLen;
-            result += bot;
-            return result;
+            throw new NotImplementedException();
         }
 
-        public IExplodedKey<ulong, uint, uint> Join(uint top, string rawBot)
+        //L1T Split(ExKeyT exKey, out L2T bot);
+        public uint Split(SimpleExKey exKey, out uint bot)
+        {
+            throw new NotImplementedException();
+        }
+
+        // Join and split exploded key from L1 and L2Raw.
+        //ExKeyT Join(L1T top, L2TRaw bot);
+        public SimpleExKey Join(uint top, string rawBot)
         {
             uint bot = Level2KeyMan.FromRaw(rawBot);
-            ulong cKey = Join(top, bot);
+            ulong cKey = JoinComp(top, bot);
 
-            IExplodedKey<ulong, uint, uint> result = new SimpleExKey(cKey, top, bot);
-
+            SimpleExKey result = new SimpleExKey(cKey, top, bot);
             return result;
         }
 
-        public bool TryJoin(uint top, string rawBot, out ulong cKey)
+        //L1T Split(ExKeyT exKey, out L2TRaw bot);
+        public uint Split(SimpleExKey exKey, out string rawBot)
+        {
+            throw new NotImplementedException();
+        }
+
+        // Try version of Join
+        //bool TryJoin(L1T top, L2TRaw rawBot, out ExKeyT exKey);
+        public bool TryJoin(uint top, string rawBot, out SimpleExKey exKey)
+        {
+            throw new NotImplementedException();
+        }
+
+        // Try version of Join Comp
+        public bool TryJoinComp(uint top, string rawBot, out ulong cKey)
         {
             if (Level2KeyMan.TryGetFromRaw(rawBot, out uint bot))
             {
-                cKey = Join(top, Level2KeyMan.FromRaw(rawBot));
+                cKey = JoinComp(top, Level2KeyMan.FromRaw(rawBot));
                 return true;
             }
             else
@@ -54,13 +74,27 @@ namespace DRM.TypeSafePropertyBag.Fundamentals.ObjectIdDictionary
             }
         }
 
-        public IExplodedKey<ulong, uint, uint> Split(ulong cKey)
+        // Create exploded key from composite key.
+        //ExKeyT Split(CompT cKey);
+        public SimpleExKey Split(ulong cKey)
         {
-            uint top = Split(cKey, out uint bot);
+            uint top = SplitComp(cKey, out uint bot);
             return new SimpleExKey(cKey, top, bot);
         }
 
-        public uint Split(ulong cKey, out uint bot)
+
+        // Join and split composite key from L1 and L2.
+        //CompT JoinComp(L1T top, L2T bot);
+        public ulong JoinComp(uint top, uint bot)
+        {
+            ulong result = top;
+            result = result << _botFieldLen;
+            result += bot;
+            return result;
+        }
+
+        //L1T SplitComp(CompT cKey, out L2T bot);
+        public uint SplitComp(ulong cKey, out uint bot)
         {
             bot = (uint)(cKey & _botMask);
 
@@ -68,12 +102,21 @@ namespace DRM.TypeSafePropertyBag.Fundamentals.ObjectIdDictionary
             return result;
         }
 
-        public uint Split(ulong cKey, out string rawBot)
+        // Join and split composite key from L1 and L2Raw.
+        //CompT JoinComp(L1T top, L2TRaw rawBot);
+        public ulong JoinComp(uint top, string rawBot)
         {
-            uint result = Split(_topMask, out uint bot);
+            throw new NotImplementedException();
+        }
+
+        //L1T SplitComp(CompT cKey, out L2TRaw rawBot);
+        public uint SplitComp(ulong cKey, out string rawBot)
+        {
+            uint result = SplitComp(_topMask, out uint bot);
             rawBot = Level2KeyMan.FromCooked(bot);
 
             return result;
         }
+
     }
 }

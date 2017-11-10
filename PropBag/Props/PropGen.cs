@@ -11,12 +11,13 @@ using System.Runtime.CompilerServices;
 using DRM.TypeSafePropertyBag;
 using System.ComponentModel;
 using System.Windows;
+using DRM.TypeSafePropertyBag.Fundamentals;
 
 namespace DRM.PropBag
 {
     public struct PropGen : IPropGen
     {
-        public ulong PropId { get; }
+        public SimpleExKey PropId { get; }
 
         public IProp TypedProp { get; }
 
@@ -39,27 +40,25 @@ namespace DRM.PropBag
             return new ValPlusType(Value, TypedProp.Type);
         }
 
-        // Constructor
-        public PropGen(IProp genericTypedProp, ulong? propId)
+        // Constructors
+        public PropGen(IProp genericTypedProp, SimpleExKey propId)
         {
-            if(genericTypedProp == null)
-            {
-                TypedProp = null;
-                PropId = 0;
-                IsEmpty = true;
-            }
-            else
-            {
-                TypedProp = genericTypedProp;
-                PropId = propId.Value;
-                IsEmpty = false;
-            }
+            TypedProp = genericTypedProp ?? throw new ArgumentNullException($"{nameof(genericTypedProp)} must be non-null.");
+            PropId = propId;
+            IsEmpty = false;
+
 
             //PropertyChangedWithGenVals = null; // = delegate { };
             //PropertyChanged = null;
             //_actTable = null;
         }
 
+        public PropGen(bool? makeEmpty)
+        {
+            TypedProp = null;
+            PropId = new SimpleExKey();
+            IsEmpty = true;
+        }
 
         public void CleanUp(bool doTypedCleanup)
         {

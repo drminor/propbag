@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DRM.TypeSafePropertyBag.Fundamentals.ObjectIdDictionary
+namespace DRM.TypeSafePropertyBag.Fundamentals
 {
     public class SimpleLevel2KeyMan : IL2KeyMan<uint, string>
     {

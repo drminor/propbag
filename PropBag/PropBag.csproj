@@ -47,6 +47,11 @@
     <Compile Include="EventManagement\IProvideAnEventManager.cs" />
     <None Include="EventManagement\PCTypedEventBase_OLD.cs" />
     <Compile Include="EventManagement\SimplePCEventManager.cs" />
+    <Compile Include="LocalBinding\ILocalValueConverter.cs" />
+    <Compile Include="LocalBinding\LocalBindingMode.cs" />
+    <Compile Include="LocalBinding\LocalBindingOps.cs" />
+    <Compile Include="LocalBinding\LocalBindingInfo.cs" />
+    <Compile Include="LocalBinding\LocalPropertyPath.cs" />
     <Compile Include="ObjectIdIssuer.cs" />
     <Compile Include="ControlModel\DeriveFromClassField_NotUsed.cs" />
     <Compile Include="ControlModel\DeriveFromClassModeEnum.cs" />

@@ -3,7 +3,7 @@ using DRM.PropBag.ControlModel;
 using DRM.PropBag.EventManagement;
 using DRM.TypeSafePropertyBag;
 using DRM.TypeSafePropertyBag.EventManagement;
-using DRM.TypeSafePropertyBag.Fundamentals.ObjectIdDictionary;
+using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -69,8 +69,8 @@ namespace DRM.PropBag
 
         private uint _ourObjectId;
         private IL2KeyMan<uint, string> _level2KeyManager;
-        private ICKeyMan<ulong, uint, uint, string> _compKeyManager;
-        private readonly IObjectIdDictionary<ulong, uint, uint, string, PropGen> _theStore;
+        private ICKeyMan<SimpleExKey, ulong, uint, uint, string> _compKeyManager;
+        private readonly IObjectIdDictionary<SimpleExKey, ulong, uint, uint, string, PropGen> _theStore;
 
         private SimpleSubscriptionManager<IPropGen> _subscriptionManager;
 
@@ -144,14 +144,14 @@ namespace DRM.PropBag
             //tVals = new Dictionary<string, PropGen>();
         }
 
-        private IObjectIdDictionary<ulong, uint, uint, string, PropGen> ProvisonTheStore(
-            out IL2KeyMan<uint, string> level2KeyMan, out ICKeyMan<ulong, uint, uint, string> compKeyManager) 
+        private IObjectIdDictionary<SimpleExKey, ulong, uint, uint, string, PropGen> ProvisonTheStore(
+            out IL2KeyMan<uint, string> level2KeyMan, out ICKeyMan<SimpleExKey, ulong, uint, uint, string> compKeyManager) 
         {
             level2KeyMan = new SimpleLevel2KeyMan();
             compKeyManager = new SimpleCompKeyMan(level2KeyMan, 48);
 
 
-            IObjectIdDictionary<ulong, uint, uint, string, PropGen> result 
+            IObjectIdDictionary<SimpleExKey, ulong, uint, uint, string, PropGen> result 
                 = new SimpleObjectIdDictionary<PropGen>(compKeyManager: compKeyManager, level2KeyManager: level2KeyMan);
 
             return result;
@@ -276,7 +276,7 @@ namespace DRM.PropBag
             if (neverCreate)
             {
                 wasRegistered = false;
-                return new PropGen(null, null);
+                return new PropGen(null);
             }
 
             if (alwaysRegister)
@@ -300,7 +300,7 @@ namespace DRM.PropBag
                         else
                         {
                             wasRegistered = false;
-                            return new PropGen(null, null);
+                            return new PropGen(null);
                         }
                     }
                 case ReadMissingPropPolicyEnum.Register:
@@ -640,15 +640,16 @@ namespace DRM.PropBag
             return setPropDel(value, this, propertyName, genProp.TypedProp);
         }
 
-        public bool SetIt<T>(T value, ulong cKey)
+        public bool SetIt<T>(T value, SimpleExKey exKey)
         {
-            PropGen genProp = GetPropGen<T>(cKey, desiredHasStoreValue: PropFactory.ProvidesStorage);
+            PropGen genProp = GetPropGen<T>(exKey, desiredHasStoreValue: PropFactory.ProvidesStorage);
 
-            uint objectKey = _compKeyManager.Split(cKey, out string propertyName);
+            //uint objectKey = _compKeyManager.Split(cKey, out string propertyName);
 
-            if (objectKey != _ourObjectId)
-                throw new AccessViolationException($"CKey: {cKey} does not belong to IPropBag: {FullClassName} with ObjectId: {_ourObjectId}.");
+            if (exKey.Level1Key != _ourObjectId)
+                throw new AccessViolationException($"CKey: {exKey} does not belong to IPropBag: {FullClassName} with ObjectId: {_ourObjectId}.");
 
+            string propertyName = _level2KeyManager.FromCooked(exKey.Level2Key);
             IPropPrivate<T> prop = CheckTypeInfo<T>(genProp, propertyName, _theStore);
 
             return DoSet(value, propertyName, prop);
@@ -786,7 +787,7 @@ namespace DRM.PropBag
         public bool SubscribeToPropChanged<T>(EventHandler<PCTypedEventArgs<T>> eventHandler, string propertyName)
         {
             SimpleExKey exKey = (SimpleExKey) _compKeyManager.Join(_ourObjectId, propertyName);
-            PropGen genProp = GetPropGen<T>(exKey.CKey, desiredHasStoreValue: PropFactory.ProvidesStorage);
+            PropGen genProp = GetPropGen<T>(exKey, desiredHasStoreValue: PropFactory.ProvidesStorage);
 
             IPropPrivate<T> prop = CheckTypeInfo<T>(genProp, propertyName, _theStore);
 
@@ -807,7 +808,7 @@ namespace DRM.PropBag
         public bool UnSubscribeToPropChanged<T>(EventHandler<PCTypedEventArgs<T>> eventHandler, string propertyName)
         {
             SimpleExKey exKey = (SimpleExKey)_compKeyManager.Join(_ourObjectId, propertyName);
-            PropGen genProp = GetPropGen<T>(exKey.CKey, desiredHasStoreValue: PropFactory.ProvidesStorage);
+            PropGen genProp = GetPropGen<T>(exKey, desiredHasStoreValue: PropFactory.ProvidesStorage);
 
             IPropPrivate<T> prop = CheckTypeInfo<T>(genProp, propertyName, _theStore);
 
@@ -1122,11 +1123,11 @@ namespace DRM.PropBag
 
         protected void AddProp<T>(string propertyName, IProp<T> prop)
         {
-            ulong cKey = GetNewCKey(propertyName);
-            PropGen propGen = new PropGen(prop, cKey);
+            SimpleExKey exKey = GetNewExKey(propertyName);
+            PropGen propGen = new PropGen(prop, exKey);
 
             //tVals.Add(propertyName, propGen);
-            if (!_theStore.TryAdd(cKey, propGen))
+            if (!_theStore.TryAdd(exKey, propGen))
             {
                 throw new ApplicationException("Could not add the new propGen to the store.");
             }
@@ -1135,12 +1136,12 @@ namespace DRM.PropBag
 
         protected PropGen AddProp(string propertyName, IProp genericTypedProp)
         {
-            ulong cKey = GetNewCKey(propertyName);
+            SimpleExKey exKey = GetNewExKey(propertyName);
 
-            PropGen propGen = new PropGen(genericTypedProp, cKey);
+            PropGen propGen = new PropGen(genericTypedProp, exKey);
 
             //tVals.Add(propertyName, propGen);
-            if (!_theStore.TryAdd(cKey, propGen))
+            if (!_theStore.TryAdd(exKey, propGen))
             {
                 throw new ApplicationException("Could not add the new propGen to the store.");
             }
@@ -1254,8 +1255,9 @@ namespace DRM.PropBag
         {
             var theStoreAsCollection = _theStore as ICollection<KeyValuePair<ulong, PropGen>>;
 
+            // TODO: Use the Key from _theStore once the key has been changed to an IExplodedKey.
             IEnumerable<KeyValuePair<string, ValPlusType>> list = theStoreAsCollection.Select(x =>
-            new KeyValuePair<string, ValPlusType>(GetPropNameFromCKey(x.Key), x.Value.ValuePlusType())).ToList();
+            new KeyValuePair<string, ValPlusType>(GetPropNameFromL2Key(x.Value.PropId.Level2Key), x.Value.ValuePlusType())).ToList();
 
             //IEnumerable<KeyValuePair<string, ValPlusType>> list =
             //    tVals.Select(x => new KeyValuePair<string, ValPlusType>(x.Key, x.Value.ValuePlusType())).ToList();
@@ -1280,7 +1282,7 @@ namespace DRM.PropBag
 
             foreach(KeyValuePair<ulong, PropGen> kvp in theStoreAsCollection)
             {
-                result.Add(GetPropNameFromCKey(kvp.Key), kvp.Value.Value);
+                result.Add(GetPropNameFromL2Key(kvp.Value.PropId.Level2Key), kvp.Value.Value);
             }
             return result;
         }
@@ -1295,7 +1297,7 @@ namespace DRM.PropBag
             //}
 
             var theStoreAsDict = _theStore as IDictionary<ulong, PropGen>;
-            List<string> result = theStoreAsDict.Select(x => GetPropNameFromCKey(x.Key)).ToList();
+            List<string> result = theStoreAsDict.Select(x => GetPropNameFromL2Key(x.Value.PropId.Level2Key)).ToList();
             return result;
         }
 
@@ -1438,7 +1440,7 @@ namespace DRM.PropBag
 
         //private IPropPrivate<T> CheckTypeInfo<T>(PropGen genProp, string propertyName, IDictionary<string, PropGen> dict)
 
-        private IPropPrivate<T> CheckTypeInfo<T>(PropGen genProp, string propertyName, IDictionary<ulong, PropGen> dict)
+        private IPropPrivate<T> CheckTypeInfo<T>(PropGen genProp, string propertyName, IDictionary<SimpleExKey, PropGen> dict)
         {
             if (!genProp.TypedProp.TypeIsSolid)
             {
@@ -1565,35 +1567,32 @@ namespace DRM.PropBag
 
         #region Composite Key Support
 
-        private string GetPropNameFromCKey(ulong cKey)
+        private string GetPropNameFromL2Key(uint l2Key)
         {
-            ulong objectId = _compKeyManager.Split(cKey, out string propertyName);
+            string propertyName = _level2KeyManager.FromCooked(l2Key);
             return propertyName;
         }
 
-        private ulong GetNewCKey(string propertyName)
+        private SimpleExKey GetNewExKey(string propertyName)
         {
-            // Register new propertyName and get a Level2 key.
-            uint l2Key = _level2KeyManager.Add(propertyName);
+            // Register new propertyName and get an exploded key.
+            SimpleExKey exKey = _compKeyManager.Join(_ourObjectId, propertyName);
 
-            // Create a combined (L1) Key
-            ulong cKey = _compKeyManager.Join(_ourObjectId, l2Key);
-
-            return cKey;
+            return exKey;
         }
 
-        protected PropGen GetPropGen<T>(ulong cKey, bool? desiredHasStoreValue)
+        protected PropGen GetPropGen<T>(SimpleExKey exKey, bool? desiredHasStoreValue)
         {
             PropGen genProp;
 
-            if (!_theStore.TryGetValue(cKey, out genProp))
+            if (!_theStore.TryGetValue(exKey, out genProp))
             {
                 throw new KeyNotFoundException("That cKey was not found.");
             }
 
             if (!genProp.IsEmpty && desiredHasStoreValue.HasValue && desiredHasStoreValue.Value != genProp.TypedProp.HasStore)
             {
-                string propertyName = GetPropNameFromCKey(cKey);
+                string propertyName = GetPropNameFromL2Key(exKey.Level2Key);
                 if (desiredHasStoreValue.Value)
                     //Caller needs property to have a backing store.
                     throw new InvalidOperationException(string.Format("Property: {0} has no backing store held by this instance of PropBag. This operation can only be performed on properties for which a backing store is held by this instance.", propertyName));

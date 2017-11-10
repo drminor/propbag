@@ -1,5 +1,5 @@
 ﻿
-using DRM.TypeSafePropertyBag.Fundamentals.ObjectIdDictionary;
+using DRM.TypeSafePropertyBag.Fundamentals;
 
 namespace DRM.TypeSafePropertyBag.EventManagement
 {

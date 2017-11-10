@@ -49,6 +49,11 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
 
         public static bool IsPropBagBased(this Type type)
         {
+            if (type.Name == "PropBag")
+            {
+                return true;
+            }
+
             Type[] interfaces = type.GetInterfaces();
 
             bool result = null != type.GetInterfaces().FirstOrDefault

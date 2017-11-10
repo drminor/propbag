@@ -1,4 +1,4 @@
-﻿using DRM.TypeSafePropertyBag.Fundamentals.ObjectIdDictionary;
+﻿using DRM.TypeSafePropertyBag.Fundamentals;
 using System.Collections.Concurrent;
 
 namespace DRM.TypeSafePropertyBag.EventManagement
@@ -11,13 +11,13 @@ namespace DRM.TypeSafePropertyBag.EventManagement
         const int EXPECTED_NO_OF_OBJECTS = 10000;
 
         private ConcurrentDictionary<uint, CollectionOfSubscriberCollections> _propIndexesByObject;
-        ICKeyMan<ulong, uint, uint, string> _compKeyManager;
+        ICKeyMan<SimpleExKey, ulong, uint, uint, string> _compKeyManager;
 
         #endregion
 
         #region Constructor
 
-        public SimpleSubscriptionManager(ICKeyMan<ulong, uint, uint, string> compKeyManager)
+        public SimpleSubscriptionManager(ICKeyMan<SimpleExKey, ulong, uint, uint, string> compKeyManager)
         {
             _compKeyManager = compKeyManager;
             _propIndexesByObject = new ConcurrentDictionary<uint, CollectionOfSubscriberCollections>
@@ -86,7 +86,8 @@ namespace DRM.TypeSafePropertyBag.EventManagement
 
             CollectionOfSubscriberCollections result = _propIndexesByObject.GetOrAdd
                 (
-                objectKey,
+                key: objectKey,
+                valueFactory:
                     (
                     x => { internalWasAdded = true; return new CollectionOfSubscriberCollections(); }
                     )

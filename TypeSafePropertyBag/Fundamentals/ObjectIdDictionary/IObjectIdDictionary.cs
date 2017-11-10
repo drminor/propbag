@@ -2,8 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace DRM.TypeSafePropertyBag.Fundamentals.ObjectIdDictionary
+namespace DRM.TypeSafePropertyBag.Fundamentals
 {
+
     /// <summary>
     /// 
     /// </summary>
@@ -12,16 +13,16 @@ namespace DRM.TypeSafePropertyBag.Fundamentals.ObjectIdDictionary
     /// <typeparam name="L2T">The type used to  identify a property for a given object using the raw form, usually a numeric type.</typeparam>
     /// <typeparam name="L2TRaw">The type used to identify a property for a given object using the "cooked" form, usually System.String.</typeparam>
     /// <typeparam name="PropDataT">The type used to implement the IPropGen interface.</typeparam>
-    public interface IObjectIdDictionary<CompT, L1T, L2T, L2TRaw, PropDataT>
-        : IDictionary<CompT, PropDataT>, ICollection<KeyValuePair<CompT, PropDataT>>, 
-        IEnumerable<KeyValuePair<CompT, PropDataT>>, IDictionary, ICollection, IEnumerable where PropDataT : IPropGen
+    public interface IObjectIdDictionary<ExKeyT, CompT, L1T, L2T, L2TRaw, PropDataT>
+        : IDictionary<ExKeyT, PropDataT>, ICollection<KeyValuePair<ExKeyT, PropDataT>>, 
+        IEnumerable<KeyValuePair<ExKeyT, PropDataT>>, IDictionary, ICollection, IEnumerable where ExKeyT : IExplodedKey<CompT, L1T, L2T> where PropDataT : IPropGen
     {
         #region ConcurentDictionary Methods
 
-        bool TryAdd(CompT cKey, PropDataT value);
+        bool TryAdd(ExKeyT exKey, PropDataT value);
 
-        PropDataT GetOrAdd(CompT cKey, PropDataT value);
-        PropDataT GetOrAdd(CompT cKey, Func<CompT, PropDataT> valueFactory);
+        PropDataT GetOrAdd(ExKeyT cKey, PropDataT value);
+        PropDataT GetOrAdd(ExKeyT cKey, Func<ExKeyT, PropDataT> valueFactory);
 
         // These are provided by IDictionary
         //bool TryGetValue(CompT key, out TValue value);
@@ -29,11 +30,11 @@ namespace DRM.TypeSafePropertyBag.Fundamentals.ObjectIdDictionary
         //TValue this[CompT key] { get; set; }
 
 
-        bool TryRemove(CompT cKey, out PropDataT value);
+        bool TryRemove(ExKeyT cKey, out PropDataT value);
 
-        bool TryUpdate(CompT key, PropDataT newValue, PropDataT comparisonValue);
-        PropDataT AddOrUpdate(CompT cKey, PropDataT addValue, Func<CompT, PropDataT, PropDataT> updateValueFactory);
-        PropDataT AddOrUpdate(CompT cKey, Func<CompT, PropDataT> addValueFactory, Func<CompT, PropDataT, PropDataT> updateValueFactory);
+        bool TryUpdate(ExKeyT key, PropDataT newValue, PropDataT comparisonValue);
+        PropDataT AddOrUpdate(ExKeyT cKey, PropDataT addValue, Func<ExKeyT, PropDataT, PropDataT> updateValueFactory);
+        PropDataT AddOrUpdate(ExKeyT cKey, Func<ExKeyT, PropDataT> addValueFactory, Func<ExKeyT, PropDataT, PropDataT> updateValueFactory);
 
         #endregion
 
@@ -82,9 +83,9 @@ namespace DRM.TypeSafePropertyBag.Fundamentals.ObjectIdDictionary
         #endregion
     }
 
-    public interface IProvideObjectIds<CompT, L1T, L2T, L2TRaw> : IIssueL1Keys<L1T>
+    public interface IProvideObjectIds<ExKeyT, CompT, L1T, L2T, L2TRaw> : IIssueL1Keys<L1T> where ExKeyT : IExplodedKey<CompT, L1T, L2T>
     {
-        ICKeyMan<CompT, L1T, L2T, L2TRaw> CompKeyManager { get; }
+        ICKeyMan<ExKeyT, CompT, L1T, L2T, L2TRaw> CompKeyManager { get; }
         IL2KeyMan<L2T, L2TRaw> Leve2KeyManager { get; }
     }
 
@@ -93,17 +94,32 @@ namespace DRM.TypeSafePropertyBag.Fundamentals.ObjectIdDictionary
         L1T NextL1Key { get; }
     }
 
-    public interface ICKeyMan<CompT, L1T, L2T, L2TRaw>
+    public interface ICKeyMan<ExKeyT, CompT, L1T, L2T, L2TRaw> where ExKeyT : IExplodedKey<CompT, L1T, L2T>
     {
-        CompT Join(L1T top, L2T bot);
-        L1T Split(CompT cKey, out L2T bot);
+        // Join and split exploded key from L1 and L2
+        ExKeyT Join(L1T top, L2T bot);
+        L1T Split(ExKeyT exKey, out L2T bot);
 
-        IExplodedKey<CompT, L1T, L2T> Join(L1T top, L2TRaw rawBot);
-        L1T Split(CompT cKey, out L2TRaw rawBot);
+        // Join and split exploded key from L1 and L2Raw.
+        ExKeyT Join(L1T top, L2TRaw bot);
+        L1T Split(ExKeyT exKey, out L2TRaw bot);
 
-        bool TryJoin(L1T top, L2TRaw rawBot, out CompT cKey);
+        // Try version of Join
+        bool TryJoin(L1T top, L2TRaw rawBot, out ExKeyT exKey);
 
-        IExplodedKey<CompT, L1T, L2T> Split(CompT cKey);
+        // Try version of Join Comp
+        bool TryJoinComp(L1T top, L2TRaw rawBot, out CompT cKey);
+
+        // Create exploded key from composite key.
+        ExKeyT Split(CompT cKey);
+
+        // Join and split composite key from L1 and L2.
+        CompT JoinComp(L1T top, L2T bot);
+        L1T SplitComp(CompT cKey, out L2T bot);
+
+        // Join and split composite key from L1 and L2Raw.
+        CompT JoinComp(L1T top, L2TRaw rawBot);
+        L1T SplitComp(CompT cKey, out L2TRaw rawBot);
     }
 
     public interface IL2KeyMan<L2T, L2TRaw>
@@ -117,7 +133,7 @@ namespace DRM.TypeSafePropertyBag.Fundamentals.ObjectIdDictionary
         L2T Add(L2TRaw rawBot);
     }
 
-    public interface IExplodedKey<CompT, L1T, L2T>
+    public interface IExplodedKey<CompT, L1T, L2T> 
     {
         CompT CKey { get; }
         L1T Level1Key { get; }

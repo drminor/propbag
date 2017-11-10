@@ -1,4 +1,5 @@
 ﻿using DRM.TypeSafePropertyBag.EventManagement;
+using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -119,7 +120,7 @@ namespace DRM.TypeSafePropertyBag
     /// </summary>
     public interface IPropGen
     {
-        ulong PropId { get; }
+        SimpleExKey PropId { get; }
         bool IsEmpty { get; }
 
         /// <summary>

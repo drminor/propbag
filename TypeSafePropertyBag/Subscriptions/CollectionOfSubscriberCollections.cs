@@ -11,13 +11,13 @@ namespace DRM.TypeSafePropertyBag.EventManagement
         const int PROP_INDEX_CONCURRENCY_LEVEL = 1; // Typical number of threads simultaneously accessing the ObjectIndexes.
         const int EXPECTED_NO_OF_OBJECTS = 50;
 
-        private ConcurrentDictionary<uint, SubscriberCollection> _subPtrs2;
-        private readonly object _sync;
+        private ConcurrentDictionary<uint, SubscriberCollection> _listOfSubscribersForAProp;
+        //private readonly object _sync;
 
         public CollectionOfSubscriberCollections()
         {
-            _sync = new object();
-            _subPtrs2 = new ConcurrentDictionary<uint, SubscriberCollection>
+            //_sync = new object();
+            _listOfSubscribersForAProp = new ConcurrentDictionary<uint, SubscriberCollection>
                 (
                 concurrencyLevel: PROP_INDEX_CONCURRENCY_LEVEL,
                 capacity: EXPECTED_NO_OF_OBJECTS
@@ -28,9 +28,10 @@ namespace DRM.TypeSafePropertyBag.EventManagement
         {
             bool internalWasAdded = false;
 
-            SubscriberCollection result = _subPtrs2.GetOrAdd
+            SubscriberCollection result = _listOfSubscribersForAProp.GetOrAdd
                 (
-                l2Key,
+                key: l2Key,
+                valueFactory:
                     (
                     x => { internalWasAdded = true; return new SubscriberCollection(); }
                     )
@@ -38,31 +39,11 @@ namespace DRM.TypeSafePropertyBag.EventManagement
 
             wasAdded = internalWasAdded;
             return result;
-
-            //lock (_sync)
-            //{
-            //    if (_subPtrs2.TryGetValue(l2Key, out SubscriberCollection sc))
-            //    {
-            //        return sc;
-            //    }
-            //    else
-            //    {
-            //        SubscriberCollection result = new SubscriberCollection();
-            //        if(_subPtrs2.TryAdd(l2Key, result))
-            //        {
-            //            return result;
-            //        }
-            //        else
-            //        {
-            //            throw new InvalidOperationException($"Could not add freshly created SubscriberCollection for {l2Key}.");
-            //        }
-            //    }
-            //}
         }
 
         public bool RemoveListOfSubscriptionPtrs(uint l2Key)
         {
-            if(_subPtrs2.TryRemove(l2Key, out SubscriberCollection sc))
+            if(_listOfSubscribersForAProp.TryRemove(l2Key, out SubscriberCollection sc))
             {
                 return true;
             }
@@ -74,14 +55,14 @@ namespace DRM.TypeSafePropertyBag.EventManagement
 
         public bool ContainsTheListOfSubscriptionPtrs(uint l2Key)
         {
-            bool result =_subPtrs2.ContainsKey(l2Key);
+            bool result =_listOfSubscribersForAProp.ContainsKey(l2Key);
             return result;
         }
 
         public int ClearTheListOfSubscriptionPtrs()
         {
-            int result = _subPtrs2.Count;
-            _subPtrs2.Clear();
+            int result = _listOfSubscribersForAProp.Count;
+            _listOfSubscribersForAProp.Clear();
 
             return result;
         }
