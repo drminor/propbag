@@ -14,12 +14,12 @@ namespace DRM.TypeSafePropertyBag.EventManagement
     /// </summary>
     /// <typeparam name="CompT">The type of the composite key for property objects.</typeparam>
     /// <typeparam name="PropDataT">The type used to cary instances of IPropGen.</typeparam>
-    public interface ICacheSubscriptions<CompT, PropDataT>
+    public interface ICacheSubscriptions<ExKeyT, CompT, L1T, L2T, PropDataT> where ExKeyT : IExplodedKey<CompT, L1T,L2T>
     {
         ISubscriptionGen AddSubscription(ISubscriptionKeyGen subscriptionRequest, out bool wasAdded);
         bool RemoveSubscription(ISubscriptionKeyGen subscriptionRequest);
 
-        SubscriberCollection GetSubscriptions(IExplodedKey<ulong, uint, uint> exKey);
+        SubscriberCollection GetSubscriptions(ExKeyT exKey);
 
     }
 }

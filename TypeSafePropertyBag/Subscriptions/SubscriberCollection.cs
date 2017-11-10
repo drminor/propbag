@@ -97,7 +97,7 @@ namespace DRM.TypeSafePropertyBag.EventManagement
         {
             lock (_sync)
             {
-                subscription = _subs.FirstOrDefault((x => x.ExKey.Level2Key == l2Key));
+                subscription = _subs.FirstOrDefault((x => x.SourcePropId.Level2Key == l2Key));
             }
 
             if(subscription == null)

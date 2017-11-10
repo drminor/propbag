@@ -11,6 +11,8 @@ namespace DRM.TypeSafePropertyBag.EventManagement
         TypedAction,
         ObjectAction,
 
-        ActionNoParams // Used by the IDisposable implementation.
+        ActionNoParams, // Used by the IDisposable implementation.
+
+        LocalBinding
     }
 }

@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 
 namespace DRM.TypeSafePropertyBag.EventManagement
 {
-    public class SimpleSubscriptionManager<PropDataT> : ICacheSubscriptions<ulong, PropDataT> where PropDataT : IPropGen
+    public class SimpleSubscriptionManager<PropDataT> : ICacheSubscriptions<SimpleExKey, ulong, uint, uint, PropDataT> where PropDataT : IPropGen
     {
         #region Private Members
 
@@ -59,7 +59,7 @@ namespace DRM.TypeSafePropertyBag.EventManagement
             return result;
         }
 
-        public SubscriberCollection GetSubscriptions(IExplodedKey<ulong, uint, uint> exKey)
+        public SubscriberCollection GetSubscriptions(SimpleExKey exKey)
         {
             CollectionOfSubscriberCollections propIndex = GetPropIndexForObject(exKey.Level1Key, out bool propIndexWasCreated);
             if(propIndexWasCreated)
