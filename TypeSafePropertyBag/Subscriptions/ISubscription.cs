@@ -11,7 +11,8 @@ namespace DRM.TypeSafePropertyBag.EventManagement
     /// <typeparam name="T">The type of the property to which this subscription will subscribe.</typeparam>
     public interface IBindingSubscription<T> : ISubscription<T>
     {
-        IExplodedKey<ulong, uint, uint> TargetPropId { get; }
+        SimpleExKey TargetPropId { get; }
+        LocalBindingInfo BindingInfo { get; }
     }
 
     /// <summary>
@@ -28,7 +29,7 @@ namespace DRM.TypeSafePropertyBag.EventManagement
 
     public interface ISubscriptionGen
     {
-        IExplodedKey<ulong, uint, uint> SourcePropId { get; }
+        SimpleExKey SourcePropId { get; }
         Type PropertyType { get; }
 
         SubscriptionKind SubscriptionKind { get; }

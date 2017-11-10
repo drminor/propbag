@@ -1,53 +1,53 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using DRM.TypeSafePropertyBag.Fundamentals;
+﻿using DRM.TypeSafePropertyBag.Fundamentals;
+using System;
 
 namespace DRM.TypeSafePropertyBag.EventManagement
 {
     public class AbstractLocalBinder<PropDataT> : IBindLocalProps<PropDataT> where PropDataT : IPropGen
     {
-        private SimpleLevel2KeyMan _level2KeyManager;
-        private SimpleCompKeyMan _compKeyManager;
-        private readonly SimpleObjectIdDictionary<PropDataT> _propertyStore;
+        //private SimpleLevel2KeyMan _level2KeyManager;
+        //private SimpleCompKeyMan _compKeyManager;
+        //private readonly SimpleObjectIdDictionary<PropDataT> _propertyStore;
 
-        public AbstractLocalBinder
-            (
-            SimpleObjectIdDictionary<PropDataT> propertyStore,
-            SimpleCompKeyMan compKeyManager,
-            SimpleLevel2KeyMan level2KeyManager
-            ) 
-        {
-            _propertyStore = propertyStore;
-            _compKeyManager = compKeyManager;
-            _level2KeyManager = level2KeyManager;
-        }
+        //public AbstractLocalBinder
+        //    (
+        //    SimpleObjectIdDictionary<PropDataT> propertyStore,
+        //    SimpleCompKeyMan compKeyManager,
+        //    SimpleLevel2KeyMan level2KeyManager
+        //    )
+        //{
+        //    _propertyStore = propertyStore;
+        //    _compKeyManager = compKeyManager;
+        //    _level2KeyManager = level2KeyManager;
+        //}
 
-        public PropDataT GetPropData(SimpleExKey propId)
-        {
-            return default(PropDataT);
-        }
+        //// We should get rid of this -- the caller can use her own reference to the propertyStore.
+        //public bool TryGetPropData(SimpleExKey propId, out PropDataT propData)
+        //{
+        //    uint PropBagObjectId = _compKeyManager.SplitComp(propId.CKey, out string propertyName);
+        //    if(_propertyStore.TryGetValue(propId, out propData))
+        //    {
+        //        return true;
+        //    }
+        //    else
+        //    {
+        //        return false;
+        //    }
+        //}
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="T">The type of the binding's source property.</typeparam>
-        /// <param name="targetPropId"></param>
-        /// <param name="oldValue"></param>
-        /// <param name="newValue"></param>
-        /// <returns></returns>
-        public int UpdateTarget<T>(SimpleExKey targetPropId, T oldValue, T newValue)
+        public void UpdateTarget<T>(/*IPropBag sourceHost, */BindingSubscription<T> bs, T oldValue, T newValue, ref int counter)
         {
-            return 0;
-        }
+            // Get the target
+            Action<T, T> originalAction = bs.TypedDoWhenChanged;
+            IPropBag target = (IPropBag)originalAction.Target;
 
-        public int UpdateTarget<T>(IPropBag sourceHost, BindingSubscription<T> bs, T oldValue, T newValue)
-        {
-            //bs.TypedDoWhenChanged.t
-            return 0;
+            // Use the target property key from the BindingSubscription
+            SimpleExKey targetPropId = bs.TargetPropId;
+            bool result = target.SetIt<T>(newValue, targetPropId);
+
+            // Let the caller know that one more binding target was updated.
+            if (result)
+                counter++;
         }
 
     }

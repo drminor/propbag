@@ -4,7 +4,7 @@ namespace DRM.TypeSafePropertyBag.EventManagement
 {
     public interface IBindLocalProps<PropDataT> where PropDataT : IPropGen
     {
-        PropDataT GetPropData(SimpleExKey propId);
-        int UpdateTarget<T>(SimpleExKey targetPropId, T oldValue, T newValue);
+        //bool TryGetPropData(SimpleExKey propId, out PropDataT propData);
+        void UpdateTarget<T>(/*IPropBag sourceHost, */BindingSubscription<T> bs, T oldValue, T newValue, ref int counter);
     }
 }

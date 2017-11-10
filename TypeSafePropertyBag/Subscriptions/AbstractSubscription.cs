@@ -15,7 +15,7 @@ namespace DRM.TypeSafePropertyBag.EventManagement
 
         #region ISubscription Implementation
 
-        public IExplodedKey<ulong, uint, uint> SourcePropId { get; protected set; }
+        public SimpleExKey SourcePropId { get; protected set; }
 
         public SubscriptionKind SubscriptionKind { get; protected set; }
         public SubscriptionTargetKind SubscriptionTargetKind { get; protected set; }

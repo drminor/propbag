@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DRM.TypeSafePropertyBag.Fundamentals;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 
@@ -31,6 +32,7 @@ namespace DRM.TypeSafePropertyBag
 
         bool SetValWithNoType(string propertyName, object value);
         bool SetIt<T>(T newValue, ref T curValue, string propertyName);
+        bool SetIt<T>(T value, SimpleExKey propId);
 
         bool PropertyExists(string propertyName);
         bool TryGetPropType(string propertyName, out PropKindEnum propType);

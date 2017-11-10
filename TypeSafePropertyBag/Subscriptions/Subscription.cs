@@ -1,7 +1,4 @@
-﻿using DRM.TypeSafePropertyBag.Fundamentals;
-using System;
-using System.ComponentModel;
-
+﻿
 namespace DRM.TypeSafePropertyBag.EventManagement
 {
     public class Subscription<T> : AbstractSubscripton<T>
@@ -15,7 +12,7 @@ namespace DRM.TypeSafePropertyBag.EventManagement
 
         #region ISubscription Implementation
 
-        //public IExplodedKey<ulong, uint, uint> ExKey { get; }
+        //public IExplodedKey<ulong, uint, uint> SourcePropId { get; protected set; }
 
         //public SubscriptionKind SubscriptionKind { get; }
         //public SubscriptionTargetKind SubscriptionTargetKind { get; }
@@ -36,7 +33,7 @@ namespace DRM.TypeSafePropertyBag.EventManagement
         // TODO: Consider adding additional constructors, very similar to the ones on SubscriptionKey.
         public Subscription(ISubscriptionKey<T> sKey)
         {
-            SourcePropId = sKey.ExKey;
+            SourcePropId = sKey.SourcePropId;
             TypedHandler = sKey.TypedHandler;
             GenHandler = sKey.GenHandler;
             StandardHandler = sKey.StandardHandler;

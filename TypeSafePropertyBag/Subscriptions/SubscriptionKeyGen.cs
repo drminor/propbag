@@ -16,7 +16,7 @@ namespace DRM.TypeSafePropertyBag.EventManagement
 
         #region Public Members
 
-        public IExplodedKey<ulong, uint, uint> ExKey { get; }
+        public SimpleExKey SourcePropId { get; }
 
         public SubscriptionKind SubscriptionKind { get; }
         public SubscriptionTargetKind SubscriptionTargetKind { get; }
@@ -40,10 +40,10 @@ namespace DRM.TypeSafePropertyBag.EventManagement
         #region Constructors
 
         // Standard PropertyChanged
-        protected SubscriptionKeyGen(SimpleExKey exKey, EventHandler<PropertyChangedEventArgs> standardDelegate,
+        protected SubscriptionKeyGen(SimpleExKey sourcePropId, EventHandler<PropertyChangedEventArgs> standardDelegate,
             SubscriptionPriorityGroup subscriptionPriorityGroup, bool keepRef, Func<ISubscriptionKeyGen, ISubscriptionGen> subscriptionCreator)
         {
-            ExKey = exKey;
+            SourcePropId = sourcePropId;
             SubscriptionKind = SubscriptionKind.StandardHandler;
             SubscriptionPriorityGroup = subscriptionPriorityGroup;
 
@@ -60,10 +60,10 @@ namespace DRM.TypeSafePropertyBag.EventManagement
         }
 
         // PCGenEventArgs
-        protected SubscriptionKeyGen(SimpleExKey exKey, EventHandler<PCGenEventArgs> genDelegate,
+        protected SubscriptionKeyGen(SimpleExKey sourcePropId, EventHandler<PCGenEventArgs> genDelegate,
             SubscriptionPriorityGroup subscriptionPriorityGroup, bool keepRef, Func<ISubscriptionKeyGen, ISubscriptionGen> subscriptionCreator)
         {
-            ExKey = exKey;
+            SourcePropId = sourcePropId;
             SubscriptionKind = SubscriptionKind.StandardHandler;
             SubscriptionPriorityGroup = subscriptionPriorityGroup;
 
@@ -81,10 +81,10 @@ namespace DRM.TypeSafePropertyBag.EventManagement
         }
 
         // Target and Method. Also used for TypeDelegate and TypedAction.
-        protected SubscriptionKeyGen(SimpleExKey exKey, object target, MethodInfo method,
+        protected SubscriptionKeyGen(SimpleExKey sourcePropId, object target, MethodInfo method,
             SubscriptionKind kind, SubscriptionPriorityGroup subscriptionPriorityGroup, bool keepRef, Func<ISubscriptionKeyGen, ISubscriptionGen> subscriptionCreator)
         {
-            ExKey = exKey;
+            SourcePropId = sourcePropId;
             SubscriptionKind = kind;
             SubscriptionPriorityGroup = subscriptionPriorityGroup;
 
@@ -102,10 +102,10 @@ namespace DRM.TypeSafePropertyBag.EventManagement
         }
 
         // Action<object, object>
-        protected SubscriptionKeyGen(SimpleExKey exKey, Action<object, object> genAction,
+        protected SubscriptionKeyGen(SimpleExKey sourcePropId, Action<object, object> genAction,
             SubscriptionPriorityGroup subscriptionPriorityGroup, bool keepRef, Func<ISubscriptionKeyGen, ISubscriptionGen> subscriptionCreator)
         {
-            ExKey = exKey;
+            SourcePropId = sourcePropId;
             SubscriptionKind = SubscriptionKind.ObjectAction;
             SubscriptionPriorityGroup = subscriptionPriorityGroup;
 
@@ -123,10 +123,10 @@ namespace DRM.TypeSafePropertyBag.EventManagement
         }
 
         // ActionNoParams 
-        protected SubscriptionKeyGen(SimpleExKey exKey, Action action,
+        protected SubscriptionKeyGen(SimpleExKey sourcePropId, Action action,
             SubscriptionPriorityGroup subscriptionPriorityGroup, bool keepRef, Func<ISubscriptionKeyGen, ISubscriptionGen> subscriptionCreator)
         {
-            ExKey = exKey;
+            SourcePropId = sourcePropId;
             SubscriptionKind = SubscriptionKind.ActionNoParams;
             SubscriptionPriorityGroup = subscriptionPriorityGroup;
 
@@ -183,7 +183,7 @@ namespace DRM.TypeSafePropertyBag.EventManagement
         public bool Equals(SubscriptionKeyGen other)
         {
             return other != null &&
-                   ExKey == other.ExKey &&
+                   SourcePropId == other.SourcePropId &&
                    EqualityComparer<object>.Default.Equals(Target, other.Target) &&
                    EqualityComparer<MethodInfo>.Default.Equals(Method, other.Method);
         }
@@ -191,7 +191,7 @@ namespace DRM.TypeSafePropertyBag.EventManagement
         public override int GetHashCode()
         {
             var hashCode = 1273468457;
-            hashCode = hashCode * -1521134295 + ExKey.GetHashCode();
+            hashCode = hashCode * -1521134295 + SourcePropId.GetHashCode();
             hashCode = hashCode * -1521134295 + EqualityComparer<object>.Default.GetHashCode(Target);
             hashCode = hashCode * -1521134295 + EqualityComparer<MethodInfo>.Default.GetHashCode(Method);
             return hashCode;

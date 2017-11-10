@@ -5,6 +5,12 @@ using System.Reflection;
 
 namespace DRM.TypeSafePropertyBag.EventManagement
 {
+    public interface IBindingSubscriptionKey<T> : ISubscriptionKey<T>
+    {
+        SimpleExKey TargetPropId { get; }
+        LocalBindingInfo BindingInfo { get; }
+    }
+
     public interface ISubscriptionKey<T> : ISubscriptionKeyGen
     {
         EventHandler<PCTypedEventArgs<T>> TypedHandler { get; }
@@ -18,7 +24,7 @@ namespace DRM.TypeSafePropertyBag.EventManagement
     /// </summary>
     public interface ISubscriptionKeyGen
     {
-        IExplodedKey<ulong, uint, uint> ExKey { get; }
+        SimpleExKey SourcePropId { get; }
 
         SubscriptionKind SubscriptionKind { get; }
         SubscriptionTargetKind SubscriptionTargetKind { get; }

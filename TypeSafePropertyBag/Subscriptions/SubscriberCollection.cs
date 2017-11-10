@@ -21,9 +21,9 @@ namespace DRM.TypeSafePropertyBag.EventManagement
         {
             lock (_sync)
             {
-                if (TryGetSubscription(subscriptionKey.ExKey.Level2Key, out ISubscriptionGen subscription))
+                if (TryGetSubscription(subscriptionKey.SourcePropId.Level2Key, out ISubscriptionGen subscription))
                 {
-                    System.Diagnostics.Debug.WriteLine($"The subscription for {subscriptionKey.ExKey} has aleady been created.");
+                    System.Diagnostics.Debug.WriteLine($"The subscription for {subscriptionKey.SourcePropId} has aleady been created.");
                     return subscription;
                 }
                 else

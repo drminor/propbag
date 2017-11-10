@@ -143,7 +143,7 @@ namespace DRM.PropBag
 
             _subscriptionManager = new SimpleSubscriptionManager<PropGen>(_compKeyManager);
 
-            _localBinder = new SimpleLocalBinder<PropGen>(_theStore, _compKeyManager, _level2KeyManager);
+            _localBinder = new SimpleLocalBinder<PropGen>(/*_theStore, _compKeyManager, _level2KeyManager*/);
 
             //tVals = new Dictionary<string, PropGen>();
         }
@@ -1297,12 +1297,13 @@ namespace DRM.PropBag
                     out IEnumerable<ISubscriptionGen> localBindings
                     );
 
+                int counter = 0;
                 // Use Default(T) for old value.
                 foreach (ISubscriptionGen x in localBindings)
                 {
                     BindingSubscription<T> typedBs = (BindingSubscription<T>)x;
 
-                    _localBinder.UpdateTarget<T>(this, typedBs, default(T), newValue);
+                    _localBinder.UpdateTarget<T>(/*(IPropBag)this, */typedBs, default(T), newValue, ref counter);
 
                 }
                 // END PROCESS BINDINGS
@@ -1345,11 +1346,11 @@ namespace DRM.PropBag
                 out IEnumerable<ISubscriptionGen> localBindings
                 );
 
-            // Use Default(T) for old value.
+            int counter = 0;
             foreach (ISubscriptionGen x in localBindings)
             {
                 BindingSubscription<T> typedBs = (BindingSubscription<T>)x;
-                _localBinder.UpdateTarget<T>(this, typedBs, oldVal, newValue);
+                _localBinder.UpdateTarget<T>(typedBs, oldVal, newValue, ref counter);
             }
             // END PROCESS BINDINGS
 

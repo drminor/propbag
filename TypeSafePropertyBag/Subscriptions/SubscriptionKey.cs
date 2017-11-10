@@ -1,7 +1,6 @@
 ﻿using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
 using System.ComponentModel;
-using System.Reflection;
 
 namespace DRM.TypeSafePropertyBag.EventManagement
 {

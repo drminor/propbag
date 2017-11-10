@@ -8,11 +8,11 @@ namespace DRM.TypeSafePropertyBag.EventManagement
         // TODO: let's see if we can avoid using one or more of the dependencies!
         public SimpleLocalBinder
             (
-            SimpleObjectIdDictionary<PropDataT> propertyStore,
-            SimpleCompKeyMan compKeyManager,
-            SimpleLevel2KeyMan level2KeyManager
+            //SimpleObjectIdDictionary<PropDataT> propertyStore,
+            //SimpleCompKeyMan compKeyManager,
+            //SimpleLevel2KeyMan level2KeyManager
             )
-            : base(propertyStore, compKeyManager, level2KeyManager)
+            //: base(propertyStore, compKeyManager, level2KeyManager)
         {
         }
 

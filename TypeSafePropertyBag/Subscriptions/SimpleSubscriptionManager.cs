@@ -30,7 +30,7 @@ namespace DRM.TypeSafePropertyBag.EventManagement
 
         public ISubscriptionGen AddSubscription(ISubscriptionKeyGen subscriptionRequest, out bool wasAdded)
         {
-            SubscriberCollection sc = GetSubscriptions((SimpleExKey) subscriptionRequest.ExKey);
+            SubscriberCollection sc = GetSubscriptions((SimpleExKey) subscriptionRequest.SourcePropId);
 
             bool internalWasAdded = false;
 
@@ -44,7 +44,7 @@ namespace DRM.TypeSafePropertyBag.EventManagement
 
             if(internalWasAdded)
             {
-                System.Diagnostics.Debug.WriteLine($"Created a new Subscription for Property: {subscriptionRequest.ExKey} / Event: {result.SubscriptionKind}.");
+                System.Diagnostics.Debug.WriteLine($"Created a new Subscription for Property: {subscriptionRequest.SourcePropId} / Event: {result.SubscriptionKind}.");
             }
 
             wasAdded = internalWasAdded;
@@ -54,8 +54,8 @@ namespace DRM.TypeSafePropertyBag.EventManagement
 
         public bool RemoveSubscription(ISubscriptionKeyGen subscriptionRequest)
         {
-            SubscriberCollection sc = GetSubscriptions((SimpleExKey)subscriptionRequest.ExKey);
-            bool result = sc.RemoveSubscription(subscriptionRequest.ExKey);
+            SubscriberCollection sc = GetSubscriptions((SimpleExKey)subscriptionRequest.SourcePropId);
+            bool result = sc.RemoveSubscription(subscriptionRequest.SourcePropId);
             return result;
         }
 

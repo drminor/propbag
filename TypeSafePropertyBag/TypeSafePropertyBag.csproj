@@ -89,6 +89,7 @@
     <Compile Include="ResolveTypeDelegate.cs" />
     <Compile Include="Fundamentals\TypedWeakReference.cs" />
     <Compile Include="Fundamentals\TypeExtension.cs" />
+    <Compile Include="Subscriptions\SubscriptionKeyForBinding.cs" />
     <Compile Include="Subscriptions\SubscriptionKeyGen.cs" />
     <Compile Include="Subscriptions\SubscriptionKey.cs" />
     <Compile Include="Subscriptions\SubscriptionKind.cs" />
