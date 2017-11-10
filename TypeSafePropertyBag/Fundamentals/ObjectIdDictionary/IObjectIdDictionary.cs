@@ -64,17 +64,17 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
 
         #region Level 2 Raw
 
-        bool TryAdd(L1T top, L2TRaw rawBot, PropDataT value);
-        PropDataT GetOrAdd(L1T top, L2TRaw rawBot, PropDataT value);
+        //bool TryAdd(L1T top, L2TRaw rawBot, PropDataT value);
+        //PropDataT GetOrAdd(L1T top, L2TRaw rawBot, PropDataT value);
 
-        //TValue GetOrAdd(L1T top, L2TRaw rawBot, Func<L2TRaw rawBot, TValue> valueFactory);
+        ////TValue GetOrAdd(L1T top, L2TRaw rawBot, Func<L2TRaw rawBot, TValue> valueFactory);
 
-        bool TryGetValue(L1T top, L2TRaw rawBot, out PropDataT value);
-        bool ContainsKey(L1T top, L2TRaw rawBot);
-        //TValue thisL1T top, L2TRaw rawBot] { get; set; }
+        //bool TryGetValue(L1T top, L2TRaw rawBot, out PropDataT value);
+        //bool ContainsKey(L1T top, L2TRaw rawBot);
+        ////TValue thisL1T top, L2TRaw rawBot] { get; set; }
 
 
-        bool TryRemove(L1T top, L2TRaw rawBot, out PropDataT value);
+        //bool TryRemove(L1T top, L2TRaw rawBot, out PropDataT value);
 
         //bool TryUpdate(L1T top, L2TRaw rawBot, TValue newValue, TValue comparisonValue);
         //TValue AddOrUpdate(L1T top, L2TRaw rawBot, TValue addValue, Func<L1T top, L2TRaw rawBot, TValue, TValue> updateValueFactory);
@@ -108,7 +108,7 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
         bool TryJoin(L1T top, L2TRaw rawBot, out ExKeyT exKey);
 
         // Try version of Join Comp
-        bool TryJoinComp(L1T top, L2TRaw rawBot, out CompT cKey);
+        bool TryJoinComp(L1T top, L2TRaw rawBot, out CompT cKey, out L2T bot);
 
         // Create exploded key from composite key.
         ExKeyT Split(CompT cKey);

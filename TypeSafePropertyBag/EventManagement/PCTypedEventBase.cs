@@ -3,14 +3,14 @@ using System.Threading;
 
 namespace DRM.TypeSafePropertyBag.EventManagement
 {
-    public class PCTypedEventBase<T> : INotifyPCTyped<T>
+    public class PCTypedEventBase<TPropData, T> : INotifyPCTyped<T> where TPropData : IPropGen
     {
         //object _evLock;
         //private event EventHandler<PCTypedEventArgs<T>> _privateEvent;
 
-        SimpleSubscriptionManager<IPropGen> _subscriptionManager;
+        SimpleSubscriptionManager<TPropData> _subscriptionManager;
 
-        public PCTypedEventBase(SimpleSubscriptionManager<IPropGen> subscriptionManager)
+        public PCTypedEventBase(SimpleSubscriptionManager<TPropData> subscriptionManager)
         {
             //_evLock = new object();
             //_privateEvent = delegate { };

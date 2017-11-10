@@ -26,7 +26,9 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
         //ExKeyT Join(L1T top, L2T bot);
         public SimpleExKey Join(uint top, uint bot)
         {
-            throw new NotImplementedException();
+            ulong ckey = JoinComp(top, bot);
+            SimpleExKey result = new SimpleExKey(ckey, top, bot);
+            return result;
         }
 
         //L1T Split(ExKeyT exKey, out L2T bot);
@@ -56,13 +58,22 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
         //bool TryJoin(L1T top, L2TRaw rawBot, out ExKeyT exKey);
         public bool TryJoin(uint top, string rawBot, out SimpleExKey exKey)
         {
-            throw new NotImplementedException();
+            if(TryJoinComp(top, rawBot, out ulong cKey, out uint bot))
+            {
+                exKey = new SimpleExKey(cKey, top, bot);
+                return true;
+            }
+            else
+            {
+                exKey = new SimpleExKey();
+                return false;
+            }
         }
 
         // Try version of Join Comp
-        public bool TryJoinComp(uint top, string rawBot, out ulong cKey)
+        public bool TryJoinComp(uint top, string rawBot, out ulong cKey, out uint bot)
         {
-            if (Level2KeyMan.TryGetFromRaw(rawBot, out uint bot))
+            if (Level2KeyMan.TryGetFromRaw(rawBot, out bot))
             {
                 cKey = JoinComp(top, Level2KeyMan.FromRaw(rawBot));
                 return true;
