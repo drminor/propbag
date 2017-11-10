@@ -1,14 +1,13 @@
 ﻿
-using System.Reflection;
 using DRM.PropBag;
 using DRM.TypeSafePropertyBag;
 using System;
 using System.Collections.Generic;
-
+using System.Reflection;
 
 namespace PropBagLib.Tests
 {
-	public partial class PubPropBagModel : PubPropBag
+    public partial class PubPropBagModel : PubPropBag
 	{
 		public PubPropBagModel() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered, null) { }
 

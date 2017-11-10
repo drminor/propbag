@@ -1,14 +1,14 @@
 ﻿
-using System.Reflection;
 using DRM.PropBag;
 using DRM.TypeSafePropertyBag;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 
 namespace PropBagLib.Tests
 {
-	public partial class AllPropsRegisteredModel : PropBag
+    public partial class AllPropsRegisteredModel : PropBag
 	{
 		public AllPropsRegisteredModel() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered, null) { }
 

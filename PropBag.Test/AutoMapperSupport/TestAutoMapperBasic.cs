@@ -5,6 +5,7 @@ using DRM.TypeSafePropertyBag;
 using NUnit.Framework;
 using System;
 
+
 namespace PropBagLib.Tests.AutoMapperSupport
 {
     [TestFixtureAttribute]

@@ -1,5 +1,4 @@
-﻿using DRM.PropBag;
-using DRM.TypeSafePropertyBag;
+﻿using DRM.TypeSafePropertyBag;
 using NUnit.Framework;
 using System;
 

@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-
-using NUnit.Framework;
-
-
-using DRM.PropBag;
+﻿
 using DRM.TypeSafePropertyBag;
+using NUnit.Framework;
 
 namespace PropBagLib.Tests
 {
-
-
     [TestFixtureAttribute]
     public class TestPerformance
     {

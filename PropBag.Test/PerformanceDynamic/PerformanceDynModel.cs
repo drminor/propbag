@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 using System.ComponentModel;
 
 using DRM.TypeSafePropertyBag;
-using DRM.PropBag;
+using DRM.PropBag; using DRM.TypeSafePropertyBag;
 
 namespace PropBagLib.Tests
 {

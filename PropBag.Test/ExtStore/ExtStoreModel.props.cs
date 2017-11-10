@@ -1,14 +1,13 @@
 ﻿
-using System.Reflection;
 using DRM.PropBag;
 using DRM.TypeSafePropertyBag;
 using System;
-using System.Collections.Generic;
+using System.Reflection;
 
 
 namespace PropBagLib.Tests
 {
-	public partial class ExtStoreModel : PropBag
+    public partial class ExtStoreModel : PropBag
 	{
 		public ExtStoreModel() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered, null) { }
 
