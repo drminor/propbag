@@ -1,4 +1,6 @@
-﻿namespace DRM.PropBag.AutoMapperSupport
+﻿using DRM.TypeSafePropertyBag;
+
+namespace DRM.PropBag.AutoMapperSupport
 {
     public interface IProvideAMapperConfiguration
     {

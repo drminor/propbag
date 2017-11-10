@@ -2,6 +2,8 @@
 using DRM.TypeWrapper.TypeDesc;
 using DRM.ViewModelTools;
 
+using DRM.TypeSafePropertyBag;
+
 namespace DRM.PropBag.AutoMapperSupport
 {
     public class SimplePropBagMapperBuilderProvider : IPropBagMapperBuilderProvider

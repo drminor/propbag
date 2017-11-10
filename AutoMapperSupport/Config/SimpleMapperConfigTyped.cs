@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBag.AutoMapperSupport
 {

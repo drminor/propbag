@@ -3,6 +3,8 @@ using DRM.PropBag.ControlModel;
 using DRM.ViewModelTools;
 using System;
 
+using DRM.TypeSafePropertyBag;
+
 namespace DRM.PropBag.AutoMapperSupport
 {
     public class SimplePropBagMapperBuilder<TSource, TDestination> : IBuildPropBagMapper<TSource, TDestination> where TDestination : class, IPropBag

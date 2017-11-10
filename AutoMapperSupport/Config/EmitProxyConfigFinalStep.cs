@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using DRM.PropBag.ControlModel;
 using System;
+using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
