@@ -488,29 +488,6 @@ namespace DRM.PropBag
                 doWhenChangedX, doAfterNotify, GetComparerForProps<T>(comparer, propFactory, useRefEquality));
         }
 
-        // TODO: Consider caching the delegates created here, or having creating a new delegate
-        // that calls the first.
-
-        // Also remember that if the source delegate has multiple targets that the Target and Method properties only return the values for the last target in the invocation list. 
-        private static EventHandler<PCTypedEventArgs<T>> GetTypedDoWhenChanged<T>(EventHandler<PCGenEventArgs> doWhenChanged)
-        {
-            EventHandler<PCTypedEventArgs<T>> result;
-            if (doWhenChanged == null)
-            {
-                result = null;
-            }
-            else
-            {
-                result = (EventHandler<PCTypedEventArgs<T>>)Delegate.CreateDelegate(typeof(
-                    EventHandler<PCTypedEventArgs<T>>), doWhenChanged.Target, doWhenChanged.Method);
-
-                // This creates a new delegate which calls the first one.
-                //var x = new EventHandler<PropertyChangedWithTValsEventArgs<T>>(doWhenChanged);
-
-            }
-            return result;
-        }
-
         // With No Value
         private static IProp<T> CreatePropWithNoValue<T>(IPropFactory propFactory,
             string propertyName, object extraInfo,
@@ -538,6 +515,30 @@ namespace DRM.PropBag
                 return (Func<T, T, bool>)comparer;
             }
         }
+
+        // TODO: Consider caching the delegates created here, or having creating a new delegate
+        // that calls the first.
+
+        // Also remember that if the source delegate has multiple targets that the Target and Method properties only return the values for the last target in the invocation list. 
+        private static EventHandler<PCTypedEventArgs<T>> GetTypedDoWhenChanged<T>(EventHandler<PCGenEventArgs> doWhenChanged)
+        {
+            EventHandler<PCTypedEventArgs<T>> result;
+            if (doWhenChanged == null)
+            {
+                result = null;
+            }
+            else
+            {
+                result = (EventHandler<PCTypedEventArgs<T>>)Delegate.CreateDelegate(typeof(
+                    EventHandler<PCTypedEventArgs<T>>), doWhenChanged.Target, doWhenChanged.Method);
+
+                // This creates a new delegate which calls the first one.
+                //var x = new EventHandler<PropertyChangedWithTValsEventArgs<T>>(doWhenChanged);
+
+            }
+            return result;
+        }
+
         #endregion
     }
 }

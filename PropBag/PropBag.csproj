@@ -41,17 +41,6 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="EventManagement\IEventManager.cs" />
-    <Compile Include="EventManagement\IPCEventManager.cs" />
-    <Compile Include="EventManagement\AbstractPCEventManager.cs" />
-    <Compile Include="EventManagement\IProvideAnEventManager.cs" />
-    <None Include="EventManagement\PCTypedEventBase_OLD.cs" />
-    <Compile Include="EventManagement\SimplePCEventManager.cs" />
-    <Compile Include="LocalBinding\ILocalValueConverter.cs" />
-    <Compile Include="LocalBinding\LocalBindingMode.cs" />
-    <Compile Include="LocalBinding\LocalBindingOps.cs" />
-    <Compile Include="LocalBinding\LocalBindingInfo.cs" />
-    <Compile Include="LocalBinding\LocalPropertyPath.cs" />
     <Compile Include="ObjectIdIssuer.cs" />
     <Compile Include="ControlModel\DeriveFromClassField_NotUsed.cs" />
     <Compile Include="ControlModel\DeriveFromClassModeEnum.cs" />
@@ -75,8 +64,6 @@
     <Compile Include="ControlModel\TypeInfoField.cs" />
     <Compile Include="ControlModel\TwoTypes.cs" />
     <Compile Include="DoSetDelegate.cs" />
-    <Compile Include="EventManagement\SimpleEventManager.cs" />
-    <Compile Include="EventManagement\SimpleEventManagerProvider.cs" />
     <Compile Include="Factories\AbstractPropFactory.cs" />
     <Compile Include="ControlModel\PropComparerField.cs" />
     <Compile Include="ControlModel\PropDoWhenChangedField.cs" />
@@ -96,8 +83,6 @@
     <Compile Include="TypeDescriptors\MyTypeDescriptorBase.cs" />
     <Compile Include="TypeDescriptors\PbCollectionItemTypeDescriptor.cs" />
     <Compile Include="TypeDescriptors\IPbCollectionTypeDescriptor.cs" />
-    <Compile Include="PropBagInterfaces\IPropBag.cs" />
-    <Compile Include="PropBagInterfaces\IPubPropBag.cs" />
     <Compile Include="Props\PropExternStore.cs" />
     <Compile Include="Factories\PropExtStoreFactory.cs" />
     <Compile Include="Factories\PropFactory.cs" />

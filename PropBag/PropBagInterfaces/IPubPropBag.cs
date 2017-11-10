@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 using System.ComponentModel;
 using DRM.TypeSafePropertyBag;
 
-namespace DRM.PropBag
+namespace DRM.TypeSafePropertyBag
 {
     /// <summary>
     /// Adds AddProp, RemoveProp and ClearAllProps to IPropBag.

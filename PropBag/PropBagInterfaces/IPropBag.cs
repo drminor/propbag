@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 
-namespace DRM.PropBag
+namespace DRM.TypeSafePropertyBag
 {
     /// <summary>
     /// Base Property Bag Features
