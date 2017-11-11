@@ -1,26 +1,29 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 
 namespace DRM.TypeSafePropertyBag.EventManagement
 {
+    using PropIdType = UInt32;
+
     public class CollectionOfSubscriberCollections //: IEnumerable<SubscriberCollection>
     {
         const int PROP_INDEX_CONCURRENCY_LEVEL = 1; // Typical number of threads simultaneously accessing the ObjectIndexes.
         const int EXPECTED_NO_OF_OBJECTS = 50;
 
-        private ConcurrentDictionary<uint, SubscriberCollection> _listOfSubscribersForAProp;
+        private ConcurrentDictionary<PropIdType, SubscriberCollection> _listOfSubscribersForAProp;
         //private readonly object _sync;
 
         public CollectionOfSubscriberCollections()
         {
             //_sync = new object();
-            _listOfSubscribersForAProp = new ConcurrentDictionary<uint, SubscriberCollection>
+            _listOfSubscribersForAProp = new ConcurrentDictionary<PropIdType, SubscriberCollection>
                 (
                 concurrencyLevel: PROP_INDEX_CONCURRENCY_LEVEL,
                 capacity: EXPECTED_NO_OF_OBJECTS
                 );
         }
 
-        public SubscriberCollection GetOrCreate(uint l2Key, out bool wasAdded)
+        public SubscriberCollection GetOrCreate(PropIdType l2Key, out bool wasAdded)
         {
             bool internalWasAdded = false;
 
@@ -37,7 +40,7 @@ namespace DRM.TypeSafePropertyBag.EventManagement
             return result;
         }
 
-        public bool RemoveListOfSubscriptionPtrs(uint l2Key)
+        public bool RemoveListOfSubscriptionPtrs(PropIdType l2Key)
         {
             if(_listOfSubscribersForAProp.TryRemove(l2Key, out SubscriberCollection sc))
             {
@@ -49,7 +52,7 @@ namespace DRM.TypeSafePropertyBag.EventManagement
             }
         }
 
-        public bool ContainsTheListOfSubscriptionPtrs(uint l2Key)
+        public bool ContainsTheListOfSubscriptionPtrs(PropIdType l2Key)
         {
             bool result =_listOfSubscribersForAProp.ContainsKey(l2Key);
             return result;

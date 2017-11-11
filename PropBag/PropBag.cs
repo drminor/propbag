@@ -17,6 +17,14 @@ using System.Windows;
 
 namespace DRM.PropBag
 {
+    using CompositeKeyType = UInt64;
+    using ObjectIdType = UInt32;
+    using PropIdType = UInt32;
+    using PropNameType = String;
+    using PropDataType = PropGen;
+
+
+
     #region Summary and Remarks
 
     /// <summary>
@@ -45,15 +53,9 @@ namespace DRM.PropBag
 
         #region Member Declarations
 
-        // TO-DOC: Explain that the life time of any sources that listen to the events provided by this class,
-        // including the events provided by the IProp instances
-        // is determined by the lifetime of the instances of classes that derive from this PropBag class.
-
-        // TO-DOC: Explain since we may subscribe to our own events we would like to have these initialized.
-        // confirm that on post construction events are initialized for us if we don't
-        // alternative could be that they are initialized on first assignment.
         public event PropertyChangedEventHandler PropertyChanged; // = delegate { };
         public event PropertyChangingEventHandler PropertyChanging; // = delegate { };
+
         public event EventHandler<PCGenEventArgs> PropertyChangedWithGenVals; // = delegate { };
         public event EventHandler<PropertyChangedEventArgs> PropertyChangedIndividual;
 
@@ -65,16 +67,16 @@ namespace DRM.PropBag
         private PropBagTypeSafetyMode TypeSafetyMode { get; }
         protected virtual TypeSafePropBagMetaData OurMetaData { get; }
 
-        //private readonly Dictionary<string, PropGen> tVals;
-
-        private uint _ourObjectId;
         private SimpleLevel2KeyMan _level2KeyManager;
         private SimpleCompKeyMan _compKeyManager;
-        private readonly SimpleObjectIdDictionary<PropGen> _theStore;
 
-        private SimpleSubscriptionManager<PropGen> _subscriptionManager;
+        private readonly SimplePropStoreAccessService<IPropBag, IPropGen> _ourStoreAccess;
+        private object _accessToken;
 
-        private SimpleLocalBinder<PropGen> _localBinder;
+
+        private SimpleSubscriptionManager<PropDataType> _subscriptionManager;
+
+        private SimpleLocalBinder<PropDataType> _localBinder;
 
         #endregion
 
@@ -86,11 +88,11 @@ namespace DRM.PropBag
         /// a method from the System.Reflection namespace.
         /// </summary>
         /// <param name="dummy"></param>
-        protected PropBag(byte dummy)
+        public PropBag(byte dummy)
         {
             TypeSafetyMode = PropBagTypeSafetyMode.None;
             PropFactory = null;
-            _theStore = null;
+            _ourStoreAccess = null;
             OurMetaData = BuildMetaData(this.TypeSafetyMode, classFullName: null, propFactory: null);
         }
 
@@ -102,7 +104,7 @@ namespace DRM.PropBag
 
         // TODO: remove this constructor.
         protected PropBag(PropBagTypeSafetyMode typeSafetyMode, IPropFactory propFactory)
-            : this(typeSafetyMode, null, propFactory) { }
+            : this(typeSafetyMode, propFactory, null) { }
 
         /// <summary>
         /// 
@@ -110,53 +112,55 @@ namespace DRM.PropBag
         /// <param name="pm"></param>
         /// <param name="propFactory">The PropFactory to use instead of the one specified by the PropModel.</param>
         public PropBag(ControlModel.PropModel pm, string fullClassName = null, IPropFactory propFactory = null)
-            : this(pm.TypeSafetyMode, fullClassName, propFactory ?? pm.PropFactory)
+            : this(pm.TypeSafetyMode, propFactory ?? pm.PropFactory, fullClassName)
         {
             Hydrate(pm);
         }
 
-        protected PropBag(PropBagTypeSafetyMode typeSafetyMode, string fullClassName = null, IPropFactory propFactory = null)
+        protected PropBag(PropBagTypeSafetyMode typeSafetyMode, IPropFactory propFactory, string fullClassName = null)
         {
             this.TypeSafetyMode = typeSafetyMode;
 
+            if (propFactory == null) throw new ArgumentNullException(nameof(propFactory));
+
             bool returnDefaultForUndefined = TypeSafePropBagMetaData.Helper.GetReturnDefaultForUndefined(typeSafetyMode);
 
-            if (propFactory != null)
-            {
-                // Put this back in for those use cases when we are not instantiated with a PropModel.
-                //if (propFactory.ReturnDefaultForUndefined != returnDefaultForUndefined)
-                //{
-                //    throw new ApplicationException("The 'ReturnDefaultForUndefined' setting on the specified property factory conflicts with the TypeSafetyMode specified.");
-                //}
-                PropFactory = propFactory;
-            }
-            else
-            {
-                // Use the "built-in" property factory, if the caller did not supply one.
-                PropFactory = new PropFactory(typeResolver: null, valueConverter: null);
-            }
+            //if (propFactory != null)
+            //{
+            //    // Put this back in for those use cases when we are not instantiated with a PropModel.
+            //    //if (propFactory.ReturnDefaultForUndefined != returnDefaultForUndefined)
+            //    //{
+            //    //    throw new ApplicationException("The 'ReturnDefaultForUndefined' setting on the specified property factory conflicts with the TypeSafetyMode specified.");
+            //    //}
+            //    PropFactory = propFactory;
+            //}
+            //else
+            //{
+            //    // Use the "built-in" property factory, if the caller did not supply one.
+            //    PropFactory = new PropFactory(typeResolver: null, valueConverter: null);
+            //}
+
+            // Put this back in for those use cases when we are not instantiated with a PropModel.
+            //if (propFactory.ReturnDefaultForUndefined != returnDefaultForUndefined)
+            //{
+            //    throw new ApplicationException("The 'ReturnDefaultForUndefined' setting on the specified property factory conflicts with the TypeSafetyMode specified.");
+            //}
+            PropFactory = propFactory;
 
             OurMetaData = BuildMetaData(TypeSafetyMode, fullClassName, PropFactory);
 
-            _ourObjectId = (uint) ObjectIdIssuer.NextObjectId;
-            _theStore = ProvisonTheStore(out _level2KeyManager, out _compKeyManager);
+            _level2KeyManager = new SimpleLevel2KeyMan(65536);
+            _compKeyManager = new SimpleCompKeyMan(_level2KeyManager);
+
+            object _accessToken;
+
+            _ourStoreAccess = (SimplePropStoreAccessService<IPropBag, IPropGen>)
+                PropFactory.PropStoreAccessServiceProvider.CreatePropStoreService(this);
+
 
             _subscriptionManager = new SimpleSubscriptionManager<PropGen>(_compKeyManager);
 
-            _localBinder = new SimpleLocalBinder<PropGen>(/*_theStore, _compKeyManager, _level2KeyManager*/);
-
-            //tVals = new Dictionary<string, PropGen>();
-        }
-
-        private SimpleObjectIdDictionary<PropGen> ProvisonTheStore(
-            out SimpleLevel2KeyMan level2KeyMan, out SimpleCompKeyMan compKeyManager) 
-        {
-            level2KeyMan = new SimpleLevel2KeyMan();
-            compKeyManager = new SimpleCompKeyMan(level2KeyMan, 48);
-
-
-            SimpleObjectIdDictionary<PropGen> result = new SimpleObjectIdDictionary<PropGen>(compKeyManager, level2KeyMan);
-            return result;
+            _localBinder = new SimpleLocalBinder<PropGen>();
         }
 
         protected TypeSafePropBagMetaData BuildMetaData(PropBagTypeSafetyMode typeSafetyMode, string classFullName, IPropFactory propFactory)
@@ -451,7 +455,7 @@ namespace DRM.PropBag
                     if (!genProp.TypedProp.TypeIsSolid)
                     {
                         MakeTypeSolid(ref genProp, propertyType, propertyName);
-                        _theStore[genProp.PropId] = genProp;
+                        _ourStoreAccess[this, genProp.PropId] = genProp;
                     }
                     else
                     {
@@ -523,7 +527,7 @@ namespace DRM.PropBag
             {
                 if (!genProp.IsEmpty)
                 {
-                    CheckTypeInfo<T>(genProp, propertyName, _theStore);
+                    CheckTypeInfo<T>(genProp, propertyName, _ourStoreAccess);
                 }
                 return genProp;
             }
@@ -591,7 +595,7 @@ namespace DRM.PropBag
                         if (MakeTypeSolid(ref genProp, newType, propertyName))
                         {
                             // TODO: implement try update.
-                            _theStore[genProp.PropId] = genProp;
+                            _ourStoreAccess[this, genProp.PropId] = genProp;
                         }
 
                     }
@@ -629,27 +633,27 @@ namespace DRM.PropBag
             }
 
             // TODO: avoid having to (re)produce the PropId.
-            SimpleExKey propId = _compKeyManager.Join(_ourObjectId, propertyName);
+            PropIdType propId = GetPropId(propertyName);
 
             // TODO: Make the PropFactory supply this service.
             DoSetDelegate setPropDel = DelegateCacheProvider.DoSetDelegateCache.GetOrAdd(genProp.TypedProp.Type);
-            return setPropDel(this,  propId, propertyName, genProp.TypedProp, value);
+            return setPropDel(this, propId, propertyName, genProp.TypedProp, value);
         }
 
-        public bool SetIt<T>(T value, SimpleExKey propId)
-        {
-            PropGen genProp = GetPropGen<T>(propId, desiredHasStoreValue: PropFactory.ProvidesStorage);
+        //public bool SetIt<T>(T value, SimpleExKey propId)
+        //{
+        //    PropGen genProp = GetPropGen<T>(propId, desiredHasStoreValue: PropFactory.ProvidesStorage);
 
-            //uint objectKey = _compKeyManager.Split(cKey, out string propertyName);
+        //    //ObjectIdType objectKey = _compKeyManager.Split(cKey, out string propertyName);
 
-            if (propId.Level1Key != _ourObjectId)
-                throw new AccessViolationException($"CKey: {propId} does not belong to IPropBag: {FullClassName} with ObjectId: {_ourObjectId}.");
+        //    if (propId.Level1Key != _ourObjectId)
+        //        throw new AccessViolationException($"CKey: {propId} does not belong to IPropBag: {FullClassName} with ObjectId: {_ourObjectId}.");
 
-            string propertyName = _level2KeyManager.FromCooked(propId.Level2Key);
-            IPropPrivate<T> prop = CheckTypeInfo<T>(genProp, propertyName, _theStore);
+        //    string propertyName = _level2KeyManager.FromCooked(propId.Level2Key);
+        //    IPropPrivate<T> prop = CheckTypeInfo<T>(genProp, propertyName, _ourStoreAccess);
 
-            return DoSet(propId, propertyName, prop, value);
-        }
+        //    return DoSet(propId, propertyName, prop, value);
+        //}
 
         public bool SetIt<T>(T value, string propertyName)
         {
@@ -671,9 +675,11 @@ namespace DRM.PropBag
             // No point in calling DoSet, it would find that the value is the same and do nothing.
             if (wasRegistered) return true;
 
-            IPropPrivate<T> prop = CheckTypeInfo<T>(genProp, propertyName, _theStore);
+            IPropPrivate<T> prop = CheckTypeInfo<T>(genProp, propertyName, _ourStoreAccess);
 
-            SimpleExKey propId = _compKeyManager.Join(_ourObjectId, propertyName);
+            // TODO: avoid having to (re)produce the PropId.
+            PropIdType propId = GetPropId(propertyName);
+
             return DoSet(propId, propertyName, prop, value);
         }
 
@@ -706,7 +712,7 @@ namespace DRM.PropBag
             // No point in calling DoSet, it would find that the value is the same and do nothing.
             if (wasRegistered) return true;
 
-            IPropPrivate<T> typedProp = CheckTypeInfo<T>(genProp, propertyName, _theStore);
+            IPropPrivate<T> typedProp = CheckTypeInfo<T>(genProp, propertyName, _ourStoreAccess);
 
             bool theSame = typedProp.Compare(newValue, curValue);
 
@@ -721,7 +727,7 @@ namespace DRM.PropBag
                 curValue = newValue;
 
                 // TODO: Change this routine to avoid having to (re)produce the propId.
-                SimpleExKey propId =  _compKeyManager.Join(_ourObjectId, propertyName);
+                PropIdType propId = GetPropId(propertyName);
 
                 // Raise notify events.
                 DoNotifyWork<T>(propId, propertyName, typedProp, oldVal: oldValue, newValue: newValue);
@@ -781,18 +787,51 @@ namespace DRM.PropBag
 
         #region Subscribe to Typed PropertyChanged
 
+        public bool AddBinding<T>(string propertyName, string targetPropertyName, Action<T,T> ttAction)
+        {
+            //SimpleExKey sourcePropId = (SimpleExKey)_compKeyManager.Join(_ourObjectId, propertyName);
+
+            PropIdType propId = GetPropId(propertyName);
+            PropGen genProp = GetPropGen<T>(propId, desiredHasStoreValue: PropFactory.ProvidesStorage);
+
+            IPropPrivate<T> prop = CheckTypeInfo<T>(genProp, propertyName, _ourStoreAccess);
+
+            //SimpleExKey targetPropId = _compKeyManager.Join(_ourObjectId, targetPropertyName);
+
+            //Action<T, T> tt = (x, y) => { x.Equals(y); };
+
+            if (prop != null)
+            {
+
+                //LocalPropertyPath dum = new LocalPropertyPath("dum", new object[] { });
+                //LocalBindingInfo dum2 = new LocalBindingInfo(dum, LocalBindingMode.Default);
+
+                //ISubscriptionKeyGen bindingRequest =
+                //    new BindingSubscriptionKey<T>(sourcePropId, targetPropId, dum2, ttAction);
+
+                //ISubscriptionGen newSubscription = _subscriptionManager.AddSubscription(bindingRequest, out bool wasAdded);
+                //return wasAdded;
+                return false;
+            }
+            else
+            {
+                return false;
+            }
+
+        }
+
         // TODO: Implement our own WeakEventManager for Delegates that have a single Type Parameter.
         public bool SubscribeToPropChanged<T>(EventHandler<PCTypedEventArgs<T>> eventHandler, string propertyName)
         {
-            SimpleExKey exKey = (SimpleExKey) _compKeyManager.Join(_ourObjectId, propertyName);
-            PropGen genProp = GetPropGen<T>(exKey, desiredHasStoreValue: PropFactory.ProvidesStorage);
+            PropIdType propId = GetPropId(propertyName);
+            PropGen genProp = GetPropGen<T>(propId, desiredHasStoreValue: PropFactory.ProvidesStorage);
 
-            IPropPrivate<T> prop = CheckTypeInfo<T>(genProp, propertyName, _theStore);
+            IPropPrivate<T> prop = CheckTypeInfo<T>(genProp, propertyName, _ourStoreAccess);
 
             if (prop != null)
             {
                 ISubscriptionKeyGen subscriptionRequest =
-                    new SubscriptionKey<T>(exKey, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
+                    new SubscriptionKey<T>(this, propId, _ourStoreAccess, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
 
                 ISubscriptionGen newSubscription = _subscriptionManager.AddSubscription(subscriptionRequest, out bool wasAdded);
                 return wasAdded;
@@ -805,15 +844,15 @@ namespace DRM.PropBag
 
         public bool UnSubscribeToPropChanged<T>(EventHandler<PCTypedEventArgs<T>> eventHandler, string propertyName)
         {
-            SimpleExKey exKey = (SimpleExKey)_compKeyManager.Join(_ourObjectId, propertyName);
-            PropGen genProp = GetPropGen<T>(exKey, desiredHasStoreValue: PropFactory.ProvidesStorage);
+            PropIdType propId = GetPropId(propertyName);
+            PropGen genProp = GetPropGen<T>(propId, desiredHasStoreValue: PropFactory.ProvidesStorage);
 
-            IPropPrivate<T> prop = CheckTypeInfo<T>(genProp, propertyName, _theStore);
+            IPropPrivate<T> prop = CheckTypeInfo<T>(genProp, propertyName, _ourStoreAccess);
 
             if (prop != null)
             {
                 ISubscriptionKeyGen subscriptionRequest =
-                    new SubscriptionKey<T>(exKey, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
+                    new SubscriptionKey<T>(this, propId, _ourStoreAccess, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
 
                 bool wasRemoved = _subscriptionManager.RemoveSubscription(subscriptionRequest);
                 return wasRemoved;
@@ -990,17 +1029,17 @@ namespace DRM.PropBag
                 }
             }
 
-            uint l2Key = _level2KeyManager.FromRaw(propertyName);
+            PropIdType l2Key = GetPropId(propertyName);
 
-            bool result = _theStore.ContainsKey(_ourObjectId, l2Key); 
+            bool result = _ourStoreAccess.ContainsKey(this, l2Key); 
             return result;
         }
 
         // TODO: PropBagTypeSafetyMode.Locked is not honored here.
         public bool TryGetTypeOfProperty(string propertyName, out Type type)
         {
-            uint l2Key = _level2KeyManager.FromRaw(propertyName);
-            if (_theStore.TryGetValue(_ourObjectId, l2Key, out PropGen value))
+            PropIdType l2Key = GetPropId(propertyName);
+            if (_ourStoreAccess.TryGetValue(this, l2Key, out IPropGen value))
             {
                 type = value.TypedProp.Type;
                 return true;
@@ -1121,11 +1160,11 @@ namespace DRM.PropBag
 
         protected void AddProp<T>(string propertyName, IProp<T> prop)
         {
-            SimpleExKey exKey = GetNewExKey(propertyName);
-            PropGen propGen = new PropGen(prop, exKey);
+            PropIdType l2Key = GetPropId(propertyName);
+            PropGen propGen = new PropGen(prop, l2Key);
 
             //tVals.Add(propertyName, propGen);
-            if (!_theStore.TryAdd(exKey, propGen))
+            if (!_ourStoreAccess.TryAdd(this, l2Key, propGen))
             {
                 throw new ApplicationException("Could not add the new propGen to the store.");
             }
@@ -1134,11 +1173,11 @@ namespace DRM.PropBag
 
         protected PropGen AddProp(string propertyName, IProp genericTypedProp)
         {
-            SimpleExKey exKey = GetNewExKey(propertyName);
+            PropIdType l2Key = GetPropId(propertyName);
 
-            PropGen propGen = new PropGen(genericTypedProp, exKey);
+            PropGen propGen = new PropGen(genericTypedProp, l2Key);
 
-            if (!_theStore.TryAdd(exKey, propGen))
+            if (!_ourStoreAccess.TryAdd(this, l2Key, propGen))
             {
                 throw new ApplicationException("Could not add the new propGen to the store.");
             }
@@ -1166,8 +1205,8 @@ namespace DRM.PropBag
             {
                 pGen.CleanUp(doTypedCleanup: false);
 
-                uint l2Key = _level2KeyManager.FromRaw(propertyName);
-                if (!_theStore.TryRemove(_ourObjectId, l2Key, out PropGen foundValue) )
+                PropIdType l2Key = GetPropId(propertyName);
+                if (!_ourStoreAccess.TryRemove(this, l2Key, out IPropGen foundValue) )
                 {
                     System.Diagnostics.Debug.WriteLine($"The prop was found, but could not be removed. Property: {propertyName}.");
 
@@ -1190,8 +1229,8 @@ namespace DRM.PropBag
             {
                 genProp.CleanUp(doTypedCleanup: true);
 
-                uint l2Key = _level2KeyManager.FromRaw(propertyName);
-                if (!_theStore.TryRemove(_ourObjectId, l2Key, out PropGen foundValue))
+                PropIdType l2Key = GetPropId(propertyName);
+                if (!_ourStoreAccess.TryRemove(this,  l2Key, out IPropGen foundValue))
                 {
                     System.Diagnostics.Debug.WriteLine($"The prop was found, but could not be removed. Property: {propertyName}.");
 
@@ -1224,16 +1263,16 @@ namespace DRM.PropBag
             //doSetDelegateDict.Clear();
             ClearEventSubscribers();
 
-            (_theStore as IDictionary<SimpleExKey, PropGen>).Clear();
+            _ourStoreAccess.Clear(this);
         }
 
         protected void ClearEventSubscribers()
         {
-            var theStoreAsCollection = _theStore as ICollection<KeyValuePair<SimpleExKey, PropGen>>;
+            IEnumerable<IPropGen> propDataObjects = _ourStoreAccess.GetValues(this);
 
-            foreach (var x in theStoreAsCollection)
+            foreach (IPropGen propData in propDataObjects)
             {
-                x.Value.CleanUp(doTypedCleanup: true);
+                propData.CleanUp(doTypedCleanup: true);
             }
         }
 
@@ -1243,11 +1282,10 @@ namespace DRM.PropBag
         /// <returns></returns>
         public IDictionary<string, ValPlusType> GetAllPropNamesAndTypes()
         {
-            var theStoreAsCollection = _theStore as ICollection<KeyValuePair<SimpleExKey, PropGen>>;
+            IEnumerable<KeyValuePair<PropNameType, IPropGen>> theStoreAsCollection = _ourStoreAccess.GetCollection(this);
 
-            // TODO: Use the Key from _theStore once the key has been changed to an IExplodedKey.
             IEnumerable<KeyValuePair<string, ValPlusType>> list = theStoreAsCollection.Select(x =>
-            new KeyValuePair<string, ValPlusType>(GetPropNameFromL2Key(x.Key.Level2Key), x.Value.ValuePlusType())).ToList();
+            new KeyValuePair<string, ValPlusType>(x.Key, x.Value.ValuePlusType())).ToList();
 
             IDictionary <string, ValPlusType> result = list.ToDictionary(pair => pair.Key, pair => pair.Value);
             return result; 
@@ -1256,23 +1294,16 @@ namespace DRM.PropBag
         /// <summary>
         /// Returns all of the values in dictionary of objects, keyed by PropertyName.
         /// </summary>
-        public IDictionary<string, object> GetAllPropertyValues()
+        public IDictionary<PropNameType, IPropGen> GetAllPropertyValues()
         {
-            Dictionary<string, object> result = new Dictionary<string, object>();
-
-            var theStoreAsCollection = _theStore as ICollection<KeyValuePair<SimpleExKey, PropGen>>;
-
-            foreach(KeyValuePair<SimpleExKey, PropGen> kvp in theStoreAsCollection)
-            {
-                result.Add(GetPropNameFromL2Key(kvp.Key.Level2Key), kvp.Value.Value);
-            }
+            IEnumerable<KeyValuePair<PropNameType, IPropGen>> theStoreAsCollection = _ourStoreAccess.GetCollection(this);
+            IDictionary<PropNameType, IPropGen> result = theStoreAsCollection.ToDictionary(pair => pair.Key, pair => pair.Value);
             return result;
         }
 
-        public IList<string> GetAllPropertyNames()
+        public IList<PropNameType> GetAllPropertyNames()
         {
-            var theStoreAsDict = _theStore as IDictionary<SimpleExKey, PropGen>;
-            List<string> result = theStoreAsDict.Select(x => GetPropNameFromL2Key(x.Key.Level2Key)).ToList();
+            var result = _ourStoreAccess.GetKeys(this).ToList();
             return result;
         }
 
@@ -1280,7 +1311,7 @@ namespace DRM.PropBag
 
         #region Private Methods and Properties
 
-        private bool DoSet<T>(SimpleExKey propId, string propertyName, IPropPrivate<T> typedProp, T newValue)
+        private bool DoSet<T>(PropIdType propId, string propertyName, IPropPrivate<T> typedProp, T newValue)
         {
             if (!typedProp.ValueIsDefined)
             {
@@ -1289,28 +1320,28 @@ namespace DRM.PropBag
                 typedProp.TypedValue = newValue;
 
                 // PROCESS BINDINGS
-                IEnumerable<ISubscriptionGen> typedSubs = GetTypedSubscriptions<PropGen, T>
-                    (
-                    propId,
-                    propertyName,
-                    _subscriptionManager,
-                    out IEnumerable<ISubscriptionGen> localBindings
-                    );
+                //IEnumerable<ISubscriptionGen> typedSubs = GetTypedSubscriptions<PropGen, T>
+                //    (
+                //    propId,
+                //    propertyName,
+                //    _subscriptionManager,
+                //    out IEnumerable<ISubscriptionGen> localBindings
+                //    );
 
-                int counter = 0;
-                // Use Default(T) for old value.
-                foreach (ISubscriptionGen x in localBindings)
-                {
-                    BindingSubscription<T> typedBs = (BindingSubscription<T>)x;
+                //int counter = 0;
+                //// Use Default(T) for old value.
+                //foreach (ISubscriptionGen x in localBindings)
+                //{
+                //    BindingSubscription<T> typedBs = (BindingSubscription<T>)x;
 
-                    _localBinder.UpdateTarget<T>(/*(IPropBag)this, */typedBs, default(T), newValue, ref counter);
+                //    _localBinder.UpdateTarget<T>(/*(IPropBag)this, */typedBs, default(T), newValue, ref counter);
 
-                }
+                //}
                 // END PROCESS BINDINGS
 
                 // Raise the standard PropertyChanged event
                 OnPropertyChanged(PropFactory.IndexerName);
-                OnPropertyChangedIndividual(propertyName);
+                //OnPropertyChangedIndividual(propertyName);
                 return true; // If it was originally unassigned, then it will always be updated.
             }
             else
@@ -1334,14 +1365,15 @@ namespace DRM.PropBag
             }
         }
 
-        private void DoNotifyWork<T>(SimpleExKey propId, string propertyName, IPropPrivate<T> typedProp, T oldVal, T newValue)
+        private void DoNotifyWork<T>(PropIdType propId, string propertyName, IPropPrivate<T> typedProp, T oldVal, T newValue)
         {
 
             // PROCESS BINDINGS
             IEnumerable<ISubscriptionGen> typedSubs = GetTypedSubscriptions<PropGen, T>
                 (
+                this,
                 propId,
-                propertyName,
+                _ourStoreAccess,
                 _subscriptionManager,
                 out IEnumerable<ISubscriptionGen> localBindings
                 );
@@ -1352,6 +1384,15 @@ namespace DRM.PropBag
                 BindingSubscription<T> typedBs = (BindingSubscription<T>)x;
                 _localBinder.UpdateTarget<T>(typedBs, oldVal, newValue, ref counter);
             }
+            if (counter > 0)
+                System.Diagnostics.Debug.WriteLine($"Updated {counter} binding targets.");
+
+            foreach (ISubscriptionGen y in typedSubs)
+            {
+                Subscription<T> bs = (Subscription<T>)y;
+                bs.TypedHandler(this, new PCTypedEventArgs<T>(propertyName, oldVal, newValue));
+            }
+
             // END PROCESS BINDINGS
 
             if (typedProp.DoAfterNotify)
@@ -1360,12 +1401,12 @@ namespace DRM.PropBag
                 OnPropertyChanged(PropFactory.IndexerName);
 
                 // Raise the individual PropertyChanged event
-                OnPropertyChangedIndividual(propertyName);
+                //OnPropertyChangedIndividual(propertyName);
 
                 // Replaced by the _subscriptionManager!
                 //// The typed, PropertyChanged event defined on the individual property.
                 //prop.OnPropertyChangedWithTVals(propertyName, oldVal, newValue);
-                typedProp.RaiseEventsForParent(typedSubs, this, propertyName, oldVal, newValue);
+                //typedProp.RaiseEventsForParent(typedSubs, this, propertyName, oldVal, newValue);
 
                 // The un-typed, PropertyChanged event defined on the individual property.
                 typedProp.OnPropertyChangedWithVals(propertyName, oldVal, newValue);
@@ -1385,12 +1426,12 @@ namespace DRM.PropBag
                 OnPropertyChanged(PropFactory.IndexerName);
 
                 // Raise the individual PropertyChanged event
-                OnPropertyChangedIndividual(propertyName);
+                //OnPropertyChangedIndividual(propertyName);
 
                 // Replaced by the _subscriptionManager!
                 //// The typed, PropertyChanged event defined on the individual property.
                 //prop.OnPropertyChangedWithTVals(propertyName, oldVal, newValue);
-                typedProp.RaiseEventsForParent(typedSubs, this, propertyName, oldVal, newValue);
+                //typedProp.RaiseEventsForParent(typedSubs, this, propertyName, oldVal, newValue);
 
                 // The un-typed, PropertyChanged event defined on the individual property.
                 typedProp.OnPropertyChangedWithVals(propertyName, oldVal, newValue);
@@ -1402,15 +1443,21 @@ namespace DRM.PropBag
 
         private IEnumerable<ISubscriptionGen> GetTypedSubscriptions<PropDataT, T>
             (
-            SimpleExKey propId,
-            string propertyName,
+            IPropBag host,
+            PropIdType propId,
+            SimplePropStoreAccessService<IPropBag, IPropGen> storeAccessor,
             SimpleSubscriptionManager<PropDataT> subscriptionManager,
             out IEnumerable<ISubscriptionGen> localBindings
             ) where PropDataT : IPropGen
         {
             //PCTypedEventBase<PropGen, T> pCTypedEventBase = new PCTypedEventBase<PropGen, T>(_subscriptionManager);
 
-            SubscriberCollection sc = _subscriptionManager.GetSubscriptions(propId);
+            SubscriberCollection sc = _subscriptionManager.GetSubscriptions
+                (
+                host,
+                propId,
+                storeAccessor
+                );
 
             IEnumerable<ISubscriptionGen> typedSubs = sc.Where(x => x.SubscriptionKind == SubscriptionKind.TypedHandler);
             localBindings = sc.Where(x => x.SubscriptionKind == SubscriptionKind.LocalBinding);
@@ -1427,9 +1474,11 @@ namespace DRM.PropBag
             Debug.Assert(!(alwaysRegister && mustBeRegistered), "AlwaysRegister and MustBeRegistered cannot both be true.");
             Debug.Assert(!(alwaysRegister && neverCreate), "AlwaysRegister and NeverCreate cannot both be true.");
 
-            PropGen genProp;
+            IPropGen genProp;
 
-            if (_theStore.TryGetValue(_ourObjectId, propertyName, out genProp))
+            PropIdType l2Key = GetPropId(propertyName);
+
+            if (_ourStoreAccess.TryGetValue(this, l2Key, out genProp))
             {
                 wasRegistered = false;
             }
@@ -1447,10 +1496,10 @@ namespace DRM.PropBag
                     throw new InvalidOperationException(string.Format("Property: {0} has a backing store held by this instance of PropBag. This operation can only be performed on properties for which no backing store is kept by this instance.", propertyName));
             }
 
-            return genProp;
+            return (PropGen) genProp;
         }
 
-        private IPropPrivate<T> CheckTypeInfo<T>(PropGen genProp, string propertyName, IDictionary<SimpleExKey, PropGen> dict)
+        private IPropPrivate<T> CheckTypeInfo<T>(PropGen genProp, string propertyName, SimplePropStoreAccessService<IPropBag, IPropGen> storeAccess)
         {
             if (!genProp.TypedProp.TypeIsSolid)
             {
@@ -1458,7 +1507,7 @@ namespace DRM.PropBag
                 {
                     if (MakeTypeSolid(ref genProp, typeof(T), propertyName))
                     {
-                        dict[genProp.PropId] = genProp;
+                        storeAccess[this, genProp.PropId] = genProp;
                     }
                 }
                 catch (InvalidCastException ice)
@@ -1577,33 +1626,30 @@ namespace DRM.PropBag
 
         #region Composite Key Support
 
-        private string GetPropNameFromL2Key(uint l2Key)
+        private PropNameType GetPropName(PropIdType l2Key)
         {
-            string propertyName = _level2KeyManager.FromCooked(l2Key);
+            PropNameType propertyName = _level2KeyManager.FromCooked(l2Key);
             return propertyName;
         }
 
-        private SimpleExKey GetNewExKey(string propertyName)
+        private PropIdType GetPropId(PropNameType propertyName)
         {
             // Register new propertyName and get an exploded key.
-            uint l2Key = _level2KeyManager.Add(propertyName);
-            SimpleExKey exKey = _compKeyManager.Join(_ourObjectId, l2Key);
+            PropIdType l2Key = _level2KeyManager.GetOrAdd(propertyName);
 
-            return exKey;
+            return l2Key;
         }
 
-        protected PropGen GetPropGen<T>(SimpleExKey exKey, bool? desiredHasStoreValue)
+        protected PropGen GetPropGen<T>(PropIdType l2Key, bool? desiredHasStoreValue)
         {
-            PropGen genProp;
-
-            if (!_theStore.TryGetValue(exKey, out genProp))
+            if (!_ourStoreAccess.TryGetValue(this, l2Key, out IPropGen genProp))
             {
                 throw new KeyNotFoundException("That cKey was not found.");
             }
 
             if (!genProp.IsEmpty && desiredHasStoreValue.HasValue && desiredHasStoreValue.Value != genProp.TypedProp.HasStore)
             {
-                string propertyName = GetPropNameFromL2Key(exKey.Level2Key);
+                string propertyName = GetPropName(l2Key);
                 if (desiredHasStoreValue.Value)
                     //Caller needs property to have a backing store.
                     throw new InvalidOperationException(string.Format("Property: {0} has no backing store held by this instance of PropBag. This operation can only be performed on properties for which a backing store is held by this instance.", propertyName));
@@ -1611,22 +1657,22 @@ namespace DRM.PropBag
                     throw new InvalidOperationException(string.Format("Property: {0} has a backing store held by this instance of PropBag. This operation can only be performed on properties for which no backing store is kept by this instance.", propertyName));
             }
 
-            return genProp;
+            return (PropGen) genProp;
         }
 
         #endregion
 
         #region Methods to Raise Events
 
-        protected void OnPropertyChangedIndividual(string propertyName)
-        {
-            EventHandler<PropertyChangedEventArgs> handler = Interlocked.CompareExchange(ref PropertyChangedIndividual, null, null);
+        //protected void OnPropertyChangedIndividual(string propertyName)
+        //{
+        //    EventHandler<PropertyChangedEventArgs> handler = Interlocked.CompareExchange(ref PropertyChangedIndividual, null, null);
 
-            if (handler != null)
-            {
-                handler(this, new PropertyChangedEventArgs(propertyName));
-            }
-        }
+        //    if (handler != null)
+        //    {
+        //        handler(this, new PropertyChangedEventArgs(propertyName));
+        //    }
+        //}
 
         // Raise Standard Events
         protected void OnPropertyChanged(string propertyName)
@@ -1674,8 +1720,8 @@ namespace DRM.PropBag
             //    return false;
             //}
 
-            uint l2Key = _level2KeyManager.FromRaw(propertyName);
-            if (_theStore.TryGetValue(_ourObjectId, l2Key, out PropGen value))
+            PropIdType l2Key = GetPropId(propertyName);
+            if (_ourStoreAccess.TryGetValue(this, l2Key, out IPropGen value))
             {
                 propType = value.TypedProp.PropKind;
                 return true;
@@ -1689,8 +1735,8 @@ namespace DRM.PropBag
 
         public bool TryGetListSource(string propertyName, Type itemType, out IListSource listSource)
         {
-            uint l2Key = _level2KeyManager.FromRaw(propertyName);
-            if (_theStore.TryGetValue(_ourObjectId, l2Key, out PropGen value))
+            PropIdType l2Key = GetPropId(propertyName);
+            if (_ourStoreAccess.TryGetValue(this, l2Key, out IPropGen value))
             {
                 listSource = value.TypedProp.ListSource;
                 return true;
@@ -1740,7 +1786,7 @@ namespace DRM.PropBag
             // because this method has access to this instance of PropBag.
             // TODO: update this to use a true open delegate where the caller
             // specifies the target on which to call DoSet<T>.
-            static bool DoSetBridge<T>(IPropBag target, SimpleExKey propId, string propertyName, IProp prop, object value)
+            static bool DoSetBridge<T>(IPropBag target, PropIdType propId, string propertyName, IProp prop, object value)
             {
                 return ((PropBag)target).DoSet<T>(propId, propertyName, (IPropPrivate<T>)prop, (T)value);
             }

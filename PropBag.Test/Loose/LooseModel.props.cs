@@ -9,15 +9,24 @@ namespace PropBagLib.Tests
 
         public LooseModel() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered) { }
 
-		public LooseModel(PropBagTypeSafetyMode typeSafetyMode) : base(typeSafetyMode)
+		public LooseModel(PropBagTypeSafetyMode typeSafetyMode, IPropFactory propFactory) : base(typeSafetyMode, propFactory)
         {
             AddProp<object>("PropObject");
             AddProp<string>("PropString");
+            AddProp<string>("PropString2", null, false, null, null, "12");
             AddProp<bool>("PropBool", null, false, null, initialValue: false);
             AddProp<int>("PropInt");
             AddProp<TimeSpan>("PropTimeSpan");
             AddProp<Uri>("PropUri");
             AddProp<Lazy<int>>("PropLazyInt");
+
+            AddBinding<string>("PropString", "PropString2", FF);
+
+        }
+
+        public void FF(string s1, string s2)
+        {
+            System.Diagnostics.Debug.WriteLine($"The strings are: {s1} + {s2}");
         }
 
         #region Property Declarations

@@ -4,7 +4,6 @@ using System.Collections.Generic;
 
 namespace DRM.TypeSafePropertyBag.Fundamentals
 {
-
     /// <summary>
     /// 
     /// </summary>
@@ -56,42 +55,31 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
 
         bool TryRemove(L1T top, L2T bot, out PropDataT value);
 
-        //bool TryUpdate(L1T top, L2T bot, TValue newValue, TValue comparisonValue);
-        //TValue AddOrUpdate(L1T top, L2T bot, TValue addValue, Func<L1T top, L2T bot, TValue, TValue> updateValueFactory);
-        //TValue AddOrUpdate(L1T top, L2T bot, Func<L1T top, L2T bot, TValue> addValueFactory, Func<L1T top, L2T bot, TValue, TValue> updateValueFactory);
+        //bool TryUpdate(L1T top, L2T bot, PropDataT newValue, PropDataT comparisonValue);
+        //PropDataT AddOrUpdate(L1T top, L2T bot, PropDataT addValue, Func<L1T, L2T, PropDataT, PropDataT> updateValueFactory);
+        //PropDataT AddOrUpdate(L1T top, L2T bot, Func<L1T, L2T, PropDataT> addValueFactory, Func<L1T, L2T, PropDataT, PropDataT> updateValueFactory);
 
         #endregion
 
         #region Level 2 Raw
 
-        //bool TryAdd(L1T top, L2TRaw rawBot, PropDataT value);
-        //PropDataT GetOrAdd(L1T top, L2TRaw rawBot, PropDataT value);
+        bool TryAdd(L1T top, L2TRaw rawBot, PropDataT value);
+        PropDataT GetOrAdd(L1T top, L2TRaw rawBot, PropDataT value);
 
-        ////TValue GetOrAdd(L1T top, L2TRaw rawBot, Func<L2TRaw rawBot, TValue> valueFactory);
+        //TValue GetOrAdd(L1T top, L2TRaw rawBot, Func<L2TRaw rawBot, TValue> valueFactory);
 
-        //bool TryGetValue(L1T top, L2TRaw rawBot, out PropDataT value);
-        //bool ContainsKey(L1T top, L2TRaw rawBot);
-        ////TValue thisL1T top, L2TRaw rawBot] { get; set; }
+        bool TryGetValue(L1T top, L2TRaw rawBot, out PropDataT value);
+        bool ContainsKey(L1T top, L2TRaw rawBot);
+        //TValue thisL1T top, L2TRaw rawBot] { get; set; }
 
 
-        //bool TryRemove(L1T top, L2TRaw rawBot, out PropDataT value);
+        bool TryRemove(L1T top, L2TRaw rawBot, out PropDataT value);
 
-        //bool TryUpdate(L1T top, L2TRaw rawBot, TValue newValue, TValue comparisonValue);
-        //TValue AddOrUpdate(L1T top, L2TRaw rawBot, TValue addValue, Func<L1T top, L2TRaw rawBot, TValue, TValue> updateValueFactory);
-        //TValue AddOrUpdate(L1T top, L2TRaw rawBot, Func<L1T top, L2TRaw rawBot, TValue> addValueFactory, Func<L1T top, L2TRaw rawBot, TValue, TValue> updateValueFactory);
+        //bool TryUpdate(L1T top, L2TRaw rawBot, PropDataT newValue, PropDataT comparisonValue);
+        //PropDataT AddOrUpdate(L1T top, L2TRaw rawBot, PropDataT addValue, Func<L1T, L2TRaw, PropDataT, PropDataT> updateValueFactory);
+        //PropDataT AddOrUpdate(L1T top, L2TRaw rawBot, Func<L1T, L2TRaw, PropDataT> addValueFactory, Func<L1T, L2TRaw, PropDataT, PropDataT> updateValueFactory);
 
         #endregion
-    }
-
-    public interface IProvideObjectIds<ExKeyT, CompT, L1T, L2T, L2TRaw> : IIssueL1Keys<L1T> where ExKeyT : IExplodedKey<CompT, L1T, L2T>
-    {
-        ICKeyMan<ExKeyT, CompT, L1T, L2T, L2TRaw> CompKeyManager { get; }
-        IL2KeyMan<L2T, L2TRaw> Leve2KeyManager { get; }
-    }
-
-    public interface IIssueL1Keys<L1T>
-    {
-        L1T NextL1Key { get; }
     }
 
     public interface ICKeyMan<ExKeyT, CompT, L1T, L2T, L2TRaw> where ExKeyT : IExplodedKey<CompT, L1T, L2T>
@@ -131,14 +119,19 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
         bool TryGetFromCooked(L2T raw, out L2TRaw rawBot);
 
         L2T Add(L2TRaw rawBot);
+        L2T GetOrAdd(L2TRaw rawBot);
     }
 
-    public interface IExplodedKey<CompT, L1T, L2T> 
-    {
-        CompT CKey { get; }
-        L1T Level1Key { get; }
-        L2T Level2Key { get; }
-    }
+    //public interface IProvideObjectIds<ExKeyT, CompT, L1T, L2T, L2TRaw> : IIssueL1Keys<L1T> where ExKeyT : IExplodedKey<CompT, L1T, L2T>
+    //{
+    //    ICKeyMan<ExKeyT, CompT, L1T, L2T, L2TRaw> CompKeyManager { get; }
+    //    IL2KeyMan<L2T, L2TRaw> Leve2KeyManager { get; }
+    //}
+
+    //public interface IIssueL1Keys<L1T>
+    //{
+    //    L1T NextL1Key { get; }
+    //}
 
     //public interface IHaveAnL1Key<L1T>
     //{

@@ -45,10 +45,10 @@ namespace DRM.PropBag
         protected PubPropBag(PropBagTypeSafetyMode typeSafetyMode, IPropFactory propFactory)
             : base(typeSafetyMode, propFactory) { }
 
-        public PubPropBag(PropBagTypeSafetyMode typeSafetyMode, string fullClassName = null, IPropFactory propFactory = null)
-            : base(typeSafetyMode, fullClassName, propFactory) { }
+        public PubPropBag(PropBagTypeSafetyMode typeSafetyMode, IPropFactory propFactory, string fullClassName = null)
+            : base(typeSafetyMode, propFactory, fullClassName) { }
 
-        public PubPropBag(PropModel pm, string fullClassName = null, IPropFactory propFactory = null)
+        public PubPropBag(PropModel pm, IPropFactory propFactory = null, string fullClassName = null)
             : base(pm, fullClassName, propFactory) { }
 
 

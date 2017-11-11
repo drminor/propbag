@@ -1,7 +1,6 @@
 ﻿using System;
 
 // This should be removed since  WeakReference<T> can be used instead.
-// This does not work for structs -- the same as for WeakReference<T>.
 
 // This does allow one to change the value of TrackRessurection, where WeakReference<T>
 // does not.

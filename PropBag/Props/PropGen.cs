@@ -15,9 +15,11 @@ using DRM.TypeSafePropertyBag.Fundamentals;
 
 namespace DRM.PropBag
 {
+    using PropIdType = UInt32;
+
     public struct PropGen : IPropGen
     {
-        public SimpleExKey PropId { get; }
+        public PropIdType PropId { get; }
 
         public IProp TypedProp { get; }
 
@@ -41,7 +43,7 @@ namespace DRM.PropBag
         }
 
         // Constructors
-        public PropGen(IProp genericTypedProp, SimpleExKey propId)
+        public PropGen(IProp genericTypedProp, PropIdType propId)
         {
             TypedProp = genericTypedProp ?? throw new ArgumentNullException($"{nameof(genericTypedProp)} must be non-null.");
             PropId = propId;
@@ -56,7 +58,7 @@ namespace DRM.PropBag
         public PropGen(bool? makeEmpty)
         {
             TypedProp = null;
-            PropId = new SimpleExKey();
+            PropId = 0;
             IsEmpty = true;
         }
 

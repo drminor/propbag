@@ -21,7 +21,7 @@ namespace DRM.TypeSafePropertyBag.EventManagement
         {
             lock (_sync)
             {
-                if (TryGetSubscription(subscriptionKey.SourcePropId.Level2Key, out ISubscriptionGen subscription))
+                if (TryGetSubscription(subscriptionKey, out ISubscriptionGen subscription))
                 {
                     System.Diagnostics.Debug.WriteLine($"The subscription for {subscriptionKey.SourcePropId} has aleady been created.");
                     return subscription;
@@ -52,27 +52,27 @@ namespace DRM.TypeSafePropertyBag.EventManagement
             }
         }
 
-        public bool RemoveSubscription(ISubscriptionGen subscription)
-        {
-            lock (_sync)
-            {
-                if (ContainsSubscription(subscription))
-                {
-                    _subs.Remove(subscription);
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-        }
+        //public bool RemoveSubscription(ISubscriptionGen subscription)
+        //{
+        //    lock (_sync)
+        //    {
+        //        if (ContainsSubscription(subscription))
+        //        {
+        //            _subs.Remove(subscription);
+        //            return true;
+        //        }
+        //        else
+        //        {
+        //            return false;
+        //        }
+        //    }
+        //}
 
-        public bool RemoveSubscription(IExplodedKey<ulong, uint, uint> exKey)
+        public bool RemoveSubscription(ISubscriptionKeyGen request)
         {
             lock (_sync)
             {
-                if (TryGetSubscription(exKey.Level2Key, out ISubscriptionGen subscription))
+                if (TryGetSubscription(request, out ISubscriptionGen subscription))
                 {
                     // TODO: consider adding a TryRemove method.
                     _subs.Remove(subscription);
@@ -80,7 +80,7 @@ namespace DRM.TypeSafePropertyBag.EventManagement
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine($"Could not find the subscription for {exKey} when trying to remove it.");
+                    System.Diagnostics.Debug.WriteLine($"Could not find the subscription for {request.SourcePropId} when trying to remove it.");
                     return false;
                 }
 
@@ -93,11 +93,11 @@ namespace DRM.TypeSafePropertyBag.EventManagement
             return result;
         }
 
-        public bool TryGetSubscription(uint l2Key, out ISubscriptionGen subscription)
+        public bool TryGetSubscription(ISubscriptionKeyGen request, out ISubscriptionGen subscription)
         {
             lock (_sync)
             {
-                subscription = _subs.FirstOrDefault((x => x.SourcePropId.Level2Key == l2Key));
+                subscription = _subs.FirstOrDefault((x => x.SourcePropId.Level2Key == request.SourcePropId.Level2Key && x.SubscriptionKind == request.SubscriptionKind));
             }
 
             if(subscription == null)

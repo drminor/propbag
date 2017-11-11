@@ -114,7 +114,7 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
         public bool TryGetValue(L1T top, L2TRaw rawBot, out PropDataT value)
         {
             bool result;
-            if(CompKeyManager.TryJoin(top, rawBot, out ExKeyT comp))
+            if (CompKeyManager.TryJoin(top, rawBot, out ExKeyT comp))
             {
                 result = TryGetValue(comp, out value);
                 return result;

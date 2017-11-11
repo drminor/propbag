@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using DRM.TypeSafePropertyBag.EventManagement;
 
 namespace DRM.TypeSafePropertyBag
 {
-    public interface IPropFactory //: IProvideAnEventManager
+    public interface IPropFactory 
     {
         bool ProvidesStorage { get; }
         //bool ReturnDefaultForUndefined { get; }
@@ -12,6 +11,8 @@ namespace DRM.TypeSafePropertyBag
 
         ResolveTypeDelegate TypeResolver { get; }
         IConvertValues ValueConverter { get; }
+
+        IProvidePropStoreAccessService<IPropBag, IPropGen> PropStoreAccessServiceProvider { get; }
 
         #region Collection-Type Methods Methods
 

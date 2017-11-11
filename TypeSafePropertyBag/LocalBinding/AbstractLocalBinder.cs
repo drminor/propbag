@@ -35,19 +35,19 @@ namespace DRM.TypeSafePropertyBag.EventManagement
         //    }
         //}
 
-        public void UpdateTarget<T>(/*IPropBag sourceHost, */BindingSubscription<T> bs, T oldValue, T newValue, ref int counter)
+        public void UpdateTarget<T>(BindingSubscription<T> bs, T oldValue, T newValue, ref int counter)
         {
-            // Get the target
-            Action<T, T> originalAction = bs.TypedDoWhenChanged;
-            IPropBag target = (IPropBag)originalAction.Target;
+            //// Get the target
+            //Action<T, T> originalAction = bs.TypedDoWhenChanged;
+            //IPropBag target = (IPropBag)originalAction.Target;
 
-            // Use the target property key from the BindingSubscription
-            SimpleExKey targetPropId = bs.TargetPropId;
-            bool result = target.SetIt<T>(newValue, targetPropId);
+            //// Use the target property key from the BindingSubscription
+            //SimpleExKey targetPropId = bs.TargetPropId;
+            //bool result = target.SetIt<T>(newValue, targetPropId);
 
-            // Let the caller know that one more binding target was updated.
-            if (result)
-                counter++;
+            //// Let the caller know that one more binding target was updated.
+            //if (result)
+            //    counter++;
         }
 
     }

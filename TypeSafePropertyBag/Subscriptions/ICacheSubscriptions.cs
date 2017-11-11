@@ -1,8 +1,11 @@
 ﻿
 using DRM.TypeSafePropertyBag.Fundamentals;
+using System;
 
 namespace DRM.TypeSafePropertyBag.EventManagement
 {
+    using PropIdType = UInt32;
+
     /// <summary>
     /// Provides storage that one or more IPropBags can share to hold callbacks registered for particular properties registered on the IPropBag.
     /// The callbacks can be one of several forms including, but not limited to:
@@ -20,6 +23,8 @@ namespace DRM.TypeSafePropertyBag.EventManagement
         bool RemoveSubscription(ISubscriptionKeyGen subscriptionRequest);
 
         SubscriberCollection GetSubscriptions(ExKeyT exKey);
+
+        SubscriberCollection GetSubscriptions(IPropBag host, PropIdType propId, SimplePropStoreAccessService<IPropBag, IPropGen> storeAccessor);
 
     }
 }

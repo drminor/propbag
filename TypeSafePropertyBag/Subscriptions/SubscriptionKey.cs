@@ -12,11 +12,26 @@ namespace DRM.TypeSafePropertyBag.EventManagement
         #region Constructors
 
         // Typed Handler -- PCTypeEventArgs<T>
-        public SubscriptionKey(SimpleExKey exKey, EventHandler<PCTypedEventArgs<T>> handler, SubscriptionPriorityGroup subscriptionPriorityGroup, bool keepRef)
-            : base(exKey, target: handler.Target, method: handler.Method, kind: SubscriptionKind.TypedHandler,
+        public SubscriptionKey
+            (
+            IPropBag host,
+            uint propId,
+            SimplePropStoreAccessService<IPropBag, IPropGen> storeAccessor,
+            EventHandler<PCTypedEventArgs<T>> handler,
+            SubscriptionPriorityGroup subscriptionPriorityGroup,
+            bool keepRef
+            )
+            : base(GetTheKey(host, propId, storeAccessor), target: handler.Target, method: handler.Method, kind: SubscriptionKind.TypedHandler,
                   subscriptionPriorityGroup: subscriptionPriorityGroup, keepRef: keepRef, subscriptionCreator: CreateSubscriptionGen)
         {
             TypedHandler = handler;
+        }
+
+        private static SimpleExKey GetTheKey(IPropBag host, uint propId, SimplePropStoreAccessService<IPropBag, IPropGen> storeAccessor)
+        {
+            SimpleExKey result = ((IHaveTheKey<IPropBag>)storeAccessor).GetTheKey(host, propId);
+
+            return result;
         }
 
         // Gen Handler -- PCGenEventArgs

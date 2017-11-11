@@ -32,7 +32,7 @@ namespace DRM.TypeSafePropertyBag
 
         bool SetValWithNoType(string propertyName, object value);
         bool SetIt<T>(T newValue, ref T curValue, string propertyName);
-        bool SetIt<T>(T value, SimpleExKey propId);
+        //bool SetIt<T>(T value, SimpleExKey propId);
 
         bool PropertyExists(string propertyName);
         bool TryGetPropType(string propertyName, out PropKindEnum propType);
@@ -50,6 +50,8 @@ namespace DRM.TypeSafePropertyBag
         bool SubscribeToPropChanged(EventHandler<PCObjectEventArgs> eventHandler, string propertyName);
         bool UnSubscribeToPropChanged(EventHandler<PCObjectEventArgs> eventHandler, string propertyName);
 
+        bool AddBinding<T>(string propertyName, string targetPropertyName, Action<T, T> ttAction);
+
 
         //bool SubscribeToPropChanged<T>(Action<T, T> doOnChange, string propertyName);
         //bool UnSubscribeToPropChanged<T>(Action<T, T> doOnChange, string propertyName);
@@ -61,7 +63,7 @@ namespace DRM.TypeSafePropertyBag
 
         // Consider moving these to the TypeSafePropBagMetaData class.
         IList<string> GetAllPropertyNames();
-        IDictionary<string, object> GetAllPropertyValues();
+        IDictionary<string, IPropGen> GetAllPropertyValues();
         IDictionary<string, ValPlusType> GetAllPropNamesAndTypes();
 
         //IPropGen this[int index] { get; }

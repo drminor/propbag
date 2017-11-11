@@ -4,24 +4,44 @@ using System.Linq;
 
 namespace DRM.TypeSafePropertyBag.Fundamentals
 {
-    public class SimpleLevel2KeyMan : IL2KeyMan<uint, string>
-    {
-        Dictionary<string, uint> _rawDict;
-        Dictionary<uint, string> _cookedDict;
+    using PropIdType = UInt32;
+    using PropNameType = String;
 
-        public SimpleLevel2KeyMan()
+    public class SimpleLevel2KeyMan : IL2KeyMan<PropIdType, PropNameType>
+    {
+        #region Private Members
+
+        Dictionary<PropNameType, PropIdType> _rawDict;
+        Dictionary<PropIdType, PropNameType> _cookedDict;
+
+        readonly object _sync;
+
+        #endregion
+
+        #region Constructor
+
+        public SimpleLevel2KeyMan(int maxPropsPerObject)
         {
-            _rawDict = new Dictionary<string, uint>();
-            _cookedDict = new Dictionary<uint, string>();
+            _rawDict = new Dictionary<PropNameType, PropIdType>();
+            _cookedDict = new Dictionary<PropIdType, PropNameType>();
+            MaxPropsPerObject = maxPropsPerObject;
+
+            _sync = new object();
         }
 
-        public string FromCooked(uint bot)
+        #endregion
+
+        #region Public Members
+
+        public int MaxPropsPerObject { get; }
+
+        public PropNameType FromCooked(PropIdType bot)
         {
-            string result = _cookedDict.Values.FirstOrDefault();
+            PropNameType result = _cookedDict.Values.FirstOrDefault();
             return result;
         }
 
-        public bool TryGetFromCooked(uint bot, out string rawBot)
+        public bool TryGetFromCooked(PropIdType bot, out PropNameType rawBot)
         {
             if (_cookedDict.TryGetValue(bot, out rawBot))
             {
@@ -34,13 +54,13 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
             }
         }
 
-        public uint FromRaw(string rawBot)
+        public PropIdType FromRaw(PropNameType rawBot)
         {
-            uint result = _rawDict[rawBot];
+            PropIdType result = _rawDict[rawBot];
             return result;
         }
 
-        public bool TryGetFromRaw(string rawBot, out uint bot)
+        public bool TryGetFromRaw(PropNameType rawBot, out PropIdType bot)
         {
             if(_rawDict.TryGetValue(rawBot, out bot))
             {
@@ -53,23 +73,47 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
             }
         }
 
-        public uint Add(string rawBot)
+        public PropIdType Add(PropNameType rawBot)
         {
-            uint cookedVal = NextCookedVal;
+            PropIdType cookedVal = NextCookedVal;
             _rawDict.Add(rawBot, cookedVal);
             _cookedDict.Add(cookedVal, rawBot);
             return cookedVal;
         }
 
+        public PropIdType GetOrAdd(PropNameType rawBot)
+        {
+            lock (_sync)
+            {
+                if (_rawDict.TryGetValue(rawBot, out PropIdType existingCookedVal))
+                {
+                    return existingCookedVal;
+                }
+                else
+                {
+                    PropIdType cookedVal = NextCookedVal;
+                    _rawDict.Add(rawBot, cookedVal);
+                    _cookedDict.Add(cookedVal, rawBot);
+                    return cookedVal;
+                }
+            }
+        }
+
+        #endregion
+
+        #region Private Methods
+
         private long m_Counter = 0;
-        public uint NextCookedVal
+        private uint NextCookedVal
         {
             get
             {
                 long temp = System.Threading.Interlocked.Increment(ref m_Counter);
-                if (temp > uint.MaxValue) throw new InvalidOperationException("The Level2 Key Manager has run out of Ids.");
+                if (temp > MaxPropsPerObject) throw new InvalidOperationException("The SimpleLevel2Key Manager has run out of property ids.");
                 return (uint)temp;
             }
         }
+
+        #endregion
     }
 }

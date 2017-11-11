@@ -1,20 +1,28 @@
 ﻿
 using System;
-using System.Collections.Generic;
 
 namespace DRM.TypeSafePropertyBag.Fundamentals
 {
-    public struct SimpleExKey : IExplodedKey<ulong, uint, uint>, IEquatable<SimpleExKey>
-    {
-        public ulong CKey { get; }
-        public uint Level1Key { get; }
-        public uint Level2Key { get; }
+    using CompositeKeyType = UInt64;
+    using ObjectIdType = UInt32;
+    using PropIdType = UInt32;
 
-        public SimpleExKey(ulong cKey, uint level1Key, uint level2Key) : this()
+    using ObjectRefType = WeakReference<IPropBag>;
+
+    public struct SimpleExKey : IExplodedKey<CompositeKeyType, ObjectIdType, PropIdType>, IEquatable<SimpleExKey>
+    {
+        public CompositeKeyType CKey { get; }
+        public ObjectIdType Level1Key { get; }
+        public PropIdType Level2Key { get; }
+
+        public ObjectRefType _wrToPropBag { get; }
+
+        public SimpleExKey(CompositeKeyType cKey, ObjectRefType accessToken, ObjectIdType level1Key, PropIdType level2Key) : this()
         {
             CKey = cKey;
             Level1Key = level1Key;
             Level2Key = level2Key;
+            _wrToPropBag = accessToken ?? throw new ArgumentNullException(nameof(accessToken));
         }
 
         public override bool Equals(object obj)
@@ -29,9 +37,11 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
 
         public override int GetHashCode()
         {
-            var hashCode = 1252689209;
-            hashCode = hashCode * -1521134295 + base.GetHashCode();
-            hashCode = hashCode * -1521134295 + CKey.GetHashCode();
+            //var hashCode = 1252689209;
+            //hashCode = hashCode * -1521134295 + base.GetHashCode();
+            //hashCode = hashCode * -1521134295 + CKey.GetHashCode();
+
+            var hashCode = CKey.GetHashCode();
             return hashCode;
         }
 

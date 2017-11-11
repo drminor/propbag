@@ -16,9 +16,10 @@ namespace DRM.PropBag
         }
 
         public PropFactory(/*bool returnDefaultForUndefined,*/
+            SimplePropStoreAccessServiceProvider<IPropBag, IPropGen> propStoreAccessServiceProvider,
             ResolveTypeDelegate typeResolver = null,
             IConvertValues valueConverter = null)
-        : base(/*returnDefaultForUndefined, */typeResolver, valueConverter) { }
+        : base(/*returnDefaultForUndefined, */ propStoreAccessServiceProvider, typeResolver, valueConverter) { }
 
 
         // TODO: This is temporary just for testing.

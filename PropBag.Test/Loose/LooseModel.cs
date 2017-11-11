@@ -6,6 +6,13 @@ namespace PropBagLib.Tests
 {
     public partial class LooseModel : PropBag
     {
+        private PropBagTypeSafetyMode none;
+
+        public LooseModel(PropBagTypeSafetyMode none)
+        {
+            this.none = none;
+        }
+
         public bool DoWhenStringChanged_WasCalled { get; set; }
         public string DoWhenStringPropOldVal { get; set; }
         public string DoWhenStringPropNewVal { get; set; }

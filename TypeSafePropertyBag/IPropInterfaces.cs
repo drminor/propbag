@@ -8,6 +8,8 @@ using System.Data;
 
 namespace DRM.TypeSafePropertyBag
 {
+    using PropIdType = UInt32;
+
     // Typically implemented by TypedTableBase<T> Class
     public interface IDTPropPrivate<CT,T> : ICPropPrivate<CT,T> where CT: IEnumerable<T>
     {
@@ -120,7 +122,7 @@ namespace DRM.TypeSafePropertyBag
     /// </summary>
     public interface IPropGen
     {
-        SimpleExKey PropId { get; }
+        PropIdType PropId { get; }
         bool IsEmpty { get; }
 
         /// <summary>

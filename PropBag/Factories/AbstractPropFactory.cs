@@ -31,6 +31,8 @@ namespace DRM.PropBag
         /// </summary>
         public virtual string IndexerName { get; }
 
+        public IProvidePropStoreAccessService<IPropBag, IPropGen> PropStoreAccessServiceProvider { get; }
+
         #endregion
 
         #region Constructor
@@ -38,11 +40,14 @@ namespace DRM.PropBag
         public AbstractPropFactory
             (
             //bool returnDefaultForUndefined,
+            SimplePropStoreAccessServiceProvider<IPropBag, IPropGen> propStoreAccessServiceProvider,
             ResolveTypeDelegate typeResolver = null,
             IConvertValues valueConverter = null
             )
         {
             //ReturnDefaultForUndefined = returnDefaultForUndefined;
+
+            PropStoreAccessServiceProvider = propStoreAccessServiceProvider;
 
             // Use our default implementation, if the caller did not supply one.
             TypeResolver = typeResolver ?? this.GetTypeFromName;

@@ -40,6 +40,7 @@ namespace DRM.TypeSafePropertyBag.EventManagement
                 subscriptionCreator: CreateSubscriptionGen
             )
         {
+            TypedDoWhenChanged = action;
             TargetPropId = targetPropId;
             BindingInfo = bindingInfo;
         }

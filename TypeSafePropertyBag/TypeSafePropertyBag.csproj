@@ -45,6 +45,7 @@
     <Compile Include="EventManagement\PCTypedEventBase.cs" />
     <Compile Include="EventManagement\PropertyChangedEventManager.cs" />
     <Compile Include="Fundamentals\IWeakEventListener.cs" />
+    <Compile Include="Fundamentals\ObjectIdDictionary\IExplodedKey.cs" />
     <Compile Include="Fundamentals\ObjectIdDictionary\SimpleExKey.cs" />
     <Compile Include="LocalBinding\AbstractLocalBinder.cs" />
     <Compile Include="LocalBinding\IBindLocalProps.cs" />
@@ -56,7 +57,12 @@
     <Compile Include="LocalBinding\SimpleLocalBinder.cs" />
     <Compile Include="LocalBinding\SimpleLocalBindingOps.cs" />
     <Compile Include="PropBagInterfaces\IPropBag.cs" />
+    <Compile Include="PropStore\IProvidePropStoreAccessService.cs" />
     <Compile Include="PropBagInterfaces\IPubPropBag.cs" />
+    <Compile Include="PropStore\IPropStoreAccessService.cs" />
+    <Compile Include="PropStore\IHaveTheKey.cs" />
+    <Compile Include="PropStore\SimplePropStoreAccessService.cs" />
+    <Compile Include="PropStore\SimplePropStoreAccessServiceProvider.cs" />
     <Compile Include="Subscriptions\CollectionOfSubscriberCollections.cs" />
     <Compile Include="Subscriptions\ICacheSubscriptions.cs" />
     <Compile Include="Subscriptions\ISubscription.cs" />

@@ -3,6 +3,7 @@ using DRM.PropBag.AutoMapperSupport;
 using DRM.PropBag.ControlModel;
 using DRM.PropBag.ControlsWPF;
 using DRM.TypeSafePropertyBag;
+using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
 using System.ComponentModel;
 using System.Windows;
@@ -144,9 +145,25 @@ namespace PropBagTestApp.Infra
         public static SimpleAutoMapperProvider AutoMapperProvider { get; }
         public static IPropFactory ThePropFactory { get; }
 
-        static JustSayNo() 
+        private static SimpleLevel2KeyMan _level2KeyManager;
+        private static SimpleCompKeyMan _compKeyManager;
+        private static readonly SimpleObjectIdDictionary<IPropGen> _theStore;
+
+        public static SimplePropStoreAccessServiceProvider<IPropBag, IPropGen> PropStoreAccessServiceProvider { get; }
+
+        static JustSayNo()
         {
-            ThePropFactory = new PropFactory(typeResolver: GetTypeFromName, valueConverter: null);
+            _theStore = ProvisonTheStore(out _level2KeyManager, out _compKeyManager);
+
+            PropStoreAccessServiceProvider = new SimplePropStoreAccessServiceProvider<IPropBag, IPropGen>
+                (_theStore, _compKeyManager, _level2KeyManager);
+
+            ThePropFactory = new PropFactory
+                (
+                    propStoreAccessServiceProvider: PropStoreAccessServiceProvider,
+                    typeResolver: GetTypeFromName,
+                    valueConverter: null
+                );
 
             IPropBagTemplateProvider propBagTemplateProvider
                 = new PropBagTemplateProvider(Application.Current.Resources);
@@ -177,6 +194,19 @@ namespace PropBagTestApp.Infra
 
             return result;
         }
+
+        private static SimpleObjectIdDictionary<IPropGen> ProvisonTheStore(out SimpleLevel2KeyMan level2KeyMan, out SimpleCompKeyMan compKeyManager)
+        {
+            level2KeyMan = new SimpleLevel2KeyMan(MAX_NUMBER_OF_PROPERTIES);
+            compKeyManager = new SimpleCompKeyMan(level2KeyMan);
+
+            SimpleObjectIdDictionary<IPropGen> result = new SimpleObjectIdDictionary<IPropGen>(compKeyManager, level2KeyMan);
+            return result;
+        }
+
+        // Maximum number of PropertyIds for any one given Object.
+        private const int LOG_BASE2_MAX_PROPERTIES = 16;
+        public static readonly int MAX_NUMBER_OF_PROPERTIES = (int)Math.Pow(2, LOG_BASE2_MAX_PROPERTIES); //65536;
 
         #region InDesign Support
         public static bool InDesignMode() => _isInDesignMode.HasValue && _isInDesignMode == true;

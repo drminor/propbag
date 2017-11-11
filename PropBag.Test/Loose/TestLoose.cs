@@ -7,7 +7,7 @@ namespace PropBagLib.Tests
     [TestFixtureAttribute]
     public class TestLoose
     {
-
+        AutoMapperSupport.AutoMapperHelpers _amHelpers;
         LooseModel mod1;
 
         const string PROP_NEW = "NewProp";
@@ -22,6 +22,7 @@ namespace PropBagLib.Tests
         [OneTimeSetUp]
         public void Create()
         {
+            _amHelpers = new AutoMapperSupport.AutoMapperHelpers();
         }
 
         [OneTimeTearDown]
@@ -37,7 +38,7 @@ namespace PropBagLib.Tests
         [Test]
         public void ShouldUpdateBool()
         {
-            mod1 = new LooseModel(PropBagTypeSafetyMode.None)
+            mod1 = new LooseModel(PropBagTypeSafetyMode.None, _amHelpers.PropFactory_V1)
             {
                 PropBool = true
             };
@@ -47,8 +48,9 @@ namespace PropBagLib.Tests
         [Test]
         public void ShouldUpdateString()
         {
-            mod1 = new LooseModel(PropBagTypeSafetyMode.None);
+            mod1 = new LooseModel(PropBagTypeSafetyMode.None, _amHelpers.PropFactory_V1);
             mod1.PropStringChanged += Mod1_PropStringChanged;
+
 
             mod1.PropString = "Test2";
 
@@ -62,10 +64,12 @@ namespace PropBagLib.Tests
             Assert.That(propString_WasUpdated, Is.EqualTo(true), "PropStringChangeWasCalled = false");
         }
 
+
+
         [Test]
         public void ShouldSAndGLooseBool()
         {
-            mod1 = new LooseModel(PropBagTypeSafetyMode.None)
+            mod1 = new LooseModel(PropBagTypeSafetyMode.None, _amHelpers.PropFactory_V1)
             {
                 PropBool = true
             };
@@ -79,7 +83,7 @@ namespace PropBagLib.Tests
         [Test]
         public void ShouldSAndGLooseUseNewProp()
         {
-            mod1 = new LooseModel(PropBagTypeSafetyMode.None);
+            mod1 = new LooseModel(PropBagTypeSafetyMode.None, _amHelpers.PropFactory_V1);
 
             mod1["System.String", PROP_NEW] = "string";
 
@@ -93,7 +97,7 @@ namespace PropBagLib.Tests
         [Test]
         public void ShouldSAndGLooseUseNew1stNullNotOk()
         {
-            mod1 = new LooseModel(PropBagTypeSafetyMode.None);
+            mod1 = new LooseModel(PropBagTypeSafetyMode.None, _amHelpers.PropFactory_V1);
 
             mod1["System.Object", PROP_NEW] = null;
             Assert.That(mod1.GetTypeOfProperty(PROP_NEW), Is.EqualTo(typeof(object)));
@@ -104,7 +108,7 @@ namespace PropBagLib.Tests
         [Test]
         public void ShouldSAndGLooseUseNew2ndNullOk()
         {
-            mod1 = new LooseModel(PropBagTypeSafetyMode.None);
+            mod1 = new LooseModel(PropBagTypeSafetyMode.None, _amHelpers.PropFactory_V1);
 
             mod1["System.String", PROP_NEW] = "string";
             mod1["System.String", PROP_NEW] = null;
@@ -119,7 +123,7 @@ namespace PropBagLib.Tests
         [Test]
         public void ShouldGetKeyNotFoundEx()
         {
-            mod1 = new LooseModel(PropBagTypeSafetyMode.None);
+            mod1 = new LooseModel(PropBagTypeSafetyMode.None, _amHelpers.PropFactory_V1);
 
             object x;
             Assert.Throws<InvalidOperationException>(() => x = mod1["System.String", "x"]);
@@ -137,7 +141,7 @@ namespace PropBagLib.Tests
         [Test]
         public void UpdateViaPropGenAccess()
         {
-            mod1 = new LooseModel(PropBagTypeSafetyMode.None);
+            mod1 = new LooseModel(PropBagTypeSafetyMode.None, _amHelpers.PropFactory_V1);
 
             IPropGen pg = mod1.GetPropGen("PropBool");
 
