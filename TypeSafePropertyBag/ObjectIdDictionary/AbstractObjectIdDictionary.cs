@@ -3,11 +3,11 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 
-namespace DRM.TypeSafePropertyBag.Fundamentals
+namespace DRM.TypeSafePropertyBag
 {
-    public class AbstractObjectIdDictionary<ExKeyT, CompT, L1T, L2T, L2TRaw, PropDataT> :
-        ConcurrentDictionary<ExKeyT, PropDataT>,
-        IObjectIdDictionary<ExKeyT, CompT, L1T, L2T, L2TRaw, PropDataT> where ExKeyT : IExplodedKey<CompT, L1T, L2T> where PropDataT : IPropGen
+    public class AbstractObjectIdDictionary<ExKeyT, CompT, L1T, L2T, L2TRaw> :
+        ConcurrentDictionary<ExKeyT, IPropGen>,
+        IObjectIdDictionary<ExKeyT, CompT, L1T, L2T, L2TRaw, IPropGen> where ExKeyT : IExplodedKey<CompT, L1T, L2T> 
     {
         #region Private Memebers
 
@@ -38,11 +38,11 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
         {
             //ICollection<KeyValuePair<CompT, TValue>> r = (ICollection<KeyValuePair<CompT, TValue>>) this;
 
-            var thisAsCollection = this as ICollection<KeyValuePair<ExKeyT, PropDataT>>;
+            var thisAsCollection = this as ICollection<KeyValuePair<ExKeyT, IPropBag>>;
 
-            List<KeyValuePair<ExKeyT, PropDataT>> toRemove = new List<KeyValuePair<ExKeyT, PropDataT>>();
+            List<KeyValuePair<ExKeyT, IPropBag>> toRemove = new List<KeyValuePair<ExKeyT, IPropBag>>();
 
-            foreach (KeyValuePair<ExKeyT, PropDataT> kvp in thisAsCollection)
+            foreach (KeyValuePair<ExKeyT, IPropBag> kvp in thisAsCollection)
             {
                 L1T foundTop = CompKeyManager.Split(kvp.Key, out L2T bot);
                 if (foundTop.Equals(top))
@@ -52,7 +52,7 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
             }
 
             int result = 0;
-            foreach (KeyValuePair<ExKeyT, PropDataT> kvp in toRemove)
+            foreach (KeyValuePair<ExKeyT, IPropBag> kvp in toRemove)
             {
                 thisAsCollection.Remove(kvp);
                 result++;
@@ -64,19 +64,19 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
 
         #region Level 2 Cooked 
 
-        public PropDataT GetOrAdd(L1T top, L2T bot, PropDataT value)
+        public IPropGen GetOrAdd(L1T top, L2T bot, IPropGen value)
         {
             ExKeyT key = CompKeyManager.Join(top, bot);
             return GetOrAdd(key, value);
         }
 
-        public bool TryAdd(L1T top, L2T bot, PropDataT value)
+        public bool TryAdd(L1T top, L2T bot, IPropGen value)
         {
             ExKeyT key = CompKeyManager.Join(top, bot);
             return TryAdd(key, value);
         }
 
-        public bool TryGetValue(L1T top, L2T bot, out PropDataT value)
+        public bool TryGetValue(L1T top, L2T bot, out IPropGen value)
         {
             ExKeyT key = CompKeyManager.Join(top, bot);
             return TryGetValue(key, out value);
@@ -89,7 +89,7 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
             return result;
         }
 
-        public bool TryRemove(L1T top, L2T bot, out PropDataT value)
+        public bool TryRemove(L1T top, L2T bot, out IPropGen value)
         {
             ExKeyT key = CompKeyManager.Join(top, bot);
             return TryRemove(key, out value);
@@ -99,19 +99,19 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
 
         #region Level 2 Raw
 
-        public bool TryAdd(L1T top, L2TRaw rawBot, PropDataT value)
+        public bool TryAdd(L1T top, L2TRaw rawBot, IPropGen value)
         {
             ExKeyT key = CompKeyManager.Join(top, Level2KeyManager.FromRaw(rawBot));
             return TryAdd(key, value);
         }
 
-        public PropDataT GetOrAdd(L1T top, L2TRaw rawBot, PropDataT value)
+        public IPropGen GetOrAdd(L1T top, L2TRaw rawBot, IPropGen value)
         {
             ExKeyT key = CompKeyManager.Join(top, Level2KeyManager.FromRaw(rawBot));
             return GetOrAdd(key, value);
         }
 
-        public bool TryGetValue(L1T top, L2TRaw rawBot, out PropDataT value)
+        public bool TryGetValue(L1T top, L2TRaw rawBot, out IPropGen value)
         {
             bool result;
             if (CompKeyManager.TryJoin(top, rawBot, out ExKeyT comp))
@@ -121,7 +121,7 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
             }
             else
             {
-                value = default(PropDataT);
+                value = default(IPropGen);
                 return false;
             }
         }
@@ -133,7 +133,7 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
             return result;
         }
 
-        public bool TryRemove(L1T top, L2TRaw rawBot, out PropDataT value)
+        public bool TryRemove(L1T top, L2TRaw rawBot, out IPropGen value)
         {
             ExKeyT key = CompKeyManager.Join(top, Level2KeyManager.FromRaw(rawBot));
             return TryRemove(key, out value);

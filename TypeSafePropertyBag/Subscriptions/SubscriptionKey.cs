@@ -1,9 +1,11 @@
-﻿using DRM.TypeSafePropertyBag.Fundamentals;
-using System;
+﻿using System;
 using System.ComponentModel;
 
 namespace DRM.TypeSafePropertyBag.EventManagement
 {
+    using PropIdType = UInt32;
+    using PropNameType = String;
+
     public class SubscriptionKey<T> : SubscriptionKeyGen, ISubscriptionKey<T>
     {
         public EventHandler<PCTypedEventArgs<T>> TypedHandler { get; private set; }
@@ -16,7 +18,7 @@ namespace DRM.TypeSafePropertyBag.EventManagement
             (
             IPropBag host,
             uint propId,
-            SimplePropStoreAccessService<IPropBag, IPropGen> storeAccessor,
+            IPropStoreAccessService<PropIdType, PropNameType> storeAccessor,
             EventHandler<PCTypedEventArgs<T>> handler,
             SubscriptionPriorityGroup subscriptionPriorityGroup,
             bool keepRef
@@ -27,9 +29,9 @@ namespace DRM.TypeSafePropertyBag.EventManagement
             TypedHandler = handler;
         }
 
-        private static SimpleExKey GetTheKey(IPropBag host, uint propId, SimplePropStoreAccessService<IPropBag, IPropGen> storeAccessor)
+        private static SimpleExKey GetTheKey(IPropBag host, uint propId, IPropStoreAccessService<PropIdType, PropNameType> storeAccessor)
         {
-            SimpleExKey result = ((IHaveTheKey<IPropBag>)storeAccessor).GetTheKey(host, propId);
+            SimpleExKey result = ((IHaveTheSimpleKey)storeAccessor).GetTheKey(host, propId);
 
             return result;
         }

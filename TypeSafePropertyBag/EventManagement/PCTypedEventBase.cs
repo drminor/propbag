@@ -8,9 +8,9 @@ namespace DRM.TypeSafePropertyBag.EventManagement
         //object _evLock;
         //private event EventHandler<PCTypedEventArgs<T>> _privateEvent;
 
-        SimpleSubscriptionManager<TPropData> _subscriptionManager;
+        SimpleSubscriptionManager _subscriptionManager;
 
-        public PCTypedEventBase(SimpleSubscriptionManager<TPropData> subscriptionManager)
+        public PCTypedEventBase(SimpleSubscriptionManager subscriptionManager)
         {
             //_evLock = new object();
             //_privateEvent = delegate { };

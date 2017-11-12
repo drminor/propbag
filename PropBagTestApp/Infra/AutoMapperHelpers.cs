@@ -147,15 +147,15 @@ namespace PropBagTestApp.Infra
 
         private static SimpleLevel2KeyMan _level2KeyManager;
         private static SimpleCompKeyMan _compKeyManager;
-        private static readonly SimpleObjectIdDictionary<IPropGen> _theStore;
+        private static readonly SimpleObjectIdDictionary _theStore;
 
-        public static SimplePropStoreAccessServiceProvider<IPropBag, IPropGen> PropStoreAccessServiceProvider { get; }
+        public static SimplePropStoreAccessServiceProvider PropStoreAccessServiceProvider { get; }
 
         static JustSayNo()
         {
             _theStore = ProvisonTheStore(out _level2KeyManager, out _compKeyManager);
 
-            PropStoreAccessServiceProvider = new SimplePropStoreAccessServiceProvider<IPropBag, IPropGen>
+            PropStoreAccessServiceProvider = new SimplePropStoreAccessServiceProvider
                 (_theStore, _compKeyManager, _level2KeyManager);
 
             ThePropFactory = new PropFactory
@@ -195,12 +195,12 @@ namespace PropBagTestApp.Infra
             return result;
         }
 
-        private static SimpleObjectIdDictionary<IPropGen> ProvisonTheStore(out SimpleLevel2KeyMan level2KeyMan, out SimpleCompKeyMan compKeyManager)
+        private static SimpleObjectIdDictionary ProvisonTheStore(out SimpleLevel2KeyMan level2KeyMan, out SimpleCompKeyMan compKeyManager)
         {
             level2KeyMan = new SimpleLevel2KeyMan(MAX_NUMBER_OF_PROPERTIES);
             compKeyManager = new SimpleCompKeyMan(level2KeyMan);
 
-            SimpleObjectIdDictionary<IPropGen> result = new SimpleObjectIdDictionary<IPropGen>(compKeyManager, level2KeyMan);
+            SimpleObjectIdDictionary result = new SimpleObjectIdDictionary(compKeyManager, level2KeyMan);
             return result;
         }
 

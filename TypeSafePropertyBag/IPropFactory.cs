@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace DRM.TypeSafePropertyBag
 {
+    using PropIdType = UInt32;
+    using PropNameType = String;
+
     public interface IPropFactory 
     {
         bool ProvidesStorage { get; }
@@ -12,7 +15,7 @@ namespace DRM.TypeSafePropertyBag
         ResolveTypeDelegate TypeResolver { get; }
         IConvertValues ValueConverter { get; }
 
-        IProvidePropStoreAccessService<IPropBag, IPropGen> PropStoreAccessServiceProvider { get; }
+        IProvidePropStoreAccessService<PropIdType, PropNameType> PropStoreAccessServiceProvider { get; }
 
         #region Collection-Type Methods Methods
 

@@ -1,19 +1,14 @@
 ﻿
-
-using System;
-
 namespace DRM.TypeSafePropertyBag
 {
-    public interface IProvidePropStoreAccessService<PropBagT, PropDataT>
-        where PropBagT : IPropBag
-        where PropDataT : IPropGen
+    public interface IProvidePropStoreAccessService<L2T, L2TRaw>
     {
         long MaxObjectsPerAppDomain { get; }
         int MaxPropsPerObject { get; }
 
         // TODO: Consider not supporting this method: The client must keep the reference.
-        IPropStoreAccessService<PropBagT, PropDataT> GetOrCreatePropStoreService(PropBagT propBag);
+        IPropStoreAccessService<L2T, L2TRaw> GetOrCreatePropStoreService(IPropBag propBag);
 
-        IPropStoreAccessService<PropBagT, PropDataT> CreatePropStoreService(PropBagT propBag);
+        IPropStoreAccessService<L2T, L2TRaw> CreatePropStoreService(IPropBag propBag);
     }
 }

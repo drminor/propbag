@@ -14,6 +14,9 @@ using DRM.PropBag.EventManagement;
 
 namespace DRM.PropBag
 {
+    using PropIdType = System.UInt32;
+    using PropNameType = System.String;
+
     public abstract class AbstractPropFactory : IPropFactory
     {
         #region Public Properties
@@ -31,7 +34,7 @@ namespace DRM.PropBag
         /// </summary>
         public virtual string IndexerName { get; }
 
-        public IProvidePropStoreAccessService<IPropBag, IPropGen> PropStoreAccessServiceProvider { get; }
+        public IProvidePropStoreAccessService<PropIdType, PropNameType> PropStoreAccessServiceProvider { get; }
 
         #endregion
 
@@ -40,7 +43,7 @@ namespace DRM.PropBag
         public AbstractPropFactory
             (
             //bool returnDefaultForUndefined,
-            SimplePropStoreAccessServiceProvider<IPropBag, IPropGen> propStoreAccessServiceProvider,
+            IProvidePropStoreAccessService<PropIdType, PropNameType> propStoreAccessServiceProvider,
             ResolveTypeDelegate typeResolver = null,
             IConvertValues valueConverter = null
             )

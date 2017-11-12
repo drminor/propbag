@@ -4,7 +4,6 @@ using System;
 
 namespace DRM.TypeSafePropertyBag.EventManagement
 {
-    using PropIdType = UInt32;
 
     /// <summary>
     /// Provides storage that one or more IPropBags can share to hold callbacks registered for particular properties registered on the IPropBag.
@@ -17,14 +16,15 @@ namespace DRM.TypeSafePropertyBag.EventManagement
     /// </summary>
     /// <typeparam name="CompT">The type of the composite key for property objects.</typeparam>
     /// <typeparam name="PropDataT">The type used to cary instances of IPropGen.</typeparam>
-    public interface ICacheSubscriptions<ExKeyT, CompT, L1T, L2T, PropDataT> where ExKeyT : IExplodedKey<CompT, L1T,L2T>
+    public interface ICacheSubscriptions<ExKeyT, CompT, ObjectIdT, PropIdT, PropNameT>
+        where ExKeyT : IExplodedKey<CompT, ObjectIdT, PropIdT>
     {
         ISubscriptionGen AddSubscription(ISubscriptionKeyGen subscriptionRequest, out bool wasAdded);
         bool RemoveSubscription(ISubscriptionKeyGen subscriptionRequest);
 
         SubscriberCollection GetSubscriptions(ExKeyT exKey);
 
-        SubscriberCollection GetSubscriptions(IPropBag host, PropIdType propId, SimplePropStoreAccessService<IPropBag, IPropGen> storeAccessor);
+        SubscriberCollection GetSubscriptions(IPropBag host, PropIdT propId, IPropStoreAccessService<PropIdT, PropNameT> storeAccessor);
 
     }
 }

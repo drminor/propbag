@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace DRM.TypeSafePropertyBag.Fundamentals
+namespace DRM.TypeSafePropertyBag
 {
     /// <summary>
     /// 
@@ -14,7 +14,7 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
     /// <typeparam name="PropDataT">The type used to implement the IPropGen interface.</typeparam>
     public interface IObjectIdDictionary<ExKeyT, CompT, L1T, L2T, L2TRaw, PropDataT>
         : IDictionary<ExKeyT, PropDataT>, ICollection<KeyValuePair<ExKeyT, PropDataT>>, 
-        IEnumerable<KeyValuePair<ExKeyT, PropDataT>>, IDictionary, ICollection, IEnumerable where ExKeyT : IExplodedKey<CompT, L1T, L2T> where PropDataT : IPropGen
+        IEnumerable<KeyValuePair<ExKeyT, PropDataT>>, IDictionary, ICollection, IEnumerable where ExKeyT : IExplodedKey<CompT, L1T, L2T> //where PropDataT : IPropGen
     {
         #region ConcurentDictionary Methods
 

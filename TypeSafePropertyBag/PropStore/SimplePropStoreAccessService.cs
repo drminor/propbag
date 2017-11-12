@@ -7,25 +7,22 @@ namespace DRM.TypeSafePropertyBag
 {
     using CompositeKeyType = UInt64;
     using ObjectIdType = UInt32;
-    using ObjectRefType = WeakReference<IPropBag>;
 
     using PropIdType = UInt32;
     using PropNameType = String;
 
-    public sealed class SimplePropStoreAccessService<PropBagT, PropDataT>
-        : IPropStoreAccessService<PropBagT, PropDataT>, IHaveTheKey<PropBagT>
-        where PropBagT : IPropBag
-        where PropDataT : IPropGen
+    public sealed class SimplePropStoreAccessService
+        : IPropStoreAccessService<PropIdType, PropNameType>, IHaveTheSimpleKey
     {
         #region Private Members
 
-        ObjectRefType _clientAccessToken;
+        WeakReference<IPropBag> _clientAccessToken;
         ObjectIdType _objectId;
 
         SimpleCompKeyMan _compKeyManager;
         SimpleLevel2KeyMan _level2KeyManager;
 
-        SimpleObjectIdDictionary<PropDataT> _theGlobalStore;
+        SimpleObjectIdDictionary _theGlobalStore;
         //IReadOnlyDictionary<ObjectRefType, ObjectIdType> _objectIdDictionary;
 
         #endregion
@@ -34,9 +31,9 @@ namespace DRM.TypeSafePropertyBag
 
         public SimplePropStoreAccessService
             (
-            ObjectRefType clientAccessToken,
+            WeakReference<IPropBag> clientAccessToken,
             ObjectIdType objectId,
-            SimpleObjectIdDictionary<PropDataT> theGlobalStore,
+            SimpleObjectIdDictionary theGlobalStore,
             SimpleCompKeyMan compKeyManager,
             SimpleLevel2KeyMan level2KeyManager
             )
@@ -57,12 +54,12 @@ namespace DRM.TypeSafePropertyBag
         public int MaxPropsPerObject { get; }
         public long MaxObjectsPerAppDomain { get; }
 
-        public PropDataT this[PropBagT propBag, PropIdType propId]
+        public IPropGen this[IPropBag propBag, PropIdType propId]
         {
             get
             {
                 SimpleExKey exKey = GetExKey(propBag, propId);
-                PropDataT result = _theGlobalStore[exKey];
+                IPropGen result = _theGlobalStore[exKey];
 
                 return result;
             }
@@ -73,7 +70,7 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        public bool TryGetValue(PropBagT propBag, PropIdType propId, out PropDataT propData)
+        public bool TryGetValue(IPropBag propBag, PropIdType propId, out IPropGen propData)
         {
             SimpleExKey exKey = GetExKey(propBag, propId);
 
@@ -81,7 +78,7 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        public bool TryAdd(PropBagT propBag, PropIdType propId, PropDataT propData)
+        public bool TryAdd(IPropBag propBag, PropIdType propId, IPropGen propData)
         {
             SimpleExKey exKey = GetExKey(propBag, propId);
 
@@ -89,7 +86,7 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        public bool TryRemove(PropBagT propBag, PropIdType propId, out PropDataT propData)
+        public bool TryRemove(IPropBag propBag, PropIdType propId, out IPropGen propData)
         {
             SimpleExKey exKey = GetExKey(propBag, propId);
 
@@ -97,7 +94,7 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
          
-        public bool ContainsKey(PropBagT propBag, PropIdType propId)
+        public bool ContainsKey(IPropBag propBag, PropIdType propId)
         {
             SimpleExKey exKey = GetExKey(propBag, propId);
 
@@ -107,41 +104,41 @@ namespace DRM.TypeSafePropertyBag
 
         // TODO: Consider keeping a index of all Props,
         // or making the caller remove each Prop individually.
-        public void Clear(PropBagT propBag)
+        public void Clear(IPropBag propBag)
         {
             ObjectIdType objectId = GetAndCheckObjectRef(propBag);
 
-            IEnumerable<KeyValuePair<SimpleExKey, PropDataT>> propDataObjectsForThisPropBag = _theGlobalStore.Where(x => x.Key.Level1Key == objectId);
-            foreach(KeyValuePair<SimpleExKey, PropDataT> kvp in propDataObjectsForThisPropBag)
+            IEnumerable<KeyValuePair<SimpleExKey, IPropGen>> propDataObjectsForThisPropBag = _theGlobalStore.Where(x => x.Key.Level1Key == objectId);
+            foreach(KeyValuePair<SimpleExKey, IPropGen> kvp in propDataObjectsForThisPropBag)
             {
-                _theGlobalStore.TryRemove(kvp.Key, out PropDataT dontNeedItVal);
+                _theGlobalStore.TryRemove(kvp.Key, out IPropGen dontNeedItVal);
             }
         }
 
-        public IEnumerable<KeyValuePair<PropNameType, PropDataT>> GetCollection(PropBagT propBag)
+        public IEnumerable<KeyValuePair<PropNameType, IPropGen>> GetCollection(IPropBag propBag)
         {
             ObjectIdType objectId = GetAndCheckObjectRef(propBag);
 
-            IEnumerable<KeyValuePair<SimpleExKey, PropDataT>> propDataObjectsForThisPropBag = _theGlobalStore.Where(x => x.Key.Level1Key == objectId);
+            IEnumerable<KeyValuePair<SimpleExKey, IPropGen>> propDataObjectsForThisPropBag = _theGlobalStore.Where(x => x.Key.Level1Key == objectId);
 
-            IEnumerable<KeyValuePair<PropNameType, PropDataT>> result = propDataObjectsForThisPropBag.Select(x =>
-                new KeyValuePair<PropNameType, PropDataT>(GetPropNameFromL2Key(x.Key.Level2Key), x.Value));
+            IEnumerable<KeyValuePair<PropNameType, IPropGen>> result = propDataObjectsForThisPropBag.Select(x =>
+                new KeyValuePair<PropNameType, IPropGen>(GetPropNameFromL2Key(x.Key.Level2Key), x.Value));
 
             return result;
         }
 
-        public IEnumerator<KeyValuePair<PropNameType, PropDataT>> GetEnumerator(PropBagT propBag) 
+        public IEnumerator<KeyValuePair<PropNameType, IPropGen>> GetEnumerator(IPropBag propBag) 
         {
-            IEnumerable<KeyValuePair<PropNameType, PropDataT>> list = GetCollection(propBag);
-            IEnumerator<KeyValuePair<PropNameType, PropDataT>> result = list.GetEnumerator();
+            IEnumerable<KeyValuePair<PropNameType, IPropGen>> list = GetCollection(propBag);
+            IEnumerator<KeyValuePair<PropNameType, IPropGen>> result = list.GetEnumerator();
             return result;
         }
 
-        public IEnumerable<PropNameType> GetKeys(PropBagT propBag)
+        public IEnumerable<PropNameType> GetKeys(IPropBag propBag)
         {
             ObjectIdType objectId = GetAndCheckObjectRef(propBag);
 
-            IEnumerable<KeyValuePair<SimpleExKey, PropDataT>> propDataObjectsForThisPropBag = _theGlobalStore.Where(x => x.Key.Level1Key == objectId);
+            IEnumerable<KeyValuePair<SimpleExKey, IPropGen>> propDataObjectsForThisPropBag = _theGlobalStore.Where(x => x.Key.Level1Key == objectId);
 
             IEnumerable<PropNameType> result = propDataObjectsForThisPropBag.Select(x =>
                 GetPropNameFromL2Key(x.Key.Level2Key));
@@ -149,13 +146,13 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        public IEnumerable<PropDataT> GetValues(PropBagT propBag)
+        public IEnumerable<IPropGen> GetValues(IPropBag propBag)
         {
             ObjectIdType objectId = GetAndCheckObjectRef(propBag);
 
-            IEnumerable<KeyValuePair<SimpleExKey, PropDataT>> propDataObjectsForThisPropBag = _theGlobalStore.Where(x => x.Key.Level1Key == objectId);
+            IEnumerable<KeyValuePair<SimpleExKey, IPropGen>> propDataObjectsForThisPropBag = _theGlobalStore.Where(x => x.Key.Level1Key == objectId);
 
-            IEnumerable<PropDataT> result = propDataObjectsForThisPropBag.Select(x => x.Value);
+            IEnumerable<IPropGen> result = propDataObjectsForThisPropBag.Select(x => x.Value);
 
             return result;
         }
@@ -170,7 +167,7 @@ namespace DRM.TypeSafePropertyBag
 
         #region Private Methods
 
-        SimpleExKey GetExKey(PropBagT propBag, PropIdType propId)
+        SimpleExKey GetExKey(IPropBag propBag, PropIdType propId)
         {
             ObjectIdType objectId = GetAndCheckObjectRef(propBag);
             CompositeKeyType cKey = _compKeyManager.JoinComp(objectId, propId);
@@ -178,9 +175,9 @@ namespace DRM.TypeSafePropertyBag
             return exKey;
         }
 
-        ObjectIdType GetAndCheckObjectRef(PropBagT propBag)
+        ObjectIdType GetAndCheckObjectRef(IPropBag propBag)
         {
-            PropBagT client = UnwrapWeakRef(_clientAccessToken);
+            IPropBag client = SimpleExKey.UnwrapWeakRef(_clientAccessToken);
             if (!object.ReferenceEquals(propBag, client))
             {
                 throw new InvalidOperationException("This PropStoreAccessService can only service the PropBag object that created it.");
@@ -191,24 +188,21 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        private PropBagT UnwrapWeakRef(ObjectRefType oRef)
-        {
-            if (oRef.TryGetTarget(out IPropBag target))
-            {
-                PropBagT result = (PropBagT)target;
-                return result;
-            }
-            else
-            {
-                return default(PropBagT);
-            }
-        }
+        #region Explicit Implementation of the internal interface: IHaveTheKey
 
-        SimpleExKey IHaveTheKey<PropBagT>.GetTheKey(PropBagT propBag, uint propId)
+        SimpleExKey IHaveTheSimpleKey.GetTheKey(IPropBag propBag, PropIdType propId)
         {
             SimpleExKey result = GetExKey(propBag, propId);
             return result;
         }
+
+        IExplodedKey<CompositeKeyType, ObjectIdType, PropIdType> IHaveTheKey<CompositeKeyType, ObjectIdType, PropIdType>.GetTheKey(IPropBag propBag, PropIdType propId)
+        {
+            IExplodedKey<CompositeKeyType, ObjectIdType, PropIdType> result = GetExKey(propBag, propId);
+            return result;
+        }
+
+        #endregion
 
         //ObjectIdType FromRaw(ObjectRefType rawBot)
         //{

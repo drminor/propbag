@@ -1,5 +1,4 @@
-﻿using DRM.TypeSafePropertyBag.Fundamentals;
-using System;
+﻿using System;
 using System.ComponentModel;
 
 namespace DRM.TypeSafePropertyBag.EventManagement

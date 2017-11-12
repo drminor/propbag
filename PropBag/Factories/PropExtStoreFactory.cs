@@ -19,13 +19,13 @@ namespace DRM.PropBag
         #region Constructors
 
         public PropExtStoreFactory(/*bool returnDefaultForUndefined*/
-            SimplePropStoreAccessServiceProvider<IPropBag, IPropGen> propStoreAccessServiceProvider)
+            SimplePropStoreAccessServiceProvider propStoreAccessServiceProvider)
             : this(null/*, returnDefaultForUndefined*/, propStoreAccessServiceProvider)
         {
         }
 
         public PropExtStoreFactory(object stuff, /*bool returnDefaultForUndefined,*/
-                SimplePropStoreAccessServiceProvider<IPropBag, IPropGen> propStoreAccessServiceProvider,
+                SimplePropStoreAccessServiceProvider propStoreAccessServiceProvider,
                 ResolveTypeDelegate typeResolver = null,
                 IConvertValues valueConverter = null)
             : base(/*returnDefaultForUndefined, */propStoreAccessServiceProvider, typeResolver, valueConverter)

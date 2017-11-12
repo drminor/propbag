@@ -6,19 +6,20 @@ using System.Linq;
 namespace DRM.TypeSafePropertyBag
 {
     using ObjectIdType = UInt32;
-    using ObjectRefType = WeakReference<IPropBag>;
+    using PropIdType = UInt32;
+    using PropNameType = String;
 
-    public class SimplePropStoreAccessServiceProvider<PropBagT, PropDataT> 
-        : IProvidePropStoreAccessService<PropBagT, PropDataT> where PropBagT : class, IPropBag where PropDataT : IPropGen
+    public class SimplePropStoreAccessServiceProvider 
+        : IProvidePropStoreAccessService<PropIdType, PropNameType>
     {
         #region Private Members
 
-        readonly SimpleObjectIdDictionary<PropDataT> _theGlobalStore;
+        readonly SimpleObjectIdDictionary _theGlobalStore;
         SimpleCompKeyMan _compKeyManager;
         SimpleLevel2KeyMan _level2KeyManager;
 
-        readonly Dictionary<ObjectRefType, ObjectIdType> _rawDict;
-        readonly Dictionary<ObjectIdType, ObjectRefType> _cookedDict;
+        readonly Dictionary<WeakReference<IPropBag>, ObjectIdType> _rawDict;
+        readonly Dictionary<ObjectIdType, WeakReference<IPropBag>> _cookedDict;
 
         readonly object _sync;
 
@@ -26,7 +27,7 @@ namespace DRM.TypeSafePropertyBag
 
         #region Constructor
 
-        public SimplePropStoreAccessServiceProvider(SimpleObjectIdDictionary<PropDataT> theGlobalStore,
+        public SimplePropStoreAccessServiceProvider(SimpleObjectIdDictionary theGlobalStore,
             SimpleCompKeyMan compKeyManager, SimpleLevel2KeyMan level2KeyManager)
         {
             _theGlobalStore = theGlobalStore;
@@ -36,8 +37,8 @@ namespace DRM.TypeSafePropertyBag
             MaxPropsPerObject = _compKeyManager.MaxPropsPerObject;
             MaxObjectsPerAppDomain = _compKeyManager.MaxObjectsPerAppDomain;
 
-            _rawDict = new Dictionary<ObjectRefType, ObjectIdType>();
-            _cookedDict = new Dictionary<ObjectIdType, ObjectRefType>();
+            _rawDict = new Dictionary<WeakReference<IPropBag>, ObjectIdType>();
+            _cookedDict = new Dictionary<ObjectIdType, WeakReference<IPropBag>>();
 
             _sync = new object();
         }
@@ -50,24 +51,24 @@ namespace DRM.TypeSafePropertyBag
         public long MaxObjectsPerAppDomain { get; }
 
 
-        public IPropStoreAccessService<PropBagT, PropDataT> GetOrCreatePropStoreService(PropBagT propBag)
+        public IPropStoreAccessService<PropIdType, PropNameType> GetOrCreatePropStoreService(IPropBag propBag)
         {
-            ObjectIdType newObjectId = GetOrAdd(propBag, out ObjectRefType accessToken);
+            ObjectIdType newObjectId = GetOrAdd(propBag, out WeakReference<IPropBag> accessToken);
 
-            SimplePropStoreAccessService<PropBagT, PropDataT> result
-                = new SimplePropStoreAccessService<PropBagT, PropDataT>(accessToken, newObjectId, _theGlobalStore, _compKeyManager, _level2KeyManager);
+            SimplePropStoreAccessService result
+                = new SimplePropStoreAccessService(accessToken, newObjectId, _theGlobalStore, _compKeyManager, _level2KeyManager);
 
             return result;
         }
 
-        public IPropStoreAccessService<PropBagT, PropDataT> CreatePropStoreService(PropBagT propBag)
+        public IPropStoreAccessService<PropIdType, PropNameType> CreatePropStoreService(IPropBag propBag)
         {
-            ObjectRefType accessToken = new WeakReference<IPropBag>(propBag);
+            WeakReference<IPropBag> accessToken = new WeakReference<IPropBag>(propBag);
 
             ObjectIdType newObjectId = Add(accessToken);
 
-            SimplePropStoreAccessService<PropBagT, PropDataT> result
-                = new SimplePropStoreAccessService<PropBagT, PropDataT>(accessToken, newObjectId, _theGlobalStore, _compKeyManager, _level2KeyManager);
+            SimplePropStoreAccessService result
+                = new SimplePropStoreAccessService(accessToken, newObjectId, _theGlobalStore, _compKeyManager, _level2KeyManager);
 
             return result;
         }
@@ -76,7 +77,7 @@ namespace DRM.TypeSafePropertyBag
 
         #region Private Methods
 
-        private ObjectIdType Add(ObjectRefType objectRef)
+        private ObjectIdType Add(WeakReference<IPropBag> objectRef)
         {
             lock (_sync)
             {
@@ -92,11 +93,11 @@ namespace DRM.TypeSafePropertyBag
         /// </summary>
         /// <param name="propBag"></param>
         /// <returns></returns>
-        private ObjectIdType GetOrAdd(PropBagT propBag, out ObjectRefType accessToken)
+        private ObjectIdType GetOrAdd(IPropBag propBag, out WeakReference<IPropBag> accessToken)
         {
             lock (_sync)
             {
-                accessToken = _rawDict.Where(x => Object.ReferenceEquals(UnwrapWeakRef(x.Key), propBag)).FirstOrDefault().Key;
+                accessToken = _rawDict.Where(x => Object.ReferenceEquals(SimpleExKey.UnwrapWeakRef(x.Key), propBag)).FirstOrDefault().Key;
 
                 if(accessToken != null)
                 {
@@ -112,23 +113,6 @@ namespace DRM.TypeSafePropertyBag
                 _rawDict.Add(accessToken, cookedVal);
                 _cookedDict.Add(cookedVal, accessToken);
                 return cookedVal;
-            }
-        }
-
-        private PropBagT UnwrapWeakRef(ObjectRefType oRef)
-        {
-            if(oRef.TryGetTarget(out IPropBag target))
-            {
-                PropBagT result = (PropBagT) target;
-                return result;
-            }
-            else
-            {
-                var x = default(PropBagT);
-                return x;
-
-                //PropBag x = new PropBag(0);
-                //return x as PropBagT;
             }
         }
 

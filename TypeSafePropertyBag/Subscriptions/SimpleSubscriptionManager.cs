@@ -1,5 +1,4 @@
-﻿using DRM.TypeSafePropertyBag.Fundamentals;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 
 namespace DRM.TypeSafePropertyBag.EventManagement
@@ -7,8 +6,9 @@ namespace DRM.TypeSafePropertyBag.EventManagement
     using CompositeKeyType = UInt64;
     using ObjectIdType = UInt32;
     using PropIdType = UInt32;
+    using PropNameType = String;
 
-    public class SimpleSubscriptionManager<PropDataT> : ICacheSubscriptions<SimpleExKey, CompositeKeyType, ObjectIdType, PropIdType, PropDataT> where PropDataT : IPropGen
+    public class SimpleSubscriptionManager : ICacheSubscriptions<SimpleExKey, CompositeKeyType, ObjectIdType, PropIdType, PropNameType>
     {
         #region Private Members
 
@@ -16,15 +16,15 @@ namespace DRM.TypeSafePropertyBag.EventManagement
         const int EXPECTED_NO_OF_OBJECTS = 10000;
 
         private ConcurrentDictionary<ObjectIdType, CollectionOfSubscriberCollections> _propIndexesByObject;
-        private SimpleCompKeyMan _compKeyManager;
+        //private SimpleCompKeyMan _compKeyManager;
 
         #endregion
 
         #region Constructor
 
-        public SimpleSubscriptionManager(SimpleCompKeyMan compKeyManager)
+        public SimpleSubscriptionManager()
         {
-            _compKeyManager = compKeyManager;
+            //_compKeyManager = compKeyManager;
             _propIndexesByObject = new ConcurrentDictionary<ObjectIdType, CollectionOfSubscriberCollections>
                 (concurrencyLevel: OBJECT_INDEX_CONCURRENCY_LEVEL, capacity: EXPECTED_NO_OF_OBJECTS);
         }
@@ -69,7 +69,7 @@ namespace DRM.TypeSafePropertyBag.EventManagement
 
         public bool RemoveSubscription(ISubscriptionKeyGen subscriptionRequest)
         {
-            SubscriberCollection sc = GetSubscriptions((SimpleExKey)subscriptionRequest.SourcePropId);
+            SubscriberCollection sc = GetSubscriptions(subscriptionRequest.SourcePropId);
             bool result = sc.RemoveSubscription(subscriptionRequest);
 
             if (result)
@@ -95,12 +95,7 @@ namespace DRM.TypeSafePropertyBag.EventManagement
             return result;
         }
 
-        public SubscriberCollection GetSubscriptions
-            (
-            IPropBag host,
-            PropIdType propId,
-            SimplePropStoreAccessService<IPropBag, IPropGen> storeAccessor
-            )
+        public SubscriberCollection GetSubscriptions(IPropBag host, PropIdType propId, SimplePropStoreAccessService storeAccessor)
         {
             SimpleExKey exKey = GetTheKey(host, propId, storeAccessor);
 
@@ -108,11 +103,27 @@ namespace DRM.TypeSafePropertyBag.EventManagement
             return result;
         }
 
-        private SimpleExKey GetTheKey(IPropBag host, uint propId, SimplePropStoreAccessService<IPropBag, IPropGen> storeAccessor)
+        public SubscriberCollection GetSubscriptions(IPropBag host, PropIdType propId, IPropStoreAccessService<PropIdType, PropNameType> storeAccessor)
         {
-            SimpleExKey result = ((IHaveTheKey<IPropBag>)storeAccessor).GetTheKey(host, propId);
+            SimpleExKey exKey = GetTheKey(host, propId, storeAccessor);
+
+            SubscriberCollection result = GetSubscriptions(exKey);
+            return result;
+        }
+
+        private SimpleExKey GetTheKey(IPropBag host, uint propId, SimplePropStoreAccessService storeAccessor)
+        {
+            SimpleExKey result = ((IHaveTheSimpleKey)storeAccessor).GetTheKey(host, propId);
 
             return result;
+        }
+
+        private SimpleExKey GetTheKey(IPropBag host, uint propId, IPropStoreAccessService<PropIdType, PropNameType> storeAccessor)
+        {
+            IExplodedKey<CompositeKeyType, ObjectIdType, PropIdType> exKey = ((IHaveTheKey<CompositeKeyType, ObjectIdType, PropIdType>) storeAccessor).GetTheKey(host, propId);
+
+            SimpleExKey withWeakRef = SimpleExKey.FromIExploadedKeyWithWeakRef(exKey);
+            return withWeakRef;
         }
 
         #endregion
@@ -135,6 +146,8 @@ namespace DRM.TypeSafePropertyBag.EventManagement
             wasAdded = internalWasAdded;
             return result;
         }
+
+
 
         #endregion
     }

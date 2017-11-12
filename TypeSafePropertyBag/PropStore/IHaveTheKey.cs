@@ -1,13 +1,8 @@
-﻿using DRM.TypeSafePropertyBag.Fundamentals;
-using System;
-
+﻿
 namespace DRM.TypeSafePropertyBag
 {
-    using PropIdType = UInt32;
-
-    public interface IHaveTheKey<PropBagT>
+    internal interface IHaveTheKey<CompT, L1T, L2T>
     {
-        SimpleExKey GetTheKey(PropBagT propBag, PropIdType propId);
-
+        IExplodedKey<CompT, L1T, L2T> GetTheKey(IPropBag propBag, L2T propId);
     }
 }

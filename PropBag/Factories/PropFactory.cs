@@ -6,8 +6,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using DRM.TypeSafePropertyBag;
+
 namespace DRM.PropBag
 {
+    using PropIdType = System.UInt32;
+    using PropNameType = System.String;
+
     public class PropFactory : AbstractPropFactory
     {
         public override bool ProvidesStorage
@@ -16,7 +21,7 @@ namespace DRM.PropBag
         }
 
         public PropFactory(/*bool returnDefaultForUndefined,*/
-            SimplePropStoreAccessServiceProvider<IPropBag, IPropGen> propStoreAccessServiceProvider,
+            IProvidePropStoreAccessService<PropIdType, PropNameType> propStoreAccessServiceProvider,
             ResolveTypeDelegate typeResolver = null,
             IConvertValues valueConverter = null)
         : base(/*returnDefaultForUndefined, */ propStoreAccessServiceProvider, typeResolver, valueConverter) { }

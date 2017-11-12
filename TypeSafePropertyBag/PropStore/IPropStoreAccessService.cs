@@ -1,26 +1,25 @@
-﻿using DRM.TypeSafePropertyBag.Fundamentals;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace DRM.TypeSafePropertyBag
 {
-    public interface IPropStoreAccessService<PropBagT, PropDataT>
-        where PropBagT : IPropBag
-        where PropDataT : IPropGen
+    // TODO: Consider renaming this interface to: IGuardPropStore.
+    public interface IPropStoreAccessService<PropIdT, PropNameT>
     {
-        PropDataT this[PropBagT propBag, uint propId] { get; set; }
+        IPropGen this[IPropBag propBag, PropIdT propId] { get; set; }
 
         int MaxPropsPerObject { get; }
         long MaxObjectsPerAppDomain { get; }
 
-        void Clear(PropBagT propBag);
-        bool ContainsKey(PropBagT propBag, uint propId);
+        void Clear(IPropBag propBag);
+        bool ContainsKey(IPropBag propBag, PropIdT propId);
 
-        IEnumerator<KeyValuePair<string, PropDataT>> GetEnumerator(PropBagT propBag);
-        IEnumerable<string> GetKeys(PropBagT propBag);
-        IEnumerable<PropDataT> GetValues(PropBagT propBag);
+        IEnumerable<KeyValuePair<PropNameT, IPropGen>> GetCollection(IPropBag propBag);
+        IEnumerator<KeyValuePair<PropNameT, IPropGen>> GetEnumerator(IPropBag propBag);
+        IEnumerable<PropNameT> GetKeys(IPropBag propBag);
+        IEnumerable<IPropGen> GetValues(IPropBag propBag);
 
-        bool TryAdd(PropBagT propBag, uint propId, PropDataT propData);
-        bool TryGetValue(PropBagT propBag, uint propId, out PropDataT propData);
-        bool TryRemove(PropBagT propBag, uint propId, out PropDataT propData);
+        bool TryAdd(IPropBag propBag, PropIdT propId, IPropGen propData);
+        bool TryGetValue(IPropBag propBag, PropIdT propId, out IPropGen propData);
+        bool TryRemove(IPropBag propBag, PropIdT propId, out IPropGen propData);
     }
 }
