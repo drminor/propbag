@@ -10,6 +10,12 @@ using System.Windows;
 
 namespace PropBagTestApp.Infra
 {
+    using PropIdType = UInt32;
+    using PropNameType = String;
+    using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
+    using SubCacheType = ICacheSubscriptions<SimpleExKey, UInt64, UInt32, UInt32, String>;
+    using LocalBinderType = IBindLocalProps<UInt32>;
+
     public class AutoMapperHelpers
     {
         public SimpleAutoMapperProvider InitializeAutoMappers(IPropModelProvider propModelProvider)
@@ -158,9 +164,14 @@ namespace PropBagTestApp.Infra
             PropStoreAccessServiceProvider = new SimplePropStoreAccessServiceProvider
                 (_theStore, _compKeyManager, _level2KeyManager);
 
+            SubCacheType subscriptionManager = new SimpleSubscriptionManager();
+            LocalBinderType localBinder = new SimpleLocalBinder();
+
             ThePropFactory = new PropFactory
                 (
                     propStoreAccessServiceProvider: PropStoreAccessServiceProvider,
+                    subscriptionManager: subscriptionManager,
+                    localBinder: localBinder,
                     typeResolver: GetTypeFromName,
                     valueConverter: null
                 );

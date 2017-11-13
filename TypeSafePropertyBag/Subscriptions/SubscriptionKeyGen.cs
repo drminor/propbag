@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
 
-namespace DRM.TypeSafePropertyBag.EventManagement
+namespace DRM.TypeSafePropertyBag
 {
     public class SubscriptionKeyGen : ISubscriptionKeyGen, IEquatable<SubscriptionKeyGen>
     {
@@ -14,9 +14,9 @@ namespace DRM.TypeSafePropertyBag.EventManagement
 
         #endregion
 
-        #region Public Members
+        #region Public Properties
 
-        public SimpleExKey SourcePropId { get; }
+        public SimpleExKey SourcePropRef { get; }
 
         public SubscriptionKind SubscriptionKind { get; }
         public SubscriptionTargetKind SubscriptionTargetKind { get; }
@@ -27,7 +27,7 @@ namespace DRM.TypeSafePropertyBag.EventManagement
         public EventHandler<PCGenEventArgs> GenHandler { get; private set; }
         public EventHandler<PropertyChangedEventArgs> StandardHandler { get; private set; }
 
-        public object Target { get; private set; }
+        public object Target { get; private set; } // For BindingSubscriptions this will always be a WeakReference<IPropBag>
         public MethodInfo Method { get; }
 
         public Action<object, object> GenDoWhenChanged { get; private set; }
@@ -35,15 +35,20 @@ namespace DRM.TypeSafePropertyBag.EventManagement
 
         public bool HasBeenUsed { get; private set; }
 
+        // Members for Binding Subscriptions
+
+        public SimpleExKey TargetPropRef { get; }
+        public LocalBindingInfo BindingInfo { get; }
+
         #endregion
 
-        #region Constructors
+        #region Constructors for Property Changed Handlers
 
         // Standard PropertyChanged
         protected SubscriptionKeyGen(SimpleExKey sourcePropId, EventHandler<PropertyChangedEventArgs> standardDelegate,
             SubscriptionPriorityGroup subscriptionPriorityGroup, bool keepRef, Func<ISubscriptionKeyGen, ISubscriptionGen> subscriptionCreator)
         {
-            SourcePropId = sourcePropId;
+            SourcePropRef = sourcePropId;
             SubscriptionKind = SubscriptionKind.StandardHandler;
             SubscriptionPriorityGroup = subscriptionPriorityGroup;
 
@@ -63,7 +68,7 @@ namespace DRM.TypeSafePropertyBag.EventManagement
         protected SubscriptionKeyGen(SimpleExKey sourcePropId, EventHandler<PCGenEventArgs> genDelegate,
             SubscriptionPriorityGroup subscriptionPriorityGroup, bool keepRef, Func<ISubscriptionKeyGen, ISubscriptionGen> subscriptionCreator)
         {
-            SourcePropId = sourcePropId;
+            SourcePropRef = sourcePropId;
             SubscriptionKind = SubscriptionKind.StandardHandler;
             SubscriptionPriorityGroup = subscriptionPriorityGroup;
 
@@ -84,7 +89,7 @@ namespace DRM.TypeSafePropertyBag.EventManagement
         protected SubscriptionKeyGen(SimpleExKey sourcePropId, object target, MethodInfo method,
             SubscriptionKind kind, SubscriptionPriorityGroup subscriptionPriorityGroup, bool keepRef, Func<ISubscriptionKeyGen, ISubscriptionGen> subscriptionCreator)
         {
-            SourcePropId = sourcePropId;
+            SourcePropRef = sourcePropId;
             SubscriptionKind = kind;
             SubscriptionPriorityGroup = subscriptionPriorityGroup;
 
@@ -101,11 +106,15 @@ namespace DRM.TypeSafePropertyBag.EventManagement
             HasBeenUsed = false;
         }
 
+        #endregion
+
+        #region Constructors for Actions
+
         // Action<object, object>
         protected SubscriptionKeyGen(SimpleExKey sourcePropId, Action<object, object> genAction,
             SubscriptionPriorityGroup subscriptionPriorityGroup, bool keepRef, Func<ISubscriptionKeyGen, ISubscriptionGen> subscriptionCreator)
         {
-            SourcePropId = sourcePropId;
+            SourcePropRef = sourcePropId;
             SubscriptionKind = SubscriptionKind.ObjectAction;
             SubscriptionPriorityGroup = subscriptionPriorityGroup;
 
@@ -126,7 +135,7 @@ namespace DRM.TypeSafePropertyBag.EventManagement
         protected SubscriptionKeyGen(SimpleExKey sourcePropId, Action action,
             SubscriptionPriorityGroup subscriptionPriorityGroup, bool keepRef, Func<ISubscriptionKeyGen, ISubscriptionGen> subscriptionCreator)
         {
-            SourcePropId = sourcePropId;
+            SourcePropRef = sourcePropId;
             SubscriptionKind = SubscriptionKind.ActionNoParams;
             SubscriptionPriorityGroup = subscriptionPriorityGroup;
 
@@ -145,6 +154,40 @@ namespace DRM.TypeSafePropertyBag.EventManagement
 
         #endregion
 
+        #region Constructors for Binding Subscriptions
+
+        // Target and Method. Also used for TypeDelegate and TypedAction.
+        protected SubscriptionKeyGen(
+            SimpleExKey targetPropRef, 
+            LocalBindingInfo bindingInfo,
+            SubscriptionKind kind,
+            SubscriptionPriorityGroup subscriptionPriorityGroup,
+            Func<ISubscriptionKeyGen, ISubscriptionGen> subscriptionCreator)
+        {
+            SubscriptionKind = kind;
+            SubscriptionPriorityGroup = subscriptionPriorityGroup;
+
+            StandardHandler = null;
+            GenHandler = null;
+            UseTargetAndMethod = true;
+            GenDoWhenChanged = null;
+            Action = null;
+            Target = TargetPropRef.WR_AccessToken; 
+            Method = null;
+
+            SubscriptionTargetKind = SubscriptionTargetKind.LocalWeakRef;
+            SubscriptionCreator = subscriptionCreator;
+            HasBeenUsed = false;
+
+            // Properties unique to Binding Subscriptions
+            TargetPropRef = targetPropRef; // The binding is created on the target, we will go find the source of the events to listen.
+            BindingInfo = bindingInfo;
+
+        }
+        #endregion
+
+        #region Private Methods / Constructor support
+
         private SubscriptionTargetKind GetKindOfTarget(object target, bool keepRef)
         {
             if(target.GetType().IsPropBagBased())
@@ -156,6 +199,10 @@ namespace DRM.TypeSafePropertyBag.EventManagement
                 return keepRef ? SubscriptionTargetKind.StandardKeepRef : SubscriptionTargetKind.Standard;
             }
         }
+
+        #endregion
+
+        #region Public Methods
 
         public ISubscriptionGen CreateSubscription()
         {
@@ -173,6 +220,8 @@ namespace DRM.TypeSafePropertyBag.EventManagement
             HasBeenUsed = true;
         }
 
+        #endregion
+
         #region IEquatable Support and Object Overrides
 
         public override bool Equals(object obj)
@@ -183,7 +232,7 @@ namespace DRM.TypeSafePropertyBag.EventManagement
         public bool Equals(SubscriptionKeyGen other)
         {
             return other != null &&
-                   SourcePropId == other.SourcePropId &&
+                   SourcePropRef == other.SourcePropRef &&
                    EqualityComparer<object>.Default.Equals(Target, other.Target) &&
                    EqualityComparer<MethodInfo>.Default.Equals(Method, other.Method);
         }
@@ -191,7 +240,7 @@ namespace DRM.TypeSafePropertyBag.EventManagement
         public override int GetHashCode()
         {
             var hashCode = 1273468457;
-            hashCode = hashCode * -1521134295 + SourcePropId.GetHashCode();
+            hashCode = hashCode * -1521134295 + SourcePropRef.GetHashCode();
             hashCode = hashCode * -1521134295 + EqualityComparer<object>.Default.GetHashCode(Target);
             hashCode = hashCode * -1521134295 + EqualityComparer<MethodInfo>.Default.GetHashCode(Method);
             return hashCode;

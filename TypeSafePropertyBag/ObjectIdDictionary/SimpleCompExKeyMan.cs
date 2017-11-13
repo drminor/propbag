@@ -10,7 +10,7 @@ namespace DRM.TypeSafePropertyBag
     // TODO: Since the maximum number of properties per object may be less than 2^^32, then the 
     // maximum number of objects may be more than 2 ^^ 32 -- which takes a Int64, not a UInt32
 
-    public class SimpleCompKeyMan : ICKeyMan<CompositeKeyType, ObjectIdType, PropIdType, PropNameType>
+    public class SimpleCompExKeyMan : ICompExKeyMan<SimpleExKey, CompositeKeyType, ObjectIdType, PropIdType, PropNameType>
     {
         private SimpleLevel2KeyMan Level2KeyMan { get; }
         public int MaxPropsPerObject { get; }
@@ -20,7 +20,7 @@ namespace DRM.TypeSafePropertyBag
         CompositeKeyType _botMask;
         CompositeKeyType _topMask;
 
-        public SimpleCompKeyMan(SimpleLevel2KeyMan level2KeyMan)
+        public SimpleCompExKeyMan(SimpleLevel2KeyMan level2KeyMan)
         {
             Level2KeyMan = level2KeyMan ?? throw new ArgumentNullException($"{nameof(level2KeyMan)}.");
             MaxPropsPerObject = level2KeyMan.MaxPropsPerObject;
@@ -158,5 +158,6 @@ namespace DRM.TypeSafePropertyBag
 
             return result;
         }
+
     }
 }

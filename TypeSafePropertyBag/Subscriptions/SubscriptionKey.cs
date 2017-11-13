@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 
-namespace DRM.TypeSafePropertyBag.EventManagement
+namespace DRM.TypeSafePropertyBag
 {
     using PropIdType = UInt32;
     using PropNameType = String;
@@ -32,7 +32,6 @@ namespace DRM.TypeSafePropertyBag.EventManagement
         private static SimpleExKey GetTheKey(IPropBag host, uint propId, IPropStoreAccessService<PropIdType, PropNameType> storeAccessor)
         {
             SimpleExKey result = ((IHaveTheSimpleKey)storeAccessor).GetTheKey(host, propId);
-
             return result;
         }
 

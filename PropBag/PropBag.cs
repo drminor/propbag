@@ -1,9 +1,9 @@
 ﻿using DRM.PropBag.Caches;
 using DRM.PropBag.ControlModel;
-using DRM.PropBag.EventManagement;
+
 using DRM.TypeSafePropertyBag;
-using DRM.TypeSafePropertyBag.EventManagement;
 using DRM.TypeSafePropertyBag.Fundamentals;
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -19,8 +19,11 @@ namespace DRM.PropBag
 {
     using PropIdType = UInt32;
     using PropNameType = String;
-
+    using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
     using SubCacheType = ICacheSubscriptions<SimpleExKey, UInt64, UInt32, UInt32, String>;
+    using LocalBinderType = IBindLocalProps<UInt32>;
+
+    using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
 
     #region Summary and Remarks
 
@@ -47,26 +50,24 @@ namespace DRM.PropBag
     {
         #region Member Declarations
 
+        // These items are provided to us.
+        protected IPropFactory PropFactory { get; set; }
+        private readonly PSAccessServiceType _ourStoreAccess;
+        private SubCacheType _subscriptionManager;
+        private LocalBinderType _localBinder;
+
+        // We are responsible for these
+        private PropBagTypeSafetyMode TypeSafetyMode { get; }
+        protected virtual ITypeSafePropBagMetaData OurMetaData { get; }
+        private IL2KeyMan<PropIdType, PropNameType> _level2KeyManager;
+
+        // These fulfill the IPropBag contract
+        public string FullClassName => OurMetaData.FullClassName;
         public event PropertyChangedEventHandler PropertyChanged; // = delegate { };
         public event PropertyChangingEventHandler PropertyChanging; // = delegate { };
 
         public event EventHandler<PCGenEventArgs> PropertyChangedWithGenVals; // = delegate { };
         public event EventHandler<PropertyChangedEventArgs> PropertyChangedIndividual;
-
-        // DRM: Changed to protected and added set accessor on 10/29/17; DRM: removed set accessor on 11/2/17.
-        protected IPropFactory PropFactory { get; /*set; */}
-
-        public string FullClassName => OurMetaData.FullClassName;
-
-        private PropBagTypeSafetyMode TypeSafetyMode { get; }
-        protected virtual TypeSafePropBagMetaData OurMetaData { get; }
-
-        private SimpleLevel2KeyMan _level2KeyManager;
-
-        private readonly IPropStoreAccessService<PropIdType, PropNameType> _ourStoreAccess;
-
-        private SubCacheType _subscriptionManager;
-        private SimpleLocalBinder _localBinder;
 
         #endregion
 
@@ -109,43 +110,17 @@ namespace DRM.PropBag
 
         protected PropBag(PropBagTypeSafetyMode typeSafetyMode, IPropFactory propFactory, string fullClassName = null)
         {
-            this.TypeSafetyMode = typeSafetyMode;
-
-            if (propFactory == null) throw new ArgumentNullException(nameof(propFactory));
-
-            bool returnDefaultForUndefined = TypeSafePropBagMetaData.Helper.GetReturnDefaultForUndefined(typeSafetyMode);
-
-            //if (propFactory != null)
-            //{
-            //    // Put this back in for those use cases when we are not instantiated with a PropModel.
-            //    //if (propFactory.ReturnDefaultForUndefined != returnDefaultForUndefined)
-            //    //{
-            //    //    throw new ApplicationException("The 'ReturnDefaultForUndefined' setting on the specified property factory conflicts with the TypeSafetyMode specified.");
-            //    //}
-            //    PropFactory = propFactory;
-            //}
-            //else
-            //{
-            //    // Use the "built-in" property factory, if the caller did not supply one.
-            //    PropFactory = new PropFactory(typeResolver: null, valueConverter: null);
-            //}
-
-            // Put this back in for those use cases when we are not instantiated with a PropModel.
-            //if (propFactory.ReturnDefaultForUndefined != returnDefaultForUndefined)
-            //{
-            //    throw new ApplicationException("The 'ReturnDefaultForUndefined' setting on the specified property factory conflicts with the TypeSafetyMode specified.");
-            //}
-            PropFactory = propFactory;
+            TypeSafetyMode = typeSafetyMode;
+            PropFactory = propFactory ?? throw new ArgumentNullException(nameof(propFactory));
 
             OurMetaData = BuildMetaData(TypeSafetyMode, fullClassName, PropFactory);
 
-            _level2KeyManager = new SimpleLevel2KeyMan(65536);
-
             _ourStoreAccess = PropFactory.PropStoreAccessServiceProvider.CreatePropStoreService(this);
+            _level2KeyManager = new SimpleLevel2KeyMan(_ourStoreAccess.MaxPropsPerObject);
 
-            _subscriptionManager = new SimpleSubscriptionManager();
+            _subscriptionManager = PropFactory.SubscriptionManager;
 
-            _localBinder = new SimpleLocalBinder();
+            _localBinder = PropFactory.LocalBinder;
         }
 
         protected TypeSafePropBagMetaData BuildMetaData(PropBagTypeSafetyMode typeSafetyMode, string classFullName, IPropFactory propFactory)
@@ -767,9 +742,18 @@ namespace DRM.PropBag
 
         #region Subscribe to Typed PropertyChanged
 
-        public bool AddBinding<T>(string propertyName, string targetPropertyName, Action<T,T> ttAction)
+        public object GetVisa<T>(IPropBag datasource, string sourcepath, string propertyName)
         {
             PropIdType propId = GetPropId(propertyName);
+            return null;
+
+            // !_ourStoreAccess.GetVisa(this, propId, IPropBag dataSource, string sourcePath)
+        }
+
+        public bool AddBinding<T>(string targetPropertyName, string sourcePath, Action<T, T> ttAction)
+        {
+            // Build a reference to the target property that is in our PropBag object.
+            PropIdType propId = GetPropId(targetPropertyName);
             PropGen genProp = GetPropGen<T>(propId, desiredHasStoreValue: PropFactory.ProvidesStorage);
 
             IPropPrivate<T> prop = CheckTypeInfo<T>(genProp, _ourStoreAccess);
@@ -778,16 +762,51 @@ namespace DRM.PropBag
 
             if (prop != null)
             {
+                // Create a request that
+                // 1. provides a definite weak reference to the target propId (this/PropId/OUR_STORE_ACCESS)
+                // 2. provides a path to the source either by
+                //      a. relative -- Have OUR_STORE_ACCESS get our Object Id
+                //              and search all running Properties to see if they are hosting that Object.
+                //              and navigate up / down using dotted prop path.
+                //      b. absolute -- Start at the top and find a 
+                //  3. Having the caller supply us with a PropGen object
+                //          that she got by calling GetIt<T>(x,x).Get<T>(y.y), etc.
 
-                //LocalPropertyPath dum = new LocalPropertyPath("dum", new object[] { });
-                //LocalBindingInfo dum2 = new LocalBindingInfo(dum, LocalBindingMode.Default);
+                // Option A: Use a string and send it to a service to get a 
+                // that/PropId/THEIR_STORE_ACCESS
 
-                //ISubscriptionKeyGen bindingRequest =
-                //    new BindingSubscriptionKey<T>(sourcePropId, targetPropId, dum2, ttAction);
+                // What we really need is to have the binding target be able to 
+                // provide to a (PropBag) client a package that can be verified
+                // by the event source (via services on the GlobalStore) that the 
+                // binding target has agreed to be updated.
 
-                //ISubscriptionGen newSubscription = _subscriptionManager.AddSubscription(bindingRequest, out bool wasAdded);
-                //return wasAdded;
-                return false;
+                // 1. request to binding target; he request contains:
+                //      a. the source propbag object
+                //      b. the property name on the source.
+                //      c. the target propbag object.
+                //      d. the property name on the target.
+                //
+
+
+                // 2. client gets package.
+                // 3. client provides package to binding source when requesting the binding subscription.
+
+
+
+
+
+
+
+
+                LocalPropertyPath pathToSource = new LocalPropertyPath("test", new object[] { });
+                LocalBindingInfo bindingInfo = new LocalBindingInfo(pathToSource, LocalBindingMode.OneWay);
+
+                ISubscriptionKeyGen bindingRequest =
+                    new BindingSubscriptionKey<T>(this, propId, _ourStoreAccess, bindingInfo);
+
+                ISubscriptionGen newSubscription = _subscriptionManager.AddSubscription(bindingRequest, out bool wasAdded);
+                return wasAdded;
+                //return false;
             }
             else
             {
@@ -983,7 +1002,7 @@ namespace DRM.PropBag
 
         #region Public Methods
 
-        public TypeSafePropBagMetaData GetMetaData()
+        public virtual ITypeSafePropBagMetaData GetMetaData()
         {
             return OurMetaData;
         }
@@ -1354,6 +1373,8 @@ namespace DRM.PropBag
                 );
 
             // Update the binding targets -- by passing the work to our LocalBinder implementation.
+            // These bindings were created on the target.
+            // We are here because some agent placed a BindingSubscription in our queue.
             int counter = 0;
             foreach (ISubscriptionGen x in localBindings)
             {

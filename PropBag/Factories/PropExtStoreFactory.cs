@@ -7,6 +7,12 @@ using System.Threading.Tasks;
 
 namespace DRM.PropBag
 {
+    using PropIdType = UInt32;
+    using PropNameType = String;
+    using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
+    using SubCacheType = ICacheSubscriptions<SimpleExKey, UInt64, UInt32, UInt32, String>;
+    using LocalBinderType = IBindLocalProps<UInt32>;
+
     public class PropExtStoreFactory : AbstractPropFactory
     {
         object Stuff { get; }
@@ -18,17 +24,16 @@ namespace DRM.PropBag
 
         #region Constructors
 
-        public PropExtStoreFactory(/*bool returnDefaultForUndefined*/
-            SimplePropStoreAccessServiceProvider propStoreAccessServiceProvider)
-            : this(null/*, returnDefaultForUndefined*/, propStoreAccessServiceProvider)
-        {
-        }
-
-        public PropExtStoreFactory(object stuff, /*bool returnDefaultForUndefined,*/
-                SimplePropStoreAccessServiceProvider propStoreAccessServiceProvider,
-                ResolveTypeDelegate typeResolver = null,
-                IConvertValues valueConverter = null)
-            : base(/*returnDefaultForUndefined, */propStoreAccessServiceProvider, typeResolver, valueConverter)
+        public PropExtStoreFactory
+            (
+                object stuff, 
+                PSAccessServiceProviderType propStoreAccessServiceProvider,
+                SubCacheType subscriptionManager,
+                LocalBinderType localBinder,
+                ResolveTypeDelegate typeResolver,
+                IConvertValues valueConverter
+            )
+            : base(propStoreAccessServiceProvider, subscriptionManager, localBinder, typeResolver, valueConverter)
         {
             // Info to help us set up the getters and setters
             Stuff = stuff;
@@ -40,7 +45,7 @@ namespace DRM.PropBag
 
         public override ICPropPrivate<CT, T> Create<CT, T>(
             CT initialValue,
-            string propertyName, object extraInfo = null,
+            PropNameType propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
             EventHandler<PCTypedEventArgs<CT>> doWhenChangedX = null, bool doAfterNotify = false, Func<CT, CT, bool> comparer = null)
         {
@@ -49,7 +54,7 @@ namespace DRM.PropBag
         }
 
         public override ICPropPrivate<CT, T> CreateWithNoValue<CT, T>(
-            string propertyName, object extraInfo = null,
+            PropNameType propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
             EventHandler<PCTypedEventArgs<CT>> doWhenChangedX = null, bool doAfterNotify = false, Func<CT, CT, bool> comparer = null)
         {
@@ -62,7 +67,7 @@ namespace DRM.PropBag
         #region Propety-type property creators
 
         public override IProp<T> Create<T>(T initialValue,
-            string propertyName, object extraInfo = null,
+            PropNameType propertyName, object extraInfo = null,
             bool dummy = true, bool typeIsSolid = true,
             EventHandler<PCTypedEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false, Func<T,T,bool> comparer = null)
         {
@@ -72,7 +77,7 @@ namespace DRM.PropBag
         }
 
         public override IProp<T> CreateWithNoValue<T>(
-            string propertyName, object extraInfo = null,
+            PropNameType propertyName, object extraInfo = null,
             bool dummy = true, bool typeIsSolid = true,
             EventHandler<PCTypedEventArgs<T>> doWhenChangedX = null,
             //EventHandler<PropertyChangedWithTValsEventArgs<T>> doWhenChangedX = null,
@@ -94,7 +99,7 @@ namespace DRM.PropBag
 
         public override IProp CreateGenFromObject(Type typeOfThisProperty,
             object value,
-            string propertyName, object extraInfo,
+            PropNameType propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
             EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null)
         {
@@ -103,7 +108,7 @@ namespace DRM.PropBag
 
         public override IProp CreateGenFromString(Type typeOfThisProperty,
             string value, bool useDefault,
-            string propertyName, object extraInfo,
+            PropNameType propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
             EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null)
         {
@@ -111,7 +116,7 @@ namespace DRM.PropBag
         }
 
         public override IProp CreateGenWithNoValue(Type typeOfThisProperty,
-            string propertyName, object extraInfo,
+            PropNameType propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
             EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null)
         {

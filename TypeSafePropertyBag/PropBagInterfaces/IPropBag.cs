@@ -53,7 +53,7 @@ namespace DRM.TypeSafePropertyBag
         bool SubscribeToPropChanged(EventHandler<PCObjectEventArgs> eventHandler, string propertyName);
         bool UnSubscribeToPropChanged(EventHandler<PCObjectEventArgs> eventHandler, string propertyName);
 
-        bool AddBinding<T>(string propertyName, string targetPropertyName, Action<T, T> ttAction);
+        bool AddBinding<T>(string targetPropertyName, string propertyName, Action<T, T> ttAction);
 
 
         //bool SubscribeToPropChanged<T>(Action<T, T> doOnChange, string propertyName);

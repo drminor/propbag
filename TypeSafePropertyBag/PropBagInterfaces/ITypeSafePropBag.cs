@@ -13,10 +13,11 @@ namespace DRM.TypeSafePropertyBag
         Type GetTypeOfProperty(string propertyName);
         bool TryGetTypeOfProperty(string propertyName, out Type propertyType);
 
-        // Consider removing these and including them in IPropBag
-        IPropGen GetPropGen(string propertyName, Type propertyType);
-        IProp<T> GetTypedProp<T>(string propertyName);
+        // These could possible be added to an internal interface; 
+        // an interface that would be implemented by the PropStore or PropStore Access Service.
+        //IPropGen GetPropGen(string propertyName, Type propertyType);
+        //IProp<T> GetTypedProp<T>(string propertyName);
 
-        TypeSafePropBagMetaData GetMetaData();
+        ITypeSafePropBagMetaData GetMetaData();
     }
 }

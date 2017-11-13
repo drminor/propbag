@@ -1,10 +1,9 @@
-﻿using DRM.TypeSafePropertyBag.Fundamentals;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DRM.TypeSafePropertyBag.EventManagement
+namespace DRM.TypeSafePropertyBag
 {
     public class SubscriberCollection : IEnumerable<ISubscriptionGen>
     {
@@ -23,7 +22,7 @@ namespace DRM.TypeSafePropertyBag.EventManagement
             {
                 if (TryGetSubscription(subscriptionKey, out ISubscriptionGen subscription))
                 {
-                    System.Diagnostics.Debug.WriteLine($"The subscription for {subscriptionKey.SourcePropId} has aleady been created.");
+                    System.Diagnostics.Debug.WriteLine($"The subscription for {subscriptionKey.SourcePropRef} has aleady been created.");
                     return subscription;
                 }
                 else
@@ -80,7 +79,7 @@ namespace DRM.TypeSafePropertyBag.EventManagement
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine($"Could not find the subscription for {request.SourcePropId} when trying to remove it.");
+                    System.Diagnostics.Debug.WriteLine($"Could not find the subscription for {request.SourcePropRef} when trying to remove it.");
                     return false;
                 }
 
@@ -97,7 +96,7 @@ namespace DRM.TypeSafePropertyBag.EventManagement
         {
             lock (_sync)
             {
-                subscription = _subs.FirstOrDefault((x => x.SourcePropId.Level2Key == request.SourcePropId.Level2Key && x.SubscriptionKind == request.SubscriptionKind));
+                subscription = _subs.FirstOrDefault((x => x.SourcePropId.Level2Key == request.SourcePropRef.Level2Key && x.SubscriptionKind == request.SubscriptionKind));
             }
 
             if(subscription == null)

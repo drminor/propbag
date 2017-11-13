@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Globalization;
 
-namespace DRM.TypeSafePropertyBag.EventManagement
+namespace DRM.TypeSafePropertyBag
 {
     //public interface ITypedValueConverter<TSource, TTarget> 
     //{

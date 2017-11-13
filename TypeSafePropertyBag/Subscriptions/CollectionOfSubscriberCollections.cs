@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 
-namespace DRM.TypeSafePropertyBag.EventManagement
+namespace DRM.TypeSafePropertyBag
 {
     using PropIdType = UInt32;
 

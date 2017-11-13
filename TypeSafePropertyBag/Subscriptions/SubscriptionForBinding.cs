@@ -1,8 +1,7 @@
-﻿using DRM.TypeSafePropertyBag.Fundamentals;
-using System;
+﻿using System;
 using System.ComponentModel;
 
-namespace DRM.TypeSafePropertyBag.EventManagement
+namespace DRM.TypeSafePropertyBag
 {
     public class BindingSubscription<T> : AbstractSubscripton<T>, IBindingSubscription<T>
     {
@@ -30,17 +29,22 @@ namespace DRM.TypeSafePropertyBag.EventManagement
         new public Action<object, object> GenDoWhenChanged => null;
         new public Action Action => null;
 
+
+
         #endregion
 
         #region Constructors
 
         public BindingSubscription(IBindingSubscriptionKey<T> sKey)
         {
-            SourcePropId = sKey.SourcePropId;
+            SourcePropId = sKey.SourcePropRef;
             TypedDoWhenChanged = sKey.TypedDoWhenChanged;
 
-            TargetPropId = sKey.TargetPropId;
+            TargetPropId = sKey.TargetPropRef;
             BindingInfo = sKey.BindingInfo;
+
+            Target = sKey.Target;
+            Method = sKey.Method;
 
             SubscriptionKind = sKey.SubscriptionKind;
             SubscriptionPriorityGroup = sKey.SubscriptionPriorityGroup;

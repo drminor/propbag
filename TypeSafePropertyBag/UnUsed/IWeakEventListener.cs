@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DRM.PropBag.EventManagement.NotUsed
+namespace DRM.TypeSafePropertyBag.UnUsed
 {
     /// <summary>
     /// Provides event listening support for classes that expect to receive events 

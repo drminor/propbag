@@ -61,7 +61,7 @@ namespace DRM.PropBag.TypeDescriptors
         {
             _propBag = propBag;
 
-            TypeSafePropBagMetaData metadata = propBag.GetMetaData();
+            ITypeSafePropBagMetaData metadata = propBag.GetMetaData();
 
             propertyName = propertyName ?? metadata.ClassName;
             _tdConfig = new TypeDescriptorConfig(new Attribute[] { }, typeof(object), true, propertyName, typeof(PropBag), true);

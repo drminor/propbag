@@ -1,27 +1,27 @@
-﻿using System;
+﻿using DRM.TypeSafePropertyBag;
+
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-using System.Reflection;
-using System.ComponentModel;
-using System.Globalization;
-using DRM.TypeSafePropertyBag;
-using System.Collections.ObjectModel;
-using DRM.TypeSafePropertyBag.EventManagement;
-using DRM.PropBag.EventManagement;
-
 namespace DRM.PropBag
 {
-    using PropIdType = System.UInt32;
-    using PropNameType = System.String;
+    using PropIdType = UInt32;
+    using PropNameType = String;
+    using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
+    using SubCacheType = ICacheSubscriptions<SimpleExKey, UInt64, UInt32, UInt32, String>;
+    using LocalBinderType = IBindLocalProps<UInt32>;
 
     public abstract class AbstractPropFactory : IPropFactory
     {
         #region Public Properties
 
-        //public bool ReturnDefaultForUndefined { get; }
         public ResolveTypeDelegate TypeResolver { get; }
 
         public IConvertValues ValueConverter { get; }
@@ -34,7 +34,9 @@ namespace DRM.PropBag
         /// </summary>
         public virtual string IndexerName { get; }
 
-        public IProvidePropStoreAccessService<PropIdType, PropNameType> PropStoreAccessServiceProvider { get; }
+        public PSAccessServiceProviderType PropStoreAccessServiceProvider { get; }
+        public SubCacheType SubscriptionManager { get; }
+        public LocalBinderType LocalBinder { get; }
 
         #endregion
 
@@ -42,15 +44,19 @@ namespace DRM.PropBag
 
         public AbstractPropFactory
             (
-            //bool returnDefaultForUndefined,
-            IProvidePropStoreAccessService<PropIdType, PropNameType> propStoreAccessServiceProvider,
+            PSAccessServiceProviderType propStoreAccessServiceProvider,
+            SubCacheType subscriptionManager,
+            LocalBinderType localBinder = null,
             ResolveTypeDelegate typeResolver = null,
             IConvertValues valueConverter = null
             )
         {
-            //ReturnDefaultForUndefined = returnDefaultForUndefined;
 
-            PropStoreAccessServiceProvider = propStoreAccessServiceProvider;
+            PropStoreAccessServiceProvider = propStoreAccessServiceProvider ?? throw new ArgumentNullException(nameof(propStoreAccessServiceProvider));
+            SubscriptionManager = subscriptionManager ?? throw new ArgumentNullException(nameof(subscriptionManager));
+
+            // Use our default implementation, if the caller did not supply one.
+            LocalBinder = localBinder ?? new SimpleLocalBinder();
 
             // Use our default implementation, if the caller did not supply one.
             TypeResolver = typeResolver ?? this.GetTypeFromName;
@@ -67,12 +73,12 @@ namespace DRM.PropBag
 
         public abstract ICPropPrivate<CT, T> Create<CT, T>(
             CT initialValue,
-            string propertyName, object extraInfo = null,
+            PropNameType propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
             EventHandler<PCTypedEventArgs<CT>> doWhenChangedX = null, bool doAfterNotify = false, Func<CT, CT, bool> comparer = null) where CT : IEnumerable<T>;
 
         public abstract ICPropPrivate<CT, T> CreateWithNoValue<CT, T>(
-            string propertyName, object extraInfo = null,
+            PropNameType propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
             EventHandler<PCTypedEventArgs<CT>> doWhenChangedX = null, bool doAfterNotify = false, Func<CT, CT, bool> comparer = null) where CT : IEnumerable<T>;
 
@@ -81,12 +87,12 @@ namespace DRM.PropBag
         #region Propety-type property creators
         public abstract IProp<T> Create<T>(
             T initialValue,
-            string propertyName, object extraInfo = null,
+            PropNameType propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
             EventHandler<PCTypedEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false, Func<T, T, bool> comparer = null);
 
         public abstract IProp<T> CreateWithNoValue<T>(
-            string propertyName, object extraInfo = null,
+            PropNameType propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
             EventHandler<PCTypedEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false, Func<T, T, bool> comparer = null);
 
@@ -96,7 +102,7 @@ namespace DRM.PropBag
 
         public abstract IProp CreateGenFromObject(Type typeOfThisProperty,
             object value,
-            string propertyName, object extraInfo,
+            PropNameType propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
             EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null);
 
@@ -107,7 +113,7 @@ namespace DRM.PropBag
             EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null);
 
         public abstract IProp CreateGenWithNoValue(Type typeOfThisProperty,
-            string propertyName, object extraInfo,
+            PropNameType propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
             EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null);
 
@@ -153,13 +159,13 @@ namespace DRM.PropBag
             //return RefEqualityComparer<T>.Default;
         }
 
-        public T GetDefaultValue<T>(string propertyName = null)
+        public T GetDefaultValue<T>(PropNameType propertyName = null)
         {
             return ValueConverter.GetDefaultValue<T>(propertyName);
             //return default(T);
         }
 
-        public object GetDefaultValue(Type propertyType, string propertyName = null)
+        public object GetDefaultValue(Type propertyType, PropNameType propertyName = null)
         {
             return ValueConverter.GetDefaultValue(propertyType, propertyName);
             //if (propertyType == null)
@@ -167,7 +173,7 @@ namespace DRM.PropBag
             //    throw new InvalidOperationException($"Cannot manufacture a default value if the type is specified as null for property: {propertyName}.");
             //}
 
-            //if (propertyType == typeof(string))
+            //if (propertyType == typeof(PropNameType))
             //    return null;
 
             //return Activator.CreateInstance(propertyType);
@@ -435,7 +441,7 @@ namespace DRM.PropBag
         // With No Value
         private static ICPropPrivate<CT, T> CreateCPropWithNoValue<CT, T>(IPropFactory propFactory,
             bool useDefault,
-            string propertyName, object extraInfo,
+            PropNameType propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid,
             EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = true) where CT : class, IEnumerable<T>
         {
@@ -461,7 +467,7 @@ namespace DRM.PropBag
         // From Object
         private static IProp<T> CreatePropFromObject<T>(IPropFactory propFactory,
             object value,
-            string propertyName, object extraInfo,
+            PropNameType propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid,
             EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false)
         {
@@ -476,7 +482,7 @@ namespace DRM.PropBag
         // From String
         private static IProp<T> CreatePropFromString<T>(IPropFactory propFactory,
             string value, bool useDefault,
-            string propertyName, object extraInfo,
+            PropNameType propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid,
             EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false)
         {
@@ -498,7 +504,7 @@ namespace DRM.PropBag
 
         // With No Value
         private static IProp<T> CreatePropWithNoValue<T>(IPropFactory propFactory,
-            string propertyName, object extraInfo,
+            PropNameType propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid,
             EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false)
         {

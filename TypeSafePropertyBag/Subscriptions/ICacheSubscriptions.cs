@@ -1,10 +1,6 @@
 ﻿
-using DRM.TypeSafePropertyBag.Fundamentals;
-using System;
-
-namespace DRM.TypeSafePropertyBag.EventManagement
+namespace DRM.TypeSafePropertyBag
 {
-
     /// <summary>
     /// Provides storage that one or more IPropBags can share to hold callbacks registered for particular properties registered on the IPropBag.
     /// The callbacks can be one of several forms including, but not limited to:
@@ -14,17 +10,20 @@ namespace DRM.TypeSafePropertyBag.EventManagement
     /// Actions of type: &lt; <typeparamref name="object"/>, <typeparamref name="T"/>, <typeparamref name="T"/> &gt;,
     /// and Actions of type: &lt; <typeparamref name="T"/>, <typeparamref name="T"/> &gt;
     /// </summary>
+    /// <typeparam name="ExKeyT">The Exploded Key Type</typeparam>
     /// <typeparam name="CompT">The type of the composite key for property objects.</typeparam>
-    /// <typeparam name="PropDataT">The type used to cary instances of IPropGen.</typeparam>
-    public interface ICacheSubscriptions<ExKeyT, CompT, ObjectIdT, PropIdT, PropNameT>
-        where ExKeyT : IExplodedKey<CompT, ObjectIdT, PropIdT>
+    /// <typeparam name="L1T">The type used to store ObjectIds.</typeparam>
+    /// <typeparam name="L2T">The type used to store PropIds.</typeparam>
+    /// <typeparam name="L2TRaw">The type used to store PropertyNames.</typeparam>
+    public interface ICacheSubscriptions<ExKeyT, CompT, L1T, L2T, L2TRaw>
+        where ExKeyT : IExplodedKey<CompT, L1T, L2T>
     {
         ISubscriptionGen AddSubscription(ISubscriptionKeyGen subscriptionRequest, out bool wasAdded);
         bool RemoveSubscription(ISubscriptionKeyGen subscriptionRequest);
 
         SubscriberCollection GetSubscriptions(ExKeyT exKey);
 
-        SubscriberCollection GetSubscriptions(IPropBag host, PropIdT propId, IPropStoreAccessService<PropIdT, PropNameT> storeAccessor);
+        SubscriberCollection GetSubscriptions(IPropBag host, L2T propId, IPropStoreAccessService<L2T, L2TRaw> storeAccessor);
 
     }
 }

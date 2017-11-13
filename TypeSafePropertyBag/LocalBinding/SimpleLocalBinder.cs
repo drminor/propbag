@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DRM.TypeSafePropertyBag.EventManagement
+namespace DRM.TypeSafePropertyBag
 {
     using PropIdType = System.UInt32;
 
@@ -38,10 +38,6 @@ namespace DRM.TypeSafePropertyBag.EventManagement
 
         public void UpdateTarget<T>(BindingSubscription<T> bs, T oldValue, T newValue, ref int counter)
         {
-            // Get the target
-            //Action<T, T> originalAction = bs.TypedDoWhenChanged;
-            //IPropBag target = (IPropBag)originalAction.Target;
-
             // Use the target property key from the BindingSubscription
             SimpleExKey targetPropId = bs.TargetPropId;
 
@@ -50,6 +46,7 @@ namespace DRM.TypeSafePropertyBag.EventManagement
 
             // The object reference
             IPropBag target = SimpleExKey.UnwrapWeakRef(targetPropId.WR_AccessToken);
+            IPropBag targetAlt = SimpleExKey.UnwrapWeakRef((WeakReference<IPropBag>)bs.Target);
 
             // Ask the target to set the property to the newValue.
             bool result = target.SetIt<T>(newValue, propId);
@@ -60,19 +57,6 @@ namespace DRM.TypeSafePropertyBag.EventManagement
         }
 
         #region Private Methods
-
-        //private IPropBag UnwrapWeakRef(WeakReference<IPropBag> objectRef)
-        //{
-        //    if (objectRef.TryGetTarget(out IPropBag target))
-        //    {
-        //        IPropBag result = (IPropBag)target;
-        //        return result;
-        //    }
-        //    else
-        //    {
-        //        return default(IPropBag);
-        //    }
-        //}
 
         #endregion
 

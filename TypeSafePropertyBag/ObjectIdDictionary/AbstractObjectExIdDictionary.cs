@@ -5,13 +5,13 @@ using System.Collections.Generic;
 
 namespace DRM.TypeSafePropertyBag
 {
-    public class AbstractObjectIdDictionary<CompT, L1T, L2T, L2TRaw> :
-        ConcurrentDictionary<CompT, IPropGen>,
-        IObjectIdDictionary<CompT, L1T, L2T, L2TRaw, IPropGen> 
+    public class AbstractObjectExIdDictionary<ExKeyT, CompT, L1T, L2T, L2TRaw> :
+        ConcurrentDictionary<ExKeyT, IPropGen>,
+        IObjectExIdDictionary<ExKeyT, CompT, L1T, L2T, L2TRaw, IPropGen> where ExKeyT : IExplodedKey<CompT, L1T, L2T> 
     {
         #region Private Memebers
 
-        ICKeyMan<CompT, L1T, L2T, L2TRaw> CompKeyManager { get; }
+        ICompExKeyMan<ExKeyT, CompT, L1T, L2T, L2TRaw> CompKeyManager { get; }
 
         IL2KeyMan<L2T, L2TRaw> Level2KeyManager { get; }
 
@@ -19,7 +19,7 @@ namespace DRM.TypeSafePropertyBag
 
         #region Constructor
 
-        public AbstractObjectIdDictionary(ICKeyMan<CompT, L1T, L2T, L2TRaw> compKeyManager, IL2KeyMan<L2T, L2TRaw> level2KeyManager)
+        public AbstractObjectExIdDictionary(ICompExKeyMan<ExKeyT, CompT, L1T, L2T, L2TRaw> compKeyManager, IL2KeyMan<L2T, L2TRaw> level2KeyManager)
         {
             CompKeyManager = compKeyManager ?? throw new ArgumentNullException(nameof(compKeyManager));
             Level2KeyManager = level2KeyManager ?? throw new ArgumentNullException(nameof(level2KeyManager));
@@ -38,13 +38,13 @@ namespace DRM.TypeSafePropertyBag
         {
             //ICollection<KeyValuePair<CompT, TValue>> r = (ICollection<KeyValuePair<CompT, TValue>>) this;
 
-            var thisAsCollection = this as ICollection<KeyValuePair<CompT, IPropBag>>;
+            var thisAsCollection = this as ICollection<KeyValuePair<ExKeyT, IPropBag>>;
 
-            List<KeyValuePair<CompT, IPropBag>> toRemove = new List<KeyValuePair<CompT, IPropBag>>();
+            List<KeyValuePair<ExKeyT, IPropBag>> toRemove = new List<KeyValuePair<ExKeyT, IPropBag>>();
 
-            foreach (KeyValuePair<CompT, IPropBag> kvp in thisAsCollection)
+            foreach (KeyValuePair<ExKeyT, IPropBag> kvp in thisAsCollection)
             {
-                L1T foundTop = CompKeyManager.SplitComp(kvp.Key, out L2T bot);
+                L1T foundTop = CompKeyManager.Split(kvp.Key, out L2T bot);
                 if (foundTop.Equals(top))
                 {
                     toRemove.Add(kvp);
@@ -52,7 +52,7 @@ namespace DRM.TypeSafePropertyBag
             }
 
             int result = 0;
-            foreach (KeyValuePair<CompT, IPropBag> kvp in toRemove)
+            foreach (KeyValuePair<ExKeyT, IPropBag> kvp in toRemove)
             {
                 thisAsCollection.Remove(kvp);
                 result++;
@@ -66,32 +66,32 @@ namespace DRM.TypeSafePropertyBag
 
         public IPropGen GetOrAdd(L1T top, L2T bot, IPropGen value)
         {
-            CompT key = CompKeyManager.JoinComp(top, bot);
+            ExKeyT key = CompKeyManager.Join(top, bot);
             return GetOrAdd(key, value);
         }
 
         public bool TryAdd(L1T top, L2T bot, IPropGen value)
         {
-            CompT key = CompKeyManager.JoinComp(top, bot);
+            ExKeyT key = CompKeyManager.Join(top, bot);
             return TryAdd(key, value);
         }
 
         public bool TryGetValue(L1T top, L2T bot, out IPropGen value)
         {
-            CompT key = CompKeyManager.JoinComp(top, bot);
+            ExKeyT key = CompKeyManager.Join(top, bot);
             return TryGetValue(key, out value);
         }
 
         public bool ContainsKey(L1T top, L2T bot)
         {
-            CompT key = CompKeyManager.JoinComp(top, bot);
+            ExKeyT key = CompKeyManager.Join(top, bot);
             bool result = ContainsKey(key);
             return result;
         }
 
         public bool TryRemove(L1T top, L2T bot, out IPropGen value)
         {
-            CompT key = CompKeyManager.JoinComp(top, bot);
+            ExKeyT key = CompKeyManager.Join(top, bot);
             return TryRemove(key, out value);
         }
 
@@ -101,20 +101,20 @@ namespace DRM.TypeSafePropertyBag
 
         public bool TryAdd(L1T top, L2TRaw rawBot, IPropGen value)
         {
-            CompT key = CompKeyManager.JoinComp(top, Level2KeyManager.FromRaw(rawBot));
+            ExKeyT key = CompKeyManager.Join(top, Level2KeyManager.FromRaw(rawBot));
             return TryAdd(key, value);
         }
 
         public IPropGen GetOrAdd(L1T top, L2TRaw rawBot, IPropGen value)
         {
-            CompT key = CompKeyManager.JoinComp(top, Level2KeyManager.FromRaw(rawBot));
+            ExKeyT key = CompKeyManager.Join(top, Level2KeyManager.FromRaw(rawBot));
             return GetOrAdd(key, value);
         }
 
         public bool TryGetValue(L1T top, L2TRaw rawBot, out IPropGen value)
         {
             bool result;
-            if (CompKeyManager.TryJoinComp(top, rawBot, out CompT comp, out L2T bot))
+            if (CompKeyManager.TryJoin(top, rawBot, out ExKeyT comp))
             {
                 result = TryGetValue(comp, out value);
                 return result;
@@ -128,18 +128,16 @@ namespace DRM.TypeSafePropertyBag
 
         public bool ContainsKey(L1T top, L2TRaw rawBot)
         {
-            CompT key = CompKeyManager.JoinComp(top, Level2KeyManager.FromRaw(rawBot));
+            ExKeyT key = CompKeyManager.Join(top, Level2KeyManager.FromRaw(rawBot));
             bool result = ContainsKey(key);
             return result;
         }
 
         public bool TryRemove(L1T top, L2TRaw rawBot, out IPropGen value)
         {
-            CompT key = CompKeyManager.JoinComp(top, Level2KeyManager.FromRaw(rawBot));
+            ExKeyT key = CompKeyManager.Join(top, Level2KeyManager.FromRaw(rawBot));
             return TryRemove(key, out value);
         }
-
-
 
 
         #endregion

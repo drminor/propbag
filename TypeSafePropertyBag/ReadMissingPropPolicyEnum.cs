@@ -1,4 +1,5 @@
-﻿namespace DRM.TypeSafePropertyBag
+﻿
+namespace DRM.TypeSafePropertyBag
 {
     // TODO: Consider creating a WriteMissingPropPolicyEnum.
     // TODO: Consider handling "Allow Reflection" separately and removing TypeSafetyMode: "Locked."

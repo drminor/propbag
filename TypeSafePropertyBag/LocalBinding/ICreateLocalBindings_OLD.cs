@@ -1,8 +1,6 @@
 ﻿using System;
-using DRM.TypeSafePropertyBag.Fundamentals;
 
-
-namespace DRM.TypeSafePropertyBag.EventManagement
+namespace DRM.TypeSafePropertyBag
 {
     public interface ICreateLocalBindings<PropDataT> where PropDataT : IPropGen
     {

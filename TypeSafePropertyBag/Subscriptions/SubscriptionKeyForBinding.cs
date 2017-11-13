@@ -1,14 +1,15 @@
-﻿using DRM.TypeSafePropertyBag.Fundamentals;
-using System;
+﻿using System;
 
-namespace DRM.TypeSafePropertyBag.EventManagement
+namespace DRM.TypeSafePropertyBag
 {
+    using PropIdType = UInt32;
+    using PropNameType = String;
+
     public class BindingSubscriptionKey<T> : SubscriptionKeyGen, IBindingSubscriptionKey<T>
     {
         #region IBindingSubscription<T> implementation
 
-        public SimpleExKey TargetPropId { get; }
-        public LocalBindingInfo BindingInfo { get; }
+        // Also see SubscriptionKeyGen for properties that do not require a type parameter.
 
         #endregion
 
@@ -21,28 +22,59 @@ namespace DRM.TypeSafePropertyBag.EventManagement
 
         #region Constructors
 
-        // Typed Action
+        //// Typed Action
+        //public BindingSubscriptionKey
+        //    (
+        //        SimpleExKey sourcePropId,
+        //        SimpleExKey targetPropId,
+        //        LocalBindingInfo bindingInfo,
+        //        Action<T, T> action
+        //    )
+        //    : base
+        //    (
+        //        sourcePropId,
+        //        target: action.Target,
+        //        method: action.Method,
+        //        kind: SubscriptionKind.LocalBinding,
+        //        subscriptionPriorityGroup: SubscriptionPriorityGroup.First,
+        //        keepRef: false,
+        //        subscriptionCreator: CreateSubscriptionGen
+        //    )
+        //{
+        //    TypedDoWhenChanged = action;
+        //    TargetPropId = targetPropId;
+        //    BindingInfo = bindingInfo;
+        //}
+
         public BindingSubscriptionKey
             (
-                SimpleExKey sourcePropId,
-                SimpleExKey targetPropId,
-                LocalBindingInfo bindingInfo,
-                Action<T, T> action
+                IPropBag targetHost,
+                PropIdType propId,
+                IPropStoreAccessService<PropIdType, PropNameType> storeAccessor,
+                LocalBindingInfo bindingInfo
             )
             : base
             (
-                sourcePropId,
-                target: action.Target,
-                method: action.Method,
-                kind: SubscriptionKind.LocalBinding,
-                subscriptionPriorityGroup: SubscriptionPriorityGroup.First,
-                keepRef: false,
-                subscriptionCreator: CreateSubscriptionGen
+                GetTheKey(targetHost, propId, storeAccessor),
+                bindingInfo, 
+                SubscriptionKind.LocalBinding,
+                SubscriptionPriorityGroup.First,
+                CreateSubscriptionGen
             )
         {
-            TypedDoWhenChanged = action;
-            TargetPropId = targetPropId;
-            BindingInfo = bindingInfo;
+            TypedDoWhenChanged = null;
+        }
+
+
+        //kind: SubscriptionKind.LocalBinding,
+        //        subscriptionPriorityGroup: SubscriptionPriorityGroup.First,
+        //        keepRef: false,
+        //        subscriptionCreator: CreateSubscriptionGen
+
+        private static SimpleExKey GetTheKey(IPropBag host, uint propId, IPropStoreAccessService<PropIdType, PropNameType> storeAccessor)
+        {
+            SimpleExKey result = ((IHaveTheSimpleKey)storeAccessor).GetTheKey(host, propId);
+            return result;
         }
 
         #endregion

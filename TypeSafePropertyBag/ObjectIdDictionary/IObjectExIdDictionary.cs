@@ -12,16 +12,16 @@ namespace DRM.TypeSafePropertyBag
     /// <typeparam name="L2T">The type used to  identify a property for a given object using the raw form, usually a numeric type.</typeparam>
     /// <typeparam name="L2TRaw">The type used to identify a property for a given object using the "cooked" form, usually System.String.</typeparam>
     /// <typeparam name="PropDataT">The type used to implement the IPropGen interface.</typeparam>
-    public interface IObjectIdDictionary<CompT, L1T, L2T, L2TRaw, PropDataT>
-        : IDictionary<CompT, PropDataT>, ICollection<KeyValuePair<CompT, PropDataT>>, 
-        IEnumerable<KeyValuePair<CompT, PropDataT>>, IDictionary, ICollection, IEnumerable 
+    public interface IObjectExIdDictionary<ExKeyT, CompT, L1T, L2T, L2TRaw, PropDataT>
+        : IDictionary<ExKeyT, PropDataT>, ICollection<KeyValuePair<ExKeyT, PropDataT>>, 
+        IEnumerable<KeyValuePair<ExKeyT, PropDataT>>, IDictionary, ICollection, IEnumerable where ExKeyT : IExplodedKey<CompT, L1T, L2T>
     {
         #region ConcurentDictionary Methods
 
-        bool TryAdd(CompT exKey, PropDataT value);
+        bool TryAdd(ExKeyT exKey, PropDataT value);
 
-        PropDataT GetOrAdd(CompT cKey, PropDataT value);
-        PropDataT GetOrAdd(CompT cKey, Func<CompT, PropDataT> valueFactory);
+        PropDataT GetOrAdd(ExKeyT cKey, PropDataT value);
+        PropDataT GetOrAdd(ExKeyT cKey, Func<ExKeyT, PropDataT> valueFactory);
 
         // These are provided by IDictionary
         //bool TryGetValue(CompT key, out TValue value);
@@ -29,11 +29,11 @@ namespace DRM.TypeSafePropertyBag
         //TValue this[CompT key] { get; set; }
 
 
-        bool TryRemove(CompT cKey, out PropDataT value);
+        bool TryRemove(ExKeyT cKey, out PropDataT value);
 
-        bool TryUpdate(CompT key, PropDataT newValue, PropDataT comparisonValue);
-        PropDataT AddOrUpdate(CompT cKey, PropDataT addValue, Func<CompT, PropDataT, PropDataT> updateValueFactory);
-        PropDataT AddOrUpdate(CompT cKey, Func<CompT, PropDataT> addValueFactory, Func<CompT, PropDataT, PropDataT> updateValueFactory);
+        bool TryUpdate(ExKeyT key, PropDataT newValue, PropDataT comparisonValue);
+        PropDataT AddOrUpdate(ExKeyT cKey, PropDataT addValue, Func<ExKeyT, PropDataT, PropDataT> updateValueFactory);
+        PropDataT AddOrUpdate(ExKeyT cKey, Func<ExKeyT, PropDataT> addValueFactory, Func<ExKeyT, PropDataT, PropDataT> updateValueFactory);
 
         #endregion
 

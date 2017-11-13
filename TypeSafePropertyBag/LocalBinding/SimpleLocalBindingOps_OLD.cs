@@ -1,7 +1,5 @@
-﻿using DRM.TypeSafePropertyBag.Fundamentals;
-using System;
+﻿using System;
 using System.Reflection;
-
 
 /// <remarks>
 /// 
@@ -18,7 +16,7 @@ using System.Reflection;
 ///
 /// </remarks>
 
-namespace DRM.TypeSafePropertyBag.EventManagement
+namespace DRM.TypeSafePropertyBag
 {
     public class SimpleLocalBindingOps<PropDataT> : ICreateLocalBindings<PropDataT> where PropDataT : IPropGen
     {

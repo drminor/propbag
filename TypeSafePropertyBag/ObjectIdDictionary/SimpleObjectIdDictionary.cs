@@ -7,7 +7,7 @@ namespace DRM.TypeSafePropertyBag
     using PropIdType = UInt32;
     using PropNameType = String;
 
-    public class SimpleObjectIdDictionary : AbstractObjectIdDictionary<SimpleExKey, CompositeKeyType, ObjectIdType, PropIdType, PropNameType>
+    public class SimpleObjectIdDictionary : AbstractObjectIdDictionary<CompositeKeyType, ObjectIdType, PropIdType, PropNameType>
     {
         public SimpleObjectIdDictionary(SimpleCompKeyMan compKeyManager, SimpleLevel2KeyMan level2KeyManager)
             : base(compKeyManager, level2KeyManager)

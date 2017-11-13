@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 
-namespace DRM.TypeSafePropertyBag.EventManagement
+namespace DRM.TypeSafePropertyBag
 {
     public struct LocalBindingInfo
     {

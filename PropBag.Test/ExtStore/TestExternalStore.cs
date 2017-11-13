@@ -2,10 +2,17 @@
 using DRM.PropBag;
 using DRM.TypeSafePropertyBag;
 using NUnit.Framework;
+using System;
 
 namespace PropBagLib.Tests
 {
+    using PropIdType = UInt32;
+    using PropNameType = String;
+    using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
+    using SubCacheType = ICacheSubscriptions<SimpleExKey, UInt64, UInt32, UInt32, String>;
+    using LocalBinderType = IBindLocalProps<UInt32>;
 
+    using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
 
     [TestFixtureAttribute]
     public class TestExternalStore
@@ -23,8 +30,18 @@ namespace PropBagLib.Tests
         public void Create()
         {
             upCntr = 0;
+
             object stuff = new object();
-            PropExtStoreFactory factory = new PropExtStoreFactory(stuff: stuff, propStoreAccessServiceProvider: null, typeResolver: null, valueConverter: null);
+            IPropFactory standardPropFactory = new AutoMapperSupport.AutoMapperHelpers().PropFactory_V1;
+
+            PropExtStoreFactory factory = new PropExtStoreFactory
+                (stuff: stuff,
+                propStoreAccessServiceProvider: standardPropFactory.PropStoreAccessServiceProvider,
+                subscriptionManager: standardPropFactory.SubscriptionManager,
+                localBinder: null,
+                typeResolver: null,
+                valueConverter: null
+                );
 
             mod1 = ExtStoreModel.Create(factory);
 

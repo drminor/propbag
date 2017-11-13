@@ -1,10 +1,11 @@
 ﻿
-namespace DRM.TypeSafePropertyBag.EventManagement
+namespace DRM.TypeSafePropertyBag
 {
     public enum SubscriptionTargetKind
     {
         Standard,
         StandardKeepRef,
-        PropBag
+        PropBag,
+        LocalWeakRef // WeakReference<IPropBag>
     }
 }

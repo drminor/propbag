@@ -1,7 +1,8 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Reflection;
 
-namespace DRM.TypeSafePropertyBag.EventManagement
+namespace DRM.TypeSafePropertyBag
 {
     public class AbstractSubscripton<T> : ISubscription<T> 
     {
@@ -27,6 +28,9 @@ namespace DRM.TypeSafePropertyBag.EventManagement
 
         public Action<object, object> GenDoWhenChanged { get; protected set; }
         public Action Action { get; protected set; }
+
+        public object Target { get; protected set; }
+        public MethodInfo Method { get; protected set; }
 
         #endregion
 

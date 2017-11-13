@@ -1,4 +1,4 @@
-﻿namespace DRM.TypeSafePropertyBag.Fundamentals.NotUsed
+﻿namespace DRM.TypeSafePropertyBag.UnUsed
 {
     public class GenerateHash
     {

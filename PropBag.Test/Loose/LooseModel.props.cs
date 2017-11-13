@@ -20,7 +20,7 @@ namespace PropBagLib.Tests
             AddProp<Uri>("PropUri");
             AddProp<Lazy<int>>("PropLazyInt");
 
-            AddBinding<string>("PropString", "PropString2", FF);
+            AddBinding<string>("PropString2", "PropString", FF);
 
         }
 

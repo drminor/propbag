@@ -10,8 +10,11 @@ using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBag
 {
-    using PropIdType = System.UInt32;
-    using PropNameType = System.String;
+    using PropIdType = UInt32;
+    using PropNameType = String;
+    using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
+    using SubCacheType = ICacheSubscriptions<SimpleExKey, UInt64, UInt32, UInt32, String>;
+    using LocalBinderType = IBindLocalProps<UInt32>;
 
     public class PropFactory : AbstractPropFactory
     {
@@ -20,12 +23,17 @@ namespace DRM.PropBag
             get { return true; }
         }
 
-        public PropFactory(/*bool returnDefaultForUndefined,*/
-            IProvidePropStoreAccessService<PropIdType, PropNameType> propStoreAccessServiceProvider,
-            ResolveTypeDelegate typeResolver = null,
-            IConvertValues valueConverter = null)
-        : base(/*returnDefaultForUndefined, */ propStoreAccessServiceProvider, typeResolver, valueConverter) { }
-
+        public PropFactory
+            (
+                PSAccessServiceProviderType propStoreAccessServiceProvider,
+                SubCacheType subscriptionManager,
+                LocalBinderType localBinder,
+                ResolveTypeDelegate typeResolver,
+                IConvertValues valueConverter
+            )
+            : base(propStoreAccessServiceProvider, subscriptionManager, localBinder, typeResolver, valueConverter)
+        {
+        }
 
         // TODO: This is temporary just for testing.
         //public override Type GetTypeFromName(string typeName)
@@ -51,7 +59,7 @@ namespace DRM.PropBag
         }
 
         public override ICPropPrivate<CT, T> CreateWithNoValue<CT, T>(
-            string propertyName, object extraInfo = null,
+            PropNameType propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
             EventHandler<PCTypedEventArgs<CT>> doWhenChangedX = null, bool doAfterNotify = false, Func<CT, CT, bool> comparer = null)
         {
@@ -71,7 +79,7 @@ namespace DRM.PropBag
         // TODO: Need to create IPropPrivate<T> 
         public override IProp<T> Create<T>(
             T initialValue,
-            string propertyName, object extraInfo = null,
+            PropNameType propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
             EventHandler<PCTypedEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false, Func<T,T,bool> comparer = null)
         {
@@ -84,7 +92,7 @@ namespace DRM.PropBag
         }
 
         public override IProp<T> CreateWithNoValue<T>(
-            string propertyName, object extraInfo = null,
+            PropNameType propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
             EventHandler<PCTypedEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false, Func<T,T,bool> comparer = null)
         {
@@ -103,7 +111,7 @@ namespace DRM.PropBag
 
         public override IProp CreateGenFromObject(Type typeOfThisProperty,
             object value,
-            string propertyName, object extraInfo,
+            PropNameType propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
             EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null)
         {
@@ -129,7 +137,7 @@ namespace DRM.PropBag
 
         public override IProp CreateGenFromString(Type typeOfThisProperty,
             string value, bool useDefault,
-            string propertyName, object extraInfo,
+            PropNameType propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
             EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null)
         {
@@ -154,7 +162,7 @@ namespace DRM.PropBag
         }
 
         public override IProp CreateGenWithNoValue(Type typeOfThisProperty,
-            string propertyName, object extraInfo,
+            PropNameType propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
             EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null)
         {

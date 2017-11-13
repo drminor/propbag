@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace DRM.TypeSafePropertyBag.Fundamentals
 {
-    public static class TypeExtension
+    public static class TypeExtensions
     {
         public static bool IsInterface(this Type type) => type.GetTypeInfo().IsInterface;
 

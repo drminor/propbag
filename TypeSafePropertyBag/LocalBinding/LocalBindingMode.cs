@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DRM.TypeSafePropertyBag.EventManagement
+namespace DRM.TypeSafePropertyBag
 {
     public enum LocalBindingMode
     {

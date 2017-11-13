@@ -2,11 +2,16 @@
 using DRM.PropBag.AutoMapperSupport;
 using DRM.PropBag.ControlModel;
 using DRM.TypeSafePropertyBag;
-using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
 
 namespace PropBagLib.Tests.AutoMapperSupport
 {
+    using PropIdType = UInt32;
+    using PropNameType = String;
+    using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
+    using SubCacheType = ICacheSubscriptions<SimpleExKey, UInt64, UInt32, UInt32, String>;
+    using LocalBinderType = IBindLocalProps<UInt32>;
+
     public class AutoMapperHelpers
     {
         public SimpleAutoMapperProvider InitializeAutoMappers(IPropModelProvider propModelProvider)
@@ -50,7 +55,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
         private SimpleCompKeyMan _compKeyManager;
         private SimpleObjectIdDictionary _theStore;
 
-        SimplePropStoreAccessServiceProvider PropStoreAccessServiceProvider { get; set; }
+        PSAccessServiceProviderType PropStoreAccessServiceProvider { get; set; }
 
         IPropFactory _propFactory_V1;
         public IPropFactory PropFactory_V1
@@ -64,9 +69,14 @@ namespace PropBagLib.Tests.AutoMapperSupport
                     PropStoreAccessServiceProvider = new SimplePropStoreAccessServiceProvider
                         (_theStore, _compKeyManager, _level2KeyManager);
 
+                    SubCacheType subscriptionManager = new SimpleSubscriptionManager();
+                    LocalBinderType localBinder = new SimpleLocalBinder();
+
                     _propFactory_V1 = new PropFactory
                         (
                         propStoreAccessServiceProvider: PropStoreAccessServiceProvider,
+                        subscriptionManager: subscriptionManager,
+                        localBinder: null,
                         typeResolver: GetTypeFromName,
                         valueConverter: null
                         );

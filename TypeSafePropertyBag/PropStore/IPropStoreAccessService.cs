@@ -3,23 +3,23 @@
 namespace DRM.TypeSafePropertyBag
 {
     // TODO: Consider renaming this interface to: IGuardPropStore.
-    public interface IPropStoreAccessService<PropIdT, PropNameT>
+    public interface IPropStoreAccessService<L2T, L2TRaw>
     {
-        IPropGen this[IPropBag propBag, PropIdT propId] { get; set; }
+        IPropGen this[IPropBag propBag, L2T propId] { get; set; }
 
         int MaxPropsPerObject { get; }
         long MaxObjectsPerAppDomain { get; }
 
         void Clear(IPropBag propBag);
-        bool ContainsKey(IPropBag propBag, PropIdT propId);
+        bool ContainsKey(IPropBag propBag, L2T propId);
 
-        IEnumerable<KeyValuePair<PropNameT, IPropGen>> GetCollection(IPropBag propBag);
-        IEnumerator<KeyValuePair<PropNameT, IPropGen>> GetEnumerator(IPropBag propBag);
-        IEnumerable<PropNameT> GetKeys(IPropBag propBag);
+        IEnumerable<KeyValuePair<L2TRaw, IPropGen>> GetCollection(IPropBag propBag);
+        IEnumerator<KeyValuePair<L2TRaw, IPropGen>> GetEnumerator(IPropBag propBag);
+        IEnumerable<L2TRaw> GetKeys(IPropBag propBag);
         IEnumerable<IPropGen> GetValues(IPropBag propBag);
 
-        bool TryAdd(IPropBag propBag, PropIdT propId, IPropGen propData);
-        bool TryGetValue(IPropBag propBag, PropIdT propId, out IPropGen propData);
-        bool TryRemove(IPropBag propBag, PropIdT propId, out IPropGen propData);
+        bool TryAdd(IPropBag propBag, L2T propId, IPropGen propData);
+        bool TryGetValue(IPropBag propBag, L2T propId, out IPropGen propData);
+        bool TryRemove(IPropBag propBag, L2T propId, out IPropGen propData);
     }
 }

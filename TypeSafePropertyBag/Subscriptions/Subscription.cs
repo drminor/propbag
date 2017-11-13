@@ -1,5 +1,5 @@
 ﻿
-namespace DRM.TypeSafePropertyBag.EventManagement
+namespace DRM.TypeSafePropertyBag
 {
     public class Subscription<T> : AbstractSubscripton<T>
     {
@@ -33,13 +33,16 @@ namespace DRM.TypeSafePropertyBag.EventManagement
         // TODO: Consider adding additional constructors, very similar to the ones on SubscriptionKey.
         public Subscription(ISubscriptionKey<T> sKey)
         {
-            SourcePropId = sKey.SourcePropId;
+            SourcePropId = sKey.SourcePropRef;
             TypedHandler = sKey.TypedHandler;
             GenHandler = sKey.GenHandler;
             StandardHandler = sKey.StandardHandler;
             TypedDoWhenChanged = sKey.TypedDoWhenChanged;
             GenDoWhenChanged = sKey.GenDoWhenChanged;
             Action = sKey.Action;
+
+            Target = sKey.Target;
+            Method = sKey.Method;
 
             SubscriptionKind = sKey.SubscriptionKind;
             SubscriptionPriorityGroup = sKey.SubscriptionPriorityGroup;

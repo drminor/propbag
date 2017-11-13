@@ -6,25 +6,29 @@ namespace DRM.TypeSafePropertyBag
     using PropIdType = UInt32;
     using PropNameType = String;
 
+    using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
+    using SubCacheType = ICacheSubscriptions<SimpleExKey, UInt64, UInt32, UInt32, String>;
+    using LocalBinderType = IBindLocalProps<UInt32>;
+
     public interface IPropFactory 
     {
         bool ProvidesStorage { get; }
-        //bool ReturnDefaultForUndefined { get; }
         string IndexerName { get; }
-
         ResolveTypeDelegate TypeResolver { get; }
         IConvertValues ValueConverter { get; }
 
-        IProvidePropStoreAccessService<PropIdType, PropNameType> PropStoreAccessServiceProvider { get; }
+        PSAccessServiceProviderType PropStoreAccessServiceProvider { get; }
+        LocalBinderType LocalBinder { get; }
+        SubCacheType SubscriptionManager { get; }
 
         #region Collection-Type Methods Methods
 
-        ICPropPrivate<CT, T> Create<CT, T>(CT initialValue, string propertyName, object extraInfo = null,
+        ICPropPrivate<CT, T> Create<CT, T>(CT initialValue, PropNameType propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
             EventHandler<PCTypedEventArgs<CT>> doWhenChangedX = null, bool doAfterNotify = false,
             Func<CT, CT, bool> comparer = null) where CT : IEnumerable<T>;
 
-        ICPropPrivate<CT, T> CreateWithNoValue<CT, T>(string propertyName, object extraInfo = null,
+        ICPropPrivate<CT, T> CreateWithNoValue<CT, T>(PropNameType propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
             EventHandler<PCTypedEventArgs<CT>> doWhenChangedX = null, bool doAfterNotify = false,
             Func<CT, CT, bool> comparer = null) where CT : IEnumerable<T>;
@@ -33,11 +37,11 @@ namespace DRM.TypeSafePropertyBag
 
         #region Property-Type Methods
 
-        IProp<T> Create<T>(T initialValue, string propertyName, object extraInfo = null, 
+        IProp<T> Create<T>(T initialValue, PropNameType propertyName, object extraInfo = null, 
             bool hasStorage = true, bool typeIsSolid = true, EventHandler<PCTypedEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false,
             Func<T, T, bool> comparer = null);
 
-        IProp<T> CreateWithNoValue<T>(string propertyName, object extraInfo = null, 
+        IProp<T> CreateWithNoValue<T>(PropNameType propertyName, object extraInfo = null, 
             bool hasStorage = true, bool typeIsSolid = true, EventHandler<PCTypedEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false
             , Func<T, T, bool> comparer = null);
 
@@ -45,36 +49,36 @@ namespace DRM.TypeSafePropertyBag
 
         #region Generic property creators 
 
-        IProp CreateGenFromObject(Type typeOfThisProperty, object value, string propertyName, object extraInfo, 
+        IProp CreateGenFromObject(Type typeOfThisProperty, object value, PropNameType propertyName, object extraInfo, 
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
             EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify,
             Delegate comparer, bool useRefEquality = false, Type collectionType = null);
 
-        IProp CreateGenFromString(Type typeOfThisProperty, string value, bool useDefault, string propertyName, object extraInfo,
+        IProp CreateGenFromString(Type typeOfThisProperty, PropNameType value, bool useDefault, PropNameType propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
             EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify,
             Delegate comparer, bool useRefEquality = false, Type collectionType = null);
 
-        IProp CreateGenWithNoValue(Type typeOfThisProperty, string propertyName, object extraInfo,
+        IProp CreateGenWithNoValue(Type typeOfThisProperty, PropNameType propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
             EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify,
             Delegate comparer, bool useRefEquality = false, Type collectionType = null);
 
-        //IPropGen CreatePropInferType(object value, string propertyName, object extraInfo, bool hasStorage);
+        //IPropGen CreatePropInferType(object value, PropNameType propertyName, object extraInfo, bool hasStorage);
 
         #endregion
 
         Func<T, T, bool> GetRefEqualityComparer<T>();
 
-        object GetDefaultValue(Type propertyType, string propertyName = null);
+        object GetDefaultValue(Type propertyType, PropNameType propertyName = null);
 
-        T GetDefaultValue<T>(string propertyName = null);
+        T GetDefaultValue<T>(PropNameType propertyName = null);
 
         T GetValueFromObject<T>(object value);
 
-        T GetValueFromString<T>(string value);
+        T GetValueFromString<T>(PropNameType value);
 
-        CT GetValueFromString<CT, T>(string value) where CT : class;
+        CT GetValueFromString<CT, T>(PropNameType value) where CT : class;
 
         Type GetTypeFromValue(object value);
 

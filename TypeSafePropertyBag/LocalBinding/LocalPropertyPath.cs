@@ -1,6 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 
-namespace DRM.TypeSafePropertyBag.EventManagement
+namespace DRM.TypeSafePropertyBag
 {
     //
     // Summary:

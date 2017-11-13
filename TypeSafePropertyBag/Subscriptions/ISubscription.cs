@@ -1,9 +1,8 @@
-﻿using DRM.TypeSafePropertyBag.Fundamentals;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Reflection;
 
-namespace DRM.TypeSafePropertyBag.EventManagement
+namespace DRM.TypeSafePropertyBag
 {
     /// <summary>
     /// 
@@ -40,6 +39,9 @@ namespace DRM.TypeSafePropertyBag.EventManagement
         EventHandler<PropertyChangedEventArgs> StandardHandler { get; }
         Action<object, object> GenDoWhenChanged { get; }
         Action Action { get; }
+
+        object Target { get; }
+        MethodInfo Method { get; }
     }
 
 }

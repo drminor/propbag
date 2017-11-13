@@ -1,20 +1,20 @@
-﻿using DRM.TypeSafePropertyBag.Fundamentals;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Reflection;
 
-namespace DRM.TypeSafePropertyBag.EventManagement
+namespace DRM.TypeSafePropertyBag
 {
     public interface IBindingSubscriptionKey<T> : ISubscriptionKey<T>
     {
-        SimpleExKey TargetPropId { get; }
-        LocalBindingInfo BindingInfo { get; }
+        // These have been moved to the ISubscriptionKeyGen interface.
+        //SimpleExKey TargetPropId { get; }
+        //LocalBindingInfo BindingInfo { get; }
     }
 
     public interface ISubscriptionKey<T> : ISubscriptionKeyGen
     {
         EventHandler<PCTypedEventArgs<T>> TypedHandler { get; }
-        Action<T, T> TypedDoWhenChanged { get; }
+        Action<T,T> TypedDoWhenChanged { get; }
     }
 
     /// <summary>
@@ -24,7 +24,7 @@ namespace DRM.TypeSafePropertyBag.EventManagement
     /// </summary>
     public interface ISubscriptionKeyGen
     {
-        SimpleExKey SourcePropId { get; }
+        SimpleExKey SourcePropRef { get; } // Property that raises the events to which we are subscribing.
 
         SubscriptionKind SubscriptionKind { get; }
         SubscriptionTargetKind SubscriptionTargetKind { get; }
@@ -45,5 +45,10 @@ namespace DRM.TypeSafePropertyBag.EventManagement
         bool HasBeenUsed { get; }
 
         void MarkAsUsed();
+
+        // Properties for BindingSubscriptions
+
+        SimpleExKey TargetPropRef { get; }
+        LocalBindingInfo BindingInfo { get; }
     }
 }

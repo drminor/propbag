@@ -1,9 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿
+using System;
 using System.Linq;
+
 namespace DRM.TypeSafePropertyBag
 {
-    public class TypeSafePropBagMetaData
+    public class TypeSafePropBagMetaData : ITypeSafePropBagMetaData
     {
         private TypeSafePropBagMetaData() { } // Disallow use of parameterless constructor.
 
@@ -57,6 +58,8 @@ namespace DRM.TypeSafePropertyBag
 
         public bool ReturnDefaultForUndefined { get; }
 
+        // The default value is automatically produced when accessing a value that has been set to undefined,
+        // if and only if the TypeSafetyMode is 'None' or 'RegisterOnGetLoose.'.
         protected bool GetReturnDefaultForUndefined(PropBagTypeSafetyMode typeSafetyMode)
             => typeSafetyMode == PropBagTypeSafetyMode.None || typeSafetyMode == PropBagTypeSafetyMode.RegisterOnGetLoose;
 
@@ -153,9 +156,8 @@ namespace DRM.TypeSafePropertyBag
             {
                 return null;
             }
-
-            IEnumerable<string> temp = fullName.Split('.');
-            string lastTerm = temp.Last();
+            
+            string lastTerm = fullName.Split('.').Last();
 
             return lastTerm;
         }

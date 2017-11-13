@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 
-namespace DRM.TypeSafePropertyBag.EventManagement
+namespace DRM.TypeSafePropertyBag
 {
     using CompositeKeyType = UInt64;
     using ObjectIdType = UInt32;
@@ -40,7 +40,7 @@ namespace DRM.TypeSafePropertyBag.EventManagement
                 throw new ApplicationException("Its alread been used.");
             }
 
-            SubscriberCollection sc = GetSubscriptions((SimpleExKey) subscriptionRequest.SourcePropId);
+            SubscriberCollection sc = GetSubscriptions((SimpleExKey) subscriptionRequest.SourcePropRef);
 
             bool internalWasAdded = false;
 
@@ -55,12 +55,12 @@ namespace DRM.TypeSafePropertyBag.EventManagement
             if(subscriptionRequest.HasBeenUsed)
             {
                 System.Diagnostics.Debug.WriteLine($"Created a new Subscription for Property:" +
-                    $" {subscriptionRequest.SourcePropId} / Event: {result.SubscriptionKind}.");
+                    $" {subscriptionRequest.SourcePropRef} / Event: {result.SubscriptionKind}.");
             }
             else
             {
                 System.Diagnostics.Debug.WriteLine($"The subscription for for Property:" +
-                    $" {subscriptionRequest.SourcePropId} / Event: {result.SubscriptionKind} was not added.");
+                    $" {subscriptionRequest.SourcePropRef} / Event: {result.SubscriptionKind} was not added.");
             }
 
             wasAdded = internalWasAdded;
@@ -69,11 +69,11 @@ namespace DRM.TypeSafePropertyBag.EventManagement
 
         public bool RemoveSubscription(ISubscriptionKeyGen subscriptionRequest)
         {
-            SubscriberCollection sc = GetSubscriptions(subscriptionRequest.SourcePropId);
+            SubscriberCollection sc = GetSubscriptions(subscriptionRequest.SourcePropRef);
             bool result = sc.RemoveSubscription(subscriptionRequest);
 
             if (result)
-                System.Diagnostics.Debug.WriteLine($"Removed the subscription for {subscriptionRequest.SourcePropId}.");
+                System.Diagnostics.Debug.WriteLine($"Removed the subscription for {subscriptionRequest.SourcePropRef}.");
 
             return result;
         }
