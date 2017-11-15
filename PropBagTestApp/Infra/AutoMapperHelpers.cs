@@ -161,8 +161,8 @@ namespace PropBagTestApp.Infra
         {
             _theStore = ProvisonTheStore(out _level2KeyManager, out _compKeyManager);
 
-            PropStoreAccessServiceProvider = new SimplePropStoreAccessServiceProvider
-                (_theStore, _compKeyManager, _level2KeyManager);
+
+            PropStoreAccessServiceProvider = new SimplePropStoreAccessServiceProvider(_theStore/*, MAX_NUMBER_OF_PROPERTIES*/);
 
             SubCacheType subscriptionManager = new SimpleSubscriptionManager();
             LocalBinderType localBinder = new SimpleLocalBinder();
@@ -209,9 +209,9 @@ namespace PropBagTestApp.Infra
         private static SimpleObjectIdDictionary ProvisonTheStore(out SimpleLevel2KeyMan level2KeyMan, out SimpleCompKeyMan compKeyManager)
         {
             level2KeyMan = new SimpleLevel2KeyMan(MAX_NUMBER_OF_PROPERTIES);
-            compKeyManager = new SimpleCompKeyMan(level2KeyMan);
+            compKeyManager = new SimpleCompKeyMan(MAX_NUMBER_OF_PROPERTIES/*level2KeyManager*/);
 
-            SimpleObjectIdDictionary result = new SimpleObjectIdDictionary(compKeyManager, level2KeyMan);
+            SimpleObjectIdDictionary result = new SimpleObjectIdDictionary(compKeyManager/*, level2KeyMan*/);
             return result;
         }
 

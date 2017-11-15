@@ -16,6 +16,26 @@ namespace DRM.TypeSafePropertyBag
             _subs = new List<ISubscriptionGen>();
         }
 
+        /// <summary>
+        /// Removes subscriptions for which the reference object no longer lives.
+        /// </summary>
+        /// <param name="totalCount">The total number of subscriptions present when the operation began.</param>
+        /// <returns>The number of dead subscriptions found.</returns>
+        public int PruneSubscriptions(out int totalCount)
+        {
+            int result = 0;
+            totalCount = 0;
+            lock(_sync)
+            {
+                foreach(ISubscriptionGen x in _subs)
+                {
+                    //x.
+                    totalCount++;
+                }
+            }
+            return result;
+        }
+
         public ISubscriptionGen GetOrAdd(ISubscriptionKeyGen subscriptionKey, Func<ISubscriptionKeyGen, ISubscriptionGen> factory)
         {
             lock (_sync)

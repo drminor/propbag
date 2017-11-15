@@ -6,7 +6,11 @@ using System.Data;
 
 namespace DRM.TypeSafePropertyBag
 {
+    using CompositeKeyType = UInt64;
+    using ObjectIdType = UInt32;
+
     using PropIdType = UInt32;
+    using PropNameType = String;
 
     // Typically implemented by TypedTableBase<T> Class
     public interface IDTPropPrivate<CT,T> : ICPropPrivate<CT,T> where CT: IEnumerable<T>
@@ -49,7 +53,7 @@ namespace DRM.TypeSafePropertyBag
     /// Objects that implement this interface are often created by an instance of a class that inherits from AbstractPropFactory.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public interface IProp<T> : IProp, INotifyPCTyped<T> //, IProvideATypedEventManager<T>
+    public interface IProp<T> : IProp //, INotifyPCTyped<T> //, IProvideATypedEventManager<T>
     {
         T TypedValue { get; set; }
 
@@ -58,19 +62,8 @@ namespace DRM.TypeSafePropertyBag
 
         void DoWhenChanged(T oldVal, T newVal);
 
-        // Property Changed with typed values support
-        //event EventHandler<PropertyChangedWithTValsEventArgs<T>> PropertyChangedWithTVals;
-        //void OnPropertyChangedWithTVals(string propertyName, T oldVal, T newVal);
-
-        // TODO: Consider moving these to the IPropPrivate<T> interface.
-        // and using the WeakEventManager style.
-        //void SubscribeToPropChanged(Action<T, T> doOnChange);
-        //bool UnSubscribeToPropChanged(Action<T, T> doOnChange);
-
         //void RaiseEvents(IEnumerable<ISubscriptionGen> typedSubs);
-        void RaiseEventsForParent(IEnumerable<ISubscriptionGen> typedSubs, object parent, 
-            string propertyName, object oldVal, object newVal);
-
+        //void RaiseEventsForParent(IEnumerable<ISubscriptionGen> typedSubs, object parent, string propertyName, object oldVal, object newVal);
 
         Attribute[] Attributes { get; }
     }
@@ -78,7 +71,7 @@ namespace DRM.TypeSafePropertyBag
     /// <summary>
     /// These are the non-type specific features that every instance of IProp<typeparamref name="T"/> implement.
     /// </summary>
-    public interface IProp : INotifyPCGen
+    public interface IProp
     {
         PropKindEnum PropKind { get; }
         Type Type { get; }
@@ -98,29 +91,42 @@ namespace DRM.TypeSafePropertyBag
         /// <returns>True, if the value was defined at the time this call was made.</returns>
         bool SetValueToUndefined();
 
+        void OnPropertyChangedWithObjectVals(PropNameType propertyName, object oldVal, object newVal);
 
-        // Property Changed with typed values support
-        //event EventHandler<PropertyChangedWithValsEventArgs> PropertyChangedWithVals;
-        void OnPropertyChangedWithVals(string propertyName, object oldVal, object newVal);
-
-        //void SubscribeToPropChanged(Action<object, object> doOnChange);
-        //bool UnSubscribeToPropChanged(Action<object, object> doOnChange);
-
-
-        bool CallBacksHappenAfterPubEvents { get; }
-        bool HasCallBack { get; }
-        bool HasChangedWithTValSubscribers { get; }
+        //bool CallBacksHappenAfterPubEvents { get; }
+        //bool HasCallBack { get; }
+        //bool HasChangedWithTValSubscribers { get; }
 
         void CleanUpTyped();
+    }
+
+    /// <summary>
+    /// Allows access from code in the TypeSafePropertyBag assembly, but not from the PropBag assembly.
+    /// </summary>
+    internal interface IPropDataInternal
+    {
+        void SetCompKey(CompositeKeyType value);
+        void SetChildObjectId(ObjectIdType value);
+        void SetTypedProp(IProp value);
     }
 
     /// <summary>
     /// Classes that implement the IPropBag interface, keep a list of properties, each of which implements this interface.
     /// These features are managed by the PropBag, and not by classes that inherit from AbstractProp.
     /// </summary>
-    public interface IPropGen
+    public interface IPropData : INotifyPCObject
     {
-        PropIdType PropId { get; }
+        // TODO: Make this the Exploded key, which contains a weak reference to the PropBag hosting this PropDataItem.
+        CompositeKeyType CompKey { get; }
+
+        //// TODO: This can be computed from the CompKey and it does take up 4 bytes, consider using CompKey exclusively.
+        //PropIdType PropId { get; } 
+
+        // The ObjectId assigned to the value of this Prop, if the TypedProp.Type implements IPropBag.
+        ObjectIdType ChildObjectId { get; }
+
+        bool IsPropBag { get; }
+
         bool IsEmpty { get; }
 
         /// <summary>
@@ -129,10 +135,10 @@ namespace DRM.TypeSafePropertyBag
         /// </summary>
         IProp TypedProp { get; }
 
-        object Value { get; }
-
         ValPlusType ValuePlusType();
 
         void CleanUp(bool doTypedCleanup);
+
+        void OnPropertyChangedWithObjectVals(PropNameType propertyName, object oldVal, object newVal);
     }
 }

@@ -6,26 +6,26 @@ using System.Collections.Generic;
 namespace DRM.TypeSafePropertyBag
 {
     public class AbstractObjectIdDictionary<CompT, L1T, L2T, L2TRaw> :
-        ConcurrentDictionary<CompT, IPropGen>,
-        IObjectIdDictionary<CompT, L1T, L2T, L2TRaw, IPropGen> 
+        ConcurrentDictionary<CompT, IPropData>,
+        IObjectIdDictionary<CompT, L1T, L2T, L2TRaw, IPropData> 
     {
         #region Private Memebers
 
-        ICKeyMan<CompT, L1T, L2T, L2TRaw> CompKeyManager { get; }
-
-        IL2KeyMan<L2T, L2TRaw> Level2KeyManager { get; }
+        //IL2KeyMan<L2T, L2TRaw> Level2KeyManager { get; }
 
         #endregion
 
         #region Constructor
 
-        public AbstractObjectIdDictionary(ICKeyMan<CompT, L1T, L2T, L2TRaw> compKeyManager, IL2KeyMan<L2T, L2TRaw> level2KeyManager)
+        public AbstractObjectIdDictionary(ICKeyMan<CompT, L1T, L2T, L2TRaw> compKeyManager/*, IL2KeyMan<L2T, L2TRaw> level2KeyManager*/)
         {
             CompKeyManager = compKeyManager ?? throw new ArgumentNullException(nameof(compKeyManager));
-            Level2KeyManager = level2KeyManager ?? throw new ArgumentNullException(nameof(level2KeyManager));
+            //Level2KeyManager = level2KeyManager ?? throw new ArgumentNullException(nameof(level2KeyManager));
         }
 
         #endregion
+
+        public ICKeyMan<CompT, L1T, L2T, L2TRaw> CompKeyManager { get; }
 
         #region Level 1 
 
@@ -64,19 +64,19 @@ namespace DRM.TypeSafePropertyBag
 
         #region Level 2 Cooked 
 
-        public IPropGen GetOrAdd(L1T top, L2T bot, IPropGen value)
+        public IPropData GetOrAdd(L1T top, L2T bot, IPropData value)
         {
             CompT key = CompKeyManager.JoinComp(top, bot);
             return GetOrAdd(key, value);
         }
 
-        public bool TryAdd(L1T top, L2T bot, IPropGen value)
+        public bool TryAdd(L1T top, L2T bot, IPropData value)
         {
             CompT key = CompKeyManager.JoinComp(top, bot);
             return TryAdd(key, value);
         }
 
-        public bool TryGetValue(L1T top, L2T bot, out IPropGen value)
+        public bool TryGetValue(L1T top, L2T bot, out IPropData value)
         {
             CompT key = CompKeyManager.JoinComp(top, bot);
             return TryGetValue(key, out value);
@@ -89,7 +89,7 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        public bool TryRemove(L1T top, L2T bot, out IPropGen value)
+        public bool TryRemove(L1T top, L2T bot, out IPropData value)
         {
             CompT key = CompKeyManager.JoinComp(top, bot);
             return TryRemove(key, out value);
@@ -99,45 +99,45 @@ namespace DRM.TypeSafePropertyBag
 
         #region Level 2 Raw
 
-        public bool TryAdd(L1T top, L2TRaw rawBot, IPropGen value)
-        {
-            CompT key = CompKeyManager.JoinComp(top, Level2KeyManager.FromRaw(rawBot));
-            return TryAdd(key, value);
-        }
+        //public bool TryAdd(L1T top, L2TRaw rawBot, IPropData value)
+        //{
+        //    CompT key = CompKeyManager.JoinComp(top, Level2KeyManager.FromRaw(rawBot));
+        //    return TryAdd(key, value);
+        //}
 
-        public IPropGen GetOrAdd(L1T top, L2TRaw rawBot, IPropGen value)
-        {
-            CompT key = CompKeyManager.JoinComp(top, Level2KeyManager.FromRaw(rawBot));
-            return GetOrAdd(key, value);
-        }
+        //public IPropData GetOrAdd(L1T top, L2TRaw rawBot, IPropData value)
+        //{
+        //    CompT key = CompKeyManager.JoinComp(top, Level2KeyManager.FromRaw(rawBot));
+        //    return GetOrAdd(key, value);
+        //}
 
-        public bool TryGetValue(L1T top, L2TRaw rawBot, out IPropGen value)
-        {
-            bool result;
-            if (CompKeyManager.TryJoinComp(top, rawBot, out CompT comp, out L2T bot))
-            {
-                result = TryGetValue(comp, out value);
-                return result;
-            }
-            else
-            {
-                value = default(IPropGen);
-                return false;
-            }
-        }
+        //public bool TryGetValue(L1T top, L2TRaw rawBot, out IPropData value)
+        //{
+        //    bool result;
+        //    if (CompKeyManager.TryJoinComp(top, rawBot, out CompT comp, out L2T bot))
+        //    {
+        //        result = TryGetValue(comp, out value);
+        //        return result;
+        //    }
+        //    else
+        //    {
+        //        value = default(IPropData);
+        //        return false;
+        //    }
+        //}
 
-        public bool ContainsKey(L1T top, L2TRaw rawBot)
-        {
-            CompT key = CompKeyManager.JoinComp(top, Level2KeyManager.FromRaw(rawBot));
-            bool result = ContainsKey(key);
-            return result;
-        }
+        //public bool ContainsKey(L1T top, L2TRaw rawBot)
+        //{
+        //    CompT key = CompKeyManager.JoinComp(top, Level2KeyManager.FromRaw(rawBot));
+        //    bool result = ContainsKey(key);
+        //    return result;
+        //}
 
-        public bool TryRemove(L1T top, L2TRaw rawBot, out IPropGen value)
-        {
-            CompT key = CompKeyManager.JoinComp(top, Level2KeyManager.FromRaw(rawBot));
-            return TryRemove(key, out value);
-        }
+        //public bool TryRemove(L1T top, L2TRaw rawBot, out IPropData value)
+        //{
+        //    CompT key = CompKeyManager.JoinComp(top, Level2KeyManager.FromRaw(rawBot));
+        //    return TryRemove(key, out value);
+        //}
 
 
 

@@ -5,8 +5,8 @@ using System.ComponentModel;
 
 namespace DRM.TypeSafePropertyBag
 {
-
     using PropIdType = System.UInt32;
+    using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
 
     /// <summary>
     /// Base Property Bag Features
@@ -26,7 +26,7 @@ namespace DRM.TypeSafePropertyBag
         //IProp<T> GetTypedProp<T>(string propertyName);
         //IPropGen GetPropGen(string propertyName, Type propertyType);
 
-        bool TryGetPropGen(string propertyName, Type propertyType, out IPropGen propGen);
+        bool TryGetPropGen(string propertyName, Type propertyType, out IPropData propGen);
 
         object this[string typeName, string propertyName] { get; set; }
         object this[Type type, string propertyName] { get; set; }
@@ -55,7 +55,6 @@ namespace DRM.TypeSafePropertyBag
 
         bool AddBinding<T>(string targetPropertyName, string propertyName, Action<T, T> ttAction);
 
-
         //bool SubscribeToPropChanged<T>(Action<T, T> doOnChange, string propertyName);
         //bool UnSubscribeToPropChanged<T>(Action<T, T> doOnChange, string propertyName);
 
@@ -63,10 +62,11 @@ namespace DRM.TypeSafePropertyBag
         //bool UnSubscribeToPropChanged(Action<object, object> doOnChange, string propertyName);
 
         string FullClassName { get; }
+        PSAccessServiceType OurStoreAccessor { get; }
 
         // Consider moving these to the TypeSafePropBagMetaData class.
         IList<string> GetAllPropertyNames();
-        IDictionary<string, IPropGen> GetAllPropertyValues();
+        IDictionary<string, IPropData> GetAllPropertyValues();
         IDictionary<string, ValPlusType> GetAllPropNamesAndTypes();
 
         //IPropGen this[int index] { get; }

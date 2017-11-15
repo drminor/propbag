@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 
 namespace DRM.TypeSafePropertyBag
 {
@@ -7,7 +6,10 @@ namespace DRM.TypeSafePropertyBag
     using ObjectIdType = UInt32;
     using PropIdType = UInt32;
 
-    public struct SimpleExKey : IExplodedKey<CompositeKeyType, ObjectIdType, PropIdType>, IEquatable<SimpleExKey>
+    using ExKeyType = IExplodedKey<UInt64, UInt32, UInt32>;
+
+
+    public struct SimpleExKey : ExKeyType, IEquatable<SimpleExKey>
     {
         #region Constructor
 
@@ -47,7 +49,7 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        static public SimpleExKey FromIExploadedKeyWithWeakRef(IExplodedKey<CompositeKeyType, ObjectIdType, PropIdType> exKey)
+        static public SimpleExKey FromIExploadedKeyWithWeakRef(ExKeyType exKey)
         {
             SimpleExKey result = new SimpleExKey(exKey.CKey, (WeakReference<IPropBag>)exKey.AccessToken,
                 exKey.Level1Key, exKey.Level2Key);

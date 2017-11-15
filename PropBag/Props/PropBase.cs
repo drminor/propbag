@@ -132,7 +132,7 @@ namespace DRM.PropBag
             return null;
         }
 
-        public void OnPropertyChangedWithVals(string propertyName, object oldVal, object newVal)
+        public void OnPropertyChangedWithObjectVals(string propertyName, object oldVal, object newVal)
         {
             EventHandler<PCGenEventArgs> handler = Interlocked.CompareExchange(ref PropertyChangedWithGenVals, null, null);
 
@@ -146,50 +146,7 @@ namespace DRM.PropBag
         #endregion
 
 
-        #region Generic PropertyChangedWithVals support
-
-        //public void SubscribeToPropChanged(Action<object, object> doOnChange)
-        //{
-        //    EventHandler<PCGenEventArgs> eventHandler = (s, e) => { doOnChange(e.OldValue, e.NewValue); };
-
-        //    if (GetHandlerFromAction(doOnChange, ref _actTableGen) == null)
-        //    {
-        //        PropertyChangedWithGenVals += eventHandler;
-        //        if (_actTableGen == null)
-        //        {
-        //            _actTableGen = new List<Tuple<Action<object, object>, EventHandler<PCGenEventArgs>>>();
-        //        }
-        //        _actTableGen.Add(new Tuple<Action<object, object>, EventHandler<PCGenEventArgs>>(doOnChange, eventHandler));
-        //    }
-        //}
-
-        //public bool UnSubscribeToPropChanged(Action<object, object> doOnChange)
-        //{
-        //    Tuple<Action<object, object>, EventHandler<PCGenEventArgs>> actEntry = GetHandlerFromAction(doOnChange, ref _actTableGen);
-
-        //    if (actEntry == null) return false;
-
-        //    PropertyChangedWithGenVals -= actEntry.Item2;
-        //    _actTableGen.Remove(actEntry);
-        //    return true;
-        //}
-
-        //private Tuple<Action<object, object>, EventHandler<PCGenEventArgs>> GetHandlerFromAction(Action<object, object> act,
-        //    ref List<Tuple<Action<object, object>, EventHandler<PCGenEventArgs>>> actTable)
-        //{
-        //    if (actTable == null)
-        //    {
-        //        return null;
-        //    }
-
-        //    for (int i = 0; i < actTable.Count; i++)
-        //    {
-        //        Tuple<Action<object, object>, EventHandler<PCGenEventArgs>> tup = actTable[i];
-        //        if (tup.Item1 == act) return tup;
-        //    }
-
-        //    return null;
-        //}
+        #region Object PropertyChangedWithVals support
 
 
         #endregion

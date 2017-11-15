@@ -9,8 +9,8 @@ namespace DRM.TypeSafePropertyBag
 
     public class SimpleObjectIdDictionary : AbstractObjectIdDictionary<CompositeKeyType, ObjectIdType, PropIdType, PropNameType>
     {
-        public SimpleObjectIdDictionary(SimpleCompKeyMan compKeyManager, SimpleLevel2KeyMan level2KeyManager)
-            : base(compKeyManager, level2KeyManager)
+        public SimpleObjectIdDictionary(SimpleCompKeyMan compKeyManager/*, SimpleLevel2KeyMan level2KeyManager*/)
+            : base(compKeyManager/*, level2KeyManager*/)
         {
         }
     }

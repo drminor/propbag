@@ -38,7 +38,7 @@ namespace DRM.PropBag.ControlModel
         //    DoAfterNotify = doAfterNotify;
         //}
 
-        public Func<object, EventHandler<PCGenEventArgs>> DoWhenActionGetter { get; }
+        public Func<object, EventHandler<PCGenEventArgs>> DoWhenGenHandlerGetter { get; }
 
         public PropDoWhenChangedField(EventHandler<PCGenEventArgs> doWhenChangedAction, bool doAfterNotify,
             bool methodIsLocal, Type declaringType, string fullClassName, string instanceKey, string methodName,
@@ -52,10 +52,8 @@ namespace DRM.PropBag.ControlModel
             InstanceKey = instanceKey; //  ?? throw new ArgumentNullException(nameof(instanceKey));
             MethodName = methodName; //  ?? throw new ArgumentNullException(nameof(methodName));
 
-            DoWhenActionGetter = doWhenChangedActionGetter;
+            DoWhenGenHandlerGetter = doWhenChangedActionGetter;
         }
-
-
 
         public bool Equals(PropDoWhenChangedField other)
         {

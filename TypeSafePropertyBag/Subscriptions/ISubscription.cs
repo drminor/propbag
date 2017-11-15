@@ -10,8 +10,7 @@ namespace DRM.TypeSafePropertyBag
     /// <typeparam name="T">The type of the property to which this subscription will subscribe.</typeparam>
     public interface IBindingSubscription<T> : ISubscription<T>
     {
-        SimpleExKey TargetPropId { get; }
-        LocalBindingInfo BindingInfo { get; }
+
     }
 
     /// <summary>
@@ -42,6 +41,10 @@ namespace DRM.TypeSafePropertyBag
 
         object Target { get; }
         MethodInfo Method { get; }
+
+        // Binding Subscription Members
+        SimpleExKey TargetPropId { get; }
+        LocalBindingInfo BindingInfo { get; }
     }
 
 }

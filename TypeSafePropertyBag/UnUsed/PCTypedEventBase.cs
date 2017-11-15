@@ -3,7 +3,7 @@ using System.Threading;
 
 namespace DRM.TypeSafePropertyBag.UnUsed
 {
-    public class PCTypedEventBase<TPropData, T> : INotifyPCTyped<T> where TPropData : IPropGen
+    public class PCTypedEventBase<TPropData, T> : INotifyPCTyped<T> where TPropData : IPropData
     {
         //object _evLock;
         //private event EventHandler<PCTypedEventArgs<T>> _privateEvent;

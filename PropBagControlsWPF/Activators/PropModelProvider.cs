@@ -176,7 +176,7 @@ namespace DRM.PropBag.ControlsWPF
                         
                         if(dwc.MethodName != null)
                         {
-                            doWhenChangedGetter = doWhenChangedHelper.GetTheDoWhenChangedActionGetter(dwc, rpi.PropertyType);
+                            doWhenChangedGetter = doWhenChangedHelper.GetTheDoWhenChangedGenHandlerGetter(dwc, rpi.PropertyType);
                         }
 
                         ControlModel.PropDoWhenChangedField rdwc =

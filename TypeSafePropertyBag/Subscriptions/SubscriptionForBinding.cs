@@ -7,8 +7,9 @@ namespace DRM.TypeSafePropertyBag
     {
         #region IBindingSubscription<T> Implementation
 
-        public SimpleExKey TargetPropId { get; }
-        public LocalBindingInfo BindingInfo { get; }
+        // These are now part of IBindingSubscriptionGen
+        //public SimpleExKey TargetPropId { get; }
+        //public LocalBindingInfo BindingInfo { get; }
 
         #endregion
 
@@ -21,15 +22,11 @@ namespace DRM.TypeSafePropertyBag
 
         #region ISubscription Implementation
 
-        //public IExplodedKey<ulong, uint, uint> SourcePropId { get; protected set; }
-
         new public EventHandler<PCGenEventArgs> GenHandler => null;
         new public EventHandler<PropertyChangedEventArgs> StandardHandler => null;
 
         new public Action<object, object> GenDoWhenChanged => null;
         new public Action Action => null;
-
-
 
         #endregion
 

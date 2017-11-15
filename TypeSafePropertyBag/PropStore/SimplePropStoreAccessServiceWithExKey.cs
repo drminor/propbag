@@ -11,6 +11,9 @@ namespace DRM.TypeSafePropertyBag
     using PropIdType = UInt32;
     using PropNameType = String;
 
+    using ExKeyType = IExplodedKey<UInt64, UInt32, UInt32>;
+    using HaveTheKeyType = IHaveTheKey<UInt64, UInt32, UInt32>;
+
     public sealed class SimplePropStoreAccessServiceWithExKey
         : IPropStoreAccessService<PropIdType, PropNameType>, IHaveTheSimpleKey
     {
@@ -196,9 +199,9 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        IExplodedKey<CompositeKeyType, ObjectIdType, PropIdType> IHaveTheKey<CompositeKeyType, ObjectIdType, PropIdType>.GetTheKey(IPropBag propBag, PropIdType propId)
+        ExKeyType HaveTheKeyType.GetTheKey(IPropBag propBag, PropIdType propId)
         {
-            IExplodedKey<CompositeKeyType, ObjectIdType, PropIdType> result = GetCompKey(propBag, propId);
+            ExKeyType result = GetCompKey(propBag, propId);
             return result;
         }
 

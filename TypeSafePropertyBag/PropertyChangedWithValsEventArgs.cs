@@ -3,6 +3,9 @@ using System.ComponentModel;
 
 namespace DRM.TypeSafePropertyBag
 {
+    using PropIdType = UInt32;
+    using PropNameType = String;
+
     /// <summary>
     /// Provides typed value change information for the <see cref="INotifyPropertyChangedWithTVals<typeparamref name="T"/>.PropertyChanged"/> event.
     /// </summary>
@@ -118,4 +121,33 @@ namespace DRM.TypeSafePropertyBag
         /// </summary>
         public object NewValue { get; protected set; }
     }
+
+    ///// <summary> Using PCObjectEventArgs instead.
+    ///// Provides value change information for the <see cref="INotifyPropDataChanged.PropChanged"/> event.
+    ///// </summary>
+    //public class PropDataValSetEventArgs : PropertyChangedEventArgs
+    //{
+    //    /// <summary>
+    //    /// Initializes a new instance of the <see cref="PCObjectEventArgs"/> class.
+    //    /// </summary>
+    //    /// <param name="propName">The PropertyName.</param>
+    //    /// <param name="propId">The PropId</param>
+    //    /// <param name="propValueState">The new state of the value.</param>
+    //    public PropDataValSetEventArgs(PropNameType propName, PropIdType propId, PropValueStateEnum propValueState)
+    //        : base(propName)
+    //    {
+    //        PropValueState = propValueState;
+    //    }
+
+    //    /// <summary>
+    //    /// Gets the old value of the property.
+    //    /// </summary>
+    //    public PropValueStateEnum PropValueState { get; protected set; }
+    //}
+
+    //public enum PropValueStateEnum
+    //{
+    //    Bindable,
+    //    Unbindable
+    //}
 }

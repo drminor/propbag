@@ -32,6 +32,10 @@ namespace DRM.TypeSafePropertyBag
         public object Target { get; protected set; }
         public MethodInfo Method { get; protected set; }
 
+        // Binding Subscription Members
+        public SimpleExKey TargetPropId { get; protected set; }
+        public LocalBindingInfo BindingInfo { get; protected set; }
+
         #endregion
 
         #region Constructors

@@ -37,7 +37,7 @@ namespace DRM.TypeSafePropertyBag
 
         public PropNameType FromCooked(PropIdType bot)
         {
-            PropNameType result = _cookedDict.Values.FirstOrDefault();
+            PropNameType result = _cookedDict[bot];
             return result;
         }
 

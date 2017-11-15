@@ -3,6 +3,8 @@ namespace DRM.TypeSafePropertyBag
 {
     public interface IL2KeyMan<L2T, L2TRaw>
     {
+        int MaxPropsPerObject { get; }
+
         L2T FromRaw(L2TRaw rawBot);
         bool TryGetFromRaw(L2TRaw rawBot, out L2T bot);
 

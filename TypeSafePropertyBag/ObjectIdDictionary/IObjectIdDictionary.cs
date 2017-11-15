@@ -16,6 +16,11 @@ namespace DRM.TypeSafePropertyBag
         : IDictionary<CompT, PropDataT>, ICollection<KeyValuePair<CompT, PropDataT>>, 
         IEnumerable<KeyValuePair<CompT, PropDataT>>, IDictionary, ICollection, IEnumerable 
     {
+
+        // Readonly access to the Composite Key Manager.
+        ICKeyMan<CompT, L1T, L2T, L2TRaw> CompKeyManager { get; }
+
+
         #region ConcurentDictionary Methods
 
         bool TryAdd(CompT exKey, PropDataT value);
@@ -61,24 +66,24 @@ namespace DRM.TypeSafePropertyBag
 
         #endregion
 
-        #region Level 2 Raw
+        //#region Level 2 Raw
 
-        bool TryAdd(L1T top, L2TRaw rawBot, PropDataT value);
-        PropDataT GetOrAdd(L1T top, L2TRaw rawBot, PropDataT value);
+        //bool TryAdd(L1T top, L2TRaw rawBot, PropDataT value);
+        //PropDataT GetOrAdd(L1T top, L2TRaw rawBot, PropDataT value);
 
-        //TValue GetOrAdd(L1T top, L2TRaw rawBot, Func<L2TRaw rawBot, TValue> valueFactory);
+        ////TValue GetOrAdd(L1T top, L2TRaw rawBot, Func<L2TRaw rawBot, TValue> valueFactory);
 
-        bool TryGetValue(L1T top, L2TRaw rawBot, out PropDataT value);
-        bool ContainsKey(L1T top, L2TRaw rawBot);
-        //TValue thisL1T top, L2TRaw rawBot] { get; set; }
+        //bool TryGetValue(L1T top, L2TRaw rawBot, out PropDataT value);
+        //bool ContainsKey(L1T top, L2TRaw rawBot);
+        ////TValue thisL1T top, L2TRaw rawBot] { get; set; }
 
 
-        bool TryRemove(L1T top, L2TRaw rawBot, out PropDataT value);
+        //bool TryRemove(L1T top, L2TRaw rawBot, out PropDataT value);
 
-        //bool TryUpdate(L1T top, L2TRaw rawBot, PropDataT newValue, PropDataT comparisonValue);
-        //PropDataT AddOrUpdate(L1T top, L2TRaw rawBot, PropDataT addValue, Func<L1T, L2TRaw, PropDataT, PropDataT> updateValueFactory);
-        //PropDataT AddOrUpdate(L1T top, L2TRaw rawBot, Func<L1T, L2TRaw, PropDataT> addValueFactory, Func<L1T, L2TRaw, PropDataT, PropDataT> updateValueFactory);
+        ////bool TryUpdate(L1T top, L2TRaw rawBot, PropDataT newValue, PropDataT comparisonValue);
+        ////PropDataT AddOrUpdate(L1T top, L2TRaw rawBot, PropDataT addValue, Func<L1T, L2TRaw, PropDataT, PropDataT> updateValueFactory);
+        ////PropDataT AddOrUpdate(L1T top, L2TRaw rawBot, Func<L1T, L2TRaw, PropDataT> addValueFactory, Func<L1T, L2TRaw, PropDataT, PropDataT> updateValueFactory);
 
-        #endregion
+        //#endregion
     }
 }

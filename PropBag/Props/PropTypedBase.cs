@@ -3,9 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
 using System.Threading;
 
 namespace DRM.PropBag
@@ -172,6 +169,22 @@ namespace DRM.PropBag
         //    return null;
         //}
 
+        //public void OnPropertyChangedWithTVals(string propertyName, T oldVal, T newVal)
+        //{
+        //    EventHandler<PCTypedEventArgs<T>> handler = Interlocked.CompareExchange(ref PropertyChangedWithTVals, null, null);
+
+        //    if (handler != null)
+        //        handler(this, new PCTypedEventArgs<T>(propertyName, oldVal, newVal));
+        //}
+
+        //public override void OnPropertyChangedWithVals(string propertyName, object oldVal, object newVal)
+        //{
+        //    EventHandler<PCGenEventArgs> handler = Interlocked.CompareExchange(ref PropertyChangedWithGenVals, null, null);
+
+        //    if (handler != null)
+        //        handler(this, new PCGenEventArgs(propertyName, this.Type, oldVal, newVal));
+        //}
+
         #endregion
 
         #region Raise Events
@@ -186,29 +199,6 @@ namespace DRM.PropBag
                 sspt.TypedHandler(parent, eArgs);
             }
         }
-
-
-        public void OnPropertyChangedWithTVals(string propertyName, T oldVal, T newVal)
-        {
-            EventHandler<PCTypedEventArgs<T>> handler = Interlocked.CompareExchange(ref PropertyChangedWithTVals, null, null);
-
-            if (handler != null)
-                handler(this, new PCTypedEventArgs<T>(propertyName, oldVal, newVal));
-        }
-
-        //public override void OnPropertyChangedWithVals(string propertyName, object oldVal, object newVal)
-        //{
-        //    EventHandler<PCGenEventArgs> handler = Interlocked.CompareExchange(ref PropertyChangedWithGenVals, null, null);
-
-        //    if (handler != null)
-        //        handler(this, new PCGenEventArgs(propertyName, this.Type, oldVal, newVal));
-        //}
-
-        //// TODOXX:
-        //public IEventManager<INotifyPCTyped<T>, PCTypedEventArgs<T>> GetTheEventManger()
-        //{
-        //    throw new NotImplementedException();
-        //}
 
         #endregion
     }

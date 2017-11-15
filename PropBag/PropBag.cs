@@ -19,11 +19,15 @@ namespace DRM.PropBag
 {
     using PropIdType = UInt32;
     using PropNameType = String;
+    using L2KeyManType = IL2KeyMan<UInt32, String>;
+
     using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
     using SubCacheType = ICacheSubscriptions<SimpleExKey, UInt64, UInt32, UInt32, String>;
     using LocalBinderType = IBindLocalProps<UInt32>;
 
     using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
+
+    using ObjectIdType = UInt32;
 
     #region Summary and Remarks
 
@@ -52,14 +56,16 @@ namespace DRM.PropBag
 
         // These items are provided to us.
         protected IPropFactory PropFactory { get; set; }
-        private readonly PSAccessServiceType _ourStoreAccess;
+
+        public PSAccessServiceType OurStoreAccessor { get; }
+
         private SubCacheType _subscriptionManager;
         private LocalBinderType _localBinder;
 
         // We are responsible for these
         private PropBagTypeSafetyMode TypeSafetyMode { get; }
         protected virtual ITypeSafePropBagMetaData OurMetaData { get; }
-        private IL2KeyMan<PropIdType, PropNameType> _level2KeyManager;
+        private L2KeyManType _level2KeyManager;
 
         // These fulfill the IPropBag contract
         public string FullClassName => OurMetaData.FullClassName;
@@ -83,7 +89,7 @@ namespace DRM.PropBag
         {
             TypeSafetyMode = PropBagTypeSafetyMode.None;
             PropFactory = null;
-            _ourStoreAccess = null;
+            OurStoreAccessor = null;
             OurMetaData = BuildMetaData(this.TypeSafetyMode, classFullName: null, propFactory: null);
         }
 
@@ -115,8 +121,13 @@ namespace DRM.PropBag
 
             OurMetaData = BuildMetaData(TypeSafetyMode, fullClassName, PropFactory);
 
-            _ourStoreAccess = PropFactory.PropStoreAccessServiceProvider.CreatePropStoreService(this);
-            _level2KeyManager = new SimpleLevel2KeyMan(_ourStoreAccess.MaxPropsPerObject);
+            int maxPropsPerObject = PropFactory.PropStoreAccessServiceProvider.MaxPropsPerObject;
+            _level2KeyManager = new SimpleLevel2KeyMan(maxPropsPerObject);
+
+            OurStoreAccessor = PropFactory.PropStoreAccessServiceProvider.CreatePropStoreService(this, _level2KeyManager);
+
+            //_level2KeyManager = OurStoreAccessor.Le
+
 
             _subscriptionManager = PropFactory.SubscriptionManager;
 
@@ -181,9 +192,9 @@ namespace DRM.PropBag
 
                 EventHandler<PCGenEventArgs> doWhenChangedAction = pi.DoWhenChangedField?.DoWhenChangedAction;
 
-                if(doWhenChangedAction == null && (pi?.DoWhenChangedField?.DoWhenActionGetter != null))
+                if(doWhenChangedAction == null && (pi?.DoWhenChangedField?.DoWhenGenHandlerGetter != null))
                 {
-                    Func<object, EventHandler<PCGenEventArgs>> rr = pi.DoWhenChangedField.DoWhenActionGetter;
+                    Func<object, EventHandler<PCGenEventArgs>> rr = pi.DoWhenChangedField.DoWhenGenHandlerGetter;
 
                     doWhenChangedAction = rr(this);
                 }
@@ -225,7 +236,7 @@ namespace DRM.PropBag
         // This will always return a valid value -- or throw an exception,
         // unless neverCreate is set, in which case it will
         // never throw an exception and always return an empty PropGen.
-        private PropGen HandleMissingProp(string propertyName, Type propertyType, out bool wasRegistered,
+        private IPropData HandleMissingProp(PropIdType propId, PropNameType propertyName, Type propertyType, out bool wasRegistered,
             bool haveValue, object value, bool alwaysRegister, bool mustBeRegistered, bool neverCreate)
         {
             ReadMissingPropPolicyEnum thePolicyToUse; //= alwaysRegister ? ReadMissingPropPolicyEnum.Register : ReadMissingPropPolicy;
@@ -242,7 +253,7 @@ namespace DRM.PropBag
             if (neverCreate)
             {
                 wasRegistered = false;
-                return new PropGen(null);
+                return new PropGen();
             }
 
             if (alwaysRegister)
@@ -266,7 +277,7 @@ namespace DRM.PropBag
                         else
                         {
                             wasRegistered = false;
-                            return new PropGen(null);
+                            return new PropGen();
                         }
                     }
                 case ReadMissingPropPolicyEnum.Register:
@@ -277,6 +288,7 @@ namespace DRM.PropBag
                         if (haveValue)
                         {
                             bool typeIsSolid = PropFactory.IsTypeSolid(value, propertyType);
+
 
                             genericTypedProp = PropFactory.CreateGenFromObject(propertyType, value,
                                 propertyName, null, PropFactory.ProvidesStorage, typeIsSolid, PropKindEnum.Prop, null, false, null);
@@ -294,7 +306,7 @@ namespace DRM.PropBag
                                 null, PropFactory.ProvidesStorage, typeIsSolid, PropKindEnum.Prop, null, false, null);
                         }
 
-                        PropGen propGen = AddProp(propertyName, genericTypedProp);
+                        IPropData propGen = AddProp(propertyName, genericTypedProp);
 
                         wasRegistered = true;
                         return propGen;
@@ -322,7 +334,12 @@ namespace DRM.PropBag
 
         #region Property Access Methods
 
-        //public IPropGen this[int index] => throw new NotImplementedException();
+        // Just for testing??
+        protected ObjectIdType GetParentObjectId()
+        {
+            ObjectIdType result =  OurStoreAccessor.GetParentObjectId(this);
+            return result;
+        }
 
         public object this[string typeName, string propertyName]
         {
@@ -364,11 +381,11 @@ namespace DRM.PropBag
             throw new InvalidOperationException(msg);
         }
 
-        public bool TryGetPropGen(string propertyName, Type propertyType, out IPropGen propGen)
+        public bool TryGetPropGen(string propertyName, Type propertyType, out IPropData propGen)
         {
             bool mustBeRegistered = TypeSafetyMode == PropBagTypeSafetyMode.Locked;
 
-            propGen = GetPropGen(propertyName, propertyType, out bool wasRegistered,
+            propGen = GetPropGen(propertyName, propertyType, out bool wasRegistered, out PropIdType propId,
                 haveValue: false,
                 value: null,
                 alwaysRegister: false,
@@ -391,16 +408,14 @@ namespace DRM.PropBag
         }
 
         // Public wrapper aroud GetPropGen
-        //
-        //CHK: PropertyType may be null.
-        public IPropGen GetPropGen(string propertyName, Type propertyType = null)
+        public IPropData GetPropGen(string propertyName, Type propertyType = null)
         {
             if (propertyType == null && OurMetaData.OnlyTypedAccess)
             {
                 ReportNonTypedAccess(propertyName, nameof(GetPropGen));
             }
 
-            PropGen genProp = GetPropGen(propertyName, propertyType, out bool wasRegistered,
+            IPropData PropData = GetPropGen(propertyName, propertyType, out bool wasRegistered, out PropIdType propId,
                 haveValue: false,
                 value: null,
                 alwaysRegister: false,
@@ -412,33 +427,32 @@ namespace DRM.PropBag
             {
                 if (propertyType != null)
                 {
-                    if (!genProp.TypedProp.TypeIsSolid)
+                    if (!PropData.TypedProp.TypeIsSolid)
                     {
-                        MakeTypeSolid(ref genProp, propertyType);
-                        _ourStoreAccess[this, genProp.PropId] = genProp;
+                        MakeTypeSolid(propId, propertyName, PropData, propertyType);
                     }
                     else
                     {
-                        if (propertyType != genProp.TypedProp.Type)
+                        if (propertyType != PropData.TypedProp.Type)
                         {
-                            throw new InvalidOperationException(string.Format("Attempting to get property: {0} whose type is {1}, with a call whose type parameter is {2} is invalid.", propertyName, genProp.TypedProp.Type.ToString(), propertyType.ToString()));
+                            throw new InvalidOperationException(string.Format("Attempting to get property: {0} whose type is {1}, with a call whose type parameter is {2} is invalid.", propertyName, PropData.TypedProp.Type.ToString(), propertyType.ToString()));
                         }
                     }
                 }
             }
 
-            return genProp;
+            return PropData;
         }
 
         public object GetValWithType(string propertyName, Type propertyType)
         {
-            PropGen pg = (PropGen)GetPropGen(propertyName, propertyType);
-            return pg.Value;
+            IPropData pg = (IPropData)GetPropGen(propertyName, propertyType);
+            return pg.TypedProp.TypedValueAsObject;
         }
 
         public ValPlusType GetValPlusType(string propertyName, Type propertyType)
         {
-            IPropGen pg = GetPropGen(propertyName, propertyType);
+            IPropData pg = GetPropGen(propertyName, propertyType);
             return pg.ValuePlusType();
         }
 
@@ -454,11 +468,11 @@ namespace DRM.PropBag
 
         private IPropPrivate<T> GetTypedPropPrivate<T>(string propertyName, bool mustBeRegistered, bool neverCreate = false)
         {
-            PropGen genProp = GetGenPropPrivate<T>(propertyName, mustBeRegistered, neverCreate);
+            IPropData PropData = GetGenPropPrivate<T>(propertyName, mustBeRegistered, neverCreate);
 
-            if (!genProp.IsEmpty)
+            if (!PropData.IsEmpty)
             {
-                return (IPropPrivate<T>)genProp.TypedProp;
+                return (IPropPrivate<T>)PropData.TypedProp;
             }
             else
             {
@@ -466,14 +480,14 @@ namespace DRM.PropBag
             }
         }
 
-        private PropGen GetGenPropPrivate<T>(string propertyName, bool mustBeRegistered, bool neverCreate = false)
+        private IPropData GetGenPropPrivate<T>(string propertyName, bool mustBeRegistered, bool neverCreate = false)
         {
             bool hasStore = PropFactory.ProvidesStorage;
 
             // TODO: Make this use a different version of GetPropGen: one that takes advantage of the 
             // compile-time type knowlege -- especially if we have to register the property in HandleMissing.
 
-            PropGen genProp = GetPropGen(propertyName, typeof(T), out bool wasRegistered,
+            IPropData PropData = GetPropGen(propertyName, typeof(T), out bool wasRegistered, out PropIdType propId,
                 haveValue: false,
                 value: null,
                 alwaysRegister: false,
@@ -482,14 +496,14 @@ namespace DRM.PropBag
                 desiredHasStoreValue: PropFactory.ProvidesStorage);
 
             if (wasRegistered)
-                return genProp;
+                return PropData;
             else
             {
-                if (!genProp.IsEmpty)
+                if (!PropData.IsEmpty)
                 {
-                    CheckTypeInfo<T>(genProp, _ourStoreAccess);
+                    CheckTypeInfo<T>(propId, propertyName, PropData, OurStoreAccessor);
                 }
-                return genProp;
+                return PropData;
             }
         }
 
@@ -524,7 +538,7 @@ namespace DRM.PropBag
             bool alwaysRegister = !OurMetaData.AllPropsMustBeRegistered;
             bool mustBeRegistered = OurMetaData.AllPropsMustBeRegistered;
 
-            PropGen genProp = GetPropGen(propertyName, propertyType, out bool wasRegistered,
+            IPropData PropData = GetPropGen(propertyName, propertyType, out bool wasRegistered, out PropIdType propId,
                     haveValue: true,
                     value: value,
                     alwaysRegister: alwaysRegister,
@@ -537,7 +551,7 @@ namespace DRM.PropBag
 
             if (value != null)
             {
-                if (!genProp.TypedProp.TypeIsSolid)
+                if (!PropData.TypedProp.TypeIsSolid)
                 {
                     try
                     {
@@ -552,12 +566,7 @@ namespace DRM.PropBag
                             newType = PropFactory.GetTypeFromValue(value);
                         }
 
-                        if (MakeTypeSolid(ref genProp, newType))
-                        {
-                            // TODO: implement try update.
-                            _ourStoreAccess[this, genProp.PropId] = genProp;
-                        }
-
+                        MakeTypeSolid(propId, propertyName, PropData, newType);
                     }
                     catch (InvalidCastException ice)
                     {
@@ -577,36 +586,33 @@ namespace DRM.PropBag
                         newType = PropFactory.GetTypeFromValue(value);
                     }
 
-                    if (!AreTypesSame(newType, genProp.TypedProp.Type))
+                    if (!AreTypesSame(newType, PropData.TypedProp.Type))
                     {
-                        throw new ApplicationException(string.Format("Attempting to set property: {0} whose type is {1}, with a call whose type parameter is {2} is invalid.", propertyName, genProp.TypedProp.Type.ToString(), newType.ToString()));
+                        throw new ApplicationException(string.Format("Attempting to set property: {0} whose type is {1}, with a call whose type parameter is {2} is invalid.", propertyName, PropData.TypedProp.Type.ToString(), newType.ToString()));
                     }
                 }
             }
             else
             {
                 // Check to make sure that we are not attempting to set the value of a ValueType to null.
-                if (genProp.TypedProp.TypeIsSolid && genProp.TypedProp.Type.IsValueType)
+                if (PropData.TypedProp.TypeIsSolid && PropData.TypedProp.Type.IsValueType)
                 {
                     throw new InvalidOperationException(string.Format("Cannot set property: {0} to null, it is a value type.", propertyName));
                 }
             }
 
-            // TODO: avoid having to (re)produce the PropId.
-            PropIdType propId = GetPropId(propertyName);
-
             // TODO: Make the PropFactory supply this service.
-            DoSetDelegate setPropDel = DelegateCacheProvider.DoSetDelegateCache.GetOrAdd(genProp.TypedProp.Type);
-            return setPropDel(this, propId, propertyName, genProp.TypedProp, value);
+            DoSetDelegate setPropDel = DelegateCacheProvider.DoSetDelegateCache.GetOrAdd(PropData.TypedProp.Type);
+            return setPropDel(this, propId, propertyName, PropData.TypedProp, value);
         }
 
         public bool SetIt<T>(T value, PropIdType propId)
         {
-            PropGen genProp = GetPropGen<T>(propId, desiredHasStoreValue: PropFactory.ProvidesStorage);
+            PropNameType propertyName = GetPropName(propId); 
+            IPropData PropData = GetPropGen<T>(propertyName, out PropIdType dummy, desiredHasStoreValue: PropFactory.ProvidesStorage);
 
-            IPropPrivate<T> prop = CheckTypeInfo<T>(genProp, _ourStoreAccess);
+            IPropPrivate<T> prop = CheckTypeInfo<T>(propId, propertyName, PropData, OurStoreAccessor);
 
-            string propertyName = GetPropName(propId);
             return DoSet(propId, propertyName, prop, value);
         }
 
@@ -619,7 +625,7 @@ namespace DRM.PropBag
             bool mustBeRegistered = OurMetaData.AllPropsMustBeRegistered;
 
             // TODO: Create a GetPropGen<T> that uses the _theStore.
-            PropGen genProp = GetPropGen(propertyName, typeof(T), out bool wasRegistered,
+            IPropData PropData = GetPropGen(propertyName, typeof(T), out bool wasRegistered, out PropIdType propId,
                 haveValue: true,
                 value: value,
                 alwaysRegister: alwaysRegister,
@@ -630,10 +636,7 @@ namespace DRM.PropBag
             // No point in calling DoSet, it would find that the value is the same and do nothing.
             if (wasRegistered) return true;
 
-            IPropPrivate<T> prop = CheckTypeInfo<T>(genProp, _ourStoreAccess);
-
-            // TODO: avoid having to (re)produce the PropId.
-            PropIdType propId = GetPropId(propertyName);
+            IPropPrivate<T> prop = CheckTypeInfo<T>(propId, propertyName, PropData, OurStoreAccessor);
 
             return DoSet(propId, propertyName, prop, value);
         }
@@ -656,7 +659,7 @@ namespace DRM.PropBag
             bool alwaysRegister = !OurMetaData.AllPropsMustBeRegistered;
             bool mustBeRegistered = OurMetaData.AllPropsMustBeRegistered;
 
-            PropGen genProp = GetPropGen(propertyName, typeof(T), out bool wasRegistered,
+            IPropData PropData = GetPropGen(propertyName, typeof(T), out bool wasRegistered, out PropIdType propId,
                     haveValue: true,
                     value: newValue,
                     alwaysRegister: alwaysRegister,
@@ -667,7 +670,7 @@ namespace DRM.PropBag
             // No point in calling DoSet, it would find that the value is the same and do nothing.
             if (wasRegistered) return true;
 
-            IPropPrivate<T> typedProp = CheckTypeInfo<T>(genProp, _ourStoreAccess);
+            IPropPrivate<T> typedProp = CheckTypeInfo<T>(propId, propertyName, PropData, OurStoreAccessor);
 
             bool theSame = typedProp.Compare(newValue, curValue);
 
@@ -680,9 +683,6 @@ namespace DRM.PropBag
 
                 // Make the update.
                 curValue = newValue;
-
-                // TODO: Change this routine to avoid having to (re)produce the propId.
-                PropIdType propId = GetPropId(propertyName);
 
                 // Raise notify events.
                 DoNotifyWork<T>(propId, propertyName, typedProp, oldVal: oldValue, newValue: newValue);
@@ -700,7 +700,7 @@ namespace DRM.PropBag
             string propertyName, Type propertyType)
         {
             bool mustBeRegistered = OurMetaData.AllPropsMustBeRegistered;
-            IPropGen genProp = GetPropGen(propertyName, propertyType, out bool wasRegistered,
+            IPropData PropData = GetPropGen(propertyName, propertyType, out bool wasRegistered, out PropIdType propId,
                 haveValue: false,
                 value: null,
                 alwaysRegister: false,
@@ -708,7 +708,7 @@ namespace DRM.PropBag
                 neverCreate: false,
                 desiredHasStoreValue: PropFactory.ProvidesStorage);
 
-            if (!genProp.IsEmpty)
+            if (!PropData.IsEmpty)
             {
                 WeakEventManager<INotifyPCIndividual, PropertyChangedEventArgs>.
                     AddHandler(this, "PropertyChangedIndividual", handler);
@@ -721,7 +721,7 @@ namespace DRM.PropBag
             string propertyName, Type propertyType)
         {
             bool mustBeRegistered = OurMetaData.AllPropsMustBeRegistered;
-            IPropGen genProp = GetPropGen(propertyName, propertyType, out bool wasRegistered,
+            IPropData PropData = GetPropGen(propertyName, propertyType, out bool wasRegistered, out PropIdType propId,
                 haveValue: false,
                 value: null,
                 alwaysRegister: false,
@@ -729,7 +729,7 @@ namespace DRM.PropBag
                 neverCreate: false,
                 desiredHasStoreValue: PropFactory.ProvidesStorage);
 
-            if (!genProp.IsEmpty)
+            if (!PropData.IsEmpty)
             {
                 WeakEventManager<INotifyPropertyChanged, PropertyChangedEventArgs>.
                     RemoveHandler(this, "PropertyChangedIndividual", handler);
@@ -753,10 +753,10 @@ namespace DRM.PropBag
         public bool AddBinding<T>(string targetPropertyName, string sourcePath, Action<T, T> ttAction)
         {
             // Build a reference to the target property that is in our PropBag object.
-            PropIdType propId = GetPropId(targetPropertyName);
-            PropGen genProp = GetPropGen<T>(propId, desiredHasStoreValue: PropFactory.ProvidesStorage);
+            IPropData PropData = GetPropGen<T>(targetPropertyName, out PropIdType propId, desiredHasStoreValue: PropFactory.ProvidesStorage);
 
-            IPropPrivate<T> prop = CheckTypeInfo<T>(genProp, _ourStoreAccess);
+            IPropPrivate<T> prop = CheckTypeInfo<T>(propId, targetPropertyName, PropData, OurStoreAccessor);
+
 
             //Action<T, T> tt = (x, y) => { x.Equals(y); };
 
@@ -802,7 +802,7 @@ namespace DRM.PropBag
                 LocalBindingInfo bindingInfo = new LocalBindingInfo(pathToSource, LocalBindingMode.OneWay);
 
                 ISubscriptionKeyGen bindingRequest =
-                    new BindingSubscriptionKey<T>(this, propId, _ourStoreAccess, bindingInfo);
+                    new BindingSubscriptionKey<T>(this, propId, OurStoreAccessor, bindingInfo);
 
                 ISubscriptionGen newSubscription = _subscriptionManager.AddSubscription(bindingRequest, out bool wasAdded);
                 return wasAdded;
@@ -817,15 +817,14 @@ namespace DRM.PropBag
         // TODO: Implement our own WeakEventManager for Delegates that have a single Type Parameter.
         public bool SubscribeToPropChanged<T>(EventHandler<PCTypedEventArgs<T>> eventHandler, string propertyName)
         {
-            PropIdType propId = GetPropId(propertyName);
-            PropGen genProp = GetPropGen<T>(propId, desiredHasStoreValue: PropFactory.ProvidesStorage);
+            IPropData PropData = GetPropGen<T>(propertyName, out PropIdType propId, desiredHasStoreValue: PropFactory.ProvidesStorage);
 
-            IPropPrivate<T> prop = CheckTypeInfo<T>(genProp, _ourStoreAccess);
+            IPropPrivate<T> prop = CheckTypeInfo<T>(propId, propertyName, PropData, OurStoreAccessor);
 
             if (prop != null)
             {
                 ISubscriptionKeyGen subscriptionRequest =
-                    new SubscriptionKey<T>(this, propId, _ourStoreAccess, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
+                    new SubscriptionKey<T>(this, propId, OurStoreAccessor, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
 
                 ISubscriptionGen newSubscription = _subscriptionManager.AddSubscription(subscriptionRequest, out bool wasAdded);
                 return wasAdded;
@@ -838,15 +837,14 @@ namespace DRM.PropBag
 
         public bool UnSubscribeToPropChanged<T>(EventHandler<PCTypedEventArgs<T>> eventHandler, string propertyName)
         {
-            PropIdType propId = GetPropId(propertyName);
-            PropGen genProp = GetPropGen<T>(propId, desiredHasStoreValue: PropFactory.ProvidesStorage);
+            IPropData PropData = GetPropGen<T>(propertyName, out PropIdType propId, desiredHasStoreValue: PropFactory.ProvidesStorage);
 
-            IPropPrivate<T> prop = CheckTypeInfo<T>(genProp, _ourStoreAccess);
+            IPropPrivate<T> prop = CheckTypeInfo<T>(propId, propertyName, PropData, OurStoreAccessor);
 
             if (prop != null)
             {
                 ISubscriptionKeyGen subscriptionRequest =
-                    new SubscriptionKey<T>(this, propId, _ourStoreAccess, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
+                    new SubscriptionKey<T>(this, propId, OurStoreAccessor, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
 
                 bool wasRemoved = _subscriptionManager.RemoveSubscription(subscriptionRequest);
                 return wasRemoved;
@@ -921,7 +919,7 @@ namespace DRM.PropBag
 
             //bool mustBeRegistered = OurMetaData.AllPropsMustBeRegistered;
 
-            //IPropGen genProp = GetPropGen(propertyName, null, out bool wasRegistered,
+            //IPropGen PropData = GetPropGen(propertyName, null, out bool wasRegistered,
             //        haveValue: false,
             //        value: null,
             //        alwaysRegister: false,
@@ -929,10 +927,10 @@ namespace DRM.PropBag
             //        neverCreate: false,
             //        desiredHasStoreValue: PropFactory.ProvidesStorage);
 
-            //if (!genProp.IsEmpty)
+            //if (!PropData.IsEmpty)
             //{
             //    // TODO: Help the caller subscribe using a WeakReference
-            //    genProp.SubscribeToPropChanged(doOnChange);
+            //    PropData.SubscribeToPropChanged(doOnChange);
             //    return true;
             //}
             //return false;
@@ -949,7 +947,7 @@ namespace DRM.PropBag
         //{
         //    bool mustBeRegistered = OurMetaData.AllPropsMustBeRegistered;
 
-        //    IPropGen genProp = GetPropGen(propertyName, null, out bool wasRegistered,
+        //    IPropGen PropData = GetPropGen(propertyName, null, out bool wasRegistered,
         //            haveValue: false,
         //            value: null,
         //            alwaysRegister: false,
@@ -957,10 +955,10 @@ namespace DRM.PropBag
         //            neverCreate: false,
         //            desiredHasStoreValue: PropFactory.ProvidesStorage);
 
-        //    if (!genProp.IsEmpty)
+        //    if (!PropData.IsEmpty)
         //    {
         //        // TODO: Help the caller subscribe using a WeakReference
-        //        genProp.SubscribeToPropChanged(doOnChange);
+        //        PropData.SubscribeToPropChanged(doOnChange);
         //        return true;
         //    }
         //    return false;
@@ -970,7 +968,7 @@ namespace DRM.PropBag
         //{
         //    bool mustBeRegistered = OurMetaData.AllPropsMustBeRegistered;
 
-        //    IPropGen genProp = GetPropGen(propertyName, null, out bool wasRegistered,
+        //    IPropGen PropData = GetPropGen(propertyName, null, out bool wasRegistered,
         //            haveValue: false,
         //            value: null,
         //            alwaysRegister: false,
@@ -978,8 +976,8 @@ namespace DRM.PropBag
         //            neverCreate: false,
         //            desiredHasStoreValue: PropFactory.ProvidesStorage);
 
-        //    if (!genProp.IsEmpty)
-        //        return genProp.UnSubscribeToPropChanged(doOnChange);
+        //    if (!PropData.IsEmpty)
+        //        return PropData.UnSubscribeToPropChanged(doOnChange);
         //    else
         //        return false;
         //}
@@ -1023,17 +1021,17 @@ namespace DRM.PropBag
                 }
             }
 
-            PropIdType l2Key = GetPropId(propertyName);
+            PropIdType propId = GetPropId(propertyName);
 
-            bool result = _ourStoreAccess.ContainsKey(this, l2Key); 
+            bool result = OurStoreAccessor.ContainsKey(this, propId); 
             return result;
         }
 
         // TODO: PropBagTypeSafetyMode.Locked is not honored here.
         public bool TryGetTypeOfProperty(string propertyName, out Type type)
         {
-            PropIdType l2Key = GetPropId(propertyName);
-            if (_ourStoreAccess.TryGetValue(this, l2Key, out IPropGen value))
+            PropIdType propId = GetPropId(propertyName);
+            if (OurStoreAccessor.TryGetValue(this, propId, out IPropData value))
             {
                 type = value.TypedProp.Type;
                 return true;
@@ -1052,7 +1050,7 @@ namespace DRM.PropBag
 
         public System.Type GetTypeOfProperty(string propertyName)
         {
-            IPropGen pGen = GetPropGen(propertyName, null, out bool wasRegistered,
+            IPropData pGen = GetPropGen(propertyName, null, out bool wasRegistered, out PropIdType propId,
                 haveValue: false,
                 value: null,
                 alwaysRegister: false,
@@ -1152,26 +1150,29 @@ namespace DRM.PropBag
             return pg;
         }
 
-        protected void AddProp<T>(string propertyName, IProp<T> prop)
+        protected IPropData AddProp<T>(string propertyName, IProp<T> genericTypedProp)
         {
-            PropIdType l2Key = GetPropId(propertyName);
-            PropGen propGen = new PropGen(prop, l2Key);
+            PropIdType propId = GetPropId(propertyName);
+            IPropData propGen = new PropGen(genericTypedProp, propId);
 
-            //tVals.Add(propertyName, propGen);
-            if (!_ourStoreAccess.TryAdd(this, l2Key, propGen))
+            if (!OurStoreAccessor.TryAdd(this, propId, propGen))
             {
                 throw new ApplicationException("Could not add the new propGen to the store.");
             }
-            //prop.DoWhenChanged = 
+
+            if(propGen.IsPropBag)
+            {
+                //_subscriptionManager.AddSubscription()
+            }
+            return propGen;
         }
 
-        protected PropGen AddProp(string propertyName, IProp genericTypedProp)
+        protected IPropData AddProp(string propertyName, IProp genericTypedProp)
         {
-            PropIdType l2Key = GetPropId(propertyName);
+            PropIdType propId = GetPropId(propertyName);
+            IPropData propGen = new PropGen(genericTypedProp, propId);
 
-            PropGen propGen = new PropGen(genericTypedProp, l2Key);
-
-            if (!_ourStoreAccess.TryAdd(this, l2Key, propGen))
+            if (!OurStoreAccessor.TryAdd(this, propId, propGen))
             {
                 throw new ApplicationException("Could not add the new propGen to the store.");
             }
@@ -1187,7 +1188,7 @@ namespace DRM.PropBag
 
             bool mustBeRegistered = TypeSafetyMode == PropBagTypeSafetyMode.Locked;
 
-            IPropGen pGen = GetPropGen(propertyName, null, out bool wasRegistered,
+            IPropData pGen = GetPropGen(propertyName, null, out bool wasRegistered, out PropIdType propId,
                 haveValue: false,
                 value: null,
                 alwaysRegister: false,
@@ -1199,8 +1200,7 @@ namespace DRM.PropBag
             {
                 pGen.CleanUp(doTypedCleanup: false);
 
-                PropIdType l2Key = GetPropId(propertyName);
-                if (!_ourStoreAccess.TryRemove(this, l2Key, out IPropGen foundValue) )
+                if (!OurStoreAccessor.TryRemove(this, propId, out IPropData foundValue) )
                 {
                     System.Diagnostics.Debug.WriteLine($"The prop was found, but could not be removed. Property: {propertyName}.");
 
@@ -1217,14 +1217,14 @@ namespace DRM.PropBag
         {
             bool mustBeRegistered = TypeSafetyMode == PropBagTypeSafetyMode.Locked;
 
-            PropGen genProp = GetGenPropPrivate<T>(propertyName, mustBeRegistered: mustBeRegistered, neverCreate: true);
+            IPropData PropData = GetGenPropPrivate<T>(propertyName, mustBeRegistered: mustBeRegistered, neverCreate: true);
 
-            if(!genProp.IsEmpty)
+            if(!PropData.IsEmpty)
             {
-                genProp.CleanUp(doTypedCleanup: true);
+                PropData.CleanUp(doTypedCleanup: true);
 
-                PropIdType l2Key = GetPropId(propertyName);
-                if (!_ourStoreAccess.TryRemove(this,  l2Key, out IPropGen foundValue))
+                PropIdType propId = GetPropId(propertyName);
+                if (!OurStoreAccessor.TryRemove(this, propId, out IPropData foundValue))
                 {
                     System.Diagnostics.Debug.WriteLine($"The prop was found, but could not be removed. Property: {propertyName}.");
 
@@ -1257,14 +1257,14 @@ namespace DRM.PropBag
             //doSetDelegateDict.Clear();
             ClearEventSubscribers();
 
-            _ourStoreAccess.Clear(this);
+            OurStoreAccessor.Clear(this);
         }
 
         protected void ClearEventSubscribers()
         {
-            IEnumerable<IPropGen> propDataObjects = _ourStoreAccess.GetValues(this);
+            IEnumerable<IPropData> propDataObjects = OurStoreAccessor.GetValues(this);
 
-            foreach (IPropGen propData in propDataObjects)
+            foreach (IPropData propData in propDataObjects)
             {
                 propData.CleanUp(doTypedCleanup: true);
             }
@@ -1276,7 +1276,7 @@ namespace DRM.PropBag
         /// <returns></returns>
         public IDictionary<string, ValPlusType> GetAllPropNamesAndTypes()
         {
-            IEnumerable<KeyValuePair<PropNameType, IPropGen>> theStoreAsCollection = _ourStoreAccess.GetCollection(this);
+            IEnumerable<KeyValuePair<PropNameType, IPropData>> theStoreAsCollection = OurStoreAccessor.GetCollection(this);
 
             IEnumerable<KeyValuePair<string, ValPlusType>> list = theStoreAsCollection.Select(x =>
             new KeyValuePair<string, ValPlusType>(x.Key, x.Value.ValuePlusType())).ToList();
@@ -1288,16 +1288,16 @@ namespace DRM.PropBag
         /// <summary>
         /// Returns all of the values in dictionary of objects, keyed by PropertyName.
         /// </summary>
-        public IDictionary<PropNameType, IPropGen> GetAllPropertyValues()
+        public IDictionary<PropNameType, IPropData> GetAllPropertyValues()
         {
-            IEnumerable<KeyValuePair<PropNameType, IPropGen>> theStoreAsCollection = _ourStoreAccess.GetCollection(this);
-            IDictionary<PropNameType, IPropGen> result = theStoreAsCollection.ToDictionary(pair => pair.Key, pair => pair.Value);
+            IEnumerable<KeyValuePair<PropNameType, IPropData>> theStoreAsCollection = OurStoreAccessor.GetCollection(this);
+            IDictionary<PropNameType, IPropData> result = theStoreAsCollection.ToDictionary(pair => pair.Key, pair => pair.Value);
             return result;
         }
 
         public IList<PropNameType> GetAllPropertyNames()
         {
-            var result = _ourStoreAccess.GetKeys(this).ToList();
+            var result = OurStoreAccessor.GetKeys(this).ToList();
             return result;
         }
 
@@ -1314,7 +1314,7 @@ namespace DRM.PropBag
                 typedProp.TypedValue = newValue;
 
                 // PROCESS BINDINGS
-                //IEnumerable<ISubscriptionGen> typedSubs = GetTypedSubscriptions<PropGen, T>
+                //IEnumerable<ISubscriptionGen> typedSubs = GetTypedSubscriptions<IPropGen, T>
                 //    (
                 //    propId,
                 //    propertyName,
@@ -1367,7 +1367,7 @@ namespace DRM.PropBag
                 (
                 this,
                 propId,
-                _ourStoreAccess,
+                OurStoreAccessor,
                 _subscriptionManager,
                 out IEnumerable<ISubscriptionGen> localBindings
                 );
@@ -1407,7 +1407,7 @@ namespace DRM.PropBag
                 //typedProp.RaiseEventsForParent(typedSubs, this, propertyName, oldVal, newValue);
 
                 // The un-typed, PropertyChanged event defined on the individual property.
-                typedProp.OnPropertyChangedWithVals(propertyName, oldVal, newValue);
+                typedProp.OnPropertyChangedWithObjectVals(propertyName, oldVal, newValue);
 
                 //// The un-typed, PropertyChanged shared event.
                 OnPropertyChangedWithVals(propertyName, typeof(T), oldVal, newValue);
@@ -1432,7 +1432,7 @@ namespace DRM.PropBag
                 //typedProp.RaiseEventsForParent(typedSubs, this, propertyName, oldVal, newValue);
 
                 // The un-typed, PropertyChanged event defined on the individual property.
-                typedProp.OnPropertyChangedWithVals(propertyName, oldVal, newValue);
+                typedProp.OnPropertyChangedWithObjectVals(propertyName, oldVal, newValue);
 
                 // The un-typed, PropertyChanged shared event.
                 OnPropertyChangedWithVals(propertyName, typeof(T),  oldVal, newValue);
@@ -1443,7 +1443,7 @@ namespace DRM.PropBag
             (
             IPropBag host,
             PropIdType propId,
-            IPropStoreAccessService<PropIdType, PropNameType> storeAccessor,
+            PSAccessServiceType storeAccessor,
             SubCacheType subscriptionManager,
             out IEnumerable<ISubscriptionGen> localBindings
             )
@@ -1456,29 +1456,30 @@ namespace DRM.PropBag
             return typedSubs;
         }
 
-        protected PropGen GetPropGen(string propertyName, Type propertyType,
-            out bool wasRegistered, bool haveValue, object value,
+        protected IPropData GetPropGen(PropNameType propertyName, Type propertyType,
+            out bool wasRegistered, out PropIdType propId,
+            bool haveValue, object value,
             bool alwaysRegister, bool mustBeRegistered, bool neverCreate, bool? desiredHasStoreValue)
         {
             if (propertyName == null) throw new ArgumentNullException("propertyName", "PropertyName is null on call to GetValue.");
 
+            propId = GetPropId(propertyName);
+
             Debug.Assert(!(alwaysRegister && mustBeRegistered), "AlwaysRegister and MustBeRegistered cannot both be true.");
             Debug.Assert(!(alwaysRegister && neverCreate), "AlwaysRegister and NeverCreate cannot both be true.");
 
-            IPropGen genProp;
+            IPropData PropData;
 
-            PropIdType l2Key = GetPropId(propertyName);
-
-            if (_ourStoreAccess.TryGetValue(this, l2Key, out genProp))
+            if (OurStoreAccessor.TryGetValue(this, propId, out PropData))
             {
                 wasRegistered = false;
             }
             else
             {
-                genProp = this.HandleMissingProp(propertyName, propertyType, out wasRegistered, haveValue, value, alwaysRegister, mustBeRegistered, neverCreate);
+                PropData = this.HandleMissingProp(propId, propertyName, propertyType, out wasRegistered, haveValue, value, alwaysRegister, mustBeRegistered, neverCreate);
             }
 
-            if (!genProp.IsEmpty && desiredHasStoreValue.HasValue && desiredHasStoreValue.Value != genProp.TypedProp.HasStore)
+            if (!PropData.IsEmpty && desiredHasStoreValue.HasValue && desiredHasStoreValue.Value != PropData.TypedProp.HasStore)
             {
                 if (desiredHasStoreValue.Value)
                     //Caller needs property to have a backing store.
@@ -1487,53 +1488,48 @@ namespace DRM.PropBag
                     throw new InvalidOperationException(string.Format("Property: {0} has a backing store held by this instance of PropBag. This operation can only be performed on properties for which no backing store is kept by this instance.", propertyName));
             }
 
-            return (PropGen) genProp;
+            return (IPropData) PropData;
         }
 
-        private IPropPrivate<T> CheckTypeInfo<T>(PropGen genProp, IPropStoreAccessService<PropIdType, PropNameType> storeAccess)
+        private IPropPrivate<T> CheckTypeInfo<T>(PropIdType propId, PropNameType propertyName, IPropData PropData, PSAccessServiceType storeAccess)
         {
-            if (!genProp.TypedProp.TypeIsSolid)
+            if (!PropData.TypedProp.TypeIsSolid)
             {
                 try
                 {
-                    if (MakeTypeSolid(ref genProp, typeof(T)))
-                    {
-                        storeAccess[this, genProp.PropId] = genProp;
-                    }
+                    Type newType = typeof(T);
+                    MakeTypeSolid(propId, propertyName, PropData, newType);
                 }
                 catch (InvalidCastException ice)
                 {
-                    string propertyName = GetPropName(genProp.PropId);
                     throw new ApplicationException($"The property: {propertyName} was originally set to null. " +
                         "Now its being set to a value whose type is a value type. Value types don't allow setting to null.", ice);
                 }
             }
             else
             {
-                string propertyName = GetPropName(genProp.PropId);
-                if (!AreTypesSame(typeof(T), genProp.TypedProp.Type))
+                if (!AreTypesSame(typeof(T), PropData.TypedProp.Type))
                 {
-                    throw new ApplicationException($"Attempting to set property: {propertyName} whose type is {genProp.TypedProp.Type}, " +
+                    throw new ApplicationException($"Attempting to set property: {propertyName} whose type is {PropData.TypedProp.Type}, " +
                         $"with a call whose type parameter is {typeof(T).ToString()} is invalid.");
                 }
             }
 
-            return (IPropPrivate<T>)genProp.TypedProp;
+            return (IPropPrivate<T>)PropData.TypedProp;
         }
 
         /// <summary>
-        /// Returns Null if no update was required,
-        /// otherwise it returns the new PropGen object.
+        /// Returns true if and only if the type was updated.
         /// </summary>
-        /// <param name="genProp"></param>
+        /// <param name="PropData"></param>
         /// <param name="newType"></param>
-        /// <param name="propertyName"></param>
-        /// <returns></returns>
-        private bool MakeTypeSolid(ref PropGen genProp, Type newType)
+        /// <returns>True if the type was updated, otherwise false.</returns>
+        private bool MakeTypeSolid(PropIdType propId, PropNameType propertyName, IPropData PropData, Type newType)
         {
-            //Type currentType = genProp.Type;
+            //Type currentType = PropData.Type;
 
-            Debug.Assert(genProp.Value == null, "The current value of the property should be null when MakeTypeSolid is called.");
+            Debug.Assert(PropData.TypedProp.TypedValueAsObject == null, "The current value of the property should be null when MakeTypeSolid is called.");
+            Debug.Assert(!PropData.IsEmpty, "PropData is empty on call to MakeTypeSolid.");
 
             System.Type underlyingtype = Nullable.GetUnderlyingType(newType);
 
@@ -1545,18 +1541,15 @@ namespace DRM.PropBag
 
             // We are using strict equality here, since we have the oportunity to update the type to anything
             // that is assignable from a value of type object (which is everything.)
-            if (newType != genProp.TypedProp.Type)
+            if (newType != PropData.TypedProp.Type)
             {
-                // Next statement uses reflection.
-                object curValue = genProp.Value;
-                PropKindEnum propKind = genProp.TypedProp.PropKind;
+                object curValue = PropData.TypedProp.TypedValueAsObject;
+                PropKindEnum propKind = PropData.TypedProp.PropKind;
 
-                string propertyName = GetPropName(genProp.PropId);
                 IProp genericTypedProp = PropFactory.CreateGenFromObject(newType, curValue, propertyName, null, true, true, propKind, null, false, null, false);
 
-                //genProp.UpdateWithSolidType(newType, curValue);
-                genProp = new PropGen(genericTypedProp, genProp.PropId);
-                return true;
+                bool result = OurStoreAccessor.SetTypedProp(this, propId, genericTypedProp);
+                return result;
             }
             else
             {
@@ -1587,7 +1580,6 @@ namespace DRM.PropBag
             {
                 return newType.UnderlyingSystemType == curType.UnderlyingSystemType;
             }
-
         }
 
         /// <summary>
@@ -1622,30 +1614,32 @@ namespace DRM.PropBag
 
         #region Composite Key Support
 
-        private PropNameType GetPropName(PropIdType l2Key)
+        private PropNameType GetPropName(PropIdType propId)
         {
-            PropNameType propertyName = _level2KeyManager.FromCooked(l2Key);
+            PropNameType propertyName = _level2KeyManager.FromCooked(propId);
             return propertyName;
         }
 
         private PropIdType GetPropId(PropNameType propertyName)
         {
             // Register new propertyName and get an exploded key.
-            PropIdType l2Key = _level2KeyManager.GetOrAdd(propertyName);
+            PropIdType propId = _level2KeyManager.GetOrAdd(propertyName);
 
-            return l2Key;
+            return propId;
         }
 
-        protected PropGen GetPropGen<T>(PropIdType l2Key, bool? desiredHasStoreValue)
+        protected IPropData GetPropGen<T>(PropNameType propertyName, out PropIdType propId, bool? desiredHasStoreValue)
         {
-            if (!_ourStoreAccess.TryGetValue(this, l2Key, out IPropGen genProp))
+            propId = GetPropId(propertyName);
+            if (!OurStoreAccessor.TryGetValue(this, propId, out IPropData PropData))
             {
                 throw new KeyNotFoundException("That cKey was not found.");
             }
 
-            if (!genProp.IsEmpty && desiredHasStoreValue.HasValue && desiredHasStoreValue.Value != genProp.TypedProp.HasStore)
+            propertyName = GetPropName(propId);
+
+            if (!PropData.IsEmpty && desiredHasStoreValue.HasValue && desiredHasStoreValue.Value != PropData.TypedProp.HasStore)
             {
-                string propertyName = GetPropName(l2Key);
                 if (desiredHasStoreValue.Value)
                     //Caller needs property to have a backing store.
                     throw new InvalidOperationException(string.Format("Property: {0} has no backing store held by this instance of PropBag. This operation can only be performed on properties for which a backing store is held by this instance.", propertyName));
@@ -1653,7 +1647,7 @@ namespace DRM.PropBag
                     throw new InvalidOperationException(string.Format("Property: {0} has a backing store held by this instance of PropBag. This operation can only be performed on properties for which no backing store is kept by this instance.", propertyName));
             }
 
-            return (PropGen) genProp;
+            return (IPropData) PropData;
         }
 
         #endregion
@@ -1705,7 +1699,7 @@ namespace DRM.PropBag
 
         public bool TryGetPropType(string propertyName, out PropKindEnum propType)
         {
-            //if (tVals.TryGetValue(propertyName, out PropGen value))
+            //if (tVals.TryGetValue(propertyName, out IPropGen value))
             //{
             //    propType = value.TypedProp.PropKind;
             //    return true;
@@ -1716,8 +1710,8 @@ namespace DRM.PropBag
             //    return false;
             //}
 
-            PropIdType l2Key = GetPropId(propertyName);
-            if (_ourStoreAccess.TryGetValue(this, l2Key, out IPropGen value))
+            PropIdType propId = GetPropId(propertyName);
+            if (OurStoreAccessor.TryGetValue(this, propId, out IPropData value))
             {
                 propType = value.TypedProp.PropKind;
                 return true;
@@ -1732,7 +1726,7 @@ namespace DRM.PropBag
         public bool TryGetListSource(string propertyName, Type itemType, out IListSource listSource)
         {
             PropIdType l2Key = GetPropId(propertyName);
-            if (_ourStoreAccess.TryGetValue(this, l2Key, out IPropGen value))
+            if (OurStoreAccessor.TryGetValue(this, l2Key, out IPropData value))
             {
                 listSource = value.TypedProp.ListSource;
                 return true;
@@ -1746,72 +1740,79 @@ namespace DRM.PropBag
 
         #endregion
 
-        #region Generic Method Support
-
-        /// <summary>
-        /// Used to create Delegates when the type of the value is not known at run time.
-        /// </summary>
-        static private Type GMT_TYPE = typeof(GenericMethodTemplates);
-
-        // Method Templates for Property Bag
-        internal static class GenericMethodTemplates
+        // TODO: Consider creating a new interface: IPropBagInternal
+        // and making this method be a member of that interface.
+        private bool DoSetBridge<T>(IPropBag target, PropIdType propId, string propertyName, IProp prop, object value)
         {
-            static Lazy<MethodInfo> theSingleGenericDoSetBridgeMethodInfo;
-            static MethodInfo GenericDoSetBridgeMethodInfo { get { return theSingleGenericDoSetBridgeMethodInfo.Value; } }
-
-            static Lazy<MethodInfo> theSingleGenGetTypedCollMethodInfo;
-            static MethodInfo GenGetTypedCollMethodInfo { get { return theSingleGenGetTypedCollMethodInfo.Value; } }
-
-            static GenericMethodTemplates()
-            {
-                theSingleGenericDoSetBridgeMethodInfo = new Lazy<MethodInfo>(() =>
-                    GMT_TYPE.GetMethod("DoSetBridge", BindingFlags.Static | BindingFlags.NonPublic),
-                    LazyThreadSafetyMode.PublicationOnly);
-
-                theSingleGenGetTypedCollMethodInfo = new Lazy<MethodInfo>(() =>
-                    GMT_TYPE.GetMethod("GetTypedCollection", BindingFlags.Static | BindingFlags.NonPublic),
-                    LazyThreadSafetyMode.PublicationOnly);
-            }
-
-            //static bool DoSetBridge<T>(object value, PropBag target, string propertyName, IProp prop)
-            //{
-            //    return target.DoSet<T>((T)value, propertyName, (IPropPrivate<T>)prop);
-            //}
-
-            // This implementation uses the concrete PropBag, instead of IPropBag
-            // because this method has access to this instance of PropBag.
-            // TODO: update this to use a true open delegate where the caller
-            // specifies the target on which to call DoSet<T>.
-            static bool DoSetBridge<T>(IPropBag target, PropIdType propId, string propertyName, IProp prop, object value)
-            {
-                return ((PropBag)target).DoSet<T>(propId, propertyName, (IPropPrivate<T>)prop, (T)value);
-            }
-
-            public static DoSetDelegate GetDoSetDelegate(Type typeOfThisValue)
-            {
-                MethodInfo methInfoSetProp = GenericMethodTemplates.GenericDoSetBridgeMethodInfo.MakeGenericMethod(typeOfThisValue);
-                DoSetDelegate result = (DoSetDelegate)Delegate.CreateDelegate(typeof(DoSetDelegate), methInfoSetProp);
-
-                return result;
-            }
-
-            static IList GetTypedCollection<T>(PropBag source, string propertyName)
-            {
-                ObservableCollection<T> result = source.GetIt<ObservableCollection<T>>(propertyName);
-                return result;
-            }
-
-            public static GetTypedCollectionDelegate GetTheGetTypedCollectionDelegate(Type typeOfThisValue)
-            {
-                MethodInfo methInfoSetProp = GenericMethodTemplates.GenGetTypedCollMethodInfo.MakeGenericMethod(typeOfThisValue);
-                GetTypedCollectionDelegate result = (GetTypedCollectionDelegate)Delegate.CreateDelegate(typeof(GetTypedCollectionDelegate), methInfoSetProp);
-
-                return result;
-            }
-
+            return ((PropBag)target).DoSet<T>(propId, propertyName, (IPropPrivate<T>)prop, (T)value);
         }
 
-        #endregion
+        //#region Generic Method Support
+
+        ///// <summary>
+        ///// Used to create Delegates when the type of the value is not known at run time.
+        ///// </summary>
+        //static private Type GMT_TYPE = typeof(GenericMethodTemplates);
+
+        //// Method Templates for Property Bag
+        //internal static class GenericMethodTemplates
+        //{
+        //    //static Lazy<MethodInfo> theSingleGenericDoSetBridgeMethodInfo;
+        //    //static MethodInfo GenericDoSetBridgeMethodInfo { get { return theSingleGenericDoSetBridgeMethodInfo.Value; } }
+
+        //    static Lazy<MethodInfo> theSingleGenGetTypedCollMethodInfo;
+        //    static MethodInfo GenGetTypedCollMethodInfo { get { return theSingleGenGetTypedCollMethodInfo.Value; } }
+
+        //    static GenericMethodTemplates()
+        //    {
+        //        //theSingleGenericDoSetBridgeMethodInfo = new Lazy<MethodInfo>(() =>
+        //        //    GMT_TYPE.GetMethod("DoSetBridge", BindingFlags.Static | BindingFlags.NonPublic),
+        //        //    LazyThreadSafetyMode.PublicationOnly);
+
+        //        theSingleGenGetTypedCollMethodInfo = new Lazy<MethodInfo>(() =>
+        //            GMT_TYPE.GetMethod("GetTypedCollection", BindingFlags.Static | BindingFlags.NonPublic),
+        //            LazyThreadSafetyMode.PublicationOnly);
+        //    }
+
+        //    ////static bool DoSetBridge<T>(object value, PropBag target, string propertyName, IProp prop)
+        //    ////{
+        //    ////    return target.DoSet<T>((T)value, propertyName, (IPropPrivate<T>)prop);
+        //    ////}
+
+        //    //// This implementation uses the concrete PropBag, instead of IPropBag
+        //    //// because this method has access to this instance of PropBag.
+        //    //// TODO: update this to use a true open delegate where the caller
+        //    //// specifies the target on which to call DoSet<T>.
+        //    //static bool DoSetBridge<T>(IPropBag target, PropIdType propId, string propertyName, IProp prop, object value)
+        //    //{
+        //    //    return ((PropBag)target).DoSet<T>(propId, propertyName, (IPropPrivate<T>)prop, (T)value);
+        //    //}
+
+        //    //public static DoSetDelegate GetDoSetDelegate(Type typeOfThisValue)
+        //    //{
+        //    //    MethodInfo methInfoSetProp = GenericMethodTemplates.GenericDoSetBridgeMethodInfo.MakeGenericMethod(typeOfThisValue);
+        //    //    DoSetDelegate result = (DoSetDelegate)Delegate.CreateDelegate(typeof(DoSetDelegate), methInfoSetProp);
+
+        //    //    return result;
+        //    //}
+
+        //    static IList GetTypedCollection<T>(PropBag source, string propertyName)
+        //    {
+        //        ObservableCollection<T> result = source.GetIt<ObservableCollection<T>>(propertyName);
+        //        return result;
+        //    }
+
+        //    public static GetTypedCollectionDelegate GetTheGetTypedCollectionDelegate(Type typeOfThisValue)
+        //    {
+        //        MethodInfo methInfoSetProp = GenericMethodTemplates.GenGetTypedCollMethodInfo.MakeGenericMethod(typeOfThisValue);
+        //        GetTypedCollectionDelegate result = (GetTypedCollectionDelegate)Delegate.CreateDelegate(typeof(GetTypedCollectionDelegate), methInfoSetProp);
+
+        //        return result;
+        //    }
+
+        //}
+
+        //#endregion
 
     }
 }

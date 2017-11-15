@@ -8,6 +8,12 @@ namespace DRM.TypeSafePropertyBag
     using PropIdType = UInt32;
     using PropNameType = String;
 
+    using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
+
+    using ExKeyType = IExplodedKey<UInt64, UInt32, UInt32>;
+    using HaveTheKeyType = IHaveTheKey<UInt64, UInt32, UInt32>;
+
+
     public class SimpleSubscriptionManager : ICacheSubscriptions<SimpleExKey, CompositeKeyType, ObjectIdType, PropIdType, PropNameType>
     {
         #region Private Members
@@ -103,7 +109,7 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        public SubscriberCollection GetSubscriptions(IPropBag host, PropIdType propId, IPropStoreAccessService<PropIdType, PropNameType> storeAccessor)
+        public SubscriberCollection GetSubscriptions(IPropBag host, PropIdType propId, PSAccessServiceType storeAccessor)
         {
             SimpleExKey exKey = GetTheKey(host, propId, storeAccessor);
 
@@ -118,9 +124,9 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        private SimpleExKey GetTheKey(IPropBag host, uint propId, IPropStoreAccessService<PropIdType, PropNameType> storeAccessor)
+        private SimpleExKey GetTheKey(IPropBag host, uint propId, PSAccessServiceType storeAccessor)
         {
-            IExplodedKey<CompositeKeyType, ObjectIdType, PropIdType> exKey = ((IHaveTheKey<CompositeKeyType, ObjectIdType, PropIdType>) storeAccessor).GetTheKey(host, propId);
+            ExKeyType exKey = ((HaveTheKeyType) storeAccessor).GetTheKey(host, propId);
 
             SimpleExKey withWeakRef = SimpleExKey.FromIExploadedKeyWithWeakRef(exKey);
             return withWeakRef;
@@ -146,8 +152,6 @@ namespace DRM.TypeSafePropertyBag
             wasAdded = internalWasAdded;
             return result;
         }
-
-
 
         #endregion
     }

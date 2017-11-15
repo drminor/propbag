@@ -143,7 +143,7 @@ namespace PropBagLib.Tests
         {
             mod1 = new LooseModel(PropBagTypeSafetyMode.None, _amHelpers.PropFactory_V1);
 
-            IPropGen pg = mod1.GetPropGen("PropBool");
+            IPropData pg = mod1.GetPropGen("PropBool");
 
             IProp<bool> pt = (IProp<bool>)pg.TypedProp;
 

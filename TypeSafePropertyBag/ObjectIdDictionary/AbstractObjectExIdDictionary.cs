@@ -6,8 +6,8 @@ using System.Collections.Generic;
 namespace DRM.TypeSafePropertyBag
 {
     public class AbstractObjectExIdDictionary<ExKeyT, CompT, L1T, L2T, L2TRaw> :
-        ConcurrentDictionary<ExKeyT, IPropGen>,
-        IObjectExIdDictionary<ExKeyT, CompT, L1T, L2T, L2TRaw, IPropGen> where ExKeyT : IExplodedKey<CompT, L1T, L2T> 
+        ConcurrentDictionary<ExKeyT, IPropData>,
+        IObjectExIdDictionary<ExKeyT, CompT, L1T, L2T, L2TRaw, IPropData> where ExKeyT : IExplodedKey<CompT, L1T, L2T> 
     {
         #region Private Memebers
 
@@ -64,19 +64,19 @@ namespace DRM.TypeSafePropertyBag
 
         #region Level 2 Cooked 
 
-        public IPropGen GetOrAdd(L1T top, L2T bot, IPropGen value)
+        public IPropData GetOrAdd(L1T top, L2T bot, IPropData value)
         {
             ExKeyT key = CompKeyManager.Join(top, bot);
             return GetOrAdd(key, value);
         }
 
-        public bool TryAdd(L1T top, L2T bot, IPropGen value)
+        public bool TryAdd(L1T top, L2T bot, IPropData value)
         {
             ExKeyT key = CompKeyManager.Join(top, bot);
             return TryAdd(key, value);
         }
 
-        public bool TryGetValue(L1T top, L2T bot, out IPropGen value)
+        public bool TryGetValue(L1T top, L2T bot, out IPropData value)
         {
             ExKeyT key = CompKeyManager.Join(top, bot);
             return TryGetValue(key, out value);
@@ -89,7 +89,7 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        public bool TryRemove(L1T top, L2T bot, out IPropGen value)
+        public bool TryRemove(L1T top, L2T bot, out IPropData value)
         {
             ExKeyT key = CompKeyManager.Join(top, bot);
             return TryRemove(key, out value);
@@ -99,19 +99,19 @@ namespace DRM.TypeSafePropertyBag
 
         #region Level 2 Raw
 
-        public bool TryAdd(L1T top, L2TRaw rawBot, IPropGen value)
+        public bool TryAdd(L1T top, L2TRaw rawBot, IPropData value)
         {
             ExKeyT key = CompKeyManager.Join(top, Level2KeyManager.FromRaw(rawBot));
             return TryAdd(key, value);
         }
 
-        public IPropGen GetOrAdd(L1T top, L2TRaw rawBot, IPropGen value)
+        public IPropData GetOrAdd(L1T top, L2TRaw rawBot, IPropData value)
         {
             ExKeyT key = CompKeyManager.Join(top, Level2KeyManager.FromRaw(rawBot));
             return GetOrAdd(key, value);
         }
 
-        public bool TryGetValue(L1T top, L2TRaw rawBot, out IPropGen value)
+        public bool TryGetValue(L1T top, L2TRaw rawBot, out IPropData value)
         {
             bool result;
             if (CompKeyManager.TryJoin(top, rawBot, out ExKeyT comp))
@@ -121,7 +121,7 @@ namespace DRM.TypeSafePropertyBag
             }
             else
             {
-                value = default(IPropGen);
+                value = default(IPropData);
                 return false;
             }
         }
@@ -133,7 +133,7 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        public bool TryRemove(L1T top, L2TRaw rawBot, out IPropGen value)
+        public bool TryRemove(L1T top, L2TRaw rawBot, out IPropData value)
         {
             ExKeyT key = CompKeyManager.Join(top, Level2KeyManager.FromRaw(rawBot));
             return TryRemove(key, out value);

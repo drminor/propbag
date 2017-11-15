@@ -7,12 +7,15 @@ namespace DRM.TypeSafePropertyBag
     using PropIdType = UInt32;
     using PropNameType = String;
 
+    using L2KeyManType = IL2KeyMan<UInt32, String>;
+
+
     // TODO: Since the maximum number of properties per object may be less than 2^^32, then the 
     // maximum number of objects may be more than 2 ^^ 32 -- which takes a Int64, not a UInt32
 
     public class SimpleCompKeyMan : ICKeyMan<CompositeKeyType, ObjectIdType, PropIdType, PropNameType>
     {
-        private SimpleLevel2KeyMan Level2KeyMan { get; }
+        private L2KeyManType Level2KeyMan { get; }
         public int MaxPropsPerObject { get; }
 
         int _botFieldLen;
@@ -20,10 +23,12 @@ namespace DRM.TypeSafePropertyBag
         CompositeKeyType _botMask;
         CompositeKeyType _topMask;
 
-        public SimpleCompKeyMan(SimpleLevel2KeyMan level2KeyMan)
+        public SimpleCompKeyMan(int maxPropsPerObject/*L2KeyManType level2KeyMan*/)
         {
-            Level2KeyMan = level2KeyMan ?? throw new ArgumentNullException($"{nameof(level2KeyMan)}.");
-            MaxPropsPerObject = level2KeyMan.MaxPropsPerObject;
+            //Level2KeyMan = level2KeyMan ?? throw new ArgumentNullException($"{nameof(level2KeyMan)}.");
+            //MaxPropsPerObject = level2KeyMan.MaxPropsPerObject;
+
+            MaxPropsPerObject = maxPropsPerObject;
 
             double numBitsForProps = Math.Log(MaxPropsPerObject, 2);
 
@@ -38,7 +43,8 @@ namespace DRM.TypeSafePropertyBag
 
             if (4 > numBitsForProps || numBitsForProps > topRange)
             {
-                throw new ArgumentException($"maxPropsPerObject must be between 4 and {topRange}, inclusive.", nameof(level2KeyMan.MaxPropsPerObject));
+                //throw new ArgumentException($"maxPropsPerObject must be between 4 and {topRange}, inclusive.", nameof(level2KeyMan.MaxPropsPerObject));
+                throw new ArgumentException($"maxPropsPerObject must be between 4 and {topRange}, inclusive.", nameof(maxPropsPerObject));
             }
 
             int numberOfTopBits = (int)Math.Round((double)numberOfBitsInCKey - numBitsForProps, 0);
@@ -69,14 +75,14 @@ namespace DRM.TypeSafePropertyBag
 
         // Join and split exploded key from L1 and L2Raw.
         //ExKeyT Join(L1T top, L2TRaw bot);
-        public SimpleExKey Join(ObjectIdType top, PropNameType rawBot)
-        {
-            PropIdType bot = Level2KeyMan.FromRaw(rawBot);
-            CompositeKeyType cKey = JoinComp(top, bot);
+        //public SimpleExKey Join(ObjectIdType top, PropNameType rawBot)
+        //{
+        //    PropIdType bot = Level2KeyMan.FromRaw(rawBot);
+        //    CompositeKeyType cKey = JoinComp(top, bot);
 
-            SimpleExKey result = new SimpleExKey(cKey, null, top, bot);
-            return result;
-        }
+        //    SimpleExKey result = new SimpleExKey(cKey, null, top, bot);
+        //    return result;
+        //}
 
         //L1T Split(ExKeyT exKey, out L2TRaw bot);
         public ObjectIdType Split(SimpleExKey exKey, out PropNameType rawBot)
@@ -86,34 +92,34 @@ namespace DRM.TypeSafePropertyBag
 
         // Try version of Join
         //bool TryJoin(L1T top, L2TRaw rawBot, out ExKeyT exKey);
-        public bool TryJoin(ObjectIdType top, PropNameType rawBot, out SimpleExKey exKey)
-        {
-            if(TryJoinComp(top, rawBot, out CompositeKeyType cKey, out PropIdType bot))
-            {
-                exKey = new SimpleExKey(cKey, null, top, bot);
-                return true;
-            }
-            else
-            {
-                exKey = new SimpleExKey();
-                return false;
-            }
-        }
+        //public bool TryJoin(ObjectIdType top, PropNameType rawBot, out SimpleExKey exKey)
+        //{
+        //    if(TryJoinComp(top, rawBot, out CompositeKeyType cKey, out PropIdType bot))
+        //    {
+        //        exKey = new SimpleExKey(cKey, null, top, bot);
+        //        return true;
+        //    }
+        //    else
+        //    {
+        //        exKey = new SimpleExKey();
+        //        return false;
+        //    }
+        //}
 
         // Try version of Join Comp
-        public bool TryJoinComp(ObjectIdType top, PropNameType rawBot, out CompositeKeyType cKey, out PropIdType bot)
-        {
-            if (Level2KeyMan.TryGetFromRaw(rawBot, out bot))
-            {
-                cKey = JoinComp(top, Level2KeyMan.FromRaw(rawBot));
-                return true;
-            }
-            else
-            {
-                cKey = 0;
-                return false;
-            }
-        }
+        //public bool TryJoinComp(ObjectIdType top, PropNameType rawBot, out CompositeKeyType cKey, out PropIdType bot)
+        //{
+        //    if (Level2KeyMan.TryGetFromRaw(rawBot, out bot))
+        //    {
+        //        cKey = JoinComp(top, Level2KeyMan.FromRaw(rawBot));
+        //        return true;
+        //    }
+        //    else
+        //    {
+        //        cKey = 0;
+        //        return false;
+        //    }
+        //}
 
         // Create exploded key from composite key.
         //ExKeyT Split(CompT cKey);
@@ -151,12 +157,32 @@ namespace DRM.TypeSafePropertyBag
         }
 
         //L1T SplitComp(CompT cKey, out L2TRaw rawBot);
-        public ObjectIdType SplitComp(CompositeKeyType cKey, out PropNameType rawBot)
-        {
-            ObjectIdType result = SplitComp(_topMask, out PropIdType bot);
-            rawBot = Level2KeyMan.FromCooked(bot);
+        //public ObjectIdType SplitComp(CompositeKeyType cKey, out PropNameType rawBot)
+        //{
+        //    ObjectIdType result = SplitComp(cKey, out PropIdType bot);
+        //    rawBot = Level2KeyMan.FromCooked(bot);
 
-            return result;
+        //    return result;
+        //}
+
+        // TODO: if we change the type of ObjectIdKey to Uint64,
+        // the we can save a shift operation.
+        public bool Verify(CompositeKeyType cKey, ObjectIdType top)
+        {
+            ObjectIdType testTop = (ObjectIdType)((cKey >> _botFieldLen) & _topMask);
+            return testTop == top;
         }
+
+        public bool Verify(CompositeKeyType cKey, ObjectIdType top, PropIdType bot)
+        {
+            uint testTop = SplitComp(cKey, out PropIdType testBot);
+            return testTop == top && testBot == bot;
+        }
+
+        //public bool Verify(CompositeKeyType cKey, ObjectIdType top, PropNameType rawBot)
+        //{
+        //    uint testTop = SplitComp(cKey, out PropNameType testRawBot);
+        //    return testTop == top && testRawBot == rawBot;
+        //}
     }
 }

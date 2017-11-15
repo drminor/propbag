@@ -1,4 +1,5 @@
-﻿namespace DRM.TypeSafePropertyBag
+﻿
+namespace DRM.TypeSafePropertyBag
 {
     public interface IExplodedKey<CompT, L1T, L2T>
     {
