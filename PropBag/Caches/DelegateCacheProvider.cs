@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using DRM.TypeSafePropertyBag.Fundamentals;
-//using DRM.PropBag;
+using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBag.Caches
 {
@@ -17,7 +17,7 @@ namespace DRM.PropBag.Caches
 
         static Lazy<TypeDescBasedTConverterCache> theSingleTypeDescBasedTConverterCache;
 
-        static Lazy<LockingConcurrentDictionary<Type, DoSetDelegate>> theSingleDoSetDelegateCache;
+        static Lazy<DoSetDelegateCache> theSingleDoSetDelegateCache;
 
         #endregion
 
@@ -30,7 +30,7 @@ namespace DRM.PropBag.Caches
         }
 
         // DoSet Delegate Cache
-        internal static LockingConcurrentDictionary<Type, DoSetDelegate> DoSetDelegateCache
+        internal static DoSetDelegateCache DoSetDelegateCache
         {
             get { return theSingleDoSetDelegateCache.Value; }
         }
@@ -48,14 +48,21 @@ namespace DRM.PropBag.Caches
 
 
             // Do Set Delegate Cache for PropBagBase
-            Func<Type, DoSetDelegate> valueFactory = PropBag.GenericMethodTemplates.GetDoSetDelegate;
-            theSingleDoSetDelegateCache = 
-                new Lazy<LockingConcurrentDictionary<Type, DoSetDelegate>>
+            //Func<Type, DoSetDelegate> valueFactory = PropBag.GenericMethodTemplates.GetDoSetDelegate;
+            //theSingleDoSetDelegateCache = 
+            //    new Lazy<LockingConcurrentDictionary<Type, DoSetDelegate>>
+            //    (
+            //        () => new LockingConcurrentDictionary<Type, DoSetDelegate>(valueFactory),
+            //        LazyThreadSafetyMode.PublicationOnly
+            //    );
+
+            theSingleDoSetDelegateCache =
+                new Lazy<DoSetDelegateCache>
                 (
-                    () => new LockingConcurrentDictionary<Type, DoSetDelegate>(valueFactory),
-                    LazyThreadSafetyMode.PublicationOnly
+                    () => new DoSetDelegateCache(typeof(PropBag)), LazyThreadSafetyMode.PublicationOnly
                 );
         }
+
         #endregion
 
         #region Instance Constructors
