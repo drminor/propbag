@@ -12,7 +12,7 @@ namespace DRM.PropBag
     using PropIdType = UInt32;
     using PropNameType = String;
     using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
-    using SubCacheType = ICacheSubscriptions<SimpleExKey, UInt64, UInt32, UInt32, String>;
+    using SubCacheType = ICacheSubscriptions<UInt32>;
     using LocalBinderType = IBindLocalProps<UInt32>;
 
     #region Summary and Remarks

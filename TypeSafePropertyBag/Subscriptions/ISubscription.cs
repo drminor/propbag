@@ -4,6 +4,8 @@ using System.Reflection;
 
 namespace DRM.TypeSafePropertyBag
 {
+    using ExKeyT = IExplodedKey<UInt64, UInt32, UInt32>;
+
     /// <summary>
     /// 
     /// </summary>
@@ -27,7 +29,7 @@ namespace DRM.TypeSafePropertyBag
 
     public interface ISubscriptionGen
     {
-        SimpleExKey SourcePropId { get; }
+        ExKeyT SourcePropId { get; }
         Type PropertyType { get; }
 
         SubscriptionKind SubscriptionKind { get; }
@@ -43,7 +45,7 @@ namespace DRM.TypeSafePropertyBag
         MethodInfo Method { get; }
 
         // Binding Subscription Members
-        SimpleExKey TargetPropId { get; }
+        ExKeyT TargetPropId { get; }
         LocalBindingInfo BindingInfo { get; }
     }
 

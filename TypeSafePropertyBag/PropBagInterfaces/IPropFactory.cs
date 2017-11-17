@@ -3,12 +3,14 @@ using System.Collections.Generic;
 
 namespace DRM.TypeSafePropertyBag
 {
+    #region Type Aliases
     using PropIdType = UInt32;
     using PropNameType = String;
 
     using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
-    using SubCacheType = ICacheSubscriptions<SimpleExKey, UInt64, UInt32, UInt32, String>;
+    //using SubCacheType = ICacheSubscriptions<SimpleExKey, UInt64, UInt32, UInt32, String>;
     using LocalBinderType = IBindLocalProps<UInt32>;
+    #endregion
 
     public interface IPropFactory 
     {
@@ -19,7 +21,7 @@ namespace DRM.TypeSafePropertyBag
 
         PSAccessServiceProviderType PropStoreAccessServiceProvider { get; }
         LocalBinderType LocalBinder { get; }
-        SubCacheType SubscriptionManager { get; }
+        //SubCacheType SubscriptionManager { get; }
 
         #region Collection-Type Methods Methods
 

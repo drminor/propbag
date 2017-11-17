@@ -6,11 +6,13 @@ using System.Data;
 
 namespace DRM.TypeSafePropertyBag
 {
+    #region Type Aliases
     using CompositeKeyType = UInt64;
     using ObjectIdType = UInt32;
 
     using PropIdType = UInt32;
     using PropNameType = String;
+    #endregion
 
     // Typically implemented by TypedTableBase<T> Class
     public interface IDTPropPrivate<CT,T> : ICPropPrivate<CT,T> where CT: IEnumerable<T>
@@ -71,7 +73,7 @@ namespace DRM.TypeSafePropertyBag
     /// <summary>
     /// These are the non-type specific features that every instance of IProp<typeparamref name="T"/> implement.
     /// </summary>
-    public interface IProp
+    public interface IProp : INotifyPCObject
     {
         PropKindEnum PropKind { get; }
         Type Type { get; }
@@ -103,10 +105,17 @@ namespace DRM.TypeSafePropertyBag
     /// <summary>
     /// Allows access from code in the TypeSafePropertyBag assembly, but not from the PropBag assembly.
     /// </summary>
-    internal interface IPropDataInternal
+    internal interface IPropDataInternal : IPropData
     {
-        void SetCompKey(CompositeKeyType value);
-        void SetChildObjectId(ObjectIdType value);
+        CompositeKeyType CKey { get; }
+        bool IsPropBag { get; }
+
+        // The ObjectId assigned to the value of this Prop, if the TypedProp.Type is, or derives from, IPropBag.
+        ObjectIdType ChildObjectId { get; set; }
+
+        // On those occasions when the IProp starts off with Type = object, and then later, the type is firmed up,
+        // The IPropBag needs to be able to have a new IProp created with the correct type
+        // and that new IProp needs to replace the original IProp.
         void SetTypedProp(IProp value);
     }
 
@@ -116,16 +125,7 @@ namespace DRM.TypeSafePropertyBag
     /// </summary>
     public interface IPropData : INotifyPCObject
     {
-        // TODO: Make this the Exploded key, which contains a weak reference to the PropBag hosting this PropDataItem.
-        CompositeKeyType CompKey { get; }
-
-        //// TODO: This can be computed from the CompKey and it does take up 4 bytes, consider using CompKey exclusively.
-        //PropIdType PropId { get; } 
-
-        // The ObjectId assigned to the value of this Prop, if the TypedProp.Type implements IPropBag.
-        ObjectIdType ChildObjectId { get; }
-
-        bool IsPropBag { get; }
+        PropIdType PropId { get; }
 
         bool IsEmpty { get; }
 

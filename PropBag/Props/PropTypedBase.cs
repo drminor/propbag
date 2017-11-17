@@ -18,6 +18,7 @@ namespace DRM.PropBag
         #region Public Members
 
         public event EventHandler<PCTypedEventArgs<T>> PropertyChangedWithTVals;
+        //public event EventHandler<PCGenEventArgs> PropertyChangedWithGenVals;
 
         abstract public T TypedValue { get; set; }
 

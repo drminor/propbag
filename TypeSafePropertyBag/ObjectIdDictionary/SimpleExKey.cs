@@ -57,7 +57,6 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-
         #endregion
 
         #region IEquatable Support and Object Overrides

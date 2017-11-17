@@ -23,11 +23,8 @@ namespace DRM.TypeSafePropertyBag
         CompositeKeyType _botMask;
         CompositeKeyType _topMask;
 
-        public SimpleCompKeyMan(int maxPropsPerObject/*L2KeyManType level2KeyMan*/)
+        public SimpleCompKeyMan(int maxPropsPerObject)
         {
-            //Level2KeyMan = level2KeyMan ?? throw new ArgumentNullException($"{nameof(level2KeyMan)}.");
-            //MaxPropsPerObject = level2KeyMan.MaxPropsPerObject;
-
             MaxPropsPerObject = maxPropsPerObject;
 
             double numBitsForProps = Math.Log(MaxPropsPerObject, 2);
@@ -48,7 +45,8 @@ namespace DRM.TypeSafePropertyBag
             }
 
             int numberOfTopBits = (int)Math.Round((double)numberOfBitsInCKey - numBitsForProps, 0);
-            MaxObjectsPerAppDomain = (long) Math.Pow(2, numberOfTopBits);
+
+            MaxObjectsPerAppDomain = (long)Math.Pow(2, numberOfTopBits);
 
             _shift = numberOfTopBits;
             _botFieldLen = numberOfBitsInCKey - numberOfTopBits;
@@ -183,6 +181,30 @@ namespace DRM.TypeSafePropertyBag
         //{
         //    uint testTop = SplitComp(cKey, out PropNameType testRawBot);
         //    return testTop == top && testRawBot == rawBot;
+        //}
+
+        //private long GetMaxObjectsPerAppDomain(int maxPropsPerObject)
+        //{
+        //    double numBitsForProps = Math.Log(maxPropsPerObject, 2);
+
+        //    if ((int)numBitsForProps - numBitsForProps > 0.5)
+        //    {
+        //        throw new ArgumentException("The maxPropsPerObject must be an even power of two. For example: 256, 512, 1024, etc.");
+        //    }
+
+        //    int numberOfBitsInCKey = (int)Math.Log(CompositeKeyType.MaxValue, 2);
+
+        //    double topRange = numberOfBitsInCKey - 2; // Must leave room for at least 4 objects.
+
+        //    if (4 > numBitsForProps || numBitsForProps > topRange)
+        //    {
+        //        throw new ArgumentException($"maxPropsPerObject must be between 4 and {topRange}, inclusive.", nameof(maxPropsPerObject));
+        //    }
+
+        //    int numberOfTopBits = (int)Math.Round((double)numberOfBitsInCKey - numBitsForProps, 0);
+        //    long maxObjectsPerAppDomain = (long)Math.Pow(2, numberOfTopBits);
+
+        //    return maxObjectsPerAppDomain;
         //}
     }
 }

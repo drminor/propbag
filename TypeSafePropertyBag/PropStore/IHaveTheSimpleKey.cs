@@ -13,7 +13,7 @@ namespace DRM.TypeSafePropertyBag
     {
         new SimpleExKey GetTheKey(IPropBag propBag, PropIdType propId);
 
-        new SimpleExKey ParentKey { get; set; }
+        //new SimpleExKey ParentKey { get; set; }
 
     }
 }

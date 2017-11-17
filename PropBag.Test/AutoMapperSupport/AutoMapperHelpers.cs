@@ -9,7 +9,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
     using PropIdType = UInt32;
     using PropNameType = String;
     using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
-    using SubCacheType = ICacheSubscriptions<SimpleExKey, UInt64, UInt32, UInt32, String>;
+    using SubCacheType = ICacheSubscriptions<UInt32>;
     using LocalBinderType = IBindLocalProps<UInt32>;
 
     public class AutoMapperHelpers
@@ -51,11 +51,13 @@ namespace PropBagLib.Tests.AutoMapperSupport
         //    }
         //}
 
-        private SimpleLevel2KeyMan _level2KeyManager;
-        private SimpleCompKeyMan _compKeyManager;
-        private SimpleObjectIdDictionary _theStore;
+        public PSAccessServiceProviderType PropStoreAccessServiceProvider { get; set; }
 
-        PSAccessServiceProviderType PropStoreAccessServiceProvider { get; set; }
+        public IPropFactory GetNewPropFactory_V1()
+        {
+            _propFactory_V1 = null;
+            return PropFactory_V1;
+        }
 
         IPropFactory _propFactory_V1;
         public IPropFactory PropFactory_V1
@@ -64,17 +66,17 @@ namespace PropBagLib.Tests.AutoMapperSupport
             {
                 if(_propFactory_V1 == null)
                 {
-                    _theStore = ProvisonTheStore(out _level2KeyManager, out _compKeyManager);
-
-                    PropStoreAccessServiceProvider = new SimplePropStoreAccessServiceProvider(_theStore/*, MAX_NUMBER_OF_PROPERTIES*/);
-
+                    SimpleCompKeyMan compKeyManager = new SimpleCompKeyMan(MAX_NUMBER_OF_PROPERTIES);
+                    SimpleObjectIdDictionary theStore = new SimpleObjectIdDictionary(compKeyManager);
                     SubCacheType subscriptionManager = new SimpleSubscriptionManager();
+                    PropStoreAccessServiceProvider = new SimplePropStoreAccessServiceProvider(theStore, subscriptionManager);
+
                     LocalBinderType localBinder = new SimpleLocalBinder();
 
                     _propFactory_V1 = new PropFactory
                         (
                         propStoreAccessServiceProvider: PropStoreAccessServiceProvider,
-                        subscriptionManager: subscriptionManager,
+                        //subscriptionManager: subscriptionManager,
                         localBinder: null,
                         typeResolver: GetTypeFromName,
                         valueConverter: null
@@ -120,9 +122,9 @@ namespace PropBagLib.Tests.AutoMapperSupport
         private static SimpleObjectIdDictionary ProvisonTheStore(out SimpleLevel2KeyMan level2KeyMan, out SimpleCompKeyMan compKeyManager)
         {
             level2KeyMan = new SimpleLevel2KeyMan(MAX_NUMBER_OF_PROPERTIES);
-            compKeyManager = new SimpleCompKeyMan(MAX_NUMBER_OF_PROPERTIES/*level2KeyManager*/);
+            compKeyManager = new SimpleCompKeyMan(MAX_NUMBER_OF_PROPERTIES);
 
-            SimpleObjectIdDictionary result = new SimpleObjectIdDictionary(compKeyManager/*, level2KeyMan*/);
+            SimpleObjectIdDictionary result = new SimpleObjectIdDictionary(compKeyManager);
             return result;
         }
 

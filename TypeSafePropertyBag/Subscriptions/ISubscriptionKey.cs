@@ -4,6 +4,8 @@ using System.Reflection;
 
 namespace DRM.TypeSafePropertyBag
 {
+    using ExKeyT = IExplodedKey<UInt64, UInt32, UInt32>;
+
     public interface IBindingSubscriptionKey<T> : ISubscriptionKey<T>
     {
         // These have been moved to the ISubscriptionKeyGen interface.
@@ -24,7 +26,7 @@ namespace DRM.TypeSafePropertyBag
     /// </summary>
     public interface ISubscriptionKeyGen
     {
-        SimpleExKey SourcePropRef { get; } // Property that raises the events to which we are subscribing.
+        ExKeyT SourcePropRef { get; } // Property that raises the events to which we are subscribing.
 
         SubscriptionKind SubscriptionKind { get; }
         SubscriptionTargetKind SubscriptionTargetKind { get; }
@@ -48,7 +50,7 @@ namespace DRM.TypeSafePropertyBag
 
         // Properties for BindingSubscriptions
 
-        SimpleExKey TargetPropRef { get; }
+        ExKeyT TargetPropRef { get; }
         LocalBindingInfo BindingInfo { get; }
     }
 }

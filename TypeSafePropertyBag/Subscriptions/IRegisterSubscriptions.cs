@@ -16,15 +16,11 @@ namespace DRM.TypeSafePropertyBag
     /// </summary>
     /// <typeparam name="ExKeyT">The Exploded Key Type</typeparam>
     /// <typeparam name="L2T">The type used to store PropIds.</typeparam>
-    public interface ICacheSubscriptions<L2T>
+    public interface IRegisterSubscriptions<L2T> : ICacheSubscriptions<L2T>
     {
-        ISubscriptionGen AddSubscription(ISubscriptionKeyGen subscriptionRequest, out bool wasAdded);
-        bool RemoveSubscription(ISubscriptionKeyGen subscriptionRequest);
+        bool RegisterHandler<T>(IPropBag propBag, L2T propId, EventHandler<PCTypedEventArgs<T>> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef);
 
-        SubscriberCollection GetSubscriptions(IPropBag host, L2T propId);
-        SubscriberCollection GetSubscriptions(ExKeyT exKey);
-
-        //SubscriberCollection GetSubscriptions(IPropBag host, L2T propId, IPropStoreAccessService<L2T, L2TRaw> storeAccessor);
+        bool UnRegisterHandler<T>(IPropBag propBag, L2T propId, EventHandler<PCTypedEventArgs<T>> eventHandler);
 
     }
 }

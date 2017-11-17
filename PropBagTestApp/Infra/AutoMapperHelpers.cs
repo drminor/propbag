@@ -13,7 +13,7 @@ namespace PropBagTestApp.Infra
     using PropIdType = UInt32;
     using PropNameType = String;
     using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
-    using SubCacheType = ICacheSubscriptions<SimpleExKey, UInt64, UInt32, UInt32, String>;
+    using SubCacheType = ICacheSubscriptions<UInt32>;
     using LocalBinderType = IBindLocalProps<UInt32>;
 
     public class AutoMapperHelpers
@@ -161,16 +161,15 @@ namespace PropBagTestApp.Infra
         {
             _theStore = ProvisonTheStore(out _level2KeyManager, out _compKeyManager);
 
-
-            PropStoreAccessServiceProvider = new SimplePropStoreAccessServiceProvider(_theStore/*, MAX_NUMBER_OF_PROPERTIES*/);
-
             SubCacheType subscriptionManager = new SimpleSubscriptionManager();
+            PropStoreAccessServiceProvider = new SimplePropStoreAccessServiceProvider(_theStore, subscriptionManager);
+
             LocalBinderType localBinder = new SimpleLocalBinder();
 
             ThePropFactory = new PropFactory
                 (
                     propStoreAccessServiceProvider: PropStoreAccessServiceProvider,
-                    subscriptionManager: subscriptionManager,
+                    //subscriptionManager: subscriptionManager,
                     localBinder: localBinder,
                     typeResolver: GetTypeFromName,
                     valueConverter: null

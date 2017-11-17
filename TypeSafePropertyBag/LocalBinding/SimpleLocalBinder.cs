@@ -3,6 +3,7 @@
 namespace DRM.TypeSafePropertyBag
 {
     using PropIdType = System.UInt32;
+    using ExKeyT = IExplodedKey<UInt64, UInt32, UInt32>;
 
     public class SimpleLocalBinder : IBindLocalProps<PropIdType>
     {
@@ -39,13 +40,13 @@ namespace DRM.TypeSafePropertyBag
         public void UpdateTarget<T>(BindingSubscription<T> bs, T oldValue, T newValue, ref int counter)
         {
             // Use the target property key from the BindingSubscription
-            SimpleExKey targetPropId = bs.TargetPropId;
+            ExKeyT targetPropId = bs.TargetPropId;
 
             // The "local" PropId.
             PropIdType propId = targetPropId.Level2Key;
 
             // The object reference
-            IPropBag target = SimpleExKey.UnwrapWeakRef(targetPropId.WR_AccessToken);
+            IPropBag target = SimpleExKey.UnwrapWeakRef(((SimpleExKey) targetPropId).WR_AccessToken);
             IPropBag targetAlt = SimpleExKey.UnwrapWeakRef((WeakReference<IPropBag>)bs.Target);
 
             // Ask the target to set the property to the newValue.

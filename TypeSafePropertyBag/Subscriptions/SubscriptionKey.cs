@@ -6,6 +6,8 @@ namespace DRM.TypeSafePropertyBag
     using PropIdType = UInt32;
     using PropNameType = String;
 
+    using ExKeyT = IExplodedKey<UInt64, UInt32, UInt32>;
+
     public class SubscriptionKey<T> : SubscriptionKeyGen, ISubscriptionKey<T>
     {
         public EventHandler<PCTypedEventArgs<T>> TypedHandler { get; private set; }
@@ -16,14 +18,15 @@ namespace DRM.TypeSafePropertyBag
         // Typed Handler -- PCTypeEventArgs<T>
         public SubscriptionKey
             (
-            IPropBag host,
-            uint propId,
-            IPropStoreAccessService<PropIdType, PropNameType> storeAccessor,
+            ExKeyT exKey,
+            //IPropBag host,
+            //uint propId,
+            //IPropStoreAccessService<PropIdType, PropNameType> storeAccessor,
             EventHandler<PCTypedEventArgs<T>> handler,
             SubscriptionPriorityGroup subscriptionPriorityGroup,
             bool keepRef
             )
-            : base(GetTheKey(host, propId, storeAccessor), target: handler.Target, method: handler.Method, kind: SubscriptionKind.TypedHandler,
+            : base(exKey, target: handler.Target, method: handler.Method, kind: SubscriptionKind.TypedHandler,
                   subscriptionPriorityGroup: subscriptionPriorityGroup, keepRef: keepRef, subscriptionCreator: CreateSubscriptionGen)
         {
             TypedHandler = handler;

@@ -3,15 +3,13 @@ using System.Collections.Generic;
 
 namespace DRM.TypeSafePropertyBag
 {
-    using L1T = UInt32;
+    //using L1T = UInt32;
 
     // TODO: Consider renaming this interface to: IGuardPropStore.
-    public interface IPropStoreAccessService<L2T, L2TRaw>
+    public interface IPropStoreAccessService<L2T, L2TRaw> : IRegisterSubscriptions<L2T>
     {
-        IPropData this[IPropBag propBag, L2T propId] { get; /*set;*/ }
-
-        long MaxObjectsPerAppDomain { get; }
-        int MaxPropsPerObject { get; }
+        // IDictionary-Like Methods
+        IPropData this[IPropBag propBag, L2T propId] { get; }
 
         void Clear(IPropBag propBag);
         bool ContainsKey(IPropBag propBag, L2T propId);
@@ -21,14 +19,18 @@ namespace DRM.TypeSafePropertyBag
         IEnumerable<L2TRaw> GetKeys(IPropBag propBag);
         IEnumerable<IPropData> GetValues(IPropBag propBag);
 
-        bool TryAdd(IPropBag propBag, L2T propId, IPropData propData);
+        bool TryAdd(IPropBag propBag, L2T propId, IProp genericTypedProp, out IPropData propData);
+
         bool TryGetValue(IPropBag propBag, L2T propId, out IPropData propData);
         bool TryRemove(IPropBag propBag, L2T propId, out IPropData propData);
 
-        bool SetChildObjectId(IPropBag propBag, L2T propId, L1T childPropId);
+        // Restricted Update Method on Dictionary-like object.
         bool SetTypedProp(IPropBag propBag, L2T propId, IProp genericTypedProp);
 
+        // Diagnostics
+        void IncAccess();
+        int AccessCounter { get; }
         // For testing only??
-        uint GetParentObjectId(IPropBag propBag);
+        //L1T GetParentObjectId(IPropBag propBag);
     }
 }

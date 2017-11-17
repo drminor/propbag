@@ -15,10 +15,11 @@ namespace DRM.PropBag
     using PropIdType = UInt32;
     using PropNameType = String;
     using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
-    using SubCacheType = ICacheSubscriptions<SimpleExKey, UInt64, UInt32, UInt32, String>;
+    using SubCacheType = ICacheSubscriptions<UInt32>;
+
     using LocalBinderType = IBindLocalProps<UInt32>;
 
-    public abstract class AbstractPropFactory : IPropFactory
+    public abstract class AbstractPropFactory : IPropFactory, IDisposable
     {
         #region Public Properties
 
@@ -35,7 +36,7 @@ namespace DRM.PropBag
         public virtual string IndexerName { get; }
 
         public PSAccessServiceProviderType PropStoreAccessServiceProvider { get; }
-        public SubCacheType SubscriptionManager { get; }
+        //public SubCacheType SubscriptionManager { get; }
         public LocalBinderType LocalBinder { get; }
 
         #endregion
@@ -45,7 +46,7 @@ namespace DRM.PropBag
         public AbstractPropFactory
             (
             PSAccessServiceProviderType propStoreAccessServiceProvider,
-            SubCacheType subscriptionManager,
+            //SubCacheType subscriptionManager,
             LocalBinderType localBinder = null,
             ResolveTypeDelegate typeResolver = null,
             IConvertValues valueConverter = null
@@ -53,7 +54,7 @@ namespace DRM.PropBag
         {
 
             PropStoreAccessServiceProvider = propStoreAccessServiceProvider ?? throw new ArgumentNullException(nameof(propStoreAccessServiceProvider));
-            SubscriptionManager = subscriptionManager ?? throw new ArgumentNullException(nameof(subscriptionManager));
+            //SubscriptionManager = subscriptionManager ?? throw new ArgumentNullException(nameof(subscriptionManager));
 
             // Use our default implementation, if the caller did not supply one.
             LocalBinder = localBinder ?? new SimpleLocalBinder();
@@ -393,6 +394,44 @@ namespace DRM.PropBag
         //    var x = new SimpleEventManager();
         //    return (IEventManager<INotifyPropertyChangedWithVals, PropertyChangedWithValsEventArgs>)x;
         //}
+
+        #endregion
+
+        #region IDisposable Support
+
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects).
+                    PropStoreAccessServiceProvider.Dispose();
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        // ~Temp() {
+        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        //   Dispose(false);
+        // }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            // GC.SuppressFinalize(this);
+        }
 
         #endregion
     }

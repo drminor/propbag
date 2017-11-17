@@ -9,7 +9,7 @@ namespace PropBagLib.Tests
     using PropIdType = UInt32;
     using PropNameType = String;
     using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
-    using SubCacheType = ICacheSubscriptions<SimpleExKey, UInt64, UInt32, UInt32, String>;
+    using SubCacheType = ICacheSubscriptions<UInt32>;
     using LocalBinderType = IBindLocalProps<UInt32>;
 
     using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
@@ -37,7 +37,7 @@ namespace PropBagLib.Tests
             PropExtStoreFactory factory = new PropExtStoreFactory
                 (stuff: stuff,
                 propStoreAccessServiceProvider: standardPropFactory.PropStoreAccessServiceProvider,
-                subscriptionManager: standardPropFactory.SubscriptionManager,
+                //subscriptionManager: standardPropFactory.SubscriptionManager,
                 localBinder: null,
                 typeResolver: null,
                 valueConverter: null

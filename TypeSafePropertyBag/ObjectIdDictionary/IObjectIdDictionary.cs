@@ -13,17 +13,21 @@ namespace DRM.TypeSafePropertyBag
     /// <typeparam name="L2TRaw">The type used to identify a property for a given object using the "cooked" form, usually System.String.</typeparam>
     /// <typeparam name="PropDataT">The type used to implement the IPropGen interface.</typeparam>
     public interface IObjectIdDictionary<CompT, L1T, L2T, L2TRaw, PropDataT>
-        : IDictionary<CompT, PropDataT>, ICollection<KeyValuePair<CompT, PropDataT>>, 
-        IEnumerable<KeyValuePair<CompT, PropDataT>>, IDictionary, ICollection, IEnumerable 
+        : IDictionary<CompT, PropDataT>,
+        ICollection<KeyValuePair<CompT, PropDataT>>, 
+        IEnumerable<KeyValuePair<CompT, PropDataT>>,
+        IDictionary, ICollection, IEnumerable 
     {
 
         // Readonly access to the Composite Key Manager.
-        ICKeyMan<CompT, L1T, L2T, L2TRaw> CompKeyManager { get; }
+        //ICKeyMan<CompT, L1T, L2T, L2TRaw> CompKeyManager { get; }
 
+        long MaxObjectsPerAppDomain { get; }
+        int MaxPropsPerObject { get; }
 
         #region ConcurentDictionary Methods
 
-        bool TryAdd(CompT exKey, PropDataT value);
+        bool TryAdd(CompT cKey, PropDataT value);
 
         PropDataT GetOrAdd(CompT cKey, PropDataT value);
         PropDataT GetOrAdd(CompT cKey, Func<CompT, PropDataT> valueFactory);
@@ -50,19 +54,19 @@ namespace DRM.TypeSafePropertyBag
 
         #region Level 2 Cooked
 
-        bool TryAdd(L1T top, L2T bot, PropDataT value);
-        PropDataT GetOrAdd(L1T top, L2T bot, PropDataT value);
-        //TValue GetOrAdd(L1T top, L2T bot, Func<L1T top, L2T bot, TValue> valueFactory);
+        //bool TryAdd(L1T top, L2T bot, PropDataT value);
+        //PropDataT GetOrAdd(L1T top, L2T bot, PropDataT value);
+        ////TValue GetOrAdd(L1T top, L2T bot, Func<L1T top, L2T bot, TValue> valueFactory);
 
-        bool TryGetValue(L1T top, L2T bot, out PropDataT value);
-        bool ContainsKey(L1T top, L2T bot);
-        //TValue thisL1T top, L2T bot] { get; set; }
+        //bool TryGetValue(L1T top, L2T bot, out PropDataT value);
+        //bool ContainsKey(L1T top, L2T bot);
+        ////TValue thisL1T top, L2T bot] { get; set; }
 
-        bool TryRemove(L1T top, L2T bot, out PropDataT value);
+        //bool TryRemove(L1T top, L2T bot, out PropDataT value);
 
-        //bool TryUpdate(L1T top, L2T bot, PropDataT newValue, PropDataT comparisonValue);
-        //PropDataT AddOrUpdate(L1T top, L2T bot, PropDataT addValue, Func<L1T, L2T, PropDataT, PropDataT> updateValueFactory);
-        //PropDataT AddOrUpdate(L1T top, L2T bot, Func<L1T, L2T, PropDataT> addValueFactory, Func<L1T, L2T, PropDataT, PropDataT> updateValueFactory);
+        ////bool TryUpdate(L1T top, L2T bot, PropDataT newValue, PropDataT comparisonValue);
+        ////PropDataT AddOrUpdate(L1T top, L2T bot, PropDataT addValue, Func<L1T, L2T, PropDataT, PropDataT> updateValueFactory);
+        ////PropDataT AddOrUpdate(L1T top, L2T bot, Func<L1T, L2T, PropDataT> addValueFactory, Func<L1T, L2T, PropDataT, PropDataT> updateValueFactory);
 
         #endregion
 

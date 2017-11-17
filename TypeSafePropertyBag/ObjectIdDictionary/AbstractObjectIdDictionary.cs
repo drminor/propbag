@@ -11,23 +11,28 @@ namespace DRM.TypeSafePropertyBag
     {
         #region Private Memebers
 
-        //IL2KeyMan<L2T, L2TRaw> Level2KeyManager { get; }
+        readonly ICKeyMan<CompT, L1T, L2T, L2TRaw> _compKeyManager;
 
         #endregion
 
         #region Constructor
 
-        public AbstractObjectIdDictionary(ICKeyMan<CompT, L1T, L2T, L2TRaw> compKeyManager/*, IL2KeyMan<L2T, L2TRaw> level2KeyManager*/)
+        public AbstractObjectIdDictionary(ICKeyMan<CompT, L1T, L2T, L2TRaw> compKeyManager)
         {
-            CompKeyManager = compKeyManager ?? throw new ArgumentNullException(nameof(compKeyManager));
-            //Level2KeyManager = level2KeyManager ?? throw new ArgumentNullException(nameof(level2KeyManager));
+            _compKeyManager = compKeyManager ?? throw new ArgumentNullException(nameof(compKeyManager));
+
+            MaxObjectsPerAppDomain = compKeyManager.MaxObjectsPerAppDomain;
+            MaxPropsPerObject = compKeyManager.MaxPropsPerObject;
         }
 
         #endregion
 
-        public ICKeyMan<CompT, L1T, L2T, L2TRaw> CompKeyManager { get; }
+        public long MaxObjectsPerAppDomain { get; }
+        public int MaxPropsPerObject { get; }
 
         #region Level 1 
+
+        // TODO: take a lock during RemoveAll find stage.
 
         /// <summary>
         /// Removes all entries that have the specified top value.
@@ -44,7 +49,7 @@ namespace DRM.TypeSafePropertyBag
 
             foreach (KeyValuePair<CompT, IPropBag> kvp in thisAsCollection)
             {
-                L1T foundTop = CompKeyManager.SplitComp(kvp.Key, out L2T bot);
+                L1T foundTop = _compKeyManager.SplitComp(kvp.Key, out L2T bot);
                 if (foundTop.Equals(top))
                 {
                     toRemove.Add(kvp);
@@ -64,36 +69,36 @@ namespace DRM.TypeSafePropertyBag
 
         #region Level 2 Cooked 
 
-        public IPropData GetOrAdd(L1T top, L2T bot, IPropData value)
-        {
-            CompT key = CompKeyManager.JoinComp(top, bot);
-            return GetOrAdd(key, value);
-        }
+        //public IPropData GetOrAdd(L1T top, L2T bot, IPropData value)
+        //{
+        //    CompT key = CompKeyManager.JoinComp(top, bot);
+        //    return GetOrAdd(key, value);
+        //}
 
-        public bool TryAdd(L1T top, L2T bot, IPropData value)
-        {
-            CompT key = CompKeyManager.JoinComp(top, bot);
-            return TryAdd(key, value);
-        }
+        //public bool TryAdd(L1T top, L2T bot, IPropData value)
+        //{
+        //    CompT key = CompKeyManager.JoinComp(top, bot);
+        //    return TryAdd(key, value);
+        //}
 
-        public bool TryGetValue(L1T top, L2T bot, out IPropData value)
-        {
-            CompT key = CompKeyManager.JoinComp(top, bot);
-            return TryGetValue(key, out value);
-        }
+        //public bool TryGetValue(L1T top, L2T bot, out IPropData value)
+        //{
+        //    CompT key = CompKeyManager.JoinComp(top, bot);
+        //    return TryGetValue(key, out value);
+        //}
 
-        public bool ContainsKey(L1T top, L2T bot)
-        {
-            CompT key = CompKeyManager.JoinComp(top, bot);
-            bool result = ContainsKey(key);
-            return result;
-        }
+        //public bool ContainsKey(L1T top, L2T bot)
+        //{
+        //    CompT key = CompKeyManager.JoinComp(top, bot);
+        //    bool result = ContainsKey(key);
+        //    return result;
+        //}
 
-        public bool TryRemove(L1T top, L2T bot, out IPropData value)
-        {
-            CompT key = CompKeyManager.JoinComp(top, bot);
-            return TryRemove(key, out value);
-        }
+        //public bool TryRemove(L1T top, L2T bot, out IPropData value)
+        //{
+        //    CompT key = CompKeyManager.JoinComp(top, bot);
+        //    return TryRemove(key, out value);
+        //}
 
         #endregion
 

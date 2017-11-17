@@ -7,6 +7,7 @@ namespace DRM.TypeSafePropertyBag
     internal interface IHaveTheKey<CompT, L1T, L2T>
     {
         L1T ObjectId { get; }
+
         /// <summary>
         /// Produces a Key containing the ObjectId assigned to the PropBag that holds the Prop object
         /// identifed by the PropData Id. Note: PropData Ids are unique only in the context of its PropBag object.
@@ -19,6 +20,6 @@ namespace DRM.TypeSafePropertyBag
 
         // Returns the Globally Unique identifer for the Parent PropData item
         // if this PropStoreAccessService is serving a PropBag that is held within another IPropBag's PropData item.
-        IExplodedKey<CompT, L1T, L2T> ParentKey { get; set; }
+        //IExplodedKey<CompT, L1T, L2T> ParentKey { get; set; }
     }
 }

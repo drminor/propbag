@@ -8,39 +8,24 @@ namespace DRM.TypeSafePropertyBag
     using ObjectIdType = UInt32;
     using PropIdType = UInt32;
 
-    public class PropGen : IPropData, IPropDataInternal
+    public class PropGen : IPropDataInternal
     {
-        #region Public Properties
+        #region Public PropGen Properties
 
         public event EventHandler<PCObjectEventArgs> PropertyChangedWithObjectVals;
 
-        //public PropIdType PropId { get; }
-        public CompositeKeyType CompKey { get; private set; }
-        public bool IsPropBag { get; }
-
-        ObjectIdType _childObjectId;
-        public ObjectIdType ChildObjectId
-        {   get { return _childObjectId; }
-            private set
-            {
-                if(value != _childObjectId)
-                {
-                    ObjectIdType oldValue = ChildObjectId;
-                    _childObjectId = value;
-                    OnPropertyChangedWithObjectVals(nameof(ChildObjectId), oldValue, value);
-                }
-            }
-        }
+        public PropIdType PropId { get; }
 
         IProp _typedProp;
         public IProp TypedProp
-        {   get { return _typedProp; }
+        {
+            get { return _typedProp; }
             private set
             {
-                if(!object.ReferenceEquals(value, _typedProp))
+                if (!object.ReferenceEquals(value, _typedProp))
                 {
                     IProp oldValue = TypedProp;
-                    
+
                     _typedProp = value;
 
                     OnPropertyChangedWithObjectVals(nameof(TypedProp), oldValue, value);
@@ -48,26 +33,50 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        public bool IsEmpty => CompKey == 0;
+        public bool IsEmpty => _cKey == 0;
 
-        //public object Value => TypedProp.TypedValueAsObject;
+        #endregion
+
+        #region Public IPropDataInternal Properties
+
+        CompositeKeyType _cKey;
+        CompositeKeyType IPropDataInternal.CKey => _cKey;
+
+        ObjectIdType _childObjectId;
+        ObjectIdType IPropDataInternal.ChildObjectId
+        {
+            get { return _childObjectId; }
+            set
+            {
+                if (value != _childObjectId)
+                {
+                    ObjectIdType oldValue = ((IPropDataInternal)this).ChildObjectId;
+                    _childObjectId = value;
+                    OnPropertyChangedWithObjectVals(nameof(IPropDataInternal.ChildObjectId), oldValue, value);
+                }
+            }
+        }
+
+        private bool _isPropBag;
+        bool IPropDataInternal.IsPropBag => _isPropBag;
 
         #endregion
 
         #region Constructors
 
-        public PropGen(IProp genericTypedProp, PropIdType propId)
+        public PropGen(IProp genericTypedProp, CompositeKeyType cKey, PropIdType propId)
         {
-            CompKey = propId;
-            //PropId = propId;
-            //CompKey = 0;
-            ChildObjectId = 0;
+            _cKey = cKey;
+            PropId = propId;
+            _childObjectId = 0;
             TypedProp = genericTypedProp ?? throw new ArgumentNullException($"{nameof(genericTypedProp)} must be non-null.");
 
             PropertyChangedWithObjectVals = null;
             if(TypedProp.Type.IsPropBagBased())
             {
-                IsPropBag = true;
+                _isPropBag = true;
+                IProp ip = TypedProp;
+                //
                 // TODO: Our Caller (ie. the propBag) needs to add an event handler subscription
                 // for this Properties on (standard) property changed event handler.
                 // The event hander needs to set the Parent PropId on the PropStoreAccessor
@@ -75,23 +84,50 @@ namespace DRM.TypeSafePropertyBag
             }
             else
             {
-                IsPropBag = false;
+                _isPropBag = false;
             }
         }
 
+        ///// <summary>
+        ///// Used to create an objectRefHolder for the tree-based global store.
+        ///// </summary>
+        ///// <param name="cKey"></param>
+        //public PropGen(CompositeKeyType cKey)
+        //{
+        //    _cKey = cKey;
+        //    PropId = 0;
+        //    _childObjectId = 0;
+        //    TypedProp = null;
+        //    _isPropBag = true;
+        //    PropertyChangedWithObjectVals = null;
+        //}
+
         public PropGen()
         {
-            //PropId = 0;
-            CompKey = 0;
-            ChildObjectId = 0;
+            _cKey = 0;
+            PropId = 0;
+            _childObjectId = 0;
             TypedProp = null;
-            IsPropBag = false;
+            _isPropBag = false;
             PropertyChangedWithObjectVals = null;
+        }
+
+        event EventHandler<PCObjectEventArgs> INotifyPCObject.PropertyChangedWithObjectVals
+        {
+            add
+            {
+                throw new NotImplementedException();
+            }
+
+            remove
+            {
+                throw new NotImplementedException();
+            }
         }
 
         #endregion
 
-        #region Public Methods
+        #region PropGen Public Methods
 
         public ValPlusType ValuePlusType()
         {
@@ -106,22 +142,22 @@ namespace DRM.TypeSafePropertyBag
 
         #endregion
 
-        #region IPropDataInternal Implementation
+        #region IPropDataInternal Methods
 
-        void IPropDataInternal.SetCompKey(CompositeKeyType value)
-        {
-            CompKey = value;
-        }
+        //void IPropDataInternal.SetCompKey(CompositeKeyType value)
+        //{
+        //    _cKey = value;
+        //}
 
         void IPropDataInternal.SetTypedProp(IProp value)
         {
             TypedProp = value;
         }
 
-        void IPropDataInternal.SetChildObjectId(ObjectIdType value)
-        {
-            ChildObjectId = value;
-        }
+        //void IPropDataInternal.SetChildObjectId(ObjectIdType value)
+        //{
+        //    ChildObjectId = value;
+        //}
 
         #endregion
 

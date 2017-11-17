@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using DRM.TypeSafePropertyBag.Fundamentals.GenericTree;
+using System.Collections.Concurrent;
 
 namespace DRM.TypeSafePropertyBag
 {
+    #region Type Aliases
     using CompositeKeyType = UInt64;
     using ObjectIdType = UInt32;
     using PropIdType = UInt32;
@@ -12,78 +15,241 @@ namespace DRM.TypeSafePropertyBag
     using L2KeyManType = IL2KeyMan<UInt32, String>;
     using ICKeyManType = ICKeyMan<UInt64, UInt32, UInt32, String>;
 
-    public class SimplePropStoreAccessServiceProvider 
-        : IProvidePropStoreAccessService<PropIdType, PropNameType>
+    using ExKeyT = IExplodedKey<UInt64, UInt32, UInt32>;
+    using IHaveTheKeyIT = IHaveTheKey<UInt64, UInt32, UInt32>;
+
+    using SubCacheType = ICacheSubscriptions<UInt32>;
+
+    using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
+    using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
+    #endregion
+
+    public class SimplePropStoreAccessServiceProvider : PSAccessServiceProviderType
     {
         #region Private Members
 
+        int _accessCounter = 0; // Counts Each SetIt<T> operation on all PropBags.
+
+        int _numOfAccessServicesCreated = 0;
+
+        SubCacheType _subscriptionManager;
+
         readonly SimpleObjectIdDictionary _theGlobalStore;
-        //SimpleCompKeyMan _compKeyManager;
-        //SimpleLevel2KeyMan _level2KeyManager;
+
+        readonly Node<NodeData> _tree;
 
         readonly Dictionary<WeakReference<IPropBag>, ObjectIdType> _rawDict;
         readonly Dictionary<ObjectIdType, WeakReference<IPropBag>> _cookedDict;
 
         readonly object _sync;
 
+        // Subscription Management
+        const int OBJECT_INDEX_CONCURRENCY_LEVEL = 1; // Typical number of threads simultaneously accessing the ObjectIndexes.
+        const int EXPECTED_NO_OF_OBJECTS = 10000;
+
+        private ConcurrentDictionary<ObjectIdType, CollectionOfSubscriberCollections> _propIndexesByObject;
+
+
         #endregion
 
         #region Constructor
 
-        public SimplePropStoreAccessServiceProvider(SimpleObjectIdDictionary theGlobalStore/*, int maxPropsPerObject*/)
+        public SimplePropStoreAccessServiceProvider(SimpleObjectIdDictionary theGlobalStore, SubCacheType subscriptionManager)
         {
             _theGlobalStore = theGlobalStore;
-            //_level2KeyManager = level2KeyManager;
-            //_compKeyManager = compKeyManager;
+            _subscriptionManager = subscriptionManager;
 
-            MaxPropsPerObject = theGlobalStore.CompKeyManager.MaxPropsPerObject; //  maxPropsPerObject; // _compKeyManager.MaxPropsPerObject;
-            MaxObjectsPerAppDomain = theGlobalStore.CompKeyManager.MaxObjectsPerAppDomain;
+            // Create an "artificial" root node to hold all "real" roots, one for each "rooted" IPropBag.
+            // This node is a PropType node; its IsObjectNode = false. It has value 0 for its ObjectId, and 0 for its PropId.
+            _tree = new Node<NodeData>(new NodeData(0, new PropGen()));
 
-            //GetMaxObjectsPerAppDomain(maxPropsPerObject); // _compKeyManager.MaxObjectsPerAppDomain;
+            MaxPropsPerObject = theGlobalStore.MaxPropsPerObject; 
+            MaxObjectsPerAppDomain = theGlobalStore.MaxObjectsPerAppDomain;
 
             _rawDict = new Dictionary<WeakReference<IPropBag>, ObjectIdType>();
             _cookedDict = new Dictionary<ObjectIdType, WeakReference<IPropBag>>();
 
             _sync = new object();
+
+            _propIndexesByObject = new ConcurrentDictionary<ObjectIdType, CollectionOfSubscriberCollections>
+                (concurrencyLevel: OBJECT_INDEX_CONCURRENCY_LEVEL, capacity: EXPECTED_NO_OF_OBJECTS);
         }
 
         #endregion
 
-        #region Public Members
+        #region PropStoreAccessService Creation and TearDown
 
         public int MaxPropsPerObject { get; }
-        public long MaxObjectsPerAppDomain { get; private set; }
+        public long MaxObjectsPerAppDomain { get; set; }
 
-
-        public IPropStoreAccessService<PropIdType, PropNameType> GetOrCreatePropStoreService(IPropBag propBag, L2KeyManType level2KeyManager)
+        public PSAccessServiceType GetOrCreatePropStoreService(IPropBag propBag, L2KeyManType level2KeyManager)
         {
             ObjectIdType newObjectId = GetOrAdd(propBag, out WeakReference<IPropBag> accessToken);
 
-            // TODO: do we have the PropStoreAccesService use a shared instance of the Composite Key Manager,
-            // or do we create a new instance for each service?
-            // If shared, do we need to aquire locks during the bit manipulation operations?
-            // If so what performance loss do we get from having to aquire those lock?
+            PSAccessServiceType result = CreatePropStoreService(propBag, level2KeyManager, accessToken, newObjectId);
+            return result;
+        }
 
-            ICKeyManType compKeyManager = new SimpleCompKeyMan(level2KeyManager.MaxPropsPerObject /*level2KeyManager*/);
-            //ICKeyManType compKeyManager = _theGlobalStore.CompKeyManager;
+        public PSAccessServiceType CreatePropStoreService(IPropBag propBag, L2KeyManType level2KeyManager)
+        {
+            WeakReference<IPropBag> accessToken = new WeakReference<IPropBag>(propBag);
+            ObjectIdType newObjectId = Add(accessToken);
 
-            SimplePropStoreAccessService result
-                = new SimplePropStoreAccessService(accessToken, newObjectId, _theGlobalStore, compKeyManager, level2KeyManager);
+            PSAccessServiceType result = CreatePropStoreService(propBag, level2KeyManager, accessToken, newObjectId);
+            return result;
+        }
+
+        // TODO: Throw an exception if the level2KeyManager's MaxPropsPerObject doesn't match the GloblStore's value.
+        private PSAccessServiceType CreatePropStoreService(IPropBag propBag, L2KeyManType level2KeyManager,
+             WeakReference<IPropBag> accessToken, ObjectIdType newObjectId)
+        {
+            if(level2KeyManager.MaxPropsPerObject != _theGlobalStore.MaxPropsPerObject)
+            {
+                throw new ArgumentException($"The level2KeyManager has a value for MaxPropsPerObject ({level2KeyManager.MaxPropsPerObject})" +
+                    $" that is different from the GlobalStore (MaxPropPerObject: {_theGlobalStore.MaxPropsPerObject}) " +
+                    $"being used by this SimplePropStoreAccessServiceProvider.");
+            }
+
+            ICKeyManType compKeyManager = new SimpleCompKeyMan(level2KeyManager.MaxPropsPerObject);
+
+            PSAccessServiceType result = new SimplePropStoreAccessService(accessToken, newObjectId,
+                _theGlobalStore, compKeyManager, level2KeyManager, this);
+
+            // Add a new ObjectType node to our tree for the rooted IPropBag.
+            NodeData nodeData = new NodeData(newObjectId, result);
+            Node<NodeData> theNewNode = _tree.Add(nodeData);
+
+            // Allows the service to add / remove nodes from its node.
+            ((SimplePropStoreAccessService)result)._ourNodeFromGlobalTree = theNewNode;
+
+            // Add one more to the total count of PropStoreAccessServices created.
+            IncAccessServicesCreated();
 
             return result;
         }
 
-        public IPropStoreAccessService<PropIdType, PropNameType> CreatePropStoreService(IPropBag propBag, L2KeyManType level2KeyManager)
+        public void TearDown(PSAccessServiceType propStoreAccessService)
         {
-            WeakReference<IPropBag> accessToken = new WeakReference<IPropBag>(propBag);
+            ObjectIdType objectId = ((IHaveTheKeyIT)propStoreAccessService).ObjectId;
 
-            ObjectIdType newObjectId = Add(accessToken);
+            if(_cookedDict.TryGetValue(objectId, out WeakReference<IPropBag> WR_AccessToken))
+            {
+                _rawDict.Remove(WR_AccessToken);
+                _cookedDict.Remove(objectId);
+            }
+        }
 
-            ICKeyManType compKeyManager = new SimpleCompKeyMan(level2KeyManager.MaxPropsPerObject /*level2KeyManager*/);
-            SimplePropStoreAccessService result
-                = new SimplePropStoreAccessService(accessToken, newObjectId, _theGlobalStore, compKeyManager, level2KeyManager);
+        #endregion
+
+        #region Subscription Management
+
+        public ISubscriptionGen AddSubscription(ISubscriptionKeyGen subscriptionRequest, out bool wasAdded)
+        {
+            if (subscriptionRequest.HasBeenUsed)
+            {
+                throw new ApplicationException("Its already been used.");
+            }
+
+            SubscriberCollection sc = GetSubscriptions((SimpleExKey)subscriptionRequest.SourcePropRef);
+
+            bool internalWasAdded = false;
+
+            ISubscriptionGen result = sc.GetOrAdd
+                (
+                subscriptionRequest,
+                    (
+                    x => subscriptionRequest.CreateSubscription()
+                    )
+                );
+
+            if (subscriptionRequest.HasBeenUsed)
+            {
+                System.Diagnostics.Debug.WriteLine($"Created a new Subscription for Property:" +
+                    $" {subscriptionRequest.SourcePropRef} / Event: {result.SubscriptionKind}.");
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"The subscription for for Property:" +
+                    $" {subscriptionRequest.SourcePropRef} / Event: {result.SubscriptionKind} was not added.");
+            }
+
+            wasAdded = internalWasAdded;
+            return result;
+        }
+
+        public bool RemoveSubscription(ISubscriptionKeyGen subscriptionRequest)
+        {
+            SubscriberCollection sc = GetSubscriptions(subscriptionRequest.SourcePropRef);
+            bool result = sc.RemoveSubscription(subscriptionRequest);
+
+            if (result)
+                System.Diagnostics.Debug.WriteLine($"Removed the subscription for {subscriptionRequest.SourcePropRef}.");
 
             return result;
+        }
+
+        public SubscriberCollection GetSubscriptions(IPropBag host, uint propId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public SubscriberCollection GetSubscriptions(ExKeyT exKey)
+        {
+            CollectionOfSubscriberCollections propIndex = GetPropIndexForObject(exKey.Level1Key, out bool propIndexWasCreated);
+            if (propIndexWasCreated)
+            {
+                System.Diagnostics.Debug.WriteLine($"Created a new CollectionOfSubscriberCollections for {exKey}.");
+            }
+
+            SubscriberCollection result = propIndex.GetOrCreate(exKey.Level2Key, out bool subcriberListWasCreated);
+            if (subcriberListWasCreated)
+            {
+                System.Diagnostics.Debug.WriteLine($"Created a new SubscriberCollection for {exKey}.");
+            }
+
+            return result;
+        }
+
+        private CollectionOfSubscriberCollections GetPropIndexForObject(uint objectKey, out bool wasAdded)
+        {
+            bool internalWasAdded = false;
+
+            CollectionOfSubscriberCollections result = _propIndexesByObject.GetOrAdd
+                (
+                key: objectKey,
+                valueFactory:
+                    (
+                    x => { internalWasAdded = true; return new CollectionOfSubscriberCollections(); }
+                    )
+                );
+
+            wasAdded = internalWasAdded;
+            return result;
+        }
+
+        #endregion
+
+        #region Diagnostics
+
+        public void IncAccess()
+        {
+            _accessCounter++;
+        }
+
+        public int AccessCounter => _accessCounter;
+
+        private void IncAccessServicesCreated()
+        {
+            _numOfAccessServicesCreated++;
+        }
+        public int TotalNumberOfAccessServicesCreated => _numOfAccessServicesCreated;
+
+        public int NumberOfRootPropBagsInPlay
+        {
+            get
+            {
+                return _tree.Children.Count();
+            }
         }
 
         #endregion
@@ -140,28 +306,43 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        private long GetMaxObjectsPerAppDomain(int maxPropsPerObject)
+        #endregion
+
+        #region IDisposable Support
+
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
         {
-            double numBitsForProps = Math.Log(maxPropsPerObject, 2);
-
-            if ((int)numBitsForProps - numBitsForProps > 0.5)
+            if (!disposedValue)
             {
-                throw new ArgumentException("The maxPropsPerObject must be an even power of two. For example: 256, 512, 1024, etc.");
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects).
+                    _theGlobalStore.Clear();
+                    //_tree.Clear();
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+
+                disposedValue = true;
             }
+        }
 
-            int numberOfBitsInCKey = (int)Math.Log(CompositeKeyType.MaxValue, 2);
+        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        // ~Temp() {
+        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        //   Dispose(false);
+        // }
 
-            double topRange = numberOfBitsInCKey - 2; // Must leave room for at least 4 objects.
-
-            if (4 > numBitsForProps || numBitsForProps > topRange)
-            {
-                throw new ArgumentException($"maxPropsPerObject must be between 4 and {topRange}, inclusive.", nameof(maxPropsPerObject));
-            }
-
-            int numberOfTopBits = (int)Math.Round((double)numberOfBitsInCKey - numBitsForProps, 0);
-            long maxObjectsPerAppDomain = (long)Math.Pow(2, numberOfTopBits);
-
-            return maxObjectsPerAppDomain;
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            // GC.SuppressFinalize(this);
         }
 
         #endregion

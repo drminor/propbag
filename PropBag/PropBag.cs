@@ -22,7 +22,7 @@ namespace DRM.PropBag
     using L2KeyManType = IL2KeyMan<UInt32, String>;
 
     using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
-    using SubCacheType = ICacheSubscriptions<SimpleExKey, UInt64, UInt32, UInt32, String>;
+    using SubCacheType = ICacheSubscriptions<UInt32>;
     using LocalBinderType = IBindLocalProps<UInt32>;
 
     using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
@@ -56,10 +56,8 @@ namespace DRM.PropBag
 
         // These items are provided to us.
         protected IPropFactory PropFactory { get; set; }
-
-        public PSAccessServiceType OurStoreAccessor { get; }
-
-        private SubCacheType _subscriptionManager;
+        public PSAccessServiceType OurStoreAccessor { get; } // TODO: Make this part of an internal interface.
+        //private SubCacheType _subscriptionManager;
         private LocalBinderType _localBinder;
 
         // We are responsible for these
@@ -122,14 +120,13 @@ namespace DRM.PropBag
             OurMetaData = BuildMetaData(TypeSafetyMode, fullClassName, PropFactory);
 
             int maxPropsPerObject = PropFactory.PropStoreAccessServiceProvider.MaxPropsPerObject;
+
+            // TODO: Make the PropFactory provide a new Level2KeyManager.
             _level2KeyManager = new SimpleLevel2KeyMan(maxPropsPerObject);
 
             OurStoreAccessor = PropFactory.PropStoreAccessServiceProvider.CreatePropStoreService(this, _level2KeyManager);
 
-            //_level2KeyManager = OurStoreAccessor.Le
-
-
-            _subscriptionManager = PropFactory.SubscriptionManager;
+            //_subscriptionManager = PropFactory.SubscriptionManager;
 
             _localBinder = PropFactory.LocalBinder;
         }
@@ -334,12 +331,12 @@ namespace DRM.PropBag
 
         #region Property Access Methods
 
-        // Just for testing??
-        protected ObjectIdType GetParentObjectId()
-        {
-            ObjectIdType result =  OurStoreAccessor.GetParentObjectId(this);
-            return result;
-        }
+        //// Just for testing??
+        //protected ObjectIdType GetParentObjectId()
+        //{
+        //    ObjectIdType result =  OurStoreAccessor.GetParentObjectId(this);
+        //    return result;
+        //}
 
         public object this[string typeName, string propertyName]
         {
@@ -458,6 +455,7 @@ namespace DRM.PropBag
 
         public T GetIt<T>(string propertyName)
         {
+            //OurStoreAccessor.IncAccess();
             return GetTypedPropPrivate<T>(propertyName, mustBeRegistered: true).TypedValue;
         }
 
@@ -637,6 +635,7 @@ namespace DRM.PropBag
             if (wasRegistered) return true;
 
             IPropPrivate<T> prop = CheckTypeInfo<T>(propId, propertyName, PropData, OurStoreAccessor);
+            OurStoreAccessor.IncAccess();
 
             return DoSet(propId, propertyName, prop, value);
         }
@@ -757,7 +756,6 @@ namespace DRM.PropBag
 
             IPropPrivate<T> prop = CheckTypeInfo<T>(propId, targetPropertyName, PropData, OurStoreAccessor);
 
-
             //Action<T, T> tt = (x, y) => { x.Equals(y); };
 
             if (prop != null)
@@ -787,16 +785,8 @@ namespace DRM.PropBag
                 //      d. the property name on the target.
                 //
 
-
                 // 2. client gets package.
                 // 3. client provides package to binding source when requesting the binding subscription.
-
-
-
-
-
-
-
 
                 LocalPropertyPath pathToSource = new LocalPropertyPath("test", new object[] { });
                 LocalBindingInfo bindingInfo = new LocalBindingInfo(pathToSource, LocalBindingMode.OneWay);
@@ -804,9 +794,10 @@ namespace DRM.PropBag
                 ISubscriptionKeyGen bindingRequest =
                     new BindingSubscriptionKey<T>(this, propId, OurStoreAccessor, bindingInfo);
 
-                ISubscriptionGen newSubscription = _subscriptionManager.AddSubscription(bindingRequest, out bool wasAdded);
-                return wasAdded;
-                //return false;
+                // TODO: AAA FixMe
+                //ISubscriptionGen newSubscription = _subscriptionManager.AddSubscription(bindingRequest, out bool wasAdded);
+                //return wasAdded;
+                return false;
             }
             else
             {
@@ -818,16 +809,12 @@ namespace DRM.PropBag
         public bool SubscribeToPropChanged<T>(EventHandler<PCTypedEventArgs<T>> eventHandler, string propertyName)
         {
             IPropData PropData = GetPropGen<T>(propertyName, out PropIdType propId, desiredHasStoreValue: PropFactory.ProvidesStorage);
-
             IPropPrivate<T> prop = CheckTypeInfo<T>(propId, propertyName, PropData, OurStoreAccessor);
 
             if (prop != null)
             {
-                ISubscriptionKeyGen subscriptionRequest =
-                    new SubscriptionKey<T>(this, propId, OurStoreAccessor, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
-
-                ISubscriptionGen newSubscription = _subscriptionManager.AddSubscription(subscriptionRequest, out bool wasAdded);
-                return wasAdded;
+                bool result = OurStoreAccessor.RegisterHandler<T>(this, propId, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
+                return result;
             }
             else
             {
@@ -843,16 +830,14 @@ namespace DRM.PropBag
 
             if (prop != null)
             {
-                ISubscriptionKeyGen subscriptionRequest =
-                    new SubscriptionKey<T>(this, propId, OurStoreAccessor, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
-
-                bool wasRemoved = _subscriptionManager.RemoveSubscription(subscriptionRequest);
-                return wasRemoved;
+                bool result = OurStoreAccessor.UnRegisterHandler<T>(this, propId, eventHandler);
+                return result;
             }
             else
             {
                 return false;
             }
+
         }
 
         /// <summary>
@@ -1153,26 +1138,22 @@ namespace DRM.PropBag
         protected IPropData AddProp<T>(string propertyName, IProp<T> genericTypedProp)
         {
             PropIdType propId = GetPropId(propertyName);
-            IPropData propGen = new PropGen(genericTypedProp, propId);
+            //IPropData propGen = new PropGen(genericTypedProp, propId);
 
-            if (!OurStoreAccessor.TryAdd(this, propId, propGen))
+            if (!OurStoreAccessor.TryAdd(this, propId, genericTypedProp, out IPropData propGen))
             {
                 throw new ApplicationException("Could not add the new propGen to the store.");
             }
 
-            if(propGen.IsPropBag)
-            {
-                //_subscriptionManager.AddSubscription()
-            }
             return propGen;
         }
 
         protected IPropData AddProp(string propertyName, IProp genericTypedProp)
         {
             PropIdType propId = GetPropId(propertyName);
-            IPropData propGen = new PropGen(genericTypedProp, propId);
+            //IPropData propGen = new PropGen(genericTypedProp, propId);
 
-            if (!OurStoreAccessor.TryAdd(this, propId, propGen))
+            if (!OurStoreAccessor.TryAdd(this, propId, genericTypedProp, out IPropData propGen))
             {
                 throw new ApplicationException("Could not add the new propGen to the store.");
             }
@@ -1361,37 +1342,37 @@ namespace DRM.PropBag
 
         private void DoNotifyWork<T>(PropIdType propId, PropNameType propertyName, IPropPrivate<T> typedProp, T oldVal, T newValue)
         {
+            // TODO: AAA FixMe
+            //// PROCESS BINDINGS
+            //IEnumerable<ISubscriptionGen> typedSubs = GetTypedSubscriptions<T>
+            //    (
+            //    this,
+            //    propId,
+            //    OurStoreAccessor,
+            //    _subscriptionManager,
+            //    out IEnumerable<ISubscriptionGen> localBindings
+            //    );
 
-            // PROCESS BINDINGS
-            IEnumerable<ISubscriptionGen> typedSubs = GetTypedSubscriptions<T>
-                (
-                this,
-                propId,
-                OurStoreAccessor,
-                _subscriptionManager,
-                out IEnumerable<ISubscriptionGen> localBindings
-                );
+            //// Update the binding targets -- by passing the work to our LocalBinder implementation.
+            //// These bindings were created on the target.
+            //// We are here because some agent placed a BindingSubscription in our queue.
+            //int counter = 0;
+            //foreach (ISubscriptionGen x in localBindings)
+            //{
+            //    BindingSubscription<T> typedBs = (BindingSubscription<T>)x;
+            //    _localBinder.UpdateTarget<T>(typedBs, oldVal, newValue, ref counter);
+            //}
+            //if (counter > 0)
+            //    System.Diagnostics.Debug.WriteLine($"Updated {counter} binding targets.");
 
-            // Update the binding targets -- by passing the work to our LocalBinder implementation.
-            // These bindings were created on the target.
-            // We are here because some agent placed a BindingSubscription in our queue.
-            int counter = 0;
-            foreach (ISubscriptionGen x in localBindings)
-            {
-                BindingSubscription<T> typedBs = (BindingSubscription<T>)x;
-                _localBinder.UpdateTarget<T>(typedBs, oldVal, newValue, ref counter);
-            }
-            if (counter > 0)
-                System.Diagnostics.Debug.WriteLine($"Updated {counter} binding targets.");
+            //// Raise the PCTypedEvent to our list of subscribers
+            //foreach (ISubscriptionGen y in typedSubs)
+            //{
+            //    Subscription<T> typedSub = (Subscription<T>)y;
+            //    typedSub.TypedHandler(this, new PCTypedEventArgs<T>(propertyName, oldVal, newValue));
+            //}
 
-            // Raise the PCTypedEvent to our list of subscribers
-            foreach (ISubscriptionGen y in typedSubs)
-            {
-                Subscription<T> typedSub = (Subscription<T>)y;
-                typedSub.TypedHandler(this, new PCTypedEventArgs<T>(propertyName, oldVal, newValue));
-            }
-
-            // END PROCESS BINDINGS
+            //// END PROCESS BINDINGS
 
             if (typedProp.DoAfterNotify)
             {
@@ -1448,7 +1429,9 @@ namespace DRM.PropBag
             out IEnumerable<ISubscriptionGen> localBindings
             )
         {
-            SubscriberCollection sc = _subscriptionManager.GetSubscriptions(host, propId, storeAccessor);
+                            // TODO: AAA FixMe
+            //SubscriberCollection sc = _subscriptionManager.GetSubscriptions(host, propId, storeAccessor);
+            SubscriberCollection sc = new SubscriberCollection();
 
             IEnumerable<ISubscriptionGen> typedSubs = sc.Where(x => x.SubscriptionKind == SubscriptionKind.TypedHandler);
             localBindings = sc.Where(x => x.SubscriptionKind == SubscriptionKind.LocalBinding);
@@ -1740,12 +1723,49 @@ namespace DRM.PropBag
 
         #endregion
 
-        // TODO: Consider creating a new interface: IPropBagInternal
-        // and making this method be a member of that interface.
+        // TODO: Consider creating a new interface: IPropBagInternal and making this method be a member of that interface.
         private bool DoSetBridge<T>(IPropBag target, PropIdType propId, string propertyName, IProp prop, object value)
         {
             return ((PropBag)target).DoSet<T>(propId, propertyName, (IPropPrivate<T>)prop, (T)value);
         }
+
+        #region IDisposable Support
+
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    OurStoreAccessor.Clear(this);
+                    PropFactory.PropStoreAccessServiceProvider.TearDown(OurStoreAccessor);
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        // ~Temp() {
+        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        //   Dispose(false);
+        // }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            // GC.SuppressFinalize(this);
+        }
+
+        #endregion
 
         //#region Generic Method Support
 

@@ -13,8 +13,9 @@ namespace DRM.TypeSafePropertyBag
     using ExKeyType = IExplodedKey<UInt64, UInt32, UInt32>;
     using HaveTheKeyType = IHaveTheKey<UInt64, UInt32, UInt32>;
 
+    using SubCacheType = ICacheSubscriptions<UInt32>;
 
-    public class SimpleSubscriptionManager : ICacheSubscriptions<SimpleExKey, CompositeKeyType, ObjectIdType, PropIdType, PropNameType>
+    public class SimpleSubscriptionManager : SubCacheType
     {
         #region Private Members
 
@@ -84,7 +85,13 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        public SubscriberCollection GetSubscriptions(SimpleExKey exKey)
+
+        public SubscriberCollection GetSubscriptions(IPropBag host, uint propId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public SubscriberCollection GetSubscriptions(ExKeyType exKey)
         {
             CollectionOfSubscriberCollections propIndex = GetPropIndexForObject(exKey.Level1Key, out bool propIndexWasCreated);
             if (propIndexWasCreated)
@@ -101,36 +108,36 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        public SubscriberCollection GetSubscriptions(IPropBag host, PropIdType propId, SimplePropStoreAccessService storeAccessor)
-        {
-            SimpleExKey exKey = GetTheKey(host, propId, storeAccessor);
+        //public SubscriberCollection GetSubscriptions(IPropBag host, PropIdType propId, SimplePropStoreAccessService storeAccessor)
+        //{
+        //    SimpleExKey exKey = GetTheKey(host, propId, storeAccessor);
 
-            SubscriberCollection result = GetSubscriptions(exKey);
-            return result;
-        }
+        //    SubscriberCollection result = GetSubscriptions(exKey);
+        //    return result;
+        //}
 
-        public SubscriberCollection GetSubscriptions(IPropBag host, PropIdType propId, PSAccessServiceType storeAccessor)
-        {
-            SimpleExKey exKey = GetTheKey(host, propId, storeAccessor);
+        //public SubscriberCollection GetSubscriptions(IPropBag host, PropIdType propId, PSAccessServiceType storeAccessor)
+        //{
+        //    SimpleExKey exKey = GetTheKey(host, propId, storeAccessor);
 
-            SubscriberCollection result = GetSubscriptions(exKey);
-            return result;
-        }
+        //    SubscriberCollection result = GetSubscriptions(exKey);
+        //    return result;
+        //}
 
-        private SimpleExKey GetTheKey(IPropBag host, uint propId, SimplePropStoreAccessService storeAccessor)
-        {
-            SimpleExKey result = ((IHaveTheSimpleKey)storeAccessor).GetTheKey(host, propId);
+        //private SimpleExKey GetTheKey(IPropBag host, uint propId, SimplePropStoreAccessService storeAccessor)
+        //{
+        //    SimpleExKey result = ((IHaveTheSimpleKey)storeAccessor).GetTheKey(host, propId);
 
-            return result;
-        }
+        //    return result;
+        //}
 
-        private SimpleExKey GetTheKey(IPropBag host, uint propId, PSAccessServiceType storeAccessor)
-        {
-            ExKeyType exKey = ((HaveTheKeyType) storeAccessor).GetTheKey(host, propId);
+        //private SimpleExKey GetTheKey(IPropBag host, uint propId, PSAccessServiceType storeAccessor)
+        //{
+        //    ExKeyType exKey = ((HaveTheKeyType) storeAccessor).GetTheKey(host, propId);
 
-            SimpleExKey withWeakRef = SimpleExKey.FromIExploadedKeyWithWeakRef(exKey);
-            return withWeakRef;
-        }
+        //    SimpleExKey withWeakRef = SimpleExKey.FromIExploadedKeyWithWeakRef(exKey);
+        //    return withWeakRef;
+        //}
 
         #endregion
 

@@ -5,15 +5,11 @@ using System;
 
 namespace PropBagLib.Tests.AutoMapperSupport
 {
-    public partial class DestinationModel : PropBag
+    public partial class DestinationModel3 : PropBag
     {
-        public DestinationModel()
-            : this(PropBagTypeSafetyMode.Tight)
-        {
-        }
 
-        public DestinationModel(PropBagTypeSafetyMode typeSafetyMode)
-            : base(typeSafetyMode)
+        public DestinationModel3(PropBagTypeSafetyMode typeSafetyMode, IPropFactory propFactory, string fullClassName)
+            : base(typeSafetyMode, propFactory, fullClassName)
 		{
             AddProp<Guid>("ProductId", null, false, null, null, Guid.NewGuid());
             AddProp<int>("Amount", null, false, null, null, 0);
@@ -21,7 +17,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
             AddProp<MyModel4>("Deep", null, false, null, null, null);
         }
 
-        public DestinationModel(PropModel propModel, string fullClassName, IPropFactory propFactory)
+        public DestinationModel3(PropModel propModel, string fullClassName, IPropFactory propFactory)
             : base(propModel, fullClassName, propFactory)
         {
         }

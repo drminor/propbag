@@ -45,12 +45,14 @@
     <Compile Include="Fundamentals\UniversalTypeConverter.cs" />
     <Compile Include="GenericTree\Node.cs" />
     <Compile Include="GenericTree\NodeExtensions.cs" />
+    <Compile Include="PropStore\NodeData.cs" />
     <Compile Include="PropStore\PropGen.cs" />
     <Compile Include="PropValueStateEnum.cs" />
     <Compile Include="SimpleIOC\Container.cs" />
     <Compile Include="SimpleIOC\ContainerException.cs" />
     <Compile Include="SimpleIOC\ITypeContainer.cs" />
     <Compile Include="SimpleIOC\TypeContainer.cs" />
+    <Compile Include="Subscriptions\IRegisterSubscriptions.cs" />
     <Compile Include="UnUsed\PCTypedEventBase.cs" />
     <Compile Include="UnUsed\PropertyChangedEventManager.cs" />
     <Compile Include="UnUsed\IWeakEventListener.cs" />
@@ -110,6 +112,7 @@
     <Compile Include="PropertyChangedWithValsEventArgs.cs" />
     <Compile Include="PropKindEnum.cs" />
     <Compile Include="ResolveTypeDelegate.cs" />
+    <Compile Include="UnUsed\IDisposableTemplate.cs" />
     <Compile Include="UnUsed\TypedWeakReference.cs" />
     <Compile Include="Fundamentals\TypeExtensions.cs" />
     <Compile Include="Subscriptions\SubscriptionKeyForBinding.cs" />

@@ -6,6 +6,8 @@ using System.Reflection;
 
 namespace DRM.TypeSafePropertyBag
 {
+    using ExKeyT = IExplodedKey<UInt64, UInt32, UInt32>;
+
     public class SubscriptionKeyGen : ISubscriptionKeyGen, IEquatable<SubscriptionKeyGen>
     {
         #region Private Members
@@ -16,7 +18,7 @@ namespace DRM.TypeSafePropertyBag
 
         #region Public Properties
 
-        public SimpleExKey SourcePropRef { get; }
+        public ExKeyT SourcePropRef { get; }
 
         public SubscriptionKind SubscriptionKind { get; }
         public SubscriptionTargetKind SubscriptionTargetKind { get; }
@@ -37,7 +39,7 @@ namespace DRM.TypeSafePropertyBag
 
         // Members for Binding Subscriptions
 
-        public SimpleExKey TargetPropRef { get; }
+        public ExKeyT TargetPropRef { get; }
         public LocalBindingInfo BindingInfo { get; }
 
         #endregion
@@ -45,7 +47,7 @@ namespace DRM.TypeSafePropertyBag
         #region Constructors for Property Changed Handlers
 
         // Standard PropertyChanged
-        protected SubscriptionKeyGen(SimpleExKey sourcePropId, EventHandler<PropertyChangedEventArgs> standardDelegate,
+        protected SubscriptionKeyGen(ExKeyT sourcePropId, EventHandler<PropertyChangedEventArgs> standardDelegate,
             SubscriptionPriorityGroup subscriptionPriorityGroup, bool keepRef, Func<ISubscriptionKeyGen, ISubscriptionGen> subscriptionCreator)
         {
             SourcePropRef = sourcePropId;
@@ -65,7 +67,7 @@ namespace DRM.TypeSafePropertyBag
         }
 
         // PCGenEventArgs
-        protected SubscriptionKeyGen(SimpleExKey sourcePropId, EventHandler<PCGenEventArgs> genDelegate,
+        protected SubscriptionKeyGen(ExKeyT sourcePropId, EventHandler<PCGenEventArgs> genDelegate,
             SubscriptionPriorityGroup subscriptionPriorityGroup, bool keepRef, Func<ISubscriptionKeyGen, ISubscriptionGen> subscriptionCreator)
         {
             SourcePropRef = sourcePropId;
@@ -86,7 +88,7 @@ namespace DRM.TypeSafePropertyBag
         }
 
         // Target and Method. Also used for TypeDelegate and TypedAction.
-        protected SubscriptionKeyGen(SimpleExKey sourcePropId, object target, MethodInfo method,
+        protected SubscriptionKeyGen(ExKeyT sourcePropId, object target, MethodInfo method,
             SubscriptionKind kind, SubscriptionPriorityGroup subscriptionPriorityGroup, bool keepRef, Func<ISubscriptionKeyGen, ISubscriptionGen> subscriptionCreator)
         {
             SourcePropRef = sourcePropId;
@@ -111,7 +113,7 @@ namespace DRM.TypeSafePropertyBag
         #region Constructors for Actions
 
         // Action<object, object>
-        protected SubscriptionKeyGen(SimpleExKey sourcePropId, Action<object, object> genAction,
+        protected SubscriptionKeyGen(ExKeyT sourcePropId, Action<object, object> genAction,
             SubscriptionPriorityGroup subscriptionPriorityGroup, bool keepRef, Func<ISubscriptionKeyGen, ISubscriptionGen> subscriptionCreator)
         {
             SourcePropRef = sourcePropId;
@@ -132,7 +134,7 @@ namespace DRM.TypeSafePropertyBag
         }
 
         // ActionNoParams 
-        protected SubscriptionKeyGen(SimpleExKey sourcePropId, Action action,
+        protected SubscriptionKeyGen(ExKeyT sourcePropId, Action action,
             SubscriptionPriorityGroup subscriptionPriorityGroup, bool keepRef, Func<ISubscriptionKeyGen, ISubscriptionGen> subscriptionCreator)
         {
             SourcePropRef = sourcePropId;
@@ -158,7 +160,7 @@ namespace DRM.TypeSafePropertyBag
 
         // Target and Method. Also used for TypeDelegate and TypedAction.
         protected SubscriptionKeyGen(
-            SimpleExKey targetPropRef, 
+            ExKeyT targetPropRef, 
             LocalBindingInfo bindingInfo,
             SubscriptionKind kind,
             SubscriptionPriorityGroup subscriptionPriorityGroup,
@@ -172,7 +174,7 @@ namespace DRM.TypeSafePropertyBag
             UseTargetAndMethod = true;
             GenDoWhenChanged = null;
             Action = null;
-            Target = TargetPropRef.WR_AccessToken; 
+            Target = ((SimpleExKey)TargetPropRef).WR_AccessToken;
             Method = null;
 
             SubscriptionTargetKind = SubscriptionTargetKind.LocalWeakRef;

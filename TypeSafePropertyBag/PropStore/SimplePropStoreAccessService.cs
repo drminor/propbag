@@ -1,9 +1,11 @@
-﻿using System;
+﻿using DRM.TypeSafePropertyBag.Fundamentals.GenericTree;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace DRM.TypeSafePropertyBag
 {
+    #region Type Aliases 
     using CompositeKeyType = UInt64;
     using ObjectIdType = UInt32;
 
@@ -13,25 +15,30 @@ namespace DRM.TypeSafePropertyBag
     using ExKeyT = IExplodedKey<UInt64, UInt32, UInt32>;
     using IHaveTheKeyIT = IHaveTheKey<UInt64, UInt32, UInt32>;
 
-    using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
 
+    using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
     using ICKeyManType = ICKeyMan<UInt64, UInt32, UInt32, String>;
     using L2KeyManType = IL2KeyMan<UInt32, String>;
 
-    public sealed class SimplePropStoreAccessService
-        : PSAccessServiceType, IHaveTheSimpleKey
+    using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
+    #endregion
+
+    public sealed class SimplePropStoreAccessService : PSAccessServiceType, IHaveTheSimpleKey
     {
         #region Private Members
 
-        SimpleExKey _parentPropDataRef; // If this propBag is being managed by a "parenting" IPropData object on some other IPropBag, this will hold a reference to that IPropData object.
+        //SimpleExKey _parentPropDataRef; // If this propBag is being managed by a "parenting" IPropData object on some other IPropBag, this will hold a reference to that IPropData object.
 
         WeakReference<IPropBag> _clientAccessToken;
         ObjectIdType _objectId;
 
+        SimpleObjectIdDictionary _theGlobalStore;
         ICKeyManType _compKeyManager;
         L2KeyManType _level2KeyManager;
 
-        SimpleObjectIdDictionary _theGlobalStore;
+        PSAccessServiceProviderType _propStoreAccessServiceProvider;
+        public Node<NodeData> _ourNodeFromGlobalTree;
+
         //IReadOnlyDictionary<ObjectRefType, ObjectIdType> _objectIdDictionary;
 
         #endregion
@@ -44,10 +51,11 @@ namespace DRM.TypeSafePropertyBag
             ObjectIdType objectId,
             SimpleObjectIdDictionary theGlobalStore,
             ICKeyManType compKeyManager,
-            L2KeyManType level2KeyManager
+            L2KeyManType level2KeyManager,
+            PSAccessServiceProviderType propStoreAccessServiceProvider
             )
         {
-            _parentPropDataRef = new SimpleExKey();
+            //_parentPropDataRef = new SimpleExKey();
             _clientAccessToken = clientAccessToken;
             _objectId = objectId;
             _theGlobalStore = theGlobalStore;
@@ -56,6 +64,8 @@ namespace DRM.TypeSafePropertyBag
 
             MaxPropsPerObject = compKeyManager.MaxPropsPerObject;
             MaxObjectsPerAppDomain = compKeyManager.MaxObjectsPerAppDomain;
+
+            _propStoreAccessServiceProvider = propStoreAccessServiceProvider;
         }
 
         #endregion
@@ -67,11 +77,18 @@ namespace DRM.TypeSafePropertyBag
         //    return new object();
         //}
 
-        public ObjectIdType GetParentObjectId(IPropBag propBag)
+        //public ObjectIdType GetParentObjectId(IPropBag propBag)
+        //{
+        //    GetAndCheckObjectRef(propBag);
+        //    return _parentPropDataRef.Level1Key;
+        //}
+
+        public void IncAccess()
         {
-            GetAndCheckObjectRef(propBag);
-            return _parentPropDataRef.Level1Key;
+            _propStoreAccessServiceProvider.IncAccess();
         }
+
+        public int AccessCounter => _propStoreAccessServiceProvider.AccessCounter;
 
         public bool SetChildObjectId(IPropBag propBag, PropIdType propId, ObjectIdType childObjectId)
         {
@@ -79,7 +96,7 @@ namespace DRM.TypeSafePropertyBag
 
             if(_theGlobalStore.TryGetValue(cKey, out IPropData propData))
             {
-                ((IPropDataInternal)propData).SetChildObjectId(childObjectId);
+                ((IPropDataInternal)propData).ChildObjectId = childObjectId;
                 return true;
             }
             else
@@ -90,9 +107,9 @@ namespace DRM.TypeSafePropertyBag
 
         public bool SetTypedProp(IPropBag propBag, PropIdType propId, IProp genericTypedProp)
         {
-            CompositeKeyType exKey = GetCompKey(propBag, propId);
+            CompositeKeyType cKey = GetCompKey(propBag, propId);
 
-            if (_theGlobalStore.TryGetValue(exKey, out IPropData propData))
+            if (_theGlobalStore.TryGetValue(cKey, out IPropData propData))
             {
                 ((IPropDataInternal)propData).SetTypedProp(genericTypedProp);
                 return true;
@@ -115,15 +132,15 @@ namespace DRM.TypeSafePropertyBag
         {
             get
             {
-                CompositeKeyType exKey = GetCompKey(propBag, propId);
-                IPropData result = _theGlobalStore[exKey];
+                CompositeKeyType cKey = GetCompKey(propBag, propId);
+                IPropData result = _theGlobalStore[cKey];
 
                 return result;
             }
             private set
             {
-                CompositeKeyType exKey = GetCompKey(propBag, propId);
-                _theGlobalStore[exKey] = value;
+                CompositeKeyType cKey = GetCompKey(propBag, propId);
+                _theGlobalStore[cKey] = value;
             }
         }
 
@@ -135,94 +152,91 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        public bool TryAdd(IPropBag propBag, PropIdType propId, IPropData propData)
+        public bool TryAdd(IPropBag propBag, PropIdType propId, IProp genericTypedProp, out IPropData propData)
         {
-            if(propData.IsPropBag)
+            CompositeKeyType cKey = GetCompKey(propBag, propId);
+            propData = new PropGen(genericTypedProp, cKey, propId);
+            IPropDataInternal int_PropData = (IPropDataInternal)propData;
+
+            bool result = _theGlobalStore.TryAdd(cKey, propData);
+
+            if (result)
             {
-                SimpleExKey exKey = GetExKey(propBag, propId);
-                bool result = _theGlobalStore.TryAdd(exKey.CKey, propData);
+                _ourNodeFromGlobalTree.Add(new NodeData(cKey, int_PropData));
 
-                // Set the ParentKey of the child propData item to reference the global PropId of this new property.
-                // Cast the payload of the Prop Data item to IPropBag
-                object test =  propData.TypedProp.TypedValueAsObject;
-
-                ObjectIdType childPropBagObjectId = 0;
-                if (propData?.TypedProp?.TypedValueAsObject is IPropBag child)
+                if (int_PropData.IsPropBag)
                 {
-                    // Get a reference to the Child's StoreAccessor's IHaveTheSimpleKey interface.
-                    PSAccessServiceType StoreAccessForChild = child.OurStoreAccessor;
-                    // Set the ParentKey on that StoreAccess to the GlobalKey for the PropData item that is being added.
+                    // If the new property is of a type that implements IPropBag,
+                    // attempt to get a reference to the StoreAccessor of that IPropBag object,
+                    // and from that StoreAccessor, the object id of the PropBag.
+                    // Use the PropBag's ObjectId to set the ChildObjectId of this new property.
 
-                    if (StoreAccessForChild is IHaveTheSimpleKey keyAccess)
+                    // Cast the payload of the Prop Data item to IPropBag
+                    if (propData?.TypedProp?.TypedValueAsObject is IPropBag child)
                     {
-                        keyAccess.ParentKey = exKey;
-                        childPropBagObjectId = keyAccess.ObjectId;
+                        // Get a reference to the Child's StoreAccessor's IHaveTheSimpleKey interface.
+                        PSAccessServiceType StoreAccessForChild = child.OurStoreAccessor;
+                        // Set the ParentKey on that StoreAccess to the GlobalKey for the PropData item that is being added.
+
+                        if (StoreAccessForChild is IHaveTheSimpleKey keyAccess)
+                        {
+                            //// Get an exploded key that reference the property being added.
+                            //SimpleExKey exKey = GetExKey(cKey, propId);
+
+                            //// Set the prop's child PropBag's store accessor's parentKey to be us.
+                            //keyAccess.ParentKey = exKey;
+
+                            // Set the (new) prop's childPropBagObjectId
+                            int_PropData.ChildObjectId = keyAccess.ObjectId;
+                        }
                     }
                 }
-
-                if (propData is IPropDataInternal pgi)
-                {
-                    pgi.SetCompKey(exKey.CKey);
-                    pgi.SetChildObjectId(childPropBagObjectId);
-
-                    propData.PropertyChangedWithObjectVals += PropData_PropertyChangedWithObjectVals; 
-                }
-
-                return result;
-            } 
-            else
-            {
-                CompositeKeyType cKey = GetCompKey(propBag, propId);
-                bool result = _theGlobalStore.TryAdd(cKey, propData);
-
-                if (propData is IPropDataInternal pgi)
-                {
-                    pgi.SetCompKey(cKey);
-                }
-
-                return result;
             }
+            return result;
         }
 
         private void PropData_PropertyChangedWithObjectVals(object sender, PCObjectEventArgs e)
         {
             if(e.PropertyName == "TypedProp")
             {
-                if(sender is IPropData pd)
-                {
-                    if(pd?.TypedProp?.TypedValueAsObject is IPropBag child)
-                    {
-                        if(pd.ChildObjectId != 0)
-                        {
-                            // Get a reference to the Child's StoreAccessor's IHaveTheSimpleKey interface.
-                            PSAccessServiceType StoreAccessForChild = child.OurStoreAccessor;
-                            // Set the ParentKey on that StoreAccess to the GlobalKey for the PropData item that is being added.
+                //if(sender is IPropData pd)
+                //{
+                //    if(pd?.TypedProp?.TypedValueAsObject is IPropBag child)
+                //    {
+                //        if(pd.ChildObjectId != 0)
+                //        {
+                //            // Get a reference to the Child's StoreAccessor's IHaveTheSimpleKey interface.
+                //            PSAccessServiceType StoreAccessForChild = child.OurStoreAccessor;
+                //            // Set the ParentKey on that StoreAccess to the GlobalKey for the PropData item that is being added.
 
-                            if (StoreAccessForChild is IHaveTheSimpleKey keyAccess)
-                            {
-                                // TODO: Fix Me.
-                                //keyAccess.ParentKey = pd.ChildObjectId;
-                            }
-                        }
+                //            if (StoreAccessForChild is IHaveTheSimpleKey keyAccess)
+                //            {
+                //                // Get the Global PropId Key using our client's ObjectId, 
+                //                ObjectIdType objectId = _compKeyManager.SplitComp(pd.CompKey, out PropIdType propId);
+                //                System.Diagnostics.Debug.Assert(objectId == _objectId, "The object ids do not match.");
 
-                    }
-                }
+                //                keyAccess.ParentKey = new SimpleExKey(pd.CompKey, _clientAccessToken, objectId, propId);
+                //            }
+                //        }
+
+                //    }
+                //}
             }
         }
 
         public bool TryRemove(IPropBag propBag, PropIdType propId, out IPropData propData)
         {
-            CompositeKeyType exKey = GetCompKey(propBag, propId);
+            CompositeKeyType cKey = GetCompKey(propBag, propId);
 
-            bool result = _theGlobalStore.TryRemove(exKey, out propData);
+            bool result = _theGlobalStore.TryRemove(cKey, out propData);
             return result;
         }
          
         public bool ContainsKey(IPropBag propBag, PropIdType propId)
         {
-            CompositeKeyType exKey = GetCompKey(propBag, propId);
+            CompositeKeyType cKey = GetCompKey(propBag, propId);
 
-            bool result = _theGlobalStore.ContainsKey(exKey);
+            bool result = _theGlobalStore.ContainsKey(cKey);
             return result;
         }
 
@@ -234,9 +248,12 @@ namespace DRM.TypeSafePropertyBag
 
             IEnumerable<KeyValuePair<CompositeKeyType, IPropData>> propDataObjectsForThisPropBag =
                 _theGlobalStore.Where(x => GetObjectIdFromKey(x.Key) == objectId);
+
             foreach(KeyValuePair<CompositeKeyType, IPropData> kvp in propDataObjectsForThisPropBag)
             {
-                _theGlobalStore.TryRemove(kvp.Key, out IPropData dontNeedItVal);
+                _theGlobalStore.TryRemove(kvp.Key, out IPropData propData);
+                
+                propData.CleanUp(doTypedCleanup: true);
             }
         }
 
@@ -297,6 +314,60 @@ namespace DRM.TypeSafePropertyBag
 
         #endregion
 
+        #region IRegister Subscription Implementation
+
+        public bool RegisterHandler<T>(IPropBag propBag, PropIdType propId, EventHandler<PCTypedEventArgs<T>> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef)
+        {
+            ExKeyT exKey = GetExKey(propBag, propId);
+
+            ISubscriptionKeyGen subscriptionRequest = new SubscriptionKey<T>(exKey, eventHandler, priorityGroup, keepRef);
+
+            ISubscriptionGen newSubscription = AddSubscription(subscriptionRequest, out bool wasAdded);
+            return wasAdded;
+        }
+
+        public bool UnRegisterHandler<T>(IPropBag propBag, PropIdType propId, EventHandler<PCTypedEventArgs<T>> eventHandler)
+        {
+            ExKeyT exKey = GetExKey(propBag, propId);
+
+            ISubscriptionKeyGen subscriptionRequest = new SubscriptionKey<T>(exKey, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
+
+            bool wasRemoved = RemoveSubscription(subscriptionRequest);
+            return wasRemoved;
+        }
+
+
+        #endregion
+
+        #region ICacheSubscriptions Implementation -- Pass through to the Service Provider.
+
+        public ISubscriptionGen AddSubscription(ISubscriptionKeyGen subscriptionRequest, out bool wasAdded)
+        {
+            ISubscriptionGen result = _propStoreAccessServiceProvider.AddSubscription(subscriptionRequest, out wasAdded);
+            return result;
+        }
+
+        public bool RemoveSubscription(ISubscriptionKeyGen subscriptionRequest)
+        {
+            bool result = _propStoreAccessServiceProvider.RemoveSubscription(subscriptionRequest);
+            return result;
+        }
+
+        public SubscriberCollection GetSubscriptions(IPropBag host, PropIdType propId)
+        {
+            SimpleExKey exKey = GetExKey(host, propId);
+            SubscriberCollection result = _propStoreAccessServiceProvider.GetSubscriptions(exKey);
+            return result;
+        }
+
+        public SubscriberCollection GetSubscriptions(ExKeyT exKey)
+        {
+            SubscriberCollection result = _propStoreAccessServiceProvider.GetSubscriptions(exKey);
+            return result;
+        }
+
+        #endregion
+
         #region Private Methods
 
         CompositeKeyType GetCompKey(IPropBag propBag, PropIdType propId)
@@ -352,6 +423,18 @@ namespace DRM.TypeSafePropertyBag
             return exKey;
         }
 
+        /// <summary>
+        /// Does not check the ObjectReference.
+        /// </summary>
+        /// <param name="cKey"></param>
+        /// <param name="propId"></param>
+        /// <returns></returns>
+        private SimpleExKey GetExKey(CompositeKeyType cKey, PropIdType propId)
+        {
+            SimpleExKey exKey = new SimpleExKey(cKey, _clientAccessToken, _objectId, propId);
+            return exKey;
+        }
+
         // Also verifies that the compKey matches the propBag value.
         // Don't use this if you need an ExKey, since 1) ExKey requires a PropId value, 2) to get a PropId value you need split the CompKey, 3) Verify Splits the CompKey, 4) you can easily verify by using reference equality to see that our _objectId == the objectId from the CompKey.
         private ObjectIdType GetAndCheckObjectRef(IPropBag propBag, CompositeKeyType cKey)
@@ -400,29 +483,29 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        SimpleExKey IHaveTheSimpleKey.ParentKey
-        {
-            get
-            {
-                return _parentPropDataRef;
-            }
-            set
-            {
-                _parentPropDataRef = value;
-            }
-        }
+        //SimpleExKey IHaveTheSimpleKey.ParentKey
+        //{
+        //    get
+        //    {
+        //        return _parentPropDataRef;
+        //    }
+        //    set
+        //    {
+        //        _parentPropDataRef = value;
+        //    }
+        //}
 
-        ExKeyT IHaveTheKeyIT.ParentKey
-        {
-            get
-            {
-                return _parentPropDataRef;
-            }
-            set
-            {
-                _parentPropDataRef = (SimpleExKey)value;
-            }
-        }
+        //ExKeyT IHaveTheKeyIT.ParentKey
+        //{
+        //    get
+        //    {
+        //        return _parentPropDataRef;
+        //    }
+        //    set
+        //    {
+        //        _parentPropDataRef = (SimpleExKey)value;
+        //    }
+        //}
 
         #endregion
 

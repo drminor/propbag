@@ -1,13 +1,9 @@
 ﻿using PropBagLib.Tests.BusinessModel;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace PropBagLib.Tests.AutoMapperSupport
+namespace PropBagLib.Tests.PerformanceDb
 {
     public class MyModel
     {
@@ -88,8 +84,6 @@ namespace PropBagLib.Tests.AutoMapperSupport
             }
         }
 
-
-
         private void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -123,6 +117,46 @@ namespace PropBagLib.Tests.AutoMapperSupport
 
 
         public event PropertyChangedEventHandler PropertyChanged;
+
+        private void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
+
+    public class MyModel5 : INotifyPropertyChanged
+    {
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        Guid _productId;
+        public Guid ProductId
+        {
+            get { return _productId; }
+            set
+            {
+                if (value != _productId)
+                {
+                    _productId = value;
+                    OnPropertyChanged(nameof(ProductId));
+                }
+            }
+        }
+
+        Business _business;
+        public Business Business
+        {
+            get { return _business; }
+            set
+            {
+                if (value != _business)
+                {
+                    _business = value;
+                    OnPropertyChanged(nameof(Business));
+                }
+            }
+        }
+
+        public ObservableCollection<Person> PersonCollection { get; set; }
 
         private void OnPropertyChanged(string propertyName)
         {
