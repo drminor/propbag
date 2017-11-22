@@ -2,8 +2,15 @@
 
 namespace DRM.TypeSafePropertyBag
 {
+    using CompositeKeyType = UInt64;
+    using ObjectIdType = UInt64;
+
     using PropIdType = UInt32;
     using PropNameType = String;
+
+    using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
+
+    using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
 
     public class BindingSubscriptionKey<T> : SubscriptionKeyGen, IBindingSubscriptionKey<T>
     {
@@ -16,88 +23,46 @@ namespace DRM.TypeSafePropertyBag
         #region Subscription<T> implementation
 
         public EventHandler<PCTypedEventArgs<T>> TypedHandler => null;
-        public Action<T, T> TypedDoWhenChanged { get; private set; }
+        public Action<T, T> TypedDoWhenChanged => null;
 
         #endregion
 
         #region Constructors
 
-        //// Typed Action
-        //public BindingSubscriptionKey
-        //    (
-        //        SimpleExKey sourcePropId,
-        //        SimpleExKey targetPropId,
-        //        LocalBindingInfo bindingInfo,
-        //        Action<T, T> action
-        //    )
-        //    : base
-        //    (
-        //        sourcePropId,
-        //        target: action.Target,
-        //        method: action.Method,
-        //        kind: SubscriptionKind.LocalBinding,
-        //        subscriptionPriorityGroup: SubscriptionPriorityGroup.First,
-        //        keepRef: false,
-        //        subscriptionCreator: CreateSubscriptionGen
-        //    )
-        //{
-        //    TypedDoWhenChanged = action;
-        //    TargetPropId = targetPropId;
-        //    BindingInfo = bindingInfo;
-        //}
-
         public BindingSubscriptionKey
             (
-                IPropBag targetHost,
-                PropIdType propId,
-                IPropStoreAccessService<PropIdType, PropNameType> storeAccessor,
+                ExKeyT targetPropRef,
                 LocalBindingInfo bindingInfo
             )
             : base
             (
-                GetTheKey(targetHost, propId, storeAccessor),
+                targetPropRef,
                 bindingInfo, 
                 SubscriptionKind.LocalBinding,
                 SubscriptionPriorityGroup.First,
-                CreateSubscriptionGen
+                CreateBindingGen
             )
         {
-            TypedDoWhenChanged = null;
-        }
-
-
-        //kind: SubscriptionKind.LocalBinding,
-        //        subscriptionPriorityGroup: SubscriptionPriorityGroup.First,
-        //        keepRef: false,
-        //        subscriptionCreator: CreateSubscriptionGen
-
-        private static SimpleExKey GetTheKey(IPropBag host, uint propId, IPropStoreAccessService<PropIdType, PropNameType> storeAccessor)
-        {
-            SimpleExKey result = ((IHaveTheSimpleKey)storeAccessor).GetTheKey(host, propId);
-            return result;
         }
 
         #endregion
 
         public new void MarkAsUsed()
         {
-            //TypedHandler = null;
-            TypedDoWhenChanged = null;
-
             base.MarkAsUsed();
         }
 
-        public static IBindingSubscription<T> CreateSubscription(IBindingSubscriptionKey<T> bindingRequest)
+        public static IBindingSubscription<T> CreateBinding(IBindingSubscriptionKey<T> bindingRequest, PSAccessServiceType propStoreAccessService)
         {
-            IBindingSubscription<T> result = new BindingSubscription<T>(bindingRequest);
+            IBindingSubscription<T> result = new BindingSubscription<T>(bindingRequest, propStoreAccessService);
             bindingRequest.MarkAsUsed();
 
             return result;
         }
 
-        public static ISubscriptionGen CreateSubscriptionGen(ISubscriptionKeyGen bindingRequestGen)
+        public static ISubscriptionGen CreateBindingGen(ISubscriptionKeyGen bindingRequestGen, PSAccessServiceType propStoreAccessService)
         {
-            return (ISubscriptionGen)CreateSubscription((IBindingSubscriptionKey<T>)bindingRequestGen);
+            return (ISubscriptionGen)CreateBinding((IBindingSubscriptionKey<T>)bindingRequestGen, propStoreAccessService);
         }
 
     }

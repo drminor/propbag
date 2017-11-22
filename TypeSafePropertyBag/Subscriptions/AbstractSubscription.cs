@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace DRM.TypeSafePropertyBag
 {
-    using ExKeyT = IExplodedKey<UInt64, UInt32, UInt32>;
+    using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
 
     public class AbstractSubscripton<T> : ISubscription<T> 
     {

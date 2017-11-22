@@ -13,7 +13,6 @@ namespace DRM.PropBag
     using PropNameType = String;
     using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
     using SubCacheType = ICacheSubscriptions<UInt32>;
-    using LocalBinderType = IBindLocalProps<UInt32>;
 
     #region Summary and Remarks
 

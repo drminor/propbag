@@ -3,7 +3,7 @@
 namespace DRM.TypeSafePropertyBag
 {
     using PropIdType = System.UInt32;
-    using ExKeyT = IExplodedKey<UInt64, UInt32, UInt32>;
+    using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
 
     public class SimpleLocalBinder : IBindLocalProps<PropIdType>
     {
@@ -50,11 +50,11 @@ namespace DRM.TypeSafePropertyBag
             IPropBag targetAlt = SimpleExKey.UnwrapWeakRef((WeakReference<IPropBag>)bs.Target);
 
             // Ask the target to set the property to the newValue.
-            bool result = target.SetIt<T>(newValue, propId);
+            //bool result = target.SetIt<T>(newValue, propId);
 
             // Let the caller know that one more binding targets were updated.
-            if (result)
-                counter++;
+            //if (result)
+            //    counter++;
         }
 
         #region Private Methods

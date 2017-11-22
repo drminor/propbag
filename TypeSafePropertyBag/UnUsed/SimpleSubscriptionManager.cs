@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Collections.Concurrent;
 
-namespace DRM.TypeSafePropertyBag
+namespace DRM.TypeSafePropertyBag.UnUsed
 {
     using CompositeKeyType = UInt64;
-    using ObjectIdType = UInt32;
+    using ObjectIdType = UInt64;
     using PropIdType = UInt32;
     using PropNameType = String;
 
     using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
 
-    using ExKeyType = IExplodedKey<UInt64, UInt32, UInt32>;
-    using HaveTheKeyType = IHaveTheKey<UInt64, UInt32, UInt32>;
+    using ExKeyType = IExplodedKey<UInt64, UInt64, UInt32>;
+    using HaveTheKeyType = IHaveTheKey<UInt64, UInt64, UInt32>;
 
     using SubCacheType = ICacheSubscriptions<UInt32>;
 
@@ -143,7 +143,7 @@ namespace DRM.TypeSafePropertyBag
 
         #region Private Methods
 
-        private CollectionOfSubscriberCollections GetPropIndexForObject(uint objectKey, out bool wasAdded)
+        private CollectionOfSubscriberCollections GetPropIndexForObject(ObjectIdType objectKey, out bool wasAdded)
         {
             bool internalWasAdded = false;
 

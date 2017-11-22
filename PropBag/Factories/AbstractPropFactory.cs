@@ -15,9 +15,8 @@ namespace DRM.PropBag
     using PropIdType = UInt32;
     using PropNameType = String;
     using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
-    using SubCacheType = ICacheSubscriptions<UInt32>;
 
-    using LocalBinderType = IBindLocalProps<UInt32>;
+    //using LocalBinderType = IBindLocalProps<UInt32>;
 
     public abstract class AbstractPropFactory : IPropFactory, IDisposable
     {
@@ -36,8 +35,7 @@ namespace DRM.PropBag
         public virtual string IndexerName { get; }
 
         public PSAccessServiceProviderType PropStoreAccessServiceProvider { get; }
-        //public SubCacheType SubscriptionManager { get; }
-        public LocalBinderType LocalBinder { get; }
+        //public LocalBinderType LocalBinder { get; }
 
         #endregion
 
@@ -47,17 +45,16 @@ namespace DRM.PropBag
             (
             PSAccessServiceProviderType propStoreAccessServiceProvider,
             //SubCacheType subscriptionManager,
-            LocalBinderType localBinder = null,
+            //LocalBinderType localBinder = null,
             ResolveTypeDelegate typeResolver = null,
             IConvertValues valueConverter = null
             )
         {
 
             PropStoreAccessServiceProvider = propStoreAccessServiceProvider ?? throw new ArgumentNullException(nameof(propStoreAccessServiceProvider));
-            //SubscriptionManager = subscriptionManager ?? throw new ArgumentNullException(nameof(subscriptionManager));
 
             // Use our default implementation, if the caller did not supply one.
-            LocalBinder = localBinder ?? new SimpleLocalBinder();
+            //LocalBinder = localBinder ?? new SimpleLocalBinder();
 
             // Use our default implementation, if the caller did not supply one.
             TypeResolver = typeResolver ?? this.GetTypeFromName;

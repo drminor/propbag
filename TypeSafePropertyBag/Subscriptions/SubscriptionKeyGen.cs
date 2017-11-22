@@ -6,13 +6,20 @@ using System.Reflection;
 
 namespace DRM.TypeSafePropertyBag
 {
-    using ExKeyT = IExplodedKey<UInt64, UInt32, UInt32>;
+    using CompositeKeyType = UInt64;
+    using ObjectIdType = UInt64;
+
+    using PropIdType = UInt32;
+    using PropNameType = String;
+    using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
+    using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
 
     public class SubscriptionKeyGen : ISubscriptionKeyGen, IEquatable<SubscriptionKeyGen>
     {
         #region Private Members
 
         Func<ISubscriptionKeyGen, ISubscriptionGen> SubscriptionCreator { get; }
+        Func<ISubscriptionKeyGen, PSAccessServiceType, ISubscriptionGen> BindingFactory { get;}
 
         #endregion
 
@@ -38,7 +45,6 @@ namespace DRM.TypeSafePropertyBag
         public bool HasBeenUsed { get; private set; }
 
         // Members for Binding Subscriptions
-
         public ExKeyT TargetPropRef { get; }
         public LocalBindingInfo BindingInfo { get; }
 
@@ -158,13 +164,13 @@ namespace DRM.TypeSafePropertyBag
 
         #region Constructors for Binding Subscriptions
 
-        // Target and Method. Also used for TypeDelegate and TypedAction.
+        // Creates a new Binding Request.
         protected SubscriptionKeyGen(
             ExKeyT targetPropRef, 
             LocalBindingInfo bindingInfo,
             SubscriptionKind kind,
             SubscriptionPriorityGroup subscriptionPriorityGroup,
-            Func<ISubscriptionKeyGen, ISubscriptionGen> subscriptionCreator)
+            Func<ISubscriptionKeyGen, PSAccessServiceType, ISubscriptionGen> bindingFactory)
         {
             SubscriptionKind = kind;
             SubscriptionPriorityGroup = subscriptionPriorityGroup;
@@ -174,18 +180,19 @@ namespace DRM.TypeSafePropertyBag
             UseTargetAndMethod = true;
             GenDoWhenChanged = null;
             Action = null;
-            Target = ((SimpleExKey)TargetPropRef).WR_AccessToken;
+            Target = null;
             Method = null;
 
             SubscriptionTargetKind = SubscriptionTargetKind.LocalWeakRef;
-            SubscriptionCreator = subscriptionCreator;
+            SubscriptionCreator = null;
+            BindingFactory = bindingFactory;
             HasBeenUsed = false;
 
             // Properties unique to Binding Subscriptions
             TargetPropRef = targetPropRef; // The binding is created on the target, we will go find the source of the events to listen.
             BindingInfo = bindingInfo;
-
         }
+
         #endregion
 
         #region Private Methods / Constructor support
@@ -209,6 +216,11 @@ namespace DRM.TypeSafePropertyBag
         public ISubscriptionGen CreateSubscription()
         {
             return SubscriptionCreator(this);
+        }
+
+        public virtual ISubscriptionGen CreateBinding(PSAccessServiceType propStoreAccessService)
+        {
+            return BindingFactory(this, propStoreAccessService);
         }
 
         public void MarkAsUsed()

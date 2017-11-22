@@ -5,7 +5,7 @@ using System.Threading;
 namespace DRM.TypeSafePropertyBag
 {
     using CompositeKeyType = UInt64;
-    using ObjectIdType = UInt32;
+    using ObjectIdType = UInt64;
     using PropIdType = UInt32;
 
     public class PropGen : IPropDataInternal
@@ -42,20 +42,20 @@ namespace DRM.TypeSafePropertyBag
         CompositeKeyType _cKey;
         CompositeKeyType IPropDataInternal.CKey => _cKey;
 
-        ObjectIdType _childObjectId;
-        ObjectIdType IPropDataInternal.ChildObjectId
-        {
-            get { return _childObjectId; }
-            set
-            {
-                if (value != _childObjectId)
-                {
-                    ObjectIdType oldValue = ((IPropDataInternal)this).ChildObjectId;
-                    _childObjectId = value;
-                    OnPropertyChangedWithObjectVals(nameof(IPropDataInternal.ChildObjectId), oldValue, value);
-                }
-            }
-        }
+        //ObjectIdType _childObjectId;
+        //ObjectIdType IPropDataInternal.ChildObjectId
+        //{
+        //    get { return _childObjectId; }
+        //    set
+        //    {
+        //        if (value != _childObjectId)
+        //        {
+        //            ObjectIdType oldValue = ((IPropDataInternal)this).ChildObjectId;
+        //            _childObjectId = value;
+        //            OnPropertyChangedWithObjectVals(nameof(IPropDataInternal.ChildObjectId), oldValue, value);
+        //        }
+        //    }
+        //}
 
         private bool _isPropBag;
         bool IPropDataInternal.IsPropBag => _isPropBag;
@@ -68,7 +68,7 @@ namespace DRM.TypeSafePropertyBag
         {
             _cKey = cKey;
             PropId = propId;
-            _childObjectId = 0;
+            //_childObjectId = 0;
             TypedProp = genericTypedProp ?? throw new ArgumentNullException($"{nameof(genericTypedProp)} must be non-null.");
 
             PropertyChangedWithObjectVals = null;
@@ -106,7 +106,7 @@ namespace DRM.TypeSafePropertyBag
         {
             _cKey = 0;
             PropId = 0;
-            _childObjectId = 0;
+            //_childObjectId = 0;
             TypedProp = null;
             _isPropBag = false;
             PropertyChangedWithObjectVals = null;

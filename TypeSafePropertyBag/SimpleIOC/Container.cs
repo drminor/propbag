@@ -38,9 +38,8 @@ namespace DRM.TypeSafePropertyBag.Fundamentals.SimpleIOC
 
         public T Use<T>()
         {
-            ITypeContainer typeContainer;
             var fullTypeName = GetFullTypeName<T>();
-            if (!_typeContainers.TryGetValue(fullTypeName, out typeContainer))
+            if (!_typeContainers.TryGetValue(fullTypeName, out ITypeContainer typeContainer))
             {
                 throw new ContainerException<T>("The type {0} has not been registered in the container.");
             }

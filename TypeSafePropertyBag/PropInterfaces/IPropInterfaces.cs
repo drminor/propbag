@@ -8,7 +8,7 @@ namespace DRM.TypeSafePropertyBag
 {
     #region Type Aliases
     using CompositeKeyType = UInt64;
-    using ObjectIdType = UInt32;
+    using ObjectIdType = UInt64;
 
     using PropIdType = UInt32;
     using PropNameType = String;
@@ -95,10 +95,6 @@ namespace DRM.TypeSafePropertyBag
 
         void OnPropertyChangedWithObjectVals(PropNameType propertyName, object oldVal, object newVal);
 
-        //bool CallBacksHappenAfterPubEvents { get; }
-        //bool HasCallBack { get; }
-        //bool HasChangedWithTValSubscribers { get; }
-
         void CleanUpTyped();
     }
 
@@ -110,8 +106,8 @@ namespace DRM.TypeSafePropertyBag
         CompositeKeyType CKey { get; }
         bool IsPropBag { get; }
 
-        // The ObjectId assigned to the value of this Prop, if the TypedProp.Type is, or derives from, IPropBag.
-        ObjectIdType ChildObjectId { get; set; }
+        //// The ObjectId assigned to the value of this Prop, if the TypedProp.Type is, or derives from, IPropBag.
+        //ObjectIdType ChildObjectId { get; set; }
 
         // On those occasions when the IProp starts off with Type = object, and then later, the type is firmed up,
         // The IPropBag needs to be able to have a new IProp created with the correct type

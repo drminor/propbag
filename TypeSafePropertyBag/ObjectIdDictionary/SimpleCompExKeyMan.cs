@@ -3,14 +3,16 @@
 namespace DRM.TypeSafePropertyBag
 {
     using CompositeKeyType = UInt64;
-    using ObjectIdType = UInt32;
+    using ObjectIdType = UInt64;
     using PropIdType = UInt32;
     using PropNameType = String;
+
+    using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
 
     // TODO: Since the maximum number of properties per object may be less than 2^^32, then the 
     // maximum number of objects may be more than 2 ^^ 32 -- which takes a Int64, not a UInt32
 
-    public class SimpleCompExKeyMan : ICompExKeyMan<SimpleExKey, CompositeKeyType, ObjectIdType, PropIdType, PropNameType>
+    public class SimpleCompExKeyMan : ICompExKeyMan<ExKeyT, CompositeKeyType, ObjectIdType, PropIdType, PropNameType>
     {
         private SimpleLevel2KeyMan Level2KeyMan { get; }
         public int MaxPropsPerObject { get; }
@@ -54,39 +56,39 @@ namespace DRM.TypeSafePropertyBag
 
         // Join and split exploded key from L1 and L2
         //ExKeyT Join(L1T top, L2T bot);
-        public SimpleExKey Join(ObjectIdType top, PropIdType bot)
+        public ExKeyT Join(ObjectIdType top, PropIdType bot)
         {
             CompositeKeyType cKey = JoinComp(top, bot);
-            SimpleExKey result = new SimpleExKey(cKey, null, top, bot);
+            ExKeyT result = new SimpleExKey(cKey, null, top, bot);
             return result;
         }
 
         //L1T Split(ExKeyT exKey, out L2T bot);
-        public ObjectIdType Split(SimpleExKey exKey, out PropIdType bot)
+        public ObjectIdType Split(ExKeyT exKey, out PropIdType bot)
         {
             throw new NotImplementedException();
         }
 
         // Join and split exploded key from L1 and L2Raw.
         //ExKeyT Join(L1T top, L2TRaw bot);
-        public SimpleExKey Join(ObjectIdType top, PropNameType rawBot)
+        public ExKeyT Join(ObjectIdType top, PropNameType rawBot)
         {
             PropIdType bot = Level2KeyMan.FromRaw(rawBot);
             CompositeKeyType cKey = JoinComp(top, bot);
 
-            SimpleExKey result = new SimpleExKey(cKey, null, top, bot);
+            ExKeyT result = new SimpleExKey(cKey, null, top, bot);
             return result;
         }
 
         //L1T Split(ExKeyT exKey, out L2TRaw bot);
-        public ObjectIdType Split(SimpleExKey exKey, out PropNameType rawBot)
+        public ObjectIdType Split(ExKeyT exKey, out PropNameType rawBot)
         {
             throw new NotImplementedException();
         }
 
         // Try version of Join
         //bool TryJoin(L1T top, L2TRaw rawBot, out ExKeyT exKey);
-        public bool TryJoin(ObjectIdType top, PropNameType rawBot, out SimpleExKey exKey)
+        public bool TryJoin(ObjectIdType top, PropNameType rawBot, out ExKeyT exKey)
         {
             if(TryJoinComp(top, rawBot, out CompositeKeyType cKey, out PropIdType bot))
             {
@@ -117,9 +119,9 @@ namespace DRM.TypeSafePropertyBag
 
         // Create exploded key from composite key.
         //ExKeyT Split(CompT cKey);
-        public SimpleExKey Split(CompositeKeyType cKey)
+        public ExKeyT Split(CompositeKeyType cKey)
         {
-            uint top = SplitComp(cKey, out PropIdType bot);
+            ObjectIdType top = SplitComp(cKey, out PropIdType bot);
             return new SimpleExKey(cKey, null, top, bot);
         }
 
@@ -139,7 +141,7 @@ namespace DRM.TypeSafePropertyBag
         {
             bot = (PropIdType)(cKey & _botMask);
 
-            ObjectIdType result = (ObjectIdType)((cKey >> _botFieldLen) & _topMask);
+            ObjectIdType result = ((cKey >> _botFieldLen) & _topMask);
             return result;
         }
 

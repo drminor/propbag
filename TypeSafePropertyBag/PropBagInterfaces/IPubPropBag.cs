@@ -1,16 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-
-using System.Runtime.CompilerServices;
-using System.ComponentModel;
-using DRM.TypeSafePropertyBag;
 
 namespace DRM.TypeSafePropertyBag
 {
     /// <summary>
     /// Adds AddProp, RemoveProp and ClearAllProps to IPropBag.
     /// </summary>
-    public interface IPubPropBag : IPropBag
+    public interface IPubPropBag
     {
         //object this[string typeName, string propertyName] { get; set; }
 

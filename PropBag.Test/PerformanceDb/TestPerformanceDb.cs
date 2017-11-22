@@ -4,10 +4,12 @@ using DRM.TypeSafePropertyBag;
 using NUnit.Framework;
 using PropBagLib.Tests.AutoMapperSupport;
 using PropBagLib.Tests.BusinessModel;
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading;
 
 namespace PropBagLib.Tests.PerformanceDb
 {
@@ -16,51 +18,56 @@ namespace PropBagLib.Tests.PerformanceDb
     {
         const int NUMBER_OF_PEOPLE = 1000;
 
-        SimpleAutoMapperProvider _amp;
-        AutoMapperHelpers _ourHelper;
-        IPropFactory _propFactory_V1;
-
-        List<Person> _personList;
+        //SimpleAutoMapperProvider _amp;
+        //AutoMapperHelpers _ourHelper;
+        //IPropFactory propFactory_V1;
 
         [OneTimeSetUp]
         public void SetUpOneTime()
         {
-            _ourHelper = new AutoMapperHelpers();
+            //_ourHelper = new AutoMapperHelpers();
 
+            //Business b = new Business();
+            //List<Person> personList = b.Get(1).ToList();
 
-            Business b = new Business();
-            _personList = b.Get(1).ToList();
-
-            if(_personList.Count == 0)
-            {
-                PopDatabase(NUMBER_OF_PEOPLE);
-            }
-
-            _personList = b.Get().ToList();
+            //if(personList.Count == 0)
+            //{
+            //    PopDatabase(NUMBER_OF_PEOPLE);
+            //}
         }
 
         [SetUp]
         public void SetUpForEach()
         {
             // Get a brand new propFactory instance for each test.
-            _propFactory_V1 = _ourHelper.GetNewPropFactory_V1();
+            //AutoMapperHelpers  _ourHelper = new AutoMapperHelpers();
+            //_propFactory_V1 = _ourHelper.GetNewPropFactory_V1();
         }
 
         [Test]
         public void ReadIntoNativeArray()
         {
-            Assert.That(_personList.Count == 1000, $"The PersonList contains {_personList.Count}, it should contain {NUMBER_OF_PEOPLE}.");
+            Business b = new Business();
+            List<Person> personList = b.Get().ToList();
+            Assert.That(personList.Count == 1000, $"The PersonList contains {personList.Count}, it should contain {NUMBER_OF_PEOPLE}.");
         }
 
         [Test]
         public void ReadIntoMappedArray() 
         {
+            AutoMapperHelpers ourHelper = new AutoMapperHelpers();
+            IPropFactory propFactory_V1 = ourHelper.GetNewPropFactory_V1();
+
             string fullClassName = "PropBagLib.Tests.PerformanceDb.DestinationModel1";
             List<DestinationModel1> destinationList = new List<DestinationModel1>();
 
-            foreach(Person p in _personList)
+            Assert.That(propFactory_V1.PropStoreAccessServiceProvider.AccessCounter == 0, "The Provider of PropStoreAccessServices has not had its Access Counter reset.");
+
+            Business b = new Business();
+            List<Person> personList = b.Get().ToList();
+            foreach (Person p in personList)
             {
-                DestinationModel1 dest = new DestinationModel1(PropBagTypeSafetyMode.Tight, _propFactory_V1, fullClassName);
+                DestinationModel1 dest = new DestinationModel1(PropBagTypeSafetyMode.Tight, propFactory_V1, fullClassName);
 
                 dest.SetIt<int>(p.Id, "Id");
                 dest.SetIt<string>(p.FirstName, "FirstName");
@@ -72,25 +79,26 @@ namespace PropBagLib.Tests.PerformanceDb
             }
             Assert.That(destinationList.Count == 1000, $"The PersonList contains {destinationList.Count}, it should contain {NUMBER_OF_PEOPLE}.");
 
-            DestinationModel1 lastDestItem = destinationList[NUMBER_OF_PEOPLE - 1];
-
-            int totalNumberOfGets = lastDestItem.OurStoreAccessor.AccessCounter;
+            int totalNumberOfGets = ourHelper.PropFactory_V1.PropStoreAccessServiceProvider.AccessCounter;
             Assert.That(totalNumberOfGets == NUMBER_OF_PEOPLE * 5, $"Total # of SetIt access operations is wrong: it should be {NUMBER_OF_PEOPLE * 5}, but instead it is {totalNumberOfGets}.");
         }
 
         [Test]
         public void CanMapObservableCollection_Proxy()
         {
-            _amp = _ourHelper.GetAutoMapperSetup_V1();
-            IPropFactory propFactory = _propFactory_V1;
+            AutoMapperHelpers ourHelper = new AutoMapperHelpers();
+            IPropFactory propFactory_V1 = ourHelper.GetNewPropFactory_V1();
+
+            SimpleAutoMapperProvider _amp = ourHelper.GetAutoMapperSetup_V1();
+            IPropFactory propFactory = propFactory_V1;
             PropModelHelpers pmHelpers = new PropModelHelpers();
 
-            Assert.That(_propFactory_V1.PropStoreAccessServiceProvider.AccessCounter == 0, "The Provider of PropStoreAccessServices has not had its Access Counter reset.");
+            Assert.That(propFactory_V1.PropStoreAccessServiceProvider.AccessCounter == 0, "The Provider of PropStoreAccessServices has not had its Access Counter reset.");
 
             // Setup Mapping between Model1 and Person
             PropModel propModel1 = pmHelpers.GetPropModelForModel1Dest(propFactory);
             Type typeToWrap = typeof(DestinationModel1); // typeof(PropBag);
-            string configPackageName = "Emit_Proxy"; // "Extra_Members"; //
+            string configPackageName = "Extra_Members"; //"Emit_Proxy"; // 
 
             IPropBagMapperKey<Person, DestinationModel1> mapperRequest =
                 _amp.RegisterMapperRequest<Person, DestinationModel1>
@@ -116,24 +124,62 @@ namespace PropBagLib.Tests.PerformanceDb
             PropModel propModel5 = pmHelpers.GetPropModelForModel5Dest(propFactory);
 
             string fullClassName = null; // Don't override the value from the PropModel.
-            DestinationModel5 testMainVM = new DestinationModel5(propModel5, fullClassName, _propFactory_V1);
+            DestinationModel5 testMainVM = new DestinationModel5(propModel5, fullClassName, propFactory_V1);
 
             Business b = new Business();
             testMainVM.SetIt(b, "Business"); // THIS IS A SET ACESSS OPERATION.
             // ToDo: try using IEnumerable<Person> instead.
-            List<Person> unMappedPeople = testMainVM.GetIt<Business>("Business").Get();
+
+            b = testMainVM.GetIt<Business>("Business");
+
+            List<Person> unMappedPeople = b.Get();
 
             IEnumerable<DestinationModel1> mappedPeople = mapper.MapToDestination(unMappedPeople);
-
+            unMappedPeople = null;
             ObservableCollection<DestinationModel1> readyForTheView = new System.Collections.ObjectModel.ObservableCollection<DestinationModel1>(mappedPeople);
 
-            // Each time a item is mapped, it is first created. (5 sets during consruction, and another 5 for the actual mapping.)
-            DestinationModel1 lastDestItem = mappedPeople.Last();
-            int totalNumberOfGets = lastDestItem.OurStoreAccessor.AccessCounter;
-            Assert.That(totalNumberOfGets == 1 + (NUMBER_OF_PEOPLE * 10), $"Total # of SetIt access operations is wrong: it should be {NUMBER_OF_PEOPLE * 5}, but instead it is {totalNumberOfGets}.");
+            mappedPeople = null;
 
-            int currentNumRootPropBags = _ourHelper.PropFactory_V1.PropStoreAccessServiceProvider.NumberOfRootPropBagsInPlay;
-            int totalRootPropBagsCreated = _ourHelper.PropFactory_V1.PropStoreAccessServiceProvider.TotalNumberOfAccessServicesCreated;
+            // Each time a item is mapped, it is first created. (5 sets during consruction, and another 5 for the actual mapping.)
+            int totalNumberOfGets = ourHelper.PropFactory_V1.PropStoreAccessServiceProvider.AccessCounter;
+
+            if(configPackageName == "Extra_Members")
+            {
+                Assert.That(totalNumberOfGets == 1, $"Total # of SetIt access operations is wrong: it should be {1}, but instead it is {totalNumberOfGets}.");
+            }
+            else
+            {
+                Assert.That(totalNumberOfGets == 1 + (NUMBER_OF_PEOPLE * 5), $"Total # of SetIt access operations is wrong: it should be {1 + NUMBER_OF_PEOPLE * 5}, but instead it is {totalNumberOfGets}.");
+            }
+
+            int currentNumRootPropBags = ourHelper.PropFactory_V1.PropStoreAccessServiceProvider.NumberOfRootPropBagsInPlay;
+            int totalRootPropBagsCreated = ourHelper.PropFactory_V1.PropStoreAccessServiceProvider.TotalNumberOfAccessServicesCreated;
+
+            Thread.Sleep(new TimeSpan(0, 0, 1));
+
+            foreach(DestinationModel1 pp in readyForTheView)
+            {
+                pp.Dispose();
+            }
+            readyForTheView = null;
+
+            testMainVM.SetIt<Business>(null, "Business");
+            b.Dispose();
+            b = null;
+
+            testMainVM.Dispose();
+            testMainVM = null;
+
+            Thread.Sleep(new TimeSpan(0, 0, 1));
+
+            // Test the PropStoreAccessProvider prune store feature.
+            // Do nothing for 1 hour, 24 minutes, in increments of 5 seconds.
+            for (int tp = 0; tp < 1000; tp++)
+            {
+                // Yield for 20 seconds.
+                Thread.Sleep(new TimeSpan(0, 0, 5));
+                GC.Collect(4, GCCollectionMode.Forced);
+            }
         }
 
 
@@ -158,9 +204,9 @@ namespace PropBagLib.Tests.PerformanceDb
         {
             Business b = new Business();
 
-            _personList = b.Get().ToList();
+            List<Person> personList = b.Get().ToList();
 
-            foreach (Person p in _personList)
+            foreach (Person p in personList)
             {
                 b.Delete(p);
             }

@@ -43,11 +43,28 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Fundamentals\UniversalTypeConverter.cs" />
+    <Compile Include="GenericTree\BaseTreeNode.cs" />
+    <Compile Include="GenericTree\IAmANodeInATree.cs" />
     <Compile Include="GenericTree\Node.cs" />
     <Compile Include="GenericTree\NodeExtensions.cs" />
-    <Compile Include="PropStore\NodeData.cs" />
+    <Compile Include="LocalBinding\Engine\DataSourceChangedEventArgs.cs" />
+    <Compile Include="LocalBinding\Engine\DataSourceChangedEventHandler.cs" />
+    <Compile Include="LocalBinding\Engine\DataSourceChangeTypeEnum.cs" />
+    <Compile Include="LocalBinding\Engine\ObservableSource.cs" />
+    <Compile Include="LocalBinding\Engine\ObservableSourceProvider.cs" />
+    <Compile Include="LocalBinding\Engine\ObservableSourceStatusEnum.cs" />
+    <Compile Include="LocalBinding\Engine\OSCollection.cs" />
+    <Compile Include="LocalBinding\Engine\OSSExtensions.cs" />
+    <Compile Include="LocalBinding\Engine\SourceKindEnum.cs" />
+    <Compile Include="LocalBinding\Instances\LocalBinder.cs" />
+    <Compile Include="LocalBinding\Management\BindingsCollection.cs" />
+    <Compile Include="LocalBinding\Management\ICacheBindings.cs" />
+    <Compile Include="LocalBinding\Registration\IRegisterBindings.cs" />
+    <Compile Include="PropBagInterfaces\IPropBagProxy.cs" />
+    <Compile Include="PropStore\PropBagProxy.cs" />
+    <Compile Include="PropStore\PropStoreNode.cs" />
     <Compile Include="PropStore\PropGen.cs" />
-    <Compile Include="PropValueStateEnum.cs" />
+    <Compile Include="UnUsed\PropValueStateEnum.cs" />
     <Compile Include="SimpleIOC\Container.cs" />
     <Compile Include="SimpleIOC\ContainerException.cs" />
     <Compile Include="SimpleIOC\ITypeContainer.cs" />
@@ -61,14 +78,13 @@
     <Compile Include="ObjectIdDictionary\IObjectIdDictionary.cs" />
     <Compile Include="ObjectIdDictionary\SimpleCompExKeyMan.cs" />
     <Compile Include="ObjectIdDictionary\SimpleExKey.cs" />
-    <Compile Include="LocalBinding\SimpleLocalBinder.cs" />
-    <Compile Include="LocalBinding\IBindLocalProps.cs" />
-    <None Include="LocalBinding\ICreateLocalBindings_OLD.cs" />
-    <Compile Include="LocalBinding\ILocalValueConverter.cs" />
-    <Compile Include="LocalBinding\LocalBindingInfo.cs" />
-    <Compile Include="LocalBinding\LocalBindingMode.cs" />
-    <Compile Include="LocalBinding\LocalPropertyPath.cs" />
-    <None Include="LocalBinding\SimpleLocalBindingOps_OLD.cs" />
+    <None Include="LocalBinding\OLD\SimpleLocalBinder.cs" />
+    <None Include="LocalBinding\OLD\IBindLocalProps.cs" />
+    <None Include="LocalBinding\OLD\ICreateLocalBindings_OLD.cs" />
+    <Compile Include="LocalBinding\Registration\ILocalValueConverter.cs" />
+    <Compile Include="LocalBinding\Registration\LocalBindingInfo.cs" />
+    <Compile Include="LocalBinding\Registration\LocalBindingMode.cs" />
+    <Compile Include="LocalBinding\Registration\LocalPropertyPath.cs" />
     <Compile Include="PropBagInterfaces\IConvertValues.cs" />
     <Compile Include="PropBagInterfaces\INotifyPropertyChangedWithVals.cs" />
     <Compile Include="PropBagInterfaces\IPropBag.cs" />
@@ -83,7 +99,7 @@
     <Compile Include="PropBagInterfaces\IPubPropBag.cs" />
     <Compile Include="PropStore\IPropStoreAccessService.cs" />
     <Compile Include="PropStore\IHaveTheKey.cs" />
-    <Compile Include="PropStore\IHaveTheSimpleKey.cs" />
+    <Compile Include="UnUsed\IHaveTheSimpleKey.cs" />
     <None Include="PropStore\SimplePropStoreAccessServiceWithExKey.cs" />
     <Compile Include="PropStore\SimplePropStoreAccessService.cs" />
     <Compile Include="PropStore\SimplePropStoreAccessServiceProvider.cs" />
@@ -91,7 +107,7 @@
     <Compile Include="Subscriptions\ICacheSubscriptions.cs" />
     <Compile Include="Subscriptions\ISubscription.cs" />
     <Compile Include="Subscriptions\ISubscriptionKey.cs" />
-    <Compile Include="Subscriptions\SimpleSubscriptionManager.cs" />
+    <Compile Include="UnUsed\SimpleSubscriptionManager.cs" />
     <Compile Include="Subscriptions\SubscriberCollection.cs" />
     <Compile Include="Subscriptions\AbstractSubscription.cs" />
     <Compile Include="Subscriptions\SubscriptionForBinding.cs" />
@@ -124,5 +140,6 @@
     <Compile Include="TypeSafePropBagMetaData.cs" />
     <Compile Include="ValPlusType.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -6,15 +6,13 @@ namespace DRM.TypeSafePropertyBag
     // Summary:
     //     Implements a data structure for describing a property as a path below another
     //     property, or below an owning type.
-    public sealed class LocalPropertyPath
+    public class LocalPropertyPath
     {
         public string Path { get; }
-        public Collection<object> PathParameters { get; }
 
-        public LocalPropertyPath(string path, params object[] pathParameters)
+        public LocalPropertyPath(string path)
         {
             Path = path;
-            PathParameters = new Collection<object>(pathParameters);
         }
     }
 }

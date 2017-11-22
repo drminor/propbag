@@ -12,9 +12,8 @@ namespace PropBagTestApp.Infra
 {
     using PropIdType = UInt32;
     using PropNameType = String;
+
     using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
-    using SubCacheType = ICacheSubscriptions<UInt32>;
-    using LocalBinderType = IBindLocalProps<UInt32>;
 
     public class AutoMapperHelpers
     {
@@ -146,31 +145,24 @@ namespace PropBagTestApp.Infra
     // TODO: Fix this!!
     public static class JustSayNo // To using Static-based config providers.
     {
+        // Maximum number of PropertyIds for any one given Object.
+        private const int LOG_BASE2_MAX_PROPERTIES = 16;
+        public static readonly int MAX_NUMBER_OF_PROPERTIES = (int)Math.Pow(2, LOG_BASE2_MAX_PROPERTIES); //65536;
+
         public static PropModelProvider PropModelProvider { get; }
         public static ViewModelHelper ViewModelHelper { get; }
         public static SimpleAutoMapperProvider AutoMapperProvider { get; }
         public static IPropFactory ThePropFactory { get; }
 
-        private static SimpleLevel2KeyMan _level2KeyManager;
-        private static SimpleCompKeyMan _compKeyManager;
-        private static readonly SimpleObjectIdDictionary _theStore;
-
-        public static SimplePropStoreAccessServiceProvider PropStoreAccessServiceProvider { get; }
+        public static PSAccessServiceProviderType PropStoreAccessServiceProvider { get; }
 
         static JustSayNo()
         {
-            _theStore = ProvisonTheStore(out _level2KeyManager, out _compKeyManager);
-
-            SubCacheType subscriptionManager = new SimpleSubscriptionManager();
-            PropStoreAccessServiceProvider = new SimplePropStoreAccessServiceProvider(_theStore, subscriptionManager);
-
-            LocalBinderType localBinder = new SimpleLocalBinder();
+            IProvidePropStoreAccessService<PropIdType, PropNameType> result = new SimplePropStoreAccessServiceProvider(MAX_NUMBER_OF_PROPERTIES);
 
             ThePropFactory = new PropFactory
                 (
                     propStoreAccessServiceProvider: PropStoreAccessServiceProvider,
-                    //subscriptionManager: subscriptionManager,
-                    localBinder: localBinder,
                     typeResolver: GetTypeFromName,
                     valueConverter: null
                 );
@@ -204,19 +196,6 @@ namespace PropBagTestApp.Infra
 
             return result;
         }
-
-        private static SimpleObjectIdDictionary ProvisonTheStore(out SimpleLevel2KeyMan level2KeyMan, out SimpleCompKeyMan compKeyManager)
-        {
-            level2KeyMan = new SimpleLevel2KeyMan(MAX_NUMBER_OF_PROPERTIES);
-            compKeyManager = new SimpleCompKeyMan(MAX_NUMBER_OF_PROPERTIES/*level2KeyManager*/);
-
-            SimpleObjectIdDictionary result = new SimpleObjectIdDictionary(compKeyManager/*, level2KeyMan*/);
-            return result;
-        }
-
-        // Maximum number of PropertyIds for any one given Object.
-        private const int LOG_BASE2_MAX_PROPERTIES = 16;
-        public static readonly int MAX_NUMBER_OF_PROPERTIES = (int)Math.Pow(2, LOG_BASE2_MAX_PROPERTIES); //65536;
 
         #region InDesign Support
         public static bool InDesignMode() => _isInDesignMode.HasValue && _isInDesignMode == true;

@@ -1,4 +1,12 @@
-﻿namespace DRM.TypeSafePropertyBag.Fundamentals.GenericTree
+﻿
+
+/// <remarks>
+/// This Generic Tree of Nodes was copied wholesale from:
+/// http://www.siepman.nl/blog/post/2013/07/30/tree-node-nodes-descendants-ancestors.aspx
+/// http://www.siepman.nl/blog/author/Admin.aspx
+/// </remarks>
+
+namespace DRM.TypeSafePropertyBag.Fundamentals.GenericTree
 {
     using System;
     using System.Collections;

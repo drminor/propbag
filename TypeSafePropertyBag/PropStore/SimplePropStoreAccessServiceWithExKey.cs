@@ -6,7 +6,7 @@ using System.Linq;
 namespace DRM.TypeSafePropertyBag
 {
     using CompositeKeyType = UInt64;
-    using ObjectIdType = UInt32;
+    using ObjectIdType = UInt64;
 
     using PropIdType = UInt32;
     using PropNameType = String;

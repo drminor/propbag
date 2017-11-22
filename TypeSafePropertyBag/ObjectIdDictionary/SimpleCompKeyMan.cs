@@ -3,12 +3,11 @@
 namespace DRM.TypeSafePropertyBag
 {
     using CompositeKeyType = UInt64;
-    using ObjectIdType = UInt32;
+    using ObjectIdType = UInt64;
     using PropIdType = UInt32;
     using PropNameType = String;
 
     using L2KeyManType = IL2KeyMan<UInt32, String>;
-
 
     // TODO: Since the maximum number of properties per object may be less than 2^^32, then the 
     // maximum number of objects may be more than 2 ^^ 32 -- which takes a Int64, not a UInt32
@@ -82,11 +81,11 @@ namespace DRM.TypeSafePropertyBag
         //    return result;
         //}
 
-        //L1T Split(ExKeyT exKey, out L2TRaw bot);
-        public ObjectIdType Split(SimpleExKey exKey, out PropNameType rawBot)
-        {
-            throw new NotImplementedException();
-        }
+        ////L1T Split(ExKeyT exKey, out L2TRaw bot);
+        //public ObjectIdType Split(SimpleExKey exKey, out PropNameType rawBot)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
         // Try version of Join
         //bool TryJoin(L1T top, L2TRaw rawBot, out ExKeyT exKey);
@@ -123,7 +122,7 @@ namespace DRM.TypeSafePropertyBag
         //ExKeyT Split(CompT cKey);
         public SimpleExKey Split(CompositeKeyType cKey)
         {
-            uint top = SplitComp(cKey, out PropIdType bot);
+            ObjectIdType top = SplitComp(cKey, out PropIdType bot);
             return new SimpleExKey(cKey, null, top, bot);
         }
 
@@ -147,12 +146,12 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        // Join and split composite key from L1 and L2Raw.
-        //CompT JoinComp(L1T top, L2TRaw rawBot);
-        public CompositeKeyType JoinComp(ObjectIdType top, PropNameType rawBot)
-        {
-            throw new NotImplementedException();
-        }
+        //// Join and split composite key from L1 and L2Raw.
+        ////CompT JoinComp(L1T top, L2TRaw rawBot);
+        //public CompositeKeyType JoinComp(ObjectIdType top, PropNameType rawBot)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
         //L1T SplitComp(CompT cKey, out L2TRaw rawBot);
         //public ObjectIdType SplitComp(CompositeKeyType cKey, out PropNameType rawBot)
@@ -173,7 +172,7 @@ namespace DRM.TypeSafePropertyBag
 
         public bool Verify(CompositeKeyType cKey, ObjectIdType top, PropIdType bot)
         {
-            uint testTop = SplitComp(cKey, out PropIdType testBot);
+            ObjectIdType testTop = SplitComp(cKey, out PropIdType testBot);
             return testTop == top && testBot == bot;
         }
 
@@ -183,28 +182,5 @@ namespace DRM.TypeSafePropertyBag
         //    return testTop == top && testRawBot == rawBot;
         //}
 
-        //private long GetMaxObjectsPerAppDomain(int maxPropsPerObject)
-        //{
-        //    double numBitsForProps = Math.Log(maxPropsPerObject, 2);
-
-        //    if ((int)numBitsForProps - numBitsForProps > 0.5)
-        //    {
-        //        throw new ArgumentException("The maxPropsPerObject must be an even power of two. For example: 256, 512, 1024, etc.");
-        //    }
-
-        //    int numberOfBitsInCKey = (int)Math.Log(CompositeKeyType.MaxValue, 2);
-
-        //    double topRange = numberOfBitsInCKey - 2; // Must leave room for at least 4 objects.
-
-        //    if (4 > numBitsForProps || numBitsForProps > topRange)
-        //    {
-        //        throw new ArgumentException($"maxPropsPerObject must be between 4 and {topRange}, inclusive.", nameof(maxPropsPerObject));
-        //    }
-
-        //    int numberOfTopBits = (int)Math.Round((double)numberOfBitsInCKey - numBitsForProps, 0);
-        //    long maxObjectsPerAppDomain = (long)Math.Pow(2, numberOfTopBits);
-
-        //    return maxObjectsPerAppDomain;
-        //}
     }
 }

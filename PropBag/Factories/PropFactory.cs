@@ -14,8 +14,6 @@ namespace DRM.PropBag
     using PropIdType = UInt32;
     using PropNameType = String;
     using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
-    //using SubCacheType = ICacheSubscriptions<SimpleExKey, UInt64, UInt32, UInt32, String>;
-    using LocalBinderType = IBindLocalProps<UInt32>;
     #endregion
 
     public class PropFactory : AbstractPropFactory
@@ -28,12 +26,10 @@ namespace DRM.PropBag
         public PropFactory
             (
                 PSAccessServiceProviderType propStoreAccessServiceProvider,
-                //SubCacheType subscriptionManager,
-                LocalBinderType localBinder,
                 ResolveTypeDelegate typeResolver,
                 IConvertValues valueConverter
             )
-            : base(propStoreAccessServiceProvider, /*subscriptionManager, */localBinder, typeResolver, valueConverter)
+            : base(propStoreAccessServiceProvider, typeResolver, valueConverter)
         {
         }
 

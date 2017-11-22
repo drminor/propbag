@@ -8,8 +8,6 @@ namespace DRM.TypeSafePropertyBag
     using PropNameType = String;
 
     using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
-    //using SubCacheType = ICacheSubscriptions<SimpleExKey, UInt64, UInt32, UInt32, String>;
-    using LocalBinderType = IBindLocalProps<UInt32>;
     #endregion
 
     public interface IPropFactory 
@@ -20,8 +18,6 @@ namespace DRM.TypeSafePropertyBag
         IConvertValues ValueConverter { get; }
 
         PSAccessServiceProviderType PropStoreAccessServiceProvider { get; }
-        LocalBinderType LocalBinder { get; }
-        //SubCacheType SubscriptionManager { get; }
 
         #region Collection-Type Methods Methods
 
@@ -85,6 +81,5 @@ namespace DRM.TypeSafePropertyBag
         Type GetTypeFromValue(object value);
 
         bool IsTypeSolid(object value, Type propertyType);
-
     }
 }

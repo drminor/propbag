@@ -1,22 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using DRM.TypeSafePropertyBag.Fundamentals.GenericTree;
 using System.Collections.Concurrent;
+using System.Threading;
 
 namespace DRM.TypeSafePropertyBag
 {
     #region Type Aliases
     using CompositeKeyType = UInt64;
-    using ObjectIdType = UInt32;
+    using ObjectIdType = UInt64;
     using PropIdType = UInt32;
     using PropNameType = String;
 
     using L2KeyManType = IL2KeyMan<UInt32, String>;
-    using ICKeyManType = ICKeyMan<UInt64, UInt32, UInt32, String>;
+    using ICKeyManType = ICKeyMan<UInt64, UInt64, UInt32, String>;
 
-    using ExKeyT = IExplodedKey<UInt64, UInt32, UInt32>;
-    using IHaveTheKeyIT = IHaveTheKey<UInt64, UInt32, UInt32>;
+    using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
+    using IHaveTheKeyIT = IHaveTheKey<UInt64, UInt64, UInt32>;
 
     using SubCacheType = ICacheSubscriptions<UInt32>;
 
@@ -32,14 +32,10 @@ namespace DRM.TypeSafePropertyBag
 
         int _numOfAccessServicesCreated = 0;
 
-        SubCacheType _subscriptionManager;
+        readonly PropStoreNode _tree;
 
-        readonly SimpleObjectIdDictionary _theGlobalStore;
-
-        readonly Node<NodeData> _tree;
-
-        readonly Dictionary<WeakReference<IPropBag>, ObjectIdType> _rawDict;
-        readonly Dictionary<ObjectIdType, WeakReference<IPropBag>> _cookedDict;
+        readonly Dictionary<IPropBagProxy, ObjectIdType> _rawDict;
+        readonly Dictionary<ObjectIdType, IPropBagProxy> _cookedDict;
 
         readonly object _sync;
 
@@ -49,78 +45,113 @@ namespace DRM.TypeSafePropertyBag
 
         private ConcurrentDictionary<ObjectIdType, CollectionOfSubscriberCollections> _propIndexesByObject;
 
+        const int NUMBER_OF_SECONDS_BETWEEN_PRUNE_OPS = 20;
+        private Timer _timer;
 
         #endregion
 
         #region Constructor
 
-        public SimplePropStoreAccessServiceProvider(SimpleObjectIdDictionary theGlobalStore, SubCacheType subscriptionManager)
+        public SimplePropStoreAccessServiceProvider(int maxPropsPerObject  /*SimpleObjectIdDictionary theGlobalStore*/)
         {
-            _theGlobalStore = theGlobalStore;
-            _subscriptionManager = subscriptionManager;
+            MaxPropsPerObject = maxPropsPerObject; // theGlobalStore.MaxPropsPerObject;
+            MaxObjectsPerAppDomain = GetMaxObjectsPerAppDomain(maxPropsPerObject); // theGlobalStore.MaxObjectsPerAppDomain;
 
             // Create an "artificial" root node to hold all "real" roots, one for each "rooted" IPropBag.
             // This node is a PropType node; its IsObjectNode = false. It has value 0 for its ObjectId, and 0 for its PropId.
-            _tree = new Node<NodeData>(new NodeData(0, new PropGen()));
+            //_tree = new Node<NodeData>(new NodeData(0, new PropGen()));
+            _tree = new PropStoreNode(0, int_PropData: null);
 
-            MaxPropsPerObject = theGlobalStore.MaxPropsPerObject; 
-            MaxObjectsPerAppDomain = theGlobalStore.MaxObjectsPerAppDomain;
-
-            _rawDict = new Dictionary<WeakReference<IPropBag>, ObjectIdType>();
-            _cookedDict = new Dictionary<ObjectIdType, WeakReference<IPropBag>>();
+            _rawDict = new Dictionary<IPropBagProxy, ObjectIdType>();
+            _cookedDict = new Dictionary<ObjectIdType, IPropBagProxy>();
 
             _sync = new object();
 
+            // Create the subscription store.
             _propIndexesByObject = new ConcurrentDictionary<ObjectIdType, CollectionOfSubscriberCollections>
                 (concurrencyLevel: OBJECT_INDEX_CONCURRENCY_LEVEL, capacity: EXPECTED_NO_OF_OBJECTS);
+
+            _timer = new Timer(PruneStore, null, NUMBER_OF_SECONDS_BETWEEN_PRUNE_OPS * 1000, NUMBER_OF_SECONDS_BETWEEN_PRUNE_OPS * 1000);
         }
 
         #endregion
+
+        private void PruneStore(object stateInfo)
+        {
+            lock (_sync)
+            {
+                List<KeyValuePair<CompositeKeyType, PropStoreNode>> nodesThatHavePassed = _tree.All.Where(x => x.Value.IsObjectNode && HasPassed(x.Value)).ToList();
+
+                long totalRemoved = 0;
+                foreach(KeyValuePair<CompositeKeyType, PropStoreNode> kvp in nodesThatHavePassed)
+                {
+                    totalRemoved += PruneNode(kvp.Value);
+                }
+                //long? numberOfNodesRemoved = _tree.All.Where(x => x.Value.IsObjectNode).Sum(x => PruneNode(x.Value));
+                System.Diagnostics.Debug.WriteLine($"The PropStoreAccessServiceProvider pruned {totalRemoved} nodes at {DateTime.Now.ToLongTimeString()}.");
+            }
+        }
+
+        private bool HasPassed(PropStoreNode psn)
+        {
+            bool result = !psn.PropBagProxy.PropBagRef.TryGetTarget(out IPropBag dummy);
+            return result;
+        }
+
+        private int PruneNode(PropStoreNode psn)
+        {
+            if(!psn.PropBagProxy.PropBagRef.TryGetTarget(out IPropBag dummy))
+            {
+                int result = psn.Children.Count();
+                psn.MakeItARoot();
+                psn = null;
+                return result;
+            } 
+            else
+            {
+                return 0;
+            }
+        }
 
         #region PropStoreAccessService Creation and TearDown
 
         public int MaxPropsPerObject { get; }
         public long MaxObjectsPerAppDomain { get; set; }
 
-        public PSAccessServiceType GetOrCreatePropStoreService(IPropBag propBag, L2KeyManType level2KeyManager)
+        public PSAccessServiceType CreatePropStoreService(IPropBag propBag)
         {
-            ObjectIdType newObjectId = GetOrAdd(propBag, out WeakReference<IPropBag> accessToken);
+            ObjectIdType objectId = NextCookedVal;
+            WeakReference<IPropBag> propBagRef = new WeakReference<IPropBag>(propBag);
+            L2KeyManType level2KeyManager = new SimpleLevel2KeyMan(MaxPropsPerObject);
+            PropBagProxy propBagProxy = new PropBagProxy(objectId, propBagRef, level2KeyManager);
 
-            PSAccessServiceType result = CreatePropStoreService(propBag, level2KeyManager, accessToken, newObjectId);
-            return result;
-        }
+            AddToAllObjectLookups(propBagProxy);
 
-        public PSAccessServiceType CreatePropStoreService(IPropBag propBag, L2KeyManType level2KeyManager)
-        {
-            WeakReference<IPropBag> accessToken = new WeakReference<IPropBag>(propBag);
-            ObjectIdType newObjectId = Add(accessToken);
+            //if (propBagProxy.Level2KeyManager.MaxPropsPerObject != MaxPropsPerObject)
+            //{
+            //    throw new ArgumentException($"The level2KeyManager has a value for MaxPropsPerObject ({propBagProxy.Level2KeyManager.MaxPropsPerObject})" +
+            //        $" that is different from the GlobalStore (MaxPropPerObject: {MaxPropsPerObject}) " +
+            //        $"being used by this SimplePropStoreAccessServiceProvider.");
+            //}
 
-            PSAccessServiceType result = CreatePropStoreService(propBag, level2KeyManager, accessToken, newObjectId);
-            return result;
-        }
+            ICKeyManType compKeyManager = new SimpleCompKeyMan(propBagProxy.Level2KeyManager.MaxPropsPerObject);
 
-        // TODO: Throw an exception if the level2KeyManager's MaxPropsPerObject doesn't match the GloblStore's value.
-        private PSAccessServiceType CreatePropStoreService(IPropBag propBag, L2KeyManType level2KeyManager,
-             WeakReference<IPropBag> accessToken, ObjectIdType newObjectId)
-        {
-            if(level2KeyManager.MaxPropsPerObject != _theGlobalStore.MaxPropsPerObject)
-            {
-                throw new ArgumentException($"The level2KeyManager has a value for MaxPropsPerObject ({level2KeyManager.MaxPropsPerObject})" +
-                    $" that is different from the GlobalStore (MaxPropPerObject: {_theGlobalStore.MaxPropsPerObject}) " +
-                    $"being used by this SimplePropStoreAccessServiceProvider.");
-            }
+            CompositeKeyType cKey = compKeyManager.JoinComp(propBagProxy.ObjectId, 0);
 
-            ICKeyManType compKeyManager = new SimpleCompKeyMan(level2KeyManager.MaxPropsPerObject);
+            // Create a new PropStoreNode for this PropBag.
+            PropStoreNode propStoreNode = new PropStoreNode(cKey, propBagProxy);
 
-            PSAccessServiceType result = new SimplePropStoreAccessService(accessToken, newObjectId,
-                _theGlobalStore, compKeyManager, level2KeyManager, this);
 
-            // Add a new ObjectType node to our tree for the rooted IPropBag.
-            NodeData nodeData = new NodeData(newObjectId, result);
-            Node<NodeData> theNewNode = _tree.Add(nodeData);
 
-            // Allows the service to add / remove nodes from its node.
-            ((SimplePropStoreAccessService)result)._ourNodeFromGlobalTree = theNewNode;
+            // Add this new node to the global tree.
+            _tree.AddChild(propStoreNode);
+
+            PSAccessServiceType result = new SimplePropStoreAccessService
+                (
+                    propStoreNode,
+                    compKeyManager,
+                    this
+                );
 
             // Add one more to the total count of PropStoreAccessServices created.
             IncAccessServicesCreated();
@@ -128,14 +159,29 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        public void TearDown(PSAccessServiceType propStoreAccessService)
+        public void TearDown(IPropBag propBag, PSAccessServiceType storeAccessor)
         {
-            ObjectIdType objectId = ((IHaveTheKeyIT)propStoreAccessService).ObjectId;
+            PropStoreNode propStoreNode = ((IHaveTheKeyIT)storeAccessor).PropStoreNode;
 
-            if(_cookedDict.TryGetValue(objectId, out WeakReference<IPropBag> WR_AccessToken))
+            // Remove all subscriptions for this propBag.
+            bool wasRemoved = RemovePropIndexForObject(propStoreNode.PropBagProxy.ObjectId);
+            if(!wasRemoved)
             {
-                _rawDict.Remove(WR_AccessToken);
-                _cookedDict.Remove(objectId);
+                System.Diagnostics.Debug.WriteLine($"{((CompositeKeyType)propStoreNode.PropBagProxy.ObjectId).ToString()} held no subscriptions upon teardown.");
+            }
+
+            RemoveFromAllObjectLookups(propStoreNode.PropBagProxy);
+        }
+
+        private IPropBagProxy GetInt_PropBag(IPropBag propBagWithInt)
+        {
+            if (propBagWithInt is IPropBagProxy ipbi)
+            {
+                return ipbi;
+            }
+            else
+            {
+                throw new ArgumentException($"int_PropBag does not implement {nameof(IPropBagProxy)}.");
             }
         }
 
@@ -152,8 +198,6 @@ namespace DRM.TypeSafePropertyBag
 
             SubscriberCollection sc = GetSubscriptions((SimpleExKey)subscriptionRequest.SourcePropRef);
 
-            bool internalWasAdded = false;
-
             ISubscriptionGen result = sc.GetOrAdd
                 (
                 subscriptionRequest,
@@ -166,14 +210,14 @@ namespace DRM.TypeSafePropertyBag
             {
                 System.Diagnostics.Debug.WriteLine($"Created a new Subscription for Property:" +
                     $" {subscriptionRequest.SourcePropRef} / Event: {result.SubscriptionKind}.");
+                wasAdded = true;
             }
             else
             {
-                System.Diagnostics.Debug.WriteLine($"The subscription for for Property:" +
+                System.Diagnostics.Debug.WriteLine($"The subscription for Property:" +
                     $" {subscriptionRequest.SourcePropRef} / Event: {result.SubscriptionKind} was not added.");
+                wasAdded = false;
             }
-
-            wasAdded = internalWasAdded;
             return result;
         }
 
@@ -210,7 +254,11 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        private CollectionOfSubscriberCollections GetPropIndexForObject(uint objectKey, out bool wasAdded)
+        #endregion
+
+        #region Private Methods
+
+        private CollectionOfSubscriberCollections GetPropIndexForObject(ObjectIdType objectKey, out bool wasAdded)
         {
             bool internalWasAdded = false;
 
@@ -227,44 +275,31 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        #endregion
-
-        #region Diagnostics
-
-        public void IncAccess()
+        private bool RemovePropIndexForObject(ObjectIdType objectKey)
         {
-            _accessCounter++;
-        }
-
-        public int AccessCounter => _accessCounter;
-
-        private void IncAccessServicesCreated()
-        {
-            _numOfAccessServicesCreated++;
-        }
-        public int TotalNumberOfAccessServicesCreated => _numOfAccessServicesCreated;
-
-        public int NumberOfRootPropBagsInPlay
-        {
-            get
+            if(_propIndexesByObject.TryRemove(objectKey, out CollectionOfSubscriberCollections dummy))
             {
-                return _tree.Children.Count();
+                return true;
+            }
+            else
+            {
+                return false;
             }
         }
 
-        #endregion
-
-        #region Private Methods
-
-        private ObjectIdType Add(WeakReference<IPropBag> objectRef)
+        private void AddToAllObjectLookups(IPropBagProxy propBagProxy)
         {
             lock (_sync)
             {
-                ObjectIdType cookedVal = NextCookedVal;
-                _rawDict.Add(objectRef, cookedVal);
-                _cookedDict.Add(cookedVal, objectRef);
-                return cookedVal;
+                _rawDict.Add(propBagProxy, propBagProxy.ObjectId);
+                _cookedDict.Add(propBagProxy.ObjectId, propBagProxy);
             }
+        }
+
+        private void RemoveFromAllObjectLookups(IPropBagProxy propBagProxy)
+        {
+            _rawDict.Remove(propBagProxy);
+            _cookedDict.Remove(propBagProxy.ObjectId);
         }
 
         /// <summary>
@@ -272,38 +307,62 @@ namespace DRM.TypeSafePropertyBag
         /// </summary>
         /// <param name="propBag"></param>
         /// <returns></returns>
-        private ObjectIdType GetOrAdd(IPropBag propBag, out WeakReference<IPropBag> accessToken)
-        {
-            lock (_sync)
-            {
-                accessToken = _rawDict.Where(x => Object.ReferenceEquals(SimpleExKey.UnwrapWeakRef(x.Key), propBag)).FirstOrDefault().Key;
+        //private ObjectIdType GetOrAdd(IPropBag propBag, out WeakReference<IPropBag> accessToken)
+        //{
+        //    lock (_sync)
+        //    {
+        //        accessToken = _rawDict.Where(x => Object.ReferenceEquals(SimpleExKey.UnwrapWeakRef(x.Key), propBag)).FirstOrDefault().Key;
 
-                if(accessToken != null)
-                {
-                    if(_rawDict.TryGetValue(accessToken, out ObjectIdType existingCookedValue))
-                    {
-                        return existingCookedValue;
-                    }
-                }
+        //        if(accessToken != null)
+        //        {
+        //            if(_rawDict.TryGetValue(accessToken, out ObjectIdType existingCookedValue))
+        //            {
+        //                return existingCookedValue;
+        //            }
+        //        }
 
-                // This object has not been registered, register it now.
-                accessToken = new WeakReference<IPropBag>(propBag);
-                ObjectIdType cookedVal = NextCookedVal;
-                _rawDict.Add(accessToken, cookedVal);
-                _cookedDict.Add(cookedVal, accessToken);
-                return cookedVal;
-            }
-        }
+        //        // This object has not been registered, register it now.
+        //        accessToken = new WeakReference<IPropBag>(propBag);
+        //        ObjectIdType cookedVal = NextCookedVal;
+        //        _rawDict.Add(accessToken, cookedVal);
+        //        _cookedDict.Add(cookedVal, accessToken);
+        //        return cookedVal;
+        //    }
+        //}
 
         private long m_Counter = 0;
-        private uint NextCookedVal
+        private ulong NextCookedVal
         {
             get
             {
                 long temp = System.Threading.Interlocked.Increment(ref m_Counter);
                 if (temp > MaxObjectsPerAppDomain) throw new InvalidOperationException("The SimplePropStore has run out object ids.");
-                return (uint)temp;
+                return (ulong)temp;
             }
+        }
+
+        private long GetMaxObjectsPerAppDomain(int maxPropsPerObject)
+        {
+            double numBitsForProps = Math.Log(maxPropsPerObject, 2);
+
+            if ((int)numBitsForProps - numBitsForProps > 0.5)
+            {
+                throw new ArgumentException("The maxPropsPerObject must be an even power of two. For example: 256, 512, 1024, etc.");
+            }
+
+            int numberOfBitsInCKey = (int)Math.Log(CompositeKeyType.MaxValue, 2);
+
+            double topRange = numberOfBitsInCKey - 2; // Must leave room for at least 4 objects.
+
+            if (4 > numBitsForProps || numBitsForProps > topRange)
+            {
+                throw new ArgumentException($"maxPropsPerObject must be between 4 and {topRange}, inclusive.", nameof(maxPropsPerObject));
+            }
+
+            int numberOfTopBits = (int)Math.Round((double)numberOfBitsInCKey - numBitsForProps, 0);
+            long maxObjectsPerAppDomain = (long)Math.Pow(2, numberOfTopBits);
+
+            return maxObjectsPerAppDomain;
         }
 
         #endregion
@@ -319,7 +378,7 @@ namespace DRM.TypeSafePropertyBag
                 if (disposing)
                 {
                     // TODO: dispose managed state (managed objects).
-                    _theGlobalStore.Clear();
+                    //_theGlobalStore.Clear();
                     //_tree.Clear();
                 }
 
@@ -343,6 +402,32 @@ namespace DRM.TypeSafePropertyBag
             Dispose(true);
             // TODO: uncomment the following line if the finalizer is overridden above.
             // GC.SuppressFinalize(this);
+        }
+
+        #endregion
+
+        #region Diagnostics
+
+        public void IncAccess()
+        {
+            _accessCounter++;
+        }
+
+        public int AccessCounter => _accessCounter;
+
+        private void IncAccessServicesCreated()
+        {
+            _numOfAccessServicesCreated++;
+        }
+
+        public int TotalNumberOfAccessServicesCreated => _numOfAccessServicesCreated;
+
+        public int NumberOfRootPropBagsInPlay
+        {
+            get
+            {
+                return _tree.Children.Count();
+            }
         }
 
         #endregion

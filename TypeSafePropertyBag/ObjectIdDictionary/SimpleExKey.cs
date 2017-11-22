@@ -3,10 +3,10 @@
 namespace DRM.TypeSafePropertyBag
 {
     using CompositeKeyType = UInt64;
-    using ObjectIdType = UInt32;
+    using ObjectIdType = UInt64;
     using PropIdType = UInt32;
 
-    using ExKeyType = IExplodedKey<UInt64, UInt32, UInt32>;
+    using ExKeyType = IExplodedKey<UInt64, UInt64, UInt32>;
 
 
     public struct SimpleExKey : ExKeyType, IEquatable<SimpleExKey>
@@ -49,13 +49,14 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        static public SimpleExKey FromIExploadedKeyWithWeakRef(ExKeyType exKey)
-        {
-            SimpleExKey result = new SimpleExKey(exKey.CKey, (WeakReference<IPropBag>)exKey.AccessToken,
-                exKey.Level1Key, exKey.Level2Key);
 
-            return result;
-        }
+        //static public SimpleExKey FromIExploadedKeyWithWeakRef(ExKeyType exKey)
+        //{
+        //    SimpleExKey result = new SimpleExKey(exKey.CKey, (WeakReference<IPropBag>)exKey.AccessToken,
+        //        exKey.Level1Key, exKey.Level2Key);
+
+        //    return result;
+        //}
 
         #endregion
 

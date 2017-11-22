@@ -18,8 +18,8 @@ namespace DRM.TypeSafePropertyBag
         /// <returns></returns>
         IExplodedKey<CompT, L1T, L2T> GetTheKey(IPropBag propBag, L2T propId);
 
-        // Returns the Globally Unique identifer for the Parent PropData item
-        // if this PropStoreAccessService is serving a PropBag that is held within another IPropBag's PropData item.
-        //IExplodedKey<CompT, L1T, L2T> ParentKey { get; set; }
+        IExplodedKey<CompT, L1T, L2T> GetTheKey(IPropBagProxy propBagProxy, L2T propId);
+
+        PropStoreNode PropStoreNode { get; }
     }
 }

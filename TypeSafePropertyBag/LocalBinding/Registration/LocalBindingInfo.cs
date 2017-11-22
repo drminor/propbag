@@ -7,6 +7,7 @@ namespace DRM.TypeSafePropertyBag
         public LocalBindingInfo(LocalPropertyPath propertyPath) : this()
         {
             PropertyPath = propertyPath;
+            Mode = LocalBindingMode.OneWay;
         }
 
         public LocalBindingInfo(LocalPropertyPath propertyPath, LocalBindingMode mode) : this(propertyPath)

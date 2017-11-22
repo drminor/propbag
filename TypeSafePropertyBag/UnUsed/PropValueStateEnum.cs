@@ -1,5 +1,5 @@
 ﻿
-namespace DRM.TypeSafePropertyBag
+namespace DRM.TypeSafePropertyBag.UnUsed
 {
     public enum PropValueStateEnum
     {

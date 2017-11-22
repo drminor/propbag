@@ -6,7 +6,7 @@ namespace DRM.TypeSafePropertyBag
     using PropIdType = UInt32;
     using PropNameType = String;
 
-    using ExKeyT = IExplodedKey<UInt64, UInt32, UInt32>;
+    using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
 
     public class SubscriptionKey<T> : SubscriptionKeyGen, ISubscriptionKey<T>
     {
@@ -19,9 +19,6 @@ namespace DRM.TypeSafePropertyBag
         public SubscriptionKey
             (
             ExKeyT exKey,
-            //IPropBag host,
-            //uint propId,
-            //IPropStoreAccessService<PropIdType, PropNameType> storeAccessor,
             EventHandler<PCTypedEventArgs<T>> handler,
             SubscriptionPriorityGroup subscriptionPriorityGroup,
             bool keepRef
@@ -30,12 +27,6 @@ namespace DRM.TypeSafePropertyBag
                   subscriptionPriorityGroup: subscriptionPriorityGroup, keepRef: keepRef, subscriptionCreator: CreateSubscriptionGen)
         {
             TypedHandler = handler;
-        }
-
-        private static SimpleExKey GetTheKey(IPropBag host, uint propId, IPropStoreAccessService<PropIdType, PropNameType> storeAccessor)
-        {
-            SimpleExKey result = ((IHaveTheSimpleKey)storeAccessor).GetTheKey(host, propId);
-            return result;
         }
 
         // Gen Handler -- PCGenEventArgs
@@ -91,6 +82,12 @@ namespace DRM.TypeSafePropertyBag
         {
             return (ISubscriptionGen)CreateSubscription((ISubscriptionKey<T>)subscriptionRequestGen);
         }
+
+        //private static SimpleExKey GetTheKey(IPropBag host, uint propId, IPropStoreAccessService<PropIdType, PropNameType> storeAccessor)
+        //{
+        //    SimpleExKey result = ((IHaveTheSimpleKey)storeAccessor).GetTheKey(host, propId);
+        //    return result;
+        //}
 
     }
 }

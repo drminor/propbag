@@ -87,7 +87,11 @@ namespace PropBagLib.Tests.BusinessModel
                 if (disposing)
                 {
                     // TODO: dispose managed state (managed objects).
-                    if (_dbContext != null) _dbContext.Dispose();
+                    if (_dbContext != null)
+                    {
+                        _dbContext.Dispose();
+                        _dbContext = null;
+                    }
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.

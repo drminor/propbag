@@ -4,13 +4,17 @@ using System.Reflection;
 
 namespace DRM.TypeSafePropertyBag
 {
-    using ExKeyT = IExplodedKey<UInt64, UInt32, UInt32>;
+    using CompositeKeyType = UInt64;
+    using ObjectIdType = UInt64;
+
+    using PropIdType = UInt32;
+    using PropNameType = String;
+    using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
+
+    using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
 
     public interface IBindingSubscriptionKey<T> : ISubscriptionKey<T>
     {
-        // These have been moved to the ISubscriptionKeyGen interface.
-        //SimpleExKey TargetPropId { get; }
-        //LocalBindingInfo BindingInfo { get; }
     }
 
     public interface ISubscriptionKey<T> : ISubscriptionKeyGen
@@ -49,8 +53,9 @@ namespace DRM.TypeSafePropertyBag
         void MarkAsUsed();
 
         // Properties for BindingSubscriptions
-
         ExKeyT TargetPropRef { get; }
         LocalBindingInfo BindingInfo { get; }
+        ISubscriptionGen CreateBinding(PSAccessServiceType storeAccessor); 
+
     }
 }

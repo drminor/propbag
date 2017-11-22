@@ -3,8 +3,6 @@ using System;
 
 namespace DRM.TypeSafePropertyBag
 {
-    using ExKeyT = IExplodedKey<UInt64, UInt32, UInt32>;
-
     /// <summary>
     /// Provides storage that one or more IPropBags can share to hold callbacks registered for particular properties registered on the IPropBag.
     /// The callbacks can be one of several forms including, but not limited to:
@@ -14,7 +12,6 @@ namespace DRM.TypeSafePropertyBag
     /// Actions of type: &lt; <typeparamref name="object"/>, <typeparamref name="T"/>, <typeparamref name="T"/> &gt;,
     /// and Actions of type: &lt; <typeparamref name="T"/>, <typeparamref name="T"/> &gt;
     /// </summary>
-    /// <typeparam name="ExKeyT">The Exploded Key Type</typeparam>
     /// <typeparam name="L2T">The type used to store PropIds.</typeparam>
     public interface IRegisterSubscriptions<L2T> : ICacheSubscriptions<L2T>
     {

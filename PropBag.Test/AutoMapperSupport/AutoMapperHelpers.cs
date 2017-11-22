@@ -9,11 +9,13 @@ namespace PropBagLib.Tests.AutoMapperSupport
     using PropIdType = UInt32;
     using PropNameType = String;
     using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
-    using SubCacheType = ICacheSubscriptions<UInt32>;
-    using LocalBinderType = IBindLocalProps<UInt32>;
 
     public class AutoMapperHelpers
     {
+        // Maximum number of PropertyIds for any one given Object.
+        private const int LOG_BASE2_MAX_PROPERTIES = 16;
+        public static readonly int MAX_NUMBER_OF_PROPERTIES = (int)Math.Pow(2, LOG_BASE2_MAX_PROPERTIES); //65536;
+
         public SimpleAutoMapperProvider InitializeAutoMappers(IPropModelProvider propModelProvider)
         {
             IPropBagMapperBuilderProvider propBagMapperBuilderProvider
@@ -66,18 +68,11 @@ namespace PropBagLib.Tests.AutoMapperSupport
             {
                 if(_propFactory_V1 == null)
                 {
-                    SimpleCompKeyMan compKeyManager = new SimpleCompKeyMan(MAX_NUMBER_OF_PROPERTIES);
-                    SimpleObjectIdDictionary theStore = new SimpleObjectIdDictionary(compKeyManager);
-                    SubCacheType subscriptionManager = new SimpleSubscriptionManager();
-                    PropStoreAccessServiceProvider = new SimplePropStoreAccessServiceProvider(theStore, subscriptionManager);
-
-                    LocalBinderType localBinder = new SimpleLocalBinder();
+                    PSAccessServiceProviderType PropStoreAccessServiceProvider = new SimplePropStoreAccessServiceProvider(MAX_NUMBER_OF_PROPERTIES);
 
                     _propFactory_V1 = new PropFactory
                         (
                         propStoreAccessServiceProvider: PropStoreAccessServiceProvider,
-                        //subscriptionManager: subscriptionManager,
-                        localBinder: null,
                         typeResolver: GetTypeFromName,
                         valueConverter: null
                         );
@@ -118,19 +113,5 @@ namespace PropBagLib.Tests.AutoMapperSupport
 
             return result;
         }
-
-        private static SimpleObjectIdDictionary ProvisonTheStore(out SimpleLevel2KeyMan level2KeyMan, out SimpleCompKeyMan compKeyManager)
-        {
-            level2KeyMan = new SimpleLevel2KeyMan(MAX_NUMBER_OF_PROPERTIES);
-            compKeyManager = new SimpleCompKeyMan(MAX_NUMBER_OF_PROPERTIES);
-
-            SimpleObjectIdDictionary result = new SimpleObjectIdDictionary(compKeyManager);
-            return result;
-        }
-
-        // Maximum number of PropertyIds for any one given Object.
-        private const int LOG_BASE2_MAX_PROPERTIES = 16;
-        public static readonly int MAX_NUMBER_OF_PROPERTIES = (int)Math.Pow(2, LOG_BASE2_MAX_PROPERTIES); //65536;
-
     }
 }

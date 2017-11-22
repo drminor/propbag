@@ -10,10 +10,8 @@ namespace DRM.TypeSafePropertyBag
         int MaxPropsPerObject { get; }
 
         // Create and TearDown PropStoreAccessService instances.
-        // TODO: Consider not supporting this method: The client must keep the reference.
-        IPropStoreAccessService<L2T, L2TRaw> GetOrCreatePropStoreService(IPropBag propBag, IL2KeyMan<L2T, L2TRaw> level2KeyManager);
-        IPropStoreAccessService<L2T, L2TRaw> CreatePropStoreService(IPropBag propBag, IL2KeyMan<L2T, L2TRaw> level2KeyManager);
-        void TearDown(IPropStoreAccessService<L2T, L2TRaw> propStoreAccessService);
+        IPropStoreAccessService<L2T, L2TRaw> CreatePropStoreService(IPropBag propBag);
+        void TearDown(IPropBag int_PropBag, IPropStoreAccessService<L2T, L2TRaw> propStoreService);
 
         // Diagnostics
         void IncAccess();
