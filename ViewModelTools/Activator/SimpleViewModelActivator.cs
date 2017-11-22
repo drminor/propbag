@@ -2,6 +2,7 @@
 using DRM.PropBag.ControlModel;
 using DRM.TypeSafePropertyBag;
 using System;
+using System.Reflection;
 
 namespace DRM.ViewModelTools
 {
@@ -48,7 +49,12 @@ namespace DRM.ViewModelTools
         public object GetNewViewModel(PropModel propModel, Type typeToCreate, string fullClassName = null, IPropFactory propFactory = null)
         {
             object[] parameters = new object[] { propModel, fullClassName, propFactory };
-            object result = Activator.CreateInstance(typeToCreate, parameters);
+
+            //BindingFlags bFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.CreateInstance;
+            //object result = Activator.CreateInstance(typeToCreate, bFlags, binder: null, args: parameters, culture: null);
+
+            object result = Activator.CreateInstance(typeToCreate, args: parameters);
+
             return result;
         }
 
