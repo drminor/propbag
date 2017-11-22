@@ -599,20 +599,20 @@ namespace DRM.TypeSafePropertyBag
 
         private ObjectIdType GetAndCheckObjectRef(IPropBag propBag)
         {
-            IPropBag client = SimpleExKey.UnwrapWeakRef(_clientAccessToken);
-            if (client == null)
+            if(_clientAccessToken.TryGetTarget(out IPropBag target))
+            {
+                if (!object.ReferenceEquals(propBag, target))
+                {
+                    throw new InvalidOperationException("This PropStoreAccessService can only service the PropBag object that created it.");
+                }
+
+                ObjectIdType result = _objectId;
+                return result;
+            }
+            else
             {
                 throw new InvalidOperationException("The weak reference to the PropBag held by the StoreAccessor, holds no object.");
             }
-
-            if (!object.ReferenceEquals(propBag, client))
-            {
-                throw new InvalidOperationException("This PropStoreAccessService can only service the PropBag object that created it.");
-            }
-
-            ObjectIdType result = _objectId;
-
-            return result;
         }
 
         #endregion

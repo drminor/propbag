@@ -8,7 +8,6 @@ namespace DRM.TypeSafePropertyBag
 
     using ExKeyType = IExplodedKey<UInt64, UInt64, UInt32>;
 
-
     public struct SimpleExKey : ExKeyType, IEquatable<SimpleExKey>
     {
         #region Constructor
@@ -31,32 +30,6 @@ namespace DRM.TypeSafePropertyBag
         public object AccessToken => WR_AccessToken;
 
         public WeakReference<IPropBag> WR_AccessToken { get; }
-
-        #endregion
-
-        #region Public Methods
-
-        static public IPropBag UnwrapWeakRef(WeakReference<IPropBag> objectRef)
-        {
-            if (objectRef.TryGetTarget(out IPropBag target))
-            {
-                IPropBag result = (IPropBag)target;
-                return result;
-            }
-            else
-            {
-                return default(IPropBag);
-            }
-        }
-
-
-        //static public SimpleExKey FromIExploadedKeyWithWeakRef(ExKeyType exKey)
-        //{
-        //    SimpleExKey result = new SimpleExKey(exKey.CKey, (WeakReference<IPropBag>)exKey.AccessToken,
-        //        exKey.Level1Key, exKey.Level2Key);
-
-        //    return result;
-        //}
 
         #endregion
 

@@ -31,6 +31,12 @@ namespace DRM.TypeSafePropertyBag
             Level2KeyManager = level2KeyManager ?? throw new ArgumentNullException(nameof(level2KeyManager));
         }
 
+        public bool TryGetTarget(out IPropBag target)
+        {
+            bool result = PropBagRef.TryGetTarget(out target);
+            return result;
+        }
+
         public override bool Equals(object obj)
         {
             return Equals(obj as PropBagProxy);
