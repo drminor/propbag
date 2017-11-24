@@ -21,21 +21,12 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
     public class LocalBinder<T>
     {
         const int ROOT_INDEX = 0;
+        const string BINDER_NAME = "PB_LocalBinder";
 
         #region Private Properties
 
-        const string BINDER_NAME = "PB_LocalBinder";
-
-        PSAccessServiceType _ourStoreAccessor { get; }
-        IHaveTheKeyIT _ourStoreKeyProvider { get; }
         PropStoreNode _ourNode { get; }
-
-        /// <summary>
-        /// Used to listen to changes to the sources of data for each step in the path.
-        /// </summary>
         OSCollection<T> _dataSourceChangeListeners { get; set; }
-
-        bool PathIsAbsolute { get; }
 
         #endregion
 
@@ -43,6 +34,13 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
         public ExKeyT BindingTarget { get; }
         public LocalBindingInfo BindingInfo { get; private set; }
+
+        public bool PathIsAbsolute { get; }
+        public bool Complete { get; private set; }
+
+        #endregion
+
+        #region Converter Properties
 
         //Lazy<IValueConverter> _defaultConverter;
         //public virtual Lazy<IValueConverter> DefaultConverter
@@ -77,31 +75,26 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
         //        _defConvParamBuilder = value;
         //    }
         //}
-
         #endregion
 
         #region Constructor
 
         public LocalBinder(PSAccessServiceType propStoreAccessService, ExKeyT TargetPropId, LocalBindingInfo bindingInfo)
         {
-            _ourStoreAccessor = propStoreAccessService ?? throw new ArgumentNullException(nameof(propStoreAccessService));
+            _ourNode = GetPropStore(propStoreAccessService);
             BindingTarget = TargetPropId;
             BindingInfo = bindingInfo;
 
-            _ourNode = GetPropStore(propStoreAccessService, out IHaveTheKeyIT storeProvider);
-            _ourStoreKeyProvider = storeProvider;
-
-            //UseMultiBinding = useMultiBinding;
-            //_dataSourceChangeListeners = null;
-
-            StartBinding(BindingTarget, BindingInfo);
+            _dataSourceChangeListeners = StartBinding(BindingTarget, BindingInfo, out bool pathIsAbsolute, out bool complete);
+            PathIsAbsolute = pathIsAbsolute;
+            Complete = complete;
         }
 
-        private PropStoreNode GetPropStore(PSAccessServiceType propStoreAccessService, out IHaveTheKeyIT storeKeyProvider)
+        private PropStoreNode GetPropStore(PSAccessServiceType propStoreAccessService)
         {
             if (propStoreAccessService is IHaveTheKeyIT skp)
             {
-                storeKeyProvider = skp;
+                IHaveTheKeyIT storeKeyProvider = skp;
                 PropStoreNode propStoreNode = storeKeyProvider.PropStoreNode;
                 return propStoreNode;
             }
@@ -111,22 +104,181 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             }
         }
 
-        private bool StartBinding(ExKeyT bindingTarget, LocalBindingInfo bindingInfo)
+        #endregion
+
+        #region Path Analysis
+
+        private OSCollection<T> StartBinding(ExKeyT bindingTarget, LocalBindingInfo bInfo, out bool pathIsAbsolute, out bool complete)
         {
-            _dataSourceChangeListeners = PreparePathListeners(BindingTarget, BindingInfo, out bool pathIsAbsolute);
+            complete = false;
+            string[] pathElements = GetPathComponents(bInfo.PropertyPath.Path, out int compCount);
 
-            //InitPathListeners(BindingTarget, BindingInfo, _dataSourceChangeListeners);
+            if (compCount == 0)
+            {
+                throw new InvalidOperationException("The path has no components.");
+            }
 
-            //CreateTheBinding(BindingTarget, BindingInfo, _dataSourceChangeListeners);
+            if(compCount == 1 && pathElements[0] == ".")
+            {
+                // Can't bind to yourself.
+            }
 
-            return pathIsAbsolute;
+            // Remove initial "this" component, if present.
+            if(pathElements[0] == ".")
+            {
+                pathElements.CopyTo(pathElements, 1);
+            }
+
+            OSCollection<T> result = new OSCollection<T>();
+            PropStoreNode next;
+
+            // Create the observable source for the first element.
+            string rootElement = pathElements[ROOT_INDEX];
+
+            if (rootElement == string.Empty)
+            {
+                pathIsAbsolute = true;
+
+                // remove the initial (empty) path component.
+                pathElements.CopyTo(pathElements, 1);
+
+                // Find our current root.
+                next = GetRootPropBag(_ourNode);
+
+                result.Add(new ObservableSource<T>(next, rootElement, SourceKindEnum.AbsRoot, BINDER_NAME));
+                next = _ourNode;
+            }
+            else
+            {
+                pathIsAbsolute = false;
+                next = _ourNode;
+            }
+
+            // Process each step, except for the last.
+            for (int nPtr = 0; next != null && nPtr < compCount - 1; nPtr++)
+            {
+                string pathComp = pathElements[nPtr];
+                if (pathComp == "..")
+                {
+                    if(nPtr > 0)
+                    { 
+                        SourceKindEnum parentSourceKind = result[nPtr - 1].SourceKind;
+
+                        if(parentSourceKind != SourceKindEnum.RootUp && parentSourceKind != SourceKindEnum.Up)
+                        {
+                            throw new InvalidOperationException("A path cannot have '..' components that folllow a component that indentifies a property by name.");
+                        }
+                    }
+
+                    SourceKindEnum nextResultKind = nPtr > 0 ? SourceKindEnum.Up : SourceKindEnum.RootUp;
+                    result.Add(new ObservableSource<T>(next, pathComp, nextResultKind, BINDER_NAME));
+                    next = GetHostingPropBag(next);
+                }
+                else
+                {
+                    if (GetChild(next, pathComp, out PropStoreNode child, out IPropBag propBag))
+                    {
+                        SourceKindEnum nextResultKind = nPtr > 0 ? SourceKindEnum.Down : SourceKindEnum.RootDown;
+                        result.Add(new ObservableSource<T>(propBag, pathComp, nextResultKind, BINDER_NAME));
+
+                        // Get the Prop Store Node associated with the IPropBag being hosted by the found PropItem.
+                        next = ((IHaveTheKeyIT)next).GetObjectNodeForPropVal(child.Int_PropData);
+                    }
+                    else
+                    {
+                        // Our client is no longer with us, or no propItem named pathComp exists.
+                        next = null;
+                    }
+                }
+            }
+
+            // Add the terminal node.
+            if(next != null)
+            {
+                string pathComp = pathElements[compCount - 1];
+                if (pathComp == "..")
+                {
+                    throw new InvalidOperationException("The last component of the path cannot be '..'.");
+                }
+                else
+                {
+                    if (GetChild(next, pathComp, out PropStoreNode child, out IPropBag propBag))
+                    {
+                        result.Add(new ObservableSource<T>(propBag, pathComp, SourceKindEnum.TerminalNode, BINDER_NAME));
+
+                        // We have subscribed to the property that is the source of the binding.
+                        complete = true;
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        private PropStoreNode GetRootPropBag(PropStoreNode objectNode)
+        {
+            PropStoreNode last = objectNode;
+
+            PropStoreNode next = objectNode;
+            while(null != (next = GetHostingPropBag(last))) { }
+
+            return last;
+        }
+
+        private string[] GetPathComponents(string path, out int count)
+        {
+            string[] components = path.Split('/');
+            count = components.Length;
+            return components;
+        }
+
+        private PropStoreNode GetHostingPropBag(PropStoreNode objectNode)
+        {
+            // See if this PropStoreNode has a parent PropItem
+            IPropDataInternal parentsData = objectNode?.Parent?.Int_PropData;
+
+            if (parentsData != null)
+            {
+                // Get the PropStoreNode for the PropBag that "owns" the found PropItem.
+                PropStoreNode result = ((IHaveTheKeyIT)objectNode).GetObjectNodeForPropVal(parentsData);
+                return result;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        private bool GetChild(PropStoreNode objectNode, string propertyName, out PropStoreNode child, out IPropBag propBag)
+        {
+            if (objectNode.PropBagProxy.PropBagRef.TryGetTarget(out propBag))
+            {
+                PropIdType propId = objectNode.PropBagProxy.Level2KeyManager.FromRaw(propertyName);
+                ExKeyT exKey = ((IHaveTheKeyIT)objectNode).GetTheKey(objectNode.PropBagProxy, propId);
+
+                if (objectNode.TryGetChild(exKey.CKey, out child))
+                {
+                    return true;
+                }
+                else
+                {
+                    // Could not locate a property with that name.
+                    return false;
+                }
+            }
+            else
+            {
+                // Our client is no longer with us.
+                child = null;
+                return false;
+            }
         }
 
         #endregion
 
-        #region Provide Value
+        #region Value Converter Support
 
-        protected virtual void SetDefaultConverter()
+        private void SetDefaultConverter()
         {
             //if (DefaultConverter == null)
             //{
@@ -139,7 +291,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             //}
         }
 
-        protected virtual IConvertValues GetConverter(IPropBagProxy bindingTarget, LocalBindingInfo bInfo, Type sourceType,
+        private IConvertValues GetConverter(IPropBagProxy bindingTarget, LocalBindingInfo bInfo, Type sourceType,
             string pathElement, bool isPropBagBased, out object converterParameter)
         {
 
@@ -190,183 +342,18 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             return null;
         }
 
-        protected virtual object OurDefaultConverterParameterBuilder(IPropBagProxy bindingTarget, LocalBindingInfo bInfo, Type sourceType,
+        private object OurDefaultConverterParameterBuilder(IPropBagProxy bindingTarget, LocalBindingInfo bInfo, Type sourceType,
             string pathElement)
         {
             //return new TwoTypes(sourceType, bindingTarget.PropertyType);
             return null;
         }
 
-        //protected virtual ObservableSource<T> GetSourceRoot(IPropBagProxy bindingTarget, object source,
-        //    string pathElement = ROOT_PATH_ELEMENT, string binderName = "")
-        //{
-        //    ObservableSource<T> osp = ObservableSource<T>.GetSourceRoot(bindingTarget, source, pathElement, binderName);
-        //    return osp;
-        //}
-
         #endregion
 
-        #region Path Analysis
+        #region Data Source Change Handling
 
-        protected OSCollection<T> PreparePathListeners(ExKeyT bindingTarget, LocalBindingInfo bInfo, out bool pathIsAbsolute)
-        {
-            string[] pathElements = GetPathComponents(bInfo.PropertyPath.Path, out int compCount);
-
-            if (compCount == 0)
-            {
-                throw new InvalidOperationException("The path has no components.");
-            }
-
-            OSCollection<T> result = new OSCollection<T>();
-            PropStoreNode next = _ourNode;
-
-            // Create the observable source for the first element.
-            string rootElement = pathElements[ROOT_INDEX];
-
-            if (rootElement == string.Empty)
-            {
-                // Add place holder of type AbsRoot.
-                pathIsAbsolute = true;
-                result.Add(new ObservableSource<T>(rootElement, BINDER_NAME, SourceKindEnum.AbsRoot));
-            }
-            else
-            {
-                pathIsAbsolute = false;
-                if(rootElement == "..")
-                {
-                    result.Add(new ObservableSource<T>(next, rootElement, SourceKindEnum.RootUp, BINDER_NAME));
-                    IPropDataInternal parentsData = next?.Parent?.Int_PropData;
-                    if (parentsData != null)
-                        next = ((IHaveTheKeyIT)next).GetNodeForPropVal(parentsData);
-                    else
-                        next = null;
-                }
-                else
-                {
-                    if(next.PropBagProxy.PropBagRef.TryGetTarget(out IPropBag propBag))
-                    {
-                        PropIdType propId = next.PropBagProxy.Level2KeyManager.FromRaw(rootElement);
-                        ExKeyT exKey = ((IHaveTheKeyIT)next).GetTheKey(next.PropBagProxy, propId);
-
-                        if(next.TryGetChild(exKey.CKey, out PropStoreNode child))
-                        {
-                            result.Add(new ObservableSource<T>(propBag, rootElement, SourceKindEnum.RootDown, BINDER_NAME));
-
-                            // Get the Prop Store Node associated with the IPropBag being 
-                            // hosted by the found PropItem.
-                            next = ((IHaveTheKeyIT)next).GetNodeForPropVal(child.Int_PropData);
-                        }
-                        else
-                        {
-                            // Could not locate a property with that name.
-                            next = null;
-                        }
-                    }
-                    else
-                    {
-                        // Our client is no longer with us.
-                        next = null;
-                    }
-                }
-            }
-
-            // Add the intervening nodes if any.
-            for (int nPtr = 1; next != null && nPtr < compCount - 1; nPtr++)
-            {
-                string pathComp = pathElements[nPtr];
-
-                if (pathComp == "..")
-                {
-                    if(!(result[nPtr -1].SourceKind == SourceKindEnum.RootUp || result[nPtr - 1].SourceKind == SourceKindEnum.Up))
-                    {
-                        throw new InvalidOperationException("A path cannot have '..' components that folllow a component that indentifies a property by name.");
-                    }
-
-                    result.Add(new ObservableSource<T>(next, rootElement, SourceKindEnum.RootUp, BINDER_NAME));
-                    IPropDataInternal parentsData = next?.Parent?.Int_PropData;
-                    if (parentsData != null)
-                        next = ((IHaveTheKeyIT)next).GetNodeForPropVal(parentsData);
-                    else
-                        next = null;
-                }
-                else
-                {
-                    if (next.PropBagProxy.PropBagRef.TryGetTarget(out IPropBag propBag))
-                    {
-                        PropIdType propId = next.PropBagProxy.Level2KeyManager.FromRaw(rootElement);
-                        ExKeyT exKey = ((IHaveTheKeyIT)next).GetTheKey(next.PropBagProxy, propId);
-
-                        if (next.TryGetChild(exKey.CKey, out PropStoreNode child))
-                        {
-                            result.Add(new ObservableSource<T>(propBag, rootElement, SourceKindEnum.RootDown, BINDER_NAME));
-
-                            // Get the Prop Store Node associated with the IPropBag being 
-                            // hosted by the found PropItem.
-                            next = ((IHaveTheKeyIT)next).GetNodeForPropVal(child.Int_PropData);
-                        }
-                        else
-                        {
-                            // Could not locate a property with that name.
-                            next = null;
-                        }
-                    }
-                    else
-                    {
-                        // Our client is no longer with us.
-                        next = null;
-                    }
-                }
-            }
-
-            // Add the terminal node.
-            if(next != null)
-            {
-                string pathComp = pathElements[compCount - 1];
-                if (pathComp == "..")
-                {
-                    throw new InvalidOperationException("The last component of the path cannot be '..'.");
-                }
-                else
-                {
-                    if (next.PropBagProxy.PropBagRef.TryGetTarget(out IPropBag propBag))
-                    {
-                        PropIdType propId = next.PropBagProxy.Level2KeyManager.FromRaw(rootElement);
-                        ExKeyT exKey = ((IHaveTheKeyIT)next).GetTheKey(next.PropBagProxy, propId);
-
-                        if (next.TryGetChild(exKey.CKey, out PropStoreNode child))
-                        {
-                            result.Add(new ObservableSource<T>(propBag, rootElement, SourceKindEnum.TerminalNode, BINDER_NAME));
-
-                            // Get the Prop Store Node associated with the IPropBag being 
-                            // hosted by the found PropItem.
-                            next = ((IHaveTheKeyIT)next).GetNodeForPropVal(child.Int_PropData);
-                        }
-                        else
-                        {
-                            // Could not locate a property with that name.
-                            next = null;
-                        }
-                    }
-                    else
-                    {
-                        // Our client is no longer with us.
-                        next = null;
-                    }
-                }
-            }
-
-            return result;
-        }
-
-        protected bool InitPathListeners(ExKeyT bindingTarget, LocalBindingInfo bInfo, OSCollection<T> pathListeners)
-        {
-            DataSourceChangedEventArgs dsChangedEventArgs = new DataSourceChangedEventArgs(DataSourceChangeTypeEnum.Initializing, null, typeof(T), true, true);
-
-            return RefreshPathListeners(bindingTarget, bInfo, pathListeners,
-                dsChangedEventArgs, pathListeners[ROOT_INDEX]);
-        }
-
-        protected bool RefreshPathListeners(ExKeyT bindingTarget, LocalBindingInfo bInfo, OSCollection<T> pathListeners,
+        private bool RefreshPathListeners(ExKeyT bindingTarget, LocalBindingInfo bInfo, OSCollection<T> pathListeners,
             DataSourceChangedEventArgs changeInfo, ObservableSource<T> signalingOs)
         {
             // Assume that this operation will not require the binding to be updated,
@@ -391,11 +378,11 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
                 System.Diagnostics.Debug.Assert(nodeIndex == ROOT_INDEX, $"The node index should refer to the ObservableSource<T> for " +
                     $"the root when DataSourceChangeType = {nameof(DataSourceChangeTypeEnum.Initializing)}.");
 
-                if(pathListeners[0].SourceKind == SourceKindEnum.AbsRoot)
+                if (pathListeners[0].SourceKind == SourceKindEnum.AbsRoot)
                 {
 
                 }
-                else if(pathListeners[0].SourceKind == SourceKindEnum.RootUp)
+                else if (pathListeners[0].SourceKind == SourceKindEnum.RootUp)
                 {
                     //ObservableSource<T> ru = new ObservableSource<T>(pathListeners[0].PathElement, BINDER_NAME, )
                 }
@@ -450,7 +437,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
                 nodeIndex++;
                 ObservableSource<T> child = pathListeners[nodeIndex];
                 bool matched = changedPropName == child.PathElement;
-                    
+
 
                 if (!matched || !(nodeIndex < pathListeners.Count - 1))
                 {
@@ -586,155 +573,9 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             return bindingInfoChanged;
         }
 
-        protected virtual string[] GetPathComponents(string path, out int count)
-        {
-            string[] components = path.Split('/');
-            count = components.Length;
-            return components;
-        }
-
-        #endregion
-
-        #region Build Bindings
-
-        protected void CreateTheBinding(ExKeyT bindingTarget, LocalBindingInfo bInfo, OSCollection<T> pathListeners)
-        {
-            //System.Diagnostics.Debug.Assert(sourceType != null, "The SourceType should never be null here.");
-
-            //// One node:    1 parent, 0 intervening objects, the terminal path element is "." -- The binding binds to the source data itself.
-            //// Two nodes:   1 parent, 0 intervening objects, 1 terminal path element.
-            //// Three nodes: 1 parent, 1 intervening object, 1 terminal path element.
-            //// Four nodes:  1 parent, 2 intervening objects, 1 terminal path element.
-
-            //// The next to last node, must have data, in order to avoid binding warnings.
-            //ObservableSource<T> lastParent = pathListeners[pathListeners.Count - 2];
-            //string strNewPath = pathListeners.GetNewPath(justForDiag: false);
-            //ObservableSourceStatusEnum lastParentStatus = lastParent.Status;
-            //System.Diagnostics.Debug.WriteLine($"Path = {bInfo.PropertyPath.Path}, NewPath = {strNewPath}, " +
-            //    $"Terminal Node Status = {lastParentStatus}.");
-
-            //if (lastParentStatus.IsReadyOrWatching())
-            //{
-            //    // Check to see if DataContext holds source property.
-            //    // When a DataContext is set via a binding, in some cases,
-            //    // bindings that rely on that DataContext may get set
-            //    // before the binding that provides the correct DataContext is set.
-
-            //    ObservableSource<T> root = pathListeners[ROOT_INDEX];
-            //    if (root.SourceKind == SourceKindEnum.FrameworkElement || root.SourceKind == SourceKindEnum.FrameworkContentElement)
-            //    {
-            //        string firstChildPathElement = pathListeners[ROOT_INDEX + 1].PathElement;
-            //        if (!root.DoesChildExist(firstChildPathElement))
-            //        {
-            //            System.Diagnostics.Debug.WriteLine($"No Binding is being created. Data is present, but doesn't contain source property: {firstChildPathElement}.");
-            //            isCustom = false;
-            //            return null;
-            //        }
-            //    }
-
-            //    // TODO: What about the original PropertyPath parameters?
-            //    PropertyPath newPath = new PropertyPath(strNewPath);
-
-            //    isCustom = lastParent.IsPropBagBased;
-            //    return CreateBinding(bindingTarget, bInfo, sourceType, newPath, isCustom);
-            //}
-            //else
-            //{
-            //    System.Diagnostics.Debug.Assert(pathListeners[0].IsListeningForNewDC, "There are no active listeners!");
-
-            //    System.Diagnostics.Debug.WriteLine("No Binding is being created, not enough data.");
-            //    isCustom = false;
-            //    return null;
-            //}
-        }
-
-        protected virtual void CreateBinding(ExKeyT bindingTarget, LocalBindingInfo bInfo, string newPath)
-        {
-            //Binding result;
-
-            //if (isPropBagBased)
-            //{
-            //    IValueConverter converter = GetConverter(bindingTarget, bInfo, sourceType,
-            //        newPath.Path, isPropBagBased, out object converterParameter);
-
-            //    result = new Binding
-            //    {
-            //        Path = newPath,
-            //        Converter = converter,
-            //        ConverterParameter = converterParameter,
-            //    };
-            //    ApplyStandardBindingParams(bInfo, ref result);
-            //}
-            //else
-            //{
-            //    result = CreateDefaultBinding(bindingTarget, bInfo, sourceType, newPath);
-            //}
-
-            //return result;
-        }
-
-        //protected virtual void ApplyStandardBindingParams(MyBindingInfo bInfo, ref Binding binding)
-        //{
-        //    if (bInfo.ElementName != null) binding.ElementName = bInfo.ElementName;
-        //    if (bInfo.RelativeSource != null) binding.RelativeSource = bInfo.RelativeSource;
-        //    if (bInfo.Source != null) binding.Source = bInfo.Source;
-
-        //    binding.BindingGroupName = bInfo.BindingGroupName;
-        //    binding.BindsDirectlyToSource = bInfo.BindsDirectlyToSource;
-        //    binding.Delay = bInfo.Delay;
-
-        //    binding.FallbackValue = bInfo.FallBackValue;
-
-        //    binding.NotifyOnSourceUpdated = bInfo.NotifyOnSourceUpdated;
-        //    binding.NotifyOnTargetUpdated = bInfo.NotifyOnTargetUpdated;
-        //    binding.NotifyOnValidationError = bInfo.NotifyOnValidationError;
-
-        //    binding.StringFormat = bInfo.StringFormat;
-        //    binding.TargetNullValue = bInfo.TargetNullValue;
-
-        //    binding.UpdateSourceExceptionFilter = bInfo.UpdateSourceExceptionFilter;
-
-        //    binding.UpdateSourceTrigger = bInfo.UpdateSourceTrigger;
-        //    binding.ValidatesOnDataErrors = bInfo.ValidatesOnDataErrors;
-        //    binding.ValidatesOnExceptions = bInfo.ValidatesOnExceptions;
-        //    binding.ValidatesOnNotifyDataErrors = bInfo.ValidatesOnNotifyDataErrors;
-
-        //    binding.XPath = bInfo.XPath;
-        //}
-
-        #endregion
-
-        #region Binding Operation Support
-
-        //protected virtual BindingBase GetTheBindingBase(DependencyObject depObj, DependencyProperty targetProperty)
-        //{
-        //    return BindingOperations.GetBindingBase(depObj, targetProperty);
-        //}
-
-        //protected virtual BindingExpressionBase GetTheBindingExpressionBase(DependencyObject depObj, DependencyProperty targetProperty)
-        //{
-        //    BindingExpressionBase bExpBase = BindingOperations.GetBindingExpressionBase(depObj, targetProperty);
-        //    return bExpBase;
-        //}
-
-        //protected virtual BindingExpressionBase SetTheBinding(DependencyObject targetObject, DependencyProperty targetProperty, BindingBase bb)
-        //{
-        //    BindingExpressionBase bExp = BindingOperations.SetBinding(targetObject, targetProperty, bb);
-        //    return bExp;
-        //}
-
-        //protected virtual void ClearTheBinding(DependencyObject depObj, DependencyProperty targetProperty)
-        //{
-        //    BindingOperations.ClearBinding(depObj, targetProperty);
-        //}
-
-        #endregion
-
-        #region Data Source Changed Handler
-
         private void PropertyChangedWithTVals(object sender, PCTypedEventArgs<T> e)
         {
-            System.Diagnostics.Debug.WriteLine("One of our data sources has changed");
+            System.Diagnostics.Debug.WriteLine("The terminal node's property value has been updated.");
         }
 
         protected virtual void DataSourceHasChanged(object sender, DataSourceChangedEventArgs e)
@@ -815,5 +656,4 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
         #endregion
     }
-
 }

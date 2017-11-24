@@ -175,36 +175,36 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
             return false;
         }
 
-        public bool DoesChildExist(string pathElement)
-        {
-            //if (SourceKind == SourceKindEnum.Empty || SourceKind == SourceKindEnum.TerminalNode)
-            //{
-            //    throw new ApplicationException($"The Observable is empty or is the TerminalNode, calling DoesChildExist is not supported.");
-            //}
+        //public bool DoesChildExist(string pathElement)
+        //{
+        //    //if (SourceKind == SourceKindEnum.Empty || SourceKind == SourceKindEnum.TerminalNode)
+        //    //{
+        //    //    throw new ApplicationException($"The Observable is empty or is the TerminalNode, calling DoesChildExist is not supported.");
+        //    //}
 
-            //Type parentType = this.Type;
-            //if (parentType == null) return false;
+        //    //Type parentType = this.Type;
+        //    //if (parentType == null) return false;
 
-            //if (IsPropBagBased)
-            //{
-            //    return DoesChildExist_PropBag((IPropBag)Data, parentType, pathElement);
-            //}
-            //else
-            //{
-            //    return DoesChildExist_Clr(Data, parentType, pathElement);
-            //}
-            return false;
-        }
+        //    //if (IsPropBagBased)
+        //    //{
+        //    //    return DoesChildExist_PropBag((IPropBag)Data, parentType, pathElement);
+        //    //}
+        //    //else
+        //    //{
+        //    //    return DoesChildExist_Clr(Data, parentType, pathElement);
+        //    //}
+        //    return false;
+        //}
 
-        public bool DoesChildExist_PropBag(IPropBag data, Type type, string pathElement)
-        {
-            return data.PropertyExists(pathElement);
-        }
+        //public bool DoesChildExist_PropBag(IPropBag data, Type type, string pathElement)
+        //{
+        //    return data.PropertyExists(pathElement);
+        //}
 
-        public bool DoesChildExist_Clr(object data, Type type, string pathElement)
-        {
-            return type.HasDeclaredProperty(pathElement);
-        }
+        //public bool DoesChildExist_Clr(object data, Type type, string pathElement)
+        //{
+        //    return type.HasDeclaredProperty(pathElement);
+        //}
 
         public ObservableSource<T> GetChild(string pathElement)
         {
@@ -228,60 +228,60 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
             return null;
         }
 
-        private ObservableSource<T> GetChildFromPropBag(IPropBag data, Type type, string pathElement)
-        {
-            object newData;
-            Type newType;
+        //private ObservableSource<T> GetChildFromPropBag(IPropBag data, Type type, string pathElement)
+        //{
+        //    object newData;
+        //    Type newType;
 
-            if (data.TryGetPropGen(pathElement, null, out IPropData iPg))
-            {
-                newData = iPg?.TypedProp?.TypedValueAsObject;
-                newType = iPg?.TypedProp?.Type;
+        //    if (data.TryGetPropGen(pathElement, null, out IPropData iPg))
+        //    {
+        //        newData = iPg?.TypedProp?.TypedValueAsObject;
+        //        newType = iPg?.TypedProp?.Type;
 
-                if (newData != null)
-                {
-                    ObservableSource<T> child = CreateChild(newData, newType, pathElement);
-                    return child;
-                }
-                else
-                {
-                    return new ObservableSource<T>(pathElement, newType, BinderName);
-                }
-            }
-            else
-            {
-                // Property value could not be retreived.
-                if (data.TryGetTypeOfProperty(pathElement, out newType))
-                {
-                    // Create an ObservableSource with SourceKind = TerminalNode.
-                    return new ObservableSource<T>(pathElement, newType, BinderName);
-                }
-                else
-                {
-                    return null;
-                }
-            }
-        }
+        //        if (newData != null)
+        //        {
+        //            ObservableSource<T> child = CreateChild(newData, newType, pathElement);
+        //            return child;
+        //        }
+        //        else
+        //        {
+        //            return new ObservableSource<T>(pathElement, newType, BinderName);
+        //        }
+        //    }
+        //    else
+        //    {
+        //        // Property value could not be retreived.
+        //        if (data.TryGetTypeOfProperty(pathElement, out newType))
+        //        {
+        //            // Create an ObservableSource with SourceKind = TerminalNode.
+        //            return new ObservableSource<T>(pathElement, newType, BinderName);
+        //        }
+        //        else
+        //        {
+        //            return null;
+        //        }
+        //    }
+        //}
 
-        private ObservableSource<T> GetChildFromClr(object data, Type type, string pathElement)
-        {
-            if (data != null)
-            {
-                object val = GetMemberValue(pathElement, data, type, this.PathElement,
-                    out Type pt);
+        //private ObservableSource<T> GetChildFromClr(object data, Type type, string pathElement)
+        //{
+        //    if (data != null)
+        //    {
+        //        object val = GetMemberValue(pathElement, data, type, this.PathElement,
+        //            out Type pt);
 
-                ObservableSource<T> child = CreateChild(val, pt, pathElement);
-                return child;
-            }
-            else
-            {
-                // Using reflection, get the type.
-                Type pt = GetTypeOfPathElement(pathElement, type, this.PathElement);
+        //        ObservableSource<T> child = CreateChild(val, pt, pathElement);
+        //        return child;
+        //    }
+        //    else
+        //    {
+        //        // Using reflection, get the type.
+        //        Type pt = GetTypeOfPathElement(pathElement, type, this.PathElement);
 
-                // Create an ObservableSource with SourceKind = TerminalNode.
-                return new ObservableSource<T>(pathElement, pt, BinderName);
-            }
-        }
+        //        // Create an ObservableSource with SourceKind = TerminalNode.
+        //        return new ObservableSource<T>(pathElement, pt, BinderName);
+        //    }
+        //}
 
         public bool Subscribe(EventHandler<DataSourceChangedEventArgs> subscriber)
         {
@@ -489,163 +489,162 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
             BinderName = binderName;
         }
 
-        #region Holding 
-        public ObservableSource(string pathElement, string binderName, SourceKindEnum sourceKind)
-            : this(pathElement, false, binderName)
-        {
-            SourceKind = sourceKind;
-            Status = ObservableSourceStatusEnum.NoType;
-        }
-        #endregion
-
-        #region Terminal Node 
-        public ObservableSource(string pathElement, Type type, string binderName)
-            : this(pathElement, false, binderName)
-        {
-            SourceKind = SourceKindEnum.TerminalNode;
-            Status = ObservableSourceStatusEnum.HasType;
-        }
-        #endregion
-
-        #region From Framework Element and Framework Content Element
-        //public ObservableSource(FrameworkElement fe, string pathElement, bool isTargetADc, PathConnectorTypeEnum pathConnectorType, string binderName)
-        //    : this(pathElement, pathConnectorType, true, binderName)
+        //#region Holding 
+        //public ObservableSource(string pathElement, string binderName, SourceKindEnum sourceKind)
+        //    : this(pathElement, false, binderName)
         //{
-        //    SourceKind = SourceKindEnum.FrameworkElement;
-        //    AnchorElement = fe;
+        //    SourceKind = sourceKind;
+        //    Status = ObservableSourceStatusEnum.NoType;
+        //}
+        //#endregion
 
-        //    UpdateWatcherAndData_Fe(fe, pathElement, isTargetADc, binderName);
+        //#region Terminal Node 
+        //public ObservableSource(string pathElement, Type type, string binderName)
+        //    : this(pathElement, false, binderName)
+        //{
+        //    SourceKind = SourceKindEnum.TerminalNode;
+        //    Status = ObservableSourceStatusEnum.HasType;
+        //}
+        //#endregion
+
+        //#region From Framework Element and Framework Content Element
+        ////public ObservableSource(FrameworkElement fe, string pathElement, bool isTargetADc, PathConnectorTypeEnum pathConnectorType, string binderName)
+        ////    : this(pathElement, pathConnectorType, true, binderName)
+        ////{
+        ////    SourceKind = SourceKindEnum.FrameworkElement;
+        ////    AnchorElement = fe;
+
+        ////    UpdateWatcherAndData_Fe(fe, pathElement, isTargetADc, binderName);
+        ////}
+
+        ////public ObservableSource(FrameworkContentElement fce, string pathElement, bool isTargetADc, PathConnectorTypeEnum pathConnectorType, string binderName)
+        ////    : this(pathElement, pathConnectorType, true, binderName)
+        ////{
+        ////    SourceKind = SourceKindEnum.FrameworkContentElement;
+        ////    AnchorElement = fce;
+
+        ////    UpdateWatcherAndData_Fe(fce, pathElement, isTargetADc, binderName);
+        ////}
+
+        //private void DataContextChanged_Fe(DependencyPropertyChangedEventArgs e)
+        //{
+        //    //DependencyObject feOrFce = (DependencyObject)this.AnchorElement;
+
+        //    //bool changed = UpdateWatcherAndData_Fe(feOrFce, this.PathElement, this.IsTargetADc, this.BinderName);
+
+        //    //// TODO: Determine if a real change has occured,
+        //    //// and then raise only if real.
+        //    //OnDataSourceChanged(DataSourceChangeTypeEnum.DataContextUpdated, changed);
         //}
 
-        //public ObservableSource(FrameworkContentElement fce, string pathElement, bool isTargetADc, PathConnectorTypeEnum pathConnectorType, string binderName)
-        //    : this(pathElement, pathConnectorType, true, binderName)
+        //private void SubscribeTo_FcOrFce(DependencyObject newDepObj, Action<DependencyPropertyChangedEventArgs> action)
         //{
-        //    SourceKind = SourceKindEnum.FrameworkContentElement;
-        //    AnchorElement = fce;
+        //    //// TODO: Create a new version of DependencyPropertyListener
+        //    //// that takes an existing event source so that we can make these event subscriptions use a Weak Reference.
 
-        //    UpdateWatcherAndData_Fe(fce, pathElement, isTargetADc, binderName);
+        //    //if(newDepObj is FrameworkElement fe)
+        //    //{
+        //    //    DependencyProperty dataContextProp = LogicalTree.FeDataContextDpPropProvider.Value;
+        //    //    DepPropListener = fe.ListenToProperty(dataContextProp, action);
+        //    //}
+        //    //else if(newDepObj is FrameworkContentElement fce)
+        //    //{
+        //    //    DependencyProperty dataContextProp = LogicalTree.FceDataContextDpPropProvider.Value;
+        //    //    DepPropListener = fce.ListenToProperty(dataContextProp, action);
+        //    //}
+        //    //else
+        //    //{
+        //    //    // TODO: Throw an InvalidOperationException.
+        //    //}
         //}
 
-        private void DataContextChanged_Fe(DependencyPropertyChangedEventArgs e)
-        {
-            //DependencyObject feOrFce = (DependencyObject)this.AnchorElement;
+        //private bool UpdateWatcherAndData_Fe(DependencyObject targetObject, string pathElement,
+        //    bool isTargetADc, string binderName)
+        //{
+        //    //if (SourceKind != SourceKindEnum.FrameworkElement && SourceKind != SourceKindEnum.FrameworkContentElement)
+        //    //{
+        //    //    throw new InvalidOperationException($"Cannot call {nameof(UpdateWatcherAndData_Fe)} " +
+        //    //        $"if the ObservableSource does not have a SourceKind of {nameof(SourceKindEnum.FrameworkElement)} " +
+        //    //        $"or {nameof(SourceKindEnum.FrameworkContentElement)}.");
+        //    //}
 
-            //bool changed = UpdateWatcherAndData_Fe(feOrFce, this.PathElement, this.IsTargetADc, this.BinderName);
+        //    //string fwElementName = LogicalTree.GetNameFromDepObject(targetObject);
+        //    //System.Diagnostics.Debug.WriteLine($"Fetching DataContext to use from: {fwElementName} for pathElement: {pathElement}.");
 
-            //// TODO: Determine if a real change has occured,
-            //// and then raise only if real.
-            //OnDataSourceChanged(DataSourceChangeTypeEnum.DataContextUpdated, changed);
-        }
+        //    //this.IsTargetADc = isTargetADc;
 
-        private void SubscribeTo_FcOrFce(DependencyObject newDepObj, Action<DependencyPropertyChangedEventArgs> action)
-        {
-            //// TODO: Create a new version of DependencyPropertyListener
-            //// that takes an existing event source so that we can make these event subscriptions use a Weak Reference.
+        //    //// If this binding sets a DataContext, watch the TargetObject's parent, otherwise watch the TargetObject for DataContext updates
 
-            //if(newDepObj is FrameworkElement fe)
-            //{
-            //    DependencyProperty dataContextProp = LogicalTree.FeDataContextDpPropProvider.Value;
-            //    DepPropListener = fe.ListenToProperty(dataContextProp, action);
-            //}
-            //else if(newDepObj is FrameworkContentElement fce)
-            //{
-            //    DependencyProperty dataContextProp = LogicalTree.FceDataContextDpPropProvider.Value;
-            //    DepPropListener = fce.ListenToProperty(dataContextProp, action);
-            //}
-            //else
-            //{
-            //    // TODO: Throw an InvalidOperationException.
-            //}
-        }
+        //    //// TODO: May want to make sure that the value of Container is a DependencyObject.
+        //    //DependencyObject curContainer = (DependencyObject)Container;
+        //    //DependencyObject newContainer = isTargetADc ? LogicalTreeHelper.GetParent(targetObject) : targetObject;
 
-        private bool UpdateWatcherAndData_Fe(DependencyObject targetObject, string pathElement,
-            bool isTargetADc, string binderName)
-        {
-            //if (SourceKind != SourceKindEnum.FrameworkElement && SourceKind != SourceKindEnum.FrameworkContentElement)
-            //{
-            //    throw new InvalidOperationException($"Cannot call {nameof(UpdateWatcherAndData_Fe)} " +
-            //        $"if the ObservableSource does not have a SourceKind of {nameof(SourceKindEnum.FrameworkElement)} " +
-            //        $"or {nameof(SourceKindEnum.FrameworkContentElement)}.");
-            //}
+        //    //if(!object.ReferenceEquals(curContainer, newContainer))
+        //    //{
+        //    //    SubscribeTo_FcOrFce(newContainer, DataContextChanged_Fe);
+        //    //    Container = newContainer;
+        //    //}
 
-            //string fwElementName = LogicalTree.GetNameFromDepObject(targetObject);
-            //System.Diagnostics.Debug.WriteLine($"Fetching DataContext to use from: {fwElementName} for pathElement: {pathElement}.");
+        //    //// Now see if we can find a data context.
+        //    //DependencyObject foundNode = LogicalTree.GetDataContext(targetObject, out bool foundIt,
+        //    //    startWithParent: isTargetADc, inspectAncestors: true, stopOnNodeWithBoundDc: true);
 
-            //this.IsTargetADc = isTargetADc;
+        //    //if (!foundIt)
+        //    //{
+        //    //    bool changed = UpdateData(null, null, ObservableSourceStatusEnum.NoType);
+        //    //    return changed;
+        //    //}
 
-            //// If this binding sets a DataContext, watch the TargetObject's parent, otherwise watch the TargetObject for DataContext updates
+        //    //if (!object.ReferenceEquals(targetObject, foundNode))
+        //    //{
+        //    //    string foundFwElementName = LogicalTree.GetNameFromDepObject(foundNode);
+        //    //    System.Diagnostics.Debug.WriteLine($"Found DataContext to watch using an ancestor: {foundFwElementName} for pathElement: {pathElement}.");
+        //    //}
+        //    //else
+        //    //{
+        //    //    System.Diagnostics.Debug.WriteLine($"Found DataContext to watch on the target object for pathElement: {pathElement}.");
+        //    //}
 
-            //// TODO: May want to make sure that the value of Container is a DependencyObject.
-            //DependencyObject curContainer = (DependencyObject)Container;
-            //DependencyObject newContainer = isTargetADc ? LogicalTreeHelper.GetParent(targetObject) : targetObject;
+        //    //DependencyObject foundNodeWithBoundDc = LogicalTree.GetDataContextWithBoundDc(targetObject,
+        //    //    out bool foundOneWithBoundDc, startWithParent: isTargetADc);
 
-            //if(!object.ReferenceEquals(curContainer, newContainer))
-            //{
-            //    SubscribeTo_FcOrFce(newContainer, DataContextChanged_Fe);
-            //    Container = newContainer;
-            //}
+        //    //if (foundOneWithBoundDc)
+        //    //{
+        //    //    System.Diagnostics.Debug.WriteLine("Some parent has a DataContext that is set via a Binding Markup.");
+        //    //}
 
-            //// Now see if we can find a data context.
-            //DependencyObject foundNode = LogicalTree.GetDataContext(targetObject, out bool foundIt,
-            //    startWithParent: isTargetADc, inspectAncestors: true, stopOnNodeWithBoundDc: true);
+        //    //if (foundNode is FrameworkElement fe)
+        //    //{
+        //    //    Type newType = fe.DataContext?.GetType();
+        //    //    ObservableSourceStatusEnum newStatus = Status.SetReady(fe.DataContext != null);
 
-            //if (!foundIt)
-            //{
-            //    bool changed = UpdateData(null, null, ObservableSourceStatusEnum.NoType);
-            //    return changed;
-            //}
+        //    //    bool changed = UpdateData(fe.DataContext, newType, newStatus);
+        //    //    //if(newType.IsIListSource())
+        //    //    //{
+        //    //    //    changed = UpdateData(((IListSource)fe.DataContext).GetList(), newType, newStatus);
+        //    //    //}
+        //    //    //else
+        //    //    //{
+        //    //    //    changed = UpdateData(fe.DataContext, newType, newStatus);
+        //    //    //}
 
-            //if (!object.ReferenceEquals(targetObject, foundNode))
-            //{
-            //    string foundFwElementName = LogicalTree.GetNameFromDepObject(foundNode);
-            //    System.Diagnostics.Debug.WriteLine($"Found DataContext to watch using an ancestor: {foundFwElementName} for pathElement: {pathElement}.");
-            //}
-            //else
-            //{
-            //    System.Diagnostics.Debug.WriteLine($"Found DataContext to watch on the target object for pathElement: {pathElement}.");
-            //}
+        //    //    return changed;
+        //    //}
+        //    //else if (foundNode is FrameworkContentElement fce)
+        //    //{
+        //    //    Type newType = fce.DataContext?.GetType();
+        //    //    ObservableSourceStatusEnum newStatus = Status.SetReady(fce.DataContext != null);
+        //    //    bool changed = UpdateData(fce.DataContext, newType, newStatus);
+        //    //    return changed;
+        //    //}
+        //    //else
+        //    //{
+        //    //    throw new ApplicationException($"Found node in {binderName}.ObservableSourceProvider<T> was neither a FrameworkElement or a FrameworkContentElement.");
+        //    //}
+        //    return false;
+        //}
 
-            //DependencyObject foundNodeWithBoundDc = LogicalTree.GetDataContextWithBoundDc(targetObject,
-            //    out bool foundOneWithBoundDc, startWithParent: isTargetADc);
-
-            //if (foundOneWithBoundDc)
-            //{
-            //    System.Diagnostics.Debug.WriteLine("Some parent has a DataContext that is set via a Binding Markup.");
-            //}
-
-            //if (foundNode is FrameworkElement fe)
-            //{
-            //    Type newType = fe.DataContext?.GetType();
-            //    ObservableSourceStatusEnum newStatus = Status.SetReady(fe.DataContext != null);
-
-            //    bool changed = UpdateData(fe.DataContext, newType, newStatus);
-            //    //if(newType.IsIListSource())
-            //    //{
-            //    //    changed = UpdateData(((IListSource)fe.DataContext).GetList(), newType, newStatus);
-            //    //}
-            //    //else
-            //    //{
-            //    //    changed = UpdateData(fe.DataContext, newType, newStatus);
-            //    //}
-
-            //    return changed;
-            //}
-            //else if (foundNode is FrameworkContentElement fce)
-            //{
-            //    Type newType = fce.DataContext?.GetType();
-            //    ObservableSourceStatusEnum newStatus = Status.SetReady(fce.DataContext != null);
-            //    bool changed = UpdateData(fce.DataContext, newType, newStatus);
-            //    return changed;
-            //}
-            //else
-            //{
-            //    throw new ApplicationException($"Found node in {binderName}.ObservableSourceProvider<T> was neither a FrameworkElement or a FrameworkContentElement.");
-            //}
-            return false;
-        }
-
-
-        #endregion
+        //#endregion
 
         #region From INotifyPCTyped<T>
 

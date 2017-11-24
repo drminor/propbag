@@ -36,38 +36,38 @@ namespace PropBagTestApp
             System.Diagnostics.Debug.WriteLine("ProductId was changed.");
         }
 
-        int _testP;
-        public int TestP
-        {
-           get { return _testP; } 
-            set
-            {
-                _testP = value;
-                OnPropertyChanged("TestP");
-            }
-        }
+        //int _testP;
+        //public int TestP
+        //{
+        //   get { return _testP; } 
+        //    set
+        //    {
+        //        _testP = value;
+        //        OnPropertyChanged("TestP");
+        //    }
+        //}
 
-        double _testDouble;
-        public double TestDouble
-        {
-            get { return _testDouble; }
-            set
-            {
-                _testDouble = value;
-                OnPropertyChanged("TestDouble");
-            }
-        }
+        //double _testDouble;
+        //public double TestDouble
+        //{
+        //    get { return _testDouble; }
+        //    set
+        //    {
+        //        _testDouble = value;
+        //        OnPropertyChanged("TestDouble");
+        //    }
+        //}
 
-        MyModel4 _deep2;
-        public MyModel4 Deep2
-        {
-            get { return _deep2; }
-            set
-            {
-                _deep2 = value;
-                OnPropertyChanged("Deep2");
-            }
-        }
+        //MyModel4 _deep2;
+        //public MyModel4 Deep2
+        //{
+        //    get { return _deep2; }
+        //    set
+        //    {
+        //        _deep2 = value;
+        //        OnPropertyChanged("Deep2");
+        //    }
+        //}
 
 
     }

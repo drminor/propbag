@@ -37,7 +37,7 @@ namespace DRM.TypeSafePropertyBag
         INotifyPropertyChanging,
         INotifyPCGen,
         INotifyPCObject,
-        INotifyPCIndividual,
+        //INotifyPCIndividual,
         IDisposable
     {
         // These are defined by ITypeSafePropBag

@@ -22,6 +22,6 @@ namespace DRM.TypeSafePropertyBag
 
         PropStoreNode PropStoreNode { get; }
 
-        PropStoreNode GetNodeForPropVal(IPropDataInternal int_propData);
+        PropStoreNode GetObjectNodeForPropVal(IPropDataInternal int_propData);
     }
 }

@@ -123,7 +123,7 @@ namespace DRM.TypeSafePropertyBag
                 if(guest != null)
                 {
                     // The PropStoreNode will raise its ParentNodeHasChanged event.
-                    PropStoreNode guestPropBagNode = GetGuestObjectNodeFromNewValue((IPropBag)guest);
+                    PropStoreNode guestPropBagNode = GetGuestObjectNodeFromPropItemVal((IPropBag)guest);
                     guestPropBagNode.MakeItAChildOf(propStoreNode);
                 }
 
@@ -455,39 +455,50 @@ namespace DRM.TypeSafePropertyBag
         {
             if (e.NewValueIsUndefined)
             {
-                System.Diagnostics.Debug.Assert(e.OldValue is IPropBag, "The old value does not implement IPropBag on PropertyChangedWithObjectVals handler in PropStoreAccessService.");
+                if (e.OldValue != null)
+                {
+                    System.Diagnostics.Debug.Assert(e.OldValue is IPropBag, "The old value does not implement IPropBag on PropertyChangedWithObjectVals handler in PropStoreAccessService.");
 
-                // Make old a root.
-                PropStoreNode guestPropBagNode = GetGuestObjectNodeFromNewValue((IPropBag)e.OldValue);
-                _ourNode.AddSibling(guestPropBagNode);
+                    // Make old a root.
+                    PropStoreNode guestPropBagNode = GetGuestObjectNodeFromPropItemVal((IPropBag)e.OldValue);
+                    _ourNode.AddSibling(guestPropBagNode);
+                }
             }
             else if (e.OldValueIsUndefined)
             {
-                System.Diagnostics.Debug.Assert(e.NewValue is IPropBag, "The new value does not implement IPropBag on PropertyChangedWithObjectVals handler in PropStoreAccessService.");
+                if (e.NewValue != null)
+                {
+                    System.Diagnostics.Debug.Assert(e.NewValue is IPropBag, "The new value does not implement IPropBag on PropertyChangedWithObjectVals handler in PropStoreAccessService.");
 
-                // Move to child of us. This object is currently a root.
-                PropStoreNode guestPropBagNode = GetGuestObjectNodeFromNewValue((IPropBag)e.NewValue);
-                guestPropBagNode.MakeItAChildOf(_ourNode);
+                    // Move to child of us. This object is currently a root.
+                    PropStoreNode guestPropBagNode = GetGuestObjectNodeFromPropItemVal((IPropBag)e.NewValue);
+                    guestPropBagNode.MakeItAChildOf(_ourNode);
+                }
             }
             else
             {
-                // Out with the old, in with the new.
+                // Out with the old, and in with the new.
+                if (e.OldValue != null)
+                {
+                    System.Diagnostics.Debug.Assert(e.OldValue is IPropBag, "The old value does not implement IPropBag on PropertyChangedWithObjectVals handler in PropStoreAccessService.");
 
-                System.Diagnostics.Debug.Assert(e.OldValue is IPropBag, "The old value does not implement IPropBag on PropertyChangedWithObjectVals handler in PropStoreAccessService.");
+                    // Make old a root.
+                    PropStoreNode guestPropBagNode = GetGuestObjectNodeFromPropItemVal((IPropBag)e.OldValue);
+                    _ourNode.AddSibling(guestPropBagNode);
+                }
 
-                // Make old a root.
-                PropStoreNode guestPropBagNode = GetGuestObjectNodeFromNewValue((IPropBag)e.OldValue);
-                _ourNode.AddSibling(guestPropBagNode);
+                if (e.NewValue != null)
+                {
+                    System.Diagnostics.Debug.Assert(e.NewValue is IPropBag, "The new value does not implement IPropBag on PropertyChangedWithObjectVals handler in PropStoreAccessService.");
 
-                System.Diagnostics.Debug.Assert(e.NewValue is IPropBag, "The new value does not implement IPropBag on PropertyChangedWithObjectVals handler in PropStoreAccessService.");
-
-                // Move to child of us. This object is currently a root.
-                PropStoreNode newGuest = GetGuestObjectNodeFromNewValue((IPropBag)e.NewValue);
-                newGuest.MakeItAChildOf(_ourNode);
+                    // Move to child of us. This object is currently a root.
+                    PropStoreNode newGuest = GetGuestObjectNodeFromPropItemVal((IPropBag)e.NewValue);
+                    newGuest.MakeItAChildOf(_ourNode);
+                }
             }
         }
-        #endregion
 
+        #endregion
 
         #region Private Methods
 
@@ -499,7 +510,7 @@ namespace DRM.TypeSafePropertyBag
             return childObjectNode;
         }
 
-        private PropStoreNode GetGuestObjectNodeFromNewValue(IPropBag propBag)
+        private PropStoreNode GetGuestObjectNodeFromPropItemVal(IPropBag propBag)
         {
             //ObjectIdType objectId = GetAndCheckObjectRef(propBag);
 
@@ -706,7 +717,7 @@ namespace DRM.TypeSafePropertyBag
 
         PropStoreNode IHaveTheKeyIT.PropStoreNode => _ourNode;
 
-        PropStoreNode IHaveTheKeyIT.GetNodeForPropVal(IPropDataInternal int_propData)
+        PropStoreNode IHaveTheKeyIT.GetObjectNodeForPropVal(IPropDataInternal int_propData)
         {
             PropStoreNode result;
             if (int_propData?.TypedProp?.TypedValueAsObject is IPropBagInternal guest_int)
