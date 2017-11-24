@@ -40,4 +40,19 @@ namespace PropBagLib.Tests.PerformanceDb
 
     }
 
+    public partial class DestinationModel6 : PropBag
+    {
+        //public DestinationModel6(PropBagTypeSafetyMode typeSafetyMode, IPropFactory propFactory, string fullClassName)
+        //    : base(typeSafetyMode, propFactory, fullClassName)
+        //{
+        //    AddProp<Guid>("ProductId", null, false, null, null, Guid.NewGuid());
+        //}
+
+        public DestinationModel6(PropModel propModel, string fullClassName, IPropFactory propFactory)
+            : base(propModel, fullClassName, propFactory)
+        {
+        }
+
+    }
+
 }

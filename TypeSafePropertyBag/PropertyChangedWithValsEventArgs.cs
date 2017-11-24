@@ -33,15 +33,34 @@ namespace DRM.TypeSafePropertyBag
         {
         }
 
+        public PCTypedEventArgs(string propertyName, bool oldValueIsUndefined, bool newValueIsUndefined)
+            : base(propertyName, typeof(T), oldValueIsUndefined, newValueIsUndefined)
+        {
+        }
+
         /// <summary>
         /// Gets the old value of the property.
         /// </summary>
-        public new T OldValue => (T)base.OldValue;
+        public new T OldValue
+        {
+            get { return (T)base.OldValue; }
+            set
+            {
+                base.OldValue = value;
+            }
+        }
 
         /// <summary>
         /// Gets the new value of the property.
         /// </summary>
-        public new T NewValue => (T)base.NewValue;
+        public new T NewValue
+        {
+            get { return (T)base.NewValue; }
+            set
+            {
+                base.NewValue = value;
+            }
+        }
     }
 
     /// <summary>
@@ -79,6 +98,14 @@ namespace DRM.TypeSafePropertyBag
         {
             OldValue = oldValue;
             OldValueIsUndefined = false;
+            NewValueIsUndefined = newValueIsUndefined;
+            PropertyType = propertyType;
+        }
+
+        public PCGenEventArgs(string propertyName, Type propertyType, bool oldValueIsUndefined, bool newValueIsUndefined)
+            : base(propertyName)
+        {
+            OldValueIsUndefined = oldValueIsUndefined;
             NewValueIsUndefined = newValueIsUndefined;
             PropertyType = propertyType;
         }

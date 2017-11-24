@@ -108,7 +108,7 @@ namespace DRM.TypeSafePropertyBag
 
         public bool ContainsSubscription(ISubscriptionGen subscription)
         {
-            bool result = _subs.Contains(subscription);
+            bool result = _subs.Exists(x => x.Equals(subscription));
             return result;
         }
 
@@ -116,17 +116,11 @@ namespace DRM.TypeSafePropertyBag
         {
             lock (_sync)
             {
-                subscription = _subs.FirstOrDefault((x => x.SourcePropId.Level2Key == request.SourcePropRef.Level2Key && x.SubscriptionKind == request.SubscriptionKind));
+                subscription = _subs.FirstOrDefault(x => x.Equals(request));
             }
 
-            if(subscription == null)
-            {
-                return false;
-            }
-            else
-            {
-                return true;
-            }
+            bool result = subscription != null;
+            return result;
         }
 
         public int ClearSubscriptions()

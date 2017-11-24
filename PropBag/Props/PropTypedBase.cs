@@ -17,7 +17,7 @@ namespace DRM.PropBag
 
         #region Public Members
 
-        public event EventHandler<PCTypedEventArgs<T>> PropertyChangedWithTVals;
+        //public event EventHandler<PCTypedEventArgs<T>> PropertyChangedWithTVals;
         //public event EventHandler<PCGenEventArgs> PropertyChangedWithGenVals;
 
         abstract public T TypedValue { get; set; }
@@ -59,7 +59,7 @@ namespace DRM.PropBag
             //DoWHenChangedAction = doWhenChanged;
             DoAfterNotify = doAfterNotify;
             Comparer = comparer;
-            PropertyChangedWithTVals = doWhenChangedX;
+            //PropertyChangedWithTVals = doWhenChangedX;
             GetDefaultValFunc = getDefaultValFunc;
         }
 
@@ -121,7 +121,7 @@ namespace DRM.PropBag
         {
             Comparer = null;
             //DoWHenChangedAction = null;
-            PropertyChangedWithTVals = null;
+            //PropertyChangedWithTVals = null;
             base.CleanUpTyped();
         }
 
@@ -190,16 +190,16 @@ namespace DRM.PropBag
 
         #region Raise Events
 
-        public void RaiseEventsForParent(IEnumerable<ISubscriptionGen> typedSubs, object parent,
-            string propertyName, object oldVal, object newVal)
-        {
-            PCTypedEventArgs<T> eArgs = new PCTypedEventArgs<T>(propertyName, (T)oldVal, (T)newVal);
+        //public void RaiseEventsForParent(IEnumerable<ISubscriptionGen> typedSubs, object parent,
+        //    string propertyName, object oldVal, object newVal)
+        //{
+        //    PCTypedEventArgs<T> eArgs = new PCTypedEventArgs<T>(propertyName, (T)oldVal, (T)newVal);
 
-            foreach (Subscription<T> sspt in typedSubs)
-            {
-                sspt.TypedHandler(parent, eArgs);
-            }
-        }
+        //    foreach (Subscription<T> sspt in typedSubs)
+        //    {
+        //        sspt.TypedHandler(parent, eArgs);
+        //    }
+        //}
 
         #endregion
     }

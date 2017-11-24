@@ -6,26 +6,15 @@ namespace DRM.TypeSafePropertyBag
 {
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
 
-    // TODO: Implement IEquatable
-
-    public class AbstractSubscripton<T> : ISubscription<T> 
+    public class SubscriptionGen : ISubscriptionGen
     {
-        #region ISubscription<T> implementation
-
-        public EventHandler<PCTypedEventArgs<T>> TypedHandler { get; protected set; }
-        public Action<T, T> TypedDoWhenChanged { get; protected set; }
-
-        #endregion
-
-        #region ISubscription Implementation
-
         public ExKeyT SourcePropRef { get; protected set; }
 
         public SubscriptionKind SubscriptionKind { get; protected set; }
         public SubscriptionTargetKind SubscriptionTargetKind { get; protected set; }
         public SubscriptionPriorityGroup SubscriptionPriorityGroup { get; protected set; }
 
-        public Type PropertyType => typeof(T);
+        public Type PropertyType { get; }
 
         public EventHandler<PCGenEventArgs> GenHandler { get; protected set; }
         public EventHandler<PCObjectEventArgs> ObjHandler { get; protected set; }
@@ -44,10 +33,23 @@ namespace DRM.TypeSafePropertyBag
 
         public object LocalBinderRefProxy => null;
 
-        #endregion
+        public SubscriptionGen(ISubscriptionKeyGen sKey)
+        {
+            PropertyType = sKey.PropertyType;
+            SourcePropRef = sKey.SourcePropRef;
 
-        #region Constructors
+            GenHandler = sKey.GenHandler;
+            ObjHandler = sKey.ObjHandler;
+            StandardHandler = sKey.StandardHandler;
+            GenDoWhenChanged = sKey.GenDoWhenChanged;
+            Action = sKey.Action;
 
-        #endregion
+            Target = sKey.Target;
+            Method = sKey.Method;
+
+            SubscriptionKind = sKey.SubscriptionKind;
+            SubscriptionPriorityGroup = sKey.SubscriptionPriorityGroup;
+            SubscriptionTargetKind = sKey.SubscriptionTargetKind;
+        }
     }
 }

@@ -14,8 +14,9 @@ namespace DRM.TypeSafePropertyBag
 
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
     using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
+    using System.Collections.Generic;
 
-    public class BindingSubscription<T> : AbstractSubscripton<T>, IBindingSubscription<T>
+    public class BindingSubscription<T> : AbstractSubscripton<T>, IBindingSubscription<T>, IEquatable<BindingSubscription<T>>, IEquatable<ISubscriptionGen>
     {
         #region IBindingSubscription<T> Implementation
 
@@ -32,9 +33,10 @@ namespace DRM.TypeSafePropertyBag
 
         #region ISubscription Implementation
 
-        new public ExKeyT SourcePropId => null;
+        new public ExKeyT SourcePropRef => null;
 
         new public EventHandler<PCGenEventArgs> GenHandler => null;
+        new public EventHandler<PCObjectEventArgs> ObjHandler => null;
         new public EventHandler<PropertyChangedEventArgs> StandardHandler => null;
 
         new public Action<object, object> GenDoWhenChanged => null;
@@ -43,20 +45,52 @@ namespace DRM.TypeSafePropertyBag
         new public object Target => null;
         new public MethodInfo Method => null;
 
+        new public object LocalBinderRefProxy => (object)LocalBinder;
+
         #endregion
 
         #region Constructors
 
         public BindingSubscription(IBindingSubscriptionKey<T> sKey, PSAccessServiceType propStoreAccessService)
         {
-            TargetPropId = sKey.TargetPropRef;
+            TargetPropRef = sKey.TargetPropRef;
             BindingInfo = sKey.BindingInfo;
 
             SubscriptionKind = sKey.SubscriptionKind;
             SubscriptionPriorityGroup = sKey.SubscriptionPriorityGroup;
             SubscriptionTargetKind = sKey.SubscriptionTargetKind;
 
-            LocalBinder = new LocalBinder<T>(propStoreAccessService, TargetPropId, sKey.BindingInfo);
+            LocalBinder = new LocalBinder<T>(propStoreAccessService, TargetPropRef, sKey.BindingInfo);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as BindingSubscription<T>);
+        }
+
+        public bool Equals(BindingSubscription<T> other)
+        {
+            return other != null && object.ReferenceEquals(LocalBinder, other.LocalBinder);
+        }
+
+        public override int GetHashCode()
+        {
+            return LocalBinder.GetHashCode();
+        }
+
+        public bool Equals(ISubscriptionGen other)
+        {
+            return other != null && object.ReferenceEquals(LocalBinder, other.LocalBinderRefProxy);
+        }
+
+        public static bool operator ==(BindingSubscription<T> subscription1, BindingSubscription<T> subscription2)
+        {
+            return object.ReferenceEquals(subscription1.LocalBinder, subscription2.LocalBinder);
+        }
+
+        public static bool operator !=(BindingSubscription<T> subscription1, BindingSubscription<T> subscription2)
+        {
+            return !(subscription1 == subscription2);
         }
 
         #endregion

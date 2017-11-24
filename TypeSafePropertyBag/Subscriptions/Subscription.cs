@@ -33,9 +33,10 @@ namespace DRM.TypeSafePropertyBag
         // TODO: Consider adding additional constructors, very similar to the ones on SubscriptionKey.
         public Subscription(ISubscriptionKey<T> sKey)
         {
-            SourcePropId = sKey.SourcePropRef;
+            SourcePropRef = sKey.SourcePropRef;
             TypedHandler = sKey.TypedHandler;
             GenHandler = sKey.GenHandler;
+            ObjHandler = sKey.ObjHandler;
             StandardHandler = sKey.StandardHandler;
             TypedDoWhenChanged = sKey.TypedDoWhenChanged;
             GenDoWhenChanged = sKey.GenDoWhenChanged;

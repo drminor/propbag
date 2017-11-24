@@ -2,13 +2,11 @@
 {
     public enum SourceKindEnum
     {
-        FrameworkElement,
-        FrameworkContentElement,
-        DataGridColumn,
-        DataSourceProvider,
-        PropertyObject,
-        CollectionObject,
-        Empty,
+        AbsRoot,
+        RootUp,
+        RootDown,
+        Up,
+        Down,
         TerminalNode
     }
 

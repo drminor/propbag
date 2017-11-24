@@ -55,7 +55,7 @@ namespace DRM.TypeSafePropertyBag
     /// Objects that implement this interface are often created by an instance of a class that inherits from AbstractPropFactory.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public interface IProp<T> : IProp //, INotifyPCTyped<T> //, IProvideATypedEventManager<T>
+    public interface IProp<T> : IProp //, INotifyPCTyped<T> 
     {
         T TypedValue { get; set; }
 
@@ -73,7 +73,7 @@ namespace DRM.TypeSafePropertyBag
     /// <summary>
     /// These are the non-type specific features that every instance of IProp<typeparamref name="T"/> implement.
     /// </summary>
-    public interface IProp : INotifyPCObject
+    public interface IProp //: INotifyPCObject
     {
         PropKindEnum PropKind { get; }
         Type Type { get; }
@@ -93,7 +93,7 @@ namespace DRM.TypeSafePropertyBag
         /// <returns>True, if the value was defined at the time this call was made.</returns>
         bool SetValueToUndefined();
 
-        void OnPropertyChangedWithObjectVals(PropNameType propertyName, object oldVal, object newVal);
+        //void OnPropertyChangedWithObjectVals(PropNameType propertyName, object oldVal, object newVal);
 
         void CleanUpTyped();
     }
@@ -106,20 +106,20 @@ namespace DRM.TypeSafePropertyBag
         CompositeKeyType CKey { get; }
         bool IsPropBag { get; }
 
-        //// The ObjectId assigned to the value of this Prop, if the TypedProp.Type is, or derives from, IPropBag.
-        //ObjectIdType ChildObjectId { get; set; }
-
         // On those occasions when the IProp starts off with Type = object, and then later, the type is firmed up,
         // The IPropBag needs to be able to have a new IProp created with the correct type
         // and that new IProp needs to replace the original IProp.
-        void SetTypedProp(IProp value);
+        void SetTypedProp(PropNameType propertyName, IProp value);
+
+        // TODO: replace with Subscribe and Unsubscribe methods.
+        //EventHandler<PCObjectEventArgs> PCObjectEvent {get;}
     }
 
     /// <summary>
     /// Classes that implement the IPropBag interface, keep a list of properties, each of which implements this interface.
     /// These features are managed by the PropBag, and not by classes that inherit from AbstractProp.
     /// </summary>
-    public interface IPropData : INotifyPCObject
+    public interface IPropData //: INotifyPCObject
     {
         PropIdType PropId { get; }
 
@@ -135,6 +135,6 @@ namespace DRM.TypeSafePropertyBag
 
         void CleanUp(bool doTypedCleanup);
 
-        void OnPropertyChangedWithObjectVals(PropNameType propertyName, object oldVal, object newVal);
+        //void OnPropertyChangedWithObjectVals(PropNameType propertyName, object oldVal, object newVal);
     }
 }

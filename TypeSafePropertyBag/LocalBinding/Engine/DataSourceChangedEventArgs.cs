@@ -1,38 +1,69 @@
 ﻿using System;
-using System.ComponentModel;
 
 namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
 {
-    public class DataSourceChangedEventArgs : EventArgs
+    using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
+
+    public class DataSourceChangedEventArgs : PCGenEventArgs
     {
+        public DataSourceChangedEventArgs(DataSourceChangeTypeEnum changeType, string propertyName, Type propertyType, object newValue) : base(propertyName, propertyType, newValue)
+        {
+        }
+
+        public DataSourceChangedEventArgs(DataSourceChangeTypeEnum changeType, string propertyName, Type propertyType, object oldValue, object newValue) : base(propertyName, propertyType, oldValue, newValue)
+        {
+        }
+
+        public DataSourceChangedEventArgs(DataSourceChangeTypeEnum changeType, string propertyName, Type propertyType, object oldValue, bool newValueIsUndefined) : base(propertyName, propertyType, oldValue, newValueIsUndefined)
+        {
+        }
+
+        public DataSourceChangedEventArgs(DataSourceChangeTypeEnum changeType, string propertyName, Type propertyType, bool oldValueIsUndefined, bool newValueIsUndefined) : base(propertyName, propertyType, oldValueIsUndefined, newValueIsUndefined)
+        {
+        }
+
         /// <summary>
         /// Reports how the DataSource was changed.
         /// </summary>
         public DataSourceChangeTypeEnum ChangeType { get; private set; }
-        public bool DataWasUpdated { get; private set; }
 
-        public string PropertyName { get; private set; }
-        public CollectionChangeAction Action { get; private set; }
-        public object Element { get; private set; }
-
-        private DataSourceChangedEventArgs(DataSourceChangeTypeEnum changeType, bool dataWasChanged, string propertyName, 
-            CollectionChangeAction action, object element)
+        static public DataSourceChangedEventArgs NewFromPCGen(PCGenEventArgs eventArgs)
         {
-            ChangeType = changeType;
-            DataWasUpdated = dataWasChanged;
-            PropertyName = propertyName;
-            Action = action;
-            Element = element;
+            DataSourceChangedEventArgs result = new DataSourceChangedEventArgs
+                (
+                DataSourceChangeTypeEnum.PropertyChanged,
+                eventArgs.PropertyName,
+                eventArgs.PropertyType,
+                eventArgs.OldValueIsUndefined,
+                eventArgs.NewValueIsUndefined
+                );
+
+            if (!eventArgs.OldValueIsUndefined)
+            {
+                result.OldValue = eventArgs.OldValue;
+            }
+
+            if (!eventArgs.NewValueIsUndefined)
+            {
+                result.NewValue = eventArgs.NewValue;
+            }
+
+            return result;
         }
 
-        public DataSourceChangedEventArgs(DataSourceChangeTypeEnum changeType, bool dataWasChanged)
-            : this(changeType, dataWasChanged, null, CollectionChangeAction.Refresh, null) { }
+        static public DataSourceChangedEventArgs NewFromPSNodeParentChanged(PSNodeParentChangedEventArgs eventArgs, Type propertyType)
+        {
+            DataSourceChangedEventArgs result = new DataSourceChangedEventArgs
+                (
+                DataSourceChangeTypeEnum.ParentHasChanged,
+                null,
+                propertyType,
+                eventArgs.OldValue,
+                eventArgs.NewValue
+                );
 
-        public DataSourceChangedEventArgs(string propertyName)
-            : this(DataSourceChangeTypeEnum.PropertyChanged, true, propertyName, CollectionChangeAction.Refresh, null) { }
-
-        public DataSourceChangedEventArgs(CollectionChangeAction action, object element)
-            : this(DataSourceChangeTypeEnum.CollectionChanged, true, null, action, element) { }
+            return result;
+        }
 
     }
 

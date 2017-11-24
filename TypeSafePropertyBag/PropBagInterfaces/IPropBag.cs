@@ -23,14 +23,22 @@ namespace DRM.TypeSafePropertyBag
 
     public interface IPropBagInternal
     { 
-        PSAccessServiceType OurStoreAccessor { get; }
+        PSAccessServiceType ItsStoreAccessor { get; }
         L2KeyManType Level2KeyManager { get; }
     }
 
     /// <summary>
     /// Base Property Bag Features
     /// </summary>
-    public interface IPropBag : ITypeSafePropBag, ICustomTypeDescriptor, INotifyPropertyChanged, INotifyPropertyChanging, INotifyPCGen, INotifyPCIndividual, IDisposable
+    public interface IPropBag
+        : ITypeSafePropBag,
+        ICustomTypeDescriptor,
+        INotifyPropertyChanged,
+        INotifyPropertyChanging,
+        INotifyPCGen,
+        INotifyPCObject,
+        INotifyPCIndividual,
+        IDisposable
     {
         // These are defined by ITypeSafePropBag
         //object GetValWithType(string propertyName, Type propertyType);
@@ -42,9 +50,6 @@ namespace DRM.TypeSafePropertyBag
         //Type GetTypeOfProperty(string propertyName);
         //bool TryGetTypeOfProperty(string propertyName, out Type type);
 
-        //IProp<T> GetTypedProp<T>(string propertyName);
-        //IPropGen GetPropGen(string propertyName, Type propertyType);
-
         bool TryGetPropGen(string propertyName, Type propertyType, out IPropData propGen);
 
         object this[string typeName, string propertyName] { get; set; }
@@ -54,7 +59,6 @@ namespace DRM.TypeSafePropertyBag
 
         bool SetValWithNoType(string propertyName, object value);
         bool SetIt<T>(T newValue, ref T curValue, string propertyName);
-        //bool SetIt<T>(T value, PropIdType propId);
 
         bool PropertyExists(string propertyName);
         bool TryGetPropType(string propertyName, out PropKindEnum propType);
@@ -72,7 +76,8 @@ namespace DRM.TypeSafePropertyBag
         bool SubscribeToPropChanged(EventHandler<PCObjectEventArgs> eventHandler, string propertyName);
         bool UnSubscribeToPropChanged(EventHandler<PCObjectEventArgs> eventHandler, string propertyName);
 
-        bool AddBinding<T>(string targetPropertyName, string propertyName, Action<T, T> ttAction);
+        bool RegisterBinding<T>(string nameOfPropertyToUpdate, string pathToSource);
+        bool UnregisterBinding<T>(string nameOfPropertyToUpdate, string pathToSource);
 
         //bool SubscribeToPropChanged<T>(Action<T, T> doOnChange, string propertyName);
         //bool UnSubscribeToPropChanged<T>(Action<T, T> doOnChange, string propertyName);

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 /// <remarks>
 /// The logic of providing access to parent and child objects, where each object is the same,
@@ -13,15 +14,22 @@ using System.Linq;
 namespace DRM.TypeSafePropertyBag
 {
     #region Type Aliases 
+
     using CompositeKeyType = UInt64;
-    using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
+
     #endregion
 
-    internal class PropStoreNode 
+    internal class PropStoreNode : IEquatable<PropStoreNode>, INotifyParentNodeChanged
     {
         #region Private Members
 
         private readonly Dictionary<CompositeKeyType, PropStoreNode> _children;
+
+        #endregion
+
+        #region Events
+
+        public event EventHandler<PSNodeParentChangedEventArgs> ParentNodeHasChanged;
 
         #endregion
 
@@ -30,7 +38,7 @@ namespace DRM.TypeSafePropertyBag
         // Each node holds data about an IPropBag, or a Prop Item belonging to a IPropBag.
         public bool IsObjectNode { get; }
 
-        // If this is an ObjectNode, the PropId portion of the CKey is 0. CKey == ObjectId.
+        // If this is an ObjectNode, the PropId portion of the CKey is 0.
         // If this is an PropNode, the CKey identifies both the IPropBag and the Prop. Its a globally unique PropId.
         public CompositeKeyType CompKey { get; }
 
@@ -40,43 +48,173 @@ namespace DRM.TypeSafePropertyBag
         // PropData will have a value, only for PropNodes.
         public IPropDataInternal Int_PropData { get; set; }
 
-        public PropStoreNode Parent { get; private set; } 
+        PropStoreNode _parent;
+        public PropStoreNode Parent
+        {
+            get { return _parent; }
+            private set
+            {
+                PropStoreNode oldValue = _parent;
+                _parent = value;
+                OnParentNodeHasChanged(oldValue, _parent);
+            }
+        }
 
-        public bool IsRoot => Parent == null;
+        private bool IsArtificialRoot { get; }
+        public bool IsRoot => Parent.IsArtificialRoot;
 
         public Dictionary<CompositeKeyType, PropStoreNode> ChildList => _children;
 
         public IEnumerable<KeyValuePair<CompositeKeyType, PropStoreNode>> Children => (IEnumerable<KeyValuePair<CompositeKeyType, PropStoreNode>>)_children;
 
+        public IEnumerable<KeyValuePair<CompositeKeyType, PropStoreNode>> GetNodesAtLevel(int level)
+        {
+            return Root.GetNodesAtLevelInternal(level);
+        }
+
+        public IEnumerable<KeyValuePair<CompositeKeyType, PropStoreNode>> GetNodesAtLevelInternal(int level)
+        {
+            if (level == Level)
+            {
+                return MakeEnumerable(this);
+            }
+            return Children.SelectMany(c => c.Value.GetNodesAtLevelInternal(level));
+        }
+
+        public int Level => -1 + Ancestors.Count();
+
+        public PropStoreNode Root
+        {
+            get
+            {
+                if (Parent.IsArtificialRoot)
+                {
+                    return this;
+                }
+                else if (IsArtificialRoot)
+                {
+                    throw new InvalidOperationException("Cannot get the root of the tree from the Artificial Root.");
+                }
+                else
+                {
+                    return Ancestors.Last().Value;
+                }
+            }
+        }
+
+        public IEnumerable<KeyValuePair<CompositeKeyType, PropStoreNode>> All => Root.SelfAndDescendants;
+
+        public IEnumerable<KeyValuePair<CompositeKeyType, PropStoreNode>> Ancestors
+        {
+            get
+            {
+                if (Parent.IsArtificialRoot)
+                {
+                    // We are the root of this tree, return an empty list.
+                    return Enumerable.Empty<KeyValuePair<CompositeKeyType, PropStoreNode>>();
+                }
+                if (IsArtificialRoot)
+                {
+                    throw new InvalidOperationException("Cannot get the list of ancestors from the Artificial Root.");
+                }
+                else
+                {
+                    return MakeEnumerable(Parent).Concat(Parent.Ancestors);
+                }
+            }
+        }
+
+        // TODO: see if we avoid creating the value, just to turn around and skip it.
+        public IEnumerable<KeyValuePair<CompositeKeyType, PropStoreNode>> Descendants => SelfAndDescendants.Skip(1);
+
+        public IEnumerable<KeyValuePair<CompositeKeyType, PropStoreNode>> SameLevel => SelfAndSameLevel.Where(Other);
+
+        public IEnumerable<KeyValuePair<CompositeKeyType, PropStoreNode>> SelfAndAncestors
+        {
+            get
+            {
+                if (Parent.IsArtificialRoot)
+                {
+                    return MakeEnumerable(this);
+                }
+                else if (IsArtificialRoot)
+                {
+                    throw new InvalidOperationException("Cannot get the list of SelfAndAncestors from the Artificial Root.");
+                }
+                else
+                {
+                    return MakeEnumerable(this).Concat(Ancestors);
+                }
+            }
+        }
+
+        public IEnumerable<KeyValuePair<CompositeKeyType, PropStoreNode>> SelfAndChildren => MakeEnumerable(this).Concat(Children);
+
+        public IEnumerable<KeyValuePair<CompositeKeyType, PropStoreNode>> SelfAndDescendants =>
+            MakeEnumerable(this).Concat(Children.SelectMany(c => c.Value.SelfAndDescendants));
+
+        public IEnumerable<KeyValuePair<CompositeKeyType, PropStoreNode>> SelfAndSameLevel => GetNodesAtLevel(Level);
+
+        public IEnumerable<KeyValuePair<CompositeKeyType, PropStoreNode>> SelfAndSiblings
+        {
+            get
+            {
+                if (IsRoot)
+                {
+                    return MakeEnumerable(this);
+                }
+                else
+                {
+                    return Parent.Children;
+                }
+            }
+        }
+
+        public IEnumerable<KeyValuePair<CompositeKeyType, PropStoreNode>> Siblings => SelfAndSiblings.Where(Other);
+
         #endregion
 
         #region Constructors
 
-        private PropStoreNode()
+        public PropStoreNode()
         {
+            CompKey = 0;
+            PropBagProxy = null;
+            Int_PropData = null;
+
+            IsObjectNode = false;
+            IsArtificialRoot = true;
             _children = new Dictionary<CompositeKeyType, PropStoreNode>();
+            Parent = null;
         }
 
-        public PropStoreNode(CompositeKeyType ckey, IPropBagProxy propBagProxy) : this()
+        public PropStoreNode(CompositeKeyType ckey, IPropBagProxy propBagProxy, PropStoreNode newParent)
         {
-            IsObjectNode = true;
             CompKey = ckey;
             PropBagProxy = propBagProxy ?? throw new ArgumentNullException(nameof(propBagProxy));
+            Int_PropData = null;
+
+            IsObjectNode = true;
+
+            IsArtificialRoot = false;
+            _children = new Dictionary<CompositeKeyType, PropStoreNode>();
+
+            this.Parent = newParent;
+            newParent.ChildList.Add(ckey, this);
         }
 
-        public PropStoreNode(CompositeKeyType ckey, IPropDataInternal int_PropData) : this()
+        public PropStoreNode(CompositeKeyType ckey, IPropDataInternal int_PropData, PropStoreNode newParent)
         {
-            IsObjectNode = false;
             CompKey = ckey;
-            if(ckey != 0)
-            {
-                Int_PropData = int_PropData ?? throw new ArgumentNullException(nameof(int_PropData));
-            }
-            else
-            {
-                if (int_PropData != null) throw new ArgumentNullException("The CKey is 0, but the int_PropData is not null.");
-                Int_PropData = null;
-            }
+            PropBagProxy = null;
+            Int_PropData = int_PropData ?? throw new ArgumentNullException(nameof(int_PropData));
+
+            IsObjectNode = false;
+            IsArtificialRoot = false;
+            _children = new Dictionary<CompositeKeyType, PropStoreNode>();
+
+            this.Parent = newParent;
+            newParent.ChildList.Add(ckey, this);
         }
 
         #endregion
@@ -96,11 +234,26 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        public void AddChild(PropStoreNode child)
+        public bool TryRemoveChild(CompositeKeyType cKey, out PropStoreNode child)
         {
+            if (_children.TryGetValue(cKey, out child))
+            {
+                _children.Remove(cKey);
+                return true;
+            }
+            else
+            {
+                child = null;
+                return false;
+            }
+        }
+
+        private void AddChild(PropStoreNode child)
+        {
+            // Check to see if the child already has a parent, excluding the "Artifical" root used to hold all "real" roots.
             if (child.Parent != null && child.Parent.CompKey != 0)
             {
-                throw new ArgumentException($"The child with value [{child}] can not be added because it is not a root node.");
+                throw new ArgumentException($"The child with value [{child}] can not be added because it is already a child of some other node.");
             }
 
             if (Root == child)
@@ -131,81 +284,26 @@ namespace DRM.TypeSafePropertyBag
             parent.AddChild(this);
         }
 
-        public void MakeItARoot()
+        public void MakeItARoot(PropStoreNode artificialRoot)
         {
             if (IsRoot)
             {
                 throw new InvalidOperationException("This node [{this}] is already a root.");
             }
             bool wasRemoved = Parent.ChildList.Remove(this.CompKey);
-            Parent = null;
-        }
-
-        public IEnumerable<KeyValuePair<CompositeKeyType, PropStoreNode>> GetNodesAtLevel(int level)
-        {
-            return Root.GetNodesAtLevelInternal(level);
-        }
-
-        public IEnumerable<KeyValuePair<CompositeKeyType, PropStoreNode>> GetNodesAtLevelInternal(int level)
-        {
-            if (level == Level)
+            if(wasRemoved)
             {
-                return MakeEnumerable(this);
+                if(!artificialRoot.IsArtificialRoot)
+                {
+                    throw new InvalidOperationException("The node provided for the artificial root was not the artficial root.");
+                }
+                Parent = artificialRoot;
             }
-            return Children.SelectMany(c => c.Value.GetNodesAtLevelInternal(level));
-        }
-
-        public int Level => Ancestors.Count();
-
-        public PropStoreNode Root => SelfAndAncestors.Last().Value;
-
-        public IEnumerable<KeyValuePair<CompositeKeyType, PropStoreNode>> All => Root.SelfAndDescendants;
-
-        public IEnumerable<KeyValuePair<CompositeKeyType, PropStoreNode>> Ancestors
-        {
-            get
+            else
             {
-                if (IsRoot)
-                {
-                    return Enumerable.Empty<KeyValuePair<CompositeKeyType, PropStoreNode>>();
-                }
-                else
-                {
-                    return MakeEnumerable(Parent).Concat(Parent.Ancestors);
-                }
+                throw new OperationCanceledException("This node could not be removed from it parent's list of child nodes.");
             }
         }
-
-        // TODO: see if we avoid creating the value, just to turn around and skip it.
-        public IEnumerable<KeyValuePair<CompositeKeyType, PropStoreNode>> Descendants => SelfAndDescendants.Skip(1);
-
-        public IEnumerable<KeyValuePair<CompositeKeyType, PropStoreNode>> SameLevel => SelfAndSameLevel.Where(Other);
-
-        public IEnumerable<KeyValuePair<CompositeKeyType, PropStoreNode>> SelfAndAncestors => MakeEnumerable(this).Concat(Ancestors);
-
-        public IEnumerable<KeyValuePair<CompositeKeyType, PropStoreNode>> SelfAndChildren => MakeEnumerable(this).Concat(Children);
-
-        public IEnumerable<KeyValuePair<CompositeKeyType, PropStoreNode>> SelfAndDescendants => 
-            MakeEnumerable(this).Concat(Children.SelectMany(c => c.Value.SelfAndDescendants));
-
-        public IEnumerable<KeyValuePair<CompositeKeyType, PropStoreNode>> SelfAndSameLevel => GetNodesAtLevel(Level);
-
-        public IEnumerable<KeyValuePair<CompositeKeyType, PropStoreNode>> SelfAndSiblings
-        {
-            get
-            {
-                if (IsRoot)
-                {
-                    return MakeEnumerable(this);
-                }
-                else
-                {
-                    return Parent.Children;
-                }
-            }
-        }
-
-        public IEnumerable<KeyValuePair<CompositeKeyType, PropStoreNode>> Siblings => SelfAndSiblings.Where(Other);
 
         #endregion
 
@@ -218,8 +316,48 @@ namespace DRM.TypeSafePropertyBag
             yield return new KeyValuePair<CompositeKeyType, PropStoreNode>(node.CompKey, node);
         }
 
+        private void OnParentNodeHasChanged(PropStoreNode oldValue, PropStoreNode newValue)
+        {
+            Interlocked.CompareExchange(ref ParentNodeHasChanged, null, null)?.Invoke(
+                this, new PSNodeParentChangedEventArgs(this.CompKey, oldValue.PropBagProxy, newValue.PropBagProxy));
+
+            System.Diagnostics.Debug.WriteLine($"Completed calling OnParentNodeHasChanged. There were {ParentNodeHasChanged?.GetInvocationList()?.Count() ?? 0} subscribers.");
+        }
+
         #endregion
 
+        #region IEquatable Support and Object Overrides
 
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as PropStoreNode);
+        }
+
+        public bool Equals(PropStoreNode other)
+        {
+            return other != null &&
+                   CompKey == other.CompKey &&
+                   IsArtificialRoot == other.IsArtificialRoot;
+        }
+
+        public override int GetHashCode()
+        {
+            var hashCode = 990052434;
+            hashCode = hashCode * -1521134295 + CompKey.GetHashCode();
+            hashCode = hashCode * -1521134295 + IsArtificialRoot.GetHashCode();
+            return hashCode;
+        }
+
+        public static bool operator ==(PropStoreNode node1, PropStoreNode node2)
+        {
+            return EqualityComparer<PropStoreNode>.Default.Equals(node1, node2);
+        }
+
+        public static bool operator !=(PropStoreNode node1, PropStoreNode node2)
+        {
+            return !(node1 == node2);
+        }
+
+        #endregion
     }
 }

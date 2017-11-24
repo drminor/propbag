@@ -19,8 +19,8 @@ namespace DRM.PropBag
     {
         #region Public Members
 
-        public event EventHandler<PCGenEventArgs>  PropertyChangedWithGenVals;
-        public event EventHandler<PCObjectEventArgs> PropertyChangedWithObjectVals;
+        //public event EventHandler<PCGenEventArgs>  PropertyChangedWithGenVals;
+        //public event EventHandler<PCObjectEventArgs> PropertyChangedWithObjectVals;
 
         public PropKindEnum PropKind { get; private set; }
         public Type Type { get; private set; }
@@ -45,8 +45,8 @@ namespace DRM.PropBag
             TypeIsSolid = typeIsSolid;
             HasStore = hasStore;
             _attributes = new Attribute[] { };
-            PropertyChangedWithObjectVals = null;
-            PropertyChangedWithObjectVals = null;
+            //PropertyChangedWithObjectVals = null;
+            //PropertyChangedWithObjectVals = null;
         }
 
         #endregion
@@ -60,7 +60,7 @@ namespace DRM.PropBag
         public void CleanUpTyped()
         {
             //PropertyChangedWithGenVals = null;
-            PropertyChangedWithObjectVals = null;
+            //PropertyChangedWithObjectVals = null;
         }
 
         #endregion
@@ -113,27 +113,27 @@ namespace DRM.PropBag
         //    return null;
         //}
 
-        public void OnPropertyChangedWithGenVals(string propertyName, object oldVal, object newVal)
-        {
-            EventHandler<PCGenEventArgs> handler = Interlocked.CompareExchange(ref PropertyChangedWithGenVals, null, null);
+        //public void OnPropertyChangedWithGenVals(string propertyName, object oldVal, object newVal)
+        //{
+        //    EventHandler<PCGenEventArgs> handler = Interlocked.CompareExchange(ref PropertyChangedWithGenVals, null, null);
 
-            if (handler != null)
-            {
-                Type propertyType = this.Type;
-                handler(this, new PCGenEventArgs(propertyName, propertyType, oldVal, newVal));
-            }
-        }
+        //    if (handler != null)
+        //    {
+        //        Type propertyType = this.Type;
+        //        handler(this, new PCGenEventArgs(propertyName, propertyType, oldVal, newVal));
+        //    }
+        //}
 
-        public void OnPropertyChangedWithObjectVals(string propertyName, object oldVal, object newVal)
-        {
-            EventHandler<PCObjectEventArgs> handler = Interlocked.CompareExchange(ref PropertyChangedWithObjectVals, null, null);
+        //public void OnPropertyChangedWithObjectVals(string propertyName, object oldVal, object newVal)
+        //{
+        //    EventHandler<PCObjectEventArgs> handler = Interlocked.CompareExchange(ref PropertyChangedWithObjectVals, null, null);
 
-            if (handler != null)
-            {
-                Type propertyType = this.Type;
-                handler(this, new PCObjectEventArgs(propertyName, oldVal, newVal));
-            }
-        }
+        //    if (handler != null)
+        //    {
+        //        Type propertyType = this.Type;
+        //        handler(this, new PCObjectEventArgs(propertyName, oldVal, newVal));
+        //    }
+        //}
 
         #endregion
 

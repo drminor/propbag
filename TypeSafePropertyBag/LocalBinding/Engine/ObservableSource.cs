@@ -10,45 +10,29 @@ using System.Windows.Data;
 
 namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
 {
-    public class ObservableSource
+    using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
+
+    public class ObservableSource<T> : INotifyPCTyped<T>
     {
         #region Public events and properties
 
-        public event DataSourceChangedEventHandler DataSourceChanged = null; // delegate { };
+        public event EventHandler<DataSourceChangedEventArgs>  DataSourceChanged = null;
+        public event EventHandler<PCTypedEventArgs<T>> PropertyChangedWithTVals;
 
         public string BinderName { get; private set; }
-        public PathConnectorTypeEnum PathConnector { get; private set; }
+        public PathConnectorTypeEnum PathConnector => PathConnectorTypeEnum.Dot;
 
-        string _pathElement;
-        public string PathElement { get; private set; }
+        public string PathElement { get; set; }
 
-        public string NewPathElement { get; set; }
+        public ExKeyT PropId { get; }
 
-        private WeakReference<IDisposable> _wrDepPropListener;
-        private IDisposable DepPropListener
-        {
-            get
-            {
-                if(_wrDepPropListener != null)
-                {
-                    if(_wrDepPropListener.TryGetTarget(out IDisposable depPropListener))
-                    {
-                        return depPropListener;
-                    }
-                }
-                return null;
-            }
-            set
-            {
-                IDisposable old = DepPropListener;
-                if (old != null) old.Dispose();
-                if(value != null)
-                {
-                    _wrDepPropListener = new WeakReference<IDisposable>(value);
-                }
-            }
-        }
+        public SourceKindEnum SourceKind { get; }
 
+        public INotifyParentNodeChanged ParentChangedSource { get; }
+
+        public INotifyPCGen PropChangeGenSource { get; }
+
+        public INotifyPCTyped<T> PropChangedTypedSource { get; }
 
 
         internal bool GetHasTypeAndHasData(out bool hasData)
@@ -84,8 +68,9 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
 
         #region Public Methods
 
-        public void Reset(DataSourceChangedEventHandler subscriber = null)
+        public void Reset(EventHandler<DataSourceChangedEventArgs> subscriber)
         {
+
             //if (subscriber != null) Unsubscribe(subscriber);
 
             //if (SourceKind != SourceKindEnum.Empty && SourceKind != SourceKindEnum.TerminalNode && Status.IsWatching())
@@ -221,7 +206,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
             return type.HasDeclaredProperty(pathElement);
         }
 
-        public ObservableSourceProvider GetChild(string pathElement)
+        public ObservableSource<T> GetChild(string pathElement)
         {
             //if (SourceKind == SourceKindEnum.Empty || SourceKind == SourceKindEnum.TerminalNode)
             //{
@@ -243,7 +228,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
             return null;
         }
 
-        private ObservableSourceProvider GetChildFromPropBag(IPropBag data, Type type, string pathElement)
+        private ObservableSource<T> GetChildFromPropBag(IPropBag data, Type type, string pathElement)
         {
             object newData;
             Type newType;
@@ -255,12 +240,12 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
 
                 if (newData != null)
                 {
-                    ObservableSourceProvider child = CreateChild(newData, newType, pathElement);
+                    ObservableSource<T> child = CreateChild(newData, newType, pathElement);
                     return child;
                 }
                 else
                 {
-                    return new ObservableSourceProvider(pathElement, newType, PathConnectorTypeEnum.Dot, BinderName);
+                    return new ObservableSource<T>(pathElement, newType, BinderName);
                 }
             }
             else
@@ -269,24 +254,23 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
                 if (data.TryGetTypeOfProperty(pathElement, out newType))
                 {
                     // Create an ObservableSource with SourceKind = TerminalNode.
-                    return new ObservableSourceProvider(pathElement, newType, PathConnectorTypeEnum.Dot, BinderName);
+                    return new ObservableSource<T>(pathElement, newType, BinderName);
                 }
                 else
                 {
                     return null;
                 }
             }
-
         }
 
-        private ObservableSourceProvider GetChildFromClr(object data, Type type, string pathElement)
+        private ObservableSource<T> GetChildFromClr(object data, Type type, string pathElement)
         {
             if (data != null)
             {
                 object val = GetMemberValue(pathElement, data, type, this.PathElement,
                     out Type pt);
 
-                ObservableSourceProvider child = CreateChild(val, pt, pathElement);
+                ObservableSource<T> child = CreateChild(val, pt, pathElement);
                 return child;
             }
             else
@@ -295,11 +279,11 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
                 Type pt = GetTypeOfPathElement(pathElement, type, this.PathElement);
 
                 // Create an ObservableSource with SourceKind = TerminalNode.
-                return new ObservableSourceProvider(pathElement, pt, PathConnectorTypeEnum.Dot, BinderName);
+                return new ObservableSource<T>(pathElement, pt, BinderName);
             }
         }
 
-        public bool Subscribe(DataSourceChangedEventHandler subscriber)
+        public bool Subscribe(EventHandler<DataSourceChangedEventArgs> subscriber)
         {
             if (DataSourceChanged == null)
             {
@@ -321,7 +305,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
             }
         }
 
-        public bool Unsubscribe(DataSourceChangedEventHandler subscriber)
+        public bool Unsubscribe(EventHandler<DataSourceChangedEventArgs> subscriber)
         {
             if (DataSourceChanged == null)
             {
@@ -342,135 +326,59 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
             }
         }
 
+        public bool Unsubscribe(EventHandler<PCTypedEventArgs<T>> subscriber)
+        {
+            if (PropertyChangedWithTVals == null)
+            {
+                return false; // It's not there.
+            }
+            else
+            {
+                Delegate[] subscriberList = PropertyChangedWithTVals.GetInvocationList();
+                if (subscriberList.FirstOrDefault((x) => x == (Delegate)subscriber) == null)
+                {
+                    return false; // Not there.
+                }
+                else
+                {
+                    PropertyChangedWithTVals -= subscriber;
+                    return true; // We removed it.
+                }
+            }
+        }
+
         public void BeginListeningToSource()
         {
-            //switch (SourceKind)
-            //{
-            //    case SourceKindEnum.PropertyObject:
-            //        {
-            //            AddSubscriptions(Data);
-            //            break;
-            //        }
-            //    case SourceKindEnum.CollectionObject:
-            //        {
-            //            AddSubscriptions(Data);
-            //            break;
-            //        }
-            //    case SourceKindEnum.FrameworkElement:
-            //        {
-            //            AddSubscriptions(Data);
-            //            break;
-            //        }
-            //    case SourceKindEnum.FrameworkContentElement:
-            //        {
-            //            AddSubscriptions(Data);
-            //            break;
-            //        }
-            //    case SourceKindEnum.DataGridColumn:
-            //        {
-            //            AddSubscriptions(Data);
-            //            break;
-            //        }
-            //    case SourceKindEnum.DataSourceProvider:
-            //        {
-            //            AddSubscriptions(Data);
-            //            break;
-            //        }
-            //    case SourceKindEnum.TerminalNode:
-            //        {
-            //            goto case SourceKindEnum.Empty;
-            //        }
-            //    case SourceKindEnum.Empty:
-            //        {
-            //            break;
-            //        }
-            //    default:
-            //        {
-            //            string msg = $"ObservableSouce with SourceKind value: {SourceKind} is not supported or " +
-            //                "is not recognized on call to BeginListeningToSource.";
-
-            //            System.Diagnostics.Debug.WriteLine(msg);
-            //            break;
-            //        }
-            //}
         }
 
         public void StopListeningToSource()
         {
-            //switch (SourceKind)
-            //{
-            //    case SourceKindEnum.PropertyObject:
-            //        {
-            //            RemoveSubscriptions(Data);
-            //            break;
-            //        }
-            //    case SourceKindEnum.CollectionObject:
-            //        {
-            //            RemoveSubscriptions(Data);
-            //            break;
-            //        }
-            //    case SourceKindEnum.FrameworkElement:
-            //        {
-            //            RemoveSubscriptions(Data);
-            //            break;
-            //        }
-            //    case SourceKindEnum.FrameworkContentElement:
-            //        {
-            //            RemoveSubscriptions(Data);
-            //            break;
-            //        }
-            //    case SourceKindEnum.DataGridColumn:
-            //        {
-            //            RemoveSubscriptions(Data);
-            //            break;
-            //        }
-            //    case SourceKindEnum.DataSourceProvider:
-            //        {
-            //            RemoveSubscriptions(Data);
-            //            break;
-            //        }
-            //    case SourceKindEnum.TerminalNode:
-            //        {
-            //            goto case SourceKindEnum.Empty;
-            //        }
-            //    case SourceKindEnum.Empty:
-            //        {
-            //            break;
-            //        }
-            //    default:
-            //        {
-            //            string msg = $"ObservableSouce with SourceKind value: {SourceKind} is not supported or " +
-            //                "is not recognized on call to StopListeningToSource.";
-
-            //            System.Diagnostics.Debug.WriteLine(msg);
-            //            break;
-            //        }
-            //}
+            RemoveSubscriptions();
         }
 
         #endregion
 
         #region Private Methods
 
-        private ObservableSourceProvider CreateChild(object data, Type type, string pathElement)
+        private ObservableSource<T> CreateChild(object data, Type type, string pathElement)
         {
-            // Property Changed
-            if (typeof(INotifyPropertyChanged).IsAssignableFrom(type))
-            {
-                return new ObservableSourceProvider(data as INotifyPropertyChanged, pathElement, PathConnectorTypeEnum.Dot, BinderName);
-            }
+            //// Property Changed
+            //if (typeof(INotifyPropertyChanged).IsAssignableFrom(type))
+            //{
+            //    return new ObservableSourceProvider<T>(data as INotifyPropertyChanged, pathElement, PathConnectorTypeEnum.Dot, BinderName);
+            //}
 
-            // Collection Changed
-            else if (typeof(INotifyCollectionChanged).IsAssignableFrom(type))
-            {
-                return new ObservableSourceProvider(data as INotifyCollectionChanged, pathElement, PathConnectorTypeEnum.Dot, BinderName);
-            }
+            //// Collection Changed
+            //else if (typeof(INotifyCollectionChanged).IsAssignableFrom(type))
+            //{
+            //    return new ObservableSourceProvider<T>(data as INotifyCollectionChanged, pathElement, PathConnectorTypeEnum.Dot, BinderName);
+            //}
 
-            // DataSourceProvider
-            else if (typeof(DataSourceProvider).IsAssignableFrom(type))
-            {
-                return new ObservableSourceProvider(data as DataSourceProvider, pathElement, PathConnectorTypeEnum.Dot, BinderName);
-            }
+            //// DataSourceProvider
+            //else if (typeof(DataSourceProvider).IsAssignableFrom(type))
+            //{
+            //    return new ObservableSourceProvider<T>(data as DataSourceProvider, pathElement, PathConnectorTypeEnum.Dot, BinderName);
+            //}
 
             throw new InvalidOperationException("Cannot create child: it does not implement INotifyPropertyChanged, INotifyCollectionChanged, nor is it, or dervive from, a DataSourceProvider.");
         }
@@ -508,7 +416,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
             //Status = workStatus;
         }
 
-        private void RemoveSubscriptions(object dc)
+        private void RemoveSubscriptions()
         {
             //if (dc == null) return;
 
@@ -534,34 +442,68 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
             //{
             //    System.Diagnostics.Debug.WriteLine("Could not remove subscriptions. Object Object does not implement INotifyPropertyChanged, nor does it implement INotifyCollectionChanged.");
             //}
+            switch (this.SourceKind)
+            {
+                case SourceKindEnum.AbsRoot:
+                    {
+                        goto case SourceKindEnum.Up;
+                    }
+                case SourceKindEnum.RootUp:
+                    {
+                        goto case SourceKindEnum.Up;
+                    }
+                case SourceKindEnum.RootDown:
+                    {
+                        goto case SourceKindEnum.Down;
+                    }
+                case SourceKindEnum.Up:
+                    {
+                        ParentChangedSource.ParentNodeHasChanged -= NotifyParentChangedSource_ParentNodeHasChanged;
+                        break;
+                    }
+                case SourceKindEnum.Down:
+                    {
+                        PropChangeGenSource.PropertyChangedWithGenVals -= ItRaisesPCTGen_PropertyChangedWithGenVals;
+                        break;
+                    }
+                case SourceKindEnum.TerminalNode:
+                    {
+                        this.PropChangedTypedSource.PropertyChangedWithTVals -= ItRaisesPCTGen_PropertyChangedWithGenVals;
+                        break;
+                    }
+                default:
+                    {
+                        throw new InvalidOperationException($"{this.SourceKind} is not recognized or is not supported.");
+                    }
+            }
         }
 
         #endregion
 
         #region Constructors and their handlers
 
-        private ObservableSource(string pathElement, PathConnectorTypeEnum pathConnector, bool isListening, string binderName)
+        private ObservableSource(string pathElement, bool isListening, string binderName)
         {
             PathElement = pathElement;
-            PathConnector = pathConnector;
             IsListeningForNewDC = isListening;
             BinderName = binderName;
         }
 
-        #region Empty 
-        public ObservableSource(string pathElement, string binderName)
-            : this(pathElement, PathConnectorTypeEnum.Dot, false, binderName)
+        #region Holding 
+        public ObservableSource(string pathElement, string binderName, SourceKindEnum sourceKind)
+            : this(pathElement, false, binderName)
         {
+            SourceKind = sourceKind;
             Status = ObservableSourceStatusEnum.NoType;
         }
         #endregion
 
         #region Terminal Node 
-        public ObservableSource(string pathElement, Type type, PathConnectorTypeEnum pathConnectorType, string binderName)
-            : this(pathElement, pathConnectorType, false, binderName)
+        public ObservableSource(string pathElement, Type type, string binderName)
+            : this(pathElement, false, binderName)
         {
+            SourceKind = SourceKindEnum.TerminalNode;
             Status = ObservableSourceStatusEnum.HasType;
-
         }
         #endregion
 
@@ -697,7 +639,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
             //}
             //else
             //{
-            //    throw new ApplicationException($"Found node in {binderName}.ObservableSourceProvider was neither a FrameworkElement or a FrameworkContentElement.");
+            //    throw new ApplicationException($"Found node in {binderName}.ObservableSourceProvider<T> was neither a FrameworkElement or a FrameworkContentElement.");
             //}
             return false;
         }
@@ -705,146 +647,85 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
 
         #endregion
 
-        #region From DataGridColumn
-        //public ObservableSource(DataGridColumn dgc, string pathElement, PathConnectorTypeEnum pathConnectorType, string binderName)
-        //    : this(pathElement, pathConnectorType, true, binderName)
-        //{
-        //    AnchorElement = dgc;
-        //    SourceKind = SourceKindEnum.DataGridColumn;
+        #region From INotifyPCTyped<T>
 
-        //    SubscribeTo_Dg(dgc, DisplayIndexChanged_Dg);
-
-        //    UpdateData_Dg(dgc, pathElement, binderName);
-
-        //}
-
-        private void DisplayIndexChanged_Dg(DependencyPropertyChangedEventArgs e)
+        public ObservableSource(INotifyPCTyped<T> itRaisesPCTyped, string pathElement, 
+            SourceKindEnum sourceKind, string binderName)
+            : this(pathElement,  false, binderName)
         {
-            //DataGridColumn dgc = (DataGridColumn)this.AnchorElement;
-
-            //bool changed = UpdateData_Dg(dgc, this.PathElement, this.BinderName);
-
-            //// TODO: Determine if a real change has occured by comparing the value of Status before and afer the call 
-            //// to DgUpdateData and then raise only if appropriate.
-
-            //if (Status == ObservableSourceStatusEnum.Ready)
-            //{
-            //    OnDataSourceChanged(DataSourceChangeTypeEnum.DataContextUpdated, changed);
-            //}
-        }
-
-        //private bool UpdateData_Dg(DataGridColumn dgc, string pathElement, string binderName)
-        //{
-        //    //if (SourceKind != SourceKindEnum.DataGridColumn)
-        //    //{
-        //    //    throw new InvalidOperationException($"Cannot call {nameof(UpdateData_Dg)} " +
-        //    //        $"if the ObservableSource is not of SourceKind: {nameof(SourceKindEnum.DataGridColumn)}.");
-        //    //}
-
-        //    //System.Diagnostics.Debug.WriteLine($"Fetching DataGrid for a DataGridColumn for {pathElement}.");
-
-        //    //DataGrid dataGrid = LogicalTree.GetDataGridOwner(dgc);
-
-        //    //Type newType = dataGrid?.GetType();
-        //    //ObservableSourceStatusEnum newStatus = Status.SetReady(dataGrid != null);
-
-        //    //bool changed = UpdateData(dataGrid?.SelectedItems, newType, newStatus);
-        //    //return changed;
-        //    return false;
-        //}
-
-        //private void SubscribeTo_Dg(DataGridColumn dcg, Action<DependencyPropertyChangedEventArgs> action)
-        //{
-        //    //DependencyProperty dispIndex = LogicalTree.DataGridColumn_DisplayIndex_DpPropProvider.Value;
-        //    //DepPropListener = dcg.ListenToProperty(dispIndex, action);
-
-        //    //object anchor = AnchorElement;
-
-        //    //if (anchor != null && anchor is DataGridColumn currentDgc)
-        //    //{
-        //    //    if (Container != null && Container is IDisposable disp)
-        //    //    {
-        //    //        // Free up the previous DependencyPropertyListener.
-        //    //        disp.Dispose();
-        //    //    }
-        //    //}
-
-        //    //if(action != null)
-        //    //{
-        //    //    DependencyProperty dispIndex = LogicalTree.DataGridColumn_DisplayIndex_DpPropProvider.Value;
-        //    //    Container = dcg.PropertyChanged(dispIndex, action);
-        //    //}
-        //    //else
-        //    //{
-        //    //    Container = null;
-        //    //}
-        //}
-
-        #endregion
-
-        #region From INotifyPropertyChanged
-        public ObservableSource(INotifyPropertyChanged itRaisesPropChanged, string pathElement, PathConnectorTypeEnum pathConnectorType, string binderName)
-            : this(pathElement, pathConnectorType, false, binderName)
-        {
+            SourceKind = sourceKind;
+            PropChangedTypedSource = itRaisesPCTyped;
+            itRaisesPCTyped.PropertyChangedWithTVals += ItRaisesPCTyped_PropertyChangedWithTVals;
             Status = ObservableSourceStatusEnum.Ready;
         }
 
-        private void OnPCEvent(object source, PropertyChangedEventArgs args)
+        private void ItRaisesPCTyped_PropertyChangedWithTVals(object sender, PCTypedEventArgs<T> e)
         {
-            OnDataSourceChanged(args.PropertyName);
+            OnPropertyChangedWithTVals(e);
         }
+
         #endregion
 
-        #region From INotifyCollection Changed
-        public ObservableSource(INotifyCollectionChanged itRaisesCollectionChanged, string pathElement, PathConnectorTypeEnum pathConnectorType, string binderName)
-            : this(pathElement, pathConnectorType, false, binderName)
+        #region From INotifyPCGen 
+
+        public ObservableSource(INotifyPCGen itRaisesPCTGen, string pathElement,
+            SourceKindEnum sourceKind, string binderName)
+            : this(pathElement, false, binderName)
         {
+            SourceKind = sourceKind;
+            PropChangeGenSource = itRaisesPCTGen;
+            itRaisesPCTGen.PropertyChangedWithGenVals += ItRaisesPCTGen_PropertyChangedWithGenVals;
             Status = ObservableSourceStatusEnum.Ready;
-
-            //WeakEventManager<INotifyCollectionChanged, CollectionChangeEventArgs>
-            //    .AddHandler(itRaisesCollectionChanged, "CollectionChanged", OnCCEvent);
         }
 
-        private void OnCCEvent(object source, CollectionChangeEventArgs args)
+        private void ItRaisesPCTGen_PropertyChangedWithGenVals(object sender, PCGenEventArgs e)
         {
-            OnDataSourceChanged(args.Action, args.Element);
+            if (e.PropertyName == PathElement)
+            {
+                OnDataSourceChanged(DataSourceChangeTypeEnum.PropertyChanged, e);
+            }
         }
+
         #endregion
 
-        #region From DataSourceProvider
-        public ObservableSource(DataSourceProvider dsp, string pathElement, PathConnectorTypeEnum pathConnectorType, string binderName)
-            : this(pathElement, pathConnectorType, true, binderName)
-        {
-            WeakEventManager<DataSourceProvider, EventArgs>.AddHandler(dsp, "DataChanged", OnDataSourceProvider_DataChanged);
+        #region PropStoreParent
 
-            Status = ObservableSourceStatusEnum.Undetermined;
+        public ObservableSource(INotifyParentNodeChanged notifyParentChangedSource, string pathElement, SourceKindEnum sourceKind, string binderName)
+            : this(pathElement, false, binderName)
+        {
+            SourceKind = sourceKind;
+            ParentChangedSource = notifyParentChangedSource;
+            notifyParentChangedSource.ParentNodeHasChanged += NotifyParentChangedSource_ParentNodeHasChanged;
+            Status = ObservableSourceStatusEnum.Ready;
         }
 
-        private void OnDataSourceProvider_DataChanged(object source, EventArgs args)
+        private void NotifyParentChangedSource_ParentNodeHasChanged(object sender, PSNodeParentChangedEventArgs e)
         {
-            // TODO: Has something changed.
-            bool changed = true;
-            OnDataSourceChanged(DataSourceChangeTypeEnum.DataContextUpdated, changed);
+            OnDataSourceChanged(DataSourceChangeTypeEnum.ParentHasChanged, e);
         }
+
         #endregion
+
 
         #endregion Constructors and their handlers
 
         #region Raise Event Helpers
 
-        private void OnDataSourceChanged(DataSourceChangeTypeEnum changeType, bool changed)
+        public void OnPropertyChangedWithTVals(PCTypedEventArgs<T> eArgs)
         {
-            Interlocked.CompareExchange(ref DataSourceChanged, null, null)?.Invoke(this, new DataSourceChangedEventArgs(changeType, changed));
+            Interlocked.CompareExchange(ref PropertyChangedWithTVals, null, null)?.Invoke(this, eArgs);
         }
 
-        private void OnDataSourceChanged(string propertyName)
+        private void OnDataSourceChanged(DataSourceChangeTypeEnum changeType, PCGenEventArgs eArgs)
         {
-            Interlocked.CompareExchange(ref DataSourceChanged, null, null)?.Invoke(this, new DataSourceChangedEventArgs(propertyName));
+            Interlocked.CompareExchange(ref DataSourceChanged, null, null)
+                ?.Invoke(this, DataSourceChangedEventArgs.NewFromPCGen(eArgs));
         }
 
-        private void OnDataSourceChanged(CollectionChangeAction action, object element)
+        private void OnDataSourceChanged(DataSourceChangeTypeEnum changeType, PSNodeParentChangedEventArgs eArgs)
         {
-            Interlocked.CompareExchange(ref DataSourceChanged, null, null)?.Invoke(this, new DataSourceChangedEventArgs(action, element));
+            Interlocked.CompareExchange(ref DataSourceChanged, null, null)
+                ?.Invoke(this, DataSourceChangedEventArgs.NewFromPSNodeParentChanged(eArgs, typeof(T)));
         }
 
         #endregion Raise Event Helpers

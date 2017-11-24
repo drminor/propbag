@@ -7,7 +7,7 @@ using System.Windows.Data;
 
 namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
 {
-    public class ObservableSourceProvider
+    public class ObservableSourceProvider<T>
     {
         #region Private properties
 
@@ -24,18 +24,18 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
 
         #region Public Methods
 
-        public ObservableSource CreateObservableSource()
+        public ObservableSource<T> CreateObservableSource()
         {
             switch (this.SourceKind)
             {
-                case SourceKindEnum.Empty: return new ObservableSource(PathElement, BinderName);
-                case SourceKindEnum.TerminalNode: return new ObservableSource(PathElement, Type, PathConnectorType, BinderName);
-                //case SourceKindEnum.FrameworkElement: return new ObservableSource((FrameworkElement)Data, PathElement, IsTargetADc, PathConnectorType, BinderName);
-                //case SourceKindEnum.FrameworkContentElement: return new ObservableSource((FrameworkContentElement)Data, PathElement, IsTargetADc, PathConnectorType, BinderName);
-                //case SourceKindEnum.DataGridColumn: return new ObservableSource((DataGridColumn)Data, PathElement, PathConnectorType, BinderName);
-                case SourceKindEnum.PropertyObject: return new ObservableSource((INotifyPropertyChanged)Data, PathElement, PathConnectorType, BinderName);
-                case SourceKindEnum.CollectionObject: return new ObservableSource((INotifyCollectionChanged)Data, PathElement, PathConnectorType, BinderName);
-                case SourceKindEnum.DataSourceProvider: return new ObservableSource((DataSourceProvider)Data, PathElement, PathConnectorType, BinderName);
+                case SourceKindEnum.Down: return new ObservableSource<T>(PathElement, BinderName);
+                //case SourceKindEnum.TerminalNode: return new ObservableSource<T>(PathElement, Type, PathConnectorType, BinderName);
+                ////case SourceKindEnum.FrameworkElement: return new ObservableSource<T>((FrameworkElement)Data, PathElement, IsTargetADc, PathConnectorType, BinderName);
+                ////case SourceKindEnum.FrameworkContentElement: return new ObservableSource<T>((FrameworkContentElement)Data, PathElement, IsTargetADc, PathConnectorType, BinderName);
+                ////case SourceKindEnum.DataGridColumn: return new ObservableSource<T>((DataGridColumn)Data, PathElement, PathConnectorType, BinderName);
+                //case SourceKindEnum.PropertyObject: return new ObservableSource<T>((INotifyPropertyChanged)Data, PathElement, PathConnectorType, BinderName);
+                //case SourceKindEnum.CollectionObject: return new ObservableSource<T>((INotifyCollectionChanged)Data, PathElement, PathConnectorType, BinderName);
+                //case SourceKindEnum.DataSourceProvider: return new ObservableSource<T>((DataSourceProvider)Data, PathElement, PathConnectorType, BinderName);
                 default: throw new InvalidOperationException("That Source Kind is not recognized.");
             }
         }
@@ -44,10 +44,10 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
 
         #region GetSource Support
 
-        public static ObservableSourceProvider GetSourceRoot(IPropBagProxy bindingTarget,
+        public static ObservableSourceProvider<T> GetSourceRoot(IPropBagProxy bindingTarget,
             object source, string pathElement, string binderName)
         {
-            //if (source != null && GetSourceFromSource(source, pathElement, binderName, out ObservableSourceProvider osp))
+            //if (source != null && GetSourceFromSource(source, pathElement, binderName, out ObservableSource<T>Provider<T> osp))
             //{
             //    return osp;
             //}
@@ -56,51 +56,53 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
             //    GetDefaultSource(bindingTarget, pathElement, binderName, out osp);
             //    return osp;
             //}
-            return new ObservableSourceProvider("", PathConnectorTypeEnum.Dot, "");
+            return new ObservableSourceProvider<T>("", PathConnectorTypeEnum.Dot, "");
         }
 
-        public static bool GetSourceFromSource(object source, string pathElement, string binderName, out ObservableSourceProvider osp)
+        public static bool GetSourceFromSource(object source, string pathElement, string binderName, out ObservableSource<T> osp)
         {
-            if (source is DataSourceProvider)
-            {
-                osp = new ObservableSourceProvider(source as DataSourceProvider, pathElement, PathConnectorTypeEnum.Dot, binderName);
-                return true;
-            }
-            else if (source is INotifyPropertyChanged)
-            {
-                osp = new ObservableSourceProvider(source as INotifyPropertyChanged, pathElement, PathConnectorTypeEnum.Dot, binderName);
-                return true;
-            }
-            else if (source is INotifyCollectionChanged)
-            {
-                osp = new ObservableSourceProvider(source as INotifyCollectionChanged, pathElement, PathConnectorTypeEnum.Dot, binderName);
-                return true;
-            }
-            else
-            {
-                osp = null;
-                return false;
-            }
+            //if (source is DataSourceProvider)
+            //{
+            //    osp = new ObservableSource<T>(source as DataSourceProvider, pathElement, PathConnectorTypeEnum.Dot, binderName);
+            //    return true;
+            //}
+            //else if (source is INotifyPropertyChanged)
+            //{
+            //    osp = new ObservableSource<T>(source as INotifyPropertyChanged, pathElement, PathConnectorTypeEnum.Dot, binderName);
+            //    return true;
+            //}
+            //else if (source is INotifyCollectionChanged)
+            //{
+            //    osp = new ObservableSource<T>(source as INotifyCollectionChanged, pathElement, PathConnectorTypeEnum.Dot, binderName);
+            //    return true;
+            //}
+            //else
+            //{
+            //    osp = null;
+            //    return false;
+            //}
+            osp = null;
+            return false;
         }
 
         public static bool GetDefaultSource(IPropBagProxy bindingTarget, string pathElement, 
-            string binderName, out ObservableSourceProvider osp)
+            string binderName, out ObservableSource<T> osp)
         {
             //bool isTargetADc = bindingTarget.IsDataContext;
 
             //if(bindingTarget.DependencyObject is FrameworkElement fe)
             //{
-            //    osp = new ObservableSourceProvider(fe, pathElement, isTargetADc, PathConnectorTypeEnum.Dot, binderName);
+            //    osp = new ObservableSource<T>Provider<T>(fe, pathElement, isTargetADc, PathConnectorTypeEnum.Dot, binderName);
             //    return true;
             //}
             //else if(bindingTarget.DependencyObject is FrameworkContentElement fce)
             //{
-            //    osp = new ObservableSourceProvider(fce, pathElement, isTargetADc, PathConnectorTypeEnum.Dot, binderName);
+            //    osp = new ObservableSource<T>Provider<T>(fce, pathElement, isTargetADc, PathConnectorTypeEnum.Dot, binderName);
             //    return true;
             //}
             //else if(bindingTarget.DependencyObject is DataGridColumn dgc)
             //{
-            //    osp = new ObservableSourceProvider(dgc, pathElement, PathConnectorTypeEnum.Dot, binderName);
+            //    osp = new ObservableSource<T>Provider<T>(dgc, pathElement, PathConnectorTypeEnum.Dot, binderName);
             //    return false;
             //}
             //else
@@ -108,7 +110,8 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
             //    osp = null;
             //    return false;
             //}
-            osp = new ObservableSourceProvider("", PathConnectorTypeEnum.Dot, "");
+            //osp = new ObservableSource<T>("", typeof(T), PathConnectorTypeEnum.Dot, "");
+            osp = null;
             return false;
         }
 
@@ -119,7 +122,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
         {
             Data = null;
             Type = null;
-            SourceKind = SourceKindEnum.Empty;
+            SourceKind = SourceKindEnum.Down;
             PathElement = pathElement;
             PathConnectorType = pathConnectorType;
             BinderName = binderName;
@@ -138,7 +141,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
         #endregion
 
         #region From Framework Element and Framework Content Element
-        //public ObservableSourceProvider(FrameworkElement fe, string pathElement, bool isTargetADc, PathConnectorTypeEnum pathConnectorType, string binderName)
+        //public ObservableSource<T>Provider<T>(FrameworkElement fe, string pathElement, bool isTargetADc, PathConnectorTypeEnum pathConnectorType, string binderName)
         //    : this(pathElement, pathConnectorType, binderName)
         //{
         //    Data = fe;
@@ -148,7 +151,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
             
         //}
 
-        //public ObservableSourceProvider(FrameworkContentElement fce, string pathElement, bool isTargetADc, PathConnectorTypeEnum pathConnectorType, string binderName)
+        //public ObservableSource<T>Provider<T>(FrameworkContentElement fce, string pathElement, bool isTargetADc, PathConnectorTypeEnum pathConnectorType, string binderName)
         //    : this(pathElement, pathConnectorType, binderName)
         //{
         //    Data = fce;
@@ -157,7 +160,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
         //    IsTargetADc = isTargetADc;
         //}
 
-        //public ObservableSourceProvider(DataGridColumn dgc, string pathElement, PathConnectorTypeEnum pathConnectorType, string binderName)
+        //public ObservableSource<T>Provider<T>(DataGridColumn dgc, string pathElement, PathConnectorTypeEnum pathConnectorType, string binderName)
         //    : this(pathElement, pathConnectorType, binderName)
         //{
         //    Data = dgc;
@@ -173,7 +176,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
         {
             Data = itRaisesPropChanged ?? throw new ArgumentNullException($"{nameof(itRaisesPropChanged)} was null when constructing Observable Source.");
             Type = null;
-            SourceKind = SourceKindEnum.PropertyObject;
+            SourceKind = SourceKindEnum.Down;
         }
 
         #endregion
@@ -184,19 +187,9 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
         {
             Data = itRaisesCollectionChanged ?? throw new ArgumentNullException($"{nameof(itRaisesCollectionChanged)} was null when constructing Observable Source.");
             Type = null;
-            SourceKind = SourceKindEnum.CollectionObject;
+            SourceKind = SourceKindEnum.Down;
         }
 
-        #endregion
-
-        #region From DataSourceProvider
-        public ObservableSourceProvider(DataSourceProvider dsp, string pathElement, PathConnectorTypeEnum pathConnectorType, string binderName)
-            : this(pathElement, pathConnectorType, binderName)
-        {
-            Data = dsp;
-            Type = null;
-            SourceKind = SourceKindEnum.DataSourceProvider;
-        }
         #endregion
 
         #endregion Constructors

@@ -30,6 +30,7 @@ namespace DRM.TypeSafePropertyBag
     /// </summary>
     public interface ISubscriptionKeyGen
     {
+        Type PropertyType { get; }
         ExKeyT SourcePropRef { get; } // Property that raises the events to which we are subscribing.
 
         SubscriptionKind SubscriptionKind { get; }
@@ -40,7 +41,10 @@ namespace DRM.TypeSafePropertyBag
         bool UseTargetAndMethod { get; }
 
         EventHandler<PropertyChangedEventArgs> StandardHandler { get; }
+
         EventHandler<PCGenEventArgs> GenHandler { get; }
+        EventHandler<PCObjectEventArgs> ObjHandler { get; }
+
         Action<object, object> GenDoWhenChanged { get; }
         Action Action { get; }
 

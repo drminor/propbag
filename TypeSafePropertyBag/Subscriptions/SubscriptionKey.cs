@@ -7,8 +7,9 @@ namespace DRM.TypeSafePropertyBag
     using PropNameType = String;
 
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
+    using System.Collections.Generic;
 
-    public class SubscriptionKey<T> : SubscriptionKeyGen, ISubscriptionKey<T>
+    public class SubscriptionKey<T> : SubscriptionKeyGen, ISubscriptionKey<T>, IEquatable<SubscriptionKey<T>>
     {
         public EventHandler<PCTypedEventArgs<T>> TypedHandler { get; private set; }
         public Action<T, T> TypedDoWhenChanged { get; private set; }
@@ -31,13 +32,19 @@ namespace DRM.TypeSafePropertyBag
 
         // Gen Handler -- PCGenEventArgs
         public SubscriptionKey(SimpleExKey exKey, EventHandler<PCGenEventArgs> handler, SubscriptionPriorityGroup subscriptionPriorityGroup, bool keepRef)
-            : base(exKey, handler, subscriptionPriorityGroup, keepRef: keepRef, subscriptionCreator: CreateSubscriptionGen)
+            : base(exKey, handler, subscriptionPriorityGroup, keepRef: keepRef)
+        {
+        }
+
+        // Obj Handler -- PCObjEventArgs
+        public SubscriptionKey(SimpleExKey exKey, EventHandler<PCObjectEventArgs> handler, SubscriptionPriorityGroup subscriptionPriorityGroup, bool keepRef)
+            : base(exKey, handler, subscriptionPriorityGroup, keepRef: keepRef)
         {
         }
 
         // Standard Handler -- PropertyChangedEventArgs
         public SubscriptionKey(SimpleExKey exKey, EventHandler<PropertyChangedEventArgs> handler, SubscriptionPriorityGroup subscriptionPriorityGroup, bool keepRef)
-            : base(exKey, handler, subscriptionPriorityGroup, keepRef, subscriptionCreator: CreateSubscriptionGen)
+            : base(exKey, handler, subscriptionPriorityGroup, keepRef)
         {
         }
 
@@ -78,16 +85,34 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        public static ISubscriptionGen CreateSubscriptionGen(ISubscriptionKeyGen subscriptionRequestGen)
+        new public static ISubscriptionGen CreateSubscriptionGen(ISubscriptionKeyGen subscriptionRequestGen)
         {
             return (ISubscriptionGen)CreateSubscription((ISubscriptionKey<T>)subscriptionRequestGen);
         }
 
-        //private static SimpleExKey GetTheKey(IPropBag host, uint propId, IPropStoreAccessService<PropIdType, PropNameType> storeAccessor)
-        //{
-        //    SimpleExKey result = ((IHaveTheSimpleKey)storeAccessor).GetTheKey(host, propId);
-        //    return result;
-        //}
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as SubscriptionKeyGen);
+        }
 
+        public bool Equals(SubscriptionKey<T> other)
+        {
+            return other != null && base.Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        public static bool operator ==(SubscriptionKey<T> key1, SubscriptionKey<T> key2)
+        {
+            return ((SubscriptionKeyGen)key1) == (SubscriptionKeyGen)key2;
+        }
+
+        public static bool operator !=(SubscriptionKey<T> key1, SubscriptionKey<T> key2)
+        {
+            return !(key1 == key2);
+        }
     }
 }

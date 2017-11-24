@@ -11,6 +11,7 @@ namespace DRM.TypeSafePropertyBag
 
     using PropIdType = UInt32;
     using PropNameType = String;
+
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
     using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
 
@@ -25,6 +26,7 @@ namespace DRM.TypeSafePropertyBag
 
         #region Public Properties
 
+        public Type PropertyType { get; }
         public ExKeyT SourcePropRef { get; }
 
         public SubscriptionKind SubscriptionKind { get; }
@@ -34,6 +36,8 @@ namespace DRM.TypeSafePropertyBag
         public bool UseTargetAndMethod { get; }
 
         public EventHandler<PCGenEventArgs> GenHandler { get; private set; }
+        public EventHandler<PCObjectEventArgs> ObjHandler { get; private set; }
+
         public EventHandler<PropertyChangedEventArgs> StandardHandler { get; private set; }
 
         public object Target { get; private set; } // For BindingSubscriptions this will always be a WeakReference<IPropBag>
@@ -53,13 +57,16 @@ namespace DRM.TypeSafePropertyBag
         #region Constructors for Property Changed Handlers
 
         // Standard PropertyChanged
-        protected SubscriptionKeyGen(ExKeyT sourcePropId, EventHandler<PropertyChangedEventArgs> standardDelegate,
-            SubscriptionPriorityGroup subscriptionPriorityGroup, bool keepRef, Func<ISubscriptionKeyGen, ISubscriptionGen> subscriptionCreator)
+        public SubscriptionKeyGen(ExKeyT sourcePropId, EventHandler<PropertyChangedEventArgs> standardDelegate,
+            SubscriptionPriorityGroup subscriptionPriorityGroup, bool keepRef)
         {
             SourcePropRef = sourcePropId;
             SubscriptionKind = SubscriptionKind.StandardHandler;
             SubscriptionPriorityGroup = subscriptionPriorityGroup;
 
+            this.
+            GenHandler = null;
+            ObjHandler = null;
             StandardHandler = standardDelegate;
             UseTargetAndMethod = false;
             GenDoWhenChanged = null;
@@ -68,20 +75,22 @@ namespace DRM.TypeSafePropertyBag
             Method = standardDelegate.Method;
 
             SubscriptionTargetKind = GetKindOfTarget(standardDelegate.Target, keepRef);
-            SubscriptionCreator = subscriptionCreator;
+            SubscriptionCreator = CreateSubscriptionGen;
             HasBeenUsed = false;
         }
 
         // PCGenEventArgs
-        protected SubscriptionKeyGen(ExKeyT sourcePropId, EventHandler<PCGenEventArgs> genDelegate,
-            SubscriptionPriorityGroup subscriptionPriorityGroup, bool keepRef, Func<ISubscriptionKeyGen, ISubscriptionGen> subscriptionCreator)
+        public SubscriptionKeyGen(ExKeyT sourcePropId, EventHandler<PCGenEventArgs> genDelegate,
+            SubscriptionPriorityGroup subscriptionPriorityGroup, bool keepRef)
         {
             SourcePropRef = sourcePropId;
-            SubscriptionKind = SubscriptionKind.StandardHandler;
+            SubscriptionKind = SubscriptionKind.GenHandler;
             SubscriptionPriorityGroup = subscriptionPriorityGroup;
 
             StandardHandler = null;
             GenHandler = genDelegate;
+            ObjHandler = null;
+
             UseTargetAndMethod = false;
             GenDoWhenChanged = null;
             Action = null;
@@ -89,12 +98,34 @@ namespace DRM.TypeSafePropertyBag
             Method = genDelegate.Method;
 
             SubscriptionTargetKind = GetKindOfTarget(genDelegate.Target, keepRef);
-            SubscriptionCreator = subscriptionCreator;
+            SubscriptionCreator = CreateSubscriptionGen;
+            HasBeenUsed = false;
+        }
+
+        // PCObjEventArgs
+        public SubscriptionKeyGen(ExKeyT sourcePropId, EventHandler<PCObjectEventArgs> objDelegate,
+            SubscriptionPriorityGroup subscriptionPriorityGroup, bool keepRef)
+        {
+            SourcePropRef = sourcePropId;
+            SubscriptionKind = SubscriptionKind.ObjHandler;
+            SubscriptionPriorityGroup = subscriptionPriorityGroup;
+
+            StandardHandler = null;
+            GenHandler = null;
+            ObjHandler = objDelegate;
+            UseTargetAndMethod = false;
+            GenDoWhenChanged = null;
+            Action = null;
+            Target = objDelegate.Target;
+            Method = objDelegate.Method;
+
+            SubscriptionTargetKind = GetKindOfTarget(objDelegate.Target, keepRef);
+            SubscriptionCreator = CreateSubscriptionGen;
             HasBeenUsed = false;
         }
 
         // Target and Method. Also used for TypeDelegate and TypedAction.
-        protected SubscriptionKeyGen(ExKeyT sourcePropId, object target, MethodInfo method,
+        public SubscriptionKeyGen(ExKeyT sourcePropId, object target, MethodInfo method,
             SubscriptionKind kind, SubscriptionPriorityGroup subscriptionPriorityGroup, bool keepRef, Func<ISubscriptionKeyGen, ISubscriptionGen> subscriptionCreator)
         {
             SourcePropRef = sourcePropId;
@@ -164,8 +195,12 @@ namespace DRM.TypeSafePropertyBag
 
         #region Constructors for Binding Subscriptions
 
+        // TODO: Note since the Target and Method are not set, the default IEquatable implementation does not produce
+        // accurate results.
+
         // Creates a new Binding Request.
         protected SubscriptionKeyGen(
+            Type propertyType,
             ExKeyT targetPropRef, 
             LocalBindingInfo bindingInfo,
             SubscriptionKind kind,
@@ -177,6 +212,8 @@ namespace DRM.TypeSafePropertyBag
 
             StandardHandler = null;
             GenHandler = null;
+            ObjHandler = null;
+
             UseTargetAndMethod = true;
             GenDoWhenChanged = null;
             Action = null;
@@ -207,6 +244,12 @@ namespace DRM.TypeSafePropertyBag
             {
                 return keepRef ? SubscriptionTargetKind.StandardKeepRef : SubscriptionTargetKind.Standard;
             }
+        }
+
+        public static ISubscriptionGen CreateSubscriptionGen(ISubscriptionKeyGen subscriptionRequestGen)
+        {
+            ISubscriptionGen result = new SubscriptionGen(subscriptionRequestGen);
+            return result;
         }
 
         #endregion

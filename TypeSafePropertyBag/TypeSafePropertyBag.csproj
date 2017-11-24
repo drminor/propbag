@@ -51,7 +51,7 @@
     <Compile Include="LocalBinding\Engine\DataSourceChangedEventHandler.cs" />
     <Compile Include="LocalBinding\Engine\DataSourceChangeTypeEnum.cs" />
     <Compile Include="LocalBinding\Engine\ObservableSource.cs" />
-    <Compile Include="LocalBinding\Engine\ObservableSourceProvider.cs" />
+    <None Include="LocalBinding\Engine\ObservableSourceProvider.cs" />
     <Compile Include="LocalBinding\Engine\ObservableSourceStatusEnum.cs" />
     <Compile Include="LocalBinding\Engine\OSCollection.cs" />
     <Compile Include="LocalBinding\Engine\OSSExtensions.cs" />
@@ -61,9 +61,12 @@
     <Compile Include="LocalBinding\Management\ICacheBindings.cs" />
     <Compile Include="LocalBinding\Registration\IRegisterBindings.cs" />
     <Compile Include="PropBagInterfaces\IPropBagProxy.cs" />
+    <Compile Include="PropStore\INotifyParentNodeChanged.cs" />
     <Compile Include="PropStore\PropBagProxy.cs" />
     <Compile Include="PropStore\PropStoreNode.cs" />
     <Compile Include="PropStore\PropGen.cs" />
+    <Compile Include="PropStore\PSNodeParentChangedEventArgs.cs" />
+    <Compile Include="Subscriptions\SubscriptionGen.cs" />
     <Compile Include="UnUsed\PropValueStateEnum.cs" />
     <Compile Include="SimpleIOC\Container.cs" />
     <Compile Include="SimpleIOC\ContainerException.cs" />

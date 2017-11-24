@@ -7,12 +7,13 @@ namespace DRM.TypeSafePropertyBag
     using CompositeKeyType = UInt64;
     using ObjectIdType = UInt64;
     using PropIdType = UInt32;
+    using PropNameType = String;
 
     public class PropGen : IPropDataInternal
     {
         #region Public PropGen Properties
 
-        public event EventHandler<PCObjectEventArgs> PropertyChangedWithObjectVals;
+        public event EventHandler<PCObjectEventArgs> PropertyChangedWithObjectVals = delegate {};
 
         public PropIdType PropId { get; }
 
@@ -20,17 +21,17 @@ namespace DRM.TypeSafePropertyBag
         public IProp TypedProp
         {
             get { return _typedProp; }
-            private set
-            {
-                if (!object.ReferenceEquals(value, _typedProp))
-                {
-                    IProp oldValue = TypedProp;
+            //private set
+            //{
+            //    if (!object.ReferenceEquals(value, _typedProp))
+            //    {
+            //        IProp oldValue = TypedProp;
 
-                    _typedProp = value;
+            //        _typedProp = value;
 
-                    OnPropertyChangedWithObjectVals(nameof(TypedProp), oldValue, value);
-                }
-            }
+            //        OnPropertyChangedWithObjectVals(nameof(TypedProp), oldValue, value);
+            //    }
+            //}
         }
 
         public bool IsEmpty => _cKey == 0;
@@ -42,88 +43,50 @@ namespace DRM.TypeSafePropertyBag
         CompositeKeyType _cKey;
         CompositeKeyType IPropDataInternal.CKey => _cKey;
 
-        //ObjectIdType _childObjectId;
-        //ObjectIdType IPropDataInternal.ChildObjectId
-        //{
-        //    get { return _childObjectId; }
-        //    set
-        //    {
-        //        if (value != _childObjectId)
-        //        {
-        //            ObjectIdType oldValue = ((IPropDataInternal)this).ChildObjectId;
-        //            _childObjectId = value;
-        //            OnPropertyChangedWithObjectVals(nameof(IPropDataInternal.ChildObjectId), oldValue, value);
-        //        }
-        //    }
-        //}
-
         private bool _isPropBag;
         bool IPropDataInternal.IsPropBag => _isPropBag;
+
+        //EventHandler<PCObjectEventArgs> IPropDataInternal.PCObjectEvent => PropertyChangedWithObjectVals;
 
         #endregion
 
         #region Constructors
 
-        public PropGen(IProp genericTypedProp, CompositeKeyType cKey, PropIdType propId)
+        public PropGen(IProp genericTypedProp, CompositeKeyType cKey, PropIdType propId, PropNameType propertyName)
         {
             _cKey = cKey;
             PropId = propId;
-            //_childObjectId = 0;
-            TypedProp = genericTypedProp ?? throw new ArgumentNullException($"{nameof(genericTypedProp)} must be non-null.");
-
-            PropertyChangedWithObjectVals = null;
-            if(TypedProp.Type.IsPropBagBased())
-            {
-                _isPropBag = true;
-                IProp ip = TypedProp;
-                //
-                // TODO: Our Caller (ie. the propBag) needs to add an event handler subscription
-                // for this Properties on (standard) property changed event handler.
-                // The event hander needs to set the Parent PropId on the PropStoreAccessor
-                // that belongs to the objectId reference by our ChildPropId.
-            }
-            else
-            {
-                _isPropBag = false;
-            }
+            if(genericTypedProp == null) throw new ArgumentNullException($"{nameof(genericTypedProp)} must be non-null.");
+            ((IPropDataInternal)this).SetTypedProp(propertyName, genericTypedProp);
         }
 
-        ///// <summary>
-        ///// Used to create an objectRefHolder for the tree-based global store.
-        ///// </summary>
-        ///// <param name="cKey"></param>
-        //public PropGen(CompositeKeyType cKey)
-        //{
-        //    _cKey = cKey;
-        //    PropId = 0;
-        //    _childObjectId = 0;
-        //    TypedProp = null;
-        //    _isPropBag = true;
-        //    PropertyChangedWithObjectVals = null;
-        //}
+        private void GenericTypedProp_PropertyChangedWithObjectVals(object sender, PCObjectEventArgs e)
+        {
+            OnPropertyChangedWithObjectVals(e);
+        }
 
         public PropGen()
         {
             _cKey = 0;
             PropId = 0;
-            //_childObjectId = 0;
-            TypedProp = null;
+            _typedProp = null;
             _isPropBag = false;
             PropertyChangedWithObjectVals = null;
         }
 
-        event EventHandler<PCObjectEventArgs> INotifyPCObject.PropertyChangedWithObjectVals
-        {
-            add
-            {
-                throw new NotImplementedException();
-            }
+        //event EventHandler<PCObjectEventArgs> INotifyPCObject.PropertyChangedWithObjectVals
+        //{
+        //    add
+        //    {
 
-            remove
-            {
-                throw new NotImplementedException();
-            }
-        }
+        //        throw new NotImplementedException();
+        //    }
+
+        //    remove
+        //    {
+        //        throw new NotImplementedException();
+        //    }
+        //}
 
         #endregion
 
@@ -136,28 +99,55 @@ namespace DRM.TypeSafePropertyBag
 
         public void CleanUp(bool doTypedCleanup)
         {
-            if(doTypedCleanup && TypedProp != null) TypedProp.CleanUpTyped();
+            IProp typedProp = TypedProp;
+
             PropertyChangedWithObjectVals = null;
+
+            if (typedProp != null)
+            {
+                //if (typedProp.GetType().IsPropBagBased())
+                //{
+                //    // Remove our handler from the old value.
+                //    typedProp.PropertyChangedWithObjectVals -= GenericTypedProp_PropertyChangedWithObjectVals;
+                //}
+
+                if (doTypedCleanup) typedProp.CleanUpTyped();
+            }
         }
 
         #endregion
 
         #region IPropDataInternal Methods
 
-        //void IPropDataInternal.SetCompKey(CompositeKeyType value)
-        //{
-        //    _cKey = value;
-        //}
-
-        void IPropDataInternal.SetTypedProp(IProp value)
+        void IPropDataInternal.SetTypedProp(PropNameType propertyName, IProp value)
         {
-            TypedProp = value;
-        }
+            //if (!object.ReferenceEquals(value, _typedProp))
+            //{
+            //    IProp oldValue = _typedProp;
+            //    if (oldValue != null && oldValue.GetType().IsPropBagBased())
+            //    {
+            //        // Remove our handler from the old value.
+            //        oldValue.PropertyChangedWithObjectVals -= GenericTypedProp_PropertyChangedWithObjectVals;
+            //    }
 
-        //void IPropDataInternal.SetChildObjectId(ObjectIdType value)
-        //{
-        //    ChildObjectId = value;
-        //}
+            //    _typedProp = value;
+            //    OnPropertyChangedWithObjectVals(propertyName, oldValue?.TypedValueAsObject, value?.TypedValueAsObject);
+
+            //    if (_typedProp.TypedValueAsObject != null && _typedProp.TypedValueAsObject.GetType().IsPropBagBased())
+            //    {
+            //        _isPropBag = true;
+            //        // Subscribe to the new value's PropertyChanged event.
+            //        _typedProp.PropertyChangedWithObjectVals += GenericTypedProp_PropertyChangedWithObjectVals;
+            //    }
+            //    else
+            //    {
+            //        _isPropBag = false;
+            //    }
+            //}
+
+            _typedProp = value;
+            _isPropBag = _typedProp.Type.IsPropBagBased();
+        }
 
         #endregion
 
@@ -165,10 +155,14 @@ namespace DRM.TypeSafePropertyBag
 
         public void OnPropertyChangedWithObjectVals(string propertyName, object oldValue, object newValue)
         {
-            EventHandler<PCObjectEventArgs> handler = Interlocked.CompareExchange(ref PropertyChangedWithObjectVals, null, null);
+            Interlocked.CompareExchange(ref PropertyChangedWithObjectVals, null, null)
+                ?.Invoke(this, new PCObjectEventArgs(propertyName, oldValue, newValue));
+        }
 
-            if (handler != null)
-                handler(this, new PCObjectEventArgs(propertyName, oldValue, newValue));
+        public void OnPropertyChangedWithObjectVals(PCObjectEventArgs e)
+        {
+            Interlocked.CompareExchange(ref PropertyChangedWithObjectVals, null, null)
+                ?.Invoke(this, e);
         }
 
         #endregion

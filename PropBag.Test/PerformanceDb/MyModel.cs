@@ -114,8 +114,6 @@ namespace PropBagLib.Tests.PerformanceDb
             }
         }
 
-
-
         public event PropertyChangedEventHandler PropertyChanged;
 
         private void OnPropertyChanged(string propertyName)
@@ -163,5 +161,69 @@ namespace PropBagLib.Tests.PerformanceDb
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
+
+    public class MyModel6 : INotifyPropertyChanged
+    {
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        Business _business;
+        public Business Business
+        {
+            get { return _business; }
+            set
+            {
+                if (value != _business)
+                {
+                    _business = value;
+                    OnPropertyChanged(nameof(Business));
+                }
+            }
+        }
+
+        MyModel5 _childVM;
+        public MyModel5 ChildVM
+        {
+            get { return _childVM; }
+            set
+            {
+                _childVM = value;
+                OnPropertyChanged(nameof(ChildVM));
+            }
+        }
+
+        Person _selectedPerson;
+        public Person SelectedPerson
+        {
+            get { return _selectedPerson; }
+            set
+            {
+                if(value != _selectedPerson)
+                {
+                    _selectedPerson = value;
+                    OnPropertyChanged(nameof(SelectedPerson));
+                }
+            }
+        }
+
+        string _wMessage;
+        public string WMessage
+        {
+            get { return _wMessage; }
+            set
+            {
+                if(value != _wMessage)
+                {
+                    _wMessage = value;
+                    OnPropertyChanged(nameof(WMessage));
+                }
+            }
+        }
+
+        private void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
+
 
 }

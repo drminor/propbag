@@ -64,7 +64,7 @@ namespace DRM.PropBag
         private L2KeyManType _level2KeyManager;
 
         // These fulfill the IPropBagInternal contract
-        PSAccessServiceType IPropBagInternal.OurStoreAccessor => _ourStoreAccessor;
+        PSAccessServiceType IPropBagInternal.ItsStoreAccessor => _ourStoreAccessor;
         L2KeyManType IPropBagInternal.Level2KeyManager => _level2KeyManager;
 
         // These fulfill the IPropBag contract
@@ -75,6 +75,7 @@ namespace DRM.PropBag
 
         public event EventHandler<PCGenEventArgs> PropertyChangedWithGenVals; // = delegate { };
         public event EventHandler<PropertyChangedEventArgs> PropertyChangedIndividual;
+        public event EventHandler<PCObjectEventArgs> PropertyChangedWithObjectVals;
 
         #endregion
 
@@ -743,47 +744,18 @@ namespace DRM.PropBag
 
         #endregion
 
-        #region Subscribe to Typed PropertyChanged
+        #region Register / Unregister Binding
 
-        public bool AddBinding<T>(string targetPropertyName, string sourcePath, Action<T, T> ttAction)
+        public bool RegisterBinding<T>(string nameOfPropertyToUpdate, string pathToSource)
         {
-            // Build a reference to the target property that is in our PropBag object.
-            IPropData PropData = GetPropGen<T>(targetPropertyName, out PropIdType propId, desiredHasStoreValue: _propFactory.ProvidesStorage);
+            IPropData PropData = GetPropGen<T>(nameOfPropertyToUpdate, out PropIdType propId, desiredHasStoreValue: _propFactory.ProvidesStorage);
 
-            IPropPrivate<T> prop = CheckTypeInfo<T>(propId, targetPropertyName, PropData, _ourStoreAccessor);
+            IPropPrivate<T> prop = CheckTypeInfo<T>(propId, nameOfPropertyToUpdate, PropData, _ourStoreAccessor);
 
             if (prop != null)
             {
-                // Create a request that
-                // 1. provides a definite weak reference to the target propId (this/PropId/OUR_STORE_ACCESS)
-                // 2. provides a path to the source either by
-                //      a. relative -- Have OUR_STORE_ACCESS get our Object Id
-                //              and search all running Properties to see if they are hosting that Object.
-                //              and navigate up / down using dotted prop path.
-                //      b. absolute -- Start at the top and find a 
-                //  3. Having the caller supply us with a PropGen object
-                //          that she got by calling GetIt<T>(x).Get<T>(y), etc.
-
-                // Option A: Use a string and send it to a service to get a 
-                // that/PropId/THEIR_STORE_ACCESS
-
-                // What we really need is to have the binding target be able to 
-                // provide to a (PropBag) client a package that can be verified
-                // by the event source (via services on the GlobalStore) that the 
-                // binding target has agreed to be updated.
-
-                // 1. request to binding target; the request contains:
-                //      a. the source propbag object
-                //      b. the property name on the source.
-                //      c. the target propbag object.
-                //      d. the property name on the target.
-                //
-
-                // 2. client gets package.
-                // 3. client provides package to binding source when requesting the binding subscription.
-
-                LocalPropertyPath pathToSource = new LocalPropertyPath("test");
-                LocalBindingInfo bindingInfo = new LocalBindingInfo(pathToSource, LocalBindingMode.OneWay);
+                LocalPropertyPath lpp = new LocalPropertyPath(pathToSource);
+                LocalBindingInfo bindingInfo = new LocalBindingInfo(lpp, LocalBindingMode.OneWay);
 
                 bool wasAdded = _ourStoreAccessor.RegisterBinding<T>(this, propId, bindingInfo);
                 return wasAdded;
@@ -793,6 +765,30 @@ namespace DRM.PropBag
                 return false;
             }
         }
+
+        public bool UnregisterBinding<T>(string nameOfPropertyToUpdate, string pathToSource)
+        {
+            IPropData PropData = GetPropGen<T>(nameOfPropertyToUpdate, out PropIdType propId, desiredHasStoreValue: _propFactory.ProvidesStorage);
+
+            IPropPrivate<T> prop = CheckTypeInfo<T>(propId, nameOfPropertyToUpdate, PropData, _ourStoreAccessor);
+
+            if (prop != null)
+            {
+                LocalPropertyPath lpp = new LocalPropertyPath(pathToSource);
+                LocalBindingInfo bindingInfo = new LocalBindingInfo(lpp, LocalBindingMode.OneWay);
+
+                bool wasRemoved = _ourStoreAccessor.UnRegisterBinding<T>(this, propId, bindingInfo);
+                return wasRemoved;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        #endregion
+
+        #region Subscribe to Typed PropertyChanged
 
         // TODO: Implement our own WeakEventManager for Delegates that have a single Type Parameter.
         public bool SubscribeToPropChanged<T>(EventHandler<PCTypedEventArgs<T>> eventHandler, string propertyName)
@@ -962,12 +958,48 @@ namespace DRM.PropBag
 
         public bool SubscribeToPropChanged(EventHandler<PCObjectEventArgs> eventHandler, string propertyName)
         {
-            throw new NotImplementedException();
+            bool mustBeRegistered = OurMetaData.AllPropsMustBeRegistered;
+
+            IPropData PropData = GetPropGen(propertyName, null, out bool wasRegistered, out PropIdType propId,
+                    haveValue: false,
+                    value: null,
+                    alwaysRegister: false,
+                    mustBeRegistered: mustBeRegistered,
+                    neverCreate: false,
+                    desiredHasStoreValue: _propFactory.ProvidesStorage);
+
+            if (!PropData.IsEmpty)
+            {
+                bool result = _ourStoreAccessor.RegisterHandler(this, propId, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
+                return result;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         public bool UnSubscribeToPropChanged(EventHandler<PCObjectEventArgs> eventHandler, string propertyName)
         {
-            throw new NotImplementedException();
+            bool mustBeRegistered = OurMetaData.AllPropsMustBeRegistered;
+
+            IPropData PropData = GetPropGen(propertyName, null, out bool wasRegistered, out PropIdType propId,
+                    haveValue: false,
+                    value: null,
+                    alwaysRegister: false,
+                    mustBeRegistered: mustBeRegistered,
+                    neverCreate: false,
+                    desiredHasStoreValue: _propFactory.ProvidesStorage);
+
+            if (!PropData.IsEmpty)
+            {
+                bool result = _ourStoreAccessor.UnRegisterHandler(this, propId, eventHandler);
+                return result;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         #endregion
@@ -1129,7 +1161,7 @@ namespace DRM.PropBag
             PropIdType propId = GetPropId(propertyName);
             //IPropData propGen = new PropGen(genericTypedProp, propId);
 
-            if (!_ourStoreAccessor.TryAdd(this, propId, genericTypedProp, out IPropData propGen))
+            if (!_ourStoreAccessor.TryAdd(this, propId, propertyName, genericTypedProp, out IPropData propGen))
             {
                 throw new ApplicationException("Could not add the new propGen to the store.");
             }
@@ -1142,7 +1174,7 @@ namespace DRM.PropBag
             PropIdType propId = GetPropId(propertyName);
             //IPropData propGen = new PropGen(genericTypedProp, propId);
 
-            if (!_ourStoreAccessor.TryAdd(this, propId, genericTypedProp, out IPropData propGen))
+            if (!_ourStoreAccessor.TryAdd(this, propId, propertyName, genericTypedProp, out IPropData propGen))
             {
                 throw new ApplicationException("Could not add the new propGen to the store.");
             }
@@ -1170,10 +1202,9 @@ namespace DRM.PropBag
             {
                 pGen.CleanUp(doTypedCleanup: false);
 
-                if (!_ourStoreAccessor.TryRemove(this, propId/*, out IPropData foundValue*/) )
+                if (!_ourStoreAccessor.TryRemove(this, propId, out IPropData foundValue))
                 {
                     System.Diagnostics.Debug.WriteLine($"The prop was found, but could not be removed. Property: {propertyName}.");
-
                 }
             }
             else
@@ -1194,7 +1225,7 @@ namespace DRM.PropBag
                 PropData.CleanUp(doTypedCleanup: true);
 
                 PropIdType propId = GetPropId(propertyName);
-                if (!_ourStoreAccessor.TryRemove(this, propId/*, out IPropData foundValue*/))
+                if (!_ourStoreAccessor.TryRemove(this, propId, out IPropData foundValue))
                 {
                     System.Diagnostics.Debug.WriteLine($"The prop was found, but could not be removed. Property: {propertyName}.");
                 }
@@ -1315,21 +1346,55 @@ namespace DRM.PropBag
             // PROCESS BINDINGS
             SubscriberCollection sc = GetSubscriptions(propId);
 
-            IEnumerable<Subscription<T>> typedSubs = GetTypedSubscriptions<T>(sc);
+            IEnumerable<ISubscription<T>> typedSubs = GetTypedSubscriptions<T>(sc);
 
             // Raise the PCTypedEvent to our list of subscribers
             if (!typedProp.ValueIsDefined)
             {
-                foreach (Subscription<T> typedSub in typedSubs)
+                foreach (ISubscription<T> typedSub in typedSubs)
                 {
                     typedSub.TypedHandler(this, new PCTypedEventArgs<T>(propertyName, newValue));
                 }
             }
             else
             {
-                foreach (Subscription<T> typedSub in typedSubs)
+                foreach (ISubscription<T> typedSub in typedSubs)
                 {
                     typedSub.TypedHandler(this, new PCTypedEventArgs<T>(propertyName, oldVal, newValue));
+                }
+            }
+
+            IEnumerable<ISubscriptionGen> genSubs = GetPCGenSubscriptions(sc);
+
+            if (!typedProp.ValueIsDefined)
+            {
+                foreach (ISubscriptionGen genSub in genSubs)
+                {
+                    genSub.GenHandler(this, new PCGenEventArgs(propertyName, typeof(T), newValue));
+                }
+            }
+            else
+            {
+                foreach (ISubscriptionGen genSub in genSubs)
+                {
+                    genSub.GenHandler(this, new PCGenEventArgs(propertyName, typeof(T), oldVal, newValue));
+                }
+            }
+
+            IEnumerable<ISubscriptionGen> objSubs = GetPCObjectSubscriptions(sc);
+
+            if (!typedProp.ValueIsDefined)
+            {
+                foreach (ISubscriptionGen objSub in objSubs)
+                {
+                    objSub.ObjHandler(this, new PCObjectEventArgs(propertyName, newValue));
+                }
+            }
+            else
+            {
+                foreach (ISubscriptionGen objSub in objSubs)
+                {
+                    objSub.ObjHandler(this, new PCObjectEventArgs(propertyName, oldVal, newValue));
                 }
             }
 
@@ -1350,7 +1415,7 @@ namespace DRM.PropBag
                 //typedProp.RaiseEventsForParent(typedSubs, this, propertyName, oldVal, newValue);
 
                 // The un-typed, PropertyChanged event defined on the individual property.
-                typedProp.OnPropertyChangedWithObjectVals(propertyName, oldVal, newValue);
+                //typedProp.OnPropertyChangedWithObjectVals(propertyName, oldVal, newValue);
 
                 //// The un-typed, PropertyChanged shared event.
                 OnPropertyChangedWithVals(propertyName, typeof(T), oldVal, newValue);
@@ -1375,7 +1440,7 @@ namespace DRM.PropBag
                 //typedProp.RaiseEventsForParent(typedSubs, this, propertyName, oldVal, newValue);
 
                 // The un-typed, PropertyChanged event defined on the individual property.
-                typedProp.OnPropertyChangedWithObjectVals(propertyName, oldVal, newValue);
+                //typedProp.OnPropertyChangedWithObjectVals(propertyName, oldVal, newValue);
 
                 // The un-typed, PropertyChanged shared event.
                 OnPropertyChangedWithVals(propertyName, typeof(T), oldVal, newValue);
@@ -1388,15 +1453,29 @@ namespace DRM.PropBag
             return sc;
         }
 
-        private IEnumerable<Subscription<T>> GetTypedSubscriptions<T>(SubscriberCollection sc)
+        private IEnumerable<ISubscription<T>> GetTypedSubscriptions<T>(SubscriberCollection sc)
         {
-            IEnumerable<Subscription<T>> typedSubs = sc.Where(x => x.SubscriptionKind == SubscriptionKind.TypedHandler).Select(y => (Subscription<T>)y);
-            //localBindings = sc.Where(x => x.SubscriptionKind == SubscriptionKind.LocalBinding);
+            IEnumerable<ISubscription<T>> typedSubs = sc.Where(x => x.SubscriptionKind == SubscriptionKind.TypedHandler)
+                .Select(y => (ISubscription<T>)y);
 
             return typedSubs;
         }
 
+        private IEnumerable<ISubscriptionGen> GetPCGenSubscriptions(SubscriberCollection sc)
+        {
+            IEnumerable<ISubscriptionGen> genSubs = sc.Where(x => x.SubscriptionKind == SubscriptionKind.GenHandler)
+                .Select(y => (ISubscriptionGen)y);
 
+            return genSubs;
+        }
+
+        private IEnumerable<ISubscriptionGen> GetPCObjectSubscriptions(SubscriberCollection sc)
+        {
+            IEnumerable<ISubscriptionGen> objSubs = sc.Where(x => x.SubscriptionKind == SubscriptionKind.ObjHandler)
+                .Select(y => (ISubscriptionGen)y);
+
+            return objSubs;
+        }
 
         protected IPropData GetPropGen(PropNameType propertyName, Type propertyType,
             out bool wasRegistered, out PropIdType propId,
@@ -1490,7 +1569,7 @@ namespace DRM.PropBag
 
                 IProp genericTypedProp = _propFactory.CreateGenFromObject(newType, curValue, propertyName, null, true, true, propKind, null, false, null, false);
 
-                bool result = _ourStoreAccessor.SetTypedProp(this, propId, genericTypedProp);
+                bool result = _ourStoreAccessor.SetTypedProp(this, propId, propertyName, genericTypedProp);
                 return result;
             }
             else

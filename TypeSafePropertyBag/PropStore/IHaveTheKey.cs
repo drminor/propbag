@@ -21,5 +21,7 @@ namespace DRM.TypeSafePropertyBag
         IExplodedKey<CompT, L1T, L2T> GetTheKey(IPropBagProxy propBagProxy, L2T propId);
 
         PropStoreNode PropStoreNode { get; }
+
+        PropStoreNode GetNodeForPropVal(IPropDataInternal int_propData);
     }
 }

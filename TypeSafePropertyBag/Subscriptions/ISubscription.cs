@@ -34,7 +34,7 @@ namespace DRM.TypeSafePropertyBag
     // and the action to be performed when that IProp's value changes.
     public interface ISubscriptionGen
     {
-        ExKeyT SourcePropId { get; } // A weak reference to the object that raises the event.
+        ExKeyT SourcePropRef { get; } // A weak reference to the object that raises the event.
         Type PropertyType { get; }
 
         SubscriptionKind SubscriptionKind { get; }
@@ -42,6 +42,8 @@ namespace DRM.TypeSafePropertyBag
         SubscriptionPriorityGroup SubscriptionPriorityGroup { get; }
 
         EventHandler<PCGenEventArgs> GenHandler { get; }
+        EventHandler<PCObjectEventArgs> ObjHandler { get; }
+
         EventHandler<PropertyChangedEventArgs> StandardHandler { get; }
         Action<object, object> GenDoWhenChanged { get; }
         Action Action { get; }
@@ -50,8 +52,10 @@ namespace DRM.TypeSafePropertyBag
         MethodInfo Method { get; }
 
         // Binding Subscription Members
-        ExKeyT TargetPropId { get; }
+        ExKeyT TargetPropRef { get; }
         LocalBindingInfo BindingInfo { get; }
+
+        object LocalBinderRefProxy { get; }
     }
 
 }

@@ -90,13 +90,12 @@ namespace PropBagLib.Tests.PerformanceDb
             IPropFactory propFactory_V1 = ourHelper.GetNewPropFactory_V1();
 
             SimpleAutoMapperProvider _amp = ourHelper.GetAutoMapperSetup_V1();
-            IPropFactory propFactory = propFactory_V1;
             PropModelHelpers pmHelpers = new PropModelHelpers();
 
             Assert.That(propFactory_V1.PropStoreAccessServiceProvider.AccessCounter == 0, "The Provider of PropStoreAccessServices has not had its Access Counter reset.");
 
             // Setup Mapping between Model1 and Person
-            PropModel propModel1 = pmHelpers.GetPropModelForModel1Dest(propFactory);
+            PropModel propModel1 = pmHelpers.GetPropModelForModel1Dest(propFactory_V1);
             Type typeToWrap = typeof(DestinationModel1); // typeof(PropBag);
             string configPackageName = "Extra_Members"; //"Emit_Proxy"; // 
 
@@ -121,7 +120,7 @@ namespace PropBagLib.Tests.PerformanceDb
             //};
 
 
-            PropModel propModel5 = pmHelpers.GetPropModelForModel5Dest(propFactory);
+            PropModel propModel5 = pmHelpers.GetPropModelForModel5Dest(propFactory_V1);
 
             string fullClassName = null; // Don't override the value from the PropModel.
             DestinationModel5 testMainVM = new DestinationModel5(propModel5, fullClassName, propFactory_V1);
@@ -155,33 +154,68 @@ namespace PropBagLib.Tests.PerformanceDb
             int currentNumRootPropBags = ourHelper.PropFactory_V1.PropStoreAccessServiceProvider.NumberOfRootPropBagsInPlay;
             int totalRootPropBagsCreated = ourHelper.PropFactory_V1.PropStoreAccessServiceProvider.TotalNumberOfAccessServicesCreated;
 
-            Thread.Sleep(new TimeSpan(0, 0, 1));
+            //Thread.Sleep(new TimeSpan(0, 0, 1));
 
-            foreach(DestinationModel1 pp in readyForTheView)
-            {
-                pp.Dispose();
-            }
-            readyForTheView = null;
+            //foreach(DestinationModel1 pp in readyForTheView)
+            //{
+            //    pp.Dispose();
+            //}
+            //readyForTheView = null;
 
-            testMainVM.SetIt<Business>(null, "Business");
-            b.Dispose();
-            b = null;
+            //testMainVM.SetIt<Business>(null, "Business");
+            //b.Dispose();
+            //b = null;
 
-            testMainVM.Dispose();
-            testMainVM = null;
+            //testMainVM.Dispose();
+            //testMainVM = null;
 
-            Thread.Sleep(new TimeSpan(0, 0, 1));
+            //Thread.Sleep(new TimeSpan(0, 0, 1));
 
-            // Test the PropStoreAccessProvider prune store feature.
-            // Do nothing for 1 hour, 24 minutes, in increments of 5 seconds.
-            for (int tp = 0; tp < 1000; tp++)
-            {
-                // Yield for 20 seconds.
-                Thread.Sleep(new TimeSpan(0, 0, 5));
-                GC.Collect(4, GCCollectionMode.Forced);
-            }
+            //// Test the PropStoreAccessProvider prune store feature.
+            //// Do nothing for 1 hour, 24 minutes, in increments of 5 seconds.
+            //for (int tp = 0; tp < 1000; tp++)
+            //{
+            //    // Yield for 20 seconds.
+            //    Thread.Sleep(new TimeSpan(0, 0, 5));
+            //    GC.Collect(4, GCCollectionMode.Forced);
+            //}
         }
 
+        [Test]
+        public void ZBindParent()
+        {
+            AutoMapperHelpers ourHelper = new AutoMapperHelpers();
+            IPropFactory propFactory_V1 = ourHelper.GetNewPropFactory_V1();
+            Assert.That(propFactory_V1.PropStoreAccessServiceProvider.AccessCounter == 0, "The Provider of PropStoreAccessServices has not had its Access Counter reset.");
+
+            List<DestinationModel1> destinationList = new List<DestinationModel1>();
+
+            PropModelHelpers pmHelpers = new PropModelHelpers();
+
+            // Set up Child VM (Using Model 5)
+            PropModel propModel5 = pmHelpers.GetPropModelForModel5Dest(propFactory_V1);
+            DestinationModel5 testChildVM = new DestinationModel5(propModel5, null, propFactory_V1);
+
+            Business b = new Business();
+            testChildVM.SetIt(b, "Business");
+            testChildVM.RegisterBinding<Business>("Business", "../Business");
+
+            List<Person> personList = b.Get().ToList();
+            ObservableCollection<Person> personList2 = new ObservableCollection<Person>(personList);
+            testChildVM.SetIt(personList2, "PersonCollection");
+
+
+            // Set up MainVM (Using Model 6)
+            PropModel propModel6 = pmHelpers.GetPropModelForModel6Dest(propFactory_V1);
+            DestinationModel6 testMainVM = new DestinationModel6(propModel6, null, propFactory_V1);
+
+            Business b2 = new Business();
+            testMainVM.SetIt(b, "Business");
+
+            testMainVM.SetIt<DestinationModel5>(testChildVM, "ChildVM");
+        }
+
+        #region DB Helper Methods
 
         private void PopDatabase(int num)
         {
@@ -212,6 +246,6 @@ namespace PropBagLib.Tests.PerformanceDb
             }
         }
 
-
+        #endregion
     }
 }

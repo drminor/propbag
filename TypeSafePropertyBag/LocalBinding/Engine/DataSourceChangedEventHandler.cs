@@ -7,6 +7,6 @@ using System.Threading.Tasks;
 namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
 {
 
-    public delegate void DataSourceChangedEventHandler(object sender, DataSourceChangedEventArgs e);
+    //public delegate void DataSourceChangedEventHandler(object sender, DataSourceChangedEventArgs e);
 
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace DRM.TypeSafePropertyBag
 {
@@ -18,7 +19,10 @@ namespace DRM.TypeSafePropertyBag
     public interface ICacheBindings<L2T>
     {
         ISubscriptionGen AddBinding(ISubscriptionKeyGen bindingRequest, out bool wasAdded);
-        bool RemoveBinding(IPropBag host, L2T propId);
-        ISubscriptionGen GetBinding(IPropBag host, L2T propId);
+        bool TryRemoveBinding(ISubscriptionKeyGen bindingRequest, out ISubscriptionGen binding);
+
+        //bool TryRemoveBinding(IPropBag host, L2T propId);
+
+        IEnumerable<ISubscriptionGen> GetBindings(IPropBag host, uint propId);
     }
 }

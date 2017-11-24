@@ -3,25 +3,19 @@
     public enum DataSourceChangeTypeEnum
     {
         /// <summary>
-        /// A CLR, or Dependency Object has signaled that one of its properties has received
-        /// a new value.
+        /// A PropBag PropItem (IProp) has signaled that its value has been updated.
+        /// The parent IPropBag raises a PropertyChangedWithTVals event on behalf of it's IProp prop item.
         /// </summary>
         PropertyChanged,
 
         /// <summary>
-        /// A CLR collection object has signaled that its content have changed.
+        /// A PropBag object is now a guest of a different PropItem, or is the guest of no PropItem.
+        /// The PropStoreNode raises a ParentNodeHasChanged event.
         /// </summary>
-        CollectionChanged,
+        ParentHasChanged,
 
         /// <summary>
-        /// A FrameworkElement or a FrameworkContentElement has signaled that the value
-        /// of its DataContext property now points to a different object,
-        /// or a DataSourceProvider has signaled that it's data now returns a different object.
-        /// </summary>
-        DataContextUpdated,
-
-        /// <summary>
-        /// Used internaly to begin listening to the FrameworkElement's DataContextChanged
+        /// Used internally to begin listening to the FrameworkElement's DataContextChanged
         /// or the DataSourceProvider, DataChanged event.
         /// </summary>
         Initializing

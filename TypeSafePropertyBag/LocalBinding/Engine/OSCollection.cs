@@ -4,38 +4,19 @@ using System.Linq;
 
 namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
 {
-    public class OSCollection : List<ObservableSource>
+    public class OSCollection<T> : List<ObservableSource<T>>
     {
-        public OSCollection(string rootElementName, string[] pathElements, Type sourceType, string binderName)
+        public OSCollection()
         {
-            Add(new ObservableSource(rootElementName, binderName));
-
-            int compCount = pathElements.Length;
-            // Add the intervening nodes if any.
-            for (int nPtr = 0; nPtr < compCount - 1; nPtr++)
-            {
-                Add(new ObservableSource(pathElements[nPtr], binderName));
-            }
-
-            if (compCount == 0)
-            {
-                // Path is empty, bind to the datasource.
-                Add(new ObservableSource(string.Empty, sourceType, PathConnectorTypeEnum.Dot, binderName));
-            }
-            else
-            {
-                // Add the terminal node.
-                Add(new ObservableSource(pathElements[compCount - 1], sourceType, PathConnectorTypeEnum.Dot, binderName));
-            }
         }
 
-        public new void Add(ObservableSource os)
+        public new void Add(ObservableSource<T> os)
         {
             if (os == null) throw new InvalidOperationException("Items of an OSCollection cannot be null.");
             base.Add(os);
         }
 
-        public new ObservableSource this[int index]
+        public new ObservableSource<T> this[int index]
         {
             get
             {
@@ -56,36 +37,13 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
 
                 for (int nPtr = 1; nPtr < Count; nPtr++)
                 {
-                    if (result != null) result += ".";
+                    if (result != null) result += "/";
                     result += this[nPtr].PathElement;
                 }
 
                 return result ?? ".";
             }
         }
-
-        public string GetNewPath(bool justForDiag = false)
-        {
-            string result = null;
-
-            for (int nPtr = 1; nPtr < Count; nPtr++)
-            {
-                string test = GetConnectedPathElement(result == null, this[nPtr].PathConnector, this[nPtr].NewPathElement);
-
-                if (test == null)
-                {
-                    if(!justForDiag)
-                        System.Diagnostics.Debug.WriteLine("A new path component is null; resplacing with '.'.");
-                }
-                result += test;
-            }
-
-            return result ?? ".";
-        }
-
-        public string Path2 => string.Join(null, this.Skip(1).Select((x, idx) => GetConnectedPathElement(idx == 0, x.PathConnector, x.PathElement)));
-
-        public string NewPath2 => string.Join(null, this.Skip(1).Select((x, idx) => GetConnectedPathElement(idx == 0, x.PathConnector, x.NewPathElement)));
 
         private string GetConnectedPathElement(bool isFirst, PathConnectorTypeEnum po, string pathElement)
         {
@@ -94,9 +52,9 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
                 switch (po)
                 {
                     case PathConnectorTypeEnum.Dot: return pathElement;
-                    case PathConnectorTypeEnum.Slash: return pathElement ?? ".";
-                    case PathConnectorTypeEnum.DotIndexer: return $"[{pathElement}]";
-                    case PathConnectorTypeEnum.SlashIndexer: return $"[{pathElement}]";
+                    //case PathConnectorTypeEnum.Slash: return pathElement ?? ".";
+                    //case PathConnectorTypeEnum.DotIndexer: return $"[{pathElement}]";
+                    //case PathConnectorTypeEnum.SlashIndexer: return $"[{pathElement}]";
                     default:
                         {
                             throw new InvalidOperationException($"The value {po} is not a supported or recognized PathOperatorEnum.");
@@ -114,10 +72,10 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
 
                 switch (po)
                 {
-                    case PathConnectorTypeEnum.Dot: return $".{pathElement}";
-                    case PathConnectorTypeEnum.Slash: return $"/{pathElement}";
-                    case PathConnectorTypeEnum.DotIndexer: return $".[{pathElement}]";
-                    case PathConnectorTypeEnum.SlashIndexer: return $"/[{pathElement}]";
+                    case PathConnectorTypeEnum.Dot: return $"/{pathElement}";
+                    //case PathConnectorTypeEnum.Slash: return $"/{pathElement}";
+                    //case PathConnectorTypeEnum.DotIndexer: return $".[{pathElement}]";
+                    //case PathConnectorTypeEnum.SlashIndexer: return $"/[{pathElement}]";
                     default:
                         {
                             throw new InvalidOperationException($"The value {po} is not a supported or recognized PathOperatorEnum.");
@@ -126,12 +84,11 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
             }
         }
 
-        public void ResetListeners(int startIndex, DataSourceChangedEventHandler subscriber)
+        public void ResetListeners(int startIndex, EventHandler<DataSourceChangedEventArgs> dsSubscription)
         {
-            // Note: Resetting the TerminalNode is not supported, and never needed.
-            for (int nPtr = startIndex; nPtr < Count - 1; nPtr++)
+            for (int nPtr = startIndex; nPtr < Count; nPtr++)
             {
-                this[nPtr].Reset(subscriber);
+                this[nPtr].Reset(dsSubscription);
             }
         }
 
@@ -141,11 +98,11 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
         /// <param name="pathListeners"></param>
         /// <param name="index"></param>
         /// <param name="newListenerProvider"></param>
-        /// <param name="subscriber"></param>
+        /// <param name="dsSubscription"></param>
         /// <param name="newListener"></param>
         /// <returns>True if the path listener is ready to start listening to property and/or collection change events.</returns>
-        public ObservableSourceStatusEnum ReplaceListener(int index, ref ObservableSourceProvider newListenerProvider,
-            DataSourceChangedEventHandler subscriber, out ObservableSource newListener)
+        public ObservableSourceStatusEnum ReplaceListener(int index, ObservableSource<T> newListener,
+            EventHandler<DataSourceChangedEventArgs> dsSubscription, EventHandler<PCTypedEventArgs<T>> typedSubscription)
         {
             if (index == Count - 1)
             {
@@ -153,43 +110,34 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
                     "We are replacing the terminal listener. This is not good.");
             }
 
-            ObservableSource oldListener = this[index];
-
-            if (newListenerProvider != null)
-            {
-                newListener = newListenerProvider.CreateObservableSource(); newListenerProvider = null;
-            }
-            else
-            {
-                newListener = null;
-            }
+            ObservableSource<T> oldListener = this[index];
 
             bool wasListening = oldListener?.IsListeningForNewDC == true;
 
             if (newListener?.IsListeningForNewDC != true)
             {
-                // The new ObservableSource is not responding to any change events.
+                // The new ObservableSource<T> is not responding to any change events.
                 if (index == 0)
                 {
                     System.Diagnostics.Debug.WriteLine("The Source Root is not listening.");
                 }
                 else if (wasListening)
                 {
-                    System.Diagnostics.Debug.WriteLine($"The ObservableSource at node {index} is no longer listening to any change events.");
+                    System.Diagnostics.Debug.WriteLine($"The ObservableSource<T> at node {index} is no longer listening to any change events.");
                 }
             }
 
             if (oldListener != null)
             {
 #if DEBUG
-                bool wasRemoved = oldListener.Unsubscribe(subscriber);
+                bool wasRemoved = oldListener.Unsubscribe(dsSubscription);
                 System.Diagnostics.Debug.Assert(wasListening == wasRemoved, "Was Listening does not agree with WasRemoved.");
 
                 // Remove PropertyChanged or CollectionChanged event handlers, if any.
-                oldListener.Reset();
+                oldListener.Reset(dsSubscription);
 #else
                 // Remove all event handlers.
-                oldListener.Reset(subscriber);
+                oldListener.Reset(dsSubscription);
 #endif
             }
 
@@ -201,8 +149,8 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
 
             if (newListener.IsListeningForNewDC)
             {
-                bool isListening = newListener.Subscribe(subscriber);
-                System.Diagnostics.Debug.Assert(isListening, "Subscriber was already present, but should not have been.");
+                bool isListening = newListener.Subscribe(dsSubscription);
+                System.Diagnostics.Debug.Assert(isListening, "dsSubscription was already present, but should not have been.");
                 isListening = newListener.IsListeningForNewDC;
             }
 

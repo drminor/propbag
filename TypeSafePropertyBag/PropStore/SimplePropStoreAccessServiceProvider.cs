@@ -46,7 +46,7 @@ namespace DRM.TypeSafePropertyBag
         private ConcurrentDictionary<ObjectIdType, CollectionOfSubscriberCollections> _propIndexesByObject;
 
         const int NUMBER_OF_SECONDS_BETWEEN_PRUNE_OPS = 20;
-        private Timer _timer;
+        //private Timer _timer;
 
         #endregion
 
@@ -58,9 +58,7 @@ namespace DRM.TypeSafePropertyBag
             MaxObjectsPerAppDomain = GetMaxObjectsPerAppDomain(maxPropsPerObject); // theGlobalStore.MaxObjectsPerAppDomain;
 
             // Create an "artificial" root node to hold all "real" roots, one for each "rooted" IPropBag.
-            // This node is a PropType node; its IsObjectNode = false. It has value 0 for its ObjectId, and 0 for its PropId.
-            //_tree = new Node<NodeData>(new NodeData(0, new PropGen()));
-            _tree = new PropStoreNode(0, int_PropData: null);
+            _tree = new PropStoreNode();
 
             _rawDict = new Dictionary<IPropBagProxy, ObjectIdType>();
             _cookedDict = new Dictionary<ObjectIdType, IPropBagProxy>();
@@ -71,7 +69,7 @@ namespace DRM.TypeSafePropertyBag
             _propIndexesByObject = new ConcurrentDictionary<ObjectIdType, CollectionOfSubscriberCollections>
                 (concurrencyLevel: OBJECT_INDEX_CONCURRENCY_LEVEL, capacity: EXPECTED_NO_OF_OBJECTS);
 
-            _timer = new Timer(PruneStore, null, NUMBER_OF_SECONDS_BETWEEN_PRUNE_OPS * 1000, NUMBER_OF_SECONDS_BETWEEN_PRUNE_OPS * 1000);
+            //_timer = new Timer(PruneStore, null, NUMBER_OF_SECONDS_BETWEEN_PRUNE_OPS * 1000, NUMBER_OF_SECONDS_BETWEEN_PRUNE_OPS * 1000);
         }
 
         #endregion
@@ -103,7 +101,7 @@ namespace DRM.TypeSafePropertyBag
             if(!psn.PropBagProxy.PropBagRef.TryGetTarget(out IPropBag dummy))
             {
                 int result = psn.Children.Count();
-                psn.MakeItARoot();
+                psn.MakeItARoot(_tree);
                 psn = null;
                 return result;
             } 
@@ -138,13 +136,8 @@ namespace DRM.TypeSafePropertyBag
 
             CompositeKeyType cKey = compKeyManager.JoinComp(propBagProxy.ObjectId, 0);
 
-            // Create a new PropStoreNode for this PropBag.
-            PropStoreNode propStoreNode = new PropStoreNode(cKey, propBagProxy);
-
-
-
-            // Add this new node to the global tree.
-            _tree.AddChild(propStoreNode);
+            // Create a new PropStoreNode for this PropBag and add make it a root.
+            PropStoreNode propStoreNode = new PropStoreNode(cKey, propBagProxy, _tree);
 
             PSAccessServiceType result = new SimplePropStoreAccessService
                 (
