@@ -55,26 +55,29 @@ namespace DRM.PropBag
         #region Member Declarations
 
         // These items are provided to us.
-        protected readonly IPropFactory _propFactory;
-        protected readonly PSAccessServiceType _ourStoreAccessor;
+        private readonly IPropFactory _propFactory;
+        private readonly PSAccessServiceType _ourStoreAccessor;
 
         // We are responsible for these
         protected virtual ITypeSafePropBagMetaData OurMetaData { get; }
         private readonly PropBagTypeSafetyMode _typeSafetyMode;
-        private L2KeyManType _level2KeyManager;
+        private readonly L2KeyManType _level2KeyManager;
 
         // These fulfill the IPropBagInternal contract
         PSAccessServiceType IPropBagInternal.ItsStoreAccessor => _ourStoreAccessor;
         L2KeyManType IPropBagInternal.Level2KeyManager => _level2KeyManager;
 
-        // These fulfill the IPropBag contract
+        #endregion
+
+        #region Public Events and Properties
+
         public string FullClassName => OurMetaData.FullClassName;
 
         public event PropertyChangedEventHandler PropertyChanged; // = delegate { };
         public event PropertyChangingEventHandler PropertyChanging; // = delegate { };
 
         public event EventHandler<PCGenEventArgs> PropertyChangedWithGenVals; // = delegate { };
-        public event EventHandler<PropertyChangedEventArgs> PropertyChangedIndividual;
+        //public event EventHandler<PropertyChangedEventArgs> PropertyChangedIndividual;
         public event EventHandler<PCObjectEventArgs> PropertyChangedWithObjectVals;
 
         #endregion
@@ -698,6 +701,8 @@ namespace DRM.PropBag
 
         #endregion
 
+        #region Event Subscriptions
+
         #region Subscribe to Property Changed
 
         public bool SubscribeToPropChanged(EventHandler<PropertyChangedEventArgs> handler,
@@ -714,8 +719,12 @@ namespace DRM.PropBag
 
             if (!PropData.IsEmpty)
             {
-                WeakEventManager<INotifyPCIndividual, PropertyChangedEventArgs>.
-                    AddHandler(this, "PropertyChangedIndividual", handler);
+                //WeakEventManager<INotifyPCIndividual, PropertyChangedEventArgs>.
+                //    AddHandler(this, "PropertyChangedIndividual", handler);
+
+                WeakEventManager<INotifyPropertyChanged, PropertyChangedEventArgs>.
+                    AddHandler(this, "PropertyChanged", handler);
+
                 return true;
             }
             return false;
@@ -736,7 +745,7 @@ namespace DRM.PropBag
             if (!PropData.IsEmpty)
             {
                 WeakEventManager<INotifyPropertyChanged, PropertyChangedEventArgs>.
-                    RemoveHandler(this, "PropertyChangedIndividual", handler);
+                    RemoveHandler(this, "PropertyChanged", handler);
                 return true;
             }
             return false;
@@ -744,53 +753,8 @@ namespace DRM.PropBag
 
         #endregion
 
-        #region Register / Unregister Binding
-
-        public bool RegisterBinding<T>(string nameOfPropertyToUpdate, string pathToSource)
-        {
-            IPropData PropData = GetPropGen<T>(nameOfPropertyToUpdate, out PropIdType propId, desiredHasStoreValue: _propFactory.ProvidesStorage);
-
-            IPropPrivate<T> prop = CheckTypeInfo<T>(propId, nameOfPropertyToUpdate, PropData, _ourStoreAccessor);
-
-            if (prop != null)
-            {
-                LocalPropertyPath lpp = new LocalPropertyPath(pathToSource);
-                LocalBindingInfo bindingInfo = new LocalBindingInfo(lpp, LocalBindingMode.OneWay);
-
-                bool wasAdded = _ourStoreAccessor.RegisterBinding<T>(this, propId, bindingInfo);
-                return wasAdded;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        public bool UnregisterBinding<T>(string nameOfPropertyToUpdate, string pathToSource)
-        {
-            IPropData PropData = GetPropGen<T>(nameOfPropertyToUpdate, out PropIdType propId, desiredHasStoreValue: _propFactory.ProvidesStorage);
-
-            IPropPrivate<T> prop = CheckTypeInfo<T>(propId, nameOfPropertyToUpdate, PropData, _ourStoreAccessor);
-
-            if (prop != null)
-            {
-                LocalPropertyPath lpp = new LocalPropertyPath(pathToSource);
-                LocalBindingInfo bindingInfo = new LocalBindingInfo(lpp, LocalBindingMode.OneWay);
-
-                bool wasRemoved = _ourStoreAccessor.UnRegisterBinding<T>(this, propId, bindingInfo);
-                return wasRemoved;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        #endregion
-
         #region Subscribe to Typed PropertyChanged
 
-        // TODO: Implement our own WeakEventManager for Delegates that have a single Type Parameter.
         public bool SubscribeToPropChanged<T>(EventHandler<PCTypedEventArgs<T>> eventHandler, string propertyName)
         {
             IPropData PropData = GetPropGen<T>(propertyName, out PropIdType propId, desiredHasStoreValue: _propFactory.ProvidesStorage);
@@ -822,7 +786,6 @@ namespace DRM.PropBag
             {
                 return false;
             }
-
         }
 
         /// <summary>
@@ -851,7 +814,10 @@ namespace DRM.PropBag
             return UnSubscribeToPropChanged<T>(eventHandler, propertyName);
         }
 
-        //// Allow callers to easily subscribe to PropertyChangedWithTVals.
+        #endregion
+
+        #region Register / Unregister Action<T,T> callbacks.
+
         //public bool SubscribeToPropChanged<T>(Action<T, T> doOnChange, string propertyName)
         //{
         //    bool mustBeRegistered = OurMetaData.AllPropsMustBeRegistered;
@@ -885,72 +851,49 @@ namespace DRM.PropBag
 
         public bool SubscribeToPropChanged(EventHandler<PCGenEventArgs> eventHandler, string propertyName, Type propertyType)
         {
-            throw new NotImplementedException();
+            bool mustBeRegistered = OurMetaData.AllPropsMustBeRegistered;
 
-            //bool mustBeRegistered = OurMetaData.AllPropsMustBeRegistered;
+            IPropData PropData = GetPropGen(propertyName, null, out bool wasRegistered, out PropIdType propId,
+                    haveValue: false,
+                    value: null,
+                    alwaysRegister: false,
+                    mustBeRegistered: mustBeRegistered,
+                    neverCreate: false,
+                    desiredHasStoreValue: _propFactory.ProvidesStorage);
 
-            //IPropGen PropData = GetPropGen(propertyName, null, out bool wasRegistered,
-            //        haveValue: false,
-            //        value: null,
-            //        alwaysRegister: false,
-            //        mustBeRegistered: mustBeRegistered,
-            //        neverCreate: false,
-            //        desiredHasStoreValue: PropFactory.ProvidesStorage);
-
-            //if (!PropData.IsEmpty)
-            //{
-            //    // TODO: Help the caller subscribe using a WeakReference
-            //    PropData.SubscribeToPropChanged(doOnChange);
-            //    return true;
-            //}
-            //return false;
+            if (!PropData.IsEmpty)
+            {
+                bool result = _ourStoreAccessor.RegisterHandler(this, propId, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
+                return result;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         public bool UnSubscribeToPropChanged(EventHandler<PCGenEventArgs> eventHandler, string propertyName, Type propertyType)
         {
-            throw new NotImplementedException();
+            bool mustBeRegistered = OurMetaData.AllPropsMustBeRegistered;
+
+            IPropData PropData = GetPropGen(propertyName, null, out bool wasRegistered, out PropIdType propId,
+                    haveValue: false,
+                    value: null,
+                    alwaysRegister: false,
+                    mustBeRegistered: mustBeRegistered,
+                    neverCreate: false,
+                    desiredHasStoreValue: _propFactory.ProvidesStorage);
+
+            if (!PropData.IsEmpty)
+            {
+                bool result = _ourStoreAccessor.UnRegisterHandler(this, propId, eventHandler);
+                return result;
+            }
+            else
+            {
+                return false;
+            }
         }
-
-        //// This is used to allow the caller to get notified only when a particular property is changed with values.
-        //// It can be used in any for any TypeSafetyMode, but is especially handy when the TypeSafetyMode = 'none.'
-        //public bool SubscribeToPropChanged(Action<object, object> doOnChange, string propertyName)
-        //{
-        //    bool mustBeRegistered = OurMetaData.AllPropsMustBeRegistered;
-
-        //    IPropGen PropData = GetPropGen(propertyName, null, out bool wasRegistered,
-        //            haveValue: false,
-        //            value: null,
-        //            alwaysRegister: false,
-        //            mustBeRegistered: mustBeRegistered,
-        //            neverCreate: false,
-        //            desiredHasStoreValue: PropFactory.ProvidesStorage);
-
-        //    if (!PropData.IsEmpty)
-        //    {
-        //        // TODO: Help the caller subscribe using a WeakReference
-        //        PropData.SubscribeToPropChanged(doOnChange);
-        //        return true;
-        //    }
-        //    return false;
-        //}
-
-        //public bool UnSubscribeToPropChanged(Action<object, object> doOnChange, string propertyName)
-        //{
-        //    bool mustBeRegistered = OurMetaData.AllPropsMustBeRegistered;
-
-        //    IPropGen PropData = GetPropGen(propertyName, null, out bool wasRegistered,
-        //            haveValue: false,
-        //            value: null,
-        //            alwaysRegister: false,
-        //            mustBeRegistered: mustBeRegistered,
-        //            neverCreate: false,
-        //            desiredHasStoreValue: PropFactory.ProvidesStorage);
-
-        //    if (!PropData.IsEmpty)
-        //        return PropData.UnSubscribeToPropChanged(doOnChange);
-        //    else
-        //        return false;
-        //}
 
         #endregion
 
@@ -1004,11 +947,133 @@ namespace DRM.PropBag
 
         #endregion
 
+        #region Register / Unregister Action<object, object> callbacks.
+
+        //// This is used to allow the caller to get notified only when a particular property is changed with values.
+        //// It can be used in any for any TypeSafetyMode, but is especially handy when the TypeSafetyMode = 'none.'
+        //public bool SubscribeToPropChanged(Action<object, object> doOnChange, string propertyName)
+        //{
+        //    bool mustBeRegistered = OurMetaData.AllPropsMustBeRegistered;
+
+        //    IPropGen PropData = GetPropGen(propertyName, null, out bool wasRegistered,
+        //            haveValue: false,
+        //            value: null,
+        //            alwaysRegister: false,
+        //            mustBeRegistered: mustBeRegistered,
+        //            neverCreate: false,
+        //            desiredHasStoreValue: PropFactory.ProvidesStorage);
+
+        //    if (!PropData.IsEmpty)
+        //    {
+        //        // TODO: Help the caller subscribe using a WeakReference
+        //        PropData.SubscribeToPropChanged(doOnChange);
+        //        return true;
+        //    }
+        //    return false;
+        //}
+
+        //public bool UnSubscribeToPropChanged(Action<object, object> doOnChange, string propertyName)
+        //{
+        //    bool mustBeRegistered = OurMetaData.AllPropsMustBeRegistered;
+
+        //    IPropGen PropData = GetPropGen(propertyName, null, out bool wasRegistered,
+        //            haveValue: false,
+        //            value: null,
+        //            alwaysRegister: false,
+        //            mustBeRegistered: mustBeRegistered,
+        //            neverCreate: false,
+        //            desiredHasStoreValue: PropFactory.ProvidesStorage);
+
+        //    if (!PropData.IsEmpty)
+        //        return PropData.UnSubscribeToPropChanged(doOnChange);
+        //    else
+        //        return false;
+        //}
+
+        #endregion
+
+        #endregion
+
+        #region Register / Unregister Binding
+
+        public bool RegisterBinding<T>(string nameOfPropertyToUpdate, string pathToSource)
+        {
+            IPropData PropData = GetPropGen<T>(nameOfPropertyToUpdate, out PropIdType propId, desiredHasStoreValue: _propFactory.ProvidesStorage);
+
+            IPropPrivate<T> prop = CheckTypeInfo<T>(propId, nameOfPropertyToUpdate, PropData, _ourStoreAccessor);
+
+            if (prop != null)
+            {
+                LocalPropertyPath lpp = new LocalPropertyPath(pathToSource);
+                LocalBindingInfo bindingInfo = new LocalBindingInfo(lpp, LocalBindingMode.OneWay);
+
+                bool wasAdded = _ourStoreAccessor.RegisterBinding<T>(this, propId, bindingInfo);
+                return wasAdded;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public bool UnregisterBinding<T>(string nameOfPropertyToUpdate, string pathToSource)
+        {
+            IPropData PropData = GetPropGen<T>(nameOfPropertyToUpdate, out PropIdType propId, desiredHasStoreValue: _propFactory.ProvidesStorage);
+
+            IPropPrivate<T> prop = CheckTypeInfo<T>(propId, nameOfPropertyToUpdate, PropData, _ourStoreAccessor);
+
+            if (prop != null)
+            {
+                LocalPropertyPath lpp = new LocalPropertyPath(pathToSource);
+                LocalBindingInfo bindingInfo = new LocalBindingInfo(lpp, LocalBindingMode.OneWay);
+
+                bool wasRemoved = _ourStoreAccessor.UnRegisterBinding<T>(this, propId, bindingInfo);
+                return wasRemoved;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        #endregion
+
         #region Public Methods
 
         public virtual ITypeSafePropBagMetaData GetMetaData()
         {
             return OurMetaData;
+        }
+
+        /// <summary>
+        /// Makes a copy of the core list.
+        /// </summary>
+        /// <returns></returns>
+        public IDictionary<string, ValPlusType> GetAllPropNamesAndTypes()
+        {
+            IEnumerable<KeyValuePair<PropNameType, IPropData>> theStoreAsCollection = _ourStoreAccessor.GetCollection(this);
+
+            IEnumerable<KeyValuePair<string, ValPlusType>> list = theStoreAsCollection.Select(x =>
+            new KeyValuePair<string, ValPlusType>(x.Key, x.Value.ValuePlusType())).ToList();
+
+            IDictionary<string, ValPlusType> result = list.ToDictionary(pair => pair.Key, pair => pair.Value);
+            return result;
+        }
+
+        /// <summary>
+        /// Returns all of the values in dictionary of objects, keyed by PropertyName.
+        /// </summary>
+        public IDictionary<PropNameType, IPropData> GetAllPropertyValues()
+        {
+            IEnumerable<KeyValuePair<PropNameType, IPropData>> theStoreAsCollection = _ourStoreAccessor.GetCollection(this);
+            IDictionary<PropNameType, IPropData> result = theStoreAsCollection.ToDictionary(pair => pair.Key, pair => pair.Value);
+            return result;
+        }
+
+        public IList<PropNameType> GetAllPropertyNames()
+        {
+            var result = _ourStoreAccessor.GetKeys(this).ToList();
+            return result;
         }
 
         public bool PropertyExists(string propertyName)
@@ -1211,7 +1276,6 @@ namespace DRM.PropBag
             {
                 System.Diagnostics.Debug.WriteLine($"Could not remove property: {propertyName}.");
             }
-
         }
         
         protected void RemoveProp<T>(string propertyName)
@@ -1270,40 +1334,9 @@ namespace DRM.PropBag
             }
         }
 
-        /// <summary>
-        /// Makes a copy of the core list.
-        /// </summary>
-        /// <returns></returns>
-        public IDictionary<string, ValPlusType> GetAllPropNamesAndTypes()
-        {
-            IEnumerable<KeyValuePair<PropNameType, IPropData>> theStoreAsCollection = _ourStoreAccessor.GetCollection(this);
-
-            IEnumerable<KeyValuePair<string, ValPlusType>> list = theStoreAsCollection.Select(x =>
-            new KeyValuePair<string, ValPlusType>(x.Key, x.Value.ValuePlusType())).ToList();
-
-            IDictionary <string, ValPlusType> result = list.ToDictionary(pair => pair.Key, pair => pair.Value);
-            return result; 
-        }
-
-        /// <summary>
-        /// Returns all of the values in dictionary of objects, keyed by PropertyName.
-        /// </summary>
-        public IDictionary<PropNameType, IPropData> GetAllPropertyValues()
-        {
-            IEnumerable<KeyValuePair<PropNameType, IPropData>> theStoreAsCollection = _ourStoreAccessor.GetCollection(this);
-            IDictionary<PropNameType, IPropData> result = theStoreAsCollection.ToDictionary(pair => pair.Key, pair => pair.Value);
-            return result;
-        }
-
-        public IList<PropNameType> GetAllPropertyNames()
-        {
-            var result = _ourStoreAccessor.GetKeys(this).ToList();
-            return result;
-        }
-
         #endregion
 
-        #region Private Methods and Properties
+        #region Private Methods
 
         private bool DoSet<T>(PropIdType propId, string propertyName, IPropPrivate<T> typedProp, ref T curValue, T newValue)
         {
@@ -1322,7 +1355,8 @@ namespace DRM.PropBag
                     oldValue = default(T);
                 }
 
-                OnPropertyChanging(_propFactory.IndexerName);
+                // TODO: Fix This.
+                //OnPropertyChanging(_propFactory.IndexerName);
 
                 // Make the update.
                 if (typedProp.HasStore)
@@ -1340,9 +1374,6 @@ namespace DRM.PropBag
 
         private void DoNotifyWork<T>(PropIdType propId, PropNameType propertyName, IPropPrivate<T> typedProp, T oldVal, T newValue)
         {
-            // Let our StoreAccessor know that a property has been updated.
-            //OurStoreAccessor.PropHasChanged<T>(this, propId, oldVal, newValue, !typedProp.ValueIsDefined);
-
             // PROCESS BINDINGS
             SubscriberCollection sc = GetSubscriptions(propId);
 
@@ -1404,7 +1435,7 @@ namespace DRM.PropBag
             if (typedProp.DoAfterNotify)
             {
                 // Raise the standard PropertyChanged event
-                OnPropertyChanged(_propFactory.IndexerName);
+                //OnPropertyChanged(_propFactory.IndexerName);
 
                 // Raise the individual PropertyChanged event
                 //OnPropertyChangedIndividual(propertyName);
@@ -1418,18 +1449,18 @@ namespace DRM.PropBag
                 //typedProp.OnPropertyChangedWithObjectVals(propertyName, oldVal, newValue);
 
                 //// The un-typed, PropertyChanged shared event.
-                OnPropertyChangedWithVals(propertyName, typeof(T), oldVal, newValue);
+                //OnPropertyChangedWithVals(propertyName, typeof(T), oldVal, newValue);
 
                 // then perform the call back.
-                typedProp.DoWhenChanged(oldVal, newValue);
+                //typedProp.DoWhenChanged(oldVal, newValue);
             }
             else
             {
                 // Peform the call back,
-                typedProp.DoWhenChanged(oldVal, newValue);
+                //typedProp.DoWhenChanged(oldVal, newValue);
 
                 // Raise the standard PropertyChanged event
-                OnPropertyChanged(_propFactory.IndexerName);
+                //OnPropertyChanged(_propFactory.IndexerName);
 
                 // Raise the individual PropertyChanged event
                 //OnPropertyChangedIndividual(propertyName);
@@ -1443,7 +1474,7 @@ namespace DRM.PropBag
                 //typedProp.OnPropertyChangedWithObjectVals(propertyName, oldVal, newValue);
 
                 // The un-typed, PropertyChanged shared event.
-                OnPropertyChangedWithVals(propertyName, typeof(T), oldVal, newValue);
+                //OnPropertyChangedWithVals(propertyName, typeof(T), oldVal, newValue);
             }
         }
 
@@ -1510,6 +1541,26 @@ namespace DRM.PropBag
             }
 
             return (IPropData) PropData;
+        }
+
+        protected IPropData GetPropGen<T>(PropNameType propertyName, out PropIdType propId, bool? desiredHasStoreValue)
+        {
+            propId = GetPropId(propertyName);
+            if (!_ourStoreAccessor.TryGetValue(this, propId, out IPropData PropData))
+            {
+                throw new KeyNotFoundException("That cKey was not found.");
+            }
+
+            if (!PropData.IsEmpty && desiredHasStoreValue.HasValue && desiredHasStoreValue.Value != PropData.TypedProp.HasStore)
+            {
+                if (desiredHasStoreValue.Value)
+                    //Caller needs property to have a backing store.
+                    throw new InvalidOperationException(string.Format("Property: {0} has no backing store held by this instance of PropBag. This operation can only be performed on properties for which a backing store is held by this instance.", propertyName));
+                else
+                    throw new InvalidOperationException(string.Format("Property: {0} has a backing store held by this instance of PropBag. This operation can only be performed on properties for which no backing store is kept by this instance.", propertyName));
+            }
+
+            return (IPropData)PropData;
         }
 
         private IPropPrivate<T> CheckTypeInfo<T>(PropIdType propId, PropNameType propertyName, IPropData PropData, PSAccessServiceType storeAccess)
@@ -1649,29 +1700,30 @@ namespace DRM.PropBag
             return propId;
         }
 
-        protected IPropData GetPropGen<T>(PropNameType propertyName, out PropIdType propId, bool? desiredHasStoreValue)
-        {
-            propId = GetPropId(propertyName);
-            if (!_ourStoreAccessor.TryGetValue(this, propId, out IPropData PropData))
-            {
-                throw new KeyNotFoundException("That cKey was not found.");
-            }
-
-            if (!PropData.IsEmpty && desiredHasStoreValue.HasValue && desiredHasStoreValue.Value != PropData.TypedProp.HasStore)
-            {
-                if (desiredHasStoreValue.Value)
-                    //Caller needs property to have a backing store.
-                    throw new InvalidOperationException(string.Format("Property: {0} has no backing store held by this instance of PropBag. This operation can only be performed on properties for which a backing store is held by this instance.", propertyName));
-                else
-                    throw new InvalidOperationException(string.Format("Property: {0} has a backing store held by this instance of PropBag. This operation can only be performed on properties for which no backing store is kept by this instance.", propertyName));
-            }
-
-            return (IPropData) PropData;
-        }
-
         #endregion
 
         #region Methods to Raise Events
+
+        // Raise Standard Events
+        //protected void OnPropertyChanged(string propertyName)
+        //{
+        //    PropertyChangedEventHandler handler = Interlocked.CompareExchange(ref PropertyChanged, null, null);
+
+        //    if (handler != null)
+        //    {
+        //        handler(this, new PropertyChangedEventArgs(propertyName));
+        //    }
+        //}
+
+        //protected void OnPropertyChanging(string propertyName)
+        //{
+        //    PropertyChangingEventHandler handler = Interlocked.CompareExchange(ref PropertyChanging, null, null);
+
+        //    if (handler != null)
+        //    {
+        //        handler(this, new PropertyChangingEventArgs(propertyName));
+        //    }
+        //}
 
         //protected void OnPropertyChangedIndividual(string propertyName)
         //{
@@ -1683,34 +1735,14 @@ namespace DRM.PropBag
         //    }
         //}
 
-        // Raise Standard Events
-        protected void OnPropertyChanged(string propertyName)
-        {
-           PropertyChangedEventHandler handler = Interlocked.CompareExchange(ref PropertyChanged, null, null);
+        // INotifyPCGen
+        //protected void OnPropertyChangedWithVals(string propertyName, Type propertyType, object oldVal, object newVal)
+        //{
+        //    EventHandler<PCGenEventArgs> handler = Interlocked.CompareExchange(ref PropertyChangedWithGenVals, null, null);
 
-            if (handler != null)
-            {
-                handler(this, new PropertyChangedEventArgs(propertyName));
-            }
-        }
-
-        protected void OnPropertyChanging(string propertyName)
-        {
-            PropertyChangingEventHandler handler = Interlocked.CompareExchange(ref PropertyChanging, null, null);
-
-            if (handler != null)
-            {
-                handler(this, new PropertyChangingEventArgs(propertyName));
-            }
-        }
-
-        protected void OnPropertyChangedWithVals(string propertyName, Type propertyType, object oldVal, object newVal)
-        {
-            EventHandler<PCGenEventArgs> handler = Interlocked.CompareExchange(ref PropertyChangedWithGenVals, null, null);
-
-            if (handler != null)
-                handler(this, new PCGenEventArgs(propertyName, propertyType, oldVal, newVal));
-        }
+        //    if (handler != null)
+        //        handler(this, new PCGenEventArgs(propertyName, propertyType, oldVal, newVal));
+        //}
 
         #endregion
 
@@ -1759,19 +1791,6 @@ namespace DRM.PropBag
 
         #endregion
 
-        // TODO: Consider creating a new interface: IPropBagInternal and making this method be a member of that interface.
-        private bool DoSetBridge<T>(IPropBag target, PropIdType propId, string propertyName, IProp prop, object value)
-        {
-            T typedValue = (T)value;
-
-            IPropPrivate<T> typeProp = (IPropPrivate<T>)prop;
-            bool result =  ((PropBag)target).DoSet<T>(propId, propertyName, typeProp, ref typedValue, (T) value);
-
-            typeProp.TypedValue = typedValue;
-
-            return result;
-        }
-
         #region IDisposable Support
 
         private bool disposedValue = false; // To detect redundant calls
@@ -1813,7 +1832,20 @@ namespace DRM.PropBag
 
         #endregion
 
-        //#region Generic Method Support
+        #region Generic Method Support
+
+        // TODO: Consider creating a new interface: IPropBagInternal and making this method be a member of that interface.
+        private bool DoSetBridge<T>(IPropBag target, PropIdType propId, string propertyName, IProp prop, object value)
+        {
+            T typedValue = (T)value;
+
+            IPropPrivate<T> typeProp = (IPropPrivate<T>)prop;
+            bool result = ((PropBag)target).DoSet<T>(propId, propertyName, typeProp, ref typedValue, (T)value);
+
+            typeProp.TypedValue = typedValue;
+
+            return result;
+        }
 
         ///// <summary>
         ///// Used to create Delegates when the type of the value is not known at run time.
@@ -1878,7 +1910,6 @@ namespace DRM.PropBag
 
         //}
 
-        //#endregion
-
+        #endregion
     }
 }
