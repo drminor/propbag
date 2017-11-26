@@ -60,7 +60,7 @@ namespace DRM.TypeSafePropertyBag
             SubscriptionPriorityGroup = sKey.SubscriptionPriorityGroup;
             SubscriptionTargetKind = sKey.SubscriptionTargetKind;
 
-            LocalBinder = new LocalBinder<T>(propStoreAccessService, TargetPropRef.CKey, TargetPropRef.Level2Key, sKey.BindingInfo);
+            LocalBinder = new LocalBinder<T>(propStoreAccessService, TargetPropRef.Level2Key, sKey.BindingInfo);
         }
 
         public override bool Equals(object obj)

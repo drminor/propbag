@@ -10,9 +10,9 @@ namespace DRM.TypeSafePropertyBag
 
     public struct SimpleExKey : ExKeyType, IEquatable<SimpleExKey>
     {
-
         private const int LOG_BASE2_MAX_PROPERTIES = 16;
-        private static readonly int MAX_NUMBER_OF_PROPERTIES = (int)Math.Pow(2, LOG_BASE2_MAX_PROPERTIES); //65536;
+
+        private static readonly int _maxPropPerObject = (int)Math.Pow(2, LOG_BASE2_MAX_PROPERTIES); //65536;
 
         private static long _maxObjectsPerAppDomain;
         private static int _botFieldLen;
@@ -22,14 +22,14 @@ namespace DRM.TypeSafePropertyBag
 
         static SimpleExKey()
         {
-            double numBitsForProps = LOG_BASE2_MAX_PROPERTIES;
+            int numBitsForProps = LOG_BASE2_MAX_PROPERTIES;
             int numberOfBitsInCKey = (int)Math.Log(CompositeKeyType.MaxValue, 2);
-            int numberOfTopBits = (int)Math.Round((double)numberOfBitsInCKey - numBitsForProps, 0);
+            int numberOfTopBits = numberOfBitsInCKey - numBitsForProps;
 
             _maxObjectsPerAppDomain = (long)Math.Pow(2, numberOfTopBits);
 
             _shift = numberOfTopBits;
-            _botFieldLen = numberOfBitsInCKey - numberOfTopBits;
+            _botFieldLen = numBitsForProps; // numberOfBitsInCKey - numberOfTopBits;
             _botMask = ((CompositeKeyType)1 << _botFieldLen) - 1;
             _topMask = ((CompositeKeyType)1 << numberOfTopBits) - 1;
         }
@@ -45,40 +45,36 @@ namespace DRM.TypeSafePropertyBag
         //}
 
 
+        public SimpleExKey(ObjectIdType level1Key, PropIdType level2Key) : this(StaticFuse(level1Key, level2Key))
+        {
+        }
 
         public SimpleExKey(CompositeKeyType cKey) : this()
         {
+            System.Diagnostics.Debug.Assert(cKey != 0, "The value 0 is reserved to indicate an empty Key. To create an empty key, use the parameterless constructor.");
             CKey = cKey;
-        }
-
-        public SimpleExKey(ObjectIdType level1Key, PropIdType level2Key) : this()
-        {
-            CKey = Fuse(level1Key, level2Key);
         }
 
         #endregion
 
         #region Public Members
 
+        public bool isEmpty => CKey == 0;
         public CompositeKeyType CKey { get; }
-
         public ObjectIdType Level1Key => (CKey >> _botFieldLen) & _topMask;
-
         public PropIdType Level2Key => (PropIdType)(CKey & _botMask);
 
         public long MaxObjectsPerAppDomain => _maxObjectsPerAppDomain;
-
-        public int MaxPropsPerObject => MAX_NUMBER_OF_PROPERTIES;
+        public int MaxPropsPerObject => _maxPropPerObject;
 
         //public object AccessToken => WR_AccessToken;
-
         //public WeakReference<IPropBagInternal> WR_AccessToken { get; }
 
         #endregion
 
         #region Public Methods
 
-        public CompositeKeyType Fuse(ObjectIdType top, uint bot)
+        public CompositeKeyType Fuse(ObjectIdType top, PropIdType bot)
         {
             CompositeKeyType result = top;
             result = result << _botFieldLen;
@@ -86,7 +82,7 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        public ObjectIdType Explode(CompositeKeyType cKey, out uint bot)
+        public ObjectIdType Explode(CompositeKeyType cKey, out PropIdType bot)
         {
             bot = (PropIdType)(cKey & _botMask);
 
@@ -100,13 +96,21 @@ namespace DRM.TypeSafePropertyBag
             return testTop == top;
         }
 
-        public bool Verify(CompositeKeyType cKey, ObjectIdType top, uint bot)
+        public bool Verify(CompositeKeyType cKey, ObjectIdType top, PropIdType bot)
         {
             ObjectIdType testTop = Explode(cKey, out PropIdType testBot);
             return testTop == top && testBot == bot;
         }
 
         #endregion
+
+        private static CompositeKeyType StaticFuse(ObjectIdType top, PropIdType bot)
+        {
+            CompositeKeyType result = top;
+            result = result << _botFieldLen;
+            result += bot;
+            return result;
+        }
 
         #region IEquatable Support and Object Overrides
 
@@ -122,10 +126,6 @@ namespace DRM.TypeSafePropertyBag
 
         public override int GetHashCode()
         {
-            //var hashCode = 1252689209;
-            //hashCode = hashCode * -1521134295 + base.GetHashCode();
-            //hashCode = hashCode * -1521134295 + CKey.GetHashCode();
-
             var hashCode = CKey.GetHashCode();
             return hashCode;
         }

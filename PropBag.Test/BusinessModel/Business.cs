@@ -9,8 +9,7 @@ namespace PropBagLib.Tests.BusinessModel
         PersonDB _dbContext = null;
         public Business()
         {
-            AppDomain.CurrentDomain.SetData("DataDirectory",
-             Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData));
+            AppDomain.CurrentDomain.SetData("DataDirectory", Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData));
             _dbContext = new PersonDB();
         }
 

@@ -3,6 +3,7 @@ namespace DRM.TypeSafePropertyBag
 {
     public interface IExplodedKey<CompT, L1T, L2T>
     {
+        bool isEmpty { get; }
         CompT CKey { get; }
         L1T Level1Key { get; }
         L2T Level2Key { get; }

@@ -74,7 +74,6 @@ namespace DRM.TypeSafePropertyBag
             get
             {
                 ExKeyT cKey = GetCompKey(propBag, propId);
-                //IPropData result = _theGlobalStore[cKey];
                 IPropData result = GetChild(cKey).Int_PropData;
                 return result;
             }
@@ -289,7 +288,8 @@ namespace DRM.TypeSafePropertyBag
             return wasRemoved;
         }
 
-        public bool RegisterHandler(IPropBag propBag, uint propId, EventHandler<PCGenEventArgs> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef)
+        public bool RegisterHandler(IPropBag propBag, uint propId, 
+            EventHandler<PCGenEventArgs> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef)
         {
             ExKeyT exKey = GetExKey(propBag, propId);
             ISubscriptionKeyGen subscriptionRequest = new SubscriptionKeyGen(exKey, eventHandler, priorityGroup, keepRef);
@@ -307,7 +307,8 @@ namespace DRM.TypeSafePropertyBag
             return wasRemoved;
         }
 
-        public bool RegisterHandler(IPropBag propBag, uint propId, EventHandler<PCObjectEventArgs> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef)
+        public bool RegisterHandler(IPropBag propBag, uint propId, 
+            EventHandler<PCObjectEventArgs> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef)
         {
             ExKeyT exKey = GetExKey(propBag, propId);
             ISubscriptionKeyGen subscriptionRequest = new SubscriptionKeyGen(exKey, eventHandler, priorityGroup, keepRef);
@@ -565,19 +566,6 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        //private IPropData GetChild(CompositeKeyType cKey)
-        //{
-        //    if (_ourNode.TryGetChild(cKey, out PropStoreNode child))
-        //    {
-        //        IPropData result = _ourNode.Int_PropData;
-        //        return result;
-        //    }
-        //    else
-        //    {
-        //        throw new KeyNotFoundException("That propId could not be found.");
-        //    }
-        //}
-
         private PropStoreNode GetChild(ExKeyT cKey)
         {
             if (_ourNode.TryGetChild(cKey, out PropStoreNode child))
@@ -681,17 +669,6 @@ namespace DRM.TypeSafePropertyBag
         //    return exKey;
         //}
 
-        /// <summary>
-        /// Does not check the ObjectReference.
-        /// </summary>
-        /// <param name="cKey"></param>
-        /// <param name="propId"></param>
-        /// <returns></returns>
-        private ExKeyT GetExKey(CompositeKeyType cKey, PropIdType propId)
-        {
-            ExKeyT exKey = new SimpleExKey(cKey);
-            return exKey;
-        }
 
         //// Also verifies that the compKey matches the propBag value.
         //// Don't use this if you need an ExKey, since 1) ExKey requires a PropId value, 2) to get a PropId value you need split the CompKey, 3) Verify Splits the CompKey, 4) you can easily verify by using reference equality to see that our _objectId == the objectId from the CompKey.
@@ -728,51 +705,39 @@ namespace DRM.TypeSafePropertyBag
 
         #region Explicit Implementation of the internal interface: IHaveTheKey
 
-        public ObjectIdType ObjectId => _objectId;
-
-        ExKeyT IHaveTheKeyIT.GetTheKey(IPropBag propBag, PropIdType propId)
-        {
-            ExKeyT result = GetExKey(propBag, propId);
-            return result;
-        }
-
-        ExKeyT IHaveTheKeyIT.GetTheKey(IPropBagProxy propBagProxy, PropIdType propId)
-        {
-            ExKeyT result = new SimpleExKey(propBagProxy.ObjectId, propId);
-            return result;
-        }
-
-        //CompositeKeyType IHaveTheKeyIT.GetCompKey(ObjectIdType objectId, PropIdType propId)
-        //{
-        //    CompositeKeyType cKey = _compKeyManager.JoinComp(objectId, propId);
-        //    return cKey;
-        //}
-
         PropStoreNode IHaveTheKeyIT.PropStoreNode => _ourNode;
 
-        PropStoreNode IHaveTheKeyIT.GetObjectNodeForPropVal(IPropDataInternal int_propData)
-        {
-            System.Diagnostics.Debug.Assert(int_propData != null, "Any parent of an ObjectId type PropStoreNode should have an instance of an IPropDataInternal.");
-            System.Diagnostics.Debug.Assert(int_propData.TypedProp != null, "All objects that implement IPropDataInternal must have a non-null value for TypedProp.");
-            System.Diagnostics.Debug.Assert(int_propData.TypedProp.Type is IPropBag, "All calls to GetObjectNodeForPropVal must be made for properties of a type that derives from IPropBag.");
+        //ObjectIdType IHaveTheKeyIT.ObjectId => _objectId;
 
-            object test = int_propData.TypedProp.TypedValueAsObject;
+        //ExKeyT IHaveTheKeyIT.GetTheKey(IPropBag propBag, PropIdType propId)
+        //{
+        //    ExKeyT result = GetExKey(propBag, propId);
+        //    return result;
+        //}
 
-            if (test == null) return null;
+        //PropStoreNode IHaveTheKeyIT.GetObjectNodeForPropVal(IPropDataInternal int_propData)
+        //{
+        //    System.Diagnostics.Debug.Assert(int_propData != null, "Any parent of an ObjectId type PropStoreNode should have an instance of an IPropDataInternal.");
+        //    System.Diagnostics.Debug.Assert(int_propData.TypedProp != null, "All objects that implement IPropDataInternal must have a non-null value for TypedProp.");
+        //    System.Diagnostics.Debug.Assert(int_propData.TypedProp.Type is IPropBag, "All calls to GetObjectNodeForPropVal must be made for properties of a type that derives from IPropBag.");
 
-            System.Diagnostics.Debug.Assert(test is IPropBagInternal, "All instances of IPropBag must also implement IPropBagInternal.");
-            System.Diagnostics.Debug.Assert(((IPropBagInternal)test).ItsStoreAccessor != null, "All instances of IPropBagInternal must have a non-null value for ItsStoreAccessor.");
-            System.Diagnostics.Debug.Assert(((IPropBagInternal)test).ItsStoreAccessor is IHaveTheKeyIT, "All instances of IPropBagInternal must have a value for ItsStoreAccessor that implements IHaveTheKeyIT.");
+        //    object test = int_propData.TypedProp.TypedValueAsObject;
 
-            PropStoreNode result = ((IHaveTheKeyIT)((IPropBagInternal)test).ItsStoreAccessor).PropStoreNode;
-            return result;
-        }
+        //    if (test == null) return null;
 
-        bool IHaveTheKeyIT.TryGetAChildOfMine(PropIdType propId, out PropStoreNode child)
-        {
-            bool result = _ourNode.TryGetChild(propId, out child);
-            return result;
-        }
+        //    System.Diagnostics.Debug.Assert(test is IPropBagInternal, "All instances of IPropBag must also implement IPropBagInternal.");
+        //    System.Diagnostics.Debug.Assert(((IPropBagInternal)test).ItsStoreAccessor != null, "All instances of IPropBagInternal must have a non-null value for ItsStoreAccessor.");
+        //    System.Diagnostics.Debug.Assert(((IPropBagInternal)test).ItsStoreAccessor is IHaveTheKeyIT, "All instances of IPropBagInternal must have a value for ItsStoreAccessor that implements IHaveTheKeyIT.");
+
+        //    PropStoreNode result = ((IHaveTheKeyIT)((IPropBagInternal)test).ItsStoreAccessor).PropStoreNode;
+        //    return result;
+        //}
+
+        //bool IHaveTheKeyIT.TryGetAChildOfMine(PropIdType propId, out PropStoreNode child)
+        //{
+        //    bool result = _ourNode.TryGetChild(propId, out child);
+        //    return result;
+        //}
 
         #endregion
 

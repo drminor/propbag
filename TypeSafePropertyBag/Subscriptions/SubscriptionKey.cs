@@ -25,7 +25,7 @@ namespace DRM.TypeSafePropertyBag
             bool keepRef
             )
             : base(exKey, target: handler.Target, method: handler.Method, kind: SubscriptionKind.TypedHandler,
-                  subscriptionPriorityGroup: subscriptionPriorityGroup, keepRef: keepRef, subscriptionCreator: CreateSubscriptionGen)
+                  subscriptionPriorityGroup: subscriptionPriorityGroup, keepRef: keepRef, subscriptionFactory: CreateSubscriptionGen)
         {
             TypedHandler = handler;
         }
@@ -51,19 +51,19 @@ namespace DRM.TypeSafePropertyBag
         // Typed Action
         public SubscriptionKey(SimpleExKey exKey, Action<T, T> action, SubscriptionPriorityGroup subscriptionPriorityGroup, bool keepRef)
             : base(exKey, target: action.Target, method: action.Method, kind: SubscriptionKind.TypedAction,
-                  subscriptionPriorityGroup: subscriptionPriorityGroup, keepRef: keepRef, subscriptionCreator: CreateSubscriptionGen)
+                  subscriptionPriorityGroup: subscriptionPriorityGroup, keepRef: keepRef, subscriptionFactory: CreateSubscriptionGen)
         {
         }
 
         // Action No Parameters / i.e., Message
         public SubscriptionKey(SimpleExKey exKey, Action action, SubscriptionPriorityGroup subscriptionPriorityGroup, bool keepRef)
-            : base(exKey, action, subscriptionPriorityGroup, keepRef: keepRef, subscriptionCreator: CreateSubscriptionGen)
+            : base(exKey, action, subscriptionPriorityGroup, keepRef: keepRef, subscriptionFactory: CreateSubscriptionGen)
         {
         }
 
         // Action<object, object>
         public SubscriptionKey(SimpleExKey exKey, Action <object, object> genAction, SubscriptionPriorityGroup subscriptionPriorityGroup, bool keepRef)
-            : base(exKey, genAction, subscriptionPriorityGroup, keepRef: keepRef, subscriptionCreator: CreateSubscriptionGen)
+            : base(exKey, genAction, subscriptionPriorityGroup, keepRef: keepRef, subscriptionFactory: CreateSubscriptionGen)
         {
         }
 

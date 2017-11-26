@@ -86,7 +86,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
         #region Constructor
 
-        public LocalBinder(PSAccessServiceType propStoreAccessService, CompositeKeyType cKey, PropIdType propId, LocalBindingInfo bindingInfo)
+        public LocalBinder(PSAccessServiceType propStoreAccessService, PropIdType propId, LocalBindingInfo bindingInfo)
         {
             _propId = propId;
             BindingInfo = bindingInfo;
@@ -105,8 +105,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
                 throw new InvalidOperationException("Cannot retrieve the Target's property name from the TargetPropId.");
             }
 
-
-            _listeners = StartBinding(BindingInfo, out bool pathIsAbsolute, out bool complete);
+            _listeners = StartBinding(_targetObject, BindingInfo, out bool pathIsAbsolute, out bool complete);
             PathIsAbsolute = pathIsAbsolute;
             Complete = complete;
 
@@ -134,7 +133,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
         #region Path Analysis
 
-        private OSCollection<T> StartBinding(LocalBindingInfo bInfo, out bool pathIsAbsolute, out bool complete)
+        private OSCollection<T> StartBinding(WeakReference<IPropBagInternal> bindingTarget, LocalBindingInfo bInfo, out bool pathIsAbsolute, out bool complete)
         {
             complete = false;
             string[] pathElements = GetPathComponents(bInfo.PropertyPath.Path, out int compCount);
@@ -197,30 +196,36 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
                     { 
                         SourceKindEnum parentSourceKind = result[nPtr - 1].SourceKind;
 
-                        if(parentSourceKind != SourceKindEnum.RootUp && parentSourceKind != SourceKindEnum.Up)
+                        if(parentSourceKind != SourceKindEnum.Up)
                         {
                             throw new InvalidOperationException("A path cannot have '..' components that folllow a component that indentifies a property by name.");
                         }
                     }
 
-                    SourceKindEnum nextResultKind = nPtr == 0 ? SourceKindEnum.RootUp : SourceKindEnum.Up;
-                    result.Add(CreateAndListen(next, pathComp, nextResultKind));
+                    result.Add(CreateAndListen(next, pathComp, SourceKindEnum.Up));
                     //next = GetHostingPropBag(next);
                     next = next.Parent?.Parent;
                 }
                 else
                 {
-                    if (GetChild(next, pathComp, out PropStoreNode child, out IPropBagInternal propBag))
+                    if (GetChildsPropBag(next, out IPropBagInternal propBag))
                     {
-                        SourceKindEnum nextResultKind = nPtr == 0 ? SourceKindEnum.RootDown : SourceKindEnum.Down;
-                        result.Add(CreateAndListen(propBag, pathComp, nextResultKind));
+                        result.Add(CreateAndListen(propBag, pathComp, SourceKindEnum.Down));
 
-                        // Get the Prop Store Node associated with the IPropBag being hosted by the found PropItem.
-                        next = child.OnlyChildOfPropItem;
+                        if (GetChildsData(next, propBag, pathComp, out PropStoreNode child))
+                        {
+                            next = child.OnlyChildOfPropItem;
+                        }
+                        else
+                        {
+                            // Can't get PropBag that is a guest of the child PropItem.
+                            next = null;
+                        }
                     }
                     else
                     {
-                        // Our client is no longer with us, or no propItem named pathComp exists.
+                        // TODO: Check this -- can't we get the PropBag from the previous path step.
+                        // Can't get the PropBag for the child.
                         next = null;
                     }
                 }
@@ -231,12 +236,20 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             {
                 string pathComp = pathElements[compCount - 1];
 
-                if (GetChild(next, pathComp, out PropStoreNode child, out IPropBagInternal propBag))
+                if (GetChildsPropBag(next, out IPropBagInternal propBag))
                 {
                     result.Add(CreateAndListen(propBag, pathComp, SourceKindEnum.TerminalNode));
-
                     // We have subscribed to the property that is the source of the binding.
                     complete = true;
+
+                    if (GetChildsData(next, propBag, pathComp, out PropStoreNode child))
+                    {
+                        System.Diagnostics.Debug.WriteLine("The binding source has been reached.");
+                        if (UpdateTarget(bindingTarget, child))
+                        {
+                            System.Diagnostics.Debug.WriteLine("The target has been updated.");
+                        }
+                    }
                 }
             }
 
@@ -246,7 +259,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
         private ObservableSource<T> CreateAndListen(IPropBagInternal propBag, string pathComp, SourceKindEnum sourceKind)
         {
             ObservableSource<T> result = new ObservableSource<T>((IPropBag) propBag, pathComp, sourceKind, BINDER_NAME);
-            result.DataSourceChanged += DataSourceHasChanged;
+            result.DataSourceChanged += DataSourceHasChanged_Handler;
             //result.PropertyChangedWithTVals += PropertyChangedWithTVals;
             return result;
         }
@@ -254,7 +267,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
         private ObservableSource<T> CreateAndListen(PropStoreNode propStoreNode, string pathComp, SourceKindEnum sourceKind)
         {
             ObservableSource<T> result = new ObservableSource<T>(propStoreNode, pathComp, sourceKind, BINDER_NAME);
-            result.DataSourceChanged += DataSourceHasChanged;
+            result.DataSourceChanged += DataSourceHasChanged_Handler;
             return result;
         }
 
@@ -278,82 +291,48 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
         private PropStoreNode GetHostingPropBag(PropStoreNode propStoreNode)
         {
             PropStoreNode result = propStoreNode.IsObjectNode ? propStoreNode.Parent : propStoreNode.Parent?.Parent;
-
             return result;
-
-            //// See if this PropStoreNode has a parent PropItem
-            //PropStoreNode parent;
-            //if (null == (parent = propStoreNode.Parent)) return null;
-
-            //System.Diagnostics.Debug.Assert(parent.Int_PropData != null, "Any parent of an ObjectId type PropStoreNode should have an instance of an IPropDataInternal.");
-            //System.Diagnostics.Debug.Assert(parent.Int_PropData.TypedProp != null, "All objects that implement IPropDataInternal must have a non-null value for TypedProp.");
-            //System.Diagnostics.Debug.Assert(parent.Int_PropData.TypedProp.Type is IPropBag, "All calls to GetHostingPropBag must be for children");
-
-            //object test = parent.Int_PropData.TypedProp.TypedValueAsObject;
-
-            //if (test == null) return null;
-
-            //PropStoreNode result;
-            //if (propStoreNode.PropBagProxy.PropBagRef.TryGetTarget(out IPropBagInternal propBag))
-            //{
-            //    PSAccessServiceType propStoreAccessService = propBag.ItsStoreAccessor;
-            //    if(propStoreAccessService is IHaveTheKeyIT keyProvider)
-            //    {
-            //        result = keyProvider.GetObjectNodeForPropVal(parentsData);
-            //    }
-            //    else
-            //    {
-            //        result = null;
-            //    }
-
-            //    //IHaveTheKeyIT keyAccessor = (IHaveTheKeyIT)((IPropBagInternal)propBag).ItsStoreAccessor;
-            //    //result = keyAccessor.GetObjectNodeForPropVal(parentsData);
-            //}
-            //else
-            //{
-            //    result = null;
-            //}
-            //return result;
         }
 
-        private bool GetChild(PropStoreNode objectNode, string propertyName, out PropStoreNode child, out IPropBagInternal propBag)
+        private bool GetChildsPropBag(PropStoreNode objectNode, out IPropBagInternal propBag)
         {
             if (!objectNode.IsObjectNode) throw new ArgumentException("The PropStoreNode from which to get the child, must be for a PropBag object, not a property.");
 
             // Unwrap the weak reference held by the objectNode in it's PropBagProxy.PropBagRef.
-            if (objectNode.PropBagProxy.PropBagRef.TryGetTarget(out propBag))
-            {
-                // Each PropBag has a reference to its StoreAccessor which can fetch its children.
-                // This saves us from having to find the PropStoreNode for this objectNode, using only
-                // our PropStoreNode, or a reference to the PropStoreAccessService.
+            bool result = objectNode.PropBagProxy.PropBagRef.TryGetTarget(out propBag);
+            return result;
+        }
+
+        private bool GetChildsPropBagStoreNode(PropStoreNode objectNode, out PropStoreNode propBagNode)
+        {
+            if(GetChildsPropBag(objectNode, out IPropBagInternal propBag))
+            { 
                 IHaveTheKeyIT keyProvider = (IHaveTheKeyIT)propBag.ItsStoreAccessor;
-
-                // TODO: We could have the keyAccessor do the name to id lookup.
-                PropIdType propId = objectNode.PropBagProxy.Level2KeyManager.FromRaw(propertyName);
-
-                bool result = keyProvider.TryGetAChildOfMine(propId, out child);
-                return result;
+                propBagNode = keyProvider.PropStoreNode;
+                return true;
             }
             else
             {
-                // The Weak Reference holds no target.
-                child = null;
+                propBagNode = null;
                 return false;
             }
         }
 
-        //private IHaveTheKeyIT GetKeyProvider(IPropBagInternal propBag)
-        //{
-        //    PSAccessServiceType propStoreAccessService = propBag.ItsStoreAccessor;
-        //    if (propStoreAccessService is IHaveTheKeyIT keyProvider)
-        //    {
-        //        return keyProvider;
-        //    }
-        //    else
-        //    {
-        //        return null;
-        //    }
-        //}
+        private bool GetChildsData(PropStoreNode objectNode, IPropBagInternal propBag, string propertyName, out PropStoreNode child)
+        {
+            PropIdType propId = objectNode.PropBagProxy.Level2KeyManager.FromRaw(propertyName);
+
+            // Each PropBag has a reference to its StoreAccessor which can fetch its children.
+            // This saves us from having to find the PropStoreNode for this objectNode, using only
+            // our PropStoreNode, or a reference to the PropStoreAccessService.
+            IHaveTheKeyIT keyProvider = (IHaveTheKeyIT)propBag.ItsStoreAccessor;
+
+            PropStoreNode propBagNode = keyProvider.PropStoreNode;
+            bool result = propBagNode.TryGetChild(propId, out child);
+
+            //bool result = keyProvider.TryGetAChildOfMine(propId, out child);
+            return result;
+        }
 
         #endregion
 
@@ -459,6 +438,44 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
                 // We have a new root, start at the beginning.
                 next = GetRootPropBag(_ourNode);
             }
+            else if(signalingOs.SourceKind == SourceKindEnum.TerminalNode)
+            {
+                System.Diagnostics.Debug.WriteLine("The source data value of the binding has been updated.");
+
+                if (PathIsAbsolute)
+                {
+                    next = GetRootPropBag(_ourNode);
+                }
+                else
+                {
+                    next = _ourNode;
+                }
+
+                next = GetChangedNode(next, pathElements, nodeIndex + 1);
+
+                if (GetChildsPropBag(next, out IPropBagInternal propBag))
+                {
+                    string pathComp = pathElements[compCount - 1];
+
+                    if (GetChildsData(next, propBag, pathComp, out PropStoreNode child))
+                    {
+                        System.Diagnostics.Debug.WriteLine("The binding source has been reached during binding update.");
+                        if (UpdateTarget(bindingTarget, child))
+                        {
+                            System.Diagnostics.Debug.WriteLine("The target has been updated.");
+                        }
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine("Could not get reference to the PropItem's PropStoreNode during binding update.");
+                    }
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine("Could not get reference to ChildPropBag during binding update.");
+                }
+                return;
+            }
             else
             {
                 if (PathIsAbsolute)
@@ -480,8 +497,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
                 string pathComp = pathElements[nPtr];
                 if (pathComp == "..")
                 {
-                    SourceKindEnum nextResultKind = nPtr == 0 ? SourceKindEnum.RootUp : SourceKindEnum.Up;
-                    ObservableSource<T> newListener = CreateAndListen(next, pathComp, nextResultKind);
+                    ObservableSource<T> newListener = CreateAndListen(next, pathComp, SourceKindEnum.Up);
 
                     if (_listeners.Count > nPtr)
                     {
@@ -498,10 +514,9 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
                 }
                 else
                 {
-                    if (GetChild(next, pathComp, out PropStoreNode child, out IPropBagInternal propBag))
+                    if (GetChildsPropBag(next, out IPropBagInternal propBag))
                     {
-                        SourceKindEnum nextResultKind = nPtr == 0 ? SourceKindEnum.RootDown : SourceKindEnum.Down;
-                        ObservableSource<T> newListener = CreateAndListen(propBag, pathComp, nextResultKind);
+                        ObservableSource<T> newListener = CreateAndListen(propBag, pathComp, SourceKindEnum.Down);
 
                         if (_listeners.Count > nPtr)
                         {
@@ -514,12 +529,20 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
                             _listeners.Add(newListener);
                         }
 
-                        // Get the Prop Store Node associated with the IPropBag being hosted by the found PropItem.
-                        next = child.OnlyChildOfPropItem;
+                        if (GetChildsData(next, propBag, pathComp, out PropStoreNode child))
+                        {
+                            next = child.OnlyChildOfPropItem;
+                        }
+                        else
+                        {
+                            // Can't get PropBag that is a guest of the child PropItem.
+                            next = null;
+                        }
                     }
                     else
                     {
-                        // Our client is no longer with us, or no propItem named pathComp exists.
+                        // TODO: Check this -- can't we get the PropBag from the previous path step.
+                        // Can't get the PropBag for the child.
                         next = null;
                     }
                 }
@@ -530,10 +553,10 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             {
                 System.Diagnostics.Debug.Assert(nPtr == compCount - 1, $"The counter variable: nPtr should be {compCount - 1}, but is {nPtr} instead.");
 
-                string pathComp = pathElements[nPtr];
-
-                if (GetChild(next, pathComp, out PropStoreNode child, out IPropBagInternal propBag))
+                if(GetChildsPropBag(next, out IPropBagInternal propBag))
                 {
+                    string pathComp = pathElements[nPtr];
+
                     ObservableSource<T> newListener = CreateAndListen(propBag, pathComp, SourceKindEnum.TerminalNode);
 
                     if (_listeners.Count > nPtr)
@@ -547,11 +570,20 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
                         _listeners.Add(newListener);
                     }
 
+                    // We have created or updated the listener for this step, advance the pointer.
+                    nPtr++;
+
                     // We have subscribed to the property that is the source of the binding.
                     Complete = true;
-                    nPtr++;
-                    System.Diagnostics.Debug.WriteLine("The binding source has been reached.");
-                    UpdateTarget(bindingTarget, child);
+
+                    if (GetChildsData(next, propBag, pathComp, out PropStoreNode child))
+                    {
+                        System.Diagnostics.Debug.WriteLine("The binding source has been reached.");
+                        if (UpdateTarget(bindingTarget, child))
+                        {
+                            System.Diagnostics.Debug.WriteLine("The target has been updated.");
+                        }
+                    }
                 }
             }
 
@@ -566,13 +598,14 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
         private void TearDownListener(ObservableSource<T> listener)
         {
             listener.RemoveSubscriptions();
-            if(listener.SourceKind == SourceKindEnum.AbsRoot || listener.SourceKind == SourceKindEnum.RootUp || listener.SourceKind == SourceKindEnum.Up)
+            if(listener.SourceKind == SourceKindEnum.TerminalNode)
             {
-                listener.Unsubscribe(PropertyChangedWithTVals);
+                listener.Unsubscribe(DataSourceHasChanged_Handler);
+                //listener.Unsubscribe(PropertyChangedWithTVals_Handler);
             }
             else
             {
-                listener.Unsubscribe(DataSourceHasChanged);
+                listener.Unsubscribe(DataSourceHasChanged_Handler);
             }
         }
 
@@ -587,22 +620,30 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
                 }
                 else
                 {
-                    if (GetChild(objectNode, pathComp, out PropStoreNode child, out IPropBagInternal propBag))
+                    if(GetChildsPropBagStoreNode(objectNode, out PropStoreNode propBagNode))
                     {
-                        // Get the Prop Store Node associated with the IPropBag being hosted by the found PropItem.
-                        objectNode = child.OnlyChildOfPropItem;
+                        objectNode = propBagNode;
                     }
                     else
                     {
-                        // Our client is no longer with us, or no propItem named pathComp exists.
                         objectNode = null;
                     }
+                    //if (GetChild(objectNode, pathComp, out PropStoreNode child, out IPropBagInternal propBag))
+                    //{
+                    //    // Get the Prop Store Node associated with the IPropBag being hosted by the found PropItem.
+                    //    objectNode = child.OnlyChildOfPropItem;
+                    //}
+                    //else
+                    //{
+                    //    // Our client is no longer with us, or no propItem named pathComp exists.
+                    //    objectNode = null;
+                    //}
                 }
             }
             return objectNode;
         }
 
-        private void DataSourceHasChanged(object sender, DataSourceChangedEventArgs e)
+        private void DataSourceHasChanged_Handler(object sender, DataSourceChangedEventArgs e)
         {
             // Check for unsupported Change Type.
             if (!(e.ChangeType == DataSourceChangeTypeEnum.ParentHasChanged || e.ChangeType == DataSourceChangeTypeEnum.PropertyChanged))
@@ -614,14 +655,14 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             RefreshPathListeners(_targetObject, BindingInfo, _listeners, listener, e);
         }
 
-        private void PropertyChangedWithTVals(object sender, PCTypedEventArgs<T> e)
+        private void PropertyChangedWithTVals_Handler(object sender, PCTypedEventArgs<T> e)
         {
             System.Diagnostics.Debug.WriteLine("The terminal node's property value has been updated.");
 
             if (_targetObject.TryGetTarget(out IPropBagInternal propBag))
             {
                 bool wasSet = ((IPropBag)propBag).SetIt(e.NewValue, e.PropertyName);
-                string status = wasSet ? "has been set" : "could not be updated";
+                string status = wasSet ? "has been updated" : "could not be updated";
                 System.Diagnostics.Debug.WriteLine($"The binding target {status}.");
             }
             else
@@ -634,43 +675,63 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
         #region Update Target
 
-        private void UpdateTarget(WeakReference<IPropBagInternal> bindingTarget, PropStoreNode sourcePropNode)
+        private bool UpdateTarget(WeakReference<IPropBagInternal> bindingTarget, PropStoreNode sourcePropNode)
         {
+            bool result;
             if (sourcePropNode.Parent.PropBagProxy.PropBagRef.TryGetTarget(out IPropBagInternal propBag))
             {
                 IHaveTheKeyIT keyProvider = (IHaveTheKeyIT)propBag.ItsStoreAccessor;
 
-                // TODO: We would not need to do this if we had a Level1 Key Manager
-                // or PropBag would accept a PropId, instead of a name.
-                // or if we had a way to get a node from a CKey.
-                if (keyProvider.PropStoreNode.PropBagProxy.Level2KeyManager.TryGetFromRaw(PropertyName, out PropIdType propId))
+                PropStoreNode propBagNode = keyProvider.PropStoreNode;
+                if (propBagNode.PropBagProxy.Level2KeyManager.TryGetFromRaw(PropertyName, out PropIdType propId))
                 {
-                    if (propBag.ItsStoreAccessor.TryGetValue((IPropBag)propBag, propId, out IPropData propData))
+                    if(propBagNode.TryGetChild(propId, out PropStoreNode child))
                     {
-                        UpdateTarget(bindingTarget, (T)propData.TypedProp.TypedValueAsObject);
+                        IPropDataInternal propData = child.Int_PropData;
+                        T newValue = (T)propData.TypedProp.TypedValueAsObject;
+                        result = UpdateTarget(bindingTarget, newValue);
                     }
+                    else
+                    {
+                        // Could not access the child node by that property name.
+                        result = false;
+                    }
+
+
+                    //if (propBag.ItsStoreAccessor.TryGetValue((IPropBag)propBag, propId, out IPropData propData))
+                    //{
+                    //    result = UpdateTarget(bindingTarget, (T)propData.TypedProp.TypedValueAsObject);
+                    //}
+                    //else
+                    //{
+                    //    result = false;
+                    //}
                 }
                 else
                 {
                     System.Diagnostics.Debug.WriteLine($"Update Target could not find that property by name: {PropertyName}.");
+                    result = false;
                 }
             }
             else
             {
                 System.Diagnostics.Debug.WriteLine("The Weak Reference held by the PropBagProxy contains not object.");
+                result = false;
             }
+            return result;
         }
 
-        private void UpdateTarget(WeakReference<IPropBagInternal> bindingTarget, T newValue)
+        private bool UpdateTarget(WeakReference<IPropBagInternal> bindingTarget, T newValue)
         {
             if(bindingTarget.TryGetTarget(out IPropBagInternal propBag))
             {
                 bool result = ((IPropBag)propBag).SetIt(newValue, this.PropertyName);
-                System.Diagnostics.Debug.WriteLine("The target has been updated.");
+                return true;
             }
             else
             {
                 System.Diagnostics.Debug.WriteLine("Target IPropBag was found to be 'not with us' on call to Update Target.");
+                return false;
             }
         }
 

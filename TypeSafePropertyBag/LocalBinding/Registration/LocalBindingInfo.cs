@@ -1,8 +1,10 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 
 namespace DRM.TypeSafePropertyBag
 {
-    public struct LocalBindingInfo
+    public struct LocalBindingInfo : IEquatable<LocalBindingInfo>
     {
         public LocalBindingInfo(LocalPropertyPath propertyPath) : this()
         {
@@ -31,6 +33,22 @@ namespace DRM.TypeSafePropertyBag
 
         }
 
+        public override bool Equals(object obj)
+        {
+            return obj is LocalBindingInfo && Equals((LocalBindingInfo)obj);
+        }
+
+        public bool Equals(LocalBindingInfo other)
+        {
+            return EqualityComparer<LocalPropertyPath>.Default.Equals(PropertyPath, other.PropertyPath);
+        }
+
+        public override int GetHashCode()
+        {
+            int hashCode = PropertyPath.GetHashCode();
+            return hashCode;
+        }
+
         public CultureInfo ConverterCulture { get; set; }
         public object ConverterParameter { get; set; }
 
@@ -54,6 +72,15 @@ namespace DRM.TypeSafePropertyBag
 
         public int Delay { get; set; }
 
+        public static bool operator ==(LocalBindingInfo info1, LocalBindingInfo info2)
+        {
+            return info1.Equals(info2);
+        }
+
+        public static bool operator !=(LocalBindingInfo info1, LocalBindingInfo info2)
+        {
+            return !(info1 == info2);
+        }
     }
 
 }

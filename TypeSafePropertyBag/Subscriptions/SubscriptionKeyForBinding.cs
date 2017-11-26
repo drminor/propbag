@@ -75,15 +75,15 @@ namespace DRM.TypeSafePropertyBag
         public bool Equals(BindingSubscriptionKey<T> other)
         {
             return other != null &&
-                TargetPropRef.CKey == other.TargetPropRef.CKey
-                && BindingInfo.PropertyPath == other.BindingInfo.PropertyPath;
+                TargetPropRef == other.TargetPropRef
+                && BindingInfo == other.BindingInfo;
         }
 
         public override int GetHashCode()
         {
             var hashCode = -748789155;
-            hashCode = hashCode * -1521134295 + TargetPropRef.Level2Key.GetHashCode();
-            hashCode = hashCode * -1521134295 + BindingInfo.PropertyPath.GetHashCode();
+            hashCode = hashCode * -1521134295 + TargetPropRef.GetHashCode();
+            hashCode = hashCode * -1521134295 + BindingInfo.GetHashCode();
             return hashCode;
         }
 

@@ -3,8 +3,8 @@
     public enum SourceKindEnum
     {
         AbsRoot,
-        RootUp,
-        RootDown,
+        //RootUp,
+        //RootDown,
         Up,
         Down,
         TerminalNode

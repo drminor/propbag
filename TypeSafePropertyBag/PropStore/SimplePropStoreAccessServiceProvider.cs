@@ -160,7 +160,7 @@ namespace DRM.TypeSafePropertyBag
             bool wasRemoved = RemovePropIndexForObject(propStoreNode.PropBagProxy.ObjectId);
             if(!wasRemoved)
             {
-                System.Diagnostics.Debug.WriteLine($"{((CompositeKeyType)propStoreNode.PropBagProxy.ObjectId).ToString()} held no subscriptions upon teardown.");
+                System.Diagnostics.Debug.WriteLine($"PropBag Object: {propStoreNode.PropBagProxy.ObjectId} held no subscriptions upon teardown.");
             }
 
             RemoveFromAllObjectLookups(propStoreNode.PropBagProxy);

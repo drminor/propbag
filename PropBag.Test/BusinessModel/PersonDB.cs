@@ -2,9 +2,9 @@
 
 namespace PropBagLib.Tests.BusinessModel
 {
-    public class PersonDB:DbContext
+    public class PersonDB : DbContext
     {
-        public PersonDB():base("name=DefaultConnection")
+        public PersonDB() : base("name=DefaultConnection")
         {
 
         }

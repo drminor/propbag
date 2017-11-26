@@ -200,9 +200,9 @@ namespace PropBagLib.Tests.PerformanceDb
             testChildVM.SetIt(b, "Business");
             testChildVM.RegisterBinding<Business>("Business", "../Business");
 
-            List<Person> personList = b.Get().ToList();
-            ObservableCollection<Person> personList2 = new ObservableCollection<Person>(personList);
-            testChildVM.SetIt(personList2, "PersonCollection");
+            //List<Person> personList = b.Get().ToList();
+            //ObservableCollection<Person> personList2 = new ObservableCollection<Person>(personList);
+            //testChildVM.SetIt(personList2, "PersonCollection");
 
 
             // Set up MainVM (Using Model 6)

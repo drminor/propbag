@@ -117,7 +117,7 @@ namespace DRM.TypeSafePropertyBag
                 if (_parent.IsArtificialRoot)
                 {
                     // We are the root of this tree, return an empty list.
-                    return Enumerable.Empty<KeyValuePair<ExKeyT, PropStoreNode>>();
+                    yield return new KeyValuePair<ExKeyT, PropStoreNode>();
                 }
                 if (IsArtificialRoot)
                 {
@@ -125,14 +125,15 @@ namespace DRM.TypeSafePropertyBag
                 }
                 else
                 {
-                    List<KeyValuePair<ExKeyT, PropStoreNode>> result = new List<KeyValuePair<ExKeyT, PropStoreNode>>();
+                    //List<KeyValuePair<ExKeyT, PropStoreNode>> result = new List<KeyValuePair<ExKeyT, PropStoreNode>>();
                     PropStoreNode lastParent = Parent;
                     while(lastParent != null)
                     {
-                        result.Add(new KeyValuePair<ExKeyT, PropStoreNode>(lastParent.CompKey, lastParent));
+                        //result.Add(new KeyValuePair<ExKeyT, PropStoreNode>(lastParent.CompKey, lastParent));
+                        yield return new KeyValuePair<ExKeyT, PropStoreNode>(lastParent.CompKey, lastParent);
                         lastParent = lastParent.Parent;
                     }
-                    return result as IEnumerable<KeyValuePair<ExKeyT, PropStoreNode>>;
+                    //return result as IEnumerable<KeyValuePair<ExKeyT, PropStoreNode>>;
                 }
             }
         }
@@ -191,7 +192,7 @@ namespace DRM.TypeSafePropertyBag
 
         public PropStoreNode()
         {
-            CompKey = new SimpleExKey(0);
+            CompKey = new SimpleExKey();
             PropBagProxy = null;
             Int_PropData = null;
 
@@ -251,7 +252,7 @@ namespace DRM.TypeSafePropertyBag
 
         public bool TryGetChild(PropIdType propId, out PropStoreNode child)
         {
-            ExKeyT cKey = new SimpleExKey(this.CompKey.CKey, propId);
+            ExKeyT cKey = new SimpleExKey(this.CompKey.Level1Key, propId);
             if (_children.TryGetValue(cKey, out child))
             {
                 return true;
@@ -396,6 +397,36 @@ namespace DRM.TypeSafePropertyBag
             hashCode = hashCode * -1521134295 + CompKey.GetHashCode();
             hashCode = hashCode * -1521134295 + IsArtificialRoot.GetHashCode();
             return hashCode;
+        }
+
+        public override string ToString()
+        {
+            string result;
+
+            if (IsObjectNode)
+            {
+                if (PropBagProxy.PropBagRef.TryGetTarget(out IPropBagInternal target))
+                {
+                    result = $"{((IPropBag)target).FullClassName} (O:{CompKey.Level1Key}).";
+                }
+                else
+                {
+                    result = $"PropStoreNode for {CompKey} for which the Weak Reference holds no object.";
+                }
+            }
+            else
+            {
+                if(Parent.PropBagProxy.Level2KeyManager.TryGetFromCooked(Int_PropData.PropId, out string propertyName))
+                {
+                    result = $"{propertyName} on {Parent} (P:{CompKey.Level2Key}).";
+                }
+                else
+                {
+                    result = $"Could not get property name on {Parent}.";
+                }
+            }
+
+            return result;
         }
 
         public static bool operator ==(PropStoreNode node1, PropStoreNode node2)

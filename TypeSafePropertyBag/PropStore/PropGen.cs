@@ -37,7 +37,7 @@ namespace DRM.TypeSafePropertyBag
             //}
         }
 
-        public bool IsEmpty => _cKey.CKey == 0;
+        public bool IsEmpty => _cKey.isEmpty;
 
         #endregion
 

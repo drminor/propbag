@@ -19,7 +19,7 @@ namespace DRM.TypeSafePropertyBag
     {
         #region Private Members
 
-        Func<ISubscriptionKeyGen, ISubscriptionGen> SubscriptionCreator { get; }
+        Func<ISubscriptionKeyGen, ISubscriptionGen> SubscriptionFactory { get; }
         Func<ISubscriptionKeyGen, PSAccessServiceType, ISubscriptionGen> BindingFactory { get;}
 
         #endregion
@@ -75,7 +75,7 @@ namespace DRM.TypeSafePropertyBag
             Method = standardDelegate.Method;
 
             SubscriptionTargetKind = GetKindOfTarget(standardDelegate.Target, keepRef);
-            SubscriptionCreator = CreateSubscriptionGen;
+            SubscriptionFactory = CreateSubscriptionGen;
             HasBeenUsed = false;
         }
 
@@ -98,7 +98,7 @@ namespace DRM.TypeSafePropertyBag
             Method = genDelegate.Method;
 
             SubscriptionTargetKind = GetKindOfTarget(genDelegate.Target, keepRef);
-            SubscriptionCreator = CreateSubscriptionGen;
+            SubscriptionFactory = CreateSubscriptionGen;
             HasBeenUsed = false;
         }
 
@@ -120,13 +120,13 @@ namespace DRM.TypeSafePropertyBag
             Method = objDelegate.Method;
 
             SubscriptionTargetKind = GetKindOfTarget(objDelegate.Target, keepRef);
-            SubscriptionCreator = CreateSubscriptionGen;
+            SubscriptionFactory = CreateSubscriptionGen;
             HasBeenUsed = false;
         }
 
         // Target and Method. Also used for TypeDelegate and TypedAction.
         public SubscriptionKeyGen(ExKeyT sourcePropId, object target, MethodInfo method,
-            SubscriptionKind kind, SubscriptionPriorityGroup subscriptionPriorityGroup, bool keepRef, Func<ISubscriptionKeyGen, ISubscriptionGen> subscriptionCreator)
+            SubscriptionKind kind, SubscriptionPriorityGroup subscriptionPriorityGroup, bool keepRef, Func<ISubscriptionKeyGen, ISubscriptionGen> subscriptionFactory)
         {
             SourcePropRef = sourcePropId;
             SubscriptionKind = kind;
@@ -141,7 +141,7 @@ namespace DRM.TypeSafePropertyBag
             Method = method;
 
             SubscriptionTargetKind = GetKindOfTarget(target, keepRef);
-            SubscriptionCreator = subscriptionCreator;
+            SubscriptionFactory = subscriptionFactory;
             HasBeenUsed = false;
         }
 
@@ -151,7 +151,7 @@ namespace DRM.TypeSafePropertyBag
 
         // Action<object, object>
         protected SubscriptionKeyGen(ExKeyT sourcePropId, Action<object, object> genAction,
-            SubscriptionPriorityGroup subscriptionPriorityGroup, bool keepRef, Func<ISubscriptionKeyGen, ISubscriptionGen> subscriptionCreator)
+            SubscriptionPriorityGroup subscriptionPriorityGroup, bool keepRef, Func<ISubscriptionKeyGen, ISubscriptionGen> subscriptionFactory)
         {
             SourcePropRef = sourcePropId;
             SubscriptionKind = SubscriptionKind.ObjectAction;
@@ -166,13 +166,13 @@ namespace DRM.TypeSafePropertyBag
             Method = genAction.Method;
 
             SubscriptionTargetKind = GetKindOfTarget(genAction.Target, keepRef);
-            SubscriptionCreator = subscriptionCreator;
+            SubscriptionFactory = subscriptionFactory;
             HasBeenUsed = false;
         }
 
         // ActionNoParams 
         protected SubscriptionKeyGen(ExKeyT sourcePropId, Action action,
-            SubscriptionPriorityGroup subscriptionPriorityGroup, bool keepRef, Func<ISubscriptionKeyGen, ISubscriptionGen> subscriptionCreator)
+            SubscriptionPriorityGroup subscriptionPriorityGroup, bool keepRef, Func<ISubscriptionKeyGen, ISubscriptionGen> subscriptionFactory)
         {
             SourcePropRef = sourcePropId;
             SubscriptionKind = SubscriptionKind.ActionNoParams;
@@ -187,7 +187,7 @@ namespace DRM.TypeSafePropertyBag
             Method = action.Method;
 
             SubscriptionTargetKind = GetKindOfTarget(action.Target, keepRef);
-            SubscriptionCreator = subscriptionCreator;
+            SubscriptionFactory = subscriptionFactory;
             HasBeenUsed = false;
         }
 
@@ -221,7 +221,7 @@ namespace DRM.TypeSafePropertyBag
             Method = null;
 
             SubscriptionTargetKind = SubscriptionTargetKind.LocalWeakRef;
-            SubscriptionCreator = null;
+            SubscriptionFactory = null;
             BindingFactory = bindingFactory;
             HasBeenUsed = false;
 
@@ -259,7 +259,7 @@ namespace DRM.TypeSafePropertyBag
 
         public ISubscriptionGen CreateSubscription()
         {
-            return SubscriptionCreator(this);
+            return SubscriptionFactory(this);
         }
 
         public virtual ISubscriptionGen CreateBinding(PSAccessServiceType propStoreAccessService)

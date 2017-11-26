@@ -64,7 +64,7 @@ namespace DRM.TypeSafePropertyBag
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine($"Could not find the binding for {bindingRequest.TargetPropRef.CKey} when trying to remove it.");
+                    System.Diagnostics.Debug.WriteLine($"Could not find the binding for {bindingRequest.TargetPropRef} <= {bindingRequest.BindingInfo.PropertyPath.Path} when trying to remove it.");
                     return false;
                 }
             }
@@ -81,7 +81,7 @@ namespace DRM.TypeSafePropertyBag
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine($"Could not find the binding for {binding.TargetPropRef.CKey} when trying to remove it.");
+                    System.Diagnostics.Debug.WriteLine($"Could not find the binding for {binding.TargetPropRef} <= {binding.BindingInfo.PropertyPath.Path} when trying to remove it.");
                     return false;
                 }
             }
@@ -145,8 +145,9 @@ namespace DRM.TypeSafePropertyBag
 
         private bool BindingIsForRequest(ISubscriptionGen binding, ISubscriptionKeyGen bindingRequest)
         {
-            bool result = binding.TargetPropRef.CKey == bindingRequest.TargetPropRef.CKey &&
-                binding.BindingInfo.PropertyPath.Equals(bindingRequest.BindingInfo.PropertyPath);
+            bool result = 
+                binding.TargetPropRef == bindingRequest.TargetPropRef &&
+                binding.BindingInfo == bindingRequest.BindingInfo;
 
             return result;
         }
@@ -155,7 +156,7 @@ namespace DRM.TypeSafePropertyBag
         {
             lock (_sync)
             {
-                IEnumerable<ISubscriptionGen> result = _bindings.Where((x => x.TargetPropRef.Level2Key == exKey.Level2Key));
+                IEnumerable<ISubscriptionGen> result = _bindings.Where((x => x.TargetPropRef == exKey));
                 return result;
             }
         }
