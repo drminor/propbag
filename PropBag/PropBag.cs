@@ -76,7 +76,8 @@ namespace DRM.PropBag
         public event PropertyChangedEventHandler PropertyChanged; // = delegate { };
         public event PropertyChangingEventHandler PropertyChanging; // = delegate { };
 
-        public event EventHandler<PCGenEventArgs> PropertyChangedWithGenVals; // = delegate { };
+        public event EventHandler<PCGenEventArgs> PropertyChangedWithGenVals;
+
         //public event EventHandler<PropertyChangedEventArgs> PropertyChangedIndividual;
         public event EventHandler<PCObjectEventArgs> PropertyChangedWithObjectVals;
 

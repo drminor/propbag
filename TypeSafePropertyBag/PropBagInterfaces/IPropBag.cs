@@ -15,7 +15,7 @@ namespace DRM.TypeSafePropertyBag
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
     using IHaveTheKeyIT = IHaveTheKey<UInt64, UInt64, UInt32>;
 
-    using ICKeyManType = ICKeyMan<UInt64, UInt64, UInt32, String>;
+    //using ICKeyManType = ICKeyMan<UInt64, UInt64, UInt32, String>;
     using L2KeyManType = IL2KeyMan<UInt32, String>;
 
     using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;

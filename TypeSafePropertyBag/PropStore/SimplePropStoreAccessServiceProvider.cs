@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Collections.Concurrent;
-using System.Threading;
 
 namespace DRM.TypeSafePropertyBag
 {
@@ -13,7 +12,6 @@ namespace DRM.TypeSafePropertyBag
     using PropNameType = String;
 
     using L2KeyManType = IL2KeyMan<UInt32, String>;
-    using ICKeyManType = ICKeyMan<UInt64, UInt64, UInt32, String>;
 
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
     using IHaveTheKeyIT = IHaveTheKey<UInt64, UInt64, UInt32>;
@@ -78,10 +76,10 @@ namespace DRM.TypeSafePropertyBag
         {
             lock (_sync)
             {
-                List<KeyValuePair<CompositeKeyType, PropStoreNode>> nodesThatHavePassed = _tree.All.Where(x => x.Value.IsObjectNode && HasPassed(x.Value)).ToList();
+                List<KeyValuePair<ExKeyT, PropStoreNode>> nodesThatHavePassed = _tree.All.Where(x => x.Value.IsObjectNode && HasPassed(x.Value)).ToList();
 
                 long totalRemoved = 0;
-                foreach(KeyValuePair<CompositeKeyType, PropStoreNode> kvp in nodesThatHavePassed)
+                foreach(KeyValuePair<ExKeyT, PropStoreNode> kvp in nodesThatHavePassed)
                 {
                     totalRemoved += PruneNode(kvp.Value);
                 }
@@ -92,13 +90,13 @@ namespace DRM.TypeSafePropertyBag
 
         private bool HasPassed(PropStoreNode psn)
         {
-            bool result = !psn.PropBagProxy.PropBagRef.TryGetTarget(out IPropBag dummy);
+            bool result = !psn.PropBagProxy.PropBagRef.TryGetTarget(out IPropBagInternal dummy);
             return result;
         }
 
         private int PruneNode(PropStoreNode psn)
         {
-            if(!psn.PropBagProxy.PropBagRef.TryGetTarget(out IPropBag dummy))
+            if(!psn.PropBagProxy.PropBagRef.TryGetTarget(out IPropBagInternal dummy))
             {
                 int result = psn.Children.Count();
                 psn.MakeItARoot(_tree);
@@ -116,10 +114,10 @@ namespace DRM.TypeSafePropertyBag
         public int MaxPropsPerObject { get; }
         public long MaxObjectsPerAppDomain { get; set; }
 
-        public PSAccessServiceType CreatePropStoreService(IPropBag propBag)
+        public PSAccessServiceType CreatePropStoreService(IPropBagInternal propBag)
         {
             ObjectIdType objectId = NextCookedVal;
-            WeakReference<IPropBag> propBagRef = new WeakReference<IPropBag>(propBag);
+            WeakReference<IPropBagInternal> propBagRef = new WeakReference<IPropBagInternal>(propBag);
             L2KeyManType level2KeyManager = new SimpleLevel2KeyMan(MaxPropsPerObject);
             PropBagProxy propBagProxy = new PropBagProxy(objectId, propBagRef, level2KeyManager);
 
@@ -132,9 +130,11 @@ namespace DRM.TypeSafePropertyBag
             //        $"being used by this SimplePropStoreAccessServiceProvider.");
             //}
 
-            ICKeyManType compKeyManager = new SimpleCompKeyMan(propBagProxy.Level2KeyManager.MaxPropsPerObject);
+            //ICKeyManType compKeyManager = new SimpleCompKeyMan(propBagProxy.Level2KeyManager.MaxPropsPerObject);
 
-            CompositeKeyType cKey = compKeyManager.JoinComp(propBagProxy.ObjectId, 0);
+            //CompositeKeyType cKey = compKeyManager.JoinComp(propBagProxy.ObjectId, 0);
+
+            ExKeyT cKey = new SimpleExKey(propBagProxy.ObjectId, 0);
 
             // Create a new PropStoreNode for this PropBag and add make it a root.
             PropStoreNode propStoreNode = new PropStoreNode(cKey, propBagProxy, _tree);
@@ -142,7 +142,7 @@ namespace DRM.TypeSafePropertyBag
             PSAccessServiceType result = new SimplePropStoreAccessService
                 (
                     propStoreNode,
-                    compKeyManager,
+                    //compKeyManager,
                     this
                 );
 

@@ -15,7 +15,8 @@ namespace DRM.TypeSafePropertyBag
 {
     #region Type Aliases 
 
-    using CompositeKeyType = UInt64;
+    using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
+    using PropIdType = UInt32;
 
     #endregion
 
@@ -23,7 +24,7 @@ namespace DRM.TypeSafePropertyBag
     {
         #region Private Members
 
-        private readonly Dictionary<CompositeKeyType, PropStoreNode> _children;
+        private readonly Dictionary<ExKeyT, PropStoreNode> _children;
 
         #endregion
 
@@ -40,7 +41,7 @@ namespace DRM.TypeSafePropertyBag
 
         // If this is an ObjectNode, the PropId portion of the CKey is 0.
         // If this is an PropNode, the CKey identifies both the IPropBag and the Prop. Its a globally unique PropId.
-        public CompositeKeyType CompKey { get; }
+        public ExKeyT CompKey { get; }
 
         // PropBagProxy will have a value, only for ObjectNodes.
         public IPropBagProxy PropBagProxy { get; }
@@ -51,7 +52,12 @@ namespace DRM.TypeSafePropertyBag
         PropStoreNode _parent;
         public PropStoreNode Parent
         {
-            get { return _parent; }
+            get
+            {
+                if (_parent.IsArtificialRoot) return null;
+                return _parent;
+            }
+
             private set
             {
                 PropStoreNode oldValue = _parent;
@@ -61,18 +67,18 @@ namespace DRM.TypeSafePropertyBag
         }
 
         private bool IsArtificialRoot { get; }
-        public bool IsRoot => Parent.IsArtificialRoot;
+        public bool IsRoot => _parent.IsArtificialRoot;
 
-        public Dictionary<CompositeKeyType, PropStoreNode> ChildList => _children;
+        public Dictionary<ExKeyT, PropStoreNode> ChildList => _children;
 
-        public IEnumerable<KeyValuePair<CompositeKeyType, PropStoreNode>> Children => (IEnumerable<KeyValuePair<CompositeKeyType, PropStoreNode>>)_children;
+        public IEnumerable<KeyValuePair<ExKeyT, PropStoreNode>> Children => (IEnumerable<KeyValuePair<ExKeyT, PropStoreNode>>)_children;
 
-        public IEnumerable<KeyValuePair<CompositeKeyType, PropStoreNode>> GetNodesAtLevel(int level)
+        public IEnumerable<KeyValuePair<ExKeyT, PropStoreNode>> GetNodesAtLevel(int level)
         {
             return Root.GetNodesAtLevelInternal(level);
         }
 
-        public IEnumerable<KeyValuePair<CompositeKeyType, PropStoreNode>> GetNodesAtLevelInternal(int level)
+        public IEnumerable<KeyValuePair<ExKeyT, PropStoreNode>> GetNodesAtLevelInternal(int level)
         {
             if (level == Level)
             {
@@ -87,7 +93,7 @@ namespace DRM.TypeSafePropertyBag
         {
             get
             {
-                if (Parent.IsArtificialRoot)
+                if (_parent.IsArtificialRoot)
                 {
                     return this;
                 }
@@ -102,16 +108,16 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        public IEnumerable<KeyValuePair<CompositeKeyType, PropStoreNode>> All => Root.SelfAndDescendants;
+        public IEnumerable<KeyValuePair<ExKeyT, PropStoreNode>> All => Root.SelfAndDescendants;
 
-        public IEnumerable<KeyValuePair<CompositeKeyType, PropStoreNode>> Ancestors
+        public IEnumerable<KeyValuePair<ExKeyT, PropStoreNode>> Ancestors
         {
             get
             {
-                if (Parent.IsArtificialRoot)
+                if (_parent.IsArtificialRoot)
                 {
                     // We are the root of this tree, return an empty list.
-                    return Enumerable.Empty<KeyValuePair<CompositeKeyType, PropStoreNode>>();
+                    return Enumerable.Empty<KeyValuePair<ExKeyT, PropStoreNode>>();
                 }
                 if (IsArtificialRoot)
                 {
@@ -119,21 +125,28 @@ namespace DRM.TypeSafePropertyBag
                 }
                 else
                 {
-                    return MakeEnumerable(Parent).Concat(Parent.Ancestors);
+                    List<KeyValuePair<ExKeyT, PropStoreNode>> result = new List<KeyValuePair<ExKeyT, PropStoreNode>>();
+                    PropStoreNode lastParent = Parent;
+                    while(lastParent != null)
+                    {
+                        result.Add(new KeyValuePair<ExKeyT, PropStoreNode>(lastParent.CompKey, lastParent));
+                        lastParent = lastParent.Parent;
+                    }
+                    return result as IEnumerable<KeyValuePair<ExKeyT, PropStoreNode>>;
                 }
             }
         }
 
         // TODO: see if we avoid creating the value, just to turn around and skip it.
-        public IEnumerable<KeyValuePair<CompositeKeyType, PropStoreNode>> Descendants => SelfAndDescendants.Skip(1);
+        public IEnumerable<KeyValuePair<ExKeyT, PropStoreNode>> Descendants => SelfAndDescendants.Skip(1);
 
-        public IEnumerable<KeyValuePair<CompositeKeyType, PropStoreNode>> SameLevel => SelfAndSameLevel.Where(Other);
+        public IEnumerable<KeyValuePair<ExKeyT, PropStoreNode>> SameLevel => SelfAndSameLevel.Where(Other);
 
-        public IEnumerable<KeyValuePair<CompositeKeyType, PropStoreNode>> SelfAndAncestors
+        public IEnumerable<KeyValuePair<ExKeyT, PropStoreNode>> SelfAndAncestors
         {
             get
             {
-                if (Parent.IsArtificialRoot)
+                if (_parent.IsArtificialRoot)
                 {
                     return MakeEnumerable(this);
                 }
@@ -148,14 +161,14 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        public IEnumerable<KeyValuePair<CompositeKeyType, PropStoreNode>> SelfAndChildren => MakeEnumerable(this).Concat(Children);
+        public IEnumerable<KeyValuePair<ExKeyT, PropStoreNode>> SelfAndChildren => MakeEnumerable(this).Concat(Children);
 
-        public IEnumerable<KeyValuePair<CompositeKeyType, PropStoreNode>> SelfAndDescendants =>
+        public IEnumerable<KeyValuePair<ExKeyT, PropStoreNode>> SelfAndDescendants =>
             MakeEnumerable(this).Concat(Children.SelectMany(c => c.Value.SelfAndDescendants));
 
-        public IEnumerable<KeyValuePair<CompositeKeyType, PropStoreNode>> SelfAndSameLevel => GetNodesAtLevel(Level);
+        public IEnumerable<KeyValuePair<ExKeyT, PropStoreNode>> SelfAndSameLevel => GetNodesAtLevel(Level);
 
-        public IEnumerable<KeyValuePair<CompositeKeyType, PropStoreNode>> SelfAndSiblings
+        public IEnumerable<KeyValuePair<ExKeyT, PropStoreNode>> SelfAndSiblings
         {
             get
             {
@@ -165,12 +178,12 @@ namespace DRM.TypeSafePropertyBag
                 }
                 else
                 {
-                    return Parent.Children;
+                    return _parent.Children;
                 }
             }
         }
 
-        public IEnumerable<KeyValuePair<CompositeKeyType, PropStoreNode>> Siblings => SelfAndSiblings.Where(Other);
+        public IEnumerable<KeyValuePair<ExKeyT, PropStoreNode>> Siblings => SelfAndSiblings.Where(Other);
 
         #endregion
 
@@ -178,17 +191,17 @@ namespace DRM.TypeSafePropertyBag
 
         public PropStoreNode()
         {
-            CompKey = 0;
+            CompKey = new SimpleExKey(0);
             PropBagProxy = null;
             Int_PropData = null;
 
             IsObjectNode = false;
             IsArtificialRoot = true;
-            _children = new Dictionary<CompositeKeyType, PropStoreNode>();
+            _children = new Dictionary<ExKeyT, PropStoreNode>();
             Parent = null;
         }
 
-        public PropStoreNode(CompositeKeyType ckey, IPropBagProxy propBagProxy, PropStoreNode newParent)
+        public PropStoreNode(ExKeyT ckey, IPropBagProxy propBagProxy, PropStoreNode newParent)
         {
             CompKey = ckey;
             PropBagProxy = propBagProxy ?? throw new ArgumentNullException(nameof(propBagProxy));
@@ -197,13 +210,13 @@ namespace DRM.TypeSafePropertyBag
             IsObjectNode = true;
 
             IsArtificialRoot = false;
-            _children = new Dictionary<CompositeKeyType, PropStoreNode>();
+            _children = new Dictionary<ExKeyT, PropStoreNode>();
 
-            this.Parent = newParent;
+            this._parent = newParent;
             newParent.ChildList.Add(ckey, this);
         }
 
-        public PropStoreNode(CompositeKeyType ckey, IPropDataInternal int_PropData, PropStoreNode newParent)
+        public PropStoreNode(ExKeyT ckey, IPropDataInternal int_PropData, PropStoreNode newParent)
         {
             CompKey = ckey;
             PropBagProxy = null;
@@ -211,7 +224,7 @@ namespace DRM.TypeSafePropertyBag
 
             IsObjectNode = false;
             IsArtificialRoot = false;
-            _children = new Dictionary<CompositeKeyType, PropStoreNode>();
+            _children = new Dictionary<ExKeyT, PropStoreNode>();
 
             this.Parent = newParent;
             newParent.ChildList.Add(ckey, this);
@@ -221,7 +234,36 @@ namespace DRM.TypeSafePropertyBag
 
         #region Public Methods
 
-        public bool TryGetChild(CompositeKeyType cKey, out PropStoreNode child)
+        public PropStoreNode OnlyChildOfPropItem
+        {
+            get
+            {
+                if(this.IsObjectNode)
+                {
+                    throw new InvalidOperationException("OnlyChildOfPropItem can only be called on PropStoreNodes that have IsObjectNode = false.");
+                }
+
+                ICollection<KeyValuePair<ExKeyT, PropStoreNode>> childrenAsCollection = _children as ICollection<KeyValuePair<ExKeyT, PropStoreNode>>;
+                PropStoreNode result = childrenAsCollection.FirstOrDefault().Value;
+                return result;
+            }
+        }
+
+        public bool TryGetChild(PropIdType propId, out PropStoreNode child)
+        {
+            ExKeyT cKey = new SimpleExKey(this.CompKey.CKey, propId);
+            if (_children.TryGetValue(cKey, out child))
+            {
+                return true;
+            }
+            else
+            {
+                child = null;
+                return false;
+            }
+        }
+
+        public bool TryGetChild(ExKeyT cKey, out PropStoreNode child)
         {
             if (_children.TryGetValue(cKey, out child))
             {
@@ -234,7 +276,7 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        public bool TryRemoveChild(CompositeKeyType cKey, out PropStoreNode child)
+        public bool TryRemoveChild(ExKeyT cKey, out PropStoreNode child)
         {
             if (_children.TryGetValue(cKey, out child))
             {
@@ -250,20 +292,28 @@ namespace DRM.TypeSafePropertyBag
 
         private void AddChild(PropStoreNode child)
         {
-            // Check to see if the child already has a parent, excluding the "Artifical" root used to hold all "real" roots.
-            if (child.Parent != null && child.Parent.CompKey != 0)
+            if (child.Parent != null)
             {
                 throw new ArgumentException($"The child with value [{child}] can not be added because it is already a child of some other node.");
-            }
-
-            if (Root == child)
-            {
-                throw new ArgumentException($"The child with value [{child}] is the top-most root node for this tree.");
             }
 
             if (child.SelfAndDescendants.Any(n => this.CompKey == n.Key))
             {
                 throw new ArgumentException($"The child with value [{child}] can not be added to itself or its descendants.");
+            }
+
+            if (!this.IsArtificialRoot)
+            {
+                if(child == Root)
+                throw new ArgumentException($"The child with value [{child}] is the top-most root node for this tree.");
+            }
+
+            if (child.IsObjectNode && this.IsObjectNode) throw new InvalidOperationException("Only PropNodes can be children of an ObjectNode.");
+            if (!child.IsObjectNode && !this.IsObjectNode) throw new InvalidOperationException("Only ObjectNodes can be children of a PropNode.");
+
+            if(this.IsObjectNode && this.ChildList.Count > 0)
+            {
+                throw new InvalidOperationException("PropNodes can only have zero or one children.");
             }
 
             child.Parent = this;
@@ -272,7 +322,7 @@ namespace DRM.TypeSafePropertyBag
 
         public void AddSibling(PropStoreNode child)
         {
-            Parent.AddChild(child);
+            _parent.AddChild(child);
         }
 
         public void MakeItAChildOf(PropStoreNode parent)
@@ -290,14 +340,14 @@ namespace DRM.TypeSafePropertyBag
             {
                 throw new InvalidOperationException("This node [{this}] is already a root.");
             }
-            bool wasRemoved = Parent.ChildList.Remove(this.CompKey);
+            bool wasRemoved = _parent.ChildList.Remove(this.CompKey);
             if(wasRemoved)
             {
                 if(!artificialRoot.IsArtificialRoot)
                 {
                     throw new InvalidOperationException("The node provided for the artificial root was not the artficial root.");
                 }
-                Parent = artificialRoot;
+                _parent = artificialRoot;
             }
             else
             {
@@ -309,11 +359,11 @@ namespace DRM.TypeSafePropertyBag
 
         #region Private Methods
 
-        private bool Other(KeyValuePair<CompositeKeyType, PropStoreNode> kvp) => !ReferenceEquals(kvp.Key, this.CompKey);
+        private bool Other(KeyValuePair<ExKeyT, PropStoreNode> kvp) => !ReferenceEquals(kvp.Key, this.CompKey);
 
-        private IEnumerable<KeyValuePair<CompositeKeyType, PropStoreNode>> MakeEnumerable(PropStoreNode node)
+        private IEnumerable<KeyValuePair<ExKeyT, PropStoreNode>> MakeEnumerable(PropStoreNode node)
         {
-            yield return new KeyValuePair<CompositeKeyType, PropStoreNode>(node.CompKey, node);
+            yield return new KeyValuePair<ExKeyT, PropStoreNode>(node.CompKey, node);
         }
 
         private void OnParentNodeHasChanged(PropStoreNode oldValue, PropStoreNode newValue)

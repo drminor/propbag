@@ -13,11 +13,5 @@
         /// The PropStoreNode raises a ParentNodeHasChanged event.
         /// </summary>
         ParentHasChanged,
-
-        /// <summary>
-        /// Used internally to begin listening to the FrameworkElement's DataContextChanged
-        /// or the DataSourceProvider, DataChanged event.
-        /// </summary>
-        Initializing
     }
 }

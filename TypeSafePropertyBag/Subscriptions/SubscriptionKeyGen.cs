@@ -249,6 +249,7 @@ namespace DRM.TypeSafePropertyBag
         public static ISubscriptionGen CreateSubscriptionGen(ISubscriptionKeyGen subscriptionRequestGen)
         {
             ISubscriptionGen result = new SubscriptionGen(subscriptionRequestGen);
+            subscriptionRequestGen.MarkAsUsed();
             return result;
         }
 
@@ -268,6 +269,7 @@ namespace DRM.TypeSafePropertyBag
 
         public void MarkAsUsed()
         {
+            ObjHandler = null;
             GenHandler = null;
             StandardHandler = null;
             Target = null;

@@ -10,14 +10,50 @@ namespace DRM.TypeSafePropertyBag
 
     public struct SimpleExKey : ExKeyType, IEquatable<SimpleExKey>
     {
+
+        private const int LOG_BASE2_MAX_PROPERTIES = 16;
+        private static readonly int MAX_NUMBER_OF_PROPERTIES = (int)Math.Pow(2, LOG_BASE2_MAX_PROPERTIES); //65536;
+
+        private static long _maxObjectsPerAppDomain;
+        private static int _botFieldLen;
+        private static int _shift;
+        private static CompositeKeyType _botMask;
+        private static CompositeKeyType _topMask;
+
+        static SimpleExKey()
+        {
+            double numBitsForProps = LOG_BASE2_MAX_PROPERTIES;
+            int numberOfBitsInCKey = (int)Math.Log(CompositeKeyType.MaxValue, 2);
+            int numberOfTopBits = (int)Math.Round((double)numberOfBitsInCKey - numBitsForProps, 0);
+
+            _maxObjectsPerAppDomain = (long)Math.Pow(2, numberOfTopBits);
+
+            _shift = numberOfTopBits;
+            _botFieldLen = numberOfBitsInCKey - numberOfTopBits;
+            _botMask = ((CompositeKeyType)1 << _botFieldLen) - 1;
+            _topMask = ((CompositeKeyType)1 << numberOfTopBits) - 1;
+        }
+
         #region Constructor
 
-        public SimpleExKey(CompositeKeyType cKey, WeakReference<IPropBag> accessToken, ObjectIdType level1Key, PropIdType level2Key) : this()
+        //public SimpleExKey(CompositeKeyType cKey/*, WeakReference<IPropBagInternal> accessToken, ObjectIdType level1Key, PropIdType level2Key*/) : this()
+        //{
+        //    CKey = cKey;
+        //    Level1Key = level1Key;
+        //    Level2Key = level2Key;
+        //    //WR_AccessToken = accessToken ?? throw new ArgumentNullException(nameof(accessToken));
+        //}
+
+
+
+        public SimpleExKey(CompositeKeyType cKey) : this()
         {
             CKey = cKey;
-            Level1Key = level1Key;
-            Level2Key = level2Key;
-            WR_AccessToken = accessToken ?? throw new ArgumentNullException(nameof(accessToken));
+        }
+
+        public SimpleExKey(ObjectIdType level1Key, PropIdType level2Key) : this()
+        {
+            CKey = Fuse(level1Key, level2Key);
         }
 
         #endregion
@@ -25,11 +61,50 @@ namespace DRM.TypeSafePropertyBag
         #region Public Members
 
         public CompositeKeyType CKey { get; }
-        public ObjectIdType Level1Key { get; }
-        public PropIdType Level2Key { get; }
-        public object AccessToken => WR_AccessToken;
 
-        public WeakReference<IPropBag> WR_AccessToken { get; }
+        public ObjectIdType Level1Key => (CKey >> _botFieldLen) & _topMask;
+
+        public PropIdType Level2Key => (PropIdType)(CKey & _botMask);
+
+        public long MaxObjectsPerAppDomain => _maxObjectsPerAppDomain;
+
+        public int MaxPropsPerObject => MAX_NUMBER_OF_PROPERTIES;
+
+        //public object AccessToken => WR_AccessToken;
+
+        //public WeakReference<IPropBagInternal> WR_AccessToken { get; }
+
+        #endregion
+
+        #region Public Methods
+
+        public CompositeKeyType Fuse(ObjectIdType top, uint bot)
+        {
+            CompositeKeyType result = top;
+            result = result << _botFieldLen;
+            result += bot;
+            return result;
+        }
+
+        public ObjectIdType Explode(CompositeKeyType cKey, out uint bot)
+        {
+            bot = (PropIdType)(cKey & _botMask);
+
+            ObjectIdType result = (cKey >> _botFieldLen) & _topMask;
+            return result;
+        }
+
+        public bool Verify(CompositeKeyType cKey, ObjectIdType top)
+        {
+            ObjectIdType testTop = (cKey >> _botFieldLen) & _topMask;
+            return testTop == top;
+        }
+
+        public bool Verify(CompositeKeyType cKey, ObjectIdType top, uint bot)
+        {
+            ObjectIdType testTop = Explode(cKey, out PropIdType testBot);
+            return testTop == top && testBot == bot;
+        }
 
         #endregion
 

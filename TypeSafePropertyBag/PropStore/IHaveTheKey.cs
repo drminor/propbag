@@ -20,8 +20,12 @@ namespace DRM.TypeSafePropertyBag
 
         IExplodedKey<CompT, L1T, L2T> GetTheKey(IPropBagProxy propBagProxy, L2T propId);
 
+        //CompT GetCompKey(L1T objectId, L2T propId);
+
         PropStoreNode PropStoreNode { get; }
 
         PropStoreNode GetObjectNodeForPropVal(IPropDataInternal int_propData);
+
+        bool TryGetAChildOfMine(L2T propId, out PropStoreNode propNode);
     }
 }

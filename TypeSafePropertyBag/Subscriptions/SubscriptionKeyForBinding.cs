@@ -75,7 +75,7 @@ namespace DRM.TypeSafePropertyBag
         public bool Equals(BindingSubscriptionKey<T> other)
         {
             return other != null &&
-                TargetPropRef.Level2Key == other.TargetPropRef.Level2Key
+                TargetPropRef.CKey == other.TargetPropRef.CKey
                 && BindingInfo.PropertyPath == other.BindingInfo.PropertyPath;
         }
 

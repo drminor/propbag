@@ -59,8 +59,8 @@ namespace DRM.TypeSafePropertyBag
         //ExKeyT Join(L1T top, L2T bot);
         public SimpleExKey Join(ObjectIdType top, PropIdType bot)
         {
-            CompositeKeyType cKey = JoinComp(top, bot);
-            SimpleExKey result = new SimpleExKey(cKey, null, top, bot);
+            //CompositeKeyType cKey = JoinComp(top, bot);
+            SimpleExKey result = new SimpleExKey(top, bot);
             return result;
         }
 
@@ -122,8 +122,8 @@ namespace DRM.TypeSafePropertyBag
         //ExKeyT Split(CompT cKey);
         public SimpleExKey Split(CompositeKeyType cKey)
         {
-            ObjectIdType top = SplitComp(cKey, out PropIdType bot);
-            return new SimpleExKey(cKey, null, top, bot);
+            //ObjectIdType top = SplitComp(cKey, out PropIdType bot);
+            return new SimpleExKey(cKey);
         }
 
 

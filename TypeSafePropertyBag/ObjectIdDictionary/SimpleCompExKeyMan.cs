@@ -58,8 +58,7 @@ namespace DRM.TypeSafePropertyBag
         //ExKeyT Join(L1T top, L2T bot);
         public ExKeyT Join(ObjectIdType top, PropIdType bot)
         {
-            CompositeKeyType cKey = JoinComp(top, bot);
-            ExKeyT result = new SimpleExKey(cKey, null, top, bot);
+            ExKeyT result = new SimpleExKey(top, bot);
             return result;
         }
 
@@ -74,9 +73,9 @@ namespace DRM.TypeSafePropertyBag
         public ExKeyT Join(ObjectIdType top, PropNameType rawBot)
         {
             PropIdType bot = Level2KeyMan.FromRaw(rawBot);
-            CompositeKeyType cKey = JoinComp(top, bot);
+            //CompositeKeyType cKey = JoinComp(top, bot);
 
-            ExKeyT result = new SimpleExKey(cKey, null, top, bot);
+            ExKeyT result = new SimpleExKey(top, bot);
             return result;
         }
 
@@ -92,7 +91,7 @@ namespace DRM.TypeSafePropertyBag
         {
             if(TryJoinComp(top, rawBot, out CompositeKeyType cKey, out PropIdType bot))
             {
-                exKey = new SimpleExKey(cKey, null, top, bot);
+                exKey = new SimpleExKey(cKey);
                 return true;
             }
             else
@@ -122,9 +121,8 @@ namespace DRM.TypeSafePropertyBag
         public ExKeyT Split(CompositeKeyType cKey)
         {
             ObjectIdType top = SplitComp(cKey, out PropIdType bot);
-            return new SimpleExKey(cKey, null, top, bot);
+            return new SimpleExKey(cKey);
         }
-
 
         // Join and split composite key from L1 and L2.
         //CompT JoinComp(L1T top, L2T bot);

@@ -9,6 +9,9 @@ namespace DRM.TypeSafePropertyBag
     using PropIdType = UInt32;
     using PropNameType = String;
 
+    using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
+
+
     public class PropGen : IPropDataInternal
     {
         #region Public PropGen Properties
@@ -34,25 +37,23 @@ namespace DRM.TypeSafePropertyBag
             //}
         }
 
-        public bool IsEmpty => _cKey == 0;
+        public bool IsEmpty => _cKey.CKey == 0;
 
         #endregion
 
         #region Public IPropDataInternal Properties
 
-        CompositeKeyType _cKey;
-        CompositeKeyType IPropDataInternal.CKey => _cKey;
+        private ExKeyT _cKey;
+        ExKeyT IPropDataInternal.CKey => _cKey;
 
         private bool _isPropBag;
         bool IPropDataInternal.IsPropBag => _isPropBag;
-
-        //EventHandler<PCObjectEventArgs> IPropDataInternal.PCObjectEvent => PropertyChangedWithObjectVals;
 
         #endregion
 
         #region Constructors
 
-        public PropGen(IProp genericTypedProp, CompositeKeyType cKey, PropIdType propId, PropNameType propertyName)
+        public PropGen(IProp genericTypedProp, ExKeyT cKey, PropIdType propId, PropNameType propertyName)
         {
             _cKey = cKey;
             PropId = propId;
@@ -67,7 +68,7 @@ namespace DRM.TypeSafePropertyBag
 
         public PropGen()
         {
-            _cKey = 0;
+            _cKey = new SimpleExKey(0);
             PropId = 0;
             _typedProp = null;
             _isPropBag = false;

@@ -30,7 +30,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
 
         public INotifyParentNodeChanged ParentChangedSource { get; }
 
-        public INotifyPCGen PropChangeGenSource { get; }
+        public IPropBag PropChangeGenSource { get; }
 
         public INotifyPCTyped<T> PropChangedTypedSource { get; }
 
@@ -347,76 +347,12 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
             }
         }
 
-        public void BeginListeningToSource()
-        {
-        }
-
-        public void StopListeningToSource()
-        {
-            RemoveSubscriptions();
-        }
 
         #endregion
 
         #region Private Methods
 
-        private ObservableSource<T> CreateChild(object data, Type type, string pathElement)
-        {
-            //// Property Changed
-            //if (typeof(INotifyPropertyChanged).IsAssignableFrom(type))
-            //{
-            //    return new ObservableSourceProvider<T>(data as INotifyPropertyChanged, pathElement, PathConnectorTypeEnum.Dot, BinderName);
-            //}
-
-            //// Collection Changed
-            //else if (typeof(INotifyCollectionChanged).IsAssignableFrom(type))
-            //{
-            //    return new ObservableSourceProvider<T>(data as INotifyCollectionChanged, pathElement, PathConnectorTypeEnum.Dot, BinderName);
-            //}
-
-            //// DataSourceProvider
-            //else if (typeof(DataSourceProvider).IsAssignableFrom(type))
-            //{
-            //    return new ObservableSourceProvider<T>(data as DataSourceProvider, pathElement, PathConnectorTypeEnum.Dot, BinderName);
-            //}
-
-            throw new InvalidOperationException("Cannot create child: it does not implement INotifyPropertyChanged, INotifyCollectionChanged, nor is it, or dervive from, a DataSourceProvider.");
-        }
-
-        private void AddSubscriptions(object dc)
-        {
-            //ObservableSourceStatusEnum workStatus = ObservableSourceStatusEnum.Undetermined;
-
-            //bool addedIt = false;
-            //if (dc is INotifyPropertyChanged pc)
-            //{
-            //    WeakEventManager<INotifyPropertyChanged, PropertyChangedEventArgs>
-            //        .AddHandler(pc, "PropertyChanged", OnPCEvent);
-
-            //    workStatus = ObservableSourceStatusEnum.IsWatchingProp;
-            //    addedIt = true;
-            //}
-
-            //if (dc is INotifyCollectionChanged cc)
-            //{
-            //    WeakEventManager<INotifyCollectionChanged, CollectionChangeEventArgs>
-            //        .AddHandler(cc, "CollectionChanged", OnCCEvent);
-
-            //    workStatus = workStatus.SetWatchingColl();
-            //    addedIt = true;
-            //}
-
-            //if (!addedIt)
-            //{
-            //    string msg = "Cannot create subscriptions. Object does not implement INotifyPropertyChanged, " +
-            //        "nor does it implement INotifyCollectionChanged.";
-            //    System.Diagnostics.Debug.WriteLine(msg);
-            //    //throw new ApplicationException(msg);
-            //}
-            //Status = workStatus;
-        }
-
-        private void RemoveSubscriptions()
+        public void RemoveSubscriptions()
         {
             //if (dc == null) return;
 
@@ -458,17 +394,23 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
                     }
                 case SourceKindEnum.Up:
                     {
-                        ParentChangedSource.ParentNodeHasChanged -= NotifyParentChangedSource_ParentNodeHasChanged;
+                        ParentChangedSource.ParentNodeHasChanged -= ParentNodeHasChanged_Handler;
                         break;
                     }
                 case SourceKindEnum.Down:
                     {
-                        PropChangeGenSource.PropertyChangedWithGenVals -= ItRaisesPCTGen_PropertyChangedWithGenVals;
+                        //PropChangeGenSource.PropertyChangedWithGenVals -= PropertyChangedWithGenVals_Handler;
+                        PropChangeGenSource.UnSubscribeToPropChanged(PropertyChangedWithGenVals_Handler, PathElement, typeof(T));
+                        
                         break;
                     }
                 case SourceKindEnum.TerminalNode:
                     {
-                        this.PropChangedTypedSource.PropertyChangedWithTVals -= ItRaisesPCTGen_PropertyChangedWithGenVals;
+                        //PropChangeGenSource.PropertyChangedWithGenVals -= PropertyChangedWithGenVals_Handler;
+
+                        //this.PropChangedTypedSource.PropertyChangedWithTVals -= PropertyChangedWithTVals_Handler;
+
+                        PropChangeGenSource.UnSubscribeToPropChanged(PropertyChangedWithGenVals_Handler, PathElement, typeof(T));
                         break;
                     }
                 default:
@@ -482,183 +424,22 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
 
         #region Constructors and their handlers
 
-        private ObservableSource(string pathElement, bool isListening, string binderName)
-        {
-            PathElement = pathElement;
-            IsListeningForNewDC = isListening;
-            BinderName = binderName;
-        }
-
-        //#region Holding 
-        //public ObservableSource(string pathElement, string binderName, SourceKindEnum sourceKind)
-        //    : this(pathElement, false, binderName)
-        //{
-        //    SourceKind = sourceKind;
-        //    Status = ObservableSourceStatusEnum.NoType;
-        //}
-        //#endregion
-
-        //#region Terminal Node 
-        //public ObservableSource(string pathElement, Type type, string binderName)
-        //    : this(pathElement, false, binderName)
-        //{
-        //    SourceKind = SourceKindEnum.TerminalNode;
-        //    Status = ObservableSourceStatusEnum.HasType;
-        //}
-        //#endregion
-
-        //#region From Framework Element and Framework Content Element
-        ////public ObservableSource(FrameworkElement fe, string pathElement, bool isTargetADc, PathConnectorTypeEnum pathConnectorType, string binderName)
-        ////    : this(pathElement, pathConnectorType, true, binderName)
-        ////{
-        ////    SourceKind = SourceKindEnum.FrameworkElement;
-        ////    AnchorElement = fe;
-
-        ////    UpdateWatcherAndData_Fe(fe, pathElement, isTargetADc, binderName);
-        ////}
-
-        ////public ObservableSource(FrameworkContentElement fce, string pathElement, bool isTargetADc, PathConnectorTypeEnum pathConnectorType, string binderName)
-        ////    : this(pathElement, pathConnectorType, true, binderName)
-        ////{
-        ////    SourceKind = SourceKindEnum.FrameworkContentElement;
-        ////    AnchorElement = fce;
-
-        ////    UpdateWatcherAndData_Fe(fce, pathElement, isTargetADc, binderName);
-        ////}
-
-        //private void DataContextChanged_Fe(DependencyPropertyChangedEventArgs e)
-        //{
-        //    //DependencyObject feOrFce = (DependencyObject)this.AnchorElement;
-
-        //    //bool changed = UpdateWatcherAndData_Fe(feOrFce, this.PathElement, this.IsTargetADc, this.BinderName);
-
-        //    //// TODO: Determine if a real change has occured,
-        //    //// and then raise only if real.
-        //    //OnDataSourceChanged(DataSourceChangeTypeEnum.DataContextUpdated, changed);
-        //}
-
-        //private void SubscribeTo_FcOrFce(DependencyObject newDepObj, Action<DependencyPropertyChangedEventArgs> action)
-        //{
-        //    //// TODO: Create a new version of DependencyPropertyListener
-        //    //// that takes an existing event source so that we can make these event subscriptions use a Weak Reference.
-
-        //    //if(newDepObj is FrameworkElement fe)
-        //    //{
-        //    //    DependencyProperty dataContextProp = LogicalTree.FeDataContextDpPropProvider.Value;
-        //    //    DepPropListener = fe.ListenToProperty(dataContextProp, action);
-        //    //}
-        //    //else if(newDepObj is FrameworkContentElement fce)
-        //    //{
-        //    //    DependencyProperty dataContextProp = LogicalTree.FceDataContextDpPropProvider.Value;
-        //    //    DepPropListener = fce.ListenToProperty(dataContextProp, action);
-        //    //}
-        //    //else
-        //    //{
-        //    //    // TODO: Throw an InvalidOperationException.
-        //    //}
-        //}
-
-        //private bool UpdateWatcherAndData_Fe(DependencyObject targetObject, string pathElement,
-        //    bool isTargetADc, string binderName)
-        //{
-        //    //if (SourceKind != SourceKindEnum.FrameworkElement && SourceKind != SourceKindEnum.FrameworkContentElement)
-        //    //{
-        //    //    throw new InvalidOperationException($"Cannot call {nameof(UpdateWatcherAndData_Fe)} " +
-        //    //        $"if the ObservableSource does not have a SourceKind of {nameof(SourceKindEnum.FrameworkElement)} " +
-        //    //        $"or {nameof(SourceKindEnum.FrameworkContentElement)}.");
-        //    //}
-
-        //    //string fwElementName = LogicalTree.GetNameFromDepObject(targetObject);
-        //    //System.Diagnostics.Debug.WriteLine($"Fetching DataContext to use from: {fwElementName} for pathElement: {pathElement}.");
-
-        //    //this.IsTargetADc = isTargetADc;
-
-        //    //// If this binding sets a DataContext, watch the TargetObject's parent, otherwise watch the TargetObject for DataContext updates
-
-        //    //// TODO: May want to make sure that the value of Container is a DependencyObject.
-        //    //DependencyObject curContainer = (DependencyObject)Container;
-        //    //DependencyObject newContainer = isTargetADc ? LogicalTreeHelper.GetParent(targetObject) : targetObject;
-
-        //    //if(!object.ReferenceEquals(curContainer, newContainer))
-        //    //{
-        //    //    SubscribeTo_FcOrFce(newContainer, DataContextChanged_Fe);
-        //    //    Container = newContainer;
-        //    //}
-
-        //    //// Now see if we can find a data context.
-        //    //DependencyObject foundNode = LogicalTree.GetDataContext(targetObject, out bool foundIt,
-        //    //    startWithParent: isTargetADc, inspectAncestors: true, stopOnNodeWithBoundDc: true);
-
-        //    //if (!foundIt)
-        //    //{
-        //    //    bool changed = UpdateData(null, null, ObservableSourceStatusEnum.NoType);
-        //    //    return changed;
-        //    //}
-
-        //    //if (!object.ReferenceEquals(targetObject, foundNode))
-        //    //{
-        //    //    string foundFwElementName = LogicalTree.GetNameFromDepObject(foundNode);
-        //    //    System.Diagnostics.Debug.WriteLine($"Found DataContext to watch using an ancestor: {foundFwElementName} for pathElement: {pathElement}.");
-        //    //}
-        //    //else
-        //    //{
-        //    //    System.Diagnostics.Debug.WriteLine($"Found DataContext to watch on the target object for pathElement: {pathElement}.");
-        //    //}
-
-        //    //DependencyObject foundNodeWithBoundDc = LogicalTree.GetDataContextWithBoundDc(targetObject,
-        //    //    out bool foundOneWithBoundDc, startWithParent: isTargetADc);
-
-        //    //if (foundOneWithBoundDc)
-        //    //{
-        //    //    System.Diagnostics.Debug.WriteLine("Some parent has a DataContext that is set via a Binding Markup.");
-        //    //}
-
-        //    //if (foundNode is FrameworkElement fe)
-        //    //{
-        //    //    Type newType = fe.DataContext?.GetType();
-        //    //    ObservableSourceStatusEnum newStatus = Status.SetReady(fe.DataContext != null);
-
-        //    //    bool changed = UpdateData(fe.DataContext, newType, newStatus);
-        //    //    //if(newType.IsIListSource())
-        //    //    //{
-        //    //    //    changed = UpdateData(((IListSource)fe.DataContext).GetList(), newType, newStatus);
-        //    //    //}
-        //    //    //else
-        //    //    //{
-        //    //    //    changed = UpdateData(fe.DataContext, newType, newStatus);
-        //    //    //}
-
-        //    //    return changed;
-        //    //}
-        //    //else if (foundNode is FrameworkContentElement fce)
-        //    //{
-        //    //    Type newType = fce.DataContext?.GetType();
-        //    //    ObservableSourceStatusEnum newStatus = Status.SetReady(fce.DataContext != null);
-        //    //    bool changed = UpdateData(fce.DataContext, newType, newStatus);
-        //    //    return changed;
-        //    //}
-        //    //else
-        //    //{
-        //    //    throw new ApplicationException($"Found node in {binderName}.ObservableSourceProvider<T> was neither a FrameworkElement or a FrameworkContentElement.");
-        //    //}
-        //    return false;
-        //}
-
-        //#endregion
-
         #region From INotifyPCTyped<T>
 
         public ObservableSource(INotifyPCTyped<T> itRaisesPCTyped, string pathElement, 
             SourceKindEnum sourceKind, string binderName)
-            : this(pathElement,  false, binderName)
         {
+            PathElement = pathElement;
+            IsListeningForNewDC = true;
+            BinderName = binderName;
+
             SourceKind = sourceKind;
             PropChangedTypedSource = itRaisesPCTyped;
-            itRaisesPCTyped.PropertyChangedWithTVals += ItRaisesPCTyped_PropertyChangedWithTVals;
+            itRaisesPCTyped.PropertyChangedWithTVals += PropertyChangedWithTVals_Handler;
             Status = ObservableSourceStatusEnum.Ready;
         }
 
-        private void ItRaisesPCTyped_PropertyChangedWithTVals(object sender, PCTypedEventArgs<T> e)
+        private void PropertyChangedWithTVals_Handler(object sender, PCTypedEventArgs<T> e)
         {
             OnPropertyChangedWithTVals(e);
         }
@@ -667,21 +448,25 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
 
         #region From INotifyPCGen 
 
-        public ObservableSource(INotifyPCGen itRaisesPCTGen, string pathElement,
+        public ObservableSource(IPropBag propBag, string pathElement,
             SourceKindEnum sourceKind, string binderName)
-            : this(pathElement, false, binderName)
         {
+            PathElement = pathElement;
+            IsListeningForNewDC = true;
+            BinderName = binderName;
+
             SourceKind = sourceKind;
-            PropChangeGenSource = itRaisesPCTGen;
-            itRaisesPCTGen.PropertyChangedWithGenVals += ItRaisesPCTGen_PropertyChangedWithGenVals;
+            PropChangeGenSource = propBag;
+            propBag.SubscribeToPropChanged(PropertyChangedWithGenVals_Handler, PathElement, typeof(T));
+            //itRaisesPCTGen.PropertyChangedWithGenVals += PropertyChangedWithGenVals_Handler;
             Status = ObservableSourceStatusEnum.Ready;
         }
 
-        private void ItRaisesPCTGen_PropertyChangedWithGenVals(object sender, PCGenEventArgs e)
+        private void PropertyChangedWithGenVals_Handler(object sender, PCGenEventArgs e)
         {
             if (e.PropertyName == PathElement)
             {
-                OnDataSourceChanged(DataSourceChangeTypeEnum.PropertyChanged, e);
+                OnChildPropertyHasChanged(e);
             }
         }
 
@@ -689,18 +474,22 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
 
         #region PropStoreParent
 
-        public ObservableSource(INotifyParentNodeChanged notifyParentChangedSource, string pathElement, SourceKindEnum sourceKind, string binderName)
-            : this(pathElement, false, binderName)
+        public ObservableSource(INotifyParentNodeChanged notifyParentChangedSource, string pathElement,
+            SourceKindEnum sourceKind, string binderName)
         {
+            PathElement = pathElement;
+            IsListeningForNewDC = true;
+            BinderName = binderName;
+
             SourceKind = sourceKind;
             ParentChangedSource = notifyParentChangedSource;
-            notifyParentChangedSource.ParentNodeHasChanged += NotifyParentChangedSource_ParentNodeHasChanged;
+            notifyParentChangedSource.ParentNodeHasChanged += ParentNodeHasChanged_Handler;
             Status = ObservableSourceStatusEnum.Ready;
         }
 
-        private void NotifyParentChangedSource_ParentNodeHasChanged(object sender, PSNodeParentChangedEventArgs e)
+        private void ParentNodeHasChanged_Handler(object sender, PSNodeParentChangedEventArgs e)
         {
-            OnDataSourceChanged(DataSourceChangeTypeEnum.ParentHasChanged, e);
+            OnParentHasChanged(e);
         }
 
         #endregion
@@ -715,19 +504,19 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
             Interlocked.CompareExchange(ref PropertyChangedWithTVals, null, null)?.Invoke(this, eArgs);
         }
 
-        private void OnDataSourceChanged(DataSourceChangeTypeEnum changeType, PCGenEventArgs eArgs)
+        private void OnChildPropertyHasChanged(PCGenEventArgs eArgs)
         {
             Interlocked.CompareExchange(ref DataSourceChanged, null, null)
                 ?.Invoke(this, DataSourceChangedEventArgs.NewFromPCGen(eArgs));
         }
 
-        private void OnDataSourceChanged(DataSourceChangeTypeEnum changeType, PSNodeParentChangedEventArgs eArgs)
+        private void OnParentHasChanged(PSNodeParentChangedEventArgs eArgs)
         {
             Interlocked.CompareExchange(ref DataSourceChanged, null, null)
-                ?.Invoke(this, DataSourceChangedEventArgs.NewFromPSNodeParentChanged(eArgs, typeof(T)));
+                ?.Invoke(this, DataSourceChangedEventArgs.NewFromPSNodeParentChanged(eArgs, PathElement, typeof(T)));
         }
 
-        #endregion Raise Event Helpers
+        #endregion
 
         #region Type Support
 

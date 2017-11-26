@@ -210,9 +210,13 @@ namespace PropBagLib.Tests.PerformanceDb
             DestinationModel6 testMainVM = new DestinationModel6(propModel6, null, propFactory_V1);
 
             Business b2 = new Business();
-            testMainVM.SetIt(b, "Business");
+            testMainVM.SetIt(b2, "Business");
 
             testMainVM.SetIt<DestinationModel5>(testChildVM, "ChildVM");
+
+            b2 = new Business();
+            testMainVM.SetIt(b2, "Business");
+
         }
 
         #region DB Helper Methods

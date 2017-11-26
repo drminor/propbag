@@ -10,7 +10,7 @@ namespace DRM.TypeSafePropertyBag
         int MaxPropsPerObject { get; }
 
         // Create and TearDown PropStoreAccessService instances.
-        IPropStoreAccessService<L2T, L2TRaw> CreatePropStoreService(IPropBag propBag);
+        IPropStoreAccessService<L2T, L2TRaw> CreatePropStoreService(IPropBagInternal propBag);
         void TearDown(IPropBag int_PropBag, IPropStoreAccessService<L2T, L2TRaw> propStoreService);
 
         // Diagnostics

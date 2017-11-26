@@ -12,14 +12,14 @@ namespace DRM.TypeSafePropertyBag
 
     public class PSNodeParentChangedEventArgs : EventArgs
     {
-        public PSNodeParentChangedEventArgs(CompositeKeyType propId, IPropBagProxy oldValue, IPropBagProxy newValue)
+        public PSNodeParentChangedEventArgs(ExKeyT propId, IPropBagProxy oldValue, IPropBagProxy newValue)
         {
             PropId = propId;
             OldValue = oldValue;
             NewValue = newValue;
         }
 
-        public CompositeKeyType PropId { get; set; }
+        public ExKeyT PropId { get; set; }
         public IPropBagProxy OldValue { get; set; }
         public IPropBagProxy NewValue { get; set; }
 

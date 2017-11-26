@@ -7,6 +7,8 @@ using System.Data;
 namespace DRM.TypeSafePropertyBag
 {
     #region Type Aliases
+    using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
+
     using CompositeKeyType = UInt64;
     using ObjectIdType = UInt64;
 
@@ -103,7 +105,7 @@ namespace DRM.TypeSafePropertyBag
     /// </summary>
     internal interface IPropDataInternal : IPropData
     {
-        CompositeKeyType CKey { get; }
+        ExKeyT CKey { get; }
         bool IsPropBag { get; }
 
         // On those occasions when the IProp starts off with Type = object, and then later, the type is firmed up,

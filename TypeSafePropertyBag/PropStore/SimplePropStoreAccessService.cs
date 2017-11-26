@@ -16,7 +16,6 @@ namespace DRM.TypeSafePropertyBag
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
     using IHaveTheKeyIT = IHaveTheKey<UInt64, UInt64, UInt32>;
 
-    using ICKeyManType = ICKeyMan<UInt64, UInt64, UInt32, String>;
     using L2KeyManType = IL2KeyMan<UInt32, String>;
 
     using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
@@ -27,11 +26,11 @@ namespace DRM.TypeSafePropertyBag
     {
         #region Private Members
 
-        readonly WeakReference<IPropBag> _clientAccessToken;
+        readonly WeakReference<IPropBagInternal> _clientAccessToken;
         readonly ObjectIdType _objectId;
 
         readonly PropStoreNode _ourNode;
-        readonly ICKeyManType _compKeyManager;
+        //readonly ICKeyManType _compKeyManager;
 
         PSAccessServiceProviderType _propStoreAccessServiceProvider;
 
@@ -44,12 +43,12 @@ namespace DRM.TypeSafePropertyBag
         public SimplePropStoreAccessService
             (
             PropStoreNode ourNode,
-            ICKeyManType compKeyManager,
+            //ICKeyManType compKeyManager,
             PSAccessServiceProviderType propStoreAccessServiceProvider
             )
         {
             _ourNode = ourNode;
-            _compKeyManager = compKeyManager;
+            //_compKeyManager = compKeyManager;
             _propStoreAccessServiceProvider = propStoreAccessServiceProvider;
 
             Level2KeyManager = ourNode.PropBagProxy.Level2KeyManager;
@@ -74,7 +73,7 @@ namespace DRM.TypeSafePropertyBag
         {
             get
             {
-                CompositeKeyType cKey = GetCompKey(propBag, propId);
+                ExKeyT cKey = GetCompKey(propBag, propId);
                 //IPropData result = _theGlobalStore[cKey];
                 IPropData result = GetChild(cKey).Int_PropData;
                 return result;
@@ -82,7 +81,7 @@ namespace DRM.TypeSafePropertyBag
             private set
             {
                 IPropDataInternal int_PropData = GetInt_PropData(value);
-                CompositeKeyType cKey = GetCompKey(propBag, propId);
+                ExKeyT cKey = GetCompKey(propBag, propId);
 
                 _ourNode.ChildList[cKey].Int_PropData = int_PropData;
             }
@@ -90,7 +89,7 @@ namespace DRM.TypeSafePropertyBag
 
         public bool TryGetValue(IPropBag propBag, PropIdType propId, out IPropData propData)
         {
-            CompositeKeyType cKey = GetCompKey(propBag, propId);
+            ExKeyT cKey = GetCompKey(propBag, propId);
             if(_ourNode.TryGetChild(cKey, out PropStoreNode child))
             {
                 propData = child.Int_PropData;
@@ -105,7 +104,7 @@ namespace DRM.TypeSafePropertyBag
 
         public bool TryAdd(IPropBag propBag, PropIdType propId, PropNameType propertyName, IProp genericTypedProp, out IPropData propData)
         {
-            CompositeKeyType propertyKey = GetCompKey(propBag, propId);
+            ExKeyT propertyKey = GetCompKey(propBag, propId);
             propData = new PropGen(genericTypedProp, propertyKey, propId, propertyName);
             IPropDataInternal int_PropData = (IPropDataInternal)propData;
 
@@ -122,7 +121,6 @@ namespace DRM.TypeSafePropertyBag
                 object guest = int_PropData?.TypedProp?.TypedValueAsObject; 
                 if(guest != null)
                 {
-                    // The PropStoreNode will raise its ParentNodeHasChanged event.
                     PropStoreNode guestPropBagNode = GetGuestObjectNodeFromPropItemVal((IPropBag)guest);
                     guestPropBagNode.MakeItAChildOf(propStoreNode);
                 }
@@ -135,7 +133,7 @@ namespace DRM.TypeSafePropertyBag
 
         public bool TryRemove(IPropBag propBag, PropIdType propId, out IPropData propData)
         {
-            CompositeKeyType cKey = GetCompKey(propBag, propId);
+            ExKeyT cKey = GetCompKey(propBag, propId);
 
             bool result = _ourNode.TryRemoveChild(cKey, out PropStoreNode child);
 
@@ -149,7 +147,7 @@ namespace DRM.TypeSafePropertyBag
          
         public bool ContainsKey(IPropBag propBag, PropIdType propId)
         {
-            CompositeKeyType cKey = GetCompKey(propBag, propId);
+            ExKeyT cKey = GetCompKey(propBag, propId);
             bool result = _ourNode.ChildList.ContainsKey(cKey);
             return result;
         }
@@ -188,7 +186,7 @@ namespace DRM.TypeSafePropertyBag
 
             //Bindings = new BindingsCollection();
 
-            foreach (KeyValuePair<CompositeKeyType, PropStoreNode> kvp in _ourNode.Children)
+            foreach (KeyValuePair<ExKeyT, PropStoreNode> kvp in _ourNode.Children)
             {
                 kvp.Value.Int_PropData.CleanUp(doTypedCleanup: true);
             }
@@ -198,8 +196,7 @@ namespace DRM.TypeSafePropertyBag
         public IEnumerable<KeyValuePair<PropNameType, IPropData>> GetCollection(IPropBag propBag)
         {
             GetAndCheckObjectRef(propBag);
-            IEnumerable<KeyValuePair<CompositeKeyType, PropStoreNode>> propDataObjectsForThisPropBag = _ourNode.Children;
-            Dictionary<PropNameType, IPropData> result = propDataObjectsForThisPropBag.ToDictionary
+            Dictionary<PropNameType, IPropData> result = _ourNode.Children.ToDictionary
                 (
                 x => GetPropNameFromKey(x.Key),
                 x => (IPropData) x.Value.Int_PropData
@@ -231,7 +228,7 @@ namespace DRM.TypeSafePropertyBag
 
         public bool SetTypedProp(IPropBag propBag, PropIdType propId, PropNameType propertyName, IProp genericTypedProp)
         {
-            CompositeKeyType cKey = GetCompKey(propBag, propId);
+            ExKeyT cKey = GetCompKey(propBag, propId);
 
             if (TryGetValue(propBag, propId, out IPropData propData))
             {
@@ -434,18 +431,17 @@ namespace DRM.TypeSafePropertyBag
 
         #region Prop Store Node Events and Call Backs
 
-        private bool BeginWatchingParent(CompositeKeyType propertyKey, PropIdType propId)
+        private bool BeginWatchingParent(ExKeyT propertyKey, PropIdType propId)
         {
-            ExKeyT exKey = GetExKey(propertyKey, propId);
-            SubscriptionKeyGen subscriptionRequest = new SubscriptionKeyGen(exKey, PropertyChangedWithObjectVals, SubscriptionPriorityGroup.Standard, keepRef: false);
+            SubscriptionKeyGen subscriptionRequest = new SubscriptionKeyGen(propertyKey, PropertyChangedWithObjectVals, SubscriptionPriorityGroup.Standard, keepRef: false);
             AddSubscription(subscriptionRequest, out bool wasAdded);
             return wasAdded;
         }
 
-        private bool StopWatchingParent(CompositeKeyType propertyKey, PropIdType propId)
+        private bool StopWatchingParent(ExKeyT propertyKey, PropIdType propId)
         {
-            ExKeyT exKey = GetExKey(propertyKey, propId);
-            SubscriptionKeyGen subscriptionRequest = new SubscriptionKeyGen(exKey, PropertyChangedWithObjectVals, SubscriptionPriorityGroup.Standard, keepRef: false);
+
+            SubscriptionKeyGen subscriptionRequest = new SubscriptionKeyGen(propertyKey, PropertyChangedWithObjectVals, SubscriptionPriorityGroup.Standard, keepRef: false);
             bool wasRemoved = RemoveSubscription(subscriptionRequest);
             return wasRemoved;
         }
@@ -457,7 +453,7 @@ namespace DRM.TypeSafePropertyBag
             {
                 if (e.OldValue != null)
                 {
-                    System.Diagnostics.Debug.Assert(e.OldValue is IPropBag, "The old value does not implement IPropBag on PropertyChangedWithObjectVals handler in PropStoreAccessService.");
+                    System.Diagnostics.Debug.Assert(e.OldValue.GetType().IsPropBagBased(), "The old value does not implement IPropBag on PropertyChangedWithObjectVals handler in PropStoreAccessService.");
 
                     // Make old a root.
                     PropStoreNode guestPropBagNode = GetGuestObjectNodeFromPropItemVal((IPropBag)e.OldValue);
@@ -468,11 +464,19 @@ namespace DRM.TypeSafePropertyBag
             {
                 if (e.NewValue != null)
                 {
-                    System.Diagnostics.Debug.Assert(e.NewValue is IPropBag, "The new value does not implement IPropBag on PropertyChangedWithObjectVals handler in PropStoreAccessService.");
+                    System.Diagnostics.Debug.Assert(e.NewValue.GetType().IsPropBagBased(), "The new value does not implement IPropBag on PropertyChangedWithObjectVals handler in PropStoreAccessService.");
 
-                    // Move to child of us. This object is currently a root.
-                    PropStoreNode guestPropBagNode = GetGuestObjectNodeFromPropItemVal((IPropBag)e.NewValue);
-                    guestPropBagNode.MakeItAChildOf(_ourNode);
+                    // Move to child of our property item. This object is currently a root.
+                    IPropBag propBagHost = (IPropBag)e.NewValue;
+
+                    PropStoreNode guestPropBagNode = GetGuestObjectNodeFromPropItemVal(propBagHost);
+
+                    if(_ourNode.PropBagProxy.Level2KeyManager.TryGetFromRaw(e.PropertyName, out PropIdType propId))
+                    {
+                        ExKeyT cKey = new SimpleExKey(_objectId, propId);
+                        PropStoreNode propItemNode = GetChild(cKey);
+                        guestPropBagNode.MakeItAChildOf(propItemNode);
+                    }
                 }
             }
             else
@@ -480,7 +484,7 @@ namespace DRM.TypeSafePropertyBag
                 // Out with the old, and in with the new.
                 if (e.OldValue != null)
                 {
-                    System.Diagnostics.Debug.Assert(e.OldValue is IPropBag, "The old value does not implement IPropBag on PropertyChangedWithObjectVals handler in PropStoreAccessService.");
+                    System.Diagnostics.Debug.Assert(e.OldValue.GetType().IsPropBagBased(), "The old value does not implement IPropBag on PropertyChangedWithObjectVals handler in PropStoreAccessService.");
 
                     // Make old a root.
                     PropStoreNode guestPropBagNode = GetGuestObjectNodeFromPropItemVal((IPropBag)e.OldValue);
@@ -489,11 +493,25 @@ namespace DRM.TypeSafePropertyBag
 
                 if (e.NewValue != null)
                 {
-                    System.Diagnostics.Debug.Assert(e.NewValue is IPropBag, "The new value does not implement IPropBag on PropertyChangedWithObjectVals handler in PropStoreAccessService.");
+                    System.Diagnostics.Debug.Assert(e.NewValue.GetType().IsPropBagBased(), "The new value does not implement IPropBag on PropertyChangedWithObjectVals handler in PropStoreAccessService.");
 
-                    // Move to child of us. This object is currently a root.
-                    PropStoreNode newGuest = GetGuestObjectNodeFromPropItemVal((IPropBag)e.NewValue);
-                    newGuest.MakeItAChildOf(_ourNode);
+                    // Move to child of our property item. This object is currently a root.
+                    IPropBag propBagHost = (IPropBag)e.NewValue;
+
+                    PropStoreNode guestPropBagNode = GetGuestObjectNodeFromPropItemVal(propBagHost);
+
+                    if (_ourNode.PropBagProxy.Level2KeyManager.TryGetFromRaw(e.PropertyName, out PropIdType propId))
+                    {
+                        PropStoreNode propItemNode = GetChild(propId);
+                        if(guestPropBagNode.Parent != propItemNode)
+                        {
+                            guestPropBagNode.MakeItAChildOf(propItemNode);
+                        }
+                        else
+                        {
+                            System.Diagnostics.Debug.WriteLine("The PropItemNode is already our parent.");
+                        }
+                    }
                 }
             }
         }
@@ -504,9 +522,9 @@ namespace DRM.TypeSafePropertyBag
 
         private PropStoreNode GetGuestObjectNodeFromStore(PropStoreNode propStoreNode)
         {
-            System.Diagnostics.Debug.Assert(propStoreNode.IsObjectNode, "Attempting to call GetObjectChild on a node that is not an ObjectNode.");
+            //System.Diagnostics.Debug.Assert(!propStoreNode.IsObjectNode, "Attempting to call GetGuestObjectNodeFromStore on a node that is an ObjectNode.");
 
-            PropStoreNode childObjectNode = propStoreNode.ChildList[0];
+            PropStoreNode childObjectNode = propStoreNode.OnlyChildOfPropItem;
             return childObjectNode;
         }
 
@@ -520,6 +538,7 @@ namespace DRM.TypeSafePropertyBag
                 if (accessService is IHaveTheKeyIT itsGotTheKey)
                 {
                     PropStoreNode propStoreNode = itsGotTheKey.PropStoreNode;
+                    System.Diagnostics.Debug.Assert(propStoreNode.IsObjectNode, "The propStoreNode returned from GetGuestObjectNodeFromPropVal should have IsObjectNode = true.");
                     return propStoreNode;
                 }
                 else
@@ -559,7 +578,7 @@ namespace DRM.TypeSafePropertyBag
         //    }
         //}
 
-        private PropStoreNode GetChild(CompositeKeyType cKey)
+        private PropStoreNode GetChild(ExKeyT cKey)
         {
             if (_ourNode.TryGetChild(cKey, out PropStoreNode child))
             {
@@ -572,7 +591,21 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        private PropStoreNode CheckAndGetChild(IPropBag propBag, PropIdType propId, out CompositeKeyType cKey)
+        private PropStoreNode GetChild(PropIdType propId)
+        {
+            ExKeyT cKey = new SimpleExKey(this._objectId, propId);
+            if (_ourNode.TryGetChild(cKey, out PropStoreNode child))
+            {
+                PropStoreNode result = child;
+                return result;
+            }
+            else
+            {
+                throw new KeyNotFoundException("That propId could not be found.");
+            }
+        }
+
+        private PropStoreNode CheckAndGetChild(IPropBag propBag, PropIdType propId, out ExKeyT cKey)
         {
             cKey = GetCompKey(propBag, propId);
             PropStoreNode result = GetChild(cKey);
@@ -603,55 +636,50 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        CompositeKeyType GetCompKey(IPropBag propBag, PropIdType propId)
+        ExKeyT GetCompKey(IPropBag propBag, PropIdType propId)
         {
             ObjectIdType objectId = GetAndCheckObjectRef(propBag);
-            CompositeKeyType cKey = _compKeyManager.JoinComp(objectId, propId);
+            ExKeyT cKey = new SimpleExKey(objectId, propId);
 
             return cKey;
         }
 
-        private string GetPropNameFromKey(CompositeKeyType cKey)
+        private string GetPropNameFromKey(ExKeyT cKey)
         {
-            ObjectIdType objectId = _compKeyManager.SplitComp(cKey, out PropIdType propId);
+            //ObjectIdType objectId = _compKeyManager.SplitComp(cKey, out PropIdType propId);
 
-            if(Level2KeyManager.TryGetFromCooked(propId, out PropNameType propertyName))
+            if(Level2KeyManager.TryGetFromCooked(cKey.Level2Key, out PropNameType propertyName))
             {
                 return propertyName;
             }
             else
             {
-                throw new KeyNotFoundException($"The cKey: {cKey}, which included PropId: {propId} does not correspond with any registered propertyName.");
+                throw new KeyNotFoundException($"The cKey: {cKey}, which includes PropId: {cKey.Level2Key} does not correspond with any registered propertyName.");
             }
-        }
-
-        private ObjectIdType GetObjectIdFromKey(CompositeKeyType cKey)
-        {
-            ObjectIdType objectId = _compKeyManager.SplitComp(cKey, out PropIdType propId);
-            return objectId;
         }
 
         private ExKeyT GetExKey(IPropBag propBag, PropIdType propId)
         {
             ObjectIdType objectId = GetAndCheckObjectRef(propBag);
-            CompositeKeyType cKey = _compKeyManager.JoinComp(objectId, propId);
-            SimpleExKey exKey = new SimpleExKey(cKey, _clientAccessToken, objectId, propId);
+            //CompositeKeyType cKey = _compKeyManager.JoinComp(objectId, propId);
+            ExKeyT exKey = new SimpleExKey(objectId, propId);
             return exKey;
         }
 
-        private SimpleExKey GetExKey(IPropBag propBag, CompositeKeyType cKey)
-        {
-            ObjectIdType objectIdFromCKey = _compKeyManager.SplitComp(cKey, out PropIdType propId);
-            ObjectIdType objectId = GetAndCheckObjectRef(propBag);
-            if(!object.ReferenceEquals(objectId, objectIdFromCKey))
-            {
-                throw new InvalidOperationException("The composite key given does not match the value given for propBag.");
+        //private ExKeyT GetExKey(IPropBag propBag, CompositeKeyType cKey)
+        //{
+        //    ObjectIdType objectIdFromCKey = _compKeyManager.SplitComp(cKey, out PropIdType propId);
 
-            }
+        //    ObjectIdType objectId = GetAndCheckObjectRef(propBag);
+        //    if(!object.ReferenceEquals(objectId, objectIdFromCKey))
+        //    {
+        //        throw new InvalidOperationException("The composite key given does not match the value given for propBag.");
 
-            SimpleExKey exKey = new SimpleExKey(cKey, _clientAccessToken, objectId, propId);
-            return exKey;
-        }
+        //    }
+
+        //    ExKeyT exKey = new SimpleExKey(cKey);
+        //    return exKey;
+        //}
 
         /// <summary>
         /// Does not check the ObjectReference.
@@ -659,28 +687,28 @@ namespace DRM.TypeSafePropertyBag
         /// <param name="cKey"></param>
         /// <param name="propId"></param>
         /// <returns></returns>
-        private SimpleExKey GetExKey(CompositeKeyType cKey, PropIdType propId)
+        private ExKeyT GetExKey(CompositeKeyType cKey, PropIdType propId)
         {
-            SimpleExKey exKey = new SimpleExKey(cKey, _clientAccessToken, _objectId, propId);
+            ExKeyT exKey = new SimpleExKey(cKey);
             return exKey;
         }
 
-        // Also verifies that the compKey matches the propBag value.
-        // Don't use this if you need an ExKey, since 1) ExKey requires a PropId value, 2) to get a PropId value you need split the CompKey, 3) Verify Splits the CompKey, 4) you can easily verify by using reference equality to see that our _objectId == the objectId from the CompKey.
-        private ObjectIdType GetAndCheckObjectRef(IPropBag propBag, CompositeKeyType cKey)
-        {
-            ObjectIdType result = GetAndCheckObjectRef(propBag);
-            if(!_compKeyManager.Verify(cKey, result))
-            {
-                throw new InvalidOperationException("The composite key given does not match the value given for propBag.");
-            }
+        //// Also verifies that the compKey matches the propBag value.
+        //// Don't use this if you need an ExKey, since 1) ExKey requires a PropId value, 2) to get a PropId value you need split the CompKey, 3) Verify Splits the CompKey, 4) you can easily verify by using reference equality to see that our _objectId == the objectId from the CompKey.
+        //private ObjectIdType GetAndCheckObjectRef(IPropBag propBag, CompositeKeyType cKey)
+        //{
+        //    ObjectIdType result = GetAndCheckObjectRef(propBag);
+        //    if(!_compKeyManager.Verify(cKey, result))
+        //    {
+        //        throw new ArgumentException("The ObjectId portion of the Composite Key: cKey does not 'belong' to the propBag.", nameof(cKey));
+        //    }
 
-            return result;
-        }
+        //    return result;
+        //}
 
         private ObjectIdType GetAndCheckObjectRef(IPropBag propBag)
         {
-            if(_clientAccessToken.TryGetTarget(out IPropBag target))
+            if(_clientAccessToken.TryGetTarget(out IPropBagInternal target))
             {
                 if (!object.ReferenceEquals(propBag, target))
                 {
@@ -710,26 +738,39 @@ namespace DRM.TypeSafePropertyBag
 
         ExKeyT IHaveTheKeyIT.GetTheKey(IPropBagProxy propBagProxy, PropIdType propId)
         {
-            CompositeKeyType cKey = _compKeyManager.JoinComp(_objectId, propId);
-            ExKeyT result = new SimpleExKey(cKey, propBagProxy.PropBagRef, _objectId, propId);
+            ExKeyT result = new SimpleExKey(propBagProxy.ObjectId, propId);
             return result;
         }
+
+        //CompositeKeyType IHaveTheKeyIT.GetCompKey(ObjectIdType objectId, PropIdType propId)
+        //{
+        //    CompositeKeyType cKey = _compKeyManager.JoinComp(objectId, propId);
+        //    return cKey;
+        //}
 
         PropStoreNode IHaveTheKeyIT.PropStoreNode => _ourNode;
 
         PropStoreNode IHaveTheKeyIT.GetObjectNodeForPropVal(IPropDataInternal int_propData)
         {
-            PropStoreNode result;
-            if (int_propData?.TypedProp?.TypedValueAsObject is IPropBagInternal guest_int)
-            {
-                IHaveTheKeyIT itsKeyProvider = guest_int.ItsStoreAccessor as IHaveTheKeyIT;
-                result = itsKeyProvider.PropStoreNode;
-            }
-            else
-            {
-                // Property does not have a value, or the value is not a PropBag.
-                result = null;
-            }
+            System.Diagnostics.Debug.Assert(int_propData != null, "Any parent of an ObjectId type PropStoreNode should have an instance of an IPropDataInternal.");
+            System.Diagnostics.Debug.Assert(int_propData.TypedProp != null, "All objects that implement IPropDataInternal must have a non-null value for TypedProp.");
+            System.Diagnostics.Debug.Assert(int_propData.TypedProp.Type is IPropBag, "All calls to GetObjectNodeForPropVal must be made for properties of a type that derives from IPropBag.");
+
+            object test = int_propData.TypedProp.TypedValueAsObject;
+
+            if (test == null) return null;
+
+            System.Diagnostics.Debug.Assert(test is IPropBagInternal, "All instances of IPropBag must also implement IPropBagInternal.");
+            System.Diagnostics.Debug.Assert(((IPropBagInternal)test).ItsStoreAccessor != null, "All instances of IPropBagInternal must have a non-null value for ItsStoreAccessor.");
+            System.Diagnostics.Debug.Assert(((IPropBagInternal)test).ItsStoreAccessor is IHaveTheKeyIT, "All instances of IPropBagInternal must have a value for ItsStoreAccessor that implements IHaveTheKeyIT.");
+
+            PropStoreNode result = ((IHaveTheKeyIT)((IPropBagInternal)test).ItsStoreAccessor).PropStoreNode;
+            return result;
+        }
+
+        bool IHaveTheKeyIT.TryGetAChildOfMine(PropIdType propId, out PropStoreNode child)
+        {
+            bool result = _ourNode.TryGetChild(propId, out child);
             return result;
         }
 

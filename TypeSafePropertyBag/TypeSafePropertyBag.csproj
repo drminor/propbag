@@ -81,9 +81,6 @@
     <Compile Include="ObjectIdDictionary\IObjectIdDictionary.cs" />
     <Compile Include="ObjectIdDictionary\SimpleCompExKeyMan.cs" />
     <Compile Include="ObjectIdDictionary\SimpleExKey.cs" />
-    <None Include="LocalBinding\OLD\SimpleLocalBinder.cs" />
-    <None Include="LocalBinding\OLD\IBindLocalProps.cs" />
-    <None Include="LocalBinding\OLD\ICreateLocalBindings_OLD.cs" />
     <Compile Include="LocalBinding\Registration\ILocalValueConverter.cs" />
     <Compile Include="LocalBinding\Registration\LocalBindingInfo.cs" />
     <Compile Include="LocalBinding\Registration\LocalBindingMode.cs" />
