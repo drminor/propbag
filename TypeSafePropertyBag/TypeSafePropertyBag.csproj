@@ -73,7 +73,7 @@
     <Compile Include="SimpleIOC\ITypeContainer.cs" />
     <Compile Include="SimpleIOC\TypeContainer.cs" />
     <Compile Include="Subscriptions\IRegisterSubscriptions.cs" />
-    <Compile Include="UnUsed\PCTypedEventBase.cs" />
+    <None Include="UnUsed\PCTypedEventBase.cs" />
     <Compile Include="UnUsed\PropertyChangedEventManager.cs" />
     <Compile Include="UnUsed\IWeakEventListener.cs" />
     <Compile Include="ObjectIdDictionary\AbstractObjectExIdDictionary.cs" />
@@ -98,8 +98,8 @@
     <Compile Include="PropStore\IProvidePropStoreAccessService.cs" />
     <Compile Include="PropBagInterfaces\IPubPropBag.cs" />
     <Compile Include="PropStore\IPropStoreAccessService.cs" />
-    <Compile Include="PropStore\IHaveTheKey.cs" />
-    <Compile Include="UnUsed\IHaveTheSimpleKey.cs" />
+    <Compile Include="PropStore\IHaveTheStoreNode.cs" />
+    <None Include="UnUsed\IHaveTheSimpleKey.cs" />
     <None Include="PropStore\SimplePropStoreAccessServiceWithExKey.cs" />
     <Compile Include="PropStore\SimplePropStoreAccessService.cs" />
     <Compile Include="PropStore\SimplePropStoreAccessServiceProvider.cs" />
@@ -107,7 +107,7 @@
     <Compile Include="Subscriptions\ICacheSubscriptions.cs" />
     <Compile Include="Subscriptions\ISubscription.cs" />
     <Compile Include="Subscriptions\ISubscriptionKey.cs" />
-    <Compile Include="UnUsed\SimpleSubscriptionManager.cs" />
+    <None Include="UnUsed\SimpleSubscriptionManager.cs" />
     <Compile Include="Subscriptions\SubscriberCollection.cs" />
     <Compile Include="Subscriptions\AbstractSubscription.cs" />
     <Compile Include="Subscriptions\SubscriptionForBinding.cs" />

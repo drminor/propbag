@@ -14,7 +14,6 @@ namespace DRM.TypeSafePropertyBag
     using PropNameType = String;
 
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
-    using IHaveTheKeyIT = IHaveTheKey<UInt64, UInt64, UInt32>;
 
     using L2KeyManType = IL2KeyMan<UInt32, String>;
 
@@ -22,7 +21,7 @@ namespace DRM.TypeSafePropertyBag
     using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
     #endregion
 
-    internal class SimplePropStoreAccessService : PSAccessServiceType, IHaveTheKeyIT
+    internal class SimplePropStoreAccessService : PSAccessServiceType, IHaveTheStoreNode
     {
         #region Private Members
 
@@ -55,7 +54,7 @@ namespace DRM.TypeSafePropertyBag
             MaxObjectsPerAppDomain = propStoreAccessServiceProvider.MaxObjectsPerAppDomain;
 
             _clientAccessToken = _ourNode.PropBagProxy.PropBagRef;
-            _objectId = _ourNode.PropBagProxy.ObjectId;
+            _objectId = _ourNode.CompKey.Level1Key; // .PropBagProxy.ObjectId;
 
             _bindings = new BindingsCollection();
         }
@@ -536,7 +535,7 @@ namespace DRM.TypeSafePropertyBag
             if (propBag is IPropBagInternal pbInternalAccess)
             {
                 PSAccessServiceType accessService = pbInternalAccess.ItsStoreAccessor;
-                if (accessService is IHaveTheKeyIT itsGotTheKey)
+                if (accessService is IHaveTheStoreNode itsGotTheKey)
                 {
                     PropStoreNode propStoreNode = itsGotTheKey.PropStoreNode;
                     System.Diagnostics.Debug.Assert(propStoreNode.IsObjectNode, "The propStoreNode returned from GetGuestObjectNodeFromPropVal should have IsObjectNode = true.");
@@ -544,7 +543,7 @@ namespace DRM.TypeSafePropertyBag
                 }
                 else
                 {
-                    throw new InvalidOperationException($"The {nameof(propBag)}'s {nameof(pbInternalAccess.ItsStoreAccessor)} does not implement the {nameof(IHaveTheKeyIT)} interface.");
+                    throw new InvalidOperationException($"The {nameof(propBag)}'s {nameof(pbInternalAccess.ItsStoreAccessor)} does not implement the {nameof(IHaveTheStoreNode)} interface.");
                 }
             }
             else
@@ -705,7 +704,7 @@ namespace DRM.TypeSafePropertyBag
 
         #region Explicit Implementation of the internal interface: IHaveTheKey
 
-        PropStoreNode IHaveTheKeyIT.PropStoreNode => _ourNode;
+        PropStoreNode IHaveTheStoreNode.PropStoreNode => _ourNode;
 
         //ObjectIdType IHaveTheKeyIT.ObjectId => _objectId;
 

@@ -9,7 +9,7 @@ namespace DRM.TypeSafePropertyBag.UnUsed
     /// <summary>
     /// Allows access from code in the TypeSafePropertyBag assembly, but not from the PropBag assembly.
     /// </summary>
-    internal interface IHaveTheSimpleKey : IHaveTheKey<CompositeKeyType, ObjectIdType, PropIdType>
+    internal interface IHaveTheSimpleKey : IHaveTheStoreNode<CompositeKeyType, ObjectIdType, PropIdType>
     {
         new SimpleExKey GetTheKey(IPropBag propBag, PropIdType propId);
 

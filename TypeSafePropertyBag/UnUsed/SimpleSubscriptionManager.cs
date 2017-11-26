@@ -11,7 +11,7 @@ namespace DRM.TypeSafePropertyBag.UnUsed
     using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
 
     using ExKeyType = IExplodedKey<UInt64, UInt64, UInt32>;
-    using HaveTheKeyType = IHaveTheKey<UInt64, UInt64, UInt32>;
+    using HaveTheKeyType = IHaveTheStoreNode<UInt64, UInt64, UInt32>;
 
     using SubCacheType = ICacheSubscriptions<UInt32>;
 

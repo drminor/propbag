@@ -2,9 +2,10 @@
 namespace DRM.TypeSafePropertyBag
 {
     /// <summary>
-    /// Allows access from code in the TypeSafePropertyBag assembly, but not from the PropBag assembly.
+    /// Provides 'raw' access to the PropStore for classes internal to the TypeSafePropBag assembly (and friends)
+    /// without requiring the classes that implement this interface to also be internal.
     /// </summary>
-    internal interface IHaveTheKey<CompT, L1T, L2T>
+    internal interface IHaveTheStoreNode
     {
         //L1T ObjectId { get; }
 

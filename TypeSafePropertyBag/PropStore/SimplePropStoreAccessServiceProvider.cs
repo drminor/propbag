@@ -14,8 +14,7 @@ namespace DRM.TypeSafePropertyBag
     using L2KeyManType = IL2KeyMan<UInt32, String>;
 
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
-    using IHaveTheKeyIT = IHaveTheKey<UInt64, UInt64, UInt32>;
-
+    
     using SubCacheType = ICacheSubscriptions<UInt32>;
 
     using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
@@ -32,8 +31,8 @@ namespace DRM.TypeSafePropertyBag
 
         readonly PropStoreNode _tree;
 
-        readonly Dictionary<IPropBagProxy, ObjectIdType> _rawDict;
-        readonly Dictionary<ObjectIdType, IPropBagProxy> _cookedDict;
+        //readonly Dictionary<IPropBagProxy, ObjectIdType> _rawDict;
+        //readonly Dictionary<ObjectIdType, IPropBagProxy> _cookedDict;
 
         readonly object _sync;
 
@@ -58,8 +57,8 @@ namespace DRM.TypeSafePropertyBag
             // Create an "artificial" root node to hold all "real" roots, one for each "rooted" IPropBag.
             _tree = new PropStoreNode();
 
-            _rawDict = new Dictionary<IPropBagProxy, ObjectIdType>();
-            _cookedDict = new Dictionary<ObjectIdType, IPropBagProxy>();
+            //_rawDict = new Dictionary<IPropBagProxy, ObjectIdType>();
+            //_cookedDict = new Dictionary<ObjectIdType, IPropBagProxy>();
 
             _sync = new object();
 
@@ -119,22 +118,11 @@ namespace DRM.TypeSafePropertyBag
             ObjectIdType objectId = NextCookedVal;
             WeakReference<IPropBagInternal> propBagRef = new WeakReference<IPropBagInternal>(propBag);
             L2KeyManType level2KeyManager = new SimpleLevel2KeyMan(MaxPropsPerObject);
-            PropBagProxy propBagProxy = new PropBagProxy(objectId, propBagRef, level2KeyManager);
+            IPropBagProxy propBagProxy = new PropBagProxy(propBagRef, level2KeyManager);
 
-            AddToAllObjectLookups(propBagProxy);
+            //AddToAllObjectLookups(propBagProxy);
 
-            //if (propBagProxy.Level2KeyManager.MaxPropsPerObject != MaxPropsPerObject)
-            //{
-            //    throw new ArgumentException($"The level2KeyManager has a value for MaxPropsPerObject ({propBagProxy.Level2KeyManager.MaxPropsPerObject})" +
-            //        $" that is different from the GlobalStore (MaxPropPerObject: {MaxPropsPerObject}) " +
-            //        $"being used by this SimplePropStoreAccessServiceProvider.");
-            //}
-
-            //ICKeyManType compKeyManager = new SimpleCompKeyMan(propBagProxy.Level2KeyManager.MaxPropsPerObject);
-
-            //CompositeKeyType cKey = compKeyManager.JoinComp(propBagProxy.ObjectId, 0);
-
-            ExKeyT cKey = new SimpleExKey(propBagProxy.ObjectId, 0);
+            ExKeyT cKey = new SimpleExKey(objectId, 0);
 
             // Create a new PropStoreNode for this PropBag and add make it a root.
             PropStoreNode propStoreNode = new PropStoreNode(cKey, propBagProxy, _tree);
@@ -154,16 +142,17 @@ namespace DRM.TypeSafePropertyBag
 
         public void TearDown(IPropBag propBag, PSAccessServiceType storeAccessor)
         {
-            PropStoreNode propStoreNode = ((IHaveTheKeyIT)storeAccessor).PropStoreNode;
+            PropStoreNode propStoreNode = ((IHaveTheStoreNode)storeAccessor).PropStoreNode;
 
             // Remove all subscriptions for this propBag.
-            bool wasRemoved = RemovePropIndexForObject(propStoreNode.PropBagProxy.ObjectId);
+            ObjectIdType objectId = propStoreNode.CompKey.Level1Key;
+            bool wasRemoved = RemovePropIndexForObject(objectId);
             if(!wasRemoved)
             {
-                System.Diagnostics.Debug.WriteLine($"PropBag Object: {propStoreNode.PropBagProxy.ObjectId} held no subscriptions upon teardown.");
+                System.Diagnostics.Debug.WriteLine($"PropBag Object: {objectId} held no subscriptions upon teardown.");
             }
 
-            RemoveFromAllObjectLookups(propStoreNode.PropBagProxy);
+            //RemoveFromAllObjectLookups(propStoreNode.PropBagProxy);
         }
 
         private IPropBagProxy GetInt_PropBag(IPropBag propBagWithInt)
@@ -280,20 +269,20 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        private void AddToAllObjectLookups(IPropBagProxy propBagProxy)
-        {
-            lock (_sync)
-            {
-                _rawDict.Add(propBagProxy, propBagProxy.ObjectId);
-                _cookedDict.Add(propBagProxy.ObjectId, propBagProxy);
-            }
-        }
+        //private void AddToAllObjectLookups(IPropBagProxy propBagProxy)
+        //{
+        //    lock (_sync)
+        //    {
+        //        _rawDict.Add(propBagProxy, propBagProxy.ObjectId);
+        //        _cookedDict.Add(propBagProxy.ObjectId, propBagProxy);
+        //    }
+        //}
 
-        private void RemoveFromAllObjectLookups(IPropBagProxy propBagProxy)
-        {
-            _rawDict.Remove(propBagProxy);
-            _cookedDict.Remove(propBagProxy.ObjectId);
-        }
+        //private void RemoveFromAllObjectLookups(IPropBagProxy propBagProxy)
+        //{
+        //    _rawDict.Remove(propBagProxy);
+        //    _cookedDict.Remove(propBagProxy.ObjectId);
+        //}
 
         /// <summary>
         /// This is very expensive in terms of cpu usage. Please use Add if possible.

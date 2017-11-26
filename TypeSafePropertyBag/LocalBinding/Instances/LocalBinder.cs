@@ -14,8 +14,6 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
     using L2KeyManType = IL2KeyMan<UInt32, String>;
     using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
 
-    using IHaveTheKeyIT = IHaveTheKey<UInt64, UInt64, UInt32>;
-
     #endregion
 
     public class LocalBinder<T> 
@@ -117,15 +115,15 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
         private PropStoreNode GetPropStore(PSAccessServiceType propStoreAccessService)
         {
-            if (propStoreAccessService is IHaveTheKeyIT skp)
+            if (propStoreAccessService is IHaveTheStoreNode skp)
             {
-                IHaveTheKeyIT storeKeyProvider = skp;
+                IHaveTheStoreNode storeKeyProvider = skp;
                 PropStoreNode propStoreNode = storeKeyProvider.PropStoreNode;
                 return propStoreNode;
             }
             else
             {
-                throw new InvalidOperationException($"The {nameof(propStoreAccessService)} does not implement the {nameof(IHaveTheKeyIT)} interface.");
+                throw new InvalidOperationException($"The {nameof(propStoreAccessService)} does not implement the {nameof(IHaveTheStoreNode)} interface.");
             }
         }
 
@@ -307,7 +305,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
         {
             if(GetChildsPropBag(objectNode, out IPropBagInternal propBag))
             { 
-                IHaveTheKeyIT keyProvider = (IHaveTheKeyIT)propBag.ItsStoreAccessor;
+                IHaveTheStoreNode keyProvider = (IHaveTheStoreNode)propBag.ItsStoreAccessor;
                 propBagNode = keyProvider.PropStoreNode;
                 return true;
             }
@@ -325,7 +323,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             // Each PropBag has a reference to its StoreAccessor which can fetch its children.
             // This saves us from having to find the PropStoreNode for this objectNode, using only
             // our PropStoreNode, or a reference to the PropStoreAccessService.
-            IHaveTheKeyIT keyProvider = (IHaveTheKeyIT)propBag.ItsStoreAccessor;
+            IHaveTheStoreNode keyProvider = (IHaveTheStoreNode)propBag.ItsStoreAccessor;
 
             PropStoreNode propBagNode = keyProvider.PropStoreNode;
             bool result = propBagNode.TryGetChild(propId, out child);
@@ -680,7 +678,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             bool result;
             if (sourcePropNode.Parent.PropBagProxy.PropBagRef.TryGetTarget(out IPropBagInternal propBag))
             {
-                IHaveTheKeyIT keyProvider = (IHaveTheKeyIT)propBag.ItsStoreAccessor;
+                IHaveTheStoreNode keyProvider = (IHaveTheStoreNode)propBag.ItsStoreAccessor;
 
                 PropStoreNode propBagNode = keyProvider.PropStoreNode;
                 if (propBagNode.PropBagProxy.Level2KeyManager.TryGetFromRaw(PropertyName, out PropIdType propId))
