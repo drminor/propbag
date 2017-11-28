@@ -35,6 +35,14 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
             _valueFactory = key => new Lazy<TValue>(() => valueFactory(key));
         }
 
+        public int Count
+        {
+            get
+            {
+                return _dictionary.Count;
+            }
+        }
+
         public TValue GetOrAdd(TKey key) => _dictionary.GetOrAdd(key, _valueFactory).Value;
 
         public TValue this[TKey key]

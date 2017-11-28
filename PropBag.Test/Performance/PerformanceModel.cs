@@ -1,5 +1,6 @@
 ﻿using DRM.PropBag;
 using DRM.TypeSafePropertyBag;
+using PropBagLib.Tests.AutoMapperSupport;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -10,7 +11,10 @@ namespace PropBagLib.Tests
     {
         static public PerformanceModel Create(PropBagTypeSafetyMode safetyMode)
         {
-            PerformanceModel pm = new PerformanceModel(safetyMode);
+            AutoMapperHelpers ourHelper = new AutoMapperHelpers();
+            IPropFactory propFactory_V1 = ourHelper.GetNewPropFactory_V1();
+
+            PerformanceModel pm = new PerformanceModel(safetyMode, propFactory_V1);
             pm.AddPropNoStore<int>("PropIntNoStore", null, false, null);
             pm.AddPropNoStore<string>("PropStringNoStore", null, false, null);
 

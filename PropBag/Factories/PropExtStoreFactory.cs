@@ -1,4 +1,5 @@
-﻿using DRM.TypeSafePropertyBag;
+﻿using DRM.PropBag.Caches;
+using DRM.TypeSafePropertyBag;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,13 +13,41 @@ namespace DRM.PropBag
     using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
     using SubCacheType = ICacheSubscriptions<UInt32>;
 
+    using PropBagType = PropBag;
+
     public class PropExtStoreFactory : AbstractPropFactory
     {
+        public DelegateCacheProvider2<PropBagType> DelegateCacheProvider { get; }
+
         object Stuff { get; }
 
         public override bool ProvidesStorage
         {
             get { return false; }
+        }
+
+        override public int DoSetCacheCount
+        {
+            get
+            {
+                return DelegateCacheProvider.DoSetDelegateCache.Count;
+            }
+        }
+
+        override public int CreatePropFromStringCacheCount
+        {
+            get
+            {
+                return DelegateCacheProvider.CreatePropFromStringCache.Count;
+            }
+        }
+
+        override public int CreatePropWithNoValCacheCount
+        {
+            get
+            {
+                return DelegateCacheProvider.CreatePropWithNoValCache.Count;
+            }
         }
 
         #region Constructors

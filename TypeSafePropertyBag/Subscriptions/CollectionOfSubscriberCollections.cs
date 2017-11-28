@@ -66,6 +66,12 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
+        public bool TryGetSubscriberCollection(PropIdType propId, out SubscriberCollection subs)
+        {
+            bool result = _listOfSubscribersForAProp.TryGetValue(propId, out subs);
+            return result;
+        }
+
         //public IEnumerator<SubscriberCollection> GetEnumerator()
         //{
         //    lock (_sync)

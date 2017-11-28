@@ -11,7 +11,9 @@ using System.Threading.Tasks;
 
 namespace DRM.PropBag.Caches
 {
-    // Delegate declarations. TODO: Move to dedicated file.
+    // TODO: Move these declartions to a dedicated file.
+
+    // Delegate declarations. 
     public delegate object TFromStringDelegate(string strVal);
     public delegate string StringFromTDelegate(object value);
 
@@ -70,6 +72,8 @@ namespace DRM.PropBag.Caches
             }
         }
 
+
+        // TODO: Consider using instance methods instead of static methods. This should save a few hundred nano seconds off of the time required to make each call.
         #region Internal Delegate Builders
 
         static private Type GMT_TYPE = typeof(GenericMethodTemplatesPropConv);

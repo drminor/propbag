@@ -1,4 +1,5 @@
-﻿using DRM.PropBag.AutoMapperSupport;
+﻿using DRM.PropBag;
+using DRM.PropBag.AutoMapperSupport;
 using DRM.PropBag.ControlModel;
 using DRM.TypeSafePropertyBag;
 using NUnit.Framework;
@@ -45,11 +46,31 @@ namespace PropBagLib.Tests.PerformanceDb
         }
 
         [Test]
+        public void A_ReadIntoMappedArray()
+        {
+            // This is run first, to get the database "fired up."
+            Business b = new Business();
+            List<Person> personList = b.Get().ToList();
+        }
+
+        [Test]
         public void ReadIntoNativeArray()
         {
             Business b = new Business();
             List<Person> personList = b.Get().ToList();
             Assert.That(personList.Count == 1000, $"The PersonList contains {personList.Count}, it should contain {NUMBER_OF_PEOPLE}.");
+
+            foreach(Person p in personList)
+            {
+                Person np = new Person()
+                {
+                    Id = p.Id,
+                    FirstName = p.FirstName,
+                    LastName = p.LastName,
+                    CityOfResidence = p.CityOfResidence,
+                    Profession = p.Profession
+                };
+            }
         }
 
         [Test]
@@ -81,10 +102,26 @@ namespace PropBagLib.Tests.PerformanceDb
 
             int totalNumberOfGets = ourHelper.PropFactory_V1.PropStoreAccessServiceProvider.AccessCounter;
             Assert.That(totalNumberOfGets == NUMBER_OF_PEOPLE * 5, $"Total # of SetIt access operations is wrong: it should be {NUMBER_OF_PEOPLE * 5}, but instead it is {totalNumberOfGets}.");
+
+            PropBag test = (PropBag)destinationList[0];
+
+            int howManyDoSetDelegatesGotCreated =  test.NumOfDoSetDelegatesInCache;
+        }
+
+        [Test]
+        public void CanMapObservableCollection_Extra()
+        {
+            CanMapObservableCollection("Extra_Members");
         }
 
         [Test]
         public void CanMapObservableCollection_Proxy()
+        {
+            CanMapObservableCollection("Emit_Proxy");
+        }
+
+
+        public void CanMapObservableCollection(string configPackageName)
         {
             AutoMapperHelpers ourHelper = new AutoMapperHelpers();
             IPropFactory propFactory_V1 = ourHelper.GetNewPropFactory_V1();
@@ -92,12 +129,12 @@ namespace PropBagLib.Tests.PerformanceDb
             SimpleAutoMapperProvider _amp = ourHelper.GetAutoMapperSetup_V1();
             PropModelHelpers pmHelpers = new PropModelHelpers();
 
-            Assert.That(propFactory_V1.PropStoreAccessServiceProvider.AccessCounter == 0, "The Provider of PropStoreAccessServices has not had its Access Counter reset.");
+            Assert.That(propFactory_V1.PropStoreAccessServiceProvider.AccessCounter == 0, "The Provider of PropStoreAccessServices did not have its Access Counter reset.");
 
             // Setup Mapping between Model1 and Person
             PropModel propModel1 = pmHelpers.GetPropModelForModel1Dest(propFactory_V1);
             Type typeToWrap = typeof(DestinationModel1); // typeof(PropBag);
-            string configPackageName = "Extra_Members"; //"Emit_Proxy"; // 
+            //string configPackageName = "Extra_Members"; //"Emit_Proxy"; // 
 
             IPropBagMapperKey<Person, DestinationModel1> mapperRequest =
                 _amp.RegisterMapperRequest<Person, DestinationModel1>
@@ -154,35 +191,43 @@ namespace PropBagLib.Tests.PerformanceDb
             int currentNumRootPropBags = ourHelper.PropFactory_V1.PropStoreAccessServiceProvider.NumberOfRootPropBagsInPlay;
             int totalRootPropBagsCreated = ourHelper.PropFactory_V1.PropStoreAccessServiceProvider.TotalNumberOfAccessServicesCreated;
 
-            //Thread.Sleep(new TimeSpan(0, 0, 1));
+            PropBag test = (PropBag)readyForTheView[0];
 
-            //foreach(DestinationModel1 pp in readyForTheView)
-            //{
-            //    pp.Dispose();
-            //}
-            //readyForTheView = null;
+            int howManyDoSetDelegatesGotCreated = test.NumOfDoSetDelegatesInCache;
+            int howManyCreateFromString = test.CreatePropFromStringCacheCount;
+            int howManyCreateWithNoVal = test.CreatePropWithNoValCacheCount;
 
-            //testMainVM.SetIt<Business>(null, "Business");
-            //b.Dispose();
-            //b = null;
+            Thread.Sleep(new TimeSpan(0, 0, 1));
 
-            //testMainVM.Dispose();
-            //testMainVM = null;
+            foreach (DestinationModel1 pp in readyForTheView)
+            {
+                pp.Dispose();
+            }
+            readyForTheView = null;
 
-            //Thread.Sleep(new TimeSpan(0, 0, 1));
+            testMainVM.SetIt<Business>(null, "Business");
+            b.Dispose();
+            b = null;
 
-            //// Test the PropStoreAccessProvider prune store feature.
-            //// Do nothing for 1 hour, 24 minutes, in increments of 5 seconds.
-            //for (int tp = 0; tp < 1000; tp++)
-            //{
-            //    // Yield for 20 seconds.
-            //    Thread.Sleep(new TimeSpan(0, 0, 5));
-            //    GC.Collect(4, GCCollectionMode.Forced);
-            //}
+            testMainVM.Dispose();
+            testMainVM = null;
+
+            Thread.Sleep(new TimeSpan(0, 0, 1));
+
+            // Test the PropStoreAccessProvider prune store feature.
+            // Do nothing for 1 hour, 24 minutes, in increments of 5 seconds.
+            for (int tp = 0; tp < 1000; tp++)
+            {
+                // Yield for 20 seconds.
+                Thread.Sleep(new TimeSpan(0, 0, 5));
+                GC.Collect(1, GCCollectionMode.Forced);
+            }
         }
 
+
+
         [Test]
-        public void ZBindParent()
+        public void Z_BindParent()
         {
             AutoMapperHelpers ourHelper = new AutoMapperHelpers();
             IPropFactory propFactory_V1 = ourHelper.GetNewPropFactory_V1();

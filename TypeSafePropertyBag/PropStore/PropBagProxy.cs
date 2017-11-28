@@ -18,17 +18,17 @@ namespace DRM.TypeSafePropertyBag
 
         public WeakReference<IPropBagInternal> PropBagRef { get; }
         //public ObjectIdType ObjectId { get; }
-        public L2KeyManType Level2KeyManager { get; }
+        //public L2KeyManType Level2KeyManager { get; }
 
         #endregion
 
         #region Constructor
 
-        public PropBagProxy(WeakReference<IPropBagInternal> propBagRef, L2KeyManType level2KeyManager)
+        public PropBagProxy(WeakReference<IPropBagInternal> propBagRef/*, L2KeyManType level2KeyManager*/)
         {
             PropBagRef = propBagRef ?? throw new ArgumentNullException(nameof(propBagRef));
             //ObjectId = objectId;
-            Level2KeyManager = level2KeyManager ?? throw new ArgumentNullException(nameof(level2KeyManager));
+            //Level2KeyManager = level2KeyManager ?? throw new ArgumentNullException(nameof(level2KeyManager));
         }
 
         #endregion

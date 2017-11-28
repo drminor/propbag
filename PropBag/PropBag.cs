@@ -77,8 +77,6 @@ namespace DRM.PropBag
         public event PropertyChangingEventHandler PropertyChanging; // = delegate { };
 
         public event EventHandler<PCGenEventArgs> PropertyChangedWithGenVals;
-
-        //public event EventHandler<PropertyChangedEventArgs> PropertyChangedIndividual;
         public event EventHandler<PCObjectEventArgs> PropertyChangedWithObjectVals;
 
         #endregion
@@ -601,7 +599,13 @@ namespace DRM.PropBag
 
             // TODO: Make the PropFactory supply this service.
             DoSetDelegate setPropDel = DelegateCacheProvider.DoSetDelegateCache.GetOrAdd(PropData.TypedProp.Type);
-            return setPropDel(this, propId, propertyName, PropData.TypedProp, value);
+
+            DelegateCache<DoSetDelegate> dc = ((PropFactory)_propFactory).DelegateCacheProvider.DoSetDelegateCache;
+
+            DoSetDelegate setPropDel2 = dc.GetOrAdd(PropData.TypedProp.Type);
+
+            //return setPropDel(this, propId, propertyName, PropData.TypedProp, value);
+            return setPropDel2(this, propId, propertyName, PropData.TypedProp, value);
         }
 
         //public bool SetIt<T>(T value, PropIdType propId)
@@ -1041,6 +1045,33 @@ namespace DRM.PropBag
 
         #region Public Methods
 
+        public int NumOfDoSetDelegatesInCache
+        {
+            get
+            {
+                int result = _propFactory.DoSetCacheCount;
+                return result;
+            }
+        }
+
+        public int CreatePropFromStringCacheCount
+        {
+            get
+            {
+                int result = _propFactory.CreatePropFromStringCacheCount;
+                return result;
+            }
+        }
+
+        public int CreatePropWithNoValCacheCount
+        {
+            get
+            {
+                int result = _propFactory.CreatePropWithNoValCacheCount;
+                return result;
+            }
+        }
+
         public virtual ITypeSafePropBagMetaData GetMetaData()
         {
             return OurMetaData;
@@ -1222,10 +1253,9 @@ namespace DRM.PropBag
             return pg;
         }
 
-        protected IPropData AddProp<T>(string propertyName, IProp<T> genericTypedProp)
+        protected IPropData AddProp<T>(string propertyName, IProp<T> genericTypedProp,EventHandler<PCTypedEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false)
         {
             PropIdType propId = GetPropId(propertyName);
-            //IPropData propGen = new PropGen(genericTypedProp, propId);
 
             if (!_ourStoreAccessor.TryAdd(this, propId, propertyName, genericTypedProp, out IPropData propGen))
             {
@@ -1238,7 +1268,6 @@ namespace DRM.PropBag
         protected IPropData AddProp(string propertyName, IProp genericTypedProp)
         {
             PropIdType propId = GetPropId(propertyName);
-            //IPropData propGen = new PropGen(genericTypedProp, propId);
 
             if (!_ourStoreAccessor.TryAdd(this, propId, propertyName, genericTypedProp, out IPropData propGen))
             {
@@ -1301,19 +1330,19 @@ namespace DRM.PropBag
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="doWhenChanged"></param>
-        /// <param name="doAfterNotify"></param>
-        /// <param name="propertyName"></param>
-        /// <returns>True, if there was an existing Action in place for this property.</returns>
-        protected bool RegisterDoWhenChanged<T>(Action<T, T> doWhenChanged, bool doAfterNotify, string propertyName)
-        {
-            IPropPrivate<T> prop = GetTypedPropPrivate<T>(propertyName, mustBeRegistered: true);
-            return prop.UpdateDoWhenChangedAction(doWhenChanged, doAfterNotify);
-        }
+        ///// <summary>
+        ///// 
+        ///// </summary>
+        ///// <typeparam name="T"></typeparam>
+        ///// <param name="doWhenChanged"></param>
+        ///// <param name="doAfterNotify"></param>
+        ///// <param name="propertyName"></param>
+        ///// <returns>True, if there was an existing Action in place for this property.</returns>
+        //protected bool RegisterDoWhenChanged<T>(Action<T, T> doWhenChanged, bool doAfterNotify, string propertyName)
+        //{
+        //    IPropPrivate<T> prop = GetTypedPropPrivate<T>(propertyName, mustBeRegistered: true);
+        //    return prop.UpdateDoWhenChangedAction(doWhenChanged, doAfterNotify);
+        //}
 
         protected void ClearAllProps()
         {
@@ -1378,105 +1407,116 @@ namespace DRM.PropBag
             // PROCESS BINDINGS
             SubscriberCollection sc = GetSubscriptions(propId);
 
-            IEnumerable<ISubscription<T>> typedSubs = GetTypedSubscriptions<T>(sc);
-
-            // Raise the PCTypedEvent to our list of subscribers
-            if (!typedProp.ValueIsDefined)
+            if(sc != null)
             {
-                foreach (ISubscription<T> typedSub in typedSubs)
+                // Raise the PCTypedEvent to our list of subscribers
+                IEnumerable<ISubscription<T>> typedSubs = GetTypedSubscriptions<T>(sc);
+                if (!typedProp.ValueIsDefined)
                 {
-                    typedSub.TypedHandler(this, new PCTypedEventArgs<T>(propertyName, newValue));
+                    foreach (ISubscription<T> typedSub in typedSubs)
+                    {
+                        typedSub.TypedHandler(this, new PCTypedEventArgs<T>(propertyName, newValue));
+                    }
+                }
+                else
+                {
+                    foreach (ISubscription<T> typedSub in typedSubs)
+                    {
+                        typedSub.TypedHandler(this, new PCTypedEventArgs<T>(propertyName, oldVal, newValue));
+                    }
+                }
+
+                IEnumerable<ISubscriptionGen> genSubs = GetPCGenSubscriptions(sc);
+                if (!typedProp.ValueIsDefined)
+                {
+                    foreach (ISubscriptionGen genSub in genSubs)
+                    {
+                        genSub.GenHandler(this, new PCGenEventArgs(propertyName, typeof(T), newValue));
+                    }
+                }
+                else
+                {
+                    foreach (ISubscriptionGen genSub in genSubs)
+                    {
+                        genSub.GenHandler(this, new PCGenEventArgs(propertyName, typeof(T), oldVal, newValue));
+                    }
+                }
+
+                IEnumerable<ISubscriptionGen> objSubs = GetPCObjectSubscriptions(sc);
+                if (!typedProp.ValueIsDefined)
+                {
+                    foreach (ISubscriptionGen objSub in objSubs)
+                    {
+                        objSub.ObjHandler(this, new PCObjectEventArgs(propertyName, newValue));
+                    }
+                }
+                else
+                {
+                    foreach (ISubscriptionGen objSub in objSubs)
+                    {
+                        objSub.ObjHandler(this, new PCObjectEventArgs(propertyName, oldVal, newValue));
+                    }
                 }
             }
-            else
-            {
-                foreach (ISubscription<T> typedSub in typedSubs)
-                {
-                    typedSub.TypedHandler(this, new PCTypedEventArgs<T>(propertyName, oldVal, newValue));
-                }
-            }
 
-            IEnumerable<ISubscriptionGen> genSubs = GetPCGenSubscriptions(sc);
+            // Raise the standard PropertyChanged event
+            OnPropertyChanged(_propFactory.IndexerName);
 
-            if (!typedProp.ValueIsDefined)
-            {
-                foreach (ISubscriptionGen genSub in genSubs)
-                {
-                    genSub.GenHandler(this, new PCGenEventArgs(propertyName, typeof(T), newValue));
-                }
-            }
-            else
-            {
-                foreach (ISubscriptionGen genSub in genSubs)
-                {
-                    genSub.GenHandler(this, new PCGenEventArgs(propertyName, typeof(T), oldVal, newValue));
-                }
-            }
+            // Raise the individual PropertyChanged event
+            //OnPropertyChangedIndividual(propertyName);
 
-            IEnumerable<ISubscriptionGen> objSubs = GetPCObjectSubscriptions(sc);
+            // The shared, EventHandler<PCObjectEventArgs>
+            OnPropertyChangedWithObjVals(oldVal, newValue);
 
-            if (!typedProp.ValueIsDefined)
-            {
-                foreach (ISubscriptionGen objSub in objSubs)
-                {
-                    objSub.ObjHandler(this, new PCObjectEventArgs(propertyName, newValue));
-                }
-            }
-            else
-            {
-                foreach (ISubscriptionGen objSub in objSubs)
-                {
-                    objSub.ObjHandler(this, new PCObjectEventArgs(propertyName, oldVal, newValue));
-                }
-            }
-
+            // The shared, EventHandler<PCGenEventArgs>
+            OnPropertyChangedWithGenVals(propertyName, typeof(T), oldVal, newValue);
 
             // END PROCESS BINDINGS
 
-            if (typedProp.DoAfterNotify)
-            {
-                // Raise the standard PropertyChanged event
-                //OnPropertyChanged(_propFactory.IndexerName);
+            //if (typedProp.DoAfterNotify)
+            //{
+            //    // Raise the standard PropertyChanged event
+            //    //OnPropertyChanged(_propFactory.IndexerName);
 
-                // Raise the individual PropertyChanged event
-                //OnPropertyChangedIndividual(propertyName);
+            //    // Raise the individual PropertyChanged event
+            //    //OnPropertyChangedIndividual(propertyName);
 
-                // Replaced by the _subscriptionManager!
-                //// The typed, PropertyChanged event defined on the individual property.
-                //prop.OnPropertyChangedWithTVals(propertyName, oldVal, newValue);
-                //typedProp.RaiseEventsForParent(typedSubs, this, propertyName, oldVal, newValue);
+            //    // Replaced by the _subscriptionManager!
+            //    //// The typed, PropertyChanged event defined on the individual property.
+            //    //prop.OnPropertyChangedWithTVals(propertyName, oldVal, newValue);
+            //    //typedProp.RaiseEventsForParent(typedSubs, this, propertyName, oldVal, newValue);
 
-                // The un-typed, PropertyChanged event defined on the individual property.
-                //typedProp.OnPropertyChangedWithObjectVals(propertyName, oldVal, newValue);
+            //    // The un-typed, PropertyChanged event defined on the individual property.
+            //    //typedProp.OnPropertyChangedWithObjectVals(propertyName, oldVal, newValue);
 
-                //// The un-typed, PropertyChanged shared event.
-                //OnPropertyChangedWithVals(propertyName, typeof(T), oldVal, newValue);
+            //    //// The un-typed, PropertyChanged shared event.
+            //    //OnPropertyChangedWithVals(propertyName, typeof(T), oldVal, newValue);
 
-                // then perform the call back.
-                //typedProp.DoWhenChanged(oldVal, newValue);
-            }
-            else
-            {
-                // Peform the call back,
-                //typedProp.DoWhenChanged(oldVal, newValue);
+            //    // then perform the call back.
+            //    //typedProp.DoWhenChanged(oldVal, newValue);
+            //}
+            //else
+            //{
+            //    // Peform the call back,
+            //    //typedProp.DoWhenChanged(oldVal, newValue);
 
-                // Raise the standard PropertyChanged event
-                //OnPropertyChanged(_propFactory.IndexerName);
+            //    // Raise the standard PropertyChanged event
+            //    //OnPropertyChanged(_propFactory.IndexerName);
 
-                // Raise the individual PropertyChanged event
-                //OnPropertyChangedIndividual(propertyName);
+            //    // Raise the individual PropertyChanged event
+            //    //OnPropertyChangedIndividual(propertyName);
 
-                // Replaced by the _subscriptionManager!
-                //// The typed, PropertyChanged event defined on the individual property.
-                //prop.OnPropertyChangedWithTVals(propertyName, oldVal, newValue);
-                //typedProp.RaiseEventsForParent(typedSubs, this, propertyName, oldVal, newValue);
+            //    // Replaced by the _subscriptionManager!
+            //    //// The typed, PropertyChanged event defined on the individual property.
+            //    //prop.OnPropertyChangedWithTVals(propertyName, oldVal, newValue);
+            //    //typedProp.RaiseEventsForParent(typedSubs, this, propertyName, oldVal, newValue);
 
-                // The un-typed, PropertyChanged event defined on the individual property.
-                //typedProp.OnPropertyChangedWithObjectVals(propertyName, oldVal, newValue);
+            //    // The un-typed, PropertyChanged event defined on the individual property.
+            //    //typedProp.OnPropertyChangedWithObjectVals(propertyName, oldVal, newValue);
 
-                // The un-typed, PropertyChanged shared event.
-                //OnPropertyChangedWithVals(propertyName, typeof(T), oldVal, newValue);
-            }
+            //    // The un-typed, PropertyChanged shared event.
+            //    //OnPropertyChangedWithVals(propertyName, typeof(T), oldVal, newValue);
+            //}
         }
 
         private SubscriberCollection GetSubscriptions(PropIdType propId)
@@ -1706,44 +1746,43 @@ namespace DRM.PropBag
         #region Methods to Raise Events
 
         // Raise Standard Events
-        //protected void OnPropertyChanged(string propertyName)
-        //{
-        //    PropertyChangedEventHandler handler = Interlocked.CompareExchange(ref PropertyChanged, null, null);
+        protected void OnPropertyChanged(string propertyName)
+        {
+            PropertyChangedEventHandler handler = Interlocked.CompareExchange(ref PropertyChanged, null, null);
 
-        //    if (handler != null)
-        //    {
-        //        handler(this, new PropertyChangedEventArgs(propertyName));
-        //    }
-        //}
+            if (handler != null)
+            {
+                handler(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
 
-        //protected void OnPropertyChanging(string propertyName)
-        //{
-        //    PropertyChangingEventHandler handler = Interlocked.CompareExchange(ref PropertyChanging, null, null);
+        protected void OnPropertyChanging(string propertyName)
+        {
+            PropertyChangingEventHandler handler = Interlocked.CompareExchange(ref PropertyChanging, null, null);
 
-        //    if (handler != null)
-        //    {
-        //        handler(this, new PropertyChangingEventArgs(propertyName));
-        //    }
-        //}
-
-        //protected void OnPropertyChangedIndividual(string propertyName)
-        //{
-        //    EventHandler<PropertyChangedEventArgs> handler = Interlocked.CompareExchange(ref PropertyChangedIndividual, null, null);
-
-        //    if (handler != null)
-        //    {
-        //        handler(this, new PropertyChangedEventArgs(propertyName));
-        //    }
-        //}
+            if (handler != null)
+            {
+                handler(this, new PropertyChangingEventArgs(propertyName));
+            }
+        }
 
         // INotifyPCGen
-        //protected void OnPropertyChangedWithVals(string propertyName, Type propertyType, object oldVal, object newVal)
-        //{
-        //    EventHandler<PCGenEventArgs> handler = Interlocked.CompareExchange(ref PropertyChangedWithGenVals, null, null);
+        protected void OnPropertyChangedWithGenVals(string propertyName, Type propertyType, object oldVal, object newVal)
+        {
+            EventHandler<PCGenEventArgs> handler = Interlocked.CompareExchange(ref PropertyChangedWithGenVals, null, null);
 
-        //    if (handler != null)
-        //        handler(this, new PCGenEventArgs(propertyName, propertyType, oldVal, newVal));
-        //}
+            if (handler != null)
+                handler(this, new PCGenEventArgs(propertyName, propertyType, oldVal, newVal));
+        }
+
+        // INotifyPCObject
+        protected void OnPropertyChangedWithObjVals(object oldVal, object newVal)
+        {
+            EventHandler<PCObjectEventArgs> handler = Interlocked.CompareExchange(ref PropertyChangedWithObjectVals, null, null);
+
+            if (handler != null)
+                handler(this, new PCObjectEventArgs(_propFactory.IndexerName, oldVal, newVal));
+        }
 
         #endregion
 

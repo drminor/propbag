@@ -1,4 +1,5 @@
-﻿using DRM.TypeSafePropertyBag;
+﻿using DRM.PropBag.Caches;
+using DRM.TypeSafePropertyBag;
 
 using System;
 using System.Collections.Generic;
@@ -35,7 +36,10 @@ namespace DRM.PropBag
         public virtual string IndexerName { get; }
 
         public PSAccessServiceProviderType PropStoreAccessServiceProvider { get; }
-        //public LocalBinderType LocalBinder { get; }
+
+        public abstract int DoSetCacheCount { get; }
+        public abstract int CreatePropFromStringCacheCount { get; }
+        public abstract int CreatePropWithNoValCacheCount { get; }
 
         #endregion
 
@@ -360,7 +364,6 @@ namespace DRM.PropBag
         {
             MethodInfo mi = gmtType.GetMethod("CreatePropFromString", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(typeOfThisValue);
             CreatePropFromStringDelegate result = (CreatePropFromStringDelegate)Delegate.CreateDelegate(typeof(CreatePropFromStringDelegate), mi);
-
             return result;
         }
 
@@ -369,7 +372,6 @@ namespace DRM.PropBag
         {
             MethodInfo mi = gmtType.GetMethod("CreatePropWithNoValue", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(typeOfThisValue);
             CreatePropWithNoValueDelegate result = (CreatePropWithNoValueDelegate)Delegate.CreateDelegate(typeof(CreatePropWithNoValueDelegate), mi);
-
             return result;
         }
 

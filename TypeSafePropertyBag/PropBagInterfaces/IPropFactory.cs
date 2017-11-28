@@ -81,5 +81,10 @@ namespace DRM.TypeSafePropertyBag
         Type GetTypeFromValue(object value);
 
         bool IsTypeSolid(object value, Type propertyType);
+
+        int DoSetCacheCount { get; }
+        int CreatePropFromStringCacheCount { get; }
+        int CreatePropWithNoValCacheCount { get; }
+
     }
 }

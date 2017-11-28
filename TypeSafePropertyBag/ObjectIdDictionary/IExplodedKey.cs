@@ -1,7 +1,9 @@
 ﻿
+using System;
+
 namespace DRM.TypeSafePropertyBag
 {
-    public interface IExplodedKey<CompT, L1T, L2T>
+    public interface IExplodedKey<CompT, L1T, L2T> : IEquatable<IExplodedKey<CompT, L1T, L2T>>
     {
         bool isEmpty { get; }
         CompT CKey { get; }

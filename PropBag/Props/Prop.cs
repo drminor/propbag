@@ -19,7 +19,7 @@ namespace DRM.PropBag
             EventHandler<PCTypedEventArgs<T>> doWhenChangedX = null,
             //Action<T, T> doWhenChanged = null,
             bool doAfterNotify = false)
-            : base(typeof(T), typeIsSolid, hasStore, doWhenChangedX, doAfterNotify, comparer, getDefaultValFunc)
+            : base(typeof(T), typeIsSolid, hasStore, /*doWhenChangedX, doAfterNotify, */comparer, getDefaultValFunc)
         {
             if (hasStore)
             {
@@ -35,7 +35,7 @@ namespace DRM.PropBag
             EventHandler<PCTypedEventArgs<T>> doWhenChangedX = null,
             //Action<T, T> doWhenChanged = null,
             bool doAfterNotify = false)
-            : base(typeof(T), typeIsSolid, hasStore, doWhenChangedX, doAfterNotify, comparer, getDefaultValFunc)
+            : base(typeof(T), typeIsSolid, hasStore, /*doWhenChangedX, doAfterNotify, */comparer, getDefaultValFunc)
         {
             if (hasStore)
             {

@@ -7,21 +7,21 @@ using System.Threading.Tasks;
 
 using DRM.TypeSafePropertyBag.Fundamentals;
 using DRM.TypeSafePropertyBag;
+using System.Reflection;
 
 namespace DRM.PropBag.Caches
 {
-    public static class DelegateCacheProvider
+    public class DelegateCacheProvider
     {
-
-        #region Private Backing Members
+        #region Private Static Members
 
         static Lazy<TypeDescBasedTConverterCache> theSingleTypeDescBasedTConverterCache;
 
-        static Lazy<DoSetDelegateCache> theSingleDoSetDelegateCache;
+        static Lazy<DelegateCache<DoSetDelegate>> theSingleDoSetDelegateCache;
 
         #endregion
 
-        #region Public Accessors
+        #region Public Static Properties
 
         // TypeDesc<T>-based Converter Cache
         public static TypeDescBasedTConverterCache TypeDescBasedTConverterCache
@@ -30,7 +30,12 @@ namespace DRM.PropBag.Caches
         }
 
         // DoSet Delegate Cache
-        internal static DoSetDelegateCache DoSetDelegateCache
+        //internal static DoSetDelegateCache DoSetDelegateCache
+        //{
+        //    get { return theSingleDoSetDelegateCache.Value; }
+        //}
+
+        internal static DelegateCache<DoSetDelegate> DoSetDelegateCache
         {
             get { return theSingleDoSetDelegateCache.Value; }
         }
@@ -56,10 +61,18 @@ namespace DRM.PropBag.Caches
             //        LazyThreadSafetyMode.PublicationOnly
             //    );
 
+            //theSingleDoSetDelegateCache =
+            //    new Lazy<DoSetDelegateCache>
+            //    (
+            //        () => new DoSetDelegateCache(typeof(PropBag)), LazyThreadSafetyMode.PublicationOnly
+            //    );
+
+            MethodInfo doSetMethodInfo = typeof(PropBag).GetMethod("DoSetBridge", BindingFlags.Instance | BindingFlags.NonPublic);
+
             theSingleDoSetDelegateCache =
-                new Lazy<DoSetDelegateCache>
+                new Lazy<DelegateCache<DoSetDelegate>>
                 (
-                    () => new DoSetDelegateCache(typeof(PropBag)), LazyThreadSafetyMode.PublicationOnly
+                    () => new DelegateCache<DoSetDelegate>(doSetMethodInfo), LazyThreadSafetyMode.PublicationOnly
                 );
         }
 
@@ -68,8 +81,12 @@ namespace DRM.PropBag.Caches
         #region Instance Constructors
 
         // Mark as private to disallow instances of this class to be created.
-        //private DelegateCacheProvider() { }
-        
+        private DelegateCacheProvider()
+        {
+        }
+
+
+
         #endregion
     }
 }

@@ -30,8 +30,9 @@ namespace DRM.TypeSafePropertyBag
         void RemoveProp(string propertyName, Type propertyType);
         void RemoveProp<T>(string propertyName);
 
-        bool RegisterDoWhenChanged<T>(string propertyName, Action<T, T> doWhenChanged,
-            bool doAfterNotify = false);
+        // TODO: Create a replacement for this method.
+        //bool RegisterDoWhenChanged<T>(string propertyName, Action<T, T> doWhenChanged,
+        //    bool doAfterNotify = false);
 
         void ClearAllProps();
 

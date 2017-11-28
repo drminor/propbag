@@ -108,7 +108,20 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        public IEnumerable<KeyValuePair<ExKeyT, PropStoreNode>> All => Root.SelfAndDescendants;
+        public IEnumerable<KeyValuePair<ExKeyT, PropStoreNode>> All
+        {
+            get
+            {
+                if(IsArtificialRoot)
+                {
+                    return Children.SelectMany(c => c.Value.SelfAndDescendants);
+                }
+                else
+                {
+                    return SelfAndDescendants;
+                }
+            }
+        }
 
         public IEnumerable<KeyValuePair<ExKeyT, PropStoreNode>> Ancestors
         {
@@ -411,18 +424,25 @@ namespace DRM.TypeSafePropertyBag
                 }
                 else
                 {
-                    result = $"PropStoreNode for {CompKey} for which the Weak Reference holds no object.";
+                    result = $"PropStoreNode: {CompKey} for which the Weak Reference holds no object.";
                 }
             }
             else
             {
-                if(Parent.PropBagProxy.Level2KeyManager.TryGetFromCooked(Int_PropData.PropId, out string propertyName))
+                if (Parent.PropBagProxy.PropBagRef.TryGetTarget(out IPropBagInternal target))
                 {
-                    result = $"{propertyName} on {Parent} (P:{CompKey.Level2Key}).";
+                    if (target.Level2KeyManager.TryGetFromCooked(Int_PropData.PropId, out string propertyName))
+                    {
+                        result = $"{propertyName} on {Parent} (P:{CompKey.Level2Key}).";
+                    }
+                    else
+                    {
+                        result = $"Could not get property name on {Parent}.";
+                    }
                 }
                 else
                 {
-                    result = $"Could not get property name on {Parent}.";
+                    result = $"Child of PropStoreNode: {CompKey} for which the Weak Reference holds no object.";
                 }
             }
 

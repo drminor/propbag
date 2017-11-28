@@ -132,7 +132,7 @@ namespace PropBagLib.Tests
         [Test]
         public void ShouldGetArgumentNullEx()
         {
-            mod1 = new LooseModel(PropBagTypeSafetyMode.None);
+            mod1 = new LooseModel(PropBagTypeSafetyMode.None, _amHelpers.PropFactory_V1);
 
             object x;
             Assert.Throws<ArgumentNullException>(() => x = mod1["System.String", null]);

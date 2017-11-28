@@ -118,18 +118,18 @@ namespace DRM.PropBag
             base.RemoveProp<T>(propertyName);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="propertyName"></param>
-        /// <param name="doWhenChanged"></param>
-        /// <param name="doAfterNotify"></param>
-        /// <returns>True, if there was an existing Action in place for this property.</returns>
-        new public bool RegisterDoWhenChanged<T>(string propertyName, Action<T, T> doWhenChanged, bool doAfterNotify = false)
-        {
-            return base.RegisterDoWhenChanged(doWhenChanged, doAfterNotify, propertyName);
-        }
+        ///// <summary>
+        ///// 
+        ///// </summary>
+        ///// <typeparam name="T"></typeparam>
+        ///// <param name="propertyName"></param>
+        ///// <param name="doWhenChanged"></param>
+        ///// <param name="doAfterNotify"></param>
+        ///// <returns>True, if there was an existing Action in place for this property.</returns>
+        //new public bool RegisterDoWhenChanged<T>(string propertyName, Action<T, T> doWhenChanged, bool doAfterNotify = false)
+        //{
+        //    return base.RegisterDoWhenChanged(doWhenChanged, doAfterNotify, propertyName);
+        //}
 
         new public void ClearAllProps()
         {

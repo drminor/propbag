@@ -42,6 +42,25 @@ namespace DRM.PropBag.ClassGenerator
             return r.AppendLine().ToString();
         }
 
+        static public string GetSubscribeMethodCallText(PropModel propModel, PropItem pi)
+        {
+            PropDoWhenChanged doWhenPrepped = propModel.PrepareDoWhenChangedField(pi);
+
+            //SubscribeToPropChanged<string>(GetDelegate<string>("DoWhenStringChanged"), "PropString");
+            //string result = $"SubscribeToPropChanged<{pi.Type}>(GetDelegate<{pi.Type}>(\"{doWhenPrepped.DoWhenChanged}\"), \"{pi.Name}\")";
+            string result;
+            if(doWhenPrepped.DoWhenChanged != "null")
+            {
+                result = $"SubscribeToPropChanged<{pi.Type}>({doWhenPrepped.DoWhenChanged}, \"{pi.Name}\");";
+            }
+            else
+            {
+                result = string.Empty;
+            }
+
+            return result;
+        }
+
         static public string GetAddPropMethodCallText(PropModel propModel, PropItem pi)
         {
             PropDoWhenChanged doWhenPrepped = propModel.PrepareDoWhenChangedField(pi);

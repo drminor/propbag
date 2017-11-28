@@ -20,7 +20,7 @@ namespace DRM.PropBag
             EventHandler<PCTypedEventArgs<T>> doWhenChangedX = null,
             //Action<T, T> doWhenChanged = null,
             bool doAfterNotify = false)
-            : base(typeof(T), typeIsSolid, false, doWhenChangedX, doAfterNotify, comparer, getDefaultValFunc)
+            : base(typeof(T), typeIsSolid, false, /*doWhenChangedX, doAfterNotify, */comparer, getDefaultValFunc)
         {
             Tag = Guid.NewGuid(); // tag;
             Getter = null; // getter;

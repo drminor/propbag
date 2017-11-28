@@ -88,6 +88,7 @@ namespace PropBagLib.Tests.BusinessModel
                     // TODO: dispose managed state (managed objects).
                     if (_dbContext != null)
                     {
+                        _dbContext.Person = null;
                         _dbContext.Dispose();
                         _dbContext = null;
                     }

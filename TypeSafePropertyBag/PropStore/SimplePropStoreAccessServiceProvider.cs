@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Collections.Concurrent;
+using System.Threading;
 
 namespace DRM.TypeSafePropertyBag
 {
@@ -40,7 +41,7 @@ namespace DRM.TypeSafePropertyBag
         const int OBJECT_INDEX_CONCURRENCY_LEVEL = 1; // Typical number of threads simultaneously accessing the ObjectIndexes.
         const int EXPECTED_NO_OF_OBJECTS = 10000;
 
-        private ConcurrentDictionary<ObjectIdType, CollectionOfSubscriberCollections> _propIndexesByObject;
+        private ConcurrentDictionary<ObjectIdType, CollectionOfSubscriberCollections> _propIndexes;
 
         const int NUMBER_OF_SECONDS_BETWEEN_PRUNE_OPS = 20;
         //private Timer _timer;
@@ -63,7 +64,7 @@ namespace DRM.TypeSafePropertyBag
             _sync = new object();
 
             // Create the subscription store.
-            _propIndexesByObject = new ConcurrentDictionary<ObjectIdType, CollectionOfSubscriberCollections>
+            _propIndexes = new ConcurrentDictionary<ObjectIdType, CollectionOfSubscriberCollections>
                 (concurrencyLevel: OBJECT_INDEX_CONCURRENCY_LEVEL, capacity: EXPECTED_NO_OF_OBJECTS);
 
             //_timer = new Timer(PruneStore, null, NUMBER_OF_SECONDS_BETWEEN_PRUNE_OPS * 1000, NUMBER_OF_SECONDS_BETWEEN_PRUNE_OPS * 1000);
@@ -118,7 +119,7 @@ namespace DRM.TypeSafePropertyBag
             ObjectIdType objectId = NextCookedVal;
             WeakReference<IPropBagInternal> propBagRef = new WeakReference<IPropBagInternal>(propBag);
             L2KeyManType level2KeyManager = new SimpleLevel2KeyMan(MaxPropsPerObject);
-            IPropBagProxy propBagProxy = new PropBagProxy(propBagRef, level2KeyManager);
+            IPropBagProxy propBagProxy = new PropBagProxy(propBagRef/*, level2KeyManager*/);
 
             //AddToAllObjectLookups(propBagProxy);
 
@@ -130,7 +131,7 @@ namespace DRM.TypeSafePropertyBag
             PSAccessServiceType result = new SimplePropStoreAccessService
                 (
                     propStoreNode,
-                    //compKeyManager,
+                    level2KeyManager,
                     this
                 );
 
@@ -146,7 +147,7 @@ namespace DRM.TypeSafePropertyBag
 
             // Remove all subscriptions for this propBag.
             ObjectIdType objectId = propStoreNode.CompKey.Level1Key;
-            bool wasRemoved = RemovePropIndexForObject(objectId);
+            bool wasRemoved = RemovePropIndex(objectId);
             if(!wasRemoved)
             {
                 System.Diagnostics.Debug.WriteLine($"PropBag Object: {objectId} held no subscriptions upon teardown.");
@@ -178,7 +179,7 @@ namespace DRM.TypeSafePropertyBag
                 throw new ApplicationException("Its already been used.");
             }
 
-            SubscriberCollection sc = GetSubscriptions((SimpleExKey)subscriptionRequest.SourcePropRef);
+            SubscriberCollection sc = GetOrAddSubscription((SimpleExKey)subscriptionRequest.SourcePropRef);
 
             ISubscriptionGen result = sc.GetOrAdd
                 (
@@ -205,23 +206,47 @@ namespace DRM.TypeSafePropertyBag
 
         public bool RemoveSubscription(ISubscriptionKeyGen subscriptionRequest)
         {
-            SubscriberCollection sc = GetSubscriptions(subscriptionRequest.SourcePropRef);
-            bool result = sc.RemoveSubscription(subscriptionRequest);
+            if(TryGetSubscriptions(subscriptionRequest.SourcePropRef, out SubscriberCollection sc))
+            {
+                bool result = sc.RemoveSubscription(subscriptionRequest);
 
-            if (result)
-                System.Diagnostics.Debug.WriteLine($"Removed the subscription for {subscriptionRequest.SourcePropRef}.");
+                if (result)
+                    System.Diagnostics.Debug.WriteLine($"Removed the subscription for {subscriptionRequest.SourcePropRef}.");
 
-            return result;
+                return result;
+            }
+            else
+            {
+                return false;
+            }
         }
 
-        public SubscriberCollection GetSubscriptions(IPropBag host, uint propId)
+        public SubscriberCollection GetOrAddSubscriptions(IPropBag host, uint propId)
         {
             throw new NotImplementedException();
         }
 
-        public SubscriberCollection GetSubscriptions(ExKeyT exKey)
+        public bool TryGetSubscriptions(ExKeyT exKey, out SubscriberCollection subscriberCollection)
         {
-            CollectionOfSubscriberCollections propIndex = GetPropIndexForObject(exKey.Level1Key, out bool propIndexWasCreated);
+            if(_propIndexes.TryGetValue(exKey.CKey, out CollectionOfSubscriberCollections propIndex))
+            {
+                bool result = propIndex.TryGetSubscriberCollection(exKey.Level2Key, out subscriberCollection);
+                return result;
+            }
+            else
+            {
+                subscriberCollection = null;
+                return false;
+            }
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private SubscriberCollection GetOrAddSubscription(ExKeyT exKey)
+        {
+            CollectionOfSubscriberCollections propIndex = GetOrAddPropIndex(exKey.Level1Key, out bool propIndexWasCreated);
             if (propIndexWasCreated)
             {
                 System.Diagnostics.Debug.WriteLine($"Created a new CollectionOfSubscriberCollections for {exKey}.");
@@ -236,15 +261,11 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        #endregion
-
-        #region Private Methods
-
-        private CollectionOfSubscriberCollections GetPropIndexForObject(ObjectIdType objectKey, out bool wasAdded)
+        private CollectionOfSubscriberCollections GetOrAddPropIndex(ObjectIdType objectKey, out bool wasAdded)
         {
             bool internalWasAdded = false;
 
-            CollectionOfSubscriberCollections result = _propIndexesByObject.GetOrAdd
+            CollectionOfSubscriberCollections result = _propIndexes.GetOrAdd
                 (
                 key: objectKey,
                 valueFactory:
@@ -257,9 +278,9 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        private bool RemovePropIndexForObject(ObjectIdType objectKey)
+        private bool RemovePropIndex(ObjectIdType objectKey)
         {
-            if(_propIndexesByObject.TryRemove(objectKey, out CollectionOfSubscriberCollections dummy))
+            if(_propIndexes.TryRemove(objectKey, out CollectionOfSubscriberCollections dummy))
             {
                 return true;
             }
@@ -400,6 +421,11 @@ namespace DRM.TypeSafePropertyBag
         private void IncAccessServicesCreated()
         {
             _numOfAccessServicesCreated++;
+        }
+
+        public SubscriberCollection GetSubscriptions(IPropBag host, uint propId)
+        {
+            throw new NotImplementedException();
         }
 
         public int TotalNumberOfAccessServicesCreated => _numOfAccessServicesCreated;

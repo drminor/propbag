@@ -2,6 +2,11 @@
 
 namespace DRM.TypeSafePropertyBag
 {
+    using CompositeKeyType = UInt64;
+    using ObjectIdType = UInt64;
+    using PropIdType = UInt32;
+    using PropNameType = String;
+
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
 
     /// <summary>
@@ -21,9 +26,8 @@ namespace DRM.TypeSafePropertyBag
         bool RemoveSubscription(ISubscriptionKeyGen subscriptionRequest);
 
         SubscriberCollection GetSubscriptions(IPropBag host, L2T propId);
-        SubscriberCollection GetSubscriptions(ExKeyT exKey);
 
-        //SubscriberCollection GetSubscriptions(IPropBag host, L2T propId, IPropStoreAccessService<L2T, L2TRaw> storeAccessor);
-
+        //SubscriberCollection GetSubscriptions(ObjectIdType objectId, PropIdType propId);
+        bool TryGetSubscriptions(ExKeyT exKey, out SubscriberCollection subscriberCollection);
     }
 }

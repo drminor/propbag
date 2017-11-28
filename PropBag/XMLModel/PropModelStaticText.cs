@@ -41,14 +41,14 @@ namespace DRM.PropBag.XMLModel
                 result.Add("/// </summary>");
                 result.Add("/// <param name=\"methodName\">Some public or non-public instance method in this class.</param>");
                 result.Add("/// <returns>The name, unchanged, if the method exists, otherwise null.</returns>");
-                result.Add("EventHandler<PropertyChangedWithTValsEventArgs<T>> GetDelegate<T>(string methodName)");
+                result.Add("EventHandler<PCTypedEventArgs<T>> GetDelegate<T>(string methodName)");
                 result.Add("{");
                 result.Add("    Type pp = this.GetType();");
                 result.Add("    MethodInfo mi = pp.GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);");
                 result.Add("");
                 result.Add("    if (mi == null) return null;");
                 result.Add("");
-                result.Add("    EventHandler<PropertyChangedWithTValsEventArgs<T>> result = (EventHandler<PropertyChangedWithTValsEventArgs<T>>)mi.CreateDelegate(typeof(EventHandler<PropertyChangedWithTValsEventArgs<T>>), this);");
+                result.Add("    EventHandler<PCTypedEventArgs<T>> result = (EventHandler<PCTypedEventArgs<T>>)mi.CreateDelegate(typeof(EventHandler<PCTypedEventArgs<T>>), this);");
                 result.Add("");
                 result.Add("    return result;");
                 result.Add("}");

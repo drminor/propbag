@@ -29,7 +29,6 @@ namespace DRM.TypeSafePropertyBag
         readonly ObjectIdType _objectId;
 
         readonly PropStoreNode _ourNode;
-        //readonly ICKeyManType _compKeyManager;
 
         PSAccessServiceProviderType _propStoreAccessServiceProvider;
 
@@ -42,15 +41,14 @@ namespace DRM.TypeSafePropertyBag
         public SimplePropStoreAccessService
             (
             PropStoreNode ourNode,
-            //ICKeyManType compKeyManager,
+            L2KeyManType level2KeyManager,
             PSAccessServiceProviderType propStoreAccessServiceProvider
             )
         {
             _ourNode = ourNode;
-            //_compKeyManager = compKeyManager;
             _propStoreAccessServiceProvider = propStoreAccessServiceProvider;
 
-            Level2KeyManager = ourNode.PropBagProxy.Level2KeyManager;
+            Level2KeyManager = level2KeyManager; //ourNode.PropBagProxy.Level2KeyManager;
             MaxObjectsPerAppDomain = propStoreAccessServiceProvider.MaxObjectsPerAppDomain;
 
             _clientAccessToken = _ourNode.PropBagProxy.PropBagRef;
@@ -343,15 +341,34 @@ namespace DRM.TypeSafePropertyBag
 
         public SubscriberCollection GetSubscriptions(IPropBag host, PropIdType propId)
         {
-            ExKeyT exKey = GetExKey(host, propId);
-            SubscriberCollection result = _propStoreAccessServiceProvider.GetSubscriptions(exKey);
-            return result;
+            //ExKeyT exKey = GetExKey(host, propId);
+
+            // TODO: NOTE: This does not verify that the caller is the "correct" one.
+            ExKeyT exKey = new SimpleExKey(_objectId, propId);
+
+            if( _propStoreAccessServiceProvider.TryGetSubscriptions(exKey, out SubscriberCollection subs))
+            {
+                return subs;
+            }
+            else
+            {
+                return null;
+            }
+            
+            //SubscriberCollection result = _propStoreAccessServiceProvider.GetSubscriptions(_objectId, propId);
+            //return result;
         }
 
-        public SubscriberCollection GetSubscriptions(ExKeyT exKey)
+        //public SubscriberCollection GetSubscriptions(ObjectIdType objectId, PropIdType propId)
+        //{
+        //    throw new NotSupportedException("GetSubscriptions with ObjectId and PropId is not supported. Use the version that takes a IPropBag and propId.");
+        //    //SubscriberCollection result = _propStoreAccessServiceProvider.GetSubscriptions(objectId, propId);
+        //    //return result;
+        //}
+
+        public bool TryGetSubscriptions(ExKeyT exKey, out SubscriberCollection subscriberCollection)
         {
-            SubscriberCollection result = _propStoreAccessServiceProvider.GetSubscriptions(exKey);
-            return result;
+            throw new NotImplementedException();
         }
 
         #endregion
@@ -471,7 +488,9 @@ namespace DRM.TypeSafePropertyBag
 
                     PropStoreNode guestPropBagNode = GetGuestObjectNodeFromPropItemVal(propBagHost);
 
-                    if(_ourNode.PropBagProxy.Level2KeyManager.TryGetFromRaw(e.PropertyName, out PropIdType propId))
+                    //if (_ourNode.PropBagProxy.Level2KeyManager.TryGetFromRaw(e.PropertyName, out PropIdType propId))
+
+                    if (((IPropBagInternal)propBagHost).Level2KeyManager.TryGetFromRaw(e.PropertyName, out PropIdType propId))
                     {
                         ExKeyT cKey = new SimpleExKey(_objectId, propId);
                         PropStoreNode propItemNode = GetChild(cKey);
@@ -500,7 +519,9 @@ namespace DRM.TypeSafePropertyBag
 
                     PropStoreNode guestPropBagNode = GetGuestObjectNodeFromPropItemVal(propBagHost);
 
-                    if (_ourNode.PropBagProxy.Level2KeyManager.TryGetFromRaw(e.PropertyName, out PropIdType propId))
+                    //if (_ourNode.PropBagProxy.Level2KeyManager.TryGetFromRaw(e.PropertyName, out PropIdType propId))
+
+                    if (((IPropBagInternal)propBagHost).Level2KeyManager.TryGetFromRaw(e.PropertyName, out PropIdType propId))
                     {
                         PropStoreNode propItemNode = GetChild(propId);
                         if(guestPropBagNode.Parent != propItemNode)
@@ -633,8 +654,6 @@ namespace DRM.TypeSafePropertyBag
 
         private string GetPropNameFromKey(ExKeyT cKey)
         {
-            //ObjectIdType objectId = _compKeyManager.SplitComp(cKey, out PropIdType propId);
-
             if(Level2KeyManager.TryGetFromCooked(cKey.Level2Key, out PropNameType propertyName))
             {
                 return propertyName;
@@ -648,39 +667,9 @@ namespace DRM.TypeSafePropertyBag
         private ExKeyT GetExKey(IPropBag propBag, PropIdType propId)
         {
             ObjectIdType objectId = GetAndCheckObjectRef(propBag);
-            //CompositeKeyType cKey = _compKeyManager.JoinComp(objectId, propId);
             ExKeyT exKey = new SimpleExKey(objectId, propId);
             return exKey;
         }
-
-        //private ExKeyT GetExKey(IPropBag propBag, CompositeKeyType cKey)
-        //{
-        //    ObjectIdType objectIdFromCKey = _compKeyManager.SplitComp(cKey, out PropIdType propId);
-
-        //    ObjectIdType objectId = GetAndCheckObjectRef(propBag);
-        //    if(!object.ReferenceEquals(objectId, objectIdFromCKey))
-        //    {
-        //        throw new InvalidOperationException("The composite key given does not match the value given for propBag.");
-
-        //    }
-
-        //    ExKeyT exKey = new SimpleExKey(cKey);
-        //    return exKey;
-        //}
-
-
-        //// Also verifies that the compKey matches the propBag value.
-        //// Don't use this if you need an ExKey, since 1) ExKey requires a PropId value, 2) to get a PropId value you need split the CompKey, 3) Verify Splits the CompKey, 4) you can easily verify by using reference equality to see that our _objectId == the objectId from the CompKey.
-        //private ObjectIdType GetAndCheckObjectRef(IPropBag propBag, CompositeKeyType cKey)
-        //{
-        //    ObjectIdType result = GetAndCheckObjectRef(propBag);
-        //    if(!_compKeyManager.Verify(cKey, result))
-        //    {
-        //        throw new ArgumentException("The ObjectId portion of the Composite Key: cKey does not 'belong' to the propBag.", nameof(cKey));
-        //    }
-
-        //    return result;
-        //}
 
         private ObjectIdType GetAndCheckObjectRef(IPropBag propBag)
         {

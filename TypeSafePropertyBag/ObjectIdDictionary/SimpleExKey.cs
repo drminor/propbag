@@ -135,6 +135,11 @@ namespace DRM.TypeSafePropertyBag
             return $"CompKey: O:{Level1Key} -- P:{Level2Key}";
         }
 
+        public bool Equals(ExKeyType other)
+        {
+            return CKey == other.CKey;
+        }
+
         public static bool operator ==(SimpleExKey key1, SimpleExKey key2)
         {
             return key1.Equals(key2);

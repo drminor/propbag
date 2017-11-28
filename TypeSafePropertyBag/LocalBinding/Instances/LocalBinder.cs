@@ -94,7 +94,9 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
             _targetObject = _ourNode.PropBagProxy.PropBagRef;
 
-            if (_ourNode.PropBagProxy.Level2KeyManager.TryGetFromCooked(propId, out string propertyName))
+            //if (_ourNode.PropBagProxy.Level2KeyManager.TryGetFromCooked(propId, out string propertyName))
+
+            if (propStoreAccessService.Level2KeyManager.TryGetFromCooked(propId, out string propertyName))
             {
                 PropertyName = propertyName;
             }
@@ -318,7 +320,10 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
         private bool GetChildsData(PropStoreNode objectNode, IPropBagInternal propBag, string propertyName, out PropStoreNode child)
         {
-            PropIdType propId = objectNode.PropBagProxy.Level2KeyManager.FromRaw(propertyName);
+            //PropIdType propId = objectNode.PropBagProxy.Level2KeyManager.FromRaw(propertyName);
+
+            PropIdType propId = propBag.Level2KeyManager.FromRaw(propertyName);
+
 
             // Each PropBag has a reference to its StoreAccessor which can fetch its children.
             // This saves us from having to find the PropStoreNode for this objectNode, using only
@@ -681,9 +686,12 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
                 IHaveTheStoreNode keyProvider = (IHaveTheStoreNode)propBag.ItsStoreAccessor;
 
                 PropStoreNode propBagNode = keyProvider.PropStoreNode;
-                if (propBagNode.PropBagProxy.Level2KeyManager.TryGetFromRaw(PropertyName, out PropIdType propId))
-                {
-                    if(propBagNode.TryGetChild(propId, out PropStoreNode child))
+
+                //if (propBagNode.PropBagProxy.Level2KeyManager.TryGetFromRaw(PropertyName, out PropIdType propId))
+                if (propBag.Level2KeyManager.TryGetFromRaw(PropertyName, out PropIdType propId))
+
+                    {
+                        if (propBagNode.TryGetChild(propId, out PropStoreNode child))
                     {
                         IPropDataInternal propData = child.Int_PropData;
                         T newValue = (T)propData.TypedProp.TypedValueAsObject;

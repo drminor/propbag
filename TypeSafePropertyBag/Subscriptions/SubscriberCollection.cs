@@ -116,10 +116,24 @@ namespace DRM.TypeSafePropertyBag
         {
             lock (_sync)
             {
-                subscription = _subs.FirstOrDefault(x => x.Equals(request));
+                subscription = _subs.FirstOrDefault(x => SubscriptionIsForRequest(x, request));
             }
 
             bool result = subscription != null;
+            return result;
+        }
+
+        private bool SubscriptionIsForRequest(ISubscriptionGen subscription, ISubscriptionKeyGen subscriptionRequest)
+        {
+            bool t1 = subscription.SourcePropRef.Equals(subscriptionRequest.SourcePropRef);
+            bool t2 = subscription.Target == subscriptionRequest.Target;
+            bool t3 = subscription.Method == subscriptionRequest.Method;
+
+            bool result =
+                subscription.SourcePropRef.Equals(subscriptionRequest.SourcePropRef) &&
+                subscription.Target == subscriptionRequest.Target &&
+                subscription.Method == subscriptionRequest.Method;
+
             return result;
         }
 

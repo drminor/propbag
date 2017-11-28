@@ -6,7 +6,7 @@ namespace DRM.TypeSafePropertyBag
 {
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
 
-    public class SubscriptionGen : ISubscriptionGen
+    public class SubscriptionGen : ISubscriptionGen 
     {
         public ExKeyT SourcePropRef { get; protected set; }
 

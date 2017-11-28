@@ -41,7 +41,9 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Caches\DoSetDelegateCache.cs" />
+    <Compile Include="Caches\DelegateCache.cs" />
+    <Compile Include="Caches\DelegateCacheProvider2.cs" />
+    <Compile Include="Caches\DoSetDelegateCache_OLD.cs" />
     <Compile Include="ObjectIdIssuer.cs" />
     <Compile Include="ControlModel\DeriveFromClassField_NotUsed.cs" />
     <Compile Include="ControlModel\DeriveFromClassModeEnum.cs" />

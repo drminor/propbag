@@ -2,6 +2,7 @@
 using DRM.PropBag.ControlModel;
 using DRM.TypeSafePropertyBag;
 using NUnit.Framework;
+using PropBagLib.Tests.AutoMapperSupport;
 
 namespace PropBagLib.Tests
 {
@@ -41,7 +42,10 @@ namespace PropBagLib.Tests
 
             pm.Props.Add(pi);
 
-            mod1 = new CreateAtRunTimeModel(pm);
+            AutoMapperHelpers ourHelper = new AutoMapperHelpers();
+            IPropFactory propFactory_V1 = ourHelper.GetNewPropFactory_V1();
+
+            mod1 = new CreateAtRunTimeModel(pm, propFactory_V1);
 
             Assert.That(mod1, Is.Not.EqualTo(null), "Expected the CreateAtRunTimeModel to have been created.");
 

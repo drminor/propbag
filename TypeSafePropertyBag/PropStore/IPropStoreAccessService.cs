@@ -30,7 +30,7 @@ namespace DRM.TypeSafePropertyBag
         // Restricted Update Method on Dictionary-like object.
         bool SetTypedProp(IPropBag propBag, L2T propId, L2TRaw propertyName, IProp genericTypedProp);
 
-        //void PropHasChanged<T>(IPropBag propBag, L2T propId, T oldValue, T newValue, bool oldIsUndefined);
+        
 
         // Diagnostics
         void IncAccess();

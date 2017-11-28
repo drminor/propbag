@@ -7,8 +7,6 @@ namespace PropBagLib.Tests
     public partial class LooseModel : PropBag
     {
 
-        public LooseModel() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered) { }
-
 		public LooseModel(PropBagTypeSafetyMode typeSafetyMode, IPropFactory propFactory) : base(typeSafetyMode, propFactory)
         {
             AddProp<object>("PropObject");

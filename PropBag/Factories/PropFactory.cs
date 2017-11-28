@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using DRM.TypeSafePropertyBag;
+using DRM.PropBag.Caches;
 
 namespace DRM.PropBag
 {
@@ -14,13 +15,41 @@ namespace DRM.PropBag
     using PropIdType = UInt32;
     using PropNameType = String;
     using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
+
+    using PropBagType = PropBag;
     #endregion
 
     public class PropFactory : AbstractPropFactory
     {
+        public DelegateCacheProvider2<PropBagType> DelegateCacheProvider { get; }
+
         public override bool ProvidesStorage
         {
             get { return true; }
+        }
+
+        override public int DoSetCacheCount
+        {
+            get
+            {
+                return DelegateCacheProvider.DoSetDelegateCache.Count;
+            }
+        }
+
+        override public int CreatePropFromStringCacheCount
+        {
+            get
+            {
+                return DelegateCacheProvider.CreatePropFromStringCache.Count;
+            }
+        }
+
+        override public int CreatePropWithNoValCacheCount
+        {
+            get
+            {
+                return DelegateCacheProvider.CreatePropWithNoValCache.Count;
+            }
         }
 
         public PropFactory
@@ -31,6 +60,8 @@ namespace DRM.PropBag
             )
             : base(propStoreAccessServiceProvider, typeResolver, valueConverter)
         {
+            DelegateCacheProvider = new DelegateCacheProvider2<PropBagType>();
+
         }
 
         // TODO: This is temporary just for testing.
@@ -186,6 +217,75 @@ namespace DRM.PropBag
 
         #endregion
 
-    }
+        #region Delegate Cache Support
 
+        #region Collection-Type Methods
+
+        //// From Object
+        //protected virtual CreateCPropFromObjectDelegate GetCPropCreator(Type collectionType, Type itemType)
+        //{
+        //    MethodInfo mi = gmtType.GetMethod("CreateCPropFromObject",
+        //        BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(collectionType, itemType);
+
+        //    CreateCPropFromObjectDelegate result = (CreateCPropFromObjectDelegate)Delegate.
+        //        CreateDelegate(typeof(CreateCPropFromObjectDelegate), mi);
+
+        //    return result;
+        //}
+
+        //// From String
+        //protected virtual CreateCPropFromStringDelegate GetCPropFromStringCreator(Type collectionType, Type itemType)
+        //{
+        //    MethodInfo mi = gmtType.GetMethod("CreateCPropFromString",
+        //        BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(collectionType, itemType);
+
+        //    CreateCPropFromStringDelegate result = (CreateCPropFromStringDelegate)Delegate.
+        //        CreateDelegate(typeof(CreateCPropFromStringDelegate), mi);
+
+        //    return result;
+        //}
+
+        //// With No Value
+        //protected virtual CreateCPropWithNoValueDelegate GetCPropWithNoValueCreator(Type collectionType, Type itemType)
+        //{
+        //    MethodInfo mi = gmtType.GetMethod("CreateCPropWithNoValue",
+        //        BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(collectionType, itemType);
+
+        //    CreateCPropWithNoValueDelegate result = (CreateCPropWithNoValueDelegate)Delegate.
+        //        CreateDelegate(typeof(CreateCPropWithNoValueDelegate), mi);
+
+        //    return result;
+        //}
+
+        #endregion
+
+        #region Property-Type Methods
+
+        //// From Object
+        //protected virtual CreatePropFromObjectDelegate GetPropCreator(Type typeOfThisValue)
+        //{
+        //    MethodInfo mi = gmtType.GetMethod("CreatePropFromObject", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(typeOfThisValue);
+        //    CreatePropFromObjectDelegate result = (CreatePropFromObjectDelegate)Delegate.CreateDelegate(typeof(CreatePropFromObjectDelegate), mi);
+
+        //    return result;
+        //}
+
+        // From String
+        protected new CreatePropFromStringDelegate GetPropFromStringCreator(Type typeOfThisValue)
+        {
+            CreatePropFromStringDelegate result = DelegateCacheProvider.CreatePropFromStringCache.GetOrAdd(typeOfThisValue);
+            return result;
+        }
+
+        // With No Value
+        protected new CreatePropWithNoValueDelegate GetPropWithNoValueCreator(Type typeOfThisValue)
+        {
+            CreatePropWithNoValueDelegate result = DelegateCacheProvider.CreatePropWithNoValCache.GetOrAdd(typeOfThisValue);
+            return result;
+        }
+
+        #endregion Property-Type Methods
+
+        #endregion Delegate Cache Support
+    }
 }

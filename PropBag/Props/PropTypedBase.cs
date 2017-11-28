@@ -24,14 +24,14 @@ namespace DRM.PropBag
 
         protected Func<T, T, bool> Comparer { get; set; }
 
-        private Action<T, T> _doWhenChangedAction;
-        public Action<T, T> DoWHenChangedAction
-        {
-            get { return _doWhenChangedAction; }
-            private set { _doWhenChangedAction = value; }
-        }
+        //private Action<T, T> _doWhenChangedAction;
+        //public Action<T, T> DoWHenChangedAction
+        //{
+        //    get { return _doWhenChangedAction; }
+        //    private set { _doWhenChangedAction = value; }
+        //}
 
-        public bool DoAfterNotify { get; set; }
+        //public bool DoAfterNotify { get; set; }
 
         protected GetDefaultValueDelegate<T> GetDefaultValFunc { get; }
         public virtual bool ReturnDefaultForUndefined => GetDefaultValFunc != null;
@@ -47,9 +47,9 @@ namespace DRM.PropBag
         #region Consructors
 
         protected PropTypedBase(Type typeOfThisValue, bool typeIsSolid, bool hasStore,
-            EventHandler<PCTypedEventArgs<T>> doWhenChangedX,
+            //EventHandler<PCTypedEventArgs<T>> doWhenChangedX,
             //Action<T, T> doWhenChanged,
-            bool doAfterNotify,
+            //bool doAfterNotify,
             Func<T,T,bool> comparer,
             GetDefaultValueDelegate<T> getDefaultValFunc,
             PropKindEnum propKind = PropKindEnum.Prop)
@@ -57,7 +57,7 @@ namespace DRM.PropBag
         {
 
             //DoWHenChangedAction = doWhenChanged;
-            DoAfterNotify = doAfterNotify;
+            //DoAfterNotify = doAfterNotify;
             Comparer = comparer;
             //PropertyChangedWithTVals = doWhenChangedX;
             GetDefaultValFunc = getDefaultValFunc;
@@ -67,13 +67,13 @@ namespace DRM.PropBag
 
         #region Public Methods
 
-        public void DoWhenChanged(T oldVal, T newVal)
-        {
-            Action<T, T> doWhenAction = Interlocked.CompareExchange(ref _doWhenChangedAction, null, null);
+        //public void DoWhenChanged(T oldVal, T newVal)
+        //{
+        //    Action<T, T> doWhenAction = Interlocked.CompareExchange(ref _doWhenChangedAction, null, null);
 
-            if (doWhenAction != null)
-                doWhenAction(oldVal, newVal);
-        }
+        //    if (doWhenAction != null)
+        //        doWhenAction(oldVal, newVal);
+        //}
 
         public bool CompareTo(T newValue)
         {
@@ -93,28 +93,28 @@ namespace DRM.PropBag
             return Comparer(val1, val2);
         }
 
-        public bool UpdateDoWhenChangedAction(Action<T, T> doWhenChangedAction, bool? doAfterNotify)
-        {
-            bool hadOnePreviously = doWhenChangedAction != null;
+        //public bool UpdateDoWhenChangedAction(Action<T, T> doWhenChangedAction, bool? doAfterNotify)
+        //{
+        //    bool hadOnePreviously = doWhenChangedAction != null;
 
-            this.DoWHenChangedAction = doWhenChangedAction;
-            if (doAfterNotify.HasValue)
-            {
-                this.DoAfterNotify = doAfterNotify.Value;
-            }
-            else
-            {
-                // If there was a previous value of DoWhenChangedAction, leave the value of doAfterNotify alone,
-                // otherwise set it to the default value of false.
-                if (!hadOnePreviously)
-                {
-                    // Set doAfterNotify to the default value of false.
-                    this.DoAfterNotify = false;
-                }
-            }
+        //    this.DoWHenChangedAction = doWhenChangedAction;
+        //    if (doAfterNotify.HasValue)
+        //    {
+        //        this.DoAfterNotify = doAfterNotify.Value;
+        //    }
+        //    else
+        //    {
+        //        // If there was a previous value of DoWhenChangedAction, leave the value of doAfterNotify alone,
+        //        // otherwise set it to the default value of false.
+        //        if (!hadOnePreviously)
+        //        {
+        //            // Set doAfterNotify to the default value of false.
+        //            this.DoAfterNotify = false;
+        //        }
+        //    }
 
-            return hadOnePreviously;
-        }
+        //    return hadOnePreviously;
+        //}
 
         // TODO: See if our value implements IDisposable, and if so, dispose it.
         public new void CleanUpTyped()

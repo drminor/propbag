@@ -14,7 +14,7 @@ namespace PropBagLib.Tests
         public CreateAtRunTimeModel(PropBagTypeSafetyMode typeSafetyMode, IPropFactory factory)
             : base(typeSafetyMode, factory) { }
 
-        public CreateAtRunTimeModel(PropModel pm) : base(pm)
+        public CreateAtRunTimeModel(PropModel pm, IPropFactory propFactory) : base(pm, null, propFactory)
         {
 
         }

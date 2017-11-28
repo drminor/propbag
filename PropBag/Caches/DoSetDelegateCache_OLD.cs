@@ -3,7 +3,7 @@ using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
 using System.Reflection;
 
-namespace DRM.PropBag.Caches
+namespace DRM.PropBag.Caches.NotUsed
 {
     internal class DoSetDelegateCache
     { 
@@ -19,6 +19,14 @@ namespace DRM.PropBag.Caches
 
             _doSetMethodInfo = hostType.GetMethod("DoSetBridge", BindingFlags.Instance | BindingFlags.NonPublic);
             _cache = new LockingConcurrentDictionary<Type, DoSetDelegate>(GetDoSetDelegate);
+        }
+
+        public int Count
+        {
+            get
+            {
+                return _cache.Count;
+            }
         }
 
         public DoSetDelegate GetOrAdd(Type typeOfThisValue)

@@ -1,14 +1,14 @@
 ﻿
+using System.Reflection;
 using DRM.PropBag;
 using DRM.TypeSafePropertyBag;
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 
 
 namespace PropBagLib.Tests
 {
-    public partial class AllPropsRegisteredModel : PropBag
+	public partial class AllPropsRegisteredModel : PropBag
 	{
 		public AllPropsRegisteredModel() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered, null) { }
 
@@ -17,16 +17,27 @@ namespace PropBagLib.Tests
 		public AllPropsRegisteredModel(PropBagTypeSafetyMode typeSafetyMode, IPropFactory factory) : base(typeSafetyMode, factory)
 		{
 	        AddProp<object>("PropObject", null, false, null);
+		 
 	        AddProp<string>("PropString", GetDelegate<string>("DoWhenStringChanged"), false, null);
+		SubscribeToPropChanged<string>(GetDelegate<string>("DoWhenStringChanged"), "PropString"); 
 	        AddPropNoValue<string>("PropStringCallDoAfter", GetDelegate<string>("DoWhenStringChanged"), true, EqualityComparer<string>.Default.Equals);
+		SubscribeToPropChanged<string>(GetDelegate<string>("DoWhenStringChanged"), "PropStringCallDoAfter"); 
 	        AddPropObjComp<string>("PropStringUseRefComp", GetDelegate<string>("DoWhenStringChanged"), true);
+		SubscribeToPropChanged<string>(GetDelegate<string>("DoWhenStringChanged"), "PropStringUseRefComp"); 
 	        AddProp<bool>("PropBool", null, false, null);
+		 
 	        AddProp<int>("PropInt", null, false, null);
+		 
 	        AddProp<TimeSpan>("PropTimeSpan", null, false, null);
+		 
 	        AddProp<Uri>("PropUri", null, false, null);
+		 
 	        AddProp<Lazy<int>>("PropLazyInt", null, false, null);
+		 
 	        AddProp<Nullable<int>>("PropNullableInt", GetDelegate<Nullable<int>>("DoWhenNullIntChanged"), false, null, null, -1);
+		SubscribeToPropChanged<Nullable<int>>(GetDelegate<Nullable<int>>("DoWhenNullIntChanged"), "PropNullableInt"); 
 	        AddProp<ICollection<int>>("PropICollectionInt", GetDelegate<ICollection<int>>("DoWhenICollectionIntChanged"), false, null);
+		SubscribeToPropChanged<ICollection<int>>(GetDelegate<ICollection<int>>("DoWhenICollectionIntChanged"), "PropICollectionInt"); 
 		}
 
 	#region Property Declarations
@@ -164,7 +175,7 @@ namespace PropBagLib.Tests
 		}  
 	 
 	#endregion
-
+	
 	#region PropetyChangedWithTVals Event Declarations
 		  
 			public event EventHandler<PCTypedEventArgs<object>> PropObjectChanged
