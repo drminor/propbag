@@ -123,6 +123,8 @@ namespace DRM.PropBag
             //DoWHenChangedAction = null;
             //PropertyChangedWithTVals = null;
             base.CleanUpTyped();
+
+            // TODO: Call Dispose on our value, if it implements IDisposable.
         }
 
         #endregion
