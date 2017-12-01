@@ -206,13 +206,7 @@ namespace PropBagLib.Tests.PerformanceDb
                 doWhenChanged: null, extraInfo: null, comparer: null, itemType: null);
             result.Props.Add(propItem);
 
-
-
-
             return result;
         }
-
-
-
     }
 }

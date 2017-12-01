@@ -35,6 +35,7 @@ namespace DRM.PropBag
     ///</summary>
     public class PubPropBag : PropBag, IPubPropBag
     {
+        
         #region Constructor
 
         public PubPropBag()
@@ -134,11 +135,6 @@ namespace DRM.PropBag
         new public void ClearAllProps()
         {
             base.ClearAllProps();
-        }
-
-        new public void ClearEventSubscribers()
-        {
-            base.ClearEventSubscribers();
         }
 
         #endregion

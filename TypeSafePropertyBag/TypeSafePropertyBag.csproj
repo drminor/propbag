@@ -66,6 +66,9 @@
     <Compile Include="PropStore\PropStoreNode.cs" />
     <Compile Include="PropStore\PropGen.cs" />
     <Compile Include="PropStore\PSNodeParentChangedEventArgs.cs" />
+    <Compile Include="PropStore\StoreNodeBag.cs" />
+    <Compile Include="PropStore\StoreNodeProp.cs" />
+    <Compile Include="PropStore\StoreNodes.cs" />
     <Compile Include="Subscriptions\SubscriptionGen.cs" />
     <Compile Include="UnUsed\PropValueStateEnum.cs" />
     <Compile Include="SimpleIOC\Container.cs" />
@@ -110,7 +113,7 @@
     <None Include="UnUsed\SimpleSubscriptionManager.cs" />
     <Compile Include="Subscriptions\SubscriberCollection.cs" />
     <Compile Include="Subscriptions\AbstractSubscription.cs" />
-    <Compile Include="Subscriptions\SubscriptionForBinding.cs" />
+    <Compile Include="Subscriptions\BindingSubscription.cs" />
     <Compile Include="Subscriptions\Subscription.cs" />
     <Compile Include="UnUsed\GenerateHash.cs" />
     <Compile Include="ObjectIdDictionary\IObjectExIdDictionary.cs" />

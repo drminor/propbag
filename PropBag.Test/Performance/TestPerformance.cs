@@ -23,10 +23,9 @@ namespace PropBagLib.Tests
         [TearDown]
         public void Destroy()
         {
-            mod1.ClearEventSubscribers();
+            mod1.Dispose();
             mod1 = null;
         }
-
 
         [Test]
         public void SetInt1000Regular()

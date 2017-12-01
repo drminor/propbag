@@ -36,7 +36,7 @@ namespace DRM.TypeSafePropertyBag
 
         void ClearAllProps();
 
-        void ClearEventSubscribers();
+        //void ClearEventSubscribers();
     }
 
 }

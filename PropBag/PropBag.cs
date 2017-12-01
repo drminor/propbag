@@ -1012,7 +1012,12 @@ namespace DRM.PropBag
                 LocalPropertyPath lpp = new LocalPropertyPath(pathToSource);
                 LocalBindingInfo bindingInfo = new LocalBindingInfo(lpp, LocalBindingMode.OneWay);
 
+                SubscriberCollection sc = GetSubscriptions(propId);
+
                 bool wasAdded = _ourStoreAccessor.RegisterBinding<T>(this, propId, bindingInfo);
+
+                sc = GetSubscriptions(propId);
+
                 return wasAdded;
             }
             else
@@ -1344,25 +1349,22 @@ namespace DRM.PropBag
         //    return prop.UpdateDoWhenChangedAction(doWhenChanged, doAfterNotify);
         //}
 
+        // TODO: Make instances re-usable.
+        // TODO: Make this implement a 'Reset All Data' type opertions.
         protected void ClearAllProps()
         {
-            // TODO: Fix Me.
-            //DelegateCacheProvider.DoSetDelegateCache.Clear();
-            //doSetDelegateDict.Clear();
-            ClearEventSubscribers();
-
-            _ourStoreAccessor.Clear(this);
+            _ourStoreAccessor.Dispose();
         }
 
-        protected void ClearEventSubscribers()
-        {
-            IEnumerable<IPropData> propDataObjects = _ourStoreAccessor.GetValues(this);
+        //protected void ClearEventSubscribers()
+        //{
+        //    IEnumerable<IPropData> propDataObjects = _ourStoreAccessor.GetValues(this);
 
-            foreach (IPropData propData in propDataObjects)
-            {
-                propData.CleanUp(doTypedCleanup: true);
-            }
-        }
+        //    foreach (IPropData propData in propDataObjects)
+        //    {
+        //        propData.CleanUp(doTypedCleanup: true);
+        //    }
+        //}
 
         #endregion
 
@@ -1410,7 +1412,7 @@ namespace DRM.PropBag
             if(sc != null)
             {
                 // Raise the PCTypedEvent to our list of subscribers
-                IEnumerable<ISubscription<T>> typedSubs = GetTypedSubscriptions<T>(sc);
+                List<ISubscription<T>> typedSubs = GetTypedSubscriptions<T>(sc).ToList();
                 if (!typedProp.ValueIsDefined)
                 {
                     foreach (ISubscription<T> typedSub in typedSubs)
@@ -1426,7 +1428,7 @@ namespace DRM.PropBag
                     }
                 }
 
-                IEnumerable<ISubscriptionGen> genSubs = GetPCGenSubscriptions(sc);
+                List<ISubscriptionGen> genSubs = GetPCGenSubscriptions(sc).ToList();
                 if (!typedProp.ValueIsDefined)
                 {
                     foreach (ISubscriptionGen genSub in genSubs)
@@ -1442,7 +1444,9 @@ namespace DRM.PropBag
                     }
                 }
 
-                IEnumerable<ISubscriptionGen> objSubs = GetPCObjectSubscriptions(sc);
+                List<ISubscriptionGen> genSubs2 = GetPCGenSubscriptions(sc).ToList();
+
+                List<ISubscriptionGen> objSubs = GetPCObjectSubscriptions(sc).ToList();
                 if (!typedProp.ValueIsDefined)
                 {
                     foreach (ISubscriptionGen objSub in objSubs)
@@ -1841,11 +1845,8 @@ namespace DRM.PropBag
             {
                 if (disposing)
                 {
-                    _propFactory.PropStoreAccessServiceProvider.TearDown(this, _ourStoreAccessor);
-
-                    // OurStoreAccessor.Clear(this);
-                    _ourStoreAccessor.Destroy();
-                    //_ourStoreAccessor = null; 
+                    //_propFactory.PropStoreAccessServiceProvider.TearDown(this, _ourStoreAccessor);
+                    _ourStoreAccessor.Dispose();
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.

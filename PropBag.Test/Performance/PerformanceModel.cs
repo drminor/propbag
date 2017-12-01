@@ -92,10 +92,5 @@ namespace PropBagLib.Tests
                 handler(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        new public void ClearEventSubscribers()
-        {
-            base.ClearEventSubscribers();
-        }
-
     }
 }

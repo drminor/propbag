@@ -197,7 +197,7 @@ namespace PropBagLib.Tests.PerformanceDb
             int howManyCreateFromString = test.CreatePropFromStringCacheCount;
             int howManyCreateWithNoVal = test.CreatePropWithNoValCacheCount;
 
-            Thread.Sleep(new TimeSpan(0, 0, 1));
+            //Thread.Sleep(new TimeSpan(0, 0, 1));
 
             foreach (DestinationModel1 pp in readyForTheView)
             {
@@ -212,19 +212,17 @@ namespace PropBagLib.Tests.PerformanceDb
             testMainVM.Dispose();
             testMainVM = null;
 
-            Thread.Sleep(new TimeSpan(0, 0, 1));
+            //Thread.Sleep(new TimeSpan(0, 0, 1));
 
-            // Test the PropStoreAccessProvider prune store feature.
-            // Do nothing for 1 hour, 24 minutes, in increments of 5 seconds.
-            for (int tp = 0; tp < 1000; tp++)
-            {
-                // Yield for 20 seconds.
-                Thread.Sleep(new TimeSpan(0, 0, 5));
-                GC.Collect(1, GCCollectionMode.Forced);
-            }
+            //// Test the PropStoreAccessProvider prune store feature.
+            //// Do nothing for 1 hour, 24 minutes, in increments of 5 seconds.
+            //for (int tp = 0; tp < 1000; tp++)
+            //{
+            //    // Yield for 20 seconds.
+            //    Thread.Sleep(new TimeSpan(0, 0, 5));
+            //    GC.Collect(1, GCCollectionMode.Forced);
+            //}
         }
-
-
 
         [Test]
         public void Z_BindParent()
@@ -257,11 +255,12 @@ namespace PropBagLib.Tests.PerformanceDb
             Business b2 = new Business();
             testMainVM.SetIt(b2, "Business");
 
+
             testMainVM.SetIt<DestinationModel5>(testChildVM, "ChildVM");
+            testMainVM.RegisterBinding<Business>("Business", "./ChildVM/Business");
 
             b2 = new Business();
             testMainVM.SetIt(b2, "Business");
-
         }
 
         #region DB Helper Methods
