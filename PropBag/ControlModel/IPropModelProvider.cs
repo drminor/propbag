@@ -5,13 +5,11 @@ namespace DRM.PropBag.ControlModel
 {
     public interface IPropModelProvider
     {
-        //bool HasPbtLookupResources { get; }
-        //bool CanFindPropBagTemplateWithJustKey { get; }
-
         PropModel GetPropModel(string resourceKey);
         PropModel GetPropModel(string resourceKey, IPropFactory propFactory);
 
+        // These would require adding a reference to PresentationFramework.
         //PropModel GetPropModel(ResourceDictionary rd, string resourceKey);
-        //PropModel GetPropModel(PropBagTemplate pbt);
+        //PropModel GetPropModel(ResourceDictionary rd, string resourceKey, IPropFactory propFactory);
     }
 }
