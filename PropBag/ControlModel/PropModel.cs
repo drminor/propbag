@@ -16,9 +16,6 @@ namespace DRM.PropBag.ControlModel
         #region Properties
 
         #region Activation Info
-        //bool dfppb;
-        //[XmlAttribute(AttributeName = "derive-from-pub-prop-bag")]
-        //public bool DeriveFromPubPropBag { get { return dfppb; } set { SetIfDifferent<bool>(ref dfppb, value); } }
 
         DeriveFromClassModeEnum _deriveFromClassMode;
         [XmlAttribute(AttributeName = "derive-from-class-mode")]
@@ -91,26 +88,11 @@ namespace DRM.PropBag.ControlModel
             set { this.SetCollection<ObservableCollection<PropItem>, PropItem>(ref _props, value); }
         }
 
-        //public bool IsClassDefined => ClassName != DEFAULT_CLASS_NAME;
-
         #endregion Other Properties
 
         #endregion Dependency Properties
 
         #region Constructors
-
-        //public const string DEFAULT_CLASS_NAME = "UndefinedClassName";
-
-        //public PropModel() : this(DEFAULT_CLASS_NAME,
-        //    null,
-        //    DeriveFromClassModeEnum.PropBag,
-        //    typeof(PropBag),
-        //    null,
-        //    null,
-        //    PropBagTypeSafetyMode.AllPropsMustBeRegistered,
-        //    deferMethodRefResolution: false,
-        //    requireExplicitInitialValue: false) { }
-
 
         public PropModel(string className, string namespaceName,
             DeriveFromClassModeEnum deriveFrom,
