@@ -4,9 +4,11 @@ using System.Threading;
 
 namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
 {
-    //using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
+    using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
+    using ObjectIdType = UInt64;
+    using PropIdType = UInt32;
 
-    public class ObservableSource<T> : INotifyPCTyped<T>
+    public class ObservableSource<T> : INotifyPCTyped<T>, IDisposable
     {
         #region Public events and properties
 
@@ -18,7 +20,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
 
         public string PathElement { get; set; }
 
-        //public ExKeyT PropId { get; }
+        public ExKeyT CompKey { get; }
 
         public SourceKindEnum SourceKind { get; }
 
@@ -26,117 +28,142 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
 
         public IPropBag PropChangeGenSource { get; }
 
-        public INotifyPCTyped<T> PropChangedTypedSource { get; }
-
-        //internal bool GetHasTypeAndHasData(out bool hasData)
-        //{
-
-        //    //if (SourceKind == SourceKindEnum.DataSourceProvider)
-        //    //{
-        //    //    hasData = _wrContainer != null && _wrContainer.IsAlive;
-        //    //}
-        //    //else
-        //    //{
-        //    //    hasData = _wrData != null && _wrData.IsAlive;
-        //    //}
-
-        //    //return _type != null;
-
-        //    hasData = false;
-        //    return false;
-        //}
-
-        public bool IsListeningForNewDC { get; private set; }
-
-        public bool IsReadyOrWatching => Status.IsReadyOrWatching();
-        public bool IsDcListeningToProp => Status.IsWatchingProp();
-        public bool IsDcListeningToColl => Status.IsWatchingColl();
-        public bool IsDcListening => Status.IsWatching();
-
-        public ObservableSourceStatusEnum Status { get; private set; }
+        public IPropBag PropChangedTypedSource { get; }
 
         #endregion
 
+        #region Constructors and their handlers
+
+        #region For PropertyChangedWithTVals
+
+        public ObservableSource(IPropBag propBag, ExKeyT compKey,
+            string pathElement, string binderName)
+        {
+            CompKey = compKey;
+            PathElement = pathElement;
+            BinderName = binderName;
+
+            SourceKind = SourceKindEnum.TerminalNode;
+            PropChangedTypedSource = propBag;
+            propBag.SubscribeToPropChanged<T>(PropertyChangedWithTVals_Handler, pathElement);
+        }
+
+        private void PropertyChangedWithTVals_Handler(object sender, PCTypedEventArgs<T> e)
+        {
+            OnPropertyChangedWithTVals(e);
+        }
+
+        #endregion
+
+        #region For PropertyChangedWithGenVals
+
+        public ObservableSource(IPropBag propBag, ExKeyT compKey,
+            string pathElement, SourceKindEnum sourceKind, string binderName)
+        {
+            CompKey = compKey;
+            PathElement = pathElement;
+            BinderName = binderName;
+
+            SourceKind = sourceKind;
+            PropChangeGenSource = propBag;
+            propBag.SubscribeToPropChanged(PropertyChangedWithGenVals_Handler, PathElement, typeof(T));
+        }
+
+        private void PropertyChangedWithGenVals_Handler(object sender, PCGenEventArgs e)
+        {
+            OnPropertyChangedWithGenVals(e);
+        }
+
+        #endregion
+
+        #region For PropStore
+
+        public ObservableSource(INotifyParentNodeChanged notifyParentChangedSource, ExKeyT compKey, 
+            string pathElement, SourceKindEnum sourceKind, string binderName)
+        {
+            CompKey = compKey;
+            PathElement = pathElement;
+            BinderName = binderName;
+
+            SourceKind = sourceKind;
+            ParentChangedSource = notifyParentChangedSource;
+            notifyParentChangedSource.ParentNodeHasChanged += ParentNodeHasChanged_Handler;
+        }
+
+        private void ParentNodeHasChanged_Handler(object sender, PSNodeParentChangedEventArgs e)
+        {
+            OnParentHasChanged(e);
+        }
+
+        #endregion
+
+        #endregion Constructors and their handlers
+
         #region Public Methods
 
-        //public void Reset(EventHandler<DataSourceChangedEventArgs> subscriber)
+        //public bool Subscribe(EventHandler<DataSourceChangedEventArgs> subscriber)
         //{
-
-        //    //if (subscriber != null) Unsubscribe(subscriber);
-
-        //    //if (SourceKind != SourceKindEnum.Empty && SourceKind != SourceKindEnum.TerminalNode && Status.IsWatching())
-        //    //{
-        //    //    object data = Data;
-        //    //    if (data != null)
-        //    //    {
-        //    //        RemoveSubscriptions(data);
-        //    //    }
-        //    //}
+        //    if (DataSourceChanged == null)
+        //    {
+        //        DataSourceChanged = subscriber;
+        //        return true; // We added it.
+        //    }
+        //    else
+        //    {
+        //        Delegate[] subscriberList = DataSourceChanged.GetInvocationList();
+        //        if (subscriberList.FirstOrDefault((x) => x == (Delegate)subscriber) == null)
+        //        {
+        //            DataSourceChanged += subscriber;
+        //            return true; // We added it.
+        //        }
+        //        else
+        //        {
+        //            return false; // Already there.
+        //        }
+        //    }
         //}
 
-        public bool Subscribe(EventHandler<DataSourceChangedEventArgs> subscriber)
-        {
-            if (DataSourceChanged == null)
-            {
-                DataSourceChanged = subscriber;
-                return true; // We added it.
-            }
-            else
-            {
-                Delegate[] subscriberList = DataSourceChanged.GetInvocationList();
-                if (subscriberList.FirstOrDefault((x) => x == (Delegate)subscriber) == null)
-                {
-                    DataSourceChanged += subscriber;
-                    return true; // We added it.
-                }
-                else
-                {
-                    return false; // Already there.
-                }
-            }
-        }
+        //public bool Unsubscribe(EventHandler<DataSourceChangedEventArgs> subscriber)
+        //{
+        //    if (DataSourceChanged == null)
+        //    {
+        //        return false; // It's not there.
+        //    }
+        //    else
+        //    {
+        //        Delegate[] subscriberList = DataSourceChanged.GetInvocationList();
+        //        if (subscriberList.FirstOrDefault((x) => x == (Delegate)subscriber) == null)
+        //        {
+        //            return false; // Not there.
+        //        }
+        //        else
+        //        {
+        //            DataSourceChanged -= subscriber;
+        //            return true; // We removed it.
+        //        }
+        //    }
+        //}
 
-        public bool Unsubscribe(EventHandler<DataSourceChangedEventArgs> subscriber)
-        {
-            if (DataSourceChanged == null)
-            {
-                return false; // It's not there.
-            }
-            else
-            {
-                Delegate[] subscriberList = DataSourceChanged.GetInvocationList();
-                if (subscriberList.FirstOrDefault((x) => x == (Delegate)subscriber) == null)
-                {
-                    return false; // Not there.
-                }
-                else
-                {
-                    DataSourceChanged -= subscriber;
-                    return true; // We removed it.
-                }
-            }
-        }
-
-        public bool Unsubscribe(EventHandler<PCTypedEventArgs<T>> subscriber)
-        {
-            if (PropertyChangedWithTVals == null)
-            {
-                return false; // It's not there.
-            }
-            else
-            {
-                Delegate[] subscriberList = PropertyChangedWithTVals.GetInvocationList();
-                if (subscriberList.FirstOrDefault((x) => x == (Delegate)subscriber) == null)
-                {
-                    return false; // Not there.
-                }
-                else
-                {
-                    PropertyChangedWithTVals -= subscriber;
-                    return true; // We removed it.
-                }
-            }
-        }
+        //public bool Unsubscribe(EventHandler<PCTypedEventArgs<T>> subscriber)
+        //{
+        //    if (PropertyChangedWithTVals == null)
+        //    {
+        //        return false; // It's not there.
+        //    }
+        //    else
+        //    {
+        //        Delegate[] subscriberList = PropertyChangedWithTVals.GetInvocationList();
+        //        if (subscriberList.FirstOrDefault((x) => x == (Delegate)subscriber) == null)
+        //        {
+        //            return false; // Not there.
+        //        }
+        //        else
+        //        {
+        //            PropertyChangedWithTVals -= subscriber;
+        //            return true; // We removed it.
+        //        }
+        //    }
+        //}
 
         #endregion
 
@@ -157,18 +184,12 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
                     }
                 case SourceKindEnum.Down:
                     {
-                        //PropChangeGenSource.PropertyChangedWithGenVals -= PropertyChangedWithGenVals_Handler;
                         PropChangeGenSource.UnSubscribeToPropChanged(PropertyChangedWithGenVals_Handler, PathElement, typeof(T));
-                        
                         break;
                     }
                 case SourceKindEnum.TerminalNode:
                     {
-                        //PropChangeGenSource.PropertyChangedWithGenVals -= PropertyChangedWithGenVals_Handler;
-
-                        //this.PropChangedTypedSource.PropertyChangedWithTVals -= PropertyChangedWithTVals_Handler;
-
-                        PropChangeGenSource.UnSubscribeToPropChanged(PropertyChangedWithGenVals_Handler, PathElement, typeof(T));
+                        PropChangedTypedSource.UnSubscribeToPropChanged<T>(PropertyChangedWithTVals_Handler, PathElement);
                         break;
                     }
                 default:
@@ -180,80 +201,6 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
 
         #endregion
 
-        #region Constructors and their handlers
-
-        #region From INotifyPCTyped<T>
-
-        public ObservableSource(INotifyPCTyped<T> itRaisesPCTyped, string pathElement, 
-            SourceKindEnum sourceKind, string binderName)
-        {
-            PathElement = pathElement;
-            IsListeningForNewDC = true;
-            BinderName = binderName;
-
-            SourceKind = sourceKind;
-            PropChangedTypedSource = itRaisesPCTyped;
-            itRaisesPCTyped.PropertyChangedWithTVals += PropertyChangedWithTVals_Handler;
-            Status = ObservableSourceStatusEnum.Ready;
-        }
-
-        private void PropertyChangedWithTVals_Handler(object sender, PCTypedEventArgs<T> e)
-        {
-            OnPropertyChangedWithTVals(e);
-        }
-
-        #endregion
-
-        #region From INotifyPCGen 
-
-        public ObservableSource(IPropBag propBag, string pathElement,
-            SourceKindEnum sourceKind, string binderName)
-        {
-            PathElement = pathElement;
-            IsListeningForNewDC = true;
-            BinderName = binderName;
-
-            SourceKind = sourceKind;
-            PropChangeGenSource = propBag;
-            propBag.SubscribeToPropChanged(PropertyChangedWithGenVals_Handler, PathElement, typeof(T));
-
-            Status = ObservableSourceStatusEnum.Ready;
-        }
-
-        private void PropertyChangedWithGenVals_Handler(object sender, PCGenEventArgs e)
-        {
-            if (e.PropertyName == PathElement)
-            {
-                OnChildPropertyHasChanged(e);
-            }
-        }
-
-        #endregion
-
-        #region PropStoreParent
-
-        public ObservableSource(INotifyParentNodeChanged notifyParentChangedSource, string pathElement,
-            SourceKindEnum sourceKind, string binderName)
-        {
-            PathElement = pathElement;
-            IsListeningForNewDC = true;
-            BinderName = binderName;
-
-            SourceKind = sourceKind;
-            ParentChangedSource = notifyParentChangedSource;
-            notifyParentChangedSource.ParentNodeHasChanged += ParentNodeHasChanged_Handler;
-            Status = ObservableSourceStatusEnum.Ready;
-        }
-
-        private void ParentNodeHasChanged_Handler(object sender, PSNodeParentChangedEventArgs e)
-        {
-            OnParentHasChanged(e);
-        }
-
-        #endregion
-
-        #endregion Constructors and their handlers
-
         #region Raise Event Helpers
 
         public void OnPropertyChangedWithTVals(PCTypedEventArgs<T> eArgs)
@@ -261,7 +208,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
             Interlocked.CompareExchange(ref PropertyChangedWithTVals, null, null)?.Invoke(this, eArgs);
         }
 
-        private void OnChildPropertyHasChanged(PCGenEventArgs eArgs)
+        private void OnPropertyChangedWithGenVals(PCGenEventArgs eArgs)
         {
             Interlocked.CompareExchange(ref DataSourceChanged, null, null)
                 ?.Invoke(this, DataSourceChangedEventArgs.NewFromPCGen(eArgs));
@@ -271,6 +218,46 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
         {
             Interlocked.CompareExchange(ref DataSourceChanged, null, null)
                 ?.Invoke(this, DataSourceChangedEventArgs.NewFromPSNodeParentChanged(eArgs, PathElement, typeof(T)));
+        }
+
+        #endregion
+
+        #region IDisposable Support
+
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects).
+                    DataSourceChanged = null;
+                    PropertyChangedWithTVals = null;
+                    RemoveSubscriptions();
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        // ~Temp() {
+        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        //   Dispose(false);
+        // }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            // GC.SuppressFinalize(this);
         }
 
         #endregion

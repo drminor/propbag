@@ -45,6 +45,16 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
             }
         }
 
+        public new void Clear()
+        {
+            foreach(ObservableSource<T> listener in this)
+            {
+                listener.Dispose();
+            }
+
+            base.Clear();
+        }
+
         private string GetConnectedPathElement(bool isFirst, PathConnectorTypeEnum po, string pathElement)
         {
             if (isFirst)
@@ -84,85 +94,8 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
             }
         }
 
-        //public void ResetListeners(int startIndex, EventHandler<DataSourceChangedEventArgs> dsSubscription)
-        //{
-        //    for (int nPtr = startIndex; nPtr < Count; nPtr++)
-        //    {
-        //        this[nPtr].Reset(dsSubscription);
-        //    }
-        //}
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="pathListeners"></param>
-        /// <param name="index"></param>
-        /// <param name="newListenerProvider"></param>
-        /// <param name="dsSubscription"></param>
-        /// <param name="newListener"></param>
-        /// <returns>True if the path listener is ready to start listening to property and/or collection change events.</returns>
-        //public ObservableSourceStatusEnum ReplaceListener(int index, ObservableSource<T> newListener,
-        //    EventHandler<DataSourceChangedEventArgs> dsSubscription, EventHandler<PCTypedEventArgs<T>> typedSubscription)
-        //{
-        //    if (index == Count - 1)
-        //    {
-        //        System.Diagnostics.Debug.Assert(index != Count - 1,
-        //            "We are replacing the terminal listener. This is not good.");
-        //    }
 
-        //    ObservableSource<T> oldListener = this[index];
 
-        //    bool wasListening = oldListener?.IsListeningForNewDC == true;
-
-        //    if (newListener?.IsListeningForNewDC != true)
-        //    {
-        //        // The new ObservableSource<T> is not responding to any change events.
-        //        if (index == 0)
-        //        {
-        //            System.Diagnostics.Debug.WriteLine("The Source Root is not listening.");
-        //        }
-        //        else if (wasListening)
-        //        {
-        //            System.Diagnostics.Debug.WriteLine($"The ObservableSource<T> at node {index} is no longer listening to any change events.");
-        //        }
-        //    }
-
-        //    if (oldListener != null)
-        //    {
-        //        #if DEBUG
-        //        bool wasRemoved = oldListener.Unsubscribe(dsSubscription);
-        //        System.Diagnostics.Debug.Assert(wasListening == wasRemoved, "Was Listening does not agree with WasRemoved.");
-
-        //        // Remove PropertyChanged or CollectionChanged event handlers, if any.
-        //        oldListener.Reset(dsSubscription);
-        //        #else
-        //        // Remove all event handlers.
-        //        oldListener.Reset(dsSubscription);
-        //        #endif
-        //    }
-
-        //    if (newListener == null)
-        //    {
-        //        // It is the caller's responsibility to cleanup the dependent nodes.
-        //        return ObservableSourceStatusEnum.NoType;
-        //    }
-
-        //    if (newListener.IsListeningForNewDC)
-        //    {
-        //        bool isListening = newListener.Subscribe(dsSubscription);
-        //        System.Diagnostics.Debug.Assert(isListening, "dsSubscription was already present, but should not have been.");
-        //        isListening = newListener.IsListeningForNewDC;
-        //    }
-
-        //    this[index] = newListener;
-
-        //    #if DEBUG
-        //    bool hasType = newListener.GetHasTypeAndHasData(out bool hasData);
-        //    #endif
-
-        //    // The new path listener is ready to start monitoring Property and/or Collection Changed events if 
-        //    // it still has a reference to the object that will be monitored.
-        //    return newListener.Status;
-        //}
     }
 }
