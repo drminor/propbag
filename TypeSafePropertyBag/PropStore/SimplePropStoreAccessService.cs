@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using DRM.TypeSafePropertyBag.Fundamentals;
+using System.Collections.Concurrent;
 
 namespace DRM.TypeSafePropertyBag
 {
@@ -21,16 +22,22 @@ namespace DRM.TypeSafePropertyBag
     using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
     #endregion
 
-    internal class SimplePropStoreAccessService : PSAccessServiceType, IHaveTheStoreNode
+    internal class SimplePropStoreAccessService : PSAccessServiceType, IHaveTheStoreNode, IDisposable
     {
         #region Private Members
 
         readonly WeakReference<IPropBagInternal> _clientAccessToken;
         readonly ObjectIdType _objectId;
 
-        readonly PropStoreNode _ourNode;
+        readonly StoreNodeBag _ourNode;
 
         PSAccessServiceProviderType _propStoreAccessServiceProvider;
+
+        // Subscription Management
+        const int OBJECT_INDEX_CONCURRENCY_LEVEL = 1; // Typical number of threads simultaneously accessing the ObjectIndexes.
+        const int EXPECTED_NO_OF_OBJECTS = 10000;
+
+        private CollectionOfSubscriberCollections _propIndexes;
 
         readonly BindingsCollection _bindings;
 
@@ -40,7 +47,7 @@ namespace DRM.TypeSafePropertyBag
 
         public SimplePropStoreAccessService
             (
-            PropStoreNode ourNode,
+            StoreNodeBag ourNode,
             L2KeyManType level2KeyManager,
             PSAccessServiceProviderType propStoreAccessServiceProvider
             )
@@ -48,12 +55,16 @@ namespace DRM.TypeSafePropertyBag
             _ourNode = ourNode;
             _propStoreAccessServiceProvider = propStoreAccessServiceProvider;
 
-            Level2KeyManager = level2KeyManager; //ourNode.PropBagProxy.Level2KeyManager;
+            Level2KeyManager = level2KeyManager;
             MaxObjectsPerAppDomain = propStoreAccessServiceProvider.MaxObjectsPerAppDomain;
 
             _clientAccessToken = _ourNode.PropBagProxy.PropBagRef;
-            _objectId = _ourNode.CompKey.Level1Key; // .PropBagProxy.ObjectId;
+            _objectId = _ourNode.CompKey.Level1Key;
 
+            // Create the subscription store for this PropBag.
+            _propIndexes = new CollectionOfSubscriberCollections();
+
+            // Create the binding store for this PropBag.
             _bindings = new BindingsCollection();
         }
 
@@ -74,19 +85,19 @@ namespace DRM.TypeSafePropertyBag
                 IPropData result = GetChild(cKey).Int_PropData;
                 return result;
             }
-            private set
-            {
-                IPropDataInternal int_PropData = GetInt_PropData(value);
-                ExKeyT cKey = GetCompKey(propBag, propId);
+            //private set
+            //{
+            //    IPropDataInternal int_PropData = GetInt_PropData(value);
+            //    ExKeyT cKey = GetCompKey(propBag, propId);
 
-                _ourNode.ChildList[cKey].Int_PropData = int_PropData;
-            }
+            //    _ourNode.ChildList[cKey].Int_PropData = int_PropData;
+            //}
         }
 
         public bool TryGetValue(IPropBag propBag, PropIdType propId, out IPropData propData)
         {
             ExKeyT cKey = GetCompKey(propBag, propId);
-            if(_ourNode.TryGetChild(cKey, out PropStoreNode child))
+            if(_ourNode.TryGetChild(cKey, out StoreNodeProp child))
             {
                 propData = child.Int_PropData;
                 return true;
@@ -104,7 +115,7 @@ namespace DRM.TypeSafePropertyBag
             propData = new PropGen(genericTypedProp, propertyKey, propId, propertyName);
             IPropDataInternal int_PropData = (IPropDataInternal)propData;
 
-            PropStoreNode propStoreNode = new PropStoreNode(propertyKey, int_PropData, _ourNode);
+            StoreNodeProp propStoreNode = new StoreNodeProp(propertyKey, int_PropData, _ourNode);
             bool result = true;
 
             if (int_PropData.IsPropBag)
@@ -117,12 +128,12 @@ namespace DRM.TypeSafePropertyBag
                 object guest = int_PropData?.TypedProp?.TypedValueAsObject; 
                 if(guest != null)
                 {
-                    PropStoreNode guestPropBagNode = GetGuestObjectNodeFromPropItemVal((IPropBag)guest);
-                    guestPropBagNode.MakeItAChildOf(propStoreNode);
+                    StoreNodeBag guestPropBagNode = GetGuestObjectNodeFromPropItemVal((IPropBag)guest);
+                    guestPropBagNode.Parent = propStoreNode;
                 }
 
                 // Subscribe to changes to this PropData's Value.
-                BeginWatchingParent(propertyKey, propId);
+                BeginWatchingParent(propertyKey);
             }
             return result;
         }
@@ -131,7 +142,7 @@ namespace DRM.TypeSafePropertyBag
         {
             ExKeyT cKey = GetCompKey(propBag, propId);
 
-            bool result = _ourNode.TryRemoveChild(cKey, out PropStoreNode child);
+            bool result = _ourNode.TryRemoveChild(cKey, out StoreNodeProp child);
 
             if (result)
                 propData = child.Int_PropData;
@@ -144,58 +155,39 @@ namespace DRM.TypeSafePropertyBag
         public bool ContainsKey(IPropBag propBag, PropIdType propId)
         {
             ExKeyT cKey = GetCompKey(propBag, propId);
-            bool result = _ourNode.ChildList.ContainsKey(cKey);
+            bool result = _ourNode.ChildExists(cKey);
             return result;
         }
 
-        // TODO: Take a lock here.
-        public void Clear(IPropBag propBag)
+        private void ResetAllData()
         {
-            GetAndCheckObjectRef(propBag);
-            ClearInt();
-        }
+            int numSubsRemoved = 0;
+            foreach(SubscriberCollection sc in _propIndexes)
+            {
+                numSubsRemoved += sc.ClearSubscriptions();
+            }
 
-        public void Destroy()
-        {
-            ClearInt();
-            //readonly WeakReference<IPropBag> _clientAccessToken;
-            //readonly ObjectIdType _objectId;
-
-            //readonly PropStoreNode _ourNode;
-            //readonly ICKeyManType _compKeyManager;
-            //readonly L2KeyManType _level2KeyManager;
-
-            //readonly PSAccessServiceProviderType _propStoreAccessServiceProvider;
-
-            //readonly BindingsCollection _bindings;
-            _propStoreAccessServiceProvider = null;
-        }
-
-        private void ClearInt()
-        {
             foreach (ISubscriptionGen binding in _bindings)
             {
-                // TODO: Implement IDisposable on ISubscriptionGen
-                //binding.Clear();
-                _bindings.TryRemoveBinding(binding);
+                if (binding is IDisposable disable) disable.Dispose();
             }
+            int numBindingsRemoved = _bindings.ClearBindings();
 
-            //Bindings = new BindingsCollection();
-
-            foreach (KeyValuePair<ExKeyT, PropStoreNode> kvp in _ourNode.Children)
+            foreach (StoreNodeProp prop in _ourNode.Children)
             {
-                kvp.Value.Int_PropData.CleanUp(doTypedCleanup: true);
+                prop.Int_PropData.CleanUp(doTypedCleanup: true);
             }
-            _ourNode.ChildList.Clear();
+            _ourNode.ClearChildren();
         }
 
         public IEnumerable<KeyValuePair<PropNameType, IPropData>> GetCollection(IPropBag propBag)
         {
             GetAndCheckObjectRef(propBag);
+
             Dictionary<PropNameType, IPropData> result = _ourNode.Children.ToDictionary
                 (
-                x => GetPropNameFromKey(x.Key),
-                x => (IPropData) x.Value.Int_PropData
+                x => GetPropNameFromKey(x.CompKey),
+                x => (IPropData) x.Int_PropData
                 );
 
             return result;
@@ -211,14 +203,14 @@ namespace DRM.TypeSafePropertyBag
         public IEnumerable<PropNameType> GetKeys(IPropBag propBag)
         {
             GetAndCheckObjectRef(propBag);
-            IEnumerable<PropNameType> result = _ourNode.Children.Select(x => GetPropNameFromKey(x.Key));
+            IEnumerable<PropNameType> result = _ourNode.Children.Select(x => GetPropNameFromKey(x.CompKey));
             return result;
         }
 
         public IEnumerable<IPropData> GetValues(IPropBag propBag)
         {
             GetAndCheckObjectRef(propBag);
-            IEnumerable<IPropData> result = _ourNode.Children.Select(x => x.Value.Int_PropData);
+            IEnumerable<IPropData> result = _ourNode.Children.Select(x => x.Int_PropData);
             return result;
         }
 
@@ -237,21 +229,17 @@ namespace DRM.TypeSafePropertyBag
                     if (oldTypedProp.TypedValueAsObject != null && oldTypedProp.TypedValueAsObject.GetType().IsPropBagBased())
                     {
                         // Remove the PropData's event handler from the PropBag event.
-                        StopWatchingParent(cKey, propId);
+                        StopWatchingParent(cKey);
                     }
 
                     int_propData.SetTypedProp(propertyName, genericTypedProp);
 
-                    // TODO: Raise the Prop Changed event.
-                    //OnPropertyChangedWithObjectVals(propertyName, oldTypedProp?.TypedValueAsObject, genericTypedProp?.TypedValueAsObject);
-
                     if (genericTypedProp.TypedValueAsObject != null && genericTypedProp.TypedValueAsObject.GetType().IsPropBagBased())
                     {
                         // Subscribe to the new value's PropertyChanged event.
-                        BeginWatchingParent(cKey, propId);
+                        BeginWatchingParent(cKey);
                     }
                 }
-
                 return true;
             }
             else
@@ -269,9 +257,13 @@ namespace DRM.TypeSafePropertyBag
         {
             ExKeyT exKey = GetExKey(propBag, propId);
 
+            TryGetSubscriptions(exKey, out SubscriberCollection sc);
             ISubscriptionKeyGen subscriptionRequest = new SubscriptionKey<T>(exKey, eventHandler, priorityGroup, keepRef);
 
             ISubscriptionGen newSubscription = AddSubscription(subscriptionRequest, out bool wasAdded);
+
+            TryGetSubscriptions(exKey, out SubscriberCollection sc2);
+
             return wasAdded;
         }
 
@@ -325,18 +317,55 @@ namespace DRM.TypeSafePropertyBag
 
         #endregion
 
-        #region ICacheSubscriptions Implementation -- Pass through to the Service Provider.
+        #region Subscription Management
 
         public ISubscriptionGen AddSubscription(ISubscriptionKeyGen subscriptionRequest, out bool wasAdded)
         {
-            ISubscriptionGen result = _propStoreAccessServiceProvider.AddSubscription(subscriptionRequest, out wasAdded);
+            if (subscriptionRequest.HasBeenUsed)
+            {
+                throw new ApplicationException("Its already been used.");
+            }
+
+            SubscriberCollection sc = GetOrAddSubscription((SimpleExKey)subscriptionRequest.SourcePropRef);
+
+            ISubscriptionGen result = sc.GetOrAdd
+                (
+                subscriptionRequest,
+                    (
+                    x => subscriptionRequest.CreateSubscription()
+                    )
+                );
+
+            if (subscriptionRequest.HasBeenUsed)
+            {
+                System.Diagnostics.Debug.WriteLine($"Created a new Subscription for Property:" +
+                    $" {subscriptionRequest.SourcePropRef} / Event: {result.SubscriptionKind}.");
+                wasAdded = true;
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"The subscription for Property:" +
+                    $" {subscriptionRequest.SourcePropRef} / Event: {result.SubscriptionKind} was not added.");
+                wasAdded = false;
+            }
             return result;
         }
 
         public bool RemoveSubscription(ISubscriptionKeyGen subscriptionRequest)
         {
-            bool result = _propStoreAccessServiceProvider.RemoveSubscription(subscriptionRequest);
-            return result;
+            if (TryGetSubscriptions(subscriptionRequest.SourcePropRef, out SubscriberCollection sc))
+            {
+                bool result = sc.RemoveSubscription(subscriptionRequest);
+
+                if (result)
+                    System.Diagnostics.Debug.WriteLine($"Removed the subscription for {subscriptionRequest.SourcePropRef}.");
+
+                return result;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         public SubscriberCollection GetSubscriptions(IPropBag host, PropIdType propId)
@@ -346,7 +375,7 @@ namespace DRM.TypeSafePropertyBag
             // TODO: NOTE: This does not verify that the caller is the "correct" one.
             ExKeyT exKey = new SimpleExKey(_objectId, propId);
 
-            if( _propStoreAccessServiceProvider.TryGetSubscriptions(exKey, out SubscriberCollection subs))
+            if (TryGetSubscriptions(exKey, out SubscriberCollection subs))
             {
                 return subs;
             }
@@ -354,21 +383,23 @@ namespace DRM.TypeSafePropertyBag
             {
                 return null;
             }
-            
-            //SubscriberCollection result = _propStoreAccessServiceProvider.GetSubscriptions(_objectId, propId);
-            //return result;
         }
-
-        //public SubscriberCollection GetSubscriptions(ObjectIdType objectId, PropIdType propId)
-        //{
-        //    throw new NotSupportedException("GetSubscriptions with ObjectId and PropId is not supported. Use the version that takes a IPropBag and propId.");
-        //    //SubscriberCollection result = _propStoreAccessServiceProvider.GetSubscriptions(objectId, propId);
-        //    //return result;
-        //}
 
         public bool TryGetSubscriptions(ExKeyT exKey, out SubscriberCollection subscriberCollection)
         {
-            throw new NotImplementedException();
+            bool result = _propIndexes.TryGetSubscriberCollection(exKey.Level2Key, out subscriberCollection);
+            return result;
+        }
+
+        private SubscriberCollection GetOrAddSubscription(ExKeyT exKey)
+        {
+            SubscriberCollection result = _propIndexes.GetOrCreate(exKey.Level2Key, out bool subcriberListWasCreated);
+            if (subcriberListWasCreated)
+            {
+                System.Diagnostics.Debug.WriteLine($"Created a new SubscriberCollection for {exKey}.");
+            }
+
+            return result;
         }
 
         #endregion
@@ -389,6 +420,10 @@ namespace DRM.TypeSafePropertyBag
             ISubscriptionKeyGen bindingRequest = new BindingSubscriptionKey<T>(exKey, bindingInfo);
             
             bool result = TryRemoveBinding(bindingRequest, out ISubscriptionGen binding);
+            if(binding is IDisposable disable)
+            {
+                disable.Dispose();
+            }
             return result;
         }
 
@@ -448,14 +483,18 @@ namespace DRM.TypeSafePropertyBag
 
         #region Prop Store Node Events and Call Backs
 
-        private bool BeginWatchingParent(ExKeyT propertyKey, PropIdType propId)
+        private bool BeginWatchingParent(ExKeyT propertyKey)
         {
+            TryGetSubscriptions(propertyKey, out SubscriberCollection sc);
+
             SubscriptionKeyGen subscriptionRequest = new SubscriptionKeyGen(propertyKey, PropertyChangedWithObjectVals, SubscriptionPriorityGroup.Standard, keepRef: false);
             AddSubscription(subscriptionRequest, out bool wasAdded);
+
+            TryGetSubscriptions(propertyKey, out SubscriberCollection sc2);
             return wasAdded;
         }
 
-        private bool StopWatchingParent(ExKeyT propertyKey, PropIdType propId)
+        private bool StopWatchingParent(ExKeyT propertyKey)
         {
 
             SubscriptionKeyGen subscriptionRequest = new SubscriptionKeyGen(propertyKey, PropertyChangedWithObjectVals, SubscriptionPriorityGroup.Standard, keepRef: false);
@@ -473,8 +512,8 @@ namespace DRM.TypeSafePropertyBag
                     System.Diagnostics.Debug.Assert(e.OldValue.GetType().IsPropBagBased(), "The old value does not implement IPropBag on PropertyChangedWithObjectVals handler in PropStoreAccessService.");
 
                     // Make old a root.
-                    PropStoreNode guestPropBagNode = GetGuestObjectNodeFromPropItemVal((IPropBag)e.OldValue);
-                    _ourNode.AddSibling(guestPropBagNode);
+                    StoreNodeBag guestPropBagNode = GetGuestObjectNodeFromPropItemVal((IPropBag)e.OldValue);
+                    guestPropBagNode.Parent = null;
                 }
             }
             else if (e.OldValueIsUndefined)
@@ -486,15 +525,18 @@ namespace DRM.TypeSafePropertyBag
                     // Move to child of our property item. This object is currently a root.
                     IPropBag propBagHost = (IPropBag)e.NewValue;
 
-                    PropStoreNode guestPropBagNode = GetGuestObjectNodeFromPropItemVal(propBagHost);
+                    StoreNodeBag guestPropBagNode = GetGuestObjectNodeFromPropItemVal(propBagHost);
 
                     //if (_ourNode.PropBagProxy.Level2KeyManager.TryGetFromRaw(e.PropertyName, out PropIdType propId))
 
-                    if (((IPropBagInternal)propBagHost).Level2KeyManager.TryGetFromRaw(e.PropertyName, out PropIdType propId))
+                    L2KeyManType level2Man = ((IPropBagInternal)sender).Level2KeyManager;
+
+                    //if (((IPropBagInternal)propBagHost).Level2KeyManager.TryGetFromRaw(e.PropertyName, out PropIdType propId))
+                    if (level2Man.TryGetFromRaw(e.PropertyName, out PropIdType propId))
                     {
                         ExKeyT cKey = new SimpleExKey(_objectId, propId);
-                        PropStoreNode propItemNode = GetChild(cKey);
-                        guestPropBagNode.MakeItAChildOf(propItemNode);
+                        StoreNodeProp propItemNode = GetChild(cKey);
+                        guestPropBagNode.Parent = propItemNode;
                     }
                 }
             }
@@ -506,8 +548,8 @@ namespace DRM.TypeSafePropertyBag
                     System.Diagnostics.Debug.Assert(e.OldValue.GetType().IsPropBagBased(), "The old value does not implement IPropBag on PropertyChangedWithObjectVals handler in PropStoreAccessService.");
 
                     // Make old a root.
-                    PropStoreNode guestPropBagNode = GetGuestObjectNodeFromPropItemVal((IPropBag)e.OldValue);
-                    _ourNode.AddSibling(guestPropBagNode);
+                    StoreNodeBag guestPropBagNode = GetGuestObjectNodeFromPropItemVal((IPropBag)e.OldValue);
+                    guestPropBagNode.Parent = null;
                 }
 
                 if (e.NewValue != null)
@@ -517,21 +559,30 @@ namespace DRM.TypeSafePropertyBag
                     // Move to child of our property item. This object is currently a root.
                     IPropBag propBagHost = (IPropBag)e.NewValue;
 
-                    PropStoreNode guestPropBagNode = GetGuestObjectNodeFromPropItemVal(propBagHost);
+                    StoreNodeBag guestPropBagNode = GetGuestObjectNodeFromPropItemVal(propBagHost);
 
-                    //if (_ourNode.PropBagProxy.Level2KeyManager.TryGetFromRaw(e.PropertyName, out PropIdType propId))
+                    L2KeyManType level2Man = ((IPropBagInternal)sender).Level2KeyManager;
 
-                    if (((IPropBagInternal)propBagHost).Level2KeyManager.TryGetFromRaw(e.PropertyName, out PropIdType propId))
+                    //if (((IPropBagInternal)propBagHost).Level2KeyManager.TryGetFromRaw(e.PropertyName, out PropIdType propId))
+
+                    if (level2Man.TryGetFromRaw(e.PropertyName, out PropIdType propId))
                     {
-                        PropStoreNode propItemNode = GetChild(propId);
-                        if(guestPropBagNode.Parent != propItemNode)
+                        ExKeyT cKey = new SimpleExKey(_objectId, propId);
+                        StoreNodeProp propItemNode = GetChild(cKey);
+
+                        // Update, if not already set.
+                        if (guestPropBagNode.Parent != propItemNode)
                         {
-                            guestPropBagNode.MakeItAChildOf(propItemNode);
+                            guestPropBagNode.Parent = propItemNode;
                         }
                         else
                         {
                             System.Diagnostics.Debug.WriteLine("The PropItemNode is already our parent.");
                         }
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Could not find property with name: {e.PropertyName} from {e.NewValue}.");
                     }
                 }
             }
@@ -549,7 +600,7 @@ namespace DRM.TypeSafePropertyBag
             return childObjectNode;
         }
 
-        private PropStoreNode GetGuestObjectNodeFromPropItemVal(IPropBag propBag)
+        private StoreNodeBag GetGuestObjectNodeFromPropItemVal(IPropBag propBag)
         {
             //ObjectIdType objectId = GetAndCheckObjectRef(propBag);
 
@@ -558,8 +609,7 @@ namespace DRM.TypeSafePropertyBag
                 PSAccessServiceType accessService = pbInternalAccess.ItsStoreAccessor;
                 if (accessService is IHaveTheStoreNode itsGotTheKey)
                 {
-                    PropStoreNode propStoreNode = itsGotTheKey.PropStoreNode;
-                    System.Diagnostics.Debug.Assert(propStoreNode.IsObjectNode, "The propStoreNode returned from GetGuestObjectNodeFromPropVal should have IsObjectNode = true.");
+                    StoreNodeBag propStoreNode = itsGotTheKey.PropStoreNode;
                     return propStoreNode;
                 }
                 else
@@ -573,8 +623,8 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        PropStoreNode _root;
-        private PropStoreNode Root
+        StoreNodeBag _root;
+        private StoreNodeBag Root
         {
             get
             {
@@ -586,11 +636,11 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        private PropStoreNode GetChild(ExKeyT cKey)
+        private StoreNodeProp GetChild(ExKeyT cKey)
         {
-            if (_ourNode.TryGetChild(cKey, out PropStoreNode child))
+            if (_ourNode.TryGetChild(cKey, out StoreNodeProp child))
             {
-                PropStoreNode result = child;
+                StoreNodeProp result = child;
                 return result;
             }
             else
@@ -599,12 +649,12 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        private PropStoreNode GetChild(PropIdType propId)
+        private StoreNodeProp GetChild(PropIdType propId)
         {
             ExKeyT cKey = new SimpleExKey(this._objectId, propId);
-            if (_ourNode.TryGetChild(cKey, out PropStoreNode child))
+            if (_ourNode.TryGetChild(cKey, out StoreNodeProp child))
             {
-                PropStoreNode result = child;
+                StoreNodeProp result = child;
                 return result;
             }
             else
@@ -613,10 +663,10 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        private PropStoreNode CheckAndGetChild(IPropBag propBag, PropIdType propId, out ExKeyT cKey)
+        private StoreNodeProp CheckAndGetChild(IPropBag propBag, PropIdType propId, out ExKeyT cKey)
         {
             cKey = GetCompKey(propBag, propId);
-            PropStoreNode result = GetChild(cKey);
+            StoreNodeProp result = GetChild(cKey);
             return result;
         }
 
@@ -693,7 +743,7 @@ namespace DRM.TypeSafePropertyBag
 
         #region Explicit Implementation of the internal interface: IHaveTheKey
 
-        PropStoreNode IHaveTheStoreNode.PropStoreNode => _ourNode;
+        StoreNodeBag IHaveTheStoreNode.PropStoreNode => _ourNode;
 
         //ObjectIdType IHaveTheKeyIT.ObjectId => _objectId;
 
@@ -726,6 +776,46 @@ namespace DRM.TypeSafePropertyBag
         //    bool result = _ourNode.TryGetChild(propId, out child);
         //    return result;
         //}
+
+        #endregion
+
+        #region IDisposable Support
+
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects).
+                    ResetAllData();
+
+                    _propStoreAccessServiceProvider.TearDown(_ourNode.CompKey);
+
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        // ~Temp() {
+        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        //   Dispose(false);
+        // }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            // GC.SuppressFinalize(this);
+        }
 
         #endregion
 

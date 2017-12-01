@@ -12,7 +12,7 @@ namespace DRM.TypeSafePropertyBag
 
     public class PSNodeParentChangedEventArgs : EventArgs
     {
-        public PSNodeParentChangedEventArgs(ExKeyT propId, IPropBagProxy oldValue, IPropBagProxy newValue)
+        public PSNodeParentChangedEventArgs(ExKeyT propId, ExKeyT oldValue, ExKeyT newValue)
         {
             PropId = propId;
             OldValue = oldValue;
@@ -20,8 +20,8 @@ namespace DRM.TypeSafePropertyBag
         }
 
         public ExKeyT PropId { get; set; }
-        public IPropBagProxy OldValue { get; set; }
-        public IPropBagProxy NewValue { get; set; }
+        public ExKeyT OldValue { get; set; }
+        public ExKeyT NewValue { get; set; }
 
 
     }

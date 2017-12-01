@@ -19,7 +19,7 @@ namespace DRM.TypeSafePropertyBag
         ///// <returns></returns>
         //IExplodedKey<CompT, L1T, L2T> GetTheKey(IPropBag propBag, L2T propId);
 
-        PropStoreNode PropStoreNode { get; }
+        StoreNodeBag PropStoreNode { get; }
 
         //PropStoreNode GetObjectNodeForPropVal(IPropDataInternal int_propData);
 

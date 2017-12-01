@@ -3,7 +3,9 @@ using System;
 
 namespace DRM.TypeSafePropertyBag
 {
-    public interface IProvidePropStoreAccessService<L2T, L2TRaw> : ICacheSubscriptions<L2T>, IDisposable
+    using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
+
+    public interface IProvidePropStoreAccessService<L2T, L2TRaw> : IDisposable
     {
         // Information necessary to create composite keys.
         long MaxObjectsPerAppDomain { get; }
@@ -11,7 +13,7 @@ namespace DRM.TypeSafePropertyBag
 
         // Create and TearDown PropStoreAccessService instances.
         IPropStoreAccessService<L2T, L2TRaw> CreatePropStoreService(IPropBagInternal propBag);
-        void TearDown(IPropBag int_PropBag, IPropStoreAccessService<L2T, L2TRaw> propStoreService);
+        void TearDown(ExKeyT cKey);
 
         // Diagnostics
         void IncAccess();

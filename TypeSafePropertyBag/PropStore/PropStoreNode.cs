@@ -383,7 +383,7 @@ namespace DRM.TypeSafePropertyBag
         private void OnParentNodeHasChanged(PropStoreNode oldValue, PropStoreNode newValue)
         {
             Interlocked.CompareExchange(ref ParentNodeHasChanged, null, null)?.Invoke(
-                this, new PSNodeParentChangedEventArgs(this.CompKey, oldValue.PropBagProxy, newValue.PropBagProxy));
+                this, new PSNodeParentChangedEventArgs(this.CompKey, oldValue.CompKey, newValue.CompKey));
 
             System.Diagnostics.Debug.WriteLine($"Completed calling OnParentNodeHasChanged. There were {ParentNodeHasChanged?.GetInvocationList()?.Count() ?? 0} subscribers.");
         }

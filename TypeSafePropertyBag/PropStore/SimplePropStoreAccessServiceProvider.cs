@@ -15,8 +15,6 @@ namespace DRM.TypeSafePropertyBag
     using L2KeyManType = IL2KeyMan<UInt32, String>;
 
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
-    
-    using SubCacheType = ICacheSubscriptions<UInt32>;
 
     using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
     using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
@@ -30,18 +28,11 @@ namespace DRM.TypeSafePropertyBag
 
         int _numOfAccessServicesCreated = 0;
 
-        readonly PropStoreNode _tree;
+        //readonly PropStoreNode _tree;
 
-        //readonly Dictionary<IPropBagProxy, ObjectIdType> _rawDict;
-        //readonly Dictionary<ObjectIdType, IPropBagProxy> _cookedDict;
+        readonly Dictionary<ExKeyT, StoreNodeBag> _store;
 
         readonly object _sync;
-
-        // Subscription Management
-        const int OBJECT_INDEX_CONCURRENCY_LEVEL = 1; // Typical number of threads simultaneously accessing the ObjectIndexes.
-        const int EXPECTED_NO_OF_OBJECTS = 10000;
-
-        private ConcurrentDictionary<ObjectIdType, CollectionOfSubscriberCollections> _propIndexes;
 
         const int NUMBER_OF_SECONDS_BETWEEN_PRUNE_OPS = 20;
         //private Timer _timer;
@@ -50,22 +41,20 @@ namespace DRM.TypeSafePropertyBag
 
         #region Constructor
 
-        public SimplePropStoreAccessServiceProvider(int maxPropsPerObject  /*SimpleObjectIdDictionary theGlobalStore*/)
+        public SimplePropStoreAccessServiceProvider(int maxPropsPerObject)
         {
-            MaxPropsPerObject = maxPropsPerObject; // theGlobalStore.MaxPropsPerObject;
-            MaxObjectsPerAppDomain = GetMaxObjectsPerAppDomain(maxPropsPerObject); // theGlobalStore.MaxObjectsPerAppDomain;
+            MaxPropsPerObject = maxPropsPerObject; 
+            MaxObjectsPerAppDomain = GetMaxObjectsPerAppDomain(maxPropsPerObject);
 
-            // Create an "artificial" root node to hold all "real" roots, one for each "rooted" IPropBag.
-            _tree = new PropStoreNode();
+            //// Create an "artificial" root node to hold all "real" roots, one for each "rooted" IPropBag.
+            //_tree = new PropStoreNode();
 
-            //_rawDict = new Dictionary<IPropBagProxy, ObjectIdType>();
-            //_cookedDict = new Dictionary<ObjectIdType, IPropBagProxy>();
+            ////_rawDict = new Dictionary<IPropBagProxy, ObjectIdType>();
+            ////_cookedDict = new Dictionary<ObjectIdType, IPropBagProxy>();
+
+            _store = new Dictionary<ExKeyT, StoreNodeBag>();
 
             _sync = new object();
-
-            // Create the subscription store.
-            _propIndexes = new ConcurrentDictionary<ObjectIdType, CollectionOfSubscriberCollections>
-                (concurrencyLevel: OBJECT_INDEX_CONCURRENCY_LEVEL, capacity: EXPECTED_NO_OF_OBJECTS);
 
             //_timer = new Timer(PruneStore, null, NUMBER_OF_SECONDS_BETWEEN_PRUNE_OPS * 1000, NUMBER_OF_SECONDS_BETWEEN_PRUNE_OPS * 1000);
         }
@@ -76,37 +65,23 @@ namespace DRM.TypeSafePropertyBag
         {
             lock (_sync)
             {
-                List<KeyValuePair<ExKeyT, PropStoreNode>> nodesThatHavePassed = _tree.All.Where(x => x.Value.IsObjectNode && HasPassed(x.Value)).ToList();
+                List<KeyValuePair<ExKeyT, StoreNodeBag>> nodesThatHavePassed = _store.Where(x => HasPassed(x.Value)).ToList();
 
                 long totalRemoved = 0;
-                foreach(KeyValuePair<ExKeyT, PropStoreNode> kvp in nodesThatHavePassed)
+                foreach(KeyValuePair<ExKeyT, StoreNodeBag> kvp in nodesThatHavePassed)
                 {
-                    totalRemoved += PruneNode(kvp.Value);
+                    totalRemoved += kvp.Value.Count;
+                    kvp.Value.Parent = null;
+                    _store.Remove(kvp.Key);
                 }
-                //long? numberOfNodesRemoved = _tree.All.Where(x => x.Value.IsObjectNode).Sum(x => PruneNode(x.Value));
                 System.Diagnostics.Debug.WriteLine($"The PropStoreAccessServiceProvider pruned {totalRemoved} nodes at {DateTime.Now.ToLongTimeString()}.");
             }
         }
 
-        private bool HasPassed(PropStoreNode psn)
+        private bool HasPassed(StoreNodeBag psn)
         {
             bool result = !psn.PropBagProxy.PropBagRef.TryGetTarget(out IPropBagInternal dummy);
             return result;
-        }
-
-        private int PruneNode(PropStoreNode psn)
-        {
-            if(!psn.PropBagProxy.PropBagRef.TryGetTarget(out IPropBagInternal dummy))
-            {
-                int result = psn.Children.Count();
-                psn.MakeItARoot(_tree);
-                psn = null;
-                return result;
-            } 
-            else
-            {
-                return 0;
-            }
         }
 
         #region PropStoreAccessService Creation and TearDown
@@ -121,16 +96,15 @@ namespace DRM.TypeSafePropertyBag
             L2KeyManType level2KeyManager = new SimpleLevel2KeyMan(MaxPropsPerObject);
             IPropBagProxy propBagProxy = new PropBagProxy(propBagRef/*, level2KeyManager*/);
 
-            //AddToAllObjectLookups(propBagProxy);
-
             ExKeyT cKey = new SimpleExKey(objectId, 0);
 
-            // Create a new PropStoreNode for this PropBag and add make it a root.
-            PropStoreNode propStoreNode = new PropStoreNode(cKey, propBagProxy, _tree);
+            // Create a new PropStoreNode for this PropBag
+            StoreNodeBag newBag = new StoreNodeBag(cKey, propBagProxy);
+            _store.Add(cKey, newBag);
 
             PSAccessServiceType result = new SimplePropStoreAccessService
                 (
-                    propStoreNode,
+                    newBag,
                     level2KeyManager,
                     this
                 );
@@ -141,19 +115,9 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        public void TearDown(IPropBag propBag, PSAccessServiceType storeAccessor)
+        public void TearDown(ExKeyT cKey)
         {
-            PropStoreNode propStoreNode = ((IHaveTheStoreNode)storeAccessor).PropStoreNode;
-
-            // Remove all subscriptions for this propBag.
-            ObjectIdType objectId = propStoreNode.CompKey.Level1Key;
-            bool wasRemoved = RemovePropIndex(objectId);
-            if(!wasRemoved)
-            {
-                System.Diagnostics.Debug.WriteLine($"PropBag Object: {objectId} held no subscriptions upon teardown.");
-            }
-
-            //RemoveFromAllObjectLookups(propStoreNode.PropBagProxy);
+            _store.Remove(cKey);
         }
 
         private IPropBagProxy GetInt_PropBag(IPropBag propBagWithInt)
@@ -170,140 +134,8 @@ namespace DRM.TypeSafePropertyBag
 
         #endregion
 
-        #region Subscription Management
-
-        public ISubscriptionGen AddSubscription(ISubscriptionKeyGen subscriptionRequest, out bool wasAdded)
-        {
-            if (subscriptionRequest.HasBeenUsed)
-            {
-                throw new ApplicationException("Its already been used.");
-            }
-
-            SubscriberCollection sc = GetOrAddSubscription((SimpleExKey)subscriptionRequest.SourcePropRef);
-
-            ISubscriptionGen result = sc.GetOrAdd
-                (
-                subscriptionRequest,
-                    (
-                    x => subscriptionRequest.CreateSubscription()
-                    )
-                );
-
-            if (subscriptionRequest.HasBeenUsed)
-            {
-                System.Diagnostics.Debug.WriteLine($"Created a new Subscription for Property:" +
-                    $" {subscriptionRequest.SourcePropRef} / Event: {result.SubscriptionKind}.");
-                wasAdded = true;
-            }
-            else
-            {
-                System.Diagnostics.Debug.WriteLine($"The subscription for Property:" +
-                    $" {subscriptionRequest.SourcePropRef} / Event: {result.SubscriptionKind} was not added.");
-                wasAdded = false;
-            }
-            return result;
-        }
-
-        public bool RemoveSubscription(ISubscriptionKeyGen subscriptionRequest)
-        {
-            if(TryGetSubscriptions(subscriptionRequest.SourcePropRef, out SubscriberCollection sc))
-            {
-                bool result = sc.RemoveSubscription(subscriptionRequest);
-
-                if (result)
-                    System.Diagnostics.Debug.WriteLine($"Removed the subscription for {subscriptionRequest.SourcePropRef}.");
-
-                return result;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        public SubscriberCollection GetOrAddSubscriptions(IPropBag host, uint propId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool TryGetSubscriptions(ExKeyT exKey, out SubscriberCollection subscriberCollection)
-        {
-            if(_propIndexes.TryGetValue(exKey.CKey, out CollectionOfSubscriberCollections propIndex))
-            {
-                bool result = propIndex.TryGetSubscriberCollection(exKey.Level2Key, out subscriberCollection);
-                return result;
-            }
-            else
-            {
-                subscriberCollection = null;
-                return false;
-            }
-        }
-
-        #endregion
 
         #region Private Methods
-
-        private SubscriberCollection GetOrAddSubscription(ExKeyT exKey)
-        {
-            CollectionOfSubscriberCollections propIndex = GetOrAddPropIndex(exKey.Level1Key, out bool propIndexWasCreated);
-            if (propIndexWasCreated)
-            {
-                System.Diagnostics.Debug.WriteLine($"Created a new CollectionOfSubscriberCollections for {exKey}.");
-            }
-
-            SubscriberCollection result = propIndex.GetOrCreate(exKey.Level2Key, out bool subcriberListWasCreated);
-            if (subcriberListWasCreated)
-            {
-                System.Diagnostics.Debug.WriteLine($"Created a new SubscriberCollection for {exKey}.");
-            }
-
-            return result;
-        }
-
-        private CollectionOfSubscriberCollections GetOrAddPropIndex(ObjectIdType objectKey, out bool wasAdded)
-        {
-            bool internalWasAdded = false;
-
-            CollectionOfSubscriberCollections result = _propIndexes.GetOrAdd
-                (
-                key: objectKey,
-                valueFactory:
-                    (
-                    x => { internalWasAdded = true; return new CollectionOfSubscriberCollections(); }
-                    )
-                );
-
-            wasAdded = internalWasAdded;
-            return result;
-        }
-
-        private bool RemovePropIndex(ObjectIdType objectKey)
-        {
-            if(_propIndexes.TryRemove(objectKey, out CollectionOfSubscriberCollections dummy))
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        //private void AddToAllObjectLookups(IPropBagProxy propBagProxy)
-        //{
-        //    lock (_sync)
-        //    {
-        //        _rawDict.Add(propBagProxy, propBagProxy.ObjectId);
-        //        _cookedDict.Add(propBagProxy.ObjectId, propBagProxy);
-        //    }
-        //}
-
-        //private void RemoveFromAllObjectLookups(IPropBagProxy propBagProxy)
-        //{
-        //    _rawDict.Remove(propBagProxy);
-        //    _cookedDict.Remove(propBagProxy.ObjectId);
-        //}
 
         /// <summary>
         /// This is very expensive in terms of cpu usage. Please use Add if possible.
@@ -434,7 +266,7 @@ namespace DRM.TypeSafePropertyBag
         {
             get
             {
-                return _tree.Children.Count();
+                return _store.Count;
             }
         }
 

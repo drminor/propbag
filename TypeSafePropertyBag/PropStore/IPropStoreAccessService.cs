@@ -3,17 +3,12 @@ using System.Collections.Generic;
 
 namespace DRM.TypeSafePropertyBag
 {
-    public interface IPropStoreAccessService<L2T, L2TRaw> : IRegisterSubscriptions<L2T>, IRegisterBindings<L2T>
+    public interface IPropStoreAccessService<L2T, L2TRaw> : IRegisterSubscriptions<L2T>, IRegisterBindings<L2T>, IDisposable
     {
         IL2KeyMan<L2T,L2TRaw> Level2KeyManager { get; }
 
         // IDictionary-Like Methods
         IPropData this[IPropBag propBag, L2T propId] { get; }
-
-        void Clear(IPropBag propBag);
-
-        // TODO: Change to use IDisposable.
-        void Destroy(); 
 
         bool ContainsKey(IPropBag propBag, L2T propId);
 
