@@ -40,7 +40,12 @@ namespace DRM.PropBag.ControlsWPF
 
         #region PropBagTemplate Locator Support
 
-        public PropModel GetPropModel(string resourceKey, IPropFactory propFactory = null)
+        public PropModel GetPropModel(string resourceKey)
+        {
+            return GetPropModel(resourceKey, null);
+        }
+
+        public PropModel GetPropModel(string resourceKey, IPropFactory propFactory)
         {
             try
             {
@@ -71,7 +76,12 @@ namespace DRM.PropBag.ControlsWPF
             }
         }
 
-        public PropModel GetPropModel(ResourceDictionary rd, string resourceKey, IPropFactory propFactory = null)
+        public PropModel GetPropModel(ResourceDictionary rd, string resourceKey)
+        {
+            return GetPropModel(rd, resourceKey, null);
+        }
+
+        public PropModel GetPropModel(ResourceDictionary rd, string resourceKey, IPropFactory propFactory)
         {
             try
             {
@@ -98,7 +108,7 @@ namespace DRM.PropBag.ControlsWPF
 
         #region Parsing Logic
 
-        public PropModel GetPropModel(PropBagTemplate pbt, IPropFactory propFactory = null)
+        private PropModel GetPropModel(PropBagTemplate pbt, IPropFactory propFactory)
         {
             DeriveFromClassModeEnum deriveFrom = pbt.DeriveFromClassMode;
             Type targetType = pbt.TargetType;
