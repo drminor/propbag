@@ -87,7 +87,16 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
 
             SourceKind = sourceKind;
             ParentChangedSource = notifyParentChangedSource;
-            notifyParentChangedSource.ParentNodeHasChanged += ParentNodeHasChanged_Handler;
+
+            if(sourceKind == SourceKindEnum.AbsRoot)
+            {
+                // TODO: Subscribe to RootNodeChanged instead.
+                notifyParentChangedSource.ParentNodeHasChanged += ParentNodeHasChanged_Handler;
+            }
+            else
+            {
+                notifyParentChangedSource.ParentNodeHasChanged += ParentNodeHasChanged_Handler;
+            }
         }
 
         private void ParentNodeHasChanged_Handler(object sender, PSNodeParentChangedEventArgs e)
