@@ -35,6 +35,10 @@ namespace DRM.TypeSafePropertyBag
 
         public SubscriptionGen(ISubscriptionKeyGen sKey)
         {
+            if(sKey.HasBeenUsed)
+            {
+                throw new InvalidOperationException("The Key has already been used.");
+            }
             PropertyType = sKey.PropertyType;
             SourcePropRef = sKey.SourcePropRef;
 

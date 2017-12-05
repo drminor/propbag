@@ -11,81 +11,64 @@ using System.Reflection;
 
 namespace DRM.PropBag.Caches
 {
-    public class DelegateCacheProvider
+    public class DelegateCacheProvider<T> where T: IPropBag
     {
-        #region Private Static Members
+        #region Private Members
 
-        static Lazy<TypeDescBasedTConverterCache> theSingleTypeDescBasedTConverterCache;
+        Lazy<TypeDescBasedTConverterCache> _converterCache;
 
-        static Lazy<DelegateCache<DoSetDelegate>> theSingleDoSetDelegateCache;
+        Lazy<DelegateCache<DoSetDelegate>> _doSetCache;
+
+        Lazy<DelegateCache<CreatePropFromStringDelegate>> _createPropFromStringCache;
+
+        Lazy<DelegateCache<CreatePropWithNoValueDelegate>> _createPropWithNoValCache;
 
         #endregion
 
-        #region Public Static Properties
+        #region Public Properties
 
         // TypeDesc<T>-based Converter Cache
-        public static TypeDescBasedTConverterCache TypeDescBasedTConverterCache
-        {
-            get { return theSingleTypeDescBasedTConverterCache.Value; }
-        }
+        public TypeDescBasedTConverterCache TypeDescBasedTConverterCache => _converterCache.Value;
 
-        // DoSet Delegate Cache
-        //internal static DoSetDelegateCache DoSetDelegateCache
-        //{
-        //    get { return theSingleDoSetDelegateCache.Value; }
-        //}
+        internal DelegateCache<DoSetDelegate> DoSetDelegateCache => _doSetCache.Value;
 
-        internal static DelegateCache<DoSetDelegate> DoSetDelegateCache
-        {
-            get { return theSingleDoSetDelegateCache.Value; }
-        }
+        internal DelegateCache<CreatePropFromStringDelegate> CreatePropFromStringCache => _createPropFromStringCache.Value;
+
+        internal DelegateCache<CreatePropWithNoValueDelegate> CreatePropWithNoValCache => _createPropWithNoValCache.Value;
 
         #endregion
 
         #region The Static Constructor
 
-        static DelegateCacheProvider()
+        public DelegateCacheProvider()
         {
-            // Create the static instances upon first reference.
-
             // TypeDesc<T>-based Converter Cache
-            theSingleTypeDescBasedTConverterCache = new Lazy<TypeDescBasedTConverterCache>(() => new TypeDescBasedTConverterCache(), LazyThreadSafetyMode.PublicationOnly);
+            _converterCache = new Lazy<TypeDescBasedTConverterCache>(() => new TypeDescBasedTConverterCache(), LazyThreadSafetyMode.PublicationOnly);
 
-
-            // Do Set Delegate Cache for PropBagBase
-            //Func<Type, DoSetDelegate> valueFactory = PropBag.GenericMethodTemplates.GetDoSetDelegate;
-            //theSingleDoSetDelegateCache = 
-            //    new Lazy<LockingConcurrentDictionary<Type, DoSetDelegate>>
-            //    (
-            //        () => new LockingConcurrentDictionary<Type, DoSetDelegate>(valueFactory),
-            //        LazyThreadSafetyMode.PublicationOnly
-            //    );
-
-            //theSingleDoSetDelegateCache =
-            //    new Lazy<DoSetDelegateCache>
-            //    (
-            //        () => new DoSetDelegateCache(typeof(PropBag)), LazyThreadSafetyMode.PublicationOnly
-            //    );
-
+            // DoSet 
             MethodInfo doSetMethodInfo = typeof(PropBag).GetMethod("DoSetBridge", BindingFlags.Instance | BindingFlags.NonPublic);
-
-            theSingleDoSetDelegateCache =
+            _doSetCache =
                 new Lazy<DelegateCache<DoSetDelegate>>
                 (
                     () => new DelegateCache<DoSetDelegate>(doSetMethodInfo), LazyThreadSafetyMode.PublicationOnly
                 );
+
+            // Create Prop From String
+            MethodInfo createPropNoVal_mi = typeof(APFGenericMethodTemplates).GetMethod("CreatePropWithNoValue", BindingFlags.Static | BindingFlags.NonPublic);
+            _createPropWithNoValCache =
+                new Lazy<DelegateCache<CreatePropWithNoValueDelegate>>
+                (
+                    () => new DelegateCache<CreatePropWithNoValueDelegate>(createPropNoVal_mi), LazyThreadSafetyMode.PublicationOnly
+                );
+
+            // Create Prop With No Value
+            MethodInfo createPropFromString_mi = typeof(APFGenericMethodTemplates).GetMethod("CreatePropFromString", BindingFlags.Static | BindingFlags.NonPublic);
+            _createPropFromStringCache =
+                new Lazy<DelegateCache<CreatePropFromStringDelegate>>
+                (
+                    () => new DelegateCache<CreatePropFromStringDelegate>(createPropFromString_mi), LazyThreadSafetyMode.PublicationOnly
+                );
         }
-
-        #endregion
-
-        #region Instance Constructors
-
-        // Mark as private to disallow instances of this class to be created.
-        private DelegateCacheProvider()
-        {
-        }
-
-
 
         #endregion
     }

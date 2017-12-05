@@ -6,6 +6,7 @@
         FrameworkContentElement,
         DataGridColumn,
         DataSourceProvider,
+        PCGen,
         PropertyObject,
         CollectionObject,
         Empty,

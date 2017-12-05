@@ -42,9 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Caches\DelegateCache.cs" />
-    <Compile Include="Caches\DelegateCacheProvider2.cs" />
-    <Compile Include="Caches\DoSetDelegateCache_OLD.cs" />
-    <Compile Include="ObjectIdIssuer.cs" />
+    <Compile Include="Caches\DelegateCacheProvider.cs" />
     <Compile Include="ControlModel\DeriveFromClassField_NotUsed.cs" />
     <Compile Include="ControlModel\DeriveFromClassModeEnum.cs" />
     <Compile Include="ControlModel\IPropModelProvider.cs" />
@@ -64,7 +62,6 @@
     <Compile Include="ControlModel\MapperRequest.cs" />
     <Compile Include="ControlModel\WellKnownCollectionTypeEnum.cs" />
     <Compile Include="ControlModel\NotifyPropertyChangedBase.cs" />
-    <Compile Include="Caches\DelegateCacheProvider.cs" />
     <Compile Include="ControlModel\TypeInfoField.cs" />
     <Compile Include="ControlModel\TwoTypes.cs" />
     <Compile Include="DoSetDelegate.cs" />

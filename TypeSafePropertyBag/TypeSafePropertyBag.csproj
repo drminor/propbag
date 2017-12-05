@@ -47,14 +47,9 @@
     <Compile Include="GenericTree\IAmANodeInATree.cs" />
     <Compile Include="GenericTree\Node.cs" />
     <Compile Include="GenericTree\NodeExtensions.cs" />
-    <Compile Include="LocalBinding\Engine\DataSourceChangedEventArgs.cs" />
-    <Compile Include="LocalBinding\Engine\DataSourceChangedEventHandler.cs" />
     <Compile Include="LocalBinding\Engine\DataSourceChangeTypeEnum.cs" />
     <Compile Include="LocalBinding\Engine\ObservableSource.cs" />
-    <None Include="LocalBinding\Engine\ObservableSourceProvider.cs" />
-    <Compile Include="LocalBinding\Engine\ObservableSourceStatusEnum.cs" />
     <Compile Include="LocalBinding\Engine\OSCollection.cs" />
-    <Compile Include="LocalBinding\Engine\OSSExtensions.cs" />
     <Compile Include="LocalBinding\Engine\SourceKindEnum.cs" />
     <Compile Include="LocalBinding\Instances\LocalBinder.cs" />
     <Compile Include="LocalBinding\Management\BindingsCollection.cs" />
@@ -63,7 +58,6 @@
     <Compile Include="PropBagInterfaces\IPropBagProxy.cs" />
     <Compile Include="PropStore\INotifyParentNodeChanged.cs" />
     <Compile Include="PropStore\PropBagProxy.cs" />
-    <Compile Include="PropStore\PropStoreNode.cs" />
     <Compile Include="PropStore\PropGen.cs" />
     <Compile Include="PropStore\PSNodeParentChangedEventArgs.cs" />
     <Compile Include="PropStore\StoreNodeBag.cs" />

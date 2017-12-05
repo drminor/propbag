@@ -21,7 +21,7 @@ namespace DRM.PropBag
 
     public class PropFactory : AbstractPropFactory
     {
-        public DelegateCacheProvider2<PropBagType> DelegateCacheProvider { get; }
+        public DelegateCacheProvider<PropBagType> DelegateCacheProvider { get; }
 
         public override bool ProvidesStorage
         {
@@ -60,7 +60,7 @@ namespace DRM.PropBag
             )
             : base(propStoreAccessServiceProvider, typeResolver, valueConverter)
         {
-            DelegateCacheProvider = new DelegateCacheProvider2<PropBagType>();
+            DelegateCacheProvider = new DelegateCacheProvider<PropBagType>();
 
         }
 

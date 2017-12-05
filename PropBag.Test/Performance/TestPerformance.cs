@@ -62,7 +62,8 @@ namespace PropBagLib.Tests
 
             for (int cntr = 0; cntr < InterationCount - 1; cntr++)
             {
-                mod1["System.Int32","PropInt"] = cntr;
+                mod1[typeof(int), "PropInt"] = cntr;
+                //mod1["System.Int32","PropInt"] = cntr;
             }
         }
 

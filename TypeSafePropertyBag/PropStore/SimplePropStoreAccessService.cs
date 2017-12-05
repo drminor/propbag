@@ -257,12 +257,12 @@ namespace DRM.TypeSafePropertyBag
         {
             ExKeyT exKey = GetExKey(propBag, propId);
 
-            TryGetSubscriptions(exKey, out SubscriberCollection sc);
+            TryGetSubscriptions(exKey, out IEnumerable<ISubscriptionGen> sc);
             ISubscriptionKeyGen subscriptionRequest = new SubscriptionKey<T>(exKey, eventHandler, priorityGroup, keepRef);
 
             ISubscriptionGen newSubscription = AddSubscription(subscriptionRequest, out bool wasAdded);
 
-            TryGetSubscriptions(exKey, out SubscriberCollection sc2);
+            TryGetSubscriptions(exKey, out IEnumerable<ISubscriptionGen> sc2);
 
             return wasAdded;
         }
@@ -355,7 +355,7 @@ namespace DRM.TypeSafePropertyBag
         {
             if (TryGetSubscriptions(subscriptionRequest.SourcePropRef, out SubscriberCollection sc))
             {
-                bool result = sc.RemoveSubscription(subscriptionRequest);
+                bool result = sc.TryRemoveSubscription(subscriptionRequest);
 
                 if (result)
                     System.Diagnostics.Debug.WriteLine($"Removed the subscription for {subscriptionRequest.SourcePropRef}.");
@@ -368,26 +368,34 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        public SubscriberCollection GetSubscriptions(IPropBag host, PropIdType propId)
+        public IEnumerable<ISubscriptionGen> GetSubscriptions(IPropBag host, PropIdType propId)
         {
             //ExKeyT exKey = GetExKey(host, propId);
 
             // TODO: NOTE: This does not verify that the caller is the "correct" one.
             ExKeyT exKey = new SimpleExKey(_objectId, propId);
 
-            if (TryGetSubscriptions(exKey, out SubscriberCollection subs))
+            if (TryGetSubscriptions(exKey, out IEnumerable<ISubscriptionGen> subs))
             {
                 return subs;
             }
             else
             {
-                return null;
+                IEnumerable<ISubscriptionGen> result = new SubscriberCollection();
+                return result;
             }
+        }
+
+        public bool TryGetSubscriptions(ExKeyT exKey, out IEnumerable<ISubscriptionGen> subscriberCollection)
+        {
+            bool result = _propIndexes.TryGetSubscriberCollection(exKey.Level2Key, out subscriberCollection);
+            return result;
         }
 
         public bool TryGetSubscriptions(ExKeyT exKey, out SubscriberCollection subscriberCollection)
         {
             bool result = _propIndexes.TryGetSubscriberCollection(exKey.Level2Key, out subscriberCollection);
+
             return result;
         }
 
@@ -485,25 +493,28 @@ namespace DRM.TypeSafePropertyBag
 
         private bool BeginWatchingParent(ExKeyT propertyKey)
         {
-            TryGetSubscriptions(propertyKey, out SubscriberCollection sc);
+            //TryGetSubscriptions(propertyKey, out SubscriberCollection sc);
 
-            SubscriptionKeyGen subscriptionRequest = new SubscriptionKeyGen(propertyKey, PropertyChangedWithObjectVals, SubscriptionPriorityGroup.Standard, keepRef: false);
+            SubscriptionKeyGen subscriptionRequest = new SubscriptionKeyGen(propertyKey,
+                OurParentHasChanged, SubscriptionPriorityGroup.Internal, keepRef: false);
+
             AddSubscription(subscriptionRequest, out bool wasAdded);
 
-            TryGetSubscriptions(propertyKey, out SubscriberCollection sc2);
+            //TryGetSubscriptions(propertyKey, out SubscriberCollection sc2);
             return wasAdded;
         }
 
         private bool StopWatchingParent(ExKeyT propertyKey)
         {
+            SubscriptionKeyGen subscriptionRequest = new SubscriptionKeyGen(propertyKey, 
+                OurParentHasChanged, SubscriptionPriorityGroup.Internal, keepRef: false);
 
-            SubscriptionKeyGen subscriptionRequest = new SubscriptionKeyGen(propertyKey, PropertyChangedWithObjectVals, SubscriptionPriorityGroup.Standard, keepRef: false);
             bool wasRemoved = RemoveSubscription(subscriptionRequest);
             return wasRemoved;
         }
 
         // Our call back to let us know to update the parentage of a IPropBag object.
-        private void PropertyChangedWithObjectVals(object sender, PCObjectEventArgs e)
+        private void OurParentHasChanged(object sender, PCObjectEventArgs e)
         {
             if (e.NewValueIsUndefined)
             {
@@ -527,11 +538,7 @@ namespace DRM.TypeSafePropertyBag
 
                     StoreNodeBag guestPropBagNode = GetGuestObjectNodeFromPropItemVal(propBagHost);
 
-                    //if (_ourNode.PropBagProxy.Level2KeyManager.TryGetFromRaw(e.PropertyName, out PropIdType propId))
-
                     L2KeyManType level2Man = ((IPropBagInternal)sender).Level2KeyManager;
-
-                    //if (((IPropBagInternal)propBagHost).Level2KeyManager.TryGetFromRaw(e.PropertyName, out PropIdType propId))
                     if (level2Man.TryGetFromRaw(e.PropertyName, out PropIdType propId))
                     {
                         ExKeyT cKey = new SimpleExKey(_objectId, propId);
@@ -562,9 +569,6 @@ namespace DRM.TypeSafePropertyBag
                     StoreNodeBag guestPropBagNode = GetGuestObjectNodeFromPropItemVal(propBagHost);
 
                     L2KeyManType level2Man = ((IPropBagInternal)sender).Level2KeyManager;
-
-                    //if (((IPropBagInternal)propBagHost).Level2KeyManager.TryGetFromRaw(e.PropertyName, out PropIdType propId))
-
                     if (level2Man.TryGetFromRaw(e.PropertyName, out PropIdType propId))
                     {
                         ExKeyT cKey = new SimpleExKey(_objectId, propId);
@@ -592,13 +596,13 @@ namespace DRM.TypeSafePropertyBag
 
         #region Private Methods
 
-        private PropStoreNode GetGuestObjectNodeFromStore(PropStoreNode propStoreNode)
-        {
-            //System.Diagnostics.Debug.Assert(!propStoreNode.IsObjectNode, "Attempting to call GetGuestObjectNodeFromStore on a node that is an ObjectNode.");
+        //private PropStoreNode GetGuestObjectNodeFromStore(PropStoreNode propStoreNode)
+        //{
+        //    //System.Diagnostics.Debug.Assert(!propStoreNode.IsObjectNode, "Attempting to call GetGuestObjectNodeFromStore on a node that is an ObjectNode.");
 
-            PropStoreNode childObjectNode = propStoreNode.OnlyChildOfPropItem;
-            return childObjectNode;
-        }
+        //    PropStoreNode childObjectNode = propStoreNode.OnlyChildOfPropItem;
+        //    return childObjectNode;
+        //}
 
         private StoreNodeBag GetGuestObjectNodeFromPropItemVal(IPropBag propBag)
         {
@@ -829,6 +833,5 @@ namespace DRM.TypeSafePropertyBag
         public int AccessCounter => _propStoreAccessServiceProvider.AccessCounter;
 
         #endregion
-
     }
 }

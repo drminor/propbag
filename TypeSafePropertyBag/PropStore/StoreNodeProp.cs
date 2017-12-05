@@ -52,9 +52,5 @@ namespace DRM.TypeSafePropertyBag
         public StoreNodeBag Child { get; set; }
 
         #endregion
-
-
-
-
     }
 }

@@ -364,7 +364,12 @@ namespace PropBagLib.Tests
         {
             mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered, _amHelpers.PropFactory_V1);
 
+            //mod1.SubscribeToPropChanged(Mod1_PropertyChangedWithVals, "PropInt", typeof(int));
             mod1.PropertyChangedWithGenVals += Mod1_PropertyChangedWithVals;
+            mod1.PropertyChanging += Mod1_PropertyChanging1;
+            mod1.PropertyChanged += Mod1_PropertyChanged1;
+
+            mod1.PropertyChangedWithObjectVals += Mod1_PropertyChangedWithObjectVals;
 
             mod1.PropInt = 0;
             mod1.PropInt = 1;
@@ -373,10 +378,29 @@ namespace PropBagLib.Tests
             Assert.That(genObjNewVal, Is.EqualTo(1), "The old value should have been 1.");
         }
 
+        private void Mod1_PropertyChanged1(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            string test = e.PropertyName;
+        }
+
+        private void Mod1_PropertyChanging1(object sender, System.ComponentModel.PropertyChangingEventArgs e)
+        {
+            string test = e.PropertyName;
+        }
+
+        private void Mod1_PropertyChangedWithObjectVals(object sender, PCObjectEventArgs e)
+        {
+            string test = e.PropertyName;
+        }
+
         void Mod1_PropertyChangedWithVals(object sender, PCGenEventArgs e)
         {
             object sendr = sender;
             string prpName = e.PropertyName;
+
+            //genObjOldVal = e.OldValue;
+            //genObjNewVal = e.NewValue;
+
             if (prpName == "PropInt")
             {
                 genObjOldVal = e.OldValue;

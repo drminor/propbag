@@ -41,9 +41,6 @@ namespace DRM.PropBag
         public PubPropBag()
             : base() { }
 
-        public PubPropBag(byte dummy)
-            : base(dummy) { }
-
         public PubPropBag(PropBagTypeSafetyMode typeSafetyMode)
             : base(typeSafetyMode) { }
 

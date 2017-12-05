@@ -17,8 +17,6 @@ namespace DRM.PropBag
     using PropNameType = String;
     using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
 
-    //using LocalBinderType = IBindLocalProps<UInt32>;
-
     public abstract class AbstractPropFactory : IPropFactory, IDisposable
     {
         #region Public Properties
@@ -48,17 +46,12 @@ namespace DRM.PropBag
         public AbstractPropFactory
             (
             PSAccessServiceProviderType propStoreAccessServiceProvider,
-            //SubCacheType subscriptionManager,
-            //LocalBinderType localBinder = null,
             ResolveTypeDelegate typeResolver = null,
             IConvertValues valueConverter = null
             )
         {
 
             PropStoreAccessServiceProvider = propStoreAccessServiceProvider ?? throw new ArgumentNullException(nameof(propStoreAccessServiceProvider));
-
-            // Use our default implementation, if the caller did not supply one.
-            //LocalBinder = localBinder ?? new SimpleLocalBinder();
 
             // Use our default implementation, if the caller did not supply one.
             TypeResolver = typeResolver ?? this.GetTypeFromName;
@@ -152,13 +145,8 @@ namespace DRM.PropBag
         /// <returns></returns>
         public virtual Func<T, T, bool> GetRefEqualityComparer<T>()
         {
-            var y = RefEqualityComparer<T>.Default;
-
-            DRM.PropBag.RefEqualityComparer<T> x = RefEqualityComparer<T>.Default;
-
-            //Func<T, T, bool> result = x.Equals;
-            return x.Equals; // result;
-            //return RefEqualityComparer<T>.Default;
+            RefEqualityComparer<T> x = RefEqualityComparer<T>.Default;
+            return x.Equals;
         }
 
         public T GetDefaultValue<T>(PropNameType propertyName = null)

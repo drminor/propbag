@@ -12,8 +12,11 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
     {
         #region Public events and properties
 
-        public event EventHandler<DataSourceChangedEventArgs>  DataSourceChanged = null;
+        //public event EventHandler<DataSourceChangedEventArgs>  DataSourceChanged = null;
+
         public event EventHandler<PCTypedEventArgs<T>> PropertyChangedWithTVals;
+        public event EventHandler<PCGenEventArgs> PropertyChangedWithVals;
+        public event EventHandler ParentHasChanged;
 
         public string BinderName { get; private set; }
         public PathConnectorTypeEnum PathConnector => PathConnectorTypeEnum.Dot;
@@ -99,82 +102,14 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
             }
         }
 
-        private void ParentNodeHasChanged_Handler(object sender, PSNodeParentChangedEventArgs e)
+        private void ParentNodeHasChanged_Handler(object sender, EventArgs e)
         {
-            OnParentHasChanged(e);
+            OnParentHasChanged();
         }
 
         #endregion
 
         #endregion Constructors and their handlers
-
-        #region Public Methods
-
-        //public bool Subscribe(EventHandler<DataSourceChangedEventArgs> subscriber)
-        //{
-        //    if (DataSourceChanged == null)
-        //    {
-        //        DataSourceChanged = subscriber;
-        //        return true; // We added it.
-        //    }
-        //    else
-        //    {
-        //        Delegate[] subscriberList = DataSourceChanged.GetInvocationList();
-        //        if (subscriberList.FirstOrDefault((x) => x == (Delegate)subscriber) == null)
-        //        {
-        //            DataSourceChanged += subscriber;
-        //            return true; // We added it.
-        //        }
-        //        else
-        //        {
-        //            return false; // Already there.
-        //        }
-        //    }
-        //}
-
-        //public bool Unsubscribe(EventHandler<DataSourceChangedEventArgs> subscriber)
-        //{
-        //    if (DataSourceChanged == null)
-        //    {
-        //        return false; // It's not there.
-        //    }
-        //    else
-        //    {
-        //        Delegate[] subscriberList = DataSourceChanged.GetInvocationList();
-        //        if (subscriberList.FirstOrDefault((x) => x == (Delegate)subscriber) == null)
-        //        {
-        //            return false; // Not there.
-        //        }
-        //        else
-        //        {
-        //            DataSourceChanged -= subscriber;
-        //            return true; // We removed it.
-        //        }
-        //    }
-        //}
-
-        //public bool Unsubscribe(EventHandler<PCTypedEventArgs<T>> subscriber)
-        //{
-        //    if (PropertyChangedWithTVals == null)
-        //    {
-        //        return false; // It's not there.
-        //    }
-        //    else
-        //    {
-        //        Delegate[] subscriberList = PropertyChangedWithTVals.GetInvocationList();
-        //        if (subscriberList.FirstOrDefault((x) => x == (Delegate)subscriber) == null)
-        //        {
-        //            return false; // Not there.
-        //        }
-        //        else
-        //        {
-        //            PropertyChangedWithTVals -= subscriber;
-        //            return true; // We removed it.
-        //        }
-        //    }
-        //}
-
-        #endregion
 
         #region Private Methods
 
@@ -219,14 +154,14 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
 
         private void OnPropertyChangedWithGenVals(PCGenEventArgs eArgs)
         {
-            Interlocked.CompareExchange(ref DataSourceChanged, null, null)
-                ?.Invoke(this, DataSourceChangedEventArgs.NewFromPCGen(eArgs));
+            Interlocked.CompareExchange(ref PropertyChangedWithVals, null, null)
+                ?.Invoke(this, eArgs);
         }
 
-        private void OnParentHasChanged(PSNodeParentChangedEventArgs eArgs)
+        private void OnParentHasChanged()
         {
-            Interlocked.CompareExchange(ref DataSourceChanged, null, null)
-                ?.Invoke(this, DataSourceChangedEventArgs.NewFromPSNodeParentChanged(eArgs, PathElement, typeof(T)));
+            Interlocked.CompareExchange(ref ParentHasChanged, null, null)
+                ?.Invoke(this, EventArgs.Empty);
         }
 
         #endregion
@@ -242,7 +177,8 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
                 if (disposing)
                 {
                     // TODO: dispose managed state (managed objects).
-                    DataSourceChanged = null;
+                    ParentHasChanged = null;
+                    PropertyChangedWithVals = null;
                     PropertyChangedWithTVals = null;
                     RemoveSubscriptions();
                 }

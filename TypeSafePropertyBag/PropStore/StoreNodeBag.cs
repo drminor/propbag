@@ -170,6 +170,7 @@ namespace DRM.TypeSafePropertyBag
         {
             get
             {
+                if (Parent == null) return null;
                 return Parent.Parent;
             }
         }
@@ -178,11 +179,17 @@ namespace DRM.TypeSafePropertyBag
         {
             get
             {
+                bool foundOne = false;
                 StoreNodeBag lastOwner = Owner;
                 while (lastOwner != null)
                 {
+                    foundOne = true;
                     yield return lastOwner;
                     lastOwner = lastOwner.Owner;
+                }
+                if(!foundOne)
+                {
+                    yield return null;
                 }
             }
         }

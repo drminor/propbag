@@ -62,6 +62,9 @@ namespace DRM.PropBag
         protected virtual ITypeSafePropBagMetaData OurMetaData { get; }
         private readonly PropBagTypeSafetyMode _typeSafetyMode;
         private readonly L2KeyManType _level2KeyManager;
+        private object _sync;
+        private readonly PB_EventHolder _eventHolder;
+        //private readonly bool _notifyWhenOldIsUndefined;
 
         // These fulfill the IPropBagInternal contract
         PSAccessServiceType IPropBagInternal.ItsStoreAccessor => _ourStoreAccessor;
@@ -76,26 +79,44 @@ namespace DRM.PropBag
         public event PropertyChangedEventHandler PropertyChanged; // = delegate { };
         public event PropertyChangingEventHandler PropertyChanging; // = delegate { };
 
-        public event EventHandler<PCGenEventArgs> PropertyChangedWithGenVals;
+        public event EventHandler<PCGenEventArgs> PropertyChangedWithGenVals
+        {
+            add
+            {
+                lock(_sync)
+                {
+                    WeakEventManager<PB_EventHolder, PCGenEventArgs>.AddHandler(_eventHolder, "PropertyChangedWithGenVals", value);
+                }
+            }
+            remove
+            {
+                lock (_sync)
+                {
+                    WeakEventManager<PB_EventHolder, PCGenEventArgs>.RemoveHandler(_eventHolder, "PropertyChangedWithGenVals", value);
+                }
+            }
+        }
+            
         public event EventHandler<PCObjectEventArgs> PropertyChangedWithObjectVals;
 
         #endregion
 
         #region Constructor
 
-        /// <summary>
-        /// This is constructor creates an instance with minimal resources, and is not operational.
-        /// It can be called in those cases where an instance is required as a target to use when calling
-        /// a method from the System.Reflection namespace.
-        /// </summary>
-        /// <param name="dummy"></param>
-        public PropBag(byte dummy)
-        {
-            _typeSafetyMode = PropBagTypeSafetyMode.None;
-            _propFactory = null;
-            _ourStoreAccessor = null;
-            OurMetaData = BuildMetaData(this._typeSafetyMode, classFullName: null, propFactory: null);
-        }
+        ///// <summary>
+        ///// This is constructor creates an instance with minimal resources, and is not operational.
+        ///// It can be called in those cases where an instance is required as a target to use when calling
+        ///// a method from the System.Reflection namespace.
+        ///// </summary>
+        ///// <param name="dummy"></param>
+        //public PropBag(byte dummy)
+        //{
+        //    _typeSafetyMode = PropBagTypeSafetyMode.None;
+        //    _propFactory = null;
+        //    _ourStoreAccessor = null;
+        //    OurMetaData = BuildMetaData(this._typeSafetyMode, classFullName: null, propFactory: null);
+        //    _eventHolder = null;
+        //}
 
         protected PropBag()
             : this(PropBagTypeSafetyMode.None, null, null) { }
@@ -127,6 +148,11 @@ namespace DRM.PropBag
 
             _ourStoreAccessor = _propFactory.PropStoreAccessServiceProvider.CreatePropStoreService(this);
             _level2KeyManager = _ourStoreAccessor.Level2KeyManager;
+
+            _sync = new object();
+            _eventHolder = new PB_EventHolder();
+
+            //_notifyWhenOldIsUndefined = false;
         }
 
         protected TypeSafePropBagMetaData BuildMetaData(PropBagTypeSafetyMode typeSafetyMode, string classFullName, IPropFactory propFactory)
@@ -597,15 +623,9 @@ namespace DRM.PropBag
                 }
             }
 
-            // TODO: Make the PropFactory supply this service.
-            DoSetDelegate setPropDel = DelegateCacheProvider.DoSetDelegateCache.GetOrAdd(PropData.TypedProp.Type);
-
             DelegateCache<DoSetDelegate> dc = ((PropFactory)_propFactory).DelegateCacheProvider.DoSetDelegateCache;
-
-            DoSetDelegate setPropDel2 = dc.GetOrAdd(PropData.TypedProp.Type);
-
-            //return setPropDel(this, propId, propertyName, PropData.TypedProp, value);
-            return setPropDel2(this, propId, propertyName, PropData.TypedProp, value);
+            DoSetDelegate setPropDel = dc.GetOrAdd(PropData.TypedProp.Type);
+            return setPropDel(this, propId, propertyName, PropData.TypedProp, value);
         }
 
         //public bool SetIt<T>(T value, PropIdType propId)
@@ -710,6 +730,50 @@ namespace DRM.PropBag
 
         #region Subscribe to Property Changed
 
+        public bool SubscribeToPropChanging(EventHandler<PropertyChangingEventArgs> handler,
+            string propertyName, Type propertyType)
+        {
+            bool mustBeRegistered = OurMetaData.AllPropsMustBeRegistered;
+            IPropData PropData = GetPropGen(propertyName, propertyType, out bool wasRegistered, out PropIdType propId,
+                haveValue: false,
+                value: null,
+                alwaysRegister: false,
+                mustBeRegistered: mustBeRegistered,
+                neverCreate: false,
+                desiredHasStoreValue: _propFactory.ProvidesStorage);
+
+            if (!PropData.IsEmpty)
+            {
+                WeakEventManager<INotifyPropertyChanging, PropertyChangingEventArgs>.AddHandler(this, "PropertyChanging", handler);
+                return true;
+            }
+            return false;
+        }
+
+        public bool UnsubscribeToPropChanging(EventHandler<PropertyChangingEventArgs> handler,
+            string propertyName, Type propertyType)
+        {
+            bool mustBeRegistered = OurMetaData.AllPropsMustBeRegistered;
+            IPropData PropData = GetPropGen(propertyName, propertyType, out bool wasRegistered, out PropIdType propId,
+                haveValue: false,
+                value: null,
+                alwaysRegister: false,
+                mustBeRegistered: mustBeRegistered,
+                neverCreate: false,
+                desiredHasStoreValue: _propFactory.ProvidesStorage);
+
+            if (!PropData.IsEmpty)
+            {
+                WeakEventManager<INotifyPropertyChanging, PropertyChangingEventArgs>.RemoveHandler(this, "PropertyChanging", handler);
+                return true;
+            }
+            return false;
+        }
+
+        #endregion
+
+        #region Subscribe to Property Changed
+
         public bool SubscribeToPropChanged(EventHandler<PropertyChangedEventArgs> handler,
             string propertyName, Type propertyType)
         {
@@ -724,12 +788,7 @@ namespace DRM.PropBag
 
             if (!PropData.IsEmpty)
             {
-                //WeakEventManager<INotifyPCIndividual, PropertyChangedEventArgs>.
-                //    AddHandler(this, "PropertyChangedIndividual", handler);
-
-                WeakEventManager<INotifyPropertyChanged, PropertyChangedEventArgs>.
-                    AddHandler(this, "PropertyChanged", handler);
-
+                PropertyChangedEventManager.AddHandler(this, handler, propertyName);
                 return true;
             }
             return false;
@@ -749,8 +808,7 @@ namespace DRM.PropBag
 
             if (!PropData.IsEmpty)
             {
-                WeakEventManager<INotifyPropertyChanged, PropertyChangedEventArgs>.
-                    RemoveHandler(this, "PropertyChanged", handler);
+                PropertyChangedEventManager.RemoveHandler(this, handler, propertyName);
                 return true;
             }
             return false;
@@ -1012,11 +1070,11 @@ namespace DRM.PropBag
                 LocalPropertyPath lpp = new LocalPropertyPath(pathToSource);
                 LocalBindingInfo bindingInfo = new LocalBindingInfo(lpp, LocalBindingMode.OneWay);
 
-                SubscriberCollection sc = GetSubscriptions(propId);
+                List<ISubscriptionGen> sc = GetSubscriptions(propId)?.ToList();
 
                 bool wasAdded = _ourStoreAccessor.RegisterBinding<T>(this, propId, bindingInfo);
 
-                sc = GetSubscriptions(propId);
+                sc = GetSubscriptions(propId)?.ToList();
 
                 return wasAdded;
             }
@@ -1372,23 +1430,35 @@ namespace DRM.PropBag
 
         private bool DoSet<T>(PropIdType propId, string propertyName, IPropPrivate<T> typedProp, ref T curValue, T newValue)
         {
-            bool theSame = typedProp.ValueIsDefined && typedProp.CompareTo(newValue);
-            T oldValue;
-
-            if (!theSame)
+            if (typedProp.ValueIsDefined)
             {
-                if (typedProp.ValueIsDefined)
+                bool theSame = typedProp.CompareTo(newValue);
+                if (!theSame)
                 {
-                    // Save the value before the update.
-                    oldValue = typedProp.TypedValue;
-                }
-                else
-                {
-                    oldValue = default(T);
-                }
+                    T oldValue = typedProp.TypedValue;
 
-                // TODO: Fix This.
-                //OnPropertyChanging(_propFactory.IndexerName);
+                    // TODO: Consider adding a typed version of OnPropertyChanging.
+                    OnPropertyChanging(propertyName);
+
+                    // Make the update.
+                    if (typedProp.HasStore)
+                    {
+                        typedProp.TypedValue = newValue;
+                    }
+                    curValue = newValue;
+
+                    // Raise notify events.
+                    DoNotifyWork(propId, propertyName, typedProp, oldValue, newValue);
+                }
+                return !theSame;
+            }
+            else
+            {
+                //if (_notifyWhenOldIsUndefined)
+                //{
+
+                // TODO: Consider adding a typed version of OnPropertyChanging.
+                OnPropertyChanging(propertyName);
 
                 // Make the update.
                 if (typedProp.HasStore)
@@ -1398,160 +1468,187 @@ namespace DRM.PropBag
                 curValue = newValue;
 
                 // Raise notify events.
-                DoNotifyWork(propId, propertyName, typedProp, oldValue, newValue);
-            }
+                DoNotifyWork(propId, propertyName, typedProp, newValue);
 
-            return !theSame;
+                //}
+
+                // The current value is undefined and the new value is defined, therefore: their has been a real update -- return true.
+                return true;
+            }
         }
 
         private void DoNotifyWork<T>(PropIdType propId, PropNameType propertyName, IPropPrivate<T> typedProp, T oldVal, T newValue)
         {
-            // PROCESS BINDINGS
-            SubscriberCollection sc = GetSubscriptions(propId);
-
-            if(sc != null)
+            List<ISubscriptionGen> reff = GetSubscriptions(propId).ToList();
+            foreach (ISubscriptionGen sub in GetSubscriptions(propId))
             {
-                // Raise the PCTypedEvent to our list of subscribers
-                List<ISubscription<T>> typedSubs = GetTypedSubscriptions<T>(sc).ToList();
-                if (!typedProp.ValueIsDefined)
+                if (sub is ISubscription<T> typedSub)
                 {
-                    foreach (ISubscription<T> typedSub in typedSubs)
+                    if (typedSub.TypedHandler == null)
                     {
-                        typedSub.TypedHandler(this, new PCTypedEventArgs<T>(propertyName, newValue));
+                        throw new InvalidOperationException("The Typed handler is null.");
                     }
-                }
-                else
-                {
-                    foreach (ISubscription<T> typedSub in typedSubs)
+
+                    try
                     {
                         typedSub.TypedHandler(this, new PCTypedEventArgs<T>(propertyName, oldVal, newValue));
                     }
-                }
-
-                List<ISubscriptionGen> genSubs = GetPCGenSubscriptions(sc).ToList();
-                if (!typedProp.ValueIsDefined)
-                {
-                    foreach (ISubscriptionGen genSub in genSubs)
+                    catch (Exception e)
                     {
-                        genSub.GenHandler(this, new PCGenEventArgs(propertyName, typeof(T), newValue));
+                        System.Diagnostics.Debug.WriteLine($"A TypedHandler raised an exception: {e.Message} with inner: {e.InnerException?.Message} ");
+                    }
+                }
+                else if (sub.SubscriptionKind == SubscriptionKind.GenHandler)
+                {
+                    if (sub.GenHandler == null)
+                    {
+                        throw new InvalidOperationException("The Gen handler is null.");
+                    }
+
+                    try
+                    {
+                        sub.GenHandler(this, new PCGenEventArgs(propertyName, typeof(T), oldVal, newValue));
+                    }
+                    catch (Exception e)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"A GenHandler raised an exception: {e.Message} with inner: {e.InnerException?.Message} ");
+                    }
+                }
+                else if (sub.SubscriptionKind == SubscriptionKind.ObjHandler)
+                {
+                    if (sub.ObjHandler == null)
+                    {
+                        throw new InvalidOperationException("The Obj handler is null.");
+                    }
+
+                    try
+                    {
+                        sub.ObjHandler(this, new PCObjectEventArgs(propertyName, oldVal, newValue));
+                    }
+                    catch (Exception e)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"An ObjHandler raised an exception: {e.Message} with inner: {e.InnerException?.Message} ");
                     }
                 }
                 else
                 {
-                    foreach (ISubscriptionGen genSub in genSubs)
-                    {
-                        genSub.GenHandler(this, new PCGenEventArgs(propertyName, typeof(T), oldVal, newValue));
-                    }
-                }
-
-                List<ISubscriptionGen> genSubs2 = GetPCGenSubscriptions(sc).ToList();
-
-                List<ISubscriptionGen> objSubs = GetPCObjectSubscriptions(sc).ToList();
-                if (!typedProp.ValueIsDefined)
-                {
-                    foreach (ISubscriptionGen objSub in objSubs)
-                    {
-                        objSub.ObjHandler(this, new PCObjectEventArgs(propertyName, newValue));
-                    }
-                }
-                else
-                {
-                    foreach (ISubscriptionGen objSub in objSubs)
-                    {
-                        objSub.ObjHandler(this, new PCObjectEventArgs(propertyName, oldVal, newValue));
-                    }
+                    throw new InvalidOperationException($"Handlers of kind: {sub.SubscriptionKind} are not supported.");
                 }
             }
 
             // Raise the standard PropertyChanged event
+            OnPropertyChanged(propertyName);
+
+            // Raise the standard PropertyChanged event for those subscribers who address us via the indexer.
             OnPropertyChanged(_propFactory.IndexerName);
 
-            // Raise the individual PropertyChanged event
-            //OnPropertyChangedIndividual(propertyName);
-
             // The shared, EventHandler<PCObjectEventArgs>
-            OnPropertyChangedWithObjVals(oldVal, newValue);
+            OnPropertyChangedWithObjVals(new PCObjectEventArgs(propertyName, oldVal, newValue));
 
             // The shared, EventHandler<PCGenEventArgs>
-            OnPropertyChangedWithGenVals(propertyName, typeof(T), oldVal, newValue);
-
-            // END PROCESS BINDINGS
-
-            //if (typedProp.DoAfterNotify)
-            //{
-            //    // Raise the standard PropertyChanged event
-            //    //OnPropertyChanged(_propFactory.IndexerName);
-
-            //    // Raise the individual PropertyChanged event
-            //    //OnPropertyChangedIndividual(propertyName);
-
-            //    // Replaced by the _subscriptionManager!
-            //    //// The typed, PropertyChanged event defined on the individual property.
-            //    //prop.OnPropertyChangedWithTVals(propertyName, oldVal, newValue);
-            //    //typedProp.RaiseEventsForParent(typedSubs, this, propertyName, oldVal, newValue);
-
-            //    // The un-typed, PropertyChanged event defined on the individual property.
-            //    //typedProp.OnPropertyChangedWithObjectVals(propertyName, oldVal, newValue);
-
-            //    //// The un-typed, PropertyChanged shared event.
-            //    //OnPropertyChangedWithVals(propertyName, typeof(T), oldVal, newValue);
-
-            //    // then perform the call back.
-            //    //typedProp.DoWhenChanged(oldVal, newValue);
-            //}
-            //else
-            //{
-            //    // Peform the call back,
-            //    //typedProp.DoWhenChanged(oldVal, newValue);
-
-            //    // Raise the standard PropertyChanged event
-            //    //OnPropertyChanged(_propFactory.IndexerName);
-
-            //    // Raise the individual PropertyChanged event
-            //    //OnPropertyChangedIndividual(propertyName);
-
-            //    // Replaced by the _subscriptionManager!
-            //    //// The typed, PropertyChanged event defined on the individual property.
-            //    //prop.OnPropertyChangedWithTVals(propertyName, oldVal, newValue);
-            //    //typedProp.RaiseEventsForParent(typedSubs, this, propertyName, oldVal, newValue);
-
-            //    // The un-typed, PropertyChanged event defined on the individual property.
-            //    //typedProp.OnPropertyChangedWithObjectVals(propertyName, oldVal, newValue);
-
-            //    // The un-typed, PropertyChanged shared event.
-            //    //OnPropertyChangedWithVals(propertyName, typeof(T), oldVal, newValue);
-            //}
+            _eventHolder.OnPropertyChangedWithGenVals(new PCGenEventArgs(propertyName, typeof(T), oldVal, newValue));
         }
 
-        private SubscriberCollection GetSubscriptions(PropIdType propId)
+        // For when the current value is undefined.
+        private void DoNotifyWork<T>(PropIdType propId, PropNameType propertyName, IPropPrivate<T> typedProp, T newValue)
         {
-            SubscriberCollection sc = _ourStoreAccessor.GetSubscriptions(this, propId);
+            // PROCESS BINDINGS
+
+            foreach (ISubscriptionGen sub in GetSubscriptions(propId))
+            {
+                if (sub is ISubscription<T> typedSub)
+                {
+                    if (typedSub.TypedHandler == null)
+                    {
+                        throw new InvalidOperationException("The Typed handler is null.");
+                    }
+
+                    try
+                    {
+                        typedSub.TypedHandler(this, new PCTypedEventArgs<T>(propertyName, newValue));
+                    }
+                    catch (Exception e)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"A TypedHandler raised an exception: {e.Message} with inner: {e.InnerException?.Message} ");
+                    }
+                }
+                else if (sub.SubscriptionKind == SubscriptionKind.GenHandler)
+                {
+                    if (sub.GenHandler == null)
+                    {
+                        throw new InvalidOperationException("The Gen handler is null.");
+                    }
+
+                    try
+                    {
+                        sub.GenHandler(this, new PCGenEventArgs(propertyName, typeof(T), newValue));
+                    }
+                    catch (Exception e)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"A GenHandler raised an exception: {e.Message} with inner: {e.InnerException?.Message} ");
+                    }
+                }
+                else if (sub.SubscriptionKind == SubscriptionKind.ObjHandler)
+                {
+                    if (sub.ObjHandler == null)
+                    {
+                        throw new InvalidOperationException("The Obj handler is null.");
+                    }
+
+                    try
+                    {
+                        sub.ObjHandler(this, new PCObjectEventArgs(propertyName, newValue));
+                    }
+                    catch (Exception e)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"An ObjHandler raised an exception: {e.Message} with inner: {e.InnerException?.Message} ");
+                    }
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Handlers of kind: {sub.SubscriptionKind} are not supported.");
+                }
+            }
+
+            // Raise the standard PropertyChanged event
+            OnPropertyChanged(propertyName);
+
+            // The shared, EventHandler<PCObjectEventArgs>
+            OnPropertyChangedWithObjVals(new PCObjectEventArgs(propertyName, newValue));
+
+            // The shared, EventHandler<PCGenEventArgs>
+            _eventHolder.OnPropertyChangedWithGenVals(new PCGenEventArgs(propertyName, typeof(T), newValue));
+        }
+
+        private IEnumerable<ISubscriptionGen> GetSubscriptions(PropIdType propId)
+        {
+            IEnumerable<ISubscriptionGen> sc = _ourStoreAccessor.GetSubscriptions(this, propId);
             return sc;
         }
 
-        private IEnumerable<ISubscription<T>> GetTypedSubscriptions<T>(SubscriberCollection sc)
-        {
-            IEnumerable<ISubscription<T>> typedSubs = sc.Where(x => x.SubscriptionKind == SubscriptionKind.TypedHandler)
-                .Select(y => (ISubscription<T>)y);
+        //private IEnumerable<ISubscription<T>> GetTypedSubscriptions<T>(SubscriberCollection sc)
+        //{
+        //    IEnumerable<ISubscription<T>> typedSubs = sc.Where(x => x.SubscriptionKind == SubscriptionKind.TypedHandler)
+        //        .Select(y => (ISubscription<T>)y);
 
-            return typedSubs;
-        }
+        //    return typedSubs;
+        //}
 
-        private IEnumerable<ISubscriptionGen> GetPCGenSubscriptions(SubscriberCollection sc)
-        {
-            IEnumerable<ISubscriptionGen> genSubs = sc.Where(x => x.SubscriptionKind == SubscriptionKind.GenHandler)
-                .Select(y => (ISubscriptionGen)y);
+        //private IEnumerable<ISubscriptionGen> GetPCGenSubscriptions(SubscriberCollection sc)
+        //{
+        //    IEnumerable<ISubscriptionGen> genSubs = sc.Where(x => x.SubscriptionKind == SubscriptionKind.GenHandler)
+        //        .Select(y => (ISubscriptionGen)y);
 
-            return genSubs;
-        }
+        //    return genSubs;
+        //}
 
-        private IEnumerable<ISubscriptionGen> GetPCObjectSubscriptions(SubscriberCollection sc)
-        {
-            IEnumerable<ISubscriptionGen> objSubs = sc.Where(x => x.SubscriptionKind == SubscriptionKind.ObjHandler)
-                .Select(y => (ISubscriptionGen)y);
+        //private IEnumerable<ISubscriptionGen> GetPCObjectSubscriptions(SubscriberCollection sc)
+        //{
+        //    IEnumerable<ISubscriptionGen> objSubs = sc.Where(x => x.SubscriptionKind == SubscriptionKind.ObjHandler)
+        //        .Select(y => (ISubscriptionGen)y);
 
-            return objSubs;
-        }
+        //    return objSubs;
+        //}
 
         protected IPropData GetPropGen(PropNameType propertyName, Type propertyType,
             out bool wasRegistered, out PropIdType propId,
@@ -1771,21 +1868,16 @@ namespace DRM.PropBag
         }
 
         // INotifyPCGen
-        protected void OnPropertyChangedWithGenVals(string propertyName, Type propertyType, object oldVal, object newVal)
-        {
-            EventHandler<PCGenEventArgs> handler = Interlocked.CompareExchange(ref PropertyChangedWithGenVals, null, null);
+        // Moved to the PB_EventHolder
 
-            if (handler != null)
-                handler(this, new PCGenEventArgs(propertyName, propertyType, oldVal, newVal));
-        }
 
         // INotifyPCObject
-        protected void OnPropertyChangedWithObjVals(object oldVal, object newVal)
+        protected void OnPropertyChangedWithObjVals(PCObjectEventArgs eArgs)
         {
             EventHandler<PCObjectEventArgs> handler = Interlocked.CompareExchange(ref PropertyChangedWithObjectVals, null, null);
 
             if (handler != null)
-                handler(this, new PCObjectEventArgs(_propFactory.IndexerName, oldVal, newVal));
+                handler(this, eArgs);
         }
 
         #endregion
@@ -1794,17 +1886,6 @@ namespace DRM.PropBag
 
         public bool TryGetPropType(string propertyName, out PropKindEnum propType)
         {
-            //if (tVals.TryGetValue(propertyName, out IPropGen value))
-            //{
-            //    propType = value.TypedProp.PropKind;
-            //    return true;
-            //}
-            //else
-            //{
-            //    propType = PropKindEnum.Prop;
-            //    return false;
-            //}
-
             PropIdType propId = GetPropId(propertyName);
             if (_ourStoreAccessor.TryGetValue(this, propId, out IPropData value))
             {
@@ -1888,69 +1969,28 @@ namespace DRM.PropBag
             return result;
         }
 
-        ///// <summary>
-        ///// Used to create Delegates when the type of the value is not known at run time.
-        ///// </summary>
-        //static private Type GMT_TYPE = typeof(GenericMethodTemplates);
-
-        //// Method Templates for Property Bag
-        //internal static class GenericMethodTemplates
-        //{
-        //    //static Lazy<MethodInfo> theSingleGenericDoSetBridgeMethodInfo;
-        //    //static MethodInfo GenericDoSetBridgeMethodInfo { get { return theSingleGenericDoSetBridgeMethodInfo.Value; } }
-
-        //    static Lazy<MethodInfo> theSingleGenGetTypedCollMethodInfo;
-        //    static MethodInfo GenGetTypedCollMethodInfo { get { return theSingleGenGetTypedCollMethodInfo.Value; } }
-
-        //    static GenericMethodTemplates()
-        //    {
-        //        //theSingleGenericDoSetBridgeMethodInfo = new Lazy<MethodInfo>(() =>
-        //        //    GMT_TYPE.GetMethod("DoSetBridge", BindingFlags.Static | BindingFlags.NonPublic),
-        //        //    LazyThreadSafetyMode.PublicationOnly);
-
-        //        theSingleGenGetTypedCollMethodInfo = new Lazy<MethodInfo>(() =>
-        //            GMT_TYPE.GetMethod("GetTypedCollection", BindingFlags.Static | BindingFlags.NonPublic),
-        //            LazyThreadSafetyMode.PublicationOnly);
-        //    }
-
-        //    ////static bool DoSetBridge<T>(object value, PropBag target, string propertyName, IProp prop)
-        //    ////{
-        //    ////    return target.DoSet<T>((T)value, propertyName, (IPropPrivate<T>)prop);
-        //    ////}
-
-        //    //// This implementation uses the concrete PropBag, instead of IPropBag
-        //    //// because this method has access to this instance of PropBag.
-        //    //// TODO: update this to use a true open delegate where the caller
-        //    //// specifies the target on which to call DoSet<T>.
-        //    //static bool DoSetBridge<T>(IPropBag target, PropIdType propId, string propertyName, IProp prop, object value)
-        //    //{
-        //    //    return ((PropBag)target).DoSet<T>(propId, propertyName, (IPropPrivate<T>)prop, (T)value);
-        //    //}
-
-        //    //public static DoSetDelegate GetDoSetDelegate(Type typeOfThisValue)
-        //    //{
-        //    //    MethodInfo methInfoSetProp = GenericMethodTemplates.GenericDoSetBridgeMethodInfo.MakeGenericMethod(typeOfThisValue);
-        //    //    DoSetDelegate result = (DoSetDelegate)Delegate.CreateDelegate(typeof(DoSetDelegate), methInfoSetProp);
-
-        //    //    return result;
-        //    //}
-
-        //    static IList GetTypedCollection<T>(PropBag source, string propertyName)
-        //    {
-        //        ObservableCollection<T> result = source.GetIt<ObservableCollection<T>>(propertyName);
-        //        return result;
-        //    }
-
-        //    public static GetTypedCollectionDelegate GetTheGetTypedCollectionDelegate(Type typeOfThisValue)
-        //    {
-        //        MethodInfo methInfoSetProp = GenericMethodTemplates.GenGetTypedCollMethodInfo.MakeGenericMethod(typeOfThisValue);
-        //        GetTypedCollectionDelegate result = (GetTypedCollectionDelegate)Delegate.CreateDelegate(typeof(GetTypedCollectionDelegate), methInfoSetProp);
-
-        //        return result;
-        //    }
-
-        //}
-
         #endregion
+
+        
+    }
+
+    internal class PB_EventHolder : INotifyPropertyChanged,
+        INotifyPropertyChanging,
+        INotifyPCGen,
+        INotifyPCObject
+    {
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangingEventHandler PropertyChanging;
+        public event EventHandler<PCGenEventArgs> PropertyChangedWithGenVals;
+        public event EventHandler<PCObjectEventArgs> PropertyChangedWithObjectVals;
+
+        public void OnPropertyChangedWithGenVals(PCGenEventArgs eArgs)
+        {
+            EventHandler<PCGenEventArgs> handler = Interlocked.CompareExchange(ref PropertyChangedWithGenVals, null, null);
+
+            if (handler != null)
+                handler(this, eArgs);
+        }
     }
 }

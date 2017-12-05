@@ -68,6 +68,21 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
+        public bool TryGetSubscriberCollection(PropIdType propId, out IEnumerable<ISubscriptionGen> subs)
+        {
+            bool result = _subCollections.TryGetValue(propId, out SubscriberCollection sc);
+            if(result)
+            {
+                subs = sc;
+                return true;
+            }
+            else
+            {
+                subs = null;
+                return false;
+            }
+        }
+
         public bool TryGetSubscriberCollection(PropIdType propId, out SubscriberCollection subs)
         {
             bool result = _subCollections.TryGetValue(propId, out subs);
@@ -85,16 +100,6 @@ namespace DRM.TypeSafePropertyBag
             return GetEnumerator();
         }
 
-        //public IEnumerator<SubscriberCollection> GetEnumerator()
-        //{
-        //    lock (_sync)
-        //        return _subPtrs2.ToList().GetEnumerator();
-        //}
-
-        //IEnumerator IEnumerable.GetEnumerator()
-        //{
-        //    return GetEnumerator();
-        //}
     }
 }
 

@@ -17,7 +17,7 @@ namespace DRM.PropBag
 
     public class PropExtStoreFactory : AbstractPropFactory
     {
-        public DelegateCacheProvider2<PropBagType> DelegateCacheProvider { get; }
+        public DelegateCacheProvider<PropBagType> DelegateCacheProvider { get; }
 
         object Stuff { get; }
 

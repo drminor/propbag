@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace DRM.TypeSafePropertyBag
 {
@@ -25,9 +26,10 @@ namespace DRM.TypeSafePropertyBag
         ISubscriptionGen AddSubscription(ISubscriptionKeyGen subscriptionRequest, out bool wasAdded);
         bool RemoveSubscription(ISubscriptionKeyGen subscriptionRequest);
 
-        SubscriberCollection GetSubscriptions(IPropBag host, L2T propId);
+        IEnumerable<ISubscriptionGen> GetSubscriptions(IPropBag host, L2T propId);
 
         //SubscriberCollection GetSubscriptions(ObjectIdType objectId, PropIdType propId);
         bool TryGetSubscriptions(ExKeyT exKey, out SubscriberCollection subscriberCollection);
+        bool TryGetSubscriptions(ExKeyT exKey, out IEnumerable<ISubscriptionGen> subscriberCollection);
     }
 }
