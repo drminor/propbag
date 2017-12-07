@@ -4,6 +4,7 @@ using System.Linq;
 
 namespace DRM.TypeSafePropertyBag
 {
+    using ObjectIdType = UInt64;
     using PropIdType = UInt32;
     using PropNameType = String;
 
@@ -11,8 +12,8 @@ namespace DRM.TypeSafePropertyBag
     {
         #region Private Members
 
-        Dictionary<PropNameType, PropIdType> _rawDict;
-        Dictionary<PropIdType, PropNameType> _cookedDict;
+        internal Dictionary<PropNameType, PropIdType> _rawDict;
+        internal Dictionary<PropIdType, PropNameType> _cookedDict;
 
         readonly object _sync;
 
@@ -22,11 +23,22 @@ namespace DRM.TypeSafePropertyBag
 
         public SimpleLevel2KeyMan(int maxPropsPerObject)
         {
-            _rawDict = new Dictionary<PropNameType, PropIdType>();
-            _cookedDict = new Dictionary<PropIdType, PropNameType>();
             MaxPropsPerObject = maxPropsPerObject;
 
             _sync = new object();
+            _rawDict = new Dictionary<PropNameType, PropIdType>();
+            _cookedDict = new Dictionary<PropIdType, PropNameType>();
+        }
+
+        public SimpleLevel2KeyMan(SimpleLevel2KeyMan sourceToCopy)
+        {
+            MaxPropsPerObject = sourceToCopy.MaxPropsPerObject;
+
+            _sync = new object();
+
+
+            _rawDict = new Dictionary<PropNameType, PropIdType>(sourceToCopy._rawDict);
+            _cookedDict = new Dictionary<PropIdType, PropNameType>(sourceToCopy._cookedDict);
         }
 
         #endregion
@@ -98,6 +110,8 @@ namespace DRM.TypeSafePropertyBag
                 }
             }
         }
+
+        public int PropertyCount => _rawDict.Count;
 
         #endregion
 
