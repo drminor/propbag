@@ -20,6 +20,8 @@ namespace DRM.TypeSafePropertyBag
 
     using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
     using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
+    using PSCloneServiceType = IProvidePropStoreCloneService<UInt32, String>;
+
     #endregion
 
     internal class SimplePropStoreAccessService : PSAccessServiceType, IHaveTheStoreNode, IDisposable
@@ -54,6 +56,11 @@ namespace DRM.TypeSafePropertyBag
         {
             _ourNode = ourNode;
             _propStoreAccessServiceProvider = propStoreAccessServiceProvider;
+
+            if(!(propStoreAccessServiceProvider is PSCloneServiceType))
+            {
+                throw new ArgumentException($"The {nameof(propStoreAccessServiceProvider)} does not implement the {nameof(PSCloneServiceType)} interface.");
+            }
 
             Level2KeyManager = level2KeyManager;
             MaxObjectsPerAppDomain = propStoreAccessServiceProvider.MaxObjectsPerAppDomain;
@@ -112,7 +119,7 @@ namespace DRM.TypeSafePropertyBag
         public bool TryAdd(IPropBag propBag, PropIdType propId, PropNameType propertyName, IProp genericTypedProp, out IPropData propData)
         {
             ExKeyT propertyKey = GetCompKey(propBag, propId);
-            propData = new PropGen(genericTypedProp, propertyKey, propId, propertyName);
+            propData = new PropGen(propertyKey, genericTypedProp);
             IPropDataInternal int_PropData = (IPropDataInternal)propData;
 
             StoreNodeProp propStoreNode = new StoreNodeProp(propertyKey, int_PropData, _ourNode);
@@ -596,14 +603,6 @@ namespace DRM.TypeSafePropertyBag
 
         #region Private Methods
 
-        //private PropStoreNode GetGuestObjectNodeFromStore(PropStoreNode propStoreNode)
-        //{
-        //    //System.Diagnostics.Debug.Assert(!propStoreNode.IsObjectNode, "Attempting to call GetGuestObjectNodeFromStore on a node that is an ObjectNode.");
-
-        //    PropStoreNode childObjectNode = propStoreNode.OnlyChildOfPropItem;
-        //    return childObjectNode;
-        //}
-
         private StoreNodeBag GetGuestObjectNodeFromPropItemVal(IPropBag propBag)
         {
             //ObjectIdType objectId = GetAndCheckObjectRef(propBag);
@@ -749,38 +748,6 @@ namespace DRM.TypeSafePropertyBag
 
         StoreNodeBag IHaveTheStoreNode.PropStoreNode => _ourNode;
 
-        //ObjectIdType IHaveTheKeyIT.ObjectId => _objectId;
-
-        //ExKeyT IHaveTheKeyIT.GetTheKey(IPropBag propBag, PropIdType propId)
-        //{
-        //    ExKeyT result = GetExKey(propBag, propId);
-        //    return result;
-        //}
-
-        //PropStoreNode IHaveTheKeyIT.GetObjectNodeForPropVal(IPropDataInternal int_propData)
-        //{
-        //    System.Diagnostics.Debug.Assert(int_propData != null, "Any parent of an ObjectId type PropStoreNode should have an instance of an IPropDataInternal.");
-        //    System.Diagnostics.Debug.Assert(int_propData.TypedProp != null, "All objects that implement IPropDataInternal must have a non-null value for TypedProp.");
-        //    System.Diagnostics.Debug.Assert(int_propData.TypedProp.Type is IPropBag, "All calls to GetObjectNodeForPropVal must be made for properties of a type that derives from IPropBag.");
-
-        //    object test = int_propData.TypedProp.TypedValueAsObject;
-
-        //    if (test == null) return null;
-
-        //    System.Diagnostics.Debug.Assert(test is IPropBagInternal, "All instances of IPropBag must also implement IPropBagInternal.");
-        //    System.Diagnostics.Debug.Assert(((IPropBagInternal)test).ItsStoreAccessor != null, "All instances of IPropBagInternal must have a non-null value for ItsStoreAccessor.");
-        //    System.Diagnostics.Debug.Assert(((IPropBagInternal)test).ItsStoreAccessor is IHaveTheKeyIT, "All instances of IPropBagInternal must have a value for ItsStoreAccessor that implements IHaveTheKeyIT.");
-
-        //    PropStoreNode result = ((IHaveTheKeyIT)((IPropBagInternal)test).ItsStoreAccessor).PropStoreNode;
-        //    return result;
-        //}
-
-        //bool IHaveTheKeyIT.TryGetAChildOfMine(PropIdType propId, out PropStoreNode child)
-        //{
-        //    bool result = _ourNode.TryGetChild(propId, out child);
-        //    return result;
-        //}
-
         #endregion
 
         #region IDisposable Support
@@ -828,6 +795,38 @@ namespace DRM.TypeSafePropertyBag
         public void IncAccess()
         {
             _propStoreAccessServiceProvider.IncAccess();
+        }
+
+        public PSAccessServiceType CloneProps(IPropBag callingPropBag, IPropBag copySource)
+        {
+            if(!(copySource is IPropBagInternal ipbi))
+            {
+                throw new InvalidOperationException($"The {nameof(copySource)} does not implement the {nameof(IPropBagInternal)} interface.");
+            }
+
+            if (!(callingPropBag is IPropBagInternal target))
+            {
+                throw new InvalidOperationException($"The {nameof(target)} does not implement the {nameof(IPropBagInternal)} interface.");
+            }
+
+            GetAndCheckObjectRef(callingPropBag);
+
+            PSAccessServiceType newStoreAccessor = ((PSCloneServiceType)_propStoreAccessServiceProvider).CloneService(ipbi.ItsStoreAccessor, target, out StoreNodeBag newStoreNode);
+            CopyChildProps(  ((IHaveTheStoreNode)ipbi.ItsStoreAccessor).PropStoreNode, newStoreNode);
+
+            return newStoreAccessor;
+        }
+
+        private void CopyChildProps(StoreNodeBag sourceBag, StoreNodeBag newBag)
+        {
+            foreach (StoreNodeProp childProp in sourceBag.Children)
+            {
+                ExKeyT newCKey = new SimpleExKey(newBag.ObjectId, childProp.PropId);
+
+                IPropDataInternal newPropGen = new PropGen(newCKey, (IProp)childProp.Int_PropData.TypedProp.Clone());
+
+                StoreNodeProp newChild = new StoreNodeProp(newCKey, newPropGen, newBag);
+            }
         }
 
         public int AccessCounter => _propStoreAccessServiceProvider.AccessCounter;

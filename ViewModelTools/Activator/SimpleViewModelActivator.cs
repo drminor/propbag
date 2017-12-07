@@ -35,7 +35,7 @@ namespace DRM.ViewModelTools
 
         #endregion
 
-        #region IViewModelActivator interface
+        #region IViewModelActivator Interface
 
         // BaseType + ResourceKey (BaseType known only at run time.
         public object GetNewViewModel(string resourceKey, Type typeToCreate, string fullClassName = null, IPropFactory propFactory = null)
@@ -54,7 +54,6 @@ namespace DRM.ViewModelTools
             //object result = Activator.CreateInstance(typeToCreate, bFlags, binder: null, args: parameters, culture: null);
 
             object result = Activator.CreateInstance(typeToCreate, args: parameters);
-
             return result;
         }
 
@@ -70,9 +69,27 @@ namespace DRM.ViewModelTools
         public object GetNewViewModel<BT>(PropModel propModel, string fullClassName = null, IPropFactory propFactory = null) where BT : class, IPropBag
         {
             object[] parameters = new object[] { propModel, fullClassName, propFactory };
-            object result = Activator.CreateInstance(typeof(BT), parameters);
+            object result = Activator.CreateInstance(typeof(BT), args: parameters);
             return result;
         }
+
+        public object GetNewViewModel(Type typeToCreate, IPropBag copySource)
+        {
+            object[] parameters = new object[] { copySource };
+            object result = Activator.CreateInstance(typeToCreate, args: parameters);
+            return result;
+        }
+
+        object IViewModelActivator.GetNewViewModel<BT>(IPropBag copySource)
+        {
+            object[] parameters = new object[] { copySource };
+            object result = Activator.CreateInstance(typeof(BT), args: parameters);
+            return result;
+        }
+
+        #endregion
+
+        #region Private Methods
 
         private PropModel GetPropModel(string resourceKey)
         {
@@ -83,16 +100,6 @@ namespace DRM.ViewModelTools
 
             PropModel propModel = _propModelProvider.GetPropModel(resourceKey);
             return propModel;
-        }
-
-        public Type GetWrapperType(PropModel propModel, Type typeToCreate)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Type GetWrapperType<BT>(PropModel propModel) where BT: class, IPropBag
-        {
-            throw new NotImplementedException();
         }
 
         #endregion

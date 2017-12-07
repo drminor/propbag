@@ -16,5 +16,9 @@ namespace DRM.ViewModelTools
         // Create new Type that is derived from a Type known at compile time.
         object GetNewViewModel<BT>(string resourceKey, string fullClassName = null, IPropFactory propFactory = null) where BT : class, IPropBag;
         object GetNewViewModel<BT>(PropModel propModel, string fullClassName = null, IPropFactory propFactory = null) where BT : class, IPropBag;
+
+        object GetNewViewModel(Type typeToCreate, IPropBag copySource);
+        object GetNewViewModel<BT>(IPropBag copySource) where BT : class, IPropBag;
+
     }
 }
