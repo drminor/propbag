@@ -29,6 +29,11 @@ namespace PropBagLib.Tests.AutoMapperSupport
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
+        public MyModel3()
+        {
+
+        }
+
         Guid _productId;
         public Guid ProductId
         {
@@ -87,8 +92,6 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 }
             }
         }
-
-
 
         private void OnPropertyChanged(string propertyName)
         {

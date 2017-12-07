@@ -77,27 +77,27 @@ namespace DRM.PropBag
             CT initialValue,
             string propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
-            EventHandler<PCTypedEventArgs<CT>> doWhenChangedX = null, bool doAfterNotify = false, Func<CT, CT, bool> comparer = null)
+            Func<CT, CT, bool> comparer = null)
         {
             if (comparer == null) comparer = EqualityComparer<CT>.Default.Equals;
             GetDefaultValueDelegate<CT> getDefaultValFunc = ValueConverter.GetDefaultValue<CT>;
 
             ICPropPrivate<CT, T> prop = new CProp<CT, T>(initialValue, getDefaultValFunc, typeIsSolid, hasStorage,
-                comparer, doWhenChangedX, doAfterNotify);
+                comparer);
             return prop;
         }
 
         public override ICPropPrivate<CT, T> CreateWithNoValue<CT, T>(
             PropNameType propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
-            EventHandler<PCTypedEventArgs<CT>> doWhenChangedX = null, bool doAfterNotify = false, Func<CT, CT, bool> comparer = null)
+            Func<CT, CT, bool> comparer = null)
         {
             if (comparer == null) comparer = EqualityComparer<CT>.Default.Equals;
 
             GetDefaultValueDelegate<CT> getDefaultValFunc = ValueConverter.GetDefaultValue<CT>; // this.GetDefaultValue<T>;
 
             ICPropPrivate<CT, T> prop = new CProp<CT, T>(getDefaultValFunc, typeIsSolid, hasStorage,
-                comparer, doWhenChangedX, doAfterNotify);
+                comparer);
             return prop;
         }
 
@@ -110,27 +110,26 @@ namespace DRM.PropBag
             T initialValue,
             PropNameType propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
-            EventHandler<PCTypedEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false, Func<T,T,bool> comparer = null)
+            Func<T,T,bool> comparer = null)
         {
             if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
 
             GetDefaultValueDelegate<T> getDefaultValFunc = ValueConverter.GetDefaultValue<T>; // this.GetDefaultValue<T>;
             IProp<T> prop = new Prop<T>(initialValue, getDefaultValFunc, typeIsSolid: typeIsSolid,
-                hasStore: hasStorage, comparer: comparer, doWhenChangedX: doWhenChangedX, doAfterNotify: doAfterNotify);
+                hasStore: hasStorage, comparer: comparer);
             return prop;
         }
 
         public override IProp<T> CreateWithNoValue<T>(
             PropNameType propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
-            EventHandler<PCTypedEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false, Func<T,T,bool> comparer = null)
+            Func<T,T,bool> comparer = null)
         {
             if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
 
             GetDefaultValueDelegate<T> getDefaultValFunc = ValueConverter.GetDefaultValue<T>; // this.GetDefaultValue<T>;
             IProp<T> prop = new Prop<T>(getDefaultValFunc, typeIsSolid: typeIsSolid,
-                hasStore: hasStorage, comparer: comparer, doWhenChangedX: doWhenChangedX,
-                doAfterNotify: doAfterNotify);
+                hasStore: hasStorage, comparer: comparer);
             return prop;
         }
 
@@ -142,20 +141,20 @@ namespace DRM.PropBag
             object value,
             PropNameType propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
-            EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null)
+            Delegate comparer, bool useRefEquality = false, Type itemType = null)
         {
             if (propKind == PropKindEnum.Prop)
             {
                 CreatePropFromObjectDelegate propCreator = GetPropCreator(typeOfThisProperty);
                 IProp prop = (IProp)propCreator(this, value, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
-                    doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify, comparer: comparer, useRefEquality: useRefEquality);
+                    comparer: comparer, useRefEquality: useRefEquality);
                 return prop;
             }
             else if (propKind == PropKindEnum.Collection)
             {
                 CreateCPropFromObjectDelegate propCreator = GetCPropCreator(typeOfThisProperty, itemType);
                 IProp prop = (IProp)propCreator(this, value, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
-                    doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify, comparer: comparer, useRefEquality: useRefEquality);
+                    comparer: comparer, useRefEquality: useRefEquality);
                 return prop;
             }
             else
@@ -168,20 +167,20 @@ namespace DRM.PropBag
             string value, bool useDefault,
             PropNameType propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
-            EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null)
+            Delegate comparer, bool useRefEquality = false, Type itemType = null)
         {
             if (propKind == PropKindEnum.Prop)
             {
                 CreatePropFromStringDelegate propCreator = GetPropFromStringCreator(typeOfThisProperty);
                 IProp prop = (IProp)propCreator(this, value, useDefault, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
-                    doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify, comparer: comparer, useRefEquality: useRefEquality);
+                    comparer: comparer, useRefEquality: useRefEquality);
                 return prop;
             } 
             else if(propKind == PropKindEnum.Collection)
             {
                 CreateCPropFromStringDelegate propCreator = GetCPropFromStringCreator(typeOfThisProperty, itemType);
                 IProp prop = (IProp)propCreator(this, value, useDefault, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
-                    doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify, comparer: comparer, useRefEquality: useRefEquality);
+                    comparer: comparer, useRefEquality: useRefEquality);
                 return prop;
             }
             else
@@ -193,20 +192,20 @@ namespace DRM.PropBag
         public override IProp CreateGenWithNoValue(Type typeOfThisProperty,
             PropNameType propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
-            EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null)
+            Delegate comparer, bool useRefEquality = false, Type itemType = null)
         {
             if (propKind == PropKindEnum.Prop)
             {
                 CreatePropWithNoValueDelegate propCreator = GetPropWithNoValueCreator(typeOfThisProperty);
                 IProp prop = (IProp)propCreator(this, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
-                    doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify, comparer: comparer, useRefEquality: useRefEquality);
+                    comparer: comparer, useRefEquality: useRefEquality);
                 return prop;
             }
             else if (propKind == PropKindEnum.Collection)
             {
                 CreateCPropWithNoValueDelegate propCreator = GetCPropWithNoValueCreator(typeOfThisProperty, itemType);
                 IProp prop = (IProp)propCreator(this, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
-                    doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify, comparer: comparer, useRefEquality: useRefEquality);
+                    comparer: comparer, useRefEquality: useRefEquality);
                 return prop;
             }
             else

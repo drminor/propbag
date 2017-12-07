@@ -19,6 +19,8 @@ namespace DRM.TypeSafePropertyBag
     {
         L2KeyManType Level2KeyManager { get; }
         PSAccessServiceType ItsStoreAccessor { get; }
+        IList<string> GetAllPropertyNames2();
+
     }
 
     /// <summary>
@@ -31,7 +33,7 @@ namespace DRM.TypeSafePropertyBag
         INotifyPropertyChanging,
         INotifyPCGen,
         INotifyPCObject,
-        //INotifyPCIndividual,
+        ICloneable,
         IDisposable
     {
         // These are defined by ITypeSafePropBag
@@ -80,11 +82,15 @@ namespace DRM.TypeSafePropertyBag
         //bool UnSubscribeToPropChanged(Action<object, object> doOnChange, string propertyName);
 
         string FullClassName { get; }
+        IPropFactory PropFactory { get; }
 
         // Consider moving these to the TypeSafePropBagMetaData class.
+        PropBagTypeSafetyMode TypeSafetyMode { get; }
         IList<string> GetAllPropertyNames();
         IDictionary<string, IPropData> GetAllPropertyValues();
         IDictionary<string, ValPlusType> GetAllPropNamesAndTypes();
+
+        void CloneProps(IPropBag copySource);
 
         //IPropGen this[int index] { get; }
         //int IndexOfProp(string propertyName, Type propertyType);

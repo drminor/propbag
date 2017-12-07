@@ -69,41 +69,35 @@ namespace DRM.PropBag
         /// <param name="doAfterNotify"></param>
         /// <param name="comparer">A instance of a class that implements IEqualityComparer and thus an Equals method.</param>
         /// <param name="initalValue"></param>
-        new public IProp<T> AddProp<T>(string propertyName, EventHandler<PCTypedEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false,
-            Func<T,T,bool> comparer = null, object extraInfo = null, T initialValue = default(T))
+        new public IProp<T> AddProp<T>(string propertyName, Func<T,T,bool> comparer = null, object extraInfo = null, T initialValue = default(T))
         {
-            return base.AddProp<T>(propertyName, doWhenChangedX, doAfterNotify, comparer, extraInfo, initialValue);
+            return base.AddProp<T>(propertyName, comparer, extraInfo, initialValue);
         }
 
         // TODO: Consider removing this method and adding a parameter to AddProp named "UseRefEquality."
-        new public IProp<T> AddPropObjComp<T>(string propertyName, EventHandler<PCTypedEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false,
-            object extraInfo = null, T initialValue = default(T))
+        new public IProp<T> AddPropObjComp<T>(string propertyName, object extraInfo = null, T initialValue = default(T))
         {
-            return base.AddPropObjComp(propertyName, doWhenChangedX, doAfterNotify, extraInfo, initialValue);
+            return base.AddPropObjComp(propertyName, extraInfo, initialValue);
         }
 
-        new public IProp<T> AddPropNoValue<T>(string propertyName, EventHandler<PCTypedEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false,
-            Func<T,T,bool> comparer = null, object extraInfo = null)
+        new public IProp<T> AddPropNoValue<T>(string propertyName, Func<T,T,bool> comparer = null, object extraInfo = null)
         {
-            return base.AddPropNoValue(propertyName, doWhenChangedX, doAfterNotify, comparer, extraInfo);
+            return base.AddPropNoValue(propertyName, comparer, extraInfo);
         }
 
-        new public IProp<T> AddPropObjCompNoValue<T>(string propertyName, EventHandler<PCTypedEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false,
-            object extraInfo = null)
+        new public IProp<T> AddPropObjCompNoValue<T>(string propertyName, object extraInfo = null)
         {
-            return base.AddPropObjCompNoValue(propertyName, doWhenChangedX, doAfterNotify, extraInfo);
+            return base.AddPropObjCompNoValue<T>(propertyName, extraInfo);
         }
 
-        new public IProp<T> AddPropNoStore<T>(string propertyName, EventHandler<PCTypedEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false,
-            Func<T,T,bool> comparer = null, object extraInfo = null)
+        new public IProp<T> AddPropNoStore<T>(string propertyName, Func<T,T,bool> comparer = null, object extraInfo = null)
         {
-            return base.AddPropNoStore(propertyName, doWhenChangedX, doAfterNotify, comparer, extraInfo);
+            return base.AddPropNoStore(propertyName, comparer, extraInfo);
         }
 
-        new public IProp<T> AddPropObjCompNoStore<T>(string propertyName, EventHandler<PCTypedEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false,
-            object extraInfo = null)
+        new public IProp<T> AddPropObjCompNoStore<T>(string propertyName, object extraInfo = null)
         {
-            return base.AddPropObjCompNoStore(propertyName, doWhenChangedX, doAfterNotify, extraInfo);
+            return base.AddPropObjCompNoStore<T>(propertyName, extraInfo);
         }
 
         new public void RemoveProp(string propertyName, Type propertyType)

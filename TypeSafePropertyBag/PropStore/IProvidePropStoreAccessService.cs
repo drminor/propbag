@@ -15,11 +15,17 @@ namespace DRM.TypeSafePropertyBag
         IPropStoreAccessService<L2T, L2TRaw> CreatePropStoreService(IPropBagInternal propBag);
         void TearDown(ExKeyT cKey);
 
-        // Diagnostics
+        // Diagnostics 
         void IncAccess();
         int AccessCounter { get; }
+        void ResetAccessCounter();
 
         int TotalNumberOfAccessServicesCreated { get; }
         int NumberOfRootPropBagsInPlay { get; }
+    }
+
+    internal interface IProvidePropStoreCloneService<L2T, L2TRaw>
+    {
+        IPropStoreAccessService<L2T, L2TRaw> CloneService(IPropStoreAccessService<L2T, L2TRaw> copySource, IPropBagInternal target, out StoreNodeBag newStoreNode);
     }
 }

@@ -1,13 +1,14 @@
 ﻿
+using System.Reflection;
 using DRM.PropBag;
 using DRM.TypeSafePropertyBag;
 using System;
-using System.Reflection;
+using System.Collections.Generic;
 
 
 namespace PropBagLib.Tests
 {
-    public partial class ExtStoreModel : PropBag
+	public partial class ExtStoreModel : PropBag
 	{
 		public ExtStoreModel() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered, null) { }
 
@@ -15,8 +16,10 @@ namespace PropBagLib.Tests
 
 		public ExtStoreModel(PropBagTypeSafetyMode typeSafetyMode, IPropFactory factory) : base(typeSafetyMode, factory)
 		{
-	        AddProp<int>("PropInt3", null, false, null);
-	        AddProp<int>("PropInt4", null, false, null);
+	        AddProp<int>("PropInt3", comparer:null);
+		 
+	        AddProp<int>("PropInt4", comparer:null);
+		 
 		}
 
 	#region Property Declarations
@@ -46,7 +49,7 @@ namespace PropBagLib.Tests
 		}  
 	 
 	#endregion
-
+	
 	#region PropetyChangedWithTVals Event Declarations
 		  
 			public event EventHandler<PCTypedEventArgs<int>> PropInt3Changed

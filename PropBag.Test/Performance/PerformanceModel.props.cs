@@ -1,14 +1,15 @@
 ﻿
+using System.Reflection;
 using DRM.PropBag;
 using DRM.TypeSafePropertyBag;
 using System;
 using System.Collections.Generic;
-using System.Reflection;
+using PropBagLib.Tests;
 
 
 namespace PropBagLib.Tests
 {
-    public partial class PerformanceModel : PropBag
+	public partial class PerformanceModel : PropBag
 	{
 		public PerformanceModel() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered, null) { }
 
@@ -16,16 +17,26 @@ namespace PropBagLib.Tests
 
 		public PerformanceModel(PropBagTypeSafetyMode typeSafetyMode, IPropFactory factory) : base(typeSafetyMode, factory)
 		{
-	        AddProp<object>("PropObject", null, false, null);
-	        AddProp<string>("PropString", null, false, null, null, "");
-	        AddPropObjComp<string>("PropStringUseRefComp", null, false);
-	        AddProp<bool>("PropBool", null, false, null, null, false);
-	        AddProp<int>("PropInt", null, false, null);
-	        AddProp<TimeSpan>("PropTimeSpan", null, false, null);
-	        AddProp<Uri>("PropUri", null, false, null);
-	        AddProp<Lazy<int>>("PropLazyInt", null, false, null);
-	        AddProp<Nullable<int>>("PropNullableInt", null, false, null, null, -1);
-	        AddProp<ICollection<int>>("PropICollectionInt", null, false, null, null, null);
+	        AddProp<object>("PropObject", comparer:null);
+		 
+	        AddProp<string>("PropString", null, null, initialValue:"");
+		 
+	        AddPropObjComp<string>("PropStringUseRefComp", extraInfo:null);
+		 
+	        AddProp<bool>("PropBool", null, null, initialValue:false);
+		 
+	        AddProp<int>("PropInt", comparer:null);
+		 
+	        AddProp<TimeSpan>("PropTimeSpan", comparer:null);
+		 
+	        AddProp<Uri>("PropUri", comparer:null);
+		 
+	        AddProp<Lazy<int>>("PropLazyInt", comparer:null);
+		 
+	        AddProp<Nullable<int>>("PropNullableInt", null, null, initialValue:-1);
+		 
+	        AddProp<ICollection<int>>("PropICollectionInt", null, null, initialValue:null);
+		 
 		}
 
 	#region Property Declarations
@@ -151,7 +162,7 @@ namespace PropBagLib.Tests
 		}  
 	 
 	#endregion
-
+	
 	#region PropetyChangedWithTVals Event Declarations
 		  
 			public event EventHandler<PCTypedEventArgs<object>> PropObjectChanged

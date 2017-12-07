@@ -73,7 +73,7 @@ namespace DRM.PropBag
             CT initialValue,
             PropNameType propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
-            EventHandler<PCTypedEventArgs<CT>> doWhenChangedX = null, bool doAfterNotify = false, Func<CT, CT, bool> comparer = null)
+            Func<CT, CT, bool> comparer = null)
         {
             ICPropPrivate<CT, T> prop = null;
             return prop;
@@ -82,7 +82,7 @@ namespace DRM.PropBag
         public override ICPropPrivate<CT, T> CreateWithNoValue<CT, T>(
             PropNameType propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
-            EventHandler<PCTypedEventArgs<CT>> doWhenChangedX = null, bool doAfterNotify = false, Func<CT, CT, bool> comparer = null)
+            Func<CT, CT, bool> comparer = null)
         {
             ICPropPrivate<CT, T> prop = null;
             return prop;
@@ -95,7 +95,7 @@ namespace DRM.PropBag
         public override IProp<T> Create<T>(T initialValue,
             PropNameType propertyName, object extraInfo = null,
             bool dummy = true, bool typeIsSolid = true,
-            EventHandler<PCTypedEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false, Func<T,T,bool> comparer = null)
+            Func<T,T,bool> comparer = null)
         {
             throw new InvalidOperationException("External Store Factory doesn't know how to create properties with inital values.");
 
@@ -105,16 +105,13 @@ namespace DRM.PropBag
         public override IProp<T> CreateWithNoValue<T>(
             PropNameType propertyName, object extraInfo = null,
             bool dummy = true, bool typeIsSolid = true,
-            EventHandler<PCTypedEventArgs<T>> doWhenChangedX = null,
-            //EventHandler<PropertyChangedWithTValsEventArgs<T>> doWhenChangedX = null,
-            bool doAfterNotify = false, Func<T,T,bool> comparer = null)
+            Func<T,T,bool> comparer = null)
         {
             if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
             GetDefaultValueDelegate<T> getDefaultValFunc = this.GetDefaultValue<T>;
 
             PropExternStore<T> propWithExtStore = new PropExternStore<T>(propertyName,
-                extraInfo, getDefaultValFunc, typeIsSolid: typeIsSolid, comparer: comparer,
-                doWhenChangedX: doWhenChangedX, doAfterNotify: doAfterNotify);
+                extraInfo, getDefaultValFunc, typeIsSolid: typeIsSolid, comparer: comparer);
 
             return propWithExtStore;
         }
@@ -127,7 +124,7 @@ namespace DRM.PropBag
             object value,
             PropNameType propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
-            EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null)
+            Delegate comparer, bool useRefEquality = false, Type itemType = null)
         {
             throw new InvalidOperationException("External Store Factory doesn't know how to create properties with inital values.");
         }
@@ -136,7 +133,7 @@ namespace DRM.PropBag
             string value, bool useDefault,
             PropNameType propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
-            EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null)
+            Delegate comparer, bool useRefEquality = false, Type itemType = null)
         {
             throw new InvalidOperationException("External Store Factory doesn't know how to create properties with inital values.");
         }
@@ -144,11 +141,11 @@ namespace DRM.PropBag
         public override IProp CreateGenWithNoValue(Type typeOfThisProperty,
             PropNameType propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
-            EventHandler<PCGenEventArgs> doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false, Type itemType = null)
+            Delegate comparer, bool useRefEquality = false, Type itemType = null)
         {
             CreatePropWithNoValueDelegate propCreator = GetPropWithNoValueCreator(typeOfThisProperty);
             IProp prop = (IProp)propCreator(this, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
-                doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify, comparer: comparer, useRefEquality: useRefEquality);
+                comparer: comparer, useRefEquality: useRefEquality);
 
             return prop;
         }

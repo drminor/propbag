@@ -34,7 +34,7 @@ namespace DRM.PropBag.ClassGenerator
             {
                 if (def.CreateType == PropCreateMethodEnum.noValue)
                 {
-                    prop = factory.CreateWithNoValue<T>(def.PropName, def.ExtraInfo, def.HasStore, def.TypeIsSolid, doWhenChangedX, def.DoAfterNotify, comparer);
+                    prop = factory.CreateWithNoValue<T>(def.PropName, def.ExtraInfo, def.HasStore, def.TypeIsSolid, comparer);
                 }
                 else
                 {
@@ -48,12 +48,12 @@ namespace DRM.PropBag.ClassGenerator
                         initVal = factory.GetValueFromString<T>(def.InitialValue);
                     }
 
-                    prop = factory.Create<T>(initVal, def.PropName, def.ExtraInfo, def.HasStore, def.TypeIsSolid, doWhenChangedX, def.DoAfterNotify, comparer);
+                    prop = factory.Create<T>(initVal, def.PropName, def.ExtraInfo, def.HasStore, def.TypeIsSolid, comparer);
                 }
             }
             else
             {
-                prop = factory.CreateWithNoValue<T>(def.PropName, def.ExtraInfo, def.HasStore, def.TypeIsSolid, doWhenChangedX, def.DoAfterNotify, comparer);
+                prop = factory.CreateWithNoValue<T>(def.PropName, def.ExtraInfo, def.HasStore, def.TypeIsSolid,  comparer);
             }
             return prop;
         }

@@ -1,10 +1,6 @@
 ﻿using DRM.PropBag.ControlModel;
 using DRM.TypeSafePropertyBag;
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Data;
 using System.Linq;
 using System.Windows;
@@ -22,15 +18,15 @@ namespace DRM.PropBag.ControlsWPF
         public bool HasPbtLookupResources => _propBagTemplateProvider != null;
 
         // TODO: Ultimately, this should be removed -- all PropBagTemplates should specify a PropModel.
-        public bool HasPropFactory => _fallBackPropFactory != null;
+        //public bool HasPropFactory => _fallBackPropFactory != null;
 
         #region Constructors
 
-        public PropModelProvider(IPropFactory fallBackPropFactory = null) : this(propBagTemplateProvider: null, fallBackPropFactory: fallBackPropFactory)
-        {
-        }
+        //public PropModelProvider(IPropFactory fallBackPropFactory = null) : this(propBagTemplateProvider: null, fallBackPropFactory: fallBackPropFactory)
+        //{
+        //}
 
-        public PropModelProvider(IPropBagTemplateProvider propBagTemplateProvider, IPropFactory fallBackPropFactory = null) 
+        public PropModelProvider(IPropBagTemplateProvider propBagTemplateProvider, IPropFactory fallBackPropFactory) 
         {
             _propBagTemplateProvider = propBagTemplateProvider;
             _fallBackPropFactory = fallBackPropFactory;
@@ -73,6 +69,37 @@ namespace DRM.PropBag.ControlsWPF
             catch (System.Exception e)
             {
                 throw new ApplicationException($"PropBagTemplate for ResourceKey = {resourceKey} was not found.", e);
+            }
+        }
+
+        public DRM.PropBag.ControlModel.MapperRequest GetMapperRequest(string resourceKey)
+        {
+            try
+            {
+                if (CanFindPropBagTemplateWithJustKey)
+                {
+                    MapperRequest mr = _propBagTemplateProvider.GetMapperRequest(resourceKey);
+                    ControlModel.MapperRequest mrCooked = new ControlModel.MapperRequest(mr.SourceType, mr.DestinationPropModelKey, mr.ConfigPackageName);
+                    return mrCooked;
+                }
+                else if (HasPbtLookupResources)
+                {
+                    throw new InvalidOperationException($"A call providing only a ResourceKey can only be done, " +
+                        $"if this PropModelProvider was supplied with a PropBagTemplateProvider upon construction. " +
+                        $"No class implementing: {nameof(IPropBagTemplateProvider)} was provided. " +
+                        $"Please supply a PropBagTemplate object.");
+                }
+                else
+                {
+                    throw new InvalidOperationException($"A call providing only a ResourceKey can only be done, " +
+                        $"if this PropModelProvider was supplied with the necessary resources upon construction. " +
+                        $"A {_propBagTemplateProvider.GetType()} was provided, but it does not have the necessary resources. " +
+                        $"Please supply a ResourceDictionary and ResourceKey or a ProbBagTemplate object.");
+                }
+            }
+            catch (System.Exception e)
+            {
+                throw new ApplicationException($"MapperRequest for ResourceKey = {resourceKey} was not found.", e);
             }
         }
 

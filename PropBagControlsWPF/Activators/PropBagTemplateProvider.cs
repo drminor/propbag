@@ -20,11 +20,38 @@ namespace DRM.PropBag.ControlsWPF
         {
             _resources = resources;
         }
+
         #endregion
+
+        Dictionary<string, PropBagTemplate> _pbtsFromOurResources;
+        Dictionary<string, PropBagTemplate> PbtsFromOurResources
+        {
+            get
+            {
+                if(_pbtsFromOurResources == null)
+                {
+                    _pbtsFromOurResources = GetPropBagTemplates(_resources);
+                }
+                return _pbtsFromOurResources;
+            }
+        }
+
+        Dictionary<string, MapperRequest> _mrFromOurResources;
+        Dictionary<string, MapperRequest> MrFromOurResources
+        {
+            get
+            {
+                if (_mrFromOurResources == null)
+                {
+                    _mrFromOurResources = GetMapperRequests(_resources);
+                }
+                return _mrFromOurResources;
+            }
+        }
 
         public PropBagTemplate GetPropBagTemplate(string resourceKey)
         {
-            return this.GetPropBagTemplate(_resources, resourceKey);
+            return GetPropBagTemplate(PbtsFromOurResources, resourceKey);
         }
 
         public PropBagTemplate GetPropBagTemplate(ResourceDictionary resources, string resourceKey)
@@ -34,8 +61,25 @@ namespace DRM.PropBag.ControlsWPF
             try
             {
                 pbts = GetPropBagTemplates(resources);
-                PropBagTemplate result = pbts[resourceKey];
+            }
+            catch
+            {
+                if (pbts == null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"PropBagTemplates was not populated while trying to fetch the PropBagTemplate for {resourceKey}");
+                }
+                throw;
+            }
 
+            PropBagTemplate result = GetPropBagTemplate(pbts, resourceKey);
+            return result;
+        }
+
+        private PropBagTemplate GetPropBagTemplate(Dictionary<string, PropBagTemplate> pbts, string resourceKey)
+        {
+            try
+            {
+                PropBagTemplate result = pbts[resourceKey];
                 return result;
             }
             catch
@@ -52,7 +96,6 @@ namespace DRM.PropBag.ControlsWPF
             }
         }
 
-
         public Dictionary<string, PropBagTemplate> GetPropBagTemplates(ResourceDictionary resources)
         {
             Dictionary<string, PropBagTemplate> result = new Dictionary<string, PropBagTemplate>();
@@ -66,10 +109,8 @@ namespace DRM.PropBag.ControlsWPF
                 {
                     object rdEntry = rd[objKey];
 
-                    if (rdEntry is PropBagTemplate)
+                    if (rdEntry is PropBagTemplate pbTemplate)
                     {
-                        PropBagTemplate pbTemplate = rdEntry as PropBagTemplate;
-
                         string strKey = (string)objKey;
 
                         if(strKey != pbTemplate.ClassName && strKey != pbTemplate.FullClassName)
@@ -82,7 +123,87 @@ namespace DRM.PropBag.ControlsWPF
                 }
             }
 
+            if(result.Count == 0)
+            {
+                result = null;
+            }
+
             return result;
+        }
+
+        public Dictionary<string, MapperRequest> GetMapperRequests(ResourceDictionary resources)
+        {
+            Dictionary<string, MapperRequest> result = new Dictionary<string, MapperRequest>();
+
+            // TODO: build an enumerator that walks the tree of resource dictionaries.
+            //ResourceDictionary resources = System.Windows.Application.Current.Resources;
+
+            foreach (ResourceDictionary rd in resources.MergedDictionaries)
+            {
+                foreach (object objKey in rd.Keys)
+                {
+                    object rdEntry = rd[objKey];
+
+                    if (rdEntry is MapperRequest mr)
+                    {
+                        result.Add((string) objKey, mr);
+                    }
+                }
+            }
+
+            if (result.Count == 0)
+            {
+                result = null;
+            }
+
+            return result;
+        }
+
+        public MapperRequest GetMapperRequest(string resourceKey)
+        {
+            return GetMapperRequest(MrFromOurResources, resourceKey);
+        }
+
+        public MapperRequest GetMapperRequest(ResourceDictionary resources, string resourceKey)
+        {
+            Dictionary<string, MapperRequest> mrRequests = null;
+
+            try
+            {
+                mrRequests = GetMapperRequests(resources);
+            }
+            catch
+            {
+                if (mrRequests == null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"MapperRequests was not populated while trying to fetch the MapperRequest for {resourceKey}");
+                }
+                throw;
+            }
+
+            MapperRequest result = GetMapperRequest(mrRequests, resourceKey);
+            return result;
+        }
+
+        private MapperRequest GetMapperRequest(Dictionary<string, MapperRequest> mrRequests, string resourceKey)
+        {
+            try
+            {
+                MapperRequest result = mrRequests[resourceKey];
+                return result;
+            }
+            catch
+            {
+                if (mrRequests == null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"MapperRequests was not populated while trying to fetch the MapperRequest for {resourceKey}");
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"Failed to find MapperRequest with key = {resourceKey}");
+                }
+                throw;
+            }
         }
     }
 }

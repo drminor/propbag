@@ -14,13 +14,10 @@ namespace DRM.PropBag
     {
         public PropExternStore(string propertyName,
             object extraInfo,
-            GetDefaultValueDelegate<T> getDefaultValFunc,
-            bool typeIsSolid = true,
-            Func<T, T, bool> comparer = null,
-            EventHandler<PCTypedEventArgs<T>> doWhenChangedX = null,
-            //Action<T, T> doWhenChanged = null,
-            bool doAfterNotify = false)
-            : base(typeof(T), typeIsSolid, false, /*doWhenChangedX, doAfterNotify, */comparer, getDefaultValFunc)
+            GetDefaultValueDelegate<T> defaultValFunc,
+            bool typeIsSolid,
+            Func<T, T, bool> comparer)
+            : base(typeof(T), typeIsSolid, false, comparer, defaultValFunc, PropKindEnum.Prop)
         {
             Tag = Guid.NewGuid(); // tag;
             Getter = null; // getter;
@@ -64,5 +61,14 @@ namespace DRM.PropBag
 
         override public IListSource ListSource => throw new NotSupportedException("This PropBag property is not a collection or datatable PropType.");
 
+        public override object Clone()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void CleanUpTyped()
+        {
+            // There's nothing to clean up.
+        }
     }
 }

@@ -15,8 +15,8 @@ namespace PropBagLib.Tests
             IPropFactory propFactory_V1 = ourHelper.GetNewPropFactory_V1();
 
             PerformanceModel pm = new PerformanceModel(safetyMode, propFactory_V1);
-            pm.AddPropNoStore<int>("PropIntNoStore", null, false, null);
-            pm.AddPropNoStore<string>("PropStringNoStore", null, false, null);
+            pm.AddPropNoStore<int>("PropIntNoStore");
+            pm.AddPropNoStore<string>("PropStringNoStore");
 
             return pm;
         }

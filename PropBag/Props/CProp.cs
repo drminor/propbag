@@ -14,38 +14,29 @@ namespace DRM.PropBag.Collections
     public class CProp<CT,T> : PropTypedBase<CT>, ICPropPrivate<CT,T> where CT: IEnumerable<T>
     {
         public CProp(CT initalValue,
-            GetDefaultValueDelegate<CT> getDefaultValFunc,
+            GetDefaultValueDelegate<CT> defaultValFunc,
             bool typeIsSolid,
             bool hasStore,
-            Func<CT, CT, bool> comparer,
-            EventHandler<PCTypedEventArgs<CT>> doWhenChangedX = null,
-            //Action<CT, CT> doWhenChanged = null,
-            bool doAfterNotify = false)
-            : base(typeof(CT), typeIsSolid, hasStore, /*doWhenChangedX, doAfterNotify, */comparer,
-                  getDefaultValFunc, PropKindEnum.Collection)
+            Func<CT, CT, bool> comparer)
+            : base(typeof(CT), typeIsSolid, hasStore, comparer, defaultValFunc, PropKindEnum.Collection)
         {
             if (hasStore)
             {
                 _value = initalValue;
                 _valueIsDefined = true;
-                //PropKind = PropKindEnum.Collection;
             }
         }
 
-        public CProp(GetDefaultValueDelegate<CT> getDefaultValFunc,
+        public CProp(GetDefaultValueDelegate<CT> defaultValFunc,
             bool typeIsSolid,
             bool hasStore,
-            Func<CT, CT, bool> comparer,
-            EventHandler<PCTypedEventArgs<CT>> doWhenChangedX = null,
-            //Action<CT, CT> doWhenChanged = null,
-            bool doAfterNotify = false)
-            : base(typeof(CT), typeIsSolid, hasStore, /*doWhenChangedX, doAfterNotify,*/ comparer, getDefaultValFunc, PropKindEnum.Collection)
+            Func<CT, CT, bool> comparer)
+            : base(typeof(CT), typeIsSolid, hasStore, comparer, defaultValFunc, PropKindEnum.Collection)
         {
             if (hasStore)
             {
                 _valueIsDefined = false;
             }
-            //PropKind = PropKindEnum.Collection;
         }
 
         CT _value;
@@ -109,13 +100,22 @@ namespace DRM.PropBag.Collections
             return oldSetting;
         }
 
+        public override object Clone()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void CleanUpTyped()
+        {
+            // TODO: Dispose of our items.
+        }
+
         #region ICProp<CT, T> Implementation
 
         public ReadOnlyObservableCollection<T> ReadOnlyObservableCollection
         {
             get
             {
-                //ICPropPrivate<IEnumerable<T>, T> thisProp = (ICPropPrivate <IEnumerable<T>, T >) this;
                 return ListSourceProvider.GetTheReadOnlyList(null);
             }
         }
@@ -128,7 +128,6 @@ namespace DRM.PropBag.Collections
         {
             get
             {
-                //ICPropPrivate<IEnumerable<T>, T> thisProp = (ICPropPrivate<IEnumerable<T>, T>)this;
                 return ListSourceProvider.GetTheList(null);
             }
         }
@@ -156,7 +155,6 @@ namespace DRM.PropBag.Collections
             {
                 if (_listSource == null)
                 {
-                    //ICPropPrivate<IEnumerable<T>, T> thisProp = (ICPropPrivate<IEnumerable<T>, T>)this;
                     _listSource = new PbListSource(MakeIListWrapper, null);
                 }
                 return _listSource;
@@ -220,7 +218,6 @@ namespace DRM.PropBag.Collections
         }
 
         #endregion
-
     }
 }
          

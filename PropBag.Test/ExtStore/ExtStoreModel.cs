@@ -12,8 +12,8 @@ namespace PropBagLib.Tests
 
             ExtStoreModel esm = new ExtStoreModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered, factory);
 
-            PropExternStore<int> pi = (PropExternStore<int>)esm.AddPropNoStore<int>("PropInt", null, false, null);
-            PropExternStore<string> ps = (PropExternStore<string>)esm.AddPropNoStore<string>("PropString", null, false, null);
+            PropExternStore<int> pi = (PropExternStore<int>)esm.AddPropNoStore<int>("PropInt", null);
+            PropExternStore<string> ps = (PropExternStore<string>)esm.AddPropNoStore<string>("PropString", null);
 
             ExtData ed = new ExtData();
 

@@ -9,23 +9,17 @@ namespace DRM.TypeSafePropertyBag
     {
         //object this[string typeName, string propertyName] { get; set; }
 
-        IProp<T> AddProp<T>(string propertyName, EventHandler<PCTypedEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false,
-            Func<T,T,bool> comparer = null, object extraInfo = null, T initalValue = default(T));
+        IProp<T> AddProp<T>(string propertyName, Func<T,T,bool> comparer = null, object extraInfo = null, T initalValue = default(T));
 
-        IProp<T> AddPropObjComp<T>(string propertyName, EventHandler<PCTypedEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false,
-            object extraInfo = null, T initalValue = default(T));
+        IProp<T> AddPropObjComp<T>(string propertyName, object extraInfo = null, T initalValue = default(T));
 
-        IProp<T> AddPropNoValue<T>(string propertyName, EventHandler<PCTypedEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false,
-            Func<T,T,bool> comparer = null, object extraInfo = null);
+        IProp<T> AddPropNoValue<T>(string propertyName, Func<T,T,bool> comparer = null, object extraInfo = null);
 
-        IProp<T> AddPropObjCompNoValue<T>(string propertyName, EventHandler<PCTypedEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false,
-            object extraInfo = null);
+        IProp<T> AddPropObjCompNoValue<T>(string propertyName, object extraInfo = null);
 
-        IProp<T> AddPropNoStore<T>(string propertyName, EventHandler<PCTypedEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false,
-            Func<T,T,bool> comparer = null, object extraInfo = null);
+        IProp<T> AddPropNoStore<T>(string propertyName, Func<T,T,bool> comparer = null, object extraInfo = null);
 
-        IProp<T> AddPropObjCompNoStore<T>(string propertyName, EventHandler<PCTypedEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false,
-            object extraInfo = null);
+        IProp<T> AddPropObjCompNoStore<T>(string propertyName, object extraInfo = null);
 
         void RemoveProp(string propertyName, Type propertyType);
         void RemoveProp<T>(string propertyName);
@@ -35,8 +29,6 @@ namespace DRM.TypeSafePropertyBag
         //    bool doAfterNotify = false);
 
         void ClearAllProps();
-
-        //void ClearEventSubscribers();
-    }
+   }
 
 }

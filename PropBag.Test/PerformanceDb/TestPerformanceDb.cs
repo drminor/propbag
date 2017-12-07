@@ -19,15 +19,15 @@ namespace PropBagLib.Tests.PerformanceDb
     {
         const int NUMBER_OF_PEOPLE = 1000;
 
-        //SimpleAutoMapperProvider _amp;
-        //AutoMapperHelpers _ourHelper;
-        //IPropFactory propFactory_V1;
+        SimpleAutoMapperProvider _amp;
+        AutoMapperHelpers _ourHelper;
+        IPropFactory _propFactory_V1;
 
         [OneTimeSetUp]
         public void SetUpOneTime()
         {
             //_ourHelper = new AutoMapperHelpers();
-
+            
             //Business b = new Business();
             //List<Person> personList = b.Get(1).ToList();
 
@@ -111,33 +111,153 @@ namespace PropBagLib.Tests.PerformanceDb
         [Test]
         public void CanMapObservableCollection_Extra()
         {
-            CanMapObservableCollection("Extra_Members");
+            _ourHelper = new AutoMapperHelpers();
+            _propFactory_V1 = _ourHelper.GetNewPropFactory_V1();
+            _amp = _ourHelper.GetAutoMapperSetup_V1();
+            CanMapObservableCollection("Extra_Members", _ourHelper, _propFactory_V1, _amp);
+        }
+
+        [Test]
+        public void CanMapObservableCollection_Extra_AfterSetup()
+        {
+            _propFactory_V1.PropStoreAccessServiceProvider.ResetAccessCounter();
+            CanMapObservableCollection("Extra_Members",_ourHelper, _propFactory_V1, _amp);
         }
 
         [Test]
         public void CanMapObservableCollection_Proxy()
         {
-            CanMapObservableCollection("Emit_Proxy");
+            _ourHelper = new AutoMapperHelpers();
+            _propFactory_V1 = _ourHelper.GetNewPropFactory_V1();
+            _amp = _ourHelper.GetAutoMapperSetup_V1();
+            CanMapObservableCollection("Emit_Proxy",_ourHelper, _propFactory_V1, _amp);
         }
 
-
-        public void CanMapObservableCollection(string configPackageName)
+        [Test]
+        public void CanMapObservableCollection_Proxy_AfterSetup()
         {
-            AutoMapperHelpers ourHelper = new AutoMapperHelpers();
-            IPropFactory propFactory_V1 = ourHelper.GetNewPropFactory_V1();
+            _propFactory_V1.PropStoreAccessServiceProvider.ResetAccessCounter();
+            CanMapObservableCollection("Emit_Proxy", _ourHelper, _propFactory_V1, _amp);
+        }
 
-            SimpleAutoMapperProvider _amp = ourHelper.GetAutoMapperSetup_V1();
+        //public void CanMapObservableCollection(string configPackageName)
+        //{
+        //    _ourHelper = new AutoMapperHelpers();
+        //    _propFactory_V1 = _ourHelper.GetNewPropFactory_V1();
+        //    _amp = _ourHelper.GetAutoMapperSetup_V1();
+
+        //    PropModelHelpers pmHelpers = new PropModelHelpers();
+
+        //    Assert.That(_propFactory_V1.PropStoreAccessServiceProvider.AccessCounter == 0, "The Provider of PropStoreAccessServices did not have its Access Counter reset.");
+
+        //    // Setup Mapping between Model1 and Person
+        //    PropModel propModel1 = pmHelpers.GetPropModelForModel1Dest(_propFactory_V1);
+        //    Type typeToWrap = typeof(DestinationModel1); 
+
+        //    IPropBagMapperKey<Person, DestinationModel1> mapperRequest =
+        //        _amp.RegisterMapperRequest<Person, DestinationModel1>
+        //        (
+        //            propModel: propModel1,
+        //            targetType: typeToWrap,
+        //            configPackageName: configPackageName
+        //        );
+
+        //    Assert.That(mapperRequest, Is.Not.Null, "mapperRequest should be non-null.");
+
+        //    IPropBagMapper<Person, DestinationModel1> mapper = _amp.GetMapper<Person, DestinationModel1>(mapperRequest);
+
+        //    Assert.That(mapper, Is.Not.Null, "mapper should be non-null");
+
+        //    //MyModel5 testMainVM = new MyModel5
+        //    //{
+        //    //    ProductId = Guid.NewGuid(),
+        //    //    Business = new Business()
+        //    //};
+
+
+        //    PropModel propModel5 = pmHelpers.GetPropModelForModel5Dest(_propFactory_V1);
+
+        //    string fullClassName = null; // Don't override the value from the PropModel.
+        //    DestinationModel5 testMainVM = new DestinationModel5(propModel5, fullClassName, _propFactory_V1);
+
+        //    Business b = new Business();
+        //    testMainVM.SetIt(b, "Business"); // THIS IS A SET ACESSS OPERATION.
+        //    // ToDo: try using IEnumerable<Person> instead.
+
+        //    b = testMainVM.GetIt<Business>("Business");
+
+        //    List<Person> unMappedPeople = b.Get();
+
+        //    IEnumerable<DestinationModel1> mappedPeople = mapper.MapToDestination(unMappedPeople);
+
+        //    unMappedPeople = null;
+
+        //    //DestinationModel1 test = (DestinationModel1) mappedPeople.First().Clone();
+
+        //    ObservableCollection<DestinationModel1> readyForTheView = new System.Collections.ObjectModel.ObservableCollection<DestinationModel1>(mappedPeople);
+
+        //    mappedPeople = null;
+
+        //    // Each time a item is mapped, it is first created. (5 sets during consruction, and another 5 for the actual mapping.)
+        //    int totalNumberOfGets = _ourHelper.PropFactory_V1.PropStoreAccessServiceProvider.AccessCounter;
+
+        //    if(configPackageName == "Extra_Members")
+        //    {
+        //        Assert.That(totalNumberOfGets == 1, $"Total # of SetIt access operations is wrong: it should be {1}, but instead it is {totalNumberOfGets}.");
+        //    }
+        //    else
+        //    {
+        //        Assert.That(totalNumberOfGets == 1 + (NUMBER_OF_PEOPLE * 5), $"Total # of SetIt access operations is wrong: it should be {1 + NUMBER_OF_PEOPLE * 5}, but instead it is {totalNumberOfGets}.");
+        //    }
+
+        //    int currentNumRootPropBags = _ourHelper.PropFactory_V1.PropStoreAccessServiceProvider.NumberOfRootPropBagsInPlay;
+        //    int totalRootPropBagsCreated = _ourHelper.PropFactory_V1.PropStoreAccessServiceProvider.TotalNumberOfAccessServicesCreated;
+
+        //    PropBag test = (PropBag)readyForTheView[0];
+
+        //    int howManyDoSetDelegatesGotCreated = test.NumOfDoSetDelegatesInCache;
+        //    int howManyCreateFromString = test.CreatePropFromStringCacheCount;
+        //    int howManyCreateWithNoVal = test.CreatePropWithNoValCacheCount;
+
+        //    //Thread.Sleep(new TimeSpan(0, 0, 1));
+
+        //    foreach (DestinationModel1 pp in readyForTheView)
+        //    {
+        //        pp.Dispose();
+        //    }
+        //    readyForTheView = null;
+
+        //    testMainVM.SetIt<Business>(null, "Business");
+        //    b.Dispose();
+        //    b = null;
+
+        //    testMainVM.Dispose();
+        //    testMainVM = null;
+
+        //    //Thread.Sleep(new TimeSpan(0, 0, 1));
+
+        //    //// Test the PropStoreAccessProvider prune store feature.
+        //    //// Do nothing for 1 hour, 24 minutes, in increments of 5 seconds.
+        //    //for (int tp = 0; tp < 1000; tp++)
+        //    //{
+        //    //    // Yield for 20 seconds.
+        //    //    Thread.Sleep(new TimeSpan(0, 0, 5));
+        //    //    GC.Collect(1, GCCollectionMode.Forced);
+        //    //}
+        //}
+
+        public void CanMapObservableCollection(string configPackageName, AutoMapperHelpers ourHelper, IPropFactory propFactory_V1, SimpleAutoMapperProvider amp)
+        {
             PropModelHelpers pmHelpers = new PropModelHelpers();
 
             Assert.That(propFactory_V1.PropStoreAccessServiceProvider.AccessCounter == 0, "The Provider of PropStoreAccessServices did not have its Access Counter reset.");
 
             // Setup Mapping between Model1 and Person
             PropModel propModel1 = pmHelpers.GetPropModelForModel1Dest(propFactory_V1);
-            Type typeToWrap = typeof(DestinationModel1); // typeof(PropBag);
-            //string configPackageName = "Extra_Members"; //"Emit_Proxy"; // 
+            Type typeToWrap = typeof(DestinationModel1); 
 
             IPropBagMapperKey<Person, DestinationModel1> mapperRequest =
-                _amp.RegisterMapperRequest<Person, DestinationModel1>
+                amp.RegisterMapperRequest<Person, DestinationModel1>
                 (
                     propModel: propModel1,
                     targetType: typeToWrap,
@@ -146,16 +266,9 @@ namespace PropBagLib.Tests.PerformanceDb
 
             Assert.That(mapperRequest, Is.Not.Null, "mapperRequest should be non-null.");
 
-            IPropBagMapper<Person, DestinationModel1> mapper = _amp.GetMapper<Person, DestinationModel1>(mapperRequest);
+            IPropBagMapper<Person, DestinationModel1> mapper = amp.GetMapper<Person, DestinationModel1>(mapperRequest);
 
             Assert.That(mapper, Is.Not.Null, "mapper should be non-null");
-
-            //MyModel5 testMainVM = new MyModel5
-            //{
-            //    ProductId = Guid.NewGuid(),
-            //    Business = new Business()
-            //};
-
 
             PropModel propModel5 = pmHelpers.GetPropModelForModel5Dest(propFactory_V1);
 
@@ -164,8 +277,8 @@ namespace PropBagLib.Tests.PerformanceDb
 
             Business b = new Business();
             testMainVM.SetIt(b, "Business"); // THIS IS A SET ACESSS OPERATION.
-            // ToDo: try using IEnumerable<Person> instead.
 
+            // ToDo: try using IEnumerable<Person> instead.
             b = testMainVM.GetIt<Business>("Business");
 
             List<Person> unMappedPeople = b.Get();
@@ -179,7 +292,7 @@ namespace PropBagLib.Tests.PerformanceDb
             // Each time a item is mapped, it is first created. (5 sets during consruction, and another 5 for the actual mapping.)
             int totalNumberOfGets = ourHelper.PropFactory_V1.PropStoreAccessServiceProvider.AccessCounter;
 
-            if(configPackageName == "Extra_Members")
+            if (configPackageName == "Extra_Members")
             {
                 Assert.That(totalNumberOfGets == 1, $"Total # of SetIt access operations is wrong: it should be {1}, but instead it is {totalNumberOfGets}.");
             }

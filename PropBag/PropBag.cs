@@ -56,12 +56,12 @@ namespace DRM.PropBag
 
         // These items are provided to us.
         private readonly IPropFactory _propFactory;
-        private readonly PSAccessServiceType _ourStoreAccessor;
+        private PSAccessServiceType _ourStoreAccessor { get; set; }
 
         // We are responsible for these
         protected virtual ITypeSafePropBagMetaData OurMetaData { get; }
         private readonly PropBagTypeSafetyMode _typeSafetyMode;
-        private readonly L2KeyManType _level2KeyManager;
+        private L2KeyManType _level2KeyManager { get; set; }
         private object _sync;
         private readonly PB_EventHolder _eventHolder;
         //private readonly bool _notifyWhenOldIsUndefined;
@@ -69,12 +69,15 @@ namespace DRM.PropBag
         // These fulfill the IPropBagInternal contract
         PSAccessServiceType IPropBagInternal.ItsStoreAccessor => _ourStoreAccessor;
         L2KeyManType IPropBagInternal.Level2KeyManager => _level2KeyManager;
+        IList<string> IPropBagInternal.GetAllPropertyNames2() => GetAllPropertyNames();
 
         #endregion
 
         #region Public Events and Properties
 
         public string FullClassName => OurMetaData.FullClassName;
+        public IPropFactory PropFactory => _propFactory;
+        public PropBagTypeSafetyMode TypeSafetyMode => _typeSafetyMode;
 
         public event PropertyChangedEventHandler PropertyChanged; // = delegate { };
         public event PropertyChangingEventHandler PropertyChanging; // = delegate { };
@@ -128,6 +131,12 @@ namespace DRM.PropBag
         protected PropBag(PropBagTypeSafetyMode typeSafetyMode, IPropFactory propFactory)
             : this(typeSafetyMode, propFactory, null) { }
 
+        protected PropBag(IPropBag copySource) 
+            : this(copySource.TypeSafetyMode, copySource.PropFactory, copySource.FullClassName)
+        {
+            CloneProps(copySource);
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -137,6 +146,7 @@ namespace DRM.PropBag
             : this(pm.TypeSafetyMode, propFactory ?? pm.PropFactory, fullClassName)
         {
             Hydrate(pm);
+            int testc = _level2KeyManager.PropertyCount;
         }
 
         protected PropBag(PropBagTypeSafetyMode typeSafetyMode, IPropFactory propFactory, string fullClassName = null)
@@ -239,12 +249,12 @@ namespace DRM.PropBag
                     }
 
                     pg = _propFactory.CreateGenFromString(pi.PropertyType, value, useDefault, pi.PropertyName, ei, pi.HasStore, pi.TypeIsSolid,
-                        pi.PropKind, doWhenChangedAction, pi.DoWhenChangedField.DoAfterNotify, comparer, useRefEquality, pi.ItemType);
+                        pi.PropKind,  comparer, useRefEquality, pi.ItemType);
                 }
                 else
                 {
                     pg = _propFactory.CreateGenWithNoValue(pi.PropertyType, pi.PropertyName, ei, pi.HasStore, pi.TypeIsSolid,
-                        pi.PropKind, doWhenChangedAction, pi.DoWhenChangedField.DoAfterNotify, comparer, useRefEquality, pi.ItemType);
+                        pi.PropKind, comparer, useRefEquality, pi.ItemType);
                 }
                 AddProp(pi.PropertyName, pg);
             }
@@ -1108,15 +1118,6 @@ namespace DRM.PropBag
 
         #region Public Methods
 
-        public int NumOfDoSetDelegatesInCache
-        {
-            get
-            {
-                int result = _propFactory.DoSetCacheCount;
-                return result;
-            }
-        }
-
         public int CreatePropFromStringCacheCount
         {
             get
@@ -1133,6 +1134,25 @@ namespace DRM.PropBag
                 int result = _propFactory.CreatePropWithNoValCacheCount;
                 return result;
             }
+        }
+
+        public object Clone()
+        {
+            return new PropBag(this);
+        }
+
+        public void CloneProps(IPropBag copySource)
+        {
+            PSAccessServiceType oldAccessor = _ourStoreAccessor;
+
+            PSAccessServiceType newStoreAccessor = _ourStoreAccessor.CloneProps(this, copySource);
+
+            PropertyDescriptorCollection pDescs = ((ICustomTypeDescriptor)copySource).GetProperties();
+            this._properties = pDescs;
+
+            _ourStoreAccessor = newStoreAccessor;
+            _level2KeyManager = newStoreAccessor.Level2KeyManager;
+            //var testC = _ourStoreAccessor.GetCollection(this);
         }
 
         public virtual ITypeSafePropBagMetaData GetMetaData()
@@ -1253,70 +1273,64 @@ namespace DRM.PropBag
         /// <param name="doAfterNotify"></param>
         /// <param name="comparer">A instance of a class that implements IEqualityComparer and thus an Equals method.</param>
         /// <param name="initalValue"></param>
-        protected IProp<T> AddProp<T>(string propertyName, EventHandler<PCTypedEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false,
-            Func<T, T, bool> comparer = null, object extraInfo = null, T initialValue = default(T))
+        protected IProp<T> AddProp<T>(string propertyName, Func<T, T, bool> comparer = null, object extraInfo = null, T initialValue = default(T))
         {
             bool hasStorage = true;
             bool typeIsSolid = true;
-            IProp<T> pg = _propFactory.Create<T>(initialValue, propertyName, extraInfo, hasStorage, typeIsSolid, doWhenChangedX, doAfterNotify, comparer);
+            IProp<T> pg = _propFactory.Create<T>(initialValue, propertyName, extraInfo, hasStorage, typeIsSolid, comparer);
             AddProp<T>(propertyName, pg);
             return pg;
         }
 
-        protected IProp<T> AddPropObjComp<T>(string propertyName, EventHandler<PCTypedEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false,
-            object extraInfo = null, T initialValue = default(T))
-        {
-            bool hasStorage = true;
-            bool typeIsSolid = true;
-            Func<T, T, bool> comparer = _propFactory.GetRefEqualityComparer<T>();
-            IProp<T> pg = _propFactory.Create<T>(initialValue, propertyName, extraInfo, hasStorage, typeIsSolid, doWhenChangedX, doAfterNotify, comparer);
-            AddProp<T>(propertyName, pg);
-            return pg;
-        }
-
-        protected IProp<T> AddPropNoValue<T>(string propertyName, EventHandler<PCTypedEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false,
-            Func<T, T, bool> comparer = null, object extraInfo = null)
-        {
-            bool hasStorage = true;
-            bool typeIsSolid = true;
-            IProp<T> pg = _propFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, doWhenChangedX, doAfterNotify, comparer);
-            AddProp<T>(propertyName, pg);
-            return pg;
-        }
-
-        protected IProp<T> AddPropObjCompNoValue<T>(string propertyName, EventHandler<PCTypedEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false,
-            object extraInfo = null)
+        protected IProp<T> AddPropObjComp<T>(string propertyName, object extraInfo = null, T initialValue = default(T))
         {
             bool hasStorage = true;
             bool typeIsSolid = true;
             Func<T, T, bool> comparer = _propFactory.GetRefEqualityComparer<T>();
-            IProp<T> pg = _propFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, doWhenChangedX, doAfterNotify, comparer);
+            IProp<T> pg = _propFactory.Create<T>(initialValue, propertyName, extraInfo, hasStorage, typeIsSolid, comparer);
             AddProp<T>(propertyName, pg);
             return pg;
         }
 
-        protected IProp<T> AddPropNoStore<T>(string propertyName, EventHandler<PCTypedEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false,
-            Func<T, T, bool> comparer = null, object extraInfo = null)
+        protected IProp<T> AddPropNoValue<T>(string propertyName, Func<T, T, bool> comparer = null, object extraInfo = null)
+        {
+            bool hasStorage = true;
+            bool typeIsSolid = true;
+            IProp<T> pg = _propFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, comparer);
+            AddProp<T>(propertyName, pg);
+            return pg;
+        }
+
+        protected IProp<T> AddPropObjCompNoValue<T>(string propertyName, object extraInfo = null)
+        {
+            bool hasStorage = true;
+            bool typeIsSolid = true;
+            Func<T, T, bool> comparer = _propFactory.GetRefEqualityComparer<T>();
+            IProp<T> pg = _propFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, comparer);
+            AddProp<T>(propertyName, pg);
+            return pg;
+        }
+
+        protected IProp<T> AddPropNoStore<T>(string propertyName, Func<T, T, bool> comparer = null, object extraInfo = null)
         {
             bool hasStorage = false;
             bool typeIsSolid = true;
-            IProp<T> pg = _propFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, doWhenChangedX, doAfterNotify, comparer);
+            IProp<T> pg = _propFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, comparer);
             AddProp<T>(propertyName, pg);
             return pg;
         }
 
-        protected IProp<T> AddPropObjCompNoStore<T>(string propertyName, EventHandler<PCTypedEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false,
-            object extraInfo = null)
+        protected IProp<T> AddPropObjCompNoStore<T>(string propertyName, object extraInfo = null)
         {
             bool hasStorage = false;
             bool typeIsSolid = true;
             Func<T, T, bool> comparer = _propFactory.GetRefEqualityComparer<T>();
-            IProp<T> pg = _propFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, doWhenChangedX, doAfterNotify, comparer);
+            IProp<T> pg = _propFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, comparer);
             AddProp<T>(propertyName, pg);
             return pg;
         }
 
-        protected IPropData AddProp<T>(string propertyName, IProp<T> genericTypedProp,EventHandler<PCTypedEventArgs<T>> doWhenChangedX = null, bool doAfterNotify = false)
+        protected IPropData AddProp<T>(string propertyName, IProp<T> genericTypedProp)
         {
             PropIdType propId = GetPropId(propertyName);
 
@@ -1760,7 +1774,7 @@ namespace DRM.PropBag
                 object curValue = PropData.TypedProp.TypedValueAsObject;
                 PropKindEnum propKind = PropData.TypedProp.PropKind;
 
-                IProp genericTypedProp = _propFactory.CreateGenFromObject(newType, curValue, propertyName, null, true, true, propKind, null, false, null, false);
+                IProp genericTypedProp = _propFactory.CreateGenFromObject(newType, curValue, propertyName, null, true, true, propKind, null, false, null);
 
                 bool result = _ourStoreAccessor.SetTypedProp(this, propId, propertyName, genericTypedProp);
                 return result;
@@ -1971,7 +1985,19 @@ namespace DRM.PropBag
 
         #endregion
 
-        
+        #region Diagnostics
+
+        public int NumOfDoSetDelegatesInCache
+        {
+            get
+            {
+                int result = _propFactory.DoSetCacheCount;
+                return result;
+            }
+        }
+
+        #endregion
+
     }
 
     internal class PB_EventHolder : INotifyPropertyChanged,

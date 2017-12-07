@@ -36,6 +36,7 @@ namespace <#= pm.Namespace #>
 		{
 	<# foreach (PropItem pi in pm.Props) {#>
         <#= T4Support.GetAddPropMethodCallText(pm, pi) #>;
+		<#= T4Support.GetSubscribeMethodCallText(pm, pi) #> 
 	<#  } #>
 	}
 
@@ -54,14 +55,14 @@ namespace <#= pm.Namespace #>
 		}  
 	<#  } #> 
 	#endregion
-
+	
 	#region PropetyChangedWithTVals Event Declarations
 		<# foreach (PropItem pi in pm.Props)  { #>  
-			public event EventHandler<PropertyChangedWithTValsEventArgs<<#= pi.Type #>>> <#= pi.Name #>Changed
+			public event EventHandler<PCTypedEventArgs<<#= pi.Type #>>> <#= pi.Name #>Changed
 			{
 				add
 				{
-					AddToPropChanged<<#= pi.Type #>>(value,nameof(<#= pi.Name#>Changed));
+					AddToPropChanged<<#= pi.Type #>>(value, nameof(<#= pi.Name#>Changed));
 				}
 				remove
 				{

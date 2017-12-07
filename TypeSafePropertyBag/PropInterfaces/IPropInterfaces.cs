@@ -6,7 +6,6 @@ using System.Data;
 
 namespace DRM.TypeSafePropertyBag
 {
-    #region Type Aliases
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
 
     using CompositeKeyType = UInt64;
@@ -14,7 +13,6 @@ namespace DRM.TypeSafePropertyBag
 
     using PropIdType = UInt32;
     using PropNameType = String;
-    #endregion
 
     // Typically implemented by TypedTableBase<T> Class
     public interface IDTPropPrivate<CT,T> : ICPropPrivate<CT,T> where CT: IEnumerable<T>
@@ -46,10 +44,7 @@ namespace DRM.TypeSafePropertyBag
     /// <typeparam name="T"></typeparam>
     public interface IPropPrivate<T> : IProp<T>
     {
-        //bool DoAfterNotify { get; set; }
-        //Action<T, T> DoWHenChangedAction { get; }
 
-        //bool UpdateDoWhenChangedAction(Action<T, T> doWhenChangedAction, bool? doAfterNotify);
     }
 
     /// <summary>
@@ -64,18 +59,13 @@ namespace DRM.TypeSafePropertyBag
         bool CompareTo(T value);
         bool Compare(T val1, T val2);
 
-        //void DoWhenChanged(T oldVal, T newVal);
-
-        //void RaiseEvents(IEnumerable<ISubscriptionGen> typedSubs);
-        //void RaiseEventsForParent(IEnumerable<ISubscriptionGen> typedSubs, object parent, string propertyName, object oldVal, object newVal);
-
         Attribute[] Attributes { get; }
     }
 
     /// <summary>
     /// These are the non-type specific features that every instance of IProp<typeparamref name="T"/> implement.
     /// </summary>
-    public interface IProp
+    public interface IProp : ICloneable
     {
         PropKindEnum PropKind { get; }
         Type Type { get; }
@@ -116,7 +106,7 @@ namespace DRM.TypeSafePropertyBag
     /// Classes that implement the IPropBag interface, keep a list of properties, each of which implements this interface.
     /// These features are managed by the PropBag, and not by classes that inherit from AbstractProp.
     /// </summary>
-    public interface IPropData 
+    public interface IPropData
     {
         PropIdType PropId { get; }
 

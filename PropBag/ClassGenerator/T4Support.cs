@@ -74,8 +74,6 @@ namespace DRM.PropBag.ClassGenerator
                 null, // will eventually be null, "NoValue" or "NoStore"
                 pi.Type,
                 pi.Name,
-                doWhenPrepped.DoWhenChanged,
-                doWhenPrepped.DoAfterNotify ? "true" : "false",
                 comparerPrepped.Comparer, "null",
                 "null", // Extra Info -- if we ever use it.
                 null // Initial Value
@@ -91,8 +89,6 @@ namespace DRM.PropBag.ClassGenerator
                     // AddProp or AddPropObjComp
 
                     //  public IProp<T> AddProp<T>(string propertyName, 
-                    //      Action<T, T> doIfChanged = null,
-                    //      bool doAfterNotify = false,
                     //      Func<T,T,bool> comparer = null,
                     //      object extraInfo = null,
                     //      T initalValue = default(T))
@@ -101,24 +97,24 @@ namespace DRM.PropBag.ClassGenerator
                     {
                         if (comparerPrepped.UseRefEquality)
                         {
-                            formatString = "AddProp{0}{1}<{2}>(\"{3}\", {4}, {5})";
+                            formatString = "AddProp{0}{1}<{2}>(\"{3}\", extraInfo:null)";
                         }
                         else
                         {
-                            formatString = "AddProp{0}{1}<{2}>(\"{3}\", {4}, {5}, {6})";
+                            formatString = "AddProp{0}{1}<{2}>(\"{3}\", comparer:{4})";
                         }
                     }
                     else
                     {
-                        vals[8] = PropModelExtensions.GetStringRepForValue(initialValPrepped.InitialValue, pi.Type);
+                        vals[6] = PropModelExtensions.GetStringRepForValue(initialValPrepped.InitialValue, pi.Type);
 
                         if (comparerPrepped.UseRefEquality)
                         {
-                            formatString = "AddProp{0}{1}<{2}>(\"{3}\", {4}, {5}, {7}, {8})";
+                            formatString = "AddProp{0}{1}<{2}>(\"{3}\", {4}, initialValue: {5})";
                         }
                         else
                         {
-                            formatString = "AddProp{0}{1}<{2}>(\"{3}\", {4}, {5}, {6}, {7}, {8})";
+                            formatString = "AddProp{0}{1}<{2}>(\"{3}\", {4}, {5}, initialValue:{6})";
                         }
                     }
                 }
@@ -135,11 +131,11 @@ namespace DRM.PropBag.ClassGenerator
                     vals[1] = "NoValue";
                     if (comparerPrepped.UseRefEquality)
                     {
-                        formatString = "AddProp{0}{1}<{2}>(\"{3}\", {4}, {5})";
+                        formatString = "AddProp{0}{1}<{2}>(\"{3}\", extraInfo:null)";
                     }
                     else
                     {
-                        formatString = "AddProp{0}{1}<{2}>(\"{3}\", {4}, {5}, {6})";
+                        formatString = "AddProp{0}{1}<{2}>(\"{3}\", comparer:{4})";
                     }
                 }
             }
@@ -155,11 +151,11 @@ namespace DRM.PropBag.ClassGenerator
                 vals[1] = "NoStore";
                 if (comparerPrepped.UseRefEquality)
                 {
-                    formatString = "AddProp{0}{1}<{2}>(\"{3}\", {4}, {5})";
+                    formatString = "AddProp{0}{1}<{2}>(\"{3}\"), extraInfo:null)";
                 }
                 else
                 {
-                    formatString = "AddProp{0}{1}<{2}>(\"{3}\", {4}, {5}, {6})";
+                    formatString = "AddProp{0}{1}<{2}>(\"{3}\", comparer:{4})";
                 }
             }
 
