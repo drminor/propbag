@@ -8,9 +8,6 @@ namespace DRM.PropBag.AutoMapperSupport
 {
     public class SimplePropBagMapperBuilderProvider : IPropBagMapperBuilderProvider
     {
-        //private IBuildMapperConfigurations<int, PropBag> y;
-        //private IConfigureAMapper<int, PropBag> z;
-
         private ICreateWrapperType WrapperTypeCreator { get; }
         private IViewModelActivator ViewModelActivator { get; }
 
