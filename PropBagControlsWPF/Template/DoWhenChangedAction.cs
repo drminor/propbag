@@ -11,15 +11,14 @@ namespace DRM.PropBag.ControlsWPF
 
     [TypeConverter(typeof(DuoActionTypeConverter))]
     public class DoWhenChangedAction : IEquatable<DoWhenChangedAction>
-    // : IEquatable<DoWhenChangedAction>
     {
-        public EventHandler<PCGenEventArgs> DoWhenChanged { get; set; }
+        public EventHandler<PcGenEventArgs> DoWhenChanged { get; set; }
 
         #region Constructors
 
         public DoWhenChangedAction() : this(null) { }
 
-        public DoWhenChangedAction(EventHandler<PCGenEventArgs> act)
+        public DoWhenChangedAction(EventHandler<PcGenEventArgs> act)
         {
             DoWhenChanged = act;
         }
@@ -32,12 +31,12 @@ namespace DRM.PropBag.ControlsWPF
         public bool Equals(DoWhenChangedAction other)
         {
             return other != null &&
-                   EqualityComparer<EventHandler<PCGenEventArgs>>.Default.Equals(DoWhenChanged, other.DoWhenChanged);
+                   EqualityComparer<EventHandler<PcGenEventArgs>>.Default.Equals(DoWhenChanged, other.DoWhenChanged);
         }
 
         public override int GetHashCode()
         {
-            return 2044295968 + EqualityComparer<EventHandler<PCGenEventArgs>>.Default.GetHashCode(DoWhenChanged);
+            return 2044295968 + EqualityComparer<EventHandler<PcGenEventArgs>>.Default.GetHashCode(DoWhenChanged);
         }
 
         public static bool operator ==(DoWhenChangedAction action1, DoWhenChangedAction action2)

@@ -15,25 +15,6 @@ namespace DRM.PropBag.XMLModel
         {
             if(cache[0] == null)
             {
-                //List<string> result = new List<string>();
-                //result.Add("/// <summary>");
-                //result.Add("/// If the delegate exists, the original name is returned,");
-                //result.Add("/// otherwise null is returned.");
-                //result.Add("/// </summary>");
-                //result.Add("/// <param name=\"methodName\">Some public or non-public instance method in this class.</param>");
-                //result.Add("/// <returns>The name, unchanged, if the method exists, otherwise null.</returns>");
-                //result.Add("private Action<T, T> GetDelegate<T>(string methodName)");
-                //result.Add("{");
-                //result.Add("    Type pp = this.GetType();");
-                //result.Add("    MethodInfo mi = pp.GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);");
-                //result.Add("");
-                //result.Add("    if (mi == null) return null;");
-                //result.Add("");
-                //result.Add("    Action<T, T> result = (Action<T, T>)mi.CreateDelegate(typeof(Action<T, T>), this);");
-                //result.Add("");
-                //result.Add("    return result;");
-                //result.Add("}");
-
                 List<string> result = new List<string>();
                 result.Add("/// <summary>");
                 result.Add("/// If the delegate exists, the original name is returned,");
@@ -52,8 +33,6 @@ namespace DRM.PropBag.XMLModel
                 result.Add("");
                 result.Add("    return result;");
                 result.Add("}");
-
-
 
                 cache[0] = TextFromList(result, 2);
 

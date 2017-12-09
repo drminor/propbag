@@ -97,19 +97,50 @@ namespace DRM.PropBag.ControlsWPF
             }
         }
 
+        static DependencyProperty CreateNewProperty =
+            DependencyProperty.Register("CreateNew", typeof(bool), typeof(InitialValueField));
+
+        public bool CreateNew
+        {
+            get
+            {
+                return (bool)this.GetValue(CreateNewProperty);
+            }
+            set
+            {
+                this.SetValue(CreateNewProperty, value);
+            }
+        }
+
+        static DependencyProperty PropBagResourceKeyProperty =
+            DependencyProperty.Register("PropBagResourceKey", typeof(string), typeof(InitialValueField));
+
+        public string PropBagResourceKey
+        {
+            get
+            {
+                return (string)this.GetValue(PropBagResourceKeyProperty);
+            }
+            set
+            {
+                this.SetValue(PropBagResourceKeyProperty, value);
+            }
+        }
+
         public bool AreWeValid()
         {
             int cnt = 0;
-            if (!string.IsNullOrEmpty(this.InitialValue)) if (++cnt > 1) return false;
+            if (!string.IsNullOrEmpty(this.InitialValue)) cnt++;
 
             if (SetToUndefined) if (++cnt > 1) return false;
             if (SetToDefault) if (++cnt > 1) return false;
             if (SetToNull) if (++cnt > 1) return false;
             if (SetToEmptyString) if (++cnt > 1) return false;
+            if (CreateNew) if (++cnt > 1) return false;
 
+            if (PropBagResourceKey != null && !CreateNew) return false;
 
             return cnt == 1;
-
         }
 
     }

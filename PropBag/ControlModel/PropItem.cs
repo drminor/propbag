@@ -19,6 +19,7 @@ namespace DRM.PropBag.ControlModel
         PropInitialValueField _propInitialValueField;
         PropComparerField _propComparerField;
         PropDoWhenChangedField _propDoWhenChangedField;
+        PropBinderField _propBinderField;
 
         bool _hasStore;
         bool _typeIsSolid;
@@ -66,6 +67,13 @@ namespace DRM.PropBag.ControlModel
             set { _propDoWhenChangedField = value; }
         }
 
+        [XmlElement("bind-to-local-property")]
+        public PropBinderField BinderField
+        {
+            get { return _propBinderField; }
+            set { _propBinderField = value; }
+        }
+
         [XmlAttribute(AttributeName = "caller-provides-storage")]
         public bool HasStore { get { return _hasStore; } set { SetIfDifferent<bool>(ref _hasStore, value); } }
 
@@ -83,7 +91,6 @@ namespace DRM.PropBag.ControlModel
         public PropItem(Type type, string name, bool hasStore, bool typeIsSolid, PropKindEnum propKind,
             TypeInfoField propTypeInfoField = null,
             PropInitialValueField initialValueField = null,
-            PropDoWhenChangedField doWhenChanged = null,
             string extraInfo = null, PropComparerField comparer = null, Type itemType = null)
         {
             PropertyType = type;
@@ -95,7 +102,6 @@ namespace DRM.PropBag.ControlModel
             PropTypeInfoField = _propTypeInfoField;
             InitialValueField = initialValueField;
             ComparerField = comparer;
-            DoWhenChangedField = doWhenChanged ?? new PropDoWhenChangedField();
             _itemType = itemType;
         }
     }

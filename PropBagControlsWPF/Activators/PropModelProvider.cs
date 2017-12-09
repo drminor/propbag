@@ -1,5 +1,6 @@
 ﻿using DRM.PropBag.ControlModel;
 using DRM.TypeSafePropertyBag;
+using DRM.ViewModelTools;
 using System;
 using System.Data;
 using System.Linq;
@@ -12,23 +13,18 @@ namespace DRM.PropBag.ControlsWPF
     public class PropModelProvider : IPropModelProvider
     {
         private IPropBagTemplateProvider _propBagTemplateProvider;
+        private IViewModelActivator _viewModelActivator;
         private IPropFactory _fallBackPropFactory;
 
         public bool CanFindPropBagTemplateWithJustKey => _propBagTemplateProvider?.CanFindPropBagTemplateWithJustKey != false;
         public bool HasPbtLookupResources => _propBagTemplateProvider != null;
 
-        // TODO: Ultimately, this should be removed -- all PropBagTemplates should specify a PropModel.
-        //public bool HasPropFactory => _fallBackPropFactory != null;
-
         #region Constructors
 
-        //public PropModelProvider(IPropFactory fallBackPropFactory = null) : this(propBagTemplateProvider: null, fallBackPropFactory: fallBackPropFactory)
-        //{
-        //}
-
-        public PropModelProvider(IPropBagTemplateProvider propBagTemplateProvider, IPropFactory fallBackPropFactory) 
+        public PropModelProvider(IPropBagTemplateProvider propBagTemplateProvider, IPropFactory fallBackPropFactory, IViewModelActivator viewModelActivator) 
         {
             _propBagTemplateProvider = propBagTemplateProvider;
+            _viewModelActivator = viewModelActivator;
             _fallBackPropFactory = fallBackPropFactory;
         }
 
@@ -200,8 +196,29 @@ namespace DRM.PropBag.ControlsWPF
 
                     else if (uc is InitialValueField ivf)
                     {
-                        ControlModel.PropInitialValueField rivf = new ControlModel.PropInitialValueField(
-                            ivf.InitialValue, ivf.SetToDefault, ivf.SetToUndefined, ivf.SetToNull, ivf.SetToEmptyString);
+                        ControlModel.PropInitialValueField rivf;
+
+                        // TODO: Add error handling here.
+                        if (ivf.PropBagResourceKey != null)
+                        {
+                            PropModel pm = GetPropModel(ivf.PropBagResourceKey);
+
+                            Func<object> vc = () => _viewModelActivator.GetNewViewModel(pm, pi.PropertyType, pm.FullClassName, pm.PropFactory ?? _fallBackPropFactory);
+
+                            rivf = new ControlModel.PropInitialValueField(initialValue: null, setToDefault: false, setToUndefined: false,
+                                setToEmptyString: false, setToNull: false, valueCreator: vc);
+                        }
+                        else if (ivf.CreateNew)
+                        {
+                            Func<object> vc = () => Activator.CreateInstance(pi.PropertyType);
+                            rivf = new ControlModel.PropInitialValueField(initialValue: null, setToDefault: false, setToUndefined: false,
+                                setToEmptyString: false, setToNull: false, valueCreator: vc);
+                        }
+                        else
+                        {
+                            rivf = new ControlModel.PropInitialValueField(ivf.InitialValue, ivf.SetToDefault, ivf.SetToUndefined,
+                                ivf.SetToNull, ivf.SetToEmptyString, valueCreator: null);
+                        }
 
                         rpi.InitialValueField = rivf;
                     }
@@ -209,7 +226,7 @@ namespace DRM.PropBag.ControlsWPF
                     else if (uc is PropDoWhenChangedField dwc)
                     {
 
-                        Func<object, EventHandler<PCGenEventArgs>> doWhenChangedGetter = null;
+                        Func<object, EventHandler<PcGenEventArgs>> doWhenChangedGetter = null;
                         
                         if(dwc.MethodName != null)
                         {
@@ -231,6 +248,13 @@ namespace DRM.PropBag.ControlsWPF
                             new ControlModel.PropComparerField(pcf.ComparerFunc.Comparer, pcf.UseRefEquality);
 
                         rpi.ComparerField = rpcf;
+                    }
+                    else if (uc is PropBinderField binderField)
+                    {
+                        ControlModel.PropBinderField rBinderField =
+                            new ControlModel.PropBinderField(binderField.TargetProperty, binderField.Path);
+
+                        rpi.BinderField = rBinderField;
                     }
                 }
 

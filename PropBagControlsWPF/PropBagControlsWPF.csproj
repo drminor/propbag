@@ -64,8 +64,8 @@
     <Compile Include="Binders\OSSExtensions.cs" />
     <Compile Include="Binders\SelectedItemConverter.cs" />
     <Compile Include="Binders\SourceKindEnum.cs" />
+    <Compile Include="Template\PropBinderField.cs" />
     <Compile Include="WPFHelpers\RelayCommand.cs" />
-    <None Include="BoundPropBag_OLD.cs" />
     <Compile Include="Converters\ComparerFuncTypeConverter.cs" />
     <Compile Include="Binders\DepPropChangedEventArgs.cs" />
     <Compile Include="Binders\DepPropChangedTypeConverter.cs" />

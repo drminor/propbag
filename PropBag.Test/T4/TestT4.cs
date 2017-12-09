@@ -1,25 +1,18 @@
-﻿using System;
+﻿using DRM.PropBag.ClassGenerator;
+using DRM.PropBag.XMLModel;
+using NUnit.Framework;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using System.IO;
-using NUnit.Framework;
-
-using DRM.PropBag.XMLModel;
-using DRM.PropBag.ClassGenerator;
 
 namespace PropBagLib.Tests
 {
     [TestFixture]
     public class TestT4
     {
-
         [Test]
         public void ReadInput()
         {
-            string PropDefsFilename = "PropGen_PropDefs.xml";
+            string PropDefsFilename = "Sample_PropDefs.xml";
             string excPath = System.AppDomain.CurrentDomain.BaseDirectory;
 
             string projectFolderPath = FileUtils.GetProjectFolder(excPath);
@@ -35,12 +28,6 @@ namespace PropBagLib.Tests
             List<PropItem> test = pm.Props;
 
             Assert.That(pm.Props.Count(), Is.EqualTo(11));
-
-            //foreach (PropItem pi in pm.Props)
-            //{
-            //    string AddPropText = T4Support.GetAddPropMethodCallText(pm, pi);
-            //}
-
         }
 
         [Test]
@@ -59,7 +46,7 @@ namespace PropBagLib.Tests
             {
                 Name = "one",
                 Type = "int",
-                InitalValueField = new PropIniialValueField("1"),
+                InitalValueField = new PropInitialValueField("1"),
                 HasStore = true
             };
 
@@ -69,7 +56,7 @@ namespace PropBagLib.Tests
             {
                 Name = "two",
                 Type = "string",
-                InitalValueField = new PropIniialValueField("1"),
+                InitalValueField = new PropInitialValueField("1"),
                 HasStore = true
             };
 

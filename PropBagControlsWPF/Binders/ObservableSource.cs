@@ -724,7 +724,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
             if (dc is INotifyPCGen pcGen)
             {
-                WeakEventManager<INotifyPCGen, PCGenEventArgs>
+                WeakEventManager<INotifyPCGen, PcGenEventArgs>
                     .AddHandler(pcGen, "PropertyChangedWithGenVals", PCGenEvent_Handler);
 
                 workStatus = ObservableSourceStatusEnum.IsWatchingProp;
@@ -767,7 +767,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
             if(dc is INotifyPCGen pcGen)
             {
-                WeakEventManager<INotifyPCGen, PCGenEventArgs>
+                WeakEventManager<INotifyPCGen, PcGenEventArgs>
                     .RemoveHandler(pcGen, "PropertyChangedWithGenVals", PCGenEvent_Handler);
                 removedIt = true;
             }
@@ -1071,7 +1071,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
         }
 
         // TODO: If PropBag subscribe to Typed Hander to avoid responding to any property changing.
-        private void PCGenEvent_Handler(object sender, PCGenEventArgs args)
+        private void PCGenEvent_Handler(object sender, PcGenEventArgs args)
         { 
             OnDataSourceChanged(args.PropertyName);
         }

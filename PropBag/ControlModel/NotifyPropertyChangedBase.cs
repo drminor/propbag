@@ -32,7 +32,7 @@ namespace DRM.PropBag.ControlModel
             return false;
         }
 
-        protected bool SetIfDifferentVT<T>(ref T oldVal, T newVal, [CallerMemberName]string propertyName = null) where T : struct
+        protected bool SetIfDifferentVT<T>(ref T oldVal, T newVal, string propertyName) where T : struct
         {
             if (!oldVal.Equals(newVal))
             {

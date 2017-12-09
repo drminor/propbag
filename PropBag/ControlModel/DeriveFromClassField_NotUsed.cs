@@ -12,7 +12,7 @@ namespace DRM.PropBag.ControlModel.NotUsed
 
         [XmlAttribute(AttributeName = "derive-from-class-mode")]
         public DeriveFromClassModeEnum DeriveFromClassMode
-        { get { return _deriveFromClassMode; } set { SetIfDifferentVT<DeriveFromClassModeEnum>(ref _deriveFromClassMode, value); } }
+        { get { return _deriveFromClassMode; } set { SetIfDifferentVT<DeriveFromClassModeEnum>(ref _deriveFromClassMode, value, nameof(DeriveFromClassMode)); } }
 
         [XmlElement("type")]
         public Type TypeToWrap { get { return _typeToWrap; } set { _typeToWrap = value; } }

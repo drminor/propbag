@@ -150,6 +150,7 @@ namespace DRM.PropBag.ControlsWPF
             int doWhenChangedFieldCount = 0;
             int comparerFieldCount = 0;
             int typeInfoFieldCount = 0;
+            int binderFieldCount = 0;
 
             for (int i = 0; i < chils.Count; i++)
             {
@@ -157,7 +158,7 @@ namespace DRM.PropBag.ControlsWPF
 
                 if (item is InitialValueField)
                 {
-                    if (++initValueFieldCount < 2) continue;
+                    if (++initValueFieldCount == 1) continue;
                     tooMany = true;
                     index = i;
                     return false;
@@ -165,7 +166,7 @@ namespace DRM.PropBag.ControlsWPF
 
                 if (item is PropDoWhenChangedField)
                 {
-                    if (++doWhenChangedFieldCount < 2) continue;
+                    if (++doWhenChangedFieldCount == 1) continue;
                     tooMany = true;
                     index = i;
                     return false;
@@ -173,7 +174,7 @@ namespace DRM.PropBag.ControlsWPF
 
                 if (item is PropComparerField)
                 {
-                    if (++comparerFieldCount < 2) continue;
+                    if (++comparerFieldCount == 1) continue;
                     tooMany = true;
                     index = i;
                     return false;
@@ -181,7 +182,15 @@ namespace DRM.PropBag.ControlsWPF
 
                 if (item is TypeInfoField)
                 {
-                    if (++typeInfoFieldCount < 2) continue;
+                    if (++typeInfoFieldCount == 1) continue;
+                    tooMany = true;
+                    index = i;
+                    return false;
+                }
+
+                if (item is PropBinderField)
+                {
+                    if (++binderFieldCount == 1) continue;
                     tooMany = true;
                     index = i;
                     return false;

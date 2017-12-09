@@ -20,7 +20,7 @@ namespace DRM.PropBag.ControlModel
         DeriveFromClassModeEnum _deriveFromClassMode;
         [XmlAttribute(AttributeName = "derive-from-class-mode")]
         public DeriveFromClassModeEnum DeriveFromClassMode
-        { get { return _deriveFromClassMode; } set { SetIfDifferentVT<DeriveFromClassModeEnum>(ref _deriveFromClassMode, value); } }
+        { get { return _deriveFromClassMode; } set { SetIfDifferentVT<DeriveFromClassModeEnum>(ref _deriveFromClassMode, value, nameof(DeriveFromClassMode)); } }
 
         Type _targetType;
         [XmlElement("type")]
@@ -53,7 +53,7 @@ namespace DRM.PropBag.ControlModel
         PropBagTypeSafetyMode tsm = PropBagTypeSafetyMode.Tight;
         [XmlAttribute(AttributeName = "type-safety-mode")]
         public PropBagTypeSafetyMode TypeSafetyMode
-        { get { return tsm; } set { SetIfDifferentVT<PropBagTypeSafetyMode>(ref tsm, value); } }
+        { get { return tsm; } set { SetIfDifferentVT<PropBagTypeSafetyMode>(ref tsm, value, nameof(TypeSafetyMode)); } }
 
         bool dmrr;
         [XmlAttribute(AttributeName = "defer-method-ref-resolution")]
@@ -188,20 +188,6 @@ namespace DRM.PropBag.ControlModel
                 return result;
             }
         }
-
-        //private string GetFullClassName(IEnumerable<string> namespaces, string className)
-        //{
-        //    if(namespaces == null)
-        //    {
-        //        return className;
-        //    }
-        //    else
-        //    {
-        //        string separator = ".";
-        //        string result = $"{string.Join(separator, namespaces)}{separator}{className}";
-        //        return result;
-        //    }
-        //}
 
         #endregion
 

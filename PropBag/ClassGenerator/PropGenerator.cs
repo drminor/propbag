@@ -89,7 +89,7 @@ namespace DRM.PropBag.ClassGenerator
 
             if (pi.HasStore)
             {
-                PropIniialValueField initialValPrepped = propModel.PrepareInitialField(pi);
+                PropInitialValueField initialValPrepped = propModel.PrepareInitialField(pi);
 
                 if (!initialValPrepped.SetToUndefined)
                 {

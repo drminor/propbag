@@ -28,22 +28,22 @@ namespace DRM.ViewModelTools
             System.Diagnostics.Debug.WriteLine(NO_PROPMODEL_LOOKUP_SERVICES);
         }
 
-        public SimpleViewModelActivator(IPropModelProvider propModelProvider)
-        {
-            _propModelProvider = propModelProvider ?? throw new ArgumentNullException("propModelProvider");
-        }
+        //public SimpleViewModelActivator(IPropModelProvider propModelProvider)
+        //{
+        //    _propModelProvider = propModelProvider ?? throw new ArgumentNullException("propModelProvider");
+        //}
 
         #endregion
 
         #region IViewModelActivator Interface
 
-        // BaseType + ResourceKey (BaseType known only at run time.
-        public object GetNewViewModel(string resourceKey, Type typeToCreate, string fullClassName = null, IPropFactory propFactory = null)
-        {
-            PropModel propModel = GetPropModel(resourceKey);
-            object result = GetNewViewModel(propModel, typeToCreate, fullClassName, propFactory);
-            return result;
-        }
+        //// BaseType + ResourceKey (BaseType known only at run time.
+        //public object GetNewViewModel(string resourceKey, Type typeToCreate, string fullClassName = null, IPropFactory propFactory = null)
+        //{
+        //    PropModel propModel = GetPropModel(resourceKey);
+        //    object result = GetNewViewModel(propModel, typeToCreate, fullClassName, propFactory);
+        //    return result;
+        //}
 
         // BaseType + PropModel (BaseType known only at run time.
         public object GetNewViewModel(PropModel propModel, Type typeToCreate, string fullClassName = null, IPropFactory propFactory = null)
@@ -57,13 +57,13 @@ namespace DRM.ViewModelTools
             return result;
         }
 
-        // BaseType + ResourceKey (BaseType known at compile time.)
-        public object GetNewViewModel<BT>(string resourceKey, string fullClassName = null, IPropFactory propFactory = null) where BT : class, IPropBag
-        {
-            PropModel propModel = GetPropModel(resourceKey);
-            object result = GetNewViewModel<BT>(propModel, fullClassName, propFactory);
-            return result;
-        }
+        //// BaseType + ResourceKey (BaseType known at compile time.)
+        //public object GetNewViewModel<BT>(string resourceKey, string fullClassName = null, IPropFactory propFactory = null) where BT : class, IPropBag
+        //{
+        //    PropModel propModel = GetPropModel(resourceKey);
+        //    object result = GetNewViewModel<BT>(propModel, fullClassName, propFactory);
+        //    return result;
+        //}
 
         // BaseType + PropModel (BaseType known at compile time.)
         public object GetNewViewModel<BT>(PropModel propModel, string fullClassName = null, IPropFactory propFactory = null) where BT : class, IPropBag

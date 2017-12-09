@@ -16,11 +16,10 @@ namespace DRM.PropBag.ControlsWPF
 
         #region Constructors
 
-        public ViewModelHelper(IPropModelProvider propModelProvider)
+        public ViewModelHelper(IPropModelProvider propModelProvider, IViewModelActivator viewModelActivator)
         {
             PropModelProvider = propModelProvider ?? throw new ArgumentNullException(nameof(propModelProvider));
-
-            ViewModelActivator = new SimpleViewModelActivator(propModelProvider);
+            ViewModelActivator = viewModelActivator ?? throw new ArgumentNullException(nameof(viewModelActivator));
         }
 
         #endregion

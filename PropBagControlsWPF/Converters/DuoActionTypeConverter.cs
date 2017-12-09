@@ -118,7 +118,7 @@ namespace DRM.PropBag.ControlsWPF
                 Type propType = Type.GetType(strPropType);
                 GetActionRefDelegate ActionGetter = GetTheGetActionRefDelegate(propType);
 
-                EventHandler<PCGenEventArgs> d = ActionGetter(targetInstance, targetType, methodName);
+                EventHandler<PcGenEventArgs> d = ActionGetter(targetInstance, targetType, methodName);
                 return new DoWhenChangedAction(d);
 
             }
@@ -186,7 +186,7 @@ namespace DRM.PropBag.ControlsWPF
         static private Type GMT_TYPE = typeof(GenericMethodTemplates);
 
         // Delegate declarations.
-        private delegate EventHandler<PCGenEventArgs> GetActionRefDelegate(object owningInstance, Type ownerType, string methodName);
+        private delegate EventHandler<PcGenEventArgs> GetActionRefDelegate(object owningInstance, Type ownerType, string methodName);
 
         private static GetActionRefDelegate GetTheGetActionRefDelegate(Type propertyType)
         {

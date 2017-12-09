@@ -8,7 +8,6 @@
   <namespaces>
     <namespace>System</namespace>
     <namespace>System.Collections.Generic</namespace>
-    <namespace>PropBagLib.Tests</namespace>
   </namespaces>
   <props>
     <prop>

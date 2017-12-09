@@ -9,8 +9,8 @@ namespace DRM.PropBag.ControlModel
 {
     public class PropDoWhenChangedField : NotifyPropertyChangedBase, IEquatable<PropDoWhenChangedField>
     {
-        EventHandler<PCGenEventArgs> _dwc;
-        public EventHandler<PCGenEventArgs> DoWhenChangedAction { get { return _dwc; } set { SetIfDifferentDelegate<EventHandler<PCGenEventArgs>>(ref _dwc, value, nameof(DoWhenChangedAction)); } }
+        EventHandler<PcGenEventArgs> _dwc;
+        public EventHandler<PcGenEventArgs> DoWhenChangedAction { get { return _dwc; } set { SetIfDifferentDelegate<EventHandler<PcGenEventArgs>>(ref _dwc, value, nameof(DoWhenChangedAction)); } }
 
         bool _dan;
         public bool DoAfterNotify { get { return _dan; } set { SetIfDifferent<bool>(ref _dan, value, nameof(DoAfterNotify)); } }
@@ -38,11 +38,11 @@ namespace DRM.PropBag.ControlModel
         //    DoAfterNotify = doAfterNotify;
         //}
 
-        public Func<object, EventHandler<PCGenEventArgs>> DoWhenGenHandlerGetter { get; }
+        public Func<object, EventHandler<PcGenEventArgs>> DoWhenGenHandlerGetter { get; }
 
-        public PropDoWhenChangedField(EventHandler<PCGenEventArgs> doWhenChangedAction, bool doAfterNotify,
+        public PropDoWhenChangedField(EventHandler<PcGenEventArgs> doWhenChangedAction, bool doAfterNotify,
             bool methodIsLocal, Type declaringType, string fullClassName, string instanceKey, string methodName,
-            Func<object, EventHandler<PCGenEventArgs>> doWhenChangedActionGetter)
+            Func<object, EventHandler<PcGenEventArgs>> doWhenChangedActionGetter)
         {
             DoWhenChangedAction = doWhenChangedAction;
             DoAfterNotify = doAfterNotify;

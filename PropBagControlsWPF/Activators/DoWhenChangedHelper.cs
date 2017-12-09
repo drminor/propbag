@@ -8,7 +8,7 @@ namespace DRM.PropBag.ControlsWPF
 {
     public class DoWhenChangedHelper
     {
-        public Func<object, EventHandler<PCGenEventArgs>> GetTheDoWhenChangedGenHandlerGetter(PropDoWhenChangedField pdwcf, Type propertyType)
+        public Func<object, EventHandler<PcGenEventArgs>> GetTheDoWhenChangedGenHandlerGetter(PropDoWhenChangedField pdwcf, Type propertyType)
         {
             Type declaringType = pdwcf.DeclaringType ?? throw new ArgumentNullException(nameof(declaringType));
 
@@ -16,12 +16,12 @@ namespace DRM.PropBag.ControlsWPF
 
             GetGenHandlerRefDelegate GenHandlerRefGetter = GetTheGetGenHandlerDelegate(propertyType);
 
-            Func<object, EventHandler<PCGenEventArgs>> genHandlerGetter = GetTheDoWhenChangedDelegate;
+            Func<object, EventHandler<PcGenEventArgs>> genHandlerGetter = GetTheDoWhenChangedDelegate;
             return genHandlerGetter;
 
-            EventHandler<PCGenEventArgs> GetTheDoWhenChangedDelegate(object host)
+            EventHandler<PcGenEventArgs> GetTheDoWhenChangedDelegate(object host)
             {
-                EventHandler<PCGenEventArgs> result = GenHandlerRefGetter(host, declaringType, methodName);
+                EventHandler<PcGenEventArgs> result = GenHandlerRefGetter(host, declaringType, methodName);
                 return result;
             }
         }
@@ -31,7 +31,7 @@ namespace DRM.PropBag.ControlsWPF
         static private Type GMT_TYPE = typeof(GenericMethodTemplates);
 
         // Delegate declarations.
-        private delegate EventHandler<PCGenEventArgs> GetGenHandlerRefDelegate(object owningInstance, Type ownerType, string methodName);
+        private delegate EventHandler<PcGenEventArgs> GetGenHandlerRefDelegate(object owningInstance, Type ownerType, string methodName);
 
         private static GetGenHandlerRefDelegate GetTheGetGenHandlerDelegate(Type propertyType)
         {
@@ -47,13 +47,13 @@ namespace DRM.PropBag.ControlsWPF
 
         static class GenericMethodTemplates
         {
-            private static EventHandler<PCGenEventArgs> GetGenHandlerRefDelegate<T>(object owningInstance, Type ownerType, string methodName)
+            private static EventHandler<PcGenEventArgs> GetGenHandlerRefDelegate<T>(object owningInstance, Type ownerType, string methodName)
             {
                 MethodInfo mi = ownerType.GetMethod(methodName, BindingFlags.Instance | BindingFlags.NonPublic);
 
                 if (!IsDuoAction<T>(mi)) return null;
 
-                EventHandler<PCGenEventArgs> del = (EventHandler<PCGenEventArgs>)Delegate.CreateDelegate(typeof(EventHandler<PCGenEventArgs>), owningInstance, mi);
+                EventHandler<PcGenEventArgs> del = (EventHandler<PcGenEventArgs>)Delegate.CreateDelegate(typeof(EventHandler<PcGenEventArgs>), owningInstance, mi);
 
                 return del;
             }
@@ -89,7 +89,7 @@ namespace DRM.PropBag.ControlsWPF
 
                 ParameterInfo[] parms = mi.GetParameters();
 
-                if ((parms.Length != 2) || (parms[0].ParameterType != typeof(object)) || (parms[1].ParameterType != typeof(PCGenEventArgs)))
+                if ((parms.Length != 2) || (parms[0].ParameterType != typeof(object)) || (parms[1].ParameterType != typeof(PcGenEventArgs)))
                 {
                     // Must have two parameters of the specified type.
                     return false;
@@ -140,7 +140,6 @@ namespace DRM.PropBag.ControlsWPF
 
         #endregion
 
-        // TOOD: Update the .props.tt T4 Template with this.
         private EventHandler<PCTypedEventArgs<T>> GetDelegate<T>(string methodName)
         {
             Type pp = this.GetType();

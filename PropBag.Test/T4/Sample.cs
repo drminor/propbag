@@ -4,18 +4,17 @@ using DRM.PropBag;
 using DRM.TypeSafePropertyBag;
 using System;
 using System.Collections.Generic;
-using PropBagLib.Tests;
 
 
 namespace PropBagLib.Tests
 {
-	public partial class PropGen : PropBag
+	public partial class Sample : PropBag
 	{
-		public PropGen() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered, null) { }
+		public Sample() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered, null) { }
 
-		public PropGen(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
+		public Sample(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
 
-		public PropGen(PropBagTypeSafetyMode typeSafetyMode, IPropFactory factory) : base(typeSafetyMode, factory)
+		public Sample(PropBagTypeSafetyMode typeSafetyMode, IPropFactory factory) : base(typeSafetyMode, factory)
 		{
 	        AddProp<object>("PropObject", comparer:null);
 		 

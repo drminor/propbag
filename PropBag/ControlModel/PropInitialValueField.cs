@@ -9,7 +9,6 @@ using System.ComponentModel;
 
 namespace DRM.PropBag.ControlModel
 {
-
     public class PropInitialValueField : NotifyPropertyChangedBase, IEquatable<PropInitialValueField>
     {
         string iv;
@@ -17,6 +16,8 @@ namespace DRM.PropBag.ControlModel
         bool std;
         bool stn;
         bool stes;
+        //bool cn;
+        Func<object> vc;
 
         [XmlText]
         public string InitialValue { get { return iv; } set { SetIfDifferent<string>(ref iv, value); } }
@@ -33,17 +34,24 @@ namespace DRM.PropBag.ControlModel
         [XmlAttribute("use-empty-string")]
         public bool SetToEmptyString { get { return stes; } set { SetIfDifferent<bool>(ref stes, value); } }
 
+        //[XmlAttribute("create-new")]
+        //public bool CreateNew { get { return cn; } set { SetIfDifferent<bool>(ref cn, value); } }
+
+        public Func<object> ValueCreator { get { return vc; } set { SetIfDifferentDelegate<Func<object>>(ref vc, value); } }
+
         public PropInitialValueField() : this(null) { }
 
         public PropInitialValueField(string initialValue, bool setToDefault = false,
             bool setToUndefined = false, bool setToNull = false,
-            bool setToEmptyString = false)
+            bool setToEmptyString = false, /*bool createNew = false,*/ Func<object> valueCreator = null)
         {
             InitialValue = initialValue;
             SetToUndefined = setToUndefined;
             SetToDefault = setToDefault;
             SetToNull = setToNull;
             SetToEmptyString = setToEmptyString;
+            //CreateNew = createNew;
+            ValueCreator = valueCreator;
         }
 
         public bool Equals(PropInitialValueField other)
@@ -54,23 +62,43 @@ namespace DRM.PropBag.ControlModel
                 other.SetToUndefined == SetToUndefined &&
                 other.SetToDefault == SetToDefault &&
                 other.SetToNull == SetToNull &&
-                other.SetToEmptyString == SetToEmptyString) return true;
+                other.SetToEmptyString == SetToEmptyString &&
+                //other.CreateNew == CreateNew &&
+                ReferenceEquals(other.ValueCreator, ValueCreator))
+            {
+                return true;
+            }
 
             return false;
         }
 
         public string GetStringValue()
         {
-            if (SetToDefault && SetToDefault && SetToUndefined) return null;
-            if (SetToEmptyString) return "";
-            return InitialValue;
+            if (SetToDefault || SetToNull || SetToUndefined)
+            {
+                return null;
+            }
+            else if (SetToEmptyString)
+            {
+                return "";
+            }
+            //else if (CreateNew)
+            //{
+            //    // TODO: We need another parameter in the Create method to avoid using this 'magic' string.
+            //    string MAGIC_VAL = "-0.-0.-0";
+            //    return MAGIC_VAL;
+            //}
+            else
+            {
+                return InitialValue;
+            }
         }
 
         public static PropInitialValueField UndefinedInitialValueField
         {
             get
             {
-                return new PropInitialValueField(initialValue: null, setToDefault: false, setToUndefined: true, setToNull: false, setToEmptyString: false);
+                return new PropInitialValueField(initialValue: null, setToDefault: false, setToUndefined: true, setToNull: false, setToEmptyString: false, valueCreator: null);
             }
         }
     }
