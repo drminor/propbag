@@ -18,11 +18,11 @@ namespace DRM.TypeSafePropertyBag
     /// <typeparam name="L2T">The type used to store PropIds.</typeparam>
     public interface ICacheBindings<L2T>
     {
-        ISubscriptionGen AddBinding(ISubscriptionKeyGen bindingRequest, out bool wasAdded);
-        bool TryRemoveBinding(ISubscriptionKeyGen bindingRequest, out ISubscriptionGen binding);
+        ISubscription AddBinding(ISubscriptionKeyGen bindingRequest, out bool wasAdded);
+        bool TryRemoveBinding(ISubscriptionKeyGen bindingRequest, out ISubscription binding);
 
         //bool TryRemoveBinding(IPropBag host, L2T propId);
 
-        IEnumerable<ISubscriptionGen> GetBindings(IPropBag host, uint propId);
+        IEnumerable<ISubscription> GetBindings(IPropBag host, uint propId);
     }
 }

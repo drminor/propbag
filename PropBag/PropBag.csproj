@@ -41,7 +41,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Caches\DelegateCache.cs" />
+    <None Include="Caches\DelegateCache_Moved.cs" />
     <Compile Include="Caches\DelegateCacheProvider.cs" />
     <Compile Include="ControlModel\DeriveFromClassField_NotUsed.cs" />
     <Compile Include="ControlModel\DeriveFromClassModeEnum.cs" />
@@ -57,6 +57,9 @@
     <Compile Include="Collections\PbListSource.cs" />
     <Compile Include="Collections\PbCollection.cs" />
     <None Include="Documentation\GlobalCompositePropId.md" />
+    <Compile Include="ControlModel\PropBinderField.cs" />
+    <Compile Include="Factories\APFGenericMethodTemplates.cs" />
+    <Compile Include="Factories\ICreateProps.cs" />
     <Compile Include="Props\CProp.cs" />
     <Compile Include="Collections\PbAbstractListSource.cs" />
     <Compile Include="ControlModel\MapperRequest.cs" />

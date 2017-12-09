@@ -84,8 +84,10 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <DesignTime>True</DesignTime>
     </None>
+    <Compile Include="PerformanceDb\Class1.cs" />
     <Compile Include="PerformanceDb\DestinationModels.cs" />
     <Compile Include="PerformanceDb\MyModel.cs" />
+    <Compile Include="PerformanceDb\ObservableCollTestObject.cs" />
     <Compile Include="PerformanceDb\PropModelHelpers.cs" />
     <Compile Include="PerformanceDb\TestPerformanceDb.cs" />
     <Compile Include="Performance\PerformanceModel.cs" />
@@ -124,7 +126,7 @@
     </Content>
     <Content Include="PerformanceDynamic\PerformanceDynModel_PropDefs.xml" />
     <Content Include="PubPropBag\PubPropBagModel_PropDefs.xml" />
-    <Content Include="T4\PropGen_PropDefs.xml">
+    <Content Include="T4\Sample_PropDefs.xml">
       <SubType>Designer</SubType>
     </Content>
     <Compile Include="Properties\Settings.Designer.cs">
@@ -139,8 +141,8 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="PubPropBag\PubPropBagModel.cs" />
-    <Compile Include="T4\PropGen.cs">
-      <DependentUpon>PropGen.tt</DependentUpon>
+    <Compile Include="T4\Sample.cs">
+      <DependentUpon>Sample.tt</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
@@ -205,9 +207,9 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-    <None Include="T4\PropGen.tt">
+    <None Include="T4\Sample.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>PropGen.cs</LastGenOutput>
+      <LastGenOutput>Sample.cs</LastGenOutput>
     </None>
   </ItemGroup>
   <ItemGroup>

@@ -13,7 +13,8 @@ namespace DRM.TypeSafePropertyBag
 
         // Create and TearDown PropStoreAccessService instances.
         IPropStoreAccessService<L2T, L2TRaw> CreatePropStoreService(IPropBagInternal propBag);
-        void TearDown(ExKeyT cKey);
+
+        bool TearDown(ExKeyT compKey);
 
         // Diagnostics 
         void IncAccess();

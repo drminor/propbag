@@ -7,12 +7,15 @@ namespace DRM.TypeSafePropertyBag
     using PropNameType = String;
 
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
-    using System.Collections.Generic;
 
     public class SubscriptionKey<T> : SubscriptionKeyGen, ISubscriptionKey<T>, IEquatable<SubscriptionKey<T>>
     {
+        #region Public Properties
+
         public EventHandler<PCTypedEventArgs<T>> TypedHandler { get; private set; }
         public Action<T, T> TypedDoWhenChanged { get; private set; }
+
+        #endregion
 
         #region Constructors
 
@@ -31,13 +34,13 @@ namespace DRM.TypeSafePropertyBag
         }
 
         // Gen Handler -- PCGenEventArgs
-        public SubscriptionKey(SimpleExKey exKey, EventHandler<PCGenEventArgs> handler, SubscriptionPriorityGroup subscriptionPriorityGroup, bool keepRef)
+        public SubscriptionKey(SimpleExKey exKey, EventHandler<PcGenEventArgs> handler, SubscriptionPriorityGroup subscriptionPriorityGroup, bool keepRef)
             : base(exKey, handler, subscriptionPriorityGroup, keepRef: keepRef)
         {
         }
 
         // Obj Handler -- PCObjEventArgs
-        public SubscriptionKey(SimpleExKey exKey, EventHandler<PCObjectEventArgs> handler, SubscriptionPriorityGroup subscriptionPriorityGroup, bool keepRef)
+        public SubscriptionKey(SimpleExKey exKey, EventHandler<PcObjectEventArgs> handler, SubscriptionPriorityGroup subscriptionPriorityGroup, bool keepRef)
             : base(exKey, handler, subscriptionPriorityGroup, keepRef: keepRef)
         {
         }
@@ -69,6 +72,8 @@ namespace DRM.TypeSafePropertyBag
 
         #endregion
 
+        #region Public Methods
+
         public new void MarkAsUsed()
         {
             TypedHandler = null;
@@ -85,10 +90,14 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        new public static ISubscriptionGen CreateSubscriptionGen(ISubscriptionKeyGen subscriptionRequestGen)
+        new public static ISubscription CreateSubscriptionGen(ISubscriptionKeyGen subscriptionRequestGen)
         {
-            return (ISubscriptionGen)CreateSubscription((ISubscriptionKey<T>)subscriptionRequestGen);
+            return (ISubscription)CreateSubscription((ISubscriptionKey<T>)subscriptionRequestGen);
         }
+
+        #endregion
+
+        #region IEquatable Support and Object Overrides
 
         public override bool Equals(object obj)
         {
@@ -114,5 +123,7 @@ namespace DRM.TypeSafePropertyBag
         {
             return !(key1 == key2);
         }
+
+        #endregion
     }
 }

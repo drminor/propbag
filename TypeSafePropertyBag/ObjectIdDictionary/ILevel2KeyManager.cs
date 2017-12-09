@@ -1,7 +1,9 @@
 ﻿
+using System;
+
 namespace DRM.TypeSafePropertyBag
 {
-    public interface IL2KeyMan<L2T, L2TRaw>
+    public interface IL2KeyMan<L2T, L2TRaw> : IDisposable
     {
         int MaxPropsPerObject { get; }
 

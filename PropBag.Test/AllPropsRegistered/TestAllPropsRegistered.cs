@@ -6,6 +6,9 @@ using System.Collections.ObjectModel;
 using System.Text;
 
 using DRM.TypeSafePropertyBag;
+using System.Reflection;
+
+using DRM.TypeSafePropertyBag.Fundamentals;
 
 namespace PropBagLib.Tests
 {
@@ -388,12 +391,7 @@ namespace PropBagLib.Tests
             string test = e.PropertyName;
         }
 
-        private void Mod1_PropertyChangedWithObjectVals(object sender, PCObjectEventArgs e)
-        {
-            string test = e.PropertyName;
-        }
-
-        void Mod1_PropertyChangedWithVals(object sender, PCGenEventArgs e)
+        public void Mod1_PropertyChangedWithObjectVals(object sender, PcObjectEventArgs e)
         {
             object sendr = sender;
             string prpName = e.PropertyName;
@@ -406,6 +404,26 @@ namespace PropBagLib.Tests
                 genObjOldVal = e.OldValue;
                 genObjNewVal = e.NewValue;
             }
+        }
+
+        void Mod1_PropertyChangedWithVals(object sender, PcGenEventArgs e)
+        {
+            object sendr = sender;
+            string prpName = e.PropertyName;
+
+            //genObjOldVal = e.OldValue;
+            //genObjNewVal = e.NewValue;
+
+            if (prpName == "PropInt")
+            {
+                genObjOldVal = e.OldValue;
+                genObjNewVal = e.NewValue;
+            }
+        }
+
+        public void TestHandler(object sender, EventArgs e)
+        {
+            object sendr = sender;
         }
 
         #endregion
@@ -431,7 +449,7 @@ namespace PropBagLib.Tests
             Assert.That(genObjNewVal, Is.EqualTo(1), "The new value should have been 1.");
         }
 
-        void DoWhenPropIntChangesGen(object sender, PCGenEventArgs e)
+        void DoWhenPropIntChangesGen(object sender, PcGenEventArgs e)
         {
             genObjOldVal = e.OldValue;
             genObjNewVal = e.NewValue;
@@ -465,7 +483,80 @@ namespace PropBagLib.Tests
             typedNewVal = e.NewValue;
         }
 
+        delegate void PCObjEventHandler(object @this, object sender, EventArgs e);
+
+
+        [Test]
+        public void TestPropertyChangedObject()
+        {
+            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered, _amHelpers.PropFactory_V1);
+
+            //Action<object, EventArgs> objHandler = this.TestHandler;
+
+            //WeakReference Target = new WeakReference(objHandler.Target);
+
+            //MethodInfo mi = objHandler.Method;
+
+            ////Delegate ttt = mi.CreateDelegate();
+
+            //Type dType = objHandler.Method.GetDelegateType();
+
+            //var temp3 = Delegate.CreateDelegate(dType, null, objHandler.Method);
+
+            //var temp4 = Convert.ChangeType(temp3, dType);
+
+            ////Main();
+
+
+            //Action<TestAllPropsRegistered, object, EventArgs> xx = (Action<TestAllPropsRegistered, object, EventArgs>)Delegate.CreateDelegate(typeof(Action<TestAllPropsRegistered, object, EventArgs>), null, mi);
+
+            ////PCObjEventHandler temp = (PCObjEventHandler) Delegate.CreateDelegate(typeof(PCObjEventHandler), null, sKey.ObjHandler.Method);
+            ////ObjHandler = temp;
+
+            ////PCObjectEventAction temp2 = (PCObjectEventAction) Delegate.CreateDelegate(typeof(PCObjectEventAction), null, sKey.ObjHandler.Method);
+            ////ObjHandlerProxy = temp4;
+
+            //string methodName = objHandler.Method.Name;
+
+            mod1.SubscribeToPropChanged(Mod1_PropertyChangedWithObjectVals, "PropInt");
+
+            mod1.PropInt = 0;
+            mod1.PropInt = 1;
+
+            Assert.That(genObjOldVal, Is.EqualTo(0), "The old value should have been 0.");
+            Assert.That(genObjNewVal, Is.EqualTo(1), "The old value should have been 1.");
+        }
+
+
         #endregion
+
+        void Main()
+        {
+            MethodInfo sayHelloMethod = typeof(Person).GetMethod("SayHello");
+            OpenAction<Person, string> action =
+                (OpenAction<Person, string>)
+                    Delegate.CreateDelegate(
+                        typeof(OpenAction<Person, string>),
+                        null,
+                        sayHelloMethod);
+
+            Person joe = new Person { Name = "Joe" };
+            action(joe, "Jack"); // Prints "Hello Jack, my name is Joe"
+        }
+
+        delegate void OpenAction<TThis, T>(TThis @this, T arg);
+
+
+        class Person
+        {
+            public string Name { get; set; }
+
+            public void SayHello(string name)
+            {
+                //Console.WriteLine("Hi {0}, my name is {1}", name, this.Name);
+                System.Diagnostics.Debug.WriteLine($"Hi {name}, my name is {this.Name}");
+            }
+        }
 
         #region Test PubPropBag
 

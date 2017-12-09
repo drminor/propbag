@@ -32,13 +32,13 @@ namespace DRM.TypeSafePropertyBag
 
         public BindingSubscriptionKey
             (
-                ExKeyT targetPropRef,
+                ExKeyT ownerPropId,
                 LocalBindingInfo bindingInfo
             )
             : base
             (
                 typeof(T),
-                targetPropRef,
+                ownerPropId,
                 bindingInfo,
                 SubscriptionKind.LocalBinding,
                 SubscriptionPriorityGroup.First,
@@ -62,9 +62,9 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        public static ISubscriptionGen CreateBindingGen(ISubscriptionKeyGen bindingRequestGen, PSAccessServiceType propStoreAccessService)
+        public static ISubscription CreateBindingGen(ISubscriptionKeyGen bindingRequestGen, PSAccessServiceType propStoreAccessService)
         {
-            return (ISubscriptionGen)CreateBinding((IBindingSubscriptionKey<T>)bindingRequestGen, propStoreAccessService);
+            return (ISubscription)CreateBinding((IBindingSubscriptionKey<T>)bindingRequestGen, propStoreAccessService);
         }
 
         public override bool Equals(object obj)

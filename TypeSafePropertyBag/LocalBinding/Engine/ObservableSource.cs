@@ -15,7 +15,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
         //public event EventHandler<DataSourceChangedEventArgs>  DataSourceChanged = null;
 
         public event EventHandler<PCTypedEventArgs<T>> PropertyChangedWithTVals;
-        public event EventHandler<PCGenEventArgs> PropertyChangedWithVals;
+        public event EventHandler<PcGenEventArgs> PropertyChangedWithVals;
         public event EventHandler ParentHasChanged;
 
         public string BinderName { get; private set; }
@@ -72,7 +72,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
             propBag.SubscribeToPropChanged(PropertyChangedWithGenVals_Handler, PathElement, typeof(T));
         }
 
-        private void PropertyChangedWithGenVals_Handler(object sender, PCGenEventArgs e)
+        private void PropertyChangedWithGenVals_Handler(object sender, PcGenEventArgs e)
         {
             OnPropertyChangedWithGenVals(e);
         }
@@ -152,7 +152,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
             Interlocked.CompareExchange(ref PropertyChangedWithTVals, null, null)?.Invoke(this, eArgs);
         }
 
-        private void OnPropertyChangedWithGenVals(PCGenEventArgs eArgs)
+        private void OnPropertyChangedWithGenVals(PcGenEventArgs eArgs)
         {
             Interlocked.CompareExchange(ref PropertyChangedWithVals, null, null)
                 ?.Invoke(this, eArgs);

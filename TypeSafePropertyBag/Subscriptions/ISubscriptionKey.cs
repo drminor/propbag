@@ -31,19 +31,16 @@ namespace DRM.TypeSafePropertyBag
     public interface ISubscriptionKeyGen
     {
         Type PropertyType { get; }
-        ExKeyT SourcePropRef { get; } // Property that raises the events to which we are subscribing.
+        ExKeyT OwnerPropId { get; } // Property that raises the events to which we are subscribing.
 
         SubscriptionKind SubscriptionKind { get; }
-        SubscriptionTargetKind SubscriptionTargetKind { get; }
+        //SubscriptionTargetKind SubscriptionTargetKind { get; }
         SubscriptionPriorityGroup SubscriptionPriorityGroup { get; }
 
-        // If true, the target and method will be used instead of the Delegate or Action
-        bool UseTargetAndMethod { get; }
-
+        EventHandler<PcGenEventArgs> GenHandler { get; }
+        EventHandler<PcObjectEventArgs> ObjHandler { get; }
         EventHandler<PropertyChangedEventArgs> StandardHandler { get; }
-
-        EventHandler<PCGenEventArgs> GenHandler { get; }
-        EventHandler<PCObjectEventArgs> ObjHandler { get; }
+        EventHandler<PropertyChangingEventArgs> ChangingHandler { get; }
 
         Action<object, object> GenDoWhenChanged { get; }
         Action Action { get; }
@@ -51,15 +48,13 @@ namespace DRM.TypeSafePropertyBag
         object Target { get; } 
         MethodInfo Method { get; }
 
-        ISubscriptionGen CreateSubscription();
+        ISubscription CreateSubscription();
         bool HasBeenUsed { get; }
 
         void MarkAsUsed();
 
         // Properties for BindingSubscriptions
-        ExKeyT TargetPropRef { get; }
         LocalBindingInfo BindingInfo { get; }
-        ISubscriptionGen CreateBinding(PSAccessServiceType storeAccessor); 
-
+        ISubscription CreateBinding(PSAccessServiceType storeAccessor); 
     }
 }

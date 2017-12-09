@@ -79,7 +79,7 @@ namespace DRM.TypeSafePropertyBag
 
         #region Public Members
 
-        public L2KeyManType Level2KeyManager { get; }
+        public L2KeyManType Level2KeyManager { get; private set; }
 
         public int MaxPropsPerObject => Level2KeyManager.MaxPropsPerObject;
         public long MaxObjectsPerAppDomain { get; }
@@ -166,27 +166,6 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        private void ResetAllData()
-        {
-            int numSubsRemoved = 0;
-            foreach(SubscriberCollection sc in _propIndexes)
-            {
-                numSubsRemoved += sc.ClearSubscriptions();
-            }
-
-            foreach (ISubscriptionGen binding in _bindings)
-            {
-                if (binding is IDisposable disable) disable.Dispose();
-            }
-            int numBindingsRemoved = _bindings.ClearBindings();
-
-            foreach (StoreNodeProp prop in _ourNode.Children)
-            {
-                prop.Int_PropData.CleanUp(doTypedCleanup: true);
-            }
-            _ourNode.ClearChildren();
-        }
-
         public IEnumerable<KeyValuePair<PropNameType, IPropData>> GetCollection(IPropBag propBag)
         {
             GetAndCheckObjectRef(propBag);
@@ -255,6 +234,13 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
+        public int ClearAllProps(IPropBag propBag)
+        {
+            int result = 0;
+
+            return result;
+        }
+
         #endregion
 
         #region IRegisterSubscriptions Implementation
@@ -264,12 +250,12 @@ namespace DRM.TypeSafePropertyBag
         {
             ExKeyT exKey = GetExKey(propBag, propId);
 
-            TryGetSubscriptions(exKey, out IEnumerable<ISubscriptionGen> sc);
+            TryGetSubscriptions(exKey, out IEnumerable<ISubscription> sc);
             ISubscriptionKeyGen subscriptionRequest = new SubscriptionKey<T>(exKey, eventHandler, priorityGroup, keepRef);
 
-            ISubscriptionGen newSubscription = AddSubscription(subscriptionRequest, out bool wasAdded);
+            ISubscription newSubscription = AddSubscription(subscriptionRequest, out bool wasAdded);
 
-            TryGetSubscriptions(exKey, out IEnumerable<ISubscriptionGen> sc2);
+            TryGetSubscriptions(exKey, out IEnumerable<ISubscription> sc2);
 
             return wasAdded;
         }
@@ -285,16 +271,16 @@ namespace DRM.TypeSafePropertyBag
         }
 
         public bool RegisterHandler(IPropBag propBag, uint propId, 
-            EventHandler<PCGenEventArgs> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef)
+            EventHandler<PcGenEventArgs> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef)
         {
             ExKeyT exKey = GetExKey(propBag, propId);
             ISubscriptionKeyGen subscriptionRequest = new SubscriptionKeyGen(exKey, eventHandler, priorityGroup, keepRef);
 
-            ISubscriptionGen newSubscription = AddSubscription(subscriptionRequest, out bool wasAdded);
+            ISubscription newSubscription = AddSubscription(subscriptionRequest, out bool wasAdded);
             return wasAdded;
         }
 
-        public bool UnRegisterHandler(IPropBag propBag, uint propId, EventHandler<PCGenEventArgs> eventHandler)
+        public bool UnRegisterHandler(IPropBag propBag, uint propId, EventHandler<PcGenEventArgs> eventHandler)
         {
             ExKeyT exKey = GetExKey(propBag, propId);
             ISubscriptionKeyGen subscriptionRequest = new SubscriptionKeyGen(exKey, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
@@ -304,16 +290,16 @@ namespace DRM.TypeSafePropertyBag
         }
 
         public bool RegisterHandler(IPropBag propBag, uint propId, 
-            EventHandler<PCObjectEventArgs> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef)
+            EventHandler<PcObjectEventArgs> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef)
         {
             ExKeyT exKey = GetExKey(propBag, propId);
             ISubscriptionKeyGen subscriptionRequest = new SubscriptionKeyGen(exKey, eventHandler, priorityGroup, keepRef);
 
-            ISubscriptionGen newSubscription = AddSubscription(subscriptionRequest, out bool wasAdded);
+            ISubscription newSubscription = AddSubscription(subscriptionRequest, out bool wasAdded);
             return wasAdded;
         }
 
-        public bool UnRegisterHandler(IPropBag propBag, uint propId, EventHandler<PCObjectEventArgs> eventHandler)
+        public bool UnRegisterHandler(IPropBag propBag, uint propId, EventHandler<PcObjectEventArgs> eventHandler)
         {
             ExKeyT exKey = GetExKey(propBag, propId);
             ISubscriptionKeyGen subscriptionRequest = new SubscriptionKeyGen(exKey, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
@@ -326,16 +312,16 @@ namespace DRM.TypeSafePropertyBag
 
         #region Subscription Management
 
-        public ISubscriptionGen AddSubscription(ISubscriptionKeyGen subscriptionRequest, out bool wasAdded)
+        public ISubscription AddSubscription(ISubscriptionKeyGen subscriptionRequest, out bool wasAdded)
         {
             if (subscriptionRequest.HasBeenUsed)
             {
                 throw new ApplicationException("Its already been used.");
             }
 
-            SubscriberCollection sc = GetOrAddSubscription((SimpleExKey)subscriptionRequest.SourcePropRef);
+            SubscriberCollection sc = GetOrAddSubscriberCollection(subscriptionRequest.OwnerPropId);
 
-            ISubscriptionGen result = sc.GetOrAdd
+            ISubscription result = sc.GetOrAdd
                 (
                 subscriptionRequest,
                     (
@@ -346,13 +332,13 @@ namespace DRM.TypeSafePropertyBag
             if (subscriptionRequest.HasBeenUsed)
             {
                 System.Diagnostics.Debug.WriteLine($"Created a new Subscription for Property:" +
-                    $" {subscriptionRequest.SourcePropRef} / Event: {result.SubscriptionKind}.");
+                    $" {subscriptionRequest.OwnerPropId} / Event: {result.SubscriptionKind}.");
                 wasAdded = true;
             }
             else
             {
                 System.Diagnostics.Debug.WriteLine($"The subscription for Property:" +
-                    $" {subscriptionRequest.SourcePropRef} / Event: {result.SubscriptionKind} was not added.");
+                    $" {subscriptionRequest.OwnerPropId} / Event: {result.SubscriptionKind} was not added.");
                 wasAdded = false;
             }
             return result;
@@ -360,12 +346,12 @@ namespace DRM.TypeSafePropertyBag
 
         public bool RemoveSubscription(ISubscriptionKeyGen subscriptionRequest)
         {
-            if (TryGetSubscriptions(subscriptionRequest.SourcePropRef, out SubscriberCollection sc))
+            if (TryGetSubscriptions(subscriptionRequest.OwnerPropId, out SubscriberCollection sc))
             {
                 bool result = sc.TryRemoveSubscription(subscriptionRequest);
 
                 if (result)
-                    System.Diagnostics.Debug.WriteLine($"Removed the subscription for {subscriptionRequest.SourcePropRef}.");
+                    System.Diagnostics.Debug.WriteLine($"Removed the subscription for {subscriptionRequest.OwnerPropId}.");
 
                 return result;
             }
@@ -375,25 +361,25 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        public IEnumerable<ISubscriptionGen> GetSubscriptions(IPropBag host, PropIdType propId)
+        public IEnumerable<ISubscription> GetSubscriptions(IPropBag host, PropIdType propId)
         {
             //ExKeyT exKey = GetExKey(host, propId);
 
             // TODO: NOTE: This does not verify that the caller is the "correct" one.
             ExKeyT exKey = new SimpleExKey(_objectId, propId);
 
-            if (TryGetSubscriptions(exKey, out IEnumerable<ISubscriptionGen> subs))
+            if (TryGetSubscriptions(exKey, out IEnumerable<ISubscription> subs))
             {
                 return subs;
             }
             else
             {
-                IEnumerable<ISubscriptionGen> result = new SubscriberCollection();
+                IEnumerable<ISubscription> result = new SubscriberCollection();
                 return result;
             }
         }
 
-        public bool TryGetSubscriptions(ExKeyT exKey, out IEnumerable<ISubscriptionGen> subscriberCollection)
+        public bool TryGetSubscriptions(ExKeyT exKey, out IEnumerable<ISubscription> subscriberCollection)
         {
             bool result = _propIndexes.TryGetSubscriberCollection(exKey.Level2Key, out subscriberCollection);
             return result;
@@ -406,7 +392,7 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        private SubscriberCollection GetOrAddSubscription(ExKeyT exKey)
+        private SubscriberCollection GetOrAddSubscriberCollection(ExKeyT exKey)
         {
             SubscriberCollection result = _propIndexes.GetOrCreate(exKey.Level2Key, out bool subcriberListWasCreated);
             if (subcriberListWasCreated)
@@ -425,7 +411,7 @@ namespace DRM.TypeSafePropertyBag
         {
             ExKeyT exKey = GetExKey(targetPropBag, propId);
             ISubscriptionKeyGen BindingRequest = new BindingSubscriptionKey<T>(exKey, bindingInfo);
-            ISubscriptionGen newSubscription = AddBinding(BindingRequest, out bool wasAdded);
+            ISubscription newSubscription = AddBinding(BindingRequest, out bool wasAdded);
             return wasAdded;
         }
 
@@ -434,7 +420,7 @@ namespace DRM.TypeSafePropertyBag
             ExKeyT exKey = GetExKey(targetPropBag, propId);
             ISubscriptionKeyGen bindingRequest = new BindingSubscriptionKey<T>(exKey, bindingInfo);
             
-            bool result = TryRemoveBinding(bindingRequest, out ISubscriptionGen binding);
+            bool result = TryRemoveBinding(bindingRequest, out ISubscription binding);
             if(binding is IDisposable disable)
             {
                 disable.Dispose();
@@ -446,25 +432,25 @@ namespace DRM.TypeSafePropertyBag
 
         #region Binding Management
 
-        public ISubscriptionGen AddBinding(ISubscriptionKeyGen bindingRequest, out bool wasAdded)
+        public ISubscription AddBinding(ISubscriptionKeyGen bindingRequest, out bool wasAdded)
         {
             if (bindingRequest.HasBeenUsed)
             {
                 throw new ApplicationException("Its already been used.");
             }
 
-            ISubscriptionGen result = _bindings.GetOrAdd(bindingRequest, x => bindingRequest.CreateBinding(this));
+            ISubscription result = _bindings.GetOrAdd(bindingRequest, x => bindingRequest.CreateBinding(this));
 
             if (bindingRequest.HasBeenUsed)
             {
                 System.Diagnostics.Debug.WriteLine($"Created a new Binding for Property:" +
-                    $" {bindingRequest.TargetPropRef} / Event: {result.SubscriptionKind}.");
+                    $" {bindingRequest.OwnerPropId} / Event: {result.SubscriptionKind}.");
                 wasAdded = true;
             }
             else
             {
                 System.Diagnostics.Debug.WriteLine($"The Binding for Property:" +
-                    $" {bindingRequest.TargetPropRef} / Event: {result.SubscriptionKind} was not added.");
+                    $" {bindingRequest.OwnerPropId} / Event: {result.SubscriptionKind} was not added.");
                 wasAdded = false;
             }
 
@@ -472,7 +458,7 @@ namespace DRM.TypeSafePropertyBag
 
         }
 
-        public bool TryRemoveBinding(ISubscriptionKeyGen bindingRequest, out ISubscriptionGen binding)
+        public bool TryRemoveBinding(ISubscriptionKeyGen bindingRequest, out ISubscription binding)
         {
             bool result = _bindings.TryRemoveBinding(bindingRequest, out binding);
             return result;
@@ -486,11 +472,11 @@ namespace DRM.TypeSafePropertyBag
         //    return wasRemoved;
         //}
 
-        public IEnumerable<ISubscriptionGen> GetBindings(IPropBag host, uint propId)
+        public IEnumerable<ISubscription> GetBindings(IPropBag host, uint propId)
         {
             ExKeyT exKey = GetExKey(host, propId);
 
-            IEnumerable<ISubscriptionGen> result = _bindings.TryGetBindings(exKey);
+            IEnumerable<ISubscription> result = _bindings.TryGetBindings(exKey);
             return result;                
         }
 
@@ -521,7 +507,7 @@ namespace DRM.TypeSafePropertyBag
         }
 
         // Our call back to let us know to update the parentage of a IPropBag object.
-        private void OurParentHasChanged(object sender, PCObjectEventArgs e)
+        private void OurParentHasChanged(object sender, PcObjectEventArgs e)
         {
             if (e.NewValueIsUndefined)
             {
@@ -752,6 +738,35 @@ namespace DRM.TypeSafePropertyBag
 
         #region IDisposable Support
 
+
+        private void ResetAllData()
+        {
+            int numSubsRemoved = 0;
+            foreach (SubscriberCollection sc in _propIndexes)
+            {
+                numSubsRemoved += sc.ClearSubscriptions();
+            }
+
+            _propIndexes.ClearTheListOfSubscriptionPtrs();
+
+            foreach (ISubscription binding in _bindings)
+            {
+                if (binding is IDisposable disable) disable.Dispose();
+            }
+
+            int numBindingsRemoved = _bindings.ClearBindings();
+
+            foreach (StoreNodeProp prop in _ourNode.Children)
+            {
+                prop.Int_PropData.CleanUp(doTypedCleanup: true);
+            }
+
+            _propStoreAccessServiceProvider.TearDown(_ourNode.CompKey);
+
+            Level2KeyManager.Dispose();
+            Level2KeyManager = null;
+        }
+
         private bool disposedValue = false; // To detect redundant calls
 
         protected virtual void Dispose(bool disposing)
@@ -762,9 +777,6 @@ namespace DRM.TypeSafePropertyBag
                 {
                     // TODO: dispose managed state (managed objects).
                     ResetAllData();
-
-                    _propStoreAccessServiceProvider.TearDown(_ourNode.CompKey);
-
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.

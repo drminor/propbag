@@ -90,9 +90,9 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
         #region Constructor
 
-        public LocalBinder(PSAccessServiceType propStoreAccessService, ExKeyT targetPropRef, LocalBindingInfo bindingInfo)
+        public LocalBinder(PSAccessServiceType propStoreAccessService, ExKeyT onwerPropId, LocalBindingInfo bindingInfo)
         {
-            _bindingTarget = targetPropRef;
+            _bindingTarget = onwerPropId;
             _bindingInfo = bindingInfo;
 
             // Get the PropStore (Tree) Node for the IPropBag object hosting the property that is the target of the binding.
@@ -639,7 +639,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
         #region PropertyChanged and ParentHasChanged Handlers
 
-        private void PropertyChangedWithVals_Handler(object sender, PCGenEventArgs e)
+        private void PropertyChangedWithVals_Handler(object sender, PcGenEventArgs e)
         {
             DataSourceHasChanged_Handler((ObservableSource<T>)sender, DataSourceChangeTypeEnum.PropertyChanged);
         }

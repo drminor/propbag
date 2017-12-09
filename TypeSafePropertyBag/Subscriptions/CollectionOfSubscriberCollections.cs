@@ -68,7 +68,7 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        public bool TryGetSubscriberCollection(PropIdType propId, out IEnumerable<ISubscriptionGen> subs)
+        public bool TryGetSubscriberCollection(PropIdType propId, out IEnumerable<ISubscription> subs)
         {
             bool result = _subCollections.TryGetValue(propId, out SubscriberCollection sc);
             if(result)

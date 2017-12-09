@@ -7,24 +7,24 @@ namespace DRM.TypeSafePropertyBag
 {
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
 
-    public class BindingsCollection : IEnumerable<ISubscriptionGen>
+    public class BindingsCollection : IEnumerable<ISubscription>
     {
-        private readonly List<ISubscriptionGen> _bindings;
+        private readonly List<ISubscription> _bindings;
         private readonly object _sync;
 
         public BindingsCollection()
         {
             _sync = new object();
-            _bindings = new List<ISubscriptionGen>();
+            _bindings = new List<ISubscription>();
         }
 
-        public ISubscriptionGen GetOrAdd(ISubscriptionKeyGen bindingRequest, Func<ISubscriptionKeyGen, ISubscriptionGen> factory)
+        public ISubscription GetOrAdd(ISubscriptionKeyGen bindingRequest, Func<ISubscriptionKeyGen, ISubscription> factory)
         {
             lock (_sync)
             {
-                if (TryGetBinding(bindingRequest, out ISubscriptionGen binding))
+                if (TryGetBinding(bindingRequest, out ISubscription binding))
                 {
-                    System.Diagnostics.Debug.WriteLine($"The binding for {bindingRequest.SourcePropRef} has aleady been created.");
+                    System.Diagnostics.Debug.WriteLine($"The binding for {bindingRequest.OwnerPropId} has aleady been created.");
                     return binding;
                 }
                 else
@@ -53,7 +53,7 @@ namespace DRM.TypeSafePropertyBag
         //    }
         //}
 
-        public bool TryRemoveBinding(ISubscriptionKeyGen bindingRequest, out ISubscriptionGen binding)
+        public bool TryRemoveBinding(ISubscriptionKeyGen bindingRequest, out ISubscription binding)
         {
             lock (_sync)
             {
@@ -64,13 +64,13 @@ namespace DRM.TypeSafePropertyBag
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine($"Could not find the binding for {bindingRequest.TargetPropRef} <= {bindingRequest.BindingInfo.PropertyPath.Path} when trying to remove it.");
+                    System.Diagnostics.Debug.WriteLine($"Could not find the binding for {bindingRequest.OwnerPropId} <= {bindingRequest.BindingInfo.PropertyPath.Path} when trying to remove it.");
                     return false;
                 }
             }
         }
 
-        public bool TryRemoveBinding(ISubscriptionGen binding)
+        public bool TryRemoveBinding(ISubscription binding)
         {
             lock (_sync)
             {
@@ -81,13 +81,13 @@ namespace DRM.TypeSafePropertyBag
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine($"Could not find the binding for {binding.TargetPropRef} <= {binding.BindingInfo.PropertyPath.Path} when trying to remove it.");
+                    System.Diagnostics.Debug.WriteLine($"Could not find the binding for {binding.OwnerPropId} <= {binding.BindingInfo.PropertyPath.Path} when trying to remove it.");
                     return false;
                 }
             }
         }
 
-        public void RemoveBinding(ISubscriptionGen request)
+        public void RemoveBinding(ISubscription request)
         {
             _bindings.Remove(request);
         }
@@ -109,7 +109,7 @@ namespace DRM.TypeSafePropertyBag
         //    }
         //}
 
-        public bool ContainsBinding(ISubscriptionGen binding)
+        public bool ContainsBinding(ISubscription binding)
         {
             bool result = _bindings.Exists(x => x.Equals(binding));
             return result;
@@ -121,7 +121,7 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        public bool TryGetBinding(ISubscriptionGen binding)
+        public bool TryGetBinding(ISubscription binding)
         {
             lock (_sync)
             {
@@ -132,7 +132,7 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        public bool TryGetBinding(ISubscriptionKeyGen bindingRequest, out ISubscriptionGen binding)
+        public bool TryGetBinding(ISubscriptionKeyGen bindingRequest, out ISubscription binding)
         {
             lock (_sync)
             {
@@ -143,20 +143,20 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        private bool BindingIsForRequest(ISubscriptionGen binding, ISubscriptionKeyGen bindingRequest)
+        private bool BindingIsForRequest(ISubscription binding, ISubscriptionKeyGen bindingRequest)
         {
             bool result = 
-                binding.TargetPropRef == bindingRequest.TargetPropRef &&
+                binding.OwnerPropId == bindingRequest.OwnerPropId &&
                 binding.BindingInfo == bindingRequest.BindingInfo;
 
             return result;
         }
 
-        public IEnumerable<ISubscriptionGen> TryGetBindings(ExKeyT exKey)
+        public IEnumerable<ISubscription> TryGetBindings(ExKeyT exKey)
         {
             lock (_sync)
             {
-                IEnumerable<ISubscriptionGen> result = _bindings.Where((x => x.TargetPropRef == exKey));
+                IEnumerable<ISubscription> result = _bindings.Where((x => x.OwnerPropId == exKey));
                 return result;
             }
         }
@@ -169,7 +169,7 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        public IEnumerator<ISubscriptionGen> GetEnumerator()
+        public IEnumerator<ISubscription> GetEnumerator()
         {
             lock (_sync)
                 return _bindings.GetEnumerator();

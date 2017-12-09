@@ -1,8 +1,5 @@
 ﻿using DRM.TypeSafePropertyBag.LocalBinding;
-
 using System;
-using System.ComponentModel;
-using System.Reflection;
 
 namespace DRM.TypeSafePropertyBag
 {
@@ -21,41 +18,36 @@ namespace DRM.TypeSafePropertyBag
     /// 
     /// </summary>
     /// <typeparam name="T">The type of the property to which this subscription will subscribe.</typeparam>
-    public interface ISubscription<T> : ISubscriptionGen
+    public interface ISubscription<T> : ISubscription
     {
-        // Note: only one of the Eventhandlers or one of the Actions will have a value.
-        // The SubscriptionKind specifies which one will be used.
         EventHandler<PCTypedEventArgs<T>> TypedHandler { get; }
         Action<T, T> TypedDoWhenChanged { get; }
+
+        CallPcTypedEventSubscriberDelegate<T> TypedHandlerProxy { get; }
     }
 
     // Identifies a IProp using an identifer unique to the application domain
     // that raises a event of some type (from a short list of possible event types)
     // and the action to be performed when that IProp's value changes.
-    public interface ISubscriptionGen
+    public interface ISubscription
     {
-        ExKeyT SourcePropRef { get; } // A weak reference to the object that raises the event.
+        ExKeyT OwnerPropId { get; } // Identifies the object that owns the event.
         Type PropertyType { get; }
 
         SubscriptionKind SubscriptionKind { get; }
-        SubscriptionTargetKind SubscriptionTargetKind { get; }
         SubscriptionPriorityGroup SubscriptionPriorityGroup { get; }
+        //SubscriptionTargetKind SubscriptionTargetKind { get; }
 
-        EventHandler<PCGenEventArgs> GenHandler { get; }
-        EventHandler<PCObjectEventArgs> ObjHandler { get; }
+        WeakReference Target { get; }
+        string MethodName { get; }
 
-        EventHandler<PropertyChangedEventArgs> StandardHandler { get; }
-        Action<object, object> GenDoWhenChanged { get; }
-        Action Action { get; }
+        Delegate HandlerProxy { get; }
 
-        object Target { get; }
-        MethodInfo Method { get; }
+        //Action<object, object> GenDoWhenChanged { get; }
+        //Action Action { get; }
 
         // Binding Subscription Members
-        ExKeyT TargetPropRef { get; }
         LocalBindingInfo BindingInfo { get; }
-
-        object LocalBinderRefProxy { get; }
+        object LocalBinderAsObject { get; }
     }
-
 }

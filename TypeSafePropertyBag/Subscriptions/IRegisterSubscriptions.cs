@@ -18,10 +18,10 @@ namespace DRM.TypeSafePropertyBag
         bool RegisterHandler<T>(IPropBag propBag, L2T propId, EventHandler<PCTypedEventArgs<T>> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef);
         bool UnRegisterHandler<T>(IPropBag propBag, L2T propId, EventHandler<PCTypedEventArgs<T>> eventHandler);
 
-        bool RegisterHandler(IPropBag propBag, L2T propId, EventHandler<PCGenEventArgs> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef);
-        bool UnRegisterHandler(IPropBag propBag, L2T propId, EventHandler<PCGenEventArgs> eventHandler);
+        bool RegisterHandler(IPropBag propBag, L2T propId, EventHandler<PcGenEventArgs> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef);
+        bool UnRegisterHandler(IPropBag propBag, L2T propId, EventHandler<PcGenEventArgs> eventHandler);
 
-        bool RegisterHandler(IPropBag propBag, L2T propId, EventHandler<PCObjectEventArgs> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef);
-        bool UnRegisterHandler(IPropBag propBag, L2T propId, EventHandler<PCObjectEventArgs> eventHandler);
+        bool RegisterHandler(IPropBag propBag, L2T propId, EventHandler<PcObjectEventArgs> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef);
+        bool UnRegisterHandler(IPropBag propBag, L2T propId, EventHandler<PcObjectEventArgs> eventHandler);
     }
 }

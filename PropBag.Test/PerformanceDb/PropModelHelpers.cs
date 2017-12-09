@@ -37,7 +37,7 @@ namespace PropBagLib.Tests.PerformanceDb
             PropItem propItem = new PropItem(type: typeof(int), name: "Id",
                 hasStore: true, typeIsSolid: true, propKind: PropKindEnum.Prop,
                 propTypeInfoField: null, initialValueField: pivf,
-                doWhenChanged: null, extraInfo: null, comparer: null, itemType: null);
+                extraInfo: null, comparer: null, itemType: null);
             result.Props.Add(propItem);
 
             pivf = new PropInitialValueField(initialValue: null,
@@ -47,21 +47,21 @@ namespace PropBagLib.Tests.PerformanceDb
             propItem = new PropItem(type: typeof(string), name: "FirstName",
                 hasStore: true, typeIsSolid: true, propKind: PropKindEnum.Prop,
                 propTypeInfoField: null, initialValueField: pivf,
-                doWhenChanged: null, extraInfo: null, comparer: null, itemType: null);
+                extraInfo: null, comparer: null, itemType: null);
             result.Props.Add(propItem);
 
             // Last Name (string - null)
             propItem = new PropItem(type: typeof(string), name: "LastName",
                 hasStore: true, typeIsSolid: true, propKind: PropKindEnum.Prop,
                 propTypeInfoField: null, initialValueField: pivf,
-                doWhenChanged: null, extraInfo: null, comparer: null, itemType: null);
+                extraInfo: null, comparer: null, itemType: null);
             result.Props.Add(propItem);
 
             // City Of Residence (string - null)
             propItem = new PropItem(type: typeof(string), name: "CityOfResidence",
                 hasStore: true, typeIsSolid: true, propKind: PropKindEnum.Prop,
                 propTypeInfoField: null, initialValueField: pivf,
-                doWhenChanged: null, extraInfo: null, comparer: null, itemType: null);
+                extraInfo: null, comparer: null, itemType: null);
             result.Props.Add(propItem);
 
             pivf = new PropInitialValueField(initialValue: null,
@@ -71,7 +71,7 @@ namespace PropBagLib.Tests.PerformanceDb
             propItem = new PropItem(type: typeof(Profession), name: "Profession",
                 hasStore: true, typeIsSolid: true, propKind: PropKindEnum.Prop,
                 propTypeInfoField: null, initialValueField: pivf,
-                doWhenChanged: null, extraInfo: null, comparer: null, itemType: null);
+                extraInfo: null, comparer: null, itemType: null);
             result.Props.Add(propItem);
 
             return result;
@@ -104,7 +104,7 @@ namespace PropBagLib.Tests.PerformanceDb
             PropItem propItem = new PropItem(type: typeof(Guid), name: "ProductId",
                 hasStore: true, typeIsSolid: true, propKind: PropKindEnum.Prop,
                 propTypeInfoField: null, initialValueField: pivf,
-                doWhenChanged: null, extraInfo: null, comparer: null, itemType: null);
+                extraInfo: null, comparer: null, itemType: null);
             result.Props.Add(propItem);
 
 
@@ -115,7 +115,7 @@ namespace PropBagLib.Tests.PerformanceDb
             propItem = new PropItem(type: typeof(Business), name: "Business",
                 hasStore: true, typeIsSolid: true, propKind: PropKindEnum.Prop,
                 propTypeInfoField: null, initialValueField: pivf,
-                doWhenChanged: null, extraInfo: null, comparer: null, itemType: null);
+                extraInfo: null, comparer: null, itemType: null);
             result.Props.Add(propItem);
 
 
@@ -127,7 +127,7 @@ namespace PropBagLib.Tests.PerformanceDb
                 hasStore: true, typeIsSolid: true, propKind: PropKindEnum.Collection,
                 propTypeInfoField: null,
                 initialValueField: pivf,
-                doWhenChanged: null, extraInfo: null, comparer: null, itemType: typeof(Person));
+                extraInfo: null, comparer: null, itemType: typeof(Person));
             result.Props.Add(propItem);
 
             return result;
@@ -160,7 +160,7 @@ namespace PropBagLib.Tests.PerformanceDb
             PropItem propItem = new PropItem(type: typeof(Business), name: "Business",
                 hasStore: true, typeIsSolid: true, propKind: PropKindEnum.Prop,
                 propTypeInfoField: null, initialValueField: pivf,
-                doWhenChanged: null, extraInfo: null, comparer: null, itemType: null);
+                extraInfo: null, comparer: null, itemType: null);
             result.Props.Add(propItem);
 
 
@@ -183,7 +183,7 @@ namespace PropBagLib.Tests.PerformanceDb
                 hasStore: true, typeIsSolid: true, propKind: PropKindEnum.Prop,
                 propTypeInfoField: null,
                 initialValueField: pivf,
-                doWhenChanged: null, extraInfo: null, comparer: null, itemType: typeof(Person));
+                extraInfo: null, comparer: null, itemType: typeof(Person));
             result.Props.Add(propItem);
 
             // SelectedPerson (Business - null)
@@ -193,7 +193,7 @@ namespace PropBagLib.Tests.PerformanceDb
             propItem = new PropItem(type: typeof(Person), name: "SelectedPerson",
                 hasStore: true, typeIsSolid: true, propKind: PropKindEnum.Prop,
                 propTypeInfoField: null, initialValueField: pivf,
-                doWhenChanged: null, extraInfo: null, comparer: null, itemType: null);
+                extraInfo: null, comparer: null, itemType: null);
             result.Props.Add(propItem);
 
             // WMessage (String - null)
@@ -203,7 +203,7 @@ namespace PropBagLib.Tests.PerformanceDb
             propItem = new PropItem(type: typeof(string), name: "WMessage",
                 hasStore: true, typeIsSolid: true, propKind: PropKindEnum.Prop,
                 propTypeInfoField: null, initialValueField: pivf,
-                doWhenChanged: null, extraInfo: null, comparer: null, itemType: null);
+                extraInfo: null, comparer: null, itemType: null);
             result.Props.Add(propItem);
 
             return result;

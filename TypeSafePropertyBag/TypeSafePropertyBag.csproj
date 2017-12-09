@@ -42,6 +42,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Fundamentals\DelegateCache.cs" />
     <Compile Include="Fundamentals\UniversalTypeConverter.cs" />
     <Compile Include="GenericTree\BaseTreeNode.cs" />
     <Compile Include="GenericTree\IAmANodeInATree.cs" />
@@ -63,7 +64,9 @@
     <Compile Include="PropStore\StoreNodeBag.cs" />
     <Compile Include="PropStore\StoreNodeProp.cs" />
     <Compile Include="PropStore\StoreNodes.cs" />
+    <Compile Include="Subscriptions\EventHandlerProxy.cs" />
     <Compile Include="Subscriptions\SubscriptionGen.cs" />
+    <Compile Include="Fundamentals\MethodInfoExtensions.cs" />
     <Compile Include="UnUsed\PropValueStateEnum.cs" />
     <Compile Include="SimpleIOC\Container.cs" />
     <Compile Include="SimpleIOC\ContainerException.cs" />

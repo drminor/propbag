@@ -24,7 +24,7 @@ namespace DRM.TypeSafePropertyBag
         /// <summary>
         /// Occurs when a property value changes.
         /// </summary>
-        event EventHandler<PCGenEventArgs> PropertyChangedWithGenVals;
+        event EventHandler<PcGenEventArgs> PropertyChangedWithGenVals;
     }
 
     /// <summary>
@@ -36,7 +36,7 @@ namespace DRM.TypeSafePropertyBag
         /// <summary>
         /// Occurs when a property value changes.
         /// </summary>
-        event EventHandler<PCObjectEventArgs> PropertyChangedWithObjectVals;
+        event EventHandler<PcObjectEventArgs> PropertyChangedWithObjectVals;
     }
 
     ///// <summary>

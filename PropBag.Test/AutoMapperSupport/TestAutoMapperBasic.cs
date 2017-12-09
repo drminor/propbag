@@ -187,7 +187,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
             PropItem propItem = new PropItem(type: typeof(Guid), name: "ProductId",
                 hasStore: true, typeIsSolid: true, propKind: PropKindEnum.Prop,
                 propTypeInfoField: null, initialValueField: pivf,
-                doWhenChanged: null, extraInfo: null, comparer: null, itemType: null);
+                extraInfo: null, comparer: null, itemType: null);
             result.Props.Add(propItem);
 
             // Amount (int - default)
@@ -197,7 +197,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
             propItem = new PropItem(type: typeof(int), name: "Amount",
                 hasStore: true, typeIsSolid: true, propKind: PropKindEnum.Prop,
                 propTypeInfoField: null, initialValueField: pivf,
-                doWhenChanged: null, extraInfo: null, comparer: null, itemType: null);
+                extraInfo: null, comparer: null, itemType: null);
             result.Props.Add(propItem);
 
 
@@ -208,7 +208,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
             propItem = new PropItem(type: typeof(double), name: "Size",
                 hasStore: true, typeIsSolid: true, propKind: PropKindEnum.Prop,
                 propTypeInfoField: null, initialValueField: pivf,
-                doWhenChanged: null, extraInfo: null, comparer: null, itemType: null);
+                extraInfo: null, comparer: null, itemType: null);
             result.Props.Add(propItem);
 
             // Deep (MyModel4 - null)
@@ -218,7 +218,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
             propItem = new PropItem(type: typeof(MyModel4), name: "Deep",
                 hasStore: true, typeIsSolid: true, propKind: PropKindEnum.Prop,
                 propTypeInfoField: null, initialValueField: pivf,
-                doWhenChanged: null, extraInfo: null, comparer: null, itemType: null);
+                extraInfo: null, comparer: null, itemType: null);
             result.Props.Add(propItem);
 
             return result;

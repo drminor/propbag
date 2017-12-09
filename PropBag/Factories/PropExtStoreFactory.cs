@@ -6,6 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using DRM.TypeSafePropertyBag.Fundamentals;
+
 namespace DRM.PropBag
 {
     using PropIdType = UInt32;
@@ -14,6 +16,7 @@ namespace DRM.PropBag
     using SubCacheType = ICacheSubscriptions<UInt32>;
 
     using PropBagType = PropBag;
+    using ICreatePropsType = APFGenericMethodTemplates;
 
     public class PropExtStoreFactory : AbstractPropFactory
     {

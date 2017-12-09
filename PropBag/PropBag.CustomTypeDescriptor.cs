@@ -40,7 +40,7 @@ namespace DRM.PropBag
 
         protected string GetClassName()
         {
-            return this.OurMetaData.ClassName;
+            return this._ourMetaData.ClassName;
         }
 
         // Get Converter

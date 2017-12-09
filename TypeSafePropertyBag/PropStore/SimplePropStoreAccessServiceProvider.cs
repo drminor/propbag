@@ -120,9 +120,32 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        public void TearDown(ExKeyT cKey)
+        public bool TearDown(ExKeyT compKey)
         {
-            _store.Remove(cKey);
+            if(TryRemoveBagNode(compKey, out StoreNodeBag storeNodeBag))
+            {
+                storeNodeBag.Dispose();
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        private bool TryRemoveBagNode(ExKeyT compKey, out StoreNodeBag storeNodeBag)
+        {
+            try
+            {
+                storeNodeBag = _store[compKey];
+                _store.Remove(compKey);
+                return true;
+            }
+            catch
+            {
+                storeNodeBag = null;
+                return false;
+            }
         }
 
         PSAccessServiceType PSCloneServiceType.CloneService(PSAccessServiceType sourceService, IPropBagInternal target, out StoreNodeBag newStoreNode)

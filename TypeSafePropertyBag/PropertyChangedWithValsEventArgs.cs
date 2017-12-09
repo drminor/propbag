@@ -10,7 +10,7 @@ namespace DRM.TypeSafePropertyBag
     /// Provides typed value change information for the <see cref="INotifyPropertyChangedWithTVals<typeparamref name="T"/>.PropertyChanged"/> event.
     /// </summary>
     /// <typeparam name="T">The type of the property that changed.</typeparam>
-    public class PCTypedEventArgs<T> : PCGenEventArgs
+    public class PCTypedEventArgs<T> : PcGenEventArgs
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="PCTypedEventArgs<typeparamref name="T"/> class.
@@ -67,15 +67,15 @@ namespace DRM.TypeSafePropertyBag
     /// Provides un-typed value change information for the <see cref="INotifyPCGen.PropertyChanged"/> event.
     /// Object instances of this class are used as a generic proxy for instances of <see cref="PCTypedEventArgs<typeparamref name="T"/>.
     /// </summary>
-    public class PCGenEventArgs : PropertyChangedEventArgs
+    public class PcGenEventArgs : PropertyChangedEventArgs
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="PCGenEventArgs"/> class.
+        /// Initializes a new instance of the <see cref="PcGenEventArgs"/> class.
         /// </summary>
         /// <param name="propertyName">Name of the property.</param>
         /// <param name="oldValue">The old value of the property.</param>
         /// <param name="newValue">The new value of the property.</param>
-        public PCGenEventArgs(string propertyName, Type propertyType, object oldValue, object newValue)
+        public PcGenEventArgs(string propertyName, Type propertyType, object oldValue, object newValue)
             : base(propertyName)
         {
             OldValue = oldValue;
@@ -85,7 +85,7 @@ namespace DRM.TypeSafePropertyBag
             NewValueIsUndefined = false;
         }
 
-        public PCGenEventArgs(string propertyName, Type propertyType, object newValue)
+        public PcGenEventArgs(string propertyName, Type propertyType, object newValue)
             : base(propertyName)
         {
             OldValueIsUndefined = true;
@@ -93,7 +93,7 @@ namespace DRM.TypeSafePropertyBag
             PropertyType = propertyType;
         }
 
-        public PCGenEventArgs(string propertyName, Type propertyType, object oldValue, bool newValueIsUndefined)
+        public PcGenEventArgs(string propertyName, Type propertyType, object oldValue, bool newValueIsUndefined)
             : base(propertyName)
         {
             OldValue = oldValue;
@@ -102,7 +102,7 @@ namespace DRM.TypeSafePropertyBag
             PropertyType = propertyType;
         }
 
-        public PCGenEventArgs(string propertyName, Type propertyType, bool oldValueIsUndefined, bool newValueIsUndefined)
+        public PcGenEventArgs(string propertyName, Type propertyType, bool oldValueIsUndefined, bool newValueIsUndefined)
             : base(propertyName)
         {
             OldValueIsUndefined = oldValueIsUndefined;
@@ -129,29 +129,29 @@ namespace DRM.TypeSafePropertyBag
     /// <summary>
     /// Provides value change information for the <see cref="INotifyPropertyChanged.PropertyChanged"/> event.
     /// </summary>
-    public class PCObjectEventArgs : PropertyChangedEventArgs
+    public class PcObjectEventArgs :  PropertyChangedEventArgs
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="PCObjectEventArgs"/> class.
+        /// Initializes a new instance of the <see cref="PcObjectEventArgs"/> class.
         /// </summary>
         /// <param name="propertyName">Name of the property.</param>
         /// <param name="oldValue">The old value of the property.</param>
         /// <param name="newValue">The new value of the property.</param>
-        public PCObjectEventArgs(string propertyName, object oldValue, object newValue)
+        public PcObjectEventArgs(string propertyName, object oldValue, object newValue)
             : base(propertyName)
         {
             OldValue = oldValue;
             NewValue = newValue;
         }
 
-        public PCObjectEventArgs(string propertyName, object newValue)
+        public PcObjectEventArgs(string propertyName, object newValue)
             : base(propertyName)
         {
             OldValueIsUndefined = true;
             NewValue = newValue;
         }
 
-        public PCObjectEventArgs(string propertyName, object oldValue, bool newValueIsUndefined)
+        public PcObjectEventArgs(string propertyName, object oldValue, bool newValueIsUndefined)
             : base(propertyName)
         {
             OldValue = oldValue;

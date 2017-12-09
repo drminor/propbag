@@ -16,7 +16,7 @@ namespace DRM.TypeSafePropertyBag
     using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
     using System.Collections.Generic;
 
-    public class BindingSubscription<T> : AbstractSubscripton<T>, IBindingSubscription<T>, IEquatable<BindingSubscription<T>>, IEquatable<ISubscriptionGen>
+    public class BindingSubscription<T> : AbstractSubscripton<T>, IBindingSubscription<T>, IEquatable<BindingSubscription<T>>, IEquatable<ISubscription>, IDisposable
     {
         #region IBindingSubscription<T> Implementation
 
@@ -33,19 +33,16 @@ namespace DRM.TypeSafePropertyBag
 
         #region ISubscription Implementation
 
-        new public ExKeyT SourcePropRef => null;
+        new public object Target => null;
 
-        new public EventHandler<PCGenEventArgs> GenHandler => null;
-        new public EventHandler<PCObjectEventArgs> ObjHandler => null;
+        new public EventHandler<PcGenEventArgs> GenHandler => null;
         new public EventHandler<PropertyChangedEventArgs> StandardHandler => null;
 
+        new public Delegate HandlerProxy => null;
         new public Action<object, object> GenDoWhenChanged => null;
         new public Action Action => null;
 
-        new public object Target => null;
-        new public MethodInfo Method => null;
-
-        new public object LocalBinderRefProxy => (object)LocalBinder;
+        new public object LocalBinderAsObject => (object)LocalBinder;
 
         #endregion
 
@@ -53,15 +50,19 @@ namespace DRM.TypeSafePropertyBag
 
         public BindingSubscription(IBindingSubscriptionKey<T> sKey, PSAccessServiceType propStoreAccessService)
         {
-            TargetPropRef = sKey.TargetPropRef;
+            OwnerPropId = sKey.OwnerPropId;
             BindingInfo = sKey.BindingInfo;
 
             SubscriptionKind = sKey.SubscriptionKind;
             SubscriptionPriorityGroup = sKey.SubscriptionPriorityGroup;
-            SubscriptionTargetKind = sKey.SubscriptionTargetKind;
+            //SubscriptionTargetKind = sKey.SubscriptionTargetKind;
 
-            LocalBinder = new LocalBinder<T>(propStoreAccessService, TargetPropRef, sKey.BindingInfo);
+            LocalBinder = new LocalBinder<T>(propStoreAccessService, OwnerPropId, sKey.BindingInfo);
         }
+
+        #endregion
+
+        #region IEquatable Support and Object Overrides
 
         public override bool Equals(object obj)
         {
@@ -78,9 +79,9 @@ namespace DRM.TypeSafePropertyBag
             return LocalBinder.GetHashCode();
         }
 
-        public bool Equals(ISubscriptionGen other)
+        public bool Equals(ISubscription other)
         {
-            return other != null && object.ReferenceEquals(LocalBinder, other.LocalBinderRefProxy);
+            return other != null && object.ReferenceEquals(LocalBinder, other.LocalBinderAsObject);
         }
 
         public static bool operator ==(BindingSubscription<T> subscription1, BindingSubscription<T> subscription2)
@@ -94,5 +95,44 @@ namespace DRM.TypeSafePropertyBag
         }
 
         #endregion
+
+        #region IDisposable Support
+
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects).
+                    LocalBinder.Dispose();
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        // ~Temp() {
+        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        //   Dispose(false);
+        // }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            // GC.SuppressFinalize(this);
+        }
+
+        #endregion
+
     }
 }

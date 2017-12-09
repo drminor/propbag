@@ -5,23 +5,23 @@ using System.Linq;
 
 namespace DRM.TypeSafePropertyBag
 {
-    public class SubscriberCollection : IEnumerable<ISubscriptionGen>
+    public class SubscriberCollection : IEnumerable<ISubscription>
     {
         private readonly object _sync;
-        private readonly List<ISubscriptionGen> _subs;
+        private readonly List<ISubscription> _subs;
         private int _serial;
 
         public SubscriberCollection()
         {
             _sync = new object();
-            _subs = new List<ISubscriptionGen>();
+            _subs = new List<ISubscription>();
             _serial = 0;
         }
 
-        public SubscriberCollection(IEnumerable<ISubscriptionGen> subs)
+        public SubscriberCollection(IEnumerable<ISubscription> subs)
         {
             _sync = new object();
-            _subs = new List<ISubscriptionGen>(subs);
+            _subs = new List<ISubscription>(subs);
             _serial = 0;
         }
 
@@ -36,7 +36,7 @@ namespace DRM.TypeSafePropertyBag
             totalCount = 0;
             lock(_sync)
             {
-                foreach(ISubscriptionGen x in _subs)
+                foreach(ISubscription x in _subs)
                 {
                     //x.
                     totalCount++;
@@ -45,14 +45,14 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        public ISubscriptionGen GetOrAdd(ISubscriptionKeyGen request, Func<ISubscriptionKeyGen, ISubscriptionGen> factory)
+        public ISubscription GetOrAdd(ISubscriptionKeyGen request, Func<ISubscriptionKeyGen, ISubscription> factory)
         {
-            ISubscriptionGen subscription;
+            ISubscription subscription;
             lock (_sync)
             {
                 if (null != (subscription = _subs.FirstOrDefault(x => SubscriptionIsForRequest(x, request))))
                 {
-                    System.Diagnostics.Debug.WriteLine($"The subscription for {request.SourcePropRef} has aleady been created.");
+                    System.Diagnostics.Debug.WriteLine($"The subscription for {request.OwnerPropId} has aleady been created.");
                     return subscription;
                 }
                 else
@@ -64,7 +64,7 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        public bool TryAddSubscription(ISubscriptionGen subscription)
+        public bool TryAddSubscription(ISubscription subscription)
         {
             lock (_sync)
             {
@@ -83,7 +83,7 @@ namespace DRM.TypeSafePropertyBag
         // Keep items of the same target group together and 
         // makes sure that all items in a lower numbered target group come before items in a higher numbered group.
         // Adds new items at the 'end' of it's target group.
-        private ISubscriptionGen AddSubscription(ISubscriptionGen s)
+        private ISubscription AddSubscription(ISubscription s)
         {
             SubscriptionPriorityGroup spg = s.SubscriptionPriorityGroup;
 
@@ -119,7 +119,7 @@ namespace DRM.TypeSafePropertyBag
             return s;
         }
 
-        public bool TryRemoveSubscription(ISubscriptionGen subscription)
+        public bool TryRemoveSubscription(ISubscription subscription)
         {
             lock (_sync)
             {
@@ -138,7 +138,7 @@ namespace DRM.TypeSafePropertyBag
 
         public bool TryRemoveSubscription(ISubscriptionKeyGen request)
         {
-            ISubscriptionGen subscription;
+            ISubscription subscription;
             lock (_sync)
             {
                 if(null != (subscription = _subs.FirstOrDefault(x => SubscriptionIsForRequest(x, request))))
@@ -149,13 +149,13 @@ namespace DRM.TypeSafePropertyBag
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine($"Could not find the subscription for {request.SourcePropRef} when trying to remove it.");
+                    System.Diagnostics.Debug.WriteLine($"Could not find the subscription for {request.OwnerPropId} when trying to remove it.");
                     return false;
                 }
             }
         }
 
-        public bool ContainsSubscription(ISubscriptionGen subscription)
+        public bool ContainsSubscription(ISubscription subscription)
         {
             bool result;
 
@@ -165,7 +165,7 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        public bool TryGetSubscription(ISubscriptionKeyGen request, out ISubscriptionGen subscription)
+        public bool TryGetSubscription(ISubscriptionKeyGen request, out ISubscription subscription)
         {
             lock (_sync)
             {
@@ -176,16 +176,16 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        private bool SubscriptionIsForRequest(ISubscriptionGen subscription, ISubscriptionKeyGen subscriptionRequest)
+        private bool SubscriptionIsForRequest(ISubscription subscription, ISubscriptionKeyGen subscriptionRequest)
         {
-            bool t1 = subscription.SourcePropRef.Equals(subscriptionRequest.SourcePropRef);
+            bool t1 = subscription.OwnerPropId.Equals(subscriptionRequest.OwnerPropId);
             bool t2 = subscription.Target == subscriptionRequest.Target;
-            bool t3 = subscription.Method == subscriptionRequest.Method;
+            bool t3 = subscription.MethodName == subscriptionRequest.Method.Name;
 
             bool result =
-                subscription.SourcePropRef.Equals(subscriptionRequest.SourcePropRef) &&
+                subscription.OwnerPropId.Equals(subscriptionRequest.OwnerPropId) &&
                 subscription.Target == subscriptionRequest.Target &&
-                subscription.Method == subscriptionRequest.Method;
+                subscription.MethodName == subscriptionRequest.Method.Name;
 
             return result;
         }
@@ -201,7 +201,7 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        public IEnumerator<ISubscriptionGen> GetEnumerator()
+        public IEnumerator<ISubscription> GetEnumerator()
         {
             return new SCEnumerator(this);
         }
@@ -211,7 +211,7 @@ namespace DRM.TypeSafePropertyBag
             return GetEnumerator();
         }
 
-        public class SCEnumerator : IEnumerator<ISubscriptionGen>
+        public class SCEnumerator : IEnumerator<ISubscription>
         {
             SubscriberCollection _sc;
             int ptr;
@@ -223,7 +223,7 @@ namespace DRM.TypeSafePropertyBag
                 ptr = -1;
             }
 
-            public ISubscriptionGen Current
+            public ISubscription Current
             {
                 get
                 {
@@ -274,13 +274,13 @@ namespace DRM.TypeSafePropertyBag
             #endregion
         }
 
-        public class SCEnumerator_OLD : IEnumerator<ISubscriptionGen>
+        public class SCEnumerator_OLD : IEnumerator<ISubscription>
         {
             SubscriberCollection _sc;
             int ptr;
 
             int serial;
-            List<ISubscriptionGen> _processed;
+            List<ISubscription> _processed;
 
             public SCEnumerator_OLD(SubscriberCollection sc)
             {
@@ -288,7 +288,7 @@ namespace DRM.TypeSafePropertyBag
                 ptr = -1;
             }
 
-            public ISubscriptionGen Current
+            public ISubscription Current
             {
                 get
                 {
@@ -304,7 +304,7 @@ namespace DRM.TypeSafePropertyBag
 
                         if (ptr < _sc._subs.Count)
                         {
-                            ISubscriptionGen result = _sc._subs[ptr];
+                            ISubscription result = _sc._subs[ptr];
                             if (!_processed.Contains(result))
                             {
                                 _processed.Add(result);
@@ -330,7 +330,7 @@ namespace DRM.TypeSafePropertyBag
                         if (_sc._subs.Count > 0)
                         {
                             serial = _sc._serial;
-                            _processed = new List<ISubscriptionGen>();
+                            _processed = new List<ISubscription>();
                             ptr = 0;
                         }
                         else

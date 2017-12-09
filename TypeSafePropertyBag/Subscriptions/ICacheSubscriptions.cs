@@ -23,13 +23,13 @@ namespace DRM.TypeSafePropertyBag
     /// <typeparam name="L2T">The type used to store PropIds.</typeparam>
     public interface ICacheSubscriptions<L2T>
     {
-        ISubscriptionGen AddSubscription(ISubscriptionKeyGen subscriptionRequest, out bool wasAdded);
+        ISubscription AddSubscription(ISubscriptionKeyGen subscriptionRequest, out bool wasAdded);
         bool RemoveSubscription(ISubscriptionKeyGen subscriptionRequest);
 
-        IEnumerable<ISubscriptionGen> GetSubscriptions(IPropBag host, L2T propId);
+        IEnumerable<ISubscription> GetSubscriptions(IPropBag host, L2T propId);
 
         //SubscriberCollection GetSubscriptions(ObjectIdType objectId, PropIdType propId);
         bool TryGetSubscriptions(ExKeyT exKey, out SubscriberCollection subscriberCollection);
-        bool TryGetSubscriptions(ExKeyT exKey, out IEnumerable<ISubscriptionGen> subscriberCollection);
+        bool TryGetSubscriptions(ExKeyT exKey, out IEnumerable<ISubscription> subscriberCollection);
     }
 }

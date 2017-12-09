@@ -86,8 +86,6 @@ namespace PropBagLib.Tests.AutoMapperSupport
         {
             if(_autoMapperProvider_V1 == null)
             {
-                //IPropModelProvider propModelProvider = PropModelProvider_V1;
-
                 IPropFactory propFactory = PropFactory_V1;
                 _autoMapperProvider_V1 = new AutoMapperHelpers().InitializeAutoMappers(propModelProvider: null);
             }

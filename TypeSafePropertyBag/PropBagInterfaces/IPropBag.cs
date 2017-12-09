@@ -66,11 +66,11 @@ namespace DRM.TypeSafePropertyBag
         bool SubscribeToPropChanged<T>(EventHandler<PCTypedEventArgs<T>> eventHandler, string propertyName);
         bool UnSubscribeToPropChanged<T>(EventHandler<PCTypedEventArgs<T>> eventHandler, string propertyName);
 
-        bool SubscribeToPropChanged(EventHandler<PCGenEventArgs> eventHandler, string propertyName, Type propertyType);
-        bool UnSubscribeToPropChanged(EventHandler<PCGenEventArgs> eventHandler, string propertyName, Type propertyType);
+        bool SubscribeToPropChanged(EventHandler<PcGenEventArgs> eventHandler, string propertyName, Type propertyType);
+        bool UnSubscribeToPropChanged(EventHandler<PcGenEventArgs> eventHandler, string propertyName, Type propertyType);
 
-        bool SubscribeToPropChanged(EventHandler<PCObjectEventArgs> eventHandler, string propertyName);
-        bool UnSubscribeToPropChanged(EventHandler<PCObjectEventArgs> eventHandler, string propertyName);
+        bool SubscribeToPropChanged(EventHandler<PcObjectEventArgs> eventHandler, string propertyName);
+        bool UnSubscribeToPropChanged(EventHandler<PcObjectEventArgs> eventHandler, string propertyName);
 
         bool RegisterBinding<T>(string nameOfPropertyToUpdate, string pathToSource);
         bool UnregisterBinding<T>(string nameOfPropertyToUpdate, string pathToSource);
