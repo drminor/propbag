@@ -92,6 +92,7 @@ namespace DRM.PropBag.AutoMapperSupport
             return ( ((IPropBagMapperKey<TSource, TDestination>)this).Equals(other) );
         }
 
+        // TODO: Can we do better than using the Default EqualityComparer?
         public static bool operator ==(PropBagMapperKey<TSource, TDestination> key1, PropBagMapperKey<TSource, TDestination> key2)
         {
             return EqualityComparer<PropBagMapperKey<TSource, TDestination>>.Default.Equals(key1, key2);
