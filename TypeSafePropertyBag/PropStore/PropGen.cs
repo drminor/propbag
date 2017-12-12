@@ -19,9 +19,7 @@ namespace DRM.TypeSafePropertyBag
         #region Public PropGen Properties
 
         public PropIdType PropId { get; }
-
         public IProp TypedProp { get; private set; }
-
         public bool IsEmpty => _cKey.isEmpty;
 
         #endregion

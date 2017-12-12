@@ -20,6 +20,16 @@ namespace DRM.PropBag.ControlModel
             OnPropertyChanged(propertyName);
         }
 
+        protected void SetIfDifferentRefEqu<T>(ref T oldVal, T newVal, [CallerMemberName]string propertyName = null)
+        {
+            if(!ReferenceEquals(oldVal, newVal))
+            {
+                OnPropertyChanging(propertyName);
+                oldVal = newVal;
+                OnPropertyChanged(propertyName);
+            }
+        }
+
         protected bool SetIfDifferent<T>(ref T oldVal, T newVal, [CallerMemberName]string propertyName = null) where T : IEquatable<T>
         {
             if ((oldVal == null && newVal != null) || (oldVal != null && !oldVal.Equals(newVal)))

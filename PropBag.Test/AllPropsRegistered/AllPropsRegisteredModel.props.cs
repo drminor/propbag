@@ -19,13 +19,13 @@ namespace PropBagLib.Tests
 	        AddProp<object>("PropObject", comparer:null);
 		 
 	        AddProp<string>("PropString", comparer:null);
-		    //SubscribeToPropChanged<string>(GetDelegate<string>("DoWhenStringChanged"), "PropString"); 
+		    SubscribeToPropChanged<string>(GetDelegate<string>("DoWhenStringChanged"), "PropString"); 
 
 	        AddPropNoValue<string>("PropStringCallDoAfter", comparer:EqualityComparer<string>.Default.Equals);
-		    //SubscribeToPropChanged<string>(GetDelegate<string>("DoWhenStringChanged"), "PropStringCallDoAfter"); 
+		    SubscribeToPropChanged<string>(GetDelegate<string>("DoWhenStringChanged"), "PropStringCallDoAfter"); 
 
 	        AddPropObjComp<string>("PropStringUseRefComp", extraInfo:null);
-		    //<string>(GetDelegate<string>("DoWhenStringChanged"), "PropStringUseRefComp");
+            SubscribeToPropChanged<string>(GetDelegate<string>("DoWhenStringChanged"), "PropStringUseRefComp");
             
 	        AddProp<bool>("PropBool", comparer:null);
 		 
@@ -38,10 +38,10 @@ namespace PropBagLib.Tests
 	        AddProp<Lazy<int>>("PropLazyInt", comparer:null);
 		 
 	        AddProp<Nullable<int>>("PropNullableInt", null, null, initialValue:-1);
-		    //SubscribeToPropChanged<Nullable<int>>(GetDelegate<Nullable<int>>("DoWhenNullIntChanged"), "PropNullableInt");
+		    SubscribeToPropChanged<Nullable<int>>(GetDelegate<Nullable<int>>("DoWhenNullIntChanged"), "PropNullableInt");
             
 	        AddProp<ICollection<int>>("PropICollectionInt", comparer:null);
-		    //SubscribeToPropChanged<ICollection<int>>(GetDelegate<ICollection<int>>("DoWhenICollectionIntChanged"), "PropICollectionInt"); 
+		    SubscribeToPropChanged<ICollection<int>>(GetDelegate<ICollection<int>>("DoWhenICollectionIntChanged"), "PropICollectionInt"); 
 		}
 
 	#region Property Declarations
@@ -182,7 +182,7 @@ namespace PropBagLib.Tests
 	
 	#region PropetyChangedWithTVals Event Declarations
 		  
-			public event EventHandler<PCTypedEventArgs<object>> PropObjectChanged
+			public event EventHandler<PcTypedEventArgs<object>> PropObjectChanged
 			{
 				add
 				{
@@ -194,7 +194,7 @@ namespace PropBagLib.Tests
 				}
 			}
 	  
-			public event EventHandler<PCTypedEventArgs<string>> PropStringChanged
+			public event EventHandler<PcTypedEventArgs<string>> PropStringChanged
 			{
 				add
 				{
@@ -206,7 +206,7 @@ namespace PropBagLib.Tests
 				}
 			}
 	  
-			public event EventHandler<PCTypedEventArgs<string>> PropStringCallDoAfterChanged
+			public event EventHandler<PcTypedEventArgs<string>> PropStringCallDoAfterChanged
 			{
 				add
 				{
@@ -218,7 +218,7 @@ namespace PropBagLib.Tests
 				}
 			}
 	  
-			public event EventHandler<PCTypedEventArgs<string>> PropStringUseRefCompChanged
+			public event EventHandler<PcTypedEventArgs<string>> PropStringUseRefCompChanged
 			{
 				add
 				{
@@ -230,7 +230,7 @@ namespace PropBagLib.Tests
 				}
 			}
 	  
-			public event EventHandler<PCTypedEventArgs<bool>> PropBoolChanged
+			public event EventHandler<PcTypedEventArgs<bool>> PropBoolChanged
 			{
 				add
 				{
@@ -242,7 +242,7 @@ namespace PropBagLib.Tests
 				}
 			}
 	  
-			public event EventHandler<PCTypedEventArgs<int>> PropIntChanged
+			public event EventHandler<PcTypedEventArgs<int>> PropIntChanged
 			{
 				add
 				{
@@ -254,7 +254,7 @@ namespace PropBagLib.Tests
 				}
 			}
 	  
-			public event EventHandler<PCTypedEventArgs<TimeSpan>> PropTimeSpanChanged
+			public event EventHandler<PcTypedEventArgs<TimeSpan>> PropTimeSpanChanged
 			{
 				add
 				{
@@ -266,7 +266,7 @@ namespace PropBagLib.Tests
 				}
 			}
 	  
-			public event EventHandler<PCTypedEventArgs<Uri>> PropUriChanged
+			public event EventHandler<PcTypedEventArgs<Uri>> PropUriChanged
 			{
 				add
 				{
@@ -278,7 +278,7 @@ namespace PropBagLib.Tests
 				}
 			}
 	  
-			public event EventHandler<PCTypedEventArgs<Lazy<int>>> PropLazyIntChanged
+			public event EventHandler<PcTypedEventArgs<Lazy<int>>> PropLazyIntChanged
 			{
 				add
 				{
@@ -290,7 +290,7 @@ namespace PropBagLib.Tests
 				}
 			}
 	  
-			public event EventHandler<PCTypedEventArgs<Nullable<int>>> PropNullableIntChanged
+			public event EventHandler<PcTypedEventArgs<Nullable<int>>> PropNullableIntChanged
 			{
 				add
 				{
@@ -302,7 +302,7 @@ namespace PropBagLib.Tests
 				}
 			}
 	  
-			public event EventHandler<PCTypedEventArgs<ICollection<int>>> PropICollectionIntChanged
+			public event EventHandler<PcTypedEventArgs<ICollection<int>>> PropICollectionIntChanged
 			{
 				add
 				{
@@ -322,14 +322,14 @@ namespace PropBagLib.Tests
 		/// </summary>
 		/// <param name="methodName">Some public or non-public instance method in this class.</param>
 		/// <returns>The name, unchanged, if the method exists, otherwise null.</returns>
-		EventHandler<PCTypedEventArgs<T>> GetDelegate<T>(string methodName)
+		EventHandler<PcTypedEventArgs<T>> GetDelegate<T>(string methodName)
 		{
 		    Type pp = this.GetType();
 		    MethodInfo mi = pp.GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 		
 		    if (mi == null) return null;
 		
-		    EventHandler<PCTypedEventArgs<T>> result = (EventHandler<PCTypedEventArgs<T>>)mi.CreateDelegate(typeof(EventHandler<PCTypedEventArgs<T>>), this);
+		    EventHandler<PcTypedEventArgs<T>> result = (EventHandler<PcTypedEventArgs<T>>)mi.CreateDelegate(typeof(EventHandler<PcTypedEventArgs<T>>), this);
 		
 		    return result;
 		}

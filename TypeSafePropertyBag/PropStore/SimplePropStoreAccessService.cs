@@ -4,6 +4,7 @@ using System.Linq;
 
 using DRM.TypeSafePropertyBag.Fundamentals;
 using System.Collections.Concurrent;
+using System.Reflection;
 
 namespace DRM.TypeSafePropertyBag
 {
@@ -34,6 +35,7 @@ namespace DRM.TypeSafePropertyBag
         readonly StoreNodeBag _ourNode;
 
         PSAccessServiceProviderType _propStoreAccessServiceProvider;
+        readonly IProvideHandlerDispatchDelegateCaches _handlerDispatchDelegateCacheProvider;
 
         // Subscription Management
         const int OBJECT_INDEX_CONCURRENCY_LEVEL = 1; // Typical number of threads simultaneously accessing the ObjectIndexes.
@@ -51,11 +53,13 @@ namespace DRM.TypeSafePropertyBag
             (
             StoreNodeBag ourNode,
             L2KeyManType level2KeyManager,
-            PSAccessServiceProviderType propStoreAccessServiceProvider
+            PSAccessServiceProviderType propStoreAccessServiceProvider,
+            IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider
             )
         {
             _ourNode = ourNode;
             _propStoreAccessServiceProvider = propStoreAccessServiceProvider;
+            _handlerDispatchDelegateCacheProvider = handlerDispatchDelegateCacheProvider;
 
             if(!(propStoreAccessServiceProvider is PSCloneServiceType))
             {
@@ -116,33 +120,140 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        public bool TryAdd(IPropBag propBag, PropIdType propId, PropNameType propertyName, IProp genericTypedProp, out IPropData propData)
+        public bool TryAdd(IPropBag propBag, PropIdType propId, IProp genericTypedProp, out IPropData propData)
         {
-            ExKeyT propertyKey = GetCompKey(propBag, propId);
-            propData = new PropGen(propertyKey, genericTypedProp);
-            IPropDataInternal int_PropData = (IPropDataInternal)propData;
+            StoreNodeProp newNode = TryAddFirstPart(propBag, propId, genericTypedProp);
+            propData = newNode.Int_PropData;
+            return true;
+        }
 
-            StoreNodeProp propStoreNode = new StoreNodeProp(propertyKey, int_PropData, _ourNode);
-            bool result = true;
+        //public bool TryAdd(IPropBag propBag, uint propId, IProp genericTypedProp, object target, MethodInfo method, SubscriptionKind subscriptionKind, SubscriptionPriorityGroup priorityGroup, out IPropData propData)
+        //{
+        //    StoreNodeProp newNode = TryAddFirstPart(propBag, propId, genericTypedProp);
+        //    propData = newNode.Int_PropData;
 
-            if (int_PropData.IsPropBag)
+        //    bool result;
+        //    if(method != null)
+        //    {
+        //        result = RegisterHandler(propBag, propId, target, method, subscriptionKind, priorityGroup, keepRef: false);
+        //    }
+        //    else
+        //    {
+        //        result = true;
+        //    }
+
+        //    TryAddSecondPart((IPropDataInternal)propData, newNode);
+
+        //    return result;
+        //}
+
+        public bool TryAdd<PropT>(IPropBag propBag, PropIdType propId, IProp genericTypedProp,
+            EventHandler<PcTypedEventArgs<PropT>> eventHandler, SubscriptionPriorityGroup priorityGroup, out IPropData propData)
+        {
+            StoreNodeProp newNode = TryAddFirstPart(propBag, propId, genericTypedProp);
+            propData = newNode.Int_PropData;
+
+            bool result;
+            if (eventHandler != null)
+            {
+                result = RegisterHandler<PropT>(newNode.CompKey, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
+            }
+            else
+            {
+                result = true;
+            }
+
+            TryAddSecondPart((IPropDataInternal)propData, newNode);
+
+            return result;
+        }
+
+        //object target, MethodInfo method, SubscriptionKind subscriptionKind, SubscriptionPriorityGroup priorityGroup
+
+        public bool TryAdd(IPropBag propBag, PropIdType propId, IProp genericTypedProp,
+            object target, MethodInfo method, SubscriptionKind subscriptionKind, SubscriptionPriorityGroup priorityGroup, out IPropData propData)
+        {
+            StoreNodeProp newNode = TryAddFirstPart(propBag, propId, genericTypedProp);
+            propData = newNode.Int_PropData;
+
+            bool result;
+            if (target != null)
+            {
+                ISubscriptionKeyGen subscriptionRequest = 
+                    new SubscriptionKeyGen(newNode.CompKey, target, method, subscriptionKind, priorityGroup, keepRef: false, subscriptionFactory: null);
+
+                ISubscription newSubscription = AddSubscription(subscriptionRequest, out bool wasAdded);
+
+                result = wasAdded;
+            }
+            else
+            {
+                result = true;
+            }
+
+            TryAddSecondPart((IPropDataInternal)propData, newNode);
+
+            return result;
+        }
+
+
+        public bool TryAdd(IPropBag propBag, PropIdType propId, IProp genericTypedProp,
+            EventHandler<PcGenEventArgs> eventHandler, SubscriptionPriorityGroup priorityGroup, out IPropData propData)
+        {
+            //ExKeyT propertyKey = GetCompKey(propBag, propId);
+            //propData = new PropGen(propertyKey, genericTypedProp);
+            //IPropDataInternal int_PropData = (IPropDataInternal)propData;
+
+            //StoreNodeProp propStoreNode = new StoreNodeProp(propertyKey, int_PropData, _ourNode);
+
+            StoreNodeProp newNode = TryAddFirstPart(propBag, propId, genericTypedProp);
+            propData = newNode.Int_PropData;
+
+            bool result;
+            if(eventHandler != null)
+            {
+                result = RegisterHandler(newNode.CompKey, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
+            }
+            else
+            {
+                result = true;
+            }
+
+            TryAddSecondPart((IPropDataInternal)propData, newNode);
+
+            return result;
+        }
+
+        private void TryAddSecondPart(IPropDataInternal int_propData, StoreNodeProp propStoreNode)
+        {
+            if (int_propData.IsPropBag)
             {
                 // If the new property is of a type that implements IPropBag,
                 // attempt to get a reference to the StoreAccessor of that IPropBag object,
                 // and from that StoreAccessor, the object id of the PropBag.
                 // Use the PropBag's ObjectId to set the ChildObjectId of this new property.
 
-                object guest = int_PropData?.TypedProp?.TypedValueAsObject; 
-                if(guest != null)
+                object guest = int_propData?.TypedProp?.TypedValueAsObject;
+                if (guest != null)
                 {
                     StoreNodeBag guestPropBagNode = GetGuestObjectNodeFromPropItemVal((IPropBag)guest);
                     guestPropBagNode.Parent = propStoreNode;
                 }
 
                 // Subscribe to changes to this PropData's Value.
-                BeginWatchingParent(propertyKey);
+                BeginWatchingParent(propStoreNode.CompKey);
             }
-            return result;
+        }
+
+        private StoreNodeProp TryAddFirstPart(IPropBag propBag, PropIdType propId, IProp genericTypedProp)
+        {
+            ExKeyT propertyKey = GetCompKey(propBag, propId);
+            IPropData propData = new PropGen(propertyKey, genericTypedProp);
+            IPropDataInternal int_PropData = (IPropDataInternal)propData;
+
+            StoreNodeProp propStoreNode = new StoreNodeProp(propertyKey, int_PropData, _ourNode);
+
+            return propStoreNode;
         }
 
         public bool TryRemove(IPropBag propBag, PropIdType propId, out IPropData propData)
@@ -246,21 +357,29 @@ namespace DRM.TypeSafePropertyBag
         #region IRegisterSubscriptions Implementation
 
         public bool RegisterHandler<T>(IPropBag propBag, PropIdType propId, 
-            EventHandler<PCTypedEventArgs<T>> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef)
+            EventHandler<PcTypedEventArgs<T>> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef)
         {
             ExKeyT exKey = GetExKey(propBag, propId);
 
-            TryGetSubscriptions(exKey, out IEnumerable<ISubscription> sc);
-            ISubscriptionKeyGen subscriptionRequest = new SubscriptionKey<T>(exKey, eventHandler, priorityGroup, keepRef);
+            //TryGetSubscriptions(exKey, out IEnumerable<ISubscription> sc);
 
+            ISubscriptionKey<T> subscriptionRequest = new SubscriptionKey<T>(exKey, eventHandler, priorityGroup, keepRef);
             ISubscription newSubscription = AddSubscription(subscriptionRequest, out bool wasAdded);
 
-            TryGetSubscriptions(exKey, out IEnumerable<ISubscription> sc2);
+            //TryGetSubscriptions(exKey, out IEnumerable<ISubscription> sc2);
 
             return wasAdded;
         }
 
-        public bool UnRegisterHandler<T>(IPropBag propBag, PropIdType propId, EventHandler<PCTypedEventArgs<T>> eventHandler)
+        private bool RegisterHandler<T>(ExKeyT propertyId, EventHandler<PcTypedEventArgs<T>> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef)
+        {
+            ISubscriptionKeyGen subscriptionRequest = new SubscriptionKey<T>(propertyId, eventHandler, priorityGroup, keepRef);
+            ISubscription newSubscription = AddSubscription(subscriptionRequest, out bool wasAdded);
+            return wasAdded;
+        }
+
+        public bool UnRegisterHandler<T>(IPropBag propBag, PropIdType propId,
+            EventHandler<PcTypedEventArgs<T>> eventHandler)
         {
             ExKeyT exKey = GetExKey(propBag, propId);
 
@@ -273,9 +392,14 @@ namespace DRM.TypeSafePropertyBag
         public bool RegisterHandler(IPropBag propBag, uint propId, 
             EventHandler<PcGenEventArgs> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef)
         {
-            ExKeyT exKey = GetExKey(propBag, propId);
-            ISubscriptionKeyGen subscriptionRequest = new SubscriptionKeyGen(exKey, eventHandler, priorityGroup, keepRef);
+            ExKeyT propertyId = GetExKey(propBag, propId);
+            bool result = RegisterHandler(propertyId, eventHandler, priorityGroup, keepRef);
+            return result;
+        }
 
+        private bool RegisterHandler(ExKeyT propertyId, EventHandler<PcGenEventArgs> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef)
+        {
+            ISubscriptionKeyGen subscriptionRequest = new SubscriptionKeyGen(propertyId, eventHandler, priorityGroup, keepRef);
             ISubscription newSubscription = AddSubscription(subscriptionRequest, out bool wasAdded);
             return wasAdded;
         }
@@ -308,6 +432,24 @@ namespace DRM.TypeSafePropertyBag
             return wasRemoved;
         }
 
+        public bool RegisterHandler(IPropBag propBag, uint propId, object target, MethodInfo method, SubscriptionKind subscriptionKind, SubscriptionPriorityGroup priorityGroup, bool keepRef)
+        {
+            ExKeyT exKey = GetExKey(propBag, propId);
+            ISubscriptionKeyGen subscriptionRequest = new SubscriptionKeyGen(exKey, target, method, subscriptionKind, priorityGroup, keepRef, subscriptionFactory: null);
+
+            ISubscription newSubscription = AddSubscription(subscriptionRequest, out bool wasAdded);
+            return wasAdded;
+        }
+
+        public bool UnregisterHandler(IPropBag propBag, uint propId, object target, MethodInfo method, SubscriptionKind subscriptionKind, SubscriptionPriorityGroup priorityGroup, bool keepRef)
+        {
+            ExKeyT exKey = GetExKey(propBag, propId);
+            ISubscriptionKeyGen subscriptionRequest = new SubscriptionKeyGen(exKey, target, method, subscriptionKind, priorityGroup, keepRef, subscriptionFactory: null);
+
+            bool wasRemoved = RemoveSubscription(subscriptionRequest);
+            return wasRemoved;
+        }
+
         #endregion
 
         #region Subscription Management
@@ -325,7 +467,7 @@ namespace DRM.TypeSafePropertyBag
                 (
                 subscriptionRequest,
                     (
-                    x => subscriptionRequest.CreateSubscription()
+                    x => subscriptionRequest.CreateSubscription(_handlerDispatchDelegateCacheProvider)
                     )
                 );
 
@@ -410,7 +552,12 @@ namespace DRM.TypeSafePropertyBag
         public bool RegisterBinding<T>(IPropBag targetPropBag, PropIdType propId, LocalBindingInfo bindingInfo)
         {
             ExKeyT exKey = GetExKey(targetPropBag, propId);
-            ISubscriptionKeyGen BindingRequest = new BindingSubscriptionKey<T>(exKey, bindingInfo);
+            return RegisterBinding<T>(exKey, bindingInfo);
+        }
+
+        private bool RegisterBinding<T>(ExKeyT propId, LocalBindingInfo bindingInfo)
+        {
+            ISubscriptionKeyGen BindingRequest = new BindingSubscriptionKey<T>(propId, bindingInfo);
             ISubscription newSubscription = AddBinding(BindingRequest, out bool wasAdded);
             return wasAdded;
         }
@@ -418,15 +565,53 @@ namespace DRM.TypeSafePropertyBag
         public bool UnRegisterBinding<T>(IPropBag targetPropBag, PropIdType propId, LocalBindingInfo bindingInfo)
         {
             ExKeyT exKey = GetExKey(targetPropBag, propId);
-            ISubscriptionKeyGen bindingRequest = new BindingSubscriptionKey<T>(exKey, bindingInfo);
-            
+            return UnRegisterBinding<T>(exKey, bindingInfo);
+        }
+
+        public bool UnRegisterBinding<T>(ExKeyT propId, LocalBindingInfo bindingInfo)
+        {
+            ISubscriptionKeyGen bindingRequest = new BindingSubscriptionKey<T>(propId, bindingInfo);
+
             bool result = TryRemoveBinding(bindingRequest, out ISubscription binding);
-            if(binding is IDisposable disable)
+            if (binding is IDisposable disable)
             {
                 disable.Dispose();
             }
             return result;
         }
+
+        //public bool RegisterBinding<T>(IPropBag targetPropBag, PropIdType propId, LocalBindingInfo bindingInfo)
+        //{
+        //    bool result = RegisterBinding(targetPropBag, propId, bindingInfo);
+        //    return result;
+        //}
+
+        //public bool RegisterBinding(IPropBag targetPropBag, PropIdType propId, LocalBindingInfo bindingInfo)
+        //{
+        //    ExKeyT exKey = GetExKey(targetPropBag, propId);
+        //    ISubscriptionKeyGen BindingRequest = new BindingSubscriptionKey<T>(exKey, bindingInfo);
+        //    ISubscription newSubscription = AddBinding(BindingRequest, out bool wasAdded);
+        //    return wasAdded;
+        //}
+
+        //public bool UnRegisterBinding<T>(IPropBag targetPropBag, PropIdType propId, LocalBindingInfo bindingInfo)
+        //{
+        //    bool result = UnRegisterBinding(targetPropBag, propId, bindingInfo);
+        //    return result;
+        //}
+
+        //public bool UnRegisterBinding(IPropBag targetPropBag, PropIdType propId, LocalBindingInfo bindingInfo)
+        //{
+        //    ExKeyT exKey = GetExKey(targetPropBag, propId);
+        //    ISubscriptionKeyGen bindingRequest = new BindingSubscriptionKey<T>(exKey, bindingInfo);
+
+        //    bool result = TryRemoveBinding(bindingRequest, out ISubscription binding);
+        //    if (binding is IDisposable disable)
+        //    {
+        //        disable.Dispose();
+        //    }
+        //    return result;
+        //}
 
         #endregion
 
@@ -741,21 +926,26 @@ namespace DRM.TypeSafePropertyBag
 
         private void ResetAllData()
         {
+            // Remove all handlers from each of our Events.
             int numSubsRemoved = 0;
             foreach (SubscriberCollection sc in _propIndexes)
             {
                 numSubsRemoved += sc.ClearSubscriptions();
             }
 
+            // Clear the contents of our list of Handlers, one for each property.
             _propIndexes.ClearTheListOfSubscriptionPtrs();
 
+            // Dispose of each LocalBinding object.
             foreach (ISubscription binding in _bindings)
             {
                 if (binding is IDisposable disable) disable.Dispose();
             }
 
+            // Remove our reference to each LocalBinding.
             int numBindingsRemoved = _bindings.ClearBindings();
 
+            // Dispose each PropItem.
             foreach (StoreNodeProp prop in _ourNode.Children)
             {
                 prop.Int_PropData.CleanUp(doTypedCleanup: true);
@@ -811,7 +1001,7 @@ namespace DRM.TypeSafePropertyBag
 
         public PSAccessServiceType CloneProps(IPropBag callingPropBag, IPropBag copySource)
         {
-            if(!(copySource is IPropBagInternal ipbi))
+            if(!(copySource is IPropBagInternal int_propBag))
             {
                 throw new InvalidOperationException($"The {nameof(copySource)} does not implement the {nameof(IPropBagInternal)} interface.");
             }
@@ -823,21 +1013,47 @@ namespace DRM.TypeSafePropertyBag
 
             GetAndCheckObjectRef(callingPropBag);
 
-            PSAccessServiceType newStoreAccessor = ((PSCloneServiceType)_propStoreAccessServiceProvider).CloneService(ipbi.ItsStoreAccessor, target, out StoreNodeBag newStoreNode);
-            CopyChildProps(  ((IHaveTheStoreNode)ipbi.ItsStoreAccessor).PropStoreNode, newStoreNode);
+            PSCloneServiceType accessorCloneService = (PSCloneServiceType)_propStoreAccessServiceProvider;
+
+            PSAccessServiceType newStoreAccessor = accessorCloneService.CloneService
+                (
+                    int_propBag,
+                    int_propBag.ItsStoreAccessor,
+                    target,
+                    out StoreNodeBag copySourceStoreNode,
+                    out StoreNodeBag newStoreNode
+                );
+
+            System.Diagnostics.Debug.Assert(
+                condition: newStoreAccessor.Level2KeyManager.PropertyCount == ((IPropBagInternal)copySource).Level2KeyManager.PropertyCount,
+                message: "The PropBag clone operation was not completed: The Level2KeyManager has different contents."
+                );
+
+
+            CopyChildProps(copySourceStoreNode, newStoreNode);
 
             return newStoreAccessor;
         }
 
-        private void CopyChildProps(StoreNodeBag sourceBag, StoreNodeBag newBag)
+        // TODO: What about the subscriptions and bindings that were included in the PropModel that were used to create these PropItems?
+        private void CopyChildProps(StoreNodeBag sourceBag, StoreNodeBag newBagNode)
         {
             foreach (StoreNodeProp childProp in sourceBag.Children)
             {
-                ExKeyT newCKey = new SimpleExKey(newBag.ObjectId, childProp.PropId);
+                ExKeyT newCKey = new SimpleExKey(newBagNode.ObjectId, childProp.PropId);
+
+                // FOR DEBUGGING -- To see how well the PropBag value is cloned.
+                if (childProp.Int_PropData.TypedProp.Type.IsPropBagBased())
+                {
+                    if (childProp.Int_PropData.TypedProp.TypedValueAsObject != null)
+                    {
+                        IPropBagInternal propBagInternal = (IPropBagInternal)childProp.Int_PropData.TypedProp.TypedValueAsObject;
+                    }
+                }
 
                 IPropDataInternal newPropGen = new PropGen(newCKey, (IProp)childProp.Int_PropData.TypedProp.Clone());
 
-                StoreNodeProp newChild = new StoreNodeProp(newCKey, newPropGen, newBag);
+                StoreNodeProp newChild = new StoreNodeProp(newCKey, newPropGen, newBagNode);
             }
         }
 

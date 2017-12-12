@@ -84,7 +84,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <DesignTime>True</DesignTime>
     </None>
-    <Compile Include="PerformanceDb\Class1.cs" />
     <Compile Include="PerformanceDb\DestinationModels.cs" />
     <Compile Include="PerformanceDb\MyModel.cs" />
     <Compile Include="PerformanceDb\ObservableCollTestObject.cs" />

@@ -1,6 +1,5 @@
 ﻿using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
-using System.Reflection;
 
 namespace DRM.TypeSafePropertyBag
 {
@@ -8,7 +7,7 @@ namespace DRM.TypeSafePropertyBag
     {
         #region Constructors
 
-        public Subscription(ISubscriptionKey<T> sKey)
+        internal Subscription(ISubscriptionKey<T> sKey, IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider)
         {
             OwnerPropId = sKey.OwnerPropId;
 
@@ -22,15 +21,19 @@ namespace DRM.TypeSafePropertyBag
                     {
                         Target = new WeakReference(sKey.TypedHandler.Target);
 
-                        TypedHandler = (EventHandler<PCTypedEventArgs<T>>)Delegate.CreateDelegate(typeof(EventHandler<PCTypedEventArgs<T>>), null, sKey.TypedHandler.Method);
-
-                        MethodInfo mi = sKey.GenHandler.Method;
-                        Delegate proxyDelegate = mi.CreateDelegate(); // Uses static extension Method -- TODO: Provide Instance Library.
+                        Delegate proxyDelegate = handlerDispatchDelegateCacheProvider.DelegateProxyCache.GetOrAdd(new MethodSubscriptionKind(sKey.Method, sKey.SubscriptionKind));
                         HandlerProxy = proxyDelegate;
 
+                        Type targetType = sKey.TypedHandler.Target.GetType();
 
-                        MethodName = sKey.TypedHandler.Method.Name;
+                        TypePair tp = new TypePair(targetType, PropertyType);
 
+                        CallPcTypedEventSubscriberDelegate callTheListenerDel =
+                            handlerDispatchDelegateCacheProvider.CallPcTypedEventSubsCache.GetOrAdd(tp);
+
+                        PcTypedHandlerDispatcher = callTheListenerDel;
+
+                        MethodName = HandlerProxy.Method.Name;
                         break;
                     }
 
@@ -71,8 +74,8 @@ namespace DRM.TypeSafePropertyBag
                 if (disposing)
                 {
                     // TODO: dispose managed state (managed objects).
-                    TypedHandler = null;
-                    TypedDoWhenChanged = null;
+                    //TypedHandler = null;
+                    //TypedDoWhenChanged = null;
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.

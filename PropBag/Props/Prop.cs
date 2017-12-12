@@ -191,6 +191,7 @@ namespace DRM.PropBag
         {
             // There's nothing to clean up.
         }
+
     }
 }
          

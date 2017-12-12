@@ -38,22 +38,32 @@ namespace DRM.PropBag
         
         #region Constructor
 
-        public PubPropBag()
-            : base() { }
+        //public PubPropBag()
+        //    : base() { }
 
-        public PubPropBag(PropBagTypeSafetyMode typeSafetyMode)
-            : base(typeSafetyMode) { }
+        //public PubPropBag(PropBagTypeSafetyMode typeSafetyMode)
+        //    : base(typeSafetyMode) { }
 
-        // TODO: remove this constructor.
-        protected PubPropBag(PropBagTypeSafetyMode typeSafetyMode, IPropFactory propFactory)
-            : base(typeSafetyMode, propFactory) { }
+        //// TODO: remove this constructor.
+        //protected PubPropBag(PropBagTypeSafetyMode typeSafetyMode, IPropFactory propFactory)
+        //    : base(typeSafetyMode, propFactory) { }
 
-        public PubPropBag(PropBagTypeSafetyMode typeSafetyMode, IPropFactory propFactory, string fullClassName = null)
-            : base(typeSafetyMode, propFactory, fullClassName) { }
+
 
         public PubPropBag(PropModel pm, IPropFactory propFactory = null, string fullClassName = null)
-            : base(pm, fullClassName, propFactory) { }
+            : base(pm, fullClassName, propFactory)
+        {
+        }
 
+        protected PubPropBag(IPropBag copySource)
+            : base(copySource.TypeSafetyMode, copySource.PropFactory, copySource.FullClassName)
+        {
+        }
+
+        public PubPropBag(PropBagTypeSafetyMode typeSafetyMode, IPropFactory propFactory, string fullClassName = null)
+            : base(typeSafetyMode, propFactory, fullClassName)
+        {
+        }
 
         #endregion
 

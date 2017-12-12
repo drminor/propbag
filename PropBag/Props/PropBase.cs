@@ -12,6 +12,8 @@ using System.Windows;
 
 namespace DRM.PropBag
 {
+    using PropIdType = UInt32;
+
     /// <summary>
     /// A wrapper for an instance of IProp<typeparam name="T"/>.
     /// </summary>
@@ -52,6 +54,9 @@ namespace DRM.PropBag
         public abstract bool SetValueToUndefined();
         public abstract void CleanUpTyped();
         public abstract object Clone();
+
+        public abstract bool RegisterBinding(IPropBagInternal propBag, PropIdType propId, LocalBindingInfo bindingInfo);
+        public abstract bool UnregisterBinding(IPropBagInternal propBag, PropIdType propId, LocalBindingInfo bindingInfo);
 
         #endregion
     }

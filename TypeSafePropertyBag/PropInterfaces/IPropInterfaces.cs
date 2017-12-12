@@ -86,6 +86,10 @@ namespace DRM.TypeSafePropertyBag
         bool SetValueToUndefined();
 
         void CleanUpTyped();
+
+        bool RegisterBinding(IPropBagInternal propBag, PropIdType propId, LocalBindingInfo bindingInfo);
+        bool UnregisterBinding(IPropBagInternal propBag, PropIdType propId, LocalBindingInfo bindingInfo);
+
     }
 
     /// <summary>

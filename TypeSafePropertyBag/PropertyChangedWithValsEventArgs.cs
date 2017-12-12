@@ -10,7 +10,7 @@ namespace DRM.TypeSafePropertyBag
     /// Provides typed value change information for the <see cref="INotifyPropertyChangedWithTVals<typeparamref name="T"/>.PropertyChanged"/> event.
     /// </summary>
     /// <typeparam name="T">The type of the property that changed.</typeparam>
-    public class PCTypedEventArgs<T> : PcGenEventArgs
+    public class PcTypedEventArgs<T> : PcGenEventArgs
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="PCTypedEventArgs<typeparamref name="T"/> class.
@@ -18,22 +18,22 @@ namespace DRM.TypeSafePropertyBag
         /// <param name="propertyName">Name of the property.</param>
         /// <param name="oldValue">The old value of the property.</param>
         /// <param name="newValue">The new value of the property.</param>
-        public PCTypedEventArgs(string propertyName, T oldValue, T newValue)
+        public PcTypedEventArgs(string propertyName, T oldValue, T newValue)
             : base(propertyName, typeof(T), oldValue, newValue)
         {
         }
 
-        public PCTypedEventArgs(string propertyName, T newValue)
+        public PcTypedEventArgs(string propertyName, T newValue)
             : base(propertyName, typeof(T), newValue)
         {
         }
 
-        public PCTypedEventArgs(string propertyName, T newValue, bool newValueIsUndefined)
+        public PcTypedEventArgs(string propertyName, T newValue, bool newValueIsUndefined)
             : base(propertyName, typeof(T), newValue, newValueIsUndefined)
         {
         }
 
-        public PCTypedEventArgs(string propertyName, bool oldValueIsUndefined, bool newValueIsUndefined)
+        public PcTypedEventArgs(string propertyName, bool oldValueIsUndefined, bool newValueIsUndefined)
             : base(propertyName, typeof(T), oldValueIsUndefined, newValueIsUndefined)
         {
         }

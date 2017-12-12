@@ -23,7 +23,7 @@ namespace DRM.TypeSafePropertyBag
 
         #region Subscription<T> implementation
 
-        public EventHandler<PCTypedEventArgs<T>> TypedHandler => null;
+        public EventHandler<PcTypedEventArgs<T>> TypedHandler => null;
         public Action<T, T> TypedDoWhenChanged => null;
 
         #endregion
@@ -37,8 +37,8 @@ namespace DRM.TypeSafePropertyBag
             )
             : base
             (
-                typeof(T),
                 ownerPropId,
+                typeof(T),
                 bindingInfo,
                 SubscriptionKind.LocalBinding,
                 SubscriptionPriorityGroup.First,
@@ -75,14 +75,14 @@ namespace DRM.TypeSafePropertyBag
         public bool Equals(BindingSubscriptionKey<T> other)
         {
             return other != null &&
-                TargetPropRef == other.TargetPropRef
+                OwnerPropId == other.OwnerPropId
                 && BindingInfo == other.BindingInfo;
         }
 
         public override int GetHashCode()
         {
             var hashCode = -748789155;
-            hashCode = hashCode * -1521134295 + TargetPropRef.GetHashCode();
+            hashCode = hashCode * -1521134295 + OwnerPropId.GetHashCode();
             hashCode = hashCode * -1521134295 + BindingInfo.GetHashCode();
             return hashCode;
         }

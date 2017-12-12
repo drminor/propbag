@@ -34,7 +34,7 @@ namespace PropBagLib.Tests
         //        desiredHasStoreValue:true);
         //}
 
-        public void DoWhenStringChanged(object sender, PCTypedEventArgs<string> e)
+        public void DoWhenStringChanged(object sender, PcTypedEventArgs<string> e)
         {
             DoWhenStringChanged_WasCalled = true;
             DoWhenStringPropOldVal = e.OldValue;

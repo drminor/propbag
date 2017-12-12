@@ -27,6 +27,6 @@ namespace DRM.TypeSafePropertyBag
 
     internal interface IProvidePropStoreCloneService<L2T, L2TRaw>
     {
-        IPropStoreAccessService<L2T, L2TRaw> CloneService(IPropStoreAccessService<L2T, L2TRaw> copySource, IPropBagInternal target, out StoreNodeBag newStoreNode);
+        IPropStoreAccessService<L2T, L2TRaw> CloneService(IPropBagInternal sourcePropBag, IPropStoreAccessService<L2T, L2TRaw> sourceAccessService, IPropBagInternal targetPropBag, out StoreNodeBag sourceStoreNode,  out StoreNodeBag newStoreNode);
     }
 }

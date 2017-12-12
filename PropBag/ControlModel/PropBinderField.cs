@@ -11,23 +11,22 @@ namespace DRM.PropBag.ControlModel
     public class PropBinderField : NotifyPropertyChangedBase, IEquatable<PropBinderField>
     {
         #region Private Properties
-        string targetProperty;
+        //string targetProperty;
         string path;
         #endregion
 
         #region Public Properties
 
-        [XmlAttribute("target-property-name")]
-        public string TargetProperty { get { return targetProperty; } set { this.SetIfDifferent<string>(ref targetProperty, value); } }
+        //[XmlAttribute("target-property-name")]
+        //public string TargetProperty { get { return targetProperty; } set { this.SetIfDifferent<string>(ref targetProperty, value); } }
 
         [XmlAttribute("path")]
         public string Path { get { return path; } set { this.SetIfDifferent<string>(ref path, value); } }
 
-        public PropBinderField() : this(null, null) { }
+        public PropBinderField() : this(null) { }
 
-        public PropBinderField(string targetPropertyName, string pathToSource)
+        public PropBinderField(string pathToSource)
         {
-            TargetProperty = targetPropertyName;
             Path = pathToSource;
         }
 
@@ -43,14 +42,14 @@ namespace DRM.PropBag.ControlModel
         public bool Equals(PropBinderField other)
         {
             return other != null &&
-                   TargetProperty == other.TargetProperty &&
+                   //TargetProperty == other.TargetProperty &&
                    Path == other.Path;
         }
 
         public override int GetHashCode()
         {
             var hashCode = -552951153;
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(TargetProperty);
+            //hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(TargetProperty);
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Path);
             return hashCode;
         }

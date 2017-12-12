@@ -8,5 +8,9 @@ namespace DRM.TypeSafePropertyBag
         bool RegisterBinding<T>(IPropBag targetPropBag, L2T propId, LocalBindingInfo bindingInfo);
 
         bool UnRegisterBinding<T>(IPropBag targetPropBag, L2T propId, LocalBindingInfo bindingInfo);
+
+        //bool RegisterBinding(IPropBag targetPropBag, L2T propId, LocalBindingInfo bindingInfo);
+
+        //bool UnRegisterBinding(IPropBag targetPropBag, L2T propId, LocalBindingInfo bindingInfo);
     }
 }

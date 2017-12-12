@@ -12,7 +12,7 @@ namespace DRM.TypeSafePropertyBag
         /// <summary>
         /// Occurs when a property value changes.
         /// </summary>
-        event EventHandler<PCTypedEventArgs<T>> PropertyChangedWithTVals;
+        event EventHandler<PcTypedEventArgs<T>> PropertyChangedWithTVals;
     }
 
     /// <summary>

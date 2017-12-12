@@ -6,6 +6,6 @@ namespace DRM.TypeSafePropertyBag
         Standard,
         StandardKeepRef,
         PropBag,
-        LocalWeakRef // WeakReference<IPropBag>
+        GlobalPropId // I.e., IExplodedKey<CompT, L1T, L2T>
     }
 }

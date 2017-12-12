@@ -1,14 +1,15 @@
 ﻿
 namespace DRM.TypeSafePropertyBag
 {
-    public enum SubscriptionKind
+    public enum SubscriptionKind : int
     {
         TypedHandler, //PCTypedEventArgs<T>
-        GenHandler, //PCGenEventArgs
+        GenHandler, //PCGenEventArgs, same as ObjHandler but also includes PropertyType.
 
-        ObjHandler, //Same as GenHander, but no chance of being cast to a TypedHandler
+        ObjHandler, //PCObjectEventArgs
 
         StandardHandler, // PropertyChangedEventArgs
+        ChangingHandler, // PropertyChangingEventArgs
 
         TypedAction,
         ObjectAction,

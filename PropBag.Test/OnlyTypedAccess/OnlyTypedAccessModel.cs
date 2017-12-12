@@ -34,21 +34,21 @@ namespace PropBagLib.Tests
             set { base[propertyName, key] = value; }
         }
 
-        public void DoWhenStringChanged(object sender, PCTypedEventArgs<string> e)
+        public void DoWhenStringChanged(object sender, PcTypedEventArgs<string> e)
         {
             DoWhenStringChanged_WasCalled = true;
             DoWhenStringPropOldVal = e.OldValue;
             DoWhenStringPropNewVal = e.NewValue;
         }
 
-        public void DoWhenNullIntChanged(object sender, PCTypedEventArgs<Nullable<int>> e)
+        public void DoWhenNullIntChanged(object sender, PcTypedEventArgs<Nullable<int>> e)
         {
             DoWhenStringChanged_WasCalled = true;
             NiOld = e.OldValue;
             NiNew = e.NewValue;
         }
 
-        public void DoWhenICollectionIntChanged(object sender, PCTypedEventArgs<ICollection<int>> e)
+        public void DoWhenICollectionIntChanged(object sender, PcTypedEventArgs<ICollection<int>> e)
         {
             DoWhenStringChanged_WasCalled = true;
             IcOld = e.OldValue;

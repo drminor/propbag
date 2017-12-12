@@ -71,13 +71,13 @@ namespace PropBagLib.Tests
 
         }
 
-        void Mod1_PropIntChanged(object sender, PCTypedEventArgs<int> e)
+        void Mod1_PropIntChanged(object sender, PcTypedEventArgs<int> e)
         {
             varToEnsureWorkIsDone = !varToEnsureWorkIsDone;
             upCntr++;
         }
 
-        void Mod1_PropStringChanged(object sender, PCTypedEventArgs<string> e)
+        void Mod1_PropStringChanged(object sender, PcTypedEventArgs<string> e)
         {
             varToEnsureWorkIsDone = !varToEnsureWorkIsDone;
             upCntr++;

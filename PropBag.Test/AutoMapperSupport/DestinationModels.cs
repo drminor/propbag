@@ -7,12 +7,11 @@ namespace PropBagLib.Tests.AutoMapperSupport
 {
     public partial class DestinationModel3 : PropBag, ICloneable
     {
-
         public DestinationModel3(PropBagTypeSafetyMode typeSafetyMode, IPropFactory propFactory, string fullClassName)
             : base(typeSafetyMode, propFactory, fullClassName)
 		{
             AddProp<Guid>("ProductId", null, null, Guid.NewGuid());
-            AddProp<int>("Amount", null, null, 0);
+            AddProp<int>("Amount", null, null, initialValue: 0);
             AddProp<double>("Size", null, null, 10.1);
             AddProp<MyModel4>("Deep", null, null, null);
         }

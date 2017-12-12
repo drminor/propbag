@@ -7,6 +7,9 @@ using System.Threading;
 
 namespace DRM.PropBag
 {
+    using PropIdType = UInt32;
+    using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
+
     public abstract class PropTypedBase<T> : PropBase, IPropPrivate<T>
     {
         #region Private Members
@@ -58,13 +61,15 @@ namespace DRM.PropBag
             return Comparer(val1, val2);
         }
 
-        //// TODO: See if our value implements IDisposable, and if so, dispose it.
-        //public new void CleanUpTyped()
-        //{
-        //    Comparer = null;
-        //    base.CleanUpTyped();
-        //}
+        public override bool RegisterBinding(IPropBagInternal propBag, PropIdType propId, LocalBindingInfo bindingInfo)
+        {
+            return propBag.RegisterBinding<T>(propId, bindingInfo);
+        }
 
+        public override bool UnregisterBinding(IPropBagInternal propBag, PropIdType propId, LocalBindingInfo bindingInfo)
+        {
+            return propBag.RegisterBinding<T>(propId, bindingInfo);
+        }
         #endregion
     }
 }

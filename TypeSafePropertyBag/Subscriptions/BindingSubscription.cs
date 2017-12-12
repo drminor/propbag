@@ -1,22 +1,11 @@
-﻿using System;
-using System.ComponentModel;
-
-using DRM.TypeSafePropertyBag.LocalBinding;
-using System.Reflection;
+﻿using DRM.TypeSafePropertyBag.LocalBinding;
+using System;
 
 namespace DRM.TypeSafePropertyBag
 {
-    using CompositeKeyType = UInt64;
-    using ObjectIdType = UInt64;
-
-    using PropIdType = UInt32;
-    using PropNameType = String;
-
-    using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
     using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
-    using System.Collections.Generic;
 
-    public class BindingSubscription<T> : AbstractSubscripton<T>, IBindingSubscription<T>, IEquatable<BindingSubscription<T>>, IEquatable<ISubscription>, IDisposable
+    internal class BindingSubscription<T> : AbstractSubscripton<T>, IBindingSubscription<T>, IEquatable<BindingSubscription<T>>, IEquatable<ISubscription>, IDisposable
     {
         #region IBindingSubscription<T> Implementation
 
@@ -26,22 +15,14 @@ namespace DRM.TypeSafePropertyBag
 
         #region ISubscription<T> Implementation
 
-        new public EventHandler<PCTypedEventArgs<T>> TypedHandler => null;
-        new public Action<T, T> TypedDoWhenChanged => null;
+        new CallPcTypedEventSubscriberDelegate PcTypedHandlerDispatcher => throw new NotSupportedException($"The {nameof(BindingSubscription<T>)} does not support dispatching EventHandler<PCTypeEventArgs<T>.");
 
         #endregion
 
         #region ISubscription Implementation
 
         new public object Target => null;
-
-        new public EventHandler<PcGenEventArgs> GenHandler => null;
-        new public EventHandler<PropertyChangedEventArgs> StandardHandler => null;
-
         new public Delegate HandlerProxy => null;
-        new public Action<object, object> GenDoWhenChanged => null;
-        new public Action Action => null;
-
         new public object LocalBinderAsObject => (object)LocalBinder;
 
         #endregion
@@ -133,6 +114,5 @@ namespace DRM.TypeSafePropertyBag
         }
 
         #endregion
-
     }
 }

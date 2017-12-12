@@ -9,7 +9,7 @@ namespace DRM.TypeSafePropertyBag
     /// 
     /// </summary>
     /// <typeparam name="T">The type of the property to which this subscription will subscribe.</typeparam>
-    public interface IBindingSubscription<T> : ISubscription<T>
+    public interface IBindingSubscription<T> : ISubscription
     {
         LocalBinder<T> LocalBinder { get; }
     }
@@ -20,10 +20,7 @@ namespace DRM.TypeSafePropertyBag
     /// <typeparam name="T">The type of the property to which this subscription will subscribe.</typeparam>
     public interface ISubscription<T> : ISubscription
     {
-        EventHandler<PCTypedEventArgs<T>> TypedHandler { get; }
-        Action<T, T> TypedDoWhenChanged { get; }
-
-        CallPcTypedEventSubscriberDelegate<T> TypedHandlerProxy { get; }
+        //CallPcTypedEventSubscriberDelegate PcTypedHandlerDispatcher { get; }
     }
 
     // Identifies a IProp using an identifer unique to the application domain
@@ -43,6 +40,13 @@ namespace DRM.TypeSafePropertyBag
 
         Delegate HandlerProxy { get; }
 
+        CallPcTypedEventSubscriberDelegate PcTypedHandlerDispatcher { get; }
+        CallPcGenEventSubscriberDelegate PcGenHandlerDispatcher { get; }
+        CallPcObjEventSubscriberDelegate PcObjHandlerDispatcher { get; }
+        CallPcStandardEventSubscriberDelegate PcStandardHandlerDispatcher { get; }
+        CallPChangingEventSubscriberDelegate PChangingHandlerDispatcher { get; }
+
+        // TODO: Need to create Dispatch Delegates for these two.
         //Action<object, object> GenDoWhenChanged { get; }
         //Action Action { get; }
 

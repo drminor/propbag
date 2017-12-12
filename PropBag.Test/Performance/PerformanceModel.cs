@@ -92,5 +92,10 @@ namespace PropBagLib.Tests
                 handler(this, new PropertyChangedEventArgs(propertyName));
         }
 
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+
+        }
     }
 }

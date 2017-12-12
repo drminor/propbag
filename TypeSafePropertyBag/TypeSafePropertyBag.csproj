@@ -42,7 +42,11 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Fundamentals\TwoTypesDelegateCache.cs" />
     <Compile Include="Fundamentals\DelegateCache.cs" />
+    <Compile Include="Fundamentals\TypeEqualityComparer.cs" />
+    <Compile Include="Fundamentals\TypeKey.cs" />
+    <Compile Include="Fundamentals\TypePair.cs" />
     <Compile Include="Fundamentals\UniversalTypeConverter.cs" />
     <Compile Include="GenericTree\BaseTreeNode.cs" />
     <Compile Include="GenericTree\IAmANodeInATree.cs" />
@@ -64,9 +68,14 @@
     <Compile Include="PropStore\StoreNodeBag.cs" />
     <Compile Include="PropStore\StoreNodeProp.cs" />
     <Compile Include="PropStore\StoreNodes.cs" />
-    <Compile Include="Subscriptions\EventHandlerProxy.cs" />
+    <Compile Include="Subscriptions\DelegateProxyCache\DelegateProxyCache.cs" />
+    <Compile Include="Subscriptions\HandlerDispatchDelegates.cs" />
+    <Compile Include="Subscriptions\SimpleHandlerDispatchDelegateCacheProvider.cs" />
+    <Compile Include="Subscriptions\HandlerDispatchGenericBridges.cs" />
+    <Compile Include="Subscriptions\IProvideHandlerDispatchDelegateCaches.cs" />
     <Compile Include="Subscriptions\SubscriptionGen.cs" />
     <Compile Include="Fundamentals\MethodInfoExtensions.cs" />
+    <Compile Include="Subscriptions\DelegateProxyCache\MethodSubscriptionKind.cs" />
     <Compile Include="UnUsed\PropValueStateEnum.cs" />
     <Compile Include="SimpleIOC\Container.cs" />
     <Compile Include="SimpleIOC\ContainerException.cs" />
@@ -111,14 +120,14 @@
     <Compile Include="Subscriptions\SubscriberCollection.cs" />
     <Compile Include="Subscriptions\AbstractSubscription.cs" />
     <Compile Include="Subscriptions\BindingSubscription.cs" />
-    <Compile Include="Subscriptions\Subscription.cs" />
+    <Compile Include="Subscriptions\SubscriptionTyped.cs" />
     <Compile Include="UnUsed\GenerateHash.cs" />
     <Compile Include="ObjectIdDictionary\IObjectExIdDictionary.cs" />
     <Compile Include="ObjectIdDictionary\AbstractObjectIdDictionary.cs" />
     <Compile Include="ObjectIdDictionary\SimpleCompKeyMan.cs" />
     <Compile Include="ObjectIdDictionary\SimpleLevel2KeyMan.cs" />
     <Compile Include="ObjectIdDictionary\SimpleObjectIdDictionary.cs" />
-    <Compile Include="UnUsed\PropertyObserver.cs" />
+    <None Include="UnUsed\PropertyObserver.cs" />
     <None Include="CommonGenius.Collections\IOrderedDictionary.cs" />
     <Compile Include="Fundamentals\LockingConcurrentDictionary.cs" />
     <Compile Include="ReadMissingPropPolicyEnum.cs" />
@@ -133,7 +142,7 @@
     <Compile Include="Fundamentals\TypeExtensions.cs" />
     <Compile Include="Subscriptions\SubscriptionKeyForBinding.cs" />
     <Compile Include="Subscriptions\SubscriptionKeyGen.cs" />
-    <Compile Include="Subscriptions\SubscriptionKey.cs" />
+    <Compile Include="Subscriptions\SubscriptionKeyTyped.cs" />
     <Compile Include="Subscriptions\SubscriptionKind.cs" />
     <Compile Include="Subscriptions\SubscriptionPriorityGroup.cs" />
     <Compile Include="Subscriptions\SubscriptionTargetKind.cs" />

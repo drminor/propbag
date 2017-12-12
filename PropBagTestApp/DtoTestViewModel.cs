@@ -7,7 +7,7 @@ namespace PropBagTestApp
     {
         PropModel _pm;
 
-        public DtoTestViewModel() { } // Shows that if no default constructor is available, the one that takes a single byte is use.
+        //public DtoTestViewModel() { } // Shows that if no default constructor is available, the one that takes a single byte is use.
 
         //// If it not desirable to provide a public, default, parameterless constructor, 
         //// a consructor that takes a single byte can be used instead.

@@ -59,7 +59,10 @@ namespace PropBagTestApp.Infra
 
         static JustSayNo()
         {
-            IProvidePropStoreAccessService<PropIdType, PropNameType> result = new SimplePropStoreAccessServiceProvider(MAX_NUMBER_OF_PROPERTIES);
+            IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider = new SimpleHandlerDispatchDelegateCacheProvider();
+
+            IProvidePropStoreAccessService<PropIdType, PropNameType> result = 
+                new SimplePropStoreAccessServiceProvider(MAX_NUMBER_OF_PROPERTIES, handlerDispatchDelegateCacheProvider);
 
             ThePropFactory = new PropFactory
                 (

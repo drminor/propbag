@@ -24,5 +24,8 @@ namespace DRM.TypeSafePropertyBag
         //PropStoreNode GetObjectNodeForPropVal(IPropDataInternal int_propData);
 
         //bool TryGetAChildOfMine(L2T propId, out PropStoreNode propNode);
+
+        //bool RegisterBinding<PropT>(IExplodedKey<CompT, L1T, L2T> explodedKey, LocalBindingInfo bindingInfo);
+        //bool UnregisterBinding<PropT>(IExplodedKey<CompT, L1T, L2T> explodedKey, LocalBindingInfo bindingInfo);
     }
 }

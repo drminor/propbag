@@ -5,30 +5,16 @@ namespace DRM.PropBag.ControlsWPF
 {
     public class PropBagTemplateProvider : IPropBagTemplateProvider
     {
+        #region Private Fields and Properties
+
         private ResourceDictionary _resources;
-
-        public bool CanFindPropBagTemplateWithJustKey => _resources != null;
-        
-        #region Constructor
-
-        public PropBagTemplateProvider()
-        {
-            _resources = null;
-        }
-
-        public PropBagTemplateProvider(ResourceDictionary resources)
-        {
-            _resources = resources;
-        }
-
-        #endregion
 
         Dictionary<string, PropBagTemplate> _pbtsFromOurResources;
         Dictionary<string, PropBagTemplate> PbtsFromOurResources
         {
             get
             {
-                if(_pbtsFromOurResources == null)
+                if (_pbtsFromOurResources == null)
                 {
                     _pbtsFromOurResources = GetPropBagTemplates(_resources);
                 }
@@ -48,6 +34,28 @@ namespace DRM.PropBag.ControlsWPF
                 return _mrFromOurResources;
             }
         }
+
+        #endregion
+
+        #region Public Properties
+
+        public bool CanFindPropBagTemplateWithJustKey => _resources != null;
+
+        #endregion
+
+        #region Constructor
+
+        public PropBagTemplateProvider()
+        {
+            _resources = null;
+        }
+
+        public PropBagTemplateProvider(ResourceDictionary resources)
+        {
+            _resources = resources;
+        }
+
+        #endregion
 
         public PropBagTemplate GetPropBagTemplate(string resourceKey)
         {

@@ -477,7 +477,7 @@ namespace PropBagLib.Tests
             Assert.That(typedNewVal, Is.EqualTo(1), "The new value should have been 1.");
         }
 
-        void DoWhenPropIntChangesTyped(object sender, PCTypedEventArgs<int> e)
+        void DoWhenPropIntChangesTyped(object sender, PcTypedEventArgs<int> e)
         {
             typedOldVal = e.OldValue;
             typedNewVal = e.NewValue;
@@ -584,7 +584,7 @@ namespace PropBagLib.Tests
 
         #region Event Handlers
 
-        void Mod1_PropStringChanged(object sender, PCTypedEventArgs<string> e)
+        void Mod1_PropStringChanged(object sender, PcTypedEventArgs<string> e)
         {
             propStringOldVal = e.OldValue;
             propStringNewVal = e.NewValue;
@@ -594,7 +594,7 @@ namespace PropBagLib.Tests
             doWhenStringChangedWasCalled = mod1.DoWhenStringChanged_WasCalled;
         }
 
-        void Mod1_PropStringUseRefCompChanged(object sender, PCTypedEventArgs<string> e)
+        void Mod1_PropStringUseRefCompChanged(object sender, PcTypedEventArgs<string> e)
         {
             propStringOldVal = e.OldValue;
             propStringNewVal = e.NewValue;
@@ -604,7 +604,7 @@ namespace PropBagLib.Tests
             doWhenStringChangedWasCalled = mod1.DoWhenStringChanged_WasCalled;
         }
 
-        void Mod1_PropNullableIntChanged(object sender, PCTypedEventArgs<int?> e)
+        void Mod1_PropNullableIntChanged(object sender, PcTypedEventArgs<int?> e)
         {
             Nullable<int> oldVal = e.OldValue;
             Nullable<int> newValue = e.NewValue;
@@ -612,7 +612,7 @@ namespace PropBagLib.Tests
             propNullableInt_WasUpdated = true;
         }
 
-        void Mod1_PropICollectionIntChanged(object sender, PCTypedEventArgs<ICollection<int>> e)
+        void Mod1_PropICollectionIntChanged(object sender, PcTypedEventArgs<ICollection<int>> e)
         {
             ICollection<int> oldValue = e.OldValue;
             ICollection<int> newValue = e.NewValue;

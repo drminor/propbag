@@ -11,7 +11,7 @@ namespace PropBagTestApp
         public bool PropMyStringDidChange;
         public bool PropMyPointDidChange;
 
-        private MainViewModel() { } // Shows that if no default constructor is available, the one that takes a single byte is use.
+        //private MainViewModel() { } // Shows that if no default constructor is available, the one that takes a single byte is use.
 
         // If it not desirable to provide a public, default, parameterless constructor, 
         // a consructor that takes a single byte can be used instead.

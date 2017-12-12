@@ -14,7 +14,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
 
         //public event EventHandler<DataSourceChangedEventArgs>  DataSourceChanged = null;
 
-        public event EventHandler<PCTypedEventArgs<T>> PropertyChangedWithTVals;
+        public event EventHandler<PcTypedEventArgs<T>> PropertyChangedWithTVals;
         public event EventHandler<PcGenEventArgs> PropertyChangedWithVals;
         public event EventHandler ParentHasChanged;
 
@@ -51,7 +51,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
             propBag.SubscribeToPropChanged<T>(PropertyChangedWithTVals_Handler, pathElement);
         }
 
-        private void PropertyChangedWithTVals_Handler(object sender, PCTypedEventArgs<T> e)
+        private void PropertyChangedWithTVals_Handler(object sender, PcTypedEventArgs<T> e)
         {
             OnPropertyChangedWithTVals(e);
         }
@@ -147,7 +147,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
 
         #region Raise Event Helpers
 
-        public void OnPropertyChangedWithTVals(PCTypedEventArgs<T> eArgs)
+        public void OnPropertyChangedWithTVals(PcTypedEventArgs<T> eArgs)
         {
             Interlocked.CompareExchange(ref PropertyChangedWithTVals, null, null)?.Invoke(this, eArgs);
         }

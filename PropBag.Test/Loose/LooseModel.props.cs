@@ -117,7 +117,7 @@ namespace PropBagLib.Tests
 
         #region PropetyChangedWithTVals Event Declarations
 
-        public event EventHandler<PCTypedEventArgs<object>> PropObjectChanged
+        public event EventHandler<PcTypedEventArgs<object>> PropObjectChanged
         {
             add
             {
@@ -129,7 +129,7 @@ namespace PropBagLib.Tests
             }
         }
 
-        public event EventHandler<PCTypedEventArgs<string>> PropStringChanged
+        public event EventHandler<PcTypedEventArgs<string>> PropStringChanged
         {
             add
             {
@@ -141,7 +141,7 @@ namespace PropBagLib.Tests
             }
         }
 
-        public event EventHandler<PCTypedEventArgs<bool>> PropBoolChanged
+        public event EventHandler<PcTypedEventArgs<bool>> PropBoolChanged
         {
             add
             {
@@ -153,7 +153,7 @@ namespace PropBagLib.Tests
             }
         }
 
-        public event EventHandler<PCTypedEventArgs<int>> PropIntChanged
+        public event EventHandler<PcTypedEventArgs<int>> PropIntChanged
         {
             add
             {
@@ -165,7 +165,7 @@ namespace PropBagLib.Tests
             }
         }
 
-        public event EventHandler<PCTypedEventArgs<TimeSpan>> PropTimeSpanChanged
+        public event EventHandler<PcTypedEventArgs<TimeSpan>> PropTimeSpanChanged
         {
             add
             {
@@ -177,7 +177,7 @@ namespace PropBagLib.Tests
             }
         }
 
-        public event EventHandler<PCTypedEventArgs<Uri>> PropUriChanged
+        public event EventHandler<PcTypedEventArgs<Uri>> PropUriChanged
         {
             add
             {
@@ -189,7 +189,7 @@ namespace PropBagLib.Tests
             }
         }
 
-        public event EventHandler<PCTypedEventArgs<Lazy<int>>> PropLazyIntChanged
+        public event EventHandler<PcTypedEventArgs<Lazy<int>>> PropLazyIntChanged
         {
             add
             {

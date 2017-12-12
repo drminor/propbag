@@ -10,6 +10,8 @@ namespace DRM.TypeSafePropertyBag
     using PropIdType = UInt32;
     using PropNameType = String;
 
+    using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
+
     using L2KeyManType = IL2KeyMan<UInt32, String>;
     using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
 
@@ -19,8 +21,9 @@ namespace DRM.TypeSafePropertyBag
     {
         L2KeyManType Level2KeyManager { get; }
         PSAccessServiceType ItsStoreAccessor { get; }
-        IList<string> GetAllPropertyNames2();
 
+        bool RegisterBinding<T>(PropIdType propId, LocalBindingInfo bindingInfo);
+        bool UnregisterBinding<T>(PropIdType propId, LocalBindingInfo bindingInfo);
     }
 
     /// <summary>
@@ -63,8 +66,8 @@ namespace DRM.TypeSafePropertyBag
         bool SubscribeToPropChanged(EventHandler<PropertyChangedEventArgs> handler, string propertyName, Type propertyType);
         bool UnsubscribeToPropChanged(EventHandler<PropertyChangedEventArgs> handler, string propertyName, Type propertyType);
 
-        bool SubscribeToPropChanged<T>(EventHandler<PCTypedEventArgs<T>> eventHandler, string propertyName);
-        bool UnSubscribeToPropChanged<T>(EventHandler<PCTypedEventArgs<T>> eventHandler, string propertyName);
+        bool SubscribeToPropChanged<T>(EventHandler<PcTypedEventArgs<T>> eventHandler, string propertyName);
+        bool UnSubscribeToPropChanged<T>(EventHandler<PcTypedEventArgs<T>> eventHandler, string propertyName);
 
         bool SubscribeToPropChanged(EventHandler<PcGenEventArgs> eventHandler, string propertyName, Type propertyType);
         bool UnSubscribeToPropChanged(EventHandler<PcGenEventArgs> eventHandler, string propertyName, Type propertyType);

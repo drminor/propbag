@@ -4,6 +4,7 @@ using DRM.ViewModelTools;
 using System;
 using System.Data;
 using System.Linq;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -226,18 +227,26 @@ namespace DRM.PropBag.ControlsWPF
                     else if (uc is PropDoWhenChangedField dwc)
                     {
 
-                        Func<object, EventHandler<PcGenEventArgs>> doWhenChangedGetter = null;
-                        
-                        if(dwc.MethodName != null)
-                        {
-                            doWhenChangedGetter = doWhenChangedHelper.GetTheDoWhenChangedGenHandlerGetter(dwc, rpi.PropertyType);
-                        }
+                        //Func<object, EventHandler<PcGenEventArgs>> doWhenChangedGetter = null;
 
-                        ControlModel.PropDoWhenChangedField rdwc =
-                            new ControlModel.PropDoWhenChangedField(dwc.DoWhenChangedAction.DoWhenChanged,
-                            dwc.DoAfterNotify, dwc.MethodIsLocal, dwc.DeclaringType, dwc.FullClassName, 
-                            dwc.InstanceKey, dwc.MethodName,
-                            doWhenChangedGetter);
+                        //if(dwc.MethodName != null)
+                        //{
+                        //    doWhenChangedGetter = doWhenChangedHelper.GetTheDoWhenChangedGenHandlerGetter(dwc, rpi.PropertyType);
+                        //}
+
+                        MethodInfo mi = doWhenChangedHelper.GetMethodAndSubKind(dwc, rpi.PropertyType, rpi.PropertyName, out SubscriptionKind subscriptionKind);
+
+                        SubscriptionPriorityGroup priorityGroup = dwc?.DoAfterNotify ?? false ? SubscriptionPriorityGroup.Last : SubscriptionPriorityGroup.Standard;
+
+
+                        ControlModel.PropDoWhenChangedField rdwc = new ControlModel.PropDoWhenChangedField
+                            (this, mi, subscriptionKind, priorityGroup, true, declaringType: null, fullClassName: null, instanceKey: null);
+
+                        //ControlModel.PropDoWhenChangedField rdwc =
+                        //    new ControlModel.PropDoWhenChangedField(dwc.DoWhenChangedAction.DoWhenChanged,
+                        //    dwc.DoAfterNotify, dwc.MethodIsLocal, dwc.DeclaringType, dwc.FullClassName, 
+                        //    dwc.InstanceKey, dwc.MethodName,
+                        //    doWhenChangedGetter);
 
                         rpi.DoWhenChangedField = rdwc;
                     }
@@ -252,7 +261,7 @@ namespace DRM.PropBag.ControlsWPF
                     else if (uc is PropBinderField binderField)
                     {
                         ControlModel.PropBinderField rBinderField =
-                            new ControlModel.PropBinderField(binderField.TargetProperty, binderField.Path);
+                            new ControlModel.PropBinderField(binderField.Path);
 
                         rpi.BinderField = rBinderField;
                     }

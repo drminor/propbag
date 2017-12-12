@@ -19,20 +19,23 @@ namespace DRM.TypeSafePropertyBag
     using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
     using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
     using PSCloneServiceType = IProvidePropStoreCloneService<UInt32, String>;
+
     #endregion
 
     public class SimplePropStoreAccessServiceProvider : PSAccessServiceProviderType, PSCloneServiceType
     {
         #region Private Members
 
-        int _accessCounter = 0; // Counts Each SetIt<T> operation on all PropBags.
-        int _numOfAccessServicesCreated = 0;
-
-
         readonly Dictionary<ExKeyT, StoreNodeBag> _store;
+        readonly IProvideHandlerDispatchDelegateCaches _handlerDispatchDelegateCacheProvider;
+
         readonly object _sync;
+
         const int NUMBER_OF_SECONDS_BETWEEN_PRUNE_OPS = 20;
         //private Timer _timer;
+
+        int _accessCounter = 0; // Counts Each SetIt<T> operation on all PropBags.
+        int _numOfAccessServicesCreated = 0;
 
         #endregion
 
@@ -45,10 +48,12 @@ namespace DRM.TypeSafePropertyBag
 
         #region Constructor
 
-        public SimplePropStoreAccessServiceProvider(int maxPropsPerObject)
+        public SimplePropStoreAccessServiceProvider(int maxPropsPerObject, IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider)
         {
             MaxPropsPerObject = maxPropsPerObject; 
             MaxObjectsPerAppDomain = GetMaxObjectsPerAppDomain(maxPropsPerObject);
+
+            _handlerDispatchDelegateCacheProvider = handlerDispatchDelegateCacheProvider;
 
             _store = new Dictionary<ExKeyT, StoreNodeBag>();
             _sync = new object();
@@ -93,7 +98,7 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        private PSAccessServiceType CreatePropStoreService(IPropBagInternal propBag, L2KeyManType level2KeyManager, out StoreNodeBag newBag)
+        private PSAccessServiceType CreatePropStoreService(IPropBagInternal propBag, L2KeyManType level2KeyManager, out StoreNodeBag newBagNode)
         {
             // Issue a new, unique Id for this propBag.
             ObjectIdType objectId = NextCookedVal;
@@ -101,17 +106,18 @@ namespace DRM.TypeSafePropertyBag
             // Create a new PropStoreNode for this PropBag
             ExKeyT cKey = new SimpleExKey(objectId, 0);
             IPropBagProxy propBagProxy = new PropBagProxy(propBag);
-            newBag = new StoreNodeBag(cKey, propBagProxy);
+            newBagNode = new StoreNodeBag(cKey, propBagProxy);
 
             // Add the node to the global store.
-            _store.Add(cKey, newBag);
+            _store.Add(cKey, newBagNode);
 
             // Create the access service.
             PSAccessServiceType result = new SimplePropStoreAccessService
                 (
-                    newBag,
+                    newBagNode,
                     level2KeyManager,
-                    this
+                    this,
+                    _handlerDispatchDelegateCacheProvider
                 );
 
             // Add one more to the total count of PropStoreAccessServices created.
@@ -148,21 +154,27 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        PSAccessServiceType PSCloneServiceType.CloneService(PSAccessServiceType sourceService, IPropBagInternal target, out StoreNodeBag newStoreNode)
+        PSAccessServiceType PSCloneServiceType.CloneService
+            (
+            IPropBagInternal sourcePropBag,
+            PSAccessServiceType sourceAccessService,
+            IPropBagInternal targetPropBag,
+            out StoreNodeBag sourceStoreNode, 
+            out StoreNodeBag newStoreNode)
         {
-            if(sourceService is IHaveTheStoreNode nodeProvider)
+            if(sourceAccessService is IHaveTheStoreNode nodeProvider)
             {
-                StoreNodeBag objectNode = nodeProvider.PropStoreNode;
-                if (!objectNode.PropBagProxy.PropBagRef.TryGetTarget(out IPropBagInternal propBag))
-                {
-                    throw new ObjectDisposedException($"The {nameof(StoreNodeBag)} with CKey: {objectNode.CompKey} holds a reference to a PropBag that is no longer alive.");
-                }
+                sourceStoreNode = nodeProvider.PropStoreNode;
+                //if (!sourceStoreNode.PropBagProxy.PropBagRef.TryGetTarget(out IPropBagInternal propBag))
+                //{
+                //    throw new ObjectDisposedException($"The {nameof(StoreNodeBag)} with CKey: {sourceStoreNode.CompKey} holds a reference to a PropBag that is no longer alive.");
+                //}
 
-                if (propBag.Level2KeyManager is SimpleLevel2KeyMan sl2km)
+                if (sourcePropBag.Level2KeyManager is SimpleLevel2KeyMan sourceLevel2KeyMan)
                 {
-                    L2KeyManType level2KeyManager = new SimpleLevel2KeyMan(sl2km);
+                    L2KeyManType level2KeyManager_newCopy = new SimpleLevel2KeyMan(sourceLevel2KeyMan);
 
-                    PSAccessServiceType result = CreatePropStoreService(target, sl2km, out newStoreNode);
+                    PSAccessServiceType result = CreatePropStoreService(targetPropBag, level2KeyManager_newCopy, out newStoreNode);
 
                     return result;
                 }
@@ -173,7 +185,7 @@ namespace DRM.TypeSafePropertyBag
             }
             else
             {
-                throw new InvalidOperationException($"The {nameof(sourceService)} does not implement the {nameof(IHaveTheStoreNode)} interface.");
+                throw new InvalidOperationException($"The {nameof(sourceAccessService)} does not implement the {nameof(IHaveTheStoreNode)} interface.");
             }
         }
 

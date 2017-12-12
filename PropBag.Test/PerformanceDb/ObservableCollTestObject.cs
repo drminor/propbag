@@ -14,11 +14,8 @@ namespace PropBagLib.Tests.PerformanceDb
 {
     public class ObservableCollTestObject
     {
-
         private DestinationModel5 _testMainVM { get; set; }
         private ObservableCollection<DestinationModel1> _readyForTheView { get; set; }
-
-        private IPropBagMapperKey<Person, DestinationModel1> _mapperRequest { get; set; }
 
         public void CanMapObservableCollection(
             string configPackageName,
@@ -30,23 +27,23 @@ namespace PropBagLib.Tests.PerformanceDb
             )
         {
             propFactory_V1.PropStoreAccessServiceProvider.ResetAccessCounter();
+
             Assert.That(propFactory_V1.PropStoreAccessServiceProvider.AccessCounter == 0, "The Provider of PropStoreAccessServices did not have its Access Counter reset.");
 
             // Setup Mapping between Model1 and Person
             PropModel propModel1 = pmHelpers.GetPropModelForModel1Dest(propFactory_V1);
             Type typeToWrap = typeof(DestinationModel1);
 
-            _mapperRequest = amp.RegisterMapperRequest<Person, DestinationModel1>
+            IPropBagMapperKey<Person, DestinationModel1> mapperRequest = amp.RegisterMapperRequest<Person, DestinationModel1>
                 (
                     propModel: propModel1,
                     targetType: typeToWrap,
                     configPackageName: configPackageName
                 );
 
-            Assert.That(_mapperRequest, Is.Not.Null, "mapperRequest should be non-null.");
+            Assert.That(mapperRequest, Is.Not.Null, "mapperRequest should be non-null.");
 
-            IPropBagMapper<Person, DestinationModel1> mapper = amp.GetMapper<Person, DestinationModel1>(_mapperRequest);
-
+            IPropBagMapper<Person, DestinationModel1> mapper = amp.GetMapper<Person, DestinationModel1>(mapperRequest);
             Assert.That(mapper, Is.Not.Null, "mapper should be non-null");
 
             PropModel propModel5 = pmHelpers.GetPropModelForModel5Dest(propFactory_V1);
@@ -97,8 +94,6 @@ namespace PropBagLib.Tests.PerformanceDb
                 pp.Dispose();
             }
 
-
-
             Business b = _testMainVM.GetIt<Business>("Business");
             b.Dispose();
 
@@ -107,7 +102,7 @@ namespace PropBagLib.Tests.PerformanceDb
             _testMainVM = null;
             _readyForTheView = null;
 
-            _mapperRequest = null;
+            //_mapperRequest = null;
 
         }
 

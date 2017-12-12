@@ -206,11 +206,29 @@ namespace DRM.PropBag.ControlsWPF
             {
                 MethodInfo mi = ownerType.GetMethod(methodName, BindingFlags.Instance | BindingFlags.NonPublic);
 
-                if (!IsDuoAction<T>(mi)) return null;
+                if (!HasPcGenEventHandlerSignature(mi)) return null;
 
-                Action<T, T> del = (Action<T, T>)Delegate.CreateDelegate(typeof(Action<T, T>), owningInstance, mi);
+                GetActionRefDelegate del = (GetActionRefDelegate)Delegate.CreateDelegate(typeof(GetActionRefDelegate), owningInstance, mi);
 
                 return del;
+            }
+
+            static private bool HasPcGenEventHandlerSignature(MethodInfo mi)
+            {
+                if (mi.ReturnType != typeof(void))
+                {
+                    // Must return void.
+                    return false;
+                }
+
+                ParameterInfo[] parms = mi.GetParameters();
+
+                if ((parms.Length != 2) || (parms[0].ParameterType != typeof(object)) || (parms[1].ParameterType != typeof(PcGenEventArgs)) )
+                {
+                    // Must have signature of void X(object sender, PcGenEventArgs e)
+                    return false;
+                }
+                return true;
             }
 
 

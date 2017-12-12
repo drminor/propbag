@@ -12,7 +12,7 @@ namespace PropBagLib.Tests.PerformanceDb
         public DestinationModel1(PropBagTypeSafetyMode typeSafetyMode, IPropFactory propFactory, string fullClassName)
             : base(typeSafetyMode, propFactory, fullClassName)
         {
-            AddProp<int>("Id", null, null, 0);
+            AddProp<int>("Id", null, null, initialValue: 0);
             AddProp<string>("FirstName", null, null, null);
             AddProp<string>("LastName", null, null, null);
             AddProp<string>("CityOfResidence", null, null, null);

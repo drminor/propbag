@@ -24,6 +24,7 @@ namespace PropBagLib.Tests.PerformanceDb
         IPropFactory _propFactory_V1;
         PropModelHelpers _pmHelpers;
 
+
         [OneTimeSetUp]
         public void SetUpOneTime()
         {
@@ -135,7 +136,7 @@ namespace PropBagLib.Tests.PerformanceDb
         }
 
         [Test]
-        public void CanMapObservableCollection_Proxy()
+        public void CanMapObservableCollection_AProxy()
         {
             _ourHelper = new AutoMapperHelpers();
             _propFactory_V1 = _ourHelper.GetNewPropFactory_V1();
@@ -151,7 +152,7 @@ namespace PropBagLib.Tests.PerformanceDb
         }
 
         [Test]
-        public void CanMapObservableCollection_Proxy_AfterSetup()
+        public void CanMapObservableCollection_AProxy_AfterSetup()
         {
             string configPackageName = "Emit_Proxy";
             ObservableCollTestObject oTester = new ObservableCollTestObject();

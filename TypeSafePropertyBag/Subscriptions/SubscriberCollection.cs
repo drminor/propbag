@@ -57,7 +57,8 @@ namespace DRM.TypeSafePropertyBag
                 }
                 else
                 {
-                    subscription = AddSubscription(request.CreateSubscription());
+                    subscription = factory(request);
+                    AddSubscription(subscription);
                     _serial++;
                     return subscription;
                 }
@@ -179,13 +180,13 @@ namespace DRM.TypeSafePropertyBag
         private bool SubscriptionIsForRequest(ISubscription subscription, ISubscriptionKeyGen subscriptionRequest)
         {
             bool t1 = subscription.OwnerPropId.Equals(subscriptionRequest.OwnerPropId);
-            bool t2 = subscription.Target == subscriptionRequest.Target;
-            bool t3 = subscription.MethodName == subscriptionRequest.Method.Name;
+            bool t2 = subscription.MethodName == subscriptionRequest.Method.Name;
+            bool t3 = ReferenceEquals(subscription.Target.Target, subscriptionRequest.Target);
 
             bool result =
                 subscription.OwnerPropId.Equals(subscriptionRequest.OwnerPropId) &&
-                subscription.Target == subscriptionRequest.Target &&
-                subscription.MethodName == subscriptionRequest.Method.Name;
+                subscription.MethodName == subscriptionRequest.Method.Name &&
+                ReferenceEquals(subscription.Target.Target, subscriptionRequest.Target);
 
             return result;
         }

@@ -722,7 +722,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             }
         }
 
-        private void PropertyChangedWithTVals_Handler(object sender, PCTypedEventArgs<T> e)
+        private void PropertyChangedWithTVals_Handler(object sender, PcTypedEventArgs<T> e)
         {
             System.Diagnostics.Debug.Assert(e.PropertyName == this.PropertyName, "PropertyName from PCTypedEventArgs does not match the PropertyName registered with the Binding.");
             System.Diagnostics.Debug.WriteLine("The terminal node's property value has been updated.");
@@ -799,7 +799,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
                 if (disposing)
                 {
                     // TODO: dispose managed state (managed objects).
-                    _rootListener.Dispose();
+                    if(_rootListener != null) _rootListener.Dispose();
                     _pathListeners.Clear();
                 }
 

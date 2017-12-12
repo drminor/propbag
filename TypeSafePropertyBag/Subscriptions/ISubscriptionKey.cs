@@ -13,13 +13,13 @@ namespace DRM.TypeSafePropertyBag
 
     using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
 
-    public interface IBindingSubscriptionKey<T> : ISubscriptionKey<T>
+    public interface IBindingSubscriptionKey<T> : ISubscriptionKeyGen
     {
     }
 
     public interface ISubscriptionKey<T> : ISubscriptionKeyGen
     {
-        EventHandler<PCTypedEventArgs<T>> TypedHandler { get; }
+        EventHandler<PcTypedEventArgs<T>> TypedHandler { get; }
         Action<T,T> TypedDoWhenChanged { get; }
     }
 
@@ -48,7 +48,7 @@ namespace DRM.TypeSafePropertyBag
         object Target { get; } 
         MethodInfo Method { get; }
 
-        ISubscription CreateSubscription();
+        ISubscription CreateSubscription(IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider);
         bool HasBeenUsed { get; }
 
         void MarkAsUsed();
