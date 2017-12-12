@@ -14,25 +14,29 @@ namespace DRM.TypeSafePropertyBag
 
         private static readonly int _maxPropPerObject = (int)Math.Pow(2, LOG_BASE2_MAX_PROPERTIES); //65536;
 
-        private static long _maxObjectsPerAppDomain;
-        private static int _botFieldLen;
-        private static int _shift;
-        private static CompositeKeyType _botMask;
-        private static CompositeKeyType _topMask;
+        static int numBitsForProps = LOG_BASE2_MAX_PROPERTIES;
+        static int numberOfBitsInCKey = (int)Math.Log(CompositeKeyType.MaxValue, 2);
+        static int numberOfTopBits = numberOfBitsInCKey - numBitsForProps;
 
-        static SimpleExKey()
-        {
-            int numBitsForProps = LOG_BASE2_MAX_PROPERTIES;
-            int numberOfBitsInCKey = (int)Math.Log(CompositeKeyType.MaxValue, 2);
-            int numberOfTopBits = numberOfBitsInCKey - numBitsForProps;
+        private static long _maxObjectsPerAppDomain = (long)Math.Pow(2, numberOfTopBits);
+        private static int _botFieldLen = numBitsForProps;
 
-            _maxObjectsPerAppDomain = (long)Math.Pow(2, numberOfTopBits);
+        private static CompositeKeyType _botMask = ((CompositeKeyType)1 << _botFieldLen) - 1;
+        private static CompositeKeyType _topMask = ((CompositeKeyType)1 << numberOfTopBits) - 1;
 
-            _shift = numberOfTopBits;
-            _botFieldLen = numBitsForProps; // numberOfBitsInCKey - numberOfTopBits;
-            _botMask = ((CompositeKeyType)1 << _botFieldLen) - 1;
-            _topMask = ((CompositeKeyType)1 << numberOfTopBits) - 1;
-        }
+        //static SimpleExKey()
+        //{
+        //    int numBitsForProps = LOG_BASE2_MAX_PROPERTIES;
+        //    int numberOfBitsInCKey = (int)Math.Log(CompositeKeyType.MaxValue, 2);
+        //    int numberOfTopBits = numberOfBitsInCKey - numBitsForProps;
+
+        //    _maxObjectsPerAppDomain = (long)Math.Pow(2, numberOfTopBits);
+
+        //    _shift = numberOfTopBits;
+        //    _botFieldLen = numBitsForProps; // numberOfBitsInCKey - numberOfTopBits;
+        //    _botMask = ((CompositeKeyType)1 << _botFieldLen) - 1;
+        //    _topMask = ((CompositeKeyType)1 << numberOfTopBits) - 1;
+        //}
 
         #region Constructor
 
