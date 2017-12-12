@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 
 /// <remarks>
@@ -10,6 +11,7 @@ using System.Text;
 
 namespace DRM.TypeSafePropertyBag.Fundamentals.SimpleIOC
 {
+    [Serializable]
     public class ContainerException<T> : Exception
     {
         private readonly string _message;
@@ -19,6 +21,7 @@ namespace DRM.TypeSafePropertyBag.Fundamentals.SimpleIOC
         {
             _message = string.Format(message, GetFullTypeName());
         }
+
         public override string Message
         {
             get { return _message; }
@@ -66,5 +69,20 @@ namespace DRM.TypeSafePropertyBag.Fundamentals.SimpleIOC
 
             return result.ToString();
         }
+
+        public override string ToString()
+        {
+            return $"{nameof(ContainerException<T>)} of <{typeof(T)}>, message: {_message}.";
+        }
+
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            base.GetObjectData(info, context);
+        }
+
+        protected ContainerException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+        }
+
     }
 }
