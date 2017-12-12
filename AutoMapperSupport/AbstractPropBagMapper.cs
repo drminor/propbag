@@ -104,6 +104,18 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public IEnumerable<TDestination> MapToDestination(IEnumerable<TSource> listOfSources)
         {
+            //if(_template != null)
+            //{
+            //    IPropBagInternal test = (IPropBagInternal)_template;
+            //    SimpleLevel2KeyMan sTest = (SimpleLevel2KeyMan) test.Level2KeyManager;
+            //}
+
+            //if (_pbTemplate != null)
+            //{
+            //    IPropBagInternal test = (IPropBagInternal)_pbTemplate;
+            //    SimpleLevel2KeyMan sTest = (SimpleLevel2KeyMan)test.Level2KeyManager;
+            //}
+
             return listOfSources.Select(s => MapToDestination(s));
         }
 
