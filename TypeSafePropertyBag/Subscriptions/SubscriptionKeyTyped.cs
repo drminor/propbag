@@ -13,8 +13,8 @@ namespace DRM.TypeSafePropertyBag
     {
         #region Public Properties
 
-        public EventHandler<PcTypedEventArgs<T>> TypedHandler { get; private set; }
-        public Action<T, T> TypedDoWhenChanged { get; private set; }
+        //public EventHandler<PcTypedEventArgs<T>> TypedHandler { get; private set; }
+        //public Action<T, T> TypedDoWhenChanged { get; private set; }
 
         #endregion
 
@@ -28,10 +28,11 @@ namespace DRM.TypeSafePropertyBag
             SubscriptionPriorityGroup subscriptionPriorityGroup,
             bool keepRef
             )
-            : base(exKey, target: handler.Target, method: handler.Method, kind: SubscriptionKind.TypedHandler,
+            : base(exKey, typeof(T), target: handler.Target, method: handler.Method, kind: SubscriptionKind.TypedHandler,
                   subscriptionPriorityGroup: subscriptionPriorityGroup, keepRef: keepRef, subscriptionFactory: CreateSubscriptionGen)
         {
-            TypedHandler = handler;
+            //TypedHandler = handler;
+            PropertyType = typeof(T);
         }
 
         public SubscriptionKey
@@ -42,10 +43,11 @@ namespace DRM.TypeSafePropertyBag
             SubscriptionPriorityGroup priorityGroup,
             bool keepRef
             )
-            : base(exKey, target: target, method: methodInfo, kind: SubscriptionKind.TypedHandler,
+            : base(exKey, typeof(T), target: target, method: methodInfo, kind: SubscriptionKind.TypedHandler,
           subscriptionPriorityGroup: priorityGroup, keepRef: keepRef, subscriptionFactory: CreateSubscriptionGen)
         {
-            TypedHandler = null;
+            //TypedHandler = null;
+            PropertyType = typeof(T);
         }
 
         //// Typed Action
@@ -61,8 +63,8 @@ namespace DRM.TypeSafePropertyBag
 
         public new void MarkAsUsed()
         {
-            TypedHandler = null;
-            TypedDoWhenChanged = null;
+            //TypedHandler = null;
+            //TypedDoWhenChanged = null;
 
             base.MarkAsUsed();
         }

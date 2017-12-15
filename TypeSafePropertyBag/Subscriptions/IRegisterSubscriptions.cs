@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.ComponentModel;
 using System.Reflection;
 
 namespace DRM.TypeSafePropertyBag
@@ -17,16 +18,23 @@ namespace DRM.TypeSafePropertyBag
     public interface IRegisterSubscriptions<L2T> : ICacheSubscriptions<L2T>
     {
         bool RegisterHandler<T>(IPropBag propBag, L2T propId, EventHandler<PcTypedEventArgs<T>> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef);
-        bool UnRegisterHandler<T>(IPropBag propBag, L2T propId, EventHandler<PcTypedEventArgs<T>> eventHandler);
+        bool UnregisterHandler<T>(IPropBag propBag, L2T propId, EventHandler<PcTypedEventArgs<T>> eventHandler);
 
         bool RegisterHandler(IPropBag propBag, L2T propId, EventHandler<PcGenEventArgs> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef);
-        bool UnRegisterHandler(IPropBag propBag, L2T propId, EventHandler<PcGenEventArgs> eventHandler);
+        bool UnregisterHandler(IPropBag propBag, L2T propId, EventHandler<PcGenEventArgs> eventHandler);
 
         bool RegisterHandler(IPropBag propBag, L2T propId, EventHandler<PcObjectEventArgs> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef);
-        bool UnRegisterHandler(IPropBag propBag, L2T propId, EventHandler<PcObjectEventArgs> eventHandler);
+        bool UnregisterHandler(IPropBag propBag, L2T propId, EventHandler<PcObjectEventArgs> eventHandler);
 
-        bool RegisterHandler(IPropBag propBag, L2T propid, object target, MethodInfo method, SubscriptionKind subscriptionKind, SubscriptionPriorityGroup priorityGroup, bool keepRef);
-        bool UnregisterHandler(IPropBag propBag, L2T propid, object target, MethodInfo method, SubscriptionKind subscriptionKind, SubscriptionPriorityGroup priorityGroup, bool keepRef);
+        bool RegisterHandler(IPropBag propBag, L2T propId, PropertyChangedEventHandler eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef);
+        bool UnregisterHandler(IPropBag propBag, L2T propId, PropertyChangedEventHandler eventHandler);
+
+        bool RegisterHandler(IPropBag propBag, L2T propId, PropertyChangingEventHandler eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef);
+        bool UnregisterHandler(IPropBag propBag, L2T propId, PropertyChangingEventHandler eventHandler);
+
+
+        bool RegisterHandler(IPropBag propBag, L2T propId, Type propertyType, object target, MethodInfo method, SubscriptionKind subscriptionKind, SubscriptionPriorityGroup priorityGroup, bool keepRef);
+        bool UnregisterHandler(IPropBag propBag, L2T propId, Type propertyType, object target, MethodInfo method, SubscriptionKind subscriptionKind, SubscriptionPriorityGroup priorityGroup, bool keepRef);
 
     }
 }

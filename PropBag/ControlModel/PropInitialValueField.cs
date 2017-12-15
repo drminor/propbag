@@ -16,7 +16,6 @@ namespace DRM.PropBag.ControlModel
         bool std;
         bool stn;
         bool stes;
-        //bool cn;
         Func<object> vc;
 
         [XmlText]
@@ -34,23 +33,19 @@ namespace DRM.PropBag.ControlModel
         [XmlAttribute("use-empty-string")]
         public bool SetToEmptyString { get { return stes; } set { SetIfDifferent<bool>(ref stes, value); } }
 
-        //[XmlAttribute("create-new")]
-        //public bool CreateNew { get { return cn; } set { SetIfDifferent<bool>(ref cn, value); } }
-
         public Func<object> ValueCreator { get { return vc; } set { SetIfDifferentDelegate<Func<object>>(ref vc, value); } }
 
         public PropInitialValueField() : this(null) { }
 
         public PropInitialValueField(string initialValue, bool setToDefault = false,
             bool setToUndefined = false, bool setToNull = false,
-            bool setToEmptyString = false, /*bool createNew = false,*/ Func<object> valueCreator = null)
+            bool setToEmptyString = false, Func<object> valueCreator = null)
         {
             InitialValue = initialValue;
             SetToUndefined = setToUndefined;
             SetToDefault = setToDefault;
             SetToNull = setToNull;
             SetToEmptyString = setToEmptyString;
-            //CreateNew = createNew;
             ValueCreator = valueCreator;
         }
 
@@ -63,7 +58,6 @@ namespace DRM.PropBag.ControlModel
                 other.SetToDefault == SetToDefault &&
                 other.SetToNull == SetToNull &&
                 other.SetToEmptyString == SetToEmptyString &&
-                //other.CreateNew == CreateNew &&
                 ReferenceEquals(other.ValueCreator, ValueCreator))
             {
                 return true;

@@ -72,7 +72,7 @@ namespace DRM.PropBag.ControlModel
         public PropDoWhenChangedField(object target, MethodInfo method, SubscriptionKind subscriptionKind, SubscriptionPriorityGroup priorityGroup,
             bool methodIsLocal, Type declaringType, string fullClassName, string instanceKey)
         {
-            Target = target ?? throw new ArgumentNullException(nameof(target));
+            Target = target; // ?? throw new ArgumentNullException(nameof(target));
             Method = method ?? throw new ArgumentNullException(nameof(method));
             SubscriptionKind = subscriptionKind;
             PriorityGroup = priorityGroup;

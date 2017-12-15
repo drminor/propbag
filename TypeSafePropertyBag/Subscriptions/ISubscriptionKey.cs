@@ -19,8 +19,8 @@ namespace DRM.TypeSafePropertyBag
 
     public interface ISubscriptionKey<T> : ISubscriptionKeyGen
     {
-        EventHandler<PcTypedEventArgs<T>> TypedHandler { get; }
-        Action<T,T> TypedDoWhenChanged { get; }
+        //EventHandler<PcTypedEventArgs<T>> TypedHandler { get; }
+        //Action<T,T> TypedDoWhenChanged { get; }
     }
 
     /// <summary>
@@ -37,13 +37,13 @@ namespace DRM.TypeSafePropertyBag
         //SubscriptionTargetKind SubscriptionTargetKind { get; }
         SubscriptionPriorityGroup SubscriptionPriorityGroup { get; }
 
-        EventHandler<PcGenEventArgs> GenHandler { get; }
-        EventHandler<PcObjectEventArgs> ObjHandler { get; }
-        EventHandler<PropertyChangedEventArgs> StandardHandler { get; }
-        EventHandler<PropertyChangingEventArgs> ChangingHandler { get; }
+        //EventHandler<PcGenEventArgs> GenHandler { get; }
+        //EventHandler<PcObjectEventArgs> ObjHandler { get; }
+        //PropertyChangedEventHandler StandardHandler { get; }
+        //PropertyChangingEventHandler ChangingHandler { get; }
 
-        Action<object, object> GenDoWhenChanged { get; }
-        Action Action { get; }
+        //Action<object, object> GenDoWhenChanged { get; }
+        //Action Action { get; }
 
         object Target { get; } 
         MethodInfo Method { get; }

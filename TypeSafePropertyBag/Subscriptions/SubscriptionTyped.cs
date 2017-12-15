@@ -19,14 +19,14 @@ namespace DRM.TypeSafePropertyBag
             {
                 case SubscriptionKind.TypedHandler:
                     {
-                        Target = new WeakReference(sKey.TypedHandler.Target);
+                        Target = new WeakReference(sKey.Target);
 
                         Delegate proxyDelegate = handlerDispatchDelegateCacheProvider.DelegateProxyCache.GetOrAdd(new MethodSubscriptionKind(sKey.Method, sKey.SubscriptionKind));
                         HandlerProxy = proxyDelegate;
 
-                        Type targetType = sKey.TypedHandler.Target.GetType();
+                        Type targetType = sKey.Target.GetType();
 
-                        TypePair tp = new TypePair(targetType, PropertyType);
+                        TypePair tp = new TypePair(targetType, typeof(T));
 
                         CallPcTypedEventSubscriberDelegate callTheListenerDel =
                             handlerDispatchDelegateCacheProvider.CallPcTypedEventSubsCache.GetOrAdd(tp);

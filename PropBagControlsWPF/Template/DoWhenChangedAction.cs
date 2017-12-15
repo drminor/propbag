@@ -1,15 +1,11 @@
 ﻿using DRM.TypeSafePropertyBag;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DRM.PropBag.ControlsWPF
 {
 
-    [TypeConverter(typeof(DuoActionTypeConverter))]
+    //[TypeConverter(typeof(DuoActionTypeConverter))]
     public class DoWhenChangedAction : IEquatable<DoWhenChangedAction>
     {
         public EventHandler<PcGenEventArgs> DoWhenChanged { get; set; }

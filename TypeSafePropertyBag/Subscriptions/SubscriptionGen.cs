@@ -52,9 +52,6 @@ namespace DRM.TypeSafePropertyBag
                     {
                         Target = new WeakReference(sKey.Target);
 
-                        //MethodInfo mi = sKey.Method;
-                        //Delegate proxyDelegate = mi.CreateDelegate(); // Uses static extension Method -- TODO: Provide Instance Library.
-
                         Delegate proxyDelegate = handlerDispatchDelegateCacheProvider.DelegateProxyCache.GetOrAdd(new MethodSubscriptionKind(sKey.Method, sKey.SubscriptionKind));
                         HandlerProxy = proxyDelegate;
 
@@ -73,12 +70,15 @@ namespace DRM.TypeSafePropertyBag
 
                 case SubscriptionKind.GenHandler:
                     {
-                        Target = new WeakReference(sKey.GenHandler.Target);
+                        //Target = new WeakReference(sKey.GenHandler.Target);
+                        Target = new WeakReference(sKey.Target);
 
                         Delegate proxyDelegate = handlerDispatchDelegateCacheProvider.DelegateProxyCache.GetOrAdd(new MethodSubscriptionKind(sKey.Method, sKey.SubscriptionKind));
                         HandlerProxy = proxyDelegate;
 
-                        Type targetType = sKey.GenHandler.Target.GetType();
+                        //Type targetType = sKey.GenHandler.Target.GetType();
+                        Type targetType = sKey.Target.GetType();
+
                         PcGenHandlerDispatcher = handlerDispatchDelegateCacheProvider.CallPcGenEventSubsCache.GetOrAdd(targetType);
 
                         MethodName = HandlerProxy.Method.Name;
@@ -86,12 +86,15 @@ namespace DRM.TypeSafePropertyBag
                     }
                 case SubscriptionKind.ObjHandler:
                     {
-                        Target = new WeakReference(sKey.ObjHandler.Target);
+                        //Target = new WeakReference(sKey.ObjHandler.Target);
+                        Target = new WeakReference(sKey.Target);
 
                         Delegate proxyDelegate = handlerDispatchDelegateCacheProvider.DelegateProxyCache.GetOrAdd(new MethodSubscriptionKind(sKey.Method, sKey.SubscriptionKind));
                         HandlerProxy = proxyDelegate;
 
-                        Type targetType = sKey.ObjHandler.Target.GetType();
+                        //Type targetType = sKey.ObjHandler.Target.GetType();
+                        Type targetType = sKey.Target.GetType();
+
                         PcObjHandlerDispatcher = handlerDispatchDelegateCacheProvider.CallPcObjEventSubsCache.GetOrAdd(targetType);
 
                         MethodName = HandlerProxy.Method.Name;
@@ -99,13 +102,35 @@ namespace DRM.TypeSafePropertyBag
                     }
                 case SubscriptionKind.StandardHandler:
                     {
-                        Target = new WeakReference(sKey.StandardHandler.Target);
+                        //Target = new WeakReference(sKey.StandardHandler.Target);
+                        Target = new WeakReference(sKey.Target);
+
 
                         Delegate proxyDelegate = handlerDispatchDelegateCacheProvider.DelegateProxyCache.GetOrAdd(new MethodSubscriptionKind(sKey.Method, sKey.SubscriptionKind));
                         HandlerProxy = proxyDelegate;
 
-                        Type targetType = sKey.StandardHandler.Target.GetType();
+                        //Type targetType = sKey.StandardHandler.Target.GetType();
+                        Type targetType = sKey.Target.GetType();
+
                         PcStandardHandlerDispatcher = handlerDispatchDelegateCacheProvider.CallPcStEventSubsCache.GetOrAdd(targetType);
+
+                        MethodName = HandlerProxy.Method.Name;
+                        break;
+                    }
+
+                case SubscriptionKind.ChangingHandler:
+                    {
+                        //Target = new WeakReference(sKey.ChangingHandler.Target);
+                        Target = new WeakReference(sKey.Target);
+
+
+                        Delegate proxyDelegate = handlerDispatchDelegateCacheProvider.DelegateProxyCache.GetOrAdd(new MethodSubscriptionKind(sKey.Method, sKey.SubscriptionKind));
+                        HandlerProxy = proxyDelegate;
+
+                        //Type targetType = sKey.ChangingHandler.Target.GetType();
+                        Type targetType = sKey.Target.GetType();
+
+                        PChangingHandlerDispatcher = handlerDispatchDelegateCacheProvider.CallPChangingEventSubsCache.GetOrAdd(targetType);
 
                         MethodName = HandlerProxy.Method.Name;
                         break;

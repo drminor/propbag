@@ -5,6 +5,7 @@ using System.Linq;
 using DRM.TypeSafePropertyBag.Fundamentals;
 using System.Collections.Concurrent;
 using System.Reflection;
+using System.ComponentModel;
 
 namespace DRM.TypeSafePropertyBag
 {
@@ -124,6 +125,9 @@ namespace DRM.TypeSafePropertyBag
         {
             StoreNodeProp newNode = TryAddFirstPart(propBag, propId, genericTypedProp);
             propData = newNode.Int_PropData;
+
+            TryAddSecondPart((IPropDataInternal)propData, newNode);
+
             return true;
         }
 
@@ -180,7 +184,7 @@ namespace DRM.TypeSafePropertyBag
             if (target != null)
             {
                 ISubscriptionKeyGen subscriptionRequest = 
-                    new SubscriptionKeyGen(newNode.CompKey, target, method, subscriptionKind, priorityGroup, keepRef: false, subscriptionFactory: null);
+                    new SubscriptionKeyGen(newNode.CompKey, genericTypedProp.Type, target, method, subscriptionKind, priorityGroup, keepRef: false, subscriptionFactory: null);
 
                 ISubscription newSubscription = AddSubscription(subscriptionRequest, out bool wasAdded);
 
@@ -311,6 +315,7 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
+        // TODO: transfer subscriptions and bindings, if any, to the new PropItem.
         public bool SetTypedProp(IPropBag propBag, PropIdType propId, PropNameType propertyName, IProp genericTypedProp)
         {
             ExKeyT cKey = GetCompKey(propBag, propId);
@@ -356,18 +361,14 @@ namespace DRM.TypeSafePropertyBag
 
         #region IRegisterSubscriptions Implementation
 
+        #region PC Typed Event Args
+
         public bool RegisterHandler<T>(IPropBag propBag, PropIdType propId, 
             EventHandler<PcTypedEventArgs<T>> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef)
         {
             ExKeyT exKey = GetExKey(propBag, propId);
 
-            //TryGetSubscriptions(exKey, out IEnumerable<ISubscription> sc);
-
-            ISubscriptionKey<T> subscriptionRequest = new SubscriptionKey<T>(exKey, eventHandler, priorityGroup, keepRef);
-            ISubscription newSubscription = AddSubscription(subscriptionRequest, out bool wasAdded);
-
-            //TryGetSubscriptions(exKey, out IEnumerable<ISubscription> sc2);
-
+            bool wasAdded = RegisterHandler<T>(exKey, eventHandler, priorityGroup, keepRef);
             return wasAdded;
         }
 
@@ -378,23 +379,25 @@ namespace DRM.TypeSafePropertyBag
             return wasAdded;
         }
 
-        public bool UnRegisterHandler<T>(IPropBag propBag, PropIdType propId,
-            EventHandler<PcTypedEventArgs<T>> eventHandler)
+        public bool UnregisterHandler<T>(IPropBag propBag, PropIdType propId, EventHandler<PcTypedEventArgs<T>> eventHandler)
         {
             ExKeyT exKey = GetExKey(propBag, propId);
 
             ISubscriptionKeyGen subscriptionRequest = new SubscriptionKey<T>(exKey, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
-
             bool wasRemoved = RemoveSubscription(subscriptionRequest);
             return wasRemoved;
         }
+
+        #endregion
+
+        #region PC Gen Event Args
 
         public bool RegisterHandler(IPropBag propBag, uint propId, 
             EventHandler<PcGenEventArgs> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef)
         {
             ExKeyT propertyId = GetExKey(propBag, propId);
-            bool result = RegisterHandler(propertyId, eventHandler, priorityGroup, keepRef);
-            return result;
+            bool wasAdded = RegisterHandler(propertyId, eventHandler, priorityGroup, keepRef);
+            return wasAdded;
         }
 
         private bool RegisterHandler(ExKeyT propertyId, EventHandler<PcGenEventArgs> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef)
@@ -404,7 +407,7 @@ namespace DRM.TypeSafePropertyBag
             return wasAdded;
         }
 
-        public bool UnRegisterHandler(IPropBag propBag, uint propId, EventHandler<PcGenEventArgs> eventHandler)
+        public bool UnregisterHandler(IPropBag propBag, uint propId, EventHandler<PcGenEventArgs> eventHandler)
         {
             ExKeyT exKey = GetExKey(propBag, propId);
             ISubscriptionKeyGen subscriptionRequest = new SubscriptionKeyGen(exKey, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
@@ -412,18 +415,27 @@ namespace DRM.TypeSafePropertyBag
             bool wasRemoved = RemoveSubscription(subscriptionRequest);
             return wasRemoved;
         }
+
+        #endregion
+
+        #region PC Object Event Args
 
         public bool RegisterHandler(IPropBag propBag, uint propId, 
             EventHandler<PcObjectEventArgs> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef)
         {
             ExKeyT exKey = GetExKey(propBag, propId);
-            ISubscriptionKeyGen subscriptionRequest = new SubscriptionKeyGen(exKey, eventHandler, priorityGroup, keepRef);
+            bool wasAdded = RegisterHandler(exKey, eventHandler, priorityGroup, keepRef);
+            return wasAdded;
+        }
 
+        private bool RegisterHandler(ExKeyT propertyId, EventHandler<PcObjectEventArgs> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef)
+        {
+            ISubscriptionKeyGen subscriptionRequest = new SubscriptionKeyGen(propertyId, eventHandler, priorityGroup, keepRef);
             ISubscription newSubscription = AddSubscription(subscriptionRequest, out bool wasAdded);
             return wasAdded;
         }
 
-        public bool UnRegisterHandler(IPropBag propBag, uint propId, EventHandler<PcObjectEventArgs> eventHandler)
+       public bool UnregisterHandler(IPropBag propBag, uint propId, EventHandler<PcObjectEventArgs> eventHandler)
         {
             ExKeyT exKey = GetExKey(propBag, propId);
             ISubscriptionKeyGen subscriptionRequest = new SubscriptionKeyGen(exKey, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
@@ -432,23 +444,85 @@ namespace DRM.TypeSafePropertyBag
             return wasRemoved;
         }
 
-        public bool RegisterHandler(IPropBag propBag, uint propId, object target, MethodInfo method, SubscriptionKind subscriptionKind, SubscriptionPriorityGroup priorityGroup, bool keepRef)
+        #endregion
+
+        #region PC Standard Event Args
+
+        public bool RegisterHandler(IPropBag propBag, uint propId,
+            PropertyChangedEventHandler eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef)
         {
             ExKeyT exKey = GetExKey(propBag, propId);
-            ISubscriptionKeyGen subscriptionRequest = new SubscriptionKeyGen(exKey, target, method, subscriptionKind, priorityGroup, keepRef, subscriptionFactory: null);
+            bool wasAdded = RegisterHandler(exKey, eventHandler, priorityGroup, keepRef);
+            return wasAdded;
+        }
+
+        private bool RegisterHandler(ExKeyT propertyId, PropertyChangedEventHandler eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef)
+        {
+            ISubscriptionKeyGen subscriptionRequest = new SubscriptionKeyGen(propertyId, eventHandler, priorityGroup, keepRef);
+            ISubscription newSubscription = AddSubscription(subscriptionRequest, out bool wasAdded);
+            return wasAdded;
+        }
+
+        public bool UnregisterHandler(IPropBag propBag, uint propId, PropertyChangedEventHandler eventHandler)
+        {
+            ExKeyT exKey = GetExKey(propBag, propId);
+            ISubscriptionKeyGen subscriptionRequest = new SubscriptionKeyGen(exKey, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
+
+            bool wasRemoved = RemoveSubscription(subscriptionRequest);
+            return wasRemoved;
+        }
+
+        #endregion
+
+        #region PC Changing Event Args
+
+        public bool RegisterHandler(IPropBag propBag, uint propId,
+            PropertyChangingEventHandler eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef)
+        {
+            ExKeyT exKey = GetExKey(propBag, propId);
+            bool wasAdded = RegisterHandler(exKey, eventHandler, priorityGroup, keepRef);
+            return wasAdded;
+        }
+
+        private bool RegisterHandler(ExKeyT propertyId, PropertyChangingEventHandler eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef)
+        {
+            ISubscriptionKeyGen subscriptionRequest = new SubscriptionKeyGen(propertyId, eventHandler, priorityGroup, keepRef);
+            ISubscription newSubscription = AddSubscription(subscriptionRequest, out bool wasAdded);
+            return wasAdded;
+        }
+
+        public bool UnregisterHandler(IPropBag propBag, uint propId, PropertyChangingEventHandler eventHandler)
+        {
+            ExKeyT exKey = GetExKey(propBag, propId);
+            ISubscriptionKeyGen subscriptionRequest = new SubscriptionKeyGen(exKey, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
+
+            bool wasRemoved = RemoveSubscription(subscriptionRequest);
+            return wasRemoved;
+        }
+
+        #endregion
+
+        #region Target and Method
+
+        public bool RegisterHandler(IPropBag propBag, uint propId, Type propertyType, object target, MethodInfo method, SubscriptionKind subscriptionKind, SubscriptionPriorityGroup priorityGroup, bool keepRef)
+        {
+            ExKeyT exKey = GetExKey(propBag, propId);
+            ISubscriptionKeyGen subscriptionRequest = new SubscriptionKeyGen(exKey, propertyType, target, method, subscriptionKind, priorityGroup, keepRef, subscriptionFactory: null);
 
             ISubscription newSubscription = AddSubscription(subscriptionRequest, out bool wasAdded);
             return wasAdded;
         }
 
-        public bool UnregisterHandler(IPropBag propBag, uint propId, object target, MethodInfo method, SubscriptionKind subscriptionKind, SubscriptionPriorityGroup priorityGroup, bool keepRef)
+        public bool UnregisterHandler(IPropBag propBag, uint propId, Type propertyType, object target, MethodInfo method, SubscriptionKind subscriptionKind, SubscriptionPriorityGroup priorityGroup, bool keepRef)
         {
             ExKeyT exKey = GetExKey(propBag, propId);
-            ISubscriptionKeyGen subscriptionRequest = new SubscriptionKeyGen(exKey, target, method, subscriptionKind, priorityGroup, keepRef, subscriptionFactory: null);
+            ISubscriptionKeyGen subscriptionRequest = new SubscriptionKeyGen(exKey, propertyType, target, method, subscriptionKind, priorityGroup, keepRef, subscriptionFactory: null);
 
             bool wasRemoved = RemoveSubscription(subscriptionRequest);
             return wasRemoved;
         }
+
+        #endregion
 
         #endregion
 
@@ -524,6 +598,9 @@ namespace DRM.TypeSafePropertyBag
         public bool TryGetSubscriptions(ExKeyT exKey, out IEnumerable<ISubscription> subscriberCollection)
         {
             bool result = _propIndexes.TryGetSubscriberCollection(exKey.Level2Key, out subscriberCollection);
+
+            //bool gResult = _propIndexes.TryGetSubscriberCollection(0, out subscriberCollection);
+
             return result;
         }
 
@@ -562,13 +639,13 @@ namespace DRM.TypeSafePropertyBag
             return wasAdded;
         }
 
-        public bool UnRegisterBinding<T>(IPropBag targetPropBag, PropIdType propId, LocalBindingInfo bindingInfo)
+        public bool UnregisterBinding<T>(IPropBag targetPropBag, PropIdType propId, LocalBindingInfo bindingInfo)
         {
             ExKeyT exKey = GetExKey(targetPropBag, propId);
-            return UnRegisterBinding<T>(exKey, bindingInfo);
+            return UnregisterBinding<T>(exKey, bindingInfo);
         }
 
-        public bool UnRegisterBinding<T>(ExKeyT propId, LocalBindingInfo bindingInfo)
+        public bool UnregisterBinding<T>(ExKeyT propId, LocalBindingInfo bindingInfo)
         {
             ISubscriptionKeyGen bindingRequest = new BindingSubscriptionKey<T>(propId, bindingInfo);
 

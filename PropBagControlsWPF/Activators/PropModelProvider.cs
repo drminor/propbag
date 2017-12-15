@@ -238,9 +238,13 @@ namespace DRM.PropBag.ControlsWPF
 
                         SubscriptionPriorityGroup priorityGroup = dwc?.DoAfterNotify ?? false ? SubscriptionPriorityGroup.Last : SubscriptionPriorityGroup.Standard;
 
-
                         ControlModel.PropDoWhenChangedField rdwc = new ControlModel.PropDoWhenChangedField
-                            (this, mi, subscriptionKind, priorityGroup, true, declaringType: null, fullClassName: null, instanceKey: null);
+                            (
+                            target: null, method: mi, 
+                            subscriptionKind: subscriptionKind, priorityGroup: priorityGroup,
+                            methodIsLocal: true, declaringType: null,
+                            fullClassName: null, instanceKey: null
+                            );
 
                         //ControlModel.PropDoWhenChangedField rdwc =
                         //    new ControlModel.PropDoWhenChangedField(dwc.DoWhenChangedAction.DoWhenChanged,

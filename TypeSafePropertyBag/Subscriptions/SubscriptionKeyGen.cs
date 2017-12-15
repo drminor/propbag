@@ -26,24 +26,24 @@ namespace DRM.TypeSafePropertyBag
 
         #region Public Properties
 
-        public Type PropertyType { get; }
         public ExKeyT OwnerPropId { get; }
+        public Type PropertyType { get; protected set; }
 
         public SubscriptionKind SubscriptionKind { get; }
         public SubscriptionPriorityGroup SubscriptionPriorityGroup { get; }
         //public SubscriptionTargetKind SubscriptionTargetKind { get; }
 
-        public EventHandler<PcGenEventArgs> GenHandler { get; private set; }
-        public EventHandler<PcObjectEventArgs> ObjHandler { get; private set; }
+        //public EventHandler<PcGenEventArgs> GenHandler { get; private set; }
+        //public EventHandler<PcObjectEventArgs> ObjHandler { get; private set; }
 
-        public EventHandler<PropertyChangedEventArgs> StandardHandler { get; private set; }
-        public EventHandler<PropertyChangingEventArgs> ChangingHandler { get; private set; }
+        //public PropertyChangedEventHandler StandardHandler { get; private set; }
+        //public PropertyChangingEventHandler ChangingHandler { get; private set; }
 
         public object Target { get; private set; } 
         public MethodInfo Method { get; }
 
-        public Action<object, object> GenDoWhenChanged { get; private set; }
-        public Action Action { get; private set; }
+        //public Action<object, object> GenDoWhenChanged { get; private set; }
+        //public Action Action { get; private set; }
 
         public bool HasBeenUsed { get; private set; }
 
@@ -54,26 +54,53 @@ namespace DRM.TypeSafePropertyBag
 
         #region Constructors for Property Changed Handlers
 
-        // Standard PropertyChanged
-        public SubscriptionKeyGen(ExKeyT sourcePropId, EventHandler<PropertyChangedEventArgs> standardDelegate,
+        // Standard PropertyChangedEventHandler
+        public SubscriptionKeyGen(ExKeyT sourcePropId, PropertyChangedEventHandler standardDelegate,
             SubscriptionPriorityGroup subscriptionPriorityGroup, bool keepRef)
         {
             OwnerPropId = sourcePropId;
-            //SubscriptionTargetKind = GetKindOfTarget(genDelegate.Target, keepRef);
+            PropertyType = null;
 
             SubscriptionKind = SubscriptionKind.StandardHandler;
             SubscriptionPriorityGroup = subscriptionPriorityGroup;
             //SubscriptionTargetKind = GetKindOfTarget(standardDelegate.Target, keepRef);
 
-            GenHandler = null;
-            ObjHandler = null;
-            StandardHandler = standardDelegate;
+            //GenHandler = null;
+            //ObjHandler = null;
+            //StandardHandler = standardDelegate;
 
-            GenDoWhenChanged = null;
-            Action = null;
+            //GenDoWhenChanged = null;
+            //Action = null;
 
-            Target = standardDelegate.Target;
-            Method = standardDelegate.Method;
+            Target = standardDelegate.Target ?? throw new ArgumentNullException(nameof(standardDelegate.Target));
+            Method = standardDelegate.Method ?? throw new ArgumentNullException(nameof(standardDelegate.Method));
+
+            SubscriptionFactory = CreateSubscriptionGen;
+            BindingFactory = null;
+            HasBeenUsed = false;
+        }
+
+        // Changing PropertyChangingEventHandler
+        public SubscriptionKeyGen(ExKeyT sourcePropId, PropertyChangingEventHandler changingDelegate,
+            SubscriptionPriorityGroup subscriptionPriorityGroup, bool keepRef)
+        {
+            OwnerPropId = sourcePropId;
+            PropertyType = null;
+
+            SubscriptionKind = SubscriptionKind.ChangingHandler;
+            SubscriptionPriorityGroup = subscriptionPriorityGroup;
+            //SubscriptionTargetKind = GetKindOfTarget(standardDelegate.Target, keepRef);
+
+            //GenHandler = null;
+            //ObjHandler = null;
+            //StandardHandler = null;
+            //ChangingHandler = changingDelegate;
+
+            //GenDoWhenChanged = null;
+            //Action = null;
+
+            Target = changingDelegate.Target ?? throw new ArgumentNullException(nameof(changingDelegate.Target));
+            Method = changingDelegate.Method ?? throw new ArgumentNullException(nameof(changingDelegate.Method));
 
             SubscriptionFactory = CreateSubscriptionGen;
             BindingFactory = null;
@@ -91,15 +118,15 @@ namespace DRM.TypeSafePropertyBag
             SubscriptionPriorityGroup = subscriptionPriorityGroup;
             //SubscriptionTargetKind = GetKindOfTarget(genDelegate.Target, keepRef);
 
-            StandardHandler = null;
-            GenHandler = genDelegate;
-            ObjHandler = null;
+            //StandardHandler = null;
+            //GenHandler = genDelegate;
+            //ObjHandler = null;
 
-            GenDoWhenChanged = null;
-            Action = null;
+            //GenDoWhenChanged = null;
+            //Action = null;
 
-            Target = genDelegate.Target;
-            Method = genDelegate.Method;
+            Target = genDelegate.Target ?? throw new ArgumentNullException(nameof(genDelegate.Target));
+            Method = genDelegate.Method ?? throw new ArgumentNullException(nameof(genDelegate.Method));
 
             SubscriptionFactory = CreateSubscriptionGen;
             BindingFactory = null;
@@ -117,15 +144,15 @@ namespace DRM.TypeSafePropertyBag
             SubscriptionPriorityGroup = subscriptionPriorityGroup;
             //SubscriptionTargetKind = GetKindOfTarget(objDelegate.Target, keepRef);
 
-            StandardHandler = null;
-            GenHandler = null;
-            ObjHandler = objDelegate;
+            //StandardHandler = null;
+            //GenHandler = null;
+            //ObjHandler = objDelegate;
 
-            GenDoWhenChanged = null;
-            Action = null;
+            //GenDoWhenChanged = null;
+            //Action = null;
 
-            Target = objDelegate.Target;
-            Method = objDelegate.Method;
+            Target = objDelegate.Target ?? throw new ArgumentNullException(nameof(objDelegate.Target));
+            Method = objDelegate.Method ?? throw new ArgumentNullException(nameof(objDelegate.Method));
 
             SubscriptionFactory = CreateSubscriptionGen;
             BindingFactory = null;
@@ -133,28 +160,29 @@ namespace DRM.TypeSafePropertyBag
         }
 
         // Target and Method. Also used for TypeDelegate and TypedAction.
-        public SubscriptionKeyGen(ExKeyT sourcePropId, object target, MethodInfo method,
+        public SubscriptionKeyGen(ExKeyT sourcePropId, Type propertyType,
+            object target, MethodInfo method,
             SubscriptionKind kind, 
             SubscriptionPriorityGroup subscriptionPriorityGroup,
             bool keepRef,
             Func<ISubscriptionKeyGen, IProvideHandlerDispatchDelegateCaches, ISubscription> subscriptionFactory)
         {
             OwnerPropId = sourcePropId;
-            PropertyType = null;
+            PropertyType = propertyType;
 
             SubscriptionKind = kind;
             SubscriptionPriorityGroup = subscriptionPriorityGroup;
             //SubscriptionTargetKind = GetKindOfTarget(target, keepRef);
 
-            StandardHandler = null;
-            GenHandler = null;
-            ObjHandler = null;
+            //StandardHandler = null;
+            //GenHandler = null;
+            //ObjHandler = null;
 
-            GenDoWhenChanged = null;
-            Action = null;
+            //GenDoWhenChanged = null;
+            //Action = null;
 
-            Target = target;
-            Method = method;
+            Target = target ?? throw new ArgumentNullException(nameof(target));
+            Method = method ?? throw new ArgumentNullException(nameof(method));
 
             SubscriptionFactory = subscriptionFactory ?? CreateSubscriptionGen;
             BindingFactory = null;
@@ -178,15 +206,15 @@ namespace DRM.TypeSafePropertyBag
             SubscriptionPriorityGroup = subscriptionPriorityGroup;
             //SubscriptionTargetKind = GetKindOfTarget(genAction.Target, keepRef);
 
-            StandardHandler = null;
-            GenHandler = null;
-            ObjHandler = null;
+            //StandardHandler = null;
+            //GenHandler = null;
+            //ObjHandler = null;
 
-            GenDoWhenChanged = genAction ?? throw new ArgumentNullException(nameof(genAction));
-            Action = null;
+            //GenDoWhenChanged = genAction ?? throw new ArgumentNullException(nameof(genAction));
+            //Action = null;
 
             Target = genAction.Target ?? throw new InvalidOperationException($"The value for Target on the GenAction action, cannot be null.");
-            Method = genAction.Method;
+            Method = genAction.Method ?? throw new ArgumentNullException(nameof(genAction.Method));
 
             SubscriptionFactory = subscriptionFactory;
             BindingFactory = null;
@@ -206,15 +234,15 @@ namespace DRM.TypeSafePropertyBag
             SubscriptionPriorityGroup = subscriptionPriorityGroup;
             //SubscriptionTargetKind = GetKindOfTarget(action.Target, keepRef);
 
-            StandardHandler = null;
-            GenHandler = null;
-            ObjHandler = null;
+            //StandardHandler = null;
+            //GenHandler = null;
+            //ObjHandler = null;
 
-            GenDoWhenChanged = null;
-            Action = action;
+            //GenDoWhenChanged = null;
+            //Action = action;
 
-            Target = action.Target;
-            Method = action.Method;
+            Target = action.Target ?? throw new ArgumentNullException(nameof(action.Target));
+            Method = action.Method ?? throw new ArgumentNullException(nameof(action.Method));
 
             SubscriptionFactory = subscriptionFactory;
             BindingFactory = null;
@@ -244,12 +272,12 @@ namespace DRM.TypeSafePropertyBag
             SubscriptionPriorityGroup = subscriptionPriorityGroup;
             //SubscriptionTargetKind = SubscriptionTargetKind.GlobalPropId;
 
-            StandardHandler = null;
-            GenHandler = null;
-            ObjHandler = null;
+            //StandardHandler = null;
+            //GenHandler = null;
+            //ObjHandler = null;
 
-            GenDoWhenChanged = null;
-            Action = null;
+            //GenDoWhenChanged = null;
+            //Action = null;
 
             Target = null;
             Method = null;
@@ -278,13 +306,6 @@ namespace DRM.TypeSafePropertyBag
         //    }
         //}
 
-        public static ISubscription CreateSubscriptionGen(ISubscriptionKeyGen subscriptionRequestGen, IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider)
-        {
-            ISubscription result = new SubscriptionGen(subscriptionRequestGen, handlerDispatchDelegateCacheProvider);
-            subscriptionRequestGen.MarkAsUsed();
-            return result;
-        }
-
         #endregion
 
         #region Public Methods
@@ -292,6 +313,13 @@ namespace DRM.TypeSafePropertyBag
         public ISubscription CreateSubscription(IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider)
         {
             return SubscriptionFactory(this, handlerDispatchDelegateCacheProvider);
+        }
+
+        public ISubscription CreateSubscriptionGen(ISubscriptionKeyGen subscriptionRequestGen, IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider)
+        {
+            ISubscription result = new SubscriptionGen(subscriptionRequestGen, handlerDispatchDelegateCacheProvider);
+            subscriptionRequestGen.MarkAsUsed();
+            return result;
         }
 
         public virtual ISubscription CreateBinding(PSAccessServiceType propStoreAccessService)
@@ -303,13 +331,13 @@ namespace DRM.TypeSafePropertyBag
         {
             Target = null;
 
-            ObjHandler = null;
-            GenHandler = null;
-            StandardHandler = null;
-            ChangingHandler = null;
+            //ObjHandler = null;
+            //GenHandler = null;
+            //StandardHandler = null;
+            //ChangingHandler = null;
 
-            GenDoWhenChanged = null;
-            Action = null;
+            //GenDoWhenChanged = null;
+            //Action = null;
 
             HasBeenUsed = true;
         }

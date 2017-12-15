@@ -16,7 +16,7 @@ namespace DRM.PropBag.ControlsWPF
             DependencyProperty.Register("DoWhenChangedAction", typeof(DoWhenChangedAction),
                 typeof(PropDoWhenChangedField), new PropertyMetadata(new DoWhenChangedAction()));
 
-        [TypeConverter(typeof(DuoActionTypeConverter))]
+        //[TypeConverter(typeof(DuoActionTypeConverter))]
         public DoWhenChangedAction DoWhenChangedAction
         {
             get

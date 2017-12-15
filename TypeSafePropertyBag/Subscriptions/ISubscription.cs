@@ -20,7 +20,6 @@ namespace DRM.TypeSafePropertyBag
     /// <typeparam name="T">The type of the property to which this subscription will subscribe.</typeparam>
     public interface ISubscription<T> : ISubscription
     {
-        //CallPcTypedEventSubscriberDelegate PcTypedHandlerDispatcher { get; }
     }
 
     // Identifies a IProp using an identifer unique to the application domain
