@@ -1,6 +1,6 @@
 ﻿using DRM.PropBag.Caches;
 using DRM.TypeSafePropertyBag;
-
+using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -22,6 +22,8 @@ namespace DRM.PropBag
         #region Public Properties
 
         public ResolveTypeDelegate TypeResolver { get; }
+
+        public IProvideDelegateCaches DelegateCacheProvider { get; }
 
         public IConvertValues ValueConverter { get; }
 
@@ -46,18 +48,20 @@ namespace DRM.PropBag
         public AbstractPropFactory
             (
             PSAccessServiceProviderType propStoreAccessServiceProvider,
+            IProvideDelegateCaches delegateCacheProvider,
             ResolveTypeDelegate typeResolver = null,
             IConvertValues valueConverter = null
             )
         {
 
             PropStoreAccessServiceProvider = propStoreAccessServiceProvider ?? throw new ArgumentNullException(nameof(propStoreAccessServiceProvider));
+            DelegateCacheProvider = delegateCacheProvider;
 
             // Use our default implementation, if the caller did not supply one.
             TypeResolver = typeResolver ?? this.GetTypeFromName;
 
             // Use our default implementation, if the caller did not supply one.
-            ValueConverter = valueConverter ?? new PropFactoryValueConverter(null);
+            ValueConverter = valueConverter ?? new PropFactoryValueConverter(delegateCacheProvider.TypeDescBasedTConverterCache);
 
             IndexerName = "Item[]";
         }
@@ -80,6 +84,7 @@ namespace DRM.PropBag
         #endregion
 
         #region Propety-type property creators
+
         public abstract IProp<T> Create<T>(
             T initialValue,
             PropNameType propertyName, object extraInfo = null,
@@ -292,46 +297,41 @@ namespace DRM.PropBag
 
         #region Shared Delegate Creation Logic
 
-        //TODO: Consider caching the delegates that are created here.
-
-        static private Type gmtType = typeof(APFGenericMethodTemplates);
+        //static private Type gmtType = typeof(APFGenericMethodTemplates);
 
         #region Collection-Type Methods
 
         // From Object
         protected virtual CreateCPropFromObjectDelegate GetCPropCreator(Type collectionType, Type itemType)
         {
-            MethodInfo mi = gmtType.GetMethod("CreateCPropFromObject",
-                BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(collectionType, itemType);
-
-            CreateCPropFromObjectDelegate result = (CreateCPropFromObjectDelegate)Delegate.
-                CreateDelegate(typeof(CreateCPropFromObjectDelegate), mi);
-
+            CreateCPropFromObjectDelegate result = DelegateCacheProvider.CreateCPropFromObjectCache.GetOrAdd(new TypePair(collectionType, itemType));
             return result;
+
+            //MethodInfo mi = gmtType.GetMethod("CreateCPropFromObject", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(collectionType, itemType);
+            //CreateCPropFromObjectDelegate result = (CreateCPropFromObjectDelegate)Delegate.CreateDelegate(typeof(CreateCPropFromObjectDelegate), mi);
+            //return result;
         }
 
         // From String
         protected virtual CreateCPropFromStringDelegate GetCPropFromStringCreator(Type collectionType, Type itemType)
         {
-            MethodInfo mi = gmtType.GetMethod("CreateCPropFromString",
-                BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(collectionType, itemType);
-
-            CreateCPropFromStringDelegate result = (CreateCPropFromStringDelegate)Delegate.
-                CreateDelegate(typeof(CreateCPropFromStringDelegate), mi);
-
+            CreateCPropFromStringDelegate result = DelegateCacheProvider.CreateCPropFromStringCache.GetOrAdd(new TypePair(collectionType, itemType));
             return result;
-        }
+
+            //MethodInfo mi = gmtType.GetMethod("CreateCPropFromString", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(collectionType, itemType);
+            //CreateCPropFromStringDelegate result = (CreateCPropFromStringDelegate)Delegate.CreateDelegate(typeof(CreateCPropFromStringDelegate), mi);
+            //return result;
+    }
 
         // With No Value
         protected virtual CreateCPropWithNoValueDelegate GetCPropWithNoValueCreator(Type collectionType, Type itemType)
         {
-            MethodInfo mi = gmtType.GetMethod("CreateCPropWithNoValue",
-                BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(collectionType, itemType);
-
-            CreateCPropWithNoValueDelegate result = (CreateCPropWithNoValueDelegate)Delegate.
-                CreateDelegate(typeof(CreateCPropWithNoValueDelegate), mi);
-
+            CreateCPropWithNoValueDelegate result = DelegateCacheProvider.CreateCPropWithNoValCache.GetOrAdd(new TypePair(collectionType, itemType));
             return result;
+
+            //MethodInfo mi = gmtType.GetMethod("CreateCPropWithNoValue",BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(collectionType, itemType);
+            //CreateCPropWithNoValueDelegate result = (CreateCPropWithNoValueDelegate)Delegate.CreateDelegate(typeof(CreateCPropWithNoValueDelegate), mi);
+            //return result;
         }
 
         #endregion
@@ -341,48 +341,40 @@ namespace DRM.PropBag
         // From Object
         protected virtual CreatePropFromObjectDelegate GetPropCreator(Type typeOfThisValue)
         {
-            MethodInfo mi = gmtType.GetMethod("CreatePropFromObject", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(typeOfThisValue);
-            CreatePropFromObjectDelegate result = (CreatePropFromObjectDelegate)Delegate.CreateDelegate(typeof(CreatePropFromObjectDelegate), mi);
-
+            CreatePropFromObjectDelegate result = DelegateCacheProvider.CreatePropFromObjectCache.GetOrAdd(typeOfThisValue);
             return result;
+
+            //MethodInfo mi = gmtType.GetMethod("CreatePropFromObject", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(typeOfThisValue);
+            //CreatePropFromObjectDelegate result = (CreatePropFromObjectDelegate)Delegate.CreateDelegate(typeof(CreatePropFromObjectDelegate), mi);
+            //return result;
         }
 
         // From String
         protected virtual CreatePropFromStringDelegate GetPropFromStringCreator(Type typeOfThisValue)
         {
-            MethodInfo mi = gmtType.GetMethod("CreatePropFromString", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(typeOfThisValue);
-            CreatePropFromStringDelegate result = (CreatePropFromStringDelegate)Delegate.CreateDelegate(typeof(CreatePropFromStringDelegate), mi);
+
+            CreatePropFromStringDelegate result = DelegateCacheProvider.CreatePropFromStringCache.GetOrAdd(typeOfThisValue);
             return result;
+
+            //MethodInfo mi = gmtType.GetMethod("CreatePropFromString", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(typeOfThisValue);
+            //CreatePropFromStringDelegate result = (CreatePropFromStringDelegate)Delegate.CreateDelegate(typeof(CreatePropFromStringDelegate), mi);
+            //return result;
         }
 
         // With No Value
         protected virtual CreatePropWithNoValueDelegate GetPropWithNoValueCreator(Type typeOfThisValue)
         {
-            MethodInfo mi = gmtType.GetMethod("CreatePropWithNoValue", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(typeOfThisValue);
-            CreatePropWithNoValueDelegate result = (CreatePropWithNoValueDelegate)Delegate.CreateDelegate(typeof(CreatePropWithNoValueDelegate), mi);
+            CreatePropWithNoValueDelegate result = DelegateCacheProvider.CreatePropWithNoValCache.GetOrAdd(typeOfThisValue);
             return result;
+
+            //MethodInfo mi = gmtType.GetMethod("CreatePropWithNoValue", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(typeOfThisValue);
+            //CreatePropWithNoValueDelegate result = (CreatePropWithNoValueDelegate)Delegate.CreateDelegate(typeof(CreatePropWithNoValueDelegate), mi);
+            //return result;
         }
 
         #endregion Property-Type Methods
 
         #endregion Shared Delegate Creation
-
-        #region Event Management
-
-        //public IEventManager<TEventSource, TEventArgs> GetTheEventManager<TEventSource, TEventArgs>() where TEventArgs : EventArgs
-        //{
-        //    IEventManager<TEventSource, TEventArgs> result = new SimpleEventManager();
-        //    return result;
-        //}
-
-        //public IEventManager<INotifyPropertyChangedWithVals, PropertyChangedWithValsEventArgs>
-        //    GetTheEventManager<INotifyPropertyChangedWithVals, PropertyChangedWithValsEventArgs>() where PropertyChangedWithValsEventArgs : EventArgs
-        //{
-        //    var x = new SimpleEventManager();
-        //    return (IEventManager<INotifyPropertyChangedWithVals, PropertyChangedWithValsEventArgs>)x;
-        //}
-
-        #endregion
 
         #region IDisposable Support
 
@@ -419,165 +411,6 @@ namespace DRM.PropBag
             // TODO: uncomment the following line if the finalizer is overridden above.
             // GC.SuppressFinalize(this);
         }
-
-        #endregion
-    }
-
-    static class APFGenericMethodTemplates
-    {
-        #region Collection-Type Methods
-
-        // From Object
-        private static ICPropPrivate<CT, T> CreateCPropFromObject<CT,T>(IPropFactory propFactory,
-            object value,
-            string propertyName, object extraInfo,
-            bool hasStorage, bool isTypeSolid,
-            Delegate comparer, bool useRefEquality = false) where CT : class, IEnumerable<T>
-        {
-            CT initialValue = propFactory.GetValueFromObject<CT>(value);
-
-            //EventHandler<PCTypedEventArgs<CT>> doWhenChangedX = GetTypedDoWhenChanged<CT>(doWhenChanged);
-
-            return propFactory.Create<CT,T>(initialValue, propertyName, extraInfo, hasStorage, isTypeSolid,
-                GetComparerForCollections<CT>(comparer, propFactory, useRefEquality));
-        }
-
-        // From String
-        private static ICPropPrivate<CT, T> CreateCPropFromString<CT, T>(IPropFactory propFactory,
-            string value, bool useDefault,
-            string propertyName, object extraInfo,
-            bool hasStorage, bool isTypeSolid,
-            Delegate comparer, bool useRefEquality = true) where CT : class,IEnumerable<T>
-        {
-            CT initialValue;
-            if (useDefault)
-            {
-                initialValue = propFactory.ValueConverter.GetDefaultValue<CT,T>(propertyName);
-            }
-            else
-            {
-                initialValue = propFactory.GetValueFromString<CT,T>(value);
-            }
-            //EventHandler<PCTypedEventArgs<CT>> doWhenChangedX = GetTypedDoWhenChanged<CT>(doWhenChanged);
-
-            return propFactory.Create<CT, T>(initialValue, propertyName, extraInfo, hasStorage, isTypeSolid,
-                GetComparerForCollections<CT>(comparer, propFactory, useRefEquality));
-        }
-
-        // With No Value
-        private static ICPropPrivate<CT, T> CreateCPropWithNoValue<CT, T>(IPropFactory propFactory,
-            bool useDefault,
-            PropNameType propertyName, object extraInfo,
-            bool hasStorage, bool isTypeSolid,
-            Delegate comparer, bool useRefEquality = true) where CT : class, IEnumerable<T>
-        {
-            //EventHandler<PCTypedEventArgs<CT>> doWhenChangedX = GetTypedDoWhenChanged<CT>(doWhenChanged);
-
-            return propFactory.CreateWithNoValue<CT, T>(propertyName, extraInfo, hasStorage, isTypeSolid,
-                GetComparerForCollections<CT>(comparer, propFactory, useRefEquality));
-        }
-
-        private static Func<CT, CT, bool> GetComparerForCollections<CT>(Delegate comparer, IPropFactory propFactory, bool useRefEquality)
-        {
-            Func<CT, CT, bool> compr;
-            if (useRefEquality || comparer == null)
-                return propFactory.GetRefEqualityComparer<CT>();
-            else
-                return compr = (Func<CT, CT, bool>)comparer;
-        }
-
-        #endregion
-
-        #region Property-Type Methods
-
-        // From Object
-        private static IProp<T> CreatePropFromObject<T>(IPropFactory propFactory,
-            object value,
-            PropNameType propertyName, object extraInfo,
-            bool hasStorage, bool isTypeSolid,
-            Delegate comparer, bool useRefEquality = false)
-        {
-            T initialValue = propFactory.GetValueFromObject<T>(value);
-
-            //EventHandler<PCTypedEventArgs<T>> doWhenChangedX = GetTypedDoWhenChanged<T>(doWhenChanged);
-
-            return propFactory.Create<T>(initialValue, propertyName, extraInfo, hasStorage, isTypeSolid,
-                GetComparerForProps<T>(comparer, propFactory, useRefEquality));
-        }
-
-        // From String
-        private static IProp<T> CreatePropFromString<T>(IPropFactory propFactory,
-            string value, bool useDefault,
-            PropNameType propertyName, object extraInfo,
-            bool hasStorage, bool isTypeSolid,
-            Delegate comparer, bool useRefEquality = false)
-        {
-            T initialValue;
-            if (useDefault)
-            {
-                initialValue = propFactory.ValueConverter.GetDefaultValue<T>(propertyName);
-            }
-            else
-            {
-                initialValue = propFactory.GetValueFromString<T>(value);
-            }
-
-            //EventHandler<PCTypedEventArgs<T>> doWhenChangedX = GetTypedDoWhenChanged<T>(doWhenChanged);
-
-            return propFactory.Create<T>(initialValue, propertyName, extraInfo, hasStorage, isTypeSolid,
-                GetComparerForProps<T>(comparer, propFactory, useRefEquality));
-        }
-
-        // With No Value
-        private static IProp<T> CreatePropWithNoValue<T>(IPropFactory propFactory,
-            PropNameType propertyName, object extraInfo,
-            bool hasStorage, bool isTypeSolid,
-            Delegate comparer, bool useRefEquality = false)
-        {
-            //EventHandler<PCTypedEventArgs<T>> doWhenChangedX = GetTypedDoWhenChanged<T>(doWhenChanged);
-
-            return propFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, isTypeSolid,
-                GetComparerForProps<T>(comparer, propFactory, useRefEquality));
-        }
-
-        private static Func<T, T, bool> GetComparerForProps<T>(Delegate comparer, IPropFactory propFactory, bool useRefEquality)
-        {
-            if (useRefEquality)
-            {
-                return propFactory.GetRefEqualityComparer<T>();
-            }
-            else if (comparer == null)
-            {
-                return null;
-            }
-            else
-            {
-                return (Func<T, T, bool>)comparer;
-            }
-        }
-
-        //// TODO: Consider caching the delegates created here, or having creating a new delegate
-        //// that calls the first.
-
-        //// Also remember that if the source delegate has multiple targets that the Target and Method properties only return the values for the last target in the invocation list. 
-        //private static EventHandler<PCTypedEventArgs<T>> GetTypedDoWhenChanged<T>(EventHandler<PCGenEventArgs> doWhenChanged)
-        //{
-        //    EventHandler<PCTypedEventArgs<T>> result;
-        //    if (doWhenChanged == null)
-        //    {
-        //        result = null;
-        //    }
-        //    else
-        //    {
-        //        result = (EventHandler<PCTypedEventArgs<T>>)Delegate.CreateDelegate(typeof(
-        //            EventHandler<PCTypedEventArgs<T>>), doWhenChanged.Target, doWhenChanged.Method);
-
-        //        // This creates a new delegate which calls the first one.
-        //        //var x = new EventHandler<PropertyChangedWithTValsEventArgs<T>>(doWhenChanged);
-
-        //    }
-        //    return result;
-        //}
 
         #endregion
     }

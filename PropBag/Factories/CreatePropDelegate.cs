@@ -10,21 +10,21 @@ namespace DRM.PropBag
     #region Collection-Type Methods
 
     // From Object
-    public delegate object CreateCPropFromObjectDelegate(IPropFactory propFactory,
+    public delegate IProp CreateCPropFromObjectDelegate(IPropFactory propFactory,
         object value,
         string propertyName, object extraInfo,
         bool hasStorage, bool isTypeSolid,
         Delegate comparer, bool useRefEquality);
 
     // From String
-    public delegate object CreateCPropFromStringDelegate(IPropFactory propFactory,
+    public delegate IProp CreateCPropFromStringDelegate(IPropFactory propFactory,
         string value, bool useDefault,
         string propertyName, object extraInfo,
         bool hasStorage, bool isTypeSolid,
         Delegate comparer, bool useRefEquality);
 
     // With No Value
-    public delegate object CreateCPropWithNoValueDelegate(IPropFactory propFactory,
+    public delegate IProp CreateCPropWithNoValueDelegate(IPropFactory propFactory,
         string propertyName, object extraInfo,
         bool hasStorage, bool isTypeSolid,
         Delegate comparer, bool useRefEquality);
@@ -33,21 +33,21 @@ namespace DRM.PropBag
     #region Property-Type Methods
 
     // From Object
-    public delegate object CreatePropFromObjectDelegate(IPropFactory propFactory,
+    public delegate IProp CreatePropFromObjectDelegate(IPropFactory propFactory,
         object value,
         string propertyName, object extraInfo,
         bool hasStorage, bool isTypeSolid,
         Delegate comparer, bool useRefEquality);
 
     // From String
-    public delegate object CreatePropFromStringDelegate(IPropFactory propFactory,
+    public delegate IProp CreatePropFromStringDelegate(IPropFactory propFactory,
         string value, bool useDefault,
         string propertyName, object extraInfo,
         bool hasStorage, bool isTypeSolid,
         Delegate comparer, bool useRefEquality);
 
     // With No Value
-    public delegate object CreatePropWithNoValueDelegate(IPropFactory propFactory,
+    public delegate IProp CreatePropWithNoValueDelegate(IPropFactory propFactory,
         string propertyName, object extraInfo,
         bool hasStorage, bool isTypeSolid,
         Delegate comparer, bool useRefEquality);

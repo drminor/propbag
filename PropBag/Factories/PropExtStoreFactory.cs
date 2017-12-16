@@ -20,7 +20,7 @@ namespace DRM.PropBag
 
     public class PropExtStoreFactory : AbstractPropFactory
     {
-        public DelegateCacheProvider<PropBagType> DelegateCacheProvider { get; }
+        //public IProvideDelegateCaches DelegateCacheProvider { get; }
 
         object Stuff { get; }
 
@@ -57,12 +57,13 @@ namespace DRM.PropBag
 
         public PropExtStoreFactory
             (
-                object stuff, 
+                object stuff,
                 PSAccessServiceProviderType propStoreAccessServiceProvider,
+                //IProvideDelegateCaches delegateCacheProvider,
                 ResolveTypeDelegate typeResolver,
                 IConvertValues valueConverter
             )
-            : base(propStoreAccessServiceProvider, typeResolver, valueConverter)
+            : base(propStoreAccessServiceProvider, new SimpleDelegateCacheProvider(typeof(PropBag), typeof(APFGenericMethodTemplates)), typeResolver, valueConverter)
         {
             // Info to help us set up the getters and setters
             Stuff = stuff;
@@ -100,9 +101,7 @@ namespace DRM.PropBag
             bool dummy = true, bool typeIsSolid = true,
             Func<T,T,bool> comparer = null)
         {
-            throw new InvalidOperationException("External Store Factory doesn't know how to create properties with inital values.");
-
-            //return CreateWithNoValue(propertyName, extraInfo, dummy, typeIsSolid, doWhenChanged, doAfterNotify, comparer);
+            throw new InvalidOperationException("External Store Factory doesn't know how to create properties with initial values.");
         }
 
         public override IProp<T> CreateWithNoValue<T>(
@@ -129,7 +128,7 @@ namespace DRM.PropBag
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
             Delegate comparer, bool useRefEquality = false, Type itemType = null)
         {
-            throw new InvalidOperationException("External Store Factory doesn't know how to create properties with inital values.");
+            throw new InvalidOperationException("External Store Factory doesn't know how to create properties with initial values.");
         }
 
         public override IProp CreateGenFromString(Type typeOfThisProperty,
@@ -138,7 +137,7 @@ namespace DRM.PropBag
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
             Delegate comparer, bool useRefEquality = false, Type itemType = null)
         {
-            throw new InvalidOperationException("External Store Factory doesn't know how to create properties with inital values.");
+            throw new InvalidOperationException("External Store Factory doesn't know how to create properties with initial values.");
         }
 
         public override IProp CreateGenWithNoValue(Type typeOfThisProperty,
@@ -147,7 +146,7 @@ namespace DRM.PropBag
             Delegate comparer, bool useRefEquality = false, Type itemType = null)
         {
             CreatePropWithNoValueDelegate propCreator = GetPropWithNoValueCreator(typeOfThisProperty);
-            IProp prop = (IProp)propCreator(this, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
+            IProp prop = propCreator(this, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
                 comparer: comparer, useRefEquality: useRefEquality);
 
             return prop;

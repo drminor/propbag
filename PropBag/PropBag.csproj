@@ -32,7 +32,6 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -42,7 +41,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Caches\DelegateCache_Moved.cs" />
-    <Compile Include="Caches\DelegateCacheProvider.cs" />
+    <Compile Include="Caches\SimpleDelegateCacheProvider.cs" />
+    <Compile Include="Caches\IProvideDelegateCaches.cs" />
     <Compile Include="ControlModel\DeriveFromClassField_NotUsed.cs" />
     <Compile Include="ControlModel\DeriveFromClassModeEnum.cs" />
     <Compile Include="ControlModel\IPropModelProvider.cs" />
@@ -60,6 +60,7 @@
     <Compile Include="ControlModel\PropBinderField.cs" />
     <Compile Include="Factories\APFGenericMethodTemplates.cs" />
     <Compile Include="Factories\ICreateProps.cs" />
+    <None Include="Props\CViewProp_NotUsed.cs" />
     <Compile Include="Props\CProp.cs" />
     <Compile Include="Collections\PbAbstractListSource.cs" />
     <Compile Include="ControlModel\MapperRequest.cs" />

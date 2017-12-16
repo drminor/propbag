@@ -1,18 +1,13 @@
 ﻿
 using DRM.PropBag;
+using DRM.PropBag.Caches;
 using DRM.TypeSafePropertyBag;
+
 using NUnit.Framework;
 using System;
 
 namespace PropBagLib.Tests
 {
-    using PropIdType = UInt32;
-    using PropNameType = String;
-    using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
-    using SubCacheType = ICacheSubscriptions<UInt32>;
-
-    using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
-
     [TestFixtureAttribute]
     public class TestExternalStore
     {
@@ -33,9 +28,12 @@ namespace PropBagLib.Tests
             object stuff = new object();
             IPropFactory standardPropFactory = new AutoMapperSupport.AutoMapperHelpers().PropFactory_V1;
 
+            //IProvideDelegateCaches delegateCacheProvider = new SimpleDelegateCacheProvider();
+
             PropExtStoreFactory factory = new PropExtStoreFactory
                 (stuff: stuff,
                 propStoreAccessServiceProvider: standardPropFactory.PropStoreAccessServiceProvider,
+                //delegateCacheProvider: delegateCacheProvider,
                 typeResolver: null,
                 valueConverter: null
                 );

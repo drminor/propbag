@@ -80,83 +80,83 @@ namespace DRM.PropBag
         public IPropFactory PropFactory => _propFactory;
         public PropBagTypeSafetyMode TypeSafetyMode => _typeSafetyMode;
 
-        public event PropertyChangedEventHandler PropertyChanged;
-        //{
-        //    add
-        //    {
-        //        lock (_sync)
-        //        {
-        //            SubscribeToGlobalPropChanged(value, unregister: false);
-        //        }
-        //    }
-        //    remove
-        //    {
-        //        if (disposedValue) return;
-        //        lock (_sync)
-        //        {
-        //            SubscribeToGlobalPropChanged(value, unregister: true);
-        //        }
-        //    }
-        //}
+        public event PropertyChangedEventHandler PropertyChanged
+        {
+            add
+            {
+                lock (_sync)
+                {
+                    SubscribeToGlobalPropChanged(value, unregister: false);
+                }
+            }
+            remove
+            {
+                if (disposedValue) return;
+                lock (_sync)
+                {
+                    SubscribeToGlobalPropChanged(value, unregister: true);
+                }
+            }
+        }
 
-        public event PropertyChangingEventHandler PropertyChanging;
-        //{
-        //    add
-        //    {
-        //        lock (_sync)
-        //        {
-        //            SubscribeToGlobalPropChanging(value, unregister: false);
-        //        }
-        //    }
-        //    remove
-        //    {
-        //        if (disposedValue) return;
-        //        lock (_sync)
-        //        {
-        //            SubscribeToGlobalPropChanging(value, unregister: true);
-        //        }
-        //    }
-        //}
+        public event PropertyChangingEventHandler PropertyChanging
+        {
+            add
+            {
+                lock (_sync)
+                {
+                    SubscribeToGlobalPropChanging(value, unregister: false);
+                }
+            }
+            remove
+            {
+                if (disposedValue) return;
+                lock (_sync)
+                {
+                    SubscribeToGlobalPropChanging(value, unregister: true);
+                }
+            }
+        }
 
-        public event EventHandler<PcGenEventArgs> PropertyChangedWithGenVals;
-        //{
-        //    add
-        //    {
-        //        lock(_sync)
-        //        {
-        //            SubscribeToGlobalPropChanged(value, unregister: false);
-        //            //WeakEventManager<PB_EventHolder, PcGenEventArgs>.AddHandler(_eventHolder, "PropertyChangedWithGenVals", value);
-        //        }
-        //    }
-        //    remove
-        //    {
-        //        if (disposedValue) return;
-        //        lock (_sync)
-        //        {
-        //            SubscribeToGlobalPropChanged(value, unregister: true);
-        //            //WeakEventManager<PB_EventHolder, PcGenEventArgs>.RemoveHandler(_eventHolder, "PropertyChangedWithGenVals", value);
-        //        }
-        //    }
-        //}
+        public event EventHandler<PcGenEventArgs> PropertyChangedWithGenVals
+        {
+            add
+            {
+                lock (_sync)
+                {
+                    SubscribeToGlobalPropChanged(value, unregister: false);
+                    //WeakEventManager<PB_EventHolder, PcGenEventArgs>.AddHandler(_eventHolder, "PropertyChangedWithGenVals", value);
+                }
+            }
+            remove
+            {
+                if (disposedValue) return;
+                lock (_sync)
+                {
+                    SubscribeToGlobalPropChanged(value, unregister: true);
+                    //WeakEventManager<PB_EventHolder, PcGenEventArgs>.RemoveHandler(_eventHolder, "PropertyChangedWithGenVals", value);
+                }
+            }
+        }
 
-        public event EventHandler<PcObjectEventArgs> PropertyChangedWithObjectVals;
-        //{
-        //    add
-        //    {
-        //        lock (_sync)
-        //        {
-        //            SubscribeToGlobalPropChanged(value, unregister: false);
-        //        }
-        //    }
-        //    remove
-        //    {
-        //        if (disposedValue) return;
-        //        lock (_sync)
-        //        {
-        //            SubscribeToGlobalPropChanged(value, unregister: true);
-        //        }
-        //    }
-        //}
+        public event EventHandler<PcObjectEventArgs> PropertyChangedWithObjectVals
+        {
+            add
+            {
+                lock (_sync)
+                {
+                    SubscribeToGlobalPropChanged(value, unregister: false);
+                }
+            }
+            remove
+            {
+                if (disposedValue) return;
+                lock (_sync)
+                {
+                    SubscribeToGlobalPropChanged(value, unregister: true);
+                }
+            }
+        }
 
         #endregion
 
@@ -336,7 +336,11 @@ namespace DRM.PropBag
                     {
                         throw new NotSupportedException("Only local methods are supported.");
                     }
-                    propData = AddProp(pi.PropertyName, pg, target, pi.DoWhenChangedField.Method, pi.DoWhenChangedField.SubscriptionKind, pi.DoWhenChangedField.PriorityGroup);
+                    propData = AddProp(pi.PropertyName, pg,
+                        target, 
+                        pi.DoWhenChangedField.Method, 
+                        pi.DoWhenChangedField.SubscriptionKind, 
+                        pi.DoWhenChangedField.PriorityGroup);
                 }
                 else
                 {
@@ -2249,46 +2253,46 @@ namespace DRM.PropBag
         #region Methods to Raise Events
 
         // Raise Standard Events
-        protected void OnPropertyChanged(string propertyName)
-        {
-            PropertyChangedEventHandler handler = Interlocked.CompareExchange(ref PropertyChanged, null, null);
+        //protected void OnPropertyChanged(string propertyName)
+        //{
+        //    PropertyChangedEventHandler handler = Interlocked.CompareExchange(ref PropertyChanged, null, null);
 
-            if (handler != null)
-            {
-                handler(this, new PropertyChangedEventArgs(propertyName));
-            }
-        }
+        //    if (handler != null)
+        //    {
+        //        handler(this, new PropertyChangedEventArgs(propertyName));
+        //    }
+        //}
 
-        protected void OnPropertyChanging(string propertyName)
-        {
-            PropertyChangingEventHandler handler = Interlocked.CompareExchange(ref PropertyChanging, null, null);
+        //protected void OnPropertyChanging(string propertyName)
+        //{
+        //    PropertyChangingEventHandler handler = Interlocked.CompareExchange(ref PropertyChanging, null, null);
 
-            if (handler != null)
-            {
-                handler(this, new PropertyChangingEventArgs(propertyName));
-            }
-        }
+        //    if (handler != null)
+        //    {
+        //        handler(this, new PropertyChangingEventArgs(propertyName));
+        //    }
+        //}
 
         // INotifyPCGen
         // Moved to the PB_EventHolder
 
-        public void OnPropertyChangedWithGenVals(PcGenEventArgs eArgs)
-        {
-            EventHandler<PcGenEventArgs> handler = Interlocked.CompareExchange(ref PropertyChangedWithGenVals, null, null);
+        //public void OnPropertyChangedWithGenVals(PcGenEventArgs eArgs)
+        //{
+        //    EventHandler<PcGenEventArgs> handler = Interlocked.CompareExchange(ref PropertyChangedWithGenVals, null, null);
 
-            if (handler != null)
-                handler(this, eArgs);
-        }
+        //    if (handler != null)
+        //        handler(this, eArgs);
+        //}
 
 
-        // INotifyPCObject
-        protected void OnPropertyChangedWithObjVals(PcObjectEventArgs eArgs)
-        {
-            EventHandler<PcObjectEventArgs> handler = Interlocked.CompareExchange(ref PropertyChangedWithObjectVals, null, null);
+        //// INotifyPCObject
+        //protected void OnPropertyChangedWithObjVals(PcObjectEventArgs eArgs)
+        //{
+        //    EventHandler<PcObjectEventArgs> handler = Interlocked.CompareExchange(ref PropertyChangedWithObjectVals, null, null);
 
-            if (handler != null)
-                handler(this, eArgs);
-        }
+        //    if (handler != null)
+        //        handler(this, eArgs);
+        //}
 
         #endregion
 

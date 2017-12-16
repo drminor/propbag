@@ -1,5 +1,6 @@
 ﻿using DRM.PropBag;
 using DRM.PropBag.AutoMapperSupport;
+using DRM.PropBag.Caches;
 using DRM.PropBag.ControlModel;
 using DRM.TypeSafePropertyBag;
 using System;
@@ -73,9 +74,12 @@ namespace PropBagLib.Tests.AutoMapperSupport
                     PSAccessServiceProviderType PropStoreAccessServiceProvider =
                         new SimplePropStoreAccessServiceProvider(MAX_NUMBER_OF_PROPERTIES, handlerDispatchDelegateCacheProvider);
 
+                    //IProvideDelegateCaches delegateCacheProvider = new SimpleDelegateCacheProvider();
+
                     _propFactory_V1 = new PropFactory
                         (
                         propStoreAccessServiceProvider: PropStoreAccessServiceProvider,
+                        //delegateCacheProvider: delegateCacheProvider,
                         typeResolver: GetTypeFromName,
                         valueConverter: null
                         );

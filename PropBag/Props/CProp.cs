@@ -11,6 +11,7 @@ using System.Collections;
 
 namespace DRM.PropBag.Collections
 {
+
     public class CProp<CT,T> : PropTypedBase<CT>, ICPropPrivate<CT,T> where CT: IEnumerable<T>
     {
         public CProp(CT initalValue,
@@ -207,12 +208,12 @@ namespace DRM.PropBag.Collections
             }
             else
             {
-                ObservableCollection<T> result = new ObservableCollection<T>();
+                ObservableCollection<T> result = new ObservableCollection<T>(value);
 
-                foreach(T item in value)
-                {
-                    result.Add(item);
-                }
+                //foreach(T item in value)
+                //{
+                //    result.Add(item);
+                //}
                 return result;
             }
         }

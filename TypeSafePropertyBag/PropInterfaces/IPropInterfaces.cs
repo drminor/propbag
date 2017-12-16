@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data;
+using System.Windows.Data;
 
 namespace DRM.TypeSafePropertyBag
 {
@@ -15,18 +16,24 @@ namespace DRM.TypeSafePropertyBag
     using PropNameType = String;
 
     // Typically implemented by TypedTableBase<T> Class
-    public interface IDTPropPrivate<CT,T> : ICPropPrivate<CT,T> where CT: IEnumerable<T>
+    public interface IDTPropPrivate : IProp
     {
         DataTable DataTable { get; }
     }
 
     // Typically implemented by TypedTableBase<T> Class
-    public interface IDTProp<CT,T> : ICProp<CT,T> where CT: IEnumerable<T>
+    public interface IDTProp : IProp
     {
         DataTable ReadOnlyDataTable { get; }
     }
 
-    public interface ICPropPrivate<CT,T> : ICProp<CT,T>, IPropPrivate<CT> where CT: IEnumerable<T>
+    //public interface ICViewProp<CT, T> : IProp<CT> where CT : ObservableCollection<T>
+    //{
+    //    ReadOnlyObservableCollection<T> ReadOnlyObservableCollection { get; }
+    //    bool IsListCollectionView { get; }
+    //}
+
+    public interface ICPropPrivate<CT, T> : ICProp<CT, T>, IPropPrivate<CT> where CT : IEnumerable<T>
     {
         ObservableCollection<T> ObservableCollection { get; }
         void SetListSource(IListSource value);

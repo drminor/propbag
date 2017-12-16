@@ -1,21 +1,17 @@
-﻿using System;
+﻿using DRM.PropBag.Caches;
+using DRM.PropBag.ControlModel;
+using DRM.TypeSafePropertyBag;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.ComponentModel.Design.Serialization;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-
-using System.Reflection;
-using System.ComponentModel.Design.Serialization;
-
-using DRM.PropBag.Caches;
-using DRM.PropBag.ControlModel;
-
 using System.Windows;
-//using System.Windows.Data;
-using DRM.TypeSafePropertyBag;
-using System.Collections.ObjectModel;
 
 namespace DRM.PropBag
 {
@@ -28,7 +24,7 @@ namespace DRM.PropBag
         public PropFactoryValueConverter(TypeDescBasedTConverterCache converterCache)
         {
             // If the caller does not supply a value, use our default implementation.
-            _converter = converterCache ?? new DelegateCacheProvider<PropBag>().TypeDescBasedTConverterCache; // DelegateCacheProvider.TypeDescBasedTConverterCache;
+            _converter = converterCache ?? throw new ArgumentNullException(nameof(converterCache));
         }
 
         // Value is native object, we need to return a targetType (hopefully a string at this point.)
