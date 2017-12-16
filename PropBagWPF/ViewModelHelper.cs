@@ -3,7 +3,7 @@ using DRM.TypeSafePropertyBag;
 using DRM.ViewModelTools;
 using System;
 
-namespace DRM.PropBag.ControlsWPF
+namespace DRM.PropBagWPF
 {
     public class ViewModelHelper
     {

@@ -2,6 +2,7 @@
 using DRM.PropBag.AutoMapperSupport;
 using DRM.PropBag.Caches;
 using DRM.PropBag.ControlModel;
+using DRM.PropBagWPF;
 using DRM.TypeSafePropertyBag;
 using System;
 
@@ -76,7 +77,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
 
                     //IProvideDelegateCaches delegateCacheProvider = new SimpleDelegateCacheProvider();
 
-                    _propFactory_V1 = new PropFactory
+                    _propFactory_V1 = new WPFPropFactory
                         (
                         propStoreAccessServiceProvider: PropStoreAccessServiceProvider,
                         //delegateCacheProvider: delegateCacheProvider,

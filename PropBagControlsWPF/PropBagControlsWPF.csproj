@@ -47,8 +47,6 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Activators\DoWhenChangedHelper.cs" />
-    <Compile Include="Activators\ViewModelHelper.cs" />
     <Compile Include="Binders\BindingTarget.cs" />
     <Compile Include="Binders\DataSourceChangedEventArgs.cs" />
     <Compile Include="Binders\DataSourceChangedEventHandler.cs" />
@@ -86,7 +84,6 @@
     <Compile Include="Template\PropBagTemplate.cs" />
     <Compile Include="Template\PropComparerFunc.cs" />
     <Compile Include="Template\PropComparerField.cs" />
-    <Compile Include="Activators\PropModelProvider.cs" />
     <Compile Include="Template\TypeInfoField.cs" />
     <Compile Include="Template\PropDoWhenChangedField.cs" />
     <Compile Include="Template\PropItem.cs" />

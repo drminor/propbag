@@ -39,6 +39,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ViewModelTools", "ViewModel
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TypeWrapper", "TypeWrapper\TypeWrapper.csproj", "{7C45D001-90D6-4521-82AE-41F9492F8ECE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PropBagWPF", "PropBagWPF\PropBagWPF.csproj", "{54099EF8-94BB-4D74-8705-B4756CC1C7F2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -85,6 +87,10 @@ Global
 		{7C45D001-90D6-4521-82AE-41F9492F8ECE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7C45D001-90D6-4521-82AE-41F9492F8ECE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7C45D001-90D6-4521-82AE-41F9492F8ECE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{54099EF8-94BB-4D74-8705-B4756CC1C7F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{54099EF8-94BB-4D74-8705-B4756CC1C7F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{54099EF8-94BB-4D74-8705-B4756CC1C7F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{54099EF8-94BB-4D74-8705-B4756CC1C7F2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

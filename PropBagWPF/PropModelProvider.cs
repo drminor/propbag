@@ -1,4 +1,6 @@
-﻿using DRM.PropBag.ControlModel;
+﻿
+using DRM.PropBag.ControlsWPF;
+
 using DRM.TypeSafePropertyBag;
 using DRM.ViewModelTools;
 using System;
@@ -9,11 +11,13 @@ using System.Windows;
 using System.Windows.Controls;
 
 
-namespace DRM.PropBag.ControlsWPF
+namespace DRM.PropBagWPF
 {
-    public class PropModelProvider : IPropModelProvider
+    using ControlModel = DRM.PropBag.ControlModel;
+
+    public class PropModelProvider : ControlModel.IPropModelProvider
     {
-        private IPropBagTemplateProvider _propBagTemplateProvider;
+        private DRM.PropBag.ControlsWPF.IPropBagTemplateProvider _propBagTemplateProvider;
         private IViewModelActivator _viewModelActivator;
         private IPropFactory _fallBackPropFactory;
 
@@ -33,19 +37,19 @@ namespace DRM.PropBag.ControlsWPF
 
         #region PropBagTemplate Locator Support
 
-        public PropModel GetPropModel(string resourceKey)
+        public ControlModel.PropModel GetPropModel(string resourceKey)
         {
             return GetPropModel(resourceKey, null);
         }
 
-        public PropModel GetPropModel(string resourceKey, IPropFactory propFactory)
+        public ControlModel.PropModel GetPropModel(string resourceKey, IPropFactory propFactory)
         {
             try
             {
                 if (CanFindPropBagTemplateWithJustKey)
                 {
                     PropBagTemplate pbt = _propBagTemplateProvider.GetPropBagTemplate(resourceKey);
-                    PropModel pm = GetPropModel(pbt, propFactory);
+                    ControlModel.PropModel pm = GetPropModel(pbt, propFactory);
                     return pm;
                 }
                 else if (HasPbtLookupResources)
@@ -100,19 +104,19 @@ namespace DRM.PropBag.ControlsWPF
             }
         }
 
-        public PropModel GetPropModel(ResourceDictionary rd, string resourceKey)
+        public ControlModel.PropModel GetPropModel(ResourceDictionary rd, string resourceKey)
         {
             return GetPropModel(rd, resourceKey, null);
         }
 
-        public PropModel GetPropModel(ResourceDictionary rd, string resourceKey, IPropFactory propFactory)
+        public ControlModel.PropModel GetPropModel(ResourceDictionary rd, string resourceKey, IPropFactory propFactory)
         {
             try
             {
                 if (HasPbtLookupResources)
                 {
                     PropBagTemplate pbt = _propBagTemplateProvider.GetPropBagTemplate(resourceKey);
-                    PropModel pm = GetPropModel(pbt, propFactory);
+                    ControlModel.PropModel pm = GetPropModel(pbt, propFactory);
                     return pm;
                 }
                 else
@@ -132,9 +136,9 @@ namespace DRM.PropBag.ControlsWPF
 
         #region Parsing Logic
 
-        private PropModel GetPropModel(PropBagTemplate pbt, IPropFactory propFactory)
+        private ControlModel.PropModel GetPropModel(DRM.PropBag.ControlsWPF.PropBagTemplate pbt, IPropFactory propFactory)
         {
-            DeriveFromClassModeEnum deriveFrom = pbt.DeriveFromClassMode;
+            ControlModel.DeriveFromClassModeEnum deriveFrom = pbt.DeriveFromClassMode;
             Type targetType = pbt.TargetType;
 
             //TypeInfoField wrapperTypeInfoField = GetWrapperTypeInfo(pbt);
@@ -143,7 +147,7 @@ namespace DRM.PropBag.ControlsWPF
             IPropFactory propFactoryToUse = propFactory ?? pbt.PropFactory ?? _fallBackPropFactory ??
                 throw new InvalidOperationException($"Could not get a value for the PropFactory when fetching the PropModel: {pbt.FullClassName}");
 
-            PropModel result = new PropModel
+            ControlModel.PropModel result = new ControlModel.PropModel
                 (
                 className: pbt.ClassName,
                 namespaceName: pbt.OutPutNameSpace,
@@ -167,7 +171,7 @@ namespace DRM.PropBag.ControlsWPF
 
             for (int propPtr = 0; propPtr < propsCount; propPtr++)
             {
-                PropItem pi = pbt.Props[propPtr];
+                DRM.PropBag.ControlsWPF.PropItem pi = pbt.Props[propPtr];
 
                 bool hasStore = pi.HasStore;
                 bool typeIsSolid = pi.TypeIsSolid;
@@ -202,7 +206,7 @@ namespace DRM.PropBag.ControlsWPF
                         // TODO: Add error handling here.
                         if (ivf.PropBagResourceKey != null)
                         {
-                            PropModel pm = GetPropModel(ivf.PropBagResourceKey);
+                            ControlModel.PropModel pm = GetPropModel(ivf.PropBagResourceKey);
 
                             Func<object> vc = () => _viewModelActivator.GetNewViewModel(pm, pi.PropertyType, pm.FullClassName, pm.PropFactory ?? _fallBackPropFactory);
 
@@ -312,7 +316,7 @@ namespace DRM.PropBag.ControlsWPF
 
         private Type GetTypeFromCollInfoField(TypeInfoField tif, out Type itemType)
         {
-            WellKnownCollectionTypeEnum collectionType = tif.CollectionType ?? WellKnownCollectionTypeEnum.Enumerable;
+            ControlModel.WellKnownCollectionTypeEnum collectionType = tif.CollectionType ?? ControlModel.WellKnownCollectionTypeEnum.Enumerable;
 
             switch (collectionType)
             {
@@ -324,7 +328,7 @@ namespace DRM.PropBag.ControlsWPF
                 //    {
                 //        break;
                 //    }
-                case WellKnownCollectionTypeEnum.ObservableCollection:
+                case ControlModel.WellKnownCollectionTypeEnum.ObservableCollection:
                     {
                         // Consider using the MemberType property of the "root" TypeInfoField itself.
                         TypeInfoCollection tps;

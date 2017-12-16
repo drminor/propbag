@@ -73,23 +73,28 @@ namespace DRM.PropBag
 
         #region Collection-type property creators
 
+        // TODO: Implement Create Collection With Initial Value.
         public override ICPropPrivate<CT, T> Create<CT, T>(
             CT initialValue,
             PropNameType propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
             Func<CT, CT, bool> comparer = null)
         {
-            ICPropPrivate<CT, T> prop = null;
-            return prop;
+            throw new NotImplementedException("PropExtStoreFactory has not implemented the Create Collection Prop with Initial Value.");
+            //ICPropPrivate<CT, T> prop = null;
+            //return prop;
         }
 
+        // TODO: Implement Create Collection With No Value.
         public override ICPropPrivate<CT, T> CreateWithNoValue<CT, T>(
             PropNameType propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
             Func<CT, CT, bool> comparer = null)
         {
-            ICPropPrivate<CT, T> prop = null;
-            return prop;
+            throw new NotImplementedException("PropExtStoreFactory has not implemented the Create Collection Prop with No Value.");
+
+            //ICPropPrivate<CT, T> prop = null;
+            //return prop;
         }
 
         #endregion
@@ -150,6 +155,12 @@ namespace DRM.PropBag
                 comparer: comparer, useRefEquality: useRefEquality);
 
             return prop;
+        }
+
+        // TODO: Implement GetPropWithNoValueCreator
+        protected override CreatePropWithNoValueDelegate GetPropWithNoValueCreator(Type typeOfThisValue)
+        {
+            throw new NotImplementedException("PropExtStoreFactory has not yet implemented the GetPropWithNoValueCreator method.");
         }
 
         #endregion

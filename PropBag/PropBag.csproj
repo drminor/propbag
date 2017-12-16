@@ -42,12 +42,9 @@
   <ItemGroup>
     <None Include="Caches\DelegateCache_Moved.cs" />
     <Compile Include="Caches\SimpleDelegateCacheProvider.cs" />
-    <Compile Include="Caches\IProvideDelegateCaches.cs" />
     <Compile Include="ControlModel\DeriveFromClassField_NotUsed.cs" />
     <Compile Include="ControlModel\DeriveFromClassModeEnum.cs" />
     <Compile Include="ControlModel\IPropModelProvider.cs" />
-    <Compile Include="Caches\TypeDescBasedTConverterKey.cs" />
-    <Compile Include="Caches\TypeDescBasedTConverterCache.cs" />
     <Compile Include="ClassGenerator\PropDefRaw.cs" />
     <Compile Include="ClassGenerator\PropGenerator.cs" />
     <Compile Include="ClassGenerator\PropModelExtensions.cs" />
@@ -68,14 +65,12 @@
     <Compile Include="ControlModel\NotifyPropertyChangedBase.cs" />
     <Compile Include="ControlModel\TypeInfoField.cs" />
     <Compile Include="ControlModel\TwoTypes.cs" />
-    <Compile Include="DoSetDelegate.cs" />
     <Compile Include="Factories\AbstractPropFactory.cs" />
     <Compile Include="ControlModel\PropComparerField.cs" />
     <Compile Include="ControlModel\PropDoWhenChangedField.cs" />
     <Compile Include="ControlModel\PropInitialValueField.cs" />
     <Compile Include="ControlModel\PropItem.cs" />
     <Compile Include="ControlModel\PropModel.cs" />
-    <Compile Include="Factories\CreatePropDelegate.cs" />
     <Compile Include="ExtValDelegates.cs" />
     <Compile Include="Factories\GetDefaultValueDelegate.cs" />
     <Compile Include="Factories\PropFactoryValueConverter.cs" />
@@ -90,7 +85,7 @@
     <Compile Include="TypeDescriptors\IPbCollectionTypeDescriptor.cs" />
     <Compile Include="Props\PropExternStore.cs" />
     <Compile Include="Factories\PropExtStoreFactory.cs" />
-    <Compile Include="Factories\PropFactory.cs" />
+    <None Include="Factories\PropFactory.cs" />
     <Compile Include="Props\PropBase.cs" />
     <Compile Include="Props\PropTypedBase.cs" />
     <Compile Include="PubPropBag.cs" />

@@ -161,6 +161,10 @@
       <Project>{9bee9979-9812-4675-8f97-a4dd1e7dba5f}</Project>
       <Name>PropBagControlsWPF</Name>
     </ProjectReference>
+    <ProjectReference Include="..\PropBagWPF\PropBagWPF.csproj">
+      <Project>{54099ef8-94bb-4d74-8705-b4756cc1c7f2}</Project>
+      <Name>PropBagWPF</Name>
+    </ProjectReference>
     <ProjectReference Include="..\PropBag\PropBag.csproj">
       <Project>{7387b893-fbdc-4b9c-ac9e-0b56388b46c1}</Project>
       <Name>PropBag</Name>

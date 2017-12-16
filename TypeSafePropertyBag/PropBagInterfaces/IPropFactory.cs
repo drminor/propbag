@@ -19,6 +19,8 @@ namespace DRM.TypeSafePropertyBag
 
         PSAccessServiceProviderType PropStoreAccessServiceProvider { get; }
 
+        IProvideDelegateCaches DelegateCacheProvider { get; }
+
         #region Collection-Type Methods Methods
 
         ICPropPrivate<CT, T> Create<CT, T>(CT initialValue, PropNameType propertyName, object extraInfo = null,

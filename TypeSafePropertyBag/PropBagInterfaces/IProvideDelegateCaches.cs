@@ -1,6 +1,6 @@
 ﻿using DRM.TypeSafePropertyBag.Fundamentals;
 
-namespace DRM.PropBag.Caches
+namespace DRM.TypeSafePropertyBag
 {
     public interface IProvideDelegateCaches
     {

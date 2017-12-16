@@ -1,22 +1,10 @@
-﻿using DRM.TypeSafePropertyBag;
-using DRM.TypeSafePropertyBag.Fundamentals;
+﻿using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Reflection;
-using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace DRM.PropBag.Caches
+namespace DRM.TypeSafePropertyBag
 {
-    // TODO: Move these declartions to a dedicated file.
-
-    // Delegate declarations. 
-    public delegate object TFromStringDelegate(string strVal);
-    public delegate string StringFromTDelegate(object value);
-
     public class TypeDescBasedTConverterCache
     {
         private LockingConcurrentDictionary<TypeDescBasedTConverterKey, Delegate> _converters;

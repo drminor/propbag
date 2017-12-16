@@ -1,8 +1,9 @@
-﻿using DRM.TypeSafePropertyBag;
+﻿using DRM.PropBag.ControlsWPF;
+using DRM.TypeSafePropertyBag;
 using System;
 using System.Reflection;
 
-namespace DRM.PropBag.ControlsWPF
+namespace DRM.PropBagWPF
 {
     public class DoWhenChangedHelper
     {

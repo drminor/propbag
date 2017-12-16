@@ -729,7 +729,7 @@ namespace DRM.PropBag
                 }
             }
 
-            DelegateCache<DoSetDelegate> dc = ((PropFactory)_propFactory).DelegateCacheProvider.DoSetDelegateCache;
+            DelegateCache<DoSetDelegate> dc = _propFactory.DelegateCacheProvider.DoSetDelegateCache;
             DoSetDelegate setPropDel = dc.GetOrAdd(PropData.TypedProp.Type);
             return setPropDel(this, propId, propertyName, PropData.TypedProp, value);
         }
