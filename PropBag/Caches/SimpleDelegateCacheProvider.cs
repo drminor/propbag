@@ -13,27 +13,12 @@ namespace DRM.PropBag.Caches
 {
     public class SimpleDelegateCacheProvider : IProvideDelegateCaches
     {
-        #region Private Members
-
-        //TypeDescBasedTConverterCache _converterCache;
-
-        //DelegateCache<DoSetDelegate> _doSetCache;
-
-
-        //DelegateCache<CreatePropFromStringDelegate> _createPropFromStringCache;
-
-        //DelegateCache<CreatePropWithNoValueDelegate> _createPropWithNoValCache;
-
-        //DelegateCache<CreatePropFromObjectDelegate> _createPropFromObjectCache;
-
-
-        #endregion
-
         #region Public Properties
 
         // TypeDesc<T>-based Converter Cache
         public TypeDescBasedTConverterCache TypeDescBasedTConverterCache { get; }
 
+        // DoSetDelegate Cache.
         public DelegateCache<DoSetDelegate> DoSetDelegateCache { get; }
 
 
@@ -51,9 +36,9 @@ namespace DRM.PropBag.Caches
 
     #endregion
 
-    #region Constructor
+        #region Constructor
 
-    public SimpleDelegateCacheProvider(Type propBagType, Type propCreatorType)
+        public SimpleDelegateCacheProvider(Type propBagType, Type propCreatorType)
         {
             #region Converter and DoSet
 
@@ -72,13 +57,10 @@ namespace DRM.PropBag.Caches
             MethodInfo createPropNoVal_mi = propCreatorType.GetMethod("CreatePropWithNoValue", BindingFlags.Static | BindingFlags.NonPublic);
             CreatePropWithNoValCache = new DelegateCache<CreatePropWithNoValueDelegate>(createPropNoVal_mi);
 
-
             // Create Prop With No Value
             MethodInfo createPropFromString_mi = propCreatorType.GetMethod("CreatePropFromString", BindingFlags.Static | BindingFlags.NonPublic);
             CreatePropFromStringCache = new DelegateCache<CreatePropFromStringDelegate>(createPropFromString_mi);
 
-
-            // TODO: This is not being used.
             // Create Prop From Object
             MethodInfo createPropFromObject_mi = propCreatorType.GetMethod("CreatePropFromObject", BindingFlags.Static | BindingFlags.NonPublic);
             CreatePropFromObjectCache =  new DelegateCache<CreatePropFromObjectDelegate>(createPropFromObject_mi);
@@ -91,11 +73,9 @@ namespace DRM.PropBag.Caches
             MethodInfo createCPropNoVal_mi = propCreatorType.GetMethod("CreateCPropWithNoValue", BindingFlags.Static | BindingFlags.NonPublic);
             CreateCPropWithNoValCache = new TwoTypesDelegateCache<CreateCPropWithNoValueDelegate>(createCPropNoVal_mi);
 
-
             // Create Prop With No Value
             MethodInfo createCPropFromString_mi = propCreatorType.GetMethod("CreateCPropFromString", BindingFlags.Static | BindingFlags.NonPublic);
             CreateCPropFromStringCache = new TwoTypesDelegateCache<CreateCPropFromStringDelegate>(createCPropFromString_mi);
-
 
             // TODO: This is not being used.
             // Create Prop From Object

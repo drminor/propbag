@@ -1,4 +1,5 @@
 ﻿using DRM.PropBag.Caches;
+using DRM.PropBag.Collections;
 using DRM.TypeSafePropertyBag;
 using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
@@ -68,75 +69,221 @@ namespace DRM.PropBag
 
         #endregion
 
+        //#region Collection-type property creators
+
+        //public abstract ICPropPrivate<CT, T> Create<CT, T>(
+        //    CT initialValue,
+        //    PropNameType propertyName, object extraInfo = null,
+        //    bool hasStorage = true, bool typeIsSolid = true,
+        //    Func<CT, CT, bool> comparer = null) where CT : IEnumerable<T>;
+
+        //public abstract ICPropPrivate<CT, T> CreateWithNoValue<CT, T>(
+        //    PropNameType propertyName, object extraInfo = null,
+        //    bool hasStorage = true, bool typeIsSolid = true,
+        //    Func<CT, CT, bool> comparer = null) where CT : IEnumerable<T>;
+
+        //#endregion
+
+        //#region Propety-type property creators
+
+        //public abstract IProp<T> Create<T>(
+        //    T initialValue,
+        //    PropNameType propertyName, object extraInfo = null,
+        //    bool hasStorage = true, bool typeIsSolid = true,
+        //    Func<T, T, bool> comparer = null);
+
+        //public abstract IProp<T> CreateWithNoValue<T>(
+        //    PropNameType propertyName, object extraInfo = null,
+        //    bool hasStorage = true, bool typeIsSolid = true,
+        //    Func<T, T, bool> comparer = null);
+
+        //#endregion
+
+        //#region Generic property creators
+
+        //public abstract IProp CreateGenFromObject(Type typeOfThisProperty,
+        //    object value,
+        //    PropNameType propertyName, object extraInfo,
+        //    bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
+        //    Delegate comparer, bool useRefEquality = false, Type itemType = null);
+
+        //public abstract IProp CreateGenFromString(Type typeOfThisProperty,
+        //    string value, bool useDefault,
+        //    string propertyName, object extraInfo,
+        //    bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
+        //    Delegate comparer, bool useRefEquality = false, Type itemType = null);
+
+        //public abstract IProp CreateGenWithNoValue(Type typeOfThisProperty,
+        //    PropNameType propertyName, object extraInfo,
+        //    bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
+        //    Delegate comparer, bool useRefEquality = false, Type itemType = null);
+
+        ////public virtual IPropGen CreatePropInferType(object value, string propertyName, object extraInfo, bool hasStorage)
+        ////{
+        ////    System.Type typeOfThisValue;
+        ////    bool typeIsSolid;
+
+        ////    if (value == null)
+        ////    {
+        ////        typeOfThisValue = typeof(object);
+        ////        typeIsSolid = false;
+        ////    }
+        ////    else
+        ////    {
+        ////        typeOfThisValue = GetTypeFromValue(value);
+        ////        typeIsSolid = true;
+        ////    }
+
+        ////    IPropGen prop = this.CreateGenFromObject(typeOfThisValue, value, propertyName, extraInfo, 
+        ////        hasStorage, typeIsSolid, null, false, null, false);
+        ////    return prop;
+        ////}
+
+        //#endregion
+
         #region Collection-type property creators
 
-        public abstract ICPropPrivate<CT, T> Create<CT, T>(
+        public virtual ICPropPrivate<CT, T> Create<CT, T>(
             CT initialValue,
-            PropNameType propertyName, object extraInfo = null,
+            string propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
-            Func<CT, CT, bool> comparer = null) where CT : IEnumerable<T>;
+            Func<CT, CT, bool> comparer = null) where CT : IEnumerable<T>
+        {
+            if (comparer == null) comparer = EqualityComparer<CT>.Default.Equals;
+            GetDefaultValueDelegate<CT> getDefaultValFunc = ValueConverter.GetDefaultValue<CT>;
 
-        public abstract ICPropPrivate<CT, T> CreateWithNoValue<CT, T>(
+            ICPropPrivate<CT, T> prop = new CProp<CT, T>(initialValue, getDefaultValFunc, typeIsSolid, hasStorage, comparer);
+            return prop;
+        }
+
+        public virtual ICPropPrivate<CT, T> CreateWithNoValue<CT, T>(
             PropNameType propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
-            Func<CT, CT, bool> comparer = null) where CT : IEnumerable<T>;
+            Func<CT, CT, bool> comparer = null) where CT : IEnumerable<T>
+        {
+            if (comparer == null) comparer = EqualityComparer<CT>.Default.Equals;
+
+            GetDefaultValueDelegate<CT> getDefaultValFunc = ValueConverter.GetDefaultValue<CT>;
+
+            ICPropPrivate<CT, T> prop = new CProp<CT, T>(getDefaultValFunc, typeIsSolid, hasStorage, comparer);
+            return prop;
+        }
 
         #endregion
 
         #region Propety-type property creators
 
-        public abstract IProp<T> Create<T>(
+        public virtual IProp<T> Create<T>(
             T initialValue,
             PropNameType propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
-            Func<T, T, bool> comparer = null);
+            Func<T, T, bool> comparer = null)
+        {
+            if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
 
-        public abstract IProp<T> CreateWithNoValue<T>(
+            GetDefaultValueDelegate<T> getDefaultValFunc = ValueConverter.GetDefaultValue<T>;
+            IProp<T> prop = new Prop<T>(initialValue, getDefaultValFunc, typeIsSolid: typeIsSolid, hasStore: hasStorage, comparer: comparer);
+            return prop;
+        }
+
+        public virtual IProp<T> CreateWithNoValue<T>(
             PropNameType propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
-            Func<T, T, bool> comparer = null);
+            Func<T, T, bool> comparer = null)
+        {
+            if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
+
+            GetDefaultValueDelegate<T> getDefaultValFunc = ValueConverter.GetDefaultValue<T>;
+            IProp<T> prop = new Prop<T>(getDefaultValFunc, typeIsSolid: typeIsSolid, hasStore: hasStorage, comparer: comparer);
+            return prop;
+        }
 
         #endregion
 
         #region Generic property creators
 
-        public abstract IProp CreateGenFromObject(Type typeOfThisProperty,
+        public virtual IProp CreateGenFromObject(Type typeOfThisProperty,
             object value,
             PropNameType propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
-            Delegate comparer, bool useRefEquality = false, Type itemType = null);
+            Delegate comparer, bool useRefEquality = false, Type itemType = null)
+        {
+            if (propKind == PropKindEnum.Prop)
+            {
+                CreatePropFromObjectDelegate propCreator = GetPropCreator(typeOfThisProperty);
+                IProp prop = propCreator(this, value, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
+                    comparer: comparer, useRefEquality: useRefEquality);
 
-        public abstract IProp CreateGenFromString(Type typeOfThisProperty,
+                return prop;
+            }
+            else if (propKind == PropKindEnum.Collection)
+            {
+                CreateCPropFromObjectDelegate propCreator = GetCPropCreator(typeOfThisProperty, itemType);
+                IProp prop = propCreator(this, value, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
+                    comparer: comparer, useRefEquality: useRefEquality);
+
+                return prop;
+            }
+            else
+            {
+                throw new InvalidOperationException($"PropKind = {propKind} is not recognized or is not supported.");
+            }
+        }
+
+        public virtual IProp CreateGenFromString(Type typeOfThisProperty,
             string value, bool useDefault,
-            string propertyName, object extraInfo,
-            bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
-            Delegate comparer, bool useRefEquality = false, Type itemType = null);
-
-        public abstract IProp CreateGenWithNoValue(Type typeOfThisProperty,
             PropNameType propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
-            Delegate comparer, bool useRefEquality = false, Type itemType = null);
+            Delegate comparer, bool useRefEquality = false, Type itemType = null)
+        {
+            if (propKind == PropKindEnum.Prop)
+            {
+                CreatePropFromStringDelegate propCreator = GetPropFromStringCreator(typeOfThisProperty);
+                IProp prop = propCreator(this, value, useDefault, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
+                    comparer: comparer, useRefEquality: useRefEquality);
 
-        //public virtual IPropGen CreatePropInferType(object value, string propertyName, object extraInfo, bool hasStorage)
-        //{
-        //    System.Type typeOfThisValue;
-        //    bool typeIsSolid;
+                return prop;
+            }
+            else if (propKind == PropKindEnum.Collection)
+            {
+                CreateCPropFromStringDelegate propCreator = GetCPropFromStringCreator(typeOfThisProperty, itemType);
+                IProp prop = propCreator(this, value, useDefault, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
+                    comparer: comparer, useRefEquality: useRefEquality);
 
-        //    if (value == null)
-        //    {
-        //        typeOfThisValue = typeof(object);
-        //        typeIsSolid = false;
-        //    }
-        //    else
-        //    {
-        //        typeOfThisValue = GetTypeFromValue(value);
-        //        typeIsSolid = true;
-        //    }
+                return prop;
+            }
+            else
+            {
+                throw new InvalidOperationException($"PropKind = {propKind} is not recognized or is not supported.");
+            }
+        }
 
-        //    IPropGen prop = this.CreateGenFromObject(typeOfThisValue, value, propertyName, extraInfo, 
-        //        hasStorage, typeIsSolid, null, false, null, false);
-        //    return prop;
-        //}
+        public virtual IProp CreateGenWithNoValue(Type typeOfThisProperty,
+            PropNameType propertyName, object extraInfo,
+            bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
+            Delegate comparer, bool useRefEquality = false, Type itemType = null)
+        {
+            if (propKind == PropKindEnum.Prop)
+            {
+                CreatePropWithNoValueDelegate propCreator = GetPropWithNoValueCreator(typeOfThisProperty);
+                IProp prop = propCreator(this, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
+                    comparer: comparer, useRefEquality: useRefEquality);
+
+                return prop;
+            }
+            else if (propKind == PropKindEnum.Collection)
+            {
+                CreateCPropWithNoValueDelegate propCreator = GetCPropWithNoValueCreator(typeOfThisProperty, itemType);
+                IProp prop = propCreator(this, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
+                    comparer: comparer, useRefEquality: useRefEquality);
+
+                return prop;
+            }
+            else
+            {
+                throw new InvalidOperationException($"PropKind = {propKind} is not recognized or is not supported.");
+            }
+        }
 
         #endregion
 
@@ -306,10 +453,6 @@ namespace DRM.PropBag
         {
             CreateCPropFromObjectDelegate result = DelegateCacheProvider.CreateCPropFromObjectCache.GetOrAdd(new TypePair(collectionType, itemType));
             return result;
-
-            //MethodInfo mi = gmtType.GetMethod("CreateCPropFromObject", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(collectionType, itemType);
-            //CreateCPropFromObjectDelegate result = (CreateCPropFromObjectDelegate)Delegate.CreateDelegate(typeof(CreateCPropFromObjectDelegate), mi);
-            //return result;
         }
 
         // From String
@@ -317,21 +460,13 @@ namespace DRM.PropBag
         {
             CreateCPropFromStringDelegate result = DelegateCacheProvider.CreateCPropFromStringCache.GetOrAdd(new TypePair(collectionType, itemType));
             return result;
-
-            //MethodInfo mi = gmtType.GetMethod("CreateCPropFromString", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(collectionType, itemType);
-            //CreateCPropFromStringDelegate result = (CreateCPropFromStringDelegate)Delegate.CreateDelegate(typeof(CreateCPropFromStringDelegate), mi);
-            //return result;
-    }
+        }
 
         // With No Value
         protected virtual CreateCPropWithNoValueDelegate GetCPropWithNoValueCreator(Type collectionType, Type itemType)
         {
             CreateCPropWithNoValueDelegate result = DelegateCacheProvider.CreateCPropWithNoValCache.GetOrAdd(new TypePair(collectionType, itemType));
             return result;
-
-            //MethodInfo mi = gmtType.GetMethod("CreateCPropWithNoValue",BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(collectionType, itemType);
-            //CreateCPropWithNoValueDelegate result = (CreateCPropWithNoValueDelegate)Delegate.CreateDelegate(typeof(CreateCPropWithNoValueDelegate), mi);
-            //return result;
         }
 
         #endregion
@@ -343,22 +478,13 @@ namespace DRM.PropBag
         {
             CreatePropFromObjectDelegate result = DelegateCacheProvider.CreatePropFromObjectCache.GetOrAdd(typeOfThisValue);
             return result;
-
-            //MethodInfo mi = gmtType.GetMethod("CreatePropFromObject", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(typeOfThisValue);
-            //CreatePropFromObjectDelegate result = (CreatePropFromObjectDelegate)Delegate.CreateDelegate(typeof(CreatePropFromObjectDelegate), mi);
-            //return result;
         }
 
         // From String
         protected virtual CreatePropFromStringDelegate GetPropFromStringCreator(Type typeOfThisValue)
         {
-
             CreatePropFromStringDelegate result = DelegateCacheProvider.CreatePropFromStringCache.GetOrAdd(typeOfThisValue);
             return result;
-
-            //MethodInfo mi = gmtType.GetMethod("CreatePropFromString", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(typeOfThisValue);
-            //CreatePropFromStringDelegate result = (CreatePropFromStringDelegate)Delegate.CreateDelegate(typeof(CreatePropFromStringDelegate), mi);
-            //return result;
         }
 
         // With No Value
@@ -366,10 +492,6 @@ namespace DRM.PropBag
         {
             CreatePropWithNoValueDelegate result = DelegateCacheProvider.CreatePropWithNoValCache.GetOrAdd(typeOfThisValue);
             return result;
-
-            //MethodInfo mi = gmtType.GetMethod("CreatePropWithNoValue", BindingFlags.Static | BindingFlags.NonPublic).MakeGenericMethod(typeOfThisValue);
-            //CreatePropWithNoValueDelegate result = (CreatePropWithNoValueDelegate)Delegate.CreateDelegate(typeof(CreatePropWithNoValueDelegate), mi);
-            //return result;
         }
 
         #endregion Property-Type Methods
