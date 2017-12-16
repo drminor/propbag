@@ -15,38 +15,33 @@ namespace DRM.PropBag.Caches
     {
         #region Private Members
 
-        TypeDescBasedTConverterCache _converterCache;
+        //TypeDescBasedTConverterCache _converterCache;
 
-        DelegateCache<DoSetDelegate> _doSetCache;
+        //DelegateCache<DoSetDelegate> _doSetCache;
 
 
-        DelegateCache<CreatePropFromStringDelegate> _createPropFromStringCache;
+        //DelegateCache<CreatePropFromStringDelegate> _createPropFromStringCache;
 
-        DelegateCache<CreatePropWithNoValueDelegate> _createPropWithNoValCache;
+        //DelegateCache<CreatePropWithNoValueDelegate> _createPropWithNoValCache;
 
-        DelegateCache<CreatePropFromObjectDelegate> _createPropFromObjectCache;
+        //DelegateCache<CreatePropFromObjectDelegate> _createPropFromObjectCache;
 
-        //DelegateCache<CreateCPropFromStringDelegate> _createCPropFromStringCache;
-
-        //DelegateCache<CreateCPropWithNoValueDelegate> _createCPropWithNoValCache;
-
-        //DelegateCache<CreateCPropFromObjectDelegate> _createCPropFromObjectCache;
 
         #endregion
 
         #region Public Properties
 
         // TypeDesc<T>-based Converter Cache
-        public TypeDescBasedTConverterCache TypeDescBasedTConverterCache => _converterCache;
+        public TypeDescBasedTConverterCache TypeDescBasedTConverterCache { get; }
 
-        public DelegateCache<DoSetDelegate> DoSetDelegateCache => _doSetCache;
+        public DelegateCache<DoSetDelegate> DoSetDelegateCache { get; }
 
 
-        public DelegateCache<CreatePropFromStringDelegate> CreatePropFromStringCache => _createPropFromStringCache;
+        public DelegateCache<CreatePropFromStringDelegate> CreatePropFromStringCache { get; }
 
-        public DelegateCache<CreatePropWithNoValueDelegate> CreatePropWithNoValCache => _createPropWithNoValCache;
+        public DelegateCache<CreatePropWithNoValueDelegate> CreatePropWithNoValCache { get; }
 
-        public DelegateCache<CreatePropFromObjectDelegate> CreatePropFromObjectCache => _createPropFromObjectCache;
+        public DelegateCache<CreatePropFromObjectDelegate> CreatePropFromObjectCache { get; }
 
         public TwoTypesDelegateCache<CreateCPropFromStringDelegate> CreateCPropFromStringCache { get; }
 
@@ -63,11 +58,11 @@ namespace DRM.PropBag.Caches
             #region Converter and DoSet
 
             // TypeDesc<T>-based Converter Cache
-            _converterCache = new TypeDescBasedTConverterCache();
+            TypeDescBasedTConverterCache = new TypeDescBasedTConverterCache();
 
             // DoSet 
             MethodInfo doSetMethodInfo = propBagType.GetMethod("DoSetBridge", BindingFlags.Instance | BindingFlags.NonPublic);
-            _doSetCache = new DelegateCache<DoSetDelegate>(doSetMethodInfo);
+            DoSetDelegateCache = new DelegateCache<DoSetDelegate>(doSetMethodInfo);
 
             #endregion
 
@@ -75,18 +70,18 @@ namespace DRM.PropBag.Caches
 
             // Create Prop From String
             MethodInfo createPropNoVal_mi = propCreatorType.GetMethod("CreatePropWithNoValue", BindingFlags.Static | BindingFlags.NonPublic);
-            _createPropWithNoValCache = new DelegateCache<CreatePropWithNoValueDelegate>(createPropNoVal_mi);
+            CreatePropWithNoValCache = new DelegateCache<CreatePropWithNoValueDelegate>(createPropNoVal_mi);
 
 
             // Create Prop With No Value
             MethodInfo createPropFromString_mi = propCreatorType.GetMethod("CreatePropFromString", BindingFlags.Static | BindingFlags.NonPublic);
-            _createPropFromStringCache = new DelegateCache<CreatePropFromStringDelegate>(createPropFromString_mi);
+            CreatePropFromStringCache = new DelegateCache<CreatePropFromStringDelegate>(createPropFromString_mi);
 
 
             // TODO: This is not being used.
             // Create Prop From Object
             MethodInfo createPropFromObject_mi = propCreatorType.GetMethod("CreatePropFromObject", BindingFlags.Static | BindingFlags.NonPublic);
-             _createPropFromObjectCache =  new DelegateCache<CreatePropFromObjectDelegate>(createPropFromObject_mi);
+            CreatePropFromObjectCache =  new DelegateCache<CreatePropFromObjectDelegate>(createPropFromObject_mi);
 
             #endregion
 
