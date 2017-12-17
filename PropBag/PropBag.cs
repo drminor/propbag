@@ -1,9 +1,7 @@
 ﻿using DRM.PropBag.Caches;
 using DRM.PropBag.ControlModel;
-
 using DRM.TypeSafePropertyBag;
 using DRM.TypeSafePropertyBag.Fundamentals;
-
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -12,22 +10,19 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Windows;
 
 namespace DRM.PropBag
 {
+    using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
+    using L2KeyManType = IL2KeyMan<UInt32, String>;
     using PropIdType = UInt32;
     using PropNameType = String;
-
-    using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
-
-    using L2KeyManType = IL2KeyMan<UInt32, String>;
-
     using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
-    using SubCacheType = ICacheSubscriptions<UInt32>;
-
     using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
+    using SubCacheType = ICacheSubscriptions<UInt32>;
 
     #region Summary and Remarks
 
@@ -251,9 +246,9 @@ namespace DRM.PropBag
 
             foreach (DRM.PropBag.ControlModel.PropItem pi in pm.Props)
             {
-                if(pi.PropertyName == "PersonList")
+                if(pi.PropertyName == "PersonListView")
                 {
-                    System.Diagnostics.Debug.WriteLine("Here we are.");
+                    System.Diagnostics.Debug.WriteLine("We are creating prop item: PersonListView.");
                 }
                 object ei = pi.ExtraInfo;
 
@@ -364,7 +359,7 @@ namespace DRM.PropBag
         // unless neverCreate is set, in which case it will
         // never throw an exception and always return an empty PropGen.
         private IPropData HandleMissingProp(PropIdType propId, PropNameType propertyName, Type propertyType, out bool wasRegistered,
-            bool haveValue, object value, bool alwaysRegister, bool mustBeRegistered, bool neverCreate)
+            bool haveValue, object value, bool alwaysRegister, bool mustBeRegistered, bool neverCreate, [CallerMemberName] string nameOfCallingMethod = null)
         {
             ReadMissingPropPolicyEnum thePolicyToUse; //= alwaysRegister ? ReadMissingPropPolicyEnum.Register : ReadMissingPropPolicy;
 
@@ -407,6 +402,19 @@ namespace DRM.PropBag
                             return new PropGen();
                         }
                     }
+                case ReadMissingPropPolicyEnum.NotAllowed:
+                    {
+                        if (OurMetaData.AllPropsMustBeRegistered)
+                        {
+                            ReportAccessToMissing(propertyName, nameOfCallingMethod ?? nameof(HandleMissingProp));
+                            throw new InvalidOperationException("ReportAccessToMissing did not raise an exception.");
+                            //throw new InvalidOperationException(string.Format("Property: {0} has not been declared by calling AddProp. Cannot use this method in this case. Declare by calling AddProp.", propertyName));
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException(string.Format("No property: {0} exists in this PropBag.", propertyName));
+                        }
+                    }
                 case ReadMissingPropPolicyEnum.Register:
                     {
                         // TODO: Must determine the PropKind for this new property.
@@ -416,7 +424,7 @@ namespace DRM.PropBag
                         {
                             bool typeIsSolid = _propFactory.IsTypeSolid(value, propertyType);
 
-
+                            // TODO Create a Typed version of HandleMissingProp.
                             genericTypedProp = _propFactory.CreateGenFromObject(propertyType, value,
                                 propertyName, null, _propFactory.ProvidesStorage, typeIsSolid, PropKindEnum.Prop, null, false, null);
                         }
@@ -437,17 +445,6 @@ namespace DRM.PropBag
 
                         wasRegistered = true;
                         return propGen;
-                    }
-                case ReadMissingPropPolicyEnum.NotAllowed:
-                    {
-                        if (OurMetaData.AllPropsMustBeRegistered)
-                        {
-                            throw new InvalidOperationException(string.Format("Property: {0} has not been declared by calling AddProp. Cannot use this method in this case. Declare by calling AddProp.", propertyName));
-                        }
-                        else
-                        {
-                            throw new InvalidOperationException(string.Format("No property: {0} exists in this PropBag.", propertyName));
-                        }
                     }
                 default:
                     {
@@ -524,10 +521,10 @@ namespace DRM.PropBag
             {
                 return true;
             }
-            else if(_typeSafetyMode == PropBagTypeSafetyMode.Tight)
-            {
-                return ReportAccessToMissing(propertyName, nameof(TryGetPropGen));
-            }
+            //else if(_typeSafetyMode == PropBagTypeSafetyMode.Tight)
+            //{
+            //    return ReportAccessToMissing(propertyName, nameof(TryGetPropGen));
+            //}
             else
             {
                 return false;
@@ -596,7 +593,7 @@ namespace DRM.PropBag
 
         private IPropPrivate<T> GetTypedPropPrivate<T>(string propertyName, bool mustBeRegistered, bool neverCreate = false)
         {
-            IPropData PropData = GetGenPropPrivate<T>(propertyName, mustBeRegistered, neverCreate);
+            IPropData PropData = GetGenPropPrivate<T>(propertyName, mustBeRegistered, neverCreate, out PropIdType notUsed);
 
             if (!PropData.IsEmpty)
             {
@@ -608,7 +605,7 @@ namespace DRM.PropBag
             }
         }
 
-        private IPropData GetGenPropPrivate<T>(string propertyName, bool mustBeRegistered, bool neverCreate = false)
+        private IPropData GetGenPropPrivate<T>(string propertyName, bool mustBeRegistered, bool neverCreate, out PropIdType propId)
         {
             bool hasStore = _propFactory.ProvidesStorage;
 
@@ -621,7 +618,7 @@ namespace DRM.PropBag
                 neverCreate: neverCreate,
                 desiredHasStoreValue: _propFactory.ProvidesStorage,
                 wasRegistered: out bool wasRegistered,
-                propId: out PropIdType propId);
+                propId: out propId);
 
             if (wasRegistered)
                 return PropData;
@@ -1337,24 +1334,6 @@ namespace DRM.PropBag
 
         #region Public Methods
 
-        public int CreatePropFromStringCacheCount
-        {
-            get
-            {
-                int result = _propFactory.CreatePropFromStringCacheCount;
-                return result;
-            }
-        }
-
-        public int CreatePropWithNoValCacheCount
-        {
-            get
-            {
-                int result = _propFactory.CreatePropWithNoValCacheCount;
-                return result;
-            }
-        }
-
         public object Clone()
         {
             return new PropBag(this);
@@ -1419,25 +1398,39 @@ namespace DRM.PropBag
                 }
             }
 
-            PropIdType propId = GetPropId(propertyName);
-
-            bool result = _ourStoreAccessor.ContainsKey(this, propId); 
-            return result;
+            if(TryGetPropId(propertyName, out PropIdType propId))
+            {
+                bool result = _ourStoreAccessor.ContainsKey(this, propId);
+                return result;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         // TODO: PropBagTypeSafetyMode.Locked is not honored here.
         public bool TryGetTypeOfProperty(string propertyName, out Type type)
         {
-            PropIdType propId = GetPropId(propertyName);
-            if (_ourStoreAccessor.TryGetValue(this, propId, out IPropData value))
+            //PropIdType propId = GetPropId(propertyName);
+
+            if (TryGetPropId(propertyName, out PropIdType propId))
             {
-                type = value.TypedProp.Type;
-                return true;
-            }
-            else if (_typeSafetyMode == PropBagTypeSafetyMode.Locked)
-            {
-                type = null;
-                return ReportAccessToMissing(propertyName, nameof(TryGetTypeOfProperty));
+                if (_ourStoreAccessor.TryGetValue(this, propId, out IPropData value))
+                {
+                    type = value.TypedProp.Type;
+                    return true;
+                }
+                else if (_typeSafetyMode == PropBagTypeSafetyMode.Locked)
+                {
+                    type = null;
+                    return ReportAccessToMissing(propertyName, nameof(TryGetTypeOfProperty));
+                }
+                else
+                {
+                    type = null;
+                    return false;
+                }
             }
             else
             {
@@ -1468,6 +1461,28 @@ namespace DRM.PropBag
             else
             {
                 return null;
+            }
+        }
+
+        public bool TryGetPropType(string propertyName, out PropKindEnum propType)
+        {
+            if (TryGetPropId(propertyName, out PropIdType propId))
+            {
+                if (_ourStoreAccessor.TryGetValue(this, propId, out IPropData value))
+                {
+                    propType = value.TypedProp.PropKind;
+                    return true;
+                }
+                else
+                {
+                    propType = PropKindEnum.Prop;
+                    return false;
+                }
+            }
+            else
+            {
+                propType = PropKindEnum.Prop;
+                return false;
             }
         }
 
@@ -1545,7 +1560,7 @@ namespace DRM.PropBag
         // that we know the type at compile time to our advantage??
         protected IPropData AddProp<T>(string propertyName, IProp<T> genericTypedProp, EventHandler<PcTypedEventArgs<T>> eventHandler, SubscriptionPriorityGroup priorityGroup)
         {
-            PropIdType propId = GetPropId(propertyName);
+            PropIdType propId = AddPropId(propertyName);
 
             if (!_ourStoreAccessor.TryAdd(this, propId, genericTypedProp, out IPropData propGen))
             {
@@ -1568,7 +1583,7 @@ namespace DRM.PropBag
 
         protected IPropData AddProp(string propertyName, IProp genericTypedProp)
         {
-            PropIdType propId = GetPropId(propertyName);
+            PropIdType propId = AddPropId(propertyName);
 
             if (!_ourStoreAccessor.TryAdd(this, propId, genericTypedProp, out IPropData propGen))
             {
@@ -1580,7 +1595,7 @@ namespace DRM.PropBag
         protected IPropData AddProp(string propertyName, IProp genericTypedProp, object target, MethodInfo method, 
             SubscriptionKind subscriptionKind, SubscriptionPriorityGroup priorityGroup)
         {
-            PropIdType propId = GetPropId(propertyName);
+            PropIdType propId = AddPropId(propertyName);
 
             if (!_ourStoreAccessor.TryAdd(this, propId, genericTypedProp, target, method, subscriptionKind, priorityGroup, out IPropData propGen))
             {
@@ -1625,13 +1640,12 @@ namespace DRM.PropBag
         {
             bool mustBeRegistered = _typeSafetyMode == PropBagTypeSafetyMode.Locked;
 
-            IPropData PropData = GetGenPropPrivate<T>(propertyName, mustBeRegistered: mustBeRegistered, neverCreate: true);
+            IPropData PropData = GetGenPropPrivate<T>(propertyName, mustBeRegistered: mustBeRegistered, neverCreate: true, propId: out PropIdType propId);
 
             if(!PropData.IsEmpty)
             {
                 PropData.CleanUp(doTypedCleanup: true);
 
-                PropIdType propId = GetPropId(propertyName);
                 if (!_ourStoreAccessor.TryRemove(this, propId, out IPropData foundValue))
                 {
                     System.Diagnostics.Debug.WriteLine($"The prop was found, but could not be removed. Property: {propertyName}.");
@@ -2066,16 +2080,21 @@ namespace DRM.PropBag
         {
             if (propertyName == null) throw new ArgumentNullException("propertyName", "PropertyName is null on call to GetValue.");
 
-            propId = GetPropId(propertyName);
-
             Debug.Assert(!(alwaysRegister && mustBeRegistered), "AlwaysRegister and MustBeRegistered cannot both be true.");
             Debug.Assert(!(alwaysRegister && neverCreate), "AlwaysRegister and NeverCreate cannot both be true.");
 
             IPropData PropData;
 
-            if (_ourStoreAccessor.TryGetValue(this, propId, out PropData))
+            if (TryGetPropId(propertyName, out propId))
             {
-                wasRegistered = false;
+                if (_ourStoreAccessor.TryGetValue(this, propId, out PropData))
+                {
+                    wasRegistered = false;
+                }
+                else
+                {
+                    PropData = this.HandleMissingProp(propId, propertyName, propertyType, out wasRegistered, haveValue, value, alwaysRegister, mustBeRegistered, neverCreate);
+                }
             }
             else
             {
@@ -2098,23 +2117,29 @@ namespace DRM.PropBag
             bool haveValue, object value,
             bool alwaysRegister, bool mustBeRegistered, bool neverCreate, bool? desiredHasStoreValue, out bool wasRegistered, out PropIdType propId)
         {
-            propId = GetPropId(propertyName);
-            if (!_ourStoreAccessor.TryGetValue(this, propId, out IPropData PropData))
+            if (TryGetPropId(propertyName, out propId))
             {
-                throw new KeyNotFoundException("That cKey was not found.");
-            }
+                if (!_ourStoreAccessor.TryGetValue(this, propId, out IPropData PropData))
+                {
+                    throw new KeyNotFoundException($"The property named: {propertyName} could not be found in the property store.");
+                }
 
-            if (!PropData.IsEmpty && desiredHasStoreValue.HasValue && desiredHasStoreValue.Value != PropData.TypedProp.HasStore)
+                if (!PropData.IsEmpty && desiredHasStoreValue.HasValue && desiredHasStoreValue.Value != PropData.TypedProp.HasStore)
+                {
+                    if (desiredHasStoreValue.Value)
+                        //Caller needs property to have a backing store.
+                        throw new InvalidOperationException(string.Format("Property: {0} has no backing store held by this instance of PropBag. This operation can only be performed on properties for which a backing store is held by this instance.", propertyName));
+                    else
+                        throw new InvalidOperationException(string.Format("Property: {0} has a backing store held by this instance of PropBag. This operation can only be performed on properties for which no backing store is kept by this instance.", propertyName));
+                }
+
+                wasRegistered = false;
+                return (IPropData)PropData;
+            }
+            else
             {
-                if (desiredHasStoreValue.Value)
-                    //Caller needs property to have a backing store.
-                    throw new InvalidOperationException(string.Format("Property: {0} has no backing store held by this instance of PropBag. This operation can only be performed on properties for which a backing store is held by this instance.", propertyName));
-                else
-                    throw new InvalidOperationException(string.Format("Property: {0} has a backing store held by this instance of PropBag. This operation can only be performed on properties for which no backing store is kept by this instance.", propertyName));
+                throw new KeyNotFoundException($"The property named: {propertyName} could not be found in the Level2Key man.");
             }
-
-            wasRegistered = false;
-            return (IPropData)PropData;
         }
 
         private IPropPrivate<T> CheckTypeInfo<T>(PropIdType propId, PropNameType propertyName, IPropData PropData, PSAccessServiceType storeAccess)
@@ -2240,10 +2265,24 @@ namespace DRM.PropBag
 
         #region Level2 Key Management
 
-        private PropIdType GetPropId(PropNameType propertyName)
+        private bool TryGetPropId(PropNameType propertyName, out PropIdType propId)
+        {
+            bool result = _ourStoreAccessor.Level2KeyManager.TryGetFromRaw(propertyName, out propId);
+            return result;
+        }
+
+        //private PropIdType GetPropId(PropNameType propertyName)
+        //{
+        //    // Register new propertyName and get an exploded key.
+        //    PropIdType propId = _ourStoreAccessor.Level2KeyManager.FromRaw(propertyName);
+
+        //    return propId;
+        //}
+
+        private PropIdType AddPropId(PropNameType propertyName)
         {
             // Register new propertyName and get an exploded key.
-            PropIdType propId = _ourStoreAccessor.Level2KeyManager.GetOrAdd(propertyName);
+            PropIdType propId = _ourStoreAccessor.Level2KeyManager.Add(propertyName);
 
             return propId;
         }
@@ -2298,28 +2337,22 @@ namespace DRM.PropBag
 
         #region IListSource Support
 
-        public bool TryGetPropType(string propertyName, out PropKindEnum propType)
-        {
-            PropIdType propId = GetPropId(propertyName);
-            if (_ourStoreAccessor.TryGetValue(this, propId, out IPropData value))
-            {
-                propType = value.TypedProp.PropKind;
-                return true;
-            }
-            else
-            {
-                propType = PropKindEnum.Prop;
-                return false;
-            }
-        }
-
         public bool TryGetListSource(string propertyName, Type itemType, out IListSource listSource)
         {
-            PropIdType l2Key = GetPropId(propertyName);
-            if (_ourStoreAccessor.TryGetValue(this, l2Key, out IPropData value))
+            //PropIdType l2Key = GetPropId(propertyName);
+
+            if (TryGetPropId(propertyName, out PropIdType propId))
             {
-                listSource = value.TypedProp.ListSource;
-                return true;
+                if (_ourStoreAccessor.TryGetValue(this, propId, out IPropData value))
+                {
+                    listSource = value.TypedProp.ListSource;
+                    return true;
+                }
+                else
+                {
+                    listSource = null;
+                    return false;
+                }
             }
             else
             {
@@ -2402,6 +2435,24 @@ namespace DRM.PropBag
             get
             {
                 int result = _propFactory.DoSetCacheCount;
+                return result;
+            }
+        }
+
+        public int CreatePropFromStringCacheCount
+        {
+            get
+            {
+                int result = _propFactory.CreatePropFromStringCacheCount;
+                return result;
+            }
+        }
+
+        public int CreatePropWithNoValCacheCount
+        {
+            get
+            {
+                int result = _propFactory.CreatePropWithNoValCacheCount;
                 return result;
             }
         }
