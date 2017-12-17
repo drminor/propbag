@@ -172,7 +172,7 @@ namespace DRM.PropBag.AutoMapperSupport
             catch (Exception e2)
             {
                 Type targetType = destinationTypeOrProxy ?? typeof(TDestination);
-                throw new InvalidOperationException($"Cannot create an instance of {targetType} that takes a PropModel parameter.", e2);
+                throw new InvalidOperationException($"Cannot create an instance of {targetType} that takes a copySource parameter.", e2);
             }
         }
 
