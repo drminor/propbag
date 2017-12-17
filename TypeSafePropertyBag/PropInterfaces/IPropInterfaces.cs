@@ -33,7 +33,7 @@ namespace DRM.TypeSafePropertyBag
     //    bool IsListCollectionView { get; }
     //}
 
-    public interface ICPropPrivate<CT, T> : ICProp<CT, T>, IPropPrivate<CT> where CT : IEnumerable<T>
+    public interface ICPropPrivate<CT,T> : ICProp<CT,T>, IPropPrivate<CT> where CT : IEnumerable<T>
     {
         ObservableCollection<T> ObservableCollection { get; }
         void SetListSource(IListSource value);
@@ -96,7 +96,6 @@ namespace DRM.TypeSafePropertyBag
 
         bool RegisterBinding(IPropBagInternal propBag, PropIdType propId, LocalBindingInfo bindingInfo);
         bool UnregisterBinding(IPropBagInternal propBag, PropIdType propId, LocalBindingInfo bindingInfo);
-
     }
 
     /// <summary>
