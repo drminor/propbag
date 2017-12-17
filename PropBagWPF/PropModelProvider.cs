@@ -1,15 +1,14 @@
 ﻿
 using DRM.PropBag.ControlsWPF;
-
 using DRM.TypeSafePropertyBag;
 using DRM.ViewModelTools;
+
 using System;
 using System.Data;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
-
 
 namespace DRM.PropBagWPF
 {
