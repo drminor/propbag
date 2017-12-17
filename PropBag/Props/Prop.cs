@@ -16,12 +16,11 @@ namespace DRM.PropBag
             bool typeIsSolid,
             bool hasStore,
             Func<T, T, bool> comparer)
-            : base(typeof(T), typeIsSolid, hasStore, comparer, defaultValFunc, PropKindEnum.Prop)
+            : base(typeof(T), typeIsSolid, hasStore, true, comparer, defaultValFunc, PropKindEnum.Prop)
         {
             if (hasStore)
             {
                 _value = initalValue;
-                _valueIsDefined = true;
             }
         }
 
@@ -29,12 +28,12 @@ namespace DRM.PropBag
             bool typeIsSolid,
             bool hasStore,
             Func<T, T, bool> comparer)
-            : base(typeof(T), typeIsSolid, hasStore, comparer, defaultValFunc, PropKindEnum.Prop)
+            : base(typeof(T), typeIsSolid, hasStore, false, comparer, defaultValFunc, PropKindEnum.Prop)
         {
-            if (hasStore)
-            {
-                _valueIsDefined = false;
-            }
+            //if (hasStore)
+            //{
+            //    ValueIsDefined = false;
+            //}
         }
 
         T _value;
@@ -44,7 +43,7 @@ namespace DRM.PropBag
             {
                 if (HasStore)
                 {
-                    if (!_valueIsDefined)
+                    if (!ValueIsDefined)
                     {
                         if (ReturnDefaultForUndefined)
                         {
@@ -64,7 +63,7 @@ namespace DRM.PropBag
                 if (HasStore)
                 {
                     _value = value;
-                    _valueIsDefined = true;
+                    ValueIsDefined = true;
                 }
                 else
                 {
@@ -73,29 +72,29 @@ namespace DRM.PropBag
             }
         }
 
-        public override object TypedValueAsObject => (object)TypedValue;
+        //public override object TypedValueAsObject => (object)TypedValue;
 
-        public override ValPlusType GetValuePlusType()
-        {
-            return new ValPlusType(TypedValue, Type);
-        }
+        //public override ValPlusType GetValuePlusType()
+        //{
+        //    return new ValPlusType(TypedValue, Type);
+        //}
 
-        private bool _valueIsDefined;
-        override public bool ValueIsDefined
-        {
-            get
-            {
-                return _valueIsDefined;
-            }
-        }
+        //private bool _valueIsDefined;
+        //override public bool ValueIsDefined
+        //{
+        //    get
+        //    {
+        //        return _valueIsDefined;
+        //    }
+        //}
 
-        override public bool SetValueToUndefined()
-        {
-            bool oldSetting = this._valueIsDefined;
-            _valueIsDefined = false;
+        //override public bool SetValueToUndefined()
+        //{
+        //    bool oldSetting = ValueIsDefined;
+        //    ValueIsDefined = false;
 
-            return oldSetting;
-        }
+        //    return oldSetting;
+        //}
 
         override public IListSource ListSource => throw new NotSupportedException($"This PropBag property is of PropKind = {PropKind}. It cannot provide a ListSource.");
 

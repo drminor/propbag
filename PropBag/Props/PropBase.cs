@@ -21,15 +21,14 @@ namespace DRM.PropBag
     {
         #region Public Members
 
-        public PropKindEnum PropKind { get; private set; }
+        public PropKindEnum PropKind { get; protected set; }
         public Type Type { get; }
         public bool TypeIsSolid { get; set; }
-        public bool HasStore { get; private set; }
+        public bool HasStore { get; protected set; }
 
-        Attribute[] _attributes;
-        public virtual Attribute[] Attributes => _attributes;
+        public virtual Attribute[] Attributes { get; }
 
-        public abstract bool ValueIsDefined { get; }
+        public bool ValueIsDefined { get; protected set; }
         public abstract object TypedValueAsObject { get; }
         public abstract IListSource ListSource { get; }
 
@@ -37,13 +36,14 @@ namespace DRM.PropBag
 
         #region Constructors
 
-        public PropBase(PropKindEnum propKind, Type typeOfThisValue, bool typeIsSolid, bool hasStore = true)
+        public PropBase(PropKindEnum propKind, Type typeOfThisValue, bool typeIsSolid, bool hasStore, bool valueIsDefined)
         {
             PropKind = propKind;
             Type = typeOfThisValue;
             TypeIsSolid = typeIsSolid;
             HasStore = hasStore;
-            _attributes = new Attribute[] { };
+            ValueIsDefined = valueIsDefined;
+            Attributes = new Attribute[] { };
         }
 
         #endregion

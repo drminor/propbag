@@ -17,7 +17,7 @@ namespace DRM.PropBag
             GetDefaultValueDelegate<T> defaultValFunc,
             bool typeIsSolid,
             Func<T, T, bool> comparer)
-            : base(typeof(T), typeIsSolid, false, comparer, defaultValFunc, PropKindEnum.Prop)
+            : base(typeof(T), typeIsSolid, false, true,  comparer, defaultValFunc, PropKindEnum.Prop)
         {
             Tag = Guid.NewGuid(); // tag;
             Getter = null; // getter;
@@ -42,13 +42,13 @@ namespace DRM.PropBag
             return new ValPlusType(TypedValue, Type);
         }
 
-        override public bool ValueIsDefined
-        {
-            get
-            {
-                return Getter != null;
-            }
-        }
+        //override public bool ValueIsDefined
+        //{
+        //    get
+        //    {
+        //        return Getter != null;
+        //    }
+        //}
 
         override public bool SetValueToUndefined()
         {
@@ -56,7 +56,19 @@ namespace DRM.PropBag
         }
 
         public Guid Tag { get; private set; }
-        public GetExtVal<T> Getter { get; set; }
+
+        GetExtVal<T> _getter;
+        public GetExtVal<T> Getter
+        {
+            get => _getter;
+            set
+            {
+                if(!ReferenceEquals(_getter, value))
+                {
+                    ValueIsDefined = value != null;
+                }
+            }
+        }
         public SetExtVal<T> Setter { get; set; }
 
         override public IListSource ListSource => throw new NotSupportedException("This PropBag property is not a collection or datatable PropType.");

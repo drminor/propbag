@@ -12,28 +12,25 @@ namespace DRM.PropBag
 
     public abstract class PropTypedBase<T> : PropBase, IPropPrivate<T>
     {
-        #region Private Members
+        #region Public and Protected Properties
 
-        //private List<  Tuple<  Action<T, T>, EventHandler<PCTypedEventArgs<T>>   >   > _actTable = null;
-
-        #endregion
-
-        #region Public Members
-
-        abstract public T TypedValue { get; set; }
-
-        protected Func<T, T, bool> Comparer { get; set; }
-
-        protected GetDefaultValueDelegate<T> GetDefaultValFunc { get; }
+        public virtual T TypedValue { get; set; }
         public virtual bool ReturnDefaultForUndefined => GetDefaultValFunc != null;
+
+        protected Func<T, T, bool> Comparer { get; }
+        protected GetDefaultValueDelegate<T> GetDefaultValFunc { get; }
+
+        public override object TypedValueAsObject => (object)TypedValue;
+
+        public override ValPlusType GetValuePlusType() => new ValPlusType(TypedValue, Type);
 
         #endregion
 
         #region Constructors
 
-        protected PropTypedBase(Type typeOfThisValue, bool typeIsSolid, bool hasStore,
+        protected PropTypedBase(Type typeOfThisValue, bool typeIsSolid, bool hasStore, bool valueIsDefined,
             Func<T,T,bool> comparer, GetDefaultValueDelegate<T> defaultValFunc, PropKindEnum propKind)
-            : base(propKind, typeOfThisValue, typeIsSolid, hasStore)
+            : base(propKind, typeOfThisValue, typeIsSolid, hasStore, valueIsDefined)
         {
             Comparer = comparer;
             GetDefaultValFunc = defaultValFunc;
@@ -42,6 +39,14 @@ namespace DRM.PropBag
         #endregion
 
         #region Public Methods
+
+        override public bool SetValueToUndefined()
+        {
+            bool oldSetting = ValueIsDefined;
+            ValueIsDefined = false;
+
+            return oldSetting;
+        }
 
         public bool CompareTo(T newValue)
         {
@@ -56,7 +61,7 @@ namespace DRM.PropBag
 
         public bool Compare(T val1, T val2)
         {
-            if (!ValueIsDefined) return false;
+            //if (!ValueIsDefined) return false;
 
             return Comparer(val1, val2);
         }
@@ -70,6 +75,7 @@ namespace DRM.PropBag
         {
             return propBag.RegisterBinding<T>(propId, bindingInfo);
         }
+
         #endregion
     }
 }

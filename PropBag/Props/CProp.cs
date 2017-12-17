@@ -19,12 +19,11 @@ namespace DRM.PropBag.Collections
             bool typeIsSolid,
             bool hasStore,
             Func<CT, CT, bool> comparer)
-            : base(typeof(CT), typeIsSolid, hasStore, comparer, defaultValFunc, PropKindEnum.Collection)
+            : base(typeof(CT), typeIsSolid, hasStore, true, comparer, defaultValFunc, PropKindEnum.Collection)
         {
             if (hasStore)
             {
                 _value = initalValue;
-                _valueIsDefined = true;
             }
         }
 
@@ -32,12 +31,12 @@ namespace DRM.PropBag.Collections
             bool typeIsSolid,
             bool hasStore,
             Func<CT, CT, bool> comparer)
-            : base(typeof(CT), typeIsSolid, hasStore, comparer, defaultValFunc, PropKindEnum.Collection)
+            : base(typeof(CT), typeIsSolid, hasStore, false, comparer, defaultValFunc, PropKindEnum.Collection)
         {
-            if (hasStore)
-            {
-                _valueIsDefined = false;
-            }
+            //if (hasStore)
+            //{
+            //    _valueIsDefined = false;
+            //}
         }
 
         CT _value;
@@ -47,7 +46,7 @@ namespace DRM.PropBag.Collections
             {
                 if (HasStore)
                 {
-                    if (!_valueIsDefined)
+                    if (!ValueIsDefined)
                     {
                         if (ReturnDefaultForUndefined)
                         {
@@ -67,7 +66,7 @@ namespace DRM.PropBag.Collections
                 if (HasStore)
                 {
                     _value = value;
-                    _valueIsDefined = true;
+                    ValueIsDefined = true;
                     // TODO: Update our IList
                 }
                 else
@@ -84,22 +83,22 @@ namespace DRM.PropBag.Collections
             return new ValPlusType(TypedValue, Type);
         }
 
-        private bool _valueIsDefined;
-        override public bool ValueIsDefined
-        {
-            get
-            {
-                return _valueIsDefined;
-            }
-        }
+        //private bool _valueIsDefined;
+        //override public bool ValueIsDefined
+        //{
+        //    get
+        //    {
+        //        return _valueIsDefined;
+        //    }
+        //}
 
-        override public bool SetValueToUndefined()
-        {
-            bool oldSetting = this._valueIsDefined;
-            _valueIsDefined = false;
+        //override public bool SetValueToUndefined()
+        //{
+        //    bool oldSetting = this._valueIsDefined;
+        //    _valueIsDefined = false;
 
-            return oldSetting;
-        }
+        //    return oldSetting;
+        //}
 
         public override object Clone()
         {
