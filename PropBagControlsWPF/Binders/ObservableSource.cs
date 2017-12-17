@@ -316,9 +316,22 @@ namespace DRM.PropBag.ControlsWPF.Binders
             get
             {
                 Type test = Type;
+
                 return test == null ? false : test.IsPropBagBased();
             }
         }
+
+        public bool IsPropBagBasedAndNoCustomTypeDescriptors
+        {
+            get
+            {
+                Type test = Type;
+
+                return test == null ? false : test.IsPropBagBasedAndNoCustomTypeDescriptors();
+            }
+        }
+
+        
 
         private bool IsTargetADc { get; set; }
 
@@ -473,7 +486,6 @@ namespace DRM.PropBag.ControlsWPF.Binders
             if (IsPropBagBased)
             {
                 return GetChildFromPropBag((IPropBag)Data, parentType, pathElement);
-
             }
             else
             {
