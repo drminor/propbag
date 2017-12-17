@@ -45,7 +45,7 @@ namespace DRM.TypeSafePropertyBag
         public PropGen()
         {
             TypedProp = null;
-            _cKey = new SimpleExKey(0);
+            _cKey = new SimpleExKey();
             PropId = _cKey.Level2Key;
             _isPropBag = false;
         }
