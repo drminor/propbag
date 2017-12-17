@@ -42,6 +42,7 @@
   <ItemGroup>
     <None Include="Caches\DelegateCache_Moved.cs" />
     <Compile Include="Caches\SimpleDelegateCacheProvider.cs" />
+    <Compile Include="Caches\StaticTConverter.cs" />
     <Compile Include="ControlModel\DeriveFromClassField_NotUsed.cs" />
     <Compile Include="ControlModel\DeriveFromClassModeEnum.cs" />
     <Compile Include="ControlModel\IPropModelProvider.cs" />
@@ -57,7 +58,6 @@
     <Compile Include="ControlModel\PropBinderField.cs" />
     <Compile Include="Factories\APFGenericMethodTemplates.cs" />
     <Compile Include="Factories\ICreateProps.cs" />
-    <None Include="Props\CViewProp_NotUsed.cs" />
     <Compile Include="Props\CProp.cs" />
     <Compile Include="Collections\PbAbstractListSource.cs" />
     <Compile Include="ControlModel\MapperRequest.cs" />
@@ -85,7 +85,7 @@
     <Compile Include="TypeDescriptors\IPbCollectionTypeDescriptor.cs" />
     <Compile Include="Props\PropExternStore.cs" />
     <Compile Include="Factories\PropExtStoreFactory.cs" />
-    <None Include="Factories\PropFactory.cs" />
+    <Compile Include="Factories\PropFactory.cs" />
     <Compile Include="Props\PropBase.cs" />
     <Compile Include="Props\PropTypedBase.cs" />
     <Compile Include="PubPropBag.cs" />

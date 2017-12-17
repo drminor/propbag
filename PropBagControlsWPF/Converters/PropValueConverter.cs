@@ -4,6 +4,8 @@ using System.Globalization;
 using System.Windows.Data;
 using System.Windows.Markup;
 
+using DRM.PropBag.Caches;
+
 namespace DRM.PropBag.ControlsWPF
 {
     public class PropValueConverter : MarkupExtension, IValueConverter
@@ -14,7 +16,7 @@ namespace DRM.PropBag.ControlsWPF
 
         static PropValueConverter()
         {
-            ValueConverter_Default = new PropFactoryValueConverter(null);
+            ValueConverter_Default = new PropFactoryValueConverter(StaticTConverterProvider.TypeDescBasedTConverterCache);
         }
 
         #endregion

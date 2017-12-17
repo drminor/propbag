@@ -23,8 +23,9 @@ namespace DRM.PropBag
 
         public PropFactoryValueConverter(TypeDescBasedTConverterCache converterCache)
         {
-            // If the caller does not supply a value, use our default implementation.
             _converter = converterCache ?? throw new ArgumentNullException(nameof(converterCache));
+
+            // If the caller does not supply a value, use our default implementation.
         }
 
         // Value is native object, we need to return a targetType (hopefully a string at this point.)

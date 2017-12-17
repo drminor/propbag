@@ -43,7 +43,7 @@ namespace DRM.PropBag.Caches
             #region Converter and DoSet
 
             // TypeDesc<T>-based Converter Cache
-            TypeDescBasedTConverterCache = new TypeDescBasedTConverterCache();
+            TypeDescBasedTConverterCache = StaticTConverterProvider.TypeDescBasedTConverterCache; // new TypeDescBasedTConverterCache();
 
             // DoSet 
             MethodInfo doSetMethodInfo = propBagType.GetMethod("DoSetBridge", BindingFlags.Instance | BindingFlags.NonPublic);
