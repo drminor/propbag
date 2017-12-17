@@ -2,30 +2,24 @@
 using DRM.TypeSafePropertyBag;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-using DRM.TypeSafePropertyBag;
 using DRM.PropBag.Caches;
 
 namespace DRM.PropBag
 {
-    #region Type Aliases
     using PropIdType = UInt32;
     using PropNameType = String;
     using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
 
     using PropBagType = PropBag;
-    #endregion
 
     public class PropFactory : AbstractPropFactory
     {
         public override bool ProvidesStorage => true;
 
-        override public int DoSetCacheCount => DelegateCacheProvider.DoSetDelegateCache.Count;
-        override public int CreatePropFromStringCacheCount => DelegateCacheProvider.CreatePropFromStringCache.Count;
-        override public int CreatePropWithNoValCacheCount => DelegateCacheProvider.CreatePropWithNoValCache.Count;
+        public override int DoSetCacheCount => DelegateCacheProvider.DoSetDelegateCache.Count;
+        public override int CreatePropFromStringCacheCount => DelegateCacheProvider.CreatePropFromStringCache.Count;
+        public override int CreatePropWithNoValCacheCount => DelegateCacheProvider.CreatePropWithNoValCache.Count;
 
         public PropFactory
             (
