@@ -645,7 +645,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
                 // TODO: What about the original PropertyPath parameters?
                 PropertyPath newPath = new PropertyPath(strNewPath);
 
-                isCustom = lastParent.IsPropBagBased;
+                isCustom = lastParent.IsPropBagBased; // .IsPropBagBasedAndNoCustomTypeDescriptors;
                 return CreateBinding(bindingTarget, bInfo, sourceType, newPath, isCustom);
             } 
             else
