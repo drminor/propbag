@@ -56,10 +56,21 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
 
             Type[] interfaces = type.GetInterfaces();
 
-            bool result = null != type.GetInterfaces().FirstOrDefault
-                (
-                x => x.Name == "IPropBag"
-                );
+            bool result = interfaces.Any(x => x.Name == "IPropBag");
+
+            return result;
+        }
+
+        public static bool IsPropBagBasedAndNoCustomTypeDescriptors(this Type type)
+        {
+            if (type.Name == "PropBag")
+            {
+                return true;
+            }
+
+            Type[] interfaces = type.GetInterfaces();
+
+            bool result = interfaces.Any(x => x.Name == "IPropBag") && !(interfaces.Any(x => x.Name == "ICustomTypeDescriptor"));
 
             return result;
         }
