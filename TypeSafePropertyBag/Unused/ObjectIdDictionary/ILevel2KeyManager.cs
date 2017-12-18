@@ -1,7 +1,7 @@
 ﻿
 using System;
 
-namespace DRM.TypeSafePropertyBag
+namespace DRM.ObjectIdDictionary
 {
     public interface IL2KeyMan<L2T, L2TRaw> : IDisposable
     {

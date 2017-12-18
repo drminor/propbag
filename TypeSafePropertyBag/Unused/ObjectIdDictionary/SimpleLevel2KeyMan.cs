@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DRM.TypeSafePropertyBag
+namespace DRM.ObjectIdDictionary
 {
     using ObjectIdType = UInt64;
     using PropIdType = UInt32;

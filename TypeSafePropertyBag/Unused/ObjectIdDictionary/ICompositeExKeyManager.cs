@@ -1,5 +1,5 @@
 ﻿
-namespace DRM.TypeSafePropertyBag
+namespace DRM.ObjectIdDictionary
 {
     public interface ICompExKeyMan<ExKeyT, CompT, L1T, L2T, L2TRaw> where ExKeyT : IExplodedKey<CompT, L1T, L2T>
     {

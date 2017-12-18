@@ -1,7 +1,7 @@
 ﻿
 using System;
 
-namespace DRM.TypeSafePropertyBag
+namespace DRM.ObjectIdDictionary
 {
     public interface IExplodedKey<CompT, L1T, L2T> : IEquatable<IExplodedKey<CompT, L1T, L2T>>
     {
