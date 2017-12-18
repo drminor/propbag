@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace DRM.TypeSafePropertyBag
 {
@@ -20,6 +21,9 @@ namespace DRM.TypeSafePropertyBag
         IProp<T> AddPropNoStore<T>(string propertyName, Func<T,T,bool> comparer = null, object extraInfo = null);
 
         IProp<T> AddPropObjCompNoStore<T>(string propertyName, object extraInfo = null);
+
+        ICPropPrivate<CT, T> AddCollectionProp<CT, T>(string propertyName, Func<CT, CT, bool> comparer = null,
+            object extraInfo = null, CT initialValue = default(CT)) where CT : class, IEnumerable<T>;
 
         void RemoveProp(string propertyName, Type propertyType);
         void RemoveProp<T>(string propertyName);

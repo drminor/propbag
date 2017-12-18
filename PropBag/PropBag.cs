@@ -1488,7 +1488,30 @@ namespace DRM.PropBag
 
         #endregion
 
-        #region Property Management
+        #region Add Collection-Type Props
+
+        public ICPropPrivate<CT, T> AddCollectionProp<CT, T>
+            (
+                string propertyName,
+                Func<CT, CT, bool> comparer = null,
+                object extraInfo = null,
+                CT initialValue = default(CT)
+            ) where CT : class, IEnumerable<T>
+        {
+            bool hasStorage = true;
+            bool typeIsSolid = true;
+
+            Func<CT, CT, bool> comparerToUse = comparer ?? _propFactory.GetRefEqualityComparer<CT>();
+
+            ICPropPrivate<CT, T> typedCollectionProp = _propFactory.Create<CT,T>(initialValue, propertyName, extraInfo, hasStorage, typeIsSolid, comparerToUse);
+
+            AddProp(propertyName, typedCollectionProp);
+            return typedCollectionProp;
+        }
+
+        #endregion
+
+        #region Add Property-Type Props
 
         /// <summary>
         /// Register a new Prop Item for this PropBag.
@@ -1556,13 +1579,17 @@ namespace DRM.PropBag
             return pg;
         }
 
+        #endregion
+
+        #region Property Management
+
         // TODO: This adds no value over the AddProp (no type parameter) version. -- Is there any way we can use the fact
         // that we know the type at compile time to our advantage??
-        protected IPropData AddProp<T>(string propertyName, IProp<T> genericTypedProp, EventHandler<PcTypedEventArgs<T>> eventHandler, SubscriptionPriorityGroup priorityGroup)
+        protected IPropData AddProp<T>(string propertyName, IProp<T> genericTypedProp, EventHandler<PcTypedEventArgs<T>> doWhenChanged, SubscriptionPriorityGroup priorityGroup)
         {
             PropIdType propId = AddPropId(propertyName);
 
-            if (!_ourStoreAccessor.TryAdd(this, propId, genericTypedProp, out IPropData propGen))
+            if (!_ourStoreAccessor.TryAdd(this, propId, genericTypedProp, doWhenChanged, priorityGroup, out IPropData propGen))
             {
                 throw new ApplicationException("Could not add the new propGen to the store.");
             }
@@ -1742,7 +1769,6 @@ namespace DRM.PropBag
                 if (subscriptions != null) DoNotifyWork(propId, propertyName, typedProp, newValue, subscriptions);
                 if (subscriptions != null) DoNotifyWork(propId, propertyName, typedProp, newValue, globalSubs);
 
-
                 // The current value is undefined and the new value is defined, therefore: their has been a real update -- return true.
                 return true;
             }
@@ -1788,140 +1814,122 @@ namespace DRM.PropBag
         {
             //List<ISubscription> diag_ListCheck = GetSubscriptions(propId).ToList();
 
-            if (subscriptions == null) return;
+            if (subscriptions == null)
+                return;
 
             foreach (ISubscription sub in subscriptions)
             {
-                if (sub is ISubscription<T> typedSub)
+                CheckSubScriptionObject(sub);
+
+                object target = sub.Target.Target;
+                if (target == null)
+                    return; // The subscriber has been collected by the GC.
+
+                try
                 {
-                    if (typedSub.PcTypedHandlerDispatcher == null)
+                    switch (sub.SubscriptionKind)
+                    {
+                        case SubscriptionKind.TypedHandler:
+                            PcTypedEventArgs<T> e = new PcTypedEventArgs<T>(propertyName, oldVal, newValue);
+                            sub.PcTypedHandlerDispatcher(target, this, e, sub.HandlerProxy);
+                            break;
+                        case SubscriptionKind.GenHandler:
+                            PcGenEventArgs e2 = new PcGenEventArgs(propertyName, typedProp.Type, oldVal, newValue);
+                            sub.PcGenHandlerDispatcher(target, this, e2, sub.HandlerProxy);
+                            break;
+                        case SubscriptionKind.ObjHandler:
+                            PcObjectEventArgs e3 = new PcObjectEventArgs(propertyName, oldVal, newValue);
+                            sub.PcObjHandlerDispatcher(target, this, e3, sub.HandlerProxy);
+                            break;
+                        case SubscriptionKind.StandardHandler:
+                            PropertyChangedEventArgs e4 = new PropertyChangedEventArgs(propertyName);
+                            sub.PcStandardHandlerDispatcher(target, this, e4, sub.HandlerProxy);
+                            break;
+                        case SubscriptionKind.ChangingHandler:
+                            PropertyChangingEventArgs e5 = new PropertyChangingEventArgs(propertyName);
+                            sub.PChangingHandlerDispatcher(target, this, e5, sub.HandlerProxy);
+                            break;
+                        //case SubscriptionKind.TypedAction:
+                        //    break;
+                        //case SubscriptionKind.ObjectAction:
+                        //    break;
+                        //case SubscriptionKind.ActionNoParams:
+                        //    break;
+                        //case SubscriptionKind.LocalBinding:
+                        //    break;
+                        default:
+                            throw new InvalidOperationException($"Handlers of kind: {sub.SubscriptionKind} are not supported.");
+                    }
+                }
+                catch (Exception e)
+                {
+                    System.Diagnostics.Debug.WriteLine($"A {sub.SubscriptionKind} handler raised an exception: {e.Message} with inner: {e.InnerException?.Message} ");
+                }
+            }
+        }
+
+        [Conditional("DEBUG")]
+        private void CheckSubScriptionObject(ISubscription sub)
+        {
+            if (sub.HandlerProxy == null)
+            {
+                throw new InvalidOperationException($"The {sub.SubscriptionKind} (HandlerProxy) is null.");
+            }
+
+            switch (sub.SubscriptionKind)
+            {
+                case SubscriptionKind.TypedHandler:
+                    if (sub.PcTypedHandlerDispatcher == null)
                     {
                         throw new InvalidOperationException("The Typed handler is null.");
                     }
+                    break;
 
-                    try
+                case SubscriptionKind.GenHandler:
+                    if (sub.PcGenHandlerDispatcher == null)
                     {
-                        object target = sub.Target.Target;
-                        if (target == null)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"The object listening to this event is 'no longer with us.'");
-                        }
-                        else
-                        {
-                            PcTypedEventArgs<T> e = new PcTypedEventArgs<T>(propertyName, oldVal, newValue);
-                            typedSub.PcTypedHandlerDispatcher(target, this, e, sub.HandlerProxy);
-                        }
+                        throw new InvalidOperationException("The GenHandler dispatcher is null.");
                     }
-                    catch (Exception e)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"A TypedHandler raised an exception: {e.Message} with inner: {e.InnerException?.Message} ");
-                    }
-                }
-                else if (sub.SubscriptionKind == SubscriptionKind.GenHandler)
-                {
-                    if (sub.HandlerProxy == null)
-                    {
-                        throw new InvalidOperationException("The GenHandler (HandlerProxy) is null.");
-                    }
+                    break;
 
-                    try
+                case SubscriptionKind.ObjHandler:
+                    if (sub.PcObjHandlerDispatcher == null)
                     {
-                        object target = sub.Target.Target;
-                        if (target == null)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"The object listening to this event is 'no longer with us.'");
-                        }
-                        else
-                        {
-                            PcGenEventArgs e = new PcGenEventArgs(propertyName, typedProp.Type, oldVal, newValue);
-                            sub.PcGenHandlerDispatcher(target, this, e, sub.HandlerProxy);
-                        }
+                        throw new InvalidOperationException("The ObjHandler dispatcher is null.");
                     }
-                    catch (Exception e)
+                    break;
+
+                case SubscriptionKind.StandardHandler:
+                    if (sub.PcStandardHandlerDispatcher == null)
                     {
-                        System.Diagnostics.Debug.WriteLine($"A GenHandler raised an exception: {e.Message} with inner: {e.InnerException?.Message} ");
+                        throw new InvalidOperationException("The Standard dispatcher is null.");
                     }
-                }
-                else if (sub.SubscriptionKind == SubscriptionKind.ObjHandler)
-                {
-                    if (sub.HandlerProxy == null)
+                    break;
+
+                case SubscriptionKind.ChangingHandler:
+                    if (sub.PChangingHandlerDispatcher == null)
                     {
-                        throw new InvalidOperationException("The ObjHandler (HandlerProxy) is null.");
+                        throw new InvalidOperationException("The Changing dispatcher is null.");
                     }
 
-                    try
-                    {
-                        object target = sub.Target.Target;
-                        if(target == null)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"The object listening to this event is 'no longer with us.'");
-                        }
-                        else
-                        {
-                            PcObjectEventArgs e = new PcObjectEventArgs(propertyName, oldVal, newValue);
-                            sub.PcObjHandlerDispatcher(target, this, e, sub.HandlerProxy);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"An ObjHandler raised an exception: {e.Message} with inner: {e.InnerException?.Message} ");
-                    }
-                }
-                else if (sub.SubscriptionKind == SubscriptionKind.StandardHandler)
-                {
-                    if (sub.HandlerProxy == null)
-                    {
-                        throw new InvalidOperationException("The Standard PropertyChangedEventHandler handler (HandlerProxy) is null.");
-                    }
-
-                    try
-                    {
-                        object target = sub.Target.Target;
-                        if (target == null)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"The object listening to this event is 'no longer with us.'");
-                        }
-                        else
-                        {
-                            PropertyChangedEventArgs e = new PropertyChangedEventArgs(propertyName);
-                            sub.PcStandardHandlerDispatcher(target, this, e, sub.HandlerProxy);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"A 'standard' PropertyChangedEventHandler handler raised an exception: {e.Message} with inner: {e.InnerException?.Message} ");
-                    }
-                }
-                else if (sub.SubscriptionKind == SubscriptionKind.ChangingHandler)
-                {
-                    if (sub.HandlerProxy == null)
-                    {
-                        throw new InvalidOperationException("The Changing PropertyChangingEventHandler handler (HandlerProxy) is null.");
-                    }
-
-                    try
-                    {
-                        object target = sub.Target.Target;
-                        if (target == null)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"The object listening to this event is 'no longer with us.'");
-                        }
-                        else
-                        {
-                            PropertyChangingEventArgs e = new PropertyChangingEventArgs(propertyName);
-                            sub.PChangingHandlerDispatcher(target, this, e, sub.HandlerProxy);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"A 'changing' PropertyChangingEventHandler handler raised an exception: {e.Message} with inner: {e.InnerException?.Message} ");
-                    }
-                }
-                else
-                {
+                    break;
+                //case SubscriptionKind.TypedAction:
+                //    break;
+                //case SubscriptionKind.ObjectAction:
+                //    break;
+                //case SubscriptionKind.ActionNoParams:
+                //    break;
+                //case SubscriptionKind.LocalBinding:
+                //    break;
+                default:
                     throw new InvalidOperationException($"Handlers of kind: {sub.SubscriptionKind} are not supported.");
-                }
             }
+
+            if (sub.Target.Target == null)
+            {
+                System.Diagnostics.Debug.WriteLine($"The object listening to this event is 'no longer with us.'");
+            }
+
         }
 
         // For when the current value is undefined.
@@ -1929,139 +1937,56 @@ namespace DRM.PropBag
         {
             //List<ISubscription> diag_ListCheck = GetSubscriptions(propId).ToList();
 
-            if (subscriptions == null) return;
+            if (subscriptions == null)
+                return;
 
             foreach (ISubscription sub in subscriptions)
             {
-                if (sub is ISubscription<T> typedSub)
-                {
-                    if (typedSub.PcTypedHandlerDispatcher == null)
-                    {
-                        throw new InvalidOperationException("The Typed PcTypedHandlerProxy is null.");
-                    }
+                CheckSubScriptionObject(sub);
 
-                    try
+                object target = sub.Target.Target;
+                if (target == null)
+                    return; // The subscriber has been collected by the GC.
+
+                try
+                {
+                    switch (sub.SubscriptionKind)
                     {
-                        object target = sub.Target.Target;
-                        if (target == null)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"The object listening to this event is 'no longer with us.'");
-                        }
-                        else
-                        {
+                        case SubscriptionKind.TypedHandler:
                             PcTypedEventArgs<T> e = new PcTypedEventArgs<T>(propertyName, newValue);
-                            typedSub.PcTypedHandlerDispatcher(target, this, e, sub.HandlerProxy);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"A TypedHandler raised an exception: {e.Message} with inner: {e.InnerException?.Message} ");
-                    }
-                }
-                else if (sub.SubscriptionKind == SubscriptionKind.GenHandler)
-                {
-                    if (sub.HandlerProxy == null)
-                    {
-                        throw new InvalidOperationException("The GenHandler (HandlerProxy) is null.");
-                    }
-
-                    try
-                    {
-                        object target = sub.Target.Target;
-                        if (target == null)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"The object listening to this event is 'no longer with us.'");
-                        }
-                        else
-                        {
-                            PcGenEventArgs e = new PcGenEventArgs(propertyName, typedProp.Type, newValue);
-                            sub.PcGenHandlerDispatcher(target, this, e, sub.HandlerProxy);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"A GenHandler raised an exception: {e.Message} with inner: {e.InnerException?.Message} ");
+                            sub.PcTypedHandlerDispatcher(target, this, e, sub.HandlerProxy);
+                            break;
+                        case SubscriptionKind.GenHandler:
+                            PcGenEventArgs e2 = new PcGenEventArgs(propertyName, typedProp.Type, newValue);
+                            sub.PcGenHandlerDispatcher(target, this, e2, sub.HandlerProxy);
+                            break;
+                        case SubscriptionKind.ObjHandler:
+                            PcObjectEventArgs e3 = new PcObjectEventArgs(propertyName, newValue);
+                            sub.PcObjHandlerDispatcher(target, this, e3, sub.HandlerProxy);
+                            break;
+                        case SubscriptionKind.StandardHandler:
+                            PropertyChangedEventArgs e4 = new PropertyChangedEventArgs(propertyName);
+                            sub.PcStandardHandlerDispatcher(target, this, e4, sub.HandlerProxy);
+                            break;
+                        case SubscriptionKind.ChangingHandler:
+                            PropertyChangingEventArgs e5 = new PropertyChangingEventArgs(propertyName);
+                            sub.PChangingHandlerDispatcher(target, this, e5, sub.HandlerProxy);
+                            break;
+                        //case SubscriptionKind.TypedAction:
+                        //    break;
+                        //case SubscriptionKind.ObjectAction:
+                        //    break;
+                        //case SubscriptionKind.ActionNoParams:
+                        //    break;
+                        //case SubscriptionKind.LocalBinding:
+                        //    break;
+                        default:
+                            throw new InvalidOperationException($"Handlers of kind: {sub.SubscriptionKind} are not supported.");
                     }
                 }
-                else if (sub.SubscriptionKind == SubscriptionKind.ObjHandler)
+                catch (Exception e)
                 {
-                    if (sub.HandlerProxy == null)
-                    {
-                        throw new InvalidOperationException("The Obj handler is null.");
-                    }
-
-                    try
-                    {
-                        object target = sub.Target.Target;
-                        if (target == null)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"The object listening to this event is 'no longer with us.'");
-                        }
-                        else
-                        {
-                            PcObjectEventArgs e = new PcObjectEventArgs(propertyName, newValue);
-                            sub.PcObjHandlerDispatcher(target, this, e, sub.HandlerProxy);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"An ObjHandler raised an exception: {e.Message} with inner: {e.InnerException?.Message} ");
-                    }
-                }
-                else if (sub.SubscriptionKind == SubscriptionKind.StandardHandler)
-                {
-                    if (sub.HandlerProxy == null)
-                    {
-                        throw new InvalidOperationException("The Standard PropertyChangedEventHandler handler (HandlerProxy) is null.");
-                    }
-
-                    try
-                    {
-                        object target = sub.Target.Target;
-                        if (target == null)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"The object listening to this event is 'no longer with us.'");
-                        }
-                        else
-                        {
-                            PropertyChangedEventArgs e = new PropertyChangedEventArgs(propertyName);
-                            sub.PcStandardHandlerDispatcher(target, this, e, sub.HandlerProxy);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"A 'standard' PropertyChangedEventHandler handler raised an exception: {e.Message} with inner: {e.InnerException?.Message} ");
-                    }
-                }
-
-                else if (sub.SubscriptionKind == SubscriptionKind.ChangingHandler)
-                {
-                    if (sub.HandlerProxy == null)
-                    {
-                        throw new InvalidOperationException("The Changing PropertyChangingEventHandler handler (HandlerProxy) is null.");
-                    }
-
-                    try
-                    {
-                        object target = sub.Target.Target;
-                        if (target == null)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"The object listening to this event is 'no longer with us.'");
-                        }
-                        else
-                        {
-                            PropertyChangingEventArgs e = new PropertyChangingEventArgs(propertyName);
-                            sub.PChangingHandlerDispatcher(target, this, e, sub.HandlerProxy);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"A 'changing' PropertyChangingEventHandler handler raised an exception: {e.Message} with inner: {e.InnerException?.Message} ");
-                    }
-                }
-                else
-                {
-                    throw new InvalidOperationException($"Handlers of kind: {sub.SubscriptionKind} are not supported.");
+                    System.Diagnostics.Debug.WriteLine($"A {sub.SubscriptionKind} handler raised an exception: {e.Message} with inner: {e.InnerException?.Message} ");
                 }
             }
         }

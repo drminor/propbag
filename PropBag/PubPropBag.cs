@@ -110,6 +110,12 @@ namespace DRM.PropBag
             return base.AddPropObjCompNoStore<T>(propertyName, extraInfo);
         }
 
+        new public ICPropPrivate<CT, T> AddCollectionProp<CT, T>(string propertyName, Func<CT, CT, bool> comparer = null,
+            object extraInfo = null, CT initialValue = default(CT)) where CT : class, IEnumerable<T>
+        {
+            return base.AddCollectionProp<CT, T>(propertyName, comparer, extraInfo, initialValue);
+        }
+
         new public void RemoveProp(string propertyName, Type propertyType)
         {
             base.RemoveProp(propertyName, propertyType);
