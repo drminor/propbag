@@ -3,9 +3,9 @@ using System.Threading;
 using System.Reflection.Emit;
 using System.Reflection;
 
-using DRM.TypeSafePropertyBag;
+using DRM.TypeSafePropertyBag.Fundamentals;
 
-namespace DRM.PropBag.ViewModelBuilder
+namespace DRM.PropBag.ViewModelBuilder.OLD
 {
 
     public class DefaultModuleBuilderInfoProvider : IModuleBuilderInfoProvider

@@ -14,7 +14,7 @@ namespace DRM.PropBag.ControlsWPF
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="description">Any description you would like to use to identify or othewise documeent the property
+        /// <param name="description">Any description you would like to use to identify or othewise document the property
         /// to which this attribute is applied.</param>
         public PropBagInstanceAttribute(string description) : this(ReflectionHelpers.DEFAULT_INSTANCE_KEY, description) {}
 

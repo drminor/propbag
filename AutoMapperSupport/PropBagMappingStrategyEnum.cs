@@ -1,24 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace DRM.PropBag.AutoMapperSupport
 {
     public enum PropBagMappingStrategyEnum
     {
+        /// <summary>
+        /// No Explicit Mappers will be created; AutoMapper will use its standard, built-in mappers.
+        /// </summary>
+        Plain,
+
+        /// <summary>
+        /// All Mapping Configuration will be provided by the caller.
+        /// </summary>
+        Other,
+
         /// <summary>
         /// A new object of a Type that inherits from the original ViewModel Type
         /// is used in placed of the original ViewModel instance.
         /// </summary>
         EmitProxy,
 
-        /// <summary>
-        /// A object is created that wrapps the original ViewModel instance.
-        /// When this wrapper is accessed, it causes the original ViewModel to be updated.
-        /// </summary>
-        EmitWrapper,
+        ///// <summary>
+        ///// A object is created that wrapps the original ViewModel instance.
+        ///// When this wrapper is accessed, it causes the original ViewModel to be updated.
+        ///// </summary>
+        //EmitWrapper,
 
         /// <summary>
         /// AutoMapper is given a list of additional PropertyInfo (System.Reflection) objects.

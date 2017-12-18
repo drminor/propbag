@@ -38,7 +38,7 @@ namespace PropBagTestApp
 
             Grid topGrid = (Grid)this.FindName("TopGrid");
 
-            ViewModelGenerator.StandUpViewModels(topGrid, this);
+            //ViewModelGenerator.StandUpViewModels(topGrid, this);
 
             // This is an example of how to create the binding whose source is a property in the Property Bag
             // to a UI Element in this class' view.

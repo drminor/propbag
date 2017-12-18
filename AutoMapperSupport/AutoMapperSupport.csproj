@@ -40,36 +40,48 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ConfiguredMappers.cs" />
-    <Compile Include="ConfiguredMappersProvider.cs" />
-    <Compile Include="ExtraMembers\ExtraMembersPropBagExtensions.cs" />
-    <Compile Include="ExtraMembers\MapperConfigForExtraMembers.cs" />
-    <Compile Include="IMapperConfiBuilderProvider.cs" />
-    <Compile Include="IInitializeAMapperConfig.cs" />
-    <Compile Include="IMapTypeDefinition.cs" />
+    <Compile Include="Builders\IPropBagMapperBuilderProvider.cs" />
+    <Compile Include="Builders\SimplePropBagMapperBuilderProvider.cs" />
+    <Compile Include="ConfigPackages\ConfigPackage_EmitProxy.cs" />
+    <Compile Include="ConfigPackages\ConfigPackage_ExtraMembers.cs" />
+    <Compile Include="ConfigPackages\ICreateMapperRequests.cs" />
+    <Compile Include="ConfigPackages\IProvideAMapperConfiguration.cs" />
+    <Compile Include="Config\ICreateMappingExpressions.cs" />
+    <Compile Include="IProvideAutoMappers.cs" />
+    <Compile Include="MapTypeDefinition\IMapTypeDefinitionProvider.cs" />
+    <Compile Include="Builders\PropBagMapperKeyGen.cs" />
+    <Compile Include="MapTypeDefinition\SimpleMapTypeDefinitionProvider.cs" />
+    <Compile Include="Caches\ICacheConfigPackages.cs" />
+    <Compile Include="Caches\SimplePropBagMapperCache.cs" />
+    <Compile Include="Caches\ICachePropBagMappers.cs" />
+    <Compile Include="Config\SimpleMapperConfigurationBuilderGenBase.cs" />
+    <Compile Include="Config\SimpleMapperConfigurationBuilder.cs" />
+    <Compile Include="Config\AbstractMapperConfigGen.cs" />
+    <Compile Include="Builders\IBuildPropBagMapper.cs" />
+    <Compile Include="Builders\SimplePropBagMapperBuilder.cs" />
+    <Compile Include="SimplePropBagMapper.cs" />
+    <Compile Include="SimpleAutoMapperProvider.cs" />
+    <Compile Include="Config\EmitProxyConfigFinalStep.cs" />
+    <Compile Include="Config\ExtraMembersConfigInitialStep.cs" />
+    <Compile Include="Config\IHaveAMapperConfigurationStep.cs" />
+    <Compile Include="Config\IConfigureAMapper.cs" />
+    <Compile Include="Config\MapperConfigStarter_Empty.cs" />
+    <Compile Include="Config\MapperConfigStarter_Default.cs" />
+    <Compile Include="Config\IBuildMapperConfigurations.cs" />
+    <Compile Include="Config\SimpleMapperConfigTyped.cs" />
+    <Compile Include="Config\ExtraMembersConfigFinalStep.cs" />
+    <Compile Include="MapTypeDefinition\IMapTypeDefinition.cs" />
     <Compile Include="IPropBagMapper.cs" />
-    <Compile Include="IPropBagMapperKey.cs" />
-    <Compile Include="ExtraMembers\ExtraMembersPropModelExtensions.cs" />
-    <Compile Include="MapperConfigurationProvider.cs" />
-    <Compile Include="MapperConfigurationProviderBase.cs" />
-    <Compile Include="MapperConfigInitializerProvider.cs" />
-    <Compile Include="MapTypeDefinition.cs" />
+    <Compile Include="Builders\IPropBagMapperKey.cs" />
+    <Compile Include="ExtraMembers\ExtraMembersProvider.cs" />
+    <Compile Include="MapTypeDefinition\MapTypeDefinition.cs" />
     <Compile Include="ExtraMembers\PBDispatcher.cs" />
-    <Compile Include="ExtraMembers\PropBagMapperCustom.cs" />
-    <Compile Include="PropBagMapper.cs" />
-    <Compile Include="PropBagMapperKey.cs" />
-    <Compile Include="PropBagMappingStrategyEnum.cs" />
+    <Compile Include="AbstractPropBagMapper.cs" />
+    <Compile Include="Builders\PropBagMapperKey.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ExtraMembers\PropertyInfoWT.cs" />
-    <None Include="ProxyEmit\ProxyRequest.cs" />
-    <None Include="ProxyEmit\ProxyTypeCache.cs" />
-    <None Include="ProxyEmit\ViewModelProxy.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\PropBagControlsWPF\PropBagControlsWPF.csproj">
-      <Project>{9BEE9979-9812-4675-8F97-A4DD1E7DBA5F}</Project>
-      <Name>PropBagControlsWPF</Name>
-    </ProjectReference>
     <ProjectReference Include="..\PropBag\PropBag.csproj">
       <Project>{7387B893-FBDC-4B9C-AC9E-0B56388B46C1}</Project>
       <Name>PropBag</Name>
@@ -82,9 +94,20 @@
       <Project>{bbb1e311-374e-4c91-a313-1667d83767db}</Project>
       <Name>TypeSafePropertyBag</Name>
     </ProjectReference>
+    <ProjectReference Include="..\TypeWrapper\TypeWrapper.csproj">
+      <Project>{7C45D001-90D6-4521-82AE-41F9492F8ECE}</Project>
+      <Name>TypeWrapper</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ViewModelTools\ViewModelTools.csproj">
+      <Project>{A149EAD5-06A9-47C8-8853-1D329D553EA7}</Project>
+      <Name>ViewModelTools</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Documentation\Roles and Dependencies.md" />
+    <None Include="Documentation\ServiceNotes.md" />
     <None Include="packages.config" />
+    <Compile Include="PropBagMappingStrategyEnum.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

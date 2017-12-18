@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿
+using DRM.PropBag;
+using DRM.PropBag.Caches;
+using DRM.TypeSafePropertyBag;
 
 using NUnit.Framework;
-
-
-using DRM.PropBag;
-using DRM.TypeSafePropertyBag;
+using System;
 
 namespace PropBagLib.Tests
 {
-
-
     [TestFixtureAttribute]
     public class TestExternalStore
     {
@@ -27,8 +24,19 @@ namespace PropBagLib.Tests
         public void Create()
         {
             upCntr = 0;
+
             object stuff = new object();
-            PropExtStoreFactory factory = new PropExtStoreFactory(stuff, returnDefaultForUndefined: false);
+            IPropFactory standardPropFactory = new AutoMapperSupport.AutoMapperHelpers().PropFactory_V1;
+
+            //IProvideDelegateCaches delegateCacheProvider = new SimpleDelegateCacheProvider();
+
+            PropExtStoreFactory factory = new PropExtStoreFactory
+                (stuff: stuff,
+                propStoreAccessServiceProvider: standardPropFactory.PropStoreAccessServiceProvider,
+                //delegateCacheProvider: delegateCacheProvider,
+                typeResolver: null,
+                valueConverter: null
+                );
 
             mod1 = ExtStoreModel.Create(factory);
 
@@ -61,13 +69,13 @@ namespace PropBagLib.Tests
 
         }
 
-        void Mod1_PropIntChanged(object sender, PropertyChangedWithTValsEventArgs<int> e)
+        void Mod1_PropIntChanged(object sender, PcTypedEventArgs<int> e)
         {
             varToEnsureWorkIsDone = !varToEnsureWorkIsDone;
             upCntr++;
         }
 
-        void Mod1_PropStringChanged(object sender, PropertyChangedWithTValsEventArgs<string> e)
+        void Mod1_PropStringChanged(object sender, PcTypedEventArgs<string> e)
         {
             varToEnsureWorkIsDone = !varToEnsureWorkIsDone;
             upCntr++;

@@ -9,10 +9,11 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>PropBagTestApp</RootNamespace>
     <AssemblyName>PropBagTestApp</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -59,8 +60,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="AppAutoMapperSupport\AutoMapperHelpers.cs" />
-    <Compile Include="AppAutoMapperSupport\SettingsExtensions.cs" />
+    <Compile Include="Infra\AutoMapperHelpers.cs" />
+    <Compile Include="Infra\DataContextProvider.cs" />
     <Compile Include="ViewModels\ReferenceBindViewModelPB.cs" />
     <Compile Include="ViewModels\ReferenceBindViewModel.cs" />
     <Compile Include="Views\ReferenceBindWindow.xaml.cs">
@@ -89,8 +90,6 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="AppAutoMapperSupport\MapperConfigurationProvider.cs" />
-    <Compile Include="AppAutoMapperSupport\PropBagModuleBuilderProvider.cs" />
     <Compile Include="DtoTestEmit.xaml.cs">
       <DependentUpon>DtoTestEmit.xaml</DependentUpon>
     </Compile>
@@ -111,6 +110,7 @@
     <Page Include="PropBagTemplates\ReferenceBindViewModelPB.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Page>
     <Page Include="Views\ReferenceBindWindow.xaml">
       <SubType>Designer</SubType>
@@ -158,17 +158,29 @@
       <Project>{9bee9979-9812-4675-8f97-a4dd1e7dba5f}</Project>
       <Name>PropBagControlsWPF</Name>
     </ProjectReference>
+    <ProjectReference Include="..\PropBagWPF\PropBagWPF.csproj">
+      <Project>{54099EF8-94BB-4D74-8705-B4756CC1C7F2}</Project>
+      <Name>PropBagWPF</Name>
+    </ProjectReference>
     <ProjectReference Include="..\PropBag\PropBag.csproj">
       <Project>{7387b893-fbdc-4b9c-ac9e-0b56388b46c1}</Project>
       <Name>PropBag</Name>
     </ProjectReference>
     <ProjectReference Include="..\src\AutoMapper\AutoMapper.csproj">
-      <Project>{8cba8a56-9b60-4430-9d54-9a523baf1e14}</Project>
+      <Project>{8CBA8A56-9B60-4430-9D54-9A523BAF1E14}</Project>
       <Name>AutoMapper</Name>
     </ProjectReference>
     <ProjectReference Include="..\TypeSafePropertyBag\TypeSafePropertyBag.csproj">
       <Project>{bbb1e311-374e-4c91-a313-1667d83767db}</Project>
       <Name>TypeSafePropertyBag</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TypeWrapper\TypeWrapper.csproj">
+      <Project>{7C45D001-90D6-4521-82AE-41F9492F8ECE}</Project>
+      <Name>TypeWrapper</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ViewModelTools\ViewModelTools.csproj">
+      <Project>{A149EAD5-06A9-47C8-8853-1D329D553EA7}</Project>
+      <Name>ViewModelTools</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

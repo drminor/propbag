@@ -1,30 +1,18 @@
 ﻿using DRM.PropBag.ControlModel;
-using DRM.PropBag.ControlsWPF.WPFHelpers;
 using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.ComponentModel;
 using System.Windows;
 using System.Windows.Data;
-using DRM.TypeSafePropertyBag;
-
 
 namespace DRM.PropBag.ControlsWPF.Binders
 {
+    /// <summary>
+    /// This binding implementation requires that the type of the property for the binding source be specified.
+    /// It may be possible to include a facility for PropBags that mirrors the functionality provided by System.Reflection
+    /// so that this is not neccessary.
+    /// </summary>
     public abstract class MyBindingEngineBase
     {
         #region Member Declarations
-
-        /// <summary>
-        /// This binding implementation requires that the type of the property
-        /// for the binding source be specified.
-        /// It may be possible to include a facility for PropBags that mirrors
-        /// the functionality provided by System.Reflection so that this 
-        /// is not neccessary.
-        /// </summary>
-
-
-
 
         /// <summary>
         /// Used to listen to changes to the sources of data for each step in the path.
@@ -657,7 +645,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
                 // TODO: What about the original PropertyPath parameters?
                 PropertyPath newPath = new PropertyPath(strNewPath);
 
-                isCustom = lastParent.IsPropBagBased;
+                isCustom = lastParent.IsPropBagBased; // .IsPropBagBasedAndNoCustomTypeDescriptors;
                 return CreateBinding(bindingTarget, bInfo, sourceType, newPath, isCustom);
             } 
             else

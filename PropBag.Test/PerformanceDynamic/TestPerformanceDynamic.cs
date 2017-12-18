@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 using NUnit.Framework;
 
-using DRM.PropBag;
+using DRM.PropBag; using DRM.TypeSafePropertyBag;
 using DRM.TypeSafePropertyBag;
 
 namespace PropBagLib.Tests

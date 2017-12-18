@@ -1,5 +1,5 @@
-﻿using DRM.TypeSafePropertyBag;
-using System;
+﻿using System;
+using System.Collections.Generic;
 
 namespace DRM.TypeSafePropertyBag
 {
@@ -45,12 +45,6 @@ namespace DRM.TypeSafePropertyBag
         //    return this.Equals((ValPlusType)obj);
         //}
 
-        // override object.GetHashCode
-        public override int GetHashCode()
-        {
-            return GenerateHash.CustomHash(Value.GetHashCode(), Type.GetHashCode());
-        }
-
         public override bool Equals(object other) => other is ValPlusType && Equals((ValPlusType)other);
 
         /// <summary>
@@ -58,11 +52,19 @@ namespace DRM.TypeSafePropertyBag
         /// </summary>
         /// <param name="other"></param>
         /// <returns></returns>
-        public bool Equals(ValPlusType other) => Value.Equals(other.Value) && Type == other.Type; 
+        public bool Equals(ValPlusType other) => Value.Equals(other.Value) && Type == other.Type;
+
+        public override int GetHashCode()
+        {
+            var hashCode = 1574892647;
+            hashCode = hashCode * -1521134295 + base.GetHashCode();
+            hashCode = hashCode * -1521134295 + EqualityComparer<object>.Default.GetHashCode(Value);
+            hashCode = hashCode * -1521134295 + EqualityComparer<Type>.Default.GetHashCode(Type);
+            return hashCode;
+        }
 
         public static bool operator ==(ValPlusType left, ValPlusType right) => left.Equals(right);
 
         public static bool operator !=(ValPlusType left, ValPlusType right) => !left.Equals(right);
-
     }
 }

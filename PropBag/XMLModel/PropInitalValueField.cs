@@ -8,8 +8,8 @@ using System.Xml.Serialization;
 
 namespace DRM.PropBag.XMLModel
 {
-
-    public class PropIniialValueField
+    // TODO: Add Create New Flag.
+    public class PropInitialValueField
     {
         [XmlText]
         public string InitialValue { get; set; }
@@ -26,17 +26,25 @@ namespace DRM.PropBag.XMLModel
         [XmlAttribute("use-empty-string")]
         public bool SetToEmptyString { get; set; }
 
-        public PropIniialValueField() : this(null) { }
+        [XmlAttribute("create-new")]
+        public bool CreateNew { get; set; }
 
-        public PropIniialValueField(string initialValue, bool setToDefault = false,
+        [XmlAttribute("propbag-resource-key")]
+        public string PropBagResourceKey { get; set; }
+
+        public PropInitialValueField() : this(null) { }
+
+        public PropInitialValueField(string initialValue, bool setToDefault = false,
             bool setToUndefined = false, bool setToNull = false,
-            bool setToEmptyString = false)
+            bool setToEmptyString = false, bool createNew = false, string propBagResourceKey = null)
         {
             InitialValue = initialValue;
             SetToUndefined = setToUndefined;
             SetToDefault = setToDefault;
             SetToNull = setToNull;
             SetToEmptyString = setToEmptyString;
+            CreateNew = createNew;
+            PropBagResourceKey = propBagResourceKey;
         }
     }
 }

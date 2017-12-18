@@ -1,0 +1,28 @@
+﻿using DRM.TypeSafePropertyBag;
+using System.Collections.Generic;
+
+namespace DRM.PropBag.AutoMapperSupport
+{
+    public class ConfigPackage_EmitProxy : IProvideAMapperConfiguration
+    {
+        public IConfigureAMapper<TSource, TDestination> GetTheMapperConfig<TSource, TDestination>() where TDestination : class, IPropBag
+        {
+            List<IHaveAMapperConfigurationStep> configSteps = new List<IHaveAMapperConfigurationStep>
+            {
+                new MapperConfigStarter_Default()
+            };
+
+            IConfigureAMapper<TSource, TDestination> result = new SimpleMapperConfigTyped<TSource, TDestination>
+            (
+                configSteps: configSteps,
+                finalConfigActionProvider: new EmitProxyConfigFinalStep<TSource, TDestination>(),
+                sourceConstructor: null,
+                destinationConstructor: null,
+                configStarter: null,
+                requiresWrappperTypeEmitServices: true
+            );
+                
+            return result;
+        }
+    }
+}

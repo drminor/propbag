@@ -1,0 +1,76 @@
+﻿<?xml version="1.0"?>
+<model
+  class-name="PropGen"
+  output-namespace="PropBagLib.Tests"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xsi:schemaLocation="https://www.swamphillproductions.com/PropBagModel ../../PropBag/XMLModel/PropBagModel.xsd">
+  <namespaces>
+    <namespace>System</namespace>
+    <namespace>System.Collections.Generic</namespace>
+  </namespaces>
+  <props>
+    <prop>
+      <name>PropObject</name>
+      <type>object</type>
+      <initial-value use-default="true"/>
+    </prop>
+    <prop>
+      <name>PropString</name>
+      <type>string</type>
+      <initial-value use-default="true"/>
+      <do-when-changed>DoWhenStringChanged</do-when-changed>
+    </prop>
+    <prop>
+      <name>PropStringCallDoAfter</name>
+      <type>string</type>
+      <initial-value use-undefined="true"/>
+      <comparer>EqualityComparer&lt;string&gt;.Default.Equals</comparer>
+      <do-when-changed do-after-notify="true">DoWhenStringChanged</do-when-changed>
+    </prop>
+    <prop>
+      <name>PropStringUseRefComp</name>
+      <type>string</type>
+      <initial-value use-default="true"/>
+      <comparer use-reference-equality="true"/>
+      <do-when-changed do-after-notify="true">DoWhenStringChanged</do-when-changed>
+    </prop>
+    <prop>
+      <name>PropBool</name>
+      <type>bool</type>
+      <initial-value use-default="true"></initial-value>
+    </prop>
+    <prop>
+      <name>PropInt</name>
+      <type>int</type>
+      <initial-value use-default="true"/>
+    </prop>
+    <prop>
+      <name>PropTimeSpan</name>
+      <type>TimeSpan</type>
+      <initial-value use-default="true"/>
+    </prop>
+    <prop>
+      <name>PropUri</name>
+      <type>Uri</type>
+      <initial-value use-default="true"/>
+    </prop>
+    <prop>
+      <name>PropLazyInt</name>
+      <type>Lazy&lt;int&gt;</type>
+      <initial-value use-default="true"/>
+    </prop>
+    <prop>
+      <name>PropNullableInt</name>
+      <type>Nullable&lt;int&gt;</type>
+      <initial-value>-1</initial-value>
+      <do-when-changed>DoWhenNullIntChanged</do-when-changed>
+    </prop>
+    <prop>
+      <name>PropICollectionInt</name>
+      <type>ICollection&lt;int&gt;</type>
+      <initial-value use-default="true"/>
+      <do-when-changed>DoWhenICollectionIntChanged</do-when-changed>
+    </prop>
+  </props>
+</model>

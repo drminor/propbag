@@ -1,25 +1,30 @@
 ﻿using System;
 using DRM.TypeSafePropertyBag;
-using DRM.PropBag;
+using DRM.PropBag; 
 
 namespace PropBagLib.Tests
 {
     public partial class LooseModel : PropBag
     {
 
-        public LooseModel() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered, null) { }
-
-		public LooseModel(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
-
-		public LooseModel(PropBagTypeSafetyMode typeSafetyMode, AbstractPropFactory factory) : base(typeSafetyMode, factory)
+		public LooseModel(PropBagTypeSafetyMode typeSafetyMode, IPropFactory propFactory) : base(typeSafetyMode, propFactory)
         {
             AddProp<object>("PropObject");
             AddProp<string>("PropString");
-            AddProp<bool>("PropBool", null, false, null, initialValue: false);
+            AddProp<string>("PropString2", null, null, "12");
+            AddProp<bool>("PropBool", null, initialValue: false);
             AddProp<int>("PropInt");
             AddProp<TimeSpan>("PropTimeSpan");
             AddProp<Uri>("PropUri");
             AddProp<Lazy<int>>("PropLazyInt");
+
+            //AddBinding<string>("PropString2", "PropString", FF);
+
+        }
+
+        public void FF(string s1, string s2)
+        {
+            System.Diagnostics.Debug.WriteLine($"The strings are: {s1} + {s2}");
         }
 
         #region Property Declarations
@@ -112,7 +117,7 @@ namespace PropBagLib.Tests
 
         #region PropetyChangedWithTVals Event Declarations
 
-        public event PropertyChangedWithTValsHandler<object> PropObjectChanged
+        public event EventHandler<PcTypedEventArgs<object>> PropObjectChanged
         {
             add
             {
@@ -124,7 +129,7 @@ namespace PropBagLib.Tests
             }
         }
 
-        public event PropertyChangedWithTValsHandler<string> PropStringChanged
+        public event EventHandler<PcTypedEventArgs<string>> PropStringChanged
         {
             add
             {
@@ -136,7 +141,7 @@ namespace PropBagLib.Tests
             }
         }
 
-        public event PropertyChangedWithTValsHandler<bool> PropBoolChanged
+        public event EventHandler<PcTypedEventArgs<bool>> PropBoolChanged
         {
             add
             {
@@ -148,7 +153,7 @@ namespace PropBagLib.Tests
             }
         }
 
-        public event PropertyChangedWithTValsHandler<int> PropIntChanged
+        public event EventHandler<PcTypedEventArgs<int>> PropIntChanged
         {
             add
             {
@@ -160,7 +165,7 @@ namespace PropBagLib.Tests
             }
         }
 
-        public event PropertyChangedWithTValsHandler<TimeSpan> PropTimeSpanChanged
+        public event EventHandler<PcTypedEventArgs<TimeSpan>> PropTimeSpanChanged
         {
             add
             {
@@ -172,7 +177,7 @@ namespace PropBagLib.Tests
             }
         }
 
-        public event PropertyChangedWithTValsHandler<Uri> PropUriChanged
+        public event EventHandler<PcTypedEventArgs<Uri>> PropUriChanged
         {
             add
             {
@@ -184,7 +189,7 @@ namespace PropBagLib.Tests
             }
         }
 
-        public event PropertyChangedWithTValsHandler<Lazy<int>> PropLazyIntChanged
+        public event EventHandler<PcTypedEventArgs<Lazy<int>>> PropLazyIntChanged
         {
             add
             {

@@ -1,14 +1,15 @@
-﻿using DRM.TypeSafePropertyBag;
+﻿using DRM.PropBag.Collections;
+using DRM.TypeSafePropertyBag;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 
-namespace DRM.PropBag
+namespace DRM.TypeSafePropertyBag
 {
     /// <summary>
     /// Base Property Bag Features
     /// </summary>
-    public interface IPropBag : ITypeSafePropBag, INotifyPropertyChanged, INotifyPropertyChanging, INotifyPropertyChangedWithVals
+    public interface IPropBag : ITypeSafePropBag, ICustomTypeDescriptor, INotifyPropertyChanged, INotifyPropertyChanging, INotifyPCGen, INotifyPCIndividual
     {
         // These are defined by ITypeSafePropBag
         //object GetValWithType(string propertyName, Type propertyType);
@@ -22,37 +23,49 @@ namespace DRM.PropBag
 
         //IProp<T> GetTypedProp<T>(string propertyName);
         //IPropGen GetPropGen(string propertyName, Type propertyType);
-        ValPlusType GetValPlusType(string propertyName, Type propertyType);
 
         bool TryGetPropGen(string propertyName, Type propertyType, out IPropGen propGen);
-        //IPropGen this[int index] { get; }
 
-        //int IndexOfProp(string propertyName, Type propertyType);
+        object this[string typeName, string propertyName] { get; set; }
+        object this[Type type, string propertyName] { get; set; }
 
-        object this[string typeName, string propertyName] { get; }
+        ValPlusType GetValPlusType(string propertyName, Type propertyType);
 
         bool SetValWithNoType(string propertyName, object value);
-
         bool SetIt<T>(T newValue, ref T curValue, string propertyName);
 
         bool PropertyExists(string propertyName);
+        bool TryGetPropType(string propertyName, out PropKindEnum propType);
+        bool TryGetListSource(string propertyName, Type itemType, out IListSource listSource);
 
-        bool SubscribeToPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, string propertyName);
-        bool UnSubscribeToPropChanged<T>(PropertyChangedWithTValsHandler<T> eventHandler, string propertyName);
+        bool SubscribeToPropChanged(EventHandler<PropertyChangedEventArgs> handler, string propertyName, Type propertyType);
+        bool UnsubscribeToPropChanged(EventHandler<PropertyChangedEventArgs> handler, string propertyName, Type propertyType);
 
-        bool SubscribeToPropChanged<T>(Action<T, T> doOnChange, string propertyName);
-        bool UnSubscribeToPropChanged<T>(Action<T, T> doOnChange, string propertyName);
+        bool SubscribeToPropChanged<T>(EventHandler<PCTypedEventArgs<T>> eventHandler, string propertyName);
+        bool UnSubscribeToPropChanged<T>(EventHandler<PCTypedEventArgs<T>> eventHandler, string propertyName);
 
-        bool SubscribeToPropChanged(Action<object, object> doOnChange, string propertyName);
-        bool UnSubscribeToPropChanged(Action<object, object> doOnChange, string propertyName);
+        bool SubscribeToPropChanged(EventHandler<PCGenEventArgs> eventHandler, string propertyName, Type propertyType);
+        bool UnSubscribeToPropChanged(EventHandler<PCGenEventArgs> eventHandler, string propertyName, Type propertyType);
 
+        bool SubscribeToPropChanged(EventHandler<PCObjectEventArgs> eventHandler, string propertyName);
+        bool UnSubscribeToPropChanged(EventHandler<PCObjectEventArgs> eventHandler, string propertyName);
+
+
+        //bool SubscribeToPropChanged<T>(Action<T, T> doOnChange, string propertyName);
+        //bool UnSubscribeToPropChanged<T>(Action<T, T> doOnChange, string propertyName);
+
+        //bool SubscribeToPropChanged(Action<object, object> doOnChange, string propertyName);
+        //bool UnSubscribeToPropChanged(Action<object, object> doOnChange, string propertyName);
+
+        string FullClassName { get; }
+
+        // Consider moving these to the TypeSafePropBagMetaData class.
         IList<string> GetAllPropertyNames();
         IDictionary<string, object> GetAllPropertyValues();
         IDictionary<string, ValPlusType> GetAllPropNamesAndTypes();
 
-        // Consider removing this since we are using the PBDispatch class.
-        //object GetValueGen(object host, string propertyName, Type propertyType);
-        //void SetValueGen(object host, string propertyName, Type propertyType, object value);
+        //IPropGen this[int index] { get; }
+        //int IndexOfProp(string propertyName, Type propertyType);
 
     }
 

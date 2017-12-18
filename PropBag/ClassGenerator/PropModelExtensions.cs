@@ -61,9 +61,9 @@ namespace DRM.PropBag.ClassGenerator
             return new PropComparerField(cf.Comparer ?? "null", cf.UseRefEquality);
         }
 
-        public static PropIniialValueField PrepareInitialField(this PropModel pm, PropItem pi)
+        public static PropInitialValueField PrepareInitialField(this PropModel pm, PropItem pi)
         {
-            PropIniialValueField pivf = pi.InitalValueField;
+            PropInitialValueField pivf = pi.InitalValueField;
             if (pivf == null)
             {
                 if (pm.RequireExplicitInitialValue)
@@ -74,7 +74,7 @@ namespace DRM.PropBag.ClassGenerator
                 }
 
                 // This will result in the default value being used.
-                return new PropIniialValueField(null, setToDefault: true, setToUndefined: false, setToNull: false, setToEmptyString: false);
+                return new PropInitialValueField(null, setToDefault: true, setToUndefined: false, setToNull: false, setToEmptyString: false);
             }
 
             if (pivf.InitialValue == null && !pivf.SetToDefault && !pivf.SetToUndefined && !pivf.SetToNull && !pivf.SetToEmptyString)
@@ -123,7 +123,7 @@ namespace DRM.PropBag.ClassGenerator
 
             if (pivf.SetToNull)
             {
-                return new PropIniialValueField("null", setToDefault: false, setToUndefined: false, setToNull: true, setToEmptyString: false);
+                return new PropInitialValueField("null", setToDefault: false, setToUndefined: false, setToNull: true, setToEmptyString: false);
             }
 
             if (pivf.SetToEmptyString)
@@ -131,11 +131,11 @@ namespace DRM.PropBag.ClassGenerator
                 if (pi.Type == typeof(Guid).ToString())
                 {
                     const string EMPTY_GUID = "00000000-0000-0000-0000-000000000000";
-                    return new PropIniialValueField(EMPTY_GUID, setToDefault: false, setToUndefined: false, setToNull: false, setToEmptyString: true);
+                    return new PropInitialValueField(EMPTY_GUID, setToDefault: false, setToUndefined: false, setToNull: false, setToEmptyString: true);
                 }
                 else
                 {
-                    return new PropIniialValueField("\"\"", setToDefault: false, setToUndefined: false, setToNull: false, setToEmptyString: true);
+                    return new PropInitialValueField("\"\"", setToDefault: false, setToUndefined: false, setToNull: false, setToEmptyString: true);
                 }
             }
 

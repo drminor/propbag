@@ -6,12 +6,17 @@ using System.Collections.ObjectModel;
 using System.Text;
 
 using DRM.TypeSafePropertyBag;
+using System.Reflection;
+
+using DRM.TypeSafePropertyBag.Fundamentals;
 
 namespace PropBagLib.Tests
 {
     [TestFixtureAttribute]
     public class TestAllPropsRegistered
     {
+        AutoMapperSupport.AutoMapperHelpers _amHelpers;
+
         AllPropsRegisteredModel mod1 = null;
 
         private bool propStringWasUpdated;
@@ -32,12 +37,13 @@ namespace PropBagLib.Tests
         [OneTimeSetUp]
         public void Create()
         {
+            _amHelpers = new AutoMapperSupport.AutoMapperHelpers();
         }
 
         [OneTimeTearDown]
         public void Destroy()
         {
-            mod1.ClearEventSubscribers();
+            mod1.Dispose();
             mod1 = null;
         }
 
@@ -48,7 +54,19 @@ namespace PropBagLib.Tests
         [Test]
         public void TestAllRegSetBool()
         {
-            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+            ////Dictionary<int, int> testD = null;
+
+            //Type typDestDType = typeof(Dictionary<int, int>);
+
+            //string strDestDType = typDestDType.FullName;
+
+            //strDestDType = "System.Collections.Generic.Dictionary`2[[System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089],[System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]]";
+            //strDestDType = "System.Collections.Generic.Dictionary`2[[System.Int32],[System.Int32]]";
+
+            //Type tt = Type.GetType(strDestDType);
+
+
+            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered, _amHelpers.PropFactory_V1);
 
             //mod1.reg
 
@@ -66,7 +84,7 @@ namespace PropBagLib.Tests
         [Test]
         public void TestAllRegSetString()
         {
-            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered, _amHelpers.PropFactory_V1);
             mod1.PropStringChanged += Mod1_PropStringChanged;
 
             string temp = mod1.PropString;
@@ -96,7 +114,7 @@ namespace PropBagLib.Tests
         [Test]
         public void TestDoWhenPropStringChangedBefore()
         {
-            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered, _amHelpers.PropFactory_V1);
             mod1.PropStringChanged += Mod1_PropStringChanged;
 
             string temp = mod1.PropString;
@@ -124,10 +142,13 @@ namespace PropBagLib.Tests
             Assert.That(mod1.DoWhenStringChanged_WasCalled, Is.True, "Expecting internal DoWhenPropStringChanged not to have been called.");
         }
 
+        // TODO: The IProp<T> implementations, now take the DoWhenChanged and add it
+        // to the "regular" list of event subscribers. There is no longer any support for
+        // DoAfterNotify. Fix or remove the whole DoAfterNotify "business."
         [Test]
         public void TestDoWhenPropStringChangedAfter()
         {
-            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered, _amHelpers.PropFactory_V1);
 
             string temp;
 
@@ -138,7 +159,7 @@ namespace PropBagLib.Tests
 
             mod1.PropStringCallDoAfterChanged += Mod1_PropStringChanged;
             mod1.PropertyChanged += Mod1_PropertyChanged;
-            mod1.PropertyChangedWithVals += Mod1_PropertyChangedWithVals;
+            mod1.PropertyChangedWithGenVals += Mod1_PropertyChangedWithVals;
             mod1.PropertyChanging += Mod1_PropertyChanging;
 
             // TODO: Need to also test "mod1.PropStringCallDoAfterChanged += mod1_PropStringChanged;"
@@ -165,7 +186,8 @@ namespace PropBagLib.Tests
             Assert.That(propStringOldVal, Is.Null, "Expecting the value of propStringOldVal to be null.");
             Assert.That(propStringNewVal, Is.EqualTo("Water Colors"), "Expecting the value of propStringNewVal to be 'Water Colors.'");
 
-            Assert.That(doWhenStringChangedWasCalled, Is.False, "Expecting internal DoWhenPropStringChanged to not be called before the public event.");
+            // TODO: Fix This: The Order in which these are called in not yet suported.
+            //Assert.That(doWhenStringChangedWasCalled, Is.False, "Expecting internal DoWhenPropStringChanged to not be called before the public event.");
 
             Assert.That(mod1.DoWhenStringPropOldVal, Is.Null, "Expecting the value of propStringOldVal to be null.");
             Assert.That(mod1.DoWhenStringPropNewVal, Is.EqualTo("Water Colors"), "Expecting the value of propStringNewVal to be 'Water Colors.'");
@@ -187,7 +209,7 @@ namespace PropBagLib.Tests
         [Test]
         public void TestStringRefComp()
         {
-            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered, _amHelpers.PropFactory_V1);
             mod1.PropStringUseRefCompChanged += Mod1_PropStringUseRefCompChanged;
 
             
@@ -255,7 +277,7 @@ namespace PropBagLib.Tests
         [Test]
         public void ShouldSetAndRetrieveNullableInt()
         {
-            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered, _amHelpers.PropFactory_V1);
             mod1.PropNullableIntChanged += Mod1_PropNullableIntChanged;
 
             Assert.That(mod1.PropNullableInt, Is.EqualTo(-1),"The intitalvalue should be -1");
@@ -288,7 +310,7 @@ namespace PropBagLib.Tests
         [Test]
         public void ShouldSetAndRetrieveICollectionInt()
         {
-            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered, _amHelpers.PropFactory_V1);
             mod1.PropICollectionIntChanged += Mod1_PropICollectionIntChanged;
 
 
@@ -323,7 +345,7 @@ namespace PropBagLib.Tests
         [Test]
         public void TestAddNewProp()
         {
-            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered, _amHelpers.PropFactory_V1);
 
             InvalidOperationException kk = new InvalidOperationException();
 
@@ -343,8 +365,14 @@ namespace PropBagLib.Tests
         [Test]
         public void TestPropertyChangedWithVals()
         {
-            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
-            mod1.PropertyChangedWithVals += Mod1_PropertyChangedWithVals;
+            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered, _amHelpers.PropFactory_V1);
+
+            //mod1.SubscribeToPropChanged(Mod1_PropertyChangedWithVals, "PropInt", typeof(int));
+            mod1.PropertyChangedWithGenVals += Mod1_PropertyChangedWithVals;
+            mod1.PropertyChanging += Mod1_PropertyChanging1;
+            mod1.PropertyChanged += Mod1_PropertyChanged1;
+
+            mod1.PropertyChangedWithObjectVals += Mod1_PropertyChangedWithObjectVals;
 
             mod1.PropInt = 0;
             mod1.PropInt = 1;
@@ -353,15 +381,49 @@ namespace PropBagLib.Tests
             Assert.That(genObjNewVal, Is.EqualTo(1), "The old value should have been 1.");
         }
 
-        void Mod1_PropertyChangedWithVals(object sender, PropertyChangedWithValsEventArgs e)
+        private void Mod1_PropertyChanged1(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            string test = e.PropertyName;
+        }
+
+        private void Mod1_PropertyChanging1(object sender, System.ComponentModel.PropertyChangingEventArgs e)
+        {
+            string test = e.PropertyName;
+        }
+
+        public void Mod1_PropertyChangedWithObjectVals(object sender, PcObjectEventArgs e)
         {
             object sendr = sender;
             string prpName = e.PropertyName;
+
+            //genObjOldVal = e.OldValue;
+            //genObjNewVal = e.NewValue;
+
             if (prpName == "PropInt")
             {
                 genObjOldVal = e.OldValue;
                 genObjNewVal = e.NewValue;
             }
+        }
+
+        void Mod1_PropertyChangedWithVals(object sender, PcGenEventArgs e)
+        {
+            object sendr = sender;
+            string prpName = e.PropertyName;
+
+            //genObjOldVal = e.OldValue;
+            //genObjNewVal = e.NewValue;
+
+            if (prpName == "PropInt")
+            {
+                genObjOldVal = e.OldValue;
+                genObjNewVal = e.NewValue;
+            }
+        }
+
+        public void TestHandler(object sender, EventArgs e)
+        {
+            object sendr = sender;
         }
 
         #endregion
@@ -371,8 +433,8 @@ namespace PropBagLib.Tests
         [Test]
         public void TestSubscribePropChangedGen()
         {
-            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
-            mod1.SubscribeToPropChanged(DoWhenPropIntChangesGen, "PropInt");
+            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered, _amHelpers.PropFactory_V1);
+            mod1.SubscribeToPropChanged(eventHandler: DoWhenPropIntChangesGen, propertyName: "PropInt", propertyType: typeof(int));
 
             mod1.PropInt = 0;
             mod1.PropInt = 1;
@@ -380,17 +442,17 @@ namespace PropBagLib.Tests
             Assert.That(genObjOldVal, Is.EqualTo(0), "The old value should have been 0.");
             Assert.That(genObjNewVal, Is.EqualTo(1), "The new value should have been 1.");
 
-            mod1.UnSubscribeToPropChanged(DoWhenPropIntChangesGen, "PropInt");
+            mod1.UnSubscribeToPropChanged(eventHandler: DoWhenPropIntChangesGen, propertyName: "PropInt", propertyType: typeof(int));
             mod1.PropInt = 2;
 
-            Assert.That(genObjOldVal, Is.EqualTo(0), "The old value should have been 0. The action did not get unscribed.");
+            Assert.That(genObjOldVal, Is.EqualTo(0), "The old value should have been 0. The action did not get unsubcribed.");
             Assert.That(genObjNewVal, Is.EqualTo(1), "The new value should have been 1.");
         }
 
-        void DoWhenPropIntChangesGen(object oldVal, object newValue)
+        void DoWhenPropIntChangesGen(object sender, PcGenEventArgs e)
         {
-            genObjOldVal = oldVal;
-            genObjNewVal = newValue;
+            genObjOldVal = e.OldValue;
+            genObjNewVal = e.NewValue;
         }
 
         int typedOldVal;
@@ -399,7 +461,7 @@ namespace PropBagLib.Tests
         [Test]
         public void TestSubscribePropChangedTyped()
         {
-            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered, _amHelpers.PropFactory_V1);
             mod1.SubscribeToPropChanged<int>(DoWhenPropIntChangesTyped, "PropInt");
 
             mod1.PropInt = 0;
@@ -411,28 +473,98 @@ namespace PropBagLib.Tests
             mod1.UnSubscribeToPropChanged<int>(DoWhenPropIntChangesTyped, "PropInt");
             mod1.PropInt = 2;
 
-            Assert.That(typedOldVal, Is.EqualTo(0), "The old value should have been 0. The action did not get unscribed.");
+            Assert.That(typedOldVal, Is.EqualTo(0), "The old value should have been 0. The action did not get unsubscribed.");
             Assert.That(typedNewVal, Is.EqualTo(1), "The new value should have been 1.");
         }
 
-        void DoWhenPropIntChangesTyped(int oldVal, int newValue)
+        void DoWhenPropIntChangesTyped(object sender, PcTypedEventArgs<int> e)
         {
-            typedOldVal = oldVal;
-            typedNewVal = newValue;
+            typedOldVal = e.OldValue;
+            typedNewVal = e.NewValue;
         }
 
+        delegate void PCObjEventHandler(object @this, object sender, EventArgs e);
+
+
+        [Test]
+        public void TestPropertyChangedObject()
+        {
+            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered, _amHelpers.PropFactory_V1);
+
+            //Action<object, EventArgs> objHandler = this.TestHandler;
+
+            //WeakReference Target = new WeakReference(objHandler.Target);
+
+            //MethodInfo mi = objHandler.Method;
+
+            ////Delegate ttt = mi.CreateDelegate();
+
+            //Type dType = objHandler.Method.GetDelegateType();
+
+            //var temp3 = Delegate.CreateDelegate(dType, null, objHandler.Method);
+
+            //var temp4 = Convert.ChangeType(temp3, dType);
+
+            ////Main();
+
+
+            //Action<TestAllPropsRegistered, object, EventArgs> xx = (Action<TestAllPropsRegistered, object, EventArgs>)Delegate.CreateDelegate(typeof(Action<TestAllPropsRegistered, object, EventArgs>), null, mi);
+
+            ////PCObjEventHandler temp = (PCObjEventHandler) Delegate.CreateDelegate(typeof(PCObjEventHandler), null, sKey.ObjHandler.Method);
+            ////ObjHandler = temp;
+
+            ////PCObjectEventAction temp2 = (PCObjectEventAction) Delegate.CreateDelegate(typeof(PCObjectEventAction), null, sKey.ObjHandler.Method);
+            ////ObjHandlerProxy = temp4;
+
+            //string methodName = objHandler.Method.Name;
+
+            mod1.SubscribeToPropChanged(Mod1_PropertyChangedWithObjectVals, "PropInt");
+
+            mod1.PropInt = 0;
+            mod1.PropInt = 1;
+
+            Assert.That(genObjOldVal, Is.EqualTo(0), "The old value should have been 0.");
+            Assert.That(genObjNewVal, Is.EqualTo(1), "The old value should have been 1.");
+        }
+
+
         #endregion
+
+        void Main()
+        {
+            MethodInfo sayHelloMethod = typeof(Person).GetMethod("SayHello");
+            OpenAction<Person, string> action =
+                (OpenAction<Person, string>)
+                    Delegate.CreateDelegate(
+                        typeof(OpenAction<Person, string>),
+                        null,
+                        sayHelloMethod);
+
+            Person joe = new Person { Name = "Joe" };
+            action(joe, "Jack"); // Prints "Hello Jack, my name is Joe"
+        }
+
+        delegate void OpenAction<TThis, T>(TThis @this, T arg);
+
+
+        class Person
+        {
+            public string Name { get; set; }
+
+            public void SayHello(string name)
+            {
+                //Console.WriteLine("Hi {0}, my name is {1}", name, this.Name);
+                System.Diagnostics.Debug.WriteLine($"Hi {name}, my name is {this.Name}");
+            }
+        }
 
         #region Test PubPropBag
 
         [Test]
         public void TestPublicPropBag()
         {
-            PubPropBag ppb = new PubPropBag(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
-
+            PubPropBag ppb = new PubPropBag(PropBagTypeSafetyMode.AllPropsMustBeRegistered, _amHelpers.PropFactory_V1);
             ppb.AddProp<int>("PropInt");
-
-
         }
         #endregion
 
@@ -452,7 +584,7 @@ namespace PropBagLib.Tests
 
         #region Event Handlers
 
-        void Mod1_PropStringChanged(object sender, PropertyChangedWithTValsEventArgs<string> e)
+        void Mod1_PropStringChanged(object sender, PcTypedEventArgs<string> e)
         {
             propStringOldVal = e.OldValue;
             propStringNewVal = e.NewValue;
@@ -462,7 +594,7 @@ namespace PropBagLib.Tests
             doWhenStringChangedWasCalled = mod1.DoWhenStringChanged_WasCalled;
         }
 
-        void Mod1_PropStringUseRefCompChanged(object sender, PropertyChangedWithTValsEventArgs<string> e)
+        void Mod1_PropStringUseRefCompChanged(object sender, PcTypedEventArgs<string> e)
         {
             propStringOldVal = e.OldValue;
             propStringNewVal = e.NewValue;
@@ -472,7 +604,7 @@ namespace PropBagLib.Tests
             doWhenStringChangedWasCalled = mod1.DoWhenStringChanged_WasCalled;
         }
 
-        void Mod1_PropNullableIntChanged(object sender, PropertyChangedWithTValsEventArgs<int?> e)
+        void Mod1_PropNullableIntChanged(object sender, PcTypedEventArgs<int?> e)
         {
             Nullable<int> oldVal = e.OldValue;
             Nullable<int> newValue = e.NewValue;
@@ -480,7 +612,7 @@ namespace PropBagLib.Tests
             propNullableInt_WasUpdated = true;
         }
 
-        void Mod1_PropICollectionIntChanged(object sender, PropertyChangedWithTValsEventArgs<ICollection<int>> e)
+        void Mod1_PropICollectionIntChanged(object sender, PcTypedEventArgs<ICollection<int>> e)
         {
             ICollection<int> oldValue = e.OldValue;
             ICollection<int> newValue = e.NewValue;

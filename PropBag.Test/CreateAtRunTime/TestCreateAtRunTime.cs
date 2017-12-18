@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using NUnit.Framework;
-
-using DRM.PropBag;
+﻿
 using DRM.PropBag.ControlModel;
 using DRM.TypeSafePropertyBag;
+using NUnit.Framework;
+using PropBagLib.Tests.AutoMapperSupport;
 
 namespace PropBagLib.Tests
 {
@@ -23,7 +17,7 @@ namespace PropBagLib.Tests
         }
 
         [TearDown]
-        public void destroy()
+        public void Destroy()
         {
             mod1 = null;
         }
@@ -33,13 +27,25 @@ namespace PropBagLib.Tests
         public void Test1()
         {
 
-            PropModel pm = new PropModel("CreateAtRunTimeModel", "main", "PropBagLib.Tests", deriveFromPubPropBag: false, typeSafetyMode: PropBagTypeSafetyMode.AllPropsMustBeRegistered, deferMethodRefResolution: true);
+            PropModel pm = new PropModel
+                (
+                className: "CreateAtRunTimeModel",
+                namespaceName: "PropBagLib.Tests",
+                deriveFrom: DeriveFromClassModeEnum.PropBag,
+                targetType: null, 
+                propFactory: null,
+                typeSafetyMode: PropBagTypeSafetyMode.AllPropsMustBeRegistered,
+                deferMethodRefResolution: true,
+                requireExplicitInitialValue: true);
 
-            PropItem pi = new PropItem(typeof(string), "PropString", null, true, true, new PropInitialValueField("Initial Value"), null, null);
+            PropItem pi = new PropItem(typeof(string), "PropString", true, true, PropKindEnum.Prop, null, new PropInitialValueField("Initial Value"), null, null, null);
 
             pm.Props.Add(pi);
 
-            mod1 = new CreateAtRunTimeModel(pm);
+            AutoMapperHelpers ourHelper = new AutoMapperHelpers();
+            IPropFactory propFactory_V1 = ourHelper.GetNewPropFactory_V1();
+
+            mod1 = new CreateAtRunTimeModel(pm, propFactory_V1);
 
             Assert.That(mod1, Is.Not.EqualTo(null), "Expected the CreateAtRunTimeModel to have been created.");
 

@@ -1,15 +1,13 @@
-﻿using DRM.PropBag;
+﻿using DRM.TypeSafePropertyBag;
+using DRM.PropBag.AutoMapperSupport;
 using DRM.PropBag.ControlModel;
 using DRM.PropBag.ControlsWPF;
-using DRM.PropBag.ControlsWPF.WPFHelpers;
-
-using PropBagTestApp.ViewModels;
+using DRM.ViewModelTools;
+using PropBagTestApp.Infra;
 using PropBagTestApp.Models;
-
+using PropBagTestApp.ViewModels;
 using System;
 using System.Windows;
-using System.Windows.Data;
-using DRM.TypeSafePropertyBag;
 
 namespace PropBagTestApp.View
 {
@@ -18,8 +16,11 @@ namespace PropBagTestApp.View
     /// </summary>
     public partial class ReferenceBindWindowPB_Simple : Window
     {
+
         public ReferenceBindWindowPB_Simple()
         {
+            _mapper = null;
+
             InitializeComponent();
 
             ReferenceBindViewModelPB rbvm = (ReferenceBindViewModelPB)this.DataContext;
@@ -30,39 +31,58 @@ namespace PropBagTestApp.View
 
         private void BtnRead_Click(object sender, RoutedEventArgs e)
         {
+            ReferenceBindViewModelPB vm = (ReferenceBindViewModelPB)this.DataContext;
+
+            MyModel mm = new MyModel
+            {
+                ProductId = Guid.NewGuid(),
+                Amount = 38,
+                Size = 20.02
+            };
+
+            ReadWithMap(mm, vm);
+
+            //if (vm == null)
+            //{
+            //    vm = GetNewViewModel();
+            //    this.DataContext = vm;
+            //}
+        }
+
+        private void BtnRead_Click_OLD(object sender, RoutedEventArgs e)
+        {
             //CollectionViewSource aa = new CollectionViewSource();
-            ReferenceBindViewModelPB m = (ReferenceBindViewModelPB)this.DataContext;
+            //ReferenceBindViewModelPB vm = (ReferenceBindViewModelPB)this.DataContext;
 
-            if (m == null)
-            {
-                m = GetNewViewModel();
-                this.DataContext = m;
+            //if (vm == null)
+            //{
+            //    vm = GetNewViewModel();
+            //    this.DataContext = vm;
+            //}
 
-            }
+            //vm.SetIt<int>(21, "Amount");
+            //int tttt = vm.GetIt<int>("Amount");
+            ////m.Amount = 21;
 
-            m.SetIt<int>(21, "Amount");
-            int tttt = m.GetIt<int>("Amount");
-            //m.Amount = 21;
+            //vm.SetIt<double>(30.3, "Size");
+            ////m.Size = 30.3;
 
-            m.SetIt<double>(30.3, "Size");
-            //m.Size = 30.3;
+            //vm.SetIt<Guid>(Guid.NewGuid(), "ProductId");
+            ////m.ProductId = Guid.NewGuid();
 
-            m.SetIt<Guid>(Guid.NewGuid(), "ProductId");
-            //m.ProductId = Guid.NewGuid();
+            //vm.SetIt<double>(0.01, "TestDouble");
+            ////m.TestDouble = 0.01;
 
-            m.SetIt<double>(0.01, "TestDouble");
-            //m.TestDouble = 0.01;
-
-            MyModel4 r = m.GetIt<MyModel4>("Deep");
-            if(r != null)
-            {
-                r.MyString = "Jacob2";
-            }
-            else
-            {
-                MyModel4 mod4 = new MyModel4() { MyString = "Jacob" };
-                m.SetIt<MyModel4>(mod4, "Deep");
-            }
+            //MyModel4 r = vm.GetIt<MyModel4>("Deep");
+            //if (r != null)
+            //{
+            //    r.MyString = "Jacob2";
+            //}
+            //else
+            //{
+            //    MyModel4 mod4 = new MyModel4() { MyString = "Jacob" };
+            //    vm.SetIt<MyModel4>(mod4, "Deep");
+            //}
 
         }
 
@@ -92,30 +112,47 @@ namespace PropBagTestApp.View
         {
             if(this.DataContext == null)
             {
-                this.DataContext = GetNewViewModel();
+                //this.DataContext = GetNewViewModel();
             }
             else
             {
                 this.DataContext = null;
             }
         }
-         
-        private ReferenceBindViewModelPB GetNewViewModel()
+
+        private void ReadWithMap(MyModel mm, ReferenceBindViewModelPB vm)
         {
-            PropBagTemplate pbt = PropBagTemplateResources.GetPropBagTemplate("ReferenceBindViewModelPB");
-            PropModel pm = pbt.GetPropModel();
-            IPropFactory pf = SettingsExtensions.ThePropFactory;
+            var mapper = Mapper; 
 
-            ReferenceBindViewModelPB rbvm = new ReferenceBindViewModelPB(pm, pf);
+            ReferenceBindViewModelPB tt = (ReferenceBindViewModelPB)mapper.MapToDestination(mm, vm);
 
-            MyModel4 mod4 = new MyModel4() { MyString = "Start" };
-            rbvm.SetIt<MyModel4>(mod4, "Deep");
-
-            return rbvm;
+            // Now try creating a new one from mm.
+            ReferenceBindViewModelPB test = (ReferenceBindViewModelPB)mapper.MapToDestination(mm);
         }
+
+        private readonly string REFERENCE_BIND_VM_RES_KEY = "ReferenceBindViewModelPB";
+
+        private IPropBagMapper<MyModel, ReferenceBindViewModelPB> _mapper;
+        private IPropBagMapper<MyModel, ReferenceBindViewModelPB> Mapper
+        {
+            get
+            {
+                if (_mapper == null)
+                {
+                    IPropBagMapperKey<MyModel, ReferenceBindViewModelPB> mapperRequest
+                        = JustSayNo.AutoMapperProvider.RegisterMapperRequest<MyModel, ReferenceBindViewModelPB>
+                    (
+                        REFERENCE_BIND_VM_RES_KEY,
+                        typeof(ReferenceBindViewModelPB),
+                        configPackageName: "emit_proxy"
+                    );
+
+                    _mapper = JustSayNo.AutoMapperProvider.GetMapper(mapperRequest);
+                }
+                return _mapper;
+            }
+        }
+
+
     }
-
-
-
-
 }

@@ -39,8 +39,7 @@ namespace PropBagTestApp
             InitializeComponent();
 
             Grid topGrid =  (Grid) this.FindName("TopGrid");
-
-            ViewModelGenerator.StandUpViewModels(topGrid, this);
+            //ViewModelGenerator.StandUpViewModels(topGrid, this);
 
             topGrid.DataContext = OurData;
 

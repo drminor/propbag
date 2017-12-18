@@ -14,10 +14,12 @@ namespace PropBagLib.Tests
 
 		public ExtStoreModel(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
 
-		public ExtStoreModel(PropBagTypeSafetyMode typeSafetyMode, AbstractPropFactory factory) : base(typeSafetyMode, factory)
+		public ExtStoreModel(PropBagTypeSafetyMode typeSafetyMode, IPropFactory factory) : base(typeSafetyMode, factory)
 		{
-	        AddProp<int>("PropInt3", null, false, null);
-	        AddProp<int>("PropInt4", null, false, null);
+	        AddProp<int>("PropInt3", comparer:null);
+		 
+	        AddProp<int>("PropInt4", comparer:null);
+		 
 		}
 
 	#region Property Declarations
@@ -47,10 +49,10 @@ namespace PropBagLib.Tests
 		}  
 	 
 	#endregion
-
+	
 	#region PropetyChangedWithTVals Event Declarations
 		  
-			public event PropertyChangedWithTValsHandler<int> PropInt3Changed
+			public event EventHandler<PcTypedEventArgs<int>> PropInt3Changed
 			{
 				add
 				{
@@ -62,7 +64,7 @@ namespace PropBagLib.Tests
 				}
 			}
 	  
-			public event PropertyChangedWithTValsHandler<int> PropInt4Changed
+			public event EventHandler<PcTypedEventArgs<int>> PropInt4Changed
 			{
 				add
 				{
@@ -82,14 +84,14 @@ namespace PropBagLib.Tests
 		/// </summary>
 		/// <param name="methodName">Some public or non-public instance method in this class.</param>
 		/// <returns>The name, unchanged, if the method exists, otherwise null.</returns>
-		private Action<T, T> GetDelegate<T>(string methodName)
+		EventHandler<PcTypedEventArgs<T>> GetDelegate<T>(string methodName)
 		{
 		    Type pp = this.GetType();
 		    MethodInfo mi = pp.GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 		
 		    if (mi == null) return null;
 		
-		    Action<T, T> result = (Action<T, T>)mi.CreateDelegate(typeof(Action<T, T>), this);
+		    EventHandler<PcTypedEventArgs<T>> result = (EventHandler<PcTypedEventArgs<T>>)mi.CreateDelegate(typeof(EventHandler<PcTypedEventArgs<T>>), this);
 		
 		    return result;
 		}

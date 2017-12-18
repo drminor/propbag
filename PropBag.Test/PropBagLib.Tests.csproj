@@ -33,10 +33,17 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.2.0\lib\net45\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.2.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
     <Reference Include="nunit.framework, Version=3.8.1.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
       <HintPath>..\packages\NUnit.3.8.1\lib\net45\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml.Linq" />
@@ -46,6 +53,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AutoMapperSupport\AutoMapperHelpers.cs" />
+    <Compile Include="AutoMapperSupport\DestinationModels.cs" />
+    <Compile Include="AutoMapperSupport\MyModel.cs" />
+    <Compile Include="AutoMapperSupport\TestAutoMapperBasic.cs" />
+    <Compile Include="BusinessModel\Business.cs" />
+    <Compile Include="BusinessModel\Person.cs" />
+    <Compile Include="BusinessModel\PersonDB.cs" />
     <Compile Include="CreateAtRunTime\CreateAtRunTimeModel.cs" />
     <Compile Include="CreateAtRunTime\TestCreateAtRunTime.cs" />
     <Compile Include="Dynamic\TestDynamic.cs" />
@@ -70,6 +84,11 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <DesignTime>True</DesignTime>
     </None>
+    <Compile Include="PerformanceDb\DestinationModels.cs" />
+    <Compile Include="PerformanceDb\MyModel.cs" />
+    <Compile Include="PerformanceDb\ObservableCollTestObject.cs" />
+    <Compile Include="PerformanceDb\PropModelHelpers.cs" />
+    <Compile Include="PerformanceDb\TestPerformanceDb.cs" />
     <Compile Include="Performance\PerformanceModel.cs" />
     <Compile Include="Performance\PerformanceModel.props.cs">
       <DependentUpon>PerformanceModel.props.tt</DependentUpon>
@@ -106,7 +125,7 @@
     </Content>
     <Content Include="PerformanceDynamic\PerformanceDynModel_PropDefs.xml" />
     <Content Include="PubPropBag\PubPropBagModel_PropDefs.xml" />
-    <Content Include="T4\PropGen_PropDefs.xml">
+    <Content Include="T4\Sample_PropDefs.xml">
       <SubType>Designer</SubType>
     </Content>
     <Compile Include="Properties\Settings.Designer.cs">
@@ -121,8 +140,8 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="PubPropBag\PubPropBagModel.cs" />
-    <Compile Include="T4\PropGen.cs">
-      <DependentUpon>PropGen.tt</DependentUpon>
+    <Compile Include="T4\Sample.cs">
+      <DependentUpon>Sample.tt</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
@@ -138,13 +157,33 @@
       <Project>{10cf1c6f-f877-49a8-8678-6947f55e6920}</Project>
       <Name>AutoMapperSupport</Name>
     </ProjectReference>
+    <ProjectReference Include="..\PropBagControlsWPF\PropBagControlsWPF.csproj">
+      <Project>{9bee9979-9812-4675-8f97-a4dd1e7dba5f}</Project>
+      <Name>PropBagControlsWPF</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PropBagWPF\PropBagWPF.csproj">
+      <Project>{54099ef8-94bb-4d74-8705-b4756cc1c7f2}</Project>
+      <Name>PropBagWPF</Name>
+    </ProjectReference>
     <ProjectReference Include="..\PropBag\PropBag.csproj">
       <Project>{7387b893-fbdc-4b9c-ac9e-0b56388b46c1}</Project>
       <Name>PropBag</Name>
     </ProjectReference>
+    <ProjectReference Include="..\src\AutoMapper\AutoMapper.csproj">
+      <Project>{8cba8a56-9b60-4430-9d54-9a523baf1e14}</Project>
+      <Name>AutoMapper</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TypeSafePropertyBag\TypeSafePropertyBag.csproj">
       <Project>{bbb1e311-374e-4c91-a313-1667d83767db}</Project>
       <Name>TypeSafePropertyBag</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TypeWrapper\TypeWrapper.csproj">
+      <Project>{7c45d001-90d6-4521-82ae-41f9492f8ece}</Project>
+      <Name>TypeWrapper</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ViewModelTools\ViewModelTools.csproj">
+      <Project>{a149ead5-06a9-47c8-8853-1d329d553ea7}</Project>
+      <Name>ViewModelTools</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -171,9 +210,9 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-    <None Include="T4\PropGen.tt">
+    <None Include="T4\Sample.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>PropGen.cs</LastGenOutput>
+      <LastGenOutput>Sample.cs</LastGenOutput>
     </None>
   </ItemGroup>
   <ItemGroup>

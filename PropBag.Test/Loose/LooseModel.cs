@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
+﻿
 using DRM.PropBag;
 using DRM.TypeSafePropertyBag;
 
@@ -8,6 +6,13 @@ namespace PropBagLib.Tests
 {
     public partial class LooseModel : PropBag
     {
+        //private PropBagTypeSafetyMode none;
+
+        //public LooseModel(PropBagTypeSafetyMode none)
+        //{
+        //    this.none = none;
+        //}
+
         public bool DoWhenStringChanged_WasCalled { get; set; }
         public string DoWhenStringPropOldVal { get; set; }
         public string DoWhenStringPropNewVal { get; set; }
@@ -29,11 +34,11 @@ namespace PropBagLib.Tests
         //        desiredHasStoreValue:true);
         //}
 
-        public void DoWhenStringChanged(string oldVal, string newVal)
+        public void DoWhenStringChanged(object sender, PcTypedEventArgs<string> e)
         {
             DoWhenStringChanged_WasCalled = true;
-            DoWhenStringPropOldVal = oldVal;
-            DoWhenStringPropNewVal = newVal;
+            DoWhenStringPropOldVal = e.OldValue;
+            DoWhenStringPropNewVal = e.NewValue;
         }
 
     }

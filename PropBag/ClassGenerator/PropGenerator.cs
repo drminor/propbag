@@ -24,7 +24,7 @@ namespace DRM.PropBag.ClassGenerator
         static public IProp<T> CreateViaClassGenerator(PropDefRaw def, AbstractPropFactory factory, Type derivedType, out bool typeIsSolid)
         {
             Func<T,T,bool> comparer = GetComp(def.Comparer, def.UseRefEquality, factory);
-            Action<T,T> doWhen = GetDoWhen(def.DoWhenChanged, derivedType);
+            EventHandler<PcTypedEventArgs<T>> doWhenChangedX = GetDoWhen(def.DoWhenChanged, derivedType);
 
             IProp<T> prop;
 
@@ -34,7 +34,7 @@ namespace DRM.PropBag.ClassGenerator
             {
                 if (def.CreateType == PropCreateMethodEnum.noValue)
                 {
-                    prop = factory.CreateWithNoValue<T>(def.PropName, def.ExtraInfo, def.HasStore, def.TypeIsSolid, doWhen, def.DoAfterNotify, comparer);
+                    prop = factory.CreateWithNoValue<T>(def.PropName, def.ExtraInfo, def.HasStore, def.TypeIsSolid, comparer);
                 }
                 else
                 {
@@ -48,12 +48,12 @@ namespace DRM.PropBag.ClassGenerator
                         initVal = factory.GetValueFromString<T>(def.InitialValue);
                     }
 
-                    prop = factory.Create<T>(initVal, def.PropName, def.ExtraInfo, def.HasStore, def.TypeIsSolid, doWhen, def.DoAfterNotify, comparer);
+                    prop = factory.Create<T>(initVal, def.PropName, def.ExtraInfo, def.HasStore, def.TypeIsSolid, comparer);
                 }
             }
             else
             {
-                prop = factory.CreateWithNoValue<T>(def.PropName, def.ExtraInfo, def.HasStore, def.TypeIsSolid, doWhen, def.DoAfterNotify, comparer);
+                prop = factory.CreateWithNoValue<T>(def.PropName, def.ExtraInfo, def.HasStore, def.TypeIsSolid,  comparer);
             }
             return prop;
         }
@@ -66,14 +66,14 @@ namespace DRM.PropBag.ClassGenerator
             return null;
         }
 
-        static Action<T, T> GetDoWhen(string x, Type d)
+        static EventHandler<PcTypedEventArgs<T>> GetDoWhen(string x, Type d)
         {
             MethodInfo mi = d.GetMethod(x, BindingFlags.Instance | BindingFlags.NonPublic).MakeGenericMethod(typeof(T));
             //Type delType = typeof(Action<T,T>)
 
             Type dd = mi.GetRuntimeBaseDefinition().GetType();
 
-            Action<T, T> result = (Action<T,T>)mi.CreateDelegate(dd);
+            EventHandler<PcTypedEventArgs<T>> result = (EventHandler<PcTypedEventArgs<T>>)mi.CreateDelegate(dd);
 
             return result;
         }
@@ -89,7 +89,7 @@ namespace DRM.PropBag.ClassGenerator
 
             if (pi.HasStore)
             {
-                PropIniialValueField initialValPrepped = propModel.PrepareInitialField(pi);
+                PropInitialValueField initialValPrepped = propModel.PrepareInitialField(pi);
 
                 if (!initialValPrepped.SetToUndefined)
                 {

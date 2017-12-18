@@ -1,5 +1,6 @@
 ﻿using DRM.PropBag.ControlsWPF.WPFHelpers;
 using DRM.TypeSafePropertyBag;
+using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -315,9 +316,22 @@ namespace DRM.PropBag.ControlsWPF.Binders
             get
             {
                 Type test = Type;
+
                 return test == null ? false : test.IsPropBagBased();
             }
         }
+
+        public bool IsPropBagBasedAndNoCustomTypeDescriptors
+        {
+            get
+            {
+                Type test = Type;
+
+                return test == null ? false : test.IsPropBagBasedAndNoCustomTypeDescriptors();
+            }
+        }
+
+        
 
         private bool IsTargetADc { get; set; }
 
@@ -472,7 +486,6 @@ namespace DRM.PropBag.ControlsWPF.Binders
             if (IsPropBagBased)
             {
                 return GetChildFromPropBag((IPropBag)Data, parentType, pathElement);
-
             }
             else
             {
@@ -485,18 +498,10 @@ namespace DRM.PropBag.ControlsWPF.Binders
             object newData;
             Type newType;
 
-            if (data.TryGetPropGen(pathElement, null, out IPropGen iPg))
+            if (data.TryGetPropGen(pathElement, null, out IPropData iPg))
             {
-                if (iPg is PropGen)
-                {
-                    newData = ((PropGen)iPg).TypedProp?.TypedValueAsObject;
-                    newType = ((PropGen)iPg).Type;
-                }
-                else
-                {
-                    newData = iPg?.TypedProp?.TypedValueAsObject;
-                    newType = iPg?.Type;
-                }
+                newData = iPg?.TypedProp?.TypedValueAsObject;
+                newType = iPg?.TypedProp?.Type;
 
                 if (newData != null)
                 {
@@ -596,30 +601,25 @@ namespace DRM.PropBag.ControlsWPF.Binders
                         AddSubscriptions(Data);
                         break;
                     }
-                case SourceKindEnum.CollectionObject:
-                    {
-                        AddSubscriptions(Data);
-                        break;
-                    }
                 case SourceKindEnum.FrameworkElement:
                     {
-                        AddSubscriptions(Data);
-                        break;
+                        goto case SourceKindEnum.PropertyObject;
                     }
                 case SourceKindEnum.FrameworkContentElement:
                     {
-                        AddSubscriptions(Data);
-                        break;
+                        goto case SourceKindEnum.PropertyObject;
+                    }
+                case SourceKindEnum.CollectionObject:
+                    {
+                        goto case SourceKindEnum.PropertyObject;
                     }
                 case SourceKindEnum.DataGridColumn:
                     {
-                        AddSubscriptions(Data);
-                        break;
+                        goto case SourceKindEnum.PropertyObject;
                     }
                 case SourceKindEnum.DataSourceProvider:
                     {
-                        AddSubscriptions(Data);
-                        break;
+                        goto case SourceKindEnum.PropertyObject;
                     }
                 case SourceKindEnum.TerminalNode:
                     {
@@ -733,6 +733,16 @@ namespace DRM.PropBag.ControlsWPF.Binders
             ObservableSourceStatusEnum workStatus = ObservableSourceStatusEnum.Undetermined;
 
             bool addedIt = false;
+
+            if (dc is INotifyPCGen pcGen)
+            {
+                WeakEventManager<INotifyPCGen, PcGenEventArgs>
+                    .AddHandler(pcGen, "PropertyChangedWithGenVals", PCGenEvent_Handler);
+
+                workStatus = ObservableSourceStatusEnum.IsWatchingProp;
+                addedIt = true;
+            }
+
             if (dc is INotifyPropertyChanged pc)
             {
                 WeakEventManager<INotifyPropertyChanged, PropertyChangedEventArgs>
@@ -766,6 +776,14 @@ namespace DRM.PropBag.ControlsWPF.Binders
             if (dc == null) return;
 
             bool removedIt = false;
+
+            if(dc is INotifyPCGen pcGen)
+            {
+                WeakEventManager<INotifyPCGen, PcGenEventArgs>
+                    .RemoveHandler(pcGen, "PropertyChangedWithGenVals", PCGenEvent_Handler);
+                removedIt = true;
+            }
+
             if (dc is INotifyPropertyChanged pc)
             {
                 WeakEventManager<INotifyPropertyChanged, PropertyChangedEventArgs>
@@ -828,7 +846,6 @@ namespace DRM.PropBag.ControlsWPF.Binders
             Data = null;
             Type = type;
             Status = ObservableSourceStatusEnum.HasType;
-
         }
         #endregion
 
@@ -881,12 +898,12 @@ namespace DRM.PropBag.ControlsWPF.Binders
             if(newDepObj is FrameworkElement fe)
             {
                 DependencyProperty dataContextProp = LogicalTree.FeDataContextDpPropProvider.Value;
-                DepPropListener = fe.PropertyChanged(dataContextProp, action);
+                DepPropListener = fe.ListenToProperty(dataContextProp, action);
             }
             else if(newDepObj is FrameworkContentElement fce)
             {
                 DependencyProperty dataContextProp = LogicalTree.FceDataContextDpPropProvider.Value;
-                DepPropListener = fce.PropertyChanged(dataContextProp, action);
+                DepPropListener = fce.ListenToProperty(dataContextProp, action);
             }
             else
             {
@@ -953,7 +970,17 @@ namespace DRM.PropBag.ControlsWPF.Binders
             {
                 Type newType = fe.DataContext?.GetType();
                 ObservableSourceStatusEnum newStatus = Status.SetReady(fe.DataContext != null);
+
                 bool changed = UpdateData(fe.DataContext, newType, newStatus);
+                //if(newType.IsIListSource())
+                //{
+                //    changed = UpdateData(((IListSource)fe.DataContext).GetList(), newType, newStatus);
+                //}
+                //else
+                //{
+                //    changed = UpdateData(fe.DataContext, newType, newStatus);
+                //}
+
                 return changed;
             }
             else if (foundNode is FrameworkContentElement fce)
@@ -968,8 +995,6 @@ namespace DRM.PropBag.ControlsWPF.Binders
                 throw new ApplicationException($"Found node in {binderName}.ObservableSourceProvider was neither a FrameworkElement or a FrameworkContentElement.");
             }
         }
-
-
         #endregion
 
         #region From DataGridColumn
@@ -982,7 +1007,6 @@ namespace DRM.PropBag.ControlsWPF.Binders
             SubscribeTo_Dg(dgc, DisplayIndexChanged_Dg);
 
             UpdateData_Dg(dgc, pathElement, binderName);
-
         }
 
         private void DisplayIndexChanged_Dg(DependencyPropertyChangedEventArgs e)
@@ -1022,7 +1046,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
         private void SubscribeTo_Dg(DataGridColumn dcg, Action<DependencyPropertyChangedEventArgs> action)
         {
             DependencyProperty dispIndex = LogicalTree.DataGridColumn_DisplayIndex_DpPropProvider.Value;
-            DepPropListener = dcg.PropertyChanged(dispIndex, action);
+            DepPropListener = dcg.ListenToProperty(dispIndex, action);
 
             //object anchor = AnchorElement;
 
@@ -1045,7 +1069,24 @@ namespace DRM.PropBag.ControlsWPF.Binders
             //    Container = null;
             //}
         }
+        #endregion
 
+        #region From INotifyPCGen
+        public ObservableSource(INotifyPCGen itRaisesPropChanged, string pathElement, PathConnectorTypeEnum pathConnectorType, string binderName)
+            : this(pathElement, pathConnectorType, false, binderName)
+        {
+            SourceKind = SourceKindEnum.PCGen;
+            Data = itRaisesPropChanged ?? throw new ArgumentNullException($"{nameof(itRaisesPropChanged)} was null when constructing Observable Source.");
+            Type = itRaisesPropChanged.GetType();
+
+            Status = ObservableSourceStatusEnum.Ready;
+        }
+
+        // TODO: If PropBag subscribe to Typed Hander to avoid responding to any property changing.
+        private void PCGenEvent_Handler(object sender, PcGenEventArgs args)
+        { 
+            OnDataSourceChanged(args.PropertyName);
+        }
         #endregion
 
         #region From INotifyPropertyChanged
@@ -1059,6 +1100,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
             Status = ObservableSourceStatusEnum.Ready;
         }
 
+        // TODO: If PropBag subscribe to Typed Hander to avoid responding to any property changing.
         private void OnPCEvent(object source, PropertyChangedEventArgs args)
         {
             OnDataSourceChanged(args.PropertyName);
@@ -1113,32 +1155,17 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
         private void OnDataSourceChanged(DataSourceChangeTypeEnum changeType, bool changed)
         {
-            DataSourceChangedEventHandler handler = Interlocked.CompareExchange(ref DataSourceChanged, null, null);
-
-            if (handler != null)
-            {
-                handler(this, new DataSourceChangedEventArgs(changeType, changed));
-            }
+            Interlocked.CompareExchange(ref DataSourceChanged, null, null)?.Invoke(this, new DataSourceChangedEventArgs(changeType, changed));
         }
 
         private void OnDataSourceChanged(string propertyName)
         {
-            DataSourceChangedEventHandler handler = Interlocked.CompareExchange(ref DataSourceChanged, null, null);
-
-            if (handler != null)
-            {
-                handler(this, new DataSourceChangedEventArgs(propertyName));
-            }
+            Interlocked.CompareExchange(ref DataSourceChanged, null, null)?.Invoke(this, new DataSourceChangedEventArgs(propertyName));
         }
 
         private void OnDataSourceChanged(CollectionChangeAction action, object element)
         {
-            DataSourceChangedEventHandler handler = Interlocked.CompareExchange(ref DataSourceChanged, null, null);
-
-            if (handler != null)
-            {
-                handler(this, new DataSourceChangedEventArgs(action, element));
-            }
+            Interlocked.CompareExchange(ref DataSourceChanged, null, null)?.Invoke(this, new DataSourceChangedEventArgs(action, element));
         }
 
         #endregion Raise Event Helpers

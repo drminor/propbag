@@ -1,4 +1,5 @@
-﻿using DRM.TypeSafePropertyBag;
+﻿using DRM.PropBag.ControlModel;
+using DRM.TypeSafePropertyBag;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -8,6 +9,11 @@ using System.Threading;
 
 namespace DRM.PropBag
 {
+    using PropIdType = UInt32;
+    using PropNameType = String;
+    using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
+    using SubCacheType = ICacheSubscriptions<UInt32>;
+
     #region Summary and Remarks
 
     /// <remarks>
@@ -29,22 +35,35 @@ namespace DRM.PropBag
     ///</summary>
     public class PubPropBag : PropBag, IPubPropBag
     {
+        
         #region Constructor
 
-        public PubPropBag()
-            : base() { }
+        //public PubPropBag()
+        //    : base() { }
 
-        public PubPropBag(byte dummy)
-            : base(dummy) { }
+        //public PubPropBag(PropBagTypeSafetyMode typeSafetyMode)
+        //    : base(typeSafetyMode) { }
 
-        public PubPropBag(PropBagTypeSafetyMode typeSafetyMode)
-            : base(typeSafetyMode) {} 
+        //// TODO: remove this constructor.
+        //protected PubPropBag(PropBagTypeSafetyMode typeSafetyMode, IPropFactory propFactory)
+        //    : base(typeSafetyMode, propFactory) { }
 
-        public PubPropBag(PropBagTypeSafetyMode typeSafetyMode, IPropFactory thePropFactory)
-            : base(typeSafetyMode, thePropFactory) { }
 
-        public PubPropBag(DRM.PropBag.ControlModel.PropModel pm, IPropFactory propFactory = null)
-            : base(pm, propFactory) { }
+
+        public PubPropBag(PropModel pm, IPropFactory propFactory = null, string fullClassName = null)
+            : base(pm, fullClassName, propFactory)
+        {
+        }
+
+        protected PubPropBag(IPropBag copySource)
+            : base(copySource.TypeSafetyMode, copySource.PropFactory, copySource.FullClassName)
+        {
+        }
+
+        public PubPropBag(PropBagTypeSafetyMode typeSafetyMode, IPropFactory propFactory, string fullClassName = null)
+            : base(typeSafetyMode, propFactory, fullClassName)
+        {
+        }
 
         #endregion
 
@@ -60,69 +79,63 @@ namespace DRM.PropBag
         /// <param name="doAfterNotify"></param>
         /// <param name="comparer">A instance of a class that implements IEqualityComparer and thus an Equals method.</param>
         /// <param name="initalValue"></param>
-        new public IProp<T> AddProp<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
-            Func<T,T,bool> comparer = null, object extraInfo = null, T initialValue = default(T))
+        new public IProp<T> AddProp<T>(string propertyName, Func<T,T,bool> comparer = null, object extraInfo = null, T initialValue = default(T))
         {
-            return base.AddProp<T>(propertyName, doIfChanged, doAfterNotify, comparer, extraInfo, initialValue);
+            return base.AddProp<T>(propertyName, comparer, extraInfo, initialValue);
         }
 
         // TODO: Consider removing this method and adding a parameter to AddProp named "UseRefEquality."
-        new public IProp<T> AddPropObjComp<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
-            object extraInfo = null, T initialValue = default(T))
+        new public IProp<T> AddPropObjComp<T>(string propertyName, object extraInfo = null, T initialValue = default(T))
         {
-            return base.AddPropObjComp(propertyName, doIfChanged, doAfterNotify, extraInfo, initialValue);
+            return base.AddPropObjComp(propertyName, extraInfo, initialValue);
         }
 
-        new public IProp<T> AddPropNoValue<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
-            Func<T,T,bool> comparer = null, object extraInfo = null)
+        new public IProp<T> AddPropNoValue<T>(string propertyName, Func<T,T,bool> comparer = null, object extraInfo = null)
         {
-            return base.AddPropNoValue(propertyName, doIfChanged, doAfterNotify, comparer, extraInfo);
+            return base.AddPropNoValue(propertyName, comparer, extraInfo);
         }
 
-        new public IProp<T> AddPropObjCompNoValue<T>(string propertyName, Action<T, T> doIfChanged = null, bool doAfterNotify = false,
-            object extraInfo = null)
+        new public IProp<T> AddPropObjCompNoValue<T>(string propertyName, object extraInfo = null)
         {
-            return base.AddPropObjCompNoValue(propertyName, doIfChanged, doAfterNotify, extraInfo);
+            return base.AddPropObjCompNoValue<T>(propertyName, extraInfo);
         }
 
-        new public IProp<T> AddPropNoStore<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false,
-            Func<T,T,bool> comparer = null, object extraInfo = null)
+        new public IProp<T> AddPropNoStore<T>(string propertyName, Func<T,T,bool> comparer = null, object extraInfo = null)
         {
-            return base.AddPropNoStore(propertyName, doIfChanged, doAfterNotify, comparer, extraInfo);
+            return base.AddPropNoStore(propertyName, comparer, extraInfo);
         }
 
-        new public IProp<T> AddPropObjCompNoStore<T>(string propertyName, Action<T, T> doIfChanged, bool doAfterNotify = false,
-            object extraInfo = null)
+        new public IProp<T> AddPropObjCompNoStore<T>(string propertyName, object extraInfo = null)
         {
-            return base.AddPropObjCompNoStore(propertyName, doIfChanged, doAfterNotify, extraInfo);
+            return base.AddPropObjCompNoStore<T>(propertyName, extraInfo);
         }
 
-        new public void RemoveProp(string propertyName)
+        new public void RemoveProp(string propertyName, Type propertyType)
         {
-            base.RemoveProp(propertyName);
+            base.RemoveProp(propertyName, propertyType);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="propertyName"></param>
-        /// <param name="doWhenChanged"></param>
-        /// <param name="doAfterNotify"></param>
-        /// <returns>True, if there was an existing Action in place for this property.</returns>
-        new public bool RegisterDoWhenChanged<T>(string propertyName, Action<T, T> doWhenChanged, bool doAfterNotify = false)
+        new public void RemoveProp<T>(string propertyName)
         {
-            return base.RegisterDoWhenChanged(doWhenChanged, doAfterNotify, propertyName);
+            base.RemoveProp<T>(propertyName);
         }
 
-        new public void ClearAll()
-        {
-            base.ClearAll();
-        }
+        ///// <summary>
+        ///// 
+        ///// </summary>
+        ///// <typeparam name="T"></typeparam>
+        ///// <param name="propertyName"></param>
+        ///// <param name="doWhenChanged"></param>
+        ///// <param name="doAfterNotify"></param>
+        ///// <returns>True, if there was an existing Action in place for this property.</returns>
+        //new public bool RegisterDoWhenChanged<T>(string propertyName, Action<T, T> doWhenChanged, bool doAfterNotify = false)
+        //{
+        //    return base.RegisterDoWhenChanged(doWhenChanged, doAfterNotify, propertyName);
+        //}
 
-        new public void ClearEventSubscribers()
+        new public void ClearAllProps()
         {
-            base.ClearEventSubscribers();
+            base.ClearAllProps();
         }
 
         #endregion

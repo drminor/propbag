@@ -15,18 +15,28 @@ namespace PropBagLib.Tests
 
 		public PerformanceModel(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
 
-		public PerformanceModel(PropBagTypeSafetyMode typeSafetyMode, AbstractPropFactory factory) : base(typeSafetyMode, factory)
+		public PerformanceModel(PropBagTypeSafetyMode typeSafetyMode, IPropFactory factory) : base(typeSafetyMode, factory)
 		{
-	        AddProp<object>("PropObject", null, false, null);
-	        AddProp<string>("PropString", null, false, null, null, "");
-	        AddPropObjComp<string>("PropStringUseRefComp", null, false);
-	        AddProp<bool>("PropBool", null, false, null, null, false);
-	        AddProp<int>("PropInt", null, false, null);
-	        AddProp<TimeSpan>("PropTimeSpan", null, false, null);
-	        AddProp<Uri>("PropUri", null, false, null);
-	        AddProp<Lazy<int>>("PropLazyInt", null, false, null);
-	        AddProp<Nullable<int>>("PropNullableInt", null, false, null, null, -1);
-	        AddProp<ICollection<int>>("PropICollectionInt", null, false, null, null, null);
+	        AddProp<object>("PropObject", comparer:null);
+		 
+	        AddProp<string>("PropString", null, null, initialValue:"");
+		 
+	        AddPropObjComp<string>("PropStringUseRefComp", extraInfo:null);
+		 
+	        AddProp<bool>("PropBool", null, null, initialValue:false);
+		 
+	        AddProp<int>("PropInt", comparer:null);
+		 
+	        AddProp<TimeSpan>("PropTimeSpan", comparer:null);
+		 
+	        AddProp<Uri>("PropUri", comparer:null);
+		 
+	        AddProp<Lazy<int>>("PropLazyInt", comparer:null);
+		 
+	        AddProp<Nullable<int>>("PropNullableInt", null, null, initialValue:-1);
+		 
+	        AddProp<ICollection<int>>("PropICollectionInt", null, null, initialValue:null);
+		 
 		}
 
 	#region Property Declarations
@@ -152,10 +162,10 @@ namespace PropBagLib.Tests
 		}  
 	 
 	#endregion
-
+	
 	#region PropetyChangedWithTVals Event Declarations
 		  
-			public event PropertyChangedWithTValsHandler<object> PropObjectChanged
+			public event EventHandler<PcTypedEventArgs<object>> PropObjectChanged
 			{
 				add
 				{
@@ -167,7 +177,7 @@ namespace PropBagLib.Tests
 				}
 			}
 	  
-			public event PropertyChangedWithTValsHandler<string> PropStringChanged
+			public event EventHandler<PcTypedEventArgs<string>> PropStringChanged
 			{
 				add
 				{
@@ -179,7 +189,7 @@ namespace PropBagLib.Tests
 				}
 			}
 	  
-			public event PropertyChangedWithTValsHandler<string> PropStringUseRefCompChanged
+			public event EventHandler<PcTypedEventArgs<string>> PropStringUseRefCompChanged
 			{
 				add
 				{
@@ -191,7 +201,7 @@ namespace PropBagLib.Tests
 				}
 			}
 	  
-			public event PropertyChangedWithTValsHandler<bool> PropBoolChanged
+			public event EventHandler<PcTypedEventArgs<bool>> PropBoolChanged
 			{
 				add
 				{
@@ -203,7 +213,7 @@ namespace PropBagLib.Tests
 				}
 			}
 	  
-			public event PropertyChangedWithTValsHandler<int> PropIntChanged
+			public event EventHandler<PcTypedEventArgs<int>> PropIntChanged
 			{
 				add
 				{
@@ -215,7 +225,7 @@ namespace PropBagLib.Tests
 				}
 			}
 	  
-			public event PropertyChangedWithTValsHandler<TimeSpan> PropTimeSpanChanged
+			public event EventHandler<PcTypedEventArgs<TimeSpan>> PropTimeSpanChanged
 			{
 				add
 				{
@@ -227,7 +237,7 @@ namespace PropBagLib.Tests
 				}
 			}
 	  
-			public event PropertyChangedWithTValsHandler<Uri> PropUriChanged
+			public event EventHandler<PcTypedEventArgs<Uri>> PropUriChanged
 			{
 				add
 				{
@@ -239,7 +249,7 @@ namespace PropBagLib.Tests
 				}
 			}
 	  
-			public event PropertyChangedWithTValsHandler<Lazy<int>> PropLazyIntChanged
+			public event EventHandler<PcTypedEventArgs<Lazy<int>>> PropLazyIntChanged
 			{
 				add
 				{
@@ -251,7 +261,7 @@ namespace PropBagLib.Tests
 				}
 			}
 	  
-			public event PropertyChangedWithTValsHandler<Nullable<int>> PropNullableIntChanged
+			public event EventHandler<PcTypedEventArgs<Nullable<int>>> PropNullableIntChanged
 			{
 				add
 				{
@@ -263,7 +273,7 @@ namespace PropBagLib.Tests
 				}
 			}
 	  
-			public event PropertyChangedWithTValsHandler<ICollection<int>> PropICollectionIntChanged
+			public event EventHandler<PcTypedEventArgs<ICollection<int>>> PropICollectionIntChanged
 			{
 				add
 				{
@@ -283,14 +293,14 @@ namespace PropBagLib.Tests
 		/// </summary>
 		/// <param name="methodName">Some public or non-public instance method in this class.</param>
 		/// <returns>The name, unchanged, if the method exists, otherwise null.</returns>
-		private Action<T, T> GetDelegate<T>(string methodName)
+		EventHandler<PcTypedEventArgs<T>> GetDelegate<T>(string methodName)
 		{
 		    Type pp = this.GetType();
 		    MethodInfo mi = pp.GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 		
 		    if (mi == null) return null;
 		
-		    Action<T, T> result = (Action<T, T>)mi.CreateDelegate(typeof(Action<T, T>), this);
+		    EventHandler<PcTypedEventArgs<T>> result = (EventHandler<PcTypedEventArgs<T>>)mi.CreateDelegate(typeof(EventHandler<PcTypedEventArgs<T>>), this);
 		
 		    return result;
 		}

@@ -1,4 +1,5 @@
-﻿using DRM.TypeSafePropertyBag;
+﻿using DRM.PropBag;
+using DRM.TypeSafePropertyBag;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -7,54 +8,69 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 
+// ToDo: Consider moving all types in the DRM.PropBag.ControlModel namespace back to the DRM.PropBag namespace.
 namespace DRM.PropBag.ControlModel
 {
     public class PropModel : NotifyPropertyChangedBase, IEquatable<PropModel>
     {
+        #region Properties
 
-        public const string DEFAULT_CLASS_NAME = "UndefinedClassName";
+        #region Activation Info
 
-        bool dfppb;
+        DeriveFromClassModeEnum _deriveFromClassMode;
+        [XmlAttribute(AttributeName = "derive-from-class-mode")]
+        public DeriveFromClassModeEnum DeriveFromClassMode
+        { get { return _deriveFromClassMode; } set { SetIfDifferentVT<DeriveFromClassModeEnum>(ref _deriveFromClassMode, value, nameof(DeriveFromClassMode)); } }
+
+        Type _targetType;
+        [XmlElement("type")]
+        public Type TargetType { get { return _targetType; } set { _targetType = value; } }
+
+        TypeInfoField _wrapperTypeInfoField;
+        [XmlElement("type-info")]
+        public TypeInfoField WrapperTypeInfoField
+        {
+            get { return _wrapperTypeInfoField; }
+            set { SetIfDifferent<TypeInfoField>(ref _wrapperTypeInfoField, value); }
+        }
+
         string cn;
-        string ik;
-        string ns;
-        PropBagTypeSafetyMode tsm;
-        bool dmrr;
-        bool reiv;
-        AbstractPropFactory pf;
-
-        ObservableCollection<string> _namespaces;
-        ObservableCollection<PropItem> _props;
-
-        [XmlAttribute(AttributeName = "derive-from-pub-prop-bag")]
-        public bool DeriveFromPubPropBag { get { return dfppb; } set { SetIfDifferent<bool>(ref dfppb, value); } }
-
         [XmlAttribute(AttributeName = "class-name")]
         public string ClassName { get { return cn; } set { SetIfDifferent<string>(ref cn, value); } }
 
-        [XmlIgnore]
-        public string InstanceKey { get { return ik; } set { SetIfDifferent<string>(ref ik, value); } }
+        //string ik;
+        //[XmlIgnore]
+        //public string InstanceKey { get { return ik; } set { SetIfDifferent<string>(ref ik, value); } }
 
+        string ns;
         [XmlAttribute(AttributeName = "output-namespace")]
         public string NamespaceName { get { return ns; } set { SetIfDifferent<string>(ref ns, value); } }
 
+        #endregion
+
+        #region Other Properties
+
+        PropBagTypeSafetyMode tsm = PropBagTypeSafetyMode.Tight;
         [XmlAttribute(AttributeName = "type-safety-mode")]
         public PropBagTypeSafetyMode TypeSafetyMode
-        { get { return tsm; } set { SetIfDifferentVT<PropBagTypeSafetyMode>(ref tsm, value); } }
+        { get { return tsm; } set { SetIfDifferentVT<PropBagTypeSafetyMode>(ref tsm, value, nameof(TypeSafetyMode)); } }
 
-
+        bool dmrr;
         [XmlAttribute(AttributeName = "defer-method-ref-resolution")]
         public bool DeferMethodRefResolution { get { return dmrr; } set { SetIfDifferent<bool>(ref dmrr, value); } }
 
+        bool reiv;
         [XmlAttribute(AttributeName = "require-explicit-initial-value")]
         public bool RequireExplicitInitialValue { get { return reiv; } set { SetIfDifferent<bool>(ref reiv, value); } }
 
 
         // TODO: This is not Serializable, consider providing string representation as a proxy
         // Perhaps we should simply not serialize instances of PropBag Control Models.
+        IPropFactory pf;
         [XmlIgnore]
-        public AbstractPropFactory PropFactory { get { return pf; } set { SetAlways<AbstractPropFactory>(ref pf, value); } }
+        public IPropFactory PropFactory { get { return pf; } set { SetAlways<IPropFactory>(ref pf, value); } }
 
+        ObservableCollection<string> _namespaces;
         [XmlArray("namespaces")]
         [XmlArrayItem("namespace")]
         public ObservableCollection<string> Namespaces
@@ -63,6 +79,7 @@ namespace DRM.PropBag.ControlModel
             set { this.SetCollection<ObservableCollection<string>, string>(ref _namespaces, value); }
         }
 
+        ObservableCollection<PropItem> _props;
         [XmlArray("props")]
         [XmlArrayItem("prop")]
         public ObservableCollection<PropItem> Props
@@ -71,20 +88,25 @@ namespace DRM.PropBag.ControlModel
             set { this.SetCollection<ObservableCollection<PropItem>, PropItem>(ref _props, value); }
         }
 
-        public bool IsClassDefined => ClassName != DEFAULT_CLASS_NAME;
+        #endregion Other Properties
 
-        public PropModel() : this(DEFAULT_CLASS_NAME, null, null) { }
+        #endregion Dependency Properties
 
-        public PropModel(string className, string instanceKey, string namespaceName,
-            bool deriveFromPubPropBag = false,
+        #region Constructors
+
+        public PropModel(string className, string namespaceName,
+            DeriveFromClassModeEnum deriveFrom,
+            Type targetType,
+            IPropFactory propFactory,
             PropBagTypeSafetyMode typeSafetyMode = PropBagTypeSafetyMode.AllPropsMustBeRegistered,
             bool deferMethodRefResolution = true,
             bool requireExplicitInitialValue = true)
         {
-            DeriveFromPubPropBag = deriveFromPubPropBag;
             ClassName = className;
-            InstanceKey = instanceKey;
             NamespaceName = namespaceName;
+            DeriveFromClassMode = deriveFrom;
+            TargetType = targetType;
+            PropFactory = propFactory;
             TypeSafetyMode = typeSafetyMode;
             DeferMethodRefResolution = deferMethodRefResolution;
             RequireExplicitInitialValue = requireExplicitInitialValue;
@@ -93,6 +115,85 @@ namespace DRM.PropBag.ControlModel
             Props = new ObservableCollection<PropItem>();
         }
 
+        #endregion
+
+        #region Type and Namespace support
+
+        Type _typeToCreate;
+        public Type TypeToCreate
+        {
+            get
+            {
+                if(_typeToCreate == null)
+                {
+                    _typeToCreate = GetTargetType(this.DeriveFromClassMode, this.TargetType, this.WrapperTypeInfoField);
+                }
+                return _typeToCreate;
+            }
+        }
+
+        private Type GetTargetType(DeriveFromClassModeEnum deriveFrom, Type typeToWrap, TypeInfoField typeInfofield)
+        {
+            Type result;
+
+            switch (deriveFrom)
+            {
+                case DeriveFromClassModeEnum.PropBag:
+                    {
+                        result = typeof(PropBag);
+                        break;
+                    }
+                case DeriveFromClassModeEnum.PubPropBag:
+                    {
+                        result = typeof(PubPropBag);
+                        break;
+                    }
+                case DeriveFromClassModeEnum.Custom:
+                    {
+                        // TODO: This needs (lots) more work.
+                        result = typeToWrap;
+                        break;
+                    }
+                default:
+                    {
+                        throw new InvalidOperationException($"{deriveFrom} is not recognized or is not supported.");
+                    }
+            }
+
+            return result;
+        }
+        
+        public string FullClassName
+        {
+            get
+            {
+                return GetFullClassName(this.NamespaceName, this.ClassName.Trim());
+            }
+        }
+
+        private string GetFullClassName(string namespaceName, string className)
+        {
+            if (namespaceName == null)
+            {
+                return className;
+            }
+            else if(ClassName == null || className.Length == 0)
+            {
+                throw new InvalidOperationException("The className cannot be null or empty.");
+            }
+            else
+            {
+                string separator = ".";
+                string result = $"{namespaceName}{separator}{className}";
+                return result;
+            }
+        }
+
+        #endregion
+
+        #region IEquatable support and Object overrides
+
+        // TODO:!! Update the GetHashCode for DRM.PropBag.ControlModel.PropModel
         public override int GetHashCode()
         {
             return ClassName.GetHashCode();
@@ -160,7 +261,6 @@ namespace DRM.PropBag.ControlModel
             return !(left == right);
         }
 
-
-
+        #endregion
     }
 }

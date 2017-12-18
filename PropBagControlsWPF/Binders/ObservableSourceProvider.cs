@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DRM.TypeSafePropertyBag;
+using System;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Windows;
@@ -33,6 +34,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
                 case SourceKindEnum.FrameworkElement: return new ObservableSource((FrameworkElement)Data, PathElement, IsTargetADc, PathConnectorType, BinderName);
                 case SourceKindEnum.FrameworkContentElement: return new ObservableSource((FrameworkContentElement)Data, PathElement, IsTargetADc, PathConnectorType, BinderName);
                 case SourceKindEnum.DataGridColumn: return new ObservableSource((DataGridColumn)Data, PathElement, PathConnectorType, BinderName);
+                case SourceKindEnum.PCGen: return new ObservableSource((INotifyPCGen)Data, PathElement, PathConnectorType, BinderName);
                 case SourceKindEnum.PropertyObject: return new ObservableSource((INotifyPropertyChanged)Data, PathElement, PathConnectorType, BinderName);
                 case SourceKindEnum.CollectionObject: return new ObservableSource((INotifyCollectionChanged)Data, PathElement, PathConnectorType, BinderName);
                 case SourceKindEnum.DataSourceProvider: return new ObservableSource((DataSourceProvider)Data, PathElement, PathConnectorType, BinderName);
@@ -63,6 +65,11 @@ namespace DRM.PropBag.ControlsWPF.Binders
             if (source is DataSourceProvider)
             {
                 osp = new ObservableSourceProvider(source as DataSourceProvider, pathElement, PathConnectorTypeEnum.Dot, binderName);
+                return true;
+            }
+            else if (source is INotifyPCGen)
+            {
+                osp = new ObservableSourceProvider(source as INotifyPCGen, pathElement, PathConnectorTypeEnum.Dot, binderName);
                 return true;
             }
             else if (source is INotifyPropertyChanged)
@@ -112,6 +119,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
         #endregion
 
         #region Constructors
+
         private ObservableSourceProvider(string pathElement, PathConnectorTypeEnum pathConnectorType, string binderName)
         {
             Data = null;
@@ -122,7 +130,6 @@ namespace DRM.PropBag.ControlsWPF.Binders
             BinderName = binderName;
             IsTargetADc = false;
         }
-
 
         #region Terminal Node 
         public ObservableSourceProvider(string pathElement, Type type, PathConnectorTypeEnum pathConnectorType, string binderName) 
@@ -165,12 +172,24 @@ namespace DRM.PropBag.ControlsWPF.Binders
         #endregion
 
         #region From INotifyPropertyChanged
+
         public ObservableSourceProvider(INotifyPropertyChanged itRaisesPropChanged, string pathElement, PathConnectorTypeEnum pathConnectorType, string binderName)
             : this(pathElement, pathConnectorType, binderName)
         {
             Data = itRaisesPropChanged ?? throw new ArgumentNullException($"{nameof(itRaisesPropChanged)} was null when constructing Observable Source.");
             Type = null;
             SourceKind = SourceKindEnum.PropertyObject;
+        }
+
+        #endregion
+
+        #region From INotifyPCGen
+        public ObservableSourceProvider(INotifyPCGen itRaisesPCGen, string pathElement, PathConnectorTypeEnum pathConnectorType, string binderName)
+            : this(pathElement, pathConnectorType, binderName)
+        {
+            Data = itRaisesPCGen ?? throw new ArgumentNullException($"{nameof(itRaisesPCGen)} was null when constructing Observable Source.");
+            Type = null;
+            SourceKind = SourceKindEnum.PCGen;
         }
 
         #endregion
@@ -198,7 +217,5 @@ namespace DRM.PropBag.ControlsWPF.Binders
 
         #endregion Constructors
     }
-
-
 
 }

@@ -1,8 +1,6 @@
 ﻿using DRM.PropBag;
 using DRM.PropBag.ControlModel;
 using DRM.TypeSafePropertyBag;
-using System;
-using System.Reflection;
 
 namespace PropBagLib.Tests
 {
@@ -13,10 +11,10 @@ namespace PropBagLib.Tests
 
 		public CreateAtRunTimeModel(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
 
-        public CreateAtRunTimeModel(PropBagTypeSafetyMode typeSafetyMode, AbstractPropFactory factory)
+        public CreateAtRunTimeModel(PropBagTypeSafetyMode typeSafetyMode, IPropFactory factory)
             : base(typeSafetyMode, factory) { }
 
-        public CreateAtRunTimeModel(PropModel pm) : base(pm)
+        public CreateAtRunTimeModel(PropModel pm, IPropFactory propFactory) : base(pm, null, propFactory)
         {
 
         }
@@ -27,22 +25,6 @@ namespace PropBagLib.Tests
         //    AddProp<string>("PropName", p);
         //}
 
-        /// <summary>
-        /// If the delegate exists, the original name is returned,
-        /// otherwise null is returned.
-        /// </summary>
-        /// <param name="methodName">Some public or non-public instance method in this class.</param>
-        /// <returns>The name, unchanged, if the method exists, otherwise null.</returns>
-        private Action<T, T> GetDelegate<T>(string methodName)
-        {
-            Type pp = this.GetType();
-            MethodInfo mi = pp.GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
-            if (mi == null) return null;
-
-            Action<T, T> result = (Action<T, T>)mi.CreateDelegate(typeof(Action<T, T>), this);
-
-            return result;
-        }
     }
 }

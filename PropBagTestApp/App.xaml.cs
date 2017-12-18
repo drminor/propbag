@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 
 namespace PropBagTestApp
 {
@@ -15,9 +9,6 @@ namespace PropBagTestApp
     {
         protected override void OnStartup(StartupEventArgs e)
         {
-            PropBagTestApp.Properties.Settings.Default.MapperConfigurationProvider = new DRM.PropBag.AutoMapperSupport.MapperConfigurationProvider();
-            PropBagTestApp.Properties.Settings.Default.ModuleBuilderInfoProvider = new DRM.PropBag.ViewModelBuilder.DefaultModuleBuilderInfoProvider();
-
             base.OnStartup(e);
         }
     }

@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-
-using System.Reflection;
-
-using DRM.PropBag;
+﻿using DRM.PropBag;
 using DRM.TypeSafePropertyBag;
+using System;
+using System.Collections.Generic;
 
 namespace PropBagLib.Tests
 {
-    public partial class AllPropsRegisteredModel : IPropBag
+    public partial class AllPropsRegisteredModel : PropBag
     {
         public bool DoWhenStringChanged_WasCalled { get; set; }
         public string DoWhenStringPropOldVal { get; set; }
@@ -24,26 +21,21 @@ namespace PropBagLib.Tests
         //    set { base[propertyName, key] = value; }
         //}
 
-        public void DoWhenStringChanged(string oldVal, string newVal)
+        public void DoWhenStringChanged(object sender, PcTypedEventArgs<string> e)
         {
             DoWhenStringChanged_WasCalled = true;
-            DoWhenStringPropOldVal = oldVal;
-            DoWhenStringPropNewVal = newVal;
+            DoWhenStringPropOldVal = e.OldValue;
+            DoWhenStringPropNewVal = e.NewValue;
         }
 
-        private void DoWhenNullIntChanged(Nullable<int> oldVal, Nullable<int> newVal)
+        private void DoWhenNullIntChanged(object sender, PcTypedEventArgs<Nullable<int>> e)
         {
             DoWhenNullIntChanged_WasCalled = true;
         }
 
-        private void DoWhenICollectionIntChanged(ICollection<int> oldVal, ICollection<int> newVal)
+        private void DoWhenICollectionIntChanged(object sender, PcTypedEventArgs<ICollection<int>> e)
         {
             DoWhenICollectionIntChanged_WasCalled = true;
-        }
-
-        new public void ClearEventSubscribers()
-        {
-            base.ClearEventSubscribers();
         }
 
     }

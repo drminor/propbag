@@ -13,7 +13,7 @@
         </Setter>
     </Style>
     
-    <Style TargetType="{x:Type local:PropItem}">
+    <!--<Style TargetType="{x:Type local:PropItem}">
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type local:PropItem}">
@@ -21,7 +21,7 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
-    </Style>
+    </Style>-->
 
     <Style TargetType="{x:Type local:InitialValueField}">
         <Setter Property="Template">
@@ -34,23 +34,41 @@
         </Setter>
     </Style>
 
-    <Style TargetType="{x:Type local:NamespaceItem}">
+    <!--<Style TargetType="{x:Type local:NamespaceItem}">
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type local:NamespaceItem}">
                     <ContentControl Name="NamespaceItemContent"/>
-
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
-    </Style>
-
+    </Style>-->
 
     <Style TargetType="{x:Type local:PropComparerField}">
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type local:PropComparerField}">
-                    <ContentControl Name="PropComparerFieldConent"/>
+                    <ContentControl Name="PropComparerFieldContent"/>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="{x:Type local:PropDoWhenChangedField}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type local:PropDoWhenChangedField}">
+                    <ContentControl Name="PropDoWhenChangedFieldContent"/>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="{x:Type local:TypeInfoField}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type local:TypeInfoField}">
+                    <ContentControl Name="PropTypeInfoFieldContent"/>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

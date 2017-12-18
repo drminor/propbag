@@ -25,32 +25,12 @@ namespace PropBagLib.Tests.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("EmitProxy")]
-        public global::DRM.PropBag.AutoMapperSupport.PropBagMappingStrategyEnum MappingStrategy {
+        [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.ConnectionString)]
+        [global::System.Configuration.DefaultSettingValueAttribute("Security=SSPI;AttachDBFilename=|DataDirectory|\\PubPropBag_PropBag_Test\\PersonDb.m" +
+            "df")]
+        public string DefaultConnection {
             get {
-                return ((global::DRM.PropBag.AutoMapperSupport.PropBagMappingStrategyEnum)(this["MappingStrategy"]));
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::DRM.PropBag.AutoMapperSupport.MapperConfigurationProvider MapperConfigurationProvider {
-            get {
-                return ((global::DRM.PropBag.AutoMapperSupport.MapperConfigurationProvider)(this["MapperConfigurationProvider"]));
-            }
-            set {
-                this["MapperConfigurationProvider"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::DRM.PropBag.ViewModelBuilder.DefaultModuleBuilderInfoProvider ModuleBuilderInfoProvider {
-            get {
-                return ((global::DRM.PropBag.ViewModelBuilder.DefaultModuleBuilderInfoProvider)(this["ModuleBuilderInfoProvider"]));
-            }
-            set {
-                this["ModuleBuilderInfoProvider"] = value;
+                return ((string)(this["DefaultConnection"]));
             }
         }
     }

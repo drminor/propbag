@@ -16,7 +16,7 @@ namespace DRM.PropBag.ControlsWPF.Binders
     /// </summary>
     public static class Observe
     {
-        public static IDisposable PropertyChanged(
+        public static IDisposable ListenToProperty(
             this DependencyObject source,
             DependencyProperty property,
             Action<DependencyPropertyChangedEventArgs> onChanged = null)

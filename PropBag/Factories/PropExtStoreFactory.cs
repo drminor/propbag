@@ -1,82 +1,169 @@
-﻿using DRM.TypeSafePropertyBag;
+﻿using DRM.PropBag.Caches;
+using DRM.TypeSafePropertyBag;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using DRM.TypeSafePropertyBag.Fundamentals;
+
 namespace DRM.PropBag
 {
+    using PropIdType = UInt32;
+    using PropNameType = String;
+    using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
+    using SubCacheType = ICacheSubscriptions<UInt32>;
+
+    using PropBagType = PropBag;
+    using ICreatePropsType = APFGenericMethodTemplates;
+
     public class PropExtStoreFactory : AbstractPropFactory
     {
+        //public IProvideDelegateCaches DelegateCacheProvider { get; }
+
+        object Stuff { get; }
+
         public override bool ProvidesStorage
         {
             get { return false; }
         }
 
-        public PropExtStoreFactory(bool returnDefaultForUndefined) : base(returnDefaultForUndefined) { }
+        override public int DoSetCacheCount
+        {
+            get
+            {
+                return DelegateCacheProvider.DoSetDelegateCache.Count;
+            }
+        }
 
-        object Stuff;
-        public PropExtStoreFactory(object stuff, bool returnDefaultForUndefined, ResolveTypeDelegate typeResolver = null,
-            IConvertValues valueConverter = null) : base(returnDefaultForUndefined, typeResolver, valueConverter)
+        override public int CreatePropFromStringCacheCount
+        {
+            get
+            {
+                return DelegateCacheProvider.CreatePropFromStringCache.Count;
+            }
+        }
+
+        override public int CreatePropWithNoValCacheCount
+        {
+            get
+            {
+                return DelegateCacheProvider.CreatePropWithNoValCache.Count;
+            }
+        }
+
+        #region Constructors
+
+        public PropExtStoreFactory
+            (
+                object stuff,
+                PSAccessServiceProviderType propStoreAccessServiceProvider,
+                //IProvideDelegateCaches delegateCacheProvider,
+                ResolveTypeDelegate typeResolver,
+                IConvertValues valueConverter
+            )
+            : base(propStoreAccessServiceProvider, new SimpleDelegateCacheProvider(typeof(PropBag), typeof(APFGenericMethodTemplates)), typeResolver, valueConverter)
         {
             // Info to help us set up the getters and setters
             Stuff = stuff;
         }
 
-        public override IProp<T> Create<T>(T initialValue,
-            string propertyName, object extraInfo = null,
-            bool dummy = true, bool typeIsSolid = true,
-            Action<T, T> doWhenChanged = null, bool doAfterNotify = false, Func<T,T,bool> comparer = null)
-        {
-            throw new InvalidOperationException("External Store Factory doesn't know how to create properties with inital values.");
+        #endregion
 
-            //return CreateWithNoValue(propertyName, extraInfo, dummy, typeIsSolid, doWhenChanged, doAfterNotify, comparer);
+        #region Collection-type property creators
+
+        // TODO: Implement Create Collection With Initial Value.
+        public override ICPropPrivate<CT, T> Create<CT, T>(
+            CT initialValue,
+            PropNameType propertyName, object extraInfo = null,
+            bool hasStorage = true, bool typeIsSolid = true,
+            Func<CT, CT, bool> comparer = null)
+        {
+            throw new NotImplementedException("PropExtStoreFactory has not implemented the Create Collection Prop with Initial Value.");
+            //ICPropPrivate<CT, T> prop = null;
+            //return prop;
+        }
+
+        // TODO: Implement Create Collection With No Value.
+        public override ICPropPrivate<CT, T> CreateWithNoValue<CT, T>(
+            PropNameType propertyName, object extraInfo = null,
+            bool hasStorage = true, bool typeIsSolid = true,
+            Func<CT, CT, bool> comparer = null)
+        {
+            throw new NotImplementedException("PropExtStoreFactory has not implemented the Create Collection Prop with No Value.");
+
+            //ICPropPrivate<CT, T> prop = null;
+            //return prop;
+        }
+
+        #endregion
+
+        #region Propety-type property creators
+
+        public override IProp<T> Create<T>(T initialValue,
+            PropNameType propertyName, object extraInfo = null,
+            bool dummy = true, bool typeIsSolid = true,
+            Func<T,T,bool> comparer = null)
+        {
+            throw new InvalidOperationException("External Store Factory doesn't know how to create properties with initial values.");
         }
 
         public override IProp<T> CreateWithNoValue<T>(
-            string propertyName, object extraInfo = null,
+            PropNameType propertyName, object extraInfo = null,
             bool dummy = true, bool typeIsSolid = true,
-            Action<T, T> doWhenChanged = null, bool doAfterNotify = false, Func<T,T,bool> comparer = null)
+            Func<T,T,bool> comparer = null)
         {
             if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
             GetDefaultValueDelegate<T> getDefaultValFunc = this.GetDefaultValue<T>;
 
-            PropExternStore<T> propWithExtStore = new PropExternStore<T>(propertyName, extraInfo, getDefaultValFunc, typeIsSolid: typeIsSolid, doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify, comparer: comparer);
+            PropExternStore<T> propWithExtStore = new PropExternStore<T>(propertyName,
+                extraInfo, getDefaultValFunc, typeIsSolid: typeIsSolid, comparer: comparer);
 
             return propWithExtStore;
         }
 
-        public override IPropGen CreateGenFromObject(Type typeOfThisProperty,
+        #endregion
+
+        #region Generic Prop Creators
+
+        public override IProp CreateGenFromObject(Type typeOfThisProperty,
             object value,
-            string propertyName, object extraInfo,
-            bool hasStorage, bool isTypeSolid,
-            Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false)
+            PropNameType propertyName, object extraInfo,
+            bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
+            Delegate comparer, bool useRefEquality = false, Type itemType = null)
         {
-            throw new InvalidOperationException("External Store Factory doesn't know how to create properties with inital values.");
+            throw new InvalidOperationException("External Store Factory doesn't know how to create properties with initial values.");
         }
 
-        public override IPropGen CreateGenFromString(Type typeOfThisProperty,
+        public override IProp CreateGenFromString(Type typeOfThisProperty,
             string value, bool useDefault,
-            string propertyName, object extraInfo,
-            bool hasStorage, bool isTypeSolid,
-            Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false)
+            PropNameType propertyName, object extraInfo,
+            bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
+            Delegate comparer, bool useRefEquality = false, Type itemType = null)
         {
-            throw new InvalidOperationException("External Store Factory doesn't know how to create properties with inital values.");
+            throw new InvalidOperationException("External Store Factory doesn't know how to create properties with initial values.");
         }
 
-        public override IPropGen CreateGenWithNoValue(Type typeOfThisProperty,
-            string propertyName, object extraInfo,
-            bool hasStorage, bool isTypeSolid,
-            Delegate doWhenChanged, bool doAfterNotify, Delegate comparer, bool useRefEquality = false)
+        public override IProp CreateGenWithNoValue(Type typeOfThisProperty,
+            PropNameType propertyName, object extraInfo,
+            bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
+            Delegate comparer, bool useRefEquality = false, Type itemType = null)
         {
             CreatePropWithNoValueDelegate propCreator = GetPropWithNoValueCreator(typeOfThisProperty);
-            IPropGen prop = (IPropGen)propCreator(this, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
-                doWhenChanged: doWhenChanged, doAfterNotify: doAfterNotify, comparer: comparer, useRefEquality: useRefEquality);
+            IProp prop = propCreator(this, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
+                comparer: comparer, useRefEquality: useRefEquality);
 
             return prop;
         }
 
+        // TODO: Implement GetPropWithNoValueCreator
+        protected override CreatePropWithNoValueDelegate GetPropWithNoValueCreator(Type typeOfThisValue)
+        {
+            throw new NotImplementedException("PropExtStoreFactory has not yet implemented the GetPropWithNoValueCreator method.");
+        }
+
+        #endregion
     }
 
 }

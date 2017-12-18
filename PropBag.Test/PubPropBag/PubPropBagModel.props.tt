@@ -32,10 +32,11 @@ namespace <#= pm.Namespace #>
 
 		public <#= pm.ClassName #>(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
 
-		public <#= pm.ClassName #>(PropBagTypeSafetyMode typeSafetyMode, AbstractPropFactory factory) : base(typeSafetyMode, factory)
+		public <#= pm.ClassName #>(PropBagTypeSafetyMode typeSafetyMode, IPropFactory factory) : base(typeSafetyMode, factory)
 		{
 	<# foreach (PropItem pi in pm.Props) {#>
         <#= T4Support.GetAddPropMethodCallText(pm, pi) #>;
+		<#= T4Support.GetSubscribeMethodCallText(pm, pi) #> 
 	<#  } #>
 	}
 
@@ -54,10 +55,10 @@ namespace <#= pm.Namespace #>
 		}  
 	<#  } #> 
 	#endregion
-
+	
 	#region PropetyChangedWithTVals Event Declarations
 		<# foreach (PropItem pi in pm.Props)  { #>  
-			public event PropertyChangedWithTValsHandler<<#= pi.Type #>> <#= pi.Name #>Changed
+			public event EventHandler<PCTypedEventArgs<<#= pi.Type #>>> <#= pi.Name #>Changed
 			{
 				add
 				{

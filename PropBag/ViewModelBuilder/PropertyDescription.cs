@@ -15,6 +15,15 @@ namespace DRM.PropBag.ViewModelBuilder
     {
         internal static PropertyDescription[] Empty = new PropertyDescription[0];
 
+        public string Name { get; }
+
+        public Type Type { get; }
+
+        public bool CanWrite { get; }
+
+        public bool GetIsPublic { get; }
+        public bool SetIsPublic { get; }
+
         public PropertyDescription(string name, Type type, bool canWrite = true, bool setIsPublic = true, bool getIsPublic = true)
         {
             Name = name;
@@ -34,24 +43,35 @@ namespace DRM.PropBag.ViewModelBuilder
             SetIsPublic = property.SetMethod != null;
         }
 
-        public string Name { get; }
 
-        public Type Type { get; }
 
-        public bool CanWrite { get; }
-
-        public bool GetIsPublic { get; }
-        public bool SetIsPublic { get; }
-
-        public override int GetHashCode()
-        {
-            int code = GenerateHash.CustomHash(Name.GetHashCode(), Type.GetHashCode());
-            return GenerateHash.CustomHash(code, CanWrite.GetHashCode());
-        }
+        //public override int GetHashCode()
+        //{
+        //    int code = GenerateHash.CustomHash(Name.GetHashCode(), Type.GetHashCode());
+        //    return GenerateHash.CustomHash(code, CanWrite.GetHashCode());
+        //}
 
         public override bool Equals(object other) => other is PropertyDescription && Equals((PropertyDescription)other);
 
         public bool Equals(PropertyDescription other) => Name == other.Name && Type == other.Type && CanWrite == other.CanWrite;
+
+
+        public override string ToString()
+        {
+            return base.ToString();
+        }
+
+        public override int GetHashCode()
+        {
+            var hashCode = -1889003361;
+            hashCode = hashCode * -1521134295 + base.GetHashCode();
+            hashCode = hashCode * -1521134295 + Name.GetHashCode();
+            hashCode = hashCode * -1521134295 + EqualityComparer<Type>.Default.GetHashCode(Type);
+            hashCode = hashCode * -1521134295 + CanWrite.GetHashCode();
+            hashCode = hashCode * -1521134295 + GetIsPublic.GetHashCode();
+            hashCode = hashCode * -1521134295 + SetIsPublic.GetHashCode();
+            return hashCode;
+        }
 
         public static bool operator ==(PropertyDescription left, PropertyDescription right) => left.Equals(right);
 

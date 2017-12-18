@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using DRM.PropBag;
+using DRM.PropBag; using DRM.TypeSafePropertyBag;
 
 namespace PropBagLib.Tests
 {

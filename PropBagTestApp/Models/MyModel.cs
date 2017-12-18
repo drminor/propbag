@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PropBagTestApp.Models
 {
@@ -25,20 +21,51 @@ namespace PropBagTestApp.Models
 
     public class MyModel3 : INotifyPropertyChanged
     {
-        public Guid ProductId { get; set; }
-        public int Amount { get; set; }
-
-        public double Size { get; set; }
-
-        MyModel4 _deep;
-
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private void OnPropertyChanged(string propertyName)
+        Guid _productId;
+        public Guid ProductId
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            get { return _productId; }
+            set
+            {
+                if(value != _productId)
+                {
+                    _productId = value;
+                    OnPropertyChanged(nameof(ProductId));
+                }
+            }
         }
 
+        int _amount;
+        public int Amount
+        {
+            get { return _amount; }
+            set
+            {
+                if (value != _amount)
+                {
+                    _amount = value;
+                    OnPropertyChanged(nameof(Amount));
+                }
+            }
+        }
+
+        double _size;
+        public double Size
+        {
+            get { return _size; }
+            set
+            {
+                if (value != _size)
+                {
+                    _size = value;
+                    OnPropertyChanged(nameof(Size));
+                }
+            }
+        }
+
+        MyModel4 _deep;
         public MyModel4 Deep
         {
             get
@@ -53,6 +80,11 @@ namespace PropBagTestApp.Models
                     OnPropertyChanged(nameof(Deep));
                 }
             }
+        }
+
+        private void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 

@@ -15,7 +15,7 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
 
-        <pb:PropBagTemplate Grid.Row="0" Name="T1" ClassName="MainViewModel" TypeSafetyMode="AllPropsMustBeRegistered">
+        <pb:PropBagTemplate Grid.Row="0" Name="T1" ClassName="MainViewModel">
             <pb:PropBagTemplate.Namespaces>
                 <pb:NamespaceItem Namespace="System.IO"/>
             </pb:PropBagTemplate.Namespaces>
@@ -37,7 +37,7 @@
             </pb:PropBagTemplate.Props>
         </pb:PropBagTemplate>
 
-        <pb:PropBagTemplate Grid.Row="0" ClassName="MainViewModel2" TypeSafetyMode="AllPropsMustBeRegistered">
+        <pb:PropBagTemplate Grid.Row="0" ClassName="MainViewModel2" >
             <pb:PropBagTemplate.Namespaces>
                 <pb:NamespaceItem Namespace="System"/>
             </pb:PropBagTemplate.Namespaces>

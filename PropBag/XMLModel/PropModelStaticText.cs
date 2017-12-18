@@ -22,18 +22,17 @@ namespace DRM.PropBag.XMLModel
                 result.Add("/// </summary>");
                 result.Add("/// <param name=\"methodName\">Some public or non-public instance method in this class.</param>");
                 result.Add("/// <returns>The name, unchanged, if the method exists, otherwise null.</returns>");
-                result.Add("private Action<T, T> GetDelegate<T>(string methodName)");
+                result.Add("EventHandler<PCTypedEventArgs<T>> GetDelegate<T>(string methodName)");
                 result.Add("{");
                 result.Add("    Type pp = this.GetType();");
                 result.Add("    MethodInfo mi = pp.GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);");
                 result.Add("");
                 result.Add("    if (mi == null) return null;");
                 result.Add("");
-                result.Add("    Action<T, T> result = (Action<T, T>)mi.CreateDelegate(typeof(Action<T, T>), this);");
+                result.Add("    EventHandler<PCTypedEventArgs<T>> result = (EventHandler<PCTypedEventArgs<T>>)mi.CreateDelegate(typeof(EventHandler<PCTypedEventArgs<T>>), this);");
                 result.Add("");
                 result.Add("    return result;");
                 result.Add("}");
-
 
                 cache[0] = TextFromList(result, 2);
 
@@ -41,7 +40,26 @@ namespace DRM.PropBag.XMLModel
             return cache[0];
         }
 
+                // --- NEW --- //
+        ///// <summary>
+        ///// If the delegate exists, the original name is returned,
+        ///// otherwise null is returned.
+        ///// </summary>
+        ///// <param name="methodName">Some public or non-public instance method in this class.</param>
+        ///// <returns>The name, unchanged, if the method exists, otherwise null.</returns>
+        //private EventHandler<PropertyChangedWithTValsEventArgs<T>> GetDelegate<T>(string methodName)
+        //{
+        //    Type pp = this.GetType();
+        //    MethodInfo mi = pp.GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
+        //    if (mi == null) return null;
+
+        //    EventHandler<PropertyChangedWithTValsEventArgs<T>> result = (EventHandler<PropertyChangedWithTValsEventArgs<T>>)mi.CreateDelegate(typeof(EventHandler<PropertyChangedWithTValsEventArgs<T>>), this);
+
+        //    return result;
+        //}
+
+                // --- OLD --- //
         ///// <summary>
         ///// If the delegate exists, the original name is returned,
         ///// otherwise null is returned.

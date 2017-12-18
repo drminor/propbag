@@ -1,24 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using DRM.PropBag;
+﻿using DRM.PropBag;
 using DRM.TypeSafePropertyBag;
+using System;
 
 namespace PropBagLib.Tests
 {
     public partial class ExtStoreModel 
     {
 
-        static public ExtStoreModel Create(AbstractPropFactory factory)
+        static public ExtStoreModel Create(IPropFactory factory)
         {
 
             ExtStoreModel esm = new ExtStoreModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered, factory);
 
-            PropExternStore<int> pi = (PropExternStore<int>)esm.AddPropNoStore<int>("PropInt", null, false, null);
-            PropExternStore<string> ps = (PropExternStore<string>)esm.AddPropNoStore<string>("PropString", null, false, null);
+            PropExternStore<int> pi = (PropExternStore<int>)esm.AddPropNoStore<int>("PropInt", null);
+            PropExternStore<string> ps = (PropExternStore<string>)esm.AddPropNoStore<string>("PropString", null);
 
             ExtData ed = new ExtData();
 
@@ -56,7 +51,7 @@ namespace PropBagLib.Tests
         }
 
 
-        public event PropertyChangedWithTValsHandler<int> PropIntChanged
+        public event EventHandler<PcTypedEventArgs<int>> PropIntChanged
         {
             add
             {
@@ -68,7 +63,7 @@ namespace PropBagLib.Tests
             }
         }
 
-        public event PropertyChangedWithTValsHandler<string> PropStringChanged
+        public event EventHandler<PcTypedEventArgs<string>> PropStringChanged
         {
             add
             {
