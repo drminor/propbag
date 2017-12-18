@@ -48,6 +48,7 @@ namespace DRM.TypeSafePropertyBag
             MethodInfo callPChangingEventSubscriber_mi = bridgeType.GetMethod("CallPChangingEventSubscriber", BindingFlags.Instance | BindingFlags.NonPublic);
             CallPChangingEventSubsCache = new DelegateCache<CallPChangingEventSubscriberDelegate>(callPChangingEventSubscriber_mi);
 
+            // Proxy -- Holds a copy of the original delegate but without the target.
             DelegateProxyCache = new DelegateProxyCache();
         }
     }
