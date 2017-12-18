@@ -44,7 +44,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="CViewProp_NotUsed.cs" />
+    <Compile Include="ListCViewProp.cs" />
     <Compile Include="DoWhenChangedHelper.cs" />
+    <Compile Include="IPropInterfaces.cs" />
+    <Compile Include="OListCollectionView.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WPFPropFactory.cs" />
     <Compile Include="PropModelProvider.cs" />

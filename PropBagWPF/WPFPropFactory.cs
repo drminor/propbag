@@ -1,11 +1,7 @@
 ﻿using DRM.PropBag;
 using DRM.PropBag.Caches;
-using DRM.PropBag.Collections;
 using DRM.TypeSafePropertyBag;
 using System;
-using System.Windows.Data;
-
-
 
 namespace DRM.PropBagWPF
 {
@@ -15,20 +11,66 @@ namespace DRM.PropBagWPF
     {
         public override bool ProvidesStorage => true;
 
-        public override int DoSetCacheCount => DelegateCacheProvider.DoSetDelegateCache.Count;
-        public override int CreatePropFromStringCacheCount => DelegateCacheProvider.CreatePropFromStringCache.Count;
-        public override int CreatePropWithNoValCacheCount => DelegateCacheProvider.CreatePropWithNoValCache.Count;
-
         public WPFPropFactory
             (
                 PSAccessServiceProviderType propStoreAccessServiceProvider,
-                //IProvideDelegateCaches delegateCacheProvider,
                 ResolveTypeDelegate typeResolver,
                 IConvertValues valueConverter
             )
             : base(propStoreAccessServiceProvider, new SimpleDelegateCacheProvider(typeof(PropBag.PropBag), typeof(APFGenericMethodTemplates)), typeResolver, valueConverter)
         {
         }
+
+        #region Collection-type property creators
+
+        public override ICPropPrivate<CT, T> Create<CT, T>
+            (
+            CT initialValue,
+            string propertyName,
+            object extraInfo = null,
+            bool hasStorage = true,
+            bool typeIsSolid = true,
+            Func<CT, CT, bool> comparer = null
+            )
+        {
+            ICPropPrivate<CT, T> newProp;
+            if(typeof(OListCollectionView<T>).IsAssignableFrom(initialValue.GetType()))
+            {
+                OListCollectionView<T> newVal = initialValue as OListCollectionView<T>;
+
+                // Use the default EqualityComparer defined for the OListCollectionView type.
+                //Func<OListCollectionView<T>, OListCollectionView<T>, bool> newComparer = EqualityComparer<OListCollectionView<T>>.Default.Equals;
+
+                // Use reference equality.
+                Func<OListCollectionView<T>, OListCollectionView<T>, bool> newComparer = RefEqualityComparer<OListCollectionView<T>>.Default.Equals;
+
+                newProp = (ICPropPrivate<CT, T>)CreateListViewProp<OListCollectionView<T>, T>(newVal, propertyName, extraInfo, hasStorage, typeIsSolid, newComparer);
+            }
+            else
+            {
+                newProp = base.Create<CT, T>(initialValue, propertyName, extraInfo, hasStorage, typeIsSolid, comparer);
+            }
+            return newProp;
+        }
+
+        private IListCViewProp<CT,T> CreateListViewProp<CT, T>
+            (
+            CT initialValue,
+            string propertyName,
+            object extraInfo = null,
+            bool hasStorage = true,
+            bool typeIsSolid = true,
+            Func<CT, CT, bool> comparer = null
+            ) where CT: IOListCollectionView<T>
+        {
+            IListCViewProp<CT, T> result = null;
+
+            return result;
+        }
+
+        #endregion
+
+        #region Propety-type property creators
 
         //public override IProp<T> Create<T>
         //    (
@@ -53,32 +95,6 @@ namespace DRM.PropBagWPF
         //    }
         //    return result;
         //}
-
-        #region Collection-type property creators
-
-        //public override ICPropPrivate<CT, T> Create<CT, T>
-        //    (
-        //    CT initialValue,
-        //    string propertyName,
-        //    object extraInfo = null,
-        //    bool hasStorage = true,
-        //    bool typeIsSolid = true,
-        //    Func<CT, CT, bool> comparer = null
-        //    )
-        //{
-        //    if(initialValue is )
-        //    ICPropPrivate<CT, T> input = (ICPropPrivate<CT, T>)extraInfo;
-        //    CViewProp<CT, T> result = new CViewProp<CT, T>(input);
-
-        //    ICPropPrivate<CT, T> r2 = (ICPropPrivate<CT, T>)result;
-
-        //    return r2;
-
-        //}
-
-        #endregion
-
-        #region Propety-type property creators
 
         #endregion
 

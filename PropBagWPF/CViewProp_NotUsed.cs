@@ -3,9 +3,9 @@ using System;
 using System.ComponentModel;
 using System.Windows.Data;
 
-namespace DRM.PropBag.Collections
+namespace DRM.PropBagWPF
 {
-    public class CViewProp : PropTypedBase<ListCollectionView>, IProp<ListCollectionView> 
+    public class CViewProp<T> : PropTypedBase<ListCollectionView>, IProp<ListCollectionView> 
     {
 
         public CViewProp(ListCollectionView initialValue)
