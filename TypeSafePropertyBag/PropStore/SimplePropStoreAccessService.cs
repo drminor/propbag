@@ -131,26 +131,6 @@ namespace DRM.TypeSafePropertyBag
             return true;
         }
 
-        //public bool TryAdd(IPropBag propBag, uint propId, IProp genericTypedProp, object target, MethodInfo method, SubscriptionKind subscriptionKind, SubscriptionPriorityGroup priorityGroup, out IPropData propData)
-        //{
-        //    StoreNodeProp newNode = TryAddFirstPart(propBag, propId, genericTypedProp);
-        //    propData = newNode.Int_PropData;
-
-        //    bool result;
-        //    if(method != null)
-        //    {
-        //        result = RegisterHandler(propBag, propId, target, method, subscriptionKind, priorityGroup, keepRef: false);
-        //    }
-        //    else
-        //    {
-        //        result = true;
-        //    }
-
-        //    TryAddSecondPart((IPropDataInternal)propData, newNode);
-
-        //    return result;
-        //}
-
         public bool TryAdd<PropT>(IPropBag propBag, PropIdType propId, IProp genericTypedProp,
             EventHandler<PcTypedEventArgs<PropT>> eventHandler, SubscriptionPriorityGroup priorityGroup, out IPropData propData)
         {
@@ -171,8 +151,6 @@ namespace DRM.TypeSafePropertyBag
 
             return result;
         }
-
-        //object target, MethodInfo method, SubscriptionKind subscriptionKind, SubscriptionPriorityGroup priorityGroup
 
         public bool TryAdd(IPropBag propBag, PropIdType propId, IProp genericTypedProp,
             object target, MethodInfo method, SubscriptionKind subscriptionKind, SubscriptionPriorityGroup priorityGroup, out IPropData propData)

@@ -21,7 +21,7 @@ namespace DRM.TypeSafePropertyBag
         bool TryAdd(IPropBag propBag, L2T propId, IProp genericTypedProp, out IPropData propData);
 
         bool TryAdd(IPropBag propBag, L2T propId, IProp genericTypedProp, EventHandler<PcGenEventArgs> handler, SubscriptionPriorityGroup priorityGroup, out IPropData propData);
-        //bool TryAdd<PropT>(IPropBag propBag, L2T propId, IProp genericTypedProp, EventHandler<PCTypedEventArgs<PropT>> handler, SubscriptionPriorityGroup priorityGroup, out IPropData propData);
+        bool TryAdd<PropT>(IPropBag propBag, L2T propId, IProp genericTypedProp, EventHandler<PcTypedEventArgs<PropT>> handler, SubscriptionPriorityGroup priorityGroup, out IPropData propData);
 
         bool TryAdd(IPropBag propBag, L2T propId, IProp genericTypedProp, object target, MethodInfo method, SubscriptionKind subscriptionKind, SubscriptionPriorityGroup priorityGroup, out IPropData propData);
 
