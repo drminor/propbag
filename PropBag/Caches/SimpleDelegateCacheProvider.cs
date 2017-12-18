@@ -67,7 +67,7 @@ namespace DRM.PropBag.Caches
 
             #endregion
 
-            #region Collection Prop  Creation
+            #region Collection Prop Creation
 
             // Create Prop From String
             MethodInfo createCPropNoVal_mi = propCreatorType.GetMethod("CreateCPropWithNoValue", BindingFlags.Static | BindingFlags.NonPublic);
@@ -77,7 +77,6 @@ namespace DRM.PropBag.Caches
             MethodInfo createCPropFromString_mi = propCreatorType.GetMethod("CreateCPropFromString", BindingFlags.Static | BindingFlags.NonPublic);
             CreateCPropFromStringCache = new TwoTypesDelegateCache<CreateCPropFromStringDelegate>(createCPropFromString_mi);
 
-            // TODO: This is not being used.
             // Create Prop From Object
             MethodInfo createCPropFromObject_mi = propCreatorType.GetMethod("CreateCPropFromObject", BindingFlags.Static | BindingFlags.NonPublic);
             CreateCPropFromObjectCache = new TwoTypesDelegateCache<CreateCPropFromObjectDelegate>(createCPropFromObject_mi);
