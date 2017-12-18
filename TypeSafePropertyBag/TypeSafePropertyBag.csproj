@@ -80,7 +80,7 @@
     <Compile Include="Subscriptions\HandlerDispatchGenericBridges.cs" />
     <Compile Include="Subscriptions\IProvideHandlerDispatchDelegateCaches.cs" />
     <Compile Include="Subscriptions\SubscriptionGen.cs" />
-    <Compile Include="Fundamentals\MethodInfoExtensions.cs" />
+    <Compile Include="Unused\MethodInfoExtensions.cs" />
     <Compile Include="Subscriptions\DelegateProxyCache\MethodSubscriptionKind.cs" />
     <Compile Include="TypeConverters\TypeDescBasedTConverterCache.cs" />
     <Compile Include="TypeConverters\TypeDescBasedTConverterKey.cs" />
