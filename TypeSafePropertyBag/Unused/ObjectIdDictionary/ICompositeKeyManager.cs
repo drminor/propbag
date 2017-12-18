@@ -1,5 +1,5 @@
 ﻿
-namespace DRM.TypeSafePropertyBag
+namespace DRM.ObjectIdDictionary
 {
     public interface ICKeyMan<CompT, L1T, L2T, L2TRaw> 
     {

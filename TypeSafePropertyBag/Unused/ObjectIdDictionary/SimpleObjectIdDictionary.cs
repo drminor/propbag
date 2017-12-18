@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DRM.TypeSafePropertyBag
+namespace DRM.ObjectIdDictionary
 {
     using CompositeKeyType = UInt64;
     using ObjectIdType = UInt64;

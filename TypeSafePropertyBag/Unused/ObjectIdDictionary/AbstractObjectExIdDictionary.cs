@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections;
+﻿using DRM.TypeSafePropertyBag;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 
-namespace DRM.TypeSafePropertyBag
+namespace DRM.ObjectIdDictionary
 {
     public class AbstractObjectExIdDictionary<ExKeyT, CompT, L1T, L2T, L2TRaw> :
         ConcurrentDictionary<ExKeyT, IPropData>,
