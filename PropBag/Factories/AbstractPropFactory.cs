@@ -38,9 +38,9 @@ namespace DRM.PropBag
 
         public PSAccessServiceProviderType PropStoreAccessServiceProvider { get; }
 
-        public abstract int DoSetCacheCount { get; }
-        public abstract int CreatePropFromStringCacheCount { get; }
-        public abstract int CreatePropWithNoValCacheCount { get; }
+        public virtual int DoSetCacheCount => DelegateCacheProvider.DoSetDelegateCache.Count; // abstract int DoSetCacheCount { get; }
+        public virtual int CreatePropFromStringCacheCount => DelegateCacheProvider.CreatePropFromStringCache.Count; //abstract int CreatePropFromStringCacheCount { get; }
+        public virtual int CreatePropWithNoValCacheCount => DelegateCacheProvider.CreatePropWithNoValCache.Count; //abstract int CreatePropWithNoValCacheCount { get; }
 
         #endregion
 

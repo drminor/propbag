@@ -17,10 +17,6 @@ namespace DRM.PropBag
     {
         public override bool ProvidesStorage => true;
 
-        public override int DoSetCacheCount => DelegateCacheProvider.DoSetDelegateCache.Count;
-        public override int CreatePropFromStringCacheCount => DelegateCacheProvider.CreatePropFromStringCache.Count;
-        public override int CreatePropWithNoValCacheCount => DelegateCacheProvider.CreatePropWithNoValCache.Count;
-
         public PropFactory
             (
                 PSAccessServiceProviderType propStoreAccessServiceProvider,

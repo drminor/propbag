@@ -29,30 +29,6 @@ namespace DRM.PropBag
             get { return false; }
         }
 
-        override public int DoSetCacheCount
-        {
-            get
-            {
-                return DelegateCacheProvider.DoSetDelegateCache.Count;
-            }
-        }
-
-        override public int CreatePropFromStringCacheCount
-        {
-            get
-            {
-                return DelegateCacheProvider.CreatePropFromStringCache.Count;
-            }
-        }
-
-        override public int CreatePropWithNoValCacheCount
-        {
-            get
-            {
-                return DelegateCacheProvider.CreatePropWithNoValCache.Count;
-            }
-        }
-
         #region Constructors
 
         public PropExtStoreFactory
