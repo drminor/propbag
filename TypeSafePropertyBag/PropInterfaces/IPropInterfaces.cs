@@ -39,9 +39,9 @@ namespace DRM.TypeSafePropertyBag
         void SetListSource(IListSource value);
     }
 
-    public interface ICProp<CT,T> : IProp<CT> where CT: IEnumerable<T>
+    public interface ICProp<CT,T> : IProp<CT> where CT : IEnumerable<T>
     {
-        ReadOnlyObservableCollection<T> ReadOnlyObservableCollection { get; }
+        ReadOnlyObservableCollection<T> GetReadOnlyObservableCollection();
     }
 
     /// <summary>

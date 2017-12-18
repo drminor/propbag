@@ -112,12 +112,9 @@ namespace DRM.PropBag.Collections
 
         #region ICProp<CT, T> Implementation
 
-        public ReadOnlyObservableCollection<T> ReadOnlyObservableCollection
+        public ReadOnlyObservableCollection<T> GetReadOnlyObservableCollection()
         {
-            get
-            {
-                return ListSourceProvider.GetTheReadOnlyList(null);
-            }
+            return ListSourceProvider.GetTheReadOnlyList(null);
         }
 
         #endregion
