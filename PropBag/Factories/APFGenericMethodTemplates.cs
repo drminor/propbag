@@ -19,14 +19,14 @@ namespace DRM.PropBag
 
     public class APFGenericMethodTemplates
     {
-        #region Collection-Type Methods
+        #region Enumerable-Type Methods
 
         // From Object
-        private static ICPropPrivate<CT, T> CreateCPropFromObject<CT, T>(IPropFactory propFactory,
+        private static ICProp<CT, T> CreateEPropFromObject<CT, T>(IPropFactory propFactory,
             object value,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid,
-            Delegate comparer, bool useRefEquality = false) where CT : class, IEnumerable<T>
+            Delegate comparer, bool useRefEquality = false) where CT : class, IObsCollection<T>
         {
             CT initialValue = propFactory.GetValueFromObject<CT>(value);
 
@@ -35,11 +35,11 @@ namespace DRM.PropBag
         }
 
         // From String
-        private static ICPropPrivate<CT, T> CreateCPropFromString<CT, T>(IPropFactory propFactory,
+        private static ICProp<CT, T> CreateEPropFromString<CT, T>(IPropFactory propFactory,
             string value, bool useDefault,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid,
-            Delegate comparer, bool useRefEquality = true) where CT : class, IEnumerable<T>
+            Delegate comparer, bool useRefEquality = true) where CT : class, IObsCollection<T>
         {
             CT initialValue;
             if (useDefault)
@@ -55,12 +55,33 @@ namespace DRM.PropBag
                 GetComparerForCollections<CT>(comparer, propFactory, useRefEquality));
         }
 
+        // From String FallBack to using ObservableCollection<T>
+        private static ICPropFB<CT, T> CreateEPropFromStringFB<CT, T>(IPropFactory propFactory,
+            string value, bool useDefault,
+            string propertyName, object extraInfo,
+            bool hasStorage, bool isTypeSolid,
+            Delegate comparer, bool useRefEquality = true) where CT : ObservableCollection<T>
+        {
+            CT initialValue;
+            if (useDefault)
+            {
+                initialValue = propFactory.ValueConverter.GetDefaultValue<CT, T>(propertyName);
+            }
+            else
+            {
+                initialValue = propFactory.GetValueFromString<CT, T>(value);
+            }
+
+            return propFactory.CreateFB<CT, T>(initialValue, propertyName, extraInfo, hasStorage, isTypeSolid,
+                GetComparerForCollections<CT>(comparer, propFactory, useRefEquality));
+        }
+
         // With No Value
-        private static ICPropPrivate<CT, T> CreateCPropWithNoValue<CT, T>(IPropFactory propFactory,
+        private static ICProp<CT, T> CreateEPropWithNoValue<CT, T>(IPropFactory propFactory,
             bool useDefault,
             PropNameType propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid,
-            Delegate comparer, bool useRefEquality = true) where CT : class, IEnumerable<T>
+            Delegate comparer, bool useRefEquality = true) where CT : class, IObsCollection<T>
         {
             return propFactory.CreateWithNoValue<CT, T>(propertyName, extraInfo, hasStorage, isTypeSolid,
                 GetComparerForCollections<CT>(comparer, propFactory, useRefEquality));

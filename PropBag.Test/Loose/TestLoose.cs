@@ -99,10 +99,10 @@ namespace PropBagLib.Tests
         {
             mod1 = new LooseModel(PropBagTypeSafetyMode.None, _amHelpers.PropFactory_V1);
 
-            mod1["System.Object", PROP_NEW] = null;
+            mod1[typeof(object), PROP_NEW] = 0;
             Assert.That(mod1.GetTypeOfProperty(PROP_NEW), Is.EqualTo(typeof(object)));
 
-            Assert.Throws<ApplicationException>(() => mod1["System.String", PROP_NEW] = "string");
+            Assert.Throws<ApplicationException>(() => mod1[typeof(string), PROP_NEW] = "0");
         }
 
         [Test]

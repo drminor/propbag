@@ -15,10 +15,11 @@ namespace DRM.TypeSafePropertyBag
 
         DelegateCache<CreatePropFromObjectDelegate> CreatePropFromObjectCache { get; }
 
-        TwoTypesDelegateCache<CreateCPropFromStringDelegate> CreateCPropFromStringCache { get; }
+        TwoTypesDelegateCache<CreateEPropFromStringDelegate> CreateCPropFromStringCache { get; }
+        TwoTypesDelegateCache<CreateEPropFromStringDelegate> CreateCPropFromStringFBCache { get; }
 
-        TwoTypesDelegateCache<CreateCPropWithNoValueDelegate> CreateCPropWithNoValCache { get; }
+        TwoTypesDelegateCache<CreateEPropWithNoValueDelegate> CreateCPropWithNoValCache { get; }
 
-        TwoTypesDelegateCache<CreateCPropFromObjectDelegate> CreateCPropFromObjectCache { get; }
+        TwoTypesDelegateCache<CreateEPropFromObjectDelegate> CreateCPropFromObjectCache { get; }
     }
 }

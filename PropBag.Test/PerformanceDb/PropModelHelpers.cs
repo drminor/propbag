@@ -124,7 +124,7 @@ namespace PropBagLib.Tests.PerformanceDb
                 setToDefault: false, setToUndefined: false, setToNull: true, setToEmptyString: false);
 
             propItem = new PropItem(type: typeof(ObservableCollection<Person>), name: "PersonCollection",
-                hasStore: true, typeIsSolid: true, propKind: PropKindEnum.Collection,
+                hasStore: true, typeIsSolid: true, propKind: PropKindEnum.ObservableCollection,
                 propTypeInfoField: null,
                 initialValueField: pivf,
                 extraInfo: null, comparer: null, itemType: typeof(Person));

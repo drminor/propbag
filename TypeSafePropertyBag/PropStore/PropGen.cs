@@ -54,9 +54,9 @@ namespace DRM.TypeSafePropertyBag
 
         #region PropGen Public Methods
 
-        public ValPlusType ValuePlusType()
+        public ValPlusType GetValuePlusType()
         {
-            return new ValPlusType(TypedProp.TypedValueAsObject, TypedProp.Type);
+            return TypedProp.GetValuePlusType();  //new ValPlusType(TypedProp.TypedValueAsObject, TypedProp.Type);
         }
 
         public void CleanUp(bool doTypedCleanup)

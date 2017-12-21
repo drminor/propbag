@@ -28,11 +28,12 @@ namespace DRM.PropBag.Caches
 
         public DelegateCache<CreatePropFromObjectDelegate> CreatePropFromObjectCache { get; }
 
-        public TwoTypesDelegateCache<CreateCPropFromStringDelegate> CreateCPropFromStringCache { get; }
+        public TwoTypesDelegateCache<CreateEPropFromStringDelegate> CreateCPropFromStringCache { get; }
+        public TwoTypesDelegateCache<CreateEPropFromStringDelegate> CreateCPropFromStringFBCache { get; }
 
-        public TwoTypesDelegateCache<CreateCPropWithNoValueDelegate> CreateCPropWithNoValCache { get; }
+        public TwoTypesDelegateCache<CreateEPropWithNoValueDelegate> CreateCPropWithNoValCache { get; }
 
-        public TwoTypesDelegateCache<CreateCPropFromObjectDelegate> CreateCPropFromObjectCache { get; }
+        public TwoTypesDelegateCache<CreateEPropFromObjectDelegate> CreateCPropFromObjectCache { get; }
 
     #endregion
 
@@ -69,17 +70,21 @@ namespace DRM.PropBag.Caches
 
             #region Collection Prop Creation
 
-            // Create Prop From String
-            MethodInfo createCPropNoVal_mi = propCreatorType.GetMethod("CreateCPropWithNoValue", BindingFlags.Static | BindingFlags.NonPublic);
-            CreateCPropWithNoValCache = new TwoTypesDelegateCache<CreateCPropWithNoValueDelegate>(createCPropNoVal_mi);
+            // Create C Prop with no value
+            MethodInfo createCPropNoVal_mi = propCreatorType.GetMethod("CreateEPropWithNoValue", BindingFlags.Static | BindingFlags.NonPublic);
+            CreateCPropWithNoValCache = new TwoTypesDelegateCache<CreateEPropWithNoValueDelegate>(createCPropNoVal_mi);
 
-            // Create Prop With No Value
-            MethodInfo createCPropFromString_mi = propCreatorType.GetMethod("CreateCPropFromString", BindingFlags.Static | BindingFlags.NonPublic);
-            CreateCPropFromStringCache = new TwoTypesDelegateCache<CreateCPropFromStringDelegate>(createCPropFromString_mi);
+            // Create C Prop From string
+            MethodInfo createCPropFromString_mi = propCreatorType.GetMethod("CreateEPropFromString", BindingFlags.Static | BindingFlags.NonPublic);
+            CreateCPropFromStringCache = new TwoTypesDelegateCache<CreateEPropFromStringDelegate>(createCPropFromString_mi);
+
+            // Create C Prop From string FALL BACK to ObservableCollection
+            MethodInfo createCPropFromStringFB_mi = propCreatorType.GetMethod("CreateEPropFromStringFB", BindingFlags.Static | BindingFlags.NonPublic);
+            CreateCPropFromStringFBCache = new TwoTypesDelegateCache<CreateEPropFromStringDelegate>(createCPropFromStringFB_mi);
 
             // Create Prop From Object
-            MethodInfo createCPropFromObject_mi = propCreatorType.GetMethod("CreateCPropFromObject", BindingFlags.Static | BindingFlags.NonPublic);
-            CreateCPropFromObjectCache = new TwoTypesDelegateCache<CreateCPropFromObjectDelegate>(createCPropFromObject_mi);
+            MethodInfo createCPropFromObject_mi = propCreatorType.GetMethod("CreateEPropFromObject", BindingFlags.Static | BindingFlags.NonPublic);
+            CreateCPropFromObjectCache = new TwoTypesDelegateCache<CreateEPropFromObjectDelegate>(createCPropFromObject_mi);
 
             #endregion
         }

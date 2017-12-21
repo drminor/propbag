@@ -71,7 +71,7 @@ namespace DRM.PropBag
         }
         public SetExtVal<T> Setter { get; set; }
 
-        override public IListSource ListSource => throw new NotSupportedException("This PropBag property is not a collection or datatable PropType.");
+        //override public IListSource ListSource => throw new NotSupportedException("This PropBag property is not a collection or datatable PropType.");
 
         public override object Clone()
         {

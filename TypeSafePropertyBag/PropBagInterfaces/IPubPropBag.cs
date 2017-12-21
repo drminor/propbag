@@ -22,8 +22,8 @@ namespace DRM.TypeSafePropertyBag
 
         IProp<T> AddPropObjCompNoStore<T>(string propertyName, object extraInfo = null);
 
-        ICPropPrivate<CT, T> AddCollectionProp<CT, T>(string propertyName, Func<CT, CT, bool> comparer = null,
-            object extraInfo = null, CT initialValue = default(CT)) where CT : class, IEnumerable<T>;
+        ICProp<CT, T> AddCollectionProp<CT, T>(string propertyName, Func<CT, CT, bool> comparer = null,
+            object extraInfo = null, CT initialValue = default(CT)) where CT : class, IObsCollection<T>;
 
         void RemoveProp(string propertyName, Type propertyType);
         void RemoveProp<T>(string propertyName);

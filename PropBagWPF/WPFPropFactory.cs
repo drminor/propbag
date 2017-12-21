@@ -1,7 +1,9 @@
 ﻿using DRM.PropBag;
 using DRM.PropBag.Caches;
 using DRM.TypeSafePropertyBag;
+using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
+using System.Collections.ObjectModel;
 
 namespace DRM.PropBagWPF
 {
@@ -23,50 +25,63 @@ namespace DRM.PropBagWPF
 
         #region Collection-type property creators
 
-        public override ICPropPrivate<CT, T> Create<CT, T>
-            (
-            CT initialValue,
-            string propertyName,
-            object extraInfo = null,
-            bool hasStorage = true,
-            bool typeIsSolid = true,
-            Func<CT, CT, bool> comparer = null
-            )
-        {
-            ICPropPrivate<CT, T> newProp;
-            if(typeof(OListCollectionView<T>).IsAssignableFrom(initialValue.GetType()))
-            {
-                OListCollectionView<T> newVal = initialValue as OListCollectionView<T>;
+        //public override IETypedProp<CT, T> Create<CT, T>
+        //    (
+        //    CT initialValue,
+        //    string propertyName,
+        //    object extraInfo = null,
+        //    bool hasStorage = true,
+        //    bool typeIsSolid = true,
+        //    Func<CT, CT, bool> comparer = null
+        //    )
+        //{
+        //    IETypedProp<CT, T> newProp;
+        //    if(typeof(CT).IOListCollectionViewBased())
+        //    {
+        //        IOListCollectionView<T> newVal;
+        //        if (initialValue == null)
+        //        {
+        //            newVal = new OListCollectionView<T>(new ObservableCollection<T>());
+        //        }
+        //        else
+        //        {
+        //            newVal = initialValue as IOListCollectionView<T>;
+        //        }
 
-                // Use the default EqualityComparer defined for the OListCollectionView type.
-                //Func<OListCollectionView<T>, OListCollectionView<T>, bool> newComparer = EqualityComparer<OListCollectionView<T>>.Default.Equals;
+        //        // Use reference equality.
+        //        Func<IOListCollectionView<T>, IOListCollectionView<T>, bool> newComparer = RefEqualityComparer<IOListCollectionView<T>>.Default.Equals;
 
-                // Use reference equality.
-                Func<OListCollectionView<T>, OListCollectionView<T>, bool> newComparer = RefEqualityComparer<OListCollectionView<T>>.Default.Equals;
+        //        // Get the function used to create default values from our ValueConverter.
+        //        GetDefaultValueDelegate<IOListCollectionView<T>> defaultValFunc = ValueConverter.GetDefaultValue<IOListCollectionView<T>>;
 
-                newProp = (ICPropPrivate<CT, T>)CreateListViewProp<OListCollectionView<T>, T>(newVal, propertyName, extraInfo, hasStorage, typeIsSolid, newComparer);
-            }
-            else
-            {
-                newProp = base.Create<CT, T>(initialValue, propertyName, extraInfo, hasStorage, typeIsSolid, comparer);
-            }
-            return newProp;
-        }
+        //        IListCViewProp<IOListCollectionView<T>, T> fancyNewProp = 
+        //            CreateListViewProp<IOListCollectionView<T>, T>(newVal, defaultValFunc,  propertyName, extraInfo, hasStorage, typeIsSolid, newComparer);
 
-        private IListCViewProp<CT,T> CreateListViewProp<CT, T>
-            (
-            CT initialValue,
-            string propertyName,
-            object extraInfo = null,
-            bool hasStorage = true,
-            bool typeIsSolid = true,
-            Func<CT, CT, bool> comparer = null
-            ) where CT: IOListCollectionView<T>
-        {
-            IListCViewProp<CT, T> result = null;
+        //        newProp = (IETypedProp<CT,T>) fancyNewProp;
+        //    }
+        //    else
+        //    {
+        //        newProp = base.Create<CT, T>(initialValue, propertyName, extraInfo, hasStorage, typeIsSolid, comparer);
+        //    }
 
-            return result;
-        }
+        //    return newProp;
+        //}
+
+        //private IListCViewProp<CT,T> CreateListViewProp<CT, T>
+        //    (
+        //    CT initialValue,
+        //    GetDefaultValueDelegate<CT> defaultValFunc,
+        //    string propertyName,
+        //    object extraInfo = null,
+        //    bool hasStorage = true,
+        //    bool typeIsSolid = true,
+        //    Func<CT, CT, bool> comparer = null
+        //    ) where CT: IOListCollectionView<T>
+        //{
+        //    IListCViewProp<CT, T> result = new ListCViewProp<CT, T>(initialValue, defaultValFunc, typeIsSolid, hasStorage, comparer);
+
+        //    return result;
+        //}
 
         #endregion
 

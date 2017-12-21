@@ -1,16 +1,13 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data;
-using System.Windows.Data;
 
 namespace DRM.TypeSafePropertyBag
 {
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
-
-    using CompositeKeyType = UInt64;
-    using ObjectIdType = UInt64;
 
     using PropIdType = UInt32;
     using PropNameType = String;
@@ -27,32 +24,84 @@ namespace DRM.TypeSafePropertyBag
         DataTable ReadOnlyDataTable { get; }
     }
 
-    //public interface ICViewProp<CT, T> : IProp<CT> where CT : ObservableCollection<T>
-    //{
-    //    ReadOnlyObservableCollection<T> ReadOnlyObservableCollection { get; }
-    //    bool IsListCollectionView { get; }
-    //}
-
-    public interface ICPropPrivate<CT,T> : ICProp<CT,T>, IPropPrivate<CT> where CT : IEnumerable<T>
+    // Collection View Source
+    public interface ICViewProp<TCVS, T> : IReadOnlyCViewProp<TCVS, T> where TCVS: class
     {
-        ObservableCollection<T> ObservableCollection { get; }
-        void SetListSource(IListSource value);
+        object Source { get; set; }
     }
 
-    public interface ICProp<CT,T> : IProp<CT> where CT : IEnumerable<T>
+    // CollectionViewSource -- ReadOnly 
+    public interface IReadOnlyCViewProp<TCVS, T> : IProp<TCVS> where TCVS : class
+    {
+        ICollectionView View { get; }
+        ICollectionView this[string key] { get; }
+        IReadOnlyObsCollection<T> GetReadOnlyObservableCollection();
+    }
+
+    // ObsCollection<T> interface
+    public interface ICProp<CT,T> : IETypedProp<CT, T>, IReadOnlyCProp<CT, T>/*, IListSourceProvider<CT,T>*/ where CT : IObsCollection<T>
+    {
+
+    }
+
+    // ObsCollection<T> interface -- ReadOnly
+    public interface IReadOnlyCProp<CT,T> : IReadOnlyETypedProp<CT, T>/*, IListSource*/ where CT : IReadOnlyObsCollection<T>
+    {
+
+    }
+
+
+
+    // ObservableCollection<T>
+    public interface ICPropFB<CT, T> : IProp<CT>/*, IListSourceProvider<CT,T>*/ where CT : ObservableCollection<T>
     {
         ReadOnlyObservableCollection<T> GetReadOnlyObservableCollection();
     }
 
-    /// <summary>
-    /// Extends the IProp<typeparamref name="T"/> interface with features
-    /// that are only avaialble within the PubPropBag assembly.
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public interface IPropPrivate<T> : IProp<T>
+    // ObservableCollection<T> -- ReadOnly
+    public interface IReadOnlyCPropFB<CT, T> : IProp<CT>/*, IListSource*/ where CT : ReadOnlyObservableCollection<T>
     {
 
     }
+
+
+    
+
+
+
+    // IEnumerable<T> Collections
+    public interface IETypedProp<CT, T> : IEProp<CT>, IReadOnlyETypedProp<CT, T>/*, IListSourceProvider<CT,T>*/ where CT : IEnumerable<T>
+    {
+
+    }
+
+    // IEnumerable<T> Collections -- ReadOnly
+    public interface IReadOnlyETypedProp<CT, T> : IReadOnlyEProp<CT>/*, IListSource*/ where CT : IEnumerable<T>
+    {
+
+    }
+
+    // IEnumerable Collections
+    public interface IEProp<CT> : IProp<CT>, IReadOnlyEProp<CT> where CT : IEnumerable
+    {
+        //void SetListSource(IListSource value);
+    }
+
+    // IEnumerable Collections -- ReadOnly
+    public interface IReadOnlyEProp<CT> : IProp<CT> where CT : IEnumerable
+    {
+        //IList List { get; }
+    }
+
+    ///// <summary>
+    ///// Extends the IProp<typeparamref name="T"/> interface with features
+    ///// that are only avaialble within the PubPropBag assembly.
+    ///// </summary>
+    ///// <typeparam name="T"></typeparam>
+    //public interface IPropPrivate<T> : IProp<T>
+    //{
+
+    //}
 
     /// <summary>
     /// All properties have these features based on the type of the property.
@@ -79,7 +128,8 @@ namespace DRM.TypeSafePropertyBag
         bool TypeIsSolid { get; }
         bool HasStore { get; }
 
-        IListSource ListSource { get; }
+        //IListSource ListSource { get; }
+        //ICollectionView CollectionView { get; }
 
         object TypedValueAsObject { get; }
         ValPlusType GetValuePlusType();
@@ -128,7 +178,7 @@ namespace DRM.TypeSafePropertyBag
         /// </summary>
         IProp TypedProp { get; }
 
-        ValPlusType ValuePlusType();
+        ValPlusType GetValuePlusType();
 
         void CleanUp(bool doTypedCleanup);
     }

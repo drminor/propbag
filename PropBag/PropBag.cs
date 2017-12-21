@@ -11,6 +11,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading;
 using System.Windows;
 
@@ -577,7 +578,7 @@ namespace DRM.PropBag
         public ValPlusType GetValPlusType(string propertyName, Type propertyType)
         {
             IPropData pg = GetPropGen(propertyName, propertyType);
-            return pg.ValuePlusType();
+            return pg.GetValuePlusType();
         }
 
         public T GetIt<T>(string propertyName)
@@ -586,18 +587,37 @@ namespace DRM.PropBag
             return GetTypedPropPrivate<T>(propertyName, mustBeRegistered: true).TypedValue;
         }
 
-        public IProp<T> GetTypedProp<T>(string propertyName)
+        protected IProp<T> GetTypedProp<T>(string propertyName)
         {
             return (IProp<T>)GetTypedPropPrivate<T>(propertyName, mustBeRegistered: true);
         }
 
-        private IPropPrivate<T> GetTypedPropPrivate<T>(string propertyName, bool mustBeRegistered, bool neverCreate = false)
+        protected IProp<T> GetTypedPropPrivate<T>(string propertyName, bool mustBeRegistered, bool neverCreate = false)
         {
             IPropData PropData = GetGenPropPrivate<T>(propertyName, mustBeRegistered, neverCreate, out PropIdType notUsed);
 
             if (!PropData.IsEmpty)
             {
-                return (IPropPrivate<T>)PropData.TypedProp;
+                return (IProp<T>)PropData.TypedProp;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        protected IReadOnlyCProp<CT,T> GetCProp<CT, T>(string propertyName) where CT : IObsCollection<T>
+        {
+            return (IReadOnlyCProp<CT,T>)GetTypedCPropPrivate<CT,T>(propertyName, mustBeRegistered: true);
+        }
+
+        protected ICProp<CT,T> GetTypedCPropPrivate<CT,T>(string propertyName, bool mustBeRegistered, bool neverCreate = false) where CT: IObsCollection<T>
+        {
+            IPropData PropData = GetGenPropPrivate<T>(propertyName, mustBeRegistered, neverCreate, out PropIdType notUsed);
+
+            if (!PropData.IsEmpty)
+            {
+                return (ICProp<CT,T>)  PropData.TypedProp;
             }
             else
             {
@@ -736,7 +756,7 @@ namespace DRM.PropBag
         //    PropNameType propertyName = GetPropName(propId); 
         //    IPropData PropData = GetPropGen<T>(propertyName, out PropIdType dummy, desiredHasStoreValue: PropFactory.ProvidesStorage);
 
-        //    IPropPrivate<T> prop = CheckTypeInfo<T>(propId, propertyName, PropData, OurStoreAccessor);
+        //    IProp<T> prop = CheckTypeInfo<T>(propId, propertyName, PropData, OurStoreAccessor);
 
         //    return DoSet(propId, propertyName, prop, value);
         //}
@@ -761,7 +781,7 @@ namespace DRM.PropBag
             // No point in calling DoSet, it would find that the value is the same and do nothing.
             if (wasRegistered) return true;
 
-            IPropPrivate<T> prop = CheckTypeInfo<T>(propId, propertyName, PropData, _ourStoreAccessor);
+            IProp<T> prop = CheckTypeInfo<T>(propId, propertyName, PropData, _ourStoreAccessor);
             _ourStoreAccessor.IncAccess();
 
             T curVal = PropData.TypedProp.ValueIsDefined ? (T) PropData.TypedProp.TypedValueAsObject : default(T);
@@ -799,7 +819,7 @@ namespace DRM.PropBag
             // No point in calling DoSet, it would find that the value is the same and do nothing.
             if (wasRegistered) return true;
 
-            IPropPrivate<T> typedProp = CheckTypeInfo<T>(propId, propertyName, PropData, _ourStoreAccessor);
+            IProp<T> typedProp = CheckTypeInfo<T>(propId, propertyName, PropData, _ourStoreAccessor);
 
             //DoSet<T>(propId, propertyName, typedProp, newValue);
 
@@ -857,7 +877,7 @@ namespace DRM.PropBag
                 alwaysRegister: false,
                 mustBeRegistered: mustBeRegistered,
                 neverCreate: false,
-                desiredHasStoreValue: _propFactory.ProvidesStorage,
+                desiredHasStoreValue: null,
                 wasRegistered: out bool wasRegistered,
                 propId: out PropIdType propId);
 
@@ -878,7 +898,7 @@ namespace DRM.PropBag
                 alwaysRegister: false,
                 mustBeRegistered: mustBeRegistered,
                 neverCreate: false,
-                desiredHasStoreValue: _propFactory.ProvidesStorage,
+                desiredHasStoreValue: null,
                 wasRegistered: out bool wasRegistered,
                 propId: out PropIdType propId);
 
@@ -918,7 +938,7 @@ namespace DRM.PropBag
                 alwaysRegister: false,
                 mustBeRegistered: mustBeRegistered,
                 neverCreate: false,
-                desiredHasStoreValue: _propFactory.ProvidesStorage,
+                desiredHasStoreValue: null,
                 wasRegistered: out bool wasRegistered,
                 propId: out PropIdType propId);
 
@@ -939,7 +959,7 @@ namespace DRM.PropBag
                 alwaysRegister: false,
                 mustBeRegistered: mustBeRegistered,
                 neverCreate: false,
-                desiredHasStoreValue: _propFactory.ProvidesStorage,
+                desiredHasStoreValue: null,
                 wasRegistered: out bool wasRegistered,
                 propId: out PropIdType propId);
 
@@ -982,7 +1002,7 @@ namespace DRM.PropBag
                 alwaysRegister: false,
                 mustBeRegistered: mustBeRegistered,
                 neverCreate: false,
-                desiredHasStoreValue: _propFactory.ProvidesStorage,
+                desiredHasStoreValue: null,
                 wasRegistered: out bool wasRegistered,
                 propId: out PropIdType propId);
 
@@ -1007,7 +1027,7 @@ namespace DRM.PropBag
                 alwaysRegister: false,
                 mustBeRegistered: mustBeRegistered,
                 neverCreate: false,
-                desiredHasStoreValue: _propFactory.ProvidesStorage,
+                desiredHasStoreValue: null,
                 wasRegistered: out bool wasRegistered,
                 propId: out PropIdType propId);
 
@@ -1107,7 +1127,7 @@ namespace DRM.PropBag
                 alwaysRegister: false,
                 mustBeRegistered: mustBeRegistered,
                 neverCreate: false,
-                desiredHasStoreValue: _propFactory.ProvidesStorage,
+                desiredHasStoreValue: null,
                 wasRegistered: out bool wasRegistered,
                 propId: out PropIdType propId);
 
@@ -1130,7 +1150,7 @@ namespace DRM.PropBag
                 alwaysRegister: false,
                 mustBeRegistered: mustBeRegistered,
                 neverCreate: false,
-                desiredHasStoreValue: _propFactory.ProvidesStorage,
+                desiredHasStoreValue: null,
                 wasRegistered: out bool wasRegistered,
                 propId: out PropIdType propId);
 
@@ -1173,7 +1193,7 @@ namespace DRM.PropBag
                 alwaysRegister: false,
                 mustBeRegistered: mustBeRegistered,
                 neverCreate: false,
-                desiredHasStoreValue: _propFactory.ProvidesStorage,
+                desiredHasStoreValue: null,
                 wasRegistered: out bool wasRegistered,
                 propId: out PropIdType propId);
 
@@ -1196,7 +1216,7 @@ namespace DRM.PropBag
                 alwaysRegister: false,
                 mustBeRegistered: mustBeRegistered,
                 neverCreate: false,
-                desiredHasStoreValue: _propFactory.ProvidesStorage,
+                desiredHasStoreValue: null,
                 wasRegistered: out bool wasRegistered,
                 propId: out PropIdType propId);
 
@@ -1272,7 +1292,7 @@ namespace DRM.PropBag
                 alwaysRegister: false,
                 mustBeRegistered: mustBeRegistered,
                 neverCreate: false,
-                desiredHasStoreValue: _propFactory.ProvidesStorage,
+                desiredHasStoreValue: null,
                 wasRegistered: out bool wasRegistered,
                 propId: out PropIdType propId);
 
@@ -1306,7 +1326,7 @@ namespace DRM.PropBag
                 alwaysRegister: false,
                 mustBeRegistered: mustBeRegistered,
                 neverCreate: false,
-                desiredHasStoreValue: _propFactory.ProvidesStorage,
+                desiredHasStoreValue: null,
                 wasRegistered: out bool wasRegistered,
                 propId: out PropIdType propId);
 
@@ -1360,7 +1380,7 @@ namespace DRM.PropBag
             IEnumerable<KeyValuePair<PropNameType, IPropData>> theStoreAsCollection = _ourStoreAccessor.GetCollection(this);
 
             IEnumerable<KeyValuePair<string, ValPlusType>> list = theStoreAsCollection.Select(x =>
-            new KeyValuePair<string, ValPlusType>(x.Key, x.Value.ValuePlusType())).ToList();
+            new KeyValuePair<string, ValPlusType>(x.Key, x.Value.GetValuePlusType())).ToList();
 
             IDictionary<string, ValPlusType> result = list.ToDictionary(pair => pair.Key, pair => pair.Value);
             return result;
@@ -1486,24 +1506,58 @@ namespace DRM.PropBag
             }
         }
 
+        public override string ToString()
+        {
+            IDictionary<string, ValPlusType> x = GetAllPropNamesAndTypes();
+
+            StringBuilder result = new StringBuilder();
+            int cnt = 0;
+            foreach (KeyValuePair<string, ValPlusType> kvp in x)
+            {
+                if (cnt++ == 0) result.Append("\n\r");
+
+                result.Append($" -- {kvp.Key}: {kvp.Value.Value}");
+            }
+            return result.ToString();
+        }
+
         #endregion
 
-        #region Add Collection-Type Props
+        #region Add Enumerable-Type Props
 
-        public ICPropPrivate<CT, T> AddCollectionProp<CT, T>
+        public ICProp<CT, T> AddCollectionProp<CT, T>
             (
                 string propertyName,
                 Func<CT, CT, bool> comparer = null,
                 object extraInfo = null,
                 CT initialValue = default(CT)
-            ) where CT : class, IEnumerable<T>
+            ) where CT : IObsCollection<T>
         {
             bool hasStorage = true;
             bool typeIsSolid = true;
 
             Func<CT, CT, bool> comparerToUse = comparer ?? _propFactory.GetRefEqualityComparer<CT>();
 
-            ICPropPrivate<CT, T> typedCollectionProp = _propFactory.Create<CT,T>(initialValue, propertyName, extraInfo, hasStorage, typeIsSolid, comparerToUse);
+            ICProp<CT, T> typedCollectionProp = _propFactory.Create<CT,T>(initialValue, propertyName, extraInfo, hasStorage, typeIsSolid, comparerToUse);
+
+            AddProp(propertyName, typedCollectionProp);
+            return typedCollectionProp;
+        }
+
+        public ICPropFB<CT, T> AddCollectionPropFB<CT, T>
+            (
+                string propertyName,
+                Func<CT, CT, bool> comparer = null,
+                object extraInfo = null,
+                CT initialValue = default(CT)
+            ) where CT : ObservableCollection<T>
+        {
+            bool hasStorage = true;
+            bool typeIsSolid = true;
+
+            Func<CT, CT, bool> comparerToUse = comparer ?? _propFactory.GetRefEqualityComparer<CT>();
+
+            ICPropFB<CT, T> typedCollectionProp = _propFactory.CreateFB<CT, T>(initialValue, propertyName, extraInfo, hasStorage, typeIsSolid, comparerToUse);
 
             AddProp(propertyName, typedCollectionProp);
             return typedCollectionProp;
@@ -1694,7 +1748,7 @@ namespace DRM.PropBag
         ///// <returns>True, if there was an existing Action in place for this property.</returns>
         //protected bool RegisterDoWhenChanged<T>(Action<T, T> doWhenChanged, bool doAfterNotify, string propertyName)
         //{
-        //    IPropPrivate<T> prop = GetTypedPropPrivate<T>(propertyName, mustBeRegistered: true);
+        //    IProp<T> prop = GetTypedPropPrivate<T>(propertyName, mustBeRegistered: true);
         //    return prop.UpdateDoWhenChangedAction(doWhenChanged, doAfterNotify);
         //}
 
@@ -1719,7 +1773,7 @@ namespace DRM.PropBag
 
         #region Private Methods
 
-        private bool DoSet<T>(PropIdType propId, string propertyName, IPropPrivate<T> typedProp, ref T curValue, T newValue)
+        private bool DoSet<T>(PropIdType propId, string propertyName, IProp<T> typedProp, ref T curValue, T newValue)
         {
             IEnumerable<ISubscription> subscriptions = _ourStoreAccessor.GetSubscriptions(this, propId);
 
@@ -1810,7 +1864,7 @@ namespace DRM.PropBag
             }
         }
 
-        private void DoNotifyWork<T>(PropIdType propId, PropNameType propertyName, IPropPrivate<T> typedProp, T oldVal, T newValue, IEnumerable<ISubscription> subscriptions)
+        private void DoNotifyWork<T>(PropIdType propId, PropNameType propertyName, IProp<T> typedProp, T oldVal, T newValue, IEnumerable<ISubscription> subscriptions)
         {
             //List<ISubscription> diag_ListCheck = GetSubscriptions(propId).ToList();
 
@@ -1933,7 +1987,7 @@ namespace DRM.PropBag
         }
 
         // For when the current value is undefined.
-        private void DoNotifyWork<T>(PropIdType propId, PropNameType propertyName, IPropPrivate<T> typedProp, T newValue, IEnumerable<ISubscription> subscriptions)
+        private void DoNotifyWork<T>(PropIdType propId, PropNameType propertyName, IProp<T> typedProp, T newValue, IEnumerable<ISubscription> subscriptions)
         {
             //List<ISubscription> diag_ListCheck = GetSubscriptions(propId).ToList();
 
@@ -2067,7 +2121,7 @@ namespace DRM.PropBag
             }
         }
 
-        private IPropPrivate<T> CheckTypeInfo<T>(PropIdType propId, PropNameType propertyName, IPropData PropData, PSAccessServiceType storeAccess)
+        private IProp<T> CheckTypeInfo<T>(PropIdType propId, PropNameType propertyName, IPropData PropData, PSAccessServiceType storeAccess, bool isGetOp = true)
         {
             if (!PropData.TypedProp.TypeIsSolid)
             {
@@ -2086,12 +2140,12 @@ namespace DRM.PropBag
             {
                 if (!AreTypesSame(typeof(T), PropData.TypedProp.Type))
                 {
-                    throw new ApplicationException($"Attempting to set property: {propertyName} whose type is {PropData.TypedProp.Type}, " +
+                    throw new ApplicationException($"Attempting to {(isGetOp ? "get" : "set")} property: {propertyName} whose type is {PropData.TypedProp.Type}, " +
                         $"with a call whose type parameter is {typeof(T).ToString()} is invalid.");
                 }
             }
 
-            return (IPropPrivate<T>)PropData.TypedProp;
+            return (IProp<T>)PropData.TypedProp;
         }
 
         /// <summary>
@@ -2152,9 +2206,19 @@ namespace DRM.PropBag
             {
                 return curType.IsAssignableFrom(newType);
             }
+            else if(newType.UnderlyingSystemType == curType.UnderlyingSystemType)
+            {
+                return true;
+            }
             else
             {
-                return newType.UnderlyingSystemType == curType.UnderlyingSystemType;
+                return false;
+                //bool result = curType.IsAssignableFrom(newType);
+                //if(!result)
+                //{
+                //    result = newType.IsAssignableFrom(curType);
+                //}
+                //return result;
             }
         }
 
@@ -2262,29 +2326,27 @@ namespace DRM.PropBag
 
         #region IListSource Support
 
-        public bool TryGetListSource(string propertyName, Type itemType, out IListSource listSource)
-        {
-            //PropIdType l2Key = GetPropId(propertyName);
-
-            if (TryGetPropId(propertyName, out PropIdType propId))
-            {
-                if (_ourStoreAccessor.TryGetValue(this, propId, out IPropData value))
-                {
-                    listSource = value.TypedProp.ListSource;
-                    return true;
-                }
-                else
-                {
-                    listSource = null;
-                    return false;
-                }
-            }
-            else
-            {
-                listSource = null;
-                return false;
-            }
-        }
+        //public bool TryGetListSource(string propertyName, Type itemType, out IListSource listSource)
+        //{
+        //    if (TryGetPropId(propertyName, out PropIdType propId))
+        //    {
+        //        if (_ourStoreAccessor.TryGetValue(this, propId, out IPropData value))
+        //        {
+        //            listSource = value.TypedProp.ListSource;
+        //            return true;
+        //        }
+        //        else
+        //        {
+        //            listSource = null;
+        //            return false;
+        //        }
+        //    }
+        //    else
+        //    {
+        //        listSource = null;
+        //        return false;
+        //    }
+        //}
 
         #endregion
 
@@ -2340,16 +2402,13 @@ namespace DRM.PropBag
         {
             T typedValue = (T)value;
 
-            IPropPrivate<T> typedProp = (IPropPrivate<T>)prop;
+            IProp<T> typedProp = (IProp<T>)prop;
             bool result = ((PropBag)target).DoSet<T>(propId, propertyName, typedProp, ref typedValue, (T)value);
 
             typedProp.TypedValue = typedValue;
 
             return result;
         }
-
-
-
 
         #endregion
 
@@ -2384,24 +2443,4 @@ namespace DRM.PropBag
 
         #endregion
     }
-
-    //internal class PB_EventHolder : INotifyPropertyChanged,
-    //    INotifyPropertyChanging,
-    //    INotifyPCGen,
-    //    INotifyPCObject
-    //{
-
-    //    public event PropertyChangedEventHandler PropertyChanged;
-    //    public event PropertyChangingEventHandler PropertyChanging;
-    //    public event EventHandler<PcGenEventArgs> PropertyChangedWithGenVals;
-    //    public event EventHandler<PcObjectEventArgs> PropertyChangedWithObjectVals;
-
-    //    public void OnPropertyChangedWithGenVals(PcGenEventArgs eArgs)
-    //    {
-    //        EventHandler<PcGenEventArgs> handler = Interlocked.CompareExchange(ref PropertyChangedWithGenVals, null, null);
-
-    //        if (handler != null)
-    //            handler(this, eArgs);
-    //    }
-    //}
 }

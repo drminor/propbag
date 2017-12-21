@@ -143,12 +143,33 @@ namespace DRM.PropBagWPF
         {
             get
             {
-                ObservableCollection<T> result = TypedValue?.ObservableCollection;
+                ObservableCollection<T> result;
+                CT val = TypedValue;
+
+                if (val == null)
+                {
+                    result = new ObservableCollection<T>();
+                }
+                else
+                {
+                    result = val.ObservableCollection;
+                }
+
                 return result;
             }
         }
 
         public void SetListSource(IListSource value)
+        {
+            CT val = TypedValue;
+            if (val == null)
+                return;
+
+            val.SetListSource(value);
+            _listSource = null;
+        }
+
+        public void SetListSource(CT value)
         {
             CT val = TypedValue;
             if (val == null)
@@ -179,7 +200,18 @@ namespace DRM.PropBagWPF
         // because some implementations may need additional input.
         private IList MakeIListWrapper(object component)
         {
-            return TypedValue?.ObservableCollection;
+            IList result = ObservableCollection;
+            //CT val = TypedValue;
+            //if (val == null)
+            //{
+            //    result = new ObservableCollection<T>();
+            //}
+            //else
+            //{
+            //    result = TypedValue.ObservableCollection;
+            //}
+
+            return result;
         }
 
         #endregion

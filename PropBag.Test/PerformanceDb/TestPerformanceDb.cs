@@ -48,6 +48,18 @@ namespace PropBagLib.Tests.PerformanceDb
         }
 
         [Test]
+        public void Can_ConvertIObsColl_to_ObservableColl()
+        {
+            ObservableCollection<int> ocIn = new ObservableCollection<int>();
+
+            IObsCollection<int> dest;
+
+            dest = (IObsCollection<int>) ocIn;
+
+            ObservableCollection<int> ocOut = (ObservableCollection<int>) dest;
+        }
+
+        [Test]
         public void A_ReadIntoMappedArray()
         {
             // This is run first, to get the database "fired up."

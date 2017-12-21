@@ -186,7 +186,7 @@ namespace DRM.PropBagWPF
                     if (uc is TypeInfoField tif)
                     {
                         Type propertyType = GetTypeFromInfoField(tif, pi.PropKind, pi.PropertyType, out Type itemType);
-                        if (pi.PropKind == PropKindEnum.Collection)
+                        if (propFactory.IsPropACollection(pi.PropKind))
                         {
                             rpi.CollectionType = propertyType;
                             rpi.ItemType = itemType;
@@ -293,24 +293,45 @@ namespace DRM.PropBagWPF
             switch (propKind)
             {
                 case PropKindEnum.Prop:
-                    {
-                        itemType = null;
-                        return propertyType;
-                    }
-                case PropKindEnum.Collection:
-                    {
-                        return GetTypeFromCollInfoField(tif, out itemType);
-                    }
+                    itemType = null;
+                    return propertyType;
+
+                case PropKindEnum.Enumerable:
+                    goto case PropKindEnum.ObservableCollection;
+                case PropKindEnum.Enumerable_RO:
+                    goto case PropKindEnum.ObservableCollection;
+                case PropKindEnum.EnumerableTyped:
+                    goto case PropKindEnum.ObservableCollection;
+                case PropKindEnum.EnumerableTyped_RO:
+                    goto case PropKindEnum.ObservableCollection;
+
+                case PropKindEnum.ObservableCollection:
+                    return GetTypeFromCollInfoField(tif, out itemType);
+
+                case PropKindEnum.ObservableCollection_RO:
+                    goto case PropKindEnum.ObservableCollection;
+
+                //case PropKindEnum.ObservableCollectionFB:
+                //    break;
+                //case PropKindEnum.ObservableCollectionFB_RO:
+                //    break;
+
+                //case PropKindEnum.CollectionViewSource:
+                //    break;
+                //case PropKindEnum.CollectionViewSource_RO:
+                //    break;
+
                 case PropKindEnum.DataTable:
-                    {
-                        itemType = null;
-                        return typeof(DataTable);
-                    }
+                    itemType = null;
+                    return typeof(DataTable);
+
+                case PropKindEnum.DataTable_RO:
+                    goto case PropKindEnum.DataTable;
                 default:
-                    {
-                        throw new InvalidOperationException($"PropKind = {propKind} is not recognized or is not supported.");
-                    }
+                    throw new InvalidOperationException($"PropKind = {propKind} is not recognized or is not supported.");
+
             }
+
         }
 
         private Type GetTypeFromCollInfoField(TypeInfoField tif, out Type itemType)

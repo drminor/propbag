@@ -91,16 +91,16 @@ namespace DRM.ViewModelTools
 
         #region Private Methods
 
-        private PropModel GetPropModel(string resourceKey)
-        {
-            if (!HasPropModelLookupService)
-            {
-                throw new InvalidOperationException(NO_PROPMODEL_LOOKUP_SERVICES);
-            }
+        //private PropModel GetPropModel(string resourceKey)
+        //{
+        //    if (!HasPropModelLookupService)
+        //    {
+        //        throw new InvalidOperationException(NO_PROPMODEL_LOOKUP_SERVICES);
+        //    }
 
-            PropModel propModel = _propModelProvider.GetPropModel(resourceKey);
-            return propModel;
-        }
+        //    PropModel propModel = _propModelProvider.GetPropModel(resourceKey);
+        //    return propModel;
+        //}
 
         #endregion
     }

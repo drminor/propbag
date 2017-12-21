@@ -61,7 +61,8 @@ namespace DRM.TypeSafePropertyBag
 
         bool PropertyExists(string propertyName);
         bool TryGetPropType(string propertyName, out PropKindEnum propType);
-        bool TryGetListSource(string propertyName, Type itemType, out IListSource listSource);
+
+        //bool TryGetListSource(string propertyName, Type itemType, out IListSource listSource);
 
         bool SubscribeToPropChanged(PropertyChangedEventHandler handler, string propertyName, Type propertyType);
         bool UnsubscribeToPropChanged(PropertyChangedEventHandler handler, string propertyName, Type propertyType);

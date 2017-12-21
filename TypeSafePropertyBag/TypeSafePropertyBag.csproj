@@ -41,6 +41,9 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ObsCollection.cs" />
+    <Compile Include="PropInterfaces\IListSourceProvider.cs" />
+    <Compile Include="PropInterfaces\IObsCollection.cs" />
     <Compile Include="PropStoreKeys\IExplodedKey.cs" />
     <Compile Include="PropStoreKeys\ILevel2KeyManager.cs" />
     <Compile Include="PropStoreKeys\SimpleExKey.cs" />

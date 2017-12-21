@@ -21,6 +21,13 @@ namespace PropBagLib.Tests
             return pm;
         }
 
+        new public IProp<T> GetTypedProp<T>(string propertyName)
+        {
+            IProp<T> result = base.GetTypedProp<T>(propertyName);
+            return result;
+        }
+
+
         // Regular Property Definitions Used as a control
         public event PropertyChangedEventHandler PropertyChanged2;
 

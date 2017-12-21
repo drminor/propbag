@@ -12,14 +12,14 @@ using System.Collections;
 namespace DRM.PropBag.Collections
 {
 
-    public class CProp<CT,T> : PropTypedBase<CT>, ICProp<CT,T> where CT: IObsCollection<T>
+    public class CPropFB<CT,T> : PropTypedBase<CT>, ICPropFB<CT,T> where CT: ObservableCollection<T>
     {
-        public CProp(CT initalValue,
+        public CPropFB(CT initalValue,
             GetDefaultValueDelegate<CT> defaultValFunc,
             bool typeIsSolid,
             bool hasStore,
             Func<CT, CT, bool> comparer)
-            : base(typeof(CT), typeIsSolid, hasStore, true, comparer, defaultValFunc, PropKindEnum.ObservableCollection)
+            : base(typeof(CT), typeIsSolid, hasStore, true, comparer, defaultValFunc, PropKindEnum.ObservableCollectionFB)
         {
             if (hasStore)
             {
@@ -27,11 +27,11 @@ namespace DRM.PropBag.Collections
             }
         }
 
-        public CProp(GetDefaultValueDelegate<CT> defaultValFunc,
+        public CPropFB(GetDefaultValueDelegate<CT> defaultValFunc,
             bool typeIsSolid,
             bool hasStore,
             Func<CT, CT, bool> comparer)
-            : base(typeof(CT), typeIsSolid, hasStore, false, comparer, defaultValFunc, PropKindEnum.ObservableCollection)
+            : base(typeof(CT), typeIsSolid, hasStore, false, comparer, defaultValFunc, PropKindEnum.ObservableCollectionFB)
         {
             //if (hasStore)
             //{

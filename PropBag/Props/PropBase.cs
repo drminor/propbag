@@ -30,7 +30,7 @@ namespace DRM.PropBag
 
         public bool ValueIsDefined { get; protected set; }
         public abstract object TypedValueAsObject { get; }
-        public abstract IListSource ListSource { get; }
+        //public abstract IListSource ListSource { get; }
 
         #endregion
 

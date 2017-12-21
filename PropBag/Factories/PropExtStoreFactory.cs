@@ -50,7 +50,7 @@ namespace DRM.PropBag
         #region Collection-type property creators
 
         // TODO: Implement Create Collection With Initial Value.
-        public override ICPropPrivate<CT, T> Create<CT, T>(
+        public override ICProp<CT, T> Create<CT, T>(
             CT initialValue,
             PropNameType propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
@@ -62,7 +62,7 @@ namespace DRM.PropBag
         }
 
         // TODO: Implement Create Collection With No Value.
-        public override ICPropPrivate<CT, T> CreateWithNoValue<CT, T>(
+        public override ICProp<CT, T> CreateWithNoValue<CT, T>(
             PropNameType propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
             Func<CT, CT, bool> comparer = null)

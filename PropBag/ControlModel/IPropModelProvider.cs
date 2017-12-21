@@ -13,5 +13,6 @@ namespace DRM.PropBag.ControlModel
         // These would require adding a reference to PresentationFramework.
         //PropModel GetPropModel(ResourceDictionary rd, string resourceKey);
         //PropModel GetPropModel(ResourceDictionary rd, string resourceKey, IPropFactory propFactory);
+
     }
 }

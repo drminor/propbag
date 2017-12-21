@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace DRM.TypeSafePropertyBag
 {
@@ -21,15 +22,21 @@ namespace DRM.TypeSafePropertyBag
 
         IProvideDelegateCaches DelegateCacheProvider { get; }
 
-        #region Collection-Type Methods Methods
+        bool IsPropACollection(PropKindEnum propKind);
 
-        ICPropPrivate<CT, T> Create<CT, T>(CT initialValue, PropNameType propertyName, object extraInfo = null,
-            bool hasStorage = true, bool typeIsSolid = true,
-            Func<CT, CT, bool> comparer = null) where CT : IEnumerable<T>;
+        #region Enumerable-Type Methods
 
-        ICPropPrivate<CT, T> CreateWithNoValue<CT, T>(PropNameType propertyName, object extraInfo = null,
+        ICProp<CT, T> Create<CT, T>(CT initialValue, PropNameType propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
-            Func<CT, CT, bool> comparer = null) where CT : IEnumerable<T>;
+            Func<CT, CT, bool> comparer = null) where CT : IObsCollection<T>;
+
+        ICPropFB<CT, T> CreateFB<CT, T>(CT initialValue, PropNameType propertyName, object extraInfo = null,
+            bool hasStorage = true, bool typeIsSolid = true,
+            Func<CT, CT, bool> comparer = null) where CT : ObservableCollection<T>;
+
+        ICProp<CT, T> CreateWithNoValue<CT, T>(PropNameType propertyName, object extraInfo = null,
+            bool hasStorage = true, bool typeIsSolid = true,
+            Func<CT, CT, bool> comparer = null) where CT : IObsCollection<T>;
 
         #endregion
 

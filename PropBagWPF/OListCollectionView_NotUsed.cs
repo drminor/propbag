@@ -44,9 +44,14 @@ namespace DRM.PropBagWPF
             }
         }
 
-        public void SetListSource(ObservableCollection<T> source)
+        public void SetListSource(IOListCollectionView<T> source)
         {
-            _ourList = source;
+            SetListSource((ICView<T>)source);
+        }
+
+        public void SetListSource(ICView<T> source)
+        {
+            _ourList = source.ObservableCollection;
         }
 
         IEnumerator<T> IEnumerable<T>.GetEnumerator()

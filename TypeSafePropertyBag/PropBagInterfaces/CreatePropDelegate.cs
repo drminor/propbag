@@ -2,24 +2,24 @@
 
 namespace DRM.TypeSafePropertyBag
 {
-    #region Collection-Type Methods
+    #region Enumerable-Type Methods
 
     // From Object
-    public delegate IProp CreateCPropFromObjectDelegate(IPropFactory propFactory,
+    public delegate IProp CreateEPropFromObjectDelegate(IPropFactory propFactory,
         object value,
         string propertyName, object extraInfo,
         bool hasStorage, bool isTypeSolid,
         Delegate comparer, bool useRefEquality);
 
     // From String
-    public delegate IProp CreateCPropFromStringDelegate(IPropFactory propFactory,
+    public delegate IProp CreateEPropFromStringDelegate(IPropFactory propFactory,
         string value, bool useDefault,
         string propertyName, object extraInfo,
         bool hasStorage, bool isTypeSolid,
         Delegate comparer, bool useRefEquality);
 
     // With No Value
-    public delegate IProp CreateCPropWithNoValueDelegate(IPropFactory propFactory,
+    public delegate IProp CreateEPropWithNoValueDelegate(IPropFactory propFactory,
         string propertyName, object extraInfo,
         bool hasStorage, bool isTypeSolid,
         Delegate comparer, bool useRefEquality);

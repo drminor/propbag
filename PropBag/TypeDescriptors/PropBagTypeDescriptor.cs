@@ -110,6 +110,8 @@ namespace DRM.PropBag.TypeDescriptors
             return descriptors;
         }
 
+
+
         #region PropertyDescriptor Method Overrides
 
         public override bool CanResetValue(object component)
