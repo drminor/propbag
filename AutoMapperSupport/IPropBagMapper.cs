@@ -15,6 +15,8 @@ namespace DRM.PropBag.AutoMapperSupport
 
         IEnumerable<TDestination> MapToDestination(IEnumerable<TSource> listOfSources);
         IEnumerable<TSource> MapToSource(IEnumerable<TDestination> listOfDestinations);
+
+        TDestination GetNewDestination();
     }
 
     public interface IPropBagMapperGen

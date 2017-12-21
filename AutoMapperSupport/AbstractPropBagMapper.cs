@@ -127,7 +127,7 @@ namespace DRM.PropBag.AutoMapperSupport
 
         #region Create Instance of TDestination
 
-        private TDestination GetNewDestination()
+        public TDestination GetNewDestination()
         {
             TDestination result;
 
