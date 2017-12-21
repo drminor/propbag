@@ -10,7 +10,7 @@ namespace DRM.PropBag
     using PropIdType = UInt32;
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
 
-    public abstract class PropTypedBase<T> : PropBase, IPropPrivate<T>
+    public abstract class PropTypedBase<T> : PropBase, IProp<T>
     {
         #region Public and Protected Properties
 
@@ -22,7 +22,21 @@ namespace DRM.PropBag
 
         public override object TypedValueAsObject => (object)TypedValue;
 
-        public override ValPlusType GetValuePlusType() => new ValPlusType(TypedValue, Type);
+        public override ValPlusType GetValuePlusType()
+        {
+            ValPlusType result;
+
+            if(HasStore)
+            {
+                result = ValueIsDefined ? new ValPlusType(true, TypedValue, Type) : new ValPlusType(Type);
+            }
+            else
+            {
+                result = new ValPlusType(Type);
+            }
+
+            return result;
+        }
 
         #endregion
 

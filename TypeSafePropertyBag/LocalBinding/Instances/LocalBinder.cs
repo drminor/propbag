@@ -303,7 +303,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
                     // Let's try to get the value of the property for which we just started listening to changes.
                     if (GetChildProp(next, propBag, pathComp, out StoreNodeProp child))
                     {
-                        if (UpdateTarget(bindingTarget, child))
+                        if (UpdateTargetWithStartingValue(bindingTarget, child))
                         {
                             System.Diagnostics.Debug.WriteLine($"The target has been updated during refresh. " +
                                 $"Target: {((IPropBag)propBag).GetClassName()}, {pathComp}");
@@ -345,7 +345,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
                 if (GetChildProp(next, propBag, pathComp, out StoreNodeProp child))
                 {
-                    if (UpdateTarget(bindingTarget, child))
+                    if (UpdateTargetWithStartingValue(bindingTarget, child))
                     {
                         System.Diagnostics.Debug.WriteLine($"The target has been updated during refresh. " +
                             $"Target: {((IPropBag)propBag).GetClassName()}, {pathComp}");
@@ -734,7 +734,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
         #region Update Target
 
-        private bool UpdateTarget(WeakReference<IPropBagInternal> bindingTarget, StoreNodeProp sourcePropNode)
+        private bool UpdateTargetWithStartingValue(WeakReference<IPropBagInternal> bindingTarget, StoreNodeProp sourcePropNode)
         {
             bool result;
             if (sourcePropNode.Parent.PropBagProxy.PropBagRef.TryGetTarget(out IPropBagInternal propBag))
@@ -745,10 +745,18 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
                     if (propBagNode.TryGetChild(propId, out StoreNodeProp child))
                     {
-                        IPropDataInternal propData = child.Int_PropData;
-                        T newValue = (T)propData.TypedProp.TypedValueAsObject;
+                        //IPropDataInternal propData = child.Int_PropData;
+                        IProp typedProp = child.Int_PropData.TypedProp;
 
-                        result = UpdateTarget(bindingTarget, newValue);
+                        if (!(typedProp.HasStore))
+                        {
+                            // This property has no backing store, there is no concept of a starting value. (Propably used to send messages.)
+                            result = false;
+                        }
+                        else
+                        {
+                            result = UpdateTarget(bindingTarget, (T)typedProp.TypedValueAsObject);
+                        }
                     }
                     else
                     {
