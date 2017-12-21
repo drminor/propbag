@@ -8,31 +8,31 @@ using System.Linq;
 
 namespace DRM.PropBag.Collections
 {
-    public class PbListSourceProvider<CT, PT, T> : IListSourceProvider<CT, PT, T> where PT : ICPropPrivate<CT, T> where CT : IEnumerable<T>
+    public class PbListSourceProvider<CT, T> : IListSourceProvider<CT, T> /*where PT : IETypedProp<CT, T>*/ where CT : IObsCollection<T>
     {
-        public Func<ICPropPrivate<CT, T>, ObservableCollection<T>> ObservableCollectionGetter { get; }
-        public Func<ICPropPrivate<CT, T>, ReadOnlyObservableCollection<T>> ReadOnlyObservableCollectionGetter { get; }
+        public Func<ICProp<CT, T>, ObservableCollection<T>> ObservableCollectionGetter { get; }
+        public Func<IReadOnlyCProp<CT, T>, ReadOnlyObservableCollection<T>> ReadOnlyObservableCollectionGetter { get; }
 
-        public Func<ICPropPrivate<CT, T>, IEnumerable<T>> IEnumerableGetter { get; }
+        public Func<ICProp<CT, T>, IEnumerable<T>> IEnumerableGetter { get; }
         public bool UseObservable { get; }
         public bool IsReadOnly { get; }
 
         #region Constructor
-        public PbListSourceProvider(Func<ICPropPrivate<CT, T>, ObservableCollection<T>> observableCollectionGetter)
+        public PbListSourceProvider(Func<ICProp<CT, T>, ObservableCollection<T>> observableCollectionGetter)
         {
             UseObservable = true;
             IsReadOnly = false;
             ObservableCollectionGetter = observableCollectionGetter ?? throw new ArgumentNullException(nameof(observableCollectionGetter));
         }
 
-        public PbListSourceProvider(Func<ICPropPrivate<CT, T>, ReadOnlyObservableCollection<T>> readOnlyObservableCollectionGetter)
+        public PbListSourceProvider(Func<IReadOnlyCProp<CT, T>, ReadOnlyObservableCollection<T>> readOnlyObservableCollectionGetter)
         {
             UseObservable = true;
             IsReadOnly = true;
             ReadOnlyObservableCollectionGetter = readOnlyObservableCollectionGetter ?? throw new ArgumentNullException(nameof(readOnlyObservableCollectionGetter));
         }
 
-        public PbListSourceProvider(Func<ICPropPrivate<CT, T>, IEnumerable<T>> enumerableGetter, bool isReadOnly)
+        public PbListSourceProvider(Func<ICProp<CT, T>, IEnumerable<T>> enumerableGetter, bool isReadOnly)
         {
             UseObservable = false;
             IsReadOnly = isReadOnly;
@@ -43,7 +43,7 @@ namespace DRM.PropBag.Collections
         private ObservableCollection<T> _theList;
         private ReadOnlyObservableCollection<T> _theReadOnlyList;
 
-        public ObservableCollection<T> GetTheList(ICPropPrivate<CT, T> component)
+        public ObservableCollection<T> GetTheList(ICProp<CT, T> component)
         {
             if (IsReadOnly)
             {
@@ -52,37 +52,41 @@ namespace DRM.PropBag.Collections
 
             if (_theList == null)
             {
-                if (UseObservable)
-                {
-                    _theList = ObservableCollectionGetter(component);
-                }
-                else
-                {
-                    _theList = new ObservableCollection<T>(IEnumerableGetter(component));
-                }
+                //if (UseObservable)
+                //{
+                //    _theList = ObservableCollectionGetter(component);
+                //}
+                //else
+                //{
+                //    _theList = new ObservableCollection<T>(IEnumerableGetter(component));
+                //}
+                _theList = new ObservableCollection<T>(IEnumerableGetter(component));
+
             }
             return _theList;
         }
 
-        public ReadOnlyObservableCollection<T> GetTheReadOnlyList(ICPropPrivate<CT, T> component)
+        public ReadOnlyObservableCollection<T> GetTheReadOnlyList(ICProp<CT, T> component)
         {
             if (_theReadOnlyList == null)
             {
                 if(!IsReadOnly)
                 {
                     // Provide a read-only wrapper around the ObservableCollection.
-                    _theReadOnlyList = new ReadOnlyObservableCollection<T>(GetTheList(component));
+                    _theReadOnlyList =  new ReadOnlyObservableCollection<T>(GetTheList(component));
                 }
                 else
                 {
-                    if (UseObservable)
-                    {
-                        _theReadOnlyList = ReadOnlyObservableCollectionGetter(component);
-                    }
-                    else
-                    {
-                        _theReadOnlyList = new ReadOnlyObservableCollection<T>(new ObservableCollection<T>(IEnumerableGetter(component)));
-                    }
+                    //if (UseObservable)
+                    //{
+                    //    _theReadOnlyList = ReadOnlyObservableCollectionGetter(component);
+                    //}
+                    //else
+                    //{
+                    //    _theReadOnlyList = (IReadOnlyObsCollection<T>) new ReadOnlyObservableCollection<T>(new ObservableCollection<T>(IEnumerableGetter(component)));
+                    //}
+                    _theReadOnlyList = new ReadOnlyObservableCollection<T>(new ObservableCollection<T>(IEnumerableGetter(component)));
+
                 }
             }
             return _theReadOnlyList;
