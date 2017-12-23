@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace DRM.TypeSafePropertyBag
 {
@@ -8,7 +7,7 @@ namespace DRM.TypeSafePropertyBag
     using PropIdType = UInt32;
     using PropNameType = String;
 
-    public class SimpleLevel2KeyMan : IL2KeyMan<PropIdType, PropNameType>
+    internal class SimpleLevel2KeyMan : IL2KeyMan<PropIdType, PropNameType>
     {
         #region Private Members
 

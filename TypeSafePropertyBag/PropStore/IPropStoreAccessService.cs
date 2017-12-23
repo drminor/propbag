@@ -6,7 +6,11 @@ namespace DRM.TypeSafePropertyBag
 {
     public interface IPropStoreAccessService<L2T, L2TRaw> : IRegisterSubscriptions<L2T>, IRegisterBindings<L2T>, IDisposable
     {
-        IL2KeyMan<L2T,L2TRaw> Level2KeyManager { get; }
+        int PropertyCount { get; }
+
+        bool TryGetPropId(L2TRaw propertyName, out L2T propId);
+        bool TryGetPropName(L2T propertyId, out L2TRaw propertyName);
+        L2T Add(L2TRaw propertyName);
 
         // IDictionary-Like Methods
         IPropData this[IPropBag propBag, L2T propId] { get; }

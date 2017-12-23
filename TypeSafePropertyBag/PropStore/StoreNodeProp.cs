@@ -6,19 +6,10 @@ using System.Threading.Tasks;
 
 namespace DRM.TypeSafePropertyBag
 {
-    #region Type Aliases 
-
     using CompositeKeyType = UInt64;
     using ObjectIdType = UInt64;
-
     using PropIdType = UInt32;
-    using PropNameType = String;
-
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
-
-    using L2KeyManType = IL2KeyMan<UInt32, String>;
-
-    #endregion
 
     internal class StoreNodeProp : IDisposable
     {
@@ -91,7 +82,5 @@ namespace DRM.TypeSafePropertyBag
         }
 
         #endregion
-
-
     }
 }

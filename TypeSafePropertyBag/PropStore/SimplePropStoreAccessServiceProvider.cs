@@ -18,6 +18,7 @@ namespace DRM.TypeSafePropertyBag
 
     using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
     using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
+    using PSAccessServiceInternalType = IPropStoreAccessServiceInternal<UInt32, String>;
     using PSCloneServiceType = IProvidePropStoreCloneService<UInt32, String>;
 
     #endregion
@@ -165,12 +166,8 @@ namespace DRM.TypeSafePropertyBag
             if(sourceAccessService is IHaveTheStoreNode nodeProvider)
             {
                 sourceStoreNode = nodeProvider.PropStoreNode;
-                //if (!sourceStoreNode.PropBagProxy.PropBagRef.TryGetTarget(out IPropBagInternal propBag))
-                //{
-                //    throw new ObjectDisposedException($"The {nameof(StoreNodeBag)} with CKey: {sourceStoreNode.CompKey} holds a reference to a PropBag that is no longer alive.");
-                //}
 
-                if (sourcePropBag.ItsStoreAccessor.Level2KeyManager is SimpleLevel2KeyMan sourceLevel2KeyMan)
+                if (((PSAccessServiceInternalType)sourcePropBag.ItsStoreAccessor).Level2KeyManager is SimpleLevel2KeyMan sourceLevel2KeyMan)
                 {
                     L2KeyManType level2KeyManager_newCopy = new SimpleLevel2KeyMan(sourceLevel2KeyMan);
 

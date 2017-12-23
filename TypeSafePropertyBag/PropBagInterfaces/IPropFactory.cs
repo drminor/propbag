@@ -1,16 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 namespace DRM.TypeSafePropertyBag
 {
-    #region Type Aliases
-    using PropIdType = UInt32;
     using PropNameType = String;
-
-    using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
     using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
-    #endregion
 
     public interface IPropFactory 
     {
@@ -21,9 +15,7 @@ namespace DRM.TypeSafePropertyBag
         ResolveTypeDelegate TypeResolver { get; }
         IConvertValues ValueConverter { get; }
 
-        //PSAccessServiceProviderType PropStoreAccessServiceProvider { get; }
         PSAccessServiceType CreatePropStoreService(IPropBagInternal propBag);
-
 
         IProvideDelegateCaches DelegateCacheProvider { get; }
 

@@ -11,8 +11,9 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
     using PropNameType = String;
 
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
-    using L2KeyManType = IL2KeyMan<UInt32, String>;
+
     using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
+    using PSAccessServiceInternalType = IPropStoreAccessServiceInternal<UInt32, String>;
 
     #endregion
 
@@ -95,20 +96,13 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             _bindingTarget = ownerPropId;
             _bindingInfo = bindingInfo;
 
-            // Get the PropStore (Tree) Node for the IPropBag object hosting the property that is the target of the binding.
+            // Get the PropStore Node for the IPropBag object hosting the property that is the target of the binding.
             _ourNode = GetPropBagNode(propStoreAccessService);
 
-            _targetObject = _ourNode.PropBagProxy.PropBagRef;
-
             PropIdType propId = _bindingTarget.Level2Key;
-            if (propStoreAccessService.Level2KeyManager.TryGetFromCooked(propId, out string propertyName))
-            {
-                _propertyName = propertyName;
-            }
-            else
-            {
-                throw new InvalidOperationException("Cannot retrieve the Target's property name from the TargetPropId.");
-            }
+            _propertyName = GetPropertyName(propStoreAccessService, propId);
+
+            _targetObject = _ourNode.PropBagProxy.PropBagRef;
 
             _pathElements = GetPathElements(_bindingInfo, out _isPathAbsolute, out _firstNamedStepIndex);
 
@@ -128,15 +122,28 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
         private StoreNodeBag GetPropBagNode(PSAccessServiceType propStoreAccessService)
         {
-            if (propStoreAccessService is IHaveTheStoreNode storeKeyProvider)
+            if (propStoreAccessService is IHaveTheStoreNode storeNodeProvider)
             {
-                StoreNodeBag propStoreNode = storeKeyProvider.PropStoreNode;
+                StoreNodeBag propStoreNode = storeNodeProvider.PropStoreNode;
                 return propStoreNode;
             }
             else
             {
                 throw new InvalidOperationException($"The {nameof(propStoreAccessService)} does not implement the {nameof(IHaveTheStoreNode)} interface.");
             }
+        }
+
+        private PropNameType GetPropertyName(PSAccessServiceType propStoreAccessService, PropIdType propId)
+        {
+            if(propStoreAccessService.TryGetPropName(propId, out PropNameType propertyName))
+            {
+                return propertyName;
+            }
+            else
+            {
+                throw new InvalidOperationException("Cannot retrieve the Target's property name from the TargetPropId.");
+            }
+
         }
 
         #endregion
@@ -555,7 +562,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
         private bool GetChildProp(StoreNodeBag objectNode, IPropBagInternal propBag, string propertyName, out StoreNodeProp child)
         {
-            PropIdType propId = propBag.ItsStoreAccessor.Level2KeyManager.FromRaw(propertyName);
+            PropIdType propId = ((PSAccessServiceInternalType)propBag.ItsStoreAccessor).Level2KeyManager.FromRaw(propertyName);
             bool result = objectNode.TryGetChild(propId, out child);
             return result;
         }
@@ -737,46 +744,67 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
         private bool UpdateTargetWithStartingValue(WeakReference<IPropBagInternal> bindingTarget, StoreNodeProp sourcePropNode)
         {
             bool result;
-            if (sourcePropNode.Parent.PropBagProxy.PropBagRef.TryGetTarget(out IPropBagInternal propBag))
+            IProp typedProp = sourcePropNode.Int_PropData.TypedProp;
+
+            if (!(typedProp.HasStore))
             {
-                if (propBag.ItsStoreAccessor.Level2KeyManager.TryGetFromRaw(PropertyName, out PropIdType propId))
-                {
-                    StoreNodeBag propBagNode = sourcePropNode.Parent;
-
-                    if (propBagNode.TryGetChild(propId, out StoreNodeProp child))
-                    {
-                        //IPropDataInternal propData = child.Int_PropData;
-                        IProp typedProp = child.Int_PropData.TypedProp;
-
-                        if (!(typedProp.HasStore))
-                        {
-                            // This property has no backing store, there is no concept of a starting value. (Propably used to send messages.)
-                            result = false;
-                        }
-                        else
-                        {
-                            result = UpdateTarget(bindingTarget, (T)typedProp.TypedValueAsObject);
-                        }
-                    }
-                    else
-                    {
-                        System.Diagnostics.Debug.WriteLine($"PropBagNode.TryGetChild failed to access the child node with property name:{PropertyName}.");
-                        result = false;
-                    }
-                }
-                else
-                {
-                    System.Diagnostics.Debug.WriteLine($"Update Target could not find that property by name: {PropertyName}.");
-                    result = false;
-                }
+                // This property has no backing store, there is no concept of a starting value. (Propably used to send messages.)
+                result = false;
             }
             else
             {
-                System.Diagnostics.Debug.WriteLine("Our weak reference to the binding target holds a reference to an object 'no longer with us.'");
-                result = false;
+                T newValue = (T)typedProp.TypedValueAsObject;
+                result = UpdateTarget(bindingTarget, newValue);
             }
             return result;
         }
+
+
+
+        //private bool UpdateTargetWithStartingValue(WeakReference<IPropBagInternal> bindingTarget, StoreNodeProp sourcePropNode)
+        //{
+        //    bool result;
+        //    if (sourcePropNode.Parent.PropBagProxy.PropBagRef.TryGetTarget(out IPropBagInternal propBag))
+        //    {
+        //        if (propBag.ItsStoreAccessor.Level2KeyManager.TryGetFromRaw(PropertyName, out PropIdType propId))
+        //        {
+        //            StoreNodeBag propBagNode = sourcePropNode.Parent;
+
+        //            if (propBagNode.TryGetChild(propId, out StoreNodeProp child))
+        //            {
+        //                //IPropDataInternal propData = child.Int_PropData;
+        //                IProp typedProp = child.Int_PropData.TypedProp;
+
+        //                if (!(typedProp.HasStore))
+        //                {
+        //                    // This property has no backing store, there is no concept of a starting value. (Propably used to send messages.)
+        //                    result = false;
+        //                }
+        //                else
+        //                {
+        //                    result = UpdateTarget(bindingTarget, (T)typedProp.TypedValueAsObject);
+        //                }
+        //            }
+        //            else
+        //            {
+        //                System.Diagnostics.Debug.WriteLine($"PropBagNode.TryGetChild failed to access the child node with property name:{PropertyName}.");
+        //                result = false;
+        //            }
+        //        }
+        //        else
+        //        {
+        //            System.Diagnostics.Debug.WriteLine($"Update Target could not find that property by name: {PropertyName}.");
+        //            result = false;
+        //        }
+        //    }
+        //    else
+        //    {
+        //        System.Diagnostics.Debug.WriteLine("Our weak reference to the binding target holds a reference to an object 'no longer with us.'");
+        //        result = false;
+        //    }
+        //    return result;
+        //}
+
 
         private bool UpdateTarget(WeakReference<IPropBagInternal> bindingTarget, T newValue)
         {

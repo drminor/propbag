@@ -1,23 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace DRM.TypeSafePropertyBag
 {
-    #region Type Aliases 
     using CompositeKeyType = UInt64;
     using ObjectIdType = UInt64;
-
     using PropIdType = UInt32;
-    using PropNameType = String;
-
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
-
-    using L2KeyManType = IL2KeyMan<UInt32, String>;
-    #endregion
 
     internal class StoreNodeBag : INotifyParentNodeChanged, IDisposable
     {
@@ -86,14 +77,14 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        #endregion
-
         public IEnumerable<StoreNodeProp> Children => _children.Values;
 
         public bool ChildExists(ExKeyT cKey)
         {
             return _children.ContainsKey(cKey);
         }
+
+        #endregion
 
         #region Child Accessors
 
@@ -251,6 +242,5 @@ namespace DRM.TypeSafePropertyBag
         }
 
         #endregion
-
     }
 }

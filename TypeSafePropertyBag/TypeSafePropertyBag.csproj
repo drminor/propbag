@@ -49,6 +49,8 @@
     <Compile Include="PropStoreKeys\ILevel2KeyManager.cs" />
     <Compile Include="PropStoreKeys\SimpleExKey.cs" />
     <Compile Include="PropStoreKeys\SimpleLevel2KeyMan.cs" />
+    <Compile Include="PropStore\IPropStoreAccessServiceInternal.cs" />
+    <Compile Include="PropStore\Unsubscriber.cs" />
     <Compile Include="TypeConverters\ConverterDelegates.cs" />
     <Compile Include="DoSetDelegate.cs" />
     <Compile Include="Fundamentals\TwoTypesDelegateCache.cs" />

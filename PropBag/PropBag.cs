@@ -18,7 +18,7 @@ using System.Windows;
 namespace DRM.PropBag
 {
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
-    using L2KeyManType = IL2KeyMan<UInt32, String>;
+    //using L2KeyManType = IL2KeyMan<UInt32, String>;
     using PropIdType = UInt32;
     using PropNameType = String;
 
@@ -57,18 +57,14 @@ namespace DRM.PropBag
         private PSAccessServiceType _ourStoreAccessor { get; set; }
 
         // We are responsible for these
-        private ITypeSafePropBagMetaData _ourMetaData;
+        private ITypeSafePropBagMetaData _ourMetaData { get; set; }
         protected virtual ITypeSafePropBagMetaData OurMetaData { get { return _ourMetaData; } set { _ourMetaData = value; } }
-        private PropBagTypeSafetyMode _typeSafetyMode { get; set; }
+        private PropBagTypeSafetyMode _typeSafetyMode { get; }
 
         private object _sync = new object();
 
-        //private PB_EventHolder _eventHolder { get; set; }
-        //private readonly bool _notifyWhenOldIsUndefined;
-
         // These fulfill the IPropBagInternal contract
         public PSAccessServiceType ItsStoreAccessor => _ourStoreAccessor;
-        public L2KeyManType Level2KeyManager => _ourStoreAccessor.Level2KeyManager;
 
         #endregion
 
@@ -160,31 +156,6 @@ namespace DRM.PropBag
 
         #region Constructor
 
-        ///// <summary>
-        ///// This is constructor creates an instance with minimal resources, and is not operational.
-        ///// It can be called in those cases where an instance is required as a target to use when calling
-        ///// a method from the System.Reflection namespace.
-        ///// </summary>
-        ///// <param name="dummy"></param>
-        //public PropBag(byte dummy)
-        //{
-        //    _typeSafetyMode = PropBagTypeSafetyMode.None;
-        //    _propFactory = null;
-        //    _ourStoreAccessor = null;
-        //    OurMetaData = BuildMetaData(this._typeSafetyMode, classFullName: null, propFactory: null);
-        //    _eventHolder = null;
-        //}
-
-        //protected PropBag()
-        //    : this(PropBagTypeSafetyMode.None, null, null) { }
-
-        //protected PropBag(PropBagTypeSafetyMode typeSafetyMode)
-        //    : this(typeSafetyMode, null, null) { }
-
-        //// TODO: remove this constructor.
-        //protected PropBag(PropBagTypeSafetyMode typeSafetyMode, IPropFactory propFactory)
-        //    : this(typeSafetyMode, propFactory, null) { }
-
         /// <summary>
         /// 
         /// </summary>
@@ -194,7 +165,7 @@ namespace DRM.PropBag
             : this(pm.TypeSafetyMode, propFactory ?? pm.PropFactory, fullClassName)
         {
             Hydrate(pm);
-            int testc = _ourStoreAccessor.Level2KeyManager.PropertyCount;
+            int testc = _ourStoreAccessor.PropertyCount;
         }
 
         protected PropBag(IPropBag copySource)
@@ -210,12 +181,7 @@ namespace DRM.PropBag
 
             _ourMetaData = BuildMetaData(_typeSafetyMode, fullClassName, _propFactory);
 
-            _ourStoreAccessor = _propFactory./*PropStoreAccessServiceProvider.*/CreatePropStoreService(this);
-
-            //_sync = new object();
-            //_eventHolder = new PB_EventHolder();
-
-            //_notifyWhenOldIsUndefined = false;
+            _ourStoreAccessor = _propFactory.CreatePropStoreService(this);
         }
 
         protected ITypeSafePropBagMetaData BuildMetaData(PropBagTypeSafetyMode typeSafetyMode, string classFullName, IPropFactory propFactory)
@@ -2302,7 +2268,7 @@ namespace DRM.PropBag
 
         private bool TryGetPropId(PropNameType propertyName, out PropIdType propId)
         {
-            bool result = _ourStoreAccessor.Level2KeyManager.TryGetFromRaw(propertyName, out propId);
+            bool result = _ourStoreAccessor.TryGetPropId(propertyName, out propId);
             return result;
         }
 
@@ -2317,7 +2283,7 @@ namespace DRM.PropBag
         private PropIdType AddPropId(PropNameType propertyName)
         {
             // Register new propertyName and get an exploded key.
-            PropIdType propId = _ourStoreAccessor.Level2KeyManager.Add(propertyName);
+            PropIdType propId = _ourStoreAccessor.Add(propertyName);
 
             return propId;
         }
@@ -2411,7 +2377,7 @@ namespace DRM.PropBag
                         _ourStoreAccessor.Dispose();
                         _ourStoreAccessor = null;
 
-                        OurMetaData = null;
+                        _ourMetaData = null;
                         _propFactory = null;
                         disposedValue = true;
                     }
