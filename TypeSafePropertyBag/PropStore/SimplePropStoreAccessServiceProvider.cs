@@ -1,16 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Collections.Concurrent;
-using System.Threading;
 
 namespace DRM.TypeSafePropertyBag
 {
-    #region Type Aliases
     using CompositeKeyType = UInt64;
     using ObjectIdType = UInt64;
-    using PropIdType = UInt32;
-    using PropNameType = String;
 
     using L2KeyManType = IL2KeyMan<UInt32, String>;
 
@@ -20,8 +15,6 @@ namespace DRM.TypeSafePropertyBag
     using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
     using PSAccessServiceInternalType = IPropStoreAccessServiceInternal<UInt32, String>;
     using PSCloneServiceType = IProvidePropStoreCloneService<UInt32, String>;
-
-    #endregion
 
     public class SimplePropStoreAccessServiceProvider : PSAccessServiceProviderType, PSCloneServiceType
     {
