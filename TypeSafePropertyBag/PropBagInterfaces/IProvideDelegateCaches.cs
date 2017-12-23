@@ -21,5 +21,8 @@ namespace DRM.TypeSafePropertyBag
         TwoTypesDelegateCache<CreateEPropWithNoValueDelegate> CreateCPropWithNoValCache { get; }
 
         TwoTypesDelegateCache<CreateEPropFromObjectDelegate> CreateCPropFromObjectCache { get; }
+
+        
+        TwoTypesDelegateCache<CreateCVSPropDelegate> CreateCVSPropCache { get; }
     }
 }

@@ -40,7 +40,6 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Caches\DelegateCache_Moved.cs" />
     <Compile Include="Caches\SimpleDelegateCacheProvider.cs" />
     <Compile Include="Caches\StaticTConverter.cs" />
     <Compile Include="ControlModel\DeriveFromClassField_NotUsed.cs" />
@@ -115,6 +114,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="TopLevelObjectReferences.md" />
     <None Include="XMLModel\PropBagModel.dtd" />
     <None Include="XMLModel\PropBagModel.xsd">
       <SubType>Designer</SubType>

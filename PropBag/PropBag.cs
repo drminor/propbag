@@ -21,9 +21,11 @@ namespace DRM.PropBag
     using L2KeyManType = IL2KeyMan<UInt32, String>;
     using PropIdType = UInt32;
     using PropNameType = String;
+
+    using IRegisterBindingsFowarderType = IRegisterBindingsForwarder<UInt32>;
+
     using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
     using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
-    using SubCacheType = ICacheSubscriptions<UInt32>;
 
     #region Summary and Remarks
 
@@ -46,7 +48,7 @@ namespace DRM.PropBag
 
     #endregion
 
-    public partial class PropBag : IPropBag, IPropBagInternal
+    public partial class PropBag : IPropBag, IPropBagInternal, IRegisterBindingsFowarderType
     {
         #region Member Declarations
 
@@ -208,7 +210,7 @@ namespace DRM.PropBag
 
             _ourMetaData = BuildMetaData(_typeSafetyMode, fullClassName, _propFactory);
 
-            _ourStoreAccessor = _propFactory.PropStoreAccessServiceProvider.CreatePropStoreService(this);
+            _ourStoreAccessor = _propFactory./*PropStoreAccessServiceProvider.*/CreatePropStoreService(this);
 
             //_sync = new object();
             //_eventHolder = new PB_EventHolder();
@@ -216,10 +218,10 @@ namespace DRM.PropBag
             //_notifyWhenOldIsUndefined = false;
         }
 
-        protected TypeSafePropBagMetaData BuildMetaData(PropBagTypeSafetyMode typeSafetyMode, string classFullName, IPropFactory propFactory)
+        protected ITypeSafePropBagMetaData BuildMetaData(PropBagTypeSafetyMode typeSafetyMode, string classFullName, IPropFactory propFactory)
         {
             classFullName = classFullName ?? GetFullTypeNameOfThisInstance();
-            TypeSafePropBagMetaData result = new TypeSafePropBagMetaData(classFullName, typeSafetyMode, propFactory);
+            ITypeSafePropBagMetaData result = new TypeSafePropBagMetaData(classFullName, typeSafetyMode, propFactory);
             return result;
         }
 
@@ -247,109 +249,133 @@ namespace DRM.PropBag
 
             foreach (DRM.PropBag.ControlModel.PropItem pi in pm.Props)
             {
-                if(pi.PropertyName == "PersonListView")
+                if(pi.PropertyName == "PersonList")
                 {
-                    System.Diagnostics.Debug.WriteLine("We are creating prop item: PersonListView.");
-                }
-                object ei = pi.ExtraInfo;
-
-                Delegate comparer;
-                bool useRefEquality;
-
-                if (pi.ComparerField == null)
-                {
-                    comparer = null;
-                    useRefEquality = false;
-                }
-                else
-                {
-                    comparer = pi.ComparerField.Comparer;
-                    useRefEquality = pi.ComparerField.UseRefEquality;
+                    System.Diagnostics.Debug.WriteLine("We are creating prop item: PersonList.");
                 }
 
-                if (pi.InitialValueField == null)
-                {
-                    pi.InitialValueField = PropInitialValueField.UndefinedInitialValueField;
-                }
-
-                //EventHandler<PcGenEventArgs> doWhenChangedAction = pi.DoWhenChangedField?.DoWhenChangedAction;
-
-                //if(doWhenChangedAction == null && (pi.DoWhenChangedField?.DoWhenGenHandlerGetter != null))
+                //if (pi.PropKind == PropKindEnum.ObservableCollectionFB)
                 //{
-                //    Func<object, EventHandler<PcGenEventArgs>> rr = pi.DoWhenChangedField.DoWhenGenHandlerGetter;
-
-                //    doWhenChangedAction = rr(this);
+                //    System.Diagnostics.Debug.WriteLine("Processing the PersonList Prop Item.");
                 //}
 
-                IProp pg;
-
-                if (pi.HasStore && !pi.InitialValueField.SetToUndefined)
-                {
-                    if(pi.InitialValueField.ValueCreator != null)
-                    {
-                        object newValue = pi.InitialValueField.ValueCreator();
-                        pg = _propFactory.CreateGenFromObject(pi.PropertyType, newValue, pi.PropertyName, ei, pi.HasStore, pi.TypeIsSolid,
-                            pi.PropKind, comparer, useRefEquality, pi.ItemType);
-                    }
-                    else
-                    {
-                        bool useDefault = pi.InitialValueField.SetToDefault;
-                        string value;
-
-                        // TODO: Fix this??
-                        if (pi.InitialValueField.SetToEmptyString && pi.PropertyType == typeof(Guid))
-                        {
-                            const string EMPTY_GUID = "00000000-0000-0000-0000-000000000000";
-                            value = EMPTY_GUID;
-                        }
-                        else
-                        {
-                            value = pi.InitialValueField.GetStringValue();
-                        }
-
-                        pg = _propFactory.CreateGenFromString(pi.PropertyType, value, useDefault, pi.PropertyName, ei, pi.HasStore, pi.TypeIsSolid,
-                            pi.PropKind, comparer, useRefEquality, pi.ItemType);
-                    }
-                }
-                else
-                {
-                    pg = _propFactory.CreateGenWithNoValue(pi.PropertyType, pi.PropertyName, ei, pi.HasStore, pi.TypeIsSolid,
-                        pi.PropKind, comparer, useRefEquality, pi.ItemType);
-                }
-
-                // If DoAfterNotify is true, use the 'Last' group, otherwise use the 'standard' group.
-                //SubscriptionPriorityGroup priorityGroup = pi.DoWhenChangedField?.DoAfterNotify ?? false ? SubscriptionPriorityGroup.Last : SubscriptionPriorityGroup.Standard;
-
                 IPropData propData;
-                if (pi.DoWhenChangedField != null)
+
+                if (pi.PropKind == PropKindEnum.CollectionViewSource || pi.PropKind == PropKindEnum.CollectionViewSource_RO)
                 {
-                    object target;
-                    if(pi.DoWhenChangedField.MethodIsLocal)
-                    {
-                        target = this;
-                    }
-                    else
-                    {
-                        throw new NotSupportedException("Only local methods are supported.");
-                    }
-                    propData = AddProp(pi.PropertyName, pg,
-                        target, 
-                        pi.DoWhenChangedField.Method, 
-                        pi.DoWhenChangedField.SubscriptionKind, 
-                        pi.DoWhenChangedField.PriorityGroup);
+                    IProp pg = _propFactory.CreateCVSPropFromString(pi.PropertyType, pi.PropertyName);
+                    propData = AddProp(pi.PropertyName, pg);
                 }
                 else
                 {
-                    propData = AddProp(pi.PropertyName, pg);
+                    propData = processProp(pi);
                 }
 
 
                 if (pi.BinderField?.Path != null)
                 {
                     LocalBindingInfo bindingInfo = new LocalBindingInfo(new LocalPropertyPath(pi.BinderField.Path));
-                    propData.TypedProp.RegisterBinding(this, propData.PropId, bindingInfo);
+                    propData.TypedProp.RegisterBinding((IRegisterBindingsFowarderType) this, propData.PropId, bindingInfo);
                 }
             }
+        }
+
+        private IPropData processProp(PropItem pi)
+        {
+            object ei = pi.ExtraInfo;
+
+            Delegate comparer;
+            bool useRefEquality;
+
+            if (pi.ComparerField == null)
+            {
+                comparer = null;
+                useRefEquality = false;
+            }
+            else
+            {
+                comparer = pi.ComparerField.Comparer;
+                useRefEquality = pi.ComparerField.UseRefEquality;
+            }
+
+            if (pi.InitialValueField == null)
+            {
+                pi.InitialValueField = PropInitialValueField.UndefinedInitialValueField;
+            }
+
+            //EventHandler<PcGenEventArgs> doWhenChangedAction = pi.DoWhenChangedField?.DoWhenChangedAction;
+
+            //if(doWhenChangedAction == null && (pi.DoWhenChangedField?.DoWhenGenHandlerGetter != null))
+            //{
+            //    Func<object, EventHandler<PcGenEventArgs>> rr = pi.DoWhenChangedField.DoWhenGenHandlerGetter;
+
+            //    doWhenChangedAction = rr(this);
+            //}
+
+            IProp pg;
+
+            if (pi.HasStore && !pi.InitialValueField.SetToUndefined)
+            {
+                if (pi.InitialValueField.ValueCreator != null)
+                {
+                    object newValue = pi.InitialValueField.ValueCreator();
+                    pg = _propFactory.CreateGenFromObject(pi.PropertyType, newValue, pi.PropertyName, ei, pi.HasStore, pi.TypeIsSolid,
+                        pi.PropKind, comparer, useRefEquality, pi.ItemType);
+                }
+                else
+                {
+                    bool useDefault = pi.InitialValueField.SetToDefault;
+                    string value;
+
+                    // TODO: Fix this??
+                    if (pi.InitialValueField.SetToEmptyString && pi.PropertyType == typeof(Guid))
+                    {
+                        const string EMPTY_GUID = "00000000-0000-0000-0000-000000000000";
+                        value = EMPTY_GUID;
+                    }
+                    else
+                    {
+                        value = pi.InitialValueField.GetStringValue();
+                    }
+
+                    pg = _propFactory.CreateGenFromString(pi.PropertyType, value, useDefault, pi.PropertyName, ei, pi.HasStore, pi.TypeIsSolid,
+                        pi.PropKind, comparer, useRefEquality, pi.ItemType);
+                }
+            }
+            else
+            {
+                pg = _propFactory.CreateGenWithNoValue(pi.PropertyType, pi.PropertyName, ei, pi.HasStore, pi.TypeIsSolid,
+                    pi.PropKind, comparer, useRefEquality, pi.ItemType);
+            }
+
+            // If DoAfterNotify is true, use the 'Last' group, otherwise use the 'standard' group.
+            //SubscriptionPriorityGroup priorityGroup = pi.DoWhenChangedField?.DoAfterNotify ?? false ? SubscriptionPriorityGroup.Last : SubscriptionPriorityGroup.Standard;
+
+            IPropData propData;
+            if (pi.DoWhenChangedField != null)
+            {
+                object target;
+                if (pi.DoWhenChangedField.MethodIsLocal)
+                {
+                    target = this;
+                }
+                else
+                {
+                    throw new NotSupportedException("Only local methods are supported.");
+                }
+                propData = AddProp(pi.PropertyName, pg,
+                    target,
+                    pi.DoWhenChangedField.Method,
+                    pi.DoWhenChangedField.SubscriptionKind,
+                    pi.DoWhenChangedField.PriorityGroup);
+            }
+            else
+            {
+                propData = AddProp(pi.PropertyName, pg);
+            }
+
+            return propData;
+
         }
 
         #endregion
@@ -987,12 +1013,13 @@ namespace DRM.PropBag
             }
             else
             {
-                result = _ourStoreAccessor.RegisterHandler(this, propId, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
+                IDisposable disable = _ourStoreAccessor.RegisterHandler(this, propId, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
+                result = disable != null;
             }
             return result;
         }
 
-        public bool SubscribeToPropChanged<T>(EventHandler<PcTypedEventArgs<T>> eventHandler, string propertyName)
+        public IDisposable SubscribeToPropChanged<T>(EventHandler<PcTypedEventArgs<T>> eventHandler, string propertyName)
         {
             bool mustBeRegistered = OurMetaData.AllPropsMustBeRegistered;
 
@@ -1008,12 +1035,12 @@ namespace DRM.PropBag
 
             if (propData != null)
             {
-                bool result = _ourStoreAccessor.RegisterHandler<T>(this, propId, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
-                return result;
+                IDisposable disable = _ourStoreAccessor.RegisterHandler<T>(this, propId, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
+                return disable;
             }
             else
             {
-                return false;
+                return null;
             }
         }
 
@@ -1052,7 +1079,9 @@ namespace DRM.PropBag
         protected bool AddToPropChanged<T>(EventHandler<PcTypedEventArgs<T>> eventHandler, string eventPropertyName)
         {
             string propertyName = GetPropNameFromEventProp(eventPropertyName);
-            return SubscribeToPropChanged<T>(eventHandler, propertyName);
+            IDisposable disable = SubscribeToPropChanged<T>(eventHandler, propertyName);
+
+            return disable != null;
         }
 
         /// <summary>
@@ -1114,12 +1143,14 @@ namespace DRM.PropBag
             }
             else
             {
-                result = _ourStoreAccessor.RegisterHandler(this, propId, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
+                IDisposable disable = _ourStoreAccessor.RegisterHandler(this, propId, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
+                return disable != null;
+                //result = _ourStoreAccessor.RegisterHandler(this, propId, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
             }
             return result;
         }
 
-        public bool SubscribeToPropChanged(EventHandler<PcGenEventArgs> eventHandler, string propertyName, Type propertyType)
+        public IDisposable SubscribeToPropChanged(EventHandler<PcGenEventArgs> eventHandler, string propertyName, Type propertyType)
         {
             bool mustBeRegistered = OurMetaData.AllPropsMustBeRegistered;
 
@@ -1133,12 +1164,12 @@ namespace DRM.PropBag
 
             if (!PropData.IsEmpty)
             {
-                bool result = _ourStoreAccessor.RegisterHandler(this, propId, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
-                return result;
+                IDisposable disable = _ourStoreAccessor.RegisterHandler(this, propId, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
+                return disable;
             }
             else
             {
-                return false;
+                return null;
             }
         }
 
@@ -1301,7 +1332,7 @@ namespace DRM.PropBag
                 LocalPropertyPath lpp = new LocalPropertyPath(pathToSource);
                 LocalBindingInfo bindingInfo = new LocalBindingInfo(lpp, LocalBindingMode.OneWay);
 
-                bool wasAdded = ((IPropBagInternal)this).RegisterBinding<T>(propId, bindingInfo);
+                bool wasAdded = RegisterBinding<T>(propId, bindingInfo);
                 return wasAdded;
             }
             else
@@ -1310,7 +1341,7 @@ namespace DRM.PropBag
             }
         }
 
-        bool IPropBagInternal.RegisterBinding<T>(PropIdType propId, LocalBindingInfo bindingInfo)
+        public bool RegisterBinding<T>(PropIdType propId, LocalBindingInfo bindingInfo)
         {
             bool wasAdded = _ourStoreAccessor.RegisterBinding<T>(this, propId, bindingInfo);
             return wasAdded;
@@ -1335,7 +1366,7 @@ namespace DRM.PropBag
                 LocalPropertyPath lpp = new LocalPropertyPath(pathToSource);
                 LocalBindingInfo bindingInfo = new LocalBindingInfo(lpp, LocalBindingMode.OneWay);
 
-                bool wasRemoved = ((IPropBagInternal)this).UnregisterBinding<T>(propId, bindingInfo);
+                bool wasRemoved = UnregisterBinding<T>(propId, bindingInfo);
                 return wasRemoved;
             }
             else
@@ -1344,7 +1375,7 @@ namespace DRM.PropBag
             }
         }
 
-        bool IPropBagInternal.UnregisterBinding<T>(PropIdType propId, LocalBindingInfo bindingInfo)
+        public bool UnregisterBinding<T>(PropIdType propId, LocalBindingInfo bindingInfo)
         {
             bool wasRemoved = _ourStoreAccessor.UnregisterBinding<T>(this, propId, bindingInfo);
             return wasRemoved;
@@ -1524,6 +1555,9 @@ namespace DRM.PropBag
         #endregion
 
         #region Add Enumerable-Type Props
+        #endregion
+
+        #region Add ObservableCollection<T> and IObsCollection<T> Props
 
         public ICProp<CT, T> AddCollectionProp<CT, T>
             (
@@ -1561,6 +1595,18 @@ namespace DRM.PropBag
 
             AddProp(propertyName, typedCollectionProp);
             return typedCollectionProp;
+        }
+
+        #endregion
+
+        #region Add CollectionViewSource-type Props
+
+        public IProp AddCollectionViewSourceProp<TCVS, T>(string propertyName) where TCVS : class
+        {
+            IProp cvsProp = _propFactory.CreateCVSProp<TCVS, T>(propertyName);
+
+            AddProp(propertyName, cvsProp);
+            return cvsProp;
         }
 
         #endregion

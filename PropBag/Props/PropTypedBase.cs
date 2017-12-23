@@ -10,6 +10,9 @@ namespace DRM.PropBag
     using PropIdType = UInt32;
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
 
+    using IRegisterBindingsFowarderType = IRegisterBindingsForwarder<UInt32>;
+
+
     public abstract class PropTypedBase<T> : PropBase, IProp<T>
     {
         #region Public and Protected Properties
@@ -80,14 +83,14 @@ namespace DRM.PropBag
             return Comparer(val1, val2);
         }
 
-        public override bool RegisterBinding(IPropBagInternal propBag, PropIdType propId, LocalBindingInfo bindingInfo)
+        public override bool RegisterBinding(IRegisterBindingsFowarderType forwarder, PropIdType propId, LocalBindingInfo bindingInfo)
         {
-            return propBag.RegisterBinding<T>(propId, bindingInfo);
+            return forwarder.RegisterBinding<T>(propId, bindingInfo);
         }
 
-        public override bool UnregisterBinding(IPropBagInternal propBag, PropIdType propId, LocalBindingInfo bindingInfo)
+        public override bool UnregisterBinding(IRegisterBindingsFowarderType forwarder, PropIdType propId, LocalBindingInfo bindingInfo)
         {
-            return propBag.RegisterBinding<T>(propId, bindingInfo);
+            return forwarder.RegisterBinding<T>(propId, bindingInfo);
         }
 
         #endregion

@@ -2,13 +2,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Data;
 
 namespace DRM.TypeSafePropertyBag
 {
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
-
+    using IRegisteBindingsProxyType = IRegisterBindingsProxy<UInt32>;
     using PropIdType = UInt32;
     using PropNameType = String;
 
@@ -27,15 +26,15 @@ namespace DRM.TypeSafePropertyBag
     // Collection View Source
     public interface ICViewProp<TCVS, T> : IReadOnlyCViewProp<TCVS, T> where TCVS: class
     {
-        object Source { get; set; }
+        //object Source { get; set; }
     }
 
     // CollectionViewSource -- ReadOnly 
     public interface IReadOnlyCViewProp<TCVS, T> : IProp<TCVS> where TCVS : class
     {
-        ICollectionView View { get; }
-        ICollectionView this[string key] { get; }
-        IReadOnlyObsCollection<T> GetReadOnlyObservableCollection();
+        //ICollectionView View { get; }
+        //ICollectionView this[string key] { get; }
+        //IReadOnlyObsCollection<T> GetReadOnlyObservableCollection();
     }
 
     // ObsCollection<T> interface
@@ -121,7 +120,9 @@ namespace DRM.TypeSafePropertyBag
     /// <summary>
     /// These are the non-type specific features that every instance of IProp<typeparamref name="T"/> implement.
     /// </summary>
-    public interface IProp : ICloneable
+    public interface IProp : ICloneable, IRegisteBindingsProxyType
+
+
     {
         PropKindEnum PropKind { get; }
         Type Type { get; }
@@ -143,9 +144,6 @@ namespace DRM.TypeSafePropertyBag
         bool SetValueToUndefined();
 
         void CleanUpTyped();
-
-        bool RegisterBinding(IPropBagInternal propBag, PropIdType propId, LocalBindingInfo bindingInfo);
-        bool UnregisterBinding(IPropBagInternal propBag, PropIdType propId, LocalBindingInfo bindingInfo);
     }
 
     /// <summary>
@@ -164,7 +162,7 @@ namespace DRM.TypeSafePropertyBag
 
     /// <summary>
     /// Classes that implement the IPropBag interface, keep a list of properties, each of which implements this interface.
-    /// These features are managed by the PropBag, and not by classes that inherit from AbstractProp.
+    /// These features are managed by the PropBag, and not by classes that implement IProp (derive from PropBase.)
     /// </summary>
     public interface IPropData
     {

@@ -1,35 +1,24 @@
-﻿using DRM.TypeSafePropertyBag.Fundamentals;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 
 namespace DRM.TypeSafePropertyBag
 {
-    #region Type Aliases
-
-    using PropIdType = UInt32;
     using PropNameType = String;
-
-    using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
-
-    using L2KeyManType = IL2KeyMan<UInt32, String>;
     using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
 
-    #endregion
-
+    /// <summary>
+    /// All implementers of IPropBag that also want to use the 
+    /// </summary>
     public interface IPropBagInternal
     {
-        L2KeyManType Level2KeyManager { get; }
         PSAccessServiceType ItsStoreAccessor { get; }
-
-        bool RegisterBinding<T>(PropIdType propId, LocalBindingInfo bindingInfo);
-        bool UnregisterBinding<T>(PropIdType propId, LocalBindingInfo bindingInfo);
     }
 
     /// <summary>
     /// Base Property Bag Features
     /// </summary>
-    public interface IPropBag
+    public interface IPropBag 
         : ITypeSafePropBag,
         ICustomTypeDescriptor,
         INotifyPropertyChanged,
@@ -51,36 +40,36 @@ namespace DRM.TypeSafePropertyBag
 
         bool TryGetPropGen(string propertyName, Type propertyType, out IPropData propGen);
 
-        object this[string typeName, string propertyName] { get; set; }
-        object this[Type type, string propertyName] { get; set; }
+        object this[string typeName, PropNameType propertyName] { get; set; }
+        object this[Type type, PropNameType propertyName] { get; set; }
 
-        ValPlusType GetValPlusType(string propertyName, Type propertyType);
+        ValPlusType GetValPlusType(PropNameType propertyName, Type propertyType);
 
         bool SetValWithNoType(string propertyName, object value);
-        bool SetIt<T>(T newValue, ref T curValue, string propertyName);
+        bool SetIt<T>(T newValue, ref T curValue, PropNameType propertyName);
 
-        bool PropertyExists(string propertyName);
-        bool TryGetPropType(string propertyName, out PropKindEnum propType);
+        bool PropertyExists(PropNameType propertyName);
+        bool TryGetPropType(PropNameType propertyName, out PropKindEnum propType);
 
         //bool TryGetListSource(string propertyName, Type itemType, out IListSource listSource);
 
-        bool SubscribeToPropChanged(PropertyChangedEventHandler handler, string propertyName, Type propertyType);
-        bool UnsubscribeToPropChanged(PropertyChangedEventHandler handler, string propertyName, Type propertyType);
+        bool SubscribeToPropChanged(PropertyChangedEventHandler handler, PropNameType propertyName, Type propertyType);
+        bool UnsubscribeToPropChanged(PropertyChangedEventHandler handler, PropNameType propertyName, Type propertyType);
 
-        bool SubscribeToPropChanging(PropertyChangingEventHandler handler, string propertyName, Type propertyType);
-        bool UnsubscribeToPropChanging(PropertyChangingEventHandler handler, string propertyName, Type propertyType);
-        
-        bool SubscribeToPropChanged<T>(EventHandler<PcTypedEventArgs<T>> eventHandler, string propertyName);
+        bool SubscribeToPropChanging(PropertyChangingEventHandler handler, PropNameType propertyName, Type propertyType);
+        bool UnsubscribeToPropChanging(PropertyChangingEventHandler handler, PropNameType propertyName, Type propertyType);
+
+        IDisposable SubscribeToPropChanged<T>(EventHandler<PcTypedEventArgs<T>> eventHandler, string propertyName);
         bool UnSubscribeToPropChanged<T>(EventHandler<PcTypedEventArgs<T>> eventHandler, string propertyName);
 
-        bool SubscribeToPropChanged(EventHandler<PcGenEventArgs> eventHandler, string propertyName, Type propertyType);
-        bool UnSubscribeToPropChanged(EventHandler<PcGenEventArgs> eventHandler, string propertyName, Type propertyType);
+        IDisposable SubscribeToPropChanged(EventHandler<PcGenEventArgs> eventHandler, PropNameType propertyName, Type propertyType);
+        bool UnSubscribeToPropChanged(EventHandler<PcGenEventArgs> eventHandler, PropNameType propertyName, Type propertyType);
 
-        bool SubscribeToPropChanged(EventHandler<PcObjectEventArgs> eventHandler, string propertyName);
-        bool UnSubscribeToPropChanged(EventHandler<PcObjectEventArgs> eventHandler, string propertyName);
+        bool SubscribeToPropChanged(EventHandler<PcObjectEventArgs> eventHandler, PropNameType propertyName);
+        bool UnSubscribeToPropChanged(EventHandler<PcObjectEventArgs> eventHandler, PropNameType propertyName);
 
-        bool RegisterBinding<T>(string nameOfPropertyToUpdate, string pathToSource);
-        bool UnregisterBinding<T>(string nameOfPropertyToUpdate, string pathToSource);
+        bool RegisterBinding<T>(PropNameType nameOfPropertyToUpdate, string pathToSource);
+        bool UnregisterBinding<T>(PropNameType nameOfPropertyToUpdate, string pathToSource);
 
         //bool SubscribeToPropChanged<T>(Action<T, T> doOnChange, string propertyName);
         //bool UnSubscribeToPropChanged<T>(Action<T, T> doOnChange, string propertyName);
@@ -93,9 +82,9 @@ namespace DRM.TypeSafePropertyBag
 
         // Consider moving these to the TypeSafePropBagMetaData class.
         PropBagTypeSafetyMode TypeSafetyMode { get; }
-        IList<string> GetAllPropertyNames();
-        IDictionary<string, IPropData> GetAllPropertyValues();
-        IDictionary<string, ValPlusType> GetAllPropNamesAndTypes();
+        IList<PropNameType> GetAllPropertyNames();
+        IDictionary<PropNameType, IPropData> GetAllPropertyValues();
+        IDictionary<PropNameType, ValPlusType> GetAllPropNamesAndTypes();
 
         void CloneProps(IPropBag copySource);
 

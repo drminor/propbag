@@ -13,6 +13,7 @@ using System.Windows;
 namespace DRM.PropBag
 {
     using PropIdType = UInt32;
+    using IRegisterBindingsFowarderType = IRegisterBindingsForwarder<UInt32>;
 
     /// <summary>
     /// A wrapper for an instance of IProp<typeparam name="T"/>.
@@ -55,8 +56,8 @@ namespace DRM.PropBag
         public abstract void CleanUpTyped();
         public abstract object Clone();
 
-        public abstract bool RegisterBinding(IPropBagInternal propBag, PropIdType propId, LocalBindingInfo bindingInfo);
-        public abstract bool UnregisterBinding(IPropBagInternal propBag, PropIdType propId, LocalBindingInfo bindingInfo);
+        public abstract bool RegisterBinding(IRegisterBindingsFowarderType forwarder, PropIdType propId, LocalBindingInfo bindingInfo);
+        public abstract bool UnregisterBinding(IRegisterBindingsFowarderType forwarder, PropIdType propId, LocalBindingInfo bindingInfo);
 
         #endregion
     }
