@@ -17,10 +17,10 @@ namespace DRM.TypeSafePropertyBag
     /// <typeparam name="L2T">The type used to store PropIds.</typeparam>
     public interface IRegisterSubscriptions<L2T> : ICacheSubscriptions<L2T>
     {
-        bool RegisterHandler<T>(IPropBag propBag, L2T propId, EventHandler<PcTypedEventArgs<T>> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef);
+        IDisposable RegisterHandler<T>(IPropBag propBag, L2T propId, EventHandler<PcTypedEventArgs<T>> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef);
         bool UnregisterHandler<T>(IPropBag propBag, L2T propId, EventHandler<PcTypedEventArgs<T>> eventHandler);
 
-        bool RegisterHandler(IPropBag propBag, L2T propId, EventHandler<PcGenEventArgs> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef);
+        IDisposable RegisterHandler(IPropBag propBag, L2T propId, EventHandler<PcGenEventArgs> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef);
         bool UnregisterHandler(IPropBag propBag, L2T propId, EventHandler<PcGenEventArgs> eventHandler);
 
         bool RegisterHandler(IPropBag propBag, L2T propId, EventHandler<PcObjectEventArgs> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef);
