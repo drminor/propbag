@@ -16,10 +16,15 @@ namespace DRM.PropBag
 {
     using PropIdType = UInt32;
     using PropNameType = String;
+
     using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
+    using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
 
     public abstract class AbstractPropFactory : IPropFactory, IDisposable
     {
+
+        PSAccessServiceProviderType _propStoreAccessServiceProvider { get; }
+
         #region Public Properties
 
         public ResolveTypeDelegate TypeResolver { get; }
@@ -36,7 +41,6 @@ namespace DRM.PropBag
         /// </summary>
         public virtual string IndexerName { get; }
 
-        public PSAccessServiceProviderType PropStoreAccessServiceProvider { get; }
 
         public virtual int DoSetCacheCount => DelegateCacheProvider.DoSetDelegateCache.Count; // abstract int DoSetCacheCount { get; }
         public virtual int CreatePropFromStringCacheCount => DelegateCacheProvider.CreatePropFromStringCache.Count; //abstract int CreatePropFromStringCacheCount { get; }
@@ -55,7 +59,7 @@ namespace DRM.PropBag
             )
         {
 
-            PropStoreAccessServiceProvider = propStoreAccessServiceProvider ?? throw new ArgumentNullException(nameof(propStoreAccessServiceProvider));
+            _propStoreAccessServiceProvider = propStoreAccessServiceProvider ?? throw new ArgumentNullException(nameof(propStoreAccessServiceProvider));
             DelegateCacheProvider = delegateCacheProvider;
 
             // Use our default implementation, if the caller did not supply one.
@@ -68,78 +72,6 @@ namespace DRM.PropBag
         }
 
         #endregion
-
-        //#region Collection-type property creators
-
-        //public abstract ICPropPrivate<CT, T> Create<CT, T>(
-        //    CT initialValue,
-        //    PropNameType propertyName, object extraInfo = null,
-        //    bool hasStorage = true, bool typeIsSolid = true,
-        //    Func<CT, CT, bool> comparer = null) where CT : IEnumerable<T>;
-
-        //public abstract ICPropPrivate<CT, T> CreateWithNoValue<CT, T>(
-        //    PropNameType propertyName, object extraInfo = null,
-        //    bool hasStorage = true, bool typeIsSolid = true,
-        //    Func<CT, CT, bool> comparer = null) where CT : IEnumerable<T>;
-
-        //#endregion
-
-        //#region Propety-type property creators
-
-        //public abstract IProp<T> Create<T>(
-        //    T initialValue,
-        //    PropNameType propertyName, object extraInfo = null,
-        //    bool hasStorage = true, bool typeIsSolid = true,
-        //    Func<T, T, bool> comparer = null);
-
-        //public abstract IProp<T> CreateWithNoValue<T>(
-        //    PropNameType propertyName, object extraInfo = null,
-        //    bool hasStorage = true, bool typeIsSolid = true,
-        //    Func<T, T, bool> comparer = null);
-
-        //#endregion
-
-        //#region Generic property creators
-
-        //public abstract IProp CreateGenFromObject(Type typeOfThisProperty,
-        //    object value,
-        //    PropNameType propertyName, object extraInfo,
-        //    bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
-        //    Delegate comparer, bool useRefEquality = false, Type itemType = null);
-
-        //public abstract IProp CreateGenFromString(Type typeOfThisProperty,
-        //    string value, bool useDefault,
-        //    string propertyName, object extraInfo,
-        //    bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
-        //    Delegate comparer, bool useRefEquality = false, Type itemType = null);
-
-        //public abstract IProp CreateGenWithNoValue(Type typeOfThisProperty,
-        //    PropNameType propertyName, object extraInfo,
-        //    bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
-        //    Delegate comparer, bool useRefEquality = false, Type itemType = null);
-
-        ////public virtual IPropGen CreatePropInferType(object value, string propertyName, object extraInfo, bool hasStorage)
-        ////{
-        ////    System.Type typeOfThisValue;
-        ////    bool typeIsSolid;
-
-        ////    if (value == null)
-        ////    {
-        ////        typeOfThisValue = typeof(object);
-        ////        typeIsSolid = false;
-        ////    }
-        ////    else
-        ////    {
-        ////        typeOfThisValue = GetTypeFromValue(value);
-        ////        typeIsSolid = true;
-        ////    }
-
-        ////    IPropGen prop = this.CreateGenFromObject(typeOfThisValue, value, propertyName, extraInfo, 
-        ////        hasStorage, typeIsSolid, null, false, null, false);
-        ////    return prop;
-        ////}
-
-        //#endregion
 
         public bool IsPropACollection(PropKindEnum pk)
         {
@@ -160,7 +92,17 @@ namespace DRM.PropBag
             return result;
         }
 
-        #region Collection-type property creators
+        public PSAccessServiceType CreatePropStoreService(IPropBagInternal propBag)
+        {
+            PSAccessServiceType result = _propStoreAccessServiceProvider.CreatePropStoreService(propBag);
+            return result;
+        }
+
+        #region Enumerable-Type Prop Creation 
+
+        #endregion
+
+        #region IObsCollection<T> and ObservableCollection<T> Prop Creation
 
         public virtual ICProp<CT, T> Create<CT, T>(
             CT initialValue,
@@ -203,7 +145,16 @@ namespace DRM.PropBag
 
         #endregion
 
-        #region Propety-type property creators
+        #region CollectionViewSource Prop Creation
+
+        public virtual IProp CreateCVSProp<TCVS, T>(PropNameType propertyName) where TCVS : class
+        {
+            throw new NotImplementedException("This feature is not implemented by the 'standard' implementation, please use WPFPropfactory or similar.");
+        }
+
+        #endregion
+
+        #region Scalar Prop Creation
 
         public virtual IProp<T> Create<T>(
             T initialValue,
@@ -232,7 +183,7 @@ namespace DRM.PropBag
 
         #endregion
 
-        #region Generic property creators
+        #region Generic Property Creation
 
         public virtual IProp CreateGenFromObject(Type typeOfThisProperty,
             object value,
@@ -248,7 +199,7 @@ namespace DRM.PropBag
 
                 return prop;
             }
-            else if(IsPropACollection(propKind))
+            else if (IsPropACollection(propKind))
             {
                 CreateEPropFromObjectDelegate propCreator = GetCPropCreator(typeOfThisProperty, itemType);
                 IProp prop = propCreator(this, value, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
@@ -278,7 +229,7 @@ namespace DRM.PropBag
             }
             else if (IsPropACollection(propKind))
             {
-                if(propKind == PropKindEnum.ObservableCollection)
+                if (propKind == PropKindEnum.ObservableCollectionFB)
                 {
                     CreateEPropFromStringDelegate propCreator = GetCPropFromStringFBCreator(typeOfThisProperty, itemType);
                     IProp prop = propCreator(this, value, useDefault, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
@@ -326,6 +277,11 @@ namespace DRM.PropBag
             {
                 throw new InvalidOperationException($"PropKind = {propKind} is not recognized or is not supported.");
             }
+        }
+
+        public virtual IProp CreateCVSPropFromString(Type typeOfThisProperty, PropNameType propertyName)
+        {
+            throw new NotImplementedException("This feature is not implemented by the 'standard' implementation, please use WPFPropfactory or similar.");
         }
 
         #endregion
@@ -487,9 +443,11 @@ namespace DRM.PropBag
 
         #region Shared Delegate Creation Logic
 
-        //static private Type gmtType = typeof(APFGenericMethodTemplates);
+        #region Enumerable-Type Prop Creation Methods
 
-        #region Enumerable-Type Methods
+        #endregion
+
+        #region IObsCollection<T> and ObservableCollection<T> Prop Creation Methods
 
         // From Object
         protected virtual CreateEPropFromObjectDelegate GetCPropCreator(Type collectionType, Type itemType)
@@ -521,7 +479,18 @@ namespace DRM.PropBag
 
         #endregion
 
-        #region Property-Type Methods
+        #region CollectionViewSource Prop Creation Methods
+
+        // CollectionViewSource
+        protected virtual CreateCVSPropDelegate GetCVSPropCreator(Type collectionType, Type itemType)
+        {
+            CreateCVSPropDelegate result = DelegateCacheProvider.CreateCVSPropCache.GetOrAdd(new TypePair(collectionType, itemType));
+            return result;
+        }
+
+        #endregion
+
+        #region Scalar Prop Creation Methods
 
         // From Object
         protected virtual CreatePropFromObjectDelegate GetPropCreator(Type typeOfThisValue)
@@ -559,7 +528,7 @@ namespace DRM.PropBag
                 if (disposing)
                 {
                     // TODO: dispose managed state (managed objects).
-                    PropStoreAccessServiceProvider.Dispose();
+                    _propStoreAccessServiceProvider.Dispose();
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.

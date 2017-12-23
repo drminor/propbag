@@ -28,150 +28,24 @@ namespace DRM.PropBag
         {
         }
 
-        //#region Collection-type property creators
+        #region Enumerable-Type Prop Creation 
 
-        //public override ICPropPrivate<CT, T> Create<CT, T>(
-        //    CT initialValue,
-        //    string propertyName, object extraInfo = null,
-        //    bool hasStorage = true, bool typeIsSolid = true,
-        //    Func<CT, CT, bool> comparer = null)
-        //{
-        //    if (comparer == null) comparer = EqualityComparer<CT>.Default.Equals;
-        //    GetDefaultValueDelegate<CT> getDefaultValFunc = ValueConverter.GetDefaultValue<CT>;
+        #endregion
 
-        //    ICPropPrivate<CT, T> prop = new CProp<CT, T>(initialValue, getDefaultValFunc, typeIsSolid, hasStorage, comparer);
-        //    return prop;
-        //}
+        #region IObsCollection<T> and ObservableCollection<T> Prop Creation
 
-        //public override ICPropPrivate<CT, T> CreateWithNoValue<CT, T>(
-        //    PropNameType propertyName, object extraInfo = null,
-        //    bool hasStorage = true, bool typeIsSolid = true,
-        //    Func<CT, CT, bool> comparer = null)
-        //{
-        //    if (comparer == null) comparer = EqualityComparer<CT>.Default.Equals;
+        #endregion
 
-        //    GetDefaultValueDelegate<CT> getDefaultValFunc = ValueConverter.GetDefaultValue<CT>;
+        #region CollectionViewSource Prop Creation
 
-        //    ICPropPrivate<CT, T> prop = new CProp<CT, T>(getDefaultValFunc, typeIsSolid, hasStorage, comparer);
-        //    return prop;
-        //}
+        #endregion
 
-        //#endregion
+        #region Scalar Prop Creation
 
-        //#region Propety-type property creators
+        #endregion
 
-        //public override IProp<T> Create<T>(
-        //    T initialValue,
-        //    PropNameType propertyName, object extraInfo = null,
-        //    bool hasStorage = true, bool typeIsSolid = true,
-        //    Func<T,T,bool> comparer = null)
-        //{
-        //    if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
+        #region Generic Property Creation
 
-        //    GetDefaultValueDelegate<T> getDefaultValFunc = ValueConverter.GetDefaultValue<T>; 
-        //    IProp<T> prop = new Prop<T>(initialValue, getDefaultValFunc, typeIsSolid: typeIsSolid, hasStore: hasStorage, comparer: comparer);
-        //    return prop;
-        //}
-
-        //public override IProp<T> CreateWithNoValue<T>(
-        //    PropNameType propertyName, object extraInfo = null,
-        //    bool hasStorage = true, bool typeIsSolid = true,
-        //    Func<T,T,bool> comparer = null)
-        //{
-        //    if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
-
-        //    GetDefaultValueDelegate<T> getDefaultValFunc = ValueConverter.GetDefaultValue<T>; 
-        //    IProp<T> prop = new Prop<T>(getDefaultValFunc, typeIsSolid: typeIsSolid, hasStore: hasStorage, comparer: comparer);
-        //    return prop;
-        //}
-
-        //#endregion
-
-        //#region Generic property creators
-
-        //public override IProp CreateGenFromObject(Type typeOfThisProperty,
-        //    object value,
-        //    PropNameType propertyName, object extraInfo,
-        //    bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
-        //    Delegate comparer, bool useRefEquality = false, Type itemType = null)
-        //{
-        //    if (propKind == PropKindEnum.Prop)
-        //    {
-        //        CreatePropFromObjectDelegate propCreator = GetPropCreator(typeOfThisProperty);
-        //        IProp prop = propCreator(this, value, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
-        //            comparer: comparer, useRefEquality: useRefEquality);
-
-        //        return prop;
-        //    }
-        //    else if (propKind == PropKindEnum.Collection)
-        //    {
-        //        CreateCPropFromObjectDelegate propCreator = GetCPropCreator(typeOfThisProperty, itemType);
-        //        IProp prop = propCreator(this, value, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
-        //            comparer: comparer, useRefEquality: useRefEquality);
-
-        //        return prop;
-        //    }
-        //    else
-        //    {
-        //        throw new InvalidOperationException($"PropKind = {propKind} is not recognized or is not supported.");
-        //    }
-        //}
-
-        //public override IProp CreateGenFromString(Type typeOfThisProperty,
-        //    string value, bool useDefault,
-        //    PropNameType propertyName, object extraInfo,
-        //    bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
-        //    Delegate comparer, bool useRefEquality = false, Type itemType = null)
-        //{
-        //    if (propKind == PropKindEnum.Prop)
-        //    {
-        //        CreatePropFromStringDelegate propCreator = GetPropFromStringCreator(typeOfThisProperty);
-        //        IProp prop = propCreator(this, value, useDefault, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
-        //            comparer: comparer, useRefEquality: useRefEquality);
-
-        //        return prop;
-        //    } 
-        //    else if(propKind == PropKindEnum.Collection)
-        //    {
-        //        CreateCPropFromStringDelegate propCreator = GetCPropFromStringCreator(typeOfThisProperty, itemType);
-        //        IProp prop = propCreator(this, value, useDefault, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
-        //            comparer: comparer, useRefEquality: useRefEquality);
-
-        //        return prop;
-        //    }
-        //    else
-        //    {
-        //        throw new InvalidOperationException($"PropKind = {propKind} is not recognized or is not supported.");
-        //    }
-        //}
-
-        //public override IProp CreateGenWithNoValue(Type typeOfThisProperty,
-        //    PropNameType propertyName, object extraInfo,
-        //    bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
-        //    Delegate comparer, bool useRefEquality = false, Type itemType = null)
-        //{
-        //    if (propKind == PropKindEnum.Prop)
-        //    {
-        //        CreatePropWithNoValueDelegate propCreator = GetPropWithNoValueCreator(typeOfThisProperty);
-        //        IProp prop = propCreator(this, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
-        //            comparer: comparer, useRefEquality: useRefEquality);
-
-        //        return prop;
-        //    }
-        //    else if (propKind == PropKindEnum.Collection)
-        //    {
-        //        CreateCPropWithNoValueDelegate propCreator = GetCPropWithNoValueCreator(typeOfThisProperty, itemType);
-        //        IProp prop = propCreator(this, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
-        //            comparer: comparer, useRefEquality: useRefEquality);
-
-        //        return prop;
-        //    }
-        //    else
-        //    {
-        //        throw new InvalidOperationException($"PropKind = {propKind} is not recognized or is not supported.");
-        //    }
-        //}
-
-        //#endregion
+        #endregion
     }
 }

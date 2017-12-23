@@ -9,22 +9,33 @@ namespace DRM.TypeSafePropertyBag
     using PropNameType = String;
 
     using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
+    using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
     #endregion
 
     public interface IPropFactory 
     {
+        #region Public Properties and Methods
+
         bool ProvidesStorage { get; }
         string IndexerName { get; }
         ResolveTypeDelegate TypeResolver { get; }
         IConvertValues ValueConverter { get; }
 
-        PSAccessServiceProviderType PropStoreAccessServiceProvider { get; }
+        //PSAccessServiceProviderType PropStoreAccessServiceProvider { get; }
+        PSAccessServiceType CreatePropStoreService(IPropBagInternal propBag);
+
 
         IProvideDelegateCaches DelegateCacheProvider { get; }
 
         bool IsPropACollection(PropKindEnum propKind);
 
-        #region Enumerable-Type Methods
+        #endregion
+
+        #region Enumerable-Type Prop Creation 
+
+        #endregion
+
+        #region IObsCollection<T> and ObservableCollection<T> Prop Creation
 
         ICProp<CT, T> Create<CT, T>(CT initialValue, PropNameType propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
@@ -40,7 +51,13 @@ namespace DRM.TypeSafePropertyBag
 
         #endregion
 
-        #region Property-Type Methods
+        #region CollectionViewSource Prop Creation
+
+        IProp CreateCVSProp<TCVS, T>(PropNameType propertyName) where TCVS : class;
+
+            #endregion
+
+        #region Scalar Prop Creation
 
         IProp<T> Create<T>(T initialValue, PropNameType propertyName, object extraInfo = null, 
             bool hasStorage = true, bool typeIsSolid = true, Func<T, T, bool> comparer = null);
@@ -50,13 +67,13 @@ namespace DRM.TypeSafePropertyBag
 
         #endregion
 
-        #region Generic property creators 
+        #region Generic Property Creation
 
         IProp CreateGenFromObject(Type typeOfThisProperty, object value, PropNameType propertyName, object extraInfo, 
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
             Delegate comparer, bool useRefEquality = false, Type collectionType = null);
 
-        IProp CreateGenFromString(Type typeOfThisProperty, PropNameType value, bool useDefault, PropNameType propertyName, object extraInfo,
+        IProp CreateGenFromString(Type typeOfThisProperty, string value, bool useDefault, PropNameType propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
             Delegate comparer, bool useRefEquality = false, Type collectionType = null);
 
@@ -64,9 +81,13 @@ namespace DRM.TypeSafePropertyBag
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
             Delegate comparer, bool useRefEquality = false, Type collectionType = null);
 
+        IProp CreateCVSPropFromString(Type typeOfThisProperty, PropNameType propertyName);
+
         //IPropGen CreatePropInferType(object value, PropNameType propertyName, object extraInfo, bool hasStorage);
 
         #endregion
+
+        #region Default Value and Type Support
 
         Func<T, T, bool> GetRefEqualityComparer<T>();
 
@@ -84,8 +105,14 @@ namespace DRM.TypeSafePropertyBag
 
         bool IsTypeSolid(object value, Type propertyType);
 
+        #endregion
+
+        #region Diagnostics
+
         int DoSetCacheCount { get; }
         int CreatePropFromStringCacheCount { get; }
         int CreatePropWithNoValCacheCount { get; }
+
+        #endregion
     }
 }
