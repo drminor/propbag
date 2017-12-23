@@ -19,7 +19,11 @@ namespace DRM.PropBag
 
     public class APFGenericMethodTemplates
     {
-        #region Enumerable-Type Methods
+        #region Enumerable-Type Prop Creation 
+
+        #endregion
+
+        #region IObsCollection<T> and ObservableCollection<T> Prop Creation
 
         // From Object
         private static ICProp<CT, T> CreateEPropFromObject<CT, T>(IPropFactory propFactory,
@@ -98,7 +102,17 @@ namespace DRM.PropBag
 
         #endregion
 
-        #region Property-Type Methods
+        #region CollectionViewSource Prop Creation
+
+        // CollectionViewSource
+        private static IProp CreateCVSProp<CVST, T>(IPropFactory propFactory, PropNameType propertyName) where CVST : class
+        {
+            return propFactory.CreateCVSProp<CVST, T>(propertyName);
+        }
+
+        #endregion
+
+        #region Scalar Prop Creation
 
         // From Object
         private static IProp<T> CreatePropFromObject<T>(IPropFactory propFactory,
@@ -159,7 +173,6 @@ namespace DRM.PropBag
                 return (Func<T, T, bool>)comparer;
             }
         }
-
         #endregion
     }
 }

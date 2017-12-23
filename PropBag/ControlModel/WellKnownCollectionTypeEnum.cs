@@ -9,7 +9,8 @@ namespace DRM.PropBag.ControlModel
     public enum WellKnownCollectionTypeEnum
     {
         Enumerable,
-        List,
-        ObservableCollection
+        TypedEnumerable,
+        ObservableCollection,   // IObsCollection<T>
+        ObservableCollectionFB  // ObservableCollection<T>
     }
 }

@@ -7,22 +7,26 @@ using System.Collections.ObjectModel;
 
 namespace DRM.PropBagWPF
 {
-    public class CViewProp<TCVS, T> : PropTypedBase<TCVS>, ICViewPropWPF<TCVS, T> where TCVS : CollectionViewSource
-    {
-        //private ObservableCollection<T> _theSource { get; set; }
+    using PropIdType = UInt32;
+    using PropNameType = String;
 
-        public CViewProp(CollectionViewSource initialValue)
-            : base(typeof(TCVS), true, true, true, RefEqualityComparer<CollectionViewSource>.Default.Equals, null, PropKindEnum.CollectionViewSource)
+    public class CViewProp<T> : PropTypedBase<CollectionViewSource>, ICViewPropWPF<CollectionViewSource, T> 
+    {
+        private PropNameType _propertyName { get; set; }
+
+        public CViewProp(CollectionViewSource initialValue, PropNameType propertyName)
+            : base(typeof(CollectionViewSource), true, true, true, RefEqualityComparer<CollectionViewSource>.Default.Equals, null, PropKindEnum.CollectionViewSource)
         {
-            if(initialValue != null)
+            _propertyName = propertyName;
+            if (initialValue != null)
             {
-                _value = (TCVS)initialValue;
+                _value = initialValue;
                 _source = (ObservableCollection<T>)initialValue.Source;
             }
             else
             {
                 _source = new ObservableCollection<T>();
-                _value = (TCVS)new CollectionViewSource()
+                _value = new CollectionViewSource()
                 {
                     Source = _source
                 };
@@ -30,19 +34,11 @@ namespace DRM.PropBagWPF
         }
 
 
-        TCVS _value;
-        override public TCVS TypedValue
+        CollectionViewSource _value;
+        override public CollectionViewSource TypedValue
         {
             get
             {
-                if (!ValueIsDefined)
-                {
-                    if (ReturnDefaultForUndefined)
-                    {
-                        return this.GetDefaultValFunc("Prop object doesn't know the prop's name.");
-                    }
-                    throw new InvalidOperationException("The value of this property has not yet been set.");
-                }
                 return _value;
             }
             set
@@ -73,21 +69,9 @@ namespace DRM.PropBagWPF
 
         public ReadOnlyObservableCollection<T> GetReadOnlyObservableCollection() => new ReadOnlyObservableCollection<T>(Source);
 
-        object ICViewProp<TCVS, T>.Source
-        {
-            get
-            {
-                return Source;
-            }
-            set
-            {
-                Source = (ObservableCollection<T>) value;
-            }
-        }
+        //ICollectionView IReadOnlyCViewProp<CollectionViewSource, T>.View => ((CollectionViewSource)_value)?.View;
 
-        ICollectionView IReadOnlyCViewProp<TCVS, T>.View => ((CollectionViewSource)_value)?.View;
-
-        public ICollectionView this[string key] => throw new NotImplementedException();
+        //public ICollectionView this[string key] => throw new NotImplementedException();
 
 
         public override object Clone() => throw new NotSupportedException("Prop Items implementing the ICViewProp<CT, T> interface cannot be cloned.");
@@ -97,36 +81,26 @@ namespace DRM.PropBagWPF
             // TODO: Dispose of our items.
         }
 
-        IReadOnlyObsCollection<T> IReadOnlyCViewProp<TCVS, T>.GetReadOnlyObservableCollection()
-        {
-            ReadOnlyObservableCollection<T> temp = GetReadOnlyObservableCollection();
+        #region BASIC IMPLE
 
-            IReadOnlyObsCollection<T> result = (IReadOnlyObsCollection<T>)temp;
-            return result;
-        }
-
-        //public ReadOnlyObservableCollection<T> ReadOnlyObservableCollection
+        //object ICViewProp<TCVS, T>.Source
         //{
         //    get
         //    {
-        //        return _sourceList.ReadOnlyObservableCollection;
+        //        return Source;
+        //    }
+        //    set
+        //    {
+        //        Source = (ObservableCollection<T>)value;
         //    }
         //}
 
-        //public static ListCollectionView GetEmptyView(string propertyName)
-        //{
-        //    ObservableCollection<T> temp = new ObservableCollection<T>();
-        //    ListCollectionView result = GetDefaultView(temp);
-        //    return result;
-        //}
+        //ListCollectionView IReadOnlyCViewPropWPF<TCVS, T>.this[string key] => throw new NotImplementedException();
 
-        //private static ListCollectionView GetDefaultView(ObservableCollection<T> collection)
-        //{
-        //    ICollectionView temp2 = CollectionViewSource.GetDefaultView(collection);
-        //    ListCollectionView result = temp2 as ListCollectionView;
-        //    return result;
-        //}
+        //ReadOnlyObservableCollection<T> IReadOnlyCViewPropWPF<TCVS, T>.GetReadOnlyObservableCollection() => new ReadOnlyObservableCollection<T>(Source);
 
+
+        #endregion
     }
 }
          

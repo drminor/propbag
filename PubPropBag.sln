@@ -21,6 +21,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentat
 	ProjectSection(SolutionItems) = preProject
 		Documentaton\BigPicture.txt = Documentaton\BigPicture.txt
 		Documentaton\Documentation.md = Documentaton\Documentation.md
+		Documentaton\TopLevelObjectReferences.md = Documentaton\TopLevelObjectReferences.md
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PropBagTestApp", "PropBagTestApp\PropBagTestApp.csproj", "{9D2C9BA2-FBDD-4EA8-9322-FDC0653B3E60}"

@@ -1,12 +1,12 @@
 ﻿using DRM.PropBag;
 using DRM.PropBag.Caches;
 using DRM.TypeSafePropertyBag;
-using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
-using System.Collections.ObjectModel;
+using System.Windows.Data;
 
 namespace DRM.PropBagWPF
 {
+    using PropNameType = String;
     using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
 
     public class WPFPropFactory : AbstractPropFactory
@@ -85,35 +85,34 @@ namespace DRM.PropBagWPF
 
         #endregion
 
-        #region Propety-type property creators
+        #region CollectionViewSource property creators
 
-        //public override IProp<T> Create<T>
-        //    (
-        //    T initialValue,
-        //    string propertyName,
-        //    object extraInfo = null,
-        //    bool hasStorage = true,
-        //    bool typeIsSolid = true,
-        //    Func<T, T, bool> comparer = null
-        //    )
-        //{
-        //    IProp<T> result;
+        public override IProp CreateCVSProp<TCVS, T>(PropNameType propertyName) 
+        {
+            ICViewPropWPF<CollectionViewSource, T> result = new CViewProp<T>(null, propertyName);
 
-        //    if (typeof(T) == typeof(ListCollectionView))
-        //    {
-        //        ListCollectionView temp = initialValue as ListCollectionView;
-        //        result = (IProp<T>) new CViewProp(temp);
-        //    }
-        //    else
-        //    {
-        //        result = base.Create(initialValue, propertyName, extraInfo, hasStorage, typeIsSolid, comparer);
-        //    }
-        //    return result;
-        //}
+            return (IProp)result;
+        }
+
+
+        #endregion
+
+        #region Property-type property creators
 
         #endregion
 
         #region Generic property creators
+
+        public override IProp CreateCVSPropFromString(Type typeOfThisProperty, PropNameType propertyName)
+        {
+            CreateCVSPropDelegate propCreator = GetCVSPropCreator(typeof(object), typeOfThisProperty);
+
+            IProp prop = propCreator(this, propertyName);
+
+            return prop;
+
+        }
+
 
 
         #endregion

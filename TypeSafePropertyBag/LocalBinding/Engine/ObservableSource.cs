@@ -29,9 +29,9 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
 
         public INotifyParentNodeChanged ParentChangedSource { get; }
 
-        public IPropBag PropChangeGenSource { get; }
+        public IDisposable PropChangeGenSource { get; }
 
-        public IPropBag PropChangedTypedSource { get; }
+        public IDisposable PropChangedTypedSource { get; }
 
         #endregion
 
@@ -47,8 +47,8 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
             BinderName = binderName;
 
             SourceKind = SourceKindEnum.TerminalNode;
-            PropChangedTypedSource = propBag;
-            propBag.SubscribeToPropChanged<T>(PropertyChangedWithTVals_Handler, pathElement);
+            IDisposable disable = propBag.SubscribeToPropChanged<T>(PropertyChangedWithTVals_Handler, pathElement);
+            PropChangedTypedSource = disable;
         }
 
         private void PropertyChangedWithTVals_Handler(object sender, PcTypedEventArgs<T> e)
@@ -68,8 +68,8 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
             BinderName = binderName;
 
             SourceKind = sourceKind;
-            PropChangeGenSource = propBag;
-            propBag.SubscribeToPropChanged(PropertyChangedWithGenVals_Handler, PathElement, typeof(T));
+            IDisposable disable = propBag.SubscribeToPropChanged(PropertyChangedWithGenVals_Handler, PathElement, typeof(T));
+            PropChangeGenSource = disable;
         }
 
         private void PropertyChangedWithGenVals_Handler(object sender, PcGenEventArgs e)
@@ -81,6 +81,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
 
         #region For PropStore
 
+        // TODO: Make this hold only weak references to the PropStoreBag event source.
         public ObservableSource(INotifyParentNodeChanged notifyParentChangedSource, ExKeyT compKey, 
             string pathElement, SourceKindEnum sourceKind, string binderName)
         {
@@ -128,12 +129,12 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
                     }
                 case SourceKindEnum.Down:
                     {
-                        PropChangeGenSource.UnSubscribeToPropChanged(PropertyChangedWithGenVals_Handler, PathElement, typeof(T));
+                        PropChangeGenSource.Dispose(); // .UnSubscribeToPropChanged(PropertyChangedWithGenVals_Handler, PathElement, typeof(T));
                         break;
                     }
                 case SourceKindEnum.TerminalNode:
                     {
-                        PropChangedTypedSource.UnSubscribeToPropChanged<T>(PropertyChangedWithTVals_Handler, PathElement);
+                        PropChangedTypedSource.Dispose(); // .UnSubscribeToPropChanged<T>(PropertyChangedWithTVals_Handler, PathElement);
                         break;
                     }
                 default:

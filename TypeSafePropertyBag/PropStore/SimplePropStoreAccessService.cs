@@ -9,7 +9,6 @@ using System.ComponentModel;
 
 namespace DRM.TypeSafePropertyBag
 {
-    #region Type Aliases 
     using CompositeKeyType = UInt64;
     using ObjectIdType = UInt64;
 
@@ -24,12 +23,11 @@ namespace DRM.TypeSafePropertyBag
     using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
     using PSCloneServiceType = IProvidePropStoreCloneService<UInt32, String>;
 
-    #endregion
-
     internal class SimplePropStoreAccessService : PSAccessServiceType, IHaveTheStoreNode, IDisposable
     {
         #region Private Members
 
+        readonly WeakReference<SimplePropStoreAccessService> _wrThis;
         readonly WeakReference<IPropBagInternal> _clientAccessToken;
         readonly ObjectIdType _objectId;
 
@@ -38,9 +36,9 @@ namespace DRM.TypeSafePropertyBag
         PSAccessServiceProviderType _propStoreAccessServiceProvider;
         readonly IProvideHandlerDispatchDelegateCaches _handlerDispatchDelegateCacheProvider;
 
-        // Subscription Management
-        const int OBJECT_INDEX_CONCURRENCY_LEVEL = 1; // Typical number of threads simultaneously accessing the ObjectIndexes.
-        const int EXPECTED_NO_OF_OBJECTS = 10000;
+        //// Subscription Management
+        //const int OBJECT_INDEX_CONCURRENCY_LEVEL = 1; // Typical number of threads simultaneously accessing the ObjectIndexes.
+        //const int EXPECTED_NO_OF_OBJECTS = 10000;
 
         private CollectionOfSubscriberCollections _propIndexes;
 
@@ -58,6 +56,7 @@ namespace DRM.TypeSafePropertyBag
             IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider
             )
         {
+            _wrThis = new WeakReference<SimplePropStoreAccessService>(this);
             _ourNode = ourNode;
             _propStoreAccessServiceProvider = propStoreAccessServiceProvider;
             _handlerDispatchDelegateCacheProvider = handlerDispatchDelegateCacheProvider;
@@ -140,7 +139,8 @@ namespace DRM.TypeSafePropertyBag
             bool result;
             if (eventHandler != null)
             {
-                result = RegisterHandler<PropT>(newNode.CompKey, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
+                IDisposable disable = RegisterHandler<PropT>(newNode.CompKey, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
+                result = disable != null;
             }
             else
             {
@@ -194,7 +194,8 @@ namespace DRM.TypeSafePropertyBag
             bool result;
             if(eventHandler != null)
             {
-                result = RegisterHandler(newNode.CompKey, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
+                IDisposable disable = RegisterHandler(newNode.CompKey, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
+                result = disable != null;
             }
             else
             {
@@ -341,20 +342,22 @@ namespace DRM.TypeSafePropertyBag
 
         #region PC Typed Event Args
 
-        public bool RegisterHandler<T>(IPropBag propBag, PropIdType propId, 
+        public IDisposable RegisterHandler<T>(IPropBag propBag, PropIdType propId, 
             EventHandler<PcTypedEventArgs<T>> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef)
         {
             ExKeyT exKey = GetExKey(propBag, propId);
 
-            bool wasAdded = RegisterHandler<T>(exKey, eventHandler, priorityGroup, keepRef);
-            return wasAdded;
+            IDisposable disable = RegisterHandler<T>(exKey, eventHandler, priorityGroup, keepRef);
+            return disable;
         }
 
-        private bool RegisterHandler<T>(ExKeyT propertyId, EventHandler<PcTypedEventArgs<T>> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef)
+        private IDisposable RegisterHandler<T>(ExKeyT propertyId, EventHandler<PcTypedEventArgs<T>> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef)
         {
             ISubscriptionKeyGen subscriptionRequest = new SubscriptionKey<T>(propertyId, eventHandler, priorityGroup, keepRef);
             ISubscription newSubscription = AddSubscription(subscriptionRequest, out bool wasAdded);
-            return wasAdded;
+
+            RemoveSub disable = new RemoveSub(_wrThis, subscriptionRequest);
+            return disable;
         }
 
         public bool UnregisterHandler<T>(IPropBag propBag, PropIdType propId, EventHandler<PcTypedEventArgs<T>> eventHandler)
@@ -370,19 +373,21 @@ namespace DRM.TypeSafePropertyBag
 
         #region PC Gen Event Args
 
-        public bool RegisterHandler(IPropBag propBag, uint propId, 
+        public IDisposable RegisterHandler(IPropBag propBag, uint propId, 
             EventHandler<PcGenEventArgs> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef)
         {
             ExKeyT propertyId = GetExKey(propBag, propId);
-            bool wasAdded = RegisterHandler(propertyId, eventHandler, priorityGroup, keepRef);
-            return wasAdded;
+            IDisposable result = RegisterHandler(propertyId, eventHandler, priorityGroup, keepRef);
+            return result;
         }
 
-        private bool RegisterHandler(ExKeyT propertyId, EventHandler<PcGenEventArgs> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef)
+        private IDisposable RegisterHandler(ExKeyT propertyId, EventHandler<PcGenEventArgs> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef)
         {
             ISubscriptionKeyGen subscriptionRequest = new SubscriptionKeyGen(propertyId, eventHandler, priorityGroup, keepRef);
             ISubscription newSubscription = AddSubscription(subscriptionRequest, out bool wasAdded);
-            return wasAdded;
+
+            RemoveSub disable = new RemoveSub(_wrThis, subscriptionRequest);
+            return disable;
         }
 
         public bool UnregisterHandler(IPropBag propBag, uint propId, EventHandler<PcGenEventArgs> eventHandler)
@@ -392,6 +397,58 @@ namespace DRM.TypeSafePropertyBag
 
             bool wasRemoved = RemoveSubscription(subscriptionRequest);
             return wasRemoved;
+        }
+
+        public class RemoveSub : IDisposable
+        {
+            WeakReference<SimplePropStoreAccessService> _wr;
+            ISubscriptionKeyGen _request;
+            public RemoveSub(WeakReference<SimplePropStoreAccessService> wr_us, ISubscriptionKeyGen request)
+            {
+                _wr = wr_us;
+                _request = request;
+            }
+
+            #region IDisposable Support
+
+            private bool disposedValue = false; // To detect redundant calls
+
+            protected virtual void Dispose(bool disposing)
+            {
+                if (!disposedValue)
+                {
+                    if (disposing)
+                    {
+                        // TODO: dispose managed state (managed objects).
+                        if(_wr.TryGetTarget(out SimplePropStoreAccessService accService))
+                        {
+                            accService.RemoveSubscription(_request);
+                        }
+                    }
+
+                    // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                    // TODO: set large fields to null.
+
+                    disposedValue = true;
+                }
+            }
+
+            // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+            // ~Temp() {
+            //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            //   Dispose(false);
+            // }
+
+            // This code added to correctly implement the disposable pattern.
+            public void Dispose()
+            {
+                // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+                Dispose(true);
+                // TODO: uncomment the following line if the finalizer is overridden above.
+                // GC.SuppressFinalize(this);
+            }
+
+            #endregion
         }
 
         #endregion
@@ -771,7 +828,7 @@ namespace DRM.TypeSafePropertyBag
 
                     StoreNodeBag guestPropBagNode = GetGuestObjectNodeFromPropItemVal(propBagHost);
 
-                    L2KeyManType level2Man = ((IPropBagInternal)sender).Level2KeyManager;
+                    L2KeyManType level2Man = ((IPropBagInternal)sender).ItsStoreAccessor.Level2KeyManager;
                     if (level2Man.TryGetFromRaw(e.PropertyName, out PropIdType propId))
                     {
                         ExKeyT cKey = new SimpleExKey(_objectId, propId);
@@ -801,7 +858,7 @@ namespace DRM.TypeSafePropertyBag
 
                     StoreNodeBag guestPropBagNode = GetGuestObjectNodeFromPropItemVal(propBagHost);
 
-                    L2KeyManType level2Man = ((IPropBagInternal)sender).Level2KeyManager;
+                    L2KeyManType level2Man = ((IPropBagInternal)sender).ItsStoreAccessor.Level2KeyManager;
                     if (level2Man.TryGetFromRaw(e.PropertyName, out PropIdType propId))
                     {
                         ExKeyT cKey = new SimpleExKey(_objectId, propId);
@@ -899,29 +956,29 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        private IPropBagProxy GetInt_PropBag(IPropBag propBagWithInt)
-        {
-            if (propBagWithInt is IPropBagProxy ipbi)
-            {
-                return ipbi;
-            }
-            else
-            {
-                throw new ArgumentException($"int_PropBag does not implement {nameof(IPropBagProxy)}.");
-            }
-        }
+        //private IPropBagProxy GetInt_PropBag(IPropBag propBagWithInt)
+        //{
+        //    if (propBagWithInt is IPropBagProxy ipbi)
+        //    {
+        //        return ipbi;
+        //    }
+        //    else
+        //    {
+        //        throw new ArgumentException($"int_PropBag does not implement {nameof(IPropBagProxy)}.");
+        //    }
+        //}
 
-        private IPropDataInternal GetInt_PropData(IPropData propDataWithInt)
-        {
-            if (propDataWithInt is IPropDataInternal int_PropData)
-            {
-                return int_PropData;
-            }
-            else
-            {
-                throw new ArgumentException($"propDataWithInt does not implement {nameof(propDataWithInt)}.");
-            }
-        }
+        //private IPropDataInternal GetInt_PropData(IPropData propDataWithInt)
+        //{
+        //    if (propDataWithInt is IPropDataInternal int_PropData)
+        //    {
+        //        return int_PropData;
+        //    }
+        //    else
+        //    {
+        //        throw new ArgumentException($"propDataWithInt does not implement {nameof(propDataWithInt)}.");
+        //    }
+        //}
 
         ExKeyT GetCompKey(IPropBag propBag, PropIdType propId)
         {
@@ -1080,7 +1137,7 @@ namespace DRM.TypeSafePropertyBag
                 );
 
             System.Diagnostics.Debug.Assert(
-                condition: newStoreAccessor.Level2KeyManager.PropertyCount == ((IPropBagInternal)copySource).Level2KeyManager.PropertyCount,
+                condition: newStoreAccessor.Level2KeyManager.PropertyCount == ((IPropBagInternal)copySource).ItsStoreAccessor.Level2KeyManager.PropertyCount,
                 message: "The PropBag clone operation was not completed: The Level2KeyManager has different contents."
                 );
 

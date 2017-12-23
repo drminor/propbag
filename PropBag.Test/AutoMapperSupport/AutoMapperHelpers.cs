@@ -72,7 +72,13 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 {
                     IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider = new SimpleHandlerDispatchDelegateCacheProvider();
 
-                    PSAccessServiceProviderType PropStoreAccessServiceProvider =
+                    // Retire the old store, if previously commissioned.
+                    if(PropStoreAccessServiceProvider != null)
+                    {
+                        PropStoreAccessServiceProvider.Dispose();
+                    }
+
+                    PropStoreAccessServiceProvider =
                         new SimplePropStoreAccessServiceProvider(MAX_NUMBER_OF_PROPERTIES, handlerDispatchDelegateCacheProvider);
 
                     //IProvideDelegateCaches delegateCacheProvider = new SimpleDelegateCacheProvider();

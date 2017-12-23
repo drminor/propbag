@@ -90,13 +90,13 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
         #region Constructor
 
-        public LocalBinder(PSAccessServiceType propStoreAccessService, ExKeyT onwerPropId, LocalBindingInfo bindingInfo)
+        public LocalBinder(PSAccessServiceType propStoreAccessService, ExKeyT ownerPropId, LocalBindingInfo bindingInfo)
         {
-            _bindingTarget = onwerPropId;
+            _bindingTarget = ownerPropId;
             _bindingInfo = bindingInfo;
 
             // Get the PropStore (Tree) Node for the IPropBag object hosting the property that is the target of the binding.
-            _ourNode = GetPropStore(propStoreAccessService);
+            _ourNode = GetPropBagNode(propStoreAccessService);
 
             _targetObject = _ourNode.PropBagProxy.PropBagRef;
 
@@ -126,7 +126,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             _isComplete = StartBinding(_targetObject, _pathElements, _pathListeners, _isPathAbsolute);
         }
 
-        private StoreNodeBag GetPropStore(PSAccessServiceType propStoreAccessService)
+        private StoreNodeBag GetPropBagNode(PSAccessServiceType propStoreAccessService)
         {
             if (propStoreAccessService is IHaveTheStoreNode storeKeyProvider)
             {
@@ -555,7 +555,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
         private bool GetChildProp(StoreNodeBag objectNode, IPropBagInternal propBag, string propertyName, out StoreNodeProp child)
         {
-            PropIdType propId = propBag.Level2KeyManager.FromRaw(propertyName);
+            PropIdType propId = propBag.ItsStoreAccessor.Level2KeyManager.FromRaw(propertyName);
             bool result = objectNode.TryGetChild(propId, out child);
             return result;
         }
@@ -739,7 +739,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             bool result;
             if (sourcePropNode.Parent.PropBagProxy.PropBagRef.TryGetTarget(out IPropBagInternal propBag))
             {
-                if (propBag.Level2KeyManager.TryGetFromRaw(PropertyName, out PropIdType propId))
+                if (propBag.ItsStoreAccessor.Level2KeyManager.TryGetFromRaw(PropertyName, out PropIdType propId))
                 {
                     StoreNodeBag propBagNode = sourcePropNode.Parent;
 
@@ -782,6 +782,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
         {
             if (bindingTarget.TryGetTarget(out IPropBagInternal propBag))
             {
+                //((IPropBag)propBag).TryGetPropGen(_propertyName, type)
                 bool wasSet = ((IPropBag)propBag).SetIt(newValue, this.PropertyName);
                 string status = wasSet ? "has been updated" : "already had the new value";
                 System.Diagnostics.Debug.WriteLine($"The binding target {status}.");

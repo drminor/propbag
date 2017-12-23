@@ -42,6 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ObsCollection.cs" />
+    <Compile Include="PropBagInterfaces\IRegisterBindingsForwarder.cs" />
     <Compile Include="PropInterfaces\IListSourceProvider.cs" />
     <Compile Include="PropInterfaces\IObsCollection.cs" />
     <Compile Include="PropStoreKeys\IExplodedKey.cs" />

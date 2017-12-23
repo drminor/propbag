@@ -29,6 +29,7 @@ namespace DRM.TypeSafePropertyBag
 
         #region Events
 
+        // TODO: Make this use WeakReferences to the subscriber.
         public event EventHandler<PSNodeParentChangedEventArgs> ParentNodeHasChanged;
 
         #endregion

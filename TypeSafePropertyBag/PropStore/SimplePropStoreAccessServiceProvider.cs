@@ -170,7 +170,7 @@ namespace DRM.TypeSafePropertyBag
                 //    throw new ObjectDisposedException($"The {nameof(StoreNodeBag)} with CKey: {sourceStoreNode.CompKey} holds a reference to a PropBag that is no longer alive.");
                 //}
 
-                if (sourcePropBag.Level2KeyManager is SimpleLevel2KeyMan sourceLevel2KeyMan)
+                if (sourcePropBag.ItsStoreAccessor.Level2KeyManager is SimpleLevel2KeyMan sourceLevel2KeyMan)
                 {
                     L2KeyManType level2KeyManager_newCopy = new SimpleLevel2KeyMan(sourceLevel2KeyMan);
 
