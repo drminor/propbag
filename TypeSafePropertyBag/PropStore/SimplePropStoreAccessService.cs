@@ -46,6 +46,8 @@ namespace DRM.TypeSafePropertyBag
 
         readonly BindingsCollection _bindings;
 
+        private DSProviderProviderCollection _dataSourceProviders;
+
         #endregion
 
         #region Constructor
@@ -63,9 +65,10 @@ namespace DRM.TypeSafePropertyBag
             _propStoreAccessServiceProvider = propStoreAccessServiceProvider;
             _handlerDispatchDelegateCacheProvider = handlerDispatchDelegateCacheProvider;
 
-            if(!(propStoreAccessServiceProvider is PSCloneServiceType))
+            if (!(propStoreAccessServiceProvider is PSCloneServiceType))
             {
-                throw new ArgumentException($"The {nameof(propStoreAccessServiceProvider)} does not implement the {nameof(PSCloneServiceType)} interface.");
+                string msg = $"This instance of {nameof(SimplePropStoreAccessService)} was not provided a {nameof(PSAccessServiceProviderType)} that implements the {nameof(PSCloneServiceType)} interface";
+                System.Diagnostics.Debug.WriteLine($"Warning: {msg}.");
             }
 
             _level2KeyMan = level2KeyManager;
@@ -79,6 +82,8 @@ namespace DRM.TypeSafePropertyBag
 
             // Create the binding store for this PropBag.
             _bindings = new BindingsCollection();
+
+            _dataSourceProviders = null;
         }
 
         #endregion
@@ -96,19 +101,12 @@ namespace DRM.TypeSafePropertyBag
                 IPropData result = GetChild(cKey).Int_PropData;
                 return result;
             }
-            //private set
-            //{
-            //    IPropDataInternal int_PropData = GetInt_PropData(value);
-            //    ExKeyT cKey = GetCompKey(propBag, propId);
-
-            //    _ourNode.ChildList[cKey].Int_PropData = int_PropData;
-            //}
         }
 
         public bool TryGetValue(IPropBag propBag, PropIdType propId, out IPropData propData)
         {
             ExKeyT cKey = GetCompKey(propBag, propId);
-            if(_ourNode.TryGetChild(cKey, out StoreNodeProp child))
+            if (_ourNode.TryGetChild(cKey, out StoreNodeProp child))
             {
                 propData = child.Int_PropData;
                 return true;
@@ -161,7 +159,7 @@ namespace DRM.TypeSafePropertyBag
             bool result;
             if (target != null)
             {
-                ISubscriptionKeyGen subscriptionRequest = 
+                ISubscriptionKeyGen subscriptionRequest =
                     new SubscriptionKeyGen(newNode.CompKey, genericTypedProp.Type, target, method, subscriptionKind, priorityGroup, keepRef: false, subscriptionFactory: null);
 
                 ISubscription newSubscription = AddSubscription(subscriptionRequest, out bool wasAdded);
@@ -192,7 +190,7 @@ namespace DRM.TypeSafePropertyBag
             propData = newNode.Int_PropData;
 
             bool result;
-            if(eventHandler != null)
+            if (eventHandler != null)
             {
                 IDisposable disable = RegisterHandler(newNode.CompKey, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
                 result = disable != null;
@@ -252,7 +250,7 @@ namespace DRM.TypeSafePropertyBag
 
             return result;
         }
-         
+
         public bool ContainsKey(IPropBag propBag, PropIdType propId)
         {
             ExKeyT cKey = GetCompKey(propBag, propId);
@@ -267,13 +265,13 @@ namespace DRM.TypeSafePropertyBag
             Dictionary<PropNameType, IPropData> result = _ourNode.Children.ToDictionary
                 (
                 x => GetPropNameFromKey(x.CompKey),
-                x => (IPropData) x.Int_PropData
+                x => (IPropData)x.Int_PropData
                 );
 
             return result;
         }
 
-        public IEnumerator<KeyValuePair<PropNameType, IPropData>> GetEnumerator(IPropBag propBag) 
+        public IEnumerator<KeyValuePair<PropNameType, IPropData>> GetEnumerator(IPropBag propBag)
         {
             GetAndCheckObjectRef(propBag);
             IEnumerator<KeyValuePair<PropNameType, IPropData>> result = GetCollection(propBag).GetEnumerator();
@@ -355,6 +353,13 @@ namespace DRM.TypeSafePropertyBag
 
         public PSAccessServiceType CloneProps(IPropBag callingPropBag, IPropBag copySource)
         {
+            if (!(_propStoreAccessServiceProvider is PSCloneServiceType))
+            {
+                string msg = $"This instance of {nameof(SimplePropStoreAccessService)} was not provided a {nameof(PSAccessServiceProviderType)} that implements the {nameof(PSCloneServiceType)} interface";
+
+                throw new InvalidOperationException($"{msg}.");
+            }
+
             if (!(copySource is IPropBagInternal int_propBag))
             {
                 throw new InvalidOperationException($"The {nameof(copySource)} does not implement the {nameof(IPropBagInternal)} interface.");
@@ -417,7 +422,7 @@ namespace DRM.TypeSafePropertyBag
 
         #region PC Typed Event Args
 
-        public IDisposable RegisterHandler<T>(IPropBag propBag, PropIdType propId, 
+        public IDisposable RegisterHandler<T>(IPropBag propBag, PropIdType propId,
             EventHandler<PcTypedEventArgs<T>> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef)
         {
             ExKeyT exKey = GetExKey(propBag, propId);
@@ -448,7 +453,7 @@ namespace DRM.TypeSafePropertyBag
 
         #region PC Gen Event Args
 
-        public IDisposable RegisterHandler(IPropBag propBag, uint propId, 
+        public IDisposable RegisterHandler(IPropBag propBag, uint propId,
             EventHandler<PcGenEventArgs> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef)
         {
             ExKeyT propertyId = GetExKey(propBag, propId);
@@ -478,7 +483,7 @@ namespace DRM.TypeSafePropertyBag
 
         #region PC Object Event Args
 
-        public bool RegisterHandler(IPropBag propBag, uint propId, 
+        public bool RegisterHandler(IPropBag propBag, uint propId,
             EventHandler<PcObjectEventArgs> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef)
         {
             ExKeyT exKey = GetExKey(propBag, propId);
@@ -493,7 +498,7 @@ namespace DRM.TypeSafePropertyBag
             return wasAdded;
         }
 
-       public bool UnregisterHandler(IPropBag propBag, uint propId, EventHandler<PcObjectEventArgs> eventHandler)
+        public bool UnregisterHandler(IPropBag propBag, uint propId, EventHandler<PcObjectEventArgs> eventHandler)
         {
             ExKeyT exKey = GetExKey(propBag, propId);
             ISubscriptionKeyGen subscriptionRequest = new SubscriptionKeyGen(exKey, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
@@ -797,7 +802,34 @@ namespace DRM.TypeSafePropertyBag
             ExKeyT exKey = GetExKey(host, propId);
 
             IEnumerable<ISubscription> result = _bindings.TryGetBindings(exKey);
-            return result;                
+            return result;
+        }
+
+        #endregion
+
+        #region Data Source Provider Management
+
+        public IProvideADataSourceProvider<T> GetDataSourceProvider<T>(IPropBag propBag, PropIdType propId)
+        {
+            ExKeyT globalPropId = GetCompKey(propBag, propId);
+
+            if (_dataSourceProviders == null)
+                _dataSourceProviders = new DSProviderProviderCollection();
+
+            IProvideADataSourceProviderGen result = _dataSourceProviders.GetOrAdd(propId, GetDSProviderProviderFactory<T>(propId));
+            return result as IProvideADataSourceProvider<T>;
+        }
+
+        private Func<PropIdType, IProvideADataSourceProviderGen> GetDSProviderProviderFactory<T>(PropIdType propId)
+        {
+            PSAccessServiceInternalType st = this as PSAccessServiceInternalType;
+            return GetDSProviderProvider;
+
+            // A function that encloses: the type, and a reference to this store as PSAccessServiceInternalType.
+            IProvideADataSourceProviderGen GetDSProviderProvider(PropIdType pId)
+            {
+                return new DSProviderProvider<T>(PropKindEnum.ObservableCollectionFB, pId, st);
+            }
         }
 
         #endregion
@@ -1061,11 +1093,10 @@ namespace DRM.TypeSafePropertyBag
 
         L2KeyManType PSAccessServiceInternalType.Level2KeyManager => _level2KeyMan;
 
-        bool PSAccessServiceInternalType.TryGetChildPropNode(StoreNodeProp sourcePropNode, PropNameType propertyName, out StoreNodeProp child)
+
+        bool PSAccessServiceInternalType.TryGetChildPropNode(StoreNodeBag propBagNode, PropNameType propertyName, out StoreNodeProp child)
         {
             bool result;
-
-            StoreNodeBag propBagNode = sourcePropNode.Parent;
 
             if (propBagNode.PropBagProxy.PropBagRef.TryGetTarget(out IPropBagInternal propBag))
             {
@@ -1077,25 +1108,45 @@ namespace DRM.TypeSafePropertyBag
                     }
                     else
                     {
-                        System.Diagnostics.Debug.WriteLine($"PropBagNode.TryGetChild failed to access the child node with property name:{propertyName}.");
+                        System.Diagnostics.Debug.WriteLine($"Failed to access the child node with property name: {propertyName} on propBagNode: {propBagNode.CompKey}.");
                         child = null;
                         result = false;
                     }
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine($"Update Target could not find that property by name: {propertyName}.");
+                    System.Diagnostics.Debug.WriteLine($"Could not find that property by name: {propertyName} on propBagNode: {propBagNode.CompKey}.");
                     child = null;
                     result = false;
                 }
             }
             else
             {
-                System.Diagnostics.Debug.WriteLine("Our weak reference to the binding target holds a reference to an object 'no longer with us.'");
+                System.Diagnostics.Debug.WriteLine($"The weak reference held by this StoreBagNode: {propBagNode.CompKey} holds a reference to an object that is 'no longer with us.'");
                 child = null;
                 result = false;
             }
             return result;
+        }
+
+        StoreNodeProp PSAccessServiceInternalType.GetChild(PropIdType propId)
+        {
+            StoreNodeProp result = GetChild(propId);
+            return result;
+        }
+
+        IDisposable PSAccessServiceInternalType.RegisterHandler<T>(PropIdType propId, EventHandler<PcTypedEventArgs<T>> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef)
+        {
+            SimpleExKey exKey = new SimpleExKey(_objectId, propId);
+            IDisposable disable = RegisterHandler<T>(exKey, eventHandler, priorityGroup, keepRef);
+            return disable;
+        }
+
+        IDisposable PSAccessServiceInternalType.RegisterHandler(PropIdType propId, EventHandler<PcGenEventArgs> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef)
+        {
+            SimpleExKey exKey = new SimpleExKey(_objectId, propId);
+            IDisposable disable = RegisterHandler(exKey, eventHandler, priorityGroup, keepRef);
+            return disable;
         }
 
         #endregion

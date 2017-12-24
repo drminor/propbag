@@ -37,6 +37,9 @@ namespace DRM.TypeSafePropertyBag
 
         IPropStoreAccessService<L2T, L2TRaw> CloneProps(IPropBag callingPropBag, IPropBag copySource);
 
+        IProvideADataSourceProvider<T> GetDataSourceProvider<T>(IPropBag propBag, L2T propId);
+
+
         int ClearAllProps(IPropBag propBag);
 
         // Diagnostics
