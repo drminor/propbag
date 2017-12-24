@@ -42,15 +42,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ObsCollection.cs" />
+    <Compile Include="PropBagInterfaces\GetDefaultValueDelegate.cs" />
     <Compile Include="PropBagInterfaces\IRegisterBindingsForwarder.cs" />
     <Compile Include="PropInterfaces\IListSourceProvider.cs" />
     <Compile Include="PropInterfaces\IObsCollection.cs" />
+    <Compile Include="PropInterfaces\IProvideADataSourceProvider_NotUsed.cs" />
     <Compile Include="PropStoreKeys\IExplodedKey.cs" />
     <Compile Include="PropStoreKeys\ILevel2KeyManager.cs" />
     <Compile Include="PropStoreKeys\SimpleExKey.cs" />
     <Compile Include="PropStoreKeys\SimpleLevel2KeyMan.cs" />
     <Compile Include="PropStore\IPropStoreAccessServiceInternal.cs" />
     <Compile Include="PropStore\Unsubscriber.cs" />
+    <Compile Include="Props\PropBase.cs" />
+    <Compile Include="Props\PropTypedBase.cs" />
     <Compile Include="TypeConverters\ConverterDelegates.cs" />
     <Compile Include="DoSetDelegate.cs" />
     <Compile Include="Fundamentals\TwoTypesDelegateCache.cs" />
@@ -161,6 +165,7 @@
     <Compile Include="Subscriptions\SubscriptionPriorityGroup.cs" />
     <Compile Include="Subscriptions\SubscriptionTargetKind.cs" />
     <Compile Include="TypeSafePropBagMetaData.cs" />
+    <Compile Include="Unused\WeakRefKey.cs" />
     <Compile Include="ValPlusType.cs" />
   </ItemGroup>
   <ItemGroup />

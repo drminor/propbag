@@ -57,6 +57,7 @@
     <Compile Include="ControlModel\PropBinderField.cs" />
     <Compile Include="Factories\APFGenericMethodTemplates.cs" />
     <Compile Include="Factories\ICreateProps.cs" />
+    <Compile Include="Props\BasicDataSourceProvider.cs" />
     <Compile Include="Props\CPropFB.cs" />
     <Compile Include="Props\CProp.cs" />
     <Compile Include="Collections\PbAbstractListSource.cs" />
@@ -72,7 +73,6 @@
     <Compile Include="ControlModel\PropItem.cs" />
     <Compile Include="ControlModel\PropModel.cs" />
     <Compile Include="ExtValDelegates.cs" />
-    <Compile Include="Factories\GetDefaultValueDelegate.cs" />
     <Compile Include="Factories\PropFactoryValueConverter.cs" />
     <Compile Include="Props\Prop.cs" />
     <Compile Include="PropBag.CustomTypeDescriptor.cs" />
@@ -86,8 +86,6 @@
     <Compile Include="Props\PropExternStore.cs" />
     <Compile Include="Factories\PropExtStoreFactory.cs" />
     <Compile Include="Factories\PropFactory.cs" />
-    <Compile Include="Props\PropBase.cs" />
-    <Compile Include="Props\PropTypedBase.cs" />
     <Compile Include="PubPropBag.cs" />
     <Compile Include="PropBag.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
