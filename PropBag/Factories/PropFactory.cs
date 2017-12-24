@@ -15,9 +15,8 @@ namespace DRM.PropBag
 
     public class PropFactory : AbstractPropFactory
     {
+
         public override bool ProvidesStorage => true;
-
-
 
         public PropFactory
             (

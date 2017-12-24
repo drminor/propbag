@@ -201,7 +201,7 @@ namespace DRM.PropBagWPF
             ControlModel.PropItem rpi = new ControlModel.PropItem(pi.PropertyType, pi.PropertyName,
                 hasStore, typeIsSolid, pi.PropKind, extraInfo: extraInfo);
 
-            bool isCProp = propFactory.IsPropACollection(pi.PropKind);
+            bool isCProp = propFactory.IsCollection(pi.PropKind);
             bool foundTypeInfoField = false;
 
             foreach (Control uc in pi.Items)

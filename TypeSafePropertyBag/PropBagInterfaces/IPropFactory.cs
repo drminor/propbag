@@ -19,7 +19,11 @@ namespace DRM.TypeSafePropertyBag
 
         IProvideDelegateCaches DelegateCacheProvider { get; }
 
-        bool IsPropACollection(PropKindEnum propKind);
+        bool IsCollection(IProp prop);
+        bool IsCollection(PropKindEnum propKind);
+
+        bool IsReadOnly(IProp prop);
+        bool IsReadOnly(PropKindEnum propKind);
 
         #endregion
 

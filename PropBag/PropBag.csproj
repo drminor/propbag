@@ -107,7 +107,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="TopLevelObjectReferences.md" />
     <None Include="XMLModel\PropBagModel.dtd" />
     <None Include="XMLModel\PropBagModel.xsd">
       <SubType>Designer</SubType>

@@ -34,7 +34,7 @@ namespace DRM.TypeSafePropertyBag
         /// </summary>
         public virtual string IndexerName { get; }
 
-
+        // These are used for diagnostics.
         public virtual int DoSetCacheCount => DelegateCacheProvider.DoSetDelegateCache.Count; // abstract int DoSetCacheCount { get; }
         public virtual int CreatePropFromStringCacheCount => DelegateCacheProvider.CreatePropFromStringCache.Count; //abstract int CreatePropFromStringCacheCount { get; }
         public virtual int CreatePropWithNoValCacheCount => DelegateCacheProvider.CreatePropWithNoValCache.Count; //abstract int CreatePropWithNoValCacheCount { get; }
@@ -66,30 +66,80 @@ namespace DRM.TypeSafePropertyBag
 
         #endregion
 
-        public bool IsPropACollection(PropKindEnum pk)
+        #region Prop Support
+
+        public virtual bool IsCollection(IProp prop)
         {
-            bool result = (
-                pk == PropKindEnum.Enumerable ||
-                pk == PropKindEnum.Enumerable_RO ||
-
-                pk == PropKindEnum.EnumerableTyped ||
-                pk == PropKindEnum.EnumerableTyped_RO ||
-
-                pk == PropKindEnum.ObservableCollection ||
-                pk == PropKindEnum.ObservableCollection_RO ||
-
-                pk == PropKindEnum.ObservableCollectionFB ||
-                pk == PropKindEnum.ObservableCollectionFB_RO
-                );
-
-            return result;
+            return IsCollection(prop.PropKind);
         }
+
+        public virtual bool IsCollection(PropKindEnum propKind)
+        {
+            if (propKind == PropKindEnum.Prop)
+            {
+                return false;
+            }
+            else if
+                (
+                propKind == PropKindEnum.ObservableCollection ||
+                propKind == PropKindEnum.ObservableCollectionFB ||
+                propKind == PropKindEnum.EnumerableTyped ||
+                propKind == PropKindEnum.Enumerable ||
+                propKind == PropKindEnum.ObservableCollection_RO ||
+                propKind == PropKindEnum.ObservableCollectionFB_RO ||
+                propKind == PropKindEnum.EnumerableTyped_RO ||
+                propKind == PropKindEnum.Enumerable_RO
+                )
+            {
+                return true;
+            }
+            else
+            {
+                CheckPropKindSpecial(propKind);
+                return false;
+            }
+        }
+
+        public virtual bool IsReadOnly(IProp prop)
+        {
+            return IsReadOnly(prop.PropKind);
+        }
+
+        public virtual bool IsReadOnly(PropKindEnum propKind)
+        {
+            if (propKind == PropKindEnum.Prop)
+            {
+                return false;
+            }
+            else if
+                (
+                propKind == PropKindEnum.CollectionViewSource_RO ||
+                propKind == PropKindEnum.ObservableCollection_RO ||
+                propKind == PropKindEnum.ObservableCollectionFB_RO ||
+                propKind == PropKindEnum.EnumerableTyped_RO ||
+                propKind == PropKindEnum.Enumerable_RO
+                )
+            {
+                return true;
+            }
+            else
+            {
+                CheckPropKind(propKind);
+                return false;
+            }
+        }
+
+        #endregion
+
+        #region PropStore Support
 
         public PSAccessServiceType CreatePropStoreService(IPropBagInternal propBag)
         {
             PSAccessServiceType result = _propStoreAccessServiceProvider.CreatePropStoreService(propBag);
             return result;
         }
+
+        #endregion
 
         #region Enumerable-Type Prop Creation 
 
@@ -192,7 +242,7 @@ namespace DRM.TypeSafePropertyBag
 
                 return prop;
             }
-            else if (IsPropACollection(propKind))
+            else if (IsCollection(propKind))
             {
                 CreateEPropFromObjectDelegate propCreator = GetCPropCreator(typeOfThisProperty, itemType);
                 IProp prop = propCreator(this, value, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
@@ -220,7 +270,7 @@ namespace DRM.TypeSafePropertyBag
 
                 return prop;
             }
-            else if (IsPropACollection(propKind))
+            else if (IsCollection(propKind))
             {
                 if (propKind == PropKindEnum.ObservableCollectionFB)
                 {
@@ -258,7 +308,7 @@ namespace DRM.TypeSafePropertyBag
 
                 return prop;
             }
-            else if (IsPropACollection(propKind))
+            else if (IsCollection(propKind))
             {
                 CreateEPropWithNoValueDelegate propCreator = GetCPropWithNoValueCreator(typeOfThisProperty, itemType);
                 IProp prop = propCreator(this, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
@@ -509,6 +559,51 @@ namespace DRM.TypeSafePropertyBag
         #endregion Property-Type Methods
 
         #endregion Shared Delegate Creation
+
+        #region DEBUG Checks
+
+        [System.Diagnostics.Conditional("DEBUG")]
+        private void CheckPropKind(PropKindEnum propKind)
+        {
+            if (!
+                    (
+                    propKind == PropKindEnum.CollectionViewSource ||
+                    propKind == PropKindEnum.CollectionViewSource_RO ||
+                    propKind == PropKindEnum.DataTable ||
+                    propKind == PropKindEnum.DataTable_RO ||
+                    propKind == PropKindEnum.Prop ||
+                    propKind == PropKindEnum.ObservableCollection ||
+                    propKind == PropKindEnum.ObservableCollectionFB ||
+                    propKind == PropKindEnum.EnumerableTyped ||
+                    propKind == PropKindEnum.Enumerable ||
+                    propKind == PropKindEnum.ObservableCollection_RO ||
+                    propKind == PropKindEnum.ObservableCollectionFB_RO ||
+                    propKind == PropKindEnum.EnumerableTyped_RO ||
+                    propKind == PropKindEnum.Enumerable_RO
+                    )
+                )
+            {
+                throw new InvalidOperationException($"The PropKind: {propKind} is not supported.");
+            }
+        }
+
+        [System.Diagnostics.Conditional("DEBUG")]
+        private void CheckPropKindSpecial(PropKindEnum propKind)
+        {
+            if (!
+                    (
+                    propKind == PropKindEnum.CollectionViewSource ||
+                    propKind == PropKindEnum.CollectionViewSource_RO ||
+                    propKind == PropKindEnum.DataTable ||
+                    propKind == PropKindEnum.DataTable_RO
+                    )
+                )
+            {
+                throw new InvalidOperationException($"The PropKind: {propKind} is not supported.");
+            }
+        }
+
+        #endregion 
 
         #region IDisposable Support
 
