@@ -6,7 +6,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using DRM.TypeSafePropertyBag.Fundamentals;
 
 namespace DRM.PropBag
 {
@@ -20,8 +19,6 @@ namespace DRM.PropBag
 
     public class PropExtStoreFactory : AbstractPropFactory
     {
-        //public IProvideDelegateCaches DelegateCacheProvider { get; }
-
         object Stuff { get; }
 
         public override bool ProvidesStorage
@@ -35,7 +32,6 @@ namespace DRM.PropBag
             (
                 object stuff,
                 PSAccessServiceProviderType propStoreAccessServiceProvider,
-                //IProvideDelegateCaches delegateCacheProvider,
                 ResolveTypeDelegate typeResolver,
                 IConvertValues valueConverter
             )

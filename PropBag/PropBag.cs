@@ -1,9 +1,8 @@
 ﻿using DRM.PropBag.Caches;
 using DRM.PropBag.ControlModel;
 using DRM.TypeSafePropertyBag;
-using DRM.TypeSafePropertyBag.Fundamentals;
+
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -12,18 +11,13 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
-using System.Threading;
-using System.Windows;
 
 namespace DRM.PropBag
 {
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
-    //using L2KeyManType = IL2KeyMan<UInt32, String>;
     using PropIdType = UInt32;
     using PropNameType = String;
-
     using IRegisterBindingsFowarderType = IRegisterBindingsForwarder<UInt32>;
-
     using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
     using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
 
@@ -738,7 +732,7 @@ namespace DRM.PropBag
                 }
             }
 
-            DelegateCache<DoSetDelegate> dc = _propFactory.DelegateCacheProvider.DoSetDelegateCache;
+            ICacheDelegates<DoSetDelegate> dc = _propFactory.DelegateCacheProvider.DoSetDelegateCache;
             DoSetDelegate setPropDel = dc.GetOrAdd(PropData.TypedProp.Type);
             return setPropDel(this, propId, propertyName, PropData.TypedProp, value);
         }

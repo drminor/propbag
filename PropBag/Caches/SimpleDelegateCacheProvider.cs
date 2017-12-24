@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-
 using DRM.TypeSafePropertyBag.Fundamentals;
 using DRM.TypeSafePropertyBag;
 using System.Reflection;
@@ -19,23 +18,23 @@ namespace DRM.PropBag.Caches
         public TypeDescBasedTConverterCache TypeDescBasedTConverterCache { get; }
 
         // DoSetDelegate Cache.
-        public DelegateCache<DoSetDelegate> DoSetDelegateCache { get; }
+        public ICacheDelegates<DoSetDelegate> DoSetDelegateCache { get; }
 
 
-        public DelegateCache<CreatePropFromStringDelegate> CreatePropFromStringCache { get; }
+        public ICacheDelegates<CreatePropFromStringDelegate> CreatePropFromStringCache { get; }
 
-        public DelegateCache<CreatePropWithNoValueDelegate> CreatePropWithNoValCache { get; }
+        public ICacheDelegates<CreatePropWithNoValueDelegate> CreatePropWithNoValCache { get; }
 
-        public DelegateCache<CreatePropFromObjectDelegate> CreatePropFromObjectCache { get; }
+        public ICacheDelegates<CreatePropFromObjectDelegate> CreatePropFromObjectCache { get; }
 
-        public TwoTypesDelegateCache<CreateEPropFromStringDelegate> CreateCPropFromStringCache { get; }
-        public TwoTypesDelegateCache<CreateEPropFromStringDelegate> CreateCPropFromStringFBCache { get; }
+        public ICacheDelegatesForTypePair<CreateEPropFromStringDelegate> CreateCPropFromStringCache { get; }
+        public ICacheDelegatesForTypePair<CreateEPropFromStringDelegate> CreateCPropFromStringFBCache { get; }
 
-        public TwoTypesDelegateCache<CreateEPropWithNoValueDelegate> CreateCPropWithNoValCache { get; }
+        public ICacheDelegatesForTypePair<CreateEPropWithNoValueDelegate> CreateCPropWithNoValCache { get; }
 
-        public TwoTypesDelegateCache<CreateEPropFromObjectDelegate> CreateCPropFromObjectCache { get; }
+        public ICacheDelegatesForTypePair<CreateEPropFromObjectDelegate> CreateCPropFromObjectCache { get; }
 
-        public TwoTypesDelegateCache<CreateCVSPropDelegate> CreateCVSPropCache { get; }
+        public ICacheDelegatesForTypePair<CreateCVSPropDelegate> CreateCVSPropCache { get; }
 
         #endregion
 

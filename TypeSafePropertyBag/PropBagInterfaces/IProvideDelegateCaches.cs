@@ -1,28 +1,26 @@
-﻿using DRM.TypeSafePropertyBag.Fundamentals;
-
+﻿
 namespace DRM.TypeSafePropertyBag
 {
     public interface IProvideDelegateCaches
     {
         TypeDescBasedTConverterCache TypeDescBasedTConverterCache { get; }
 
-        DelegateCache<DoSetDelegate> DoSetDelegateCache { get; }
+        ICacheDelegates<DoSetDelegate> DoSetDelegateCache { get; }
+
+        ICacheDelegates<CreatePropFromStringDelegate> CreatePropFromStringCache { get; }
+
+        ICacheDelegates<CreatePropWithNoValueDelegate> CreatePropWithNoValCache { get; }
+
+        ICacheDelegates<CreatePropFromObjectDelegate> CreatePropFromObjectCache { get; }
+
+        ICacheDelegatesForTypePair<CreateEPropFromStringDelegate> CreateCPropFromStringCache { get; }
+        ICacheDelegatesForTypePair<CreateEPropFromStringDelegate> CreateCPropFromStringFBCache { get; }
+
+        ICacheDelegatesForTypePair<CreateEPropWithNoValueDelegate> CreateCPropWithNoValCache { get; }
+
+        ICacheDelegatesForTypePair<CreateEPropFromObjectDelegate> CreateCPropFromObjectCache { get; }
 
 
-        DelegateCache<CreatePropFromStringDelegate> CreatePropFromStringCache { get; }
-
-        DelegateCache<CreatePropWithNoValueDelegate> CreatePropWithNoValCache { get; }
-
-        DelegateCache<CreatePropFromObjectDelegate> CreatePropFromObjectCache { get; }
-
-        TwoTypesDelegateCache<CreateEPropFromStringDelegate> CreateCPropFromStringCache { get; }
-        TwoTypesDelegateCache<CreateEPropFromStringDelegate> CreateCPropFromStringFBCache { get; }
-
-        TwoTypesDelegateCache<CreateEPropWithNoValueDelegate> CreateCPropWithNoValCache { get; }
-
-        TwoTypesDelegateCache<CreateEPropFromObjectDelegate> CreateCPropFromObjectCache { get; }
-
-        
-        TwoTypesDelegateCache<CreateCVSPropDelegate> CreateCVSPropCache { get; }
+        ICacheDelegatesForTypePair<CreateCVSPropDelegate> CreateCVSPropCache { get; }
     }
 }

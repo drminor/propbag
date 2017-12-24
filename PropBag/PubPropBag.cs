@@ -36,20 +36,7 @@ namespace DRM.PropBag
     ///</summary>
     public class PubPropBag : PropBag, IPubPropBag
     {
-        
         #region Constructor
-
-        //public PubPropBag()
-        //    : base() { }
-
-        //public PubPropBag(PropBagTypeSafetyMode typeSafetyMode)
-        //    : base(typeSafetyMode) { }
-
-        //// TODO: remove this constructor.
-        //protected PubPropBag(PropBagTypeSafetyMode typeSafetyMode, IPropFactory propFactory)
-        //    : base(typeSafetyMode, propFactory) { }
-
-
 
         public PubPropBag(PropModel pm, IPropFactory propFactory = null, string fullClassName = null)
             : base(pm, fullClassName, propFactory)
@@ -57,7 +44,7 @@ namespace DRM.PropBag
         }
 
         protected PubPropBag(IPropBag copySource)
-            : base(copySource.TypeSafetyMode, copySource.PropFactory, copySource.FullClassName)
+            : base(copySource)
         {
         }
 

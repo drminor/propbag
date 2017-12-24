@@ -43,6 +43,8 @@
   <ItemGroup>
     <Compile Include="Factories\AbstractPropFactory.cs" />
     <Compile Include="Factories\APFGenericMethodTemplates.cs" />
+    <Compile Include="PropBagInterfaces\ICacheDelegates.cs" />
+    <Compile Include="PropBagInterfaces\ICacheDelegatesForTypePair.cs" />
     <Compile Include="Fundamentals\TwoTypes.cs" />
     <Compile Include="ObsCollection.cs" />
     <Compile Include="PropBagInterfaces\GetDefaultValueDelegate.cs" />

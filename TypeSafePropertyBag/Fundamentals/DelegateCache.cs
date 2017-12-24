@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace DRM.TypeSafePropertyBag.Fundamentals
 {
-    public class DelegateCache<T> where T : class
+    public class DelegateCache<T> : ICacheDelegates<T> where T : class
     { 
         LockingConcurrentDictionary<TypeKey, T> _cache;
         MethodInfo _theMethod;
@@ -36,7 +36,7 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
             return result;
         }
 
-        internal T MakeTheDelegate(TypeKey tKey)
+        private T MakeTheDelegate(TypeKey tKey)
         {
             MethodInfo methInfoSetProp = _theMethod.MakeGenericMethod(tKey.Type);
             Delegate result = Delegate.CreateDelegate(typeof(T), null, methInfoSetProp);
