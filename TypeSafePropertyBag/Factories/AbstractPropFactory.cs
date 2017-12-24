@@ -1,18 +1,12 @@
-﻿using DRM.PropBag.Caches;
-using DRM.PropBag.Collections;
-using DRM.TypeSafePropertyBag;
+﻿
 using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Globalization;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace DRM.PropBag
+using System.Globalization;
+
+namespace DRM.TypeSafePropertyBag
 {
     using PropIdType = UInt32;
     using PropNameType = String;
@@ -22,7 +16,6 @@ namespace DRM.PropBag
 
     public abstract class AbstractPropFactory : IPropFactory, IDisposable
     {
-
         PSAccessServiceProviderType _propStoreAccessServiceProvider { get; }
 
         #region Public Properties
@@ -65,8 +58,8 @@ namespace DRM.PropBag
             // Use our default implementation, if the caller did not supply one.
             TypeResolver = typeResolver ?? this.GetTypeFromName;
 
-            // Use our default implementation, if the caller did not supply one.
-            ValueConverter = valueConverter ?? new PropFactoryValueConverter(delegateCacheProvider.TypeDescBasedTConverterCache);
+        // Use our default implementation, if the caller did not supply one.
+        ValueConverter = valueConverter; //?? new PropFactoryValueConverter(delegateCacheProvider.TypeDescBasedTConverterCache);
 
             IndexerName = "Item[]";
         }
@@ -104,82 +97,82 @@ namespace DRM.PropBag
 
         #region IObsCollection<T> and ObservableCollection<T> Prop Creation
 
-        public virtual ICProp<CT, T> Create<CT, T>(
+        public abstract ICProp<CT, T> Create<CT, T>(
             CT initialValue,
             string propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
-            Func<CT, CT, bool> comparer = null) where CT : IObsCollection<T>
-        {
-            if (comparer == null) comparer = EqualityComparer<CT>.Default.Equals;
-            GetDefaultValueDelegate<CT> getDefaultValFunc = ValueConverter.GetDefaultValue<CT>;
+            Func<CT, CT, bool> comparer = null) where CT : IObsCollection<T>;
+        //{
+        //    if (comparer == null) comparer = EqualityComparer<CT>.Default.Equals;
+        //    GetDefaultValueDelegate<CT> getDefaultValFunc = ValueConverter.GetDefaultValue<CT>;
 
-            ICProp<CT, T> prop = new CProp<CT, T>(initialValue, getDefaultValFunc, typeIsSolid, hasStorage, comparer);
-            return prop;
-        }
+        //    ICProp<CT, T> prop = new CProp<CT, T>(initialValue, getDefaultValFunc, typeIsSolid, hasStorage, comparer);
+        //    return prop;
+        //}
 
-        public virtual ICPropFB<CT, T> CreateFB<CT, T>(
+        public abstract ICPropFB<CT, T> CreateFB<CT, T>(
             CT initialValue,
             string propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
-            Func<CT, CT, bool> comparer = null) where CT : ObservableCollection<T>
-        {
-            if (comparer == null) comparer = EqualityComparer<CT>.Default.Equals;
-            GetDefaultValueDelegate<CT> getDefaultValFunc = ValueConverter.GetDefaultValue<CT>;
+            Func<CT, CT, bool> comparer = null) where CT : ObservableCollection<T>;
+        //{
+        //    if (comparer == null) comparer = EqualityComparer<CT>.Default.Equals;
+        //    GetDefaultValueDelegate<CT> getDefaultValFunc = ValueConverter.GetDefaultValue<CT>;
 
-            ICPropFB<CT, T> prop = new CPropFB<CT, T>(initialValue, getDefaultValFunc, typeIsSolid, hasStorage, comparer);
-            return prop;
-        }
+        //    ICPropFB<CT, T> prop = new CPropFB<CT, T>(initialValue, getDefaultValFunc, typeIsSolid, hasStorage, comparer);
+        //    return prop;
+        //}
 
-        public virtual ICProp<CT, T> CreateWithNoValue<CT, T>(
+        public abstract ICProp<CT, T> CreateWithNoValue<CT, T>(
             PropNameType propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
-            Func<CT, CT, bool> comparer = null) where CT : IObsCollection<T>
-        {
-            if (comparer == null) comparer = EqualityComparer<CT>.Default.Equals;
+            Func<CT, CT, bool> comparer = null) where CT : IObsCollection<T>;
+        //{
+        //    if (comparer == null) comparer = EqualityComparer<CT>.Default.Equals;
 
-            GetDefaultValueDelegate<CT> getDefaultValFunc = ValueConverter.GetDefaultValue<CT>;
+        //    GetDefaultValueDelegate<CT> getDefaultValFunc = ValueConverter.GetDefaultValue<CT>;
 
-            ICProp<CT, T> prop = new CProp<CT, T>(getDefaultValFunc, typeIsSolid, hasStorage, comparer);
-            return prop;
-        }
+        //    ICProp<CT, T> prop = new CProp<CT, T>(getDefaultValFunc, typeIsSolid, hasStorage, comparer);
+        //    return prop;
+        //}
 
         #endregion
 
         #region CollectionViewSource Prop Creation
 
-        public virtual IProp CreateCVSProp<TCVS, T>(PropNameType propertyName) where TCVS : class
-        {
-            throw new NotImplementedException("This feature is not implemented by the 'standard' implementation, please use WPFPropfactory or similar.");
-        }
+        public abstract IProp CreateCVSProp<TCVS, T>(PropNameType propertyName) where TCVS : class;
+        //{
+        //    throw new NotImplementedException("This feature is not implemented by the 'standard' implementation, please use WPFPropfactory or similar.");
+        //}
 
         #endregion
 
         #region Scalar Prop Creation
 
-        public virtual IProp<T> Create<T>(
+        public abstract IProp<T> Create<T>(
             T initialValue,
             PropNameType propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
-            Func<T, T, bool> comparer = null)
-        {
-            if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
+            Func<T, T, bool> comparer = null);
+        //{
+        //    if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
 
-            GetDefaultValueDelegate<T> getDefaultValFunc = ValueConverter.GetDefaultValue<T>;
-            IProp<T> prop = new Prop<T>(initialValue, getDefaultValFunc, typeIsSolid: typeIsSolid, hasStore: hasStorage, comparer: comparer);
-            return prop;
-        }
+        //    GetDefaultValueDelegate<T> getDefaultValFunc = ValueConverter.GetDefaultValue<T>;
+        //    IProp<T> prop = new Prop<T>(initialValue, getDefaultValFunc, typeIsSolid: typeIsSolid, hasStore: hasStorage, comparer: comparer);
+        //    return prop;
+        //}
 
-        public virtual IProp<T> CreateWithNoValue<T>(
+        public abstract IProp<T> CreateWithNoValue<T>(
             PropNameType propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
-            Func<T, T, bool> comparer = null)
-        {
-            if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
+            Func<T, T, bool> comparer = null);
+        //{
+        //    if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
 
-            GetDefaultValueDelegate<T> getDefaultValFunc = ValueConverter.GetDefaultValue<T>;
-            IProp<T> prop = new Prop<T>(getDefaultValFunc, typeIsSolid: typeIsSolid, hasStore: hasStorage, comparer: comparer);
-            return prop;
-        }
+        //    GetDefaultValueDelegate<T> getDefaultValFunc = ValueConverter.GetDefaultValue<T>;
+        //    IProp<T> prop = new Prop<T>(getDefaultValFunc, typeIsSolid: typeIsSolid, hasStore: hasStorage, comparer: comparer);
+        //    return prop;
+        //}
 
         #endregion
 
@@ -355,7 +348,7 @@ namespace DRM.PropBag
             // value is already of the correct type.
             if (vType == t) return (T)(object)value;
 
-            object parameter = new ControlModel.TwoTypes(t, vType);
+            object parameter = new TwoTypes(t, vType);
 
             return (T)ValueConverter.ConvertBack(value, t, parameter, CultureInfo.CurrentCulture);
         }
@@ -391,7 +384,7 @@ namespace DRM.PropBag
             if (t == s)
                 return (T)(object)value;
 
-            object parameter = new ControlModel.TwoTypes(t, s);
+            object parameter = new TwoTypes(t, s);
 
             return (T)ValueConverter.ConvertBack(value, t, parameter, CultureInfo.CurrentCulture);
         }

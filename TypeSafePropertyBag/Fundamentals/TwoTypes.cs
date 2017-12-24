@@ -1,13 +1,8 @@
-﻿using DRM.PropBag.Caches;
-using DRM.TypeSafePropertyBag;
-using System;
-using System.ComponentModel;
-using System.Globalization;
-using System.Reflection;
+﻿using System;
 
-
-namespace DRM.PropBag.ControlModel
+namespace DRM.TypeSafePropertyBag.Fundamentals
 {
+    // TODO: Consider replacing this with the TypePair struct.
     public struct TwoTypes
     {
         bool _beenInitialized;
@@ -78,6 +73,7 @@ namespace DRM.PropBag.ControlModel
             }
         }
 
+        // TODO: Move this logic to the PropBagControlsWPF project.
         public static TwoTypes FromMkUpExtParam(object parameter, Type destinationType = null)
         {
             if (parameter == null)

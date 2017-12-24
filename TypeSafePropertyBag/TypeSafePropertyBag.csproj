@@ -41,8 +41,12 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Factories\AbstractPropFactory.cs" />
+    <Compile Include="Factories\APFGenericMethodTemplates.cs" />
+    <Compile Include="Fundamentals\TwoTypes.cs" />
     <Compile Include="ObsCollection.cs" />
     <Compile Include="PropBagInterfaces\GetDefaultValueDelegate.cs" />
+    <Compile Include="PropBagInterfaces\ICreateProps.cs" />
     <Compile Include="PropBagInterfaces\IRegisterBindingsForwarder.cs" />
     <Compile Include="PropInterfaces\IListSourceProvider.cs" />
     <Compile Include="PropInterfaces\IObsCollection.cs" />
@@ -55,6 +59,7 @@
     <Compile Include="PropStore\Unsubscriber.cs" />
     <Compile Include="Props\PropBase.cs" />
     <Compile Include="Props\PropTypedBase.cs" />
+    <Compile Include="RefEqualityComparer.cs" />
     <Compile Include="TypeConverters\ConverterDelegates.cs" />
     <Compile Include="DoSetDelegate.cs" />
     <Compile Include="Fundamentals\TwoTypesDelegateCache.cs" />

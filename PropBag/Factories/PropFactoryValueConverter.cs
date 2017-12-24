@@ -1,16 +1,10 @@
 ﻿using DRM.PropBag.Caches;
-using DRM.PropBag.ControlModel;
 using DRM.TypeSafePropertyBag;
+using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.ComponentModel.Design.Serialization;
 using System.Globalization;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace DRM.PropBag
@@ -98,12 +92,12 @@ namespace DRM.PropBag
             if (targetType == typeof(object)) return value;
 
             //System.Diagnostics.Debug.Assert(value == null || typeof(string).IsAssignableFrom(value.GetType()), $"PropFactory expected string input on convert back, but type was {value.GetType()}.");
-            
+
             TwoTypes tt = TwoTypes.FromMkUpExtParam(parameter, typeof(string));
             if (tt.IsEmpty) throw new InvalidOperationException("Type information was not available.");
 #endif
 
-            if(value == null)
+            if (value == null)
             {
                 if(targetType.IsValueType)
                 {

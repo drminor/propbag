@@ -9,7 +9,7 @@ namespace DRM.PropBagWPF
     using PropNameType = String;
     using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
 
-    public class WPFPropFactory : AbstractPropFactory
+    public class WPFPropFactory : PropFactory
     {
         public override bool ProvidesStorage => true;
 
@@ -19,7 +19,7 @@ namespace DRM.PropBagWPF
                 ResolveTypeDelegate typeResolver,
                 IConvertValues valueConverter
             )
-            : base(propStoreAccessServiceProvider, new SimpleDelegateCacheProvider(typeof(PropBag.PropBag), typeof(APFGenericMethodTemplates)), typeResolver, valueConverter)
+            : base(propStoreAccessServiceProvider, typeResolver, valueConverter, new SimpleDelegateCacheProvider(typeof(PropBag.PropBag), typeof(APFGenericMethodTemplates)))
         {
         }
 

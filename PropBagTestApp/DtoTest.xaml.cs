@@ -1,15 +1,11 @@
-﻿using System;
+﻿using AutoMapper;
+using DRM.PropBag.ControlsWPF;
+using DRM.TypeSafePropertyBag.Fundamentals;
+using PropBagTestApp.Models;
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-
-
-using DRM.PropBag.ControlModel;
-using DRM.PropBag.ControlsWPF;
-
-using PropBagTestApp.Models;
-
-using AutoMapper;
 
 namespace PropBagTestApp
 {

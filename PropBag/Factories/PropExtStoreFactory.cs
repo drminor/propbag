@@ -47,7 +47,11 @@ namespace DRM.PropBag
 
         #endregion
 
-        #region Collection-type property creators
+        #region Enumerable-Type Prop Creation 
+
+        #endregion
+
+        #region IObsCollection<T> and ObservableCollection<T> Prop Creation
 
         // TODO: Implement Create Collection With Initial Value.
         public override ICProp<CT, T> Create<CT, T>(
@@ -57,8 +61,15 @@ namespace DRM.PropBag
             Func<CT, CT, bool> comparer = null)
         {
             throw new NotImplementedException("PropExtStoreFactory has not implemented the Create Collection Prop with Initial Value.");
-            //ICPropPrivate<CT, T> prop = null;
-            //return prop;
+        }
+
+        public override ICPropFB<CT, T> CreateFB<CT, T>(
+            CT initialValue,
+            string propertyName, object extraInfo = null,
+            bool hasStorage = true, bool typeIsSolid = true,
+            Func<CT, CT, bool> comparer = null)
+        {
+            throw new NotImplementedException("PropExtStoreFactory has not implemented the Create Collection Prop with Initial Value.");
         }
 
         // TODO: Implement Create Collection With No Value.
@@ -75,7 +86,16 @@ namespace DRM.PropBag
 
         #endregion
 
-        #region Propety-type property creators
+        #region CollectionViewSource Prop Creation
+
+        public override IProp CreateCVSProp<TCVS, T>(PropNameType propertyName)
+        {
+            throw new NotImplementedException("This feature is not implemented by the 'standard' implementation, please use WPFPropfactory or similar.");
+        }
+
+        #endregion
+        
+        #region Scalar Prop Creation
 
         public override IProp<T> Create<T>(T initialValue,
             PropNameType propertyName, object extraInfo = null,

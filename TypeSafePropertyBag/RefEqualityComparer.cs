@@ -3,9 +3,8 @@ using System.Collections.Generic;
 
 using System.Threading;
 
-namespace DRM.PropBag
+namespace DRM.TypeSafePropertyBag
 {
-
     ///<remarks>
     /// This was guided and inspied by this article: https://stackoverflow.com/questions/1890058/iequalitycomparert-that-uses-referenceequals
     /// Author: Snowbear (Marat Yuldashev, Ukraine)

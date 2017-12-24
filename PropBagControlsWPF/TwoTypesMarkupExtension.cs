@@ -1,20 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using System.Reflection;
-using System.ComponentModel.Design.Serialization;
-
-using DRM.PropBag.Caches;
-using DRM.PropBag.ControlModel;
-
-using System.Xaml;
+﻿using DRM.TypeSafePropertyBag.Fundamentals;
+using System;
 using System.Windows.Markup;
-using System.Windows.Data;
 
 namespace DRM.PropBag.ControlsWPF
 {
@@ -51,7 +37,7 @@ namespace DRM.PropBag.ControlsWPF
             if (SourceType == null || DestType == null)
                 throw new ArgumentException("Type argument is not specified");
 
-            return new ControlModel.TwoTypes(SourceType, DestType);
+            return new TwoTypes(SourceType, DestType);
         }
 
     }

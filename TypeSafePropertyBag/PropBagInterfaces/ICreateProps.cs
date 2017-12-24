@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using DRM.TypeSafePropertyBag;
 
-namespace DRM.PropBag
+namespace DRM.TypeSafePropertyBag
 {
     public interface ICreateProps
     {
