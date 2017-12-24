@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 
-namespace DRM.TypeSafePropertyBag.UnUsed
+namespace DRM.TypeSafePropertyBag.Unused
 {
     using CompositeKeyType = UInt64;
     using ObjectIdType = UInt64;

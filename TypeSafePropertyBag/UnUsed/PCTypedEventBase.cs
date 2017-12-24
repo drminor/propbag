@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 
-namespace DRM.TypeSafePropertyBag.UnUsed
+namespace DRM.TypeSafePropertyBag.Unused
 {
     public class PCTypedEventBase<TPropData, T> : INotifyPCTyped<T> where TPropData : IPropData
     {
