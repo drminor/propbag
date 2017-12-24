@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,14 +14,16 @@ namespace DRM.TypeSafePropertyBag
         private readonly IList<T> _internalList;
 
         public event NotifyCollectionChangedEventHandler CollectionChanged;
-        private void RaiseCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
-        {
-            CollectionChanged?.Invoke(sender, args);
-        }
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public ObsCollection(IList<T> list)
         {
             _internalList = list;
+        }
+
+        public ObsCollection()
+        {
+            _internalList = new List<T>();
         }
 
         public IEnumerator<T> GetEnumerator()
@@ -188,6 +191,16 @@ namespace DRM.TypeSafePropertyBag
         //{
         //    throw new NotImplementedException();
         //}
+
+        private void RaiseCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
+        {
+            CollectionChanged?.Invoke(sender, args);
+        }
+
+        private void RaisePropertyChanged(object sender, PropertyChangedEventArgs args)
+        {
+            PropertyChanged?.Invoke(sender, args);
+        }
     }
 
 }
