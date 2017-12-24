@@ -7,7 +7,7 @@ using System.Data;
 namespace DRM.TypeSafePropertyBag
 {
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
-    using IRegisteBindingsProxyType = IRegisterBindingsProxy<UInt32>;
+    using IRegisterBindingsProxyType = IRegisterBindingsProxy<UInt32>;
     using PropIdType = UInt32;
     using PropNameType = String;
 
@@ -50,22 +50,17 @@ namespace DRM.TypeSafePropertyBag
     }
 
 
-
     // ObservableCollection<T>
-    public interface ICPropFB<CT, T> : IProp<CT>/*, IListSourceProvider<CT,T>*/ where CT : ObservableCollection<T>
+    public interface ICPropFB<CT, T> : IETypedProp<CT, T>/*, IListSourceProvider<CT,T>*/ where CT : ObservableCollection<T>
     {
         ReadOnlyObservableCollection<T> GetReadOnlyObservableCollection();
     }
 
     // ObservableCollection<T> -- ReadOnly
-    public interface IReadOnlyCPropFB<CT, T> : IProp<CT>/*, IListSource*/ where CT : ReadOnlyObservableCollection<T>
+    public interface IReadOnlyCPropFB<CT, T> : IReadOnlyETypedProp<CT, T>/*, IListSource*/ where CT : ReadOnlyObservableCollection<T>
     {
 
     }
-
-
-    
-
 
 
     // IEnumerable<T> Collections
@@ -80,6 +75,7 @@ namespace DRM.TypeSafePropertyBag
 
     }
 
+
     // IEnumerable Collections
     public interface IEProp<CT> : IProp<CT>, IReadOnlyEProp<CT> where CT : IEnumerable
     {
@@ -91,16 +87,6 @@ namespace DRM.TypeSafePropertyBag
     {
         //IList List { get; }
     }
-
-    ///// <summary>
-    ///// Extends the IProp<typeparamref name="T"/> interface with features
-    ///// that are only avaialble within the PubPropBag assembly.
-    ///// </summary>
-    ///// <typeparam name="T"></typeparam>
-    //public interface IPropPrivate<T> : IProp<T>
-    //{
-
-    //}
 
     /// <summary>
     /// All properties have these features based on the type of the property.
@@ -120,9 +106,7 @@ namespace DRM.TypeSafePropertyBag
     /// <summary>
     /// These are the non-type specific features that every instance of IProp<typeparamref name="T"/> implement.
     /// </summary>
-    public interface IProp : ICloneable, IRegisteBindingsProxyType
-
-
+    public interface IProp : IRegisterBindingsProxyType, ICloneable
     {
         PropKindEnum PropKind { get; }
         Type Type { get; }
@@ -131,6 +115,7 @@ namespace DRM.TypeSafePropertyBag
 
         //IListSource ListSource { get; }
         //ICollectionView CollectionView { get; }
+
 
         object TypedValueAsObject { get; }
         ValPlusType GetValuePlusType();
