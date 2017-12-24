@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 namespace DRM.PropBag
 {
-    public delegate T GetDefaultValueDelegate<T>(string propertyName);
+    public class BasicDataSourceProvider
+    {
 
+    }
 }

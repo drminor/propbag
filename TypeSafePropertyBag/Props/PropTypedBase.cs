@@ -1,17 +1,11 @@
-﻿using DRM.TypeSafePropertyBag;
+﻿using System;
 
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Threading;
-
-namespace DRM.PropBag
+namespace DRM.TypeSafePropertyBag
 {
     using PropIdType = UInt32;
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
 
     using IRegisterBindingsFowarderType = IRegisterBindingsForwarder<UInt32>;
-
 
     public abstract class PropTypedBase<T> : PropBase, IProp<T>
     {
