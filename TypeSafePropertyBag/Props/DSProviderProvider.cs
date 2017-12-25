@@ -3,20 +3,8 @@ using System.Windows.Data;
 
 namespace DRM.TypeSafePropertyBag
 {
-    using CompositeKeyType = UInt64;
-    using ObjectIdType = UInt64;
-
     using PropIdType = UInt32;
-    using PropNameType = String;
-
-    using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
-
-    using L2KeyManType = IL2KeyMan<UInt32, String>;
-
-    using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
-    using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
     using PSAccessServiceInternalType = IPropStoreAccessServiceInternal<UInt32, String>;
-    using PSCloneServiceType = IProvidePropStoreCloneService<UInt32, String>;
 
     internal class DSProviderProvider<T> : IProvideADataSourceProvider<T>
     {
