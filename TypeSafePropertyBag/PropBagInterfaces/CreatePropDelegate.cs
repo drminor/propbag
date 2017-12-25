@@ -33,6 +33,7 @@ namespace DRM.TypeSafePropertyBag
     #region CollectionViewSource Methods
 
     public delegate IProp CreateCVSPropDelegate(IPropFactory propFactory, string propertyName);
+    public delegate IProp CreateCVPropDelegate(IPropFactory propFactory, string propertyName);
 
     #endregion
 

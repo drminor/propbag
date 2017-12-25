@@ -190,10 +190,16 @@ namespace DRM.TypeSafePropertyBag
 
         #region CollectionViewSource Prop Creation
 
-        public abstract IProp CreateCVSProp<TCVS, T>(PropNameType propertyName) where TCVS : class;
-        //{
-        //    throw new NotImplementedException("This feature is not implemented by the 'standard' implementation, please use WPFPropfactory or similar.");
-        //}
+        public virtual IProp CreateCVSProp<TCVS, T>(PropNameType propertyName) where TCVS : class
+        {
+            throw new NotImplementedException($"This implementation of {nameof(IPropFactory)} cannot create CVSProps (CollectionViewSource PropItems), please use WPFPropfactory or similar.");
+        }
+
+        public virtual IProp CreateCVProp<T>(string propertyName)
+        {
+            throw new NotImplementedException($"This implementation of {nameof(IPropFactory)} cannot create CVProps (CollectionView PropItems), please use WPFPropfactory or similar.");
+        }
+
 
         #endregion
 
@@ -324,7 +330,12 @@ namespace DRM.TypeSafePropertyBag
 
         public virtual IProp CreateCVSPropFromString(Type typeOfThisProperty, PropNameType propertyName)
         {
-            throw new NotImplementedException("This feature is not implemented by the 'standard' implementation, please use WPFPropfactory or similar.");
+            throw new NotImplementedException($"This implementation of {nameof(IPropFactory)} cannot create CVSProps (CollectionViewSource PropItems), please use WPFPropfactory or similar.");
+        }
+
+        public virtual IProp CreateCVPropFromString(Type typeofThisProperty, string propertyName)
+        {
+            throw new NotImplementedException($"This implementation of {nameof(IPropFactory)} cannot create CVProps (CollectionView PropItems), please use WPFPropfactory or similar.");
         }
 
         #endregion
@@ -531,6 +542,13 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
+        // CollectionView
+        protected virtual CreateCVPropDelegate GetCVPropCreator(Type itemType)
+        {
+            CreateCVPropDelegate result = DelegateCacheProvider.CreateCVPropCache.GetOrAdd(itemType);
+            return result;
+        }
+
         #endregion
 
         #region Scalar Prop Creation Methods
@@ -567,6 +585,7 @@ namespace DRM.TypeSafePropertyBag
         {
             if (!
                     (
+                    propKind == PropKindEnum.CollectionView ||
                     propKind == PropKindEnum.CollectionViewSource ||
                     propKind == PropKindEnum.CollectionViewSource_RO ||
                     propKind == PropKindEnum.DataTable ||
@@ -592,6 +611,7 @@ namespace DRM.TypeSafePropertyBag
         {
             if (!
                     (
+                    propKind == PropKindEnum.CollectionView ||
                     propKind == PropKindEnum.CollectionViewSource ||
                     propKind == PropKindEnum.CollectionViewSource_RO ||
                     propKind == PropKindEnum.DataTable ||

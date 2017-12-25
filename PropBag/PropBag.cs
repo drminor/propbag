@@ -226,6 +226,11 @@ namespace DRM.PropBag
                     IProp pg = _propFactory.CreateCVSPropFromString(pi.PropertyType, pi.PropertyName);
                     propData = AddProp(pi.PropertyName, pg);
                 }
+                else if(pi.PropKind == PropKindEnum.CollectionView)
+                {
+                    IProp pg = _propFactory.CreateCVPropFromString(pi.PropertyType, pi.PropertyName);
+                    propData = AddProp(pi.PropertyName, pg);
+                }
                 else
                 {
                     propData = processProp(pi);
@@ -234,8 +239,19 @@ namespace DRM.PropBag
 
                 if (pi.BinderField?.Path != null)
                 {
-                    LocalBindingInfo bindingInfo = new LocalBindingInfo(new LocalPropertyPath(pi.BinderField.Path));
-                    propData.TypedProp.RegisterBinding((IRegisterBindingsFowarderType) this, propData.PropId, bindingInfo);
+                    if(pi.PropKind == PropKindEnum.CollectionViewSource || pi.PropKind == PropKindEnum.CollectionViewSource_RO)
+                    {
+                        //string srcPropName = pi.BinderField.Path;
+                        //if (TryGetDataSourceProvider<PersonVM>(this, "PersonList", out IProvideADataSourceProvider<PersonVM> dataSourceProvider))
+                        //{
+                        //    cvs.Source = dataSourceProvider.DataSourceProvider;
+                        //}
+                    }
+                    else
+                    {
+                        LocalBindingInfo bindingInfo = new LocalBindingInfo(new LocalPropertyPath(pi.BinderField.Path));
+                        propData.TypedProp.RegisterBinding((IRegisterBindingsFowarderType)this, propData.PropId, bindingInfo);
+                    }
                 }
             }
         }
@@ -985,7 +1001,7 @@ namespace DRM.PropBag
 
             IPropData propData = GetPropGen<T>(propertyName,
                 haveValue: false,
-                value: default(T),
+                value: null,
                 alwaysRegister: false,
                 mustBeRegistered: mustBeRegistered,
                 neverCreate: false,
@@ -1010,7 +1026,7 @@ namespace DRM.PropBag
 
             IPropData propData = GetPropGen<T>(propertyName,
                 haveValue: false,
-                value: default(T),
+                value: null,
                 alwaysRegister: false,
                 mustBeRegistered: mustBeRegistered,
                 neverCreate: false,
@@ -1279,7 +1295,7 @@ namespace DRM.PropBag
 
             IPropData propData = GetPropGen<T>(nameOfPropertyToUpdate,
                 haveValue: false,
-                value: default(T),
+                value: null,
                 alwaysRegister: false,
                 mustBeRegistered: mustBeRegistered,
                 neverCreate: false,
@@ -1313,7 +1329,7 @@ namespace DRM.PropBag
 
             IPropData propData = GetPropGen<T>(nameOfPropertyToUpdate,
                 haveValue: false,
-                value: default(T),
+                value: null,
                 alwaysRegister: false,
                 mustBeRegistered: mustBeRegistered,
                 neverCreate: false,
@@ -2353,6 +2369,37 @@ namespace DRM.PropBag
         //        return false;
         //    }
         //}
+
+        #endregion
+
+        #region DataSourceProvider Support
+
+        public bool TryGetDataSourceProvider<T>(IPropBag propBag, PropNameType propertyName, out IProvideADataSourceProvider<T> dataSourceProvider)
+        {
+            bool mustBeRegistered = OurMetaData.AllPropsMustBeRegistered;
+
+            IPropData propData = GetPropGen<T>(propertyName,
+                haveValue: false,
+                value: null,
+                alwaysRegister: false,
+                mustBeRegistered: mustBeRegistered,
+                neverCreate: false,
+                desiredHasStoreValue: null,
+                wasRegistered: out bool wasRegistered,
+                propId: out PropIdType propId);
+
+            if (propData != null)
+            {
+                dataSourceProvider = _ourStoreAccessor.GetDataSourceProvider<T>(this, propId);
+                return true;
+            }
+            else
+            {
+                dataSourceProvider = null;
+                return false;
+            }
+        }
+
 
         #endregion
 

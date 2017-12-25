@@ -51,7 +51,9 @@ namespace DRM.TypeSafePropertyBag
 
         IProp CreateCVSProp<TCVS, T>(PropNameType propertyName) where TCVS : class;
 
-            #endregion
+        IProp CreateCVProp<T>(PropNameType propertyName);
+
+        #endregion
 
         #region Scalar Prop Creation
 
@@ -78,6 +80,7 @@ namespace DRM.TypeSafePropertyBag
             Delegate comparer, bool useRefEquality = false, Type collectionType = null);
 
         IProp CreateCVSPropFromString(Type typeOfThisProperty, PropNameType propertyName);
+        IProp CreateCVPropFromString(Type typeofThisProperty, PropNameType propertyName);
 
         //IPropGen CreatePropInferType(object value, PropNameType propertyName, object extraInfo, bool hasStorage);
 

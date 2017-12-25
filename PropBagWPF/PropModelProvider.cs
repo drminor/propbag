@@ -4,6 +4,7 @@ using DRM.TypeSafePropertyBag;
 using DRM.ViewModelTools;
 
 using System;
+using System.ComponentModel;
 using System.Data;
 using System.Linq;
 using System.Reflection;
@@ -312,6 +313,10 @@ namespace DRM.PropBagWPF
                     itemType = null;
                     return propertyType;
 
+                case PropKindEnum.CollectionView:
+                    itemType = propertyType;
+                    Type pType = typeof(ICollectionView);
+                    return pType;
 
                 case PropKindEnum.Enumerable_RO:
                     goto case PropKindEnum.ObservableCollection;

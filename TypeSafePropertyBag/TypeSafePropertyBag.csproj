@@ -50,6 +50,7 @@
     <Compile Include="PropBagInterfaces\GetDefaultValueDelegate.cs" />
     <Compile Include="PropBagInterfaces\ICreateProps.cs" />
     <Compile Include="PropBagInterfaces\IRegisterBindingsForwarder.cs" />
+    <None Include="Unused\CollectionViewSourceReferenceCode.cs" />
     <Compile Include="PropInterfaces\IListSourceProvider.cs" />
     <Compile Include="PropInterfaces\IObsCollection.cs" />
     <Compile Include="PropInterfaces\IProvideADataSourceProvider.cs" />

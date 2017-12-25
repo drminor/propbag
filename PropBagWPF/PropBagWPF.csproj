@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CViewProp.cs" />
+    <Compile Include="CViewSourceProp.cs" />
     <None Include="CViewSource_NotUsed.cs" />
     <None Include="ListCViewSourceProp_NotUsed.cs" />
     <None Include="ListCViewProp_NotUsed.cs" />

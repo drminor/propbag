@@ -29,6 +29,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
         readonly PropNameType _propertyName;
         readonly WeakReference<IPropBagInternal> _targetObject;
+        bool _targetHasStore;
 
         ObservableSource<T> _rootListener;
         readonly OSCollection<T> _pathListeners;
@@ -100,9 +101,15 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             _ourNode = GetPropBagNode(propStoreAccessService);
 
             PropIdType propId = _bindingTarget.Level2Key;
-            _propertyName = GetPropertyName(propStoreAccessService, propId);
 
             _targetObject = _ourNode.PropBagProxy.PropBagRef;
+
+            if (_targetObject.TryGetTarget(out IPropBagInternal propBag))
+            {
+                _propertyName = GetPropertyName(propStoreAccessService, propBag, propId, out bool hasStore);
+                _targetHasStore = hasStore;
+
+            }
 
             _pathElements = GetPathElements(_bindingInfo, out _isPathAbsolute, out _firstNamedStepIndex);
 
@@ -133,17 +140,30 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             }
         }
 
-        private PropNameType GetPropertyName(PSAccessServiceType propStoreAccessService, PropIdType propId)
+        // TODO: should be able to have IPropStoreAccessServiceInternal provide all of this with a single call.
+        private PropNameType GetPropertyName(PSAccessServiceType propStoreAccessService, IPropBagInternal propBag, PropIdType propId, out bool hasStore)
         {
-            if(propStoreAccessService.TryGetPropName(propId, out PropNameType propertyName))
+            PropNameType result;
+
+            if (propStoreAccessService.TryGetPropName(propId, out PropNameType propertyName))
             {
-                return propertyName;
+                result = propertyName;
             }
             else
             {
                 throw new InvalidOperationException("Cannot retrieve the Target's property name from the TargetPropId.");
             }
 
+            if (propStoreAccessService.TryGetValue((IPropBag) propBag, propId, out IPropData genProp))
+            {
+                hasStore = genProp.TypedProp.HasStore;
+            }
+            else
+            {
+                throw new InvalidOperationException("Cannot retrieve the Target's property name from the TargetPropId.");
+            }
+
+            return result;
         }
 
         #endregion
@@ -759,60 +779,23 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             return result;
         }
 
-
-
-        //private bool UpdateTargetWithStartingValue(WeakReference<IPropBagInternal> bindingTarget, StoreNodeProp sourcePropNode)
-        //{
-        //    bool result;
-        //    if (sourcePropNode.Parent.PropBagProxy.PropBagRef.TryGetTarget(out IPropBagInternal propBag))
-        //    {
-        //        if (propBag.ItsStoreAccessor.Level2KeyManager.TryGetFromRaw(PropertyName, out PropIdType propId))
-        //        {
-        //            StoreNodeBag propBagNode = sourcePropNode.Parent;
-
-        //            if (propBagNode.TryGetChild(propId, out StoreNodeProp child))
-        //            {
-        //                //IPropDataInternal propData = child.Int_PropData;
-        //                IProp typedProp = child.Int_PropData.TypedProp;
-
-        //                if (!(typedProp.HasStore))
-        //                {
-        //                    // This property has no backing store, there is no concept of a starting value. (Propably used to send messages.)
-        //                    result = false;
-        //                }
-        //                else
-        //                {
-        //                    result = UpdateTarget(bindingTarget, (T)typedProp.TypedValueAsObject);
-        //                }
-        //            }
-        //            else
-        //            {
-        //                System.Diagnostics.Debug.WriteLine($"PropBagNode.TryGetChild failed to access the child node with property name:{PropertyName}.");
-        //                result = false;
-        //            }
-        //        }
-        //        else
-        //        {
-        //            System.Diagnostics.Debug.WriteLine($"Update Target could not find that property by name: {PropertyName}.");
-        //            result = false;
-        //        }
-        //    }
-        //    else
-        //    {
-        //        System.Diagnostics.Debug.WriteLine("Our weak reference to the binding target holds a reference to an object 'no longer with us.'");
-        //        result = false;
-        //    }
-        //    return result;
-        //}
-
-
         private bool UpdateTarget(WeakReference<IPropBagInternal> bindingTarget, T newValue)
         {
             if (bindingTarget.TryGetTarget(out IPropBagInternal propBag))
             {
-                //((IPropBag)propBag).TryGetPropGen(_propertyName, type)
-                bool wasSet = ((IPropBag)propBag).SetIt(newValue, this.PropertyName);
-                string status = wasSet ? "has been updated" : "already had the new value";
+                string status;
+                if(_targetHasStore)
+                {
+                    bool wasSet = ((IPropBag)propBag).SetIt(newValue, this.PropertyName);
+                    status = wasSet ? "has been updated" : "already had the new value";
+                }
+                else
+                {
+                    T dummy = default(T);
+                    bool wasSet = ((IPropBag)propBag).SetIt(newValue, ref dummy, this.PropertyName);
+                    status = wasSet ? "has been updated" : "already had the new value";
+                }
+
                 System.Diagnostics.Debug.WriteLine($"The binding target {status}.");
                 return true;
             }

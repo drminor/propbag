@@ -108,6 +108,12 @@ namespace DRM.TypeSafePropertyBag
             return propFactory.CreateCVSProp<CVST, T>(propertyName);
         }
 
+        // CollectionView
+        private static IProp CreateCVProp<T>(IPropFactory propFactory, PropNameType propertyName)
+        {
+            return propFactory.CreateCVProp<T>(propertyName);
+        }
+
         #endregion
 
         #region Scalar Prop Creation

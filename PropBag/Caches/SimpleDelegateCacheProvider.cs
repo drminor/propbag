@@ -36,6 +36,9 @@ namespace DRM.PropBag.Caches
 
         public ICacheDelegatesForTypePair<CreateCVSPropDelegate> CreateCVSPropCache { get; }
 
+        public ICacheDelegates<CreateCVPropDelegate> CreateCVPropCache { get; }
+
+
         #endregion
 
         #region Constructor
@@ -81,6 +84,10 @@ namespace DRM.PropBag.Caches
             // CollectionViewSource
             MethodInfo createCVSProp_mi = propCreatorType.GetMethod("CreateCVSProp", BindingFlags.Static | BindingFlags.NonPublic);
             CreateCVSPropCache = new TwoTypesDelegateCache<CreateCVSPropDelegate>(createCVSProp_mi);
+
+            // CollectionView
+            MethodInfo createCVProp_mi = propCreatorType.GetMethod("CreateCVProp", BindingFlags.Static | BindingFlags.NonPublic);
+            CreateCVPropCache = new DelegateCache<CreateCVPropDelegate>(createCVProp_mi);
 
             #endregion
 

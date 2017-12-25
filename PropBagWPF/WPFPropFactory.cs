@@ -11,7 +11,7 @@ namespace DRM.PropBagWPF
 
     public class WPFPropFactory : PropFactory
     {
-        public override bool ProvidesStorage => true;
+        #region Constructor
 
         public WPFPropFactory
             (
@@ -22,6 +22,8 @@ namespace DRM.PropBagWPF
             : base(propStoreAccessServiceProvider, typeResolver, valueConverter, new SimpleDelegateCacheProvider(typeof(PropBag.PropBag), typeof(APFGenericMethodTemplates)))
         {
         }
+
+        #endregion
 
         #region Collection-type property creators
 
@@ -89,11 +91,16 @@ namespace DRM.PropBagWPF
 
         public override IProp CreateCVSProp<TCVS, T>(PropNameType propertyName) 
         {
-            ICViewPropWPF<CollectionViewSource, T> result = new CViewProp<T>(null, propertyName);
+            ICViewPropWPF<CollectionViewSource, T> result = new CViewSourceProp<T>(null, propertyName);
 
             return (IProp)result;
         }
 
+        public override IProp CreateCVProp<T>(string propertyName)
+        {
+            CViewProp<T> result = new CViewProp<T>(propertyName);
+            return result;
+        }
 
         #endregion
 
@@ -106,14 +113,16 @@ namespace DRM.PropBagWPF
         public override IProp CreateCVSPropFromString(Type typeOfThisProperty, PropNameType propertyName)
         {
             CreateCVSPropDelegate propCreator = GetCVSPropCreator(typeof(object), typeOfThisProperty);
-
             IProp prop = propCreator(this, propertyName);
-
             return prop;
-
         }
 
-
+        public override IProp CreateCVPropFromString(Type typeofThisProperty, PropNameType propertyName)
+        {
+            CreateCVPropDelegate propCreator = GetCVPropCreator(typeofThisProperty);
+            IProp prop = propCreator(this, propertyName);
+            return prop;
+        }
 
         #endregion
     }

@@ -71,11 +71,11 @@ namespace DRM.TypeSafePropertyBag
         bool RegisterBinding<T>(PropNameType nameOfPropertyToUpdate, string pathToSource);
         bool UnregisterBinding<T>(PropNameType nameOfPropertyToUpdate, string pathToSource);
 
-        //bool SubscribeToPropChanged<T>(Action<T, T> doOnChange, string propertyName);
-        //bool UnSubscribeToPropChanged<T>(Action<T, T> doOnChange, string propertyName);
+        //bool SubscribeToPropChanged<T>(Action<T, T> doOnChange, PropNameType propertyName);
+        //bool UnSubscribeToPropChanged<T>(Action<T, T> doOnChange, PropNameType propertyName);
 
-        //bool SubscribeToPropChanged(Action<object, object> doOnChange, string propertyName);
-        //bool UnSubscribeToPropChanged(Action<object, object> doOnChange, string propertyName);
+        //bool SubscribeToPropChanged(Action<object, object> doOnChange, PropNameType propertyName);
+        //bool UnSubscribeToPropChanged(Action<object, object> doOnChange, PropNameType propertyName);
 
         string FullClassName { get; }
         IPropFactory PropFactory { get; }
@@ -87,6 +87,8 @@ namespace DRM.TypeSafePropertyBag
         IDictionary<PropNameType, ValPlusType> GetAllPropNamesAndTypes();
 
         void CloneProps(IPropBag copySource);
+
+        bool TryGetDataSourceProvider<T>(IPropBag propBag, PropNameType propertyName, out IProvideADataSourceProvider<T> dataSourceProvider);
 
         //IPropGen this[int index] { get; }
         //int IndexOfProp(string propertyName, Type propertyType);

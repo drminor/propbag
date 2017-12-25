@@ -19,6 +19,8 @@ namespace DRM.TypeSafePropertyBag
         CollectionViewSource,       // ICViewProp<TCVS, T> : IReadOnlyCViewProp<TCVS, T> where TCVS: class
         CollectionViewSource_RO,    // IReadOnlyCViewProp<TCVS, T> : IProp<TCVS> where TCVS : class
 
+        CollectionView,
+
         DataTable,
         DataTable_RO
     }
