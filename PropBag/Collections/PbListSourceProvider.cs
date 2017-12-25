@@ -5,10 +5,11 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Collections.Specialized;
 
 namespace DRM.PropBag.Collections
 {
-    public class PbListSourceProvider<CT, T> : IListSourceProvider<CT, T> /*where PT : IETypedProp<CT, T>*/ where CT : IObsCollection<T>
+    public class PbListSourceProvider<CT, T> : IListSourceProvider<CT, T> /*where PT : IETypedProp<CT, T>*/ where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged
     {
         public Func<ICProp<CT, T>, ObservableCollection<T>> ObservableCollectionGetter { get; }
         public Func<IReadOnlyCProp<CT, T>, ReadOnlyObservableCollection<T>> ReadOnlyObservableCollectionGetter { get; }

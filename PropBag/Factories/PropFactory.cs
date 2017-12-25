@@ -65,7 +65,7 @@ namespace DRM.PropBag
             CT initialValue,
             string propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
-            Func<CT, CT, bool> comparer = null)
+            Func<CT, CT, bool> comparer = null) 
         {
             if (comparer == null) comparer = EqualityComparer<CT>.Default.Equals;
             GetDefaultValueDelegate<CT> getDefaultValFunc = ValueConverter.GetDefaultValue<CT>;
@@ -74,18 +74,18 @@ namespace DRM.PropBag
             return prop;
         }
 
-        public override ICPropFB<CT, T> CreateFB<CT, T>(
-            CT initialValue,
-            string propertyName, object extraInfo = null,
-            bool hasStorage = true, bool typeIsSolid = true,
-            Func<CT, CT, bool> comparer = null) 
-        {
-            if (comparer == null) comparer = EqualityComparer<CT>.Default.Equals;
-            GetDefaultValueDelegate<CT> getDefaultValFunc = ValueConverter.GetDefaultValue<CT>;
+        //public override ICPropFB<CT, T> CreateFB<CT, T>(
+        //    CT initialValue,
+        //    string propertyName, object extraInfo = null,
+        //    bool hasStorage = true, bool typeIsSolid = true,
+        //    Func<CT, CT, bool> comparer = null) 
+        //{
+        //    if (comparer == null) comparer = EqualityComparer<CT>.Default.Equals;
+        //    GetDefaultValueDelegate<CT> getDefaultValFunc = ValueConverter.GetDefaultValue<CT>;
 
-            ICPropFB<CT, T> prop = new CPropFB<CT, T>(initialValue, getDefaultValFunc, typeIsSolid, hasStorage, comparer);
-            return prop;
-        }
+        //    ICPropFB<CT, T> prop = new CPropFB<CT, T>(initialValue, getDefaultValFunc, typeIsSolid, hasStorage, comparer);
+        //    return prop;
+        //}
 
         public override ICProp<CT, T> CreateWithNoValue<CT, T>(
         PropNameType propertyName, object extraInfo = null,

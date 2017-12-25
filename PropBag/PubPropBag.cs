@@ -104,11 +104,11 @@ namespace DRM.PropBag
             return base.AddCollectionProp<CT, T>(propertyName, comparer, extraInfo, initialValue);
         }
 
-        new public ICPropFB<CT, T> AddCollectionPropFB<CT, T>(string propertyName, Func<CT, CT, bool> comparer = null,
-            object extraInfo = null, CT initialValue = default(CT)) where CT : ObservableCollection<T>
-        {
-            return base.AddCollectionPropFB<CT, T>(propertyName, comparer, extraInfo, initialValue);
-        }
+        //new public ICPropFB<CT, T> AddCollectionPropFB<CT, T>(string propertyName, Func<CT, CT, bool> comparer = null,
+        //    object extraInfo = null, CT initialValue = default(CT)) where CT : ObservableCollection<T>
+        //{
+        //    return base.AddCollectionPropFB<CT, T>(propertyName, comparer, extraInfo, initialValue);
+        //}
 
         new public void RemoveProp(string propertyName, Type propertyType)
         {

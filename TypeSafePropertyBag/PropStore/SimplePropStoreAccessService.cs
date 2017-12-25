@@ -828,7 +828,7 @@ namespace DRM.TypeSafePropertyBag
             // A function that encloses: the type, and a reference to this store as PSAccessServiceInternalType.
             IProvideADataSourceProviderGen GetDSProviderProvider(PropIdType pId)
             {
-                return new DSProviderProvider<T>(PropKindEnum.ObservableCollectionFB, pId, st);
+                return new DSProviderProvider<T>(PropKindEnum.ObservableCollection, pId, st);
             }
         }
 

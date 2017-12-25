@@ -2,14 +2,12 @@
 using System;
 using System.Windows.Data;
 
-using System.Collections.ObjectModel;
-
 namespace DRM.PropBagWPF
 {
     using PropIdType = UInt32;
     using PropNameType = String;
 
-    public class CViewProp<T> : PropTypedBase<ListCollectionView>
+    public class CViewProp<T> : PropTypedBase<ListCollectionView>, ICViewProp<ListCollectionView, T>
     {
         private PropNameType _propertyName { get; set; }
 

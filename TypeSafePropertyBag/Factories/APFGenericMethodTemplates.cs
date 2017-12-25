@@ -1,7 +1,9 @@
 ﻿
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
@@ -41,7 +43,7 @@ namespace DRM.TypeSafePropertyBag
             string value, bool useDefault,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid,
-            Delegate comparer, bool useRefEquality = true) where CT : class, IObsCollection<T>
+            Delegate comparer, bool useRefEquality = true) where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged
         {
             CT initialValue;
             if (useDefault)
@@ -57,26 +59,26 @@ namespace DRM.TypeSafePropertyBag
                 GetComparerForCollections<CT>(comparer, propFactory, useRefEquality));
         }
 
-        // From String FallBack to using ObservableCollection<T>
-        private static ICPropFB<CT, T> CreateEPropFromStringFB<CT, T>(IPropFactory propFactory,
-            string value, bool useDefault,
-            string propertyName, object extraInfo,
-            bool hasStorage, bool isTypeSolid,
-            Delegate comparer, bool useRefEquality = true) where CT : ObservableCollection<T>
-        {
-            CT initialValue;
-            if (useDefault)
-            {
-                initialValue = propFactory.ValueConverter.GetDefaultValue<CT, T>(propertyName);
-            }
-            else
-            {
-                initialValue = propFactory.GetValueFromString<CT, T>(value);
-            }
+        //// From String FallBack to using ObservableCollection<T>
+        //private static ICPropFB<CT, T> CreateEPropFromStringFB<CT, T>(IPropFactory propFactory,
+        //    string value, bool useDefault,
+        //    string propertyName, object extraInfo,
+        //    bool hasStorage, bool isTypeSolid,
+        //    Delegate comparer, bool useRefEquality = true) where CT : ObservableCollection<T>
+        //{
+        //    CT initialValue;
+        //    if (useDefault)
+        //    {
+        //        initialValue = propFactory.ValueConverter.GetDefaultValue<CT, T>(propertyName);
+        //    }
+        //    else
+        //    {
+        //        initialValue = propFactory.GetValueFromString<CT, T>(value);
+        //    }
 
-            return propFactory.CreateFB<CT, T>(initialValue, propertyName, extraInfo, hasStorage, isTypeSolid,
-                GetComparerForCollections<CT>(comparer, propFactory, useRefEquality));
-        }
+        //    return propFactory.CreateFB<CT, T>(initialValue, propertyName, extraInfo, hasStorage, isTypeSolid,
+        //        GetComparerForCollections<CT>(comparer, propFactory, useRefEquality));
+        //}
 
         // With No Value
         private static ICProp<CT, T> CreateEPropWithNoValue<CT, T>(IPropFactory propFactory,

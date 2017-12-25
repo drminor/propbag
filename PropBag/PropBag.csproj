@@ -56,7 +56,7 @@
     <None Include="Documentation\GlobalCompositePropId.md" />
     <Compile Include="ControlModel\PropBinderField.cs" />
     <Compile Include="Props\BasicDataSourceProvider.cs" />
-    <Compile Include="Props\CPropFB.cs" />
+    <None Include="Props\CPropFB_NotUsed.cs" />
     <Compile Include="Props\CProp.cs" />
     <Compile Include="Collections\PbAbstractListSource.cs" />
     <Compile Include="ControlModel\MapperRequest.cs" />

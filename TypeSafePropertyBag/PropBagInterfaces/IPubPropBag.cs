@@ -27,8 +27,8 @@ namespace DRM.TypeSafePropertyBag
         ICProp<CT, T> AddCollectionProp<CT, T>(string propertyName, Func<CT, CT, bool> comparer = null,
             object extraInfo = null, CT initialValue = default(CT)) where CT : class, IObsCollection<T>;
 
-        ICPropFB<CT, T> AddCollectionPropFB<CT, T>(string propertyName, Func<CT, CT, bool> comparer = null,
-            object extraInfo = null, CT initialValue = default(CT)) where CT : ObservableCollection<T>;
+        //ICPropFB<CT, T> AddCollectionPropFB<CT, T>(string propertyName, Func<CT, CT, bool> comparer = null,
+        //    object extraInfo = null, CT initialValue = default(CT)) where CT : ObservableCollection<T>;
 
         void RemoveProp(string propertyName, Type propertyType);
         void RemoveProp<T>(string propertyName);

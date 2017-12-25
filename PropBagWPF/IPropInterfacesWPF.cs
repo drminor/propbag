@@ -5,13 +5,13 @@ using System.Windows.Data;
 namespace DRM.PropBagWPF
 {
     // Collection View Source
-    public interface ICViewPropWPF<TCVS, T> : ICViewProp<TCVS, T>, IReadOnlyCViewPropWPF<TCVS, T> where TCVS : class
+    public interface ICViewPropWPF<TCVS, T> : ICViewSourceProp<TCVS, T>, IReadOnlyCViewPropWPF<TCVS, T> where TCVS : class
     {
         //new ObservableCollection<T> Source { get; set; }
     }
 
     // CollectionViewSource -- ReadOnly 
-    public interface IReadOnlyCViewPropWPF<TCVS, T> : IReadOnlyCViewProp<TCVS, T> where TCVS : class
+    public interface IReadOnlyCViewPropWPF<TCVS, T> : IReadOnlyCViewSourceProp<TCVS, T> where TCVS : class
     {
         //new ListCollectionView View { get; }
         //new ListCollectionView this[string key] { get; }

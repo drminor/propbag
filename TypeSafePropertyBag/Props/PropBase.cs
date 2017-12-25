@@ -85,11 +85,11 @@ namespace DRM.TypeSafePropertyBag
             else if
                 (
                 propKind == PropKindEnum.ObservableCollection ||
-                propKind == PropKindEnum.ObservableCollectionFB ||
+                //propKind == PropKindEnum.ObservableCollectionFB ||
                 propKind == PropKindEnum.EnumerableTyped ||
                 propKind == PropKindEnum.Enumerable ||
                 propKind == PropKindEnum.ObservableCollection_RO ||
-                propKind == PropKindEnum.ObservableCollectionFB_RO ||
+                //propKind == PropKindEnum.ObservableCollectionFB_RO ||
                 propKind == PropKindEnum.EnumerableTyped_RO ||
                 propKind == PropKindEnum.Enumerable_RO
                 )
@@ -113,7 +113,7 @@ namespace DRM.TypeSafePropertyBag
                 (
                 propKind == PropKindEnum.CollectionViewSource_RO ||
                 propKind == PropKindEnum.ObservableCollection_RO ||
-                propKind == PropKindEnum.ObservableCollectionFB_RO ||
+                //propKind == PropKindEnum.ObservableCollectionFB_RO ||
                 propKind == PropKindEnum.EnumerableTyped_RO ||
                 propKind == PropKindEnum.Enumerable_RO
                 )
@@ -142,11 +142,11 @@ namespace DRM.TypeSafePropertyBag
                     propKind == PropKindEnum.DataTable_RO ||
                     propKind == PropKindEnum.Prop ||
                     propKind == PropKindEnum.ObservableCollection ||
-                    propKind == PropKindEnum.ObservableCollectionFB ||
+                    //propKind == PropKindEnum.ObservableCollectionFB ||
                     propKind == PropKindEnum.EnumerableTyped ||
                     propKind == PropKindEnum.Enumerable ||
                     propKind == PropKindEnum.ObservableCollection_RO ||
-                    propKind == PropKindEnum.ObservableCollectionFB_RO ||
+                    //propKind == PropKindEnum.ObservableCollectionFB_RO ||
                     propKind == PropKindEnum.EnumerableTyped_RO ||
                     propKind == PropKindEnum.Enumerable_RO
                     )

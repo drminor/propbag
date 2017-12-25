@@ -8,11 +8,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.ObjectModel;
 using System.Collections;
+using System.Collections.Specialized;
 
 namespace DRM.PropBag.Collections
 {
 
-    public class CPropFB<CT,T> : PropTypedBase<CT>, ICPropFB<CT,T> where CT: ObservableCollection<T>
+    public class CPropFB<CT,T> : PropTypedBase<CT>, ICPropFB<CT,T> where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged
     {
         public CPropFB(CT initalValue,
             GetDefaultValueDelegate<CT> defaultValFunc,

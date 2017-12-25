@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 
 namespace DRM.TypeSafePropertyBag
 {
-    public interface IListSourceProvider<CT, T> where CT : IObsCollection<T>
+    public interface IListSourceProvider<CT, T> where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged
     {
         Func<ICProp<CT, T>, ObservableCollection<T>> ObservableCollectionGetter { get; }
         Func<IReadOnlyCProp<CT, T>, ReadOnlyObservableCollection<T>> ReadOnlyObservableCollectionGetter { get; }

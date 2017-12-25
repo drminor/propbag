@@ -1,5 +1,9 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 
 namespace DRM.TypeSafePropertyBag
 {
@@ -35,19 +39,19 @@ namespace DRM.TypeSafePropertyBag
 
         ICProp<CT, T> Create<CT, T>(CT initialValue, PropNameType propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
-            Func<CT, CT, bool> comparer = null) where CT : IObsCollection<T>;
+            Func<CT, CT, bool> comparer = null) where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged;
 
-        ICPropFB<CT, T> CreateFB<CT, T>(CT initialValue, PropNameType propertyName, object extraInfo = null,
-            bool hasStorage = true, bool typeIsSolid = true,
-            Func<CT, CT, bool> comparer = null) where CT : ObservableCollection<T>;
+        //ICPropFB<CT, T> CreateFB<CT, T>(CT initialValue, PropNameType propertyName, object extraInfo = null,
+        //    bool hasStorage = true, bool typeIsSolid = true,
+        //    Func<CT, CT, bool> comparer = null) where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged;
 
         ICProp<CT, T> CreateWithNoValue<CT, T>(PropNameType propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
-            Func<CT, CT, bool> comparer = null) where CT : IObsCollection<T>;
+            Func<CT, CT, bool> comparer = null) where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged;
 
         #endregion
 
-        #region CollectionViewSource Prop Creation
+            #region CollectionViewSource Prop Creation
 
         IProp CreateCVSProp<TCVS, T>(PropNameType propertyName) where TCVS : class;
 

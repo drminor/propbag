@@ -6,10 +6,11 @@ using System.Collections.ObjectModel;
 
 namespace DRM.PropBagWPF
 {
+    using System.ComponentModel;
     using PropIdType = UInt32;
     using PropNameType = String;
 
-    public class CViewSourceProp<T> : PropTypedBase<CollectionViewSource>, ICViewPropWPF<CollectionViewSource, T> 
+    public class CViewSourceProp<T> : PropTypedBase<CollectionViewSource>, ICViewSourceProp<CollectionViewSource, T> 
     {
         private PropNameType _propertyName { get; set; }
 
@@ -64,14 +65,44 @@ namespace DRM.PropBagWPF
 
         public ListCollectionView View => (ListCollectionView) _value?.View;
 
+        object ICViewSourceProp<CollectionViewSource, T>.Source
+        {
+            get
+            {
+                return Source;
+            }
+            set
+            {
+                if(value is ObservableCollection<T> cvs)
+                {
+                    Source = cvs;
+                }
+                else
+                {
+                    throw new InvalidOperationException($"The source value must be an {nameof(ObservableCollection<T>)}.");
+                }
+            }
+        }
+
+        ICollectionView IReadOnlyCViewSourceProp<CollectionViewSource, T>.View
+        {
+            get
+            {
+                return View;
+            }
+        }
+
         //public ReadOnlyObservableCollection<T> GetReadOnlyObservableCollection() => new ReadOnlyObservableCollection<T>(Source);
 
 
-        public override object Clone() => throw new NotSupportedException("Prop Items implementing the ICViewProp<CT, T> interface cannot be cloned.");
+        public override object Clone() => throw new NotSupportedException($"This Prop Item of type: {typeof(ICViewSourceProp<CollectionViewSource, T>).Name} does not implement the Clone method.");
 
         public override void CleanUpTyped()
         {
-            // TODO: Dispose of our items.
+            if(TypedValue is IDisposable disable)
+            {
+                disable.Dispose();
+            }
         }
     }
 }

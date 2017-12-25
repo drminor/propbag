@@ -3,8 +3,10 @@ using DRM.PropBag.ControlModel;
 using DRM.TypeSafePropertyBag;
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
@@ -608,12 +610,12 @@ namespace DRM.PropBag
             }
         }
 
-        protected IReadOnlyCProp<CT,T> GetCProp<CT, T>(string propertyName) where CT : IObsCollection<T>
+        protected IReadOnlyCProp<CT,T> GetCProp<CT, T>(string propertyName) where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged
         {
             return (IReadOnlyCProp<CT,T>)GetTypedCPropPrivate<CT,T>(propertyName, mustBeRegistered: true);
         }
 
-        protected ICProp<CT,T> GetTypedCPropPrivate<CT,T>(string propertyName, bool mustBeRegistered, bool neverCreate = false) where CT: IObsCollection<T>
+        protected ICProp<CT,T> GetTypedCPropPrivate<CT,T>(string propertyName, bool mustBeRegistered, bool neverCreate = false) where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged
         {
             IPropData PropData = GetGenPropPrivate<T>(propertyName, mustBeRegistered, neverCreate, out PropIdType notUsed);
 
@@ -1541,7 +1543,7 @@ namespace DRM.PropBag
                 Func<CT, CT, bool> comparer = null,
                 object extraInfo = null,
                 CT initialValue = default(CT)
-            ) where CT : IObsCollection<T>
+            ) where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged
         {
             bool hasStorage = true;
             bool typeIsSolid = true;
@@ -1554,24 +1556,24 @@ namespace DRM.PropBag
             return typedCollectionProp;
         }
 
-        public ICPropFB<CT, T> AddCollectionPropFB<CT, T>
-            (
-                string propertyName,
-                Func<CT, CT, bool> comparer = null,
-                object extraInfo = null,
-                CT initialValue = default(CT)
-            ) where CT : ObservableCollection<T>
-        {
-            bool hasStorage = true;
-            bool typeIsSolid = true;
+        //public ICPropFB<CT, T> AddCollectionPropFB<CT, T>
+        //    (
+        //        string propertyName,
+        //        Func<CT, CT, bool> comparer = null,
+        //        object extraInfo = null,
+        //        CT initialValue = default(CT)
+        //    ) where CT : ObservableCollection<T>
+        //{
+        //    bool hasStorage = true;
+        //    bool typeIsSolid = true;
 
-            Func<CT, CT, bool> comparerToUse = comparer ?? _propFactory.GetRefEqualityComparer<CT>();
+        //    Func<CT, CT, bool> comparerToUse = comparer ?? _propFactory.GetRefEqualityComparer<CT>();
 
-            ICPropFB<CT, T> typedCollectionProp = _propFactory.CreateFB<CT, T>(initialValue, propertyName, extraInfo, hasStorage, typeIsSolid, comparerToUse);
+        //    ICPropFB<CT, T> typedCollectionProp = _propFactory.CreateFB<CT, T>(initialValue, propertyName, extraInfo, hasStorage, typeIsSolid, comparerToUse);
 
-            AddProp(propertyName, typedCollectionProp);
-            return typedCollectionProp;
-        }
+        //    AddProp(propertyName, typedCollectionProp);
+        //    return typedCollectionProp;
+        //}
 
         #endregion
 

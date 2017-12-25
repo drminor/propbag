@@ -91,7 +91,7 @@ namespace DRM.PropBagWPF
 
         public override IProp CreateCVSProp<TCVS, T>(PropNameType propertyName) 
         {
-            ICViewPropWPF<CollectionViewSource, T> result = new CViewSourceProp<T>(null, propertyName);
+            ICViewSourceProp<CollectionViewSource, T> result = new CViewSourceProp<T>(null, propertyName);
 
             return (IProp)result;
         }

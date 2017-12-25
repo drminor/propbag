@@ -1,9 +1,11 @@
 ﻿
 using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Globalization;
 
 namespace DRM.TypeSafePropertyBag
@@ -82,11 +84,11 @@ namespace DRM.TypeSafePropertyBag
             else if
                 (
                 propKind == PropKindEnum.ObservableCollection ||
-                propKind == PropKindEnum.ObservableCollectionFB ||
+                //propKind == PropKindEnum.ObservableCollectionFB ||
                 propKind == PropKindEnum.EnumerableTyped ||
                 propKind == PropKindEnum.Enumerable ||
                 propKind == PropKindEnum.ObservableCollection_RO ||
-                propKind == PropKindEnum.ObservableCollectionFB_RO ||
+                //propKind == PropKindEnum.ObservableCollectionFB_RO ||
                 propKind == PropKindEnum.EnumerableTyped_RO ||
                 propKind == PropKindEnum.Enumerable_RO
                 )
@@ -115,7 +117,7 @@ namespace DRM.TypeSafePropertyBag
                 (
                 propKind == PropKindEnum.CollectionViewSource_RO ||
                 propKind == PropKindEnum.ObservableCollection_RO ||
-                propKind == PropKindEnum.ObservableCollectionFB_RO ||
+                //propKind == PropKindEnum.ObservableCollectionFB_RO ||
                 propKind == PropKindEnum.EnumerableTyped_RO ||
                 propKind == PropKindEnum.Enumerable_RO
                 )
@@ -151,7 +153,7 @@ namespace DRM.TypeSafePropertyBag
             CT initialValue,
             string propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
-            Func<CT, CT, bool> comparer = null) where CT : IObsCollection<T>;
+            Func<CT, CT, bool> comparer = null) where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged;
         //{
         //    if (comparer == null) comparer = EqualityComparer<CT>.Default.Equals;
         //    GetDefaultValueDelegate<CT> getDefaultValFunc = ValueConverter.GetDefaultValue<CT>;
@@ -160,23 +162,23 @@ namespace DRM.TypeSafePropertyBag
         //    return prop;
         //}
 
-        public abstract ICPropFB<CT, T> CreateFB<CT, T>(
-            CT initialValue,
-            string propertyName, object extraInfo = null,
-            bool hasStorage = true, bool typeIsSolid = true,
-            Func<CT, CT, bool> comparer = null) where CT : ObservableCollection<T>;
-        //{
-        //    if (comparer == null) comparer = EqualityComparer<CT>.Default.Equals;
-        //    GetDefaultValueDelegate<CT> getDefaultValFunc = ValueConverter.GetDefaultValue<CT>;
+        //public abstract ICPropFB<CT, T> CreateFB<CT, T>(
+        //    CT initialValue,
+        //    string propertyName, object extraInfo = null,
+        //    bool hasStorage = true, bool typeIsSolid = true,
+        //    Func<CT, CT, bool> comparer = null) where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged;
+        ////{
+        ////    if (comparer == null) comparer = EqualityComparer<CT>.Default.Equals;
+        ////    GetDefaultValueDelegate<CT> getDefaultValFunc = ValueConverter.GetDefaultValue<CT>;
 
-        //    ICPropFB<CT, T> prop = new CPropFB<CT, T>(initialValue, getDefaultValFunc, typeIsSolid, hasStorage, comparer);
-        //    return prop;
-        //}
+        ////    ICPropFB<CT, T> prop = new CPropFB<CT, T>(initialValue, getDefaultValFunc, typeIsSolid, hasStorage, comparer);
+        ////    return prop;
+        ////}
 
         public abstract ICProp<CT, T> CreateWithNoValue<CT, T>(
             PropNameType propertyName, object extraInfo = null,
             bool hasStorage = true, bool typeIsSolid = true,
-            Func<CT, CT, bool> comparer = null) where CT : IObsCollection<T>;
+            Func<CT, CT, bool> comparer = null) where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged;
         //{
         //    if (comparer == null) comparer = EqualityComparer<CT>.Default.Equals;
 
@@ -278,22 +280,22 @@ namespace DRM.TypeSafePropertyBag
             }
             else if (IsCollection(propKind))
             {
-                if (propKind == PropKindEnum.ObservableCollectionFB)
-                {
-                    CreateEPropFromStringDelegate propCreator = GetCPropFromStringFBCreator(typeOfThisProperty, itemType);
-                    IProp prop = propCreator(this, value, useDefault, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
-                        comparer: comparer, useRefEquality: useRefEquality);
+                //if (propKind == PropKindEnum.ObservableCollectionFB)
+                //{
+                //    CreateEPropFromStringDelegate propCreator = GetCPropFromStringFBCreator(typeOfThisProperty, itemType);
+                //    IProp prop = propCreator(this, value, useDefault, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
+                //        comparer: comparer, useRefEquality: useRefEquality);
 
-                    return prop;
-                }
-                else
-                {
+                //    return prop;
+                //}
+                //else
+                //{
                     CreateEPropFromStringDelegate propCreator = GetCPropFromStringCreator(typeOfThisProperty, itemType);
                     IProp prop = propCreator(this, value, useDefault, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
                         comparer: comparer, useRefEquality: useRefEquality);
 
                     return prop;
-                }
+                //}
             }
             else
             {
@@ -517,12 +519,12 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        // From String FALL BACK to ObservableCollection<T>
-        protected virtual CreateEPropFromStringDelegate GetCPropFromStringFBCreator(Type collectionType, Type itemType)
-        {
-            CreateEPropFromStringDelegate result = DelegateCacheProvider.CreateCPropFromStringFBCache.GetOrAdd(new TypePair(collectionType, itemType));
-            return result;
-        }
+        //// From String FALL BACK to ObservableCollection<T>
+        //protected virtual CreateEPropFromStringDelegate GetCPropFromStringFBCreator(Type collectionType, Type itemType)
+        //{
+        //    CreateEPropFromStringDelegate result = DelegateCacheProvider.CreateCPropFromStringFBCache.GetOrAdd(new TypePair(collectionType, itemType));
+        //    return result;
+        //}
 
         // With No Value
         protected virtual CreateEPropWithNoValueDelegate GetCPropWithNoValueCreator(Type collectionType, Type itemType)
@@ -592,11 +594,11 @@ namespace DRM.TypeSafePropertyBag
                     propKind == PropKindEnum.DataTable_RO ||
                     propKind == PropKindEnum.Prop ||
                     propKind == PropKindEnum.ObservableCollection ||
-                    propKind == PropKindEnum.ObservableCollectionFB ||
+                    //propKind == PropKindEnum.ObservableCollectionFB ||
                     propKind == PropKindEnum.EnumerableTyped ||
                     propKind == PropKindEnum.Enumerable ||
                     propKind == PropKindEnum.ObservableCollection_RO ||
-                    propKind == PropKindEnum.ObservableCollectionFB_RO ||
+                    //propKind == PropKindEnum.ObservableCollectionFB_RO ||
                     propKind == PropKindEnum.EnumerableTyped_RO ||
                     propKind == PropKindEnum.Enumerable_RO
                     )

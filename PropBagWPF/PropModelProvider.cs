@@ -194,7 +194,7 @@ namespace DRM.PropBagWPF
             bool typeIsSolid = pi.TypeIsSolid;
             string extraInfo = pi.ExtraInfo;
 
-            if(pi.PropKind == PropKindEnum.ObservableCollectionFB)
+            if(pi.PropKind == PropKindEnum.ObservableCollection)
             {
                 System.Diagnostics.Debug.WriteLine("Processing the PersonList Prop Item.");
             }
@@ -328,10 +328,10 @@ namespace DRM.PropBagWPF
                 case PropKindEnum.EnumerableTyped:
                     goto case PropKindEnum.ObservableCollection;
 
-                case PropKindEnum.ObservableCollectionFB_RO:
-                    goto case PropKindEnum.ObservableCollection;
-                case PropKindEnum.ObservableCollectionFB:
-                    goto case PropKindEnum.ObservableCollection;
+                //case PropKindEnum.ObservableCollectionFB_RO:
+                //    goto case PropKindEnum.ObservableCollection;
+                //case PropKindEnum.ObservableCollectionFB:
+                //    goto case PropKindEnum.ObservableCollection;
 
                 case PropKindEnum.ObservableCollection_RO:
                     goto case PropKindEnum.ObservableCollection;

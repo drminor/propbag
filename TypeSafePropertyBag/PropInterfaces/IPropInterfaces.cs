@@ -2,6 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Data;
 
 namespace DRM.TypeSafePropertyBag
@@ -23,44 +25,60 @@ namespace DRM.TypeSafePropertyBag
         DataTable ReadOnlyDataTable { get; }
     }
 
+    //public interface IHaveAView<T>
+    //{
+    //    ICollectionView View { get; }
+    //}
+
+
     // Collection View Source
-    public interface ICViewProp<TCVS, T> : IReadOnlyCViewProp<TCVS, T> where TCVS: class
+    public interface ICViewSourceProp<TCVS, T> : IReadOnlyCViewSourceProp<TCVS, T> where TCVS: class
     {
-        //object Source { get; set; }
+        object Source { get; set; }
     }
 
     // CollectionViewSource -- ReadOnly 
-    public interface IReadOnlyCViewProp<TCVS, T> : IProp<TCVS> where TCVS : class
+    public interface IReadOnlyCViewSourceProp<TCVS, T> : IProp<TCVS> where TCVS : class
     {
-        //ICollectionView View { get; }
+        ICollectionView View { get; }
         //ICollectionView this[string key] { get; }
         //IReadOnlyObsCollection<T> GetReadOnlyObservableCollection();
     }
 
-    // ObsCollection<T> interface
-    public interface ICProp<CT,T> : IETypedProp<CT, T>, IReadOnlyCProp<CT, T>/*, IListSourceProvider<CT,T>*/ where CT : IObsCollection<T>
+    // Collection View 
+    public interface ICViewProp<TCVS, T> : IReadOnlyCViewProp<TCVS, T> where TCVS : ICollectionView
+    {
+    }
+
+    // CollectionView -- ReadOnly 
+    public interface IReadOnlyCViewProp<TCVS, T> : IProp<TCVS> where TCVS : ICollectionView
+    {
+    }
+
+    // IList<T> + INotifyCollectionChanged
+    public interface ICProp<CT,T> : IETypedProp<CT, T>, IReadOnlyCProp<CT, T> where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged
     {
 
     }
 
-    // ObsCollection<T> interface -- ReadOnly
-    public interface IReadOnlyCProp<CT,T> : IReadOnlyETypedProp<CT, T>/*, IListSource*/ where CT : IReadOnlyObsCollection<T>
+    // IList<T> + INotifyCollectionChanged -- ReadOnly
+    public interface IReadOnlyCProp<CT,T> : IReadOnlyETypedProp<CT, T> where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged
     {
 
     }
 
 
-    // ObservableCollection<T>
-    public interface ICPropFB<CT, T> : IETypedProp<CT, T>/*, IListSourceProvider<CT,T>*/ where CT : ObservableCollection<T>
-    {
-        ReadOnlyObservableCollection<T> GetReadOnlyObservableCollection();
-    }
+    //// ObservableCollection<T>
+    //public interface ICPropFB<CT, T> : IETypedProp<CT, T> where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged //ObservableCollection<T>
+    //{
+    //    ReadOnlyObservableCollection<T> GetReadOnlyObservableCollection();
+    //}
 
-    // ObservableCollection<T> -- ReadOnly
-    public interface IReadOnlyCPropFB<CT, T> : IReadOnlyETypedProp<CT, T>/*, IListSource*/ where CT : ReadOnlyObservableCollection<T>
-    {
+    //// ObservableCollection<T> -- ReadOnly
+    //public interface IReadOnlyCPropFB<CT, T> : IReadOnlyETypedProp<CT, T> where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged // ReadOnlyObservableCollection<T>
+    //{
 
-    }
+    //}
 
 
     // IEnumerable<T> Collections

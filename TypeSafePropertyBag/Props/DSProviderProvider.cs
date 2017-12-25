@@ -22,7 +22,7 @@ namespace DRM.TypeSafePropertyBag
         {
             _propKind = propKind;
             
-            if(! (_propKind == PropKindEnum.ObservableCollection || _propKind == PropKindEnum.ObservableCollectionFB))
+            if(! (_propKind == PropKindEnum.ObservableCollection/* || _propKind == PropKindEnum.ObservableCollectionFB*/))
             {
                 throw new NotSupportedException($"This IProvideADataSourceProvider {nameof(DSProviderProvider<T>)} cannot create a DataSourceProvider for Prop Items with Kind = {_propKind}.");
             }

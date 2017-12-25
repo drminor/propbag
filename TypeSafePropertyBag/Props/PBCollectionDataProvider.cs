@@ -100,7 +100,7 @@ namespace DRM.TypeSafePropertyBag
             IProp typedProp = propDataHolder.TypedProp;
 
             // TODO: Create Extensions for PropKindEnum to query IE, IList, etc.
-            if (typedProp.PropKind == PropKindEnum.ObservableCollection || typedProp.PropKind == PropKindEnum.ObservableCollectionFB)
+            if (typedProp.PropKind == PropKindEnum.ObservableCollection /*|| typedProp.PropKind == PropKindEnum.ObservableCollectionFB*/)
             {
                 data = typedProp.TypedValueAsObject;
                 return true;
