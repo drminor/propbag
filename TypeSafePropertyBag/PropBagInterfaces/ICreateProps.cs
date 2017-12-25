@@ -1,12 +1,16 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.ComponentModel;
 
 namespace DRM.TypeSafePropertyBag
 {
     public interface ICreateProps
     {
-        ICProp<CT, T> CreateCPropFromObject<CT, T>(IPropFactory propFactory, object value, string propertyName, object extraInfo, bool hasStorage, bool isTypeSolid, Delegate comparer, bool useRefEquality = false) where CT : class, IObsCollection<T>;
-        ICProp<CT, T> CreateCPropFromString<CT, T>(IPropFactory propFactory, string value, bool useDefault, string propertyName, object extraInfo, bool hasStorage, bool isTypeSolid, Delegate comparer, bool useRefEquality = true) where CT : class, IObsCollection<T>;
-        ICProp<CT, T> CreateCPropWithNoValue<CT, T>(IPropFactory propFactory, bool useDefault, string propertyName, object extraInfo, bool hasStorage, bool isTypeSolid, Delegate comparer, bool useRefEquality = true) where CT : class, IObsCollection<T>;
+        ICProp<CT, T> CreateCPropFromObject<CT, T>(IPropFactory propFactory, object value, string propertyName, object extraInfo, bool hasStorage, bool isTypeSolid, Delegate comparer, bool useRefEquality = false) where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged;
+        ICProp<CT, T> CreateCPropFromString<CT, T>(IPropFactory propFactory, string value, bool useDefault, string propertyName, object extraInfo, bool hasStorage, bool isTypeSolid, Delegate comparer, bool useRefEquality = true) where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged;
+        ICProp<CT, T> CreateCPropWithNoValue<CT, T>(IPropFactory propFactory, bool useDefault, string propertyName, object extraInfo, bool hasStorage, bool isTypeSolid, Delegate comparer, bool useRefEquality = true) where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged;
 
         T CreateNewUsingDefaultConstructor<T>();
 

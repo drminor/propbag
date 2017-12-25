@@ -1,8 +1,10 @@
 ﻿using DRM.PropBag.ControlModel;
 using DRM.TypeSafePropertyBag;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Reflection;
@@ -99,7 +101,7 @@ namespace DRM.PropBag
         }
 
         new public ICProp<CT, T> AddCollectionProp<CT, T>(string propertyName, Func<CT, CT, bool> comparer = null,
-            object extraInfo = null, CT initialValue = default(CT)) where CT : class, IObsCollection<T>
+            object extraInfo = null, CT initialValue = default(CT)) where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged
         {
             return base.AddCollectionProp<CT, T>(propertyName, comparer, extraInfo, initialValue);
         }

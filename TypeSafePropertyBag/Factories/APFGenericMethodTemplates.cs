@@ -30,7 +30,7 @@ namespace DRM.TypeSafePropertyBag
             object value,
             string propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid,
-            Delegate comparer, bool useRefEquality = false) where CT : class, IObsCollection<T>
+            Delegate comparer, bool useRefEquality = false) where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged
         {
             CT initialValue = propFactory.GetValueFromObject<CT>(value);
 
@@ -85,7 +85,7 @@ namespace DRM.TypeSafePropertyBag
             bool useDefault,
             PropNameType propertyName, object extraInfo,
             bool hasStorage, bool isTypeSolid,
-            Delegate comparer, bool useRefEquality = true) where CT : class, IObsCollection<T>
+            Delegate comparer, bool useRefEquality = true) where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged
         {
             return propFactory.CreateWithNoValue<CT, T>(propertyName, extraInfo, hasStorage, isTypeSolid,
                 GetComparerForCollections<CT>(comparer, propFactory, useRefEquality));

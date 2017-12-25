@@ -25,10 +25,11 @@ namespace DRM.TypeSafePropertyBag
         DataTable ReadOnlyDataTable { get; }
     }
 
-    //public interface IHaveAView<T>
-    //{
-    //    ICollectionView View { get; }
-    //}
+    public interface IHaveAView<T>
+    {
+        ICollectionView View { get; }
+        //TypedCollectionView { get;} // This type is yet to be created.
+    }
 
 
     // Collection View Source
@@ -38,9 +39,9 @@ namespace DRM.TypeSafePropertyBag
     }
 
     // CollectionViewSource -- ReadOnly 
-    public interface IReadOnlyCViewSourceProp<TCVS, T> : IProp<TCVS> where TCVS : class
+    public interface IReadOnlyCViewSourceProp<TCVS, T> : IProp<TCVS>, IHaveAView<T> where TCVS : class
     {
-        ICollectionView View { get; }
+        //ICollectionView View { get; }
         //ICollectionView this[string key] { get; }
         //IReadOnlyObsCollection<T> GetReadOnlyObservableCollection();
     }

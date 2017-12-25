@@ -1,12 +1,12 @@
 ﻿using DRM.TypeSafePropertyBag;
 using System;
-using System.Windows.Data;
-
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Windows.Data;
 
 namespace DRM.PropBagWPF
 {
-    using System.ComponentModel;
     using PropIdType = UInt32;
     using PropNameType = String;
 
@@ -65,6 +65,8 @@ namespace DRM.PropBagWPF
 
         public ListCollectionView View => (ListCollectionView) _value?.View;
 
+        ICollectionView IHaveAView<T>.View => View;
+
         object ICViewSourceProp<CollectionViewSource, T>.Source
         {
             get
@@ -84,17 +86,6 @@ namespace DRM.PropBagWPF
             }
         }
 
-        ICollectionView IReadOnlyCViewSourceProp<CollectionViewSource, T>.View
-        {
-            get
-            {
-                return View;
-            }
-        }
-
-        //public ReadOnlyObservableCollection<T> GetReadOnlyObservableCollection() => new ReadOnlyObservableCollection<T>(Source);
-
-
         public override object Clone() => throw new NotSupportedException($"This Prop Item of type: {typeof(ICViewSourceProp<CollectionViewSource, T>).Name} does not implement the Clone method.");
 
         public override void CleanUpTyped()
@@ -102,6 +93,35 @@ namespace DRM.PropBagWPF
             if(TypedValue is IDisposable disable)
             {
                 disable.Dispose();
+            }
+        }
+
+        // ---- Might use this soon
+
+        IDictionary<string, CollectionViewSource> _views;
+        public ListCollectionView this[string key]
+        {
+            get
+            {
+                if (_views == null)
+                {
+                    _views = new Dictionary<string, CollectionViewSource>();
+                }
+                else
+                {
+                    if (_views.TryGetValue(key, out CollectionViewSource theView))
+                    {
+                        return (ListCollectionView)theView.View;
+                    }
+                }
+
+                CollectionViewSource cvs = new CollectionViewSource
+                {
+                    Source = TypedValue.Source
+                };
+
+                _views.Add(key, cvs);
+                return (ListCollectionView)cvs.View;
             }
         }
     }

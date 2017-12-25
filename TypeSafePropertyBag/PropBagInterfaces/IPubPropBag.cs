@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 
 namespace DRM.TypeSafePropertyBag
 {
@@ -25,7 +28,7 @@ namespace DRM.TypeSafePropertyBag
 
 
         ICProp<CT, T> AddCollectionProp<CT, T>(string propertyName, Func<CT, CT, bool> comparer = null,
-            object extraInfo = null, CT initialValue = default(CT)) where CT : class, IObsCollection<T>;
+            object extraInfo = null, CT initialValue = default(CT)) where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged;
 
         //ICPropFB<CT, T> AddCollectionPropFB<CT, T>(string propertyName, Func<CT, CT, bool> comparer = null,
         //    object extraInfo = null, CT initialValue = default(CT)) where CT : ObservableCollection<T>;

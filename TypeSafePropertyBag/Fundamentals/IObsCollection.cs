@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 
-namespace DRM.TypeSafePropertyBag
+namespace DRM.TypeSafePropertyBag.Fundamentals
 {
     public interface IReadOnlyObsCollection<T> :
         IList<T>, ICollection<T>, IEnumerable<T>,

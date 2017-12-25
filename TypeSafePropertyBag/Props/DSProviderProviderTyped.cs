@@ -6,7 +6,7 @@ namespace DRM.TypeSafePropertyBag
     using PropIdType = UInt32;
     using PSAccessServiceInternalType = IPropStoreAccessServiceInternal<UInt32, String>;
 
-    internal class DSProviderProvider<T> : IProvideADataSourceProvider<T>
+    internal class DSProviderProviderTyped<T> : IProvideADataSourceProvider<T>
     {
         #region Private Properties
 
@@ -18,13 +18,13 @@ namespace DRM.TypeSafePropertyBag
 
         #region Constructor
 
-        public DSProviderProvider(PropKindEnum propKind, PropIdType propId, PSAccessServiceInternalType storeAccesor)
+        public DSProviderProviderTyped(PropKindEnum propKind, PropIdType propId, PSAccessServiceInternalType storeAccesor)
         {
             _propKind = propKind;
             
             if(! (_propKind == PropKindEnum.ObservableCollection/* || _propKind == PropKindEnum.ObservableCollectionFB*/))
             {
-                throw new NotSupportedException($"This IProvideADataSourceProvider {nameof(DSProviderProvider<T>)} cannot create a DataSourceProvider for Prop Items with Kind = {_propKind}.");
+                throw new NotSupportedException($"This IProvideADataSourceProvider {nameof(DSProviderProviderTyped<T>)} cannot create a DataSourceProvider for Prop Items with Kind = {_propKind}.");
             }
 
             IsCollection = true;
