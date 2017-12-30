@@ -24,11 +24,30 @@ namespace DRM.TypeSafePropertyBag
             _storeAccessor = storeAccessor;
             _propId = propId;
             //IsAsynchronous = isAsynchronous;
+
+            if(!(StartWatchingProp(_storeAccessor, _propId, ref _unsubscriber)))
+            {
+                throw new InvalidOperationException($"PB Collection could not subscribe to PropertyChanged (EventHandler<PcGenEventArgs) on the property with Id: {_propId}.");
+            }
         }
 
         #endregion
 
         #region Public Properties
+
+        public bool TryGetTypedData(out IList data)
+        {
+            if(TryGetDataFromProp(_storeAccessor, _propId, out object rawData))
+            {
+                data = (IList)rawData;
+                return true;
+            }
+            else
+            {
+                data = null;
+                return false;
+            }
+        }
 
         public bool IsAsynchronous => false;
 
@@ -38,11 +57,14 @@ namespace DRM.TypeSafePropertyBag
 
         protected override void BeginQuery()
         {
+            // TODO: We should take a weak reference to the parent PropBag and use it
+            // to detect when this data is coming from a new PropBag object.
+            // Actually our LocalBinder should take care of this work -- let's test before
+            // implementing checks here.
             if(TryGetDataFromProp(_storeAccessor, _propId, out object rawData))
             {
                 if (rawData is IList data)
                 {
-                    _unsubscriber = StartWatchingProp(_storeAccessor, _propId);
                     OnQueryFinished(data);
                 }
                 else
@@ -52,8 +74,8 @@ namespace DRM.TypeSafePropertyBag
             } 
             else
             {
-                // TODO: Fix this error message.
-                throw new NotSupportedException($"{nameof(PBCollectionDataProvider)} cannot access property with Id = {_propId}.");
+                // TODO: Fix this error message -- need a way to better identify the property and parent PropBag.
+                throw new InvalidOperationException($"{nameof(PBCollectionDataProvider)} cannot access property with Id = {_propId}.");
             }
         }
 
@@ -77,18 +99,32 @@ namespace DRM.TypeSafePropertyBag
 
         #region Private Methods
 
-        private IDisposable StartWatchingProp(PSAccessServiceInternalType storeAccessor, PropIdType propId)
+        private bool StartWatchingProp(PSAccessServiceInternalType storeAccessor, PropIdType propId, ref IDisposable unsubscriber)
         {
-            IDisposable result = storeAccessor.RegisterHandler(propId, DoWhenListSourceIsReset, SubscriptionPriorityGroup.Internal, keepRef: false);
-            return result;
+            if (unsubscriber != null)
+            {
+                unsubscriber.Dispose();
+                //System.Diagnostics.Debug.WriteLine("The PBCollectionDataProvider has a previous subscription, that is not being unsubscribed.");
+            }
+
+            unsubscriber = storeAccessor.RegisterHandler(propId, DoWhenListSourceIsReset, SubscriptionPriorityGroup.Internal, keepRef: false);
+            return true;
         }
 
         private void DoWhenListSourceIsReset(object sender, PcGenEventArgs args)
         {
             // TODO: Attempt to avoid unsubscribing, just to resubscribe, if the PropItem is the same.
             _unsubscriber?.Dispose();
+            _unsubscriber = null;
 
-            if (!IsRefreshDeferred) Refresh();
+            if (!IsRefreshDeferred)
+            {
+                Refresh();
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine("Not refreshing, we are in a Deferred Refresh Cycle.");
+            }
         }
 
         private bool TryGetDataFromProp(PSAccessServiceInternalType storeAccessor, PropIdType propId, out object data)
@@ -99,16 +135,17 @@ namespace DRM.TypeSafePropertyBag
 
             IProp typedProp = propDataHolder.TypedProp;
 
-            // TODO: Create Extensions for PropKindEnum to query IE, IList, etc.
-            if (typedProp.PropKind == PropKindEnum.ObservableCollection /*|| typedProp.PropKind == PropKindEnum.ObservableCollectionFB*/)
+            // TODO: Create Extensions for PropKindEnum to query IEnumerable, IList, etc.
+            if (typedProp.PropKind == PropKindEnum.ObservableCollection)
             {
                 data = typedProp.TypedValueAsObject;
                 return true;
             }
             else
             {
-                data = null;
-                return false;
+                throw new InvalidOperationException("The source PropItem is not of kind = ObservableCollection.");
+                //data = null;
+                //return false;
             }
         }
 

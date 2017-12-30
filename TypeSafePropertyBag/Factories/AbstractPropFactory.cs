@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Globalization;
+using System.Windows.Data;
 
 namespace DRM.TypeSafePropertyBag
 {
@@ -25,6 +26,11 @@ namespace DRM.TypeSafePropertyBag
         public ResolveTypeDelegate TypeResolver { get; }
 
         public IProvideDelegateCaches DelegateCacheProvider { get; }
+
+        public virtual CViewProviderCreator CViewProviderFactory =>
+                        throw new NotImplementedException($"This implementation of {nameof(IPropFactory)}" +
+                            $" does not provide a ViewProviderFactory, please use WPFPropfactory or similar.");
+
 
         public IConvertValues ValueConverter { get; }
 
@@ -192,12 +198,12 @@ namespace DRM.TypeSafePropertyBag
 
         #region CollectionViewSource Prop Creation
 
-        public virtual IProp CreateCVSProp<TCVS, T>(PropNameType propertyName) where TCVS : class
+        public virtual IProp CreateCVSProp(PropNameType propertyName, IProvideAView viewProvider) 
         {
             throw new NotImplementedException($"This implementation of {nameof(IPropFactory)} cannot create CVSProps (CollectionViewSource PropItems), please use WPFPropfactory or similar.");
         }
 
-        public virtual IProp CreateCVProp<T>(string propertyName)
+        public virtual IProp CreateCVProp(string propertyName, IProvideAView viewProvider)
         {
             throw new NotImplementedException($"This implementation of {nameof(IPropFactory)} cannot create CVProps (CollectionView PropItems), please use WPFPropfactory or similar.");
         }
@@ -280,22 +286,11 @@ namespace DRM.TypeSafePropertyBag
             }
             else if (IsCollection(propKind))
             {
-                //if (propKind == PropKindEnum.ObservableCollectionFB)
-                //{
-                //    CreateEPropFromStringDelegate propCreator = GetCPropFromStringFBCreator(typeOfThisProperty, itemType);
-                //    IProp prop = propCreator(this, value, useDefault, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
-                //        comparer: comparer, useRefEquality: useRefEquality);
+                CreateEPropFromStringDelegate propCreator = GetCPropFromStringCreator(typeOfThisProperty, itemType);
+                IProp prop = propCreator(this, value, useDefault, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
+                    comparer: comparer, useRefEquality: useRefEquality);
 
-                //    return prop;
-                //}
-                //else
-                //{
-                    CreateEPropFromStringDelegate propCreator = GetCPropFromStringCreator(typeOfThisProperty, itemType);
-                    IProp prop = propCreator(this, value, useDefault, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
-                        comparer: comparer, useRefEquality: useRefEquality);
-
-                    return prop;
-                //}
+                return prop;
             }
             else
             {
@@ -330,12 +325,12 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        public virtual IProp CreateCVSPropFromString(Type typeOfThisProperty, PropNameType propertyName)
+        public virtual IProp CreateCVSPropFromString(Type typeOfThisProperty, PropNameType propertyName, IProvideAView viewProvider)
         {
             throw new NotImplementedException($"This implementation of {nameof(IPropFactory)} cannot create CVSProps (CollectionViewSource PropItems), please use WPFPropfactory or similar.");
         }
 
-        public virtual IProp CreateCVPropFromString(Type typeofThisProperty, string propertyName)
+        public virtual IProp CreateCVPropFromString(Type typeofThisProperty, string propertyName, IProvideAView viewProvider)
         {
             throw new NotImplementedException($"This implementation of {nameof(IPropFactory)} cannot create CVProps (CollectionView PropItems), please use WPFPropfactory or similar.");
         }
@@ -537,19 +532,19 @@ namespace DRM.TypeSafePropertyBag
 
         #region CollectionViewSource Prop Creation Methods
 
-        // CollectionViewSource
-        protected virtual CreateCVSPropDelegate GetCVSPropCreator(Type collectionType, Type itemType)
-        {
-            CreateCVSPropDelegate result = DelegateCacheProvider.CreateCVSPropCache.GetOrAdd(new TypePair(collectionType, itemType));
-            return result;
-        }
+        //// CollectionViewSource
+        //protected virtual CreateCVSPropDelegate GetCVSPropCreator(Type itemType)
+        //{
+        //    CreateCVSPropDelegate result = DelegateCacheProvider.CreateCVSPropCache.GetOrAdd(itemType);
+        //    return result;
+        //}
 
-        // CollectionView
-        protected virtual CreateCVPropDelegate GetCVPropCreator(Type itemType)
-        {
-            CreateCVPropDelegate result = DelegateCacheProvider.CreateCVPropCache.GetOrAdd(itemType);
-            return result;
-        }
+        //// CollectionView
+        //protected virtual CreateCVPropDelegate GetCVPropCreator(Type itemType)
+        //{
+        //    CreateCVPropDelegate result = DelegateCacheProvider.CreateCVPropCache.GetOrAdd(itemType);
+        //    return result;
+        //}
 
         #endregion
 

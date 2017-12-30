@@ -21,8 +21,8 @@ namespace DRM.TypeSafePropertyBag
         ICacheDelegatesForTypePair<CreateEPropFromObjectDelegate> CreateCPropFromObjectCache { get; }
 
 
-        ICacheDelegatesForTypePair<CreateCVSPropDelegate> CreateCVSPropCache { get; }
-        ICacheDelegates<CreateCVPropDelegate> CreateCVPropCache { get; }
+        //ICacheDelegates<CreateCVSPropDelegate> CreateCVSPropCache { get; }
+        //ICacheDelegates<CreateCVPropDelegate> CreateCVPropCache { get; }
 
     }
 }

@@ -13,6 +13,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Windows.Data;
 
 namespace DRM.PropBag
 {
@@ -221,44 +222,235 @@ namespace DRM.PropBag
                 //    System.Diagnostics.Debug.WriteLine("Processing the PersonList Prop Item.");
                 //}
 
-                IPropData propData;
+                IPropData propItem;
+                IProp typedProp;
 
-                if (pi.PropKind == PropKindEnum.CollectionViewSource || pi.PropKind == PropKindEnum.CollectionViewSource_RO)
+                if (pi.PropKind == PropKindEnum.CollectionViewSource)
                 {
-                    IProp pg = _propFactory.CreateCVSPropFromString(pi.PropertyType, pi.PropertyName);
-                    propData = AddProp(pi.PropertyName, pg);
+                    // Get the name of the Collection-Type PropItem that provides the data for this CollectionViewSource.
+                    string srcPropName = pi.BinderField.Path;
+
+                    //FetchData_Test(srcPropName, pi.PropertyType);
+
+                    // TODO: Consider creating a local cache of CViewManagers, keyed by srcPropName.
+                    if (TryGetViewManager(this, srcPropName, pi.PropertyType, out IManageCViews cViewManager))
+                    {
+                        IProvideAView viewProvider = cViewManager.GetViewProvider();
+
+                        typedProp = _propFactory.CreateCVSProp(pi.PropertyName, viewProvider);
+                        propItem = AddProp(pi.PropertyName, typedProp);
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException($"Could not retrieve the (generic) CViewManager for source PropItem: {srcPropName}.");
+                    }
+
+                    //if (TryGetDataSourceProvider(this, srcPropName, pi.PropertyType, out DataSourceProvider dataSourceProvider))
+                    //{
+                    //    //IManageCViews viewManager = GetViewManager(dataSourceProviderProvider);
+
+                    //    //IProvideAView viewProvider = viewManager.GetViewProvider(null);
+
+                    //    //typedProp = _propFactory.CreateCVSProp(pi.PropertyName, viewProvider);
+                    //    //propItem = AddProp(pi.PropertyName, typedProp);
+
+                    //    propItem = null;
+
+                    //}
+                    //else
+                    //{
+                    //    throw new InvalidOperationException("Fix Me.");
+                    //}
                 }
                 else if(pi.PropKind == PropKindEnum.CollectionView)
                 {
-                    IProp pg = _propFactory.CreateCVPropFromString(pi.PropertyType, pi.PropertyName);
-                    propData = AddProp(pi.PropertyName, pg);
+                    // Get the name of the Collection-Type PropItem that provides the data for this CollectionViewSource.
+                    string srcPropName = pi.BinderField.Path;
+
+                    //FetchData_Test(srcPropName, pi.PropertyType);
+
+
+                    if (TryGetViewManager(this, srcPropName, pi.PropertyType, out IManageCViews cViewManager))
+                    {
+                        IProvideAView viewProvider = cViewManager.GetViewProvider();
+
+                        typedProp = _propFactory.CreateCVProp(pi.PropertyName, viewProvider);
+                        propItem = AddProp(pi.PropertyName, typedProp);
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException($"Could not retrieve the (generic) CViewManager for source PropItem: {srcPropName}.");
+                    }
+
+                    //if (TryGetDataSourceProvider(this, srcPropName, pi.PropertyType, out DataSourceProvider dataSourceProvider))
+                    //{
+                    //    //IManageCViews viewManager = GetViewManager(dataSourceProviderProvider);
+
+                    //    //IProvideAView viewProvider = viewManager.GetViewProvider(null);
+
+                    //    //typedProp = _propFactory.CreateCVProp(pi.PropertyName, viewProvider);
+                    //    //propItem = AddProp(pi.PropertyName, typedProp);
+
+                    //    propItem = null;
+                    //}
+                    //else
+                    //{
+                    //    throw new InvalidOperationException("Fix Me.");
+                    //}
                 }
                 else
                 {
-                    propData = processProp(pi);
+                    propItem = processProp(pi, out typedProp);
                 }
-
 
                 if (pi.BinderField?.Path != null)
                 {
-                    if(pi.PropKind == PropKindEnum.CollectionViewSource || pi.PropKind == PropKindEnum.CollectionViewSource_RO)
+                    if (pi.PropKind == PropKindEnum.CollectionView)
                     {
-                        //string srcPropName = pi.BinderField.Path;
-                        //if (TryGetDataSourceProvider<PersonVM>(this, "PersonList", out IProvideADataSourceProvider<PersonVM> dataSourceProvider))
-                        //{
-                        //    cvs.Source = dataSourceProvider.DataSourceProvider;
-                        //}
+                        //throw new InvalidOperationException($"PropItems of kind = {pi.PropKind} cannot have a local binding.");
+                    }
+                    else if (pi.PropKind == PropKindEnum.CollectionViewSource || pi.PropKind == PropKindEnum.CollectionViewSource_RO)
+                    {
+                        //throw new InvalidOperationException($"PropItems of kind = {pi.PropKind} cannot have a local binding.");
                     }
                     else
                     {
                         LocalBindingInfo bindingInfo = new LocalBindingInfo(new LocalPropertyPath(pi.BinderField.Path));
-                        propData.TypedProp.RegisterBinding((IRegisterBindingsFowarderType)this, propData.PropId, bindingInfo);
+                        propItem.TypedProp.RegisterBinding((IRegisterBindingsFowarderType)this, propItem.PropId, bindingInfo);
                     }
                 }
+
+
+                //if (pi.BinderField?.Path != null)
+                //{
+                //    if(pi.PropKind == PropKindEnum.CollectionView)
+                //    {
+                //        //if (propGen is IHaveAViewSource<object> genViewSource)
+                //        //{
+                //        //    string srcPropName = pi.BinderField.Path;
+                //        //    if (TryGetDataSourceProviderGen(this, srcPropName, out IProvideADataSourceProviderGen dataSourceProvider))
+                //        //    {
+                //        //        // Register a new CollectionViewSource
+                //        //        IHaveAViewSource<object> cvsGen = null;
+
+                //        //        cvsGen.Source = dataSourceProvider;
+                //        //        SetValWithType
+                //        //    }
+
+
+
+                //        //        genViewSource.Source = dataSourceProvider.DataSourceProvider;
+                //        //}
+                //        //else
+                //        //{
+                //        //    throw new InvalidOperationException($"Property definition for property: {pi.PropertyName} " +
+                //        //        $"(of type: {pi.PropertyType}, of kind: {pi.PropKind} resulted in the creation of PropItem " +
+                //        //        $"for which the typed PropData does not implement the {nameof(IHaveAViewSource<object>)} interface.");
+                //        //}
+                //    }
+                //    else if(pi.PropKind == PropKindEnum.CollectionViewSource)
+                //    {
+                //        if (typedProp is IProvideADataSourceProvider genericCVS)
+                //        {
+                //            string srcPropName = pi.BinderField.Path;
+                //            if (TryGetDataSourceProvider(this, srcPropName, pi.PropertyType, out IProvideADataSourceProvider dataSourceProvider))
+                //            {
+                //                // TODO: FIX ME
+                //                //genericCVS.DataSourceProvider = dataSourceProvider.DataSourceProvider;
+                //            }
+                //        }
+                //        else
+                //        {
+                //            throw new InvalidOperationException($"Property definition for property: {pi.PropertyName} " +
+                //                $"(of type: {pi.PropertyType}, of kind: {pi.PropKind} resulted in the creation of PropItem " +
+                //                $"for which the typed PropData does not implement the {nameof(IProvideADataSourceProvider)} interface.");
+                //        }
+                //    }
+                //    else if(pi.PropKind == PropKindEnum.CollectionViewSource_RO)
+                //    {
+                //        throw new InvalidOperationException($"PropItems of kind = {nameof(PropKindEnum.CollectionViewSource_RO)} cannot have a local binding.");
+                //    }
+                //    else
+                //    {
+                //        LocalBindingInfo bindingInfo = new LocalBindingInfo(new LocalPropertyPath(pi.BinderField.Path));
+                //        propItem.TypedProp.RegisterBinding((IRegisterBindingsFowarderType)this, propItem.PropId, bindingInfo);
+                //    }
+                //}
             }
         }
 
-        private IPropData processProp(PropItem pi)
+        //IManageCViews<ObservableCollection<object>> _viewManager;
+        //private IManageCViews<ObservableCollection<object>> ViewManager
+        //{
+        //    get
+        //    {
+        //        if(_viewManager == null)
+        //        {
+        //            _viewManager = GetViewManager<ObservableCollection<object>>()
+        //        }
+        //    }
+        //}
+
+        public void FetchData_Test(string pName, Type pType)
+        {
+            IProvideAView viewProvider = null;
+            ICollectionView lcv = null;
+
+            IProvideAView viewProvider2 = null;
+            ICollectionView lcv2 = null;
+
+            if (TryGetViewManager(this, pName, pType, out IManageCViews cViewManager))
+            {
+                viewProvider = cViewManager.GetViewProvider();
+                lcv = viewProvider.View;
+            }
+
+            if (TryGetViewManager(this, pName, pType, out IManageCViews cViewManager2))
+            {
+                viewProvider2 = cViewManager2.GetViewProvider();
+                lcv2 = viewProvider2.View;
+            }
+
+            bool test1 = ReferenceEquals(cViewManager, cViewManager2);
+            bool test2 = ReferenceEquals(cViewManager.DataSourceProvider, cViewManager2.DataSourceProvider);
+            bool test3 = ReferenceEquals(viewProvider, viewProvider2);
+            bool test4 = ReferenceEquals(lcv, lcv2);
+
+            //var x = cvs.View;
+
+            //ListCollectionView ff = GetIt<ListCollectionView>("PersonListView");
+
+            //IEnumerable gg = ff?.SourceCollection;
+
+            //if(gg != null)
+            //{
+            //    List<object> hh = new List<object>(gg.Cast<object>());
+
+            //    int cnt = hh.Count;
+            //}
+
+
+
+            System.Diagnostics.Debug.WriteLine("You may want to set a break point here.");
+
+            //ICollectionView icv = cvs?.View;
+
+            //bool testC = ReferenceEquals(cvsPrior, cvs);
+            //bool testI = ReferenceEquals(icvPrior, icv);
+
+            //if (cvs.View is ListCollectionView lcv)
+            //{
+            //    SetIt<ListCollectionView>(lcv, "PersonListView");
+            //}
+            //else
+            //{
+            //    System.Diagnostics.Debug.WriteLine("The default view of the CollectionViewSource: CVS does not implement ListCollectionView.");
+            //    SetIt<ListCollectionView>(null, "PersonListView");
+            //}
+
+        }
+
+        private IPropData processProp(PropItem pi, out IProp propGen)
         {
             object ei = pi.ExtraInfo;
 
@@ -290,14 +482,14 @@ namespace DRM.PropBag
             //    doWhenChangedAction = rr(this);
             //}
 
-            IProp pg;
+            //IProp pg;
 
             if (pi.HasStore && !pi.InitialValueField.SetToUndefined)
             {
                 if (pi.InitialValueField.ValueCreator != null)
                 {
                     object newValue = pi.InitialValueField.ValueCreator();
-                    pg = _propFactory.CreateGenFromObject(pi.PropertyType, newValue, pi.PropertyName, ei, pi.HasStore, pi.TypeIsSolid,
+                    propGen = _propFactory.CreateGenFromObject(pi.PropertyType, newValue, pi.PropertyName, ei, pi.HasStore, pi.TypeIsSolid,
                         pi.PropKind, comparer, useRefEquality, pi.ItemType);
                 }
                 else
@@ -316,13 +508,13 @@ namespace DRM.PropBag
                         value = pi.InitialValueField.GetStringValue();
                     }
 
-                    pg = _propFactory.CreateGenFromString(pi.PropertyType, value, useDefault, pi.PropertyName, ei, pi.HasStore, pi.TypeIsSolid,
+                    propGen = _propFactory.CreateGenFromString(pi.PropertyType, value, useDefault, pi.PropertyName, ei, pi.HasStore, pi.TypeIsSolid,
                         pi.PropKind, comparer, useRefEquality, pi.ItemType);
                 }
             }
             else
             {
-                pg = _propFactory.CreateGenWithNoValue(pi.PropertyType, pi.PropertyName, ei, pi.HasStore, pi.TypeIsSolid,
+                propGen = _propFactory.CreateGenWithNoValue(pi.PropertyType, pi.PropertyName, ei, pi.HasStore, pi.TypeIsSolid,
                     pi.PropKind, comparer, useRefEquality, pi.ItemType);
             }
 
@@ -341,7 +533,7 @@ namespace DRM.PropBag
                 {
                     throw new NotSupportedException("Only local methods are supported.");
                 }
-                propData = AddProp(pi.PropertyName, pg,
+                propData = AddProp(pi.PropertyName, propGen,
                     target,
                     pi.DoWhenChangedField.Method,
                     pi.DoWhenChangedField.SubscriptionKind,
@@ -349,7 +541,7 @@ namespace DRM.PropBag
             }
             else
             {
-                propData = AddProp(pi.PropertyName, pg);
+                propData = AddProp(pi.PropertyName, propGen);
             }
 
             return propData;
@@ -582,8 +774,8 @@ namespace DRM.PropBag
         public ValPlusType GetValPlusType(string propertyName, Type propertyType)
         {
             IPropData pg = GetPropGen(propertyName, propertyType);
-            return pg.GetValuePlusType();
-        }
+            return pg.TypedProp.GetValuePlusType(); //pg.GetValuePlusType();
+        } 
 
         public T GetIt<T>(string propertyName)
         {
@@ -1389,7 +1581,8 @@ namespace DRM.PropBag
             IEnumerable<KeyValuePair<PropNameType, IPropData>> theStoreAsCollection = _ourStoreAccessor.GetCollection(this);
 
             IEnumerable<KeyValuePair<string, ValPlusType>> list = theStoreAsCollection.Select(x =>
-            new KeyValuePair<string, ValPlusType>(x.Key, x.Value.GetValuePlusType())).ToList();
+            //new KeyValuePair<string, ValPlusType>(x.Key, x.Value.GetValuePlusType())).ToList();
+            new KeyValuePair<string, ValPlusType>(x.Key, x.Value.TypedProp.GetValuePlusType())).ToList();
 
             IDictionary<string, ValPlusType> result = list.ToDictionary(pair => pair.Key, pair => pair.Value);
             return result;
@@ -1556,32 +1749,21 @@ namespace DRM.PropBag
             return typedCollectionProp;
         }
 
-        //public ICPropFB<CT, T> AddCollectionPropFB<CT, T>
-        //    (
-        //        string propertyName,
-        //        Func<CT, CT, bool> comparer = null,
-        //        object extraInfo = null,
-        //        CT initialValue = default(CT)
-        //    ) where CT : ObservableCollection<T>
-        //{
-        //    bool hasStorage = true;
-        //    bool typeIsSolid = true;
-
-        //    Func<CT, CT, bool> comparerToUse = comparer ?? _propFactory.GetRefEqualityComparer<CT>();
-
-        //    ICPropFB<CT, T> typedCollectionProp = _propFactory.CreateFB<CT, T>(initialValue, propertyName, extraInfo, hasStorage, typeIsSolid, comparerToUse);
-
-        //    AddProp(propertyName, typedCollectionProp);
-        //    return typedCollectionProp;
-        //}
-
         #endregion
 
         #region Add CollectionViewSource-type Props
 
-        public IProp AddCollectionViewSourceProp<TCVS, T>(string propertyName) where TCVS : class
+        public IProp AddCollectionViewSourceProp(string propertyName, IProvideAView viewProvider)
         {
-            IProp cvsProp = _propFactory.CreateCVSProp<TCVS, T>(propertyName);
+            IProp cvsProp = _propFactory.CreateCVSProp(propertyName, viewProvider);
+
+            AddProp(propertyName, cvsProp);
+            return cvsProp;
+        }
+
+        public IProp AddCollectionViewProp(string propertyName, IProvideAView viewProvider) 
+        {
+            IProp cvsProp = _propFactory.CreateCVProp(propertyName, viewProvider);
 
             AddProp(propertyName, cvsProp);
             return cvsProp;
@@ -2376,11 +2558,44 @@ namespace DRM.PropBag
 
         #region DataSourceProvider Support
 
-        public bool TryGetDataSourceProvider<T>(IPropBag propBag, PropNameType propertyName, out IProvideADataSourceProvider<T> dataSourceProvider)
+        //public IManageCViews<CT> GetViewManager<CT>(IProvideADataSourceProvider dataSourceProviderProvider)
+        //    where CT : class, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged
+        //{
+        //    Func<string, DataSourceProvider, IProvideAView> viewProviderFactory = _propFactory.ViewProviderFactory;
+
+        //    ViewManager<CT> result = new ViewManager<CT>(dataSourceProviderProvider, viewProviderFactory);
+        //    return result;
+        //}
+
+        //public IManageCViews GetViewManager(IProvideADataSourceProvider dataSourceProviderProvider)
+        //{
+        //    Func<string, DataSourceProvider, IProvideAView> viewProviderFactory = _propFactory.ViewProviderFactory;
+
+        //    ViewManager result = new ViewManager(dataSourceProviderProvider, viewProviderFactory);
+        //    return result;
+        //}
+
+        public bool TryGetDataSourceProvider(IPropBag propBag, PropNameType propertyName, Type propertyType,
+            out DataSourceProvider dataSourceProvider)
+        {
+            if (TryGetDataSourceProviderProvider(propBag, propertyName, propertyType, out IProvideADataSourceProvider dataSourceProviderProvider))
+            {
+                dataSourceProvider = dataSourceProviderProvider.DataSourceProvider;
+                return true;
+            }
+            else
+            {
+                dataSourceProvider = null;
+                return false;
+            }
+        }
+
+        public bool TryGetDataSourceProviderProvider(IPropBag propBag, PropNameType propertyName, Type propertyType,
+            out IProvideADataSourceProvider dataSourceProviderProvider)
         {
             bool mustBeRegistered = OurMetaData.AllPropsMustBeRegistered;
 
-            IPropData propData = GetPropGen<T>(propertyName,
+            IPropData propData = GetPropGen(propertyName, propertyType,
                 haveValue: false,
                 value: null,
                 alwaysRegister: false,
@@ -2392,12 +2607,38 @@ namespace DRM.PropBag
 
             if (propData != null)
             {
-                dataSourceProvider = _ourStoreAccessor.GetDataSourceProvider<T>(this, propId);
+                dataSourceProviderProvider = _ourStoreAccessor.GetDataSourceProviderProvider(this, propData, _propFactory.CViewProviderFactory);
                 return true;
             }
             else
             {
-                dataSourceProvider = null;
+                dataSourceProviderProvider = null;
+                return false;
+            }
+        }
+
+        public bool TryGetViewManager(IPropBag propBag, PropNameType propertyName, Type propertyType, out IManageCViews cViewManager)
+        {
+            bool mustBeRegistered = OurMetaData.AllPropsMustBeRegistered;
+
+            IPropData propData = GetPropGen(propertyName, propertyType,
+                haveValue: false,
+                value: null,
+                alwaysRegister: false,
+                mustBeRegistered: mustBeRegistered,
+                neverCreate: false,
+                desiredHasStoreValue: null,
+                wasRegistered: out bool wasRegistered,
+                propId: out PropIdType propId);
+
+            if (propData != null)
+            {
+                cViewManager = _ourStoreAccessor.GetViewManager(this, propData, _propFactory.CViewProviderFactory);
+                return true;
+            }
+            else
+            {
+                cViewManager = null;
                 return false;
             }
         }

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Windows.Data;
 
 namespace DRM.TypeSafePropertyBag
 {
@@ -22,6 +23,9 @@ namespace DRM.TypeSafePropertyBag
         PSAccessServiceType CreatePropStoreService(IPropBagInternal propBag);
 
         IProvideDelegateCaches DelegateCacheProvider { get; }
+
+        //Func<string, DataSourceProvider, IProvideAView> ViewProviderFactory { get; }
+        CViewProviderCreator CViewProviderFactory { get; }
 
         bool IsCollection(IProp prop);
         bool IsCollection(PropKindEnum propKind);
@@ -51,11 +55,12 @@ namespace DRM.TypeSafePropertyBag
 
         #endregion
 
-            #region CollectionViewSource Prop Creation
+        #region CollectionViewSource Prop Creation
 
-        IProp CreateCVSProp<TCVS, T>(PropNameType propertyName) where TCVS : class;
+        IProp CreateCVSProp(PropNameType propertyName, IProvideAView viewProvider);
 
-        IProp CreateCVProp<T>(PropNameType propertyName);
+        IProp CreateCVProp(PropNameType propertyName, IProvideAView viewProvider);
+
 
         #endregion
 
@@ -83,8 +88,9 @@ namespace DRM.TypeSafePropertyBag
             bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
             Delegate comparer, bool useRefEquality = false, Type collectionType = null);
 
-        IProp CreateCVSPropFromString(Type typeOfThisProperty, PropNameType propertyName);
-        IProp CreateCVPropFromString(Type typeofThisProperty, PropNameType propertyName);
+        //IProp CreateCVSPropFromString(Type typeOfThisProperty, PropNameType propertyName, IProvideAView viewProvider);
+
+        //IProp CreateCVPropFromString(Type typeofThisProperty, PropNameType propertyName, IProvideAView viewProvider);
 
         //IPropGen CreatePropInferType(object value, PropNameType propertyName, object extraInfo, bool hasStorage);
 
@@ -92,7 +98,7 @@ namespace DRM.TypeSafePropertyBag
 
         #region Default Value and Type Support
 
-        Func<T, T, bool> GetRefEqualityComparer<T>();
+Func<T, T, bool> GetRefEqualityComparer<T>();
 
         object GetDefaultValue(Type propertyType, PropNameType propertyName = null);
 

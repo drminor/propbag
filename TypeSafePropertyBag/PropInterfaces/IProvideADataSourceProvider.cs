@@ -2,15 +2,10 @@
 
 namespace DRM.TypeSafePropertyBag
 {
-    public interface IProvideADataSourceProvider<T> : IProvideADataSourceProviderGen
+    public interface IProvideADataSourceProvider
     {
-
-    }
-
-    public interface IProvideADataSourceProviderGen
-    {
-        DataSourceProvider DataSourceProvider { get; }
-        bool IsCollection { get; }
-        bool IsReadOnly { get; }
+        DataSourceProvider DataSourceProvider { get; } // set will be removed once we implement the view manager.
+        bool IsCollection(); 
+        bool IsReadOnly();
     }
 }

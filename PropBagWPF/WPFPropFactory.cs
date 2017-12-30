@@ -2,6 +2,7 @@
 using DRM.PropBag.Caches;
 using DRM.TypeSafePropertyBag;
 using System;
+using System.ComponentModel;
 using System.Windows.Data;
 
 namespace DRM.PropBagWPF
@@ -89,19 +90,49 @@ namespace DRM.PropBagWPF
 
         #region CollectionViewSource property creators
 
-        public override IProp CreateCVSProp<TCVS, T>(PropNameType propertyName) 
-        {
-            ICViewSourceProp<CollectionViewSource, T> result = new CViewSourceProp<T>(null, propertyName);
+        public override CViewProviderCreator CViewProviderFactory => CreateAView;
 
-            return (IProp)result;
-        }
-
-        public override IProp CreateCVProp<T>(string propertyName)
+        private IProvideAView CreateAView(string viewName, DataSourceProvider dataSourceProvider)
         {
-            CViewProp<T> result = new CViewProp<T>(propertyName);
+            ViewProvider result = new ViewProvider(viewName, dataSourceProvider);
             return result;
         }
 
+
+        public override IProp CreateCVSProp(PropNameType propertyName, IProvideAView viewProvider) 
+        {
+            ICViewSourceProp<CollectionViewSource> result = new CViewSourceProp(propertyName, viewProvider);
+            return (IProp)result;
+        }
+
+        public override IProp CreateCVProp(string propertyName, IProvideAView viewProvider)
+        {
+            //ListCollectionView newVal;
+            //if(initialValue == null)
+            //{
+            //    newVal = null;
+            //}
+            //else
+            //{
+            //    if (initialValue is ListCollectionView lcv)
+            //    {
+            //        newVal = lcv;
+            //    }
+            //    else
+            //    {
+            //        throw new ArgumentException($"The initialValue is not a ListCollectionView.", nameof(initialValue));
+            //    }
+            //}
+
+            CViewProp result = new CViewProp(propertyName, viewProvider);
+            return result;
+        }
+
+        //public IProp CreateCVPropGen(string propertyName, ICollectionView initialValue)
+        //{
+        //    CViewProp result = new CViewPropGen(propertyName, initialValue );
+        //    return result;
+        //}
         #endregion
 
         #region Property-type property creators
@@ -110,19 +141,19 @@ namespace DRM.PropBagWPF
 
         #region Generic property creators
 
-        public override IProp CreateCVSPropFromString(Type typeOfThisProperty, PropNameType propertyName)
-        {
-            CreateCVSPropDelegate propCreator = GetCVSPropCreator(typeof(object), typeOfThisProperty);
-            IProp prop = propCreator(this, propertyName);
-            return prop;
-        }
+        //public override IProp CreateCVSPropFromString(Type typeOfThisProperty, PropNameType propertyName, DataSourceProvider initialValue)
+        //{
+        //    CreateCVSPropDelegate propCreator = GetCVSPropCreator(typeOfThisProperty);
+        //    IProp prop = propCreator(this, propertyName, initialValue);
+        //    return prop;
+        //}
 
-        public override IProp CreateCVPropFromString(Type typeofThisProperty, PropNameType propertyName)
-        {
-            CreateCVPropDelegate propCreator = GetCVPropCreator(typeofThisProperty);
-            IProp prop = propCreator(this, propertyName);
-            return prop;
-        }
+        //public override IProp CreateCVPropFromString(Type typeofThisProperty, PropNameType propertyName, ICollectionView initialValue)
+        //{
+        //    CreateCVPropDelegate propCreator = GetCVPropCreator(typeofThisProperty);
+        //    IProp prop = propCreator(this, propertyName, initialValue);
+        //    return prop;
+        //}
 
         #endregion
     }

@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Windows.Data;
 
 namespace DRM.TypeSafePropertyBag
 {
@@ -88,11 +91,14 @@ namespace DRM.TypeSafePropertyBag
 
         void CloneProps(IPropBag copySource);
 
-        bool TryGetDataSourceProvider<T>(IPropBag propBag, PropNameType propertyName, out IProvideADataSourceProvider<T> dataSourceProvider);
+        bool TryGetDataSourceProviderProvider(IPropBag propBag, PropNameType propertyName, Type propertyType, out IProvideADataSourceProvider dataSourceProviderProvider);
+
+        bool TryGetDataSourceProvider(IPropBag propBag, PropNameType propertyName, Type propertyType, out DataSourceProvider dataSourceProvider);
+
+        bool TryGetViewManager(IPropBag propBag, PropNameType propertyName, Type propertyType, out IManageCViews cViewManager);
 
         //IPropGen this[int index] { get; }
         //int IndexOfProp(string propertyName, Type propertyType);
-
     }
 
 }

@@ -6,6 +6,9 @@ using DRM.TypeSafePropertyBag.Fundamentals;
 using System.Collections.Concurrent;
 using System.Reflection;
 using System.ComponentModel;
+using System.Collections;
+using System.Collections.Specialized;
+using System.Windows.Data;
 
 namespace DRM.TypeSafePropertyBag
 {
@@ -20,11 +23,12 @@ namespace DRM.TypeSafePropertyBag
     using L2KeyManType = IL2KeyMan<UInt32, String>;
 
     using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
-    using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
-    using PSAccessServiceInternalType = IPropStoreAccessServiceInternal<UInt32, String>;
+    using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
+    using PSAccessServiceInternalInterface = IPropStoreAccessServiceInternal<UInt32, String>;
     using PSCloneServiceType = IProvidePropStoreCloneService<UInt32, String>;
 
-    internal class SimplePropStoreAccessService : PSAccessServiceType, IHaveTheStoreNode, PSAccessServiceInternalType, IDisposable
+
+    internal class SimplePropStoreAccessService : PSAccessServiceInterface, IHaveTheStoreNode, PSAccessServiceInternalInterface, IDisposable
     {
         #region Private Members
 
@@ -46,7 +50,9 @@ namespace DRM.TypeSafePropertyBag
 
         readonly BindingsCollection _bindings;
 
-        private DSProviderProviderCollection _dataSourceProviders;
+        //private DSProviderProviderCollection _dataSourceProviders;
+
+        private ViewManagerCollection _genViewManagers;
 
         #endregion
 
@@ -83,7 +89,7 @@ namespace DRM.TypeSafePropertyBag
             // Create the binding store for this PropBag.
             _bindings = new BindingsCollection();
 
-            _dataSourceProviders = null;
+            _genViewManagers = null;
         }
 
         #endregion
@@ -118,6 +124,7 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
+        // Add PropItem with no subscription.
         public bool TryAdd(IPropBag propBag, PropIdType propId, IProp genericTypedProp, out IPropData propData)
         {
             StoreNodeProp newNode = TryAddFirstPart(propBag, propId, genericTypedProp);
@@ -128,6 +135,7 @@ namespace DRM.TypeSafePropertyBag
             return true;
         }
 
+        // Add PropItem with PcTyped subscription
         public bool TryAdd<PropT>(IPropBag propBag, PropIdType propId, IProp genericTypedProp,
             EventHandler<PcTypedEventArgs<PropT>> eventHandler, SubscriptionPriorityGroup priorityGroup, out IPropData propData)
         {
@@ -150,6 +158,7 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
+        // Add PropItem with Target/Method subscription
         public bool TryAdd(IPropBag propBag, PropIdType propId, IProp genericTypedProp,
             object target, MethodInfo method, SubscriptionKind subscriptionKind, SubscriptionPriorityGroup priorityGroup, out IPropData propData)
         {
@@ -176,7 +185,7 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-
+        // Add PropItem with PcGen subscription
         public bool TryAdd(IPropBag propBag, PropIdType propId, IProp genericTypedProp,
             EventHandler<PcGenEventArgs> eventHandler, SubscriptionPriorityGroup priorityGroup, out IPropData propData)
         {
@@ -205,16 +214,16 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        private void TryAddSecondPart(IPropDataInternal int_propData, StoreNodeProp propStoreNode)
+        private void TryAddSecondPart(IPropDataInternal propData, StoreNodeProp propStoreNode)
         {
-            if (int_propData.IsPropBag)
+            if (propData.IsPropBag)
             {
                 // If the new property is of a type that implements IPropBag,
                 // attempt to get a reference to the StoreAccessor of that IPropBag object,
                 // and from that StoreAccessor, the object id of the PropBag.
                 // Use the PropBag's ObjectId to set the ChildObjectId of this new property.
 
-                object guest = int_propData?.TypedProp?.TypedValueAsObject;
+                object guest = propData?.TypedProp?.TypedValueAsObject;
                 if (guest != null)
                 {
                     StoreNodeBag guestPropBagNode = GetGuestObjectNodeFromPropItemVal((IPropBag)guest);
@@ -351,7 +360,7 @@ namespace DRM.TypeSafePropertyBag
 
         public int PropertyCount => _level2KeyMan.PropertyCount;
 
-        public PSAccessServiceType CloneProps(IPropBag callingPropBag, IPropBag copySource)
+        public PSAccessServiceInterface CloneProps(IPropBag callingPropBag, IPropBag copySource)
         {
             if (!(_propStoreAccessServiceProvider is PSCloneServiceType))
             {
@@ -374,7 +383,7 @@ namespace DRM.TypeSafePropertyBag
 
             PSCloneServiceType accessorCloneService = (PSCloneServiceType)_propStoreAccessServiceProvider;
 
-            PSAccessServiceType newStoreAccessor = accessorCloneService.CloneService
+            PSAccessServiceInterface newStoreAccessor = accessorCloneService.CloneService
                 (
                     int_propBag,
                     int_propBag.ItsStoreAccessor,
@@ -384,7 +393,7 @@ namespace DRM.TypeSafePropertyBag
                 );
 
             System.Diagnostics.Debug.Assert(
-                condition: ((PSAccessServiceInternalType)newStoreAccessor).Level2KeyManager.PropertyCount == ((PSAccessServiceInternalType)((IPropBagInternal)copySource).ItsStoreAccessor).Level2KeyManager.PropertyCount,
+                condition: ((PSAccessServiceInternalInterface)newStoreAccessor).Level2KeyManager.PropertyCount == ((PSAccessServiceInternalInterface)((IPropBagInternal)copySource).ItsStoreAccessor).Level2KeyManager.PropertyCount,
                 message: "The PropBag clone operation was not completed: The Level2KeyManager has different contents."
                 );
 
@@ -809,28 +818,85 @@ namespace DRM.TypeSafePropertyBag
 
         #region Data Source Provider Management
 
-        public IProvideADataSourceProvider<T> GetDataSourceProvider<T>(IPropBag propBag, PropIdType propId)
+        // Provides thread-safe, lazy production of a single DataSourceProvider for each PropItem.
+
+        // Get a DataSourceProvider Provider
+        public IProvideADataSourceProvider GetDataSourceProviderProvider(IPropBag propBag, IPropData propData, CViewProviderCreator viewBuilder)
         {
-            ExKeyT globalPropId = GetCompKey(propBag, propId);
-
-            if (_dataSourceProviders == null)
-                _dataSourceProviders = new DSProviderProviderCollection();
-
-            IProvideADataSourceProviderGen result = _dataSourceProviders.GetOrAdd(propId, GetDSProviderProviderFactory<T>(propId));
-            return result as IProvideADataSourceProvider<T>;
+            IManageCViews CViewManagerGen = GetViewManager(propBag, propData, viewBuilder);
+            IProvideADataSourceProvider result = CViewManagerGen.DataSourceProviderProvider;
+            return result;
         }
 
-        private Func<PropIdType, IProvideADataSourceProviderGen> GetDSProviderProviderFactory<T>(PropIdType propId)
+        // Get a DataSourceProvider
+        public DataSourceProvider GetDataSourceProvider(IPropBag propBag, IPropData propData, CViewProviderCreator viewBuilder)
         {
-            PSAccessServiceInternalType st = this as PSAccessServiceInternalType;
-            return GetDSProviderProvider;
+            //ExKeyT globalPropId = GetCompKey(propBag, propId);
 
-            // A function that encloses: the type, and a reference to this store as PSAccessServiceInternalType.
-            IProvideADataSourceProviderGen GetDSProviderProvider(PropIdType pId)
+            //if (_dataSourceProviders == null)
+            //    _dataSourceProviders = new DSProviderProviderCollection();
+
+            //IProvideADataSourceProvider result = _dataSourceProviders.GetOrAdd(propId, DSProviderProviderGenFactory);
+            //return result;
+
+            IManageCViews CViewManagerGen = GetViewManager(propBag, propData, viewBuilder);
+            DataSourceProvider result = CViewManagerGen.DataSourceProvider;
+            return result;
+        }
+
+        //// Factory method to create a DataSourceProvider Provider
+        //IProvideADataSourceProvider DSProviderProviderGenFactory(PropIdType pId)
+        //{
+        //    return new DSProviderProvider(pId, PropKindEnum.ObservableCollection, this);
+        //}
+
+        public IManageCViews GetViewManager(IPropBag propBag, IPropData propData, CViewProviderCreator viewBuilder)
+        {
+            ObjectIdType objectId  = GetAndCheckObjectRef(propBag);
+
+            // There is one View Manager for each PropItem.
+            if (_genViewManagers == null)
+                _genViewManagers = new ViewManagerCollection(CViewGenManagerFactory);
+
+            IManageCViews result = _genViewManagers.GetOrAdd(propData);
+            return result;
+
+            // TODO: Make GetViewManager take a viewBuilderGetter delegate that can be called to get the viewBuilder for a particular PropItem.
+            // In this way we can provide a constant value to the ViewManagerCollection constructor, but yet have differing View Builders.
+            // Alternatively, make GetOrAdd take a factory (which of course could be different for each call.)
+            IManageCViews CViewGenManagerFactory(IPropData propData2)
             {
-                return new DSProviderProviderTyped<T>(PropKindEnum.ObservableCollection, pId, st);
+                DSProviderProvider dSProviderProvider = new DSProviderProvider(propData2.PropId, propData2.TypedProp.PropKind, this);
+
+                IManageCViews result2 = new ViewManager(dSProviderProvider, viewBuilder);
+                return result2;
             }
         }
+
+        //// Get a typed DataSourceProvider provider
+        //public IProvideADataSourceProvider<T> GetDataSourceProvider<T>(IPropBag propBag, PropIdType propId)
+        //{
+        //    ExKeyT globalPropId = GetCompKey(propBag, propId);
+
+        //    if (_dataSourceProviders == null)
+        //        _dataSourceProviders = new DSProviderProviderCollection();
+
+        //    IProvideADataSourceProviderGen result = _dataSourceProviders.GetOrAdd(propId, GetDSProviderProviderFactoryTyped<T>());
+        //    return result as IProvideADataSourceProvider<T>;
+        //}
+
+        //// Method that returns a factory to use when creating a typed DataSourceProvider provider
+        //private Func<PropIdType, IProvideADataSourceProviderGen> GetDSProviderProviderFactoryTyped<T>()
+        //{
+        //    //PSAccessServiceInternalType st = this as PSAccessServiceInternalType;
+        //    return GetDSProviderProvider;
+
+        //    // A function that encloses: the type parameter and a reference to this instance (we implement the interface: PSAccessServiceInternalType).
+        //    IProvideADataSourceProviderGen GetDSProviderProvider(PropIdType pId)
+        //    {
+        //        return new DSProviderProviderTyped<T>(PropKindEnum.ObservableCollection, pId, this);
+        //    }
+        //}
 
         #endregion
 
@@ -883,7 +949,7 @@ namespace DRM.TypeSafePropertyBag
 
                     StoreNodeBag guestPropBagNode = GetGuestObjectNodeFromPropItemVal(propBagHost);
 
-                    L2KeyManType level2Man = ((PSAccessServiceInternalType) ((IPropBagInternal)sender).ItsStoreAccessor).Level2KeyManager;
+                    L2KeyManType level2Man = ((PSAccessServiceInternalInterface) ((IPropBagInternal)sender).ItsStoreAccessor).Level2KeyManager;
                     if (level2Man.TryGetFromRaw(e.PropertyName, out PropIdType propId))
                     {
                         ExKeyT cKey = new SimpleExKey(_objectId, propId);
@@ -914,7 +980,7 @@ namespace DRM.TypeSafePropertyBag
                     StoreNodeBag guestPropBagNode = GetGuestObjectNodeFromPropItemVal(propBagHost);
 
                     
-                    L2KeyManType level2Man = ((PSAccessServiceInternalType)((IPropBagInternal)sender).ItsStoreAccessor).Level2KeyManager;
+                    L2KeyManType level2Man = ((PSAccessServiceInternalInterface)((IPropBagInternal)sender).ItsStoreAccessor).Level2KeyManager;
                     if (level2Man.TryGetFromRaw(e.PropertyName, out PropIdType propId))
                     {
                         ExKeyT cKey = new SimpleExKey(_objectId, propId);
@@ -948,7 +1014,7 @@ namespace DRM.TypeSafePropertyBag
 
             if (propBag is IPropBagInternal pbInternalAccess)
             {
-                PSAccessServiceType accessService = pbInternalAccess.ItsStoreAccessor;
+                PSAccessServiceInterface accessService = pbInternalAccess.ItsStoreAccessor;
                 if (accessService is IHaveTheStoreNode storeNodeProvider)
                 {
                     StoreNodeBag propStoreNode = storeNodeProvider.PropStoreNode;
@@ -1081,6 +1147,14 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
+        private void CheckCompKey(ExKeyT cKey)
+        {
+            if(cKey.Level1Key != _objectId)
+            {
+                throw new InvalidOperationException("This PropStoreAccessService can only service the PropBag object that created it.");
+            }
+        }
+
         #endregion
 
         #region Explicit Implementation of the internal interface: IHaveTheStoreNode
@@ -1091,16 +1165,16 @@ namespace DRM.TypeSafePropertyBag
 
         #region Explicit Implementation of the internal interface: IPropStoreAccessServiceInternal
 
-        L2KeyManType PSAccessServiceInternalType.Level2KeyManager => _level2KeyMan;
+        L2KeyManType PSAccessServiceInternalInterface.Level2KeyManager => _level2KeyMan;
 
 
-        bool PSAccessServiceInternalType.TryGetChildPropNode(StoreNodeBag propBagNode, PropNameType propertyName, out StoreNodeProp child)
+        bool PSAccessServiceInternalInterface.TryGetChildPropNode(StoreNodeBag propBagNode, PropNameType propertyName, out StoreNodeProp child)
         {
             bool result;
 
             if (propBagNode.PropBagProxy.PropBagRef.TryGetTarget(out IPropBagInternal propBag))
             {
-                if (((PSAccessServiceInternalType)propBag.ItsStoreAccessor).Level2KeyManager.TryGetFromRaw(propertyName, out PropIdType propId))
+                if (((PSAccessServiceInternalInterface)propBag.ItsStoreAccessor).Level2KeyManager.TryGetFromRaw(propertyName, out PropIdType propId))
                 {
                     if (propBagNode.TryGetChild(propId, out child))
                     {
@@ -1129,20 +1203,20 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        StoreNodeProp PSAccessServiceInternalType.GetChild(PropIdType propId)
+        StoreNodeProp PSAccessServiceInternalInterface.GetChild(PropIdType propId)
         {
             StoreNodeProp result = GetChild(propId);
             return result;
         }
 
-        IDisposable PSAccessServiceInternalType.RegisterHandler<T>(PropIdType propId, EventHandler<PcTypedEventArgs<T>> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef)
+        IDisposable PSAccessServiceInternalInterface.RegisterHandler<T>(PropIdType propId, EventHandler<PcTypedEventArgs<T>> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef)
         {
             SimpleExKey exKey = new SimpleExKey(_objectId, propId);
             IDisposable disable = RegisterHandler<T>(exKey, eventHandler, priorityGroup, keepRef);
             return disable;
         }
 
-        IDisposable PSAccessServiceInternalType.RegisterHandler(PropIdType propId, EventHandler<PcGenEventArgs> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef)
+        IDisposable PSAccessServiceInternalInterface.RegisterHandler(PropIdType propId, EventHandler<PcGenEventArgs> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef)
         {
             SimpleExKey exKey = new SimpleExKey(_objectId, propId);
             IDisposable disable = RegisterHandler(exKey, eventHandler, priorityGroup, keepRef);

@@ -1,6 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Reflection;
+using System.Windows.Data;
 
 namespace DRM.TypeSafePropertyBag
 {
@@ -36,11 +40,12 @@ namespace DRM.TypeSafePropertyBag
         bool SetTypedProp(IPropBag propBag, L2T propId, L2TRaw propertyName, IProp genericTypedProp);
 
         IPropStoreAccessService<L2T, L2TRaw> CloneProps(IPropBag callingPropBag, IPropBag copySource);
-
-        IProvideADataSourceProvider<T> GetDataSourceProvider<T>(IPropBag propBag, L2T propId);
-
-
         int ClearAllProps(IPropBag propBag);
+
+        // Collection View Related
+        IManageCViews GetViewManager(IPropBag propBag, IPropData propData, CViewProviderCreator viewBuilder);
+        IProvideADataSourceProvider GetDataSourceProviderProvider(IPropBag propBag, IPropData propData, CViewProviderCreator viewBuilder);
+        DataSourceProvider GetDataSourceProvider(IPropBag propBag, IPropData propData, CViewProviderCreator viewBuilder);
 
         // Diagnostics
         void IncAccess();

@@ -2,20 +2,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Globalization;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DRM.TypeSafePropertyBag
 {
-    using PropIdType = UInt32;
     using PropNameType = String;
-    using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
 
     public class APFGenericMethodTemplates
     {
@@ -105,15 +97,15 @@ namespace DRM.TypeSafePropertyBag
         #region CollectionViewSource Prop Creation
 
         // CollectionViewSource
-        private static IProp CreateCVSProp<CVST, T>(IPropFactory propFactory, PropNameType propertyName) where CVST : class
+        private static IProp CreateCVSProp(IPropFactory propFactory, PropNameType propertyName, IProvideAView viewProvider)
         {
-            return propFactory.CreateCVSProp<CVST, T>(propertyName);
+            return propFactory.CreateCVSProp(propertyName, viewProvider);
         }
 
         // CollectionView
-        private static IProp CreateCVProp<T>(IPropFactory propFactory, PropNameType propertyName)
+        private static IProp CreateCVProp(IPropFactory propFactory, PropNameType propertyName, IProvideAView viewProvider)
         {
-            return propFactory.CreateCVProp<T>(propertyName);
+            return propFactory.CreateCVProp(propertyName, viewProvider);
         }
 
         #endregion

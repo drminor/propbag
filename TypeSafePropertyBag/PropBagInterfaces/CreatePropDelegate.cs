@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 
 namespace DRM.TypeSafePropertyBag
 {
@@ -32,8 +33,8 @@ namespace DRM.TypeSafePropertyBag
 
     #region CollectionViewSource Methods
 
-    public delegate IProp CreateCVSPropDelegate(IPropFactory propFactory, string propertyName);
-    public delegate IProp CreateCVPropDelegate(IPropFactory propFactory, string propertyName);
+    public delegate IProp CreateCVSPropDelegate(IPropFactory propFactory, string propertyName, IProvideAView viewProvider);
+    public delegate IProp CreateCVPropDelegate(IPropFactory propFactory, string propertyName, IProvideAView viewProvider);
 
     #endregion
 

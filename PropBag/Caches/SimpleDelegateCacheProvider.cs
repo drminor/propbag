@@ -34,9 +34,9 @@ namespace DRM.PropBag.Caches
 
         public ICacheDelegatesForTypePair<CreateEPropFromObjectDelegate> CreateCPropFromObjectCache { get; }
 
-        public ICacheDelegatesForTypePair<CreateCVSPropDelegate> CreateCVSPropCache { get; }
+        //public ICacheDelegates<CreateCVSPropDelegate> CreateCVSPropCache { get; }
 
-        public ICacheDelegates<CreateCVPropDelegate> CreateCVPropCache { get; }
+        //public ICacheDelegates<CreateCVPropDelegate> CreateCVPropCache { get; }
 
 
         #endregion
@@ -81,13 +81,13 @@ namespace DRM.PropBag.Caches
 
             #region CollectionViewSource Prop Creation MethodInfo
 
-            // CollectionViewSource
-            MethodInfo createCVSProp_mi = propCreatorType.GetMethod("CreateCVSProp", BindingFlags.Static | BindingFlags.NonPublic);
-            CreateCVSPropCache = new TwoTypesDelegateCache<CreateCVSPropDelegate>(createCVSProp_mi);
+            //// CollectionViewSource
+            //MethodInfo createCVSProp_mi = propCreatorType.GetMethod("CreateCVSProp", BindingFlags.Static | BindingFlags.NonPublic);
+            //CreateCVSPropCache = new DelegateCache<CreateCVSPropDelegate>(createCVSProp_mi);
 
-            // CollectionView
-            MethodInfo createCVProp_mi = propCreatorType.GetMethod("CreateCVProp", BindingFlags.Static | BindingFlags.NonPublic);
-            CreateCVPropCache = new DelegateCache<CreateCVPropDelegate>(createCVProp_mi);
+            //// CollectionView
+            //MethodInfo createCVProp_mi = propCreatorType.GetMethod("CreateCVProp", BindingFlags.Static | BindingFlags.NonPublic);
+            //CreateCVPropCache = new DelegateCache<CreateCVPropDelegate>(createCVProp_mi);
 
             #endregion
 

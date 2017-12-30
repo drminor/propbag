@@ -31,6 +31,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -52,21 +53,27 @@
     <Compile Include="PropBagInterfaces\ICreateProps.cs" />
     <Compile Include="PropBagInterfaces\IRegisterBindingsForwarder.cs" />
     <None Include="Unused\CollectionViewSourceReferenceCode.cs" />
+    <None Include="PropInterfaces\ICollectionPropInterfaces_Safety.cs" />
+    <Compile Include="PropInterfaces\ICollectionTypedPropInterfaces.cs" />
     <Compile Include="PropInterfaces\IListSourceProvider.cs" />
     <Compile Include="Fundamentals\IObsCollection.cs" />
+    <Compile Include="PropInterfaces\ICollectionPropInterfaces.cs" />
     <Compile Include="PropInterfaces\IProvideADataSourceProvider.cs" />
+    <Compile Include="PropInterfaces\ViewAndViewManagerCreatorDelegates.cs" />
+    <Compile Include="Props\ViewManagerCollection.cs" />
+    <Compile Include="Props\ViewManager.cs" />
     <Compile Include="PropStoreKeys\IExplodedKey.cs" />
     <Compile Include="PropStoreKeys\ILevel2KeyManager.cs" />
     <Compile Include="PropStoreKeys\SimpleExKey.cs" />
     <Compile Include="PropStoreKeys\SimpleLevel2KeyMan.cs" />
     <Compile Include="PropStore\IPropStoreAccessServiceInternal.cs" />
     <Compile Include="PropStore\Unsubscriber.cs" />
-    <Compile Include="Props\DSProviderProviderGen.cs" />
-    <Compile Include="Props\DSProviderProviderCollection.cs" />
-    <Compile Include="Props\DSProviderProviderTyped.cs" />
+    <Compile Include="Props\DSProviderProviderCollection_NotUsed.cs" />
+    <Compile Include="Props\DSProviderProvider.cs" />
     <Compile Include="Props\PBCollectionDataProvider.cs" />
     <Compile Include="Props\PropBase.cs" />
     <Compile Include="Props\PropTypedBase.cs" />
+    <Compile Include="Props\ViewRefreshedEventArgs.cs" />
     <Compile Include="RefEqualityComparer.cs" />
     <Compile Include="TypeConverters\ConverterDelegates.cs" />
     <Compile Include="DoSetDelegate.cs" />

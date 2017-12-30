@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using System.ComponentModel;
 using System.Data;
 
 namespace DRM.TypeSafePropertyBag
@@ -23,88 +18,6 @@ namespace DRM.TypeSafePropertyBag
     public interface IDTProp : IProp
     {
         DataTable ReadOnlyDataTable { get; }
-    }
-
-    public interface IHaveAView<T>
-    {
-        ICollectionView View { get; }
-        //TypedCollectionView { get;} // This type is yet to be created.
-    }
-
-
-    // Collection View Source
-    public interface ICViewSourceProp<TCVS, T> : IReadOnlyCViewSourceProp<TCVS, T> where TCVS: class
-    {
-        object Source { get; set; }
-    }
-
-    // CollectionViewSource -- ReadOnly 
-    public interface IReadOnlyCViewSourceProp<TCVS, T> : IProp<TCVS>, IHaveAView<T> where TCVS : class
-    {
-        //ICollectionView View { get; }
-        //ICollectionView this[string key] { get; }
-        //IReadOnlyObsCollection<T> GetReadOnlyObservableCollection();
-    }
-
-    // Collection View 
-    public interface ICViewProp<TCVS, T> : IReadOnlyCViewProp<TCVS, T> where TCVS : ICollectionView
-    {
-    }
-
-    // CollectionView -- ReadOnly 
-    public interface IReadOnlyCViewProp<TCVS, T> : IProp<TCVS> where TCVS : ICollectionView
-    {
-    }
-
-    // IList<T> + INotifyCollectionChanged
-    public interface ICProp<CT,T> : IETypedProp<CT, T>, IReadOnlyCProp<CT, T> where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged
-    {
-
-    }
-
-    // IList<T> + INotifyCollectionChanged -- ReadOnly
-    public interface IReadOnlyCProp<CT,T> : IReadOnlyETypedProp<CT, T> where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged
-    {
-
-    }
-
-
-    //// ObservableCollection<T>
-    //public interface ICPropFB<CT, T> : IETypedProp<CT, T> where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged //ObservableCollection<T>
-    //{
-    //    ReadOnlyObservableCollection<T> GetReadOnlyObservableCollection();
-    //}
-
-    //// ObservableCollection<T> -- ReadOnly
-    //public interface IReadOnlyCPropFB<CT, T> : IReadOnlyETypedProp<CT, T> where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged // ReadOnlyObservableCollection<T>
-    //{
-
-    //}
-
-
-    // IEnumerable<T> Collections
-    public interface IETypedProp<CT, T> : IEProp<CT>, IReadOnlyETypedProp<CT, T>/*, IListSourceProvider<CT,T>*/ where CT : IEnumerable<T>
-    {
-
-    }
-
-    // IEnumerable<T> Collections -- ReadOnly
-    public interface IReadOnlyETypedProp<CT, T> : IReadOnlyEProp<CT>/*, IListSource*/ where CT : IEnumerable<T>
-    {
-
-    }
-
-
-    // IEnumerable Collections
-    public interface IEProp<CT> : IProp<CT>, IReadOnlyEProp<CT> where CT : IEnumerable
-    {
-        //void SetListSource(IListSource value);
-    }
-
-    // IEnumerable Collections -- ReadOnly
-    public interface IReadOnlyEProp<CT> : IProp<CT> where CT : IEnumerable
-    {
-        //IList List { get; }
     }
 
     /// <summary>
@@ -164,6 +77,7 @@ namespace DRM.TypeSafePropertyBag
         void SetTypedProp(PropNameType propertyName, IProp value);
     }
 
+    // TODO: Consider merging this interface with IPropDataInternal -- all of these items are really internal.
     /// <summary>
     /// Classes that implement the IPropBag interface, keep a list of properties, each of which implements this interface.
     /// These features are managed by the PropBag, and not by classes that implement IProp (derive from PropBase.)
@@ -173,6 +87,8 @@ namespace DRM.TypeSafePropertyBag
         PropIdType PropId { get; }
 
         bool IsEmpty { get; }
+
+        //bool IsPrivate { get; } // TODO: Consider adding the ability to register private PropItems.
 
         /// <summary>
         /// Provides access to the non-type specific features of this property.

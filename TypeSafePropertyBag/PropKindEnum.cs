@@ -16,8 +16,8 @@ namespace DRM.TypeSafePropertyBag
         //ObservableCollectionFB,     // ICPropFB<CT, T> : IProp<CT> where CT : ObservableCollection<T>
         //ObservableCollectionFB_RO,  // IReadOnlyCPropFB<CT, T> : IProp<CT> where CT : ReadOnlyObservableCollection<T>
 
-        CollectionViewSource,       // ICViewProp<TCVS, T> : IReadOnlyCViewProp<TCVS, T> where TCVS: class
-        CollectionViewSource_RO,    // IReadOnlyCViewProp<TCVS, T> : IProp<TCVS> where TCVS : class
+        CollectionViewSource,       // ICViewProp<CVST, T> : IReadOnlyCViewProp<CVST, T> where CVST: class
+        CollectionViewSource_RO,    // IReadOnlyCViewProp<CVST, T> : IProp<CVST> where CVST : class
 
         CollectionView,
 
