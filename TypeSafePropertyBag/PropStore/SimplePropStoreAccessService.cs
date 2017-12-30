@@ -127,95 +127,128 @@ namespace DRM.TypeSafePropertyBag
         // Add PropItem with no subscription.
         public bool TryAdd(IPropBag propBag, PropIdType propId, IProp genericTypedProp, out IPropData propData)
         {
-            StoreNodeProp newNode = TryAddFirstPart(propBag, propId, genericTypedProp);
-            propData = newNode.Int_PropData;
+            if(propBag is IPropBagInternal int_propBag)
+            {
+                StoreNodeProp newNode = TryAddFirstPart(propBag, propId, genericTypedProp);
+                propData = newNode.Int_PropData;
 
-            TryAddSecondPart((IPropDataInternal)propData, newNode);
+                TryAddSecondPart(int_propBag, newNode);
 
-            return true;
+                return true;
+            }
+            else
+            {
+                throw new InvalidOperationException("The propBag reference given to TryAdd does not implement the IPropBagInternal interface.");
+            }
         }
 
         // Add PropItem with PcTyped subscription
         public bool TryAdd<PropT>(IPropBag propBag, PropIdType propId, IProp genericTypedProp,
             EventHandler<PcTypedEventArgs<PropT>> eventHandler, SubscriptionPriorityGroup priorityGroup, out IPropData propData)
         {
-            StoreNodeProp newNode = TryAddFirstPart(propBag, propId, genericTypedProp);
-            propData = newNode.Int_PropData;
-
-            bool result;
-            if (eventHandler != null)
+            if (propBag is IPropBagInternal int_propBag)
             {
-                IDisposable disable = RegisterHandler<PropT>(newNode.CompKey, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
-                result = disable != null;
+
+                StoreNodeProp newNode = TryAddFirstPart(propBag, propId, genericTypedProp);
+                propData = newNode.Int_PropData;
+
+                bool result;
+                if (eventHandler != null)
+                {
+                    IDisposable disable = RegisterHandler<PropT>(newNode.CompKey, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
+                    result = disable != null;
+                }
+                else
+                {
+                    result = true;
+                }
+
+                TryAddSecondPart(int_propBag, newNode);
+
+                return result;
             }
             else
             {
-                result = true;
+                throw new InvalidOperationException("The propBag reference given to TryAdd does not implement the IPropBagInternal interface.");
             }
 
-            TryAddSecondPart((IPropDataInternal)propData, newNode);
-
-            return result;
         }
 
         // Add PropItem with Target/Method subscription
         public bool TryAdd(IPropBag propBag, PropIdType propId, IProp genericTypedProp,
             object target, MethodInfo method, SubscriptionKind subscriptionKind, SubscriptionPriorityGroup priorityGroup, out IPropData propData)
         {
-            StoreNodeProp newNode = TryAddFirstPart(propBag, propId, genericTypedProp);
-            propData = newNode.Int_PropData;
-
-            bool result;
-            if (target != null)
+            if (propBag is IPropBagInternal int_propBag)
             {
-                ISubscriptionKeyGen subscriptionRequest =
-                    new SubscriptionKeyGen(newNode.CompKey, genericTypedProp.Type, target, method, subscriptionKind, priorityGroup, keepRef: false, subscriptionFactory: null);
+                StoreNodeProp newNode = TryAddFirstPart(propBag, propId, genericTypedProp);
+                propData = newNode.Int_PropData;
 
-                ISubscription newSubscription = AddSubscription(subscriptionRequest, out bool wasAdded);
+                bool result;
+                if (target != null)
+                {
+                    ISubscriptionKeyGen subscriptionRequest =
+                        new SubscriptionKeyGen(newNode.CompKey, genericTypedProp.Type, target, method, subscriptionKind, priorityGroup, keepRef: false, subscriptionFactory: null);
 
-                result = wasAdded;
-            }
+                    ISubscription newSubscription = AddSubscription(subscriptionRequest, out bool wasAdded);
+
+                    result = wasAdded;
+                }
+                else
+                {
+                    result = true;
+                }
+
+                TryAddSecondPart(int_propBag, newNode);
+
+                return result;
+            } 
             else
             {
-                result = true;
+                throw new InvalidOperationException("The propBag reference given to TryAdd does not implement the IPropBagInternal interface.");
             }
-
-            TryAddSecondPart((IPropDataInternal)propData, newNode);
-
-            return result;
         }
 
         // Add PropItem with PcGen subscription
         public bool TryAdd(IPropBag propBag, PropIdType propId, IProp genericTypedProp,
             EventHandler<PcGenEventArgs> eventHandler, SubscriptionPriorityGroup priorityGroup, out IPropData propData)
         {
-            //ExKeyT propertyKey = GetCompKey(propBag, propId);
-            //propData = new PropGen(propertyKey, genericTypedProp);
-            //IPropDataInternal int_PropData = (IPropDataInternal)propData;
-
-            //StoreNodeProp propStoreNode = new StoreNodeProp(propertyKey, int_PropData, _ourNode);
-
-            StoreNodeProp newNode = TryAddFirstPart(propBag, propId, genericTypedProp);
-            propData = newNode.Int_PropData;
-
-            bool result;
-            if (eventHandler != null)
+            if (propBag is IPropBagInternal int_propBag)
             {
-                IDisposable disable = RegisterHandler(newNode.CompKey, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
-                result = disable != null;
+
+                //ExKeyT propertyKey = GetCompKey(propBag, propId);
+                //propData = new PropGen(propertyKey, genericTypedProp);
+                //IPropDataInternal int_PropData = (IPropDataInternal)propData;
+
+                //StoreNodeProp propStoreNode = new StoreNodeProp(propertyKey, int_PropData, _ourNode);
+
+                StoreNodeProp newNode = TryAddFirstPart(propBag, propId, genericTypedProp);
+                propData = newNode.Int_PropData;
+
+                bool result;
+                if (eventHandler != null)
+                {
+                    IDisposable disable = RegisterHandler(newNode.CompKey, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
+                    result = disable != null;
+                }
+                else
+                {
+                    result = true;
+                }
+
+                TryAddSecondPart(int_propBag, newNode);
+
+                return result;
             }
             else
             {
-                result = true;
+                throw new InvalidOperationException("The propBag reference given to TryAdd does not implement the IPropBagInternal interface.");
             }
-
-            TryAddSecondPart((IPropDataInternal)propData, newNode);
-
-            return result;
         }
 
-        private void TryAddSecondPart(IPropDataInternal propData, StoreNodeProp propStoreNode)
+        private void TryAddSecondPart(IPropBagInternal int_propBag, StoreNodeProp propStoreNode)
         {
+            IPropDataInternal propData = propStoreNode.Int_PropData;
+
             if (propData.IsPropBag)
             {
                 // If the new property is of a type that implements IPropBag,
@@ -227,11 +260,40 @@ namespace DRM.TypeSafePropertyBag
                 if (guest != null)
                 {
                     StoreNodeBag guestPropBagNode = GetGuestObjectNodeFromPropItemVal((IPropBag)guest);
-                    guestPropBagNode.Parent = propStoreNode;
+                    guestPropBagNode.Parent =  propStoreNode;
                 }
 
                 // Subscribe to changes to this PropData's Value.
                 BeginWatchingParent(propStoreNode.CompKey);
+            }
+
+            if(propData.TypedProp.StorageStrategy == PropStorageStrategyEnum.Virtual)
+            {
+                propData.TypedProp.ValueChanged += CreateVirtualValueChangedHandler(propStoreNode);
+            }
+        }
+
+        private EventHandler<EventArgs> CreateVirtualValueChangedHandler(StoreNodeProp propNode)
+        {
+            StoreNodeBag hostBagNode = propNode.Parent;
+
+            WeakReference<IPropBagInternal> propBagRef = hostBagNode.PropBagProxy.PropBagRef;
+            PropIdType propId = propNode.PropId;
+            PropNameType propertyName = GetPropNameFromKey(propNode.CompKey);
+
+            return newHandler;
+
+            void newHandler(object sender, EventArgs e)
+            {
+                this.ForwardRequestToRaiseStandardPC(propBagRef, propId, propertyName);
+            }
+        }
+
+        private void ForwardRequestToRaiseStandardPC(WeakReference<IPropBagInternal> propBagRef, PropIdType propId, PropNameType propName)
+        {
+            if (propBagRef.TryGetTarget(out IPropBagInternal int_propBag))
+            {
+                int_propBag.RaiseStandardPropertyChanged(propId, propName);
             }
         }
 

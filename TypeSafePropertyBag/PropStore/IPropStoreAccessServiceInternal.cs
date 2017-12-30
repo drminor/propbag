@@ -13,5 +13,7 @@ namespace DRM.TypeSafePropertyBag
         IDisposable RegisterHandler<T>(L2T propId, EventHandler<PcTypedEventArgs<T>> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef);
 
         IDisposable RegisterHandler(L2T propId, EventHandler<PcGenEventArgs> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef);
+
+
     }
 }
