@@ -62,7 +62,7 @@ namespace DRM.PropBag
             Func<T, T, bool> comparer = null, object extraInfo = null, T initialValue = default(T))
         {
             return base.AddProp<T>(propertyName, doIfChanged, doAfterNotify, comparer, extraInfo, initialValue);
-            //bool hasStorage = true;
+            //PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal;
             //bool typeIsSolid = true;
             //IProp<T> pg = ThePropFactory.Create<T>(initialValue, propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
             //AddProp<T>(propertyName, pg);
@@ -74,7 +74,7 @@ namespace DRM.PropBag
             object extraInfo = null, T initialValue = default(T))
         {
             return base.AddPropObjComp(propertyName, doIfChanged, doAfterNotify, extraInfo, initialValue);
-            //bool hasStorage = true;
+            //PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal;
             //bool typeIsSolid = true;
             //Func<T,T,bool> comparer = ThePropFactory.GetRefEqualityComparer<T>();
             //IProp<T> pg = ThePropFactory.Create<T>(initialValue, propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
@@ -86,7 +86,7 @@ namespace DRM.PropBag
             Func<T, T, bool> comparer = null, object extraInfo = null)
         {
             return base.AddPropNoValue(propertyName, doIfChanged, doAfterNotify, comparer, extraInfo);
-            //bool hasStorage = true;
+            //PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal;
             //bool typeIsSolid = true;
             //IProp<T> pg = ThePropFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);
             //AddProp<T>(propertyName, pg);
@@ -97,7 +97,7 @@ namespace DRM.PropBag
             object extraInfo = null)
         {
             return base.AddPropObjCompNoValue(propertyName, doIfChanged, doAfterNotify, extraInfo);
-            //bool hasStorage = true;
+            //PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal;
             //bool typeIsSolid = true;
             //Func<T,T,bool> comparer = ThePropFactory.GetRefEqualityComparer<T>();
             //IProp<T> pg = ThePropFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, doIfChanged, doAfterNotify, comparer);

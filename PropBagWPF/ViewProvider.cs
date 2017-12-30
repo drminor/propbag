@@ -10,7 +10,6 @@ namespace DRM.PropBagWPF
     {
         #region Private Members
 
-        private readonly DataSourceProvider _dataSourceProvider;
         private readonly CollectionViewSource _viewSource;
 
         #endregion
@@ -20,72 +19,53 @@ namespace DRM.PropBagWPF
         public ViewProvider(string viewName, DataSourceProvider dataSourceProvider)
         {
             ViewName = viewName;
-            _dataSourceProvider = dataSourceProvider ?? throw new ArgumentNullException($"{nameof(dataSourceProvider)} must have a value.");
+            DataSourceProvider = dataSourceProvider ?? throw new ArgumentNullException($"{nameof(dataSourceProvider)} must have a value.");
             _viewSource = new CollectionViewSource()
             {
-                Source = _dataSourceProvider
+                Source = DataSourceProvider
             };
-            _dataSourceProvider.DataChanged += _dataSourceProvider_DataChanged;
+
+            DataSourceProvider.DataChanged += _dataSourceProvider_DataChanged;
         }
 
         private void _dataSourceProvider_DataChanged(object sender, EventArgs e)
         {
-            object i;
-            var j = _viewSource.Source;
+            //object i;
+            //var j = _viewSource.Source;
 
-            if(j is DataSourceProvider dsp)
-            {
-                i = dsp.Data;
-            }
-            else
-            {
-                i = j;
-            }
+            //if(j is DataSourceProvider dsp)
+            //{
+            //    i = dsp.Data;
+            //}
+            //else
+            //{
+            //    i = j;
+            //}
 
 
             string viewName = null;
-            OnViewRefreshed(viewName);
+            OnViewSourceRefreshed(viewName);
+
+            // Automatically ask the View to requery it's data.
             _viewSource.View.Refresh();
         }
 
         #endregion
 
-        public event EventHandler<ViewRefreshedEventArgs> ViewRefreshed;
+        #region Event Declaration and Invoker
+
+        public event EventHandler<ViewRefreshedEventArgs> ViewSourceRefreshed;
+
+        private void OnViewSourceRefreshed(string viewName)
+        {
+            Interlocked.CompareExchange(ref ViewSourceRefreshed, null, null)?.Invoke(this, new ViewRefreshedEventArgs(viewName));
+        }
+
+        #endregion
 
         #region Public Properties and Methods
 
-        //public DataSourceProvider _dataSourceProvider
-        //{
-        //    get
-        //    {
-        //        if (TryGetDataSourceProvider(_viewSource.Source, out DataSourceProvider dsp))
-        //        {
-        //            return dsp;
-        //        }
-        //        else
-        //        {
-        //            throw new InvalidOperationException($"The current CollectionViewSource's Source does not derive from {nameof(DataSourceProvider)} class.");
-        //        }
-        //    }
-        //    set
-        //    {
-        //        if (_viewSource.Source != null)
-        //        {
-        //            if (_viewSource.Source is DataSourceProvider dsp)
-        //            {
-        //                dsp.DataChanged -= Source_DataChanged;
-        //            }
-        //        }
-
-        //        _viewSource.Source = value;
-        //        value.DataChanged += Source_DataChanged;
-        //    }
-        //}
-
-        private void OnViewRefreshed(string viewName)
-        {
-            Interlocked.CompareExchange(ref ViewRefreshed, null, null)?.Invoke(this, new ViewRefreshedEventArgs(viewName));
-        }
+        public DataSourceProvider DataSourceProvider { get; }
 
         public ListCollectionView View
         {

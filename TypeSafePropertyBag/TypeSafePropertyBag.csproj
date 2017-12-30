@@ -60,6 +60,7 @@
     <Compile Include="PropInterfaces\ICollectionPropInterfaces.cs" />
     <Compile Include="PropInterfaces\IProvideADataSourceProvider.cs" />
     <Compile Include="PropInterfaces\ViewAndViewManagerCreatorDelegates.cs" />
+    <Compile Include="PropStorageStrategyEnum.cs" />
     <Compile Include="Props\ViewManagerCollection.cs" />
     <Compile Include="Props\ViewManager.cs" />
     <Compile Include="PropStoreKeys\IExplodedKey.cs" />

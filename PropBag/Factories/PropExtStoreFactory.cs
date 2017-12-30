@@ -53,7 +53,7 @@ namespace DRM.PropBag
         public override ICProp<CT, T> Create<CT, T>(
             CT initialValue,
             PropNameType propertyName, object extraInfo = null,
-            bool hasStorage = true, bool typeIsSolid = true,
+            PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true,
             Func<CT, CT, bool> comparer = null)
         {
             throw new NotImplementedException("PropExtStoreFactory has not implemented the Create Collection Prop with Initial Value.");
@@ -62,7 +62,7 @@ namespace DRM.PropBag
         //public override ICPropFB<CT, T> CreateFB<CT, T>(
         //    CT initialValue,
         //    string propertyName, object extraInfo = null,
-        //    bool hasStorage = true, bool typeIsSolid = true,
+        //    PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true,
         //    Func<CT, CT, bool> comparer = null)
         //{
         //    throw new NotImplementedException("PropExtStoreFactory has not implemented the Create Collection Prop with Initial Value.");
@@ -71,7 +71,7 @@ namespace DRM.PropBag
         // TODO: Implement Create Collection With No Value.
         public override ICProp<CT, T> CreateWithNoValue<CT, T>(
             PropNameType propertyName, object extraInfo = null,
-            bool hasStorage = true, bool typeIsSolid = true,
+            PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true,
             Func<CT, CT, bool> comparer = null)
         {
             throw new NotImplementedException("PropExtStoreFactory has not implemented the Create Collection Prop with No Value.");
@@ -95,7 +95,7 @@ namespace DRM.PropBag
 
         public override IProp<T> Create<T>(T initialValue,
             PropNameType propertyName, object extraInfo = null,
-            bool dummy = true, bool typeIsSolid = true,
+            PropStorageStrategyEnum dummy = PropStorageStrategyEnum.External, bool typeIsSolid = true,
             Func<T,T,bool> comparer = null)
         {
             throw new InvalidOperationException("External Store Factory doesn't know how to create properties with initial values.");
@@ -103,7 +103,7 @@ namespace DRM.PropBag
 
         public override IProp<T> CreateWithNoValue<T>(
             PropNameType propertyName, object extraInfo = null,
-            bool dummy = true, bool typeIsSolid = true,
+            PropStorageStrategyEnum dummy = PropStorageStrategyEnum.External, bool typeIsSolid = true,
             Func<T,T,bool> comparer = null)
         {
             if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
@@ -122,7 +122,7 @@ namespace DRM.PropBag
         public override IProp CreateGenFromObject(Type typeOfThisProperty,
             object value,
             PropNameType propertyName, object extraInfo,
-            bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
+            PropStorageStrategyEnum storageStrategy, bool isTypeSolid, PropKindEnum propKind,
             Delegate comparer, bool useRefEquality = false, Type itemType = null)
         {
             throw new InvalidOperationException("External Store Factory doesn't know how to create properties with initial values.");
@@ -131,7 +131,7 @@ namespace DRM.PropBag
         public override IProp CreateGenFromString(Type typeOfThisProperty,
             string value, bool useDefault,
             PropNameType propertyName, object extraInfo,
-            bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
+            PropStorageStrategyEnum storageStrategy, bool isTypeSolid, PropKindEnum propKind,
             Delegate comparer, bool useRefEquality = false, Type itemType = null)
         {
             throw new InvalidOperationException("External Store Factory doesn't know how to create properties with initial values.");
@@ -139,11 +139,11 @@ namespace DRM.PropBag
 
         public override IProp CreateGenWithNoValue(Type typeOfThisProperty,
             PropNameType propertyName, object extraInfo,
-            bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
+            PropStorageStrategyEnum storageStrategy, bool isTypeSolid, PropKindEnum propKind,
             Delegate comparer, bool useRefEquality = false, Type itemType = null)
         {
             CreatePropWithNoValueDelegate propCreator = GetPropWithNoValueCreator(typeOfThisProperty);
-            IProp prop = propCreator(this, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
+            IProp prop = propCreator(this, propertyName, extraInfo, storageStrategy: storageStrategy, isTypeSolid: isTypeSolid,
                 comparer: comparer, useRefEquality: useRefEquality);
 
             return prop;

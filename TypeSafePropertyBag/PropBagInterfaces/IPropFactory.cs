@@ -42,15 +42,15 @@ namespace DRM.TypeSafePropertyBag
         #region IObsCollection<T> and ObservableCollection<T> Prop Creation
 
         ICProp<CT, T> Create<CT, T>(CT initialValue, PropNameType propertyName, object extraInfo = null,
-            bool hasStorage = true, bool typeIsSolid = true,
+            PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true,
             Func<CT, CT, bool> comparer = null) where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged;
 
         //ICPropFB<CT, T> CreateFB<CT, T>(CT initialValue, PropNameType propertyName, object extraInfo = null,
-        //    bool hasStorage = true, bool typeIsSolid = true,
+        //    PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true,
         //    Func<CT, CT, bool> comparer = null) where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged;
 
         ICProp<CT, T> CreateWithNoValue<CT, T>(PropNameType propertyName, object extraInfo = null,
-            bool hasStorage = true, bool typeIsSolid = true,
+            PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true,
             Func<CT, CT, bool> comparer = null) where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged;
 
         #endregion
@@ -67,25 +67,25 @@ namespace DRM.TypeSafePropertyBag
         #region Scalar Prop Creation
 
         IProp<T> Create<T>(T initialValue, PropNameType propertyName, object extraInfo = null, 
-            bool hasStorage = true, bool typeIsSolid = true, Func<T, T, bool> comparer = null);
+            PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true, Func<T, T, bool> comparer = null);
 
         IProp<T> CreateWithNoValue<T>(PropNameType propertyName, object extraInfo = null, 
-            bool hasStorage = true, bool typeIsSolid = true, Func<T, T, bool> comparer = null);
+            PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true, Func<T, T, bool> comparer = null);
 
         #endregion
 
         #region Generic Property Creation
 
-        IProp CreateGenFromObject(Type typeOfThisProperty, object value, PropNameType propertyName, object extraInfo, 
-            bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
+        IProp CreateGenFromObject(Type typeOfThisProperty, object value, PropNameType propertyName, object extraInfo,
+            PropStorageStrategyEnum storageStrategy, bool isTypeSolid, PropKindEnum propKind,
             Delegate comparer, bool useRefEquality = false, Type collectionType = null);
 
         IProp CreateGenFromString(Type typeOfThisProperty, string value, bool useDefault, PropNameType propertyName, object extraInfo,
-            bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
+            PropStorageStrategyEnum storageStrategy, bool isTypeSolid, PropKindEnum propKind,
             Delegate comparer, bool useRefEquality = false, Type collectionType = null);
 
         IProp CreateGenWithNoValue(Type typeOfThisProperty, PropNameType propertyName, object extraInfo,
-            bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
+            PropStorageStrategyEnum storageStrategy, bool isTypeSolid, PropKindEnum propKind,
             Delegate comparer, bool useRefEquality = false, Type collectionType = null);
 
         //IProp CreateCVSPropFromString(Type typeOfThisProperty, PropNameType propertyName, IProvideAView viewProvider);

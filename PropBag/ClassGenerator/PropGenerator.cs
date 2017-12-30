@@ -30,11 +30,11 @@ namespace DRM.PropBag.ClassGenerator
 
             typeIsSolid = def.TypeIsSolid;
 
-            if (def.HasStore)
+            if (def.StorageStrategy == PropStorageStrategyEnum.Internal)
             {
                 if (def.CreateType == PropCreateMethodEnum.noValue)
                 {
-                    prop = factory.CreateWithNoValue<T>(def.PropName, def.ExtraInfo, def.HasStore, def.TypeIsSolid, comparer);
+                    prop = factory.CreateWithNoValue<T>(def.PropName, def.ExtraInfo, def.StorageStrategy, def.TypeIsSolid, comparer);
                 }
                 else
                 {
@@ -48,12 +48,12 @@ namespace DRM.PropBag.ClassGenerator
                         initVal = factory.GetValueFromString<T>(def.InitialValue);
                     }
 
-                    prop = factory.Create<T>(initVal, def.PropName, def.ExtraInfo, def.HasStore, def.TypeIsSolid, comparer);
+                    prop = factory.Create<T>(initVal, def.PropName, def.ExtraInfo, def.StorageStrategy, def.TypeIsSolid, comparer);
                 }
             }
             else
             {
-                prop = factory.CreateWithNoValue<T>(def.PropName, def.ExtraInfo, def.HasStore, def.TypeIsSolid,  comparer);
+                prop = factory.CreateWithNoValue<T>(def.PropName, def.ExtraInfo, def.StorageStrategy, def.TypeIsSolid,  comparer);
             }
             return prop;
         }
@@ -87,7 +87,7 @@ namespace DRM.PropBag.ClassGenerator
             PropCreateMethodEnum creationStyle;
             string initVal = null;
 
-            if (pi.HasStore)
+            if (pi.StorageStrategy == PropStorageStrategyEnum.Internal)
             {
                 PropInitialValueField initialValPrepped = propModel.PrepareInitialField(pi);
 
@@ -117,7 +117,7 @@ namespace DRM.PropBag.ClassGenerator
                 creationStyle = PropCreateMethodEnum.noValue;
             }
 
-            return new PropDefRaw(creationStyle, pi.HasStore, typeIsSolid,
+            return new PropDefRaw(creationStyle, pi.StorageStrategy, typeIsSolid,
                 comparerPrepped.UseRefEquality, pi.Type, pi.Name,
                 doWhenPrepped.DoWhenChanged, doWhenPrepped.DoAfterNotify,
                 comparerPrepped.Comparer, pi.ExtraInfo, initVal);

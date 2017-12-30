@@ -8,6 +8,7 @@ using System.Windows.Data;
 namespace DRM.TypeSafePropertyBag
 {
     using PropNameType = String;
+    using PropIdType = UInt32;
     using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
 
     /// <summary>
@@ -16,6 +17,7 @@ namespace DRM.TypeSafePropertyBag
     public interface IPropBagInternal
     {
         PSAccessServiceType ItsStoreAccessor { get; }
+        void RaiseStandardPropertyChanged(PropIdType propId, PropNameType propertyName);
     }
 
     /// <summary>

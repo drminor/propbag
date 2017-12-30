@@ -54,6 +54,18 @@ namespace DRM.PropBag.ControlModel
             return false;
         }
 
+        protected bool SetIfDifferentEnum<T>(ref T oldVal, T newVal, string propertyName) where T : struct
+        {
+            if (!oldVal.Equals(newVal))
+            {
+                OnPropertyChanging(propertyName);
+                oldVal = newVal;
+                OnPropertyChanged(propertyName);
+                return true;
+            }
+            return false;
+        }
+
         // TODO: This is expensive, consider creating custom IEquatable implementation for Action<T,T>s
         protected bool SetIfDifferentDelegate<T>(ref T oldVal, T newVal, [CallerMemberName]string propertyName = null) where T : class
         {

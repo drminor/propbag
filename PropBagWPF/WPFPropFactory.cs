@@ -33,7 +33,7 @@ namespace DRM.PropBagWPF
         //    CT initialValue,
         //    string propertyName,
         //    object extraInfo = null,
-        //    bool hasStorage = true,
+        //    PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal,
         //    bool typeIsSolid = true,
         //    Func<CT, CT, bool> comparer = null
         //    )
@@ -76,7 +76,7 @@ namespace DRM.PropBagWPF
         //    GetDefaultValueDelegate<CT> defaultValFunc,
         //    string propertyName,
         //    object extraInfo = null,
-        //    bool hasStorage = true,
+        //    PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal,
         //    bool typeIsSolid = true,
         //    Func<CT, CT, bool> comparer = null
         //    ) where CT: IOListCollectionView<T>

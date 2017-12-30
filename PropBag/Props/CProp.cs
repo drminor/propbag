@@ -18,11 +18,11 @@ namespace DRM.PropBag.Collections
         public CProp(CT initalValue,
             GetDefaultValueDelegate<CT> defaultValFunc,
             bool typeIsSolid,
-            bool hasStore,
+            PropStorageStrategyEnum storageStrategy,
             Func<CT, CT, bool> comparer)
-            : base(typeof(CT), typeIsSolid, hasStore, true, comparer, defaultValFunc, PropKindEnum.ObservableCollection)
+            : base(typeof(CT), typeIsSolid, storageStrategy, true, comparer, defaultValFunc, PropKindEnum.ObservableCollection)
         {
-            if (hasStore)
+            if (storageStrategy == PropStorageStrategyEnum.Internal)
             {
                 _value = initalValue;
             }
@@ -30,9 +30,9 @@ namespace DRM.PropBag.Collections
 
         public CProp(GetDefaultValueDelegate<CT> defaultValFunc,
             bool typeIsSolid,
-            bool hasStore,
+            PropStorageStrategyEnum storageStrategy,
             Func<CT, CT, bool> comparer)
-            : base(typeof(CT), typeIsSolid, hasStore, false, comparer, defaultValFunc, PropKindEnum.ObservableCollection)
+            : base(typeof(CT), typeIsSolid, storageStrategy, false, comparer, defaultValFunc, PropKindEnum.ObservableCollection)
         {
             //if (hasStore)
             //{
@@ -45,7 +45,7 @@ namespace DRM.PropBag.Collections
         {
             get
             {
-                if (HasStore)
+                if (StorageStrategy == PropStorageStrategyEnum.Internal)
                 {
                     if (!ValueIsDefined)
                     {
@@ -64,7 +64,7 @@ namespace DRM.PropBag.Collections
             }
             set
             {
-                if (HasStore)
+                if (StorageStrategy == PropStorageStrategyEnum.Internal)
                 {
                     _value = value;
                     ValueIsDefined = true;

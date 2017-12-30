@@ -190,7 +190,7 @@ namespace DRM.PropBagWPF
 
         private ControlModel.PropItem ProcessProp(PropItem pi, IPropFactory propFactory, DoWhenChangedHelper doWhenChangedHelper)
         {
-            bool hasStore = pi.HasStore;
+            PropStorageStrategyEnum storageStrategy = pi.StorageStrategy;
             bool typeIsSolid = pi.TypeIsSolid;
             string extraInfo = pi.ExtraInfo;
 
@@ -200,7 +200,7 @@ namespace DRM.PropBagWPF
             }
 
             ControlModel.PropItem rpi = new ControlModel.PropItem(pi.PropertyType, pi.PropertyName,
-                hasStore, typeIsSolid, pi.PropKind, extraInfo: extraInfo);
+                storageStrategy, typeIsSolid, pi.PropKind, extraInfo: extraInfo);
 
             bool isCProp = propFactory.IsCollection(pi.PropKind);
             bool foundTypeInfoField = false;

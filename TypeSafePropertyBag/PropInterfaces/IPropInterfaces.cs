@@ -43,11 +43,9 @@ namespace DRM.TypeSafePropertyBag
         PropKindEnum PropKind { get; }
         Type Type { get; }
         bool TypeIsSolid { get; }
-        bool HasStore { get; }
+        PropStorageStrategyEnum StorageStrategy { get; } // True for internal, false for external. Will change to enum with items: internal, external and virtual.
 
-        //IListSource ListSource { get; }
-        //ICollectionView CollectionView { get; }
-
+        event EventHandler<EventArgs> ValueChanged; // Used by virtual properties.
 
         object TypedValueAsObject { get; }
         ValPlusType GetValuePlusType();
@@ -75,7 +73,11 @@ namespace DRM.TypeSafePropertyBag
         // The IPropBag needs to be able to have a new IProp created with the correct type
         // and that new IProp needs to replace the original IProp.
         void SetTypedProp(PropNameType propertyName, IProp value);
+
+        //event EventHandler<>
     }
+
+
 
     // TODO: Consider merging this interface with IPropDataInternal -- all of these items are really internal.
     /// <summary>

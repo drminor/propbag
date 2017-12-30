@@ -1,6 +1,5 @@
 ﻿using DRM.TypeSafePropertyBag;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading;
 using System.Windows.Data;
@@ -22,7 +21,7 @@ namespace DRM.PropBagWPF
         #region Constructor
 
         public CViewSourceProp(PropNameType propertyName, IProvideAView viewProvider)
-            : base(typeof(CollectionViewSource), true, true, true, RefEqualityComparer<CollectionViewSource>.Default.Equals, null, PropKindEnum.CollectionViewSource)
+            : base(typeof(CollectionViewSource), true, PropStorageStrategyEnum.Virtual, true, RefEqualityComparer<CollectionViewSource>.Default.Equals, null, PropKindEnum.CollectionViewSource)
         {
             _propertyName = propertyName;
             _viewProvider = viewProvider;
@@ -30,33 +29,41 @@ namespace DRM.PropBagWPF
 
         #endregion
 
+        #region Event Handlers
+
         private void OurViewProviderGotRefreshed(object sender, ViewRefreshedEventArgs e)
         {
             // Let our listeners know.
             RaiseViewRefreshed(e);
         }
 
+        #endregion
+
+        #region Event Declarations and Invokers
+
+        public event EventHandler<ViewRefreshedEventArgs> ViewSourceRefreshed;
+
         private void RaiseViewRefreshed(ViewRefreshedEventArgs e)
         {
-            Interlocked.CompareExchange(ref ViewRefreshed, null, null)?.Invoke(this, e);
+            Interlocked.CompareExchange(ref ViewSourceRefreshed, null, null)?.Invoke(this, e);
         }
 
-        public event EventHandler<ViewRefreshedEventArgs> ViewRefreshed;
+        #endregion
 
-        #region Public Properties and Methods
+        #region IProp<CollectionViewSource> implementation
 
         override public CollectionViewSource TypedValue
         {
             get
             {
                 CollectionViewSource cvs = _viewProvider.ViewSource as CollectionViewSource;
-                if(cvs.Source is DataSourceProvider dsp)
-                {
-                    dsp.DataChanged += Dsp_DataChanged;
-                }
+                //if(cvs.Source is DataSourceProvider dsp)
+                //{
+                //    dsp.DataChanged += Dsp_DataChanged;
+                //}
 
-                _viewProvider.ViewRefreshed += _viewProvider_ViewRefreshed;
-                return cvs; // _viewProvider.ViewSource as CollectionViewSource;
+                //_viewProvider.ViewSourceRefreshed += _viewProvider_ViewRefreshed;
+                return cvs; 
             }
 
             set
@@ -65,15 +72,15 @@ namespace DRM.PropBagWPF
             }
         }
 
-        private void _viewProvider_ViewRefreshed(object sender, ViewRefreshedEventArgs e)
-        {
-            System.Diagnostics.Debug.WriteLine("CVS received as ViewRefreshed Event.");
-        }
+        //private void _viewProvider_ViewRefreshed(object sender, ViewRefreshedEventArgs e)
+        //{
+        //    System.Diagnostics.Debug.WriteLine("CVS received as ViewRefreshed Event.");
+        //}
 
-        private void Dsp_DataChanged(object sender, EventArgs e)
-        {
-            System.Diagnostics.Debug.WriteLine("CVS's DSP received as ViewRefreshed Event.");
-        }
+        //private void Dsp_DataChanged(object sender, EventArgs e)
+        //{
+        //    System.Diagnostics.Debug.WriteLine("CVS's DSP received as ViewRefreshed Event.");
+        //}
 
         public override object TypedValueAsObject => TypedValue;
 
@@ -151,14 +158,9 @@ namespace DRM.PropBagWPF
         ICollectionView IProvideAView.View => _viewProvider.View;
         public string ViewName => _viewProvider.ViewName;
         public object ViewSource => _viewProvider.ViewSource;
+        public override DataSourceProvider DataSourceProvider => _viewProvider.DataSourceProvider;
 
         #endregion
-
-        //#region IProvideADataSourceProvider implementation
-
-        //DataSourceProvider IProvideADataSourceProvider.DataSourceProvider => throw new NotImplementedException();
-
-        //#endregion
 
         #region Private Methods
 
@@ -203,55 +205,5 @@ namespace DRM.PropBagWPF
         }
 
         #endregion
-
-        //#region View Management
-
-        //IDictionary<string, CollectionViewSource> _views;
-
-        //public ListCollectionView this[string key]
-        //{
-        //    get
-        //    {
-        //        if (_views == null)
-        //        {
-        //            _views = new Dictionary<string, CollectionViewSource>();
-        //        }
-        //        else
-        //        {
-        //            if (_views.TryGetValue(key, out CollectionViewSource theView))
-        //            {
-        //                if (TryGetListCollectionView(theView.View, out ListCollectionView lcv1))
-        //                {
-        //                    return lcv1;
-        //                }
-        //                else
-        //                {
-        //                    throw new InvalidOperationException($"The view provided by the CollectionViewSource for item: {key} does not implement the ListCollectionView interface.");
-        //                }
-        //            }
-        //        }
-
-        //        CollectionViewSource cvs = new CollectionViewSource
-        //        {
-        //            Source = TypedValue.Source
-        //        };
-
-        //        _views.Add(key, cvs);
-
-        //        ICollectionView view = cvs.View;
-
-        //        if (TryGetListCollectionView(view, out ListCollectionView lcv2))
-        //        {
-        //            return lcv2;
-        //        }
-        //        else
-        //        {
-        //            throw new InvalidOperationException($"The view provided by the CollectionViewSource for item: {key} does not implement the ListCollectionView interface.");
-        //        }
-        //    }
-
-        //}
-
-        //#endregion
     }
 }

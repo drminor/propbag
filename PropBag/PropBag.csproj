@@ -70,6 +70,7 @@
     <Compile Include="ControlModel\PropModel.cs" />
     <Compile Include="ExtValDelegates.cs" />
     <Compile Include="Factories\PropFactoryValueConverter.cs" />
+    <Compile Include="Props\PropNoStore.cs" />
     <Compile Include="Props\Prop.cs" />
     <Compile Include="PropBag.CustomTypeDescriptor.cs" />
     <None Include="Documentation\TypeInfoField.md" />

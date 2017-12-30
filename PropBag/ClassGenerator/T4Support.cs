@@ -6,7 +6,7 @@ using System.Xml.Serialization;
 
 using DRM.PropBag;
 using DRM.PropBag.XMLModel;
-
+using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBag.ClassGenerator
 {
@@ -80,7 +80,7 @@ namespace DRM.PropBag.ClassGenerator
             };
 
 
-            if (pi.HasStore)
+            if (pi.StorageStrategy == PropStorageStrategyEnum.Internal)
             {
                 PropInitialValueField initialValPrepped = propModel.PrepareInitialField(pi);
 

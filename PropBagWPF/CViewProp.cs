@@ -14,44 +14,56 @@ namespace DRM.PropBagWPF
         #region Private and Protected Members
 
         private readonly PropNameType _propertyName;
-
         private readonly IProvideAView _viewProvider;
-
-        public event EventHandler<ViewRefreshedEventArgs> ViewRefreshed;
 
         #endregion
 
         #region Constuctor
 
         public CViewProp(PropNameType propertyName, IProvideAView viewProvider)
-            : base(typeof(ListCollectionView), true, true, true, RefEqualityComparer<ListCollectionView>.Default.Equals, null, PropKindEnum.CollectionView)
+            : base(typeof(ListCollectionView), true, PropStorageStrategyEnum.Virtual, true, RefEqualityComparer<ListCollectionView>.Default.Equals, null, PropKindEnum.CollectionView)
         {
             _propertyName = propertyName;
             _viewProvider = viewProvider;
 
             // TODO: Implement IDisposable or make this a weak event subscription.
-            _viewProvider.ViewRefreshed += OurViewProviderGotRefreshed;
+            _viewProvider.ViewSourceRefreshed += OurViewProviderGotRefreshed;
         }
 
         #endregion
 
+        #region Event Handlers
+
         private void OurViewProviderGotRefreshed(object sender, ViewRefreshedEventArgs e)
         {
-            // Let our listeners know.
-            RaiseViewRefreshed(e);
+            // There may be agents that want to know that the View's data source has been updated.
+            RaiseViewSourceRefreshed(e);
+
+            // There may be agents that want to know when our value has changed.
+            base.OnValueChanged();
         }
 
-        private void RaiseViewRefreshed(ViewRefreshedEventArgs e)
+        #endregion
+
+        #region Event Delcarations and Invokers
+
+        public event EventHandler<ViewRefreshedEventArgs> ViewSourceRefreshed;
+
+        private void RaiseViewSourceRefreshed(ViewRefreshedEventArgs e)
         {
-            Interlocked.CompareExchange(ref ViewRefreshed, null, null)?.Invoke(this, e);
+            Interlocked.CompareExchange(ref ViewSourceRefreshed, null, null)?.Invoke(this, e);
         }
+
+        #endregion
+
+        #region IProp<ListCollectionView> implementation
 
         override public ListCollectionView TypedValue
         {
             get
             {
                 ListCollectionView lcv = _viewProvider.View as ListCollectionView;
-                System.Diagnostics.Debug.Assert(ReferenceEquals(lcv, _viewProvider.View), "The cast is not the same object as the cast source.");
+                //System.Diagnostics.Debug.Assert(ReferenceEquals(lcv, _viewProvider.View), "The cast is not the same object as the cast source.");
                 return lcv;
             }
 
@@ -63,15 +75,6 @@ namespace DRM.PropBagWPF
 
         public override object TypedValueAsObject => TypedValue;
 
-
-        #region IProvideAView implementation
-
-        ICollectionView IProvideAView.View => _viewProvider.View;
-        public string ViewName => _viewProvider.ViewName;
-        public object ViewSource => _viewProvider.ViewSource;
-
-        #endregion
-
         public override object Clone() => throw new NotSupportedException($"{nameof(CViewProp)} Prop Items do not implement the Clone method.");
 
         public override void CleanUpTyped()
@@ -81,6 +84,17 @@ namespace DRM.PropBagWPF
                 disable.Dispose();
             }
         }
+
+        #endregion
+
+        #region IProvideAView implementation
+
+        ICollectionView IProvideAView.View => _viewProvider.View;
+        public string ViewName => _viewProvider.ViewName;
+        public object ViewSource => _viewProvider.ViewSource;
+        public override DataSourceProvider DataSourceProvider => _viewProvider.DataSourceProvider;
+
+        #endregion
     }
 }
          

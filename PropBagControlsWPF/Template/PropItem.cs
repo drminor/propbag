@@ -58,18 +58,18 @@ namespace DRM.PropBag.ControlsWPF
             }
         }
 
-        static DependencyProperty HasStoreProperty =
-            DependencyProperty.Register("HasStore", typeof(bool), typeof(PropItem), new PropertyMetadata(true));
+        static DependencyProperty StorageStrategyProperty =
+            DependencyProperty.Register("StorageStrategy", typeof(PropStorageStrategyEnum), typeof(PropItem), new PropertyMetadata(PropStorageStrategyEnum.Internal));
 
-        public bool HasStore
+        public PropStorageStrategyEnum StorageStrategy
         {
             get
             {
-                return (bool)this.GetValue(HasStoreProperty);
+                return (PropStorageStrategyEnum)this.GetValue(StorageStrategyProperty);
             }
             set
             {
-                this.SetValue(HasStoreProperty, value);
+                this.SetValue(StorageStrategyProperty, value);
             }
         }
 

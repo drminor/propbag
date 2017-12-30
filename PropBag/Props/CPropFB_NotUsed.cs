@@ -18,7 +18,7 @@ namespace DRM.PropBag.Collections
         public CPropFB(CT initalValue,
             GetDefaultValueDelegate<CT> defaultValFunc,
             bool typeIsSolid,
-            bool hasStore,
+            PropStorageStrategyEnum storageStrategy,
             Func<CT, CT, bool> comparer)
             : base(typeof(CT), typeIsSolid, hasStore, true, comparer, defaultValFunc, PropKindEnum.ObservableCollectionFB)
         {
@@ -30,7 +30,7 @@ namespace DRM.PropBag.Collections
 
         public CPropFB(GetDefaultValueDelegate<CT> defaultValFunc,
             bool typeIsSolid,
-            bool hasStore,
+            PropStorageStrategyEnum storageStrategy,
             Func<CT, CT, bool> comparer)
             : base(typeof(CT), typeIsSolid, hasStore, false, comparer, defaultValFunc, PropKindEnum.ObservableCollectionFB)
         {

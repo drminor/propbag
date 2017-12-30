@@ -78,7 +78,8 @@ namespace DRM.TypeSafePropertyBag
         string ViewName { get; }
         ICollectionView View { get; } // A reference to the named view.
         object ViewSource { get; } // A reference to the CollectionViewSource (or similar class.)
-        event EventHandler<ViewRefreshedEventArgs> ViewRefreshed;
+        event EventHandler<ViewRefreshedEventArgs> ViewSourceRefreshed;
+        DataSourceProvider DataSourceProvider { get; }
     }
 
     #endregion
@@ -94,7 +95,6 @@ namespace DRM.TypeSafePropertyBag
     // Collection View 
     public interface ICViewProp<CVT>: IProp<CVT>, IProvideAView where CVT : ICollectionView
     {
-        //IProvideAView ViewProvider { get; set; }
     }
 
     // Observable List / Collection (IList + INotifyCollectionChanged)

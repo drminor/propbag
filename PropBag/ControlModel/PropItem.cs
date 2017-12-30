@@ -21,7 +21,7 @@ namespace DRM.PropBag.ControlModel
         PropDoWhenChangedField _propDoWhenChangedField;
         PropBinderField _propBinderField;
 
-        bool _hasStore;
+        PropStorageStrategyEnum _hasStore;
         bool _typeIsSolid;
         string _extraInfo;
 
@@ -75,7 +75,20 @@ namespace DRM.PropBag.ControlModel
         }
 
         [XmlAttribute(AttributeName = "caller-provides-storage")]
-        public bool HasStore { get { return _hasStore; } set { SetIfDifferent<bool>(ref _hasStore, value); } }
+        public PropStorageStrategyEnum StorageStrategy
+        {
+            get
+            {
+                return _hasStore;
+            }
+            set
+            {
+                int ov = (int)_hasStore;
+                int nv = (int)value;
+                SetIfDifferentEnum<int>(ref ov, nv, "storageStrategy");
+                _hasStore = (PropStorageStrategyEnum) ov;
+            }
+        }
 
         [XmlIgnore]
         public bool TypeIsSolid { get { return _typeIsSolid; } set { SetIfDifferent<bool>(ref _typeIsSolid, value); } }
@@ -88,7 +101,7 @@ namespace DRM.PropBag.ControlModel
         //public PropItem(Type type, string name) : this(type, name, null, true, true, PropKindEnum.Prop,
         //    null, null, null, null) { }
 
-        public PropItem(Type type, string name, bool hasStore, bool typeIsSolid, PropKindEnum propKind,
+        public PropItem(Type type, string name, PropStorageStrategyEnum storageStrategy, bool typeIsSolid, PropKindEnum propKind,
             TypeInfoField propTypeInfoField = null,
             PropInitialValueField initialValueField = null,
             string extraInfo = null, PropComparerField comparer = null, Type itemType = null)
@@ -96,7 +109,7 @@ namespace DRM.PropBag.ControlModel
             PropertyType = type;
             PropertyName = name;
             ExtraInfo = extraInfo;
-            HasStore = hasStore;
+            StorageStrategy = storageStrategy;
             TypeIsSolid = typeIsSolid;
             PropKind = propKind;
             PropTypeInfoField = _propTypeInfoField;

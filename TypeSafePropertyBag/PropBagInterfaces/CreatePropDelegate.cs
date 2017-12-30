@@ -13,20 +13,20 @@ namespace DRM.TypeSafePropertyBag
     public delegate IProp CreateEPropFromObjectDelegate(IPropFactory propFactory,
         object value,
         string propertyName, object extraInfo,
-        bool hasStorage, bool isTypeSolid,
+        PropStorageStrategyEnum storageStrategy, bool isTypeSolid,
         Delegate comparer, bool useRefEquality);
 
     // From String
     public delegate IProp CreateEPropFromStringDelegate(IPropFactory propFactory,
         string value, bool useDefault,
         string propertyName, object extraInfo,
-        bool hasStorage, bool isTypeSolid,
+        PropStorageStrategyEnum storageStrategy, bool isTypeSolid,
         Delegate comparer, bool useRefEquality);
 
     // With No Value
     public delegate IProp CreateEPropWithNoValueDelegate(IPropFactory propFactory,
         string propertyName, object extraInfo,
-        bool hasStorage, bool isTypeSolid,
+        PropStorageStrategyEnum storageStrategy, bool isTypeSolid,
         Delegate comparer, bool useRefEquality);
 
     #endregion
@@ -44,20 +44,20 @@ namespace DRM.TypeSafePropertyBag
     public delegate IProp CreatePropFromObjectDelegate(IPropFactory propFactory,
         object value,
         string propertyName, object extraInfo,
-        bool hasStorage, bool isTypeSolid,
+        PropStorageStrategyEnum storageStrategy, bool isTypeSolid,
         Delegate comparer, bool useRefEquality);
 
     // From String
     public delegate IProp CreatePropFromStringDelegate(IPropFactory propFactory,
         string value, bool useDefault,
         string propertyName, object extraInfo,
-        bool hasStorage, bool isTypeSolid,
+        PropStorageStrategyEnum storageStrategy, bool isTypeSolid,
         Delegate comparer, bool useRefEquality);
 
     // With No Value
     public delegate IProp CreatePropWithNoValueDelegate(IPropFactory propFactory,
         string propertyName, object extraInfo,
-        bool hasStorage, bool isTypeSolid,
+        PropStorageStrategyEnum storageStrategy, bool isTypeSolid,
         Delegate comparer, bool useRefEquality);
 
     #endregion

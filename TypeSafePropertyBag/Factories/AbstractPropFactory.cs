@@ -158,7 +158,7 @@ namespace DRM.TypeSafePropertyBag
         public abstract ICProp<CT, T> Create<CT, T>(
             CT initialValue,
             string propertyName, object extraInfo = null,
-            bool hasStorage = true, bool typeIsSolid = true,
+            PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true,
             Func<CT, CT, bool> comparer = null) where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged;
         //{
         //    if (comparer == null) comparer = EqualityComparer<CT>.Default.Equals;
@@ -171,7 +171,7 @@ namespace DRM.TypeSafePropertyBag
         //public abstract ICPropFB<CT, T> CreateFB<CT, T>(
         //    CT initialValue,
         //    string propertyName, object extraInfo = null,
-        //    bool hasStorage = true, bool typeIsSolid = true,
+        //    PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true,
         //    Func<CT, CT, bool> comparer = null) where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged;
         ////{
         ////    if (comparer == null) comparer = EqualityComparer<CT>.Default.Equals;
@@ -183,7 +183,7 @@ namespace DRM.TypeSafePropertyBag
 
         public abstract ICProp<CT, T> CreateWithNoValue<CT, T>(
             PropNameType propertyName, object extraInfo = null,
-            bool hasStorage = true, bool typeIsSolid = true,
+            PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true,
             Func<CT, CT, bool> comparer = null) where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged;
         //{
         //    if (comparer == null) comparer = EqualityComparer<CT>.Default.Equals;
@@ -216,7 +216,7 @@ namespace DRM.TypeSafePropertyBag
         public abstract IProp<T> Create<T>(
             T initialValue,
             PropNameType propertyName, object extraInfo = null,
-            bool hasStorage = true, bool typeIsSolid = true,
+            PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true,
             Func<T, T, bool> comparer = null);
         //{
         //    if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
@@ -228,7 +228,7 @@ namespace DRM.TypeSafePropertyBag
 
         public abstract IProp<T> CreateWithNoValue<T>(
             PropNameType propertyName, object extraInfo = null,
-            bool hasStorage = true, bool typeIsSolid = true,
+            PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true,
             Func<T, T, bool> comparer = null);
         //{
         //    if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
@@ -245,13 +245,13 @@ namespace DRM.TypeSafePropertyBag
         public virtual IProp CreateGenFromObject(Type typeOfThisProperty,
             object value,
             PropNameType propertyName, object extraInfo,
-            bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
+            PropStorageStrategyEnum storageStrategy, bool isTypeSolid, PropKindEnum propKind,
             Delegate comparer, bool useRefEquality = false, Type itemType = null)
         {
             if (propKind == PropKindEnum.Prop)
             {
                 CreatePropFromObjectDelegate propCreator = GetPropCreator(typeOfThisProperty);
-                IProp prop = propCreator(this, value, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
+                IProp prop = propCreator(this, value, propertyName, extraInfo, storageStrategy: storageStrategy, isTypeSolid: isTypeSolid,
                     comparer: comparer, useRefEquality: useRefEquality);
 
                 return prop;
@@ -259,7 +259,7 @@ namespace DRM.TypeSafePropertyBag
             else if (IsCollection(propKind))
             {
                 CreateEPropFromObjectDelegate propCreator = GetCPropCreator(typeOfThisProperty, itemType);
-                IProp prop = propCreator(this, value, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
+                IProp prop = propCreator(this, value, propertyName, extraInfo, storageStrategy: storageStrategy, isTypeSolid: isTypeSolid,
                     comparer: comparer, useRefEquality: useRefEquality);
 
                 return prop;
@@ -273,13 +273,13 @@ namespace DRM.TypeSafePropertyBag
         public virtual IProp CreateGenFromString(Type typeOfThisProperty,
             string value, bool useDefault,
             PropNameType propertyName, object extraInfo,
-            bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
+            PropStorageStrategyEnum storageStrategy, bool isTypeSolid, PropKindEnum propKind,
             Delegate comparer, bool useRefEquality = false, Type itemType = null)
         {
             if (propKind == PropKindEnum.Prop)
             {
                 CreatePropFromStringDelegate propCreator = GetPropFromStringCreator(typeOfThisProperty);
-                IProp prop = propCreator(this, value, useDefault, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
+                IProp prop = propCreator(this, value, useDefault, propertyName, extraInfo, storageStrategy: storageStrategy, isTypeSolid: isTypeSolid,
                     comparer: comparer, useRefEquality: useRefEquality);
 
                 return prop;
@@ -287,7 +287,7 @@ namespace DRM.TypeSafePropertyBag
             else if (IsCollection(propKind))
             {
                 CreateEPropFromStringDelegate propCreator = GetCPropFromStringCreator(typeOfThisProperty, itemType);
-                IProp prop = propCreator(this, value, useDefault, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
+                IProp prop = propCreator(this, value, useDefault, propertyName, extraInfo, storageStrategy: storageStrategy, isTypeSolid: isTypeSolid,
                     comparer: comparer, useRefEquality: useRefEquality);
 
                 return prop;
@@ -300,13 +300,13 @@ namespace DRM.TypeSafePropertyBag
 
         public virtual IProp CreateGenWithNoValue(Type typeOfThisProperty,
             PropNameType propertyName, object extraInfo,
-            bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
+            PropStorageStrategyEnum storageStrategy, bool isTypeSolid, PropKindEnum propKind,
             Delegate comparer, bool useRefEquality = false, Type itemType = null)
         {
             if (propKind == PropKindEnum.Prop)
             {
                 CreatePropWithNoValueDelegate propCreator = GetPropWithNoValueCreator(typeOfThisProperty);
-                IProp prop = propCreator(this, propertyName, extraInfo, hasStorage: hasStorage, isTypeSolid: isTypeSolid,
+                IProp prop = propCreator(this, propertyName, extraInfo, storageStrategy: storageStrategy, isTypeSolid: isTypeSolid,
                     comparer: comparer, useRefEquality: useRefEquality);
 
                 return prop;
@@ -314,7 +314,7 @@ namespace DRM.TypeSafePropertyBag
             else if (IsCollection(propKind))
             {
                 CreateEPropWithNoValueDelegate propCreator = GetCPropWithNoValueCreator(typeOfThisProperty, itemType);
-                IProp prop = propCreator(this, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
+                IProp prop = propCreator(this, propertyName, extraInfo, storageStrategy: storageStrategy, isTypeSolid: isTypeSolid,
                     comparer: comparer, useRefEquality: useRefEquality);
 
                 return prop;

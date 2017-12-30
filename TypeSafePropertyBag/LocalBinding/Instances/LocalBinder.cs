@@ -29,7 +29,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
         readonly PropNameType _propertyName;
         readonly WeakReference<IPropBagInternal> _targetObject;
-        bool _targetHasStore;
+        PropStorageStrategyEnum _targetHasStore;
 
         ObservableSource<T> _rootListener;
         readonly OSCollection<T> _pathListeners;
@@ -106,8 +106,8 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
             if (_targetObject.TryGetTarget(out IPropBagInternal propBag))
             {
-                _propertyName = GetPropertyName(propStoreAccessService, propBag, propId, out bool hasStore);
-                _targetHasStore = hasStore;
+                _propertyName = GetPropertyName(propStoreAccessService, propBag, propId, out PropStorageStrategyEnum storageStrategy);
+                _targetHasStore = storageStrategy;
 
             }
 
@@ -141,7 +141,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
         }
 
         // TODO: should be able to have IPropStoreAccessServiceInternal provide all of this with a single call.
-        private PropNameType GetPropertyName(PSAccessServiceType propStoreAccessService, IPropBagInternal propBag, PropIdType propId, out bool hasStore)
+        private PropNameType GetPropertyName(PSAccessServiceType propStoreAccessService, IPropBagInternal propBag, PropIdType propId, out PropStorageStrategyEnum storageStrategy)
         {
             PropNameType result;
 
@@ -156,7 +156,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
             if (propStoreAccessService.TryGetValue((IPropBag) propBag, propId, out IPropData genProp))
             {
-                hasStore = genProp.TypedProp.HasStore;
+                storageStrategy = genProp.TypedProp.StorageStrategy;
             }
             else
             {
@@ -766,15 +766,15 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             bool result;
             IProp typedProp = sourcePropNode.Int_PropData.TypedProp;
 
-            if (!(typedProp.HasStore))
-            {
-                // This property has no backing store, there is no concept of a starting value. (Propably used to send messages.)
-                result = false;
-            }
-            else
+            if(typedProp.StorageStrategy == PropStorageStrategyEnum.Internal)
             {
                 T newValue = (T)typedProp.TypedValueAsObject;
                 result = UpdateTarget(bindingTarget, newValue);
+            }
+            else
+            {
+                // This property has no backing store, there is no concept of a starting value. (Propably used to send messages.)
+                result = false;
             }
             return result;
         }
@@ -784,7 +784,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             if (bindingTarget.TryGetTarget(out IPropBagInternal propBag))
             {
                 string status;
-                if(_targetHasStore)
+                if(_targetHasStore == PropStorageStrategyEnum.Internal)
                 {
                     bool wasSet = ((IPropBag)propBag).SetIt(newValue, this.PropertyName);
                     status = wasSet ? "has been updated" : "already had the new value";

@@ -61,7 +61,7 @@ namespace DRM.PropBag
         private object _sync = new object();
 
         // These fulfill the IPropBagInternal contract
-        public PSAccessServiceType ItsStoreAccessor => _ourStoreAccessor;
+        PSAccessServiceType IPropBagInternal.ItsStoreAccessor => _ourStoreAccessor;
 
         #endregion
 
@@ -484,12 +484,12 @@ namespace DRM.PropBag
 
             //IProp pg;
 
-            if (pi.HasStore && !pi.InitialValueField.SetToUndefined)
+            if (pi.StorageStrategy == PropStorageStrategyEnum.Internal && !pi.InitialValueField.SetToUndefined)
             {
                 if (pi.InitialValueField.ValueCreator != null)
                 {
                     object newValue = pi.InitialValueField.ValueCreator();
-                    propGen = _propFactory.CreateGenFromObject(pi.PropertyType, newValue, pi.PropertyName, ei, pi.HasStore, pi.TypeIsSolid,
+                    propGen = _propFactory.CreateGenFromObject(pi.PropertyType, newValue, pi.PropertyName, ei, pi.StorageStrategy, pi.TypeIsSolid,
                         pi.PropKind, comparer, useRefEquality, pi.ItemType);
                 }
                 else
@@ -508,13 +508,13 @@ namespace DRM.PropBag
                         value = pi.InitialValueField.GetStringValue();
                     }
 
-                    propGen = _propFactory.CreateGenFromString(pi.PropertyType, value, useDefault, pi.PropertyName, ei, pi.HasStore, pi.TypeIsSolid,
+                    propGen = _propFactory.CreateGenFromString(pi.PropertyType, value, useDefault, pi.PropertyName, ei, pi.StorageStrategy, pi.TypeIsSolid,
                         pi.PropKind, comparer, useRefEquality, pi.ItemType);
                 }
             }
             else
             {
-                propGen = _propFactory.CreateGenWithNoValue(pi.PropertyType, pi.PropertyName, ei, pi.HasStore, pi.TypeIsSolid,
+                propGen = _propFactory.CreateGenWithNoValue(pi.PropertyType, pi.PropertyName, ei, pi.StorageStrategy, pi.TypeIsSolid,
                     pi.PropKind, comparer, useRefEquality, pi.ItemType);
             }
 
@@ -621,9 +621,11 @@ namespace DRM.PropBag
                         {
                             bool typeIsSolid = _propFactory.IsTypeSolid(value, propertyType);
 
+                            PropStorageStrategyEnum storageStrategy = _propFactory.ProvidesStorage ? PropStorageStrategyEnum.Internal : PropStorageStrategyEnum.External;
+
                             // TODO Create a Typed version of HandleMissingProp.
                             genericTypedProp = _propFactory.CreateGenFromObject(propertyType, value,
-                                propertyName, null, _propFactory.ProvidesStorage, typeIsSolid, PropKindEnum.Prop, null, false, null);
+                                propertyName, null, storageStrategy, typeIsSolid, PropKindEnum.Prop, null, false, null);
                         }
                         else
                         {
@@ -633,9 +635,11 @@ namespace DRM.PropBag
                             //object newValue = ThePropFactory.GetDefaultValue(propertyType, propertyName);
                             bool typeIsSolid = true;
 
+                            PropStorageStrategyEnum storageStrategy = _propFactory.ProvidesStorage ? PropStorageStrategyEnum.Internal : PropStorageStrategyEnum.External;
+
                             // On 10/8/17: Changed to use NoValue, instead of trying to generate a default value.
                             genericTypedProp = _propFactory.CreateGenWithNoValue(propertyType, propertyName,
-                                null, _propFactory.ProvidesStorage, typeIsSolid, PropKindEnum.Prop, null, false, null);
+                                null, storageStrategy, typeIsSolid, PropKindEnum.Prop, null, false, null);
                         }
 
                         IPropData propGen = AddProp(propertyName, genericTypedProp);
@@ -740,7 +744,7 @@ namespace DRM.PropBag
                 alwaysRegister: false,
                 mustBeRegistered: true,
                 neverCreate: false,
-                desiredHasStoreValue: _propFactory.ProvidesStorage,
+                desiredHasStoreValue: null, // _propFactory.ProvidesStorage,
                 wasRegistered: out bool wasRegistered,
                 propId: out PropIdType propId);
 
@@ -780,15 +784,16 @@ namespace DRM.PropBag
         public T GetIt<T>(string propertyName)
         {
             //OurStoreAccessor.IncAccess();
-            return GetTypedPropPrivate<T>(propertyName, mustBeRegistered: true).TypedValue;
+            IProp<T> typedProp = GetTypedPropPrivate<T>(propertyName, mustBeRegistered: true, neverCreate: false);
+            return typedProp.TypedValue;
         }
 
         protected IProp<T> GetTypedProp<T>(string propertyName)
         {
-            return (IProp<T>)GetTypedPropPrivate<T>(propertyName, mustBeRegistered: true);
+            return (IProp<T>)GetTypedPropPrivate<T>(propertyName, mustBeRegistered: true, neverCreate: false);
         }
 
-        protected IProp<T> GetTypedPropPrivate<T>(string propertyName, bool mustBeRegistered, bool neverCreate = false)
+        protected IProp<T> GetTypedPropPrivate<T>(string propertyName, bool mustBeRegistered, bool neverCreate/* = false*/)
         {
             IPropData PropData = GetGenPropPrivate<T>(propertyName, mustBeRegistered, neverCreate, out PropIdType notUsed);
 
@@ -823,7 +828,7 @@ namespace DRM.PropBag
 
         private IPropData GetGenPropPrivate<T>(string propertyName, bool mustBeRegistered, bool neverCreate, out PropIdType propId)
         {
-            bool hasStore = _propFactory.ProvidesStorage;
+            PropStorageStrategyEnum storageStrategy = _propFactory.ProvidesStorage ? PropStorageStrategyEnum.Internal : PropStorageStrategyEnum.External;
 
             // TODO: Make this use a different version of GetPropGen: one that takes advantage of the 
             // compile-time type knowlege -- especially if we have to register the property in HandleMissing.
@@ -832,7 +837,7 @@ namespace DRM.PropBag
                 alwaysRegister: false,
                 mustBeRegistered: mustBeRegistered,
                 neverCreate: neverCreate,
-                desiredHasStoreValue: _propFactory.ProvidesStorage,
+                desiredHasStoreValue: null,
                 wasRegistered: out bool wasRegistered,
                 propId: out propId);
 
@@ -1738,12 +1743,12 @@ namespace DRM.PropBag
                 CT initialValue = default(CT)
             ) where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged
         {
-            bool hasStorage = true;
+            PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal;
             bool typeIsSolid = true;
 
             Func<CT, CT, bool> comparerToUse = comparer ?? _propFactory.GetRefEqualityComparer<CT>();
 
-            ICProp<CT, T> typedCollectionProp = _propFactory.Create<CT,T>(initialValue, propertyName, extraInfo, hasStorage, typeIsSolid, comparerToUse);
+            ICProp<CT, T> typedCollectionProp = _propFactory.Create<CT,T>(initialValue, propertyName, extraInfo, storageStrategy, typeIsSolid, comparerToUse);
 
             AddProp(propertyName, typedCollectionProp);
             return typedCollectionProp;
@@ -1784,57 +1789,57 @@ namespace DRM.PropBag
         /// <returns></returns>
         protected IProp<T> AddProp<T>(string propertyName, Func<T, T, bool> comparer = null, object extraInfo = null, T initialValue = default(T))
         {
-            bool hasStorage = true;
+            PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal;
             bool typeIsSolid = true;
-            IProp<T> pg = _propFactory.Create<T>(initialValue, propertyName, extraInfo, hasStorage, typeIsSolid, comparer);
+            IProp<T> pg = _propFactory.Create<T>(initialValue, propertyName, extraInfo, storageStrategy, typeIsSolid, comparer);
             AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard);
             return pg;
         }
 
         protected IProp<T> AddPropObjComp<T>(string propertyName, object extraInfo = null, T initialValue = default(T))
         {
-            bool hasStorage = true;
+            PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal;
             bool typeIsSolid = true;
             Func<T, T, bool> comparer = _propFactory.GetRefEqualityComparer<T>();
-            IProp<T> pg = _propFactory.Create<T>(initialValue, propertyName, extraInfo, hasStorage, typeIsSolid, comparer);
+            IProp<T> pg = _propFactory.Create<T>(initialValue, propertyName, extraInfo, storageStrategy, typeIsSolid, comparer);
             AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard);
             return pg;
         }
 
         protected IProp<T> AddPropNoValue<T>(string propertyName, Func<T, T, bool> comparer = null, object extraInfo = null)
         {
-            bool hasStorage = true;
+            PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal;
             bool typeIsSolid = true;
-            IProp<T> pg = _propFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, comparer);
+            IProp<T> pg = _propFactory.CreateWithNoValue<T>(propertyName, extraInfo, storageStrategy, typeIsSolid, comparer);
             AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard);
             return pg;
         }
 
         protected IProp<T> AddPropObjCompNoValue<T>(string propertyName, object extraInfo = null)
         {
-            bool hasStorage = true;
+            PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal;
             bool typeIsSolid = true;
             Func<T, T, bool> comparer = _propFactory.GetRefEqualityComparer<T>();
-            IProp<T> pg = _propFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, comparer);
+            IProp<T> pg = _propFactory.CreateWithNoValue<T>(propertyName, extraInfo, storageStrategy, typeIsSolid, comparer);
             AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard);
             return pg;
         }
 
         protected IProp<T> AddPropNoStore<T>(string propertyName, Func<T, T, bool> comparer = null, object extraInfo = null)
         {
-            bool hasStorage = false;
+            PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.External;
             bool typeIsSolid = true;
-            IProp<T> pg = _propFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, comparer);
+            IProp<T> pg = _propFactory.CreateWithNoValue<T>(propertyName, extraInfo, storageStrategy, typeIsSolid, comparer);
             AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard);
             return pg;
         }
 
         protected IProp<T> AddPropObjCompNoStore<T>(string propertyName, object extraInfo = null)
         {
-            bool hasStorage = false;
+            PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.External;
             bool typeIsSolid = true;
             Func<T, T, bool> comparer = _propFactory.GetRefEqualityComparer<T>();
-            IProp<T> pg = _propFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, comparer);
+            IProp<T> pg = _propFactory.CreateWithNoValue<T>(propertyName, extraInfo, storageStrategy, typeIsSolid, comparer);
             AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard);
             return pg;
         }
@@ -1985,10 +1990,10 @@ namespace DRM.PropBag
 
             IEnumerable<ISubscription> globalSubs = _ourStoreAccessor.GetSubscriptions(this, 0);
 
-            if(propertyName == "SelectedPerson")
-            {
-                int cnt = subscriptions.Count();
-            }
+            //if(propertyName == "SelectedPerson")
+            //{
+            //    int cnt = subscriptions.Count();
+            //}
 
             if (typedProp.ValueIsDefined)
             {
@@ -2001,7 +2006,7 @@ namespace DRM.PropBag
                     if(globalSubs != null) CallChangingSubscribers(globalSubs, propertyName);
 
                     // Make the update.
-                    if (typedProp.HasStore)
+                    if (typedProp.StorageStrategy == PropStorageStrategyEnum.Internal)
                     {
                         typedProp.TypedValue = newValue;
                     }
@@ -2009,7 +2014,7 @@ namespace DRM.PropBag
 
                     // Raise notify events.
                     if(subscriptions != null) DoNotifyWork(propId, propertyName, typedProp, oldValue, newValue, subscriptions);
-                    if (subscriptions != null) DoNotifyWork(propId, propertyName, typedProp, oldValue, newValue, globalSubs);
+                    if (globalSubs != null) DoNotifyWork(propId, propertyName, typedProp, oldValue, newValue, globalSubs);
                 }
                 return !theSame;
             }
@@ -2019,7 +2024,7 @@ namespace DRM.PropBag
                 if (globalSubs != null) CallChangingSubscribers(globalSubs, propertyName);
 
                 // Make the update.
-                if (typedProp.HasStore)
+                if (typedProp.StorageStrategy == PropStorageStrategyEnum.Internal)
                 {
                     typedProp.TypedValue = newValue;
                 }
@@ -2027,7 +2032,7 @@ namespace DRM.PropBag
 
                 // Raise notify events.
                 if (subscriptions != null) DoNotifyWork(propId, propertyName, typedProp, newValue, subscriptions);
-                if (subscriptions != null) DoNotifyWork(propId, propertyName, typedProp, newValue, globalSubs);
+                if (globalSubs != null) DoNotifyWork(propId, propertyName, typedProp, newValue, globalSubs);
 
                 // The current value is undefined and the new value is defined, therefore: their has been a real update -- return true.
                 return true;
@@ -2065,7 +2070,7 @@ namespace DRM.PropBag
                 }
                 catch (Exception e)
                 {
-                    System.Diagnostics.Debug.WriteLine($"A Changing PropertyChangingEventHandler handler raised an exception: {e.Message} with inner: {e.InnerException?.Message} ");
+                    System.Diagnostics.Debug.WriteLine($"A Changing (PropertyChangingEventHandler) handler raised an exception: {e.Message} with inner: {e.InnerException?.Message} ");
                 }
             }
         }
@@ -2106,8 +2111,7 @@ namespace DRM.PropBag
                             sub.PcStandardHandlerDispatcher(target, this, e4, sub.HandlerProxy);
                             break;
                         case SubscriptionKind.ChangingHandler:
-                            PropertyChangingEventArgs e5 = new PropertyChangingEventArgs(propertyName);
-                            sub.PChangingHandlerDispatcher(target, this, e5, sub.HandlerProxy);
+                            // These are handled separately.
                             break;
                         //case SubscriptionKind.TypedAction:
                         //    break;
@@ -2125,6 +2129,48 @@ namespace DRM.PropBag
                 {
                     System.Diagnostics.Debug.WriteLine($"A {sub.SubscriptionKind} handler raised an exception: {e.Message} with inner: {e.InnerException?.Message} ");
                 }
+            }
+        }
+
+        void IPropBagInternal.RaiseStandardPropertyChanged(PropIdType propId, PropNameType propertyName)
+        {
+            IEnumerable<ISubscription> subscriptions = _ourStoreAccessor.GetSubscriptions(this, propId);
+
+            IEnumerable<ISubscription> globalSubs = _ourStoreAccessor.GetSubscriptions(this, 0);
+
+            if (subscriptions != null) RaiseStandardPropertyChangedWorker(propertyName, subscriptions);
+
+            if (globalSubs != null) RaiseStandardPropertyChangedWorker(propertyName, globalSubs);
+        }
+
+        private void RaiseStandardPropertyChangedWorker(PropNameType propertyName, IEnumerable<ISubscription> subscriptions)
+        {
+            if (subscriptions == null)
+                return;
+
+            foreach (ISubscription sub in subscriptions)
+            {
+                CheckSubScriptionObject(sub);
+
+                if (sub.SubscriptionKind == SubscriptionKind.StandardHandler)
+                {
+                    object target = sub.Target.Target;
+                    if (target == null)
+                    {
+                        return; // The subscriber has been collected by the GC.
+                    }
+
+                    try
+                    {
+                        PropertyChangedEventArgs e = new PropertyChangedEventArgs(propertyName);
+                        sub.PcStandardHandlerDispatcher(target, this, e, sub.HandlerProxy);
+                    }
+                    catch (Exception e)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"A {sub.SubscriptionKind} handler raised an exception: {e.Message} with inner: {e.InnerException?.Message} ");
+                    }
+                }
+
             }
         }
 
@@ -2286,13 +2332,17 @@ namespace DRM.PropBag
                 PropData = this.HandleMissingProp(propId, propertyName, propertyType, out wasRegistered, haveValue, value, alwaysRegister, mustBeRegistered, neverCreate);
             }
 
-            if (!PropData.IsEmpty && desiredHasStoreValue.HasValue && desiredHasStoreValue.Value != PropData.TypedProp.HasStore)
+            if (!PropData.IsEmpty && desiredHasStoreValue.HasValue)
             {
-                if (desiredHasStoreValue.Value)
+                if (desiredHasStoreValue.Value && PropData.TypedProp.StorageStrategy != PropStorageStrategyEnum.Internal)
+                {
                     //Caller needs property to have a backing store.
                     throw new InvalidOperationException(string.Format("Property: {0} has no backing store held by this instance of PropBag. This operation can only be performed on properties for which a backing store is held by this instance.", propertyName));
-                else
+                }
+                else if (!desiredHasStoreValue.Value && PropData.TypedProp.StorageStrategy == PropStorageStrategyEnum.Internal)
+                {
                     throw new InvalidOperationException(string.Format("Property: {0} has a backing store held by this instance of PropBag. This operation can only be performed on properties for which no backing store is kept by this instance.", propertyName));
+                }
             }
 
             return (IPropData) PropData;
@@ -2309,13 +2359,17 @@ namespace DRM.PropBag
                     throw new KeyNotFoundException($"The property named: {propertyName} could not be found in the property store.");
                 }
 
-                if (!PropData.IsEmpty && desiredHasStoreValue.HasValue && desiredHasStoreValue.Value != PropData.TypedProp.HasStore)
+                if (!PropData.IsEmpty && desiredHasStoreValue.HasValue)
                 {
-                    if (desiredHasStoreValue.Value)
+                    if (desiredHasStoreValue.Value && PropData.TypedProp.StorageStrategy != PropStorageStrategyEnum.Internal)
+                    {
                         //Caller needs property to have a backing store.
                         throw new InvalidOperationException(string.Format("Property: {0} has no backing store held by this instance of PropBag. This operation can only be performed on properties for which a backing store is held by this instance.", propertyName));
-                    else
+                    }
+                    else if (!desiredHasStoreValue.Value && PropData.TypedProp.StorageStrategy == PropStorageStrategyEnum.Internal)
+                    {
                         throw new InvalidOperationException(string.Format("Property: {0} has a backing store held by this instance of PropBag. This operation can only be performed on properties for which no backing store is kept by this instance.", propertyName));
+                    }
                 }
 
                 wasRegistered = false;
@@ -2382,7 +2436,7 @@ namespace DRM.PropBag
                 object curValue = PropData.TypedProp.TypedValueAsObject;
                 PropKindEnum propKind = PropData.TypedProp.PropKind;
 
-                IProp genericTypedProp = _propFactory.CreateGenFromObject(newType, curValue, propertyName, null, true, true, propKind, null, false, null);
+                IProp genericTypedProp = _propFactory.CreateGenFromObject(newType, curValue, propertyName, null, PropStorageStrategyEnum.Internal, true, propKind, null, false, null);
 
                 bool result = _ourStoreAccessor.SetTypedProp(this, propId, propertyName, genericTypedProp);
                 return result;

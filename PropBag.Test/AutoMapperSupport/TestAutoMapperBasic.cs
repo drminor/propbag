@@ -185,7 +185,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 setToDefault: true, setToUndefined: false, setToNull: false, setToEmptyString: false);
 
             PropItem propItem = new PropItem(type: typeof(Guid), name: "ProductId",
-                hasStore: true, typeIsSolid: true, propKind: PropKindEnum.Prop,
+                storageStrategy: PropStorageStrategyEnum.Internal, typeIsSolid: true, propKind: PropKindEnum.Prop,
                 propTypeInfoField: null, initialValueField: pivf,
                 extraInfo: null, comparer: null, itemType: null);
             result.Props.Add(propItem);
@@ -195,7 +195,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 setToDefault: true, setToUndefined: false, setToNull: false, setToEmptyString: false);
 
             propItem = new PropItem(type: typeof(int), name: "Amount",
-                hasStore: true, typeIsSolid: true, propKind: PropKindEnum.Prop,
+                storageStrategy: PropStorageStrategyEnum.Internal, typeIsSolid: true, propKind: PropKindEnum.Prop,
                 propTypeInfoField: null, initialValueField: pivf,
                 extraInfo: null, comparer: null, itemType: null);
             result.Props.Add(propItem);
@@ -206,7 +206,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 setToDefault: true, setToUndefined: false, setToNull: false, setToEmptyString: false);
 
             propItem = new PropItem(type: typeof(double), name: "Size",
-                hasStore: true, typeIsSolid: true, propKind: PropKindEnum.Prop,
+                storageStrategy: PropStorageStrategyEnum.Internal, typeIsSolid: true, propKind: PropKindEnum.Prop,
                 propTypeInfoField: null, initialValueField: pivf,
                 extraInfo: null, comparer: null, itemType: null);
             result.Props.Add(propItem);
@@ -216,7 +216,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 setToDefault: false, setToUndefined: false, setToNull: true, setToEmptyString: false);
 
             propItem = new PropItem(type: typeof(MyModel4), name: "Deep",
-                hasStore: true, typeIsSolid: true, propKind: PropKindEnum.Prop,
+                storageStrategy: PropStorageStrategyEnum.Internal, typeIsSolid: true, propKind: PropKindEnum.Prop,
                 propTypeInfoField: null, initialValueField: pivf,
                 extraInfo: null, comparer: null, itemType: null);
             result.Props.Add(propItem);

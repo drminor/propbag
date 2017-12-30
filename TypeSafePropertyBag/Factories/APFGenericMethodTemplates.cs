@@ -21,12 +21,12 @@ namespace DRM.TypeSafePropertyBag
         private static ICProp<CT, T> CreateEPropFromObject<CT, T>(IPropFactory propFactory,
             object value,
             string propertyName, object extraInfo,
-            bool hasStorage, bool isTypeSolid,
+            PropStorageStrategyEnum storageStrategy, bool isTypeSolid,
             Delegate comparer, bool useRefEquality = false) where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged
         {
             CT initialValue = propFactory.GetValueFromObject<CT>(value);
 
-            return propFactory.Create<CT, T>(initialValue, propertyName, extraInfo, hasStorage, isTypeSolid,
+            return propFactory.Create<CT, T>(initialValue, propertyName, extraInfo, storageStrategy, isTypeSolid,
                 GetComparerForCollections<CT>(comparer, propFactory, useRefEquality));
         }
 
@@ -34,7 +34,7 @@ namespace DRM.TypeSafePropertyBag
         private static ICProp<CT, T> CreateEPropFromString<CT, T>(IPropFactory propFactory,
             string value, bool useDefault,
             string propertyName, object extraInfo,
-            bool hasStorage, bool isTypeSolid,
+            PropStorageStrategyEnum storageStrategy, bool isTypeSolid,
             Delegate comparer, bool useRefEquality = true) where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged
         {
             CT initialValue;
@@ -47,7 +47,7 @@ namespace DRM.TypeSafePropertyBag
                 initialValue = propFactory.GetValueFromString<CT, T>(value);
             }
 
-            return propFactory.Create<CT, T>(initialValue, propertyName, extraInfo, hasStorage, isTypeSolid,
+            return propFactory.Create<CT, T>(initialValue, propertyName, extraInfo, storageStrategy, isTypeSolid,
                 GetComparerForCollections<CT>(comparer, propFactory, useRefEquality));
         }
 
@@ -55,7 +55,7 @@ namespace DRM.TypeSafePropertyBag
         //private static ICPropFB<CT, T> CreateEPropFromStringFB<CT, T>(IPropFactory propFactory,
         //    string value, bool useDefault,
         //    string propertyName, object extraInfo,
-        //    bool hasStorage, bool isTypeSolid,
+        //    PropStorageStrategyEnum storageStrategy, bool isTypeSolid,
         //    Delegate comparer, bool useRefEquality = true) where CT : ObservableCollection<T>
         //{
         //    CT initialValue;
@@ -76,10 +76,10 @@ namespace DRM.TypeSafePropertyBag
         private static ICProp<CT, T> CreateEPropWithNoValue<CT, T>(IPropFactory propFactory,
             bool useDefault,
             PropNameType propertyName, object extraInfo,
-            bool hasStorage, bool isTypeSolid,
+            PropStorageStrategyEnum storageStrategy, bool isTypeSolid,
             Delegate comparer, bool useRefEquality = true) where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged
         {
-            return propFactory.CreateWithNoValue<CT, T>(propertyName, extraInfo, hasStorage, isTypeSolid,
+            return propFactory.CreateWithNoValue<CT, T>(propertyName, extraInfo, storageStrategy, isTypeSolid,
                 GetComparerForCollections<CT>(comparer, propFactory, useRefEquality));
         }
 
@@ -116,12 +116,12 @@ namespace DRM.TypeSafePropertyBag
         private static IProp<T> CreatePropFromObject<T>(IPropFactory propFactory,
             object value,
             PropNameType propertyName, object extraInfo,
-            bool hasStorage, bool isTypeSolid,
+            PropStorageStrategyEnum storageStrategy, bool isTypeSolid,
             Delegate comparer, bool useRefEquality = false)
         {
             T initialValue = propFactory.GetValueFromObject<T>(value);
 
-            return propFactory.Create<T>(initialValue, propertyName, extraInfo, hasStorage, isTypeSolid,
+            return propFactory.Create<T>(initialValue, propertyName, extraInfo, storageStrategy, isTypeSolid,
                 GetComparerForProps<T>(comparer, propFactory, useRefEquality));
         }
 
@@ -129,7 +129,7 @@ namespace DRM.TypeSafePropertyBag
         private static IProp<T> CreatePropFromString<T>(IPropFactory propFactory,
             string value, bool useDefault,
             PropNameType propertyName, object extraInfo,
-            bool hasStorage, bool isTypeSolid,
+            PropStorageStrategyEnum storageStrategy, bool isTypeSolid,
             Delegate comparer, bool useRefEquality = false)
         {
             T initialValue;
@@ -142,17 +142,17 @@ namespace DRM.TypeSafePropertyBag
                 initialValue = propFactory.GetValueFromString<T>(value);
             }
 
-            return propFactory.Create<T>(initialValue, propertyName, extraInfo, hasStorage, isTypeSolid,
+            return propFactory.Create<T>(initialValue, propertyName, extraInfo, storageStrategy, isTypeSolid,
                 GetComparerForProps<T>(comparer, propFactory, useRefEquality));
         }
 
         // With No Value
         private static IProp<T> CreatePropWithNoValue<T>(IPropFactory propFactory,
             PropNameType propertyName, object extraInfo,
-            bool hasStorage, bool isTypeSolid,
+            PropStorageStrategyEnum storageStrategy, bool isTypeSolid,
             Delegate comparer, bool useRefEquality = false)
         {
-            return propFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, isTypeSolid,
+            return propFactory.CreateWithNoValue<T>(propertyName, extraInfo, storageStrategy, isTypeSolid,
                 GetComparerForProps<T>(comparer, propFactory, useRefEquality));
         }
 

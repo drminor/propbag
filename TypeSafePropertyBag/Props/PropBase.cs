@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Windows.Data;
 
 namespace DRM.TypeSafePropertyBag
@@ -16,7 +17,7 @@ namespace DRM.TypeSafePropertyBag
         public PropKindEnum PropKind { get; protected set; }
         public Type Type { get; }
         public bool TypeIsSolid { get; set; }
-        public bool HasStore { get; protected set; }
+        public PropStorageStrategyEnum StorageStrategy { get; protected set; }
 
         public virtual Attribute[] Attributes { get; }
 
@@ -24,6 +25,9 @@ namespace DRM.TypeSafePropertyBag
         public abstract object TypedValueAsObject { get; }
 
         DataSourceProvider _dataSourceProvider;
+
+        public event EventHandler<EventArgs> ValueChanged;
+
         public virtual DataSourceProvider DataSourceProvider
         {
             get
@@ -44,12 +48,12 @@ namespace DRM.TypeSafePropertyBag
 
         #region Constructors
 
-        public PropBase(PropKindEnum propKind, Type typeOfThisValue, bool typeIsSolid, bool hasStore, bool valueIsDefined)
+        public PropBase(PropKindEnum propKind, Type typeOfThisValue, bool typeIsSolid, PropStorageStrategyEnum storageStrategy, bool valueIsDefined)
         {
             PropKind = propKind;
             Type = typeOfThisValue;
             TypeIsSolid = typeIsSolid;
-            HasStore = hasStore;
+            StorageStrategy = storageStrategy;
             ValueIsDefined = valueIsDefined;
             Attributes = new Attribute[] { };
         }
@@ -125,6 +129,15 @@ namespace DRM.TypeSafePropertyBag
                 CheckPropKind(propKind);
                 return false;
             }
+        }
+
+        #endregion
+
+        #region Methods to Raise Events
+
+        protected void OnValueChanged()
+        {
+            Interlocked.CompareExchange(ref ValueChanged, null, null)?.Invoke(this, EventArgs.Empty);
         }
 
         #endregion

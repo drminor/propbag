@@ -1,5 +1,6 @@
 ﻿using DRM.PropBag.ClassGenerator;
 using DRM.PropBag.XMLModel;
+using DRM.TypeSafePropertyBag;
 using NUnit.Framework;
 using System.Collections.Generic;
 using System.Linq;
@@ -47,7 +48,7 @@ namespace PropBagLib.Tests
                 Name = "one",
                 Type = "int",
                 InitalValueField = new PropInitialValueField("1"),
-                HasStore = true
+                StorageStrategy = PropStorageStrategyEnum.Internal
             };
 
             pm.Props.Add(p);
@@ -57,7 +58,7 @@ namespace PropBagLib.Tests
                 Name = "two",
                 Type = "string",
                 InitalValueField = new PropInitialValueField("1"),
-                HasStore = true
+                StorageStrategy = PropStorageStrategyEnum.Internal
             };
 
             pm.Props.Add(p);

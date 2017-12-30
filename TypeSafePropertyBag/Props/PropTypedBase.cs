@@ -23,7 +23,7 @@ namespace DRM.TypeSafePropertyBag
         {
             ValPlusType result;
 
-            if(HasStore)
+            if(StorageStrategy == PropStorageStrategyEnum.Internal)
             {
                 result = ValueIsDefined ? new ValPlusType(true, TypedValue, Type) : new ValPlusType(Type);
             }
@@ -39,9 +39,9 @@ namespace DRM.TypeSafePropertyBag
 
         #region Constructors
 
-        protected PropTypedBase(Type typeOfThisValue, bool typeIsSolid, bool hasStore, bool valueIsDefined,
+        protected PropTypedBase(Type typeOfThisValue, bool typeIsSolid, PropStorageStrategyEnum storageStrategy, bool valueIsDefined,
             Func<T,T,bool> comparer, GetDefaultValueDelegate<T> defaultValFunc, PropKindEnum propKind)
-            : base(propKind, typeOfThisValue, typeIsSolid, hasStore, valueIsDefined)
+            : base(propKind, typeOfThisValue, typeIsSolid, storageStrategy, valueIsDefined)
         {
             Comparer = comparer;
             GetDefaultValFunc = defaultValFunc;
@@ -61,13 +61,14 @@ namespace DRM.TypeSafePropertyBag
 
         public bool CompareTo(T newValue)
         {
-            if (!HasStore)
+            if(StorageStrategy == PropStorageStrategyEnum.Internal)
+            {
+                return Comparer(newValue, TypedValue);
+            }
+            else
+            {
                 throw new NotImplementedException();
-
-            //// Added this behavior on 10/23/2017.
-            //if (!ValueIsDefined) return false;
-
-            return Comparer(newValue, TypedValue);
+            }
         }
 
         public bool Compare(T val1, T val2)
