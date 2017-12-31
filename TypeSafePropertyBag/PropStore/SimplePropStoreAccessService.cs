@@ -171,7 +171,6 @@ namespace DRM.TypeSafePropertyBag
             {
                 throw new InvalidOperationException("The propBag reference given to TryAdd does not implement the IPropBagInternal interface.");
             }
-
         }
 
         // Add PropItem with Target/Method subscription
@@ -214,13 +213,6 @@ namespace DRM.TypeSafePropertyBag
         {
             if (propBag is IPropBagInternal int_propBag)
             {
-
-                //ExKeyT propertyKey = GetCompKey(propBag, propId);
-                //propData = new PropGen(propertyKey, genericTypedProp);
-                //IPropDataInternal int_PropData = (IPropDataInternal)propData;
-
-                //StoreNodeProp propStoreNode = new StoreNodeProp(propertyKey, int_PropData, _ourNode);
-
                 StoreNodeProp newNode = TryAddFirstPart(propBag, propId, genericTypedProp);
                 propData = newNode.Int_PropData;
 
@@ -299,10 +291,9 @@ namespace DRM.TypeSafePropertyBag
 
         private StoreNodeProp TryAddFirstPart(IPropBag propBag, PropIdType propId, IProp genericTypedProp)
         {
-            ExKeyT propertyKey = GetCompKey(propBag, propId);
-            IPropData propData = new PropGen(propertyKey, genericTypedProp);
-            IPropDataInternal int_PropData = (IPropDataInternal)propData;
+            IPropDataInternal int_PropData = new PropGen(genericTypedProp);
 
+            ExKeyT propertyKey = GetCompKey(propBag, propId);
             StoreNodeProp propStoreNode = new StoreNodeProp(propertyKey, int_PropData, _ourNode);
 
             return propStoreNode;
@@ -470,19 +461,17 @@ namespace DRM.TypeSafePropertyBag
         {
             foreach (StoreNodeProp childProp in sourceBag.Children)
             {
+                //// FOR DEBUGGING -- To see how well the PropBag value is cloned.
+                //if (childProp.Int_PropData.TypedProp.Type.IsPropBagBased())
+                //{
+                //    if (childProp.Int_PropData.TypedProp.TypedValueAsObject != null)
+                //    {
+                //        IPropBagInternal propBagInternal = (IPropBagInternal)childProp.Int_PropData.TypedProp.TypedValueAsObject;
+                //    }
+                //}
+
+                IPropDataInternal newPropGen = new PropGen((IProp)childProp.Int_PropData.TypedProp.Clone());
                 ExKeyT newCKey = new SimpleExKey(newBagNode.ObjectId, childProp.PropId);
-
-                // FOR DEBUGGING -- To see how well the PropBag value is cloned.
-                if (childProp.Int_PropData.TypedProp.Type.IsPropBagBased())
-                {
-                    if (childProp.Int_PropData.TypedProp.TypedValueAsObject != null)
-                    {
-                        IPropBagInternal propBagInternal = (IPropBagInternal)childProp.Int_PropData.TypedProp.TypedValueAsObject;
-                    }
-                }
-
-                IPropDataInternal newPropGen = new PropGen(newCKey, (IProp)childProp.Int_PropData.TypedProp.Clone());
-
                 StoreNodeProp newChild = new StoreNodeProp(newCKey, newPropGen, newBagNode);
             }
         }
@@ -883,36 +872,22 @@ namespace DRM.TypeSafePropertyBag
         // Provides thread-safe, lazy production of a single DataSourceProvider for each PropItem.
 
         // Get a DataSourceProvider Provider
-        public IProvideADataSourceProvider GetDataSourceProviderProvider(IPropBag propBag, IPropData propData, CViewProviderCreator viewBuilder)
+        public IProvideADataSourceProvider GetDataSourceProviderProvider(IPropBag propBag, PropIdType propId, IPropData propData, CViewProviderCreator viewBuilder)
         {
-            IManageCViews CViewManagerGen = GetViewManager(propBag, propData, viewBuilder);
+            IManageCViews CViewManagerGen = GetViewManager(propBag, propId, propData, viewBuilder);
             IProvideADataSourceProvider result = CViewManagerGen.DataSourceProviderProvider;
             return result;
         }
 
         // Get a DataSourceProvider
-        public DataSourceProvider GetDataSourceProvider(IPropBag propBag, IPropData propData, CViewProviderCreator viewBuilder)
+        public DataSourceProvider GetDataSourceProvider(IPropBag propBag, PropIdType propId, IPropData propData, CViewProviderCreator viewBuilder)
         {
-            //ExKeyT globalPropId = GetCompKey(propBag, propId);
-
-            //if (_dataSourceProviders == null)
-            //    _dataSourceProviders = new DSProviderProviderCollection();
-
-            //IProvideADataSourceProvider result = _dataSourceProviders.GetOrAdd(propId, DSProviderProviderGenFactory);
-            //return result;
-
-            IManageCViews CViewManagerGen = GetViewManager(propBag, propData, viewBuilder);
+            IManageCViews CViewManagerGen = GetViewManager(propBag, propId, propData, viewBuilder);
             DataSourceProvider result = CViewManagerGen.DataSourceProvider;
             return result;
         }
 
-        //// Factory method to create a DataSourceProvider Provider
-        //IProvideADataSourceProvider DSProviderProviderGenFactory(PropIdType pId)
-        //{
-        //    return new DSProviderProvider(pId, PropKindEnum.ObservableCollection, this);
-        //}
-
-        public IManageCViews GetViewManager(IPropBag propBag, IPropData propData, CViewProviderCreator viewBuilder)
+        public IManageCViews GetViewManager(IPropBag propBag, PropIdType propId, IPropData propData, CViewProviderCreator viewBuilder)
         {
             ObjectIdType objectId  = GetAndCheckObjectRef(propBag);
 
@@ -928,7 +903,7 @@ namespace DRM.TypeSafePropertyBag
             // Alternatively, make GetOrAdd take a factory (which of course could be different for each call.)
             IManageCViews CViewGenManagerFactory(IPropData propData2)
             {
-                DSProviderProvider dSProviderProvider = new DSProviderProvider(propData2.PropId, propData2.TypedProp.PropKind, this);
+                DSProviderProvider dSProviderProvider = new DSProviderProvider(propId, propData2.TypedProp.PropKind, this);
 
                 IManageCViews result2 = new ViewManager(dSProviderProvider, viewBuilder);
                 return result2;

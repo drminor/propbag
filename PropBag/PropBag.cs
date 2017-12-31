@@ -222,6 +222,7 @@ namespace DRM.PropBag
                 //    System.Diagnostics.Debug.WriteLine("Processing the PersonList Prop Item.");
                 //}
 
+                PropIdType propId;
                 IPropData propItem;
                 IProp typedProp;
 
@@ -238,29 +239,12 @@ namespace DRM.PropBag
                         IProvideAView viewProvider = cViewManager.GetViewProvider();
 
                         typedProp = _propFactory.CreateCVSProp(pi.PropertyName, viewProvider);
-                        propItem = AddProp(pi.PropertyName, typedProp);
+                        propItem = AddProp(pi.PropertyName, typedProp, out propId);
                     }
                     else
                     {
                         throw new InvalidOperationException($"Could not retrieve the (generic) CViewManager for source PropItem: {srcPropName}.");
                     }
-
-                    //if (TryGetDataSourceProvider(this, srcPropName, pi.PropertyType, out DataSourceProvider dataSourceProvider))
-                    //{
-                    //    //IManageCViews viewManager = GetViewManager(dataSourceProviderProvider);
-
-                    //    //IProvideAView viewProvider = viewManager.GetViewProvider(null);
-
-                    //    //typedProp = _propFactory.CreateCVSProp(pi.PropertyName, viewProvider);
-                    //    //propItem = AddProp(pi.PropertyName, typedProp);
-
-                    //    propItem = null;
-
-                    //}
-                    //else
-                    //{
-                    //    throw new InvalidOperationException("Fix Me.");
-                    //}
                 }
                 else if(pi.PropKind == PropKindEnum.CollectionView)
                 {
@@ -269,38 +253,21 @@ namespace DRM.PropBag
 
                     //FetchData_Test(srcPropName, pi.PropertyType);
 
-
                     if (TryGetViewManager(this, srcPropName, pi.PropertyType, out IManageCViews cViewManager))
                     {
                         IProvideAView viewProvider = cViewManager.GetViewProvider();
 
                         typedProp = _propFactory.CreateCVProp(pi.PropertyName, viewProvider);
-                        propItem = AddProp(pi.PropertyName, typedProp);
+                        propItem = AddProp(pi.PropertyName, typedProp, out propId);
                     }
                     else
                     {
                         throw new InvalidOperationException($"Could not retrieve the (generic) CViewManager for source PropItem: {srcPropName}.");
                     }
-
-                    //if (TryGetDataSourceProvider(this, srcPropName, pi.PropertyType, out DataSourceProvider dataSourceProvider))
-                    //{
-                    //    //IManageCViews viewManager = GetViewManager(dataSourceProviderProvider);
-
-                    //    //IProvideAView viewProvider = viewManager.GetViewProvider(null);
-
-                    //    //typedProp = _propFactory.CreateCVProp(pi.PropertyName, viewProvider);
-                    //    //propItem = AddProp(pi.PropertyName, typedProp);
-
-                    //    propItem = null;
-                    //}
-                    //else
-                    //{
-                    //    throw new InvalidOperationException("Fix Me.");
-                    //}
                 }
                 else
                 {
-                    propItem = processProp(pi, out typedProp);
+                    propItem = processProp(pi, out propId);
                 }
 
                 if (pi.BinderField?.Path != null)
@@ -316,80 +283,13 @@ namespace DRM.PropBag
                     else
                     {
                         LocalBindingInfo bindingInfo = new LocalBindingInfo(new LocalPropertyPath(pi.BinderField.Path));
-                        propItem.TypedProp.RegisterBinding((IRegisterBindingsFowarderType)this, propItem.PropId, bindingInfo);
+                        propItem.TypedProp.RegisterBinding((IRegisterBindingsFowarderType)this, propId, bindingInfo);
                     }
                 }
 
 
-                //if (pi.BinderField?.Path != null)
-                //{
-                //    if(pi.PropKind == PropKindEnum.CollectionView)
-                //    {
-                //        //if (propGen is IHaveAViewSource<object> genViewSource)
-                //        //{
-                //        //    string srcPropName = pi.BinderField.Path;
-                //        //    if (TryGetDataSourceProviderGen(this, srcPropName, out IProvideADataSourceProviderGen dataSourceProvider))
-                //        //    {
-                //        //        // Register a new CollectionViewSource
-                //        //        IHaveAViewSource<object> cvsGen = null;
-
-                //        //        cvsGen.Source = dataSourceProvider;
-                //        //        SetValWithType
-                //        //    }
-
-
-
-                //        //        genViewSource.Source = dataSourceProvider.DataSourceProvider;
-                //        //}
-                //        //else
-                //        //{
-                //        //    throw new InvalidOperationException($"Property definition for property: {pi.PropertyName} " +
-                //        //        $"(of type: {pi.PropertyType}, of kind: {pi.PropKind} resulted in the creation of PropItem " +
-                //        //        $"for which the typed PropData does not implement the {nameof(IHaveAViewSource<object>)} interface.");
-                //        //}
-                //    }
-                //    else if(pi.PropKind == PropKindEnum.CollectionViewSource)
-                //    {
-                //        if (typedProp is IProvideADataSourceProvider genericCVS)
-                //        {
-                //            string srcPropName = pi.BinderField.Path;
-                //            if (TryGetDataSourceProvider(this, srcPropName, pi.PropertyType, out IProvideADataSourceProvider dataSourceProvider))
-                //            {
-                //                // TODO: FIX ME
-                //                //genericCVS.DataSourceProvider = dataSourceProvider.DataSourceProvider;
-                //            }
-                //        }
-                //        else
-                //        {
-                //            throw new InvalidOperationException($"Property definition for property: {pi.PropertyName} " +
-                //                $"(of type: {pi.PropertyType}, of kind: {pi.PropKind} resulted in the creation of PropItem " +
-                //                $"for which the typed PropData does not implement the {nameof(IProvideADataSourceProvider)} interface.");
-                //        }
-                //    }
-                //    else if(pi.PropKind == PropKindEnum.CollectionViewSource_RO)
-                //    {
-                //        throw new InvalidOperationException($"PropItems of kind = {nameof(PropKindEnum.CollectionViewSource_RO)} cannot have a local binding.");
-                //    }
-                //    else
-                //    {
-                //        LocalBindingInfo bindingInfo = new LocalBindingInfo(new LocalPropertyPath(pi.BinderField.Path));
-                //        propItem.TypedProp.RegisterBinding((IRegisterBindingsFowarderType)this, propItem.PropId, bindingInfo);
-                //    }
-                //}
             }
         }
-
-        //IManageCViews<ObservableCollection<object>> _viewManager;
-        //private IManageCViews<ObservableCollection<object>> ViewManager
-        //{
-        //    get
-        //    {
-        //        if(_viewManager == null)
-        //        {
-        //            _viewManager = GetViewManager<ObservableCollection<object>>()
-        //        }
-        //    }
-        //}
 
         public void FetchData_Test(string pName, Type pType)
         {
@@ -450,7 +350,7 @@ namespace DRM.PropBag
 
         }
 
-        private IPropData processProp(PropItem pi, out IProp propGen)
+        private IPropData processProp(PropItem pi, out PropIdType propId)
         {
             object ei = pi.ExtraInfo;
 
@@ -482,7 +382,7 @@ namespace DRM.PropBag
             //    doWhenChangedAction = rr(this);
             //}
 
-            //IProp pg;
+            IProp propGen;
 
             if (pi.StorageStrategy == PropStorageStrategyEnum.Internal && !pi.InitialValueField.SetToUndefined)
             {
@@ -537,11 +437,11 @@ namespace DRM.PropBag
                     target,
                     pi.DoWhenChangedField.Method,
                     pi.DoWhenChangedField.SubscriptionKind,
-                    pi.DoWhenChangedField.PriorityGroup);
+                    pi.DoWhenChangedField.PriorityGroup, out propId);
             }
             else
             {
-                propData = AddProp(pi.PropertyName, propGen);
+                propData = AddProp(pi.PropertyName, propGen, out propId);
             }
 
             return propData;
@@ -555,7 +455,7 @@ namespace DRM.PropBag
         // This will always return a valid value -- or throw an exception,
         // unless neverCreate is set, in which case it will
         // never throw an exception and always return an empty PropGen.
-        private IPropData HandleMissingProp(PropIdType propId, PropNameType propertyName, Type propertyType, out bool wasRegistered,
+        private IPropData HandleMissingProp(PropNameType propertyName, Type propertyType, out bool wasRegistered,
             bool haveValue, object value, bool alwaysRegister, bool mustBeRegistered, bool neverCreate, [CallerMemberName] string nameOfCallingMethod = null)
         {
             ReadMissingPropPolicyEnum thePolicyToUse; //= alwaysRegister ? ReadMissingPropPolicyEnum.Register : ReadMissingPropPolicy;
@@ -642,7 +542,7 @@ namespace DRM.PropBag
                                 null, storageStrategy, typeIsSolid, PropKindEnum.Prop, null, false, null);
                         }
 
-                        IPropData propGen = AddProp(propertyName, genericTypedProp);
+                        IPropData propGen = AddProp(propertyName, genericTypedProp, out PropIdType propId2);
 
                         wasRegistered = true;
                         return propGen;
@@ -1666,7 +1566,7 @@ namespace DRM.PropBag
             }
         }
 
-        public System.Type GetTypeOfProperty(string propertyName)
+        public Type GetTypeOfProperty(string propertyName)
         {
             IPropData pGen = GetPropGen(propertyName, null, haveValue: false, value: null,
                 alwaysRegister: false,
@@ -1750,7 +1650,7 @@ namespace DRM.PropBag
 
             ICProp<CT, T> typedCollectionProp = _propFactory.Create<CT,T>(initialValue, propertyName, extraInfo, storageStrategy, typeIsSolid, comparerToUse);
 
-            AddProp(propertyName, typedCollectionProp);
+            AddProp(propertyName, typedCollectionProp, out PropIdType propId);
             return typedCollectionProp;
         }
 
@@ -1762,7 +1662,7 @@ namespace DRM.PropBag
         {
             IProp cvsProp = _propFactory.CreateCVSProp(propertyName, viewProvider);
 
-            AddProp(propertyName, cvsProp);
+            AddProp(propertyName, cvsProp, out PropIdType propId);
             return cvsProp;
         }
 
@@ -1770,7 +1670,7 @@ namespace DRM.PropBag
         {
             IProp cvsProp = _propFactory.CreateCVProp(propertyName, viewProvider);
 
-            AddProp(propertyName, cvsProp);
+            AddProp(propertyName, cvsProp, out PropIdType propId);
             return cvsProp;
         }
 
@@ -1792,7 +1692,7 @@ namespace DRM.PropBag
             PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal;
             bool typeIsSolid = true;
             IProp<T> pg = _propFactory.Create<T>(initialValue, propertyName, extraInfo, storageStrategy, typeIsSolid, comparer);
-            AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard);
+            AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard, out PropIdType propId);
             return pg;
         }
 
@@ -1802,7 +1702,7 @@ namespace DRM.PropBag
             bool typeIsSolid = true;
             Func<T, T, bool> comparer = _propFactory.GetRefEqualityComparer<T>();
             IProp<T> pg = _propFactory.Create<T>(initialValue, propertyName, extraInfo, storageStrategy, typeIsSolid, comparer);
-            AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard);
+            AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard, out PropIdType propId);
             return pg;
         }
 
@@ -1811,7 +1711,7 @@ namespace DRM.PropBag
             PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal;
             bool typeIsSolid = true;
             IProp<T> pg = _propFactory.CreateWithNoValue<T>(propertyName, extraInfo, storageStrategy, typeIsSolid, comparer);
-            AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard);
+            AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard, out PropIdType propId);
             return pg;
         }
 
@@ -1821,7 +1721,7 @@ namespace DRM.PropBag
             bool typeIsSolid = true;
             Func<T, T, bool> comparer = _propFactory.GetRefEqualityComparer<T>();
             IProp<T> pg = _propFactory.CreateWithNoValue<T>(propertyName, extraInfo, storageStrategy, typeIsSolid, comparer);
-            AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard);
+            AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard, out PropIdType propId);
             return pg;
         }
 
@@ -1830,7 +1730,7 @@ namespace DRM.PropBag
             PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.External;
             bool typeIsSolid = true;
             IProp<T> pg = _propFactory.CreateWithNoValue<T>(propertyName, extraInfo, storageStrategy, typeIsSolid, comparer);
-            AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard);
+            AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard, out PropIdType propId);
             return pg;
         }
 
@@ -1840,7 +1740,7 @@ namespace DRM.PropBag
             bool typeIsSolid = true;
             Func<T, T, bool> comparer = _propFactory.GetRefEqualityComparer<T>();
             IProp<T> pg = _propFactory.CreateWithNoValue<T>(propertyName, extraInfo, storageStrategy, typeIsSolid, comparer);
-            AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard);
+            AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard, out PropIdType propId);
             return pg;
         }
 
@@ -1848,11 +1748,12 @@ namespace DRM.PropBag
 
         #region Property Management
 
-        // TODO: This adds no value over the AddProp (no type parameter) version. -- Is there any way we can use the fact
-        // that we know the type at compile time to our advantage??
-        protected IPropData AddProp<T>(string propertyName, IProp<T> genericTypedProp, EventHandler<PcTypedEventArgs<T>> doWhenChanged, SubscriptionPriorityGroup priorityGroup)
+        protected IPropData AddProp<T>(string propertyName, IProp<T> genericTypedProp,
+            EventHandler<PcTypedEventArgs<T>> doWhenChanged,
+            SubscriptionPriorityGroup priorityGroup,
+            out PropIdType propId)
         {
-            PropIdType propId = AddPropId(propertyName);
+            propId = AddPropId(propertyName);
 
             if (!_ourStoreAccessor.TryAdd(this, propId, genericTypedProp, doWhenChanged, priorityGroup, out IPropData propGen))
             {
@@ -1862,20 +1763,9 @@ namespace DRM.PropBag
             return propGen;
         }
 
-        //protected IPropData AddProp(string propertyName, IProp genericTypedProp, EventHandler<PcGenEventArgs> doWhenChanged, SubscriptionPriorityGroup priorityGroup)
-        //{
-        //    PropIdType propId = GetPropId(propertyName);
-
-        //    if (!_ourStoreAccessor.TryAdd(this, propId, genericTypedProp, doWhenChanged, priorityGroup, out IPropData propGen))
-        //    {
-        //        throw new ApplicationException("Could not add the new propGen to the store.");
-        //    }
-        //    return propGen;
-        //}
-
-        protected IPropData AddProp(string propertyName, IProp genericTypedProp)
+        protected IPropData AddProp(string propertyName, IProp genericTypedProp, out PropIdType propId)
         {
-            PropIdType propId = AddPropId(propertyName);
+            propId = AddPropId(propertyName);
 
             if (!_ourStoreAccessor.TryAdd(this, propId, genericTypedProp, out IPropData propGen))
             {
@@ -1885,9 +1775,9 @@ namespace DRM.PropBag
         }
 
         protected IPropData AddProp(string propertyName, IProp genericTypedProp, object target, MethodInfo method, 
-            SubscriptionKind subscriptionKind, SubscriptionPriorityGroup priorityGroup)
+            SubscriptionKind subscriptionKind, SubscriptionPriorityGroup priorityGroup, out PropIdType propId)
         {
-            PropIdType propId = AddPropId(propertyName);
+            propId = AddPropId(propertyName);
 
             if (!_ourStoreAccessor.TryAdd(this, propId, genericTypedProp, target, method, subscriptionKind, priorityGroup, out IPropData propGen))
             {
@@ -2324,12 +2214,13 @@ namespace DRM.PropBag
                 }
                 else
                 {
-                    PropData = this.HandleMissingProp(propId, propertyName, propertyType, out wasRegistered, haveValue, value, alwaysRegister, mustBeRegistered, neverCreate);
+                    throw new InvalidOperationException($"The store accessor did not find the property: {propertyName}.");
+                    //PropData = this.HandleMissingProp(propId, propertyName, propertyType, out wasRegistered, haveValue, value, alwaysRegister, mustBeRegistered, neverCreate);
                 }
             }
             else
             {
-                PropData = this.HandleMissingProp(propId, propertyName, propertyType, out wasRegistered, haveValue, value, alwaysRegister, mustBeRegistered, neverCreate);
+                PropData = this.HandleMissingProp(propertyName, propertyType, out wasRegistered, haveValue, value, alwaysRegister, mustBeRegistered, neverCreate);
             }
 
             if (!PropData.IsEmpty && desiredHasStoreValue.HasValue)
@@ -2520,19 +2411,10 @@ namespace DRM.PropBag
             return result;
         }
 
-        //private PropIdType GetPropId(PropNameType propertyName)
-        //{
-        //    // Register new propertyName and get an exploded key.
-        //    PropIdType propId = _ourStoreAccessor.Level2KeyManager.FromRaw(propertyName);
-
-        //    return propId;
-        //}
-
         private PropIdType AddPropId(PropNameType propertyName)
         {
             // Register new propertyName and get an exploded key.
             PropIdType propId = _ourStoreAccessor.Add(propertyName);
-
             return propId;
         }
 
@@ -2661,7 +2543,7 @@ namespace DRM.PropBag
 
             if (propData != null)
             {
-                dataSourceProviderProvider = _ourStoreAccessor.GetDataSourceProviderProvider(this, propData, _propFactory.CViewProviderFactory);
+                dataSourceProviderProvider = _ourStoreAccessor.GetDataSourceProviderProvider(this, propId, propData, _propFactory.CViewProviderFactory);
                 return true;
             }
             else
@@ -2687,7 +2569,7 @@ namespace DRM.PropBag
 
             if (propData != null)
             {
-                cViewManager = _ourStoreAccessor.GetViewManager(this, propData, _propFactory.CViewProviderFactory);
+                cViewManager = _ourStoreAccessor.GetViewManager(this, propId, propData, _propFactory.CViewProviderFactory);
                 return true;
             }
             else

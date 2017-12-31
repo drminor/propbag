@@ -66,17 +66,14 @@ namespace DRM.TypeSafePropertyBag
     /// </summary>
     internal interface IPropDataInternal : IPropData
     {
-        ExKeyT CKey { get; }
+        //ExKeyT CKey { get; }
         bool IsPropBag { get; }
 
         // On those occasions when the IProp starts off with Type = object, and then later, the type is firmed up,
         // The IPropBag needs to be able to have a new IProp created with the correct type
         // and that new IProp needs to replace the original IProp.
         void SetTypedProp(PropNameType propertyName, IProp value);
-
-        //event EventHandler<>
     }
-
 
 
     // TODO: Consider merging this interface with IPropDataInternal -- all of these items are really internal.
@@ -86,7 +83,7 @@ namespace DRM.TypeSafePropertyBag
     /// </summary>
     public interface IPropData
     {
-        PropIdType PropId { get; }
+        //PropIdType PropId { get; }
 
         bool IsEmpty { get; }
 

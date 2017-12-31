@@ -36,7 +36,7 @@ namespace DRM.TypeSafePropertyBag
         public ObjectIdType ObjectId => CompKey.Level1Key;
         public PropIdType PropId => CompKey.Level2Key;
 
-        public IPropDataInternal Int_PropData { get; }
+        internal IPropDataInternal Int_PropData { get; }
 
         public StoreNodeBag Parent { get; set; }
 

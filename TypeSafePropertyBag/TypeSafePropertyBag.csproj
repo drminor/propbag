@@ -186,6 +186,7 @@
     <Compile Include="Subscriptions\SubscriptionPriorityGroup.cs" />
     <Compile Include="Subscriptions\SubscriptionTargetKind.cs" />
     <Compile Include="TypeSafePropBagMetaData.cs" />
+    <Compile Include="Unused\WeakRefKeyTyped.cs" />
     <Compile Include="Unused\WeakRefKey.cs" />
     <Compile Include="ValPlusType.cs" />
   </ItemGroup>

@@ -33,12 +33,6 @@ namespace DRM.TypeSafePropertyBag
         public SubscriptionPriorityGroup SubscriptionPriorityGroup { get; }
         //public SubscriptionTargetKind SubscriptionTargetKind { get; }
 
-        //public EventHandler<PcGenEventArgs> GenHandler { get; private set; }
-        //public EventHandler<PcObjectEventArgs> ObjHandler { get; private set; }
-
-        //public PropertyChangedEventHandler StandardHandler { get; private set; }
-        //public PropertyChangingEventHandler ChangingHandler { get; private set; }
-
         public object Target { get; private set; } 
         public MethodInfo Method { get; }
 
@@ -65,10 +59,6 @@ namespace DRM.TypeSafePropertyBag
             SubscriptionPriorityGroup = subscriptionPriorityGroup;
             //SubscriptionTargetKind = GetKindOfTarget(standardDelegate.Target, keepRef);
 
-            //GenHandler = null;
-            //ObjHandler = null;
-            //StandardHandler = standardDelegate;
-
             //GenDoWhenChanged = null;
             //Action = null;
 
@@ -90,11 +80,6 @@ namespace DRM.TypeSafePropertyBag
             SubscriptionKind = SubscriptionKind.ChangingHandler;
             SubscriptionPriorityGroup = subscriptionPriorityGroup;
             //SubscriptionTargetKind = GetKindOfTarget(standardDelegate.Target, keepRef);
-
-            //GenHandler = null;
-            //ObjHandler = null;
-            //StandardHandler = null;
-            //ChangingHandler = changingDelegate;
 
             //GenDoWhenChanged = null;
             //Action = null;
@@ -118,10 +103,6 @@ namespace DRM.TypeSafePropertyBag
             SubscriptionPriorityGroup = subscriptionPriorityGroup;
             //SubscriptionTargetKind = GetKindOfTarget(genDelegate.Target, keepRef);
 
-            //StandardHandler = null;
-            //GenHandler = genDelegate;
-            //ObjHandler = null;
-
             //GenDoWhenChanged = null;
             //Action = null;
 
@@ -143,10 +124,6 @@ namespace DRM.TypeSafePropertyBag
             SubscriptionKind = SubscriptionKind.ObjHandler;
             SubscriptionPriorityGroup = subscriptionPriorityGroup;
             //SubscriptionTargetKind = GetKindOfTarget(objDelegate.Target, keepRef);
-
-            //StandardHandler = null;
-            //GenHandler = null;
-            //ObjHandler = objDelegate;
 
             //GenDoWhenChanged = null;
             //Action = null;
@@ -173,10 +150,6 @@ namespace DRM.TypeSafePropertyBag
             SubscriptionKind = kind;
             SubscriptionPriorityGroup = subscriptionPriorityGroup;
             //SubscriptionTargetKind = GetKindOfTarget(target, keepRef);
-
-            //StandardHandler = null;
-            //GenHandler = null;
-            //ObjHandler = null;
 
             //GenDoWhenChanged = null;
             //Action = null;
@@ -206,10 +179,6 @@ namespace DRM.TypeSafePropertyBag
             SubscriptionPriorityGroup = subscriptionPriorityGroup;
             //SubscriptionTargetKind = GetKindOfTarget(genAction.Target, keepRef);
 
-            //StandardHandler = null;
-            //GenHandler = null;
-            //ObjHandler = null;
-
             //GenDoWhenChanged = genAction ?? throw new ArgumentNullException(nameof(genAction));
             //Action = null;
 
@@ -233,10 +202,6 @@ namespace DRM.TypeSafePropertyBag
             SubscriptionKind = SubscriptionKind.ActionNoParams;
             SubscriptionPriorityGroup = subscriptionPriorityGroup;
             //SubscriptionTargetKind = GetKindOfTarget(action.Target, keepRef);
-
-            //StandardHandler = null;
-            //GenHandler = null;
-            //ObjHandler = null;
 
             //GenDoWhenChanged = null;
             //Action = action;
@@ -271,10 +236,6 @@ namespace DRM.TypeSafePropertyBag
             SubscriptionKind = kind;
             SubscriptionPriorityGroup = subscriptionPriorityGroup;
             //SubscriptionTargetKind = SubscriptionTargetKind.GlobalPropId;
-
-            //StandardHandler = null;
-            //GenHandler = null;
-            //ObjHandler = null;
 
             //GenDoWhenChanged = null;
             //Action = null;
@@ -330,11 +291,6 @@ namespace DRM.TypeSafePropertyBag
         public void MarkAsUsed()
         {
             Target = null;
-
-            //ObjHandler = null;
-            //GenHandler = null;
-            //StandardHandler = null;
-            //ChangingHandler = null;
 
             //GenDoWhenChanged = null;
             //Action = null;
