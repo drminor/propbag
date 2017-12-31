@@ -9,6 +9,7 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
     public class ObsCollection<T> : IObsCollection<T>
     {
         private readonly IList<T> _internalList;
+        private readonly object _sync = new object();
 
         public event NotifyCollectionChangedEventHandler CollectionChanged;
         public event PropertyChangedEventHandler PropertyChanged;
@@ -98,11 +99,11 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
 
         //public bool IsReadOnly => throw new NotImplementedException();
 
-        public bool IsFixedSize => throw new NotImplementedException();
+        public bool IsFixedSize => false;
 
-        public object SyncRoot => throw new NotImplementedException();
+        public object SyncRoot => _sync;
 
-        public bool IsSynchronized => throw new NotImplementedException();
+        public bool IsSynchronized => false;
 
         //public void Add(T item)
         //{
