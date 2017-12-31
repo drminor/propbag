@@ -61,7 +61,7 @@ namespace DRM.PropBag
         private object _sync = new object();
 
         // These fulfill the IPropBagInternal contract
-        PSAccessServiceType IPropBagInternal.ItsStoreAccessor => _ourStoreAccessor;
+        public PSAccessServiceType /*IPropBagInternal.*/ItsStoreAccessor => _ourStoreAccessor;
 
         #endregion
 
@@ -2022,7 +2022,7 @@ namespace DRM.PropBag
             }
         }
 
-        void IPropBagInternal.RaiseStandardPropertyChanged(PropIdType propId, PropNameType propertyName)
+        public void /*IPropBagInternal.*/RaiseStandardPropertyChanged(PropIdType propId, PropNameType propertyName)
         {
             IEnumerable<ISubscription> subscriptions = _ourStoreAccessor.GetSubscriptions(this, propId);
 
@@ -2543,7 +2543,7 @@ namespace DRM.PropBag
 
             if (propData != null)
             {
-                dataSourceProviderProvider = _ourStoreAccessor.GetDataSourceProviderProvider(this, propId, propData, _propFactory.CViewProviderFactory);
+                dataSourceProviderProvider = _ourStoreAccessor.GetDataSourceProviderProvider(this, propId, propData, _propFactory.GetCViewProviderFactory());
                 return true;
             }
             else
@@ -2555,7 +2555,7 @@ namespace DRM.PropBag
 
         public bool TryGetViewManager(IPropBag propBag, PropNameType propertyName, Type propertyType, out IManageCViews cViewManager)
         {
-            bool mustBeRegistered = OurMetaData.AllPropsMustBeRegistered;
+            bool mustBeRegistered = true; // TryGetViewManager is called in the constructor, we cannot reference the virtual property: OurMetaData.AllPropsMustBeRegistered; 
 
             IPropData propData = GetPropGen(propertyName, propertyType,
                 haveValue: false,
@@ -2569,7 +2569,7 @@ namespace DRM.PropBag
 
             if (propData != null)
             {
-                cViewManager = _ourStoreAccessor.GetViewManager(this, propId, propData, _propFactory.CViewProviderFactory);
+                cViewManager = _ourStoreAccessor.GetViewManager(this, propId, propData, _propFactory.GetCViewProviderFactory());
                 return true;
             }
             else
