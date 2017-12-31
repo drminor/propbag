@@ -62,8 +62,9 @@ namespace DRM.PropBagWPF
         {
             get
             {
-                ListCollectionView lcv = _viewProvider.View as ListCollectionView;
-                //System.Diagnostics.Debug.Assert(ReferenceEquals(lcv, _viewProvider.View), "The cast is not the same object as the cast source.");
+                // TODO: See if we can avoid this copy operation.
+                ListCollectionView lcv = (ListCollectionView)_viewProvider.View;
+                System.Diagnostics.Debug.Assert(ReferenceEquals(lcv, _viewProvider.View), "The cast is not the same object as the cast source.");
                 return lcv;
             }
 

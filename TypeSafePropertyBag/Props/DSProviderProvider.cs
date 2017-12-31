@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.ComponentModel;
 using System.Windows.Data;
 
 namespace DRM.TypeSafePropertyBag
@@ -83,9 +79,9 @@ namespace DRM.TypeSafePropertyBag
 
         private bool TryGetPBCollectionDataProvider(DataSourceProvider dsp, out PBCollectionDataProvider pbCollectionDSP)
         {
-            if (dsp == null || dsp is PBCollectionDataProvider)
+            if (dsp is PBCollectionDataProvider pbDSP)
             {
-                pbCollectionDSP = dsp as PBCollectionDataProvider;
+                pbCollectionDSP = pbDSP;
                 return true;
             }
             else

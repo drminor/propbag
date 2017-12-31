@@ -30,24 +30,11 @@ namespace DRM.PropBagWPF
 
         private void _dataSourceProvider_DataChanged(object sender, EventArgs e)
         {
-            //object i;
-            //var j = _viewSource.Source;
-
-            //if(j is DataSourceProvider dsp)
-            //{
-            //    i = dsp.Data;
-            //}
-            //else
-            //{
-            //    i = j;
-            //}
-
-
             string viewName = null;
             OnViewSourceRefreshed(viewName);
 
-            // Automatically ask the View to requery it's data.
-            _viewSource.View.Refresh();
+            //// Automatically ask the View to requery it's data.
+            //_viewSource.View.Refresh();
         }
 
         #endregion

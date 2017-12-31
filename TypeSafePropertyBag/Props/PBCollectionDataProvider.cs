@@ -79,22 +79,6 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        // Other methods that we may override soon.
-        //public override IDisposable DeferRefresh()
-        //{
-        //    return base.DeferRefresh();
-        //}
-
-        //protected override void OnPropertyChanged(PropertyChangedEventArgs e)
-        //{
-        //    base.OnPropertyChanged(e);
-        //}
-
-        //protected override void OnQueryFinished(object newData, Exception error, DispatcherOperationCallback completionWork, object callbackArguments)
-        //{
-        //    base.OnQueryFinished(newData, error, completionWork, callbackArguments);
-        //}
-
         #endregion
 
         #region Private Methods
@@ -129,7 +113,7 @@ namespace DRM.TypeSafePropertyBag
 
         private bool TryGetDataFromProp(PSAccessServiceInternalType storeAccessor, PropIdType propId, out object data)
         {
-            StoreNodeProp propNode = _storeAccessor.GetChild(_propId);
+            StoreNodeProp propNode = _storeAccessor.GetChild(propId);
 
             IPropDataInternal propDataHolder = propNode.Int_PropData;
 
@@ -144,8 +128,6 @@ namespace DRM.TypeSafePropertyBag
             else
             {
                 throw new InvalidOperationException("The source PropItem is not of kind = ObservableCollection.");
-                //data = null;
-                //return false;
             }
         }
 

@@ -84,63 +84,6 @@ namespace DRM.PropBagWPF
 
         public override object TypedValueAsObject => TypedValue;
 
-        //public DataSourceProvider Source
-        //{
-        //    get
-        //    {
-        //        if (TryGetDataSourceProvider(TypedValue.Source, out DataSourceProvider dsp))
-        //        {
-        //            return dsp;
-        //        }
-        //        else
-        //        {
-        //            throw new InvalidOperationException($"The current CollectionViewSource's Source does not derive from {nameof(DataSourceProvider)} class.");
-        //        }
-        //    }
-        //    set
-        //    {
-        //        if (TypedValue.Source != null)
-        //        {
-        //            if (TypedValue.Source is DataSourceProvider dsp)
-        //            {
-        //                dsp.DataChanged -= Source_DataChanged;
-        //            }
-        //        }
-
-        //        TypedValue.Source = value;
-        //        value.DataChanged += Source_DataChanged;
-        //    }
-        //}
-
-        //private void Source_DataChanged(object sender, EventArgs e)
-        //{
-        //    OnViewRefreshed(null);
-        //    foreach (KeyValuePair<string, CollectionViewSource> kvp in _views)
-        //    {
-        //        OnViewRefreshed(kvp.Key);
-        //    }
-        //}
-
-        //private void OnViewRefreshed(string viewName)
-        //{
-        //    Interlocked.CompareExchange(ref ViewRefreshed, null, null)?.Invoke(this, new ViewRefreshedEventArgs(viewName));
-        //}
-
-        //public ListCollectionView View
-        //{
-        //    get
-        //    {
-        //        if (TryGetListCollectionView(TypedValue.View, out ListCollectionView lcv))
-        //        {
-        //            return lcv;
-        //        }
-        //        else
-        //        {
-        //            throw new InvalidOperationException("The view provided by this CollectionViewSource does not implement the ListCollectionView interface.");
-        //        }
-        //    }
-        //}
-
         public override object Clone() => throw new NotSupportedException($"This Prop Item of type: {typeof(ICViewSourceProp<CollectionViewSource>).Name} does not implement the Clone method.");
 
         public override void CleanUpTyped()

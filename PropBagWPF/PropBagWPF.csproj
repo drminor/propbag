@@ -43,14 +43,11 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="CViewPropGen_NotUsed.cs" />
     <Compile Include="CViewProp.cs" />
-    <None Include="CViewSourcePropGen_NotUsed.cs" />
     <Compile Include="CViewSourceProp.cs" />
     <Compile Include="DoWhenChangedHelper.cs" />
     <Compile Include="IProvideACollectionViewSource.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <None Include="ViewManager_NotUsed.cs" />
     <Compile Include="ViewProvider.cs" />
     <Compile Include="WPFPropFactory.cs" />
     <Compile Include="PropModelProvider.cs" />
