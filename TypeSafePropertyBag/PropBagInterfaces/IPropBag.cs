@@ -1,14 +1,12 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Windows.Data;
 
 namespace DRM.TypeSafePropertyBag
 {
-    using PropNameType = String;
     using PropIdType = UInt32;
+    using PropNameType = String;
     using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
 
     /// <summary>
