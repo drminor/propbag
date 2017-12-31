@@ -25,6 +25,9 @@ namespace DRM.PropBagWPF
         }
 
         #endregion
+        #region CollectionViewSource property creators
+
+        #endregion
 
         #region Collection-type property creators
 
@@ -90,7 +93,10 @@ namespace DRM.PropBagWPF
 
         #region CollectionViewSource property creators
 
-        public override CViewProviderCreator CViewProviderFactory => CreateAView;
+        public override CViewProviderCreator GetCViewProviderFactory()
+        {
+            return CreateAView;
+        }
 
         private IProvideAView CreateAView(string viewName, DataSourceProvider dataSourceProvider)
         {

@@ -27,10 +27,11 @@ namespace DRM.TypeSafePropertyBag
 
         public IProvideDelegateCaches DelegateCacheProvider { get; }
 
-        public virtual CViewProviderCreator CViewProviderFactory =>
-                        throw new NotImplementedException($"This implementation of {nameof(IPropFactory)}" +
-                            $" does not provide a ViewProviderFactory, please use WPFPropfactory or similar.");
-
+        public virtual CViewProviderCreator GetCViewProviderFactory()
+        {
+            throw new NotImplementedException($"This implementation of {nameof(IPropFactory)}" +
+                $" does not provide a ViewProviderFactory, please use WPFPropfactory or similar.");
+        }
 
         public IConvertValues ValueConverter { get; }
 

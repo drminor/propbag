@@ -25,7 +25,7 @@ namespace DRM.TypeSafePropertyBag
         IProvideDelegateCaches DelegateCacheProvider { get; }
 
         //Func<string, DataSourceProvider, IProvideAView> ViewProviderFactory { get; }
-        CViewProviderCreator CViewProviderFactory { get; }
+        CViewProviderCreator GetCViewProviderFactory();
 
         bool IsCollection(IProp prop);
         bool IsCollection(PropKindEnum propKind);
@@ -61,7 +61,6 @@ namespace DRM.TypeSafePropertyBag
 
         IProp CreateCVProp(PropNameType propertyName, IProvideAView viewProvider);
 
-
         #endregion
 
         #region Scalar Prop Creation
@@ -88,17 +87,13 @@ namespace DRM.TypeSafePropertyBag
             PropStorageStrategyEnum storageStrategy, bool isTypeSolid, PropKindEnum propKind,
             Delegate comparer, bool useRefEquality = false, Type collectionType = null);
 
-        //IProp CreateCVSPropFromString(Type typeOfThisProperty, PropNameType propertyName, IProvideAView viewProvider);
-
-        //IProp CreateCVPropFromString(Type typeofThisProperty, PropNameType propertyName, IProvideAView viewProvider);
-
         //IPropGen CreatePropInferType(object value, PropNameType propertyName, object extraInfo, bool hasStorage);
 
         #endregion
 
         #region Default Value and Type Support
 
-Func<T, T, bool> GetRefEqualityComparer<T>();
+        Func<T, T, bool> GetRefEqualityComparer<T>();
 
         object GetDefaultValue(Type propertyType, PropNameType propertyName = null);
 
