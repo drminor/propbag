@@ -5,11 +5,10 @@ namespace DRM.TypeSafePropertyBag
 {
     public interface IExplodedKey<CompT, L1T, L2T> : IEquatable<IExplodedKey<CompT, L1T, L2T>>
     {
-        bool isEmpty { get; }
+        bool IsEmpty { get; }
         CompT CKey { get; }
         L1T Level1Key { get; }
         L2T Level2Key { get; }
-        //object AccessToken { get; }
 
         long MaxObjectsPerAppDomain { get; }
         int MaxPropsPerObject { get; }
