@@ -7,10 +7,10 @@
       <type>int</type>
       <initial-value use-undefined="false" use-default="false" use-null="false" use-empty-string="false" create-new="false">1</initial-value>
     </prop>
-    <prop  storage-strategy="Internal">
+    <prop storage-strategy="Internal">
       <name>two</name>
       <type>string</type>
       <initial-value use-undefined="false" use-default="false" use-null="false" use-empty-string="false" create-new="false">1</initial-value>
     </prop>
   </props>
-</model>
+</model>>
