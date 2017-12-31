@@ -98,7 +98,7 @@ namespace DRM.PropBagWPF
 
         #region IProvideAView implementation
 
-        ICollectionView IProvideAView.View => _viewProvider.View;
+        public ICollectionView /*IProvideAView.*/View => _viewProvider.View;
         public string ViewName => _viewProvider.ViewName;
         public object ViewSource => _viewProvider.ViewSource;
         public override DataSourceProvider DataSourceProvider => _viewProvider.DataSourceProvider;

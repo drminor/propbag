@@ -81,7 +81,7 @@ namespace DRM.PropBagWPF
 
         #region IProvideACollectionViewSource Implementation
 
-        CollectionViewSource IProvideACollectionViewSource.CollectionViewSource => _viewSource;
+        public CollectionViewSource /*IProvideACollectionViewSource.*/CollectionViewSource => _viewSource;
 
         #endregion
 
