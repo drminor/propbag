@@ -2,12 +2,12 @@
 <model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" derive-from-pub-prop-bag="false" class-name="TestOu" output-namespace="PropBagLib.Tests" type-safety-mode="AllPropsMustBeRegistered" defer-method-ref-resolution="false" require-explicit-initial-value="true">
   <namespaces />
   <props>
-    <prop caller-provides-storage="true">
+    <prop storage-strategy="Internal">
       <name>one</name>
       <type>int</type>
       <initial-value use-undefined="false" use-default="false" use-null="false" use-empty-string="false" create-new="false">1</initial-value>
     </prop>
-    <prop caller-provides-storage="true">
+    <prop  storage-strategy="Internal">
       <name>two</name>
       <type>string</type>
       <initial-value use-undefined="false" use-default="false" use-null="false" use-empty-string="false" create-new="false">1</initial-value>

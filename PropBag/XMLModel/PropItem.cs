@@ -35,7 +35,7 @@ namespace DRM.PropBag.XMLModel
         [XmlElement("do-when-changed")]
         public PropDoWhenChanged DoWhenChangedField { get; set; }
 
-        [XmlAttribute(AttributeName = "caller-provides-storage")]
+        [XmlAttribute(AttributeName = "storage-strategy")]
         public PropStorageStrategyEnum StorageStrategy { get; set; }
 
         [XmlIgnore]

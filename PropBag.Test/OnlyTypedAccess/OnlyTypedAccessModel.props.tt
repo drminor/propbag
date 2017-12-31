@@ -58,7 +58,7 @@ namespace <#= pm.Namespace #>
 	
 	#region PropetyChangedWithTVals Event Declarations
 		<# foreach (PropItem pi in pm.Props)  { #>  
-			public event EventHandler<PCTypedEventArgs<<#= pi.Type #>>> <#= pi.Name #>Changed
+			public event EventHandler<PcTypedEventArgs<<#= pi.Type #>>> <#= pi.Name #>Changed
 			{
 				add
 				{
