@@ -455,9 +455,9 @@ namespace DRM.TypeSafePropertyBag
             {
                 return null;
             }
-            else if (value == string.Empty && collectionType == typeof(ObservableCollection<T>))
+            else if (value == string.Empty)
             {
-                return new ObservableCollection<T>() as CT;
+                return default(CT);
             }
             else
             {
