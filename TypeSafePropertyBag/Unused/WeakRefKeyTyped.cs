@@ -1,14 +1,14 @@
 ﻿using System;
 
 /// <remarks>
-/// Copied from src\Framework\MS\Internal\Data\ViewManager.cs (Assembly: PresentationFramework)
+/// Based on the non-generic version copied from src\Framework\MS\Internal\Data\ViewManager.cs (Assembly: PresentationFramework)
 /// </remarks>
 
 namespace DRM.TypeSafePropertyBag.Unused
 {
     // for use as the key to a hashtable, when the "real" key is an object
     // that we should not keep alive by a strong reference.
-    internal struct WeakRefKey : IEquatable<WeakRefKey>
+    internal struct WeakRefKey<T>: IEquatable<WeakRefKey<T>> where T: class
     {
         //------------------------------------------------------
         //
@@ -16,9 +16,9 @@ namespace DRM.TypeSafePropertyBag.Unused
         //
         //------------------------------------------------------
 
-        internal WeakRefKey(object target)
+        internal WeakRefKey(T target)
         {
-            _weakRef = new WeakReference(target);
+            _weakRef = new WeakReference<T>(target);
             _hashCode = (target != null) ? target.GetHashCode() : 314159;
         }
 
@@ -28,9 +28,15 @@ namespace DRM.TypeSafePropertyBag.Unused
         //
         //------------------------------------------------------
 
-        internal object Target
+        internal T Target
         {
-            get { return _weakRef.Target; }
+            get
+            {
+                if(_weakRef.TryGetTarget(out T result))
+                    return result;
+                else
+                    return null;
+            }
         }
 
         //------------------------------------------------------
@@ -39,24 +45,22 @@ namespace DRM.TypeSafePropertyBag.Unused
         //
         //------------------------------------------------------
 
+        public bool TryGetTarget(out T target)
+        {
+            return _weakRef.TryGetTarget(out target);
+        }
+
         public override int GetHashCode()
         {
             return _hashCode;
         }
 
-        public override bool Equals(object other)
+        public override bool Equals(object obj)
         {
-            if (other is WeakRefKey wrk)
-            {
-                return Equals(wrk);
-            }
-            else
-            {
-                return false;
-            }
+            return obj is WeakRefKey<T> && Equals((WeakRefKey<T>)obj);
         }
 
-        public bool Equals(WeakRefKey other)
+        public bool Equals(WeakRefKey<T> other)
         {
             object c1 = Target;
             object c2 = other.Target;
@@ -67,8 +71,23 @@ namespace DRM.TypeSafePropertyBag.Unused
                 return (_weakRef == other._weakRef);
         }
 
+        public override string ToString()
+        {
+            if (_weakRef == null)
+                return $"Null value of type: WeakRef of type: {typeof(T)}.";
+
+            if(_weakRef.TryGetTarget(out T val))
+            {
+                return $"WeakRef of type: {typeof(T)} with value: {val.ToString()}.";
+            }
+            else
+            {
+                return $"WeakRef of type: {typeof(T)} that references an object that has been Garbage Collected.";
+            }
+        }
+
         // overload operator for ==, to be same as Equal implementation.
-        public static bool operator ==(WeakRefKey left, WeakRefKey right)
+        public static bool operator ==(WeakRefKey<T> left, WeakRefKey<T> right)
         {
             if ((object)left == null)
                 return (object)right == null;
@@ -77,7 +96,7 @@ namespace DRM.TypeSafePropertyBag.Unused
         }
 
         // overload operator for !=, to be same as Equal implementation.
-        public static bool operator !=(WeakRefKey left, WeakRefKey right)
+        public static bool operator !=(WeakRefKey<T> left, WeakRefKey<T> right)
         {
             return !(left == right);
         }
@@ -88,7 +107,7 @@ namespace DRM.TypeSafePropertyBag.Unused
         //
         //------------------------------------------------------
 
-        WeakReference _weakRef;
+        WeakReference<T> _weakRef;
         int _hashCode;  // cache target's hashcode, lest it get GC'd out from under us
     }
 
