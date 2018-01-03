@@ -11,7 +11,7 @@ namespace DRM.TypeSafePropertyBag
         {
             Action<TCaller, object, PcTypedEventArgs<T>> realDel = (Action<TCaller, object, PcTypedEventArgs<T>>)d;
 
-            realDel((TCaller)target, sender, (PcTypedEventArgs<T>) e);
+            realDel((TCaller)target, sender, (PcTypedEventArgs<T>)e);
         }
 
         private void CallPcGenEventSubscriber<TCaller>(object target, object sender, PcGenEventArgs e, Delegate d)
@@ -41,5 +41,13 @@ namespace DRM.TypeSafePropertyBag
 
             realDel((TCaller)target, sender, e);
         }
+
+        private void CallPSNodeParentChangedEventSubscriber<TCaller>(object target, object sender, PSNodeParentChangedEventArgs e, Delegate d)
+        {
+            Action<TCaller, object, PSNodeParentChangedEventArgs> realDel = (Action<TCaller, object, PSNodeParentChangedEventArgs>)d;
+
+            realDel((TCaller)target, sender, e);
+        }
+
     }
 }

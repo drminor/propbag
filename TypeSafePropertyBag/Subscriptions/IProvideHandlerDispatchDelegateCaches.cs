@@ -9,8 +9,10 @@ namespace DRM.TypeSafePropertyBag
         DelegateCache<CallPcObjEventSubscriberDelegate> CallPcObjEventSubsCache { get; }
         DelegateCache<CallPcStandardEventSubscriberDelegate> CallPcStEventSubsCache { get; }
 
-
         TwoTypesDelegateCache<CallPcTypedEventSubscriberDelegate> CallPcTypedEventSubsCache { get; }
+
+        DelegateCache<CallPSParentNodeChangedEventSubDelegate> CallPSParentNodeChangedEventSubsCache { get; }
+
 
         DelegateProxyCache DelegateProxyCache { get; }
     }

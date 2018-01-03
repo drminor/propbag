@@ -45,6 +45,7 @@
     <Compile Include="Factories\AbstractPropFactory.cs" />
     <Compile Include="Factories\APFGenericMethodTemplates.cs" />
     <Compile Include="Fundamentals\CollectionViewExtensions.cs" />
+    <Compile Include="PropBagInterfaces\INotifyItemEndEdit.cs" />
     <Compile Include="PropBagInterfaces\ICacheDelegates.cs" />
     <Compile Include="PropBagInterfaces\ICacheDelegatesForTypePair.cs" />
     <Compile Include="Fundamentals\TwoTypes.cs" />
@@ -61,6 +62,9 @@
     <Compile Include="PropInterfaces\IProvideADataSourceProvider.cs" />
     <Compile Include="PropInterfaces\ViewAndViewManagerCreatorDelegates.cs" />
     <Compile Include="PropStorageStrategyEnum.cs" />
+    <Compile Include="PropStore\Subscriptions\ParentNodeChangedSubscribers.cs" />
+    <Compile Include="PropStore\Subscriptions\ParentNCSubscription.cs" />
+    <Compile Include="PropStore\Subscriptions\ParentNCSubscriptionRequest.cs" />
     <Compile Include="Props\ViewManagerCollection.cs" />
     <Compile Include="Props\ViewManager.cs" />
     <Compile Include="PropStoreKeys\IExplodedKey.cs" />
@@ -187,7 +191,7 @@
     <Compile Include="Subscriptions\SubscriptionTargetKind.cs" />
     <Compile Include="TypeSafePropBagMetaData.cs" />
     <Compile Include="Unused\WeakRefKeyTyped.cs" />
-    <Compile Include="Unused\WeakRefKey.cs" />
+    <Compile Include="Fundamentals\WeakRefKey.cs" />
     <Compile Include="ValPlusType.cs" />
   </ItemGroup>
   <ItemGroup />

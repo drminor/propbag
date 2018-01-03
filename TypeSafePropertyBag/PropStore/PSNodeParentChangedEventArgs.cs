@@ -2,26 +2,20 @@
 
 namespace DRM.TypeSafePropertyBag
 {
-    using CompositeKeyType = UInt64;
-    using ObjectIdType = UInt64;
-
-    using PropIdType = UInt32;
-    using PropNameType = String;
-
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
 
     public class PSNodeParentChangedEventArgs : EventArgs
     {
-        public PSNodeParentChangedEventArgs(ExKeyT propId, ExKeyT oldValue, ExKeyT newValue)
+        public PSNodeParentChangedEventArgs(ExKeyT propId, ExKeyT oldParent, ExKeyT newParent)
         {
-            PropId = propId;
-            OldValue = oldValue;
-            NewValue = newValue;
+            PropId = propId; // The node whose parent is being changed.
+            OldParent = oldParent; // The old parent.
+            NewParent = newParent; // The new parent.
         }
 
         public ExKeyT PropId { get; set; }
-        public ExKeyT OldValue { get; set; }
-        public ExKeyT NewValue { get; set; }
+        public ExKeyT OldParent { get; set; }
+        public ExKeyT NewParent { get; set; }
 
 
     }
