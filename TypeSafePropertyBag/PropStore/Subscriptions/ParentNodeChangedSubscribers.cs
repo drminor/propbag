@@ -21,6 +21,7 @@ namespace DRM.TypeSafePropertyBag
             _subs = new List<ParentNCSubscription>(subs);
         }
 
+        // TODO: Complete the PruneSubscriptions method for class: ParentNodeChangedSubscribers.
         /// <summary>
         /// Removes subscriptions for which the reference object no longer lives.
         /// </summary>

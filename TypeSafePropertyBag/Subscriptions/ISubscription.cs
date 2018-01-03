@@ -1,4 +1,5 @@
-﻿using DRM.TypeSafePropertyBag.LocalBinding;
+﻿using DRM.TypeSafePropertyBag.Fundamentals;
+using DRM.TypeSafePropertyBag.LocalBinding;
 using System;
 
 namespace DRM.TypeSafePropertyBag
@@ -34,7 +35,7 @@ namespace DRM.TypeSafePropertyBag
         SubscriptionPriorityGroup SubscriptionPriorityGroup { get; }
         //SubscriptionTargetKind SubscriptionTargetKind { get; }
 
-        WeakReference Target { get; }
+        WeakRefKey Target { get; }
         string MethodName { get; }
 
         Delegate HandlerProxy { get; }

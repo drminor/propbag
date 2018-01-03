@@ -16,7 +16,7 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
         //
         //------------------------------------------------------
 
-        internal WeakRefKey(object target)
+        public WeakRefKey(object target)
         {
             _weakRef = new WeakReference(target);
             _hashCode = (target != null) ? target.GetHashCode() : 314159;
@@ -28,7 +28,7 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
         //
         //------------------------------------------------------
 
-        internal object Target
+        public object Target
         {
             get { return _weakRef.Target; }
         }

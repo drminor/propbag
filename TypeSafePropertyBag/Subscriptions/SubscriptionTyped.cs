@@ -19,7 +19,7 @@ namespace DRM.TypeSafePropertyBag
             {
                 case SubscriptionKind.TypedHandler:
                     {
-                        Target = new WeakReference(sKey.Target);
+                        Target = new WeakRefKey(sKey.Target);
 
                         Delegate proxyDelegate = handlerDispatchDelegateCacheProvider.DelegateProxyCache.GetOrAdd(new MethodSubscriptionKind(sKey.Method, sKey.SubscriptionKind));
                         HandlerProxy = proxyDelegate;

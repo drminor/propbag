@@ -25,6 +25,7 @@ namespace DRM.TypeSafePropertyBag
             _serial = 0;
         }
 
+        // TODO: Complete the PruneSubscriptions method for class: SubscriberCollection
         /// <summary>
         /// Removes subscriptions for which the reference object no longer lives.
         /// </summary>
