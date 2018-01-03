@@ -28,6 +28,7 @@ namespace DRM.TypeSafePropertyBag
         INotifyPropertyChanging,
         INotifyPCGen,
         INotifyPCObject,
+        IEditableObject,
         ICloneable,
         IDisposable
     {

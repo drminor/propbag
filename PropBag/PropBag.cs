@@ -2466,6 +2466,30 @@ namespace DRM.PropBag
 
         #endregion
 
+
+        #region IEditableObject Members
+
+        public event EventHandler<EventArgs> ItemEndEdit;
+
+
+        public void BeginEdit()
+        {
+        }
+
+        public void CancelEdit()
+        {
+        }
+
+        public void EndEdit()
+        {
+            if (ItemEndEdit != null)
+            {
+                ItemEndEdit(this, EventArgs.Empty);
+            }
+        }
+
+        #endregion
+
         #region IListSource Support
 
         //public bool TryGetListSource(string propertyName, Type itemType, out IListSource listSource)
@@ -2493,23 +2517,6 @@ namespace DRM.PropBag
         #endregion
 
         #region DataSourceProvider Support
-
-        //public IManageCViews<CT> GetViewManager<CT>(IProvideADataSourceProvider dataSourceProviderProvider)
-        //    where CT : class, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged
-        //{
-        //    Func<string, DataSourceProvider, IProvideAView> viewProviderFactory = _propFactory.ViewProviderFactory;
-
-        //    ViewManager<CT> result = new ViewManager<CT>(dataSourceProviderProvider, viewProviderFactory);
-        //    return result;
-        //}
-
-        //public IManageCViews GetViewManager(IProvideADataSourceProvider dataSourceProviderProvider)
-        //{
-        //    Func<string, DataSourceProvider, IProvideAView> viewProviderFactory = _propFactory.ViewProviderFactory;
-
-        //    ViewManager result = new ViewManager(dataSourceProviderProvider, viewProviderFactory);
-        //    return result;
-        //}
 
         public bool TryGetDataSourceProvider(IPropBag propBag, PropNameType propertyName, Type propertyType,
             out DataSourceProvider dataSourceProvider)

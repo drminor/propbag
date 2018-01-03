@@ -1,5 +1,6 @@
 ﻿using DRM.TypeSafePropertyBag;
 using System;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Threading;
 using System.Windows.Data;
@@ -9,7 +10,7 @@ namespace DRM.PropBagWPF
     using PropIdType = UInt32;
     using PropNameType = String;
 
-    public class CViewProp : PropTypedBase<ListCollectionView>, ICViewProp<ListCollectionView>
+    public class CViewProp : PropTypedBase<ListCollectionView>, ICViewProp<ListCollectionView>, INotifyItemEndEdit, INotifyCollectionChanged
     {
         #region Private and Protected Members
 
@@ -30,6 +31,31 @@ namespace DRM.PropBagWPF
             _viewProvider.ViewSourceRefreshed += OurViewProviderGotRefreshed;
         }
 
+        public event NotifyCollectionChangedEventHandler CollectionChanged
+        {
+            add
+            {
+                ((INotifyCollectionChanged)_viewProvider).CollectionChanged += value;
+            }
+
+            remove
+            {
+                ((INotifyCollectionChanged)_viewProvider).CollectionChanged -= value;
+            }
+        }
+
+        public event EventHandler<EventArgs> ItemEndEdit
+        {
+            add
+            {
+                ((INotifyItemEndEdit)_viewProvider).ItemEndEdit += value;
+            }
+
+            remove
+            {
+                ((INotifyItemEndEdit)_viewProvider).ItemEndEdit -= value;
+            }
+        }
         #endregion
 
         #region Event Handlers
@@ -49,6 +75,7 @@ namespace DRM.PropBagWPF
 
         public event EventHandler<ViewRefreshedEventArgs> ViewSourceRefreshed;
 
+
         private void RaiseViewSourceRefreshed(ViewRefreshedEventArgs e)
         {
             Interlocked.CompareExchange(ref ViewSourceRefreshed, null, null)?.Invoke(this, e);
@@ -62,7 +89,6 @@ namespace DRM.PropBagWPF
         {
             get
             {
-                // TODO: See if we can avoid this copy operation.
                 ListCollectionView lcv = (ListCollectionView)_viewProvider.View;
                 System.Diagnostics.Debug.Assert(ReferenceEquals(lcv, _viewProvider.View), "The cast is not the same object as the cast source.");
                 return lcv;

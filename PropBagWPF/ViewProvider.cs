@@ -1,16 +1,18 @@
 ﻿using DRM.TypeSafePropertyBag;
 using System;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Threading;
 using System.Windows.Data;
 
 namespace DRM.PropBagWPF
 {
-    public class ViewProvider : IProvideAView, IProvideACollectionViewSource 
+    public class ViewProvider : IProvideAView, IProvideACollectionViewSource, INotifyItemEndEdit, INotifyCollectionChanged
     {
         #region Private Members
 
         private readonly CollectionViewSource _viewSource;
+
 
         #endregion
 
@@ -20,12 +22,33 @@ namespace DRM.PropBagWPF
         {
             ViewName = viewName;
             DataSourceProvider = dataSourceProvider ?? throw new ArgumentNullException($"{nameof(dataSourceProvider)} must have a value.");
+
+            _listHasBeenRefreshed = true;
+            _currentView = null;
             _viewSource = new CollectionViewSource()
             {
                 Source = DataSourceProvider
             };
 
             DataSourceProvider.DataChanged += _dataSourceProvider_DataChanged;
+
+            if(dataSourceProvider is INotifyItemEndEdit iniee)
+            {
+                iniee.ItemEndEdit += Iniee_ItemEndEdit;
+            }
+        }
+
+        private void Iniee_ItemEndEdit(object sender, EventArgs e)
+        {
+            if(sender is IEditableObject ieo)
+            {
+                OnItemEndEdit(ieo, e);
+            }
+            else
+            {
+                throw new InvalidOperationException("The DataSourceProvider given to this ViewProvider has raised the ItemEndEdit event" +
+                    " and has provided a sender that does not implement the interface: IEditableObject.");
+            }
         }
 
         private void _dataSourceProvider_DataChanged(object sender, EventArgs e)
@@ -43,10 +66,25 @@ namespace DRM.PropBagWPF
 
         public event EventHandler<ViewRefreshedEventArgs> ViewSourceRefreshed;
 
+        public event EventHandler<EventArgs> ItemEndEdit;
+        public event NotifyCollectionChangedEventHandler CollectionChanged;
+
         private void OnViewSourceRefreshed(string viewName)
         {
+            _listHasBeenRefreshed = true;
             Interlocked.CompareExchange(ref ViewSourceRefreshed, null, null)?.Invoke(this, new ViewRefreshedEventArgs(viewName));
         }
+
+        private void OnItemEndEdit(IEditableObject sender, EventArgs e)
+        {
+            Interlocked.CompareExchange(ref ItemEndEdit, null, null)?.Invoke(sender, e);
+        }
+
+        private void OnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            Interlocked.CompareExchange(ref CollectionChanged, null, null)?.Invoke(sender, e);
+        }
+
 
         #endregion
 
@@ -54,19 +92,48 @@ namespace DRM.PropBagWPF
 
         public DataSourceProvider DataSourceProvider { get; }
 
+        private bool _listHasBeenRefreshed = false;
+        private ListCollectionView _currentView = null;
+
         public ListCollectionView View
         {
             get
             {
-                if (TryGetListCollectionView(_viewSource.View, out ListCollectionView lcv))
+                if(_listHasBeenRefreshed || _currentView == null) 
                 {
-                    return lcv;
+                    _currentView = GetView(_viewSource, _currentView);
+                    _listHasBeenRefreshed = false;
                 }
-                else
-                {
-                    throw new InvalidOperationException("The view provided by this CollectionViewSource does not implement the ListCollectionView interface.");
-                }
+     
+                return _currentView;
             }
+        }
+
+        private ListCollectionView GetView(CollectionViewSource cvs, ListCollectionView previousView)
+        {
+            if (previousView != null)
+            {
+                ((ICollectionView)previousView).CollectionChanged -= ViewProvider_CollectionChanged;
+            }
+
+            if (TryGetListCollectionView(cvs.View, out ListCollectionView lcv))
+            {
+                if(lcv != null)
+                {
+                    ((ICollectionView)lcv).CollectionChanged += ViewProvider_CollectionChanged;
+                }
+                return lcv;
+            }
+            else
+            {
+                throw new InvalidOperationException("The view provided by this CollectionViewSource does not implement the ListCollectionView interface.");
+            }
+        }
+
+        private void ViewProvider_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            System.Diagnostics.Debug.WriteLine("This ViewProvider received a collection changed event.");
+            OnCollectionChanged(sender, e);
         }
 
         #endregion
