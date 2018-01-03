@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Windows.Controls;
 using System.Windows.Data;
 
 namespace DRM.TypeSafePropertyBag
@@ -22,19 +21,18 @@ namespace DRM.TypeSafePropertyBag
             DataSourceProviderProvider = dataSourceProviderProvider;
             _viewBuilder = viewBuilder;
 
-            dataSourceProviderProvider.DataSourceProvider.DataChanged += DataSourceProvider_DataChanged;
+            //dataSourceProviderProvider.DataSourceProvider.DataChanged += DataSourceProvider_DataChanged;
         }
 
-        private void DataSourceProvider_DataChanged(object sender, EventArgs e)
-        {
-            string viewName = null;
-            IProvideAView viewProviderTest = _viewBuilder(viewName, DataSourceProviderProvider.DataSourceProvider);
+        //private void DataSourceProvider_DataChanged(object sender, EventArgs e)
+        //{
+        //    string viewName = null;
+        //    IProvideAView viewProviderTest = _viewBuilder(viewName, DataSourceProviderProvider.DataSourceProvider);
 
-            IProvideAView inPlace = _defaultView;
+        //    IProvideAView inPlace = _defaultView;
 
-            System.Diagnostics.Debug.WriteLine("You may want to set a break point here.");
-
-        }
+        //    System.Diagnostics.Debug.WriteLine("You may want to set a break point here.");
+        //}
 
         #endregion
 
@@ -92,7 +90,7 @@ namespace DRM.TypeSafePropertyBag
 
         public void SetDefaultViewProvider(IProvideAView value)
         {
-
+            DefaultView = value;
         }
 
         public void SetViewProvider(string viewName, IProvideAView value)

@@ -7,7 +7,7 @@ namespace DRM.TypeSafePropertyBag
     using PSAccessServiceInternalType = IPropStoreAccessServiceInternal<UInt32, String>;
 
     // TODO: Implement INotifyPropertyChanged
-    internal class DSProviderProvider : IProvideADataSourceProvider 
+    internal class DSProviderProvider : IProvideADataSourceProvider, INotifyItemEndEdit
     {
         #region Private Properties
 
@@ -34,12 +34,25 @@ namespace DRM.TypeSafePropertyBag
             _storeAccessor = storeAccesor;
         }
 
+        public event EventHandler<EventArgs> ItemEndEdit
+        {
+            add
+            {
+                ((INotifyItemEndEdit)_dataProvider).ItemEndEdit += value;
+            }
+
+            remove
+            {
+                ((INotifyItemEndEdit)_dataProvider).ItemEndEdit -= value;
+            }
+        }
+
         #endregion
 
         #region Public Properties
 
-        
-        DataSourceProvider _dataProvider; // Used to be declared as type PBCollectionDataProvider
+
+        PBCollectionDataProvider _dataProvider; // Used to be declared as type PBCollectionDataProvider
         public DataSourceProvider DataSourceProvider
         {
             get
@@ -52,20 +65,25 @@ namespace DRM.TypeSafePropertyBag
             }
             set
             {
-                //if(TryGetPBCollectionDataProvider(value, out PBCollectionDataProvider pbCollectionDSP))
-                //{
-                //    _dataProvider = pbCollectionDSP;
-                //}
-                //else
-                //{
-                //    throw new InvalidOperationException($"The source value must derive from the {nameof(DataSourceProvider)} class.");
-                //}
-
-                if (ReferenceEquals(_dataProvider, value))
+                if (TryGetPBCollectionDataProvider(value, out PBCollectionDataProvider pbCollectionDSP))
                 {
-                    _dataProvider = value;
+                    _dataProvider = pbCollectionDSP;
                 }
+                else
+                {
+                    throw new InvalidOperationException($"The source value must derive from the {nameof(DataSourceProvider)} class.");
+                }
+
+                //if (ReferenceEquals(_dataProvider, value))
+                //{
+                //    _dataProvider = value;
+                //}
             }
+        }
+
+        private void DataProvider_ItemEndEdit(object sender, EventArgs e)
+        {
+            throw new NotImplementedException();
         }
 
         public bool IsCollection() => true;

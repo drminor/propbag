@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.ComponentModel;
 using System.Windows.Data;
 
 namespace DRM.TypeSafePropertyBag
@@ -7,13 +8,15 @@ namespace DRM.TypeSafePropertyBag
     using PropIdType = UInt32;
     using PSAccessServiceInternalType = IPropStoreAccessServiceInternal<UInt32, String>;
 
-    internal class PBCollectionDataProvider : DataSourceProvider
+    internal class PBCollectionDataProvider : DataSourceProvider, INotifyItemEndEdit
     {
         #region Private Properties
 
         PSAccessServiceInternalType _storeAccessor;
         PropIdType _propId;
         IDisposable _unsubscriber;
+
+        public event EventHandler<EventArgs> ItemEndEdit;
 
         #endregion
 
@@ -61,10 +64,28 @@ namespace DRM.TypeSafePropertyBag
             // to detect when this data is coming from a new PropBag object.
             // Actually our LocalBinder should take care of this work -- let's test before
             // implementing checks here.
-            if(TryGetDataFromProp(_storeAccessor, _propId, out object rawData))
+
+            try
+            {
+                // Data holds a reference the previously fetched data, if any.
+                if (Data is INotifyItemEndEdit inieeCurrent)
+                {
+                    inieeCurrent.ItemEndEdit -= Iniee_ItemEndEdit;
+                }
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine($"Could not remove ItemEndEdit handler. The exception description is {e.Message}.");
+            }
+
+            if (TryGetDataFromProp(_storeAccessor, _propId, out object rawData))
             {
                 if (rawData is IList data)
                 {
+                    if(data is INotifyItemEndEdit inieeNew)
+                    {
+                        inieeNew.ItemEndEdit += Iniee_ItemEndEdit;
+                    }
                     OnQueryFinished(data);
                 }
                 else
@@ -79,9 +100,19 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
+        private void Iniee_ItemEndEdit(object sender, EventArgs e)
+        {
+            OnItemEndEdit(sender, e);
+        }
+
         #endregion
 
         #region Private Methods
+
+        protected void OnItemEndEdit(object sender, EventArgs e)
+        {
+            ItemEndEdit?.Invoke(sender, e);
+        }
 
         private bool StartWatchingProp(PSAccessServiceInternalType storeAccessor, PropIdType propId, ref IDisposable unsubscriber)
         {
