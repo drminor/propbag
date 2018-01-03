@@ -57,11 +57,11 @@ namespace DRM.TypeSafePropertyBag
 
             set
             {
-                // remove this from old parent.
-                if (_parent != null) _parent.Child = null;
-
                 if (value != _parent)
                 {
+                    // remove this from old parent.
+                    if (_parent != null) _parent.Child = null;
+
                     // save old value to use when raising OnParentNodeHasChanged event.
                     StoreNodeProp oldValue = _parent;
 
