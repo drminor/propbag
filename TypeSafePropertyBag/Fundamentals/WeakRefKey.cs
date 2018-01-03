@@ -8,7 +8,7 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
 {
     // for use as the key to a hashtable, when the "real" key is an object
     // that we should not keep alive by a strong reference.
-    internal struct WeakRefKey : IEquatable<WeakRefKey>
+    public struct WeakRefKey : IEquatable<WeakRefKey>
     {
         //------------------------------------------------------
         //
