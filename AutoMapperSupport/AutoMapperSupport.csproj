@@ -71,7 +71,6 @@
     <Compile Include="Config\SimpleMapperConfigTyped.cs" />
     <Compile Include="Config\ExtraMembersConfigFinalStep.cs" />
     <Compile Include="MapTypeDefinition\IMapTypeDefinition.cs" />
-    <Compile Include="IPropBagMapper.cs" />
     <Compile Include="Builders\IPropBagMapperKey.cs" />
     <Compile Include="ExtraMembers\ExtraMembersProvider.cs" />
     <Compile Include="MapTypeDefinition\MapTypeDefinition.cs" />
