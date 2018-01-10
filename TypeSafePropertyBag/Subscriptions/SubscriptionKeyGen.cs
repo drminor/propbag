@@ -276,7 +276,7 @@ namespace DRM.TypeSafePropertyBag
             return SubscriptionFactory(this, handlerDispatchDelegateCacheProvider);
         }
 
-        public ISubscription CreateSubscriptionGen(ISubscriptionKeyGen subscriptionRequestGen, IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider)
+        private ISubscription CreateSubscriptionGen(ISubscriptionKeyGen subscriptionRequestGen, IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider)
         {
             ISubscription result = new SubscriptionGen(subscriptionRequestGen, handlerDispatchDelegateCacheProvider);
             subscriptionRequestGen.MarkAsUsed();
