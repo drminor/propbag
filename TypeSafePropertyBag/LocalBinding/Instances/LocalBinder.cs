@@ -569,7 +569,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
         private ObservableSource<T> CreateAndListen(StoreNodeBag propStoreNode, string pathComp, SourceKindEnum sourceKind)
         {
             ObservableSource<T> result = new ObservableSource<T>(propStoreNode, propStoreNode.CompKey, pathComp, sourceKind, BINDER_NAME);
-            result.ParentHasChanged += ParentHasChanged_Handlder;
+            result.ParentHasChanged += ParentHasChanged_Handler;
             return result;
         }
 
@@ -671,7 +671,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             DataSourceHasChanged_Handler((ObservableSource<T>)sender, DataSourceChangeTypeEnum.PropertyChanged);
         }
 
-        private void ParentHasChanged_Handlder(object sender, EventArgs e)
+        private void ParentHasChanged_Handler(object sender, EventArgs e)
         {
             DataSourceHasChanged_Handler((ObservableSource<T>)sender, DataSourceChangeTypeEnum.ParentHasChanged);
         }
