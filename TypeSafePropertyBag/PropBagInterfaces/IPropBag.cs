@@ -29,6 +29,7 @@ namespace DRM.TypeSafePropertyBag
         INotifyPCGen,
         INotifyPCObject,
         IEditableObject,
+        INotifyItemEndEdit,
         ICloneable,
         IDisposable
     {
@@ -92,7 +93,7 @@ namespace DRM.TypeSafePropertyBag
 
         void CloneProps(IPropBag copySource);
 
-        bool TryGetDataSourceProviderProvider(IPropBag propBag, PropNameType propertyName, Type propertyType, out IProvideADataSourceProvider dataSourceProviderProvider);
+        //bool TryGetDataSourceProviderProvider(IPropBag propBag, PropNameType propertyName, Type propertyType, out IProvideADataSourceProvider dataSourceProviderProvider);
 
         bool TryGetDataSourceProvider(IPropBag propBag, PropNameType propertyName, Type propertyType, out DataSourceProvider dataSourceProvider);
 
