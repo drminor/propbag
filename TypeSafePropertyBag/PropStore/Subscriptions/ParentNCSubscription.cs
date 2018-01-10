@@ -19,25 +19,27 @@ namespace DRM.TypeSafePropertyBag
 
         public CallPSParentNodeChangedEventSubDelegate Dispatcher { get; }
 
-        public ParentNCSubscription(ExKeyT ownerPropId, WeakRefKey target, string methodName, Delegate proxy, CallPSParentNodeChangedEventSubDelegate dispatcher)
-        {
-            OwnerPropId = ownerPropId;
-            Target = target;
-            MethodName = methodName;
-            Proxy = proxy;
-            Dispatcher = dispatcher;
-        }
+        //public ParentNCSubscription(ExKeyT ownerPropId, WeakRefKey target, string methodName, Delegate proxy, CallPSParentNodeChangedEventSubDelegate dispatcher)
+        //{
+        //    OwnerPropId = ownerPropId;
+        //    Target = target;
+        //    MethodName = methodName;
+        //    Proxy = proxy;
+        //    Dispatcher = dispatcher;
+        //}
 
-        public ParentNCSubscription(ParentNCSubscriptionRequest request, IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider)
+        public ParentNCSubscription(ParentNCSubscriptionRequest request, ICacheDelegates<CallPSParentNodeChangedEventSubDelegate> callPSParentNodeChangedEventSubsCache)
         {
             Target = new WeakRefKey(request.Target);
             MethodName = request.Method.Name;
 
-            Type targetType = request.Target.GetType();
-
+            // TODO: Note: The Proxy Delegate is not being cached (using the DelegateProxyCache.)
             // Create an open delegate from the delegate provided. (An open delegate has a null value for the target.)
-            Proxy = MakeTheDelegate(targetType, request.Method);
-            Dispatcher = handlerDispatchDelegateCacheProvider.CallPSParentNodeChangedEventSubsCache.GetOrAdd(targetType);
+            Type delegateType = GetDelegateType(request.Method);
+            Proxy = MakeTheDelegate(delegateType, request.Method);
+
+            Type targetType = request.Target.GetType();
+            Dispatcher = callPSParentNodeChangedEventSubsCache.GetOrAdd(targetType);
         }
 
         private Type GetDelegateType(MethodInfo method)

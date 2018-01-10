@@ -1,21 +1,22 @@
-﻿using System.Collections;
+﻿using DRM.TypeSafePropertyBag.Fundamentals;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace DRM.TypeSafePropertyBag
 {
-    public class ParentNodeChangedSubscribers : IEnumerable<ParentNCSubscription>
+    public class ParentNCSubscriberCollection : IEnumerable<ParentNCSubscription>
     {
         private readonly object _sync;
         private readonly List<ParentNCSubscription> _subs;
 
-        public ParentNodeChangedSubscribers()
+        public ParentNCSubscriberCollection()
         {
             _sync = new object();
             _subs = new List<ParentNCSubscription>();
         }
 
-        public ParentNodeChangedSubscribers(IEnumerable<ParentNCSubscription> subs)
+        public ParentNCSubscriberCollection(IEnumerable<ParentNCSubscription> subs)
         {
             _sync = new object();
             _subs = new List<ParentNCSubscription>(subs);
@@ -41,7 +42,7 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        public ParentNCSubscription GetOrAdd(ParentNCSubscriptionRequest request, IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider)
+        public ParentNCSubscription GetOrAdd(ParentNCSubscriptionRequest request, ICacheDelegates<CallPSParentNodeChangedEventSubDelegate> callPSParentNodeChangedEventSubsCache)
         {
             ParentNCSubscription subscription;
             lock (_sync)
@@ -53,7 +54,7 @@ namespace DRM.TypeSafePropertyBag
                 }
                 else
                 {
-                    subscription = new ParentNCSubscription(request, handlerDispatchDelegateCacheProvider);
+                    subscription =  request.CreateSubscription(callPSParentNodeChangedEventSubsCache);
                     AddSubscription(subscription);
                     return subscription;
                 }
@@ -84,7 +85,6 @@ namespace DRM.TypeSafePropertyBag
             _subs.Add(s);
             return s;
         }
-
 
         public bool TryRemoveSubscription(ParentNCSubscription subscription)
         {
@@ -167,7 +167,7 @@ namespace DRM.TypeSafePropertyBag
 
         public IEnumerator<ParentNCSubscription> GetEnumerator()
         {
-            return GetEnumerator();
+            return _subs.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()

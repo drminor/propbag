@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DRM.TypeSafePropertyBag.Fundamentals;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -14,25 +15,98 @@ namespace DRM.TypeSafePropertyBag
     {
         #region Private Members
 
+        private ICacheDelegates<CallPSParentNodeChangedEventSubDelegate> _callPSParentNodeChangedEventSubsCache;
+
         private readonly Dictionary<ExKeyT, StoreNodeProp> _children;
+        private ParentNCSubscriberCollection _parentNCSubscriberCollection;
+        private object _sync = new object();
 
         #endregion
 
         #region Events
 
         // TODO: Make this use WeakReferences to the subscriber.
-        public event EventHandler<PSNodeParentChangedEventArgs> ParentNodeHasChanged;
+        public event EventHandler<PSNodeParentChangedEventArgs> ParentNodeHasChanged
+        {
+            add
+            {
+                ParentNCSubscriptionRequest subRequest = new ParentNCSubscriptionRequest(CompKey, value);
+                lock (_sync)
+                {
+                    ParentNCSubscription sub = ParentNCSubscriberCollection.GetOrAdd(subRequest, _callPSParentNodeChangedEventSubsCache);
+                }
+            }
+            remove
+            {
+                ParentNCSubscriptionRequest subRequest = new ParentNCSubscriptionRequest(CompKey, value);
+                lock (_sync)
+                {
+                    if (!ParentNCSubscriberCollection.TryRemoveSubscription(subRequest))
+                    {
+                        // TODO: Make this better.
+                        System.Diagnostics.Debug.WriteLine("Could not remove ParentNodeChanged subsription.");
+                    }
+                }
+            }
+        }
+
+        public IDisposable SubscribeToParentNodeHasChanged(EventHandler<PSNodeParentChangedEventArgs> handler)
+        {
+            ParentNCSubscriptionRequest subRequest = new ParentNCSubscriptionRequest(CompKey, handler);
+            lock (_sync)
+            {
+                ParentNCSubscription sub = ParentNCSubscriberCollection.GetOrAdd(subRequest, _callPSParentNodeChangedEventSubsCache);
+            }
+            UnsubscriberForPropStore unsubscriber = new UnsubscriberForPropStore(new WeakReference<StoreNodeBag>(this), subRequest);
+            return unsubscriber;
+        }
+
+        public bool UnsubscribeToParentNodeHasChanged(EventHandler<PSNodeParentChangedEventArgs> handler)
+        {
+            ParentNCSubscriptionRequest subRequest = new ParentNCSubscriptionRequest(CompKey, handler);
+            return UnsubscribeToParentNodeHasChanged(subRequest);
+        }
+
+        public bool UnsubscribeToParentNodeHasChanged(ParentNCSubscriptionRequest subRequest)
+        {
+            lock (_sync)
+            {
+                if (ParentNCSubscriberCollection.TryRemoveSubscription(subRequest))
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+
 
         #endregion
 
+        private ParentNCSubscriberCollection ParentNCSubscriberCollection
+        {
+            get
+            {
+                if(_parentNCSubscriberCollection == null)
+                {
+                    _parentNCSubscriberCollection = new ParentNCSubscriberCollection();
+                }
+                return _parentNCSubscriberCollection;
+            }
+        }
+
         #region Constructor
 
-        public StoreNodeBag(ExKeyT cKey, IPropBagProxy propBagProxy)
+        public StoreNodeBag(ExKeyT cKey, IPropBagProxy propBagProxy, ICacheDelegates<CallPSParentNodeChangedEventSubDelegate> callPSParentNodeChangedEventSubsCache)
         {
             CompKey = cKey;
             PropBagProxy = propBagProxy ?? throw new ArgumentNullException(nameof(propBagProxy));
+            _callPSParentNodeChangedEventSubsCache = callPSParentNodeChangedEventSubsCache ?? throw new ArgumentNullException(nameof(callPSParentNodeChangedEventSubsCache));
 
             _children = new Dictionary<ExKeyT, StoreNodeProp>();
+            _parentNCSubscriberCollection = null;
         }
 
         #endregion
@@ -188,10 +262,37 @@ namespace DRM.TypeSafePropertyBag
 
         private void OnParentNodeHasChanged(StoreNodeProp oldValue, StoreNodeProp newValue)
         {
-            Interlocked.CompareExchange(ref ParentNodeHasChanged, null, null)?.Invoke(
-                this, new PSNodeParentChangedEventArgs(this.CompKey, oldValue?.CompKey, newValue?.CompKey));
+            List<ParentNCSubscription> subs = null;
+            int numberOfSubscribers = 0;
+            int numDispatched = 0;
+            lock (_sync)
+            {
+                if(_parentNCSubscriberCollection != null)
+                {
+                    ExKeyT oldNodeKey = oldValue?.CompKey ?? new SimpleExKey();
+                    ExKeyT newNodeKey = newValue?.CompKey ?? new SimpleExKey();
+                    subs = _parentNCSubscriberCollection.ToList();
+                    foreach (ParentNCSubscription sub in subs)
+                    {
+                        numberOfSubscribers++;
+                        object target = sub.Target.Target;
+                        if(target != null)
+                        {
+                            try
+                            {
+                                sub.Dispatcher(target, this, new PSNodeParentChangedEventArgs(this.CompKey, oldNodeKey, newNodeKey), sub.Proxy);
+                                numDispatched++;
+                            }
+                            catch
+                            {
+                                System.Diagnostics.Debug.WriteLine("ParentNodeChanged Handler registered with StoreNodeBag, threw an exception.");
+                            }
+                        }
+                    }
+                }
+            }
 
-            System.Diagnostics.Debug.WriteLine($"Completed calling OnParentNodeHasChanged. There were {ParentNodeHasChanged?.GetInvocationList()?.Count() ?? 0} subscribers.");
+            System.Diagnostics.Debug.WriteLine($"Completed calling OnParentNodeHasChanged. There were {numberOfSubscribers} subscribers, of which {numDispatched} were dispatched.");
         }
 
         #endregion

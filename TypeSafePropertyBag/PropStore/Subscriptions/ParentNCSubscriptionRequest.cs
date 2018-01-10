@@ -19,7 +19,7 @@ namespace DRM.TypeSafePropertyBag
     {
         #region Private Members
 
-        Func<ParentNCSubscriptionRequest, IProvideHandlerDispatchDelegateCaches, ParentNCSubscription> SubscriptionFactory { get; }
+        Func<ParentNCSubscriptionRequest, ICacheDelegates<CallPSParentNodeChangedEventSubDelegate>, ParentNCSubscription> SubscriptionFactory { get; }
 
         #endregion
 
@@ -51,14 +51,14 @@ namespace DRM.TypeSafePropertyBag
 
         #region Public Methods
 
-        public ParentNCSubscription CreateSubscription(IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider)
+        public ParentNCSubscription CreateSubscription(ICacheDelegates<CallPSParentNodeChangedEventSubDelegate> callPSParentNodeChangedEventSubsCache)
         {
-            return SubscriptionFactory(this, handlerDispatchDelegateCacheProvider);
+            return SubscriptionFactory(this, callPSParentNodeChangedEventSubsCache);
         }
 
-        public ParentNCSubscription CreateSubscriptionGen(ParentNCSubscriptionRequest request, IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider)
+        private ParentNCSubscription CreateSubscriptionGen(ParentNCSubscriptionRequest request, ICacheDelegates<CallPSParentNodeChangedEventSubDelegate> callPSParentNodeChangedEventSubsCache)
         {
-            ParentNCSubscription result = new ParentNCSubscription(request, handlerDispatchDelegateCacheProvider);
+            ParentNCSubscription result = new ParentNCSubscription(request, callPSParentNodeChangedEventSubsCache);
 
             request.MarkAsUsed();
             return result;
