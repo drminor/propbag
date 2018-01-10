@@ -14,11 +14,11 @@ using System.Windows.Data;
 
 namespace DRM.PropBagWPF
 {
-    using ControlModel = DRM.PropBag.ControlModel;
+    using ControlModel = PropBag.ControlModel;
 
     public class PropModelProvider : ControlModel.IPropModelProvider
     {
-        private DRM.PropBag.ControlsWPF.IPropBagTemplateProvider _propBagTemplateProvider;
+        private IPropBagTemplateProvider _propBagTemplateProvider;
         private IViewModelActivator _viewModelActivator;
         private IPropFactory _fallBackPropFactory;
 

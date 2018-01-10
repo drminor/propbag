@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using DRM.TypeSafePropertyBag;
 using DRM.TypeSafePropertyBag.Fundamentals;
 using System.Collections.Concurrent;
 using System.Reflection;
@@ -9,6 +9,7 @@ using System.ComponentModel;
 using System.Collections;
 using System.Collections.Specialized;
 using System.Windows.Data;
+using DRM.TypeSafePropertyBag.DataAccessSupport;
 
 namespace DRM.TypeSafePropertyBag
 {
@@ -871,13 +872,13 @@ namespace DRM.TypeSafePropertyBag
 
         // Provides thread-safe, lazy production of a single DataSourceProvider for each PropItem.
 
-        // Get a DataSourceProvider Provider
-        public IProvideADataSourceProvider GetDataSourceProviderProvider(IPropBag propBag, PropIdType propId, IPropData propData, CViewProviderCreator viewBuilder)
-        {
-            IManageCViews CViewManagerGen = GetViewManager(propBag, propId, propData, viewBuilder);
-            IProvideADataSourceProvider result = CViewManagerGen.DataSourceProviderProvider;
-            return result;
-        }
+        //// Get a DataSourceProvider Provider
+        //public IProvideADataSourceProvider GetDataSourceProviderProvider(IPropBag propBag, PropIdType propId, IPropData propData, CViewProviderCreator viewBuilder)
+        //{
+        //    IManageCViews CViewManagerGen = GetViewManager(propBag, propId, propData, viewBuilder);
+        //    IProvideADataSourceProvider result = CViewManagerGen.DataSourceProviderProvider;
+        //    return result;
+        //}
 
         // Get a DataSourceProvider
         public DataSourceProvider GetDataSourceProvider(IPropBag propBag, PropIdType propId, IPropData propData, CViewProviderCreator viewBuilder)
@@ -891,7 +892,7 @@ namespace DRM.TypeSafePropertyBag
         {
             ObjectIdType objectId  = GetAndCheckObjectRef(propBag);
 
-            // There is one View Manager for each PropItem.
+            // There is one View Manager for each PropItem. The View Manager for a particular PropItem is created on first use.
             if (_genViewManagers == null)
                 _genViewManagers = new ViewManagerCollection(CViewGenManagerFactory);
 
@@ -903,7 +904,57 @@ namespace DRM.TypeSafePropertyBag
             // Alternatively, make GetOrAdd take a factory (which of course could be different for each call.)
             IManageCViews CViewGenManagerFactory(IPropData propData2)
             {
-                DSProviderProvider dSProviderProvider = new DSProviderProvider(propId, propData2.TypedProp.PropKind, this);
+                IProvideADataSourceProvider dSProviderProvider;
+                if (propData2.TypedProp.PropKind == PropKindEnum.Prop)
+                {
+                    dSProviderProvider = null; // new ClrMappedDSP<>
+                }
+                else
+                {
+                    dSProviderProvider = new PBCollectionDSP_Provider(propId, propData2.TypedProp.PropKind, this);
+                }
+
+                IManageCViews result2 = new ViewManager(dSProviderProvider, viewBuilder);
+                return result2;
+            }
+        }
+
+        // Create a Delegate cache very similar the delegate caches used to create TypeProps.
+        public IManageCViews GetViewManager<TSource, TDestination>
+            (
+            IPropBag propBag,
+            PropIdType propId,
+            IPropData propData,
+            IPropBagMapper<TSource, TDestination> mapper,
+            CViewProviderCreator viewBuilder
+            )
+            where TSource : class
+            where TDestination : INotifyItemEndEdit
+        {
+            ObjectIdType objectId = GetAndCheckObjectRef(propBag);
+
+            // There is one View Manager for each PropItem. The View Manager for a particular PropItem is created on first use.
+            if (_genViewManagers == null)
+                _genViewManagers = new ViewManagerCollection(CViewGenManagerFactory);
+
+            IManageCViews result = _genViewManagers.GetOrAdd(propData);
+            return result;
+
+            // TODO: Make GetViewManager take a viewBuilderGetter delegate that can be called to get the viewBuilder for a particular PropItem.
+            // In this way we can provide a constant value to the ViewManagerCollection constructor, but yet have differing View Builders.
+            // Alternatively, make GetOrAdd take a factory (which of course could be different for each call.)
+            IManageCViews CViewGenManagerFactory(IPropData propData2)
+            {
+                IProvideADataSourceProvider dSProviderProvider;
+                if (propData2.TypedProp.PropKind == PropKindEnum.Prop)
+                {
+                    CrudWithMapping<TSource, TDestination> mappedDal = new CrudWithMapping<TSource, TDestination>(this, propId, mapper);
+                    dSProviderProvider = new ClrMappedDSP<TDestination>(mappedDal);
+                }
+                else
+                {
+                    dSProviderProvider = new PBCollectionDSP_Provider(propId, propData2.TypedProp.PropKind, this);
+                }
 
                 IManageCViews result2 = new ViewManager(dSProviderProvider, viewBuilder);
                 return result2;
@@ -1240,6 +1291,7 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
+        // TODO: Provide method that returns the value of StoreNodeProp.Int_PropData.TypedProp as IProp<T>
         StoreNodeProp PSAccessServiceInternalInterface.GetChild(PropIdType propId)
         {
             StoreNodeProp result = GetChild(propId);

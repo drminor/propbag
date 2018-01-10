@@ -43,6 +43,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CrudWithMapping.cs" />
     <Compile Include="CViewProp.cs" />
     <Compile Include="CViewSourceProp.cs" />
     <Compile Include="DoWhenChangedHelper.cs" />

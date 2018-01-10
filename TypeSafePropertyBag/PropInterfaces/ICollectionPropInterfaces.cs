@@ -37,50 +37,32 @@ namespace DRM.TypeSafePropertyBag
     #region Infrastructure Interfaces
 
     //// Regular View Manager (CollectionViewSource factory)
-    //public interface IManageCViews<CT> where CT : IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged
+    //public interface IManageCViews
     //{
-    //    CT Data { get; }
+    //    IList Data { get; }
 
     //    IProvideADataSourceProvider DataSourceProviderProvider { get; }
     //    DataSourceProvider DataSourceProvider { get; }
 
     //    ICollectionView GetDefaultCollectionView();
-    //    void SetDefaultCollectionView(ICollectionView value);
-
     //    ICollectionView GetCollectionView(string key);
-    //    void SetCollectionView(string key, ICollectionView value);
 
     //    IProvideAView GetViewProvider();
     //    IProvideAView GetViewProvider(string key);
+
+    //    void SetDefaultViewProvider(IProvideAView value);
+    //    void SetViewProvider(string key, IProvideAView value);
     //}
 
-    // Regular View Manager (CollectionViewSource factory)
-    public interface IManageCViews
-    {
-        IList Data { get; }
-
-        IProvideADataSourceProvider DataSourceProviderProvider { get; }
-        DataSourceProvider DataSourceProvider { get; }
-
-        ICollectionView GetDefaultCollectionView();
-        ICollectionView GetCollectionView(string key);
-
-        IProvideAView GetViewProvider();
-        IProvideAView GetViewProvider(string key);
-
-        void SetDefaultViewProvider(IProvideAView value);
-        void SetViewProvider(string key, IProvideAView value);
-    }
-
-    // Regular View Provider
-    public interface IProvideAView
-    {
-        string ViewName { get; }
-        ICollectionView View { get; } // A reference to the named view.
-        object ViewSource { get; } // A reference to the CollectionViewSource (or similar class.)
-        event EventHandler<ViewRefreshedEventArgs> ViewSourceRefreshed;
-        DataSourceProvider DataSourceProvider { get; }
-    }
+    //// Regular View Provider
+    //public interface IProvideAView
+    //{
+    //    string ViewName { get; }
+    //    ICollectionView View { get; } // A reference to the named view.
+    //    object ViewSource { get; } // A reference to the CollectionViewSource (or similar class.)
+    //    event EventHandler<ViewRefreshedEventArgs> ViewSourceRefreshed;
+    //    DataSourceProvider DataSourceProvider { get; }
+    //}
 
     #endregion
 
@@ -93,8 +75,9 @@ namespace DRM.TypeSafePropertyBag
 
 
     // Collection View 
-    public interface ICViewProp<CVT>: IProp<CVT>, IProvideAView where CVT : ICollectionView
+    public interface ICViewProp<CVT> : IProp<CVT>, IProvideAView where CVT : ICollectionView
     {
+        IProvideAView ViewProvider { get; set; }
     }
 
     // Observable List / Collection (IList + INotifyCollectionChanged)

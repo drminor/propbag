@@ -42,9 +42,16 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="DataAccessSupport\CLR_Mapped_DSP - SafetyCopy.cs" />
+    <Compile Include="DataAccessSupport\CrudWithMapping.cs" />
+    <Compile Include="DataAccessSupport\IDoCRUD.cs" />
+    <Compile Include="DataAccessSupport\IHaveADataSet.cs" />
+    <Compile Include="DataAccessSupport\CLR_Mapped_DSP.cs" />
+    <Compile Include="DataAccessSupport\EndEditWrapper.cs" />
     <Compile Include="Factories\AbstractPropFactory.cs" />
     <Compile Include="Factories\APFGenericMethodTemplates.cs" />
     <Compile Include="Fundamentals\CollectionViewExtensions.cs" />
+    <Compile Include="IPropBagMapper.cs" />
     <Compile Include="PropBagInterfaces\INotifyItemEndEdit.cs" />
     <Compile Include="PropBagInterfaces\ICacheDelegates.cs" />
     <Compile Include="PropBagInterfaces\ICacheDelegatesForTypePair.cs" />
@@ -59,12 +66,15 @@
     <Compile Include="PropInterfaces\IListSourceProvider.cs" />
     <Compile Include="Fundamentals\IObsCollection.cs" />
     <Compile Include="PropInterfaces\ICollectionPropInterfaces.cs" />
+    <Compile Include="PropInterfaces\IManageCViews.cs" />
     <Compile Include="PropInterfaces\IProvideADataSourceProvider.cs" />
+    <Compile Include="PropInterfaces\IProvideAView.cs" />
     <Compile Include="PropInterfaces\ViewAndViewManagerCreatorDelegates.cs" />
     <Compile Include="PropStorageStrategyEnum.cs" />
-    <Compile Include="PropStore\Subscriptions\ParentNodeChangedSubscribers.cs" />
+    <Compile Include="PropStore\Subscriptions\ParentNCSubscriberCollection.cs" />
     <Compile Include="PropStore\Subscriptions\ParentNCSubscription.cs" />
     <Compile Include="PropStore\Subscriptions\ParentNCSubscriptionRequest.cs" />
+    <Compile Include="PropStore\Subscriptions\UnsubscriberForPropStore.cs" />
     <Compile Include="Props\ViewManagerCollection.cs" />
     <Compile Include="Props\ViewManager.cs" />
     <Compile Include="PropStoreKeys\IExplodedKey.cs" />
@@ -73,9 +83,9 @@
     <Compile Include="PropStoreKeys\SimpleLevel2KeyMan.cs" />
     <Compile Include="PropStore\IPropStoreAccessServiceInternal.cs" />
     <Compile Include="PropStore\Unsubscriber.cs" />
-    <Compile Include="Props\DSProviderProviderCollection_NotUsed.cs" />
-    <Compile Include="Props\DSProviderProvider.cs" />
-    <Compile Include="Props\PBCollectionDataProvider.cs" />
+    <Compile Include="Unused\DSProviderProviderCollection_NotUsed.cs" />
+    <Compile Include="Props\PBCollectionDSP_Provider.cs" />
+    <Compile Include="Props\PBCollectionDSP.cs" />
     <Compile Include="Props\PropBase.cs" />
     <Compile Include="Props\PropTypedBase.cs" />
     <Compile Include="Props\ViewRefreshedEventArgs.cs" />
@@ -194,6 +204,11 @@
     <Compile Include="Fundamentals\WeakRefKey.cs" />
     <Compile Include="ValPlusType.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\src\AutoMapper\AutoMapper.csproj">
+      <Project>{8cba8a56-9b60-4430-9d54-9a523baf1e14}</Project>
+      <Name>AutoMapper</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

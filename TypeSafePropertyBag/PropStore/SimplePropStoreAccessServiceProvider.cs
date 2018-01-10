@@ -100,7 +100,7 @@ namespace DRM.TypeSafePropertyBag
             // Create a new PropStoreNode for this PropBag
             ExKeyT cKey = new SimpleExKey(objectId, 0);
             IPropBagProxy propBagProxy = new PropBagProxy(propBag);
-            newBagNode = new StoreNodeBag(cKey, propBagProxy);
+            newBagNode = new StoreNodeBag(cKey, propBagProxy, _handlerDispatchDelegateCacheProvider.CallPSParentNodeChangedEventSubsCache);
 
             // Add the node to the global store.
             _store.Add(cKey, newBagNode);

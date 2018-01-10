@@ -1,13 +1,14 @@
-﻿using DRM.TypeSafePropertyBag;
-using DRM.TypeSafePropertyBag.DataAccessSupport;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
-namespace DRM.PropBagWPF
+namespace DRM.TypeSafePropertyBag.DataAccessSupport
 {
-    public class CrudWithMapping<TSource, TDestination> : IDoCRUD<TDestination>, IDisposable /*where TDal: IDoCRUD<TSource>*/ where TSource : class
+    using PropIdType = UInt32;
+    using PSAccessServiceInternalInterface = IPropStoreAccessServiceInternal<UInt32, String>;
+
+    internal class CrudWithMapping<TSource, TDestination> : IDoCRUD<TDestination>, IDisposable /*where TDal: IDoCRUD<TSource>*/ where TSource : class
     {
         #region Private Members
 
@@ -25,12 +26,63 @@ namespace DRM.PropBagWPF
             _dataAccessLayer.DataSourceChanged += _dataAccessLayer_DataSourceChanged;
         }
 
+        public CrudWithMapping(PSAccessServiceInternalInterface storeAccessor, PropIdType propId, IPropBagMapper<TSource, TDestination> mapper)
+        {
+            _mapper = mapper;
+            _dataAccessLayer = GetCurrentDS(storeAccessor, propId);
+            _dataAccessLayer.DataSourceChanged += _dataAccessLayer_DataSourceChanged;
+        }
+
+        private IDoCRUD<TSource> GetCurrentDS(PSAccessServiceInternalInterface storeAccessor, PropIdType propId)
+        {
+            StoreNodeProp propNode = storeAccessor.GetChild(propId);
+            if (propNode.Int_PropData.TypedProp is IDoCRUD<TSource> dal)
+            {
+                return dal;
+            }
+            else
+            {
+                if (propNode.Int_PropData.TypedProp != null)
+                {
+                    throw new InvalidOperationException($"The PropId: provided to CLR_Mapped_DSP refers to a PropItem: {propNode.CompKey} whose value does not implement: {nameof(IDoCRUD<TSource>)}.");
+                }
+                return null;
+            }
+        }
+
         private void _dataAccessLayer_DataSourceChanged(object sender, EventArgs e)
         {
             OnDataSourceChanged(sender, e);
         }
 
         #endregion
+
+        public IDoCRUD<TSource> DataAccessLayer
+        {
+            get
+            {
+                return _dataAccessLayer;
+            }
+            set
+            {
+                if(!ReferenceEquals(_dataAccessLayer, value))
+                {
+                    if(_dataAccessLayer != null)
+                    {
+                        _dataAccessLayer.DataSourceChanged -= _dataAccessLayer_DataSourceChanged;
+                    }
+
+                    _dataAccessLayer = value;
+
+                    if(_dataAccessLayer != null)
+                    {
+                        _dataAccessLayer.DataSourceChanged += _dataAccessLayer_DataSourceChanged;
+                    }
+
+                    OnDataSourceChanged(this, EventArgs.Empty);
+                }
+            }
+        }
 
         #region IDoCrud<TDestination> Implementation
 

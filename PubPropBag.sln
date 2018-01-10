@@ -20,6 +20,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{F93D2783-82C5-46F0-A50A-3925ADE7B367}"
 	ProjectSection(SolutionItems) = preProject
 		Documentaton\BigPicture.txt = Documentaton\BigPicture.txt
+		Documentaton\Dependencies.md = Documentaton\Dependencies.md
 		Documentaton\Documentation.md = Documentaton\Documentation.md
 		Documentaton\TopLevelObjectReferences.md = Documentaton\TopLevelObjectReferences.md
 	EndProjectSection

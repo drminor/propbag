@@ -234,6 +234,8 @@ namespace DRM.PropBag
                     //FetchData_Test(srcPropName, pi.PropertyType);
 
                     // TODO: Consider creating a local cache of CViewManagers, keyed by srcPropName.
+                    // This cache may be handy since several properties may reference the same CViewManager for a 
+                    // given instance of a PropBag.
                     if (TryGetViewManager(this, srcPropName, pi.PropertyType, out IManageCViews cViewManager))
                     {
                         IProvideAView viewProvider = cViewManager.GetViewProvider();
@@ -249,21 +251,29 @@ namespace DRM.PropBag
                 else if(pi.PropKind == PropKindEnum.CollectionView)
                 {
                     // Get the name of the Collection-Type PropItem that provides the data for this CollectionViewSource.
-                    string srcPropName = pi.BinderField.Path;
+                    string srcPropName = pi.BinderField?.Path;
 
                     //FetchData_Test(srcPropName, pi.PropertyType);
 
-                    if (TryGetViewManager(this, srcPropName, pi.PropertyType, out IManageCViews cViewManager))
+                    IProvideAView viewProvider;
+                    if (srcPropName != null)
                     {
-                        IProvideAView viewProvider = cViewManager.GetViewProvider();
-
-                        typedProp = _propFactory.CreateCVProp(pi.PropertyName, viewProvider);
-                        propItem = AddProp(pi.PropertyName, typedProp, out propId);
+                        if (TryGetViewManager(this, srcPropName, pi.PropertyType, out IManageCViews cViewManager))
+                        {
+                            viewProvider = cViewManager.GetViewProvider();
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException($"Could not retrieve the (generic) CViewManager for source PropItem: {srcPropName}.");
+                        }
                     }
                     else
                     {
-                        throw new InvalidOperationException($"Could not retrieve the (generic) CViewManager for source PropItem: {srcPropName}.");
+                        viewProvider = null;
                     }
+
+                    typedProp = _propFactory.CreateCVProp(pi.PropertyName, viewProvider);
+                    propItem = AddProp(pi.PropertyName, typedProp, out propId);
                 }
                 else
                 {
@@ -2466,7 +2476,6 @@ namespace DRM.PropBag
 
         #endregion
 
-
         #region IEditableObject Members
 
         public event EventHandler<EventArgs> ItemEndEdit;
@@ -2474,6 +2483,7 @@ namespace DRM.PropBag
 
         public void BeginEdit()
         {
+            System.Diagnostics.Debug.WriteLine($"BeginEdit was called on PropBag: {FullClassName}.");
         }
 
         public void CancelEdit()
@@ -2521,22 +2531,7 @@ namespace DRM.PropBag
         public bool TryGetDataSourceProvider(IPropBag propBag, PropNameType propertyName, Type propertyType,
             out DataSourceProvider dataSourceProvider)
         {
-            if (TryGetDataSourceProviderProvider(propBag, propertyName, propertyType, out IProvideADataSourceProvider dataSourceProviderProvider))
-            {
-                dataSourceProvider = dataSourceProviderProvider.DataSourceProvider;
-                return true;
-            }
-            else
-            {
-                dataSourceProvider = null;
-                return false;
-            }
-        }
-
-        public bool TryGetDataSourceProviderProvider(IPropBag propBag, PropNameType propertyName, Type propertyType,
-            out IProvideADataSourceProvider dataSourceProviderProvider)
-        {
-            bool mustBeRegistered = OurMetaData.AllPropsMustBeRegistered;
+            bool mustBeRegistered = true; // TryGetViewManager is called in the constructor, we cannot reference the virtual property: OurMetaData.AllPropsMustBeRegistered; 
 
             IPropData propData = GetPropGen(propertyName, propertyType,
                 haveValue: false,
@@ -2550,15 +2545,53 @@ namespace DRM.PropBag
 
             if (propData != null)
             {
-                dataSourceProviderProvider = _ourStoreAccessor.GetDataSourceProviderProvider(this, propId, propData, _propFactory.GetCViewProviderFactory());
+                dataSourceProvider = _ourStoreAccessor.GetDataSourceProvider(this, propId, propData, _propFactory.GetCViewProviderFactory());
                 return true;
             }
             else
             {
-                dataSourceProviderProvider = null;
+                dataSourceProvider = null;
                 return false;
             }
+
+            //if (TryGetDataSourceProviderProvider(propBag, propertyName, propertyType, out IProvideADataSourceProvider dataSourceProviderProvider))
+            //{
+            //    dataSourceProvider = dataSourceProviderProvider.DataSourceProvider;
+            //    return true;
+            //}
+            //else
+            //{
+            //    dataSourceProvider = null;
+            //    return false;
+            //}
         }
+
+        //public bool TryGetDataSourceProviderProvider(IPropBag propBag, PropNameType propertyName, Type propertyType,
+        //    out IProvideADataSourceProvider dataSourceProviderProvider)
+        //{
+        //    bool mustBeRegistered = OurMetaData.AllPropsMustBeRegistered;
+
+        //    IPropData propData = GetPropGen(propertyName, propertyType,
+        //        haveValue: false,
+        //        value: null,
+        //        alwaysRegister: false,
+        //        mustBeRegistered: mustBeRegistered,
+        //        neverCreate: false,
+        //        desiredHasStoreValue: null,
+        //        wasRegistered: out bool wasRegistered,
+        //        propId: out PropIdType propId);
+
+        //    if (propData != null)
+        //    {
+        //        dataSourceProviderProvider = _ourStoreAccessor.GetDataSourceProviderProvider(this, propId, propData, _propFactory.GetCViewProviderFactory());
+        //        return true;
+        //    }
+        //    else
+        //    {
+        //        dataSourceProviderProvider = null;
+        //        return false;
+        //    }
+        //}
 
         public bool TryGetViewManager(IPropBag propBag, PropNameType propertyName, Type propertyType, out IManageCViews cViewManager)
         {
@@ -2601,11 +2634,16 @@ namespace DRM.PropBag
                 {
                     lock(_sync)
                     {
-                        _ourStoreAccessor.Dispose();
+                        _ourStoreAccessor.Dispose(); // This disposes each of our PropItems.
                         _ourStoreAccessor = null;
 
                         _ourMetaData = null;
                         _propFactory = null;
+
+                        // TODO: Provide WeakReference to subscribers for this event.
+                        // instead of relying on callers to call Dispose.
+                        ItemEndEdit = null;
+
                         disposedValue = true;
                     }
 
@@ -2636,7 +2674,8 @@ namespace DRM.PropBag
 
         #region Generic Method Support
 
-        // TODO: Consider creating a new interface: IPropBagInternal and making this method be a member of that interface.
+        // TODO: This method is here because DoSet<T> is private.
+        // Consider creating a new interface: IPropBagInternal and making this method be a member of that interface.
         private bool DoSetBridge<T>(IPropBag target, PropIdType propId, string propertyName, IProp prop, object value)
         {
             T typedValue = (T)value;

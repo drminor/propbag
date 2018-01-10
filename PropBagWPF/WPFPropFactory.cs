@@ -2,7 +2,6 @@
 using DRM.PropBag.Caches;
 using DRM.TypeSafePropertyBag;
 using System;
-using System.ComponentModel;
 using System.Windows.Data;
 
 namespace DRM.PropBagWPF

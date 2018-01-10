@@ -1,61 +1,102 @@
 ﻿using DRM.TypeSafePropertyBag;
 using System;
-using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Threading;
 using System.Windows.Data;
 
 namespace DRM.PropBagWPF
 {
-    using PropIdType = UInt32;
     using PropNameType = String;
 
-    public class CViewProp : PropTypedBase<ListCollectionView>, ICViewProp<ListCollectionView>, INotifyItemEndEdit, INotifyCollectionChanged
+    // TODO: Implement IDisposable.
+    public class CViewProp : PropTypedBase<ListCollectionView>, ICViewProp<ListCollectionView>//, INotifyItemEndEdit, INotifyCollectionChanged
     {
         #region Private and Protected Members
 
         private readonly PropNameType _propertyName;
-        private readonly IProvideAView _viewProvider;
+        private IProvideAView _viewProvider;
 
         #endregion
 
         #region Constuctor
 
         public CViewProp(PropNameType propertyName, IProvideAView viewProvider)
-            : base(typeof(ListCollectionView), true, PropStorageStrategyEnum.Virtual, true, RefEqualityComparer<ListCollectionView>.Default.Equals, null, PropKindEnum.CollectionView)
+            : base(typeof(ListCollectionView), true, PropStorageStrategyEnum.Virtual, true,
+                  RefEqualityComparer<ListCollectionView>.Default.Equals, null, PropKindEnum.CollectionView)
         {
             _propertyName = propertyName;
             _viewProvider = viewProvider;
 
-            // TODO: Implement IDisposable or make this a weak event subscription.
-            _viewProvider.ViewSourceRefreshed += OurViewProviderGotRefreshed;
+            if (_viewProvider != null)
+            {
+                // TODO: Make this a weak event subscription.
+                _viewProvider.ViewSourceRefreshed += OurViewProviderGotRefreshed;
+            }
         }
 
-        public event NotifyCollectionChangedEventHandler CollectionChanged
+        public IProvideAView ViewProvider
         {
-            add
+            get => _viewProvider;
+            set
             {
-                ((INotifyCollectionChanged)_viewProvider).CollectionChanged += value;
-            }
+                if(!ReferenceEquals(_viewProvider, value))
+                {
+                    bool shouldCallReferesh;
+                    if (_viewProvider != null)
+                    {
+                        if(_viewProvider.ViewName != value.ViewName)
+                        {
+                            throw new InvalidOperationException("Fix Me");
+                        }
+                        _viewProvider.ViewSourceRefreshed -= OurViewProviderGotRefreshed;
+                        shouldCallReferesh = true;
+                    }
+                    else
+                    {
+                        shouldCallReferesh = false;
+                    }
+                    _viewProvider = value;
 
-            remove
-            {
-                ((INotifyCollectionChanged)_viewProvider).CollectionChanged -= value;
+                    if (_viewProvider != null)
+                    {
+                        _viewProvider.ViewSourceRefreshed += OurViewProviderGotRefreshed;
+                        RaiseViewSourceRefreshed(new ViewRefreshedEventArgs(_viewProvider.ViewName));
+                    }
+                    else if(shouldCallReferesh)
+                    {
+                        // New value is null and the previous value was non-null: refresh to reflect that now the list is empty.
+                        RaiseViewSourceRefreshed(new ViewRefreshedEventArgs(_viewProvider.ViewName));
+                    }
+                }
             }
         }
 
-        public event EventHandler<EventArgs> ItemEndEdit
-        {
-            add
-            {
-                ((INotifyItemEndEdit)_viewProvider).ItemEndEdit += value;
-            }
+        //// TODO Implement these directly, instead of using the base class's instance.
+        //public event NotifyCollectionChangedEventHandler CollectionChanged
+        //{
+        //    add
+        //    {
+        //        ((INotifyCollectionChanged)_viewProvider).CollectionChanged += value;
+        //    }
 
-            remove
-            {
-                ((INotifyItemEndEdit)_viewProvider).ItemEndEdit -= value;
-            }
-        }
+        //    remove
+        //    {
+        //        ((INotifyCollectionChanged)_viewProvider).CollectionChanged -= value;
+        //    }
+        //}
+
+        //public event EventHandler<EventArgs> ItemEndEdit
+        //{
+        //    add
+        //    {
+        //        ((INotifyItemEndEdit)_viewProvider).ItemEndEdit += value;
+        //    }
+
+        //    remove
+        //    {
+        //        ((INotifyItemEndEdit)_viewProvider).ItemEndEdit -= value;
+        //    }
+        //}
         #endregion
 
         #region Event Handlers
@@ -109,6 +150,11 @@ namespace DRM.PropBagWPF
             if (TypedValue is IDisposable disable)
             {
                 disable.Dispose();
+            }
+
+            if (_viewProvider != null)
+            {
+                _viewProvider.ViewSourceRefreshed -= OurViewProviderGotRefreshed;
             }
         }
 

@@ -56,6 +56,8 @@ namespace DRM.TypeSafePropertyBag
 
         public void CleanUp(bool doTypedCleanup)
         {
+            // Note: We have no managed (or unmanaged) resources to cleanup, 
+            //all we have to do is call the TypeProp's Cleanup method.
             IProp typedProp = TypedProp;
 
             if (typedProp != null)

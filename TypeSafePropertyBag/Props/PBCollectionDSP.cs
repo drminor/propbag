@@ -1,28 +1,31 @@
 ﻿using System;
 using System.Collections;
-using System.ComponentModel;
 using System.Windows.Data;
 
 namespace DRM.TypeSafePropertyBag
 {
     using PropIdType = UInt32;
-    using PSAccessServiceInternalType = IPropStoreAccessServiceInternal<UInt32, String>;
+    using PSAccessServiceInternalInterface = IPropStoreAccessServiceInternal<UInt32, String>;
 
-    internal class PBCollectionDataProvider : DataSourceProvider, INotifyItemEndEdit
+    // Takes a IProp<CT,T> where CT: is an ObservableCollection<T> and where CT raises the ItemEndEdit event.
+    // It calls for a refresh, which results in the binder to call our BeginQuery method,
+    // which will raise our DataChanged event, if the data produced by BeginQuery is different from the 'current data'.
+
+    internal class PBCollectionDSP : DataSourceProvider, INotifyItemEndEdit
     {
         #region Private Properties
 
-        PSAccessServiceInternalType _storeAccessor;
+        PSAccessServiceInternalInterface _storeAccessor;
         PropIdType _propId;
         IDisposable _unsubscriber;
 
-        public event EventHandler<EventArgs> ItemEndEdit;
-
         #endregion
+
+        public event EventHandler<EventArgs> ItemEndEdit;
 
         #region Constructor
 
-        public PBCollectionDataProvider(PSAccessServiceInternalType storeAccessor, PropIdType propId/*, bool isAsynchronous*/)
+        public PBCollectionDSP(PSAccessServiceInternalInterface storeAccessor, PropIdType propId/*, bool isAsynchronous*/)
         {
             _storeAccessor = storeAccessor;
             _propId = propId;
@@ -86,6 +89,7 @@ namespace DRM.TypeSafePropertyBag
                     {
                         inieeNew.ItemEndEdit += Iniee_ItemEndEdit;
                     }
+                    // This raises our DataChanged event (courtsey of our base class.)
                     OnQueryFinished(data);
                 }
                 else
@@ -96,7 +100,7 @@ namespace DRM.TypeSafePropertyBag
             else
             {
                 // TODO: Fix this error message -- need a way to better identify the property and parent PropBag.
-                throw new InvalidOperationException($"{nameof(PBCollectionDataProvider)} cannot access property with Id = {_propId}.");
+                throw new InvalidOperationException($"{nameof(PBCollectionDSP)} cannot access property with Id = {_propId}.");
             }
         }
 
@@ -114,7 +118,7 @@ namespace DRM.TypeSafePropertyBag
             ItemEndEdit?.Invoke(sender, e);
         }
 
-        private bool StartWatchingProp(PSAccessServiceInternalType storeAccessor, PropIdType propId, ref IDisposable unsubscriber)
+        private bool StartWatchingProp(PSAccessServiceInternalInterface storeAccessor, PropIdType propId, ref IDisposable unsubscriber)
         {
             if (unsubscriber != null)
             {
@@ -128,9 +132,9 @@ namespace DRM.TypeSafePropertyBag
 
         private void DoWhenListSourceIsReset(object sender, PcGenEventArgs args)
         {
-            // TODO: Attempt to avoid unsubscribing, just to resubscribe, if the PropItem is the same.
-            _unsubscriber?.Dispose();
-            _unsubscriber = null;
+            //// TODO: Attempt to avoid unsubscribing, just to resubscribe, if the PropItem is the same.
+            //_unsubscriber?.Dispose();
+            //_unsubscriber = null;
 
             if (!IsRefreshDeferred)
             {
@@ -142,7 +146,7 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        private bool TryGetDataFromProp(PSAccessServiceInternalType storeAccessor, PropIdType propId, out object data)
+        private bool TryGetDataFromProp(PSAccessServiceInternalInterface storeAccessor, PropIdType propId, out object data)
         {
             StoreNodeProp propNode = _storeAccessor.GetChild(propId);
 
