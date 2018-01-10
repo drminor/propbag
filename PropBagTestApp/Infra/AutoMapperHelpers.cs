@@ -63,12 +63,9 @@ namespace PropBagTestApp.Infra
             IProvidePropStoreAccessService<PropIdType, PropNameType> result = 
                 new SimplePropStoreAccessServiceProvider(MAX_NUMBER_OF_PROPERTIES, handlerDispatchDelegateCacheProvider);
 
-            //IProvideDelegateCaches delegateCacheProvider = new SimpleDelegateCacheProvider();
-
             ThePropFactory = new WPFPropFactory
                 (
                     propStoreAccessServiceProvider: PropStoreAccessServiceProvider,
-                    //delegateCacheProvider: delegateCacheProvider,
                     typeResolver: GetTypeFromName,
                     valueConverter: null
                 );
