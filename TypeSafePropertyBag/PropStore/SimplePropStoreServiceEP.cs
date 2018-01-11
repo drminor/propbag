@@ -30,7 +30,7 @@ namespace DRM.TypeSafePropertyBag
 
         #endregion
 
-        #region PropStoreAccessService Creation and TearDown
+        #region PropStoreAccessService Creation
 
         public PSAccessServiceType CreatePropStoreService(IPropBagInternal propBag)
         {
@@ -83,12 +83,13 @@ namespace DRM.TypeSafePropertyBag
 
         #region Diagnostics
 
+        public int AccessCounter => _propStoreAccessServiceProvider.AccessCounter;
+
+
         public void IncAccess()
         {
             _propStoreAccessServiceProvider.IncAccess();
         }
-
-        public int AccessCounter => _propStoreAccessServiceProvider.AccessCounter;
 
         public void ResetAccessCounter()
         {
