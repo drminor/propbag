@@ -7,7 +7,7 @@ using System.Windows.Data;
 namespace DRM.PropBagWPF
 {
     using PropNameType = String;
-    using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
+    //using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
 
     public class WPFPropFactory : PropFactory
     {

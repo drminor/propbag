@@ -71,6 +71,7 @@
     <Compile Include="PropInterfaces\IProvideAView.cs" />
     <Compile Include="PropInterfaces\ViewAndViewManagerCreatorDelegates.cs" />
     <Compile Include="PropStorageStrategyEnum.cs" />
+    <Compile Include="PropStore\SimplePropStoreServiceEP.cs" />
     <Compile Include="PropStore\Subscriptions\ParentNCSubscriberCollection.cs" />
     <Compile Include="PropStore\Subscriptions\ParentNCSubscription.cs" />
     <Compile Include="PropStore\Subscriptions\ParentNCSubscriptionRequest.cs" />

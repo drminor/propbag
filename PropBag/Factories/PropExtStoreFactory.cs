@@ -11,7 +11,7 @@ namespace DRM.PropBag
 {
     using PropIdType = UInt32;
     using PropNameType = String;
-    using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
+    //using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
     using SubCacheType = ICacheSubscriptions<UInt32>;
 
     using PropBagType = PropBag;

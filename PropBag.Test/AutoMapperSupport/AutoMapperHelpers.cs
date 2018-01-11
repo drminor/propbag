@@ -11,7 +11,6 @@ namespace PropBagLib.Tests.AutoMapperSupport
     using PropIdType = UInt32;
     using PropNameType = String;
 
-    using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
 
     public class AutoMapperHelpers : IDisposable
@@ -45,8 +44,8 @@ namespace PropBagLib.Tests.AutoMapperSupport
             return autoMapperProvider;
         }
 
-        PSAccessServiceProviderType _propStoreAccessServiceProvider;
-        public PSAccessServiceProviderType PropStoreAccessServiceProvider
+        PSAccessServiceCreatorInterface _propStoreAccessServiceProvider;
+        public PSAccessServiceCreatorInterface PropStoreAccessServiceProvider
         {
             get
             {
@@ -54,7 +53,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 {
                     IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider = new SimpleHandlerDispatchDelegateCacheProvider();
 
-                    _propStoreAccessServiceProvider = new SimplePropStoreAccessServiceProvider(
+                    _propStoreAccessServiceProvider = new SimplePropStoreServiceEP(
                         MAX_NUMBER_OF_PROPERTIES,
                         handlerDispatchDelegateCacheProvider);
                 }

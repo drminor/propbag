@@ -14,9 +14,9 @@ namespace DRM.TypeSafePropertyBag
     using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
     using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
     using PSAccessServiceInternalType = IPropStoreAccessServiceInternal<UInt32, String>;
-    using PSCloneServiceType = IProvidePropStoreCloneService<UInt32, String>;
+    //using PSCloneServiceType = IProvidePropStoreCloneService<UInt32, String>;
 
-    public class SimplePropStoreAccessServiceProvider : PSAccessServiceProviderType, PSCloneServiceType
+    internal class SimplePropStoreAccessServiceProvider : PSAccessServiceProviderType//, PSCloneServiceType
     {
         #region Private Members
 
@@ -148,7 +148,7 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        PSAccessServiceType PSCloneServiceType.CloneService
+        public PSAccessServiceType /*PSCloneServiceType.*/CloneService
             (
             IPropBagInternal sourcePropBag,
             PSAccessServiceType sourceAccessService,

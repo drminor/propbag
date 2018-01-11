@@ -26,7 +26,7 @@ namespace DRM.TypeSafePropertyBag
     using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
     using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
     using PSAccessServiceInternalInterface = IPropStoreAccessServiceInternal<UInt32, String>;
-    using PSCloneServiceType = IProvidePropStoreCloneService<UInt32, String>;
+    //using PSCloneServiceType = IProvidePropStoreCloneService<UInt32, String>;
 
 
     internal class SimplePropStoreAccessService : PSAccessServiceInterface, IHaveTheStoreNode, PSAccessServiceInternalInterface, IDisposable
@@ -72,11 +72,11 @@ namespace DRM.TypeSafePropertyBag
             _propStoreAccessServiceProvider = propStoreAccessServiceProvider;
             _handlerDispatchDelegateCacheProvider = handlerDispatchDelegateCacheProvider;
 
-            if (!(propStoreAccessServiceProvider is PSCloneServiceType))
-            {
-                string msg = $"This instance of {nameof(SimplePropStoreAccessService)} was not provided a {nameof(PSAccessServiceProviderType)} that implements the {nameof(PSCloneServiceType)} interface";
-                System.Diagnostics.Debug.WriteLine($"Warning: {msg}.");
-            }
+            //if (!(propStoreAccessServiceProvider is PSCloneServiceType))
+            //{
+            //    string msg = $"This instance of {nameof(SimplePropStoreAccessService)} was not provided a {nameof(PSAccessServiceProviderType)} that implements the {nameof(PSCloneServiceType)} interface";
+            //    System.Diagnostics.Debug.WriteLine($"Warning: {msg}.");
+            //}
 
             _level2KeyMan = level2KeyManager;
             MaxObjectsPerAppDomain = propStoreAccessServiceProvider.MaxObjectsPerAppDomain;
@@ -416,12 +416,12 @@ namespace DRM.TypeSafePropertyBag
 
         public PSAccessServiceInterface CloneProps(IPropBag callingPropBag, IPropBagInternal copySource)
         {
-            if (!(_propStoreAccessServiceProvider is PSCloneServiceType))
-            {
-                string msg = $"This instance of {nameof(SimplePropStoreAccessService)} was not provided a {nameof(PSAccessServiceProviderType)} that implements the {nameof(PSCloneServiceType)} interface";
+            //if (!(_propStoreAccessServiceProvider is PSCloneServiceType))
+            //{
+            //    string msg = $"This instance of {nameof(SimplePropStoreAccessService)} was not provided a {nameof(PSAccessServiceProviderType)} that implements the {nameof(PSCloneServiceType)} interface";
 
-                throw new InvalidOperationException($"{msg}.");
-            }
+            //    throw new InvalidOperationException($"{msg}.");
+            //}
 
             //if (!(copySource is IPropBagInternal int_propBag))
             //{
@@ -439,9 +439,11 @@ namespace DRM.TypeSafePropertyBag
             // the caller is using the StoreAccessor that belongs to the copySource to make this call.
             GetAndCheckObjectRef(copySource);
 
-            PSCloneServiceType accessorCloneService = (PSCloneServiceType)_propStoreAccessServiceProvider;
+            //PSCloneServiceType accessorCloneService = (PSCloneServiceType)_propStoreAccessServiceProvider;
 
-            PSAccessServiceInterface newStoreAccessor = accessorCloneService.CloneService
+            //PSAccessServiceInterface newStoreAccessor = accessorCloneService.CloneService
+
+            PSAccessServiceInterface newStoreAccessor = _propStoreAccessServiceProvider.CloneService
                 (
                     copySource,
                     copySource.ItsStoreAccessor,

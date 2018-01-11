@@ -13,7 +13,6 @@ namespace PropBagTestApp.Infra
     using PropIdType = UInt32;
     using PropNameType = String;
 
-    using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
 
 
@@ -57,14 +56,14 @@ namespace PropBagTestApp.Infra
         public static SimpleAutoMapperProvider AutoMapperProvider { get; }
         public static IPropFactory ThePropFactory { get; }
 
-        public static PSAccessServiceProviderType PropStoreAccessServiceProvider { get; }
+        public static PSAccessServiceCreatorInterface PropStoreAccessServiceCreator { get; }
 
         static JustSayNo()
         {
             IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider = new SimpleHandlerDispatchDelegateCacheProvider();
 
-            IProvidePropStoreAccessService<PropIdType, PropNameType> result = 
-                new SimplePropStoreAccessServiceProvider(MAX_NUMBER_OF_PROPERTIES, handlerDispatchDelegateCacheProvider);
+            PSAccessServiceCreatorInterface result = 
+                new SimplePropStoreServiceEP(MAX_NUMBER_OF_PROPERTIES, handlerDispatchDelegateCacheProvider);
 
             ThePropFactory = new WPFPropFactory
                 (
@@ -75,11 +74,11 @@ namespace PropBagTestApp.Infra
             IPropBagTemplateProvider propBagTemplateProvider = new PropBagTemplateProvider(Application.Current.Resources);
 
             IViewModelActivator vmActivator = new SimpleViewModelActivator();
-            PropModelProvider = new PropModelProvider(propBagTemplateProvider, ThePropFactory, vmActivator, PropStoreAccessServiceProvider);
+            PropModelProvider = new PropModelProvider(propBagTemplateProvider, ThePropFactory, vmActivator, PropStoreAccessServiceCreator);
 
-            ViewModelHelper = new ViewModelHelper(PropModelProvider, vmActivator, PropStoreAccessServiceProvider);
+            ViewModelHelper = new ViewModelHelper(PropModelProvider, vmActivator, PropStoreAccessServiceCreator);
 
-            AutoMapperProvider = new AutoMapperHelpers().InitializeAutoMappers(PropModelProvider, PropStoreAccessServiceProvider);
+            AutoMapperProvider = new AutoMapperHelpers().InitializeAutoMappers(PropModelProvider, PropStoreAccessServiceCreator);
         }
 
         public static Type GetTypeFromName(string typeName)
