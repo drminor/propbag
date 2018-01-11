@@ -1,28 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace DRM.TypeSafePropertyBag
 {
-    using CompositeKeyType = UInt64;
-    using ObjectIdType = UInt64;
-
-    using L2KeyManType = IL2KeyMan<UInt32, String>;
-
-    using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
-
+    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
+    using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
     using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
 
-    using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
-    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
-
-
-    public class SimplePropStoreServiceEP : PSAccessServiceCreatorInterface
+    public class SimplePropStoreServiceEP : PSAccessServiceCreatorInterface, IDisposable
     {
         #region Private Members
 
         PSAccessServiceProviderType _propStoreAccessServiceProvider;
-
 
         #endregion
 
@@ -52,7 +40,6 @@ namespace DRM.TypeSafePropertyBag
 
         #endregion
 
-
         #region IDisposable Support
 
         private bool disposedValue = false; // To detect redundant calls
@@ -63,9 +50,11 @@ namespace DRM.TypeSafePropertyBag
             {
                 if (disposing)
                 {
-                    // TODO: dispose managed state (managed objects).
-                    //_theGlobalStore.Clear();
-                    //_tree.Clear();
+                    // TODO: dispose managed state (managed objects). 
+                    if(_propStoreAccessServiceProvider != null)
+                    {
+                        _propStoreAccessServiceProvider.Dispose();
+                    }
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
