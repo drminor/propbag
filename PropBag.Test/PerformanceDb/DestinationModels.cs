@@ -7,10 +7,13 @@ using System.Collections.Generic;
 
 namespace PropBagLib.Tests.PerformanceDb
 {
+    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
+
     public partial class DestinationModel1 : PropBag, ICloneable
     {
-        public DestinationModel1(PropBagTypeSafetyMode typeSafetyMode, IPropFactory propFactory, string fullClassName)
-            : base(typeSafetyMode, propFactory, fullClassName)
+        public DestinationModel1(PropBagTypeSafetyMode typeSafetyMode, PSAccessServiceCreatorInterface storeAccessCreator,
+            string fullClassName, IPropFactory propFactory)
+            : base(typeSafetyMode, storeAccessCreator, propFactory, fullClassName)
         {
             AddProp<int>("Id", null, null, initialValue: 0);
             AddProp<string>("FirstName", null, null, null);
@@ -19,8 +22,8 @@ namespace PropBagLib.Tests.PerformanceDb
             AddProp<Profession>("Profession", null, null, Profession.Default);
         }
 
-        public DestinationModel1(PropModel propModel, string fullClassName, IPropFactory propFactory)
-            : base(propModel, fullClassName, propFactory)
+        public DestinationModel1(PropModel propModel, PSAccessServiceCreatorInterface storeAccessCreator, IPropFactory propFactory, string fullClassName)
+            : base(propModel, storeAccessCreator, propFactory, fullClassName)
         {
         }
 
@@ -37,14 +40,15 @@ namespace PropBagLib.Tests.PerformanceDb
 
     public partial class DestinationModel5 : PropBag
     {
-        public DestinationModel5(PropBagTypeSafetyMode typeSafetyMode, IPropFactory propFactory, string fullClassName)
-            : base(typeSafetyMode, propFactory, fullClassName)
+        public DestinationModel5(PropBagTypeSafetyMode typeSafetyMode, PSAccessServiceCreatorInterface storeAccessCreator,
+            string fullClassName, IPropFactory propFactory)
+            : base(typeSafetyMode, storeAccessCreator, propFactory, fullClassName)
         {
             AddProp<Guid>("ProductId", null, null, Guid.NewGuid());
         }
 
-        public DestinationModel5(PropModel propModel, string fullClassName, IPropFactory propFactory)
-            : base(propModel, fullClassName, propFactory)
+        public DestinationModel5(PropModel propModel, PSAccessServiceCreatorInterface storeAccessCreator, IPropFactory propFactory, string fullClassName)
+            : base(propModel, storeAccessCreator, propFactory, fullClassName)
         {
         }
 
@@ -58,8 +62,8 @@ namespace PropBagLib.Tests.PerformanceDb
         //    AddProp<Guid>("ProductId", null, false, null, null, Guid.NewGuid());
         //}
 
-        public DestinationModel6(PropModel propModel, string fullClassName, IPropFactory propFactory)
-            : base(propModel, fullClassName, propFactory)
+        public DestinationModel6(PropModel propModel, PSAccessServiceCreatorInterface storeAccessCreator, IPropFactory propFactory, string fullClassName)
+            : base(propModel, storeAccessCreator, propFactory, fullClassName)
         {
         }
 

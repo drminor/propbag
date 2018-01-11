@@ -12,7 +12,7 @@ namespace DRM.TypeSafePropertyBag
     /// <summary>
     /// All implementers of IPropBag that also want to use the 
     /// </summary>
-    public interface IPropBagInternal
+    public interface IPropBagInternal : IPropBag
     {
         PSAccessServiceType ItsStoreAccessor { get; }
         void RaiseStandardPropertyChanged(PropIdType propId, PropNameType propertyName);
@@ -91,7 +91,7 @@ namespace DRM.TypeSafePropertyBag
         IDictionary<PropNameType, IPropData> GetAllPropertyValues();
         IDictionary<PropNameType, ValPlusType> GetAllPropNamesAndTypes();
 
-        void CloneProps(IPropBag copySource);
+        //void CloneProps(IPropBagInternal copySource);
 
         //bool TryGetDataSourceProviderProvider(IPropBag propBag, PropNameType propertyName, Type propertyType, out IProvideADataSourceProvider dataSourceProviderProvider);
 

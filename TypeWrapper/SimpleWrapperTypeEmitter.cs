@@ -117,17 +117,28 @@ namespace DRM.TypeWrapper
         private void BuildConstructor(ConstructorBuilder cb, ConstructorInfo ci)
         {
             if (ci == null) throw new ArgumentNullException(string.Format("Cannot find contructor method for {0}", nameof(ci)));
-            if (ci.GetParameters().Length > 3) throw new NotSupportedException("Max parameter count for constructors is 3");
+            //if (ci.GetParameters().Length > 4) throw new NotSupportedException("Max parameter count for constructors is 4");
+
+            ParameterInfo[] pars = ci.GetParameters();
 
             ILGenerator ctorIl = cb.GetILGenerator();
             ctorIl.Emit(OpCodes.Ldarg_0);
-            ctorIl.Emit(OpCodes.Ldarg_1);
 
-            if (ci.GetParameters().Length > 1)
-                ctorIl.Emit(OpCodes.Ldarg_2);
+            for(int aPtr = 0; aPtr < pars.Length; aPtr++)
+            {
+                ctorIl.Emit(OpCodes.Ldarg_S, aPtr + 1);
+            }
 
-            if (ci.GetParameters().Length > 2)
-                ctorIl.Emit(OpCodes.Ldarg_3);
+            //ctorIl.Emit(OpCodes.Ldarg_1);
+
+            //if (ci.GetParameters().Length > 1)
+            //    ctorIl.Emit(OpCodes.Ldarg_2);
+
+            //if (ci.GetParameters().Length > 2)
+            //    ctorIl.Emit(OpCodes.Ldarg_3);
+
+            ////if (ci.GetParameters().Length > 3)
+            ////    ctorIl.Emit(OpCodes.Ldarg_S, 4);
 
             ctorIl.Emit(OpCodes.Call, ci);
             ctorIl.Emit(OpCodes.Ret);

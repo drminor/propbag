@@ -9,7 +9,7 @@ using System.Windows.Data;
 namespace DRM.TypeSafePropertyBag
 {
     using PropNameType = String;
-    using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
+    //using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
 
     public interface IPropFactory 
     {
@@ -20,7 +20,7 @@ namespace DRM.TypeSafePropertyBag
         ResolveTypeDelegate TypeResolver { get; }
         IConvertValues ValueConverter { get; }
 
-        PSAccessServiceType CreatePropStoreService(IPropBagInternal propBag);
+        //PSAccessServiceType CreatePropStoreService(IPropBagInternal propBag);
 
         IProvideDelegateCaches DelegateCacheProvider { get; }
 

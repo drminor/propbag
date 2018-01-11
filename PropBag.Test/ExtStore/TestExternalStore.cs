@@ -8,10 +8,11 @@ using System;
 
 namespace PropBagLib.Tests
 {
+    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
+
     [TestFixtureAttribute]
     public class TestExternalStore
     {
-
         private ExtStoreModel mod1;
 
         bool varToEnsureWorkIsDone = false;
@@ -32,13 +33,13 @@ namespace PropBagLib.Tests
 
             PropExtStoreFactory factory = new PropExtStoreFactory
                 (stuff: stuff,
-                propStoreAccessServiceProvider: mapperHelpers.PropStoreAccessServiceProvider,
                 typeResolver: null,
                 valueConverter: null
                 );
 
-            mod1 = ExtStoreModel.Create(factory);
+            PSAccessServiceCreatorInterface storeAccessCreator = mapperHelpers.StoreAccessCreator;
 
+            mod1 = ExtStoreModel.Create(storeAccessCreator, factory);
         }
 
         [TearDown]

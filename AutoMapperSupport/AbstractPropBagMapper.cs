@@ -9,6 +9,8 @@ using System.Linq;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
+    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
+
     public abstract class AbstractPropBagMapper<TSource, TDestination> 
         : IPropBagMapper<TSource, TDestination> where TDestination : class, IPropBag
     {
@@ -27,6 +29,7 @@ namespace DRM.PropBag.AutoMapperSupport
         public bool SupportsMapFrom { get; }
 
         IViewModelActivator _vmActivator;
+        PSAccessServiceCreatorInterface _storeAccessCreator;
 
         private readonly bool _requiresWrappperTypeEmitServices;
         private readonly ICloneable _template;
@@ -37,7 +40,7 @@ namespace DRM.PropBag.AutoMapperSupport
         #region Constructor
 
         public AbstractPropBagMapper(IPropBagMapperKey<TSource, TDestination> mapRequest,
-            IMapper mapper, IViewModelActivator vmActivator)
+            IMapper mapper, IViewModelActivator vmActivator, PSAccessServiceCreatorInterface storeAccessCreator)
         {
             SourceType = mapRequest.SourceTypeDef.TargetType;
             DestinationType = mapRequest.DestinationTypeDef.TargetType;
@@ -48,6 +51,7 @@ namespace DRM.PropBag.AutoMapperSupport
 
             Mapper = mapper;
             _vmActivator = vmActivator;
+            _storeAccessCreator = storeAccessCreator;
 
             SupportsMapFrom = true;
 
@@ -58,11 +62,11 @@ namespace DRM.PropBag.AutoMapperSupport
                 if(_requiresWrappperTypeEmitServices)
                 {
                     _template = null;
-                    _pbTemplate = (IPropBag)GetNewDestination(PropModel, DestinationType, PropFactory, fullClassName: null);
+                    _pbTemplate = (IPropBag)GetNewDestination(PropModel, _storeAccessCreator, DestinationType, PropFactory, fullClassName: null);
                 }
                 else
                 {
-                    _template = (ICloneable)GetNewDestination(PropModel, DestinationType, PropFactory, fullClassName: null);
+                    _template = (ICloneable)GetNewDestination(PropModel, _storeAccessCreator, DestinationType, PropFactory, fullClassName: null);
                     _pbTemplate = null;
                 }
             }
@@ -141,18 +145,18 @@ namespace DRM.PropBag.AutoMapperSupport
             }
             else
             {
-                result = GetNewDestination(PropModel, RunTimeType, PropFactory, fullClassName: null);
+                result = GetNewDestination(PropModel, _storeAccessCreator, RunTimeType, PropFactory, fullClassName: null);
             }
 
             //result = GetNewDestination(PropModel, RunTimeType, PropFactory, fullClassName: null);
             return result;
         }
 
-        private TDestination GetNewDestination(PropModel propModel, Type destinationTypeOrProxy, IPropFactory propFactory, string fullClassName)
+        private TDestination GetNewDestination(PropModel propModel, PSAccessServiceCreatorInterface storeAccessCreator, Type destinationTypeOrProxy, IPropFactory propFactory, string fullClassName)
         {
             try
             {
-                var newViewModel = _vmActivator.GetNewViewModel(propModel, destinationTypeOrProxy, fullClassName, propFactory);
+                var newViewModel = _vmActivator.GetNewViewModel(propModel, storeAccessCreator, destinationTypeOrProxy, propFactory, fullClassName);
                 return newViewModel as TDestination;
             }
             catch (Exception e2)

@@ -21,8 +21,10 @@ namespace DRM.PropBag
     using PropIdType = UInt32;
     using PropNameType = String;
     using IRegisterBindingsFowarderType = IRegisterBindingsForwarder<UInt32>;
-    using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
-    using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
+
+    //using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
+    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
+    using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
 
     #region Summary and Remarks
 
@@ -51,7 +53,7 @@ namespace DRM.PropBag
 
         // These items are provided to us.
         private IPropFactory _propFactory { get; set; }
-        private PSAccessServiceType _ourStoreAccessor { get; set; }
+        private PSAccessServiceInterface _ourStoreAccessor { get; set; }
 
         // We are responsible for these
         private ITypeSafePropBagMetaData _ourMetaData { get; set; }
@@ -61,7 +63,7 @@ namespace DRM.PropBag
         private object _sync = new object();
 
         // These fulfill the IPropBagInternal contract
-        public PSAccessServiceType /*IPropBagInternal.*/ItsStoreAccessor => _ourStoreAccessor;
+        public PSAccessServiceInterface /*IPropBagInternal.*/ItsStoreAccessor => _ourStoreAccessor;
 
         #endregion
 
@@ -158,27 +160,34 @@ namespace DRM.PropBag
         /// </summary>
         /// <param name="pm"></param>
         /// <param name="propFactory">The PropFactory to use instead of the one specified by the PropModel.</param>
-        public PropBag(ControlModel.PropModel pm, string fullClassName = null, IPropFactory propFactory = null)
-            : this(pm.TypeSafetyMode, propFactory ?? pm.PropFactory, fullClassName)
+        public PropBag(ControlModel.PropModel pm, PSAccessServiceCreatorInterface storeAcessorCreator, IPropFactory propFactory = null, string fullClassName = null)
+            : this(pm.TypeSafetyMode, storeAcessorCreator, propFactory ?? pm.PropFactory, fullClassName)
         {
             Hydrate(pm);
             int testc = _ourStoreAccessor.PropertyCount;
         }
 
-        protected PropBag(IPropBag copySource)
-            : this(copySource.TypeSafetyMode, copySource.PropFactory, copySource.FullClassName)
+        protected PropBag(IPropBagInternal copySource)
+            //: this( copySource.TypeSafetyMode, null, copySource.PropFactory, copySource.FullClassName)
         {
-            CloneProps(copySource);
+            _typeSafetyMode = copySource.TypeSafetyMode;
+            _propFactory = copySource.PropFactory;
+
+            _ourMetaData = BuildMetaData(_typeSafetyMode, copySource.FullClassName, _propFactory);
+            _ourStoreAccessor = CloneProps(copySource/*, copySource.ItsStoreAccessor*/);
         }
 
-        protected PropBag(PropBagTypeSafetyMode typeSafetyMode, IPropFactory propFactory, string fullClassName = null)
+        protected PropBag(PropBagTypeSafetyMode typeSafetyMode, PSAccessServiceCreatorInterface storeAcessorCreator, IPropFactory propFactory, string fullClassName = null)
         {
             _typeSafetyMode = typeSafetyMode;
             _propFactory = propFactory ?? throw new ArgumentNullException(nameof(propFactory));
 
             _ourMetaData = BuildMetaData(_typeSafetyMode, fullClassName, _propFactory);
 
-            _ourStoreAccessor = _propFactory.CreatePropStoreService(this);
+            //_ourStoreAccessor = _propFactory.CreatePropStoreService(this);
+
+            if (storeAcessorCreator == null) throw new ArgumentNullException(nameof(storeAcessorCreator));
+            _ourStoreAccessor = storeAcessorCreator.CreatePropStoreService(this);
         }
 
         protected ITypeSafePropBagMetaData BuildMetaData(PropBagTypeSafetyMode typeSafetyMode, string classFullName, IPropFactory propFactory)
@@ -1475,11 +1484,17 @@ namespace DRM.PropBag
             return new PropBag(this);
         }
 
-        public void CloneProps(IPropBag copySource)
+        private PSAccessServiceInterface CloneProps(IPropBagInternal copySource/*, PSAccessServiceInterface storeAccessor*/)
         {
-            _ourStoreAccessor = _ourStoreAccessor.CloneProps(this, copySource);
+
+            //_ourStoreAccessor = _ourStoreAccessor.CloneProps(this, copySource);
+
+            PSAccessServiceInterface storeAccessor = copySource.ItsStoreAccessor;
+            PSAccessServiceInterface result = storeAccessor.CloneProps(this, copySource);
 
             _properties = ((ICustomTypeDescriptor)copySource).GetProperties();
+
+            return result;
         }
 
         public virtual ITypeSafePropBagMetaData GetMetaData()
@@ -2282,7 +2297,7 @@ namespace DRM.PropBag
             }
         }
 
-        private IProp<T> CheckTypeInfo<T>(PropIdType propId, PropNameType propertyName, IPropData PropData, PSAccessServiceType storeAccess, bool isGetOp = true)
+        private IProp<T> CheckTypeInfo<T>(PropIdType propId, PropNameType propertyName, IPropData PropData, PSAccessServiceInterface storeAccess, bool isGetOp = true)
         {
             if (!PropData.TypedProp.TypeIsSolid)
             {

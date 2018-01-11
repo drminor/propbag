@@ -102,7 +102,8 @@ namespace PropBagLib.Tests.PerformanceDb
             List<Person> personList = b.Get().ToList();
             foreach (Person p in personList)
             {
-                DestinationModel1 dest = new DestinationModel1(PropBagTypeSafetyMode.Tight, propFactory_V1, fullClassName);
+                // TODO: AAA
+                DestinationModel1 dest = new DestinationModel1(PropBagTypeSafetyMode.Tight, ourHelper.StoreAccessCreator, fullClassName, propFactory_V1);
 
                 dest.SetIt<int>(p.Id, "Id");
                 dest.SetIt<string>(p.FirstName, "FirstName");
@@ -276,7 +277,9 @@ namespace PropBagLib.Tests.PerformanceDb
 
             // Set up Child VM (Using Model 5)
             PropModel propModel5 = pmHelpers.GetPropModelForModel5Dest(propFactory_V1);
-            DestinationModel5 testChildVM = new DestinationModel5(propModel5, null, propFactory_V1);
+
+            // TODO: AAA
+            DestinationModel5 testChildVM = new DestinationModel5(propModel5, ourHelper.StoreAccessCreator, propFactory_V1, null);
 
             Business b = new Business();
             testChildVM.SetIt(b, "Business");
@@ -289,7 +292,7 @@ namespace PropBagLib.Tests.PerformanceDb
 
             // Set up MainVM (Using Model 6)
             PropModel propModel6 = pmHelpers.GetPropModelForModel6Dest(propFactory_V1);
-            DestinationModel6 testMainVM = new DestinationModel6(propModel6, null, propFactory_V1);
+            DestinationModel6 testMainVM = new DestinationModel6(propModel6, ourHelper.StoreAccessCreator, propFactory_V1, null);
 
             Business b2 = new Business();
             testMainVM.SetIt(b2, "Business");

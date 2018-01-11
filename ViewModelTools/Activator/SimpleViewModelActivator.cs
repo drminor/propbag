@@ -6,6 +6,8 @@ using System.Reflection;
 
 namespace DRM.ViewModelTools
 {
+    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
+
     public class SimpleViewModelActivator : IViewModelActivator
     {
         #region Private Members
@@ -46,9 +48,9 @@ namespace DRM.ViewModelTools
         //}
 
         // BaseType + PropModel (BaseType known only at run time.
-        public object GetNewViewModel(PropModel propModel, Type typeToCreate, string fullClassName = null, IPropFactory propFactory = null)
+        public object GetNewViewModel(PropModel propModel, PSAccessServiceCreatorInterface storeAccessCreator, Type typeToCreate, IPropFactory propFactory = null, string fullClassName = null)
         {
-            object[] parameters = new object[] { propModel, fullClassName, propFactory };
+            object[] parameters = new object[] { propModel, storeAccessCreator, propFactory, fullClassName };
 
             //BindingFlags bFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.CreateInstance;
             //object result = Activator.CreateInstance(typeToCreate, bFlags, binder: null, args: parameters, culture: null);
@@ -66,9 +68,9 @@ namespace DRM.ViewModelTools
         //}
 
         // BaseType + PropModel (BaseType known at compile time.)
-        public object GetNewViewModel<BT>(PropModel propModel, string fullClassName = null, IPropFactory propFactory = null) where BT : class, IPropBag
+        public object GetNewViewModel<BT>(PropModel propModel, PSAccessServiceCreatorInterface storeAccessCreator, IPropFactory propFactory = null, string fullClassName = null) where BT : class, IPropBag
         {
-            object[] parameters = new object[] { propModel, fullClassName, propFactory };
+            object[] parameters = new object[] { propModel, storeAccessCreator, propFactory, fullClassName };
             object result = Activator.CreateInstance(typeof(BT), args: parameters);
             return result;
         }

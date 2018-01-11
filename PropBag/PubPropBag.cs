@@ -14,7 +14,9 @@ namespace DRM.PropBag
 {
     using PropIdType = UInt32;
     using PropNameType = String;
-    using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
+    //using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
+    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
+
     using SubCacheType = ICacheSubscriptions<UInt32>;
 
     #region Summary and Remarks
@@ -40,18 +42,18 @@ namespace DRM.PropBag
     {
         #region Constructor
 
-        public PubPropBag(PropModel pm, IPropFactory propFactory = null, string fullClassName = null)
-            : base(pm, fullClassName, propFactory)
+        public PubPropBag(PropModel pm, PSAccessServiceCreatorInterface storeAccessCreator, IPropFactory propFactory = null, string fullClassName = null)
+            : base(pm, storeAccessCreator, propFactory, fullClassName)
         {
         }
 
-        protected PubPropBag(IPropBag copySource)
+        protected PubPropBag(IPropBagInternal copySource)
             : base(copySource)
         {
         }
 
-        public PubPropBag(PropBagTypeSafetyMode typeSafetyMode, IPropFactory propFactory, string fullClassName = null)
-            : base(typeSafetyMode, propFactory, fullClassName)
+        public PubPropBag(PropBagTypeSafetyMode typeSafetyMode, PSAccessServiceCreatorInterface storeAccessCreator, IPropFactory propFactory, string fullClassName = null)
+            : base(typeSafetyMode, storeAccessCreator, propFactory, fullClassName)
         {
         }
 

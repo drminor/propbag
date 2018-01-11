@@ -31,11 +31,10 @@ namespace DRM.PropBag
         public PropExtStoreFactory
             (
                 object stuff,
-                PSAccessServiceProviderType propStoreAccessServiceProvider,
                 ResolveTypeDelegate typeResolver,
                 IConvertValues valueConverter
             )
-            : base(propStoreAccessServiceProvider, new SimpleDelegateCacheProvider(typeof(PropBag), typeof(APFGenericMethodTemplates)), typeResolver, valueConverter)
+            : base(new SimpleDelegateCacheProvider(typeof(PropBag), typeof(APFGenericMethodTemplates)), typeResolver, valueConverter)
         {
             // Info to help us set up the getters and setters
             Stuff = stuff;

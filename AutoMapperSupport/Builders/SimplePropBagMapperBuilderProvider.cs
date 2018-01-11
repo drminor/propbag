@@ -1,20 +1,28 @@
 ﻿using DRM.TypeWrapper;
 using DRM.TypeWrapper.TypeDesc;
 using DRM.ViewModelTools;
-
 using DRM.TypeSafePropertyBag;
+using System;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
+    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
+
     public class SimplePropBagMapperBuilderProvider : IPropBagMapperBuilderProvider
     {
         private ICreateWrapperType WrapperTypeCreator { get; }
         private IViewModelActivator ViewModelActivator { get; }
 
-        public SimplePropBagMapperBuilderProvider(ICreateWrapperType wrapperTypeCreator, IViewModelActivator viewModelActivator)
+        private PSAccessServiceCreatorInterface _storeAccessCreator;
+
+
+        public SimplePropBagMapperBuilderProvider(ICreateWrapperType wrapperTypeCreator,
+            IViewModelActivator viewModelActivator, PSAccessServiceCreatorInterface storeAccessCreator)
         {
             WrapperTypeCreator = wrapperTypeCreator ?? GetSimpleWrapperTypeCreator();
             ViewModelActivator = viewModelActivator ?? new SimpleViewModelActivator();
+            _storeAccessCreator = storeAccessCreator ?? throw new ArgumentNullException(nameof(storeAccessCreator));
+
         }
 
         public IBuildPropBagMapper<TSource, TDestination> GetPropBagMapperBuilder<TSource, TDestination>
@@ -27,7 +35,8 @@ namespace DRM.PropBag.AutoMapperSupport
                 (
                     mapperConfigurationBuilder: mapperConfigurationBuilder,
                     wrapperTypeCreator: WrapperTypeCreator,
-                    viewModelActivator: ViewModelActivator
+                    viewModelActivator: ViewModelActivator,
+                    storeAccessCreator: _storeAccessCreator
                 );
 
             return result;

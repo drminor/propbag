@@ -14,16 +14,19 @@ namespace PropBagTestApp.Infra
     using PropNameType = String;
 
     using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
+    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
+
 
     public class AutoMapperHelpers
     {
-        public SimpleAutoMapperProvider InitializeAutoMappers(IPropModelProvider propModelProvider)
+        public SimpleAutoMapperProvider InitializeAutoMappers(IPropModelProvider propModelProvider, PSAccessServiceCreatorInterface storeAccessCreator)
         {
             IPropBagMapperBuilderProvider propBagMapperBuilderProvider
                 = new SimplePropBagMapperBuilderProvider
                 (
                     wrapperTypeCreator: null,
-                    viewModelActivator: null
+                    viewModelActivator: null,
+                    storeAccessCreator: storeAccessCreator
                 );
 
             IMapTypeDefinitionProvider mapTypeDefinitionProvider = new SimpleMapTypeDefinitionProvider();
@@ -65,7 +68,6 @@ namespace PropBagTestApp.Infra
 
             ThePropFactory = new WPFPropFactory
                 (
-                    propStoreAccessServiceProvider: PropStoreAccessServiceProvider,
                     typeResolver: GetTypeFromName,
                     valueConverter: null
                 );
@@ -73,11 +75,11 @@ namespace PropBagTestApp.Infra
             IPropBagTemplateProvider propBagTemplateProvider = new PropBagTemplateProvider(Application.Current.Resources);
 
             IViewModelActivator vmActivator = new SimpleViewModelActivator();
-            PropModelProvider = new PropModelProvider(propBagTemplateProvider, ThePropFactory, vmActivator);
+            PropModelProvider = new PropModelProvider(propBagTemplateProvider, ThePropFactory, vmActivator, PropStoreAccessServiceProvider);
 
-            ViewModelHelper = new ViewModelHelper(PropModelProvider, vmActivator);
+            ViewModelHelper = new ViewModelHelper(PropModelProvider, vmActivator, PropStoreAccessServiceProvider);
 
-            AutoMapperProvider = new AutoMapperHelpers().InitializeAutoMappers(PropModelProvider);
+            AutoMapperProvider = new AutoMapperHelpers().InitializeAutoMappers(PropModelProvider, PropStoreAccessServiceProvider);
         }
 
         public static Type GetTypeFromName(string typeName)

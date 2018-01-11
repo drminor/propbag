@@ -25,7 +25,9 @@ namespace PropBagTestApp
         /// Constructor used by View to create with properties
         /// </summary>
         /// <param name="pm"></param>
-        public DtoTestViewModelEmit(PropModel pm) : base(pm)
+        
+        // TODO: AAA
+        public DtoTestViewModelEmit(PropModel pm) : base(pm, null, null, null)
         {
             // Save a reference to the model used to defined our properties.
             _pm = pm;

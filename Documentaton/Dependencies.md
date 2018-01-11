@@ -1,24 +1,69 @@
-# Top-Level Service Dependencies
+# Service Dependencies
 
-IPropBag => PropModel
+All interfaces are defined in DRM.TypeSafePropertyBag, unless otherwise noted.
+
+## PropBag Dependencies
+IPropBag => PropModel (This is a class with no defined interface, defined in namespace: DRM.PropBag.ControlModel.)
 
 PropModel => IPropFactory
 
-IPropFactory => IProvidePropStoreAccessService<UInt32, string>, ResolveTypeDelegate, IConvertValues
+IPropFactory =>
+- IProvidePropStoreAccessService<UInt32, string>,
+- ResolveTypeDelegate,
+- IConvertValues
 
-IProvidePropStoreAccessService<L2T, L2TRaw> => int maxPropsPerObject, IProvideHandlerDispatchDelegateCaches
+IProvidePropStoreAccessService<L2T, L2TRaw> =>
+- int maxPropsPerObject,
+- IProvideHandlerDispatchDelegateCaches
  
-IConvertValues =>  TypeDescBasedTConverterCache (This is a class with no defined interface.)
-
------
-IPropStoreAccessService<L2T, L2TRaw> => StoreNodeBag, IL2KeyMan<L2T, L2TRaw>, 
-        IProvidePropStoreAccessService<L2T, L2TRaw>, IProvideHandlerDispatchDelegateCaches
-
-StoreNodeBag => IPropBag, (new Object Id), DelegateCache<CallPSParentNodeChangedEventSubDelegate>
-
------
+IConvertValues => TypeDescBasedTConverterCache (This is a class with no defined interface, defined in namespace: DRM.TypeSafePropertyBag.)
 
 
+## PropStoreAccessService Dependencies
+IPropStoreAccessService<L2T, L2TRaw> =>
+- StoreNodeBag,   (Class with no defined interface, defined in namespace: DRM.TypeSafePropertyBag.)
+- IL2KeyMan<L2T, L2TRaw>, 
+- IProvidePropStoreAccessService<L2T, L2TRaw>,
+- IProvideHandlerDispatchDelegateCaches
+
+StoreNodeBag =>
+- IPropBagProxy, 
+- int ObjectId,  (New ObjectIds are provided by thread-safe sequential number generator, internal to each IProvidePropStoreAccessService implementation.)
+- ICacheDelegates&lt;CallPSParentNodeChangedEventSubDelegate&gt;
+
+IPropBagProxy => WeakReference&lt;IPropBagInternal&gt;
+
+IPropBagInternal => IPropStoreAccessService<L2T, L2TRaw>
+
+Note: All IPropBag implementations also implement IPropBagInternal. These implementation rely on the PropFactory to 
+create a class that implements: IPropStoreAccessService.
+
+## ViewModel Instantiation Services
+
+DataContextProvider => (This is a class with no defined interface, defined in namespace: MVVMApplication.Infra.)
+- ViewModelHelper (This is a class with no defined interface, defined in namespace: DRM.PropBagWPF.)
+
+ViewModelHelper => 
+- IPropModelProvider (Defined in namespace: DRM.PropBag.ControlModel)
+ -IViewModelActivator (Defined in namespace: DRM.ViewModelTools.)
+
+IPropModelProvider =>
+- IPropBagTemplateProvider
+- IPropFactory fallBackPropFactory (Will propably be removed and then all PropModel instances must specify a IPropFactory.)
+- IViewModelActivator viewModelActivator
+
+IViewModelActivator => none
+
+IPropBagTemplateProvider => ResourceDictionary (Optional)
 
 
-## Place Holder.
+
+
+
+
+
+
+
+
+
+

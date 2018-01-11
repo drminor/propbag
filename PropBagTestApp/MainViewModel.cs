@@ -1,10 +1,14 @@
 ﻿using DRM.PropBag;
 using DRM.PropBag.ControlModel;
+using DRM.TypeSafePropertyBag;
+using System;
 using System.ComponentModel;
 using System.Drawing;
 
 namespace PropBagTestApp
 {
+    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
+
     public class MainViewModel : PropBag, INotifyPropertyChanged, INotifyPropertyChanging
     {
         public bool PropFirstDidChange;
@@ -24,7 +28,8 @@ namespace PropBagTestApp
         /// Constructor used by View to create with properties
         /// </summary>
         /// <param name="pm"></param>
-        public MainViewModel(PropModel pm) : base(pm)
+        public MainViewModel(PropModel pm, PSAccessServiceCreatorInterface storeAccessCreator, IPropFactory propFactory)
+            : base(pm, storeAccessCreator, propFactory, fullClassName: null)
         {
             this.PropFirstDidChange = false;
             this.PropMyStringDidChange = false;

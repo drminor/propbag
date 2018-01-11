@@ -414,7 +414,7 @@ namespace DRM.TypeSafePropertyBag
 
         public int PropertyCount => _level2KeyMan.PropertyCount;
 
-        public PSAccessServiceInterface CloneProps(IPropBag callingPropBag, IPropBag copySource)
+        public PSAccessServiceInterface CloneProps(IPropBag callingPropBag, IPropBagInternal copySource)
         {
             if (!(_propStoreAccessServiceProvider is PSCloneServiceType))
             {
@@ -423,24 +423,28 @@ namespace DRM.TypeSafePropertyBag
                 throw new InvalidOperationException($"{msg}.");
             }
 
-            if (!(copySource is IPropBagInternal int_propBag))
-            {
-                throw new InvalidOperationException($"The {nameof(copySource)} does not implement the {nameof(IPropBagInternal)} interface.");
-            }
+            //if (!(copySource is IPropBagInternal int_propBag))
+            //{
+            //    throw new InvalidOperationException($"The {nameof(copySource)} does not implement the {nameof(IPropBagInternal)} interface.");
+            //}
 
             if (!(callingPropBag is IPropBagInternal target))
             {
                 throw new InvalidOperationException($"The {nameof(target)} does not implement the {nameof(IPropBagInternal)} interface.");
             }
 
-            GetAndCheckObjectRef(callingPropBag);
+            //GetAndCheckObjectRef(callingPropBag);
+
+            // Since the caller does not yet have a StoreAccessor (this method is responsble for creating the new StoreAccessor),
+            // the caller is using the StoreAccessor that belongs to the copySource to make this call.
+            GetAndCheckObjectRef(copySource);
 
             PSCloneServiceType accessorCloneService = (PSCloneServiceType)_propStoreAccessServiceProvider;
 
             PSAccessServiceInterface newStoreAccessor = accessorCloneService.CloneService
                 (
-                    int_propBag,
-                    int_propBag.ItsStoreAccessor,
+                    copySource,
+                    copySource.ItsStoreAccessor,
                     target,
                     out StoreNodeBag copySourceStoreNode,
                     out StoreNodeBag newStoreNode

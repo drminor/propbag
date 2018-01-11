@@ -14,7 +14,9 @@ namespace PropBagLib.Tests
             AutoMapperHelpers ourHelper = new AutoMapperHelpers();
             IPropFactory propFactory_V1 = ourHelper.GetNewPropFactory_V1();
 
-            PerformanceModel pm = new PerformanceModel(safetyMode, propFactory_V1);
+            // TODO: AAA
+            PerformanceModel pm = new PerformanceModel(safetyMode, ourHelper.StoreAccessCreator, null, propFactory_V1);
+
             pm.AddPropNoStore<int>("PropIntNoStore");
             pm.AddPropNoStore<string>("PropStringNoStore");
 

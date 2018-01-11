@@ -15,11 +15,13 @@ using System.Windows.Data;
 namespace DRM.PropBagWPF
 {
     using ControlModel = PropBag.ControlModel;
+    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
 
     public class PropModelProvider : ControlModel.IPropModelProvider
     {
         private IPropBagTemplateProvider _propBagTemplateProvider;
         private IViewModelActivator _viewModelActivator;
+        PSAccessServiceCreatorInterface _storeAccessCreator;
         private IPropFactory _fallBackPropFactory;
 
         public bool CanFindPropBagTemplateWithJustKey => _propBagTemplateProvider?.CanFindPropBagTemplateWithJustKey != false;
@@ -27,10 +29,15 @@ namespace DRM.PropBagWPF
 
         #region Constructors
 
-        public PropModelProvider(IPropBagTemplateProvider propBagTemplateProvider, IPropFactory fallBackPropFactory, IViewModelActivator viewModelActivator) 
+        public PropModelProvider(IPropBagTemplateProvider propBagTemplateProvider,
+            IPropFactory fallBackPropFactory,
+            IViewModelActivator viewModelActivator,
+            PSAccessServiceCreatorInterface storeAccessCreator
+            ) 
         {
             _propBagTemplateProvider = propBagTemplateProvider;
             _viewModelActivator = viewModelActivator;
+            _storeAccessCreator = storeAccessCreator;
             _fallBackPropFactory = fallBackPropFactory;
         }
 
@@ -234,7 +241,7 @@ namespace DRM.PropBagWPF
                     {
                         ControlModel.PropModel pm = GetPropModel(ivf.PropBagResourceKey);
 
-                        Func<object> vc = () => _viewModelActivator.GetNewViewModel(pm, pi.PropertyType, pm.FullClassName, pm.PropFactory ?? _fallBackPropFactory);
+                        Func<object> vc = () => _viewModelActivator.GetNewViewModel(pm, _storeAccessCreator, pi.PropertyType, pm.PropFactory ?? _fallBackPropFactory, pm.FullClassName);
 
                         rivf = new ControlModel.PropInitialValueField(initialValue: null, setToDefault: false, setToUndefined: false,
                             setToEmptyString: false, setToNull: false, valueCreator: vc);

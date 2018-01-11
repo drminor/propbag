@@ -49,7 +49,8 @@ namespace PropBagLib.Tests.PerformanceDb
             PropModel propModel5 = pmHelpers.GetPropModelForModel5Dest(propFactory_V1);
 
             string fullClassName = null; // Don't override the value from the PropModel.
-            _testMainVM = new DestinationModel5(propModel5, fullClassName, propFactory_V1);
+            // TODO: AAA
+            _testMainVM = new DestinationModel5(propModel5, ourHelper.StoreAccessCreator, propFactory_V1, fullClassName);
 
             Business b = new Business();
             _testMainVM.SetIt(b, "Business"); // THIS IS A SET ACESSS OPERATION.

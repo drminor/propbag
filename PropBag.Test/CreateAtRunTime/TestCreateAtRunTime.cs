@@ -45,7 +45,8 @@ namespace PropBagLib.Tests
             AutoMapperHelpers ourHelper = new AutoMapperHelpers();
             IPropFactory propFactory_V1 = ourHelper.GetNewPropFactory_V1();
 
-            mod1 = new CreateAtRunTimeModel(pm, propFactory_V1);
+            // TODO: AAA
+            mod1 = new CreateAtRunTimeModel(pm, ourHelper.StoreAccessCreator, propFactory_V1);
 
             Assert.That(mod1, Is.Not.EqualTo(null), "Expected the CreateAtRunTimeModel to have been created.");
 

@@ -19,13 +19,11 @@ namespace DRM.PropBag
 
         public PropFactory
             (
-                PSAccessServiceProviderType propStoreAccessServiceProvider,
                 ResolveTypeDelegate typeResolver,
                 IConvertValues valueConverter
             )
             : this
             (
-                  propStoreAccessServiceProvider,
                   typeResolver, 
                   valueConverter,
                   new SimpleDelegateCacheProvider(typeof(PropBag), typeof(APFGenericMethodTemplates))
@@ -35,13 +33,11 @@ namespace DRM.PropBag
 
         public PropFactory
         (
-            PSAccessServiceProviderType propStoreAccessServiceProvider,
             ResolveTypeDelegate typeResolver,
             IConvertValues valueConverter,
             IProvideDelegateCaches delegateCacheProvider
         )  : base
         (
-            propStoreAccessServiceProvider,
             delegateCacheProvider,
             typeResolver,
             GetValueConverter(valueConverter, delegateCacheProvider)

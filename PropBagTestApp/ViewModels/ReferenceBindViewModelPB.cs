@@ -25,7 +25,8 @@ namespace PropBagTestApp.ViewModels
         //{
         //}
 
-        public ReferenceBindViewModelPB(PropModel pm) : base(pm)
+        // TODO: AAA
+        public ReferenceBindViewModelPB(PropModel pm) : base(pm, null, null, null)
         {
 
         }

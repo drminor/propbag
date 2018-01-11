@@ -4,13 +4,14 @@ using System;
 
 namespace PropBagLib.Tests
 {
+    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
+
     public partial class ExtStoreModel 
     {
-
-        static public ExtStoreModel Create(IPropFactory factory)
+        static public ExtStoreModel Create(PSAccessServiceCreatorInterface storeAccessCreator, IPropFactory factory)
         {
-
-            ExtStoreModel esm = new ExtStoreModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered, factory);
+            // TODO: AAA
+            ExtStoreModel esm = new ExtStoreModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered, storeAccessCreator, null, factory);
 
             PropExternStore<int> pi = (PropExternStore<int>)esm.AddPropNoStore<int>("PropInt", null);
             PropExternStore<string> ps = (PropExternStore<string>)esm.AddPropNoStore<string>("PropString", null);

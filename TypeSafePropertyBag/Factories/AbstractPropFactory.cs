@@ -19,7 +19,7 @@ namespace DRM.TypeSafePropertyBag
 
     public abstract class AbstractPropFactory : IPropFactory, IDisposable
     {
-        PSAccessServiceProviderType _propStoreAccessServiceProvider { get; }
+        //PSAccessServiceProviderType _propStoreAccessServiceProvider { get; }
 
         #region Public Properties
 
@@ -54,14 +54,14 @@ namespace DRM.TypeSafePropertyBag
 
         public AbstractPropFactory
             (
-            PSAccessServiceProviderType propStoreAccessServiceProvider,
+            //PSAccessServiceProviderType propStoreAccessServiceProvider,
             IProvideDelegateCaches delegateCacheProvider,
             ResolveTypeDelegate typeResolver = null,
             IConvertValues valueConverter = null
             )
         {
 
-            _propStoreAccessServiceProvider = propStoreAccessServiceProvider ?? throw new ArgumentNullException(nameof(propStoreAccessServiceProvider));
+            //_propStoreAccessServiceProvider = propStoreAccessServiceProvider ?? throw new ArgumentNullException(nameof(propStoreAccessServiceProvider));
             DelegateCacheProvider = delegateCacheProvider;
 
             // Use our default implementation, if the caller did not supply one.
@@ -140,15 +140,15 @@ namespace DRM.TypeSafePropertyBag
 
         #endregion
 
-        #region PropStore Support
+        //#region PropStore Support
 
-        public PSAccessServiceType CreatePropStoreService(IPropBagInternal propBag)
-        {
-            PSAccessServiceType result = _propStoreAccessServiceProvider.CreatePropStoreService(propBag);
-            return result;
-        }
+        //public PSAccessServiceType CreatePropStoreService(IPropBagInternal propBag)
+        //{
+        //    PSAccessServiceType result = _propStoreAccessServiceProvider.CreatePropStoreService(propBag);
+        //    return result;
+        //}
 
-        #endregion
+        //#endregion
 
         #region Enumerable-Type Prop Creation 
 
@@ -634,7 +634,7 @@ namespace DRM.TypeSafePropertyBag
                 if (disposing)
                 {
                     // TODO: dispose managed state (managed objects).
-                    _propStoreAccessServiceProvider.Dispose();
+                    //_propStoreAccessServiceProvider.Dispose();
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
