@@ -25,7 +25,6 @@ namespace DRM.PropBag
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
     using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
 
-
     #region Summary and Remarks
 
     /// <summary>

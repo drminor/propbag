@@ -10,9 +10,8 @@ using System.Collections.ObjectModel;
 using System.Collections;
 using System.Collections.Specialized;
 
-namespace DRM.PropBag.Collections
+namespace DRM.PropBag
 {
-
     public class CProp<CT,T> : PropTypedBase<CT>, ICProp<CT,T> where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged
     {
         public CProp(CT initalValue,
@@ -83,23 +82,6 @@ namespace DRM.PropBag.Collections
         {
             return new ValPlusType(TypedValue, Type);
         }
-
-        //private bool _valueIsDefined;
-        //override public bool ValueIsDefined
-        //{
-        //    get
-        //    {
-        //        return _valueIsDefined;
-        //    }
-        //}
-
-        //override public bool SetValueToUndefined()
-        //{
-        //    bool oldSetting = this._valueIsDefined;
-        //    _valueIsDefined = false;
-
-        //    return oldSetting;
-        //}
 
         public override object Clone()
         {

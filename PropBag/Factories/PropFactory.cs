@@ -9,7 +9,6 @@ namespace DRM.PropBag
 {
     using PropIdType = UInt32;
     using PropNameType = String;
-    //using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
 
     using PropBagType = PropBag;
 
@@ -45,6 +44,7 @@ namespace DRM.PropBag
         {
         }
 
+        // TODO: Require the valueConverter parameter to be supplied.
         private static IConvertValues GetValueConverter(IConvertValues suppliedValueConverter, IProvideDelegateCaches delegateCacheProvider)
         {
             IConvertValues result = suppliedValueConverter ?? new PropFactoryValueConverter(delegateCacheProvider.TypeDescBasedTConverterCache);
