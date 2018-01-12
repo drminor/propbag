@@ -8,9 +8,9 @@ IPropBag => PropModel (This is a class with no defined interface, defined in nam
 PropModel => IPropFactory
 
 IPropFactory =>
-- IProvidePropStoreAccessService<UInt32, string>,
 - ResolveTypeDelegate,
 - IConvertValues
+- IProvideDelegateCaches
 
 IProvidePropStoreAccessService<L2T, L2TRaw> =>
 - int maxPropsPerObject,
@@ -45,12 +45,14 @@ DataContextProvider => (This is a class with no defined interface, defined in na
 
 ViewModelHelper => 
 - IPropModelProvider (Defined in namespace: DRM.PropBag.ControlModel)
- -IViewModelActivator (Defined in namespace: DRM.ViewModelTools.)
+- IViewModelActivator (Defined in namespace: DRM.ViewModelTools.)
+- IPropStoreAccessServiceCreator<L2T, L2TRaw> (Implemented by all IProvidePropStoreAccessService<L2T, L2TRaw>)
 
 IPropModelProvider =>
 - IPropBagTemplateProvider
 - IPropFactory fallBackPropFactory (Will propably be removed and then all PropModel instances must specify a IPropFactory.)
 - IViewModelActivator viewModelActivator
+- IPropStoreAccessServiceCreator<L2T, L2TRaw>
 
 IViewModelActivator => none
 

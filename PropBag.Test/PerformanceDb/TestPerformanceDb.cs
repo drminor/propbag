@@ -19,7 +19,7 @@ namespace PropBagLib.Tests.PerformanceDb
     {
         const int NUMBER_OF_PEOPLE = 1000;
 
-        SimpleAutoMapperProvider _amp;
+        IProvideAutoMappers _amp;
         AutoMapperHelpers _ourHelper;
         IPropFactory _propFactory_V1;
         PropModelHelpers _pmHelpers;
@@ -96,7 +96,7 @@ namespace PropBagLib.Tests.PerformanceDb
             string fullClassName = "PropBagLib.Tests.PerformanceDb.DestinationModel1";
             List<DestinationModel1> destinationList = new List<DestinationModel1>();
 
-            Assert.That(ourHelper.PropStoreAccessServiceProvider.AccessCounter == 0, "The Provider of PropStoreAccessServices has not had its Access Counter reset.");
+            Assert.That(ourHelper.StoreAccessCreator.AccessCounter == 0, "The Provider of PropStoreAccessServices has not had its Access Counter reset.");
 
             Business b = new Business();
             List<Person> personList = b.Get().ToList();
@@ -115,7 +115,7 @@ namespace PropBagLib.Tests.PerformanceDb
             }
             Assert.That(destinationList.Count == 1000, $"The PersonList contains {destinationList.Count}, it should contain {NUMBER_OF_PEOPLE}.");
 
-            int totalNumberOfGets = ourHelper.PropStoreAccessServiceProvider.AccessCounter;
+            int totalNumberOfGets = ourHelper.StoreAccessCreator.AccessCounter;
             Assert.That(totalNumberOfGets == NUMBER_OF_PEOPLE * 5, $"Total # of SetIt access operations is wrong: it should be {NUMBER_OF_PEOPLE * 5}, but instead it is {totalNumberOfGets}.");
 
             PropBag test = (PropBag)destinationList[0];
@@ -269,7 +269,7 @@ namespace PropBagLib.Tests.PerformanceDb
         {
             AutoMapperHelpers ourHelper = new AutoMapperHelpers();
             IPropFactory propFactory_V1 = ourHelper.GetNewPropFactory_V1();
-            Assert.That(ourHelper.PropStoreAccessServiceProvider.AccessCounter == 0, "The Provider of PropStoreAccessServices has not had its Access Counter reset.");
+            Assert.That(ourHelper.StoreAccessCreator.AccessCounter == 0, "The Provider of PropStoreAccessServices has not had its Access Counter reset.");
 
             List<DestinationModel1> destinationList = new List<DestinationModel1>();
 

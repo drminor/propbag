@@ -10,7 +10,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
     [TestFixtureAttribute]
     public class TestAutoMapperBasic
     {
-        SimpleAutoMapperProvider _amp;
+        IProvideAutoMappers _amp;
         IPropFactory _propFactory_V1;
 
         [OneTimeSetUp]

@@ -95,10 +95,7 @@ namespace PropBagLib.Tests
 
         protected void OnPropertyChanged2([CallerMemberName]string propertyName = null)
         {
-            PropertyChangedEventHandler handler = Interlocked.CompareExchange(ref PropertyChanged2, null, null);
-
-            if (handler != null)
-                handler(this, new PropertyChangedEventArgs(propertyName));
+            Interlocked.CompareExchange(ref PropertyChanged2, null, null)?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         protected override void Dispose(bool disposing)

@@ -7,7 +7,7 @@ using System.Threading;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
-    public class SimpleAutoMapperProvider : ICachePropBagMappers, IProvideAutoMappers
+    public class SimpleAutoMapperProvider : IProvideAutoMappers //, ICachePropBagMappers
     {
         #region Private Members
 
@@ -56,6 +56,17 @@ namespace DRM.PropBag.AutoMapperSupport
 
             RegisterMapperRequestDelegate x = GetTheRegisterMapperRequestDelegate(mr.SourceType, targetType);
             IPropBagMapperKeyGen result = x(propModel, targetType, mr.ConfigPackageName, this);
+
+            return result;
+        }
+
+        public IPropBagMapperKeyGen RegisterMapperRequest(string propModelResourceKey, Type sourceType, string configPackageName)
+        {
+            PropModel propModel = PropModelProvider.GetPropModel(propModelResourceKey);
+            Type targetType = propModel.TargetType;
+
+            RegisterMapperRequestDelegate x = GetTheRegisterMapperRequestDelegate(sourceType, targetType);
+            IPropBagMapperKeyGen result = x(propModel, targetType, configPackageName, this);
 
             return result;
         }

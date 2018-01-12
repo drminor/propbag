@@ -16,9 +16,10 @@ namespace DRM.PropBagWPF
         public WPFPropFactory
             (
                 ResolveTypeDelegate typeResolver,
-                IConvertValues valueConverter
+                IConvertValues valueConverter,
+                IProvideDelegateCaches delegateCacheProvider
             )
-            : base(typeResolver, valueConverter, new SimpleDelegateCacheProvider(typeof(PropBag.PropBag), typeof(APFGenericMethodTemplates)))
+            : base(typeResolver, valueConverter, delegateCacheProvider)
         {
         }
 

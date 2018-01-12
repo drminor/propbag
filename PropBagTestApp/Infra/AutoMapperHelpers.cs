@@ -1,4 +1,6 @@
-﻿using DRM.PropBag.AutoMapperSupport;
+﻿using DRM.PropBag;
+using DRM.PropBag.AutoMapperSupport;
+using DRM.PropBag.Caches;
 using DRM.PropBag.ControlModel;
 using DRM.PropBag.ControlsWPF;
 using DRM.PropBagWPF;
@@ -10,15 +12,11 @@ using System.Windows;
 
 namespace PropBagTestApp.Infra
 {
-    using PropIdType = UInt32;
-    using PropNameType = String;
-
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
-
 
     public class AutoMapperHelpers
     {
-        public SimpleAutoMapperProvider InitializeAutoMappers(IPropModelProvider propModelProvider, PSAccessServiceCreatorInterface storeAccessCreator)
+        public IProvideAutoMappers InitializeAutoMappers(IPropModelProvider propModelProvider, PSAccessServiceCreatorInterface storeAccessCreator)
         {
             IPropBagMapperBuilderProvider propBagMapperBuilderProvider
                 = new SimplePropBagMapperBuilderProvider
@@ -53,7 +51,7 @@ namespace PropBagTestApp.Infra
 
         public static PropModelProvider PropModelProvider { get; }
         public static ViewModelHelper ViewModelHelper { get; }
-        public static SimpleAutoMapperProvider AutoMapperProvider { get; }
+        public static IProvideAutoMappers AutoMapperProvider { get; }
         public static IPropFactory ThePropFactory { get; }
 
         public static PSAccessServiceCreatorInterface PropStoreAccessServiceCreator { get; }
@@ -65,10 +63,13 @@ namespace PropBagTestApp.Infra
             PSAccessServiceCreatorInterface result = 
                 new SimplePropStoreServiceEP(MAX_NUMBER_OF_PROPERTIES, handlerDispatchDelegateCacheProvider);
 
+            IProvideDelegateCaches delegateCacheProvider = new SimpleDelegateCacheProvider(typeof(PropBag), typeof(APFGenericMethodTemplates));
+
             ThePropFactory = new WPFPropFactory
                 (
                     typeResolver: GetTypeFromName,
-                    valueConverter: null
+                    valueConverter: null,
+                    delegateCacheProvider: delegateCacheProvider
                 );
 
             IPropBagTemplateProvider propBagTemplateProvider = new PropBagTemplateProvider(Application.Current.Resources);

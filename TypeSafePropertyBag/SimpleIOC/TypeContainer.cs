@@ -15,11 +15,7 @@ namespace DRM.TypeSafePropertyBag.Fundamentals.SimpleIOC
 
         public TypeContainer(Func<T> createFunc, bool shared = true)
         {
-            if (createFunc == null)
-            {
-                throw new ContainerException<T>("The Func to create the {0} type in de container is null.");
-            }
-            _createFunc = createFunc;
+            _createFunc = createFunc ?? throw new ContainerException<T>($"The Func to create the {typeof(T)} type in the container is null.");
             if (shared)
             {
                 _cache = new Lazy<T>(() => _createFunc());

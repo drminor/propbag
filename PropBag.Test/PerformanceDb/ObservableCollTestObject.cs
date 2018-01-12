@@ -21,14 +21,14 @@ namespace PropBagLib.Tests.PerformanceDb
             string configPackageName,
             AutoMapperHelpers ourHelper,
             IPropFactory propFactory_V1,
-            SimpleAutoMapperProvider amp,
+            IProvideAutoMappers amp,
             PropModelHelpers pmHelpers,
             int numberOfItemsToLoad
             )
         {
-            ourHelper.PropStoreAccessServiceProvider.ResetAccessCounter();
+            ourHelper.StoreAccessCreator.ResetAccessCounter();
 
-            Assert.That(ourHelper.PropStoreAccessServiceProvider.AccessCounter == 0, "The Provider of PropStoreAccessServices did not have its Access Counter reset.");
+            Assert.That(ourHelper.StoreAccessCreator.AccessCounter == 0, "The Provider of PropStoreAccessServices did not have its Access Counter reset.");
 
             // Setup Mapping between Model1 and Person
             PropModel propModel1 = pmHelpers.GetPropModelForModel1Dest(propFactory_V1);
@@ -65,7 +65,7 @@ namespace PropBagLib.Tests.PerformanceDb
             _readyForTheView = new System.Collections.ObjectModel.ObservableCollection<DestinationModel1>(mappedPeople);
 
             // Each time a item is mapped, it is first created. (5 sets during consruction, and another 5 for the actual mapping.)
-            int totalNumberOfGets = ourHelper.PropStoreAccessServiceProvider.AccessCounter;
+            int totalNumberOfGets = ourHelper.StoreAccessCreator.AccessCounter;
 
             if (configPackageName == "Extra_Members")
             {
@@ -76,8 +76,8 @@ namespace PropBagLib.Tests.PerformanceDb
                 Assert.That(totalNumberOfGets == 1 + (numberOfItemsToLoad * 5), $"Total # of SetIt access operations is wrong: it should be {1 + numberOfItemsToLoad * 5}, but instead it is {totalNumberOfGets}.");
             }
 
-            int currentNumRootPropBags = ourHelper.PropStoreAccessServiceProvider.NumberOfRootPropBagsInPlay;
-            int totalRootPropBagsCreated = ourHelper.PropStoreAccessServiceProvider.TotalNumberOfAccessServicesCreated;
+            int currentNumRootPropBags = ourHelper.StoreAccessCreator.NumberOfRootPropBagsInPlay;
+            int totalRootPropBagsCreated = ourHelper.StoreAccessCreator.TotalNumberOfAccessServicesCreated;
 
             PropBag test = (PropBag)_readyForTheView[0];
 

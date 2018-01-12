@@ -19,7 +19,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
         private const int LOG_BASE2_MAX_PROPERTIES = 16;
         public static readonly int MAX_NUMBER_OF_PROPERTIES = (int)Math.Pow(2, LOG_BASE2_MAX_PROPERTIES); //65536;
 
-        public SimpleAutoMapperProvider InitializeAutoMappers(IPropModelProvider propModelProvider, PSAccessServiceCreatorInterface storeAccessCreator)
+        public IProvideAutoMappers InitializeAutoMappers(IPropModelProvider propModelProvider, PSAccessServiceCreatorInterface storeAccessCreator)
         {
             IPropBagMapperBuilderProvider propBagMapperBuilderProvider
                 = new SimplePropBagMapperBuilderProvider
@@ -44,25 +44,22 @@ namespace PropBagLib.Tests.AutoMapperSupport
             return autoMapperProvider;
         }
 
-        PSAccessServiceCreatorInterface _propStoreAccessServiceProvider;
-        public PSAccessServiceCreatorInterface PropStoreAccessServiceProvider
+        PSAccessServiceCreatorInterface _storeAccessCreator;
+        public PSAccessServiceCreatorInterface StoreAccessCreator
         {
             get
             {
-                if (_propStoreAccessServiceProvider == null)
+                if (_storeAccessCreator == null)
                 {
                     IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider = new SimpleHandlerDispatchDelegateCacheProvider();
 
-                    _propStoreAccessServiceProvider = new SimplePropStoreServiceEP(
+                    _storeAccessCreator = new SimplePropStoreServiceEP(
                         MAX_NUMBER_OF_PROPERTIES,
                         handlerDispatchDelegateCacheProvider);
                 }
-                return _propStoreAccessServiceProvider;
+                return _storeAccessCreator;
             }
-
         }
-
-        public IPropStoreAccessServiceCreator<UInt32, String> StoreAccessCreator => PropStoreAccessServiceProvider;
 
         public IPropFactory GetNewPropFactory_V1()
         {
@@ -77,18 +74,21 @@ namespace PropBagLib.Tests.AutoMapperSupport
             {
                 if(_propFactory_V1 == null)
                 {
+                    IProvideDelegateCaches delegateCacheProvider = new SimpleDelegateCacheProvider(typeof(PropBag), typeof(APFGenericMethodTemplates));
+
                     _propFactory_V1 = new WPFPropFactory
                         (
                         typeResolver: GetTypeFromName,
-                        valueConverter: null
+                        valueConverter: null,
+                        delegateCacheProvider:delegateCacheProvider
                         );
                 }
                 return _propFactory_V1;
             }
         }
 
-        SimpleAutoMapperProvider _autoMapperProvider_V1;
-        public SimpleAutoMapperProvider GetAutoMapperSetup_V1() 
+        IProvideAutoMappers _autoMapperProvider_V1;
+        public IProvideAutoMappers GetAutoMapperSetup_V1() 
         {
             if(_autoMapperProvider_V1 == null)
             {
@@ -97,7 +97,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 _autoMapperProvider_V1 = new AutoMapperHelpers().InitializeAutoMappers
                     (
                     propModelProvider: null,
-                    storeAccessCreator: PropStoreAccessServiceProvider
+                    storeAccessCreator: StoreAccessCreator
                     );
             }
             return _autoMapperProvider_V1;
@@ -136,7 +136,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
                     // TODO: dispose managed state (managed objects).
                     this._autoMapperProvider_V1 = null;
                     this._propFactory_V1 = null;
-                    this._propStoreAccessServiceProvider = null;
+                    this._storeAccessCreator = null;
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
