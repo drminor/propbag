@@ -2,8 +2,7 @@
 
 namespace DRM.TypeSafePropertyBag
 {
-
-    public interface IPropBagProxy
+    internal interface IPropBagProxy
     {
         WeakReference<IPropBagInternal> PropBagRef { get; }
         //ObjectIdType ObjectId { get; }
