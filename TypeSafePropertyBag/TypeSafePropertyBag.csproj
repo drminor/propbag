@@ -56,7 +56,7 @@
     <Compile Include="PropBagInterfaces\ICacheDelegates.cs" />
     <Compile Include="PropBagInterfaces\ICacheDelegatesForTypePair.cs" />
     <Compile Include="Fundamentals\TwoTypes.cs" />
-    <Compile Include="Fundamentals\ObsCollection.cs" />
+    <Compile Include="Unused\ObsCollection.cs" />
     <Compile Include="PropBagInterfaces\GetDefaultValueDelegate.cs" />
     <Compile Include="PropBagInterfaces\ICreateProps.cs" />
     <Compile Include="PropBagInterfaces\IRegisterBindingsForwarder.cs" />
