@@ -1,5 +1,4 @@
-﻿
-using DRM.PropBag.ControlsWPF;
+﻿using DRM.PropBag.ControlsWPF;
 using DRM.TypeSafePropertyBag;
 using DRM.ViewModelTools;
 

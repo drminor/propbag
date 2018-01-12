@@ -8,8 +8,7 @@ namespace DRM.PropBagWPF
 {
     using PropNameType = String;
 
-    // TODO: Implement IDisposable.
-    public class CViewProp : PropTypedBase<ListCollectionView>, ICViewProp<ListCollectionView>//, INotifyItemEndEdit, INotifyCollectionChanged
+    public class CViewProp : PropTypedBase<ListCollectionView>, ICViewProp<ListCollectionView>
     {
         #region Private and Protected Members
 
@@ -19,7 +18,7 @@ namespace DRM.PropBagWPF
         #endregion
 
         #region Constuctor
-
+        // TODO: The propertName is not used, we can remove it from the constructor.
         public CViewProp(PropNameType propertyName, IProvideAView viewProvider)
             : base(typeof(ListCollectionView), true, PropStorageStrategyEnum.Virtual, true,
                   RefEqualityComparer<ListCollectionView>.Default.Equals, null, PropKindEnum.CollectionView)
@@ -71,32 +70,6 @@ namespace DRM.PropBagWPF
             }
         }
 
-        //// TODO Implement these directly, instead of using the base class's instance.
-        //public event NotifyCollectionChangedEventHandler CollectionChanged
-        //{
-        //    add
-        //    {
-        //        ((INotifyCollectionChanged)_viewProvider).CollectionChanged += value;
-        //    }
-
-        //    remove
-        //    {
-        //        ((INotifyCollectionChanged)_viewProvider).CollectionChanged -= value;
-        //    }
-        //}
-
-        //public event EventHandler<EventArgs> ItemEndEdit
-        //{
-        //    add
-        //    {
-        //        ((INotifyItemEndEdit)_viewProvider).ItemEndEdit += value;
-        //    }
-
-        //    remove
-        //    {
-        //        ((INotifyItemEndEdit)_viewProvider).ItemEndEdit -= value;
-        //    }
-        //}
         #endregion
 
         #region Event Handlers

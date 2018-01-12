@@ -1,5 +1,4 @@
 ﻿using DRM.PropBag;
-using DRM.PropBag.Caches;
 using DRM.TypeSafePropertyBag;
 using System;
 using System.Windows.Data;
@@ -7,7 +6,6 @@ using System.Windows.Data;
 namespace DRM.PropBagWPF
 {
     using PropNameType = String;
-    //using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
 
     public class WPFPropFactory : PropFactory
     {
@@ -24,6 +22,7 @@ namespace DRM.PropBagWPF
         }
 
         #endregion
+
         #region CollectionViewSource property creators
 
         #endregion
