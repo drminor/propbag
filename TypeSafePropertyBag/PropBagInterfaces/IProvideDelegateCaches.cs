@@ -14,7 +14,7 @@ namespace DRM.TypeSafePropertyBag
         ICacheDelegates<CreatePropFromObjectDelegate> CreatePropFromObjectCache { get; }
 
         ICacheDelegatesForTypePair<CreateEPropFromStringDelegate> CreateCPropFromStringCache { get; }
-        ICacheDelegatesForTypePair<CreateEPropFromStringDelegate> CreateCPropFromStringFBCache { get; }
+        //ICacheDelegatesForTypePair<CreateEPropFromStringDelegate> CreateCPropFromStringFBCache { get; }
 
         ICacheDelegatesForTypePair<CreateEPropWithNoValueDelegate> CreateCPropWithNoValCache { get; }
 

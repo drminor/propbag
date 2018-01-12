@@ -3,24 +3,16 @@ using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Globalization;
-using System.Windows.Data;
 
 namespace DRM.TypeSafePropertyBag
 {
-    using PropIdType = UInt32;
     using PropNameType = String;
-
-    using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
-    using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
 
     public abstract class AbstractPropFactory : IPropFactory, IDisposable
     {
-        //PSAccessServiceProviderType _propStoreAccessServiceProvider { get; }
-
         #region Public Properties
 
         public ResolveTypeDelegate TypeResolver { get; }
@@ -54,14 +46,11 @@ namespace DRM.TypeSafePropertyBag
 
         public AbstractPropFactory
             (
-            //PSAccessServiceProviderType propStoreAccessServiceProvider,
             IProvideDelegateCaches delegateCacheProvider,
             ResolveTypeDelegate typeResolver = null,
             IConvertValues valueConverter = null
             )
         {
-
-            //_propStoreAccessServiceProvider = propStoreAccessServiceProvider ?? throw new ArgumentNullException(nameof(propStoreAccessServiceProvider));
             DelegateCacheProvider = delegateCacheProvider;
 
             // Use our default implementation, if the caller did not supply one.
@@ -91,11 +80,9 @@ namespace DRM.TypeSafePropertyBag
             else if
                 (
                 propKind == PropKindEnum.ObservableCollection ||
-                //propKind == PropKindEnum.ObservableCollectionFB ||
                 propKind == PropKindEnum.EnumerableTyped ||
                 propKind == PropKindEnum.Enumerable ||
                 propKind == PropKindEnum.ObservableCollection_RO ||
-                //propKind == PropKindEnum.ObservableCollectionFB_RO ||
                 propKind == PropKindEnum.EnumerableTyped_RO ||
                 propKind == PropKindEnum.Enumerable_RO
                 )
@@ -124,7 +111,6 @@ namespace DRM.TypeSafePropertyBag
                 (
                 propKind == PropKindEnum.CollectionViewSource_RO ||
                 propKind == PropKindEnum.ObservableCollection_RO ||
-                //propKind == PropKindEnum.ObservableCollectionFB_RO ||
                 propKind == PropKindEnum.EnumerableTyped_RO ||
                 propKind == PropKindEnum.Enumerable_RO
                 )
@@ -140,16 +126,6 @@ namespace DRM.TypeSafePropertyBag
 
         #endregion
 
-        //#region PropStore Support
-
-        //public PSAccessServiceType CreatePropStoreService(IPropBagInternal propBag)
-        //{
-        //    PSAccessServiceType result = _propStoreAccessServiceProvider.CreatePropStoreService(propBag);
-        //    return result;
-        //}
-
-        //#endregion
-
         #region Enumerable-Type Prop Creation 
 
         #endregion
@@ -158,7 +134,7 @@ namespace DRM.TypeSafePropertyBag
 
         public abstract ICProp<CT, T> Create<CT, T>(
             CT initialValue,
-            string propertyName, object extraInfo = null,
+            PropNameType propertyName, object extraInfo = null,
             PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true,
             Func<CT, CT, bool> comparer = null) where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged;
         //{
@@ -204,7 +180,7 @@ namespace DRM.TypeSafePropertyBag
             throw new NotImplementedException($"This implementation of {nameof(IPropFactory)} cannot create CVSProps (CollectionViewSource PropItems), please use WPFPropfactory or similar.");
         }
 
-        public virtual IProp CreateCVProp(string propertyName, IProvideAView viewProvider)
+        public virtual IProp CreateCVProp(PropNameType propertyName, IProvideAView viewProvider)
         {
             throw new NotImplementedException($"This implementation of {nameof(IPropFactory)} cannot create CVProps (CollectionView PropItems), please use WPFPropfactory or similar.");
         }
@@ -515,13 +491,6 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        //// From String FALL BACK to ObservableCollection<T>
-        //protected virtual CreateEPropFromStringDelegate GetCPropFromStringFBCreator(Type collectionType, Type itemType)
-        //{
-        //    CreateEPropFromStringDelegate result = DelegateCacheProvider.CreateCPropFromStringFBCache.GetOrAdd(new TypePair(collectionType, itemType));
-        //    return result;
-        //}
-
         // With No Value
         protected virtual CreateEPropWithNoValueDelegate GetCPropWithNoValueCreator(Type collectionType, Type itemType)
         {
@@ -590,11 +559,9 @@ namespace DRM.TypeSafePropertyBag
                     propKind == PropKindEnum.DataTable_RO ||
                     propKind == PropKindEnum.Prop ||
                     propKind == PropKindEnum.ObservableCollection ||
-                    //propKind == PropKindEnum.ObservableCollectionFB ||
                     propKind == PropKindEnum.EnumerableTyped ||
                     propKind == PropKindEnum.Enumerable ||
                     propKind == PropKindEnum.ObservableCollection_RO ||
-                    //propKind == PropKindEnum.ObservableCollectionFB_RO ||
                     propKind == PropKindEnum.EnumerableTyped_RO ||
                     propKind == PropKindEnum.Enumerable_RO
                     )

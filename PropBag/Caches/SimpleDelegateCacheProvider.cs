@@ -28,7 +28,7 @@ namespace DRM.PropBag.Caches
         public ICacheDelegates<CreatePropFromObjectDelegate> CreatePropFromObjectCache { get; }
 
         public ICacheDelegatesForTypePair<CreateEPropFromStringDelegate> CreateCPropFromStringCache { get; }
-        public ICacheDelegatesForTypePair<CreateEPropFromStringDelegate> CreateCPropFromStringFBCache { get; }
+        //public ICacheDelegatesForTypePair<CreateEPropFromStringDelegate> CreateCPropFromStringFBCache { get; }
 
         public ICacheDelegatesForTypePair<CreateEPropWithNoValueDelegate> CreateCPropWithNoValCache { get; }
 
@@ -69,9 +69,9 @@ namespace DRM.PropBag.Caches
             MethodInfo createCPropFromString_mi = propCreatorType.GetMethod("CreateEPropFromString", BindingFlags.Static | BindingFlags.NonPublic);
             CreateCPropFromStringCache = new TwoTypesDelegateCache<CreateEPropFromStringDelegate>(createCPropFromString_mi);
 
-            // Create C Prop From string FALL BACK to ObservableCollection
-            MethodInfo createCPropFromStringFB_mi = propCreatorType.GetMethod("CreateEPropFromStringFB", BindingFlags.Static | BindingFlags.NonPublic);
-            CreateCPropFromStringFBCache = new TwoTypesDelegateCache<CreateEPropFromStringDelegate>(createCPropFromStringFB_mi);
+            //// Create C Prop From string FALL BACK to ObservableCollection
+            //MethodInfo createCPropFromStringFB_mi = propCreatorType.GetMethod("CreateEPropFromStringFB", BindingFlags.Static | BindingFlags.NonPublic);
+            //CreateCPropFromStringFBCache = new TwoTypesDelegateCache<CreateEPropFromStringDelegate>(createCPropFromStringFB_mi);
 
             // Create Prop From Object
             MethodInfo createCPropFromObject_mi = propCreatorType.GetMethod("CreateEPropFromObject", BindingFlags.Static | BindingFlags.NonPublic);

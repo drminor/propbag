@@ -1,0 +1,31 @@
+
+TODO List
+
+1. Make the PropModelProvider build instances of classes that implement IPropFactory.
+
+2. Make a MarkUpExtension or UserControl that replaces MVVMApplication.Infra.ViewModelProvider.
+
+3. Make a MarkupExtension or UserControl to build IProvideADataSourceProvider.
+
+4. Use Attached Dependency Properties for PropItem instead of child user controls (DRM.PropBag.ControlsWPF)
+
+5. Install and use Simple IOC to configure service dependencies.
+
+6. Create ExtensionMethods for PropKindEnum to support IsCollection, IsReadOnly, etc. instead of using IPropFactory.
+
+7. Make IViewModelActivator implementations take a IPropStoreAccessServiceCreator<UInt32, String> instance
+	instead of having to provide such on each call.
+
+8. Change ViewProvider and IProvideAView to CollectionViewProvider and IProvideACollectionView.
+
+9. Leverage IQueryable, including the AutoMapper facility Project().To<> constructs, Object Graph Flattening, and EF support.
+
+10. Create and Leverage a high-level interface similar to IDataService.
+
+11a. Make IPropBagInternal, an internal (to DRM.TypeSafePropertyBag) interface. (This will require using a dictionary of StoreNodes to IPropStoreAccessService instances.)
+
+11b. See if we can use a completed IPropStoreAccessService instance, instead of having the IPropBag instance call CreatePropStoreService on some class that implements the IPropStoreAccessServiceCreator<L2T, L2TRaw> interface.
+
+12. Eliminate memory leaks, if any.
+
+

@@ -1,33 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using DRM.TypeSafePropertyBag;
+﻿using DRM.TypeSafePropertyBag.DataAccessSupport;
 using DRM.TypeSafePropertyBag.Fundamentals;
-using System.Collections.Concurrent;
-using System.Reflection;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel;
-using System.Collections;
-using System.Collections.Specialized;
+using System.Linq;
+using System.Reflection;
 using System.Windows.Data;
-using DRM.TypeSafePropertyBag.DataAccessSupport;
 
 namespace DRM.TypeSafePropertyBag
 {
-    using CompositeKeyType = UInt64;
+    using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
+    using L2KeyManType = IL2KeyMan<UInt32, String>;
     using ObjectIdType = UInt64;
-
     using PropIdType = UInt32;
     using PropNameType = String;
-
-    using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
-
-    using L2KeyManType = IL2KeyMan<UInt32, String>;
-
-    using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
     using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
     using PSAccessServiceInternalInterface = IPropStoreAccessServiceInternal<UInt32, String>;
-    //using PSCloneServiceType = IProvidePropStoreCloneService<UInt32, String>;
-
+    using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
 
     internal class SimplePropStoreAccessService : PSAccessServiceInterface, IHaveTheStoreNode, PSAccessServiceInternalInterface, IDisposable
     {
@@ -433,15 +422,9 @@ namespace DRM.TypeSafePropertyBag
                 throw new InvalidOperationException($"The {nameof(target)} does not implement the {nameof(IPropBagInternal)} interface.");
             }
 
-            //GetAndCheckObjectRef(callingPropBag);
-
             // Since the caller does not yet have a StoreAccessor (this method is responsble for creating the new StoreAccessor),
             // the caller is using the StoreAccessor that belongs to the copySource to make this call.
             GetAndCheckObjectRef(copySource);
-
-            //PSCloneServiceType accessorCloneService = (PSCloneServiceType)_propStoreAccessServiceProvider;
-
-            //PSAccessServiceInterface newStoreAccessor = accessorCloneService.CloneService
 
             PSAccessServiceInterface newStoreAccessor = _propStoreAccessServiceProvider.CloneService
                 (

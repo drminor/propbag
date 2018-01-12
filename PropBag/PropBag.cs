@@ -22,9 +22,9 @@ namespace DRM.PropBag
     using PropNameType = String;
     using IRegisterBindingsFowarderType = IRegisterBindingsForwarder<UInt32>;
 
-    //using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
     using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
+
 
     #region Summary and Remarks
 
@@ -156,25 +156,27 @@ namespace DRM.PropBag
         #region Constructor
 
         /// <summary>
-        /// 
+        /// Creates a new PropBag using the specified PropModel and Property Store Access Creator.
         /// </summary>
-        /// <param name="pm"></param>
+        /// <param name="propModel">An instance of the class: DRM.PropBag.ControlModel.PropModel that defines the PropItems that this
+        /// PropBag will have.</param>
+        /// <param name="storeAcessorCreator"></param>
         /// <param name="propFactory">The PropFactory to use instead of the one specified by the PropModel.</param>
-        public PropBag(ControlModel.PropModel pm, PSAccessServiceCreatorInterface storeAcessorCreator, IPropFactory propFactory = null, string fullClassName = null)
-            : this(pm.TypeSafetyMode, storeAcessorCreator, propFactory ?? pm.PropFactory, fullClassName)
+        /// <param name="fullClassName">The namespace and class name to use instead of the one specified by the PropMode.</param>
+        public PropBag(ControlModel.PropModel propModel, PSAccessServiceCreatorInterface storeAcessorCreator, IPropFactory propFactory = null, string fullClassName = null)
+            : this(propModel.TypeSafetyMode, storeAcessorCreator, propFactory ?? propModel.PropFactory, fullClassName ?? propModel.FullClassName)
         {
-            Hydrate(pm);
+            Hydrate(propModel);
             int testc = _ourStoreAccessor.PropertyCount;
         }
 
         protected PropBag(IPropBagInternal copySource)
-            //: this( copySource.TypeSafetyMode, null, copySource.PropFactory, copySource.FullClassName)
         {
             _typeSafetyMode = copySource.TypeSafetyMode;
             _propFactory = copySource.PropFactory;
 
             _ourMetaData = BuildMetaData(_typeSafetyMode, copySource.FullClassName, _propFactory);
-            _ourStoreAccessor = CloneProps(copySource/*, copySource.ItsStoreAccessor*/);
+            _ourStoreAccessor = CloneProps(copySource);
         }
 
         protected PropBag(PropBagTypeSafetyMode typeSafetyMode, PSAccessServiceCreatorInterface storeAcessorCreator, IPropFactory propFactory, string fullClassName = null)
@@ -183,8 +185,6 @@ namespace DRM.PropBag
             _propFactory = propFactory ?? throw new ArgumentNullException(nameof(propFactory));
 
             _ourMetaData = BuildMetaData(_typeSafetyMode, fullClassName, _propFactory);
-
-            //_ourStoreAccessor = _propFactory.CreatePropStoreService(this);
 
             if (storeAcessorCreator == null) throw new ArgumentNullException(nameof(storeAcessorCreator));
             _ourStoreAccessor = storeAcessorCreator.CreatePropStoreService(this);
