@@ -1,4 +1,5 @@
-﻿using DRM.PropBagControlsWPF;
+﻿using DRM.PropBag;
+using DRM.PropBagControlsWPF;
 using DRM.TypeSafePropertyBag;
 using DRM.ViewModelTools;
 
@@ -10,7 +11,6 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using DRM.PropBag.ControlModel;
 
 namespace DRM.PropBagWPF
 {
@@ -96,8 +96,8 @@ namespace DRM.PropBagWPF
             {
                 if (CanFindMapperRequestWithJustKey)
                 {
-                    DRM.PropBagControlsWPF.MapperRequest mr = _mapperRequestProvider.GetMapperRequest(resourceKey);
-                    PropBag.ControlModel.MapperRequest mrCooked = new PropBag.ControlModel.MapperRequest(mr.SourceType, mr.DestinationPropModelKey, mr.ConfigPackageName);
+                    PropBagControlsWPF.MapperRequest mr = _mapperRequestProvider.GetMapperRequest(resourceKey);
+                    IMapperRequest mrCooked = new PropBag.MapperRequest(mr.SourceType, mr.DestinationPropModelKey, mr.ConfigPackageName);
                     return mrCooked;
                 }
                 else if (HasMrLookupResources)
@@ -200,7 +200,7 @@ namespace DRM.PropBagWPF
 
                 try
                 {
-                    PropBag.ControlModel.PropItem rpi = ProcessProp(pi, propFactoryToUse, doWhenChangedHelper);
+                    PropBag.PropItemModel rpi = ProcessProp(pi, propFactoryToUse, doWhenChangedHelper);
                     result.Props.Add(rpi);
                 }
                 catch (Exception e)
@@ -212,7 +212,7 @@ namespace DRM.PropBagWPF
             return result;
         }
 
-        private PropBag.ControlModel.PropItem ProcessProp(DRM.PropBagControlsWPF.PropItem pi, IPropFactory propFactory, DoWhenChangedHelper doWhenChangedHelper)
+        private PropBag.PropItemModel ProcessProp(PropItem pi, IPropFactory propFactory, DoWhenChangedHelper doWhenChangedHelper)
         {
             PropStorageStrategyEnum storageStrategy = pi.StorageStrategy;
             bool typeIsSolid = pi.TypeIsSolid;
@@ -223,7 +223,7 @@ namespace DRM.PropBagWPF
                 System.Diagnostics.Debug.WriteLine("Processing the PersonList Prop Item.");
             }
 
-            PropBag.ControlModel.PropItem rpi = new PropBag.ControlModel.PropItem(pi.PropertyType, pi.PropertyName,
+            PropItemModel rpi = new PropItemModel(pi.PropertyType, pi.PropertyName,
                 storageStrategy, typeIsSolid, pi.PropKind, extraInfo: extraInfo);
 
             bool isCProp = propFactory.IsCollection(pi.PropKind);
@@ -284,7 +284,7 @@ namespace DRM.PropBagWPF
 
                     SubscriptionPriorityGroup priorityGroup = dwc?.DoAfterNotify ?? false ? SubscriptionPriorityGroup.Last : SubscriptionPriorityGroup.Standard;
 
-                    PropBag.ControlModel.PropDoWhenChangedField rdwc = new PropBag.ControlModel.PropDoWhenChangedField
+                    IPropDoWhenChangedField rdwc = new DRM.PropBag.PropDoWhenChangedField
                         (
                         target: null, method: mi,
                         subscriptionKind: subscriptionKind, priorityGroup: priorityGroup,
@@ -297,15 +297,15 @@ namespace DRM.PropBagWPF
 
                 else if (uc is DRM.PropBagControlsWPF.PropComparerField pcf)
                 {
-                    PropBag.ControlModel.PropComparerField rpcf =
-                        new PropBag.ControlModel.PropComparerField(pcf.ComparerFunc.Comparer, pcf.UseRefEquality);
+                    PropBag.PropComparerField rpcf =
+                        new PropBag.PropComparerField(pcf.ComparerFunc.Comparer, pcf.UseRefEquality);
 
                     rpi.ComparerField = rpcf;
                 }
                 else if (uc is DRM.PropBagControlsWPF.PropBinderField binderField)
                 {
-                    PropBag.ControlModel.PropBinderField rBinderField =
-                        new PropBag.ControlModel.PropBinderField(binderField.Path);
+                    PropBag.PropBinderField rBinderField =
+                        new PropBag.PropBinderField(binderField.Path);
 
                     rpi.BinderField = rBinderField;
 

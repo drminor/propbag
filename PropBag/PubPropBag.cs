@@ -1,5 +1,4 @@
-﻿using DRM.PropBag.ControlModel;
-using DRM.TypeSafePropertyBag;
+﻿using DRM.TypeSafePropertyBag;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -14,7 +13,6 @@ namespace DRM.PropBag
 {
     using PropIdType = UInt32;
     using PropNameType = String;
-    //using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
 
     using SubCacheType = ICacheSubscriptions<UInt32>;

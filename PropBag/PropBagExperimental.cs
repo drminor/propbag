@@ -41,7 +41,7 @@ namespace DRM.PropBag
 
         public PropBagExperimental(PropBagTypeSafetyMode typeSafetyMode, IPropFactory thePropFactory) : base(typeSafetyMode, thePropFactory) {}
 
-        public PropBagExperimental(DRM.PropBag.ControlModel.PropModel pm, IPropFactory propFactory = null) : base(pm, propFactory) { }
+        public PropBagExperimental(DRM.PropBag.PropModel pm, IPropFactory propFactory = null) : base(pm, propFactory) { }
 
         #endregion
 

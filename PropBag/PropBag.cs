@@ -1,5 +1,4 @@
 ﻿using DRM.PropBag.Caches;
-using DRM.PropBag.ControlModel;
 using DRM.TypeSafePropertyBag;
 
 using System;
@@ -162,7 +161,7 @@ namespace DRM.PropBag
         /// <summary>
         /// Creates a new PropBag using the specified PropModel and Property Store Access Creator.
         /// </summary>
-        /// <param name="propModel">An instance of the class: DRM.PropBag.ControlModel.PropModel that defines the PropItems that this
+        /// <param name="propModel">An instance of the class: DRM.PropBag.PropModel that defines the PropItems that this
         /// PropBag will have.</param>
         /// <param name="storeAcessorCreator"></param>
         /// <param name="propFactory">The PropFactory to use instead of the one specified by the PropModel.</param>

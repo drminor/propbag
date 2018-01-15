@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DRM.PropBag.ControlModel
+namespace DRM.PropBag
 {
     public class MapperRequest : NotifyPropertyChangedBase, IEquatable<MapperRequest>, IMapperRequest
     {

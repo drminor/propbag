@@ -1,10 +1,6 @@
-﻿using DRM.PropBag.ControlModel;
-using DRM.TypeSafePropertyBag;
+﻿using DRM.TypeSafePropertyBag;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DRM.TypeWrapper
 {

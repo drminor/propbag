@@ -42,8 +42,6 @@
   <ItemGroup>
     <Compile Include="Caches\SimpleDelegateCacheProvider.cs" />
     <Compile Include="Caches\StaticTConverter.cs" />
-    <Compile Include="ControlModel\DeriveFromClassField_NotUsed.cs" />
-    <Compile Include="ControlModel\IPropModelProvider.cs" />
     <Compile Include="ClassGenerator\PropDefRaw.cs" />
     <Compile Include="ClassGenerator\PropGenerator.cs" />
     <Compile Include="ClassGenerator\PropModelExtensions.cs" />
@@ -62,7 +60,7 @@
     <Compile Include="ControlModel\PropComparerField.cs" />
     <Compile Include="ControlModel\PropDoWhenChangedField.cs" />
     <Compile Include="ControlModel\PropInitialValueField.cs" />
-    <Compile Include="ControlModel\PropItem.cs" />
+    <Compile Include="ControlModel\PropItemModel.cs" />
     <Compile Include="ControlModel\PropModel.cs" />
     <Compile Include="ExtValDelegates.cs" />
     <Compile Include="Factories\PropFactoryValueConverter.cs" />

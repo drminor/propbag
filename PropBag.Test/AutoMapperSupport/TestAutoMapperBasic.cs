@@ -1,6 +1,5 @@
 ﻿using DRM.PropBag;
 using DRM.PropBag.AutoMapperSupport;
-using DRM.PropBag.ControlModel;
 using DRM.TypeSafePropertyBag;
 using NUnit.Framework;
 using System;
@@ -185,7 +184,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
             PropInitialValueField pivf = new PropInitialValueField(initialValue: null,
                 setToDefault: true, setToUndefined: false, setToNull: false, setToEmptyString: false);
 
-            PropItem propItem = new PropItem(type: typeof(Guid), name: "ProductId",
+            PropItemModel propItem = new PropItemModel(type: typeof(Guid), name: "ProductId",
                 storageStrategy: PropStorageStrategyEnum.Internal, typeIsSolid: true, propKind: PropKindEnum.Prop,
                 propTypeInfoField: null, initialValueField: pivf,
                 extraInfo: null, comparer: null, itemType: null);
@@ -195,7 +194,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
             pivf = new PropInitialValueField(initialValue: null,
                 setToDefault: true, setToUndefined: false, setToNull: false, setToEmptyString: false);
 
-            propItem = new PropItem(type: typeof(int), name: "Amount",
+            propItem = new PropItemModel(type: typeof(int), name: "Amount",
                 storageStrategy: PropStorageStrategyEnum.Internal, typeIsSolid: true, propKind: PropKindEnum.Prop,
                 propTypeInfoField: null, initialValueField: pivf,
                 extraInfo: null, comparer: null, itemType: null);
@@ -206,7 +205,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
             pivf = new PropInitialValueField(initialValue: null,
                 setToDefault: true, setToUndefined: false, setToNull: false, setToEmptyString: false);
 
-            propItem = new PropItem(type: typeof(double), name: "Size",
+            propItem = new PropItemModel(type: typeof(double), name: "Size",
                 storageStrategy: PropStorageStrategyEnum.Internal, typeIsSolid: true, propKind: PropKindEnum.Prop,
                 propTypeInfoField: null, initialValueField: pivf,
                 extraInfo: null, comparer: null, itemType: null);
@@ -216,7 +215,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
             pivf = new PropInitialValueField(initialValue: null,
                 setToDefault: false, setToUndefined: false, setToNull: true, setToEmptyString: false);
 
-            propItem = new PropItem(type: typeof(MyModel4), name: "Deep",
+            propItem = new PropItemModel(type: typeof(MyModel4), name: "Deep",
                 storageStrategy: PropStorageStrategyEnum.Internal, typeIsSolid: true, propKind: PropKindEnum.Prop,
                 propTypeInfoField: null, initialValueField: pivf,
                 extraInfo: null, comparer: null, itemType: null);

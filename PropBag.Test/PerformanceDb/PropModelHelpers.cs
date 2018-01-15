@@ -1,4 +1,4 @@
-﻿using DRM.PropBag.ControlModel;
+﻿using DRM.PropBag;
 using DRM.TypeSafePropertyBag;
 
 using PropBagLib.Tests.BusinessModel;
@@ -35,7 +35,7 @@ namespace PropBagLib.Tests.PerformanceDb
             PropInitialValueField pivf = new PropInitialValueField(initialValue: "0",
                 setToDefault: false, setToUndefined: false, setToNull: false, setToEmptyString: false);
 
-            PropItem propItem = new PropItem(type: typeof(int), name: "Id",
+            PropItemModel propItem = new PropItemModel(type: typeof(int), name: "Id",
                 storageStrategy: PropStorageStrategyEnum.Internal, typeIsSolid: true, propKind: PropKindEnum.Prop,
                 propTypeInfoField: null, initialValueField: pivf,
                 extraInfo: null, comparer: null, itemType: null);
@@ -45,21 +45,21 @@ namespace PropBagLib.Tests.PerformanceDb
                 setToDefault: false, setToUndefined: false, setToNull: true, setToEmptyString: false);
 
             // First Name (string - null)
-            propItem = new PropItem(type: typeof(string), name: "FirstName",
+            propItem = new PropItemModel(type: typeof(string), name: "FirstName",
                 storageStrategy: PropStorageStrategyEnum.Internal, typeIsSolid: true, propKind: PropKindEnum.Prop,
                 propTypeInfoField: null, initialValueField: pivf,
                 extraInfo: null, comparer: null, itemType: null);
             result.Props.Add(propItem);
 
             // Last Name (string - null)
-            propItem = new PropItem(type: typeof(string), name: "LastName",
+            propItem = new PropItemModel(type: typeof(string), name: "LastName",
                 storageStrategy: PropStorageStrategyEnum.Internal, typeIsSolid: true, propKind: PropKindEnum.Prop,
                 propTypeInfoField: null, initialValueField: pivf,
                 extraInfo: null, comparer: null, itemType: null);
             result.Props.Add(propItem);
 
             // City Of Residence (string - null)
-            propItem = new PropItem(type: typeof(string), name: "CityOfResidence",
+            propItem = new PropItemModel(type: typeof(string), name: "CityOfResidence",
                storageStrategy: PropStorageStrategyEnum.Internal, typeIsSolid: true, propKind: PropKindEnum.Prop,
                 propTypeInfoField: null, initialValueField: pivf,
                 extraInfo: null, comparer: null, itemType: null);
@@ -69,7 +69,7 @@ namespace PropBagLib.Tests.PerformanceDb
                 setToDefault: true, setToUndefined: false, setToNull: true, setToEmptyString: false);
 
             // Profession
-            propItem = new PropItem(type: typeof(Profession), name: "Profession",
+            propItem = new PropItemModel(type: typeof(Profession), name: "Profession",
                 storageStrategy: PropStorageStrategyEnum.Internal, typeIsSolid: true, propKind: PropKindEnum.Prop,
                 propTypeInfoField: null, initialValueField: pivf,
                 extraInfo: null, comparer: null, itemType: null);
@@ -103,7 +103,7 @@ namespace PropBagLib.Tests.PerformanceDb
             PropInitialValueField pivf = new PropInitialValueField(initialValue: null,
                 setToDefault: true, setToUndefined: false, setToNull: false, setToEmptyString: false);
 
-            PropItem propItem = new PropItem(type: typeof(Guid), name: "ProductId",
+            PropItemModel propItem = new PropItemModel(type: typeof(Guid), name: "ProductId",
                 storageStrategy:  PropStorageStrategyEnum.Internal,
                 typeIsSolid: true, propKind: PropKindEnum.Prop,
                 propTypeInfoField: null, initialValueField: pivf,
@@ -115,7 +115,7 @@ namespace PropBagLib.Tests.PerformanceDb
             pivf = new PropInitialValueField(initialValue: null,
                 setToDefault: false, setToUndefined: false, setToNull: true, setToEmptyString: false);
 
-            propItem = new PropItem(type: typeof(Business), name: "Business",
+            propItem = new PropItemModel(type: typeof(Business), name: "Business",
                 storageStrategy: PropStorageStrategyEnum.Internal,
                 typeIsSolid: true, propKind: PropKindEnum.Prop,
                 propTypeInfoField: null, initialValueField: pivf,
@@ -127,7 +127,7 @@ namespace PropBagLib.Tests.PerformanceDb
             pivf = new PropInitialValueField(initialValue: null,
                 setToDefault: false, setToUndefined: false, setToNull: true, setToEmptyString: false);
 
-            propItem = new PropItem(type: typeof(ObservableCollection<Person>), name: "PersonCollection",
+            propItem = new PropItemModel(type: typeof(ObservableCollection<Person>), name: "PersonCollection",
                 storageStrategy: PropStorageStrategyEnum.Internal, typeIsSolid: true, propKind: PropKindEnum.ObservableCollection,
                 propTypeInfoField: null,
                 initialValueField: pivf,
@@ -162,7 +162,7 @@ namespace PropBagLib.Tests.PerformanceDb
             PropInitialValueField pivf = new PropInitialValueField(initialValue: null,
                 setToDefault: false, setToUndefined: false, setToNull: true, setToEmptyString: false);
 
-            PropItem propItem = new PropItem(type: typeof(Business), name: "Business",
+            PropItemModel propItem = new PropItemModel(type: typeof(Business), name: "Business",
                 storageStrategy: PropStorageStrategyEnum.Internal, typeIsSolid: true, propKind: PropKindEnum.Prop,
                 propTypeInfoField: null, initialValueField: pivf,
                 extraInfo: null, comparer: null, itemType: null);
@@ -184,7 +184,7 @@ namespace PropBagLib.Tests.PerformanceDb
             pivf = new PropInitialValueField(initialValue: null,
                 setToDefault: false, setToUndefined: false, setToNull: true, setToEmptyString: false);
 
-            propItem = new PropItem(type: typeof(DestinationModel5), name: "ChildVM",
+            propItem = new PropItemModel(type: typeof(DestinationModel5), name: "ChildVM",
                 storageStrategy: PropStorageStrategyEnum.Internal, typeIsSolid: true, propKind: PropKindEnum.Prop,
                 propTypeInfoField: null,
                 initialValueField: pivf,
@@ -195,7 +195,7 @@ namespace PropBagLib.Tests.PerformanceDb
             pivf = new PropInitialValueField(initialValue: null,
                 setToDefault: false, setToUndefined: false, setToNull: true, setToEmptyString: false);
 
-            propItem = new PropItem(type: typeof(Person), name: "SelectedPerson",
+            propItem = new PropItemModel(type: typeof(Person), name: "SelectedPerson",
                 storageStrategy: PropStorageStrategyEnum.Internal, typeIsSolid: true, propKind: PropKindEnum.Prop,
                 propTypeInfoField: null, initialValueField: pivf,
                 extraInfo: null, comparer: null, itemType: null);
@@ -205,7 +205,7 @@ namespace PropBagLib.Tests.PerformanceDb
             pivf = new PropInitialValueField(initialValue: null,
                 setToDefault: false, setToUndefined: false, setToNull: true, setToEmptyString: false);
 
-            propItem = new PropItem(type: typeof(string), name: "WMessage",
+            propItem = new PropItemModel(type: typeof(string), name: "WMessage",
                 storageStrategy: PropStorageStrategyEnum.Internal, typeIsSolid: true, propKind: PropKindEnum.Prop,
                 propTypeInfoField: null, initialValueField: pivf,
                 extraInfo: null, comparer: null, itemType: null);

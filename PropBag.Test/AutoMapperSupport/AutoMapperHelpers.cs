@@ -1,7 +1,6 @@
 ﻿using DRM.PropBag;
 using DRM.PropBag.AutoMapperSupport;
 using DRM.PropBag.Caches;
-using DRM.PropBag.ControlModel;
 using DRM.PropBagWPF;
 using DRM.TypeSafePropertyBag;
 using DRM.ViewModelTools;

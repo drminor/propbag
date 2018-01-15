@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
-namespace DRM.PropBag.ControlModel
+namespace DRM.PropBag
 {
     public class NotifyPropertyChangedBase : INotifyPropertyChanged, INotifyPropertyChanging
     {

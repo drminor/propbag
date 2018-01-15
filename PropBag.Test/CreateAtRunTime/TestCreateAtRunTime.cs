@@ -1,5 +1,5 @@
 ﻿
-using DRM.PropBag.ControlModel;
+using DRM.PropBag;
 using DRM.TypeSafePropertyBag;
 using NUnit.Framework;
 using PropBagLib.Tests.AutoMapperSupport;
@@ -39,7 +39,7 @@ namespace PropBagLib.Tests
                 deferMethodRefResolution: true,
                 requireExplicitInitialValue: true);
 
-            PropItem pi = new PropItem(typeof(string), "PropString", PropStorageStrategyEnum.Internal, true, PropKindEnum.Prop, null, new PropInitialValueField("Initial Value"), null, null, null);
+            PropItemModel pi = new PropItemModel(typeof(string), "PropString", PropStorageStrategyEnum.Internal, true, PropKindEnum.Prop, null, new PropInitialValueField("Initial Value"), null, null, null);
 
             pm.Props.Add(pi);
 

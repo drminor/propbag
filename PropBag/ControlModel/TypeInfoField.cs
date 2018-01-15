@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 
-namespace DRM.PropBag.ControlModel
+namespace DRM.PropBag
 {
     public class TypeInfoField : NotifyPropertyChangedBase, IEquatable<TypeInfoField>, ITypeInfoField
     {

@@ -20,7 +20,7 @@ namespace PropBagLib.Tests
 
             string propDefsPath = System.IO.Path.Combine(projectFolderPath, "T4", PropDefsFilename);
 
-            PropModel pm = PropModelReader.ReadXml(propDefsPath);
+            XMLPropModel pm = PropModelReader.ReadXml(propDefsPath);
 
             Assert.That(pm, Is.Not.EqualTo(null), "PropModelReader returned null");
 
@@ -34,7 +34,7 @@ namespace PropBagLib.Tests
         [Test]
         public void WriteXml()
         {
-            PropModel pm = new PropModel
+            XMLPropModel pm = new XMLPropModel
             {
                 ClassName = "TestOu",
                 DeriveFromPubPropBag = false,
@@ -47,7 +47,7 @@ namespace PropBagLib.Tests
             {
                 Name = "one",
                 Type = "int",
-                InitalValueField = new PropInitialValueField("1"),
+                InitialValueField = new PropInitialValueField("1"),
                 StorageStrategy = PropStorageStrategyEnum.Internal
             };
 
@@ -57,7 +57,7 @@ namespace PropBagLib.Tests
             {
                 Name = "two",
                 Type = "string",
-                InitalValueField = new PropInitialValueField("1"),
+                InitialValueField = new PropInitialValueField("1"),
                 StorageStrategy = PropStorageStrategyEnum.Internal
             };
 

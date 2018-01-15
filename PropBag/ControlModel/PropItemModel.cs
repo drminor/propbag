@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 using System.Xml.Serialization;
 
-namespace DRM.PropBag.ControlModel
+namespace DRM.PropBag
 {
-    public class PropItem : NotifyPropertyChangedBase, IPropItem
+    public class PropItemModel : NotifyPropertyChangedBase, IPropItem
     {
         string _propertyName;
         PropKindEnum _propKind;
@@ -109,7 +109,7 @@ namespace DRM.PropBag.ControlModel
         //public PropItem(Type type, string name) : this(type, name, null, true, true, PropKindEnum.Prop,
         //    null, null, null, null) { }
 
-        public PropItem(Type type, string name, PropStorageStrategyEnum storageStrategy, bool typeIsSolid, PropKindEnum propKind,
+        public PropItemModel(Type type, string name, PropStorageStrategyEnum storageStrategy, bool typeIsSolid, PropKindEnum propKind,
             ITypeInfoField propTypeInfoField = null,
             IPropInitialValueField initialValueField = null,
             string extraInfo = null, PropComparerField comparer = null, Type itemType = null)

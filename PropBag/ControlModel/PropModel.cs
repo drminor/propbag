@@ -8,8 +8,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 
-// ToDo: Consider moving all types in the DRM.PropBag.ControlModel namespace back to the DRM.PropBag namespace.
-namespace DRM.PropBag.ControlModel
+// ToDo: Consider moving all types in the DRM.PropBag namespace back to the DRM.PropBag namespace.
+namespace DRM.PropBag
 {
     public class PropModel : NotifyPropertyChangedBase, IEquatable<PropModel>, IPropModel
     {
@@ -199,7 +199,7 @@ namespace DRM.PropBag.ControlModel
 
         #region IEquatable support and Object overrides
 
-        // TODO:!! Update the GetHashCode for DRM.PropBag.ControlModel.PropModel
+        // TODO:!! Update the GetHashCode for DRM.PropBag.PropModel
         public override int GetHashCode()
         {
             return ClassName.GetHashCode();

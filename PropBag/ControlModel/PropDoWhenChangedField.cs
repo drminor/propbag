@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DRM.PropBag.ControlModel 
+namespace DRM.PropBag 
 {
     public class PropDoWhenChangedField : NotifyPropertyChangedBase, IEquatable<PropDoWhenChangedField>, IPropDoWhenChangedField
     {

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 using System.Xml.Serialization;
 
-namespace DRM.PropBag.ControlModel
+namespace DRM.PropBag
 {
     public class PropComparerField : NotifyPropertyChangedBase, IEquatable<PropComparerField>, IPropComparerField
     {

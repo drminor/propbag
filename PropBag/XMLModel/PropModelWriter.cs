@@ -12,9 +12,9 @@ namespace DRM.PropBag.XMLModel
     public class PropModelWriter
     {
 
-        static public void WriteXml(string path, PropModel pm)
+        static public void WriteXml(string path, XMLPropModel pm)
         {
-            XmlSerializer mySerializer = new XmlSerializer(typeof(PropModel));
+            XmlSerializer mySerializer = new XmlSerializer(typeof(XMLPropModel));
 
             using (FileStream fs = new FileStream(path, FileMode.OpenOrCreate))
             {

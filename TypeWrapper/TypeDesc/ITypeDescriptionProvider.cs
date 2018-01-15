@@ -1,4 +1,4 @@
-﻿using DRM.PropBag.ControlModel;
+﻿using DRM.TypeSafePropertyBag;
 using System;
 
 namespace DRM.TypeWrapper
@@ -7,6 +7,6 @@ namespace DRM.TypeWrapper
     {
         TypeDescription GetTypeDescription(NewTypeRequest newTypeRequest);
 
-        TypeDescription GetTypeDescription(PropModel propModel, Type typeToWrap, string className);
+        TypeDescription GetTypeDescription(IPropModel propModel, Type typeToWrap, string className);
     }
 }

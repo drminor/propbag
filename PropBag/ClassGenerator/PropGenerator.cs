@@ -82,14 +82,14 @@ namespace DRM.PropBag.ClassGenerator
         {
             PropDoWhenChanged doWhenPrepped = propModel.PrepareDoWhenChangedField(pi);
 
-            PropComparerField comparerPrepped = propModel.PrepareComparerField(pi.ComparerField);
+            DRM.PropBag.XMLModel.PropComparerField comparerPrepped =  propModel.PrepareComparerField(pi.ComparerField);
 
             PropCreateMethodEnum creationStyle;
             string initVal = null;
 
             if (pi.StorageStrategy == PropStorageStrategyEnum.Internal)
             {
-                PropInitialValueField initialValPrepped = propModel.PrepareInitialField(pi);
+                DRM.PropBag.XMLModel.PropInitialValueField initialValPrepped = propModel.PrepareInitialField(pi);
 
                 if (!initialValPrepped.SetToUndefined)
                 {
@@ -102,7 +102,7 @@ namespace DRM.PropBag.ClassGenerator
                     {
                         // Use the value indicated for "we provide storage" implentation.
                         creationStyle = PropCreateMethodEnum.value;
-                        initVal = pi.InitalValueField.InitialValue;
+                        initVal = pi.InitialValueField.InitialValue;
                     }
                 }
                 else

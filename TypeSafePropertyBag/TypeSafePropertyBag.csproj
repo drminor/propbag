@@ -65,6 +65,7 @@
     <Compile Include="PropBagModel\IPropInitialValueField.cs" />
     <Compile Include="PropBagModel\IPropItem.cs" />
     <Compile Include="PropBagModel\IPropModel.cs" />
+    <Compile Include="PropBagModel\IPropModelProvider.cs" />
     <Compile Include="PropBagModel\ITypeInfoField.cs" />
     <Compile Include="PropBagModel\WellKnownCollectionTypeEnum.cs" />
     <Compile Include="PropStore\IProvidePropStoreServiceSingletons.cs" />

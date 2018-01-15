@@ -1,5 +1,4 @@
 ﻿using DRM.TypeSafePropertyBag;
-using DRM.PropBag.ControlModel;
 using DRM.TypeSafePropertyBag.Fundamentals;
 using DRM.TypeWrapper;
 using System;

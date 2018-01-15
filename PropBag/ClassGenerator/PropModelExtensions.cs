@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using DRM.PropBag.XMLModel;
+using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBag.ClassGenerator
 {
@@ -23,7 +24,7 @@ namespace DRM.PropBag.ClassGenerator
         /// </summary>
         /// <param name="?"></param>
         /// <returns></returns>
-        public static IList<string> GetRequiredNamespaces(this PropModel pm)
+        public static IList<string> GetRequiredNamespaces(this XMLPropModel pm)
         {
             return new List<string> {
                 REFLECTION_NAME_SPACE, 
@@ -33,10 +34,10 @@ namespace DRM.PropBag.ClassGenerator
 
         }
 
-        public static PropDoWhenChanged PrepareDoWhenChangedField(this PropModel pm, PropItem pi)
+        public static DRM.PropBag.XMLModel.PropDoWhenChanged PrepareDoWhenChangedField(this IPropModel pm, PropItem pi)
         {
-            PropDoWhenChanged dwcf = pi.DoWhenChangedField;
-            if (dwcf == null) return new PropDoWhenChanged("null");
+            DRM.PropBag.XMLModel.PropDoWhenChanged dwcf = pi.DoWhenChangedField;
+            if (dwcf == null) return new DRM.PropBag.XMLModel.PropDoWhenChanged("null");
 
             string doWhenChanged;
             if (pm.DeferMethodRefResolution)
@@ -49,21 +50,21 @@ namespace DRM.PropBag.ClassGenerator
             return new PropDoWhenChanged(doWhenChanged, dwcf.DoAfterNotify);
         }
 
-        public static PropComparerField PrepareComparerField(this PropModel pm, PropComparerField cf)
+        public static DRM.PropBag.XMLModel.PropComparerField PrepareComparerField(this PropModel pm, DRM.PropBag.XMLModel.PropComparerField cf)
         {
-            if (cf == null) return new PropComparerField("null");
+            if (cf == null) return new DRM.PropBag.XMLModel.PropComparerField("null", false);
 
             if (cf.UseRefEquality && cf.Comparer != null)
             {
                 throw new ArgumentException("cf value of comparer must be null, if UseRefEquality is specified.");
             }
 
-            return new PropComparerField(cf.Comparer ?? "null", cf.UseRefEquality);
+            return new DRM.PropBag.XMLModel.PropComparerField(cf.Comparer ?? "null", cf.UseRefEquality);
         }
 
-        public static PropInitialValueField PrepareInitialField(this PropModel pm, PropItem pi)
+        public static DRM.PropBag.XMLModel.PropInitialValueField PrepareInitialField(this PropModel pm, PropItem pi)
         {
-            PropInitialValueField pivf = pi.InitalValueField;
+            DRM.PropBag.XMLModel.PropInitialValueField pivf = pi.InitialValueField;
             if (pivf == null)
             {
                 if (pm.RequireExplicitInitialValue)
@@ -74,7 +75,7 @@ namespace DRM.PropBag.ClassGenerator
                 }
 
                 // This will result in the default value being used.
-                return new PropInitialValueField(null, setToDefault: true, setToUndefined: false, setToNull: false, setToEmptyString: false);
+                return new DRM.PropBag.XMLModel.PropInitialValueField(null, setToDefault: true, setToUndefined: false, setToNull: false, setToEmptyString: false);
             }
 
             if (pivf.InitialValue == null && !pivf.SetToDefault && !pivf.SetToUndefined && !pivf.SetToNull && !pivf.SetToEmptyString)
@@ -123,19 +124,19 @@ namespace DRM.PropBag.ClassGenerator
 
             if (pivf.SetToNull)
             {
-                return new PropInitialValueField("null", setToDefault: false, setToUndefined: false, setToNull: true, setToEmptyString: false);
+                return new DRM.PropBag.XMLModel.PropInitialValueField("null", setToDefault: false, setToUndefined: false, setToNull: true, setToEmptyString: false);
             }
 
             if (pivf.SetToEmptyString)
             {
-                if (pi.Type == typeof(Guid).ToString())
+                if (pi.Type == typeof(Guid).Name)
                 {
                     const string EMPTY_GUID = "00000000-0000-0000-0000-000000000000";
-                    return new PropInitialValueField(EMPTY_GUID, setToDefault: false, setToUndefined: false, setToNull: false, setToEmptyString: true);
+                    return new DRM.PropBag.XMLModel.PropInitialValueField(EMPTY_GUID, setToDefault: false, setToUndefined: false, setToNull: false, setToEmptyString: true);
                 }
                 else
                 {
-                    return new PropInitialValueField("\"\"", setToDefault: false, setToUndefined: false, setToNull: false, setToEmptyString: true);
+                    return new DRM.PropBag.XMLModel.PropInitialValueField("\"\"", setToDefault: false, setToUndefined: false, setToNull: false, setToEmptyString: true);
                 }
             }
 

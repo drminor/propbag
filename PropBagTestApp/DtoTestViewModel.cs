@@ -1,5 +1,4 @@
 ﻿using DRM.PropBag;
-using DRM.PropBag.ControlModel;
 
 namespace PropBagTestApp
 {

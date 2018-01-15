@@ -13,9 +13,16 @@ namespace DRM.PropBag.ClassGenerator
     public class T4Support
     {
 
-        static public string GetBaseClassName(PropModel propModel)
+        static public string GetBaseClassName(IPropModel propModel)
         {
-            return propModel.DeriveFromPubPropBag ? "PubPropBag" : "PropBag";
+            switch(propModel.DeriveFromClassMode)
+            {
+                case DeriveFromClassModeEnum.PropBag: return "PropBag";
+                case DeriveFromClassModeEnum.PubPropBag: return "PubPropBag";
+                case DeriveFromClassModeEnum.Custom: return propModel.TypeToCreate.FullName;
+                default: throw new InvalidOperationException($"The {propModel.DeriveFromClassMode} is not recognized or is not supported.");
+            }
+            //return propModel.DeriveFromClassMode == DeriveFromClassModeEnum. .DeriveFromPubPropBag ? "PubPropBag" : "PropBag";
         }
 
         static public string GetSafetyModeString(PropModel propModel)
@@ -23,7 +30,7 @@ namespace DRM.PropBag.ClassGenerator
             return propModel.TypeSafetyMode.ToString();
         }
 
-        static public string GetNamespaces(PropModel propModel)
+        static public string GetNamespaces(DRM.PropBag.XMLModel.XMLPropModel propModel)
         {
             StringBuilder r = new StringBuilder();
 
@@ -65,7 +72,7 @@ namespace DRM.PropBag.ClassGenerator
         {
             PropDoWhenChanged doWhenPrepped = propModel.PrepareDoWhenChangedField(pi);
 
-            PropComparerField comparerPrepped = propModel.PrepareComparerField(pi.ComparerField);
+            DRM.PropBag.XMLModel.PropComparerField comparerPrepped = propModel.PrepareComparerField(pi.ComparerField);
 
             // Prepare the AddProp method call
             string formatString;
@@ -82,7 +89,7 @@ namespace DRM.PropBag.ClassGenerator
 
             if (pi.StorageStrategy == PropStorageStrategyEnum.Internal)
             {
-                PropInitialValueField initialValPrepped = propModel.PrepareInitialField(pi);
+                DRM.PropBag.XMLModel.PropInitialValueField initialValPrepped = propModel.PrepareInitialField(pi);
 
                 if (!initialValPrepped.SetToUndefined)
                 {

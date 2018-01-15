@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel;
 using System.Collections;
-using DRM.PropBag.ControlModel;
+using DRM.PropBag;
 using DRM.TypeSafePropertyBag;
 using DRM.PropBag.TypeDescriptors;
 using System.Collections.Specialized;

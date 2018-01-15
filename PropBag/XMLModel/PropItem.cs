@@ -27,7 +27,7 @@ namespace DRM.PropBag.XMLModel
         public string Type { get; set; }
 
         [XmlElement("initial-value")]
-        public PropInitialValueField InitalValueField { get; set;}
+        public PropInitialValueField InitialValueField { get; set;}
 
         [XmlElement("comparer")]
         public PropComparerField ComparerField { get; set; }

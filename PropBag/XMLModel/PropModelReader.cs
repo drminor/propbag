@@ -13,16 +13,16 @@ namespace DRM.PropBag.XMLModel
     public class PropModelReader
     {
 
-        static public PropModel ReadXml(string path)
+        static public XMLPropModel ReadXml(string path)
         {
-            XmlSerializer mySerializer = new XmlSerializer(typeof(PropModel));
+            XmlSerializer mySerializer = new XmlSerializer(typeof(XMLPropModel));
 
             using(FileStream fs = new FileStream(path, FileMode.Open))
             {
                 //XmlDocument xx = new XmlDocument();
                 //xx.Load(fs);
 
-                return (PropModel)mySerializer.Deserialize(fs);
+                return (XMLPropModel)mySerializer.Deserialize(fs);
             }
         }
 

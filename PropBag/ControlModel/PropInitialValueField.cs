@@ -8,7 +8,7 @@ using System.Xml.Serialization;
 using System.ComponentModel;
 using DRM.TypeSafePropertyBag;
 
-namespace DRM.PropBag.ControlModel
+namespace DRM.PropBag
 {
     public class PropInitialValueField : NotifyPropertyChangedBase, IEquatable<PropInitialValueField>, IPropInitialValueField
     {

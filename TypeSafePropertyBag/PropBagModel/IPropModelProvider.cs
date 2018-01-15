@@ -1,7 +1,5 @@
-﻿using DRM.TypeSafePropertyBag;
-using System;
-
-namespace DRM.PropBag.ControlModel
+﻿
+namespace DRM.TypeSafePropertyBag
 {
     public interface IProvidePropModels
     {

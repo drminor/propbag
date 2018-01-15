@@ -1,5 +1,4 @@
-﻿using DRM.PropBag.ControlModel;
-using DRM.TypeSafePropertyBag;
+﻿using DRM.TypeSafePropertyBag;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -15,7 +14,7 @@ namespace DRM.PropBag.AutoMapperSupport
         {
             List<MemberInfo> result = new List<MemberInfo>();
 
-            foreach (PropItem propItem in pm.Props)
+            foreach (PropItemModel propItem in pm.Props)
             {
                 string propertyName = propItem.PropertyName;
                 Type propertyType = propItem.PropertyType;
