@@ -7,49 +7,51 @@ using DRM.PropBag.Caches;
 
 namespace DRM.PropBag
 {
-    using PropIdType = UInt32;
     using PropNameType = String;
 
-    using PropBagType = PropBag;
 
     public class PropFactory : AbstractPropFactory
     {
         public override bool ProvidesStorage => true;
 
+        //public PropFactory
+        //    (
+        //        ResolveTypeDelegate typeResolver,
+        //        IConvertValues valueConverter
+        //    )
+        //    : this
+        //    (
+        //        typeResolver, 
+        //        valueConverter,
+        //        new SimpleDelegateCacheProvider(typeof(PropBag), typeof(APFGenericMethodTemplates))
+        //    )
+        //{
+        //}
+
         public PropFactory
             (
-                ResolveTypeDelegate typeResolver,
-                IConvertValues valueConverter
+                IProvideDelegateCaches delegateCacheProvider,
+                IConvertValues valueConverter,
+                ResolveTypeDelegate typeResolver
             )
-            : this
+            : base
             (
-                  typeResolver, 
-                  valueConverter,
-                  new SimpleDelegateCacheProvider(typeof(PropBag), typeof(APFGenericMethodTemplates))
+                delegateCacheProvider,
+                valueConverter, // GetValueConverter(valueConverter, delegateCacheProvider)
+                typeResolver
             )
         {
         }
 
-        public PropFactory
-        (
-            ResolveTypeDelegate typeResolver,
-            IConvertValues valueConverter,
-            IProvideDelegateCaches delegateCacheProvider
-        )  : base
-        (
-            delegateCacheProvider,
-            typeResolver,
-            GetValueConverter(valueConverter, delegateCacheProvider)
-        )
-        {
-        }
-
-        // TODO: Require the valueConverter parameter to be supplied.
-        private static IConvertValues GetValueConverter(IConvertValues suppliedValueConverter, IProvideDelegateCaches delegateCacheProvider)
-        {
-            IConvertValues result = suppliedValueConverter ?? new PropFactoryValueConverter(delegateCacheProvider.TypeDescBasedTConverterCache);
-            return result;
-        }
+        //// TODO: Require the valueConverter parameter to be supplied.
+        //// TODO: Separate out the TypeDescBasedTConverterCache from IProvideDelegateCaches
+        ////      and make PropFactory require a supplied TypeDescBasedTConverterCache
+        ////      and create an interface that TypeDescBasedTConverterCache can implement.
+        //private static IConvertValues GetValueConverter(IConvertValues suppliedValueConverter, IProvideDelegateCaches delegateCacheProvider)
+        //{
+        //    IConvertValues result = suppliedValueConverter ?? new PropFactoryValueConverter(delegateCacheProvider.TypeDescBasedTConverterCache);
+        //    return result;
+        //}
 
         #region Enumerable-Type Prop Creation 
 

@@ -7,7 +7,7 @@ using System.Threading;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
-    public class SimpleAutoMapperProvider : IProvideAutoMappers //, ICachePropBagMappers
+    public class SimpleAutoMapperProvider : IProvideAutoMappers
     {
         #region Private Members
 
@@ -17,7 +17,7 @@ namespace DRM.PropBag.AutoMapperSupport
         IMapTypeDefinitionProvider MapTypeDefinitionProvider { get; }
         ICachePropBagMappers MappersCachingService { get; }
         IPropBagMapperBuilderProvider MapperBuilderProvider { get; }
-        IPropModelProvider PropModelProvider { get; }
+        IProvidePropModels PropModelProvider { get; }
 
         #endregion
 
@@ -30,7 +30,7 @@ namespace DRM.PropBag.AutoMapperSupport
             IMapTypeDefinitionProvider mapTypeDefinitionProvider,
             ICachePropBagMappers mappersCachingService,
             IPropBagMapperBuilderProvider mapperBuilderProvider,
-            IPropModelProvider propModelProvider = null
+            IProvidePropModels propModelProvider = null
             )
         {
             MapTypeDefinitionProvider = mapTypeDefinitionProvider ?? throw new ArgumentNullException(nameof(mapTypeDefinitionProvider));
@@ -51,18 +51,31 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public IPropBagMapperKeyGen RegisterMapperRequest(MapperRequest mr)
         {
-            PropModel propModel = PropModelProvider.GetPropModel(mr.PropModelResourceKey);
-            Type targetType = propModel.TargetType;
+            //PropModel propModel = PropModelProvider.GetPropModel(mr.PropModelResourceKey);
+            //Type targetType = propModel.TargetType;
 
-            RegisterMapperRequestDelegate x = GetTheRegisterMapperRequestDelegate(mr.SourceType, targetType);
-            IPropBagMapperKeyGen result = x(propModel, targetType, mr.ConfigPackageName, this);
+            //RegisterMapperRequestDelegate x = GetTheRegisterMapperRequestDelegate(mr.SourceType, targetType);
+            //IPropBagMapperKeyGen result = x(propModel, targetType, mr.ConfigPackageName, this);
 
+            IPropBagMapperKeyGen result = RegisterMapperRequest(mr.PropModelResourceKey, mr.SourceType, mr.ConfigPackageName);
             return result;
         }
 
         public IPropBagMapperKeyGen RegisterMapperRequest(string propModelResourceKey, Type sourceType, string configPackageName)
         {
-            PropModel propModel = PropModelProvider.GetPropModel(propModelResourceKey);
+            IPropModel propModel = PropModelProvider.GetPropModel(propModelResourceKey);
+            //Type targetType = propModel.TargetType;
+
+            //RegisterMapperRequestDelegate x = GetTheRegisterMapperRequestDelegate(sourceType, targetType);
+            //IPropBagMapperKeyGen result = x(propModel, targetType, configPackageName, this);
+
+            IPropBagMapperKeyGen result = RegisterMapperRequest(propModel, sourceType, configPackageName);
+
+            return result;
+        }
+
+        public IPropBagMapperKeyGen RegisterMapperRequest(IPropModel propModel, Type sourceType, string configPackageName)
+        {
             Type targetType = propModel.TargetType;
 
             RegisterMapperRequestDelegate x = GetTheRegisterMapperRequestDelegate(sourceType, targetType);
@@ -71,6 +84,7 @@ namespace DRM.PropBag.AutoMapperSupport
             return result;
         }
 
+        // TODO: Remove dependency on PropModelProvider and make all calls supply a PropModel. 
         public IPropBagMapperKey<TSource, TDestination> RegisterMapperRequest<TSource, TDestination>
             (
             string resourceKey,
@@ -80,7 +94,7 @@ namespace DRM.PropBag.AutoMapperSupport
             IPropFactory propFactory = null
             ) where TDestination : class, IPropBag
         {
-            PropModel propModel = GetPropModel(resourceKey);
+            IPropModel propModel = GetPropModel(resourceKey);
 
             IPropBagMapperKey<TSource, TDestination> typedMapperRequest =
                 RegisterMapperRequest<TSource, TDestination>
@@ -97,13 +111,14 @@ namespace DRM.PropBag.AutoMapperSupport
         // TODO: Consider adding a method that takes a IConfigureAMapper instead of a configPackageName.
         public IPropBagMapperKey<TSource, TDestination> RegisterMapperRequest<TSource, TDestination>
             (
-            PropModel propModel,
+            IPropModel propModel,
             Type targetType,
             string configPackageName,
             IHaveAMapperConfigurationStep configStarterForThisRequest = null,
             IPropFactory propFactory = null
             ) where TDestination : class, IPropBag
         {
+
             // TODO: check to make sure that the "configStarterForThisRequest" value is being sent to the correct place.
 
             // TODO: Consider making the caller supply a IBuildMapperConfigurations "service."
@@ -183,14 +198,14 @@ namespace DRM.PropBag.AutoMapperSupport
             }
         }
 
-        private PropModel GetPropModel(string resourceKey, IPropFactory propFactory = null)
+        private IPropModel GetPropModel(string resourceKey, IPropFactory propFactory = null)
         {
             if (!HasPropModelLookupService)
             {
                 throw new InvalidOperationException(NO_PROPMODEL_LOOKUP_SERVICES);
             }
 
-            PropModel propModel = PropModelProvider.GetPropModel(resourceKey, propFactory);
+            IPropModel propModel = PropModelProvider.GetPropModel(resourceKey, propFactory);
             return propModel;
         }
 
@@ -207,7 +222,7 @@ namespace DRM.PropBag.AutoMapperSupport
         }
 
         internal delegate IPropBagMapperKeyGen RegisterMapperRequestDelegate
-            (PropModel propModel, Type targetType, string configPackageName, IProvideAutoMappers autoMapperProvider);
+            (IPropModel propModel, Type targetType, string configPackageName, IProvideAutoMappers autoMapperProvider);
 
         /// <summary>
         /// Used to create Delegates when the type of the value is not known at run time.
@@ -236,7 +251,7 @@ namespace DRM.PropBag.AutoMapperSupport
                     = autoMapperProvider.RegisterMapperRequest<TSource, TDestination>
                     (
                         propModel: propModel,
-                        targetType: targetType,
+                        typeToWrap: targetType,
                         configPackageName: configPackageName,
                         configStarterForThisRequest: null,
                         propFactory: null

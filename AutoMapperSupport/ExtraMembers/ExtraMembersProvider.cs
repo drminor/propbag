@@ -11,7 +11,7 @@ namespace DRM.PropBag.AutoMapperSupport
     /// </summary>
     public class ExtraMembersProvider
     {
-        public IEnumerable<MemberInfo> GetExtraMembers(PropModel pm)
+        public IEnumerable<MemberInfo> GetExtraMembers(IPropModel pm)
         {
             List<MemberInfo> result = new List<MemberInfo>();
 

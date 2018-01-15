@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DRM.TypeSafePropertyBag;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,9 +9,8 @@ using System.Xml.Serialization;
 
 namespace DRM.PropBag.ControlModel
 {
-    public class PropComparerField : NotifyPropertyChangedBase, IEquatable<PropComparerField>
+    public class PropComparerField : NotifyPropertyChangedBase, IEquatable<PropComparerField>, IPropComparerField
     {
-
         Delegate c;
         bool ure;
 

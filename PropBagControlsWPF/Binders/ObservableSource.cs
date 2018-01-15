@@ -1,4 +1,4 @@
-﻿using DRM.PropBag.ControlsWPF.WPFHelpers;
+﻿using DRM.PropBagControlsWPF.WPFHelpers;
 using DRM.TypeSafePropertyBag;
 using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
@@ -11,7 +11,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 
-namespace DRM.PropBag.ControlsWPF.Binders
+namespace DRM.PropBagControlsWPF.Binders
 {
     public class ObservableSource
     {

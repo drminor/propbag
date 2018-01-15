@@ -3,16 +3,15 @@ using System;
 
 namespace DRM.PropBag.ControlModel
 {
-    public interface IPropModelProvider
+    public interface IProvidePropModels
     {
-        PropModel GetPropModel(string resourceKey);
-        PropModel GetPropModel(string resourceKey, IPropFactory propFactory);
+        IPropModel GetPropModel(string resourceKey);
+        IPropModel GetPropModel(string resourceKey, IPropFactory propFactory);
 
-        MapperRequest GetMapperRequest(string resourceKey);
+        IMapperRequest GetMapperRequest(string resourceKey);
 
-        // These would require adding a reference to PresentationFramework.
+        // In order to include these methods, a reference to PresentationFramework must be added.
         //PropModel GetPropModel(ResourceDictionary rd, string resourceKey);
         //PropModel GetPropModel(ResourceDictionary rd, string resourceKey, IPropFactory propFactory);
-
     }
 }

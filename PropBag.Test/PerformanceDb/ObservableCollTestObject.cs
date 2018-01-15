@@ -37,7 +37,7 @@ namespace PropBagLib.Tests.PerformanceDb
             IPropBagMapperKey<Person, DestinationModel1> mapperRequest = amp.RegisterMapperRequest<Person, DestinationModel1>
                 (
                     propModel: propModel1,
-                    targetType: typeToWrap,
+                    typeToWrap: typeToWrap,
                     configPackageName: configPackageName
                 );
 

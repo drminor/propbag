@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows;
 
-namespace DRM.PropBag.ControlsWPF.Binders
+namespace DRM.PropBagControlsWPF.Binders
 {
     /// <summary>
     /// Concrete implementation of the MyBindingEngineBase abstract class.

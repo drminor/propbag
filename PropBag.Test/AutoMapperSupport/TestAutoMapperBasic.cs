@@ -46,7 +46,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 _amp.RegisterMapperRequest<MyModel3, DestinationModel3>
                 (
                     propModel: propModel,
-                    targetType: typeToWrap,
+                    typeToWrap: typeToWrap,
                     configPackageName: configPackageName
                 );
 
@@ -66,7 +66,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 _amp.RegisterMapperRequest<MyModel3, DestinationModel3>
                 (
                     propModel: propModel,
-                    targetType: typeToWrap,
+                    typeToWrap: typeToWrap,
                     configPackageName: configPackageName
                 );
 
@@ -96,7 +96,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 _amp.RegisterMapperRequest<MyModel3, DestinationModel3>
                 (
                     propModel: propModel,
-                    targetType: typeToWrap,
+                    typeToWrap: typeToWrap,
                     configPackageName: configPackageName
                 );
 
@@ -119,7 +119,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 _amp.RegisterMapperRequest<MyModel3, DestinationModel3>
                 (
                     propModel: propModel,
-                    targetType: typeToWrap,
+                    typeToWrap: typeToWrap,
                     configPackageName: configPackageName
                 );
 
@@ -149,7 +149,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 _amp.RegisterMapperRequest<MyModel3, DestinationModel3>
                 (
                     propModel: propModel,
-                    targetType: typeToWrap,
+                    typeToWrap: typeToWrap,
                     configPackageName: configPackageName
                 );
 
@@ -169,6 +169,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 namespaceName: "PropBagLib.Tests.AutoMapperSupport",
                 deriveFrom: DeriveFromClassModeEnum.PropBag,
                 targetType: null,
+                propStoreServiceProviderType: null,
                 propFactory: null,
                 typeSafetyMode: PropBagTypeSafetyMode.Tight,
                 deferMethodRefResolution: true,

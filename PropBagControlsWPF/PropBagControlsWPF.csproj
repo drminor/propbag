@@ -47,6 +47,10 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Activators\IProvideAPropFactoryCreator.cs" />
+    <Compile Include="Activators\IAMServiceRef.cs" />
+    <Compile Include="Activators\IPSServiceRef.cs" />
+    <Compile Include="Activators\MapperRequestProvider.cs" />
     <Compile Include="Binders\BindingTarget.cs" />
     <Compile Include="Binders\DataSourceChangedEventArgs.cs" />
     <Compile Include="Binders\DataSourceChangedEventHandler.cs" />
@@ -125,6 +129,10 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AutoMapperSupport\AutoMapperSupport.csproj">
+      <Project>{10cf1c6f-f877-49a8-8678-6947f55e6920}</Project>
+      <Name>AutoMapperSupport</Name>
+    </ProjectReference>
     <ProjectReference Include="..\PropBag\PropBag.csproj">
       <Project>{7387b893-fbdc-4b9c-ac9e-0b56388b46c1}</Project>
       <Name>PropBag</Name>

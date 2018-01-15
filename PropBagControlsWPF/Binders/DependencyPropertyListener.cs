@@ -4,7 +4,7 @@
 /// I found it here: https://stackoverflow.com/questions/4764916/listen-to-changes-of-dependency-property
 /// </remarks>
 
-namespace DRM.PropBag.ControlsWPF.Binders
+namespace DRM.PropBagControlsWPF.Binders
 {
     using System;
     using System.Collections.Concurrent;

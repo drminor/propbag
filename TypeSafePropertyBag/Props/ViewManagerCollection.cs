@@ -37,6 +37,28 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
             return result;
         }
 
+        public bool TryGetValue(IPropData sourcePropItem, out IManageCViews cViewManager)
+        {
+            if(_dict.TryGetValue(sourcePropItem, out cViewManager))
+            {
+                return true;
+            }
+            else
+            {
+                cViewManager = null;
+                return false;
+            }
+        }
+
+        public IManageCViews this[IPropData sourcePropItem]
+        {
+            get
+            {
+                IManageCViews result = _dict[sourcePropItem];
+                return result;
+            }
+        }
+
         #endregion
     }
 }

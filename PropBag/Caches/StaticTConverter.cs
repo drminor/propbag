@@ -9,7 +9,7 @@ namespace DRM.PropBag.Caches
 {
     public static class StaticTConverterProvider
     {
-        public static TypeDescBasedTConverterCache TypeDescBasedTConverterCache { get; }
+        public static ITypeDescBasedTConverterCache TypeDescBasedTConverterCache { get; }
 
         static StaticTConverterProvider()
         {

@@ -18,7 +18,7 @@ using System.Collections;
 using System.Reflection;
 
 using DRM.PropBag.ControlModel;
-using DRM.PropBag.ControlsWPF;
+using DRM.PropBagControlsWPF;
 
 namespace PropBagTestApp
 {

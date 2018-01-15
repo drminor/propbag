@@ -1,0 +1,187 @@
+Local Binding Feature
+
+
+Example use cases:
+----------------------
+MainWindowViewModel sets up a binding
+by watching Property: ./Business and updating ./PersonCollectionViewModel.Business
+
+PersonCollectionViewModel requests
+that a binding be created 
+on its Business Property using parent/Business as the source.
+Bind ./Business to parent/Business
+
+MainWindowViewModel sets up a binding
+by watching Property: ./PersonCollectionViewModel and updating ./WMessage
+MainWindoViewModel requests
+that a binding be created
+on its WMessage property using ./PersonCollectionViewModel/WMessage as the source.
+
+Bind ./WMessage to ./PersonCollectionViewModel/WMessage as the source.
+
+If each PropBag instance were to receive a unique key and each property were to also receive a unique key (Unique in the context of an Application Domain.)
+
+Also lets build the keys using a un-signed integer or an un-signed long integer where a certain number of the bits were used to identify the object and a the remaining bits were used to identify the property. In this way, if one was given a property identifer, one could strip off the property portion and produce an integer value that identifed the object on which that property was registered.
+
+If we were to also create a data structure that would hold either:
+A (weak) object reference to a PropBag instance
+or hold
+A PropItem
+
+And where this data structure would hold
+1. A reference to its parent
+and
+2. A list of its child objects
+
+In the case of where an instance of this data structure held info about a PropBag, we would say that it was an
+
+ObjectType instance and 
+	the parent would identify the hosting propItem.
+	and
+	the children would be the list of propItems registered as one of its member properties.
+
+In the case where an instance of this data structure held info about a PropItem, we would say that it was a 
+
+PropType instance and
+	the parent would identify the PropBag of which it was a member property.
+	and
+	the single child, if present, would be an ObjectType instance for the PropBag instance 		that had been assigned to us, i.e., our value.
+
+
+These binding could be expessed as follows: (Where R: indicates an PropBag reference, and P a PropItem.
+
+Bind (R1P3 -> R1P2/ChildObjectId/P3)
+CKey => Path of CKey/CKey
+
+Artificial Root (CKey 0/0)
+Root1 (ObjectId) (CKey x/0)
+	R1P1, R1P2, R1P3 (CKeys)
+
+Root2 (ObjectId) (CKey y/0)
+	R2P1, R2P2, R2P3
+
+Root2 is parented By ARoot or some other Root.
+Prop (CKey) is always parented by some Root.
+
+Node - ObjectType (Parented by a PropTypeNode, or ARoot.
+	CompId (with PropId portion = 0)
+	WR_AccessToken (WeakRef to IPropBag)
+
+	List of PropType child Nodes 
+	Parent Node of type PropType or Null, if a Root.
+
+
+Node - PropType (Parented by a ObjectType Node.)
+	CompId (With ObjectId portion = to parent's CompId.
+	PropData
+
+R1P2 contains Root2
+
+
+How bindings are established
+---------------------------
+
+The request to create a Binding is done on the target propbag either a part of the PropModel read in at time of construction or at run-time via a method call on an instance of some class that dervives from IPropBag.
+
+1. Target: 
+	The name of the property which is bound to the source's value. This identifies one of the properties that has already been registered on the caller's propBag.
+
+2. A source Property identifed by a string path or a direct object referecence to the source instance. (If the latter, the binding is removed if the source property object is removed from its PropBag parent or otherwise becomes null.
+
+3. A Binding Mode:
+	One Way: When ever the source changes, the target is changed.
+	Two Way: When the source changes, the target is updated; when the target canges, the 		source is updated.
+	Backwards:
+	OneTime:
+	
+
+4. A priority group, and other paramters that control how and when the target is updated.
+
+The path used to reach the source can be an absolute path, or a relative path.
+Relative paths can specify an ancestor by using ".."; "." refers to the current PropBag.
+
+./PropOne, refers to a property that is a sibling of the target property.
+PropOne also refers to that same property.
+
+../PropOnParent, refers to a property named: "PropOnParent" that exists on the parent of PropBag instance for which the target is registerd. The source is a sibling to the target.
+
+../../PropOnGrandparent refers to a property named "PropOnGrandparent" which is registered on the parent of our PropBag's parent.
+
+./ChildVM/PropThree, refers to a PropertyNamed: "PropThree" registered on the a PropBag hosted by a PropItem named: "ChildVM" on our PropBag. ChildVM is a sibling property to the target property.
+
+../../OtherVM/Prop5 refers to a property named "Prop5" parented by a VM named OtherVM which is parented by our parent's parent.
+
+/ChildOfTopVM/Level3VM/Prop10 refers to a property named "Prop10" within a PropBag that is hosted by a Property named Level3VM, which is hosted by a property named: "ChildOfTopVM" which is part of the PropBag that is the root of the PropModel.
+
+
+How PropModels are declared and how this is manifested as run-time.
+-------------------------------------------------------------------
+
+First, realize that as the WPF control model parses a PropBagTemplate (XAML resource) and that template defines a property whose type derives from IPropBag, then the PropModel of that Property is included in the PropModel being declared. A PropBagTemplate is found using the resourceKey that matches the type's name or the resource key specified in the property definition. The declared property is said to "host" instances of classes that are built using the included PropModel. In this way a tree of some depth is created.
+
+Second, realize that the "child" PropModel knows very little about the model of the PropBag that declared the property that is hosting it: many PropModels may declare properties that are of the "child" type.
+
+In regular WPF binding the path to the source is rooted on the object that is currently set to the target's DataContext.
+
+These bindings, in contrast, refer to a property on some object for which the value of that "hosting" property is the parent in any relative path specification. The root for paths specified absolutely is determined by navigating up the chain until a PropBag instance is found that is not "hosted" on some PropBag object. This PropBag is simply instantiated as a local variable which may or may not be assigned to the property or field of a CLR class.
+
+Also realize that when a PropBag instance is created it will always begins its life as a stand alone CLR variable. Only when the PropBag instance is assigned to the value of some property accessor on a PropBag instance does it receive its proper ancestory.
+
+
+How paths are evaluated
+---------------------------
+
+The first step in any binding is one of the following:
+.
+..
+/
+
+Note: All paths that do not start with a ".", "..", or "/" are prepended with a "."
+
+Here is how each type of first step is handled:
+
+If ".", nothing is done, the next step must be a PNAME.
+
+If "..", the parent of the binding target is found, the next step must be a PNAME or ..
+
+If "/", the root of the binding target is found, the next step must be a PNAME.
+
+
+For the second and all subsequent steps:
+
+If "..", the parent of the property resolved in the previous step is found. The next must be a ".." or a PNAME.
+
+If PNAME, a property by this name is found on the property resolved in the previous step. The next step, if present must be a PNAME.
+
+
+How Binding are managed.
+--------------------------
+
+Each ObjectNode that is the target of one or more bindings, keeps a list of all such binding requests.
+
+When a request is first created, the path to the source
+
+
+Each binding is put in a list on the ObjectNode. This list contains all of the bindings for that ObjectNode. The items in this list contain a list of the path steps as specifed by the source path. When a PropItem receives a new value, this list is checked to see if:
+1. The new value is the ultimate source object. If it a subscription is created on the source whose action is to update the target.
+2. The new value replaces an existing ultimate source. If it is the existing subscription on that "old" source is removed.
+
+Whether or not the prop item being updated in the ultimate source is determined by evaluating each step in the binding path to see if the those steps resolve to the prop being updated.
+
+
+
+Binding are created either by
+A. The PropBag during construction by reading a PropModel (perhaps one constructed by the set of "headless" user controls in the PropBagControlsWPF project that "read" a an XAML resorce file)
+ or
+B. At run-time by calling one of overloads of the "CreateBinding" method.
+
+
+
+
+
+	
+
+
+
+
+

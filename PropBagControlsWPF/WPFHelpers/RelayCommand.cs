@@ -8,7 +8,7 @@ using System.Windows.Input;
 /// Project Coordinator: JoshSmithOnWpf
 ///</remarks>
 
-namespace DRM.PropBag.ControlsWPF
+namespace DRM.PropBagControlsWPF
 {
 
     /// <summary>

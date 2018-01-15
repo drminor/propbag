@@ -14,9 +14,9 @@ namespace DRM.PropBag
 {
     public class PropFactoryValueConverter : IConvertValues
     {
-        TypeDescBasedTConverterCache _converter;
+        ITypeDescBasedTConverterCache _converter;
 
-        public PropFactoryValueConverter(TypeDescBasedTConverterCache converterCache)
+        public PropFactoryValueConverter(ITypeDescBasedTConverterCache converterCache)
         {
             _converter = converterCache ?? throw new ArgumentNullException(nameof(converterCache));
         }

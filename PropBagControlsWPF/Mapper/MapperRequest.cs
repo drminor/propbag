@@ -2,7 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 
-namespace DRM.PropBag.ControlsWPF
+namespace DRM.PropBagControlsWPF
 {
     public class MapperRequest : Control
     {
@@ -10,10 +10,6 @@ namespace DRM.PropBag.ControlsWPF
         {
             DefaultStyleKeyProperty.OverrideMetadata(typeof(MapperRequest),
                 new FrameworkPropertyMetadata(typeof(MapperRequest)));
-        }
-
-        public MapperRequest()
-        {
         }
 
         public static readonly DependencyProperty SourceTypeProperty =

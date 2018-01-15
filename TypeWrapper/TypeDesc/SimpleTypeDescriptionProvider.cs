@@ -1,4 +1,5 @@
 ﻿using DRM.PropBag.ControlModel;
+using DRM.TypeSafePropertyBag;
 using System;
 using System.Collections.Generic;
 
@@ -33,7 +34,7 @@ namespace DRM.TypeWrapper.TypeDesc
             return result;
         }
 
-        private IEnumerable<PropertyDescription> GetPropertyDescriptions(PropModel pm)
+        private IEnumerable<PropertyDescription> GetPropertyDescriptions(IPropModel pm)
         {
             List<PropertyDescription> result = new List<PropertyDescription>();
 

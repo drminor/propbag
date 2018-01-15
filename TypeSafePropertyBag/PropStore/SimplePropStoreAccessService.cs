@@ -869,15 +869,45 @@ namespace DRM.TypeSafePropertyBag
         //    return result;
         //}
 
+        // TODO: Update to only get -- instead of GetOrAdd.
         // Get a DataSourceProvider
-        public DataSourceProvider GetDataSourceProvider(IPropBag propBag, PropIdType propId, IPropData propData, CViewProviderCreator viewBuilder)
+        public DataSourceProvider GetOrAddDataSourceProvider(IPropBag propBag, PropIdType propId, IPropData propData, CViewProviderCreator viewBuilder)
         {
-            IManageCViews CViewManagerGen = GetViewManager(propBag, propId, propData, viewBuilder);
+            IManageCViews CViewManagerGen = GetOrAddViewManager(propBag, propId, propData, viewBuilder);
             DataSourceProvider result = CViewManagerGen.DataSourceProvider;
             return result;
         }
 
-        public IManageCViews GetViewManager(IPropBag propBag, PropIdType propId, IPropData propData, CViewProviderCreator viewBuilder)
+        public DataSourceProvider GetDataSourceProvider(IPropBag propBag, IPropData propData)
+        {
+            ObjectIdType objectId = GetAndCheckObjectRef(propBag);
+
+            // There is one View Manager for each PropItem. The View Manager for a particular PropItem is created on first use.
+            if (_genViewManagers == null)
+            {
+                return null;
+            }
+            else
+            {
+                if(_genViewManagers.TryGetValue(propData, out IManageCViews cViewManager))
+                {
+                    DataSourceProvider result = cViewManager.DataSourceProvider;
+                    return result;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+
+        // TODO: Rename to: GetOrAddViewManager
+        // Build a ViewManager whose source is a PropItem of Kind = ObservableCollection
+        // A DataSourceProvider, a CollectionViewSource and a ListCollectionView are created.
+        // The DataSourceProvider not only raises the standard DataChanged event, but also raises
+        // EventHandler<EventArgs> ItemEndEdit events whenever an item in the list raises it's ItemEndEdit event.
+        public IManageCViews GetOrAddViewManager(IPropBag propBag, PropIdType propId, IPropData propData,
+            CViewProviderCreator viewBuilder)
         {
             ObjectIdType objectId  = GetAndCheckObjectRef(propBag);
 
@@ -893,29 +923,47 @@ namespace DRM.TypeSafePropertyBag
             // Alternatively, make GetOrAdd take a factory (which of course could be different for each call.)
             IManageCViews CViewGenManagerFactory(IPropData propData2)
             {
-                IProvideADataSourceProvider dSProviderProvider;
-                if (propData2.TypedProp.PropKind == PropKindEnum.Prop)
-                {
-                    dSProviderProvider = null; // new ClrMappedDSP<>
-                }
-                else
-                {
-                    dSProviderProvider = new PBCollectionDSP_Provider(propId, propData2.TypedProp.PropKind, this);
-                }
-
+                IProvideADataSourceProvider dSProviderProvider = new PBCollectionDSP_Provider(propId, propData2.TypedProp.PropKind, this);
                 IManageCViews result2 = new ViewManager(dSProviderProvider, viewBuilder);
                 return result2;
             }
         }
 
-        // Create a Delegate cache very similar the delegate caches used to create TypeProps.
+        public IManageCViews GetOrAddViewManager(IPropBag propBag, PropIdType propId, IPropData propData,
+            CViewProviderCreator viewBuilder, IProvideADataSourceProvider dSProviderProvider)
+        {
+            ObjectIdType objectId = GetAndCheckObjectRef(propBag);
+
+            // There is one View Manager for each PropItem. The View Manager for a particular PropItem is created on first use.
+            if (_genViewManagers == null)
+                _genViewManagers = new ViewManagerCollection(CViewGenManagerFactory);
+
+            IManageCViews result = _genViewManagers.GetOrAdd(propData);
+            return result;
+
+            // TODO: Make GetViewManager take a viewBuilderGetter delegate that can be called to get the viewBuilder for a particular PropItem.
+            // In this way we can provide a constant value to the ViewManagerCollection constructor, but yet have differing View Builders.
+            // Alternatively, make GetOrAdd take a factory (which of course could be different for each call.)
+            IManageCViews CViewGenManagerFactory(IPropData propData2)
+            {
+                IManageCViews result2 = new ViewManager(dSProviderProvider, viewBuilder);
+                return result2;
+            }
+        }
+
+        // TODO: Create a Delegate cache very similar the delegate caches used to create TypeProps.
+
+        // Build a ViewManager whose source is a PropItem of Kind = Prop and whose type is IDoCrud<T>
+        // A DataSourceProvider, a CollectionViewSource and a ListCollectionView are created.
+        // The DataSourceProvider not only raises the standard DataChanged event, but also raises
+        // EventHandler<EventArgs> ItemEndEdit events whenever an item in the list raises it's ItemEndEdit event.
         public IManageCViews GetViewManager<TSource, TDestination>
             (
             IPropBag propBag,
-            PropIdType propId,
-            IPropData propData,
+            PropIdType propId, // Identifies the PropItem that implements IDoCrud<TSource>
+            IPropData propData, // The PropStore management wrapper for IProp<TSource> which holds the value of the 'IDoCrud<T>' data access layer.
             IPropBagMapper<TSource, TDestination> mapper,
-            CViewProviderCreator viewBuilder
+            CViewProviderCreator viewBuilder // Method that can be used to create a IProvideAView from a DataSourceProvider.
             )
             where TSource : class
             where TDestination : INotifyItemEndEdit

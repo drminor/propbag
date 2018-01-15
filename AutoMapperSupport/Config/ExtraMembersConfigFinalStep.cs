@@ -23,7 +23,7 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public void BuildExtraMemberConfig(IPropBagMapperKey<TSource, TDestination> mapRequest, IMapperConfigurationExpression cfg)
         {
-            PropModel propModel = mapRequest.DestinationTypeDef.PropModel;
+            IPropModel propModel = mapRequest.DestinationTypeDef.PropModel;
 
             IEnumerable<MemberInfo> extraMembers = new ExtraMembersProvider().GetExtraMembers(propModel);
 

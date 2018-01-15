@@ -40,9 +40,15 @@ namespace DRM.TypeSafePropertyBag
         int ClearAllProps(IPropBag propBag);
 
         // Collection View Related
-        IManageCViews GetViewManager(IPropBag propBag, L2T propId, IPropData propData, CViewProviderCreator viewBuilder);
         //IProvideADataSourceProvider GetDataSourceProviderProvider(IPropBag propBag, L2T propId, IPropData propData, CViewProviderCreator viewBuilder);
-        DataSourceProvider GetDataSourceProvider(IPropBag propBag, L2T propId, IPropData propData, CViewProviderCreator viewBuilder);
+
+        DataSourceProvider GetDataSourceProvider(IPropBag propBag, IPropData propData);
+
+        DataSourceProvider GetOrAddDataSourceProvider(IPropBag propBag, L2T propId, IPropData propData, CViewProviderCreator viewBuilder);
+
+        IManageCViews GetOrAddViewManager(IPropBag propBag, L2T propId, IPropData propData, CViewProviderCreator viewBuilder);
+        IManageCViews GetOrAddViewManager(IPropBag propBag, L2T propId, IPropData propData, CViewProviderCreator viewBuilder, IProvideADataSourceProvider dSProviderProvider);
+
 
         // Diagnostics
         void IncAccess();

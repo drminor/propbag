@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DRM.PropBag.ControlsWPF.Binders
+namespace DRM.PropBagControlsWPF.Binders
 {
 
     public delegate void DataSourceChangedEventHandler(object sender, DataSourceChangedEventArgs e);

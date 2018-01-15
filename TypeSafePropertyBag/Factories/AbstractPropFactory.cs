@@ -47,17 +47,25 @@ namespace DRM.TypeSafePropertyBag
         public AbstractPropFactory
             (
             IProvideDelegateCaches delegateCacheProvider,
-            ResolveTypeDelegate typeResolver = null,
-            IConvertValues valueConverter = null
-            )
+            IConvertValues valueConverter,
+            ResolveTypeDelegate typeResolver)
         {
-            DelegateCacheProvider = delegateCacheProvider;
+            DelegateCacheProvider = delegateCacheProvider ?? throw new ArgumentNullException(nameof(delegateCacheProvider));
+            ValueConverter = valueConverter ?? throw new ArgumentNullException(nameof(valueConverter));
 
-            // Use our default implementation, if the caller did not supply one.
-            TypeResolver = typeResolver ?? this.GetTypeFromName;
+            if (typeResolver != null)
+            {
+                TypeResolver = typeResolver;
+            }
+            else
+            {
+                // Use our default implementation, if the caller did not supply one.
+                TypeResolver = new SimpleTypeResolver().GetTypeFromName;
+            }
+            ////TypeResolver = typeResolver ??  this.GetTypeFromName;
 
-        // Use our default implementation, if the caller did not supply one.
-        ValueConverter = valueConverter; //?? new PropFactoryValueConverter(delegateCacheProvider.TypeDescBasedTConverterCache);
+            //// Temporarily, for testing, always use our implementation.
+            //TypeResolver = new SimpleTypeResolver().GetTypeFromName;
 
             IndexerName = "Item[]";
         }
@@ -497,6 +505,18 @@ namespace DRM.TypeSafePropertyBag
             CreateEPropWithNoValueDelegate result = DelegateCacheProvider.CreateCPropWithNoValCache.GetOrAdd(new TypePair(collectionType, itemType));
             return result;
         }
+
+        #endregion
+
+
+        #region Create DataSourceProvider-Providers
+
+        //From Object
+        //protected virtual CreateDsFromIDoCrudDelegate GetCPropCreator(Type collectionType, Type itemType)
+        //{
+        //    CreateEPropFromObjectDelegate result = DelegateCacheProvider.CreateCPropFromObjectCache.GetOrAdd(new TypePair(collectionType, itemType));
+        //    return result;
+        //}
 
         #endregion
 

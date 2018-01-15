@@ -9,13 +9,7 @@ using System.Threading.Tasks;
 
 namespace DRM.PropBag
 {
-    using PropIdType = UInt32;
     using PropNameType = String;
-    //using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
-    using SubCacheType = ICacheSubscriptions<UInt32>;
-
-    using PropBagType = PropBag;
-    using ICreatePropsType = APFGenericMethodTemplates;
 
     public class PropExtStoreFactory : AbstractPropFactory
     {
@@ -30,11 +24,17 @@ namespace DRM.PropBag
 
         public PropExtStoreFactory
             (
-                object stuff,
+                IProvideDelegateCaches delegateCacheProvider,
+                IConvertValues valueConverter,
                 ResolveTypeDelegate typeResolver,
-                IConvertValues valueConverter
+                object stuff
             )
-            : base(new SimpleDelegateCacheProvider(typeof(PropBag), typeof(APFGenericMethodTemplates)), typeResolver, valueConverter)
+            : base
+            (
+                delegateCacheProvider,
+                valueConverter,
+                typeResolver
+            )
         {
             // Info to help us set up the getters and setters
             Stuff = stuff;

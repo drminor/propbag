@@ -10,11 +10,13 @@ namespace DRM.TypeSafePropertyBag
     using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
 
     /// <summary>
-    /// All implementers of IPropBag that also want to use the 
+    /// All implementers of IPropBag that also want to use a shared property store must
+    /// implement this interface.
     /// </summary>
-    public interface IPropBagInternal : IPropBag
+    public interface IPropBagInternal : IPropBag, ICloneable
     {
         PSAccessServiceType ItsStoreAccessor { get; }
+        IPropFactory PropFactory { get; }
         void RaiseStandardPropertyChanged(PropIdType propId, PropNameType propertyName);
     }
 
@@ -30,7 +32,6 @@ namespace DRM.TypeSafePropertyBag
         INotifyPCObject,
         IEditableObject,
         INotifyItemEndEdit,
-        ICloneable,
         IDisposable
     {
         // These are defined by ITypeSafePropBag
@@ -83,7 +84,6 @@ namespace DRM.TypeSafePropertyBag
         //bool UnSubscribeToPropChanged(Action<object, object> doOnChange, PropNameType propertyName);
 
         string FullClassName { get; }
-        IPropFactory PropFactory { get; }
 
         // Consider moving these to the TypeSafePropBagMetaData class.
         PropBagTypeSafetyMode TypeSafetyMode { get; }

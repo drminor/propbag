@@ -4,6 +4,7 @@ using DRM.PropBag.Caches;
 using DRM.PropBag.ControlModel;
 using DRM.PropBagWPF;
 using DRM.TypeSafePropertyBag;
+using DRM.ViewModelTools;
 using System;
 
 namespace PropBagLib.Tests.AutoMapperSupport
@@ -19,13 +20,15 @@ namespace PropBagLib.Tests.AutoMapperSupport
         private const int LOG_BASE2_MAX_PROPERTIES = 16;
         public static readonly int MAX_NUMBER_OF_PROPERTIES = (int)Math.Pow(2, LOG_BASE2_MAX_PROPERTIES); //65536;
 
-        public IProvideAutoMappers InitializeAutoMappers(IPropModelProvider propModelProvider, PSAccessServiceCreatorInterface storeAccessCreator)
+        public IProvideAutoMappers InitializeAutoMappers(PSAccessServiceCreatorInterface storeAccessCreator)
         {
+            IViewModelActivator vmActivator = new SimpleViewModelActivator();
+
             IPropBagMapperBuilderProvider propBagMapperBuilderProvider
                 = new SimplePropBagMapperBuilderProvider
                 (
-                    wrapperTypeCreator: null,
-                    viewModelActivator: null,
+                    wrapperTypesCreator: null,
+                    viewModelActivator: vmActivator,
                     storeAccessCreator: storeAccessCreator
                 );
 
@@ -38,7 +41,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 mapTypeDefinitionProvider: mapTypeDefinitionProvider,
                 mappersCachingService: mappersCachingService,
                 mapperBuilderProvider: propBagMapperBuilderProvider,
-                propModelProvider: propModelProvider
+                propModelProvider: null
                 );
 
             return autoMapperProvider;
@@ -76,14 +79,38 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 {
                     IProvideDelegateCaches delegateCacheProvider = new SimpleDelegateCacheProvider(typeof(PropBag), typeof(APFGenericMethodTemplates));
 
+                    ITypeDescBasedTConverterCache typeDescBasedTConverterCache = new TypeDescBasedTConverterCache();
+                    IConvertValues valueConverter = new PropFactoryValueConverter(typeDescBasedTConverterCache);
+
                     _propFactory_V1 = new WPFPropFactory
                         (
-                        typeResolver: GetTypeFromName,
-                        valueConverter: null,
-                        delegateCacheProvider:delegateCacheProvider
+                        delegateCacheProvider: delegateCacheProvider,
+                        valueConverter: valueConverter,
+                        typeResolver: null
                         );
                 }
                 return _propFactory_V1;
+            }
+        }
+
+        IPropFactory _propFactoryExt_V1;
+        public IPropFactory PropFactoryExt_V1
+        {
+            get
+            {
+                if (_propFactoryExt_V1 == null)
+                {
+                    IProvideDelegateCaches delegateCacheProvider = new SimpleDelegateCacheProvider(typeof(PropBag), typeof(APFGenericMethodTemplates));
+
+                    _propFactoryExt_V1 = new PropExtStoreFactory
+                        (
+                         delegateCacheProvider: delegateCacheProvider,
+                        valueConverter: null,
+                        typeResolver: null,
+                        stuff: null
+                        );
+                }
+                return _propFactoryExt_V1;
             }
         }
 
@@ -94,34 +121,50 @@ namespace PropBagLib.Tests.AutoMapperSupport
             {
                 IPropFactory propFactory = PropFactory_V1;
 
-                _autoMapperProvider_V1 = new AutoMapperHelpers().InitializeAutoMappers
-                    (
-                    propModelProvider: null,
-                    storeAccessCreator: StoreAccessCreator
-                    );
+                _autoMapperProvider_V1 = new AutoMapperHelpers().InitializeAutoMappers(storeAccessCreator: StoreAccessCreator);
             }
             return _autoMapperProvider_V1;
         }
 
-        public Type GetTypeFromName(string typeName)
-        {
-            Type result;
-            try
-            {
-                result = Type.GetType(typeName);
-            }
-            catch (System.Exception e)
-            {
-                throw new InvalidOperationException($"Cannot create a Type instance from the string: {typeName}.", e);
-            }
+        //public Type GetTypeFromName(string typeName)
+        //{
+        //    Type result;
+        //    try
+        //    {
+        //        result = Type.GetType(typeName);
+        //    }
+        //    catch (ArgumentNullException ane)
+        //    {
+        //        throw new InvalidOperationException($"Cannot create a Type instance from the string: {typeName}.", ane);
+        //    }
+        //    catch (System.Reflection.TargetInvocationException tie)
+        //    {
+        //        throw new InvalidOperationException($"Cannot create a Type instance from the string: {typeName}.", tie);
+        //    }
+        //    catch (ArgumentException ae)
+        //    {
+        //        throw new InvalidOperationException($"Cannot create a Type instance from the string: {typeName}.", ae);
+        //    }
+        //    catch (TypeLoadException tle)
+        //    {
+        //        throw new InvalidOperationException($"Cannot create a Type instance from the string: {typeName}.", tle);
+        //    }
+        //    catch (System.IO.FileLoadException fle)
+        //    {
+        //        throw new InvalidOperationException($"Cannot create a Type instance from the string: {typeName}.", fle);
+        //    }
+        //    catch (BadImageFormatException bife)
+        //    {
+        //        throw new InvalidOperationException($"Cannot create a Type instance from the string: {typeName}.", bife);
+        //    }
 
-            if (result == null)
-            {
-                throw new InvalidOperationException($"Cannot create a Type instance from the string: {typeName}.");
-            }
+        //    if (result == null)
+        //    {
+        //        throw new InvalidOperationException($"Cannot create a Type instance from the string: {typeName}. (No exception was thrown, but GetType returned null.");
+        //    }
 
-            return result;
-        }
+        //    return result;
+        //}
 
         #region IDisposable Support
 

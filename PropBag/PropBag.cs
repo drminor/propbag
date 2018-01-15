@@ -17,7 +17,6 @@ using System.Windows.Data;
 
 namespace DRM.PropBag
 {
-    using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
     using PropIdType = UInt32;
     using PropNameType = String;
     using IRegisterBindingsFowarderType = IRegisterBindingsForwarder<UInt32>;
@@ -69,6 +68,8 @@ namespace DRM.PropBag
         #region Public Events and Properties
 
         public string FullClassName => OurMetaData.FullClassName;
+
+        // TODO: Consider making the PropFactory property part of the PropBagInternal
         public IPropFactory PropFactory => _propFactory;
         public PropBagTypeSafetyMode TypeSafetyMode => _typeSafetyMode;
 
@@ -154,6 +155,10 @@ namespace DRM.PropBag
 
         #region Constructor
 
+    //    public PropBag(ControlModel.PropModel propModel, PSAccessServiceCreatorInterface storeAcessorCreator, IPropFactory propFactory = null, string fullClassName = null)
+    //: this(propModel.TypeSafetyMode, storeAcessorCreator, propFactory ?? propModel.PropFactory, fullClassName ?? propModel.FullClassName)
+
+
         /// <summary>
         /// Creates a new PropBag using the specified PropModel and Property Store Access Creator.
         /// </summary>
@@ -162,8 +167,8 @@ namespace DRM.PropBag
         /// <param name="storeAcessorCreator"></param>
         /// <param name="propFactory">The PropFactory to use instead of the one specified by the PropModel.</param>
         /// <param name="fullClassName">The namespace and class name to use instead of the one specified by the PropMode.</param>
-        public PropBag(ControlModel.PropModel propModel, PSAccessServiceCreatorInterface storeAcessorCreator, IPropFactory propFactory = null, string fullClassName = null)
-            : this(propModel.TypeSafetyMode, storeAcessorCreator, propFactory ?? propModel.PropFactory, fullClassName ?? propModel.FullClassName)
+        public PropBag(IPropModel propModel, PSAccessServiceCreatorInterface storeAcessorCreator, IPropFactory propFactory = null, string fullClassName = null)
+            : this(propModel.TypeSafetyMode, storeAcessorCreator, propModel.PropFactory ?? propFactory, fullClassName ?? propModel.FullClassName)
         {
             Hydrate(propModel);
             int testc = _ourStoreAccessor.PropertyCount;
@@ -208,7 +213,11 @@ namespace DRM.PropBag
             return className;
         }
 
-        protected void Hydrate(PropModel pm)
+        #endregion
+
+        #region PropModel Processing
+
+        protected void Hydrate(IPropModel pm)
         {
             string cName = GetClassNameOfThisInstance();
             string pCName = pm.ClassName;
@@ -218,7 +227,7 @@ namespace DRM.PropBag
                 System.Diagnostics.Debug.WriteLine($"CLR class name: {cName} does not match PropModel class name: {pCName}.");
             }
 
-            foreach (DRM.PropBag.ControlModel.PropItem pi in pm.Props)
+            foreach (IPropItem pi in pm.Props)
             {
                 if(pi.PropertyName == "PersonList")
                 {
@@ -260,6 +269,11 @@ namespace DRM.PropBag
                 {
                     // Get the name of the Collection-Type PropItem that provides the data for this CollectionViewSource.
                     string srcPropName = pi.BinderField?.Path;
+
+                    //MapperRequest mr = pi.MapperRequest;
+                    //IPropBagMapperKeyGen mapperRequest;
+                    //mapperRequest = PropStoreServicesForThisApp.AutoMapperProvider.RegisterMapperRequest(mr.PropModelResourceKey, mr.SourceType, mr.ConfigPackageName);
+                    //_mapper = (IPropBagMapper<Person, PersonVM>)PropStoreServicesForThisApp.AutoMapperProvider.GetMapper(mapperRequest);
 
                     //FetchData_Test(srcPropName, pi.PropertyType);
 
@@ -368,7 +382,7 @@ namespace DRM.PropBag
 
         }
 
-        private IPropData processProp(PropItem pi, out PropIdType propId)
+        private IPropData processProp(IPropItem pi, out PropIdType propId)
         {
             object ei = pi.ExtraInfo;
 
@@ -2559,7 +2573,7 @@ namespace DRM.PropBag
 
             if (propData != null)
             {
-                dataSourceProvider = _ourStoreAccessor.GetDataSourceProvider(this, propId, propData, _propFactory.GetCViewProviderFactory());
+                dataSourceProvider = _ourStoreAccessor.GetOrAddDataSourceProvider(this, propId, propData, _propFactory.GetCViewProviderFactory());
                 return true;
             }
             else
@@ -2623,7 +2637,7 @@ namespace DRM.PropBag
 
             if (propData != null)
             {
-                cViewManager = _ourStoreAccessor.GetViewManager(this, propId, propData, _propFactory.GetCViewProviderFactory());
+                cViewManager = _ourStoreAccessor.GetOrAddViewManager(this, propId, propData, _propFactory.GetCViewProviderFactory());
                 return true;
             }
             else

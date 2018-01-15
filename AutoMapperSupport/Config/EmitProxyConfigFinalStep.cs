@@ -26,7 +26,7 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public void BuildEmitProxyConfig(IPropBagMapperKey<TSource, TDestination> mapRequest, IMapperConfigurationExpression cfg)
         {
-            PropModel propModel = mapRequest.DestinationTypeDef.PropModel;
+            IPropModel propModel = mapRequest.DestinationTypeDef.PropModel;
 
             Func<TDestination, TSource> regularInstanceCreator = mapRequest.MappingConfiguration.SourceConstructor;
 

@@ -6,7 +6,7 @@ using System.Reflection;
 using System.ComponentModel.Design.Serialization;
 using System.Xaml;
 
-namespace DRM.PropBag.ControlsWPF
+namespace DRM.PropBagControlsWPF
 {
     public class ComparerFuncTypeConverter : TypeConverter
     {

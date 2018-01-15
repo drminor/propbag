@@ -2,7 +2,7 @@
 using System.Windows;
 using System;
 
-namespace DRM.PropBag.ControlsWPF
+namespace DRM.PropBagControlsWPF
 {
     public class PropBagTemplateProvider : IPropBagTemplateProvider
     {
@@ -10,31 +10,19 @@ namespace DRM.PropBag.ControlsWPF
 
         private ResourceDictionary _resources;
 
-        private Dictionary<string, PropBagTemplate> _pbtsFromOurResources;
-        private Dictionary<string, PropBagTemplate> PbtsFromOurResources
-        {
-            get
-            {
-                if (_pbtsFromOurResources == null)
-                {
-                    _pbtsFromOurResources = GetPropBagTemplates(_resources);
-                }
-                return _pbtsFromOurResources;
-            }
-        }
-
-        private Dictionary<string, MapperRequest> _mrFromOurResources;
-        private Dictionary<string, MapperRequest> MrFromOurResources
-        {
-            get
-            {
-                if (_mrFromOurResources == null)
-                {
-                    _mrFromOurResources = GetMapperRequests(_resources);
-                }
-                return _mrFromOurResources;
-            }
-        }
+        // TODO: Consider parsing the entire resource file on first access.
+        //private Dictionary<string, PropBagTemplate> _pbtsFromOurResources;
+        //private Dictionary<string, PropBagTemplate> PbtsFromOurResources
+        //{
+        //    get
+        //    {
+        //        if (_pbtsFromOurResources == null)
+        //        {
+        //            _pbtsFromOurResources = GetPropBagTemplates(_resources);
+        //        }
+        //        return _pbtsFromOurResources;
+        //    }
+        //}
 
         #endregion
 
@@ -54,7 +42,7 @@ namespace DRM.PropBag.ControlsWPF
 
         #region Public Properties
 
-        public bool CanFindPropBagTemplateWithJustKey => _resources != null;
+        public bool CanFindPropBagTemplateWithJustAKey => _resources != null;
 
         #endregion
 
@@ -62,11 +50,15 @@ namespace DRM.PropBag.ControlsWPF
 
         public PropBagTemplate GetPropBagTemplate(string resourceKey)
         {
-            return GetPropBagTemplate(PbtsFromOurResources, resourceKey);
+            if (!CanFindPropBagTemplateWithJustAKey) throw new InvalidOperationException($"This instance of {nameof(PropBagTemplateProvider)} was not provide a ResourceDictionary.");
+            return GetPropBagTemplate(_resources, resourceKey);
         }
 
         public PropBagTemplate GetPropBagTemplate(ResourceDictionary resources, string resourceKey)
         {
+            if (resources == null) throw new ArgumentNullException(nameof(resources));
+            if (resourceKey == null) throw new ArgumentNullException(nameof(resourceKey));
+
             object resource;
             try
             {
@@ -94,6 +86,8 @@ namespace DRM.PropBag.ControlsWPF
 
         public Dictionary<string, PropBagTemplate> GetPropBagTemplates(ResourceDictionary resources)
         {
+            if (resources == null) throw new ArgumentNullException(nameof(resources));
+
             Dictionary<string, PropBagTemplate> result = new Dictionary<string, PropBagTemplate>();
 
             // TODO: build an enumerator that walks the tree of resource dictionaries.
@@ -121,61 +115,6 @@ namespace DRM.PropBag.ControlsWPF
             return result;
         }
 
-
-        public Dictionary<string, MapperRequest> GetMapperRequests(ResourceDictionary resources)
-        {
-            Dictionary<string, MapperRequest> result = new Dictionary<string, MapperRequest>();
-
-            // TODO: build an enumerator that walks the tree of resource dictionaries.
-            //ResourceDictionary resources = System.Windows.Application.Current.Resources;
-
-            foreach (ResourceDictionary rd in resources.MergedDictionaries)
-            {
-                foreach (object objKey in rd.Keys)
-                {
-                    object rdEntry = rd[objKey];
-
-                    if (rdEntry is MapperRequest mr)
-                    {
-                        result.Add((string)objKey, mr);
-                    }
-                }
-            }
-
-            if (result.Count == 0)
-            {
-                result = null;
-            }
-
-            return result;
-        }
-
-        public MapperRequest GetMapperRequest(string resourceKey)
-        {
-            return GetMapperRequest(MrFromOurResources, resourceKey);
-        }
-
-        public MapperRequest GetMapperRequest(ResourceDictionary resources, string resourceKey)
-        {
-            Dictionary<string, MapperRequest> mrRequests = null;
-
-            try
-            {
-                mrRequests = GetMapperRequests(resources);
-            }
-            catch
-            {
-                if (mrRequests == null)
-                {
-                    System.Diagnostics.Debug.WriteLine($"MapperRequests was not populated while trying to fetch the MapperRequest for {resourceKey}");
-                }
-                throw;
-            }
-
-            MapperRequest result = GetMapperRequest(mrRequests, resourceKey);
-            return result;
-        }
-
         #endregion
 
         #region Private Methods
@@ -198,41 +137,19 @@ namespace DRM.PropBag.ControlsWPF
             }
         }
 
-        private PropBagTemplate GetPropBagTemplate(Dictionary<string, PropBagTemplate> pbts, string resourceKey)
-        {
-            if (pbts == null) throw new ArgumentNullException(nameof(pbts));
-            try
-            {
-                PropBagTemplate result = pbts[resourceKey];
-                return result;
-            }
-            catch (KeyNotFoundException knfe)
-            {
-                throw new KeyNotFoundException($"Could not find a PropBag Template with key = {resourceKey}.", knfe);
-            }
-        }
-
-        // TODO: Make GetMapperRequest and related methods follow the pattern used by the GetPropBagTemplate method and related methods.
-        private MapperRequest GetMapperRequest(Dictionary<string, MapperRequest> mrRequests, string resourceKey)
-        {
-            try
-            {
-                MapperRequest result = mrRequests[resourceKey];
-                return result;
-            }
-            catch
-            {
-                if (mrRequests == null)
-                {
-                    System.Diagnostics.Debug.WriteLine($"MapperRequests was not populated while trying to fetch the MapperRequest for {resourceKey}");
-                }
-                else
-                {
-                    System.Diagnostics.Debug.WriteLine($"Failed to find MapperRequest with key = {resourceKey}");
-                }
-                throw;
-            }
-        }
+        //private PropBagTemplate GetPropBagTemplate(Dictionary<string, PropBagTemplate> pbts, string resourceKey)
+        //{
+        //    if (pbts == null) throw new ArgumentNullException(nameof(pbts));
+        //    try
+        //    {
+        //        PropBagTemplate result = pbts[resourceKey];
+        //        return result;
+        //    }
+        //    catch (KeyNotFoundException knfe)
+        //    {
+        //        throw new KeyNotFoundException($"Could not find a PropBag Template with key = {resourceKey}.", knfe);
+        //    }
+        //}
 
         #endregion
     }

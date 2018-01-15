@@ -43,7 +43,6 @@
     <Compile Include="Caches\SimpleDelegateCacheProvider.cs" />
     <Compile Include="Caches\StaticTConverter.cs" />
     <Compile Include="ControlModel\DeriveFromClassField_NotUsed.cs" />
-    <Compile Include="ControlModel\DeriveFromClassModeEnum.cs" />
     <Compile Include="ControlModel\IPropModelProvider.cs" />
     <Compile Include="ClassGenerator\PropDefRaw.cs" />
     <Compile Include="ClassGenerator\PropGenerator.cs" />
@@ -58,7 +57,6 @@
     <Compile Include="Props\CProp.cs" />
     <Compile Include="Collections\PbAbstractListSource.cs" />
     <Compile Include="ControlModel\MapperRequest.cs" />
-    <Compile Include="ControlModel\WellKnownCollectionTypeEnum.cs" />
     <Compile Include="ControlModel\NotifyPropertyChangedBase.cs" />
     <Compile Include="ControlModel\TypeInfoField.cs" />
     <Compile Include="ControlModel\PropComparerField.cs" />

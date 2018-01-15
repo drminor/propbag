@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using DRM.PropBag.AutoMapperSupport;
-using DRM.PropBag.ControlsWPF;
+using DRM.PropBagControlsWPF;
 using PropBagTestApp.Models;
 using System;
 using System.Collections.Generic;
@@ -8,7 +8,7 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 
-using DRM.PropBag.ControlsWPF.Binders;
+using DRM.PropBagControlsWPF.Binders;
 using PropBagTestApp.Infra;
 
 namespace PropBagTestApp
@@ -58,7 +58,7 @@ namespace PropBagTestApp
         public DtoTestEmit()
         {
 
-            if (JustSayNo.InDesignMode())
+            if (PropStoreServicesForThisApp.InDesignMode())
             {
                 System.Diagnostics.Debug.WriteLine("In Design");
                 //OurData = new DtoTestViewModelEmit(PropBagTypeSafetyMode.Tight);

@@ -3,13 +3,17 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace DRM.PropBag.ControlsWPF
+namespace DRM.PropBagControlsWPF
 {
     public class PropItem : ItemsControl
     {
         static PropItem()
         {
             DefaultStyleKeyProperty.OverrideMetadata(typeof(PropItem), new FrameworkPropertyMetadata(typeof(PropItem)));
+        }
+
+        public PropItem()
+        {
         }
 
         public static readonly DependencyProperty PropertyNameProperty =

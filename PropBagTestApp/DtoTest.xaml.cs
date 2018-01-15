@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using DRM.PropBag.ControlsWPF;
+using DRM.PropBagControlsWPF;
 using DRM.TypeSafePropertyBag.Fundamentals;
 using PropBagTestApp.Models;
 using System;

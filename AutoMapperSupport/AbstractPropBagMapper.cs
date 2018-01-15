@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using DRM.PropBag.ControlModel;
 using DRM.TypeSafePropertyBag;
 using DRM.ViewModelTools;
 using System;
@@ -19,7 +18,7 @@ namespace DRM.PropBag.AutoMapperSupport
         public Type SourceType { get; }
         public Type DestinationType { get; }
 
-        public PropModel PropModel { get; }
+        public IPropModel PropModel { get; }
         public Type RunTimeType { get; }
 
         IPropFactory PropFactory { get; }
@@ -33,7 +32,7 @@ namespace DRM.PropBag.AutoMapperSupport
 
         private readonly bool _requiresWrappperTypeEmitServices;
         private readonly ICloneable _template;
-        private readonly IPropBag _pbTemplate;
+        private readonly IPropBagInternal _pbTemplate;
 
         #endregion
 
@@ -62,7 +61,7 @@ namespace DRM.PropBag.AutoMapperSupport
                 if(_requiresWrappperTypeEmitServices)
                 {
                     _template = null;
-                    _pbTemplate = (IPropBag)GetNewDestination(PropModel, _storeAccessCreator, DestinationType, PropFactory, fullClassName: null);
+                    _pbTemplate = (IPropBagInternal)GetNewDestination(PropModel, _storeAccessCreator, DestinationType, PropFactory, fullClassName: null);
                 }
                 else
                 {
@@ -152,7 +151,7 @@ namespace DRM.PropBag.AutoMapperSupport
             return result;
         }
 
-        private TDestination GetNewDestination(PropModel propModel, PSAccessServiceCreatorInterface storeAccessCreator, Type destinationTypeOrProxy, IPropFactory propFactory, string fullClassName)
+        private TDestination GetNewDestination(IPropModel propModel, PSAccessServiceCreatorInterface storeAccessCreator, Type destinationTypeOrProxy, IPropFactory propFactory, string fullClassName)
         {
             try
             {
@@ -166,7 +165,7 @@ namespace DRM.PropBag.AutoMapperSupport
             }
         }
 
-        private TDestination GetNewDestination(Type destinationTypeOrProxy, IPropBag copySource)
+        private TDestination GetNewDestination(Type destinationTypeOrProxy, IPropBagInternal copySource)
         {
             try
             {

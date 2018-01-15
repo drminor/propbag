@@ -2,7 +2,7 @@
 
 using System.Reflection;
 
-namespace DRM.PropBag.ControlsWPF
+namespace DRM.PropBagControlsWPF
 {
     public class ReflectionHelpers
     {

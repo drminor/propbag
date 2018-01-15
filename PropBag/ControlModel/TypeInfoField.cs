@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DRM.TypeSafePropertyBag;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -8,7 +9,7 @@ using System.Xml.Serialization;
 
 namespace DRM.PropBag.ControlModel
 {
-    public class TypeInfoField : NotifyPropertyChangedBase, IEquatable<TypeInfoField>
+    public class TypeInfoField : NotifyPropertyChangedBase, IEquatable<TypeInfoField>, ITypeInfoField
     {
         Type _memberType;
         [XmlElement("member-type")]
@@ -38,18 +39,18 @@ namespace DRM.PropBag.ControlModel
         [XmlElement("type-parameter3")]
         public Type TypeParameter3 { get { return _typeParameter3; } set { _typeParameter3 = value; } }
 
-        ObservableCollection<TypeInfoField> _children;
+        ObservableCollection<ITypeInfoField> _children;
         [XmlArray("children")]
         [XmlArrayItem("child")]
-        public ObservableCollection<TypeInfoField> Children
+        public ObservableCollection<ITypeInfoField> Children
         {
             get { return _children; }
-            set { this.SetCollection<ObservableCollection<TypeInfoField>, TypeInfoField>(ref _children, value); }
+            set { this.SetCollection<ObservableCollection<ITypeInfoField>, ITypeInfoField>(ref _children, value); }
         }
 
         public TypeInfoField(Type memberType, string typeName, string fullyQualifiedTypeName,
             WellKnownCollectionTypeEnum wkCollectionType,
-            Type typeParameter1, Type typeParameter2, Type typeParameter3, ObservableCollection<TypeInfoField> children)
+            Type typeParameter1, Type typeParameter2, Type typeParameter3, ObservableCollection<ITypeInfoField> children)
         {
             MemberType = memberType;
             TypeName = typeName;
@@ -58,7 +59,7 @@ namespace DRM.PropBag.ControlModel
             TypeParameter1 = typeParameter1;
             TypeParameter2 = typeParameter2;
             TypeParameter3 = typeParameter3;
-            Children = children ?? new ObservableCollection<TypeInfoField>();
+            Children = children ?? new ObservableCollection<ITypeInfoField>();
 
             if(typeName == null & fullyQualifiedTypeName == null && memberType == null)
             {
@@ -76,7 +77,7 @@ namespace DRM.PropBag.ControlModel
                    EqualityComparer<Type>.Default.Equals(TypeParameter1, other.TypeParameter1) &&
                    EqualityComparer<Type>.Default.Equals(TypeParameter2, other.TypeParameter2) &&
                    EqualityComparer<Type>.Default.Equals(TypeParameter3, other.TypeParameter3) &&
-                   EqualityComparer<ObservableCollection<TypeInfoField>>.Default.Equals(Children, other.Children);
+                   EqualityComparer<ObservableCollection<ITypeInfoField>>.Default.Equals(Children, other.Children);
         }
 
         public override bool Equals(object obj)

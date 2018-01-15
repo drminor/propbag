@@ -11,7 +11,7 @@ using System.Reflection;
 /// 
 /// TODO: Check on https://github.com/TylerBrinkley/Enums.NET
 /// </remarks>
-namespace DRM.PropBag.ControlsWPF.Converters
+namespace DRM.PropBagControlsWPF.Converters
 {
     
     /// <summary>

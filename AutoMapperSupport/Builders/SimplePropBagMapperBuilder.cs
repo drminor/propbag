@@ -14,11 +14,11 @@ namespace DRM.PropBag.AutoMapperSupport
         private IBuildMapperConfigurations<TSource, TDestination> MapperConfigurationBuilder { get; }
         private IViewModelActivator ViewModelActivator { get; }
         private PSAccessServiceCreatorInterface _storeAccessCreator;
-        private ICreateWrapperType WrapperTypeCreator { get; }
+        private ICreateWrapperTypes WrapperTypeCreator { get; }
 
         public SimplePropBagMapperBuilder(
             IBuildMapperConfigurations<TSource, TDestination> mapperConfigurationBuilder,
-            ICreateWrapperType wrapperTypeCreator,
+            ICreateWrapperTypes wrapperTypeCreator,
             IViewModelActivator viewModelActivator,
             PSAccessServiceCreatorInterface storeAccessCreator
             )
@@ -39,7 +39,7 @@ namespace DRM.PropBag.AutoMapperSupport
                 // TODO: Is this really the responsibility of the PropBagMapperBuilder,
                 // or can we hand this off to the IBuildMapperConfigurations interface?
                 // Create the Proxy/Wrapper type if it does not already exist.
-                PropModel propModel = mapRequest.DestinationTypeDef.PropModel;
+                IPropModel propModel = mapRequest.DestinationTypeDef.PropModel;
 
                 // TODO: Can we avoid setting the NewWrapperType on the existing instance
                 // of the mapRequest?

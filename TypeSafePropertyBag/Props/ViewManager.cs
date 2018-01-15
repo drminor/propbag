@@ -6,7 +6,7 @@ using System.Windows.Data;
 
 namespace DRM.TypeSafePropertyBag
 {
-    internal class ViewManager : IManageCViews
+    public class ViewManager : IManageCViews
     {
         #region Private Members
 

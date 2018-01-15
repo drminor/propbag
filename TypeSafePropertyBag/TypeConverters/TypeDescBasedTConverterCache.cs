@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace DRM.TypeSafePropertyBag
 {
-    public class TypeDescBasedTConverterCache
+    public class TypeDescBasedTConverterCache : ITypeDescBasedTConverterCache
     {
         private LockingConcurrentDictionary<TypeDescBasedTConverterKey, Delegate> _converters;
 
@@ -102,18 +102,26 @@ namespace DRM.TypeSafePropertyBag
 
     #region Generic Method Templates
 
+    // TODO: Consider using the TypeChanger class instead of using the TypeDescriptor 'infrastructure'.
+    // or perhaps using TypeDescriptor first and then ChangeType<T> class if the TypeDescriptor.GetConverter method fails.
     static class GenericMethodTemplatesPropConv
     {
         private static string GetStringFromT<T>(object value)
         {
             TypeConverter tc = TypeDescriptor.GetConverter(typeof(T));
             return tc.ConvertToInvariantString((T)value);
+
+            //string result = TypeChanger.ChangeType<string>(value);
+            //return result;
         }
 
         private static object GetTfromString<T>(string strVal)
         {
             TypeConverter tc = TypeDescriptor.GetConverter(typeof(T));
             return (T)(tc.ConvertFromString(strVal));
+
+            //T result = TypeChanger.ChangeType<T>(strVal);
+            //return result;
         }
     }
 

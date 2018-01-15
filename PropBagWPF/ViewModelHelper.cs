@@ -7,11 +7,15 @@ namespace DRM.PropBagWPF
 {
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
 
+    /// <summary>
+    /// Provides a convenient way to create ViewModels. The PropModelProvider, ViewModelActivator and PropStoreAccessServiceCreation
+    /// services are specified when this instance is created and are used on each GetNewViewModel request.
+    /// </summary> 
     public class ViewModelHelper
     {
         #region Private Members
 
-        IPropModelProvider PropModelProvider { get; }
+        IProvidePropModels PropModelProvider { get; }
         IViewModelActivator ViewModelActivator { get; }
         PSAccessServiceCreatorInterface _storeAccessCreator;
 
@@ -19,7 +23,7 @@ namespace DRM.PropBagWPF
 
         #region Constructors
 
-        public ViewModelHelper(IPropModelProvider propModelProvider, IViewModelActivator viewModelActivator, PSAccessServiceCreatorInterface storeAccessCreator)
+        public ViewModelHelper(IProvidePropModels propModelProvider, IViewModelActivator viewModelActivator, PSAccessServiceCreatorInterface storeAccessCreator)
         {
             PropModelProvider = propModelProvider ?? throw new ArgumentNullException(nameof(propModelProvider));
             ViewModelActivator = viewModelActivator ?? throw new ArgumentNullException(nameof(viewModelActivator));
@@ -30,24 +34,41 @@ namespace DRM.PropBagWPF
 
         #region Public Methods 
 
-        // TODO: Do we use the propFactory as a backup, in case the PropModel does not have one?
-        // Or do we use it as an override, overriding any value that may be present in the PropModel?
-        // Currently we are using it as an override.
-        public object GetNewViewModel(string resourceKey, IPropFactory propFactory = null)
+        public object GetNewViewModel(string resourceKey)
         {
-            PropModel pm = PropModelProvider.GetPropModel(resourceKey);
+            IPropModel pm = PropModelProvider.GetPropModel(resourceKey);
+            object result = GetNewViewModel(pm, pm.PropFactory);
+            return result;
+        }
 
-            Type typeToCreate = pm.TypeToCreate;
-            string fullClassName = pm.FullClassName;
+        /// <summary>
+        /// Uses the specified propFactory instead of the one specified by the PropModel referenced by the given resourceKey.
+        /// </summary>
+        /// <param name="resourceKey"></param>
+        /// <param name="propFactory"></param>
+        /// <returns></returns>
+        public object GetNewViewModel(string resourceKey, IPropFactory propFactory)
+        {
+            if(propFactory == null)
+            {
+                throw new ArgumentNullException(nameof(propFactory));
+            }
 
+            IPropModel pm = PropModelProvider.GetPropModel(resourceKey);
+            object result = GetNewViewModel(pm, propFactory);
+            return result;
+        }
+
+        private object GetNewViewModel(IPropModel pm, IPropFactory propFactory)
+        {
             object result = ViewModelActivator.GetNewViewModel
                 (
                 propModel: pm,
                 storeAccessCreator: _storeAccessCreator,
-                typeToCreate: typeToCreate,
-                propFactory: propFactory ?? pm.PropFactory
-,
-                fullClassName: fullClassName);
+                typeToCreate: pm.TypeToCreate,
+                propFactory: propFactory,
+                fullClassName: pm.FullClassName
+                );
 
             return result;
         }

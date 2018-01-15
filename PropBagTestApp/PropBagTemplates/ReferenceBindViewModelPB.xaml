@@ -3,7 +3,7 @@
                     xmlns:sys="clr-namespace:System;assembly=mscorlib"
                     xmlns:mod="clr-namespace:PropBagTestApp.Models"
                     xmlns:vmod="clr-namespace:PropBagTestApp.ViewModels"
-                    xmlns:pb="clr-namespace:DRM.PropBag.ControlsWPF;assembly=WPFControls">
+                    xmlns:pb="clr-namespace:DRM.PropBagControlsWPF;assembly=WPFControls">
 
 
     <pb:PropBagTemplate x:Key="ReferenceBindViewModelPB"

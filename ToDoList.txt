@@ -1,13 +1,19 @@
 
 TODO List
 
-1. Make the PropModelProvider build instances of classes that implement IPropFactory.
+1. Make the PropModelProvider build instances of classes that implement IPropFactory. DONE
 
 2. Make a MarkUpExtension or UserControl that replaces MVVMApplication.Infra.ViewModelProvider.
 
 3. Make a MarkupExtension or UserControl to build IProvideADataSourceProvider.
 
-4. Use Attached Dependency Properties for PropItem instead of child user controls (DRM.PropBag.ControlsWPF)
+3.1.	Make a UserControl which creates a IDoCrud<T> with parameters required to create a dbContext
+			and use it as a constructor argument.
+
+3.2.	Add support to IPropBag and IPropFactory to create a CViewManager from a IDoCrud<T> with 
+			AutoMapper support.
+
+4. Use Attached Dependency Properties for PropItem instead of child user controls (DRM.PropBagControlsWPF)
 
 5. Install and use Simple IOC to configure service dependencies.
 

@@ -15,29 +15,21 @@ namespace DRM.PropBag.Caches
         #region Public Properties
 
         // TypeDesc<T>-based Converter Cache
-        public TypeDescBasedTConverterCache TypeDescBasedTConverterCache { get; }
+        //public ITypeDescBasedTConverterCache TypeDescBasedTConverterCache { get; }
 
         // DoSetDelegate Cache.
         public ICacheDelegates<DoSetDelegate> DoSetDelegateCache { get; }
 
-
         public ICacheDelegates<CreatePropFromStringDelegate> CreatePropFromStringCache { get; }
-
         public ICacheDelegates<CreatePropWithNoValueDelegate> CreatePropWithNoValCache { get; }
-
         public ICacheDelegates<CreatePropFromObjectDelegate> CreatePropFromObjectCache { get; }
 
         public ICacheDelegatesForTypePair<CreateEPropFromStringDelegate> CreateCPropFromStringCache { get; }
-        //public ICacheDelegatesForTypePair<CreateEPropFromStringDelegate> CreateCPropFromStringFBCache { get; }
-
         public ICacheDelegatesForTypePair<CreateEPropWithNoValueDelegate> CreateCPropWithNoValCache { get; }
-
         public ICacheDelegatesForTypePair<CreateEPropFromObjectDelegate> CreateCPropFromObjectCache { get; }
 
         //public ICacheDelegates<CreateCVSPropDelegate> CreateCVSPropCache { get; }
-
         //public ICacheDelegates<CreateCVPropDelegate> CreateCVPropCache { get; }
-
 
         #endregion
 
@@ -48,7 +40,7 @@ namespace DRM.PropBag.Caches
             #region Converter and DoSet MethodInfo
 
             // TypeDesc<T>-based Converter Cache
-            TypeDescBasedTConverterCache = StaticTConverterProvider.TypeDescBasedTConverterCache; // new TypeDescBasedTConverterCache();
+            //TypeDescBasedTConverterCache = StaticTConverterProvider.TypeDescBasedTConverterCache; // new TypeDescBasedTConverterCache();
 
             // DoSet 
             MethodInfo doSetMethodInfo = propBagType.GetMethod("DoSetBridge", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -68,10 +60,6 @@ namespace DRM.PropBag.Caches
             // Create C Prop From string
             MethodInfo createCPropFromString_mi = propCreatorType.GetMethod("CreateEPropFromString", BindingFlags.Static | BindingFlags.NonPublic);
             CreateCPropFromStringCache = new TwoTypesDelegateCache<CreateEPropFromStringDelegate>(createCPropFromString_mi);
-
-            //// Create C Prop From string FALL BACK to ObservableCollection
-            //MethodInfo createCPropFromStringFB_mi = propCreatorType.GetMethod("CreateEPropFromStringFB", BindingFlags.Static | BindingFlags.NonPublic);
-            //CreateCPropFromStringFBCache = new TwoTypesDelegateCache<CreateEPropFromStringDelegate>(createCPropFromStringFB_mi);
 
             // Create Prop From Object
             MethodInfo createCPropFromObject_mi = propCreatorType.GetMethod("CreateEPropFromObject", BindingFlags.Static | BindingFlags.NonPublic);

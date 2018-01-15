@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DRM.TypeSafePropertyBag;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +9,7 @@ using System.Xml.Serialization;
 
 namespace DRM.PropBag.ControlModel
 {
-    public class PropBinderField : NotifyPropertyChangedBase, IEquatable<PropBinderField>
+    public class PropBinderField : NotifyPropertyChangedBase, IEquatable<PropBinderField>, IPropBinderField
     {
         #region Private Properties
         //string targetProperty;

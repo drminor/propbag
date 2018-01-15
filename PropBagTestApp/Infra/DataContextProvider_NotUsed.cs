@@ -1,4 +1,4 @@
-﻿namespace PropBagTestApp.Infra
+﻿namespace PropBagTestApp.Infra.Unused
 {
     public class DataContextProvider
     {

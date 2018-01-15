@@ -1,8 +1,5 @@
-﻿using DRM.TypeSafePropertyBag;
-using DRM.PropBag.AutoMapperSupport;
-using DRM.PropBag.ControlModel;
-using DRM.PropBag.ControlsWPF;
-using DRM.ViewModelTools;
+﻿using DRM.PropBag.AutoMapperSupport;
+using DRM.TypeSafePropertyBag;
 using PropBagTestApp.Infra;
 using PropBagTestApp.Models;
 using PropBagTestApp.ViewModels;
@@ -140,14 +137,14 @@ namespace PropBagTestApp.View
                 if (_mapper == null)
                 {
                     IPropBagMapperKey<MyModel, ReferenceBindViewModelPB> mapperRequest
-                        = JustSayNo.AutoMapperProvider.RegisterMapperRequest<MyModel, ReferenceBindViewModelPB>
+                        = PropStoreServicesForThisApp.AutoMapperProvider.RegisterMapperRequest<MyModel, ReferenceBindViewModelPB>
                     (
                         REFERENCE_BIND_VM_RES_KEY,
                         typeof(ReferenceBindViewModelPB),
                         configPackageName: "emit_proxy"
                     );
 
-                    _mapper = JustSayNo.AutoMapperProvider.GetMapper(mapperRequest);
+                    _mapper = PropStoreServicesForThisApp.AutoMapperProvider.GetMapper(mapperRequest);
                 }
                 return _mapper;
             }

@@ -11,7 +11,7 @@ using System.ComponentModel;
 ///</remarks>
 
 
-namespace DRM.PropBag.ControlsWPF.Converters
+namespace DRM.PropBagControlsWPF.Converters
 {
 
     

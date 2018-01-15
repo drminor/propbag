@@ -1,7 +1,7 @@
 ﻿<Window x:Class="PropBagTestApp.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:pb="clr-namespace:DRM.PropBag.ControlsWPF;assembly=WPFControls"
+        xmlns:pb="clr-namespace:DRM.PropBagControlsWPF;assembly=WPFControls"
         xmlns:propbag="clr-namespace:DRM.PropBag;assembly=PropBag"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:drw="clr-namespace:System.Drawing;assembly=System.Drawing"

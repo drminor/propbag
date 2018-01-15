@@ -9,17 +9,18 @@ using System.Xml.Serialization;
 
 namespace DRM.PropBag.ControlModel
 {
-    public class PropItem : NotifyPropertyChangedBase
+    public class PropItem : NotifyPropertyChangedBase, IPropItem
     {
         string _propertyName;
         PropKindEnum _propKind;
         Type _propertyType; // Also used to store the collection type.
         Type _itemType;
-        TypeInfoField _propTypeInfoField;
-        PropInitialValueField _propInitialValueField;
-        PropComparerField _propComparerField;
-        PropDoWhenChangedField _propDoWhenChangedField;
-        PropBinderField _propBinderField;
+        ITypeInfoField _propTypeInfoField;
+        IPropInitialValueField _propInitialValueField;
+        IPropComparerField _propComparerField;
+        IPropDoWhenChangedField _propDoWhenChangedField;
+        IPropBinderField _propBinderField;
+        IMapperRequest _mapperRequest;
 
         PropStorageStrategyEnum _hasStore;
         bool _typeIsSolid;
@@ -44,34 +45,41 @@ namespace DRM.PropBag.ControlModel
         public Type ItemType { get { return _itemType; } set { _itemType = value; } }
 
         [XmlElement("type-info")]
-        public TypeInfoField PropTypeInfoField
+        public ITypeInfoField PropTypeInfoField
         {
             get { return _propTypeInfoField; }
-            set { SetIfDifferent<TypeInfoField>(ref _propTypeInfoField, value); }
+            set { SetAlways<ITypeInfoField>(ref _propTypeInfoField, value); }
         }
 
         [XmlElement("initial-value")]
-        public PropInitialValueField InitialValueField { get { return _propInitialValueField; }
-            set { SetIfDifferent<PropInitialValueField>(ref _propInitialValueField, value); }
+        public IPropInitialValueField InitialValueField { get { return _propInitialValueField; }
+            set { SetAlways<IPropInitialValueField>(ref _propInitialValueField, value); }
         }
 
         [XmlElement("comparer")]
-        public PropComparerField ComparerField { get { return _propComparerField; }
-            set { SetIfDifferent<PropComparerField>(ref _propComparerField, value); }
+        public IPropComparerField ComparerField { get { return _propComparerField; }
+            set { SetAlways<IPropComparerField>(ref _propComparerField, value); }
         }
 
         // TODO fix the IEquatable for the DoWhenChangedField.
         [XmlElement("do-when-changed")]
-        public PropDoWhenChangedField DoWhenChangedField { 
+        public IPropDoWhenChangedField DoWhenChangedField { 
             get { return _propDoWhenChangedField; }
             set { _propDoWhenChangedField = value; }
         }
 
         [XmlElement("bind-to-local-property")]
-        public PropBinderField BinderField
+        public IPropBinderField BinderField
         {
             get { return _propBinderField; }
             set { _propBinderField = value; }
+        }
+
+        [XmlElement("mapper-request-for-local-binding")]
+        public IMapperRequest MapperRequest
+        {
+            get { return _mapperRequest; }
+            set { _mapperRequest = value; }
         }
 
         [XmlAttribute(AttributeName = "caller-provides-storage")]
@@ -102,8 +110,8 @@ namespace DRM.PropBag.ControlModel
         //    null, null, null, null) { }
 
         public PropItem(Type type, string name, PropStorageStrategyEnum storageStrategy, bool typeIsSolid, PropKindEnum propKind,
-            TypeInfoField propTypeInfoField = null,
-            PropInitialValueField initialValueField = null,
+            ITypeInfoField propTypeInfoField = null,
+            IPropInitialValueField initialValueField = null,
             string extraInfo = null, PropComparerField comparer = null, Type itemType = null)
         {
             PropertyType = type;
@@ -116,6 +124,8 @@ namespace DRM.PropBag.ControlModel
             InitialValueField = initialValueField;
             ComparerField = comparer;
             _itemType = itemType;
+            _propBinderField = null;
+            _mapperRequest = null;
         }
     }
 }

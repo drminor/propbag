@@ -31,11 +31,7 @@ namespace PropBagLib.Tests
 
             IPropFactory standardPropFactory = mapperHelpers.PropFactory_V1;
 
-            PropExtStoreFactory factory = new PropExtStoreFactory
-                (stuff: stuff,
-                typeResolver: null,
-                valueConverter: null
-                );
+            IPropFactory factory = mapperHelpers.PropFactoryExt_V1;
 
             PSAccessServiceCreatorInterface storeAccessCreator = mapperHelpers.StoreAccessCreator;
 

@@ -1,5 +1,8 @@
 ﻿using DRM.PropBag;
+using DRM.PropBag.AutoMapperSupport;
+using DRM.PropBag.ControlModel;
 using DRM.TypeSafePropertyBag;
+using DRM.TypeSafePropertyBag.DataAccessSupport;
 using System;
 using System.Windows.Data;
 
@@ -9,16 +12,30 @@ namespace DRM.PropBagWPF
 
     public class WPFPropFactory : PropFactory
     {
+        IProvideAutoMappers _autoMapperProvider { get; }
         #region Constructor
 
         public WPFPropFactory
             (
-                ResolveTypeDelegate typeResolver,
+                IProvideDelegateCaches delegateCacheProvider,
                 IConvertValues valueConverter,
-                IProvideDelegateCaches delegateCacheProvider
+                ResolveTypeDelegate typeResolver
             )
-            : base(typeResolver, valueConverter, delegateCacheProvider)
+            : base(delegateCacheProvider, valueConverter, typeResolver)
         {
+            _autoMapperProvider = null;
+        }
+
+        public WPFPropFactory
+            (
+                IProvideDelegateCaches delegateCacheProvider,
+                IConvertValues valueConverter,
+                ResolveTypeDelegate typeResolver,
+                IProvideAutoMappers autoMapperProvider
+            )
+            : base(delegateCacheProvider, valueConverter, typeResolver)
+        {
+            _autoMapperProvider = autoMapperProvider;
         }
 
         #endregion
@@ -101,6 +118,34 @@ namespace DRM.PropBagWPF
             ViewProvider result = new ViewProvider(viewName, dataSourceProvider);
             return result;
         }
+
+        private IProvideADataSourceProvider GetDSProviderProvider(object iDoCrudDataSource, MapperRequest mr)
+        {
+            IProvideAutoMappers autoMapperProvider = this._autoMapperProvider ?? throw new InvalidOperationException($"This WPFPropFactory instance cannot create IProvideDataSourceProvider instances: No AutoMapperSupport was supplied upon construction.");
+
+            IPropBagMapperKeyGen realMapperRequest = autoMapperProvider.RegisterMapperRequest(mr.PropModel, mr.SourceType, mr.ConfigPackageName);
+            IPropBagMapperGen genMapper = autoMapperProvider.GetMapper(realMapperRequest);
+
+            Type sourceType = realMapperRequest.SourceTypeGenDef.TargetType;
+            Type destinationType = realMapperRequest.DestinationTypeGenDef.TargetType;
+
+            // NOW: Create a Delegate that when called will create a ClrMappedDSP<destType> and return it as IProvideADataSourceProvider
+
+
+            //CrudWithMapping<object, object> _dalMapped = new CrudWithMapping<object, object>(b, mapper);
+            //ClrMappedDSP<object> mappedDSP = new ClrMappedDSP<object>(_dalMapped);
+            return null;
+        }
+
+        //public IPropBagMapperKeyGen RegisterMapperRequest(PropModel propModel, Type sourceType, string configPackageName)
+        //{
+        //    Type targetType = propModel.TargetType;
+
+        //    RegisterMapperRequestDelegate x = GetTheRegisterMapperRequestDelegate(sourceType, targetType);
+        //    IPropBagMapperKeyGen result = x(propModel, targetType, configPackageName, this);
+
+        //    return result;
+        //}
 
 
         public override IProp CreateCVSProp(PropNameType propertyName, IProvideAView viewProvider) 

@@ -15,6 +15,8 @@ namespace DRM.TypeSafePropertyBag
 
         #endregion
 
+        //private static 
+
         #region IObsCollection<T> and ObservableCollection<T> Prop Creation
 
         // From Object

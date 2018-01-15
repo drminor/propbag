@@ -11,7 +11,7 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
     // comming from a IDoCRUD data source...
     // and produces an ObservableCollection<T> that raises the ItemEndEdit event.
 
-    internal class ClrMappedDSP<T> : DataSourceProvider, INotifyItemEndEdit, IProvideADataSourceProvider where T: INotifyItemEndEdit
+    public class ClrMappedDSP<T> : DataSourceProvider, INotifyItemEndEdit, IProvideADataSourceProvider where T: INotifyItemEndEdit
     {
         #region Private Properties
 

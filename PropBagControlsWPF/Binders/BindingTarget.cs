@@ -1,4 +1,4 @@
-﻿using DRM.PropBag.ControlsWPF.WPFHelpers;
+﻿using DRM.PropBagControlsWPF.WPFHelpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace DRM.PropBag.ControlsWPF.Binders
+namespace DRM.PropBagControlsWPF.Binders
 {
     public class BindingTarget
     {

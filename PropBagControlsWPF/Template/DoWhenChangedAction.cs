@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace DRM.PropBag.ControlsWPF
+namespace DRM.PropBagControlsWPF
 {
 
     //[TypeConverter(typeof(DuoActionTypeConverter))]

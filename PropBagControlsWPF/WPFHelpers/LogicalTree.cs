@@ -5,7 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 
-namespace DRM.PropBag.ControlsWPF.WPFHelpers
+namespace DRM.PropBagControlsWPF.WPFHelpers
 {
     public class LogicalTree
     {

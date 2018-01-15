@@ -29,7 +29,7 @@ namespace DRM.PropBag.AutoMapperSupport
         /// <summary>
         /// The PropModel to use when constructing new instances of objects of Type: Type or of Type: NewWrapperType.
         /// </summary>
-        PropModel PropModel { get; }
+        IPropModel PropModel { get; }
 
         /// <summary>
         /// The PropFactory to use when constructing new instances.

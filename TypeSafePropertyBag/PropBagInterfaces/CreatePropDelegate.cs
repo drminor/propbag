@@ -31,6 +31,13 @@ namespace DRM.TypeSafePropertyBag
 
     #endregion
 
+    #region x
+
+    //public delegate IProvideADataSourceProvider CreateDsFromIDoCrudDelegate(IPropFactory propFactory,
+    //    object IDoCrud, MapperRequest mr);
+
+    #endregion  
+
     #region CollectionViewSource Methods
 
     public delegate IProp CreateCVSPropDelegate(IPropFactory propFactory, string propertyName, IProvideAView viewProvider);

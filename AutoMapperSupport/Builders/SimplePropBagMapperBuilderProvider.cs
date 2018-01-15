@@ -10,16 +10,20 @@ namespace DRM.PropBag.AutoMapperSupport
 
     public class SimplePropBagMapperBuilderProvider : IPropBagMapperBuilderProvider
     {
-        private ICreateWrapperType WrapperTypeCreator { get; }
+        private ICreateWrapperTypes WrapperTypeCreator { get; }
         private IViewModelActivator ViewModelActivator { get; }
 
         private PSAccessServiceCreatorInterface _storeAccessCreator;
 
 
-        public SimplePropBagMapperBuilderProvider(ICreateWrapperType wrapperTypeCreator,
-            IViewModelActivator viewModelActivator, PSAccessServiceCreatorInterface storeAccessCreator)
+        public SimplePropBagMapperBuilderProvider
+            (
+            ICreateWrapperTypes wrapperTypesCreator,
+            IViewModelActivator viewModelActivator, 
+            PSAccessServiceCreatorInterface storeAccessCreator
+            )
         {
-            WrapperTypeCreator = wrapperTypeCreator ?? GetSimpleWrapperTypeCreator();
+            WrapperTypeCreator = wrapperTypesCreator ?? GetSimpleWrapperTypeCreator();
             ViewModelActivator = viewModelActivator ?? new SimpleViewModelActivator();
             _storeAccessCreator = storeAccessCreator ?? throw new ArgumentNullException(nameof(storeAccessCreator));
 
@@ -42,7 +46,7 @@ namespace DRM.PropBag.AutoMapperSupport
             return result;
         }
 
-        private ICreateWrapperType GetSimpleWrapperTypeCreator()
+        private ICreateWrapperTypes GetSimpleWrapperTypeCreator()
         {
             // -- Build WrapperType Caching Service
             // Used by some ViewModel Activators to emit types, i.e., modules.
@@ -64,11 +68,10 @@ namespace DRM.PropBag.AutoMapperSupport
                 typeDescriptionProvider: typeDescriptionProvider
                 );
 
-            ICreateWrapperType result = new SimpleWrapperTypeCreator
+            ICreateWrapperTypes result = new SimpleWrapperTypeCreator
                 (
                 wrapperTypeCachingService: wrapperTypeCachingService,
-                typeDescCachingService: typeDescCachingService//,
-                //propModelProvider: null
+                typeDescCachingService: typeDescCachingService
                 );
 
             return result;

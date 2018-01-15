@@ -2,7 +2,7 @@
 using System;
 using System.Windows.Markup;
 
-namespace DRM.PropBag.ControlsWPF
+namespace DRM.PropBagControlsWPF
 {
     [MarkupExtensionReturnType(typeof(object))]
     public class TwoTypesExtension : MarkupExtension

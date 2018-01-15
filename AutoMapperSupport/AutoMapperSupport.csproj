@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Builders\IPropBagMapperBuilderProvider.cs" />
+    <Compile Include="Builders\IPropBagMapperKey.cs" />
     <Compile Include="Builders\SimplePropBagMapperBuilderProvider.cs" />
     <Compile Include="ConfigPackages\ConfigPackage_EmitProxy.cs" />
     <Compile Include="ConfigPackages\ConfigPackage_ExtraMembers.cs" />
@@ -71,7 +72,6 @@
     <Compile Include="Config\SimpleMapperConfigTyped.cs" />
     <Compile Include="Config\ExtraMembersConfigFinalStep.cs" />
     <Compile Include="MapTypeDefinition\IMapTypeDefinition.cs" />
-    <Compile Include="Builders\IPropBagMapperKey.cs" />
     <Compile Include="ExtraMembers\ExtraMembersProvider.cs" />
     <Compile Include="MapTypeDefinition\MapTypeDefinition.cs" />
     <Compile Include="ExtraMembers\PBDispatcher.cs" />

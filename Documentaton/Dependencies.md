@@ -7,26 +7,26 @@ IPropBag / IPropBagInternal =>
 - PropModel (This is a class with no defined interface, defined in namespace: DRM.PropBag.ControlModel.)
 - IPropStoreAccessService<UInt32, String>
 
-Note: All IPropBag implementations also implement IPropBagInternal.
-Note: IPropBag could easily be changed to IPropBag<L2T, L2TRaw>, and we would use a Type Alias such as
-```<C#>
- using PropBagInterface = IPropBag<UInt32, String>;
-```
+Notes:
+
+- [ ] All IPropBag implementations also implement IPropBagInternal.
+- [ ] IPropBag could easily be changed to IPropBag<L2T, L2TRaw>, and we would use a Type Alias such as  ``` using PropBagInterface = IPropBag<UInt32, String>; ```
 
 PropModel =>
 - IPropFactory
 
 IPropFactory =>
-- ResolveTypeDelegate,
-- IConvertValues
 - IProvideDelegateCaches
+- IConvertValues
+- ResolveTypeDelegate (Func<string, Type>)
+
 
 IProvidePropStoreAccessService<L2T, L2TRaw> =>
 - int maxPropsPerObject,
 - IProvideHandlerDispatchDelegateCaches
  
 IConvertValues =>
-- TypeDescBasedTConverterCache (This is a class with no defined interface, defined in namespace: DRM.TypeSafePropertyBag.)
+- ITypeDescBasedTConverterCache
 
 
 ## PropStoreAccessService Dependencies
@@ -41,7 +41,8 @@ StoreNodeBag =>
 - int ObjectId,  (New ObjectIds are provided by thread-safe sequential number generator, internal to each IProvidePropStoreAccessService implementation.)
 - IProvideDelegateCaches (Currently: ICacheDelegates&lt;CallPSParentNodeChangedEventSubDelegate&gt; but will be changed soon.)
 
-IPropBagProxy => WeakReference&lt;IPropBagInternal&gt;
+IPropBagProxy =>
+- WeakReference&lt;IPropBagInternal&gt;
 
 
 ## ViewModel Instantiation Services
