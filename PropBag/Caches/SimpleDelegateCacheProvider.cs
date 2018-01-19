@@ -19,6 +19,7 @@ namespace DRM.PropBag.Caches
 
         // DoSetDelegate Cache.
         public ICacheDelegates<DoSetDelegate> DoSetDelegateCache { get; }
+        public ICacheDelegatesForTypePair<CVPropFromDsDelegate> CreateCViewPropCache { get; }
 
         public ICacheDelegates<CreatePropFromStringDelegate> CreatePropFromStringCache { get; }
         public ICacheDelegates<CreatePropWithNoValueDelegate> CreatePropWithNoValCache { get; }
@@ -27,6 +28,9 @@ namespace DRM.PropBag.Caches
         public ICacheDelegatesForTypePair<CreateEPropFromStringDelegate> CreateCPropFromStringCache { get; }
         public ICacheDelegatesForTypePair<CreateEPropWithNoValueDelegate> CreateCPropWithNoValCache { get; }
         public ICacheDelegatesForTypePair<CreateEPropFromObjectDelegate> CreateCPropFromObjectCache { get; }
+
+        public ICacheDelegatesForTypePair<CreateMappedDSPProviderDelegate> CreateDSPProviderCache { get; }
+
 
         //public ICacheDelegates<CreateCVSPropDelegate> CreateCVSPropCache { get; }
         //public ICacheDelegates<CreateCVPropDelegate> CreateCVPropCache { get; }
@@ -45,6 +49,10 @@ namespace DRM.PropBag.Caches
             // DoSet 
             MethodInfo doSetMethodInfo = propBagType.GetMethod("DoSetBridge", BindingFlags.Instance | BindingFlags.NonPublic);
             DoSetDelegateCache = new DelegateCache<DoSetDelegate>(doSetMethodInfo);
+
+            // AddCollectionViewPropDS using non-generic request and factory
+            MethodInfo addCollectionViewPropDS_mi = propBagType.GetMethod("CVPropFromDsBridge", BindingFlags.Instance | BindingFlags.NonPublic);
+            CreateCViewPropCache = new TwoTypesDelegateCache<CVPropFromDsDelegate>(addCollectionViewPropDS_mi);
 
             #endregion
 
@@ -76,6 +84,13 @@ namespace DRM.PropBag.Caches
             //// CollectionView
             //MethodInfo createCVProp_mi = propCreatorType.GetMethod("CreateCVProp", BindingFlags.Static | BindingFlags.NonPublic);
             //CreateCVPropCache = new DelegateCache<CreateCVPropDelegate>(createCVProp_mi);
+
+            #endregion
+
+            #region DataSource Creation MethodInfo
+
+            MethodInfo createDSPProvider_mi = propCreatorType.GetMethod("CreateMappedDSPProvider", BindingFlags.Static | BindingFlags.NonPublic);
+            CreateDSPProviderCache = new TwoTypesDelegateCache<CreateMappedDSPProviderDelegate>(createDSPProvider_mi);
 
             #endregion
 

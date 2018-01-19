@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DRM.TypeSafePropertyBag.DataAccessSupport;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -8,8 +9,9 @@ using System.Windows.Data;
 
 namespace DRM.TypeSafePropertyBag
 {
+    using PropIdType = UInt32;
     using PropNameType = String;
-    //using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
+    using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
 
     public interface IPropFactory 
     {
@@ -20,12 +22,12 @@ namespace DRM.TypeSafePropertyBag
         ResolveTypeDelegate TypeResolver { get; }
         IConvertValues ValueConverter { get; }
 
-        //PSAccessServiceType CreatePropStoreService(IPropBagInternal propBag);
-
         IProvideDelegateCaches DelegateCacheProvider { get; }
 
         //Func<string, DataSourceProvider, IProvideAView> ViewProviderFactory { get; }
         CViewProviderCreator GetCViewProviderFactory();
+        PropBagMapperCreator GetPropBagMapperFactory();
+
 
         bool IsCollection(IProp prop);
         bool IsCollection(PropKindEnum propKind);
@@ -63,6 +65,23 @@ namespace DRM.TypeSafePropertyBag
 
         #endregion
 
+        #region DataSource Creation
+
+        //CrudWithMapping<TSource, TDestination> Test<TSource, TDestination>();
+
+
+        ClrMappedDSP<TDestination> CreateMappedDS<TSource, TDestination>
+            (
+            PropIdType propId,
+            PropKindEnum propKind,
+            IDoCRUD<TSource> dal,
+            PSAccessServiceInterface storeAccesor,
+            IPropBagMapper<TSource, TDestination> mapper
+            /*, out CrudWithMapping<TSource, TDestination> mappedDal*/
+            ) where TSource : class where TDestination : INotifyItemEndEdit;
+
+        #endregion
+
         #region Scalar Prop Creation
 
         IProp<T> Create<T>(T initialValue, PropNameType propertyName, object extraInfo = null, 
@@ -88,6 +107,10 @@ namespace DRM.TypeSafePropertyBag
             Delegate comparer, bool useRefEquality = false, Type collectionType = null);
 
         //IPropGen CreatePropInferType(object value, PropNameType propertyName, object extraInfo, bool hasStorage);
+
+        IProvideADataSourceProvider GetDSProviderProvider(PropIdType propId, PropKindEnum propKind, object iDoCrudDataSource, PSAccessServiceInterface storeAccesor, IMapperRequest mr);
+
+
 
         #endregion
 

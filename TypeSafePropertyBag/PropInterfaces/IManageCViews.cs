@@ -31,5 +31,7 @@ namespace DRM.TypeSafePropertyBag
 
         void SetDefaultViewProvider(IProvideAView value);
         void SetViewProvider(string key, IProvideAView value);
+
+        object GetNewItem();
     }
 }

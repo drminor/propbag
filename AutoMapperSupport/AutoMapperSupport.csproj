@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>DRM.PropBag.AutoMapperSupport</RootNamespace>
-    <AssemblyName>AutoMapperSupport</AssemblyName>
+    <AssemblyName>PropBag.AutoMapperSupport</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

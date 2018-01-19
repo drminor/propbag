@@ -1,5 +1,5 @@
 ﻿using DRM.TypeSafePropertyBag;
-using DRM.ViewModelTools;
+using DRM.PropBag.ViewModelTools;
 using System;
 
 namespace DRM.PropBagWPF

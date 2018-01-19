@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DRM.TypeSafePropertyBag.DataAccessSupport;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows.Data;
@@ -91,13 +92,26 @@ namespace DRM.TypeSafePropertyBag
         IDictionary<PropNameType, IPropData> GetAllPropertyValues();
         IDictionary<PropNameType, ValPlusType> GetAllPropNamesAndTypes();
 
-        //void CloneProps(IPropBagInternal copySource);
 
-        //bool TryGetDataSourceProviderProvider(IPropBag propBag, PropNameType propertyName, Type propertyType, out IProvideADataSourceProvider dataSourceProviderProvider);
+        bool TryGetDataSourceProvider(PropNameType propertyName, Type propertyType, out DataSourceProvider dataSourceProvider);
 
-        bool TryGetDataSourceProvider(IPropBag propBag, PropNameType propertyName, Type propertyType, out DataSourceProvider dataSourceProvider);
+        bool TryGetViewManager(PropNameType propertyName, Type propertyType, out IManageCViews cViewManager);
 
-        bool TryGetViewManager(IPropBag propBag, PropNameType propertyName, Type propertyType, out IManageCViews cViewManager);
+
+        // Use when the property is a ICViewProp<CVT> where CVT : ICollectionView
+        IManageCViews GetOrAddViewManager(PropNameType propertyName, Type propertyType);
+
+        // Use when the property is a IDoCRUD<TSource>
+        IManageCViews GetOrAddViewManager<TDal, TSource, TDestination>
+        (
+            PropNameType propertyName,
+            Type propertyType,
+            IPropBagMapper<TSource, TDestination> mapper,
+            out IManageCViews cViewManager
+        )
+            where TDal : IDoCRUD<TSource>
+            where TSource : class
+            where TDestination : INotifyItemEndEdit;
 
         //IPropGen this[int index] { get; }
         //int IndexOfProp(string propertyName, Type propertyType);

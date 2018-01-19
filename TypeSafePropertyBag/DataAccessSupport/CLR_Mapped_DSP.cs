@@ -11,7 +11,7 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
     // comming from a IDoCRUD data source...
     // and produces an ObservableCollection<T> that raises the ItemEndEdit event.
 
-    public class ClrMappedDSP<T> : DataSourceProvider, INotifyItemEndEdit, IProvideADataSourceProvider where T: INotifyItemEndEdit
+    public class ClrMappedDSP<T> : DataSourceProvider, INotifyItemEndEdit, IProvideADataSourceProvider, IHaveACrudWithMapping<T> where T: INotifyItemEndEdit
     {
         #region Private Properties
 
@@ -65,6 +65,10 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
 
         public DataSourceProvider DataSourceProvider => this;
 
+        public IDoCrudWithMapping<T> CrudWithMapping => _dataAccessLayer as IDoCrudWithMapping<T>;
+
+
+
         #endregion
 
         #region DataSourceProvider Overrides
@@ -91,7 +95,6 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
 
             try
             {
-
                 if (TryGetDataFromProp(_dataAccessLayer, out IEnumerable<T> rawData))
                 {
                     EndEditWrapper<T> wrappedData = new EndEditWrapper<T>(rawData);
@@ -177,6 +180,20 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
 
 
         public bool IsReadOnly() => false;
+
+        public bool TryGetNewItem(out object newItem)
+        {
+            if(CrudWithMapping != null)
+            {
+                newItem = CrudWithMapping.GetNewItem();
+                return true;
+            }
+            else
+            {
+                newItem = null;
+                return false;
+            }
+        }
 
         #endregion
     }

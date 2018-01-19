@@ -1,14 +1,14 @@
 ﻿using DRM.PropBag.Caches;
 using DRM.TypeSafePropertyBag;
+using DRM.TypeSafePropertyBag.DataAccessSupport;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
-
 namespace DRM.PropBag
 {
+
     using PropNameType = String;
 
     public class PropExtStoreFactory : AbstractPropFactory
@@ -88,8 +88,17 @@ namespace DRM.PropBag
         //    throw new NotImplementedException("This feature is not implemented by the 'standard' implementation, please use WPFPropfactory or similar.");
         //}
 
+        #region DataSource Creation
+
+        public override ClrMappedDSP<TDestination> CreateMappedDS<TSource, TDestination>(uint propId, PropKindEnum propKind, IDoCRUD<TSource> dal, IPropStoreAccessService<uint, string> storeAccesor, IPropBagMapper<TSource, TDestination> mapper)
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion
-        
+
+        #endregion
+
         #region Scalar Prop Creation
 
         public override IProp<T> Create<T>(T initialValue,
@@ -153,6 +162,12 @@ namespace DRM.PropBag
         {
             throw new NotImplementedException("PropExtStoreFactory has not yet implemented the GetPropWithNoValueCreator method.");
         }
+
+        public override IProvideADataSourceProvider GetDSProviderProvider(uint propId, PropKindEnum propKind, object iDoCrudDataSource, IPropStoreAccessService<uint, string> storeAccesor, IMapperRequest mr)
+        {
+            throw new NotImplementedException();
+        }
+
 
         #endregion
     }

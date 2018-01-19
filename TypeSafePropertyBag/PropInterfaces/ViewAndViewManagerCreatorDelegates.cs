@@ -13,6 +13,8 @@ namespace DRM.TypeSafePropertyBag
 
     public delegate IProvideAView CViewProviderCreator(string viewName, DataSourceProvider dataSourceProvider);
 
+    public delegate IPropBagMapperGen PropBagMapperCreator(IMapperRequest mr);
+
     internal delegate IManageCViews CViewManagerCreator(PropIdType sourceCollectionPropId, PropKindEnum propKind,
         PSAccessServiceInternalInterface propStoreInternalAccessService, CViewProviderCreator cViewProviderCreator);
 

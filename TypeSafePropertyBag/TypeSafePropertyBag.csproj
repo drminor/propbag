@@ -44,6 +44,7 @@
   <ItemGroup>
     <None Include="DataAccessSupport\CLR_Mapped_DSP - SafetyCopy.cs" />
     <Compile Include="DataAccessSupport\CrudWithMapping.cs" />
+    <Compile Include="DataAccessSupport\IDoCrudWithMapping.cs" />
     <Compile Include="DataAccessSupport\IDoCRUD.cs" />
     <Compile Include="DataAccessSupport\IHaveADataSet.cs" />
     <Compile Include="DataAccessSupport\CLR_Mapped_DSP.cs" />
@@ -68,8 +69,10 @@
     <Compile Include="PropBagModel\IPropModelProvider.cs" />
     <Compile Include="PropBagModel\ITypeInfoField.cs" />
     <Compile Include="PropBagModel\WellKnownCollectionTypeEnum.cs" />
+    <Compile Include="PropInterfaces\IWatchPropItems.cs" />
     <Compile Include="PropStore\IProvidePropStoreServiceSingletons.cs" />
     <Compile Include="PropStore\PropStoreServices.cs" />
+    <Compile Include="Props\PropItemWatcher.cs" />
     <Compile Include="TypeConverters\ChangeType.cs" />
     <Compile Include="TypeConverters\ITypeDescBasedTConverterCache.cs" />
     <Compile Include="Unused\ObsCollection.cs" />

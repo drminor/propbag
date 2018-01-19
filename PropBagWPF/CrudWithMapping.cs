@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
-namespace DRM.PropBagWPF
+namespace DRM.PropBagWPF.Unused
 {
     public class CrudWithMapping<TSource, TDestination> : IDoCRUD<TDestination>, IDisposable /*where TDal: IDoCRUD<TSource>*/ where TSource : class
     {
@@ -20,8 +20,8 @@ namespace DRM.PropBagWPF
 
         public CrudWithMapping(IDoCRUD<TSource> dataAccessLayer, IPropBagMapper<TSource, TDestination> mapper)
         {
-            _mapper = mapper;
             _dataAccessLayer = dataAccessLayer;
+            _mapper = mapper;
             _dataAccessLayer.DataSourceChanged += _dataAccessLayer_DataSourceChanged;
         }
 

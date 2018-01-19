@@ -1,5 +1,5 @@
 ﻿using DRM.TypeSafePropertyBag;
-using DRM.ViewModelTools;
+using DRM.PropBag.ViewModelTools;
 using System;
 using System.Reflection;
 using System.Threading;
@@ -243,7 +243,7 @@ namespace DRM.PropBag.AutoMapperSupport
 
             // The Typed Method
             static IPropBagMapperKey<TSource, TDestination> RegisterMapperRequest<TSource, TDestination>
-                (PropModel propModel, Type targetType, string configPackageName, IProvideAutoMappers autoMapperProvider) where TDestination : class, IPropBag
+                (IPropModel propModel, Type targetType, string configPackageName, IProvideAutoMappers autoMapperProvider) where TDestination : class, IPropBag
             {
 
                 IPropBagMapperKey<TSource, TDestination> result

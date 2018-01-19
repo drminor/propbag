@@ -16,10 +16,10 @@ namespace DRM.PropBagControlsWPF
     {
         bool CanFindMapperRequestWithJustAKey { get; }
 
-        MapperRequest GetMapperRequest(string resourceKey);
-        MapperRequest GetMapperRequest(ResourceDictionary resources, string resourceKey);
+        MapperRequestTemplate GetMapperRequest(string resourceKey);
+        MapperRequestTemplate GetMapperRequest(ResourceDictionary resources, string resourceKey);
 
-        Dictionary<string, MapperRequest> GetMapperRequests(ResourceDictionary resources);
+        Dictionary<string, MapperRequestTemplate> GetMapperRequests(ResourceDictionary resources);
 
     }
 }

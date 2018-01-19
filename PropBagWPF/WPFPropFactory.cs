@@ -7,11 +7,18 @@ using System.Windows.Data;
 
 namespace DRM.PropBagWPF
 {
+    using PropIdType = UInt32;
     using PropNameType = String;
+    using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
 
     public class WPFPropFactory : PropFactory
     {
+        #region Private Properties
+
         IProvideAutoMappers _autoMapperProvider { get; }
+
+        #endregion
+
         #region Constructor
 
         public WPFPropFactory
@@ -107,6 +114,20 @@ namespace DRM.PropBagWPF
 
         #region CollectionViewSource property creators
 
+        public override PropBagMapperCreator GetPropBagMapperFactory()
+        {
+            return GetPropBagMapper;
+        }
+
+        private IPropBagMapperGen GetPropBagMapper(IMapperRequest mr)
+        {
+            IProvideAutoMappers autoMapperProvider = this._autoMapperProvider ?? throw new InvalidOperationException($"This WPFPropFactory instance cannot create IProvideDataSourceProvider instances: No AutoMapperSupport was supplied upon construction.");
+
+            IPropBagMapperKeyGen realMapperRequest = autoMapperProvider.RegisterMapperRequest(mr.PropModel, mr.SourceType, mr.ConfigPackageName);
+            IPropBagMapperGen genMapper = autoMapperProvider.GetMapper(realMapperRequest);
+            return genMapper;
+        }
+
         public override CViewProviderCreator GetCViewProviderFactory()
         {
             return CreateAView;
@@ -117,35 +138,6 @@ namespace DRM.PropBagWPF
             ViewProvider result = new ViewProvider(viewName, dataSourceProvider);
             return result;
         }
-
-        private IProvideADataSourceProvider GetDSProviderProvider(object iDoCrudDataSource, MapperRequest mr)
-        {
-            IProvideAutoMappers autoMapperProvider = this._autoMapperProvider ?? throw new InvalidOperationException($"This WPFPropFactory instance cannot create IProvideDataSourceProvider instances: No AutoMapperSupport was supplied upon construction.");
-
-            IPropBagMapperKeyGen realMapperRequest = autoMapperProvider.RegisterMapperRequest(mr.PropModel, mr.SourceType, mr.ConfigPackageName);
-            IPropBagMapperGen genMapper = autoMapperProvider.GetMapper(realMapperRequest);
-
-            Type sourceType = realMapperRequest.SourceTypeGenDef.TargetType;
-            Type destinationType = realMapperRequest.DestinationTypeGenDef.TargetType;
-
-            // NOW: Create a Delegate that when called will create a ClrMappedDSP<destType> and return it as IProvideADataSourceProvider
-
-
-            //CrudWithMapping<object, object> _dalMapped = new CrudWithMapping<object, object>(b, mapper);
-            //ClrMappedDSP<object> mappedDSP = new ClrMappedDSP<object>(_dalMapped);
-            return null;
-        }
-
-        //public IPropBagMapperKeyGen RegisterMapperRequest(PropModel propModel, Type sourceType, string configPackageName)
-        //{
-        //    Type targetType = propModel.TargetType;
-
-        //    RegisterMapperRequestDelegate x = GetTheRegisterMapperRequestDelegate(sourceType, targetType);
-        //    IPropBagMapperKeyGen result = x(propModel, targetType, configPackageName, this);
-
-        //    return result;
-        //}
-
 
         public override IProp CreateCVSProp(PropNameType propertyName, IProvideAView viewProvider) 
         {
@@ -181,6 +173,35 @@ namespace DRM.PropBagWPF
         //    CViewProp result = new CViewPropGen(propertyName, initialValue );
         //    return result;
         //}
+
+        #endregion
+
+        #region DataSource creators
+
+
+        //public override ClrMappedDSP<TDestination> CreateMappedDS<TSource, TDestination>
+        //    (
+        //    PropIdType propId,
+        //    PropKindEnum propKind,
+        //    IDoCRUD<TSource> dal,
+        //    PSAccessServiceInterface storeAccesor,
+        //    IPropBagMapper<TSource, TDestination> mapper  //, out CrudWithMapping<TSource, TDestination> mappedDal
+        //    ) 
+        //{
+        //    // TODO: Create Wrapper around dal, similar to PBCollectionDSP_Provider.cs
+
+
+        //    // Use the AutoMapper Mapper engine to create a "mapped" IDoCRUD<TDestination> wrapper around the specified instance of the IDoCRUD<TSource>.
+        //    CrudWithMapping<IDoCRUD<TSource>, TSource, TDestination> mappedDal =
+        //        new CrudWithMapping<IDoCRUD<TSource>, TSource, TDestination>(dal, mapper);
+
+        //    //Create a IProvideADataSourceProvider using the IDoCRUD<TDestination> DataAccessLayer.
+        //    ClrMappedDSP<TDestination> mappedDSP = new ClrMappedDSP<TDestination>(mappedDal);
+
+        //    return mappedDSP;
+        //}
+
+
         #endregion
 
         #region Property-type property creators
@@ -188,6 +209,24 @@ namespace DRM.PropBagWPF
         #endregion
 
         #region Generic property creators
+
+        // DataSource Provider
+        public override IProvideADataSourceProvider GetDSProviderProvider(PropIdType propId, PropKindEnum propKind, 
+            object iDoCrudDataSource, PSAccessServiceInterface propStoreAccessService, IMapperRequest mr)
+        {
+            IProvideAutoMappers autoMapperProvider = this._autoMapperProvider ?? throw new InvalidOperationException($"This WPFPropFactory instance cannot create IProvideDataSourceProvider instances: No AutoMapperSupport was supplied upon construction.");
+
+            IPropBagMapperKeyGen realMapperRequest = autoMapperProvider.RegisterMapperRequest(mr.PropModel, mr.SourceType, mr.ConfigPackageName);
+            IPropBagMapperGen genMapper = autoMapperProvider.GetMapper(realMapperRequest);
+
+            Type sourceType = realMapperRequest.SourceTypeGenDef.TargetType;
+            Type destinationType = realMapperRequest.DestinationTypeGenDef.TargetType;
+
+            CreateMappedDSPProviderDelegate dspProviderCreator = GetDSPProviderCreator(sourceType, destinationType.BaseType.BaseType);
+            IProvideADataSourceProvider result = dspProviderCreator(this, propId, propKind, iDoCrudDataSource, propStoreAccessService, genMapper);
+
+            return result;
+        }
 
         //public override IProp CreateCVSPropFromString(Type typeOfThisProperty, PropNameType propertyName, DataSourceProvider initialValue)
         //{

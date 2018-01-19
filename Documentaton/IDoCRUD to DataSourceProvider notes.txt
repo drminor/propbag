@@ -1,0 +1,80 @@
+A DAL PropItem of type IProp<IDoCrud<T>> is registered.
+
+
+A CollectionView PropItem (ICViewProp<CVT> / IProp<CVT>) is registered
+	and as part of the registration requests that ...
+
+The request is handled by an instance of IPropBag, which can call upon it PropStoreAccessService.
+
+1. A AutoMapper wrapper be created around the DAL. (CrudWithMapping)
+	The class: CrudWithMapping<TSource, TDestination>
+		a. Takes a IDoCRUD<TSource> and implements IDoCRUD<TDestination> by
+			forwarding calls and responses to the reference it holds to the source.
+		b. It also forwards DataChanged events.
+
+
+Note: The destination type of the AutoMapper mapping implements IEditableObject.
+	
+2. A DataSourceProvider be created around a given collection produced by the DAL.
+	This DSP (ClrMappedDSP<TDestination>) watches for
+	a. The source DSP's DataChanged event
+	and
+	b. The PropItem for PropertyChanged events.
+
+	When a request is made to produce a collection of items, that collection
+	is wrapped in a custom class that derives from ObservableCollection<T> and
+	raises the ItemEndEdit event whenever any item in the list raises its ItemEndEdit event.
+
+3. A ViewManager be created that allows additional "named" views to be created and
+	shared by all "customers" of this IPropBag instance.
+
+To create the MappedWrapper (step 1 above), the IPropBag instance must rely on a custom IPropFactory 
+since the PubPropBag assembly cannot reference PropBag.AutoMapperSupport (AutoMapperSupport depends on PropBag.)
+
+The custom IPropFactory cannot access the internal interface: PropStoreAccessorInternal.
+ (old: and so must use normal channels to subscribe to property changes.)
+
+The types TSource and TDestination are known only at run-time, and therefore we use delegates that use non-typed proxies
+that otherwise have the same method signature; we then use MakeGenericMethod to be able to call a method that 
+uses generic type parameters.
+
+The custom IPropFactory is created by helper classes built for a particular application platform such as WPF or ASP.NET, etc.
+The custom IPropFactory is then able to receive references to "extra" services, "foreign" to the PubPropBag assembly
+such as the IProvideAutoMappers.
+
+The result of the work done by the IPropFactory is an instance of a class that implements IProvideADataSourceProvider.
+This allows the IPropBag to be shielded from having to reference classs particular to that platform.
+
+
+IPropBag has a method:
+
+public IProp AddCollectionViewPropDS<TDal, TSource, TDestination>
+        (
+            PropNameType propertyName, // The name for the new property.
+            PropNameType srcPropName,   // The name of the property that holds the data (of type IDoCRUD<TSource>.)
+            IPropBagMapper<TSource, TDestination> mapper    // Optional. The AutoMapper to use to map data from the source to data in the view.
+        )
+            where TDal : IDoCRUD<TSource>
+            where TSource : class
+            where TDestination : INotifyItemEndEdit
+        {
+
+To create a new Collection-type PropItem from a named property (srcPropName) that holds an instance of IDoCRUD<T>.
+
+To support creation of these collection-type PropItems when the types are not known at compile time this method can be used:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	

@@ -1,4 +1,5 @@
 ﻿
+using DRM.TypeSafePropertyBag.DataAccessSupport;
 using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
 using System.Collections;
@@ -9,7 +10,9 @@ using System.Globalization;
 
 namespace DRM.TypeSafePropertyBag
 {
+    using PropIdType = UInt32;
     using PropNameType = String;
+    using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
 
     public abstract class AbstractPropFactory : IPropFactory, IDisposable
     {
@@ -22,7 +25,13 @@ namespace DRM.TypeSafePropertyBag
         public virtual CViewProviderCreator GetCViewProviderFactory()
         {
             throw new NotImplementedException($"This implementation of {nameof(IPropFactory)}" +
-                $" does not provide a ViewProviderFactory, please use WPFPropfactory or similar.");
+                $" does not provide a ViewProviderFactory, please use the WPFPropfactory or similar.");
+        }
+
+        public virtual PropBagMapperCreator GetPropBagMapperFactory()
+        {
+            throw new NotImplementedException($"This implementation of {nameof(IPropFactory)}" +
+                $" does not provide a PropBagMapperFactory, please use the WPFPropfactory or similar.");
         }
 
         public IConvertValues ValueConverter { get; }
@@ -193,6 +202,19 @@ namespace DRM.TypeSafePropertyBag
             throw new NotImplementedException($"This implementation of {nameof(IPropFactory)} cannot create CVProps (CollectionView PropItems), please use WPFPropfactory or similar.");
         }
 
+        #endregion
+
+        #region DataSource creation
+
+        //public abstract ClrMappedDSP<TDestination> CreateMappedDS<TSource, TDestination>(
+        //    IDoCRUD<TSource> dal,
+        //    IPropBagMapper<TSource, TDestination> mapper
+        //    /*, out CrudWithMapping<TSource, TDestination> mappedDal*/) where TSource : class where TDestination : INotifyItemEndEdit;
+
+        public abstract ClrMappedDSP<TDestination> CreateMappedDS<TSource, TDestination>(PropIdType propId, PropKindEnum propKind,
+            IDoCRUD<TSource> dal, PSAccessServiceInterface storeAccesor, IPropBagMapper<TSource, TDestination> mapper
+            /*, out CrudWithMapping<TSource, TDestination> mappedDal*/) where TSource : class where TDestination : INotifyItemEndEdit;
+
 
         #endregion
 
@@ -226,6 +248,10 @@ namespace DRM.TypeSafePropertyBag
         #endregion
 
         #region Generic Property Creation
+
+        public abstract IProvideADataSourceProvider GetDSProviderProvider(PropIdType propId, PropKindEnum propKind, object iDoCrudDataSource, PSAccessServiceInterface storeAccesor, IMapperRequest mr);
+
+
 
         public virtual IProp CreateGenFromObject(Type typeOfThisProperty,
             object value,
@@ -310,6 +336,8 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
+        // TODO: Update execption message to inform caller that these properties can be created by calls made
+        // directly to the IPropBag instance, since no generic type parameters are required.
         public virtual IProp CreateCVSPropFromString(Type typeOfThisProperty, PropNameType propertyName, IProvideAView viewProvider)
         {
             throw new NotImplementedException($"This implementation of {nameof(IPropFactory)} cannot create CVSProps (CollectionViewSource PropItems), please use WPFPropfactory or similar.");
@@ -535,6 +563,16 @@ namespace DRM.TypeSafePropertyBag
         //    CreateCVPropDelegate result = DelegateCacheProvider.CreateCVPropCache.GetOrAdd(itemType);
         //    return result;
         //}
+
+        #endregion
+
+        #region DataSource Creation Methods
+
+        protected virtual CreateMappedDSPProviderDelegate GetDSPProviderCreator(Type sourceType, Type destinationType)
+        {
+            CreateMappedDSPProviderDelegate result = DelegateCacheProvider.CreateDSPProviderCache.GetOrAdd(new TypePair(sourceType, destinationType));
+            return result;
+        }
 
         #endregion
 

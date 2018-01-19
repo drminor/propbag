@@ -49,13 +49,13 @@ namespace DRM.PropBagControlsWPF
 
         #region Public Methods
 
-        public MapperRequest GetMapperRequest(string resourceKey)
+        public MapperRequestTemplate GetMapperRequest(string resourceKey)
         {
             if (!CanFindMapperRequestWithJustAKey) throw new InvalidOperationException($"This instance of {nameof(PropBagTemplateProvider)} was not provide a ResourceDictionary.");
             return GetMapperRequest(_resources, resourceKey);
         }
 
-        public MapperRequest GetMapperRequest(ResourceDictionary resources, string resourceKey)
+        public MapperRequestTemplate GetMapperRequest(ResourceDictionary resources, string resourceKey)
         {
             if (resources == null) throw new ArgumentNullException(nameof(resources));
             if (resourceKey == null) throw new ArgumentNullException(nameof(resourceKey));
@@ -75,7 +75,7 @@ namespace DRM.PropBagControlsWPF
                 throw new InvalidOperationException($"Could not find a MapperRequest with key = {resourceKey}.");
             }
 
-            if (TryParse(resource, resourceKey, out MapperRequest mapperRequest))
+            if (TryParse(resource, resourceKey, out MapperRequestTemplate mapperRequest))
             {
                 return mapperRequest;
             }
@@ -85,11 +85,11 @@ namespace DRM.PropBagControlsWPF
             }
         }
 
-        public Dictionary<string, MapperRequest> GetMapperRequests(ResourceDictionary resources)
+        public Dictionary<string, MapperRequestTemplate> GetMapperRequests(ResourceDictionary resources)
         {
             if (resources == null) throw new ArgumentNullException(nameof(resources));
 
-            Dictionary<string, MapperRequest> result = new Dictionary<string, MapperRequest>();
+            Dictionary<string, MapperRequestTemplate> result = new Dictionary<string, MapperRequestTemplate>();
 
             foreach (ResourceDictionary rd in resources.MergedDictionaries)
             {
@@ -98,7 +98,7 @@ namespace DRM.PropBagControlsWPF
                     object rdEntry = rd[objKey];
                     string strKey = (string)objKey;
 
-                    if (TryParse(rdEntry, strKey, out MapperRequest mr))
+                    if (TryParse(rdEntry, strKey, out MapperRequestTemplate mr))
                     {
                         result.Add(strKey, mr);
                     }
@@ -117,9 +117,9 @@ namespace DRM.PropBagControlsWPF
 
         #region Private Methods
 
-        private bool TryParse(object rdEntry, string resourceKey, out MapperRequest mr)
+        private bool TryParse(object rdEntry, string resourceKey, out MapperRequestTemplate mr)
         {
-            if (rdEntry is MapperRequest pbTemplateTest)
+            if (rdEntry is MapperRequestTemplate pbTemplateTest)
             {
                 mr = pbTemplateTest;
                 return true;

@@ -6,6 +6,7 @@ namespace DRM.TypeSafePropertyBag
         //ITypeDescBasedTConverterCache TypeDescBasedTConverterCache { get; }
 
         ICacheDelegates<DoSetDelegate> DoSetDelegateCache { get; }
+        ICacheDelegatesForTypePair<CVPropFromDsDelegate> CreateCViewPropCache { get; }
 
         ICacheDelegates<CreatePropFromStringDelegate> CreatePropFromStringCache { get; }
 
@@ -18,6 +19,8 @@ namespace DRM.TypeSafePropertyBag
         ICacheDelegatesForTypePair<CreateEPropWithNoValueDelegate> CreateCPropWithNoValCache { get; }
 
         ICacheDelegatesForTypePair<CreateEPropFromObjectDelegate> CreateCPropFromObjectCache { get; }
+
+        ICacheDelegatesForTypePair<CreateMappedDSPProviderDelegate> CreateDSPProviderCache { get; }
 
 
         //ICacheDelegates<CreateCVSPropDelegate> CreateCVSPropCache { get; }

@@ -7,7 +7,7 @@ using DRM.PropBagControlsWPF;
 using DRM.PropBagWPF;
 
 using DRM.TypeSafePropertyBag;
-using DRM.ViewModelTools;
+using DRM.PropBag.ViewModelTools;
 using System;
 using System.ComponentModel;
 using System.Windows;

@@ -77,6 +77,15 @@ namespace DRM.PropBagWPF
 
         private void OnItemEndEdit(IEditableObject sender, EventArgs e)
         {
+            if (ItemEndEdit != null)
+            {
+                int cnt = ItemEndEdit.GetInvocationList().Length;
+                if (cnt > 0)
+                {
+                    System.Diagnostics.Debug.WriteLine($"There are {cnt} subscribers to this ViewProvider's ItemEndEdit event.");
+                }
+            }
+
             Interlocked.CompareExchange(ref ItemEndEdit, null, null)?.Invoke(sender, e);
         }
 

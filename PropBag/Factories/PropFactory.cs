@@ -1,14 +1,14 @@
-﻿using DRM.PropBag.Collections;
+﻿using DRM.PropBag.Caches;
+using DRM.PropBag.Collections;
 using DRM.TypeSafePropertyBag;
+using DRM.TypeSafePropertyBag.DataAccessSupport;
 using System;
 using System.Collections.Generic;
 
-using DRM.PropBag.Caches;
-
 namespace DRM.PropBag
 {
-    using PropNameType = String;
 
+    using PropNameType = String;
 
     public class PropFactory : AbstractPropFactory
     {
@@ -154,6 +154,17 @@ namespace DRM.PropBag
                 return prop;
             }
         }
+
+        public override ClrMappedDSP<TDestination> CreateMappedDS<TSource, TDestination>(uint propId, PropKindEnum propKind, IDoCRUD<TSource> dal, IPropStoreAccessService<uint, string> storeAccesor, IPropBagMapper<TSource, TDestination> mapper)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override IProvideADataSourceProvider GetDSProviderProvider(uint propId, PropKindEnum propKind, object iDoCrudDataSource, IPropStoreAccessService<uint, string> storeAccesor, IMapperRequest mr)
+        {
+            throw new NotImplementedException();
+        }
+
 
         #endregion
 

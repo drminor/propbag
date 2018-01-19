@@ -1,5 +1,4 @@
-﻿
-namespace DRM.TypeSafePropertyBag
+﻿namespace DRM.TypeSafePropertyBag
 {
     public interface IProvidePropModels
     {

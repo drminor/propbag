@@ -5,50 +5,101 @@ using System.Threading;
 
 namespace DRM.TypeSafePropertyBag.DataAccessSupport
 {
-    using PropIdType = UInt32;
-    using PSAccessServiceInternalInterface = IPropStoreAccessServiceInternal<UInt32, String>;
-
-    internal class CrudWithMapping<TSource, TDestination> : IDoCRUD<TDestination>, IDisposable /*where TDal: IDoCRUD<TSource>*/ where TSource : class
+    public class CrudWithMapping<TDal, TSource, TDestination> : IDoCRUD<TDestination>, IDisposable, IDoCrudWithMapping<TDestination> where TDal: class, IDoCRUD<TSource> where TSource : class
     {
         #region Private Members
 
-        IDoCRUD<TSource> _dataAccessLayer;
+        TDal _dataAccessLayer;
         private IPropBagMapper<TSource, TDestination> _mapper;
 
         #endregion
 
         #region Constructor
 
-        public CrudWithMapping(IDoCRUD<TSource> dataAccessLayer, IPropBagMapper<TSource, TDestination> mapper)
+        //public CrudWithMapping(TDal dataAccessLayer, IPropBagMapper<TSource, TDestination> mapper)
+        //{
+        //    _mapper = mapper;
+        //    _dataAccessLayer = dataAccessLayer;
+        //    _dataAccessLayer.DataSourceChanged += _dataAccessLayer_DataSourceChanged;
+        //}
+
+        public CrudWithMapping(IWatchAPropItem<TDal> propItemWatcher, IPropBagMapper<TSource, TDestination> mapper)
         {
             _mapper = mapper;
-            _dataAccessLayer = dataAccessLayer;
-            _dataAccessLayer.DataSourceChanged += _dataAccessLayer_DataSourceChanged;
-        }
 
-        public CrudWithMapping(PSAccessServiceInternalInterface storeAccessor, PropIdType propId, IPropBagMapper<TSource, TDestination> mapper)
-        {
-            _mapper = mapper;
-            _dataAccessLayer = GetCurrentDS(storeAccessor, propId);
-            _dataAccessLayer.DataSourceChanged += _dataAccessLayer_DataSourceChanged;
-        }
-
-        private IDoCRUD<TSource> GetCurrentDS(PSAccessServiceInternalInterface storeAccessor, PropIdType propId)
-        {
-            StoreNodeProp propNode = storeAccessor.GetChild(propId);
-            if (propNode.Int_PropData.TypedProp is IDoCRUD<TSource> dal)
+            _dataAccessLayer = propItemWatcher.GetValue();
+            if (_dataAccessLayer != null)
             {
-                return dal;
+                _dataAccessLayer.DataSourceChanged += _dataAccessLayer_DataSourceChanged;
+            }
+
+            propItemWatcher.PropertyChangedWithGenVals += PropItemWatcher_PropertyChangedWithGenVals; // .PropertyChangedWithTVals += PropItemWatcher_PropertyChangedWithTVals; 
+        }
+
+        private void PropItemWatcher_PropertyChangedWithGenVals(object sender, PcGenEventArgs e)
+        {
+            // TODO: Consider using the following statment, instead of the expanded version in place now.
+            //DataAccessLayer = e.NewValue as TDal;
+
+            if (e.NewValueIsUndefined || e.NewValue == null)
+            {
+                DataAccessLayer = null;
             }
             else
             {
-                if (propNode.Int_PropData.TypedProp != null)
-                {
-                    throw new InvalidOperationException($"The PropId: provided to CLR_Mapped_DSP refers to a PropItem: {propNode.CompKey} whose value does not implement: {nameof(IDoCRUD<TSource>)}.");
-                }
-                return null;
+                DataAccessLayer = e.NewValue as TDal;
             }
+
+            OnDataSourceChanged(this, EventArgs.Empty);
         }
+
+        // TODO: Note: we could use PcTypedEventArgs if the ViewModel registered the source PropItem as type: IDoCRUD<T> instead of 
+        // some derived type such as SourceDal : IDoCRUD<TSource>.
+
+        ////private void PropItemWatcher_PropertyChangedWithTVals(object sender, PropertyChangedEventArgs e)
+        //private void PropItemWatcher_PropertyChangedWithTVals(object sender, PcTypedEventArgs<TDal> e)
+        //{
+        //    DataAccessLayer = e.NewValueIsUndefined ? null : e.NewValue;
+        //    OnDataSourceChanged(this, EventArgs.Empty);
+
+        //    //if (e is PcTypedEventArgs<TDal> ts)
+        //    //{
+        //    //    DataAccessLayer = ts.NewValueIsUndefined ? null : ts.NewValue;
+        //    //    OnDataSourceChanged(this, EventArgs.Empty);
+        //    //}
+        //    //else if (e is PcTypedEventArgs<IDoCRUD<TDestination>> td)
+        //    //{
+        //    //    //DataAccessLayer = ts.NewValueIsUndefined ? null : ts.NewValue;
+
+        //    //    if (td.NewValueIsUndefined)
+        //    //    {
+        //    //        DataAccessLayer = null;
+        //    //    }
+        //    //    else
+        //    //    {
+        //    //        // TODO: Convert from IDoCRUD<TD> to IDoCRUD<TS>
+        //    //        System.Diagnostics.Debug.WriteLine("Expected IDoCRUD<TSource>, but got IDoCRUD<TDestination>.");
+        //    //    }
+
+        //    //    OnDataSourceChanged(this, EventArgs.Empty);
+        //}
+
+        //private IDoCRUD<TSource> GetCurrentDS(PSAccessServiceInternalInterface storeAccessor, PropIdType propId)
+        //{
+        //    StoreNodeProp propNode = storeAccessor.GetChild(propId);
+        //    if (propNode.Int_PropData.TypedProp is IDoCRUD<TSource> dal)
+        //    {
+        //        return dal;
+        //    }
+        //    else
+        //    {
+        //        if (propNode.Int_PropData.TypedProp != null)
+        //        {
+        //            throw new InvalidOperationException($"The PropId: provided to CLR_Mapped_DSP refers to a PropItem: {propNode.CompKey} whose value does not implement: {nameof(IDoCRUD<TSource>)}.");
+        //        }
+        //        return null;
+        //    }
+        //}
 
         private void _dataAccessLayer_DataSourceChanged(object sender, EventArgs e)
         {
@@ -57,7 +108,7 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
 
         #endregion
 
-        public IDoCRUD<TSource> DataAccessLayer
+        public TDal DataAccessLayer
         {
             get
             {
@@ -97,6 +148,11 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
 
         public IEnumerable<TDestination> Get(int top)
         {
+            if(_dataAccessLayer == null)
+            {
+                return new List<TDestination>();
+            }
+
             IEnumerable<TSource> unmappedItems = _dataAccessLayer.Get(top);
 
             List<TSource> test = unmappedItems.ToList();
@@ -126,13 +182,13 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
 
         public void Delete(TDestination itemToDelete)
         {
-            TSource unMappedItemToDelete = GetUnmappedItem(itemToDelete);
+            TSource unMappedItemToDelete = GetUnmappedItem_int(itemToDelete);
             _dataAccessLayer.Delete(unMappedItemToDelete);
         }
 
         public void Update(TDestination updatedItem)
         {
-            TSource unmappedItemToUpdate = GetUnmappedItem(updatedItem);
+            TSource unmappedItemToUpdate = GetUnmappedItem_int(updatedItem);
             _dataAccessLayer.Update(unmappedItemToUpdate);
         }
 
@@ -144,7 +200,7 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
 
         #endregion
 
-        private TSource GetUnmappedItem(TDestination mappedItem)
+        private TSource GetUnmappedItem_int(TDestination mappedItem)
         {
             TSource result;
             if (mappedItem != null)
@@ -158,6 +214,11 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
 
             return result;
         }
+
+        public object GetUnmappedItem(TDestination mappedItem) => GetUnmappedItem_int(mappedItem);
+
+
+
 
         private void OnDataSourceChanged(object sender, EventArgs e)
         {
@@ -199,6 +260,12 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
             Dispose(true);
             // TODO: uncomment the following line if the finalizer is overridden above.
             // GC.SuppressFinalize(this);
+        }
+
+        public bool TryGetNewItem(out object newItem)
+        {
+            newItem = _dataAccessLayer.GetNewItem();
+            return true;
         }
         #endregion
     }

@@ -3,6 +3,7 @@ using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
+    // TODO: Change Register<xxx> to Submit<xxx>. (We are submitting a notice that we will need this at some point -- remember: GetMapper creates a mapper for all pending requests on first access to any request.)
     public interface IProvideAutoMappers : ICachePropBagMappers
     {
         bool HasPropModelLookupService { get; }

@@ -33,7 +33,7 @@ namespace DRM.PropBag
             PropModel = null;
         }
 
-        public MapperRequest(Type sourceType, PropModel propModel, string configPackageName)
+        public MapperRequest(Type sourceType, IPropModel propModel, string configPackageName)
         {
             SourceType = sourceType ?? throw new ArgumentNullException(nameof(sourceType));
             PropModelResourceKey = null;

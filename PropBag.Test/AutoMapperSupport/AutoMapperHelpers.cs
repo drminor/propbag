@@ -3,7 +3,7 @@ using DRM.PropBag.AutoMapperSupport;
 using DRM.PropBag.Caches;
 using DRM.PropBagWPF;
 using DRM.TypeSafePropertyBag;
-using DRM.ViewModelTools;
+using DRM.PropBag.ViewModelTools;
 using System;
 
 namespace PropBagLib.Tests.AutoMapperSupport

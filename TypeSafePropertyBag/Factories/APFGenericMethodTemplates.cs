@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DRM.TypeSafePropertyBag.DataAccessSupport;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -6,15 +7,15 @@ using System.ComponentModel;
 
 namespace DRM.TypeSafePropertyBag
 {
+    using PropIdType = UInt32;
     using PropNameType = String;
+    using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
 
     public class APFGenericMethodTemplates
     {
         #region Enumerable-Type Prop Creation 
 
         #endregion
-
-        //private static 
 
         #region IObsCollection<T> and ObservableCollection<T> Prop Creation
 
@@ -107,6 +108,52 @@ namespace DRM.TypeSafePropertyBag
         private static IProp CreateCVProp(IPropFactory propFactory, PropNameType propertyName, IProvideAView viewProvider)
         {
             return propFactory.CreateCVProp(propertyName, viewProvider);
+        }
+
+        #endregion
+
+            #region DataSource creators
+
+            //private static ClrMappedDSP<TDestination> CreateMappedDS_Typed<TSource, TDestination>
+            //    (
+            //    IPropFactory propFactory,
+            //    PropIdType propId,
+            //    PropKindEnum propKind,
+            //    IDoCRUD<TSource> dal,
+            //    PSAccessServiceInterface propStoreAccessService,
+            //    IPropBagMapper<TSource, TDestination> mapper  //, out CrudWithMapping<TSource, TDestination> mappedDs
+            //    ) where TSource : class where TDestination : INotifyItemEndEdit
+            //{
+
+            //    ClrMappedDSP<TDestination> result = propFactory.CreateMappedDS<TSource, TDestination>(propId, propKind, dal, propStoreAccessService,  mapper);
+
+            //    //mappedDs = null;
+            //    return result;
+            //}
+
+        private static IProvideADataSourceProvider CreateMappedDSPProvider<TSource, TDestination>
+            (
+            IPropFactory propFactory,
+            PropIdType propId,
+            PropKindEnum propKind,
+            object genDal, // presumably, the value of the propItem.
+            PSAccessServiceInterface propStoreAccessService,
+            IPropBagMapperGen genMapper  //, out CrudWithMapping<TSource, TDestination> mappedDs
+            ) where TSource : class where TDestination : INotifyItemEndEdit
+        {
+            // Cast the genDal object back to it's original type.
+            IDoCRUD<TSource> dal = (IDoCRUD<TSource>)genDal;
+
+            // Cast the genMapper to it's typed-counterpart (All genMappers also implement IPropBagMapper<TS, TD>
+            IPropBagMapper<TSource, TDestination> mapper = (IPropBagMapper<TSource, TDestination>)genMapper;
+
+            // Now that we have performed the type casts, we can call the propFactory using "compile-time" type parameters.
+            ClrMappedDSP<TDestination> mappedDSP = propFactory.CreateMappedDS<TSource, TDestination>(propId, propKind, dal, propStoreAccessService, mapper);
+
+            IProvideADataSourceProvider result = mappedDSP;
+
+            //mappedDs = null;
+            return result;
         }
 
         #endregion

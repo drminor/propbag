@@ -10,19 +10,19 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
     {
         #region Private Members
 
-        ConcurrentDictionary<IPropData, IManageCViews> _dict;
+        ConcurrentDictionary<PropIdType, IManageCViews> _dict;
 
-        Func<IPropData, IManageCViews> _factory;
+        //Func<IPropData, IManageCViews> _factory;
 
         #endregion
 
         #region Constructor
 
-        public ViewManagerCollection(Func<IPropData, IManageCViews> factory)
+        public ViewManagerCollection(/*Func<IPropData, IManageCViews> factory*/)
         {
-            _factory = factory;
+            //_factory = factory;
             // TODO: Provide Expected Currency Levels.
-            _dict = new ConcurrentDictionary<IPropData, IManageCViews>();
+            _dict = new ConcurrentDictionary<PropIdType, IManageCViews>();
         }
 
         #endregion
@@ -31,15 +31,15 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
 
         public int Count => _dict.Count;
 
-        public IManageCViews GetOrAdd(IPropData sourceCollectionPropItem)
+        public IManageCViews GetOrAdd(PropIdType propId, Func<PropIdType, IManageCViews> vFactory)
         {
-            IManageCViews result = _dict.GetOrAdd(sourceCollectionPropItem, _factory);
+            IManageCViews result = _dict.GetOrAdd(propId, vFactory);
             return result;
         }
 
-        public bool TryGetValue(IPropData sourcePropItem, out IManageCViews cViewManager)
+        public bool TryGetValue(PropIdType propId, out IManageCViews cViewManager)
         {
-            if(_dict.TryGetValue(sourcePropItem, out cViewManager))
+            if(_dict.TryGetValue(propId, out cViewManager))
             {
                 return true;
             }
@@ -50,11 +50,11 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
             }
         }
 
-        public IManageCViews this[IPropData sourcePropItem]
+        public IManageCViews this[PropIdType propId]
         {
             get
             {
-                IManageCViews result = _dict[sourcePropItem];
+                IManageCViews result = _dict[propId];
                 return result;
             }
         }

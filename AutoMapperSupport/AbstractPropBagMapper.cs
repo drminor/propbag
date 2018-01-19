@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using DRM.TypeSafePropertyBag;
-using DRM.ViewModelTools;
+using DRM.PropBag.ViewModelTools;
 using System;
 
 using System.Collections.Generic;

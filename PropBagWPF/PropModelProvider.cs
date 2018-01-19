@@ -1,7 +1,7 @@
 ﻿using DRM.PropBag;
 using DRM.PropBagControlsWPF;
 using DRM.TypeSafePropertyBag;
-using DRM.ViewModelTools;
+using DRM.PropBag.ViewModelTools;
 
 using System;
 using System.ComponentModel;
@@ -96,8 +96,13 @@ namespace DRM.PropBagWPF
             {
                 if (CanFindMapperRequestWithJustKey)
                 {
-                    PropBagControlsWPF.MapperRequest mr = _mapperRequestProvider.GetMapperRequest(resourceKey);
-                    IMapperRequest mrCooked = new PropBag.MapperRequest(mr.SourceType, mr.DestinationPropModelKey, mr.ConfigPackageName);
+                    MapperRequestTemplate mr = _mapperRequestProvider.GetMapperRequest(resourceKey);
+
+                    // Go ahead and fetch the PropModel from the key specified in the "template" request -- since the 
+                    // the receiver of this PropBag.MapperRequest will probably not have access to a PropModel Provider.
+                    IPropModel propModel = GetPropModel(mr.DestinationPropModelKey);
+
+                    IMapperRequest mrCooked = new MapperRequest(mr.SourceType, propModel, mr.ConfigPackageName);
                     return mrCooked;
                 }
                 else if (HasMrLookupResources)

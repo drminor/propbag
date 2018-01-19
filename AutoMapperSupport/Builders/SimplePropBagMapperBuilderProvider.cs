@@ -1,6 +1,6 @@
-﻿using DRM.TypeWrapper;
-using DRM.TypeWrapper.TypeDesc;
-using DRM.ViewModelTools;
+﻿using DRM.PropBag.TypeWrapper;
+using DRM.PropBag.TypeWrapper.TypeDesc;
+using DRM.PropBag.ViewModelTools;
 using DRM.TypeSafePropertyBag;
 using System;
 

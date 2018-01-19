@@ -3,6 +3,10 @@ using System.ComponentModel;
 
 namespace DRM.TypeSafePropertyBag
 {
+    using PropIdType = UInt32;
+    using PropNameType = String;
+    using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
+     
     #region Enumerable-Type Methods
 
     #endregion
@@ -31,12 +35,14 @@ namespace DRM.TypeSafePropertyBag
 
     #endregion
 
-    #region x
+    #region DataSource Methods
 
-    //public delegate IProvideADataSourceProvider CreateDsFromIDoCrudDelegate(IPropFactory propFactory,
-    //    object IDoCrud, MapperRequest mr);
+    public delegate IProvideADataSourceProvider CreateMappedDSPProviderDelegate(IPropFactory propFactory,
+        PropIdType propId, PropKindEnum propKind, object genDal, 
+        PSAccessServiceInterface propStoreAccessService, IPropBagMapperGen genMapper /* , out CrudWithMapping<TSource, TDestination> mappedDs*/);
+        //where TSource : class where TDestination : INotifyItemEndEdit;
 
-    #endregion  
+    #endregion
 
     #region CollectionViewSource Methods
 

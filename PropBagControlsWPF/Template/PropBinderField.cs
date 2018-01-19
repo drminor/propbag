@@ -10,7 +10,6 @@ namespace DRM.PropBagControlsWPF
             DefaultStyleKeyProperty.OverrideMetadata(typeof(PropBinderField), new FrameworkPropertyMetadata(typeof(PropBinderField)));
         }
 
-
         static DependencyProperty PathProperty =
             DependencyProperty.Register("Path", typeof(string), typeof(PropBinderField), new PropertyMetadata(null));
 

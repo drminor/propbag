@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DRM.TypeSafePropertyBag.DataAccessSupport;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -39,6 +40,39 @@ namespace DRM.TypeSafePropertyBag
         #region Public Properties and Methods
 
         public IProvideADataSourceProvider DataSourceProviderProvider { get; }
+
+        public bool TryGetNewItem(out object newItem)
+        {
+            if(DataSourceProviderProvider.DataSourceProvider is ISupplyNewItem isni)
+            {
+                if(isni.TryGetNewItem(out newItem))
+                {
+                    return true;
+                }
+                else
+                {
+                    newItem = null;
+                    return false;
+                }
+            }
+            else
+            {
+                newItem = null;
+                return false;
+            }
+        }
+
+        public object GetNewItem()
+        {
+            if(TryGetNewItem(out object ni))
+            {
+                return ni;
+            }
+            else
+            {
+                return null;
+            }
+        }
 
         // TODO: Note if we were to use a Typed DataSourceProviderProvider we could use it to supply a value of type CT.
         public IList Data
