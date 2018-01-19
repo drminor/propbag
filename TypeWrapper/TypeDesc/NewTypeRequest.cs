@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace DRM.TypeWrapper
+namespace DRM.PropBag.TypeWrapper
 {
     public struct NewTypeRequest : IEquatable<NewTypeRequest>
     {

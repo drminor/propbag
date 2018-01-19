@@ -8,7 +8,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DRM.TypeWrapper
+namespace DRM.PropBag.TypeWrapper
 {
     [DebuggerDisplay("{Name}-{Type.Name}")]
     public struct PropertyDescription : IEquatable<PropertyDescription>

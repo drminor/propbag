@@ -1,9 +1,9 @@
 ﻿using DRM.TypeSafePropertyBag;
 using DRM.TypeSafePropertyBag.Fundamentals;
-using DRM.TypeWrapper;
+using DRM.PropBag.TypeWrapper;
 using System;
 
-namespace DRM.ViewModelTools
+namespace DRM.PropBag.ViewModelTools
 {
     public class SimpleWrapperTypeCreator : ICreateWrapperTypes
     {

@@ -1,7 +1,7 @@
 ﻿using DRM.TypeSafePropertyBag;
 using System;
 
-namespace DRM.ViewModelTools
+namespace DRM.PropBag.ViewModelTools
 {
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
 

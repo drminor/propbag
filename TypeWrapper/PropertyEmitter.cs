@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 
-namespace DRM.TypeWrapper
+namespace DRM.PropBag.TypeWrapper
 {
 
     public class PropertyEmitter

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DRM.TypeWrapper
+namespace DRM.PropBag.TypeWrapper
 {
     public struct TypeDescription : IEquatable<TypeDescription> 
     {

@@ -1,7 +1,7 @@
 ﻿using DRM.TypeSafePropertyBag;
 using System;
 
-namespace DRM.ViewModelTools
+namespace DRM.PropBag.ViewModelTools
 {
     public interface ICreateWrapperTypes
     {

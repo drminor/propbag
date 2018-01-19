@@ -1,7 +1,7 @@
 ﻿using DRM.TypeSafePropertyBag;
 using System;
 
-namespace DRM.TypeWrapper
+namespace DRM.PropBag.TypeWrapper
 {
     public interface ITypeDescriptionProvider
     {
