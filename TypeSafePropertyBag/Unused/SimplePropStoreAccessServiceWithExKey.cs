@@ -12,10 +12,10 @@ namespace DRM.TypeSafePropertyBag
     using PropNameType = String;
 
     using ExKeyType = IExplodedKey<UInt64, UInt32, UInt32>;
-    using HaveTheKeyType = IHaveTheKey<UInt64, UInt32, UInt32>;
+    //using HaveTheKeyType = IHaveTheKey<UInt64, UInt32, UInt32>;
 
     public sealed class SimplePropStoreAccessServiceWithExKey
-        : IPropStoreAccessService<PropIdType, PropNameType>, IHaveTheSimpleKey
+        : IPropStoreAccessService<PropIdType, PropNameType>, IHaveTheStoreNode
     {
         #region Private Members
 
