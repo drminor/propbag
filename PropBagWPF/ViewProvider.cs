@@ -24,7 +24,7 @@ namespace DRM.PropBagWPF
             DataSourceProvider = dataSourceProvider ?? throw new ArgumentNullException($"{nameof(dataSourceProvider)} must have a value.");
 
             _listHasBeenRefreshed = true;
-            _currentView = null;
+            _view = null;
             _viewSource = new CollectionViewSource()
             {
                 Source = DataSourceProvider
@@ -102,19 +102,19 @@ namespace DRM.PropBagWPF
         public DataSourceProvider DataSourceProvider { get; }
 
         private bool _listHasBeenRefreshed = false;
-        private ListCollectionView _currentView = null;
 
+        private ListCollectionView _view = null;
         public ListCollectionView View
         {
             get
             {
-                if(_listHasBeenRefreshed || _currentView == null) 
+                if(_listHasBeenRefreshed || _view == null) 
                 {
-                    _currentView = GetView(_viewSource, _currentView);
+                    _view = GetView(_viewSource, _view);
                     _listHasBeenRefreshed = false;
                 }
      
-                return _currentView;
+                return _view;
             }
         }
 
