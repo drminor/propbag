@@ -42,11 +42,10 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="DataAccessSupport\CLR_Mapped_DSP - SafetyCopy.cs" />
-    <Compile Include="DataAccessSupport\CrudWithMapping.cs" />
-    <Compile Include="DataAccessSupport\IDoCrudWithMapping.cs" />
+    <Compile Include="CVPropFromDsDelegate.cs" />
+    <Compile Include="DataSourceMapping\CrudWithMapping.cs" />
+    <Compile Include="DataSourceMapping\IDoCrudWithMapping.cs" />
     <Compile Include="DataAccessSupport\IDoCRUD.cs" />
-    <Compile Include="DataAccessSupport\IHaveADataSet.cs" />
     <Compile Include="DataAccessSupport\CLR_Mapped_DSP.cs" />
     <Compile Include="DataAccessSupport\EndEditWrapper.cs" />
     <Compile Include="Factories\AbstractPropFactory.cs" />
@@ -80,10 +79,9 @@
     <Compile Include="PropBagInterfaces\ICreateProps.cs" />
     <Compile Include="PropBagInterfaces\IRegisterBindingsForwarder.cs" />
     <None Include="Unused\CollectionViewSourceReferenceCode.cs" />
-    <None Include="PropInterfaces\ICollectionPropInterfaces_Safety.cs" />
     <Compile Include="PropInterfaces\ICollectionTypedPropInterfaces.cs" />
     <Compile Include="PropInterfaces\IListSourceProvider.cs" />
-    <Compile Include="Fundamentals\IObsCollection.cs" />
+    <Compile Include="Unused\IObsCollection.cs" />
     <Compile Include="PropInterfaces\ICollectionPropInterfaces.cs" />
     <Compile Include="PropInterfaces\IManageCViews.cs" />
     <Compile Include="PropInterfaces\IProvideADataSourceProvider.cs" />
@@ -182,7 +180,7 @@
     <Compile Include="PropStore\IPropStoreAccessService.cs" />
     <Compile Include="PropStore\IHaveTheStoreNode.cs" />
     <None Include="Unused\IHaveTheSimpleKey.cs" />
-    <None Include="PropStore\SimplePropStoreAccessServiceWithExKey.cs" />
+    <None Include="Unused\SimplePropStoreAccessServiceWithExKey.cs" />
     <Compile Include="PropStore\SimplePropStoreAccessService.cs" />
     <Compile Include="PropStore\SimplePropStoreAccessServiceProvider.cs" />
     <Compile Include="Subscriptions\CollectionOfSubscriberCollections.cs" />

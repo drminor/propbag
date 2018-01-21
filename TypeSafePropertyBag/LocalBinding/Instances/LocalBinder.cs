@@ -102,7 +102,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
             PropIdType propId = _bindingTarget.Level2Key;
 
-            _targetObject = _ourNode.PropBagProxy.PropBagRef;
+            _targetObject = _ourNode.PropBagProxy;
 
             if (_targetObject.TryGetTarget(out IPropBagInternal propBag))
             {
@@ -576,7 +576,9 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
         private bool GetPropBag(StoreNodeBag objectNode, out IPropBagInternal propBag)
         {
             // Unwrap the weak reference held by the objectNode in it's PropBagProxy.PropBagRef.
-            bool result = objectNode.PropBagProxy.PropBagRef.TryGetTarget(out propBag);
+            //bool result = objectNode.PropBagProxy.PropBagRef.TryGetTarget(out propBag);
+            bool result = objectNode.TryGetPropBag(out propBag);
+
             return result;
         }
 
@@ -604,7 +606,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             //}
         }
 
-        private IConvertValues GetConverter(IPropBagProxy bindingTarget, LocalBindingInfo bInfo, Type sourceType,
+        private IConvertValues GetConverter(WeakReference<IPropBagInternal> bindingTarget, LocalBindingInfo bInfo, Type sourceType,
             string pathElement, bool isPropBagBased, out object converterParameter)
         {
 
@@ -655,7 +657,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             return null;
         }
 
-        private object OurDefaultConverterParameterBuilder(IPropBagProxy bindingTarget, LocalBindingInfo bInfo, Type sourceType,
+        private object OurDefaultConverterParameterBuilder(WeakReference<IPropBagInternal> bindingTarget, LocalBindingInfo bInfo, Type sourceType,
             string pathElement)
         {
             //return new TwoTypes(sourceType, bindingTarget.PropertyType);

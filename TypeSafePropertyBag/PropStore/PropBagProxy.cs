@@ -2,7 +2,7 @@
 
 namespace DRM.TypeSafePropertyBag
 {
-    public class PropBagProxy : IPropBagProxy
+    public class PropBagProxy_Unused : IPropBagProxy
     {
         #region Public Properties
 
@@ -12,24 +12,16 @@ namespace DRM.TypeSafePropertyBag
 
         #region Constructor
 
-        public PropBagProxy(WeakReference<IPropBagInternal> propBagRef)
+        public PropBagProxy_Unused(WeakReference<IPropBagInternal> propBagRef)
         {
             PropBagRef = propBagRef ?? throw new ArgumentNullException(nameof(propBagRef));
         }
 
-        public PropBagProxy(IPropBagInternal propBag)
+        public PropBagProxy_Unused(IPropBagInternal propBag)
         {
-            if (propBag == null) throw new ArgumentNullException(nameof(propBag));
-            PropBagRef = new WeakReference<IPropBagInternal>(propBag);
+            PropBagRef = new WeakReference<IPropBagInternal>(propBag ?? throw new ArgumentNullException(nameof(propBag)));
         }
 
         #endregion
-
-        //public bool TryGetTarget(out IPropBagInternal target)
-        //{
-        //    bool result = PropBagRef.TryGetTarget(out target);
-        //    return result;
-        //}
-
     }
 }

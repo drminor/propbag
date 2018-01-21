@@ -70,7 +70,7 @@ namespace DRM.TypeSafePropertyBag
             _level2KeyMan = level2KeyManager;
             MaxObjectsPerAppDomain = propStoreAccessServiceProvider.MaxObjectsPerAppDomain;
 
-            _clientAccessToken = _ourNode.PropBagProxy.PropBagRef;
+            _clientAccessToken = _ourNode.PropBagProxy;
             _objectId = _ourNode.CompKey.Level1Key;
 
             // Create the subscription store for this PropBag.
@@ -259,7 +259,7 @@ namespace DRM.TypeSafePropertyBag
         {
             StoreNodeBag hostBagNode = propNode.Parent;
 
-            WeakReference<IPropBagInternal> propBagRef = hostBagNode.PropBagProxy.PropBagRef;
+            WeakReference<IPropBagInternal> propBagRef = hostBagNode.PropBagProxy;
             PropIdType propId = propNode.PropId;
             PropNameType propertyName = GetPropNameFromKey(propNode.CompKey);
 
@@ -1338,7 +1338,7 @@ namespace DRM.TypeSafePropertyBag
         {
             bool result;
 
-            if (propBagNode.PropBagProxy.PropBagRef.TryGetTarget(out IPropBagInternal propBag))
+            if (propBagNode.TryGetPropBag(out IPropBagInternal propBag))
             {
                 if (((PSAccessServiceInternalInterface)propBag.ItsStoreAccessor).Level2KeyManager.TryGetFromRaw(propertyName, out PropIdType propId))
                 {

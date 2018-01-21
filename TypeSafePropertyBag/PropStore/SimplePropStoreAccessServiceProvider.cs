@@ -76,7 +76,7 @@ namespace DRM.TypeSafePropertyBag
 
         private bool HasPassed(StoreNodeBag psn)
         {
-            bool result = !psn.PropBagProxy.PropBagRef.TryGetTarget(out IPropBagInternal dummy);
+            bool result = psn.TryGetPropBag(out IPropBagInternal dummy);
             return result;
         }
 
@@ -98,8 +98,7 @@ namespace DRM.TypeSafePropertyBag
 
             // Create a new PropStoreNode for this PropBag
             ExKeyT cKey = new SimpleExKey(objectId, 0);
-            IPropBagProxy propBagProxy = new PropBagProxy(propBag);
-            newBagNode = new StoreNodeBag(cKey, propBagProxy, _handlerDispatchDelegateCacheProvider.CallPSParentNodeChangedEventSubsCache);
+            newBagNode = new StoreNodeBag(cKey, propBag, _handlerDispatchDelegateCacheProvider.CallPSParentNodeChangedEventSubsCache);
 
             // Add the node to the global store.
             _store.Add(cKey, newBagNode);
