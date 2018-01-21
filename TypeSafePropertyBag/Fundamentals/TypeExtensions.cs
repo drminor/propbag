@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-
 namespace DRM.TypeSafePropertyBag.Fundamentals
 {
     public static class TypeExtensions
@@ -65,7 +64,7 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
         {
             if (type.Name == "PropBag")
             {
-                return true;
+                return false;
             }
 
             Type[] interfaces = type.GetInterfaces();
@@ -111,12 +110,12 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
             return type.GetTypeInfo().GetDeclaredField(fieldName);
         }
 
-        // TODO: Create a Class Atribute for our WrapperGenerator
-        // so that we can more accurately determine this.
-        public static bool IsEmittedProxy(this Type type)
-        {
-            return type.FullName.Contains("1.") || type.FullName.Contains("2.");
-        }
+        //// TODO: Create a Class Atribute for our WrapperGenerator
+        //// so that we can more accurately determine this.
+        //public static bool IsEmittedProxy(this Type type)
+        //{
+        //    return type.FullName.Contains("1.") || type.FullName.Contains("2.");
+        //}
 
         static public bool DoNameSpacesMatch(string ns1, string ns2)
         {
