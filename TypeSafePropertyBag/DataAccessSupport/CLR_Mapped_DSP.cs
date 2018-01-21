@@ -67,8 +67,6 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
 
         public IDoCrudWithMapping<T> CrudWithMapping => _dataAccessLayer as IDoCrudWithMapping<T>;
 
-
-
         #endregion
 
         #region DataSourceProvider Overrides
