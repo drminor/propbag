@@ -14,11 +14,12 @@ using System.Windows.Data;
 
 namespace DRM.PropBagWPF
 {
-    //using ControlModel = PropBag.ControlModel;
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
 
     public class PropModelProvider : IProvidePropModels
-    {
+    { 
+        #region Private Fields
+
         private IPropBagTemplateProvider _propBagTemplateProvider;
 
         private IMapperRequestProvider _mapperRequestProvider;
@@ -27,21 +28,16 @@ namespace DRM.PropBagWPF
         private PSAccessServiceCreatorInterface _storeAccessCreator;
         private IPropFactory _fallBackPropFactory;
 
-        public bool CanFindPropBagTemplateWithJustKey => _propBagTemplateProvider?.CanFindPropBagTemplateWithJustAKey != false;
-        public bool HasPbtLookupResources => _propBagTemplateProvider != null;
-
-        public bool CanFindMapperRequestWithJustKey => _mapperRequestProvider?.CanFindMapperRequestWithJustAKey != false;
-        public bool HasMrLookupResources => _mapperRequestProvider != null;
-
+        #endregion
 
         #region Constructors
 
-        public PropModelProvider(IPropBagTemplateProvider propBagTemplateProvider,
+        public PropModelProvider(
+            IPropBagTemplateProvider propBagTemplateProvider,
             IMapperRequestProvider mapperRequestProvider,
             IPropFactory fallBackPropFactory,
             IViewModelActivator viewModelActivator,
-            PSAccessServiceCreatorInterface storeAccessCreator
-            ) 
+            PSAccessServiceCreatorInterface storeAccessCreator) 
         {
             _propBagTemplateProvider = propBagTemplateProvider;
             _mapperRequestProvider = mapperRequestProvider;
@@ -53,6 +49,9 @@ namespace DRM.PropBagWPF
         #endregion
 
         #region PropBagTemplate Locator Support
+
+        public bool CanFindPropBagTemplateWithJustKey => _propBagTemplateProvider?.CanFindPropBagTemplateWithJustAKey != false;
+        public bool HasPbtLookupResources => _propBagTemplateProvider != null;
 
         public IPropModel GetPropModel(string resourceKey)
         {
@@ -90,6 +89,41 @@ namespace DRM.PropBagWPF
             }
         }
 
+        public IPropModel GetPropModel(ResourceDictionary rd, string resourceKey)
+        {
+            return GetPropModel(rd, resourceKey, null);
+        }
+
+        public IPropModel GetPropModel(ResourceDictionary rd, string resourceKey, IPropFactory propFactory)
+        {
+            try
+            {
+                if (HasPbtLookupResources)
+                {
+                    PropBagTemplate pbt = _propBagTemplateProvider.GetPropBagTemplate(resourceKey);
+                    IPropModel pm = GetPropModel(pbt, propFactory);
+                    return pm;
+                }
+                else
+                {
+                    throw new InvalidOperationException($"A call providing a ResourceDictionary and a ResouceKey can only be done, " +
+                        $"if this PropModelProvider was supplied with a resource upon construction. " +
+                        $"No class implementing: {nameof(IPropBagTemplateProvider)} was provided.");
+                }
+            }
+            catch (System.Exception e)
+            {
+                throw new ApplicationException("Resource was not found.", e);
+            }
+        }
+
+        #endregion
+
+        #region AutoMapperRequest Lookup Support
+
+        public bool CanFindMapperRequestWithJustKey => _mapperRequestProvider?.CanFindMapperRequestWithJustAKey != false;
+        public bool HasMrLookupResources => _mapperRequestProvider != null;
+
         public IMapperRequest GetMapperRequest(string resourceKey)
         {
             try
@@ -126,26 +160,26 @@ namespace DRM.PropBagWPF
             }
         }
 
-        public IPropModel GetPropModel(ResourceDictionary rd, string resourceKey)
-        {
-            return GetPropModel(rd, resourceKey, null);
-        }
-
-        public IPropModel GetPropModel(ResourceDictionary rd, string resourceKey, IPropFactory propFactory)
+        public IMapperRequest GetMapperRequest(ResourceDictionary rd, string resourceKey)
         {
             try
             {
-                if (HasPbtLookupResources)
+                if (HasMrLookupResources)
                 {
-                    PropBagTemplate pbt = _propBagTemplateProvider.GetPropBagTemplate(resourceKey);
-                    IPropModel pm = GetPropModel(pbt, propFactory);
-                    return pm;
+                    MapperRequestTemplate mr = _mapperRequestProvider.GetMapperRequest(rd, resourceKey);
+
+                    // Go ahead and fetch the PropModel from the key specified in the "template" request -- since the 
+                    // the receiver of this PropBag.MapperRequest will probably not have access to a PropModel Provider.
+                    IPropModel propModel = GetPropModel(mr.DestinationPropModelKey);
+
+                    IMapperRequest mrCooked = new MapperRequest(mr.SourceType, propModel, mr.ConfigPackageName);
+                    return mrCooked;
                 }
                 else
                 {
                     throw new InvalidOperationException($"A call providing a ResourceDictionary and a ResouceKey can only be done, " +
                         $"if this PropModelProvider was supplied with a resource upon construction. " +
-                        $"No class implementing: {nameof(IPropBagTemplateProvider)} was provided.");
+                        $"No class implementing: {nameof(IMapperRequestProvider)} was provided.");
                 }
             }
             catch (System.Exception e)
@@ -187,8 +221,6 @@ namespace DRM.PropBagWPF
                 requireExplicitInitialValue: pbt.RequireExplicitInitialValue
                 );
 
-            //result.PropFactory = 
-
             int namespacesCount = pbt.Namespaces == null ? 0 : pbt.Namespaces.Count;
             for (int nsPtr = 0; nsPtr < namespacesCount; nsPtr++)
             {
@@ -201,7 +233,7 @@ namespace DRM.PropBagWPF
 
             for (int propPtr = 0; propPtr < propsCount; propPtr++)
             {
-                DRM.PropBagControlsWPF.PropItem pi = pbt.Props[propPtr];
+                PropItem pi = pbt.Props[propPtr];
 
                 try
                 {
@@ -223,11 +255,6 @@ namespace DRM.PropBagWPF
             bool typeIsSolid = pi.TypeIsSolid;
             string extraInfo = pi.ExtraInfo;
 
-            if(pi.PropKind == PropKindEnum.ObservableCollection)
-            {
-                System.Diagnostics.Debug.WriteLine("Processing the PersonList Prop Item.");
-            }
-
             PropItemModel rpi = new PropItemModel(pi.PropertyType, pi.PropertyName,
                 storageStrategy, typeIsSolid, pi.PropKind, extraInfo: extraInfo);
 
@@ -238,6 +265,8 @@ namespace DRM.PropBagWPF
             {
                 // ToDo: Find and process this field first, and then enter the enclosing foreach loop.
                 // because one day, some of the other processing may depend on the PropertyType.
+
+                // Type Info Field
                 if (uc is DRM.PropBagControlsWPF.TypeInfoField tif)
                 {
                     foundTypeInfoField = true;
@@ -254,6 +283,7 @@ namespace DRM.PropBagWPF
                     }
                 }
 
+                // Initial Value Field
                 else if (uc is InitialValueField ivf)
                 {
                     PropInitialValueField rivf;
@@ -283,6 +313,7 @@ namespace DRM.PropBagWPF
                     rpi.InitialValueField = rivf;
                 }
 
+                // Do When Changed Field
                 else if (uc is DRM.PropBagControlsWPF.PropDoWhenChangedField dwc)
                 {
                     MethodInfo mi = doWhenChangedHelper.GetMethodAndSubKind(dwc, rpi.PropertyType, rpi.PropertyName, out SubscriptionKind subscriptionKind);
@@ -300,6 +331,7 @@ namespace DRM.PropBagWPF
                     rpi.DoWhenChangedField = rdwc;
                 }
 
+                // Comparer Field
                 else if (uc is DRM.PropBagControlsWPF.PropComparerField pcf)
                 {
                     PropBag.PropComparerField rpcf =
@@ -307,6 +339,8 @@ namespace DRM.PropBagWPF
 
                     rpi.ComparerField = rpcf;
                 }
+
+                // Local Binder Field
                 else if (uc is DRM.PropBagControlsWPF.PropBinderField binderField)
                 {
                     PropBag.PropBinderField rBinderField =
@@ -363,10 +397,6 @@ namespace DRM.PropBagWPF
                 case PropKindEnum.EnumerableTyped:
                     goto case PropKindEnum.ObservableCollection;
 
-                //case PropKindEnum.ObservableCollectionFB_RO:
-                //    goto case PropKindEnum.ObservableCollection;
-                //case PropKindEnum.ObservableCollectionFB:
-                //    goto case PropKindEnum.ObservableCollection;
 
                 case PropKindEnum.ObservableCollection_RO:
                     goto case PropKindEnum.ObservableCollection;
@@ -415,21 +445,21 @@ namespace DRM.PropBagWPF
                         }
                         return cType;
                     }
-                case WellKnownCollectionTypeEnum.ObservableCollection:
-                    {
-                        Type cType;
-                        if (tif == null)
-                        {
-                            itemType = propertyType;
-                            cType = GetObsCollType(itemType);
-                        }
-                        else
-                        {
-                            cType = GetObsCollectionType(tif, out itemType, GetObsCollType);
-                        }
+                //case WellKnownCollectionTypeEnum.ObservableCollection:
+                //    {
+                //        Type cType;
+                //        if (tif == null)
+                //        {
+                //            itemType = propertyType;
+                //            cType = GetObsCollType(itemType);
+                //        }
+                //        else
+                //        {
+                //            cType = GetObsCollectionType(tif, out itemType, GetObsCollType);
+                //        }
 
-                        return cType;
-                    }
+                //        return cType;
+                //    }
                 case WellKnownCollectionTypeEnum.Enumerable:
                     {
                         goto case WellKnownCollectionTypeEnum.ObservableCollectionFB;
@@ -499,16 +529,16 @@ namespace DRM.PropBagWPF
             return result;
         }
 
-        private Type GetObsCollType(Type itemType)
-        {
-            string assName = "TypeSafePropertyBag";
+        //private Type GetObsCollType(Type itemType)
+        //{
+        //    string assName = "TypeSafePropertyBag";
 
-            //string assGUID = "bbb1e311 - 374e-4c91 - a313 - 1667d83767db";
-            string typeName = $"DRM.TypeSafePropertyBag.IObsCollection`1[[{itemType.AssemblyQualifiedName}]], {assName}";
-            Type result = Type.GetType(typeName);
+        //    //string assGUID = "bbb1e311 - 374e-4c91 - a313 - 1667d83767db";
+        //    string typeName = $"DRM.TypeSafePropertyBag.IObsCollection`1[[{itemType.AssemblyQualifiedName}]], {assName}";
+        //    Type result = Type.GetType(typeName);
 
-            return result;
-        }
+        //    return result;
+        //}
 
         #endregion
     }

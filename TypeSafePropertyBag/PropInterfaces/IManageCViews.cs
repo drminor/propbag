@@ -11,7 +11,7 @@ namespace DRM.TypeSafePropertyBag
     {
         new CT Data { get; set; }
 
-        new IProvideATypedView<CT, T> GetViewProvider();
+        new IProvideATypedView<CT, T> GetDefaultViewProvider();
         new IProvideATypedView<CT, T> GetViewProvider(string key);
     }
 
@@ -20,18 +20,21 @@ namespace DRM.TypeSafePropertyBag
     {
         IList Data { get; }
 
-        //IProvideADataSourceProvider DataSourceProviderProvider { get; }
         DataSourceProvider DataSourceProvider { get; }
+
+        bool IsDataSourceReadOnly();
+        bool IsGetNewItemSupported { get; }
 
         ICollectionView GetDefaultCollectionView();
         ICollectionView GetCollectionView(string key);
 
-        IProvideAView GetViewProvider();
+        IProvideAView GetDefaultViewProvider();
         IProvideAView GetViewProvider(string key);
 
         void SetDefaultViewProvider(IProvideAView value);
-        void SetViewProvider(string key, IProvideAView value);
+        void SetViewProvider(IProvideAView value, string key);
 
         object GetNewItem();
+        void Refresh();
     }
 }

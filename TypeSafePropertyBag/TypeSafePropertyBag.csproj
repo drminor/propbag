@@ -209,6 +209,7 @@
     <Compile Include="PropKindEnum.cs" />
     <Compile Include="PropBagInterfaces\ResolveTypeDelegate.cs" />
     <Compile Include="Unused\IDisposableTemplate.cs" />
+    <None Include="Unused\TypedBusiness_NotUsed.cs" />
     <Compile Include="Unused\TypedWeakReference.cs" />
     <Compile Include="Fundamentals\TypeExtensions.cs" />
     <Compile Include="Subscriptions\SubscriptionKeyForBinding.cs" />

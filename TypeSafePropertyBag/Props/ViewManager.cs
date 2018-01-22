@@ -111,7 +111,7 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        public IProvideAView GetViewProvider()
+        public IProvideAView GetDefaultViewProvider()
         {
             return DefaultView;
         }
@@ -127,9 +127,14 @@ namespace DRM.TypeSafePropertyBag
             DefaultView = value;
         }
 
-        public void SetViewProvider(string viewName, IProvideAView value)
+        public void SetViewProvider(IProvideAView value, string viewName)
         {
             this[viewName] = value;
+        }
+
+        public void Refresh()
+        {
+           DataSourceProvider.Refresh();
         }
 
         #endregion
@@ -154,6 +159,9 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
+        public bool IsDataSourceReadOnly() => DataSourceProviderProvider.IsReadOnly();
+        public bool IsGetNewItemSupported => DataSourceProviderProvider is ISupplyNewItem;
+
         IDictionary<string, IProvideAView> _views;
         public IProvideAView this[string viewName]
         {
@@ -173,7 +181,7 @@ namespace DRM.TypeSafePropertyBag
                     }
                 }
 
-                IProvideAView vp = _viewBuilder(viewName, DataSourceProviderProvider.DataSourceProvider);   //new ViewProvider(viewName, _dataSourceProviderProvider.DataSourceProvider);
+                IProvideAView vp = _viewBuilder(viewName, DataSourceProviderProvider.DataSourceProvider);
                 _views.Add(viewName, vp);
                 return vp;
             }
