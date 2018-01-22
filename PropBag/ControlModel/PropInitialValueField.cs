@@ -93,7 +93,31 @@ namespace DRM.PropBag
         {
             get
             {
-                return new PropInitialValueField(initialValue: null, setToDefault: false, setToUndefined: true, setToNull: false, setToEmptyString: false, valueCreator: null);
+                return new PropInitialValueField
+                    (
+                    initialValue: null,
+                    setToDefault: false,
+                    setToUndefined: true,
+                    setToNull: false,
+                    setToEmptyString: false,
+                    valueCreator: null
+                    );
+            }
+        }
+
+        public static IPropInitialValueField UseDefaultInitialValueField
+        {
+            get
+            {
+                return new PropInitialValueField
+                    (
+                    initialValue: null,
+                    setToDefault: true,
+                    setToUndefined: false,
+                    setToNull: false,
+                    setToEmptyString: false,
+                    valueCreator: null
+                    );
             }
         }
     }
