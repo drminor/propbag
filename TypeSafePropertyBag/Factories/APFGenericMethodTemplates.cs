@@ -20,7 +20,7 @@ namespace DRM.TypeSafePropertyBag
         #region IObsCollection<T> and ObservableCollection<T> Prop Creation
 
         // From Object
-        private static ICProp<CT, T> CreateEPropFromObject<CT, T>(IPropFactory propFactory,
+        private static ICProp<CT, T> CreateCPropFromObject<CT, T>(IPropFactory propFactory,
             object value,
             string propertyName, object extraInfo,
             PropStorageStrategyEnum storageStrategy, bool isTypeSolid,
@@ -33,7 +33,7 @@ namespace DRM.TypeSafePropertyBag
         }
 
         // From String
-        private static ICProp<CT, T> CreateEPropFromString<CT, T>(IPropFactory propFactory,
+        private static ICProp<CT, T> CreateCPropFromString<CT, T>(IPropFactory propFactory,
             string value, bool useDefault,
             string propertyName, object extraInfo,
             PropStorageStrategyEnum storageStrategy, bool isTypeSolid,
@@ -52,27 +52,6 @@ namespace DRM.TypeSafePropertyBag
             return propFactory.Create<CT, T>(initialValue, propertyName, extraInfo, storageStrategy, isTypeSolid,
                 GetComparerForCollections<CT>(comparer, propFactory, useRefEquality));
         }
-
-        //// From String FallBack to using ObservableCollection<T>
-        //private static ICPropFB<CT, T> CreateEPropFromStringFB<CT, T>(IPropFactory propFactory,
-        //    string value, bool useDefault,
-        //    string propertyName, object extraInfo,
-        //    PropStorageStrategyEnum storageStrategy, bool isTypeSolid,
-        //    Delegate comparer, bool useRefEquality = true) where CT : ObservableCollection<T>
-        //{
-        //    CT initialValue;
-        //    if (useDefault)
-        //    {
-        //        initialValue = propFactory.ValueConverter.GetDefaultValue<CT, T>(propertyName);
-        //    }
-        //    else
-        //    {
-        //        initialValue = propFactory.GetValueFromString<CT, T>(value);
-        //    }
-
-        //    return propFactory.CreateFB<CT, T>(initialValue, propertyName, extraInfo, hasStorage, isTypeSolid,
-        //        GetComparerForCollections<CT>(comparer, propFactory, useRefEquality));
-        //}
 
         // With No Value
         private static ICProp<CT, T> CreateEPropWithNoValue<CT, T>(IPropFactory propFactory,
@@ -112,24 +91,24 @@ namespace DRM.TypeSafePropertyBag
 
         #endregion
 
-            #region DataSource creators
+        #region DataSource creators
 
-            //private static ClrMappedDSP<TDestination> CreateMappedDS_Typed<TSource, TDestination>
-            //    (
-            //    IPropFactory propFactory,
-            //    PropIdType propId,
-            //    PropKindEnum propKind,
-            //    IDoCRUD<TSource> dal,
-            //    PSAccessServiceInterface propStoreAccessService,
-            //    IPropBagMapper<TSource, TDestination> mapper  //, out CrudWithMapping<TSource, TDestination> mappedDs
-            //    ) where TSource : class where TDestination : INotifyItemEndEdit
-            //{
+        //private static ClrMappedDSP<TDestination> CreateMappedDS_Typed<TSource, TDestination>
+        //    (
+        //    IPropFactory propFactory,
+        //    PropIdType propId,
+        //    PropKindEnum propKind,
+        //    IDoCRUD<TSource> dal,
+        //    PSAccessServiceInterface propStoreAccessService,
+        //    IPropBagMapper<TSource, TDestination> mapper  //, out CrudWithMapping<TSource, TDestination> mappedDs
+        //    ) where TSource : class where TDestination : INotifyItemEndEdit
+        //{
 
-            //    ClrMappedDSP<TDestination> result = propFactory.CreateMappedDS<TSource, TDestination>(propId, propKind, dal, propStoreAccessService,  mapper);
+        //    ClrMappedDSP<TDestination> result = propFactory.CreateMappedDS<TSource, TDestination>(propId, propKind, dal, propStoreAccessService,  mapper);
 
-            //    //mappedDs = null;
-            //    return result;
-            //}
+        //    //mappedDs = null;
+        //    return result;
+        //}
 
         private static IProvideADataSourceProvider CreateMappedDSPProvider<TSource, TDestination>
             (
@@ -150,10 +129,8 @@ namespace DRM.TypeSafePropertyBag
             // Now that we have performed the type casts, we can call the propFactory using "compile-time" type parameters.
             ClrMappedDSP<TDestination> mappedDSP = propFactory.CreateMappedDS<TSource, TDestination>(propId, propKind, dal, propStoreAccessService, mapper);
 
-            IProvideADataSourceProvider result = mappedDSP;
-
-            //mappedDs = null;
-            return result;
+            //IProvideADataSourceProvider result = mappedDSP;
+            return mappedDSP; // result;
         }
 
         #endregion
@@ -219,6 +196,7 @@ namespace DRM.TypeSafePropertyBag
                 return (Func<T, T, bool>)comparer;
             }
         }
+
         #endregion
     }
 }

@@ -147,7 +147,7 @@ namespace DRM.TypeSafePropertyBag
 
         #endregion
 
-        #region IObsCollection<T> and ObservableCollection<T> Prop Creation
+        #region ObservableCollection<T> Prop Creation
 
         public abstract ICProp<CT, T> Create<CT, T>(
             CT initialValue,
@@ -161,19 +161,6 @@ namespace DRM.TypeSafePropertyBag
         //    ICProp<CT, T> prop = new CProp<CT, T>(initialValue, getDefaultValFunc, typeIsSolid, hasStorage, comparer);
         //    return prop;
         //}
-
-        //public abstract ICPropFB<CT, T> CreateFB<CT, T>(
-        //    CT initialValue,
-        //    string propertyName, object extraInfo = null,
-        //    PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true,
-        //    Func<CT, CT, bool> comparer = null) where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged;
-        ////{
-        ////    if (comparer == null) comparer = EqualityComparer<CT>.Default.Equals;
-        ////    GetDefaultValueDelegate<CT> getDefaultValFunc = ValueConverter.GetDefaultValue<CT>;
-
-        ////    ICPropFB<CT, T> prop = new CPropFB<CT, T>(initialValue, getDefaultValFunc, typeIsSolid, hasStorage, comparer);
-        ////    return prop;
-        ////}
 
         public abstract ICProp<CT, T> CreateWithNoValue<CT, T>(
             PropNameType propertyName, object extraInfo = null,
@@ -269,7 +256,7 @@ namespace DRM.TypeSafePropertyBag
             }
             else if (IsCollection(propKind))
             {
-                CreateEPropFromObjectDelegate propCreator = GetCPropCreator(typeOfThisProperty, itemType);
+                CreateCPropFromObjectDelegate propCreator = GetCPropCreator(typeOfThisProperty, itemType);
                 IProp prop = propCreator(this, value, propertyName, extraInfo, storageStrategy: storageStrategy, isTypeSolid: isTypeSolid,
                     comparer: comparer, useRefEquality: useRefEquality);
 
@@ -297,7 +284,7 @@ namespace DRM.TypeSafePropertyBag
             }
             else if (IsCollection(propKind))
             {
-                CreateEPropFromStringDelegate propCreator = GetCPropFromStringCreator(typeOfThisProperty, itemType);
+                CreateCPropFromStringDelegate propCreator = GetCPropFromStringCreator(typeOfThisProperty, itemType);
                 IProp prop = propCreator(this, value, useDefault, propertyName, extraInfo, storageStrategy: storageStrategy, isTypeSolid: isTypeSolid,
                     comparer: comparer, useRefEquality: useRefEquality);
 
@@ -324,7 +311,7 @@ namespace DRM.TypeSafePropertyBag
             }
             else if (IsCollection(propKind))
             {
-                CreateEPropWithNoValueDelegate propCreator = GetCPropWithNoValueCreator(typeOfThisProperty, itemType);
+                CreateCPropWithNoValueDelegate propCreator = GetCPropWithNoValueCreator(typeOfThisProperty, itemType);
                 IProp prop = propCreator(this, propertyName, extraInfo, storageStrategy: storageStrategy, isTypeSolid: isTypeSolid,
                     comparer: comparer, useRefEquality: useRefEquality);
 
@@ -511,26 +498,26 @@ namespace DRM.TypeSafePropertyBag
 
         #endregion
 
-        #region IObsCollection<T> and ObservableCollection<T> Prop Creation Methods
+        #region ObservableCollection<T> Prop Creation Methods
 
         // From Object
-        protected virtual CreateEPropFromObjectDelegate GetCPropCreator(Type collectionType, Type itemType)
+        protected virtual CreateCPropFromObjectDelegate GetCPropCreator(Type collectionType, Type itemType)
         {
-            CreateEPropFromObjectDelegate result = DelegateCacheProvider.CreateCPropFromObjectCache.GetOrAdd(new TypePair(collectionType, itemType));
+            CreateCPropFromObjectDelegate result = DelegateCacheProvider.CreateCPropFromObjectCache.GetOrAdd(new TypePair(collectionType, itemType));
             return result;
         }
 
         // From String
-        protected virtual CreateEPropFromStringDelegate GetCPropFromStringCreator(Type collectionType, Type itemType)
+        protected virtual CreateCPropFromStringDelegate GetCPropFromStringCreator(Type collectionType, Type itemType)
         {
-            CreateEPropFromStringDelegate result = DelegateCacheProvider.CreateCPropFromStringCache.GetOrAdd(new TypePair(collectionType, itemType));
+            CreateCPropFromStringDelegate result = DelegateCacheProvider.CreateCPropFromStringCache.GetOrAdd(new TypePair(collectionType, itemType));
             return result;
         }
 
         // With No Value
-        protected virtual CreateEPropWithNoValueDelegate GetCPropWithNoValueCreator(Type collectionType, Type itemType)
+        protected virtual CreateCPropWithNoValueDelegate GetCPropWithNoValueCreator(Type collectionType, Type itemType)
         {
-            CreateEPropWithNoValueDelegate result = DelegateCacheProvider.CreateCPropWithNoValCache.GetOrAdd(new TypePair(collectionType, itemType));
+            CreateCPropWithNoValueDelegate result = DelegateCacheProvider.CreateCPropWithNoValCache.GetOrAdd(new TypePair(collectionType, itemType));
             return result;
         }
 

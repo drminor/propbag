@@ -14,21 +14,21 @@ namespace DRM.TypeSafePropertyBag
     #region IObsCollection<T> and ObservableCollection<T> Methods
 
     // From Object
-    public delegate IProp CreateEPropFromObjectDelegate(IPropFactory propFactory,
+    public delegate IProp CreateCPropFromObjectDelegate(IPropFactory propFactory,
         object value,
         string propertyName, object extraInfo,
         PropStorageStrategyEnum storageStrategy, bool isTypeSolid,
         Delegate comparer, bool useRefEquality);
 
     // From String
-    public delegate IProp CreateEPropFromStringDelegate(IPropFactory propFactory,
+    public delegate IProp CreateCPropFromStringDelegate(IPropFactory propFactory,
         string value, bool useDefault,
         string propertyName, object extraInfo,
         PropStorageStrategyEnum storageStrategy, bool isTypeSolid,
         Delegate comparer, bool useRefEquality);
 
     // With No Value
-    public delegate IProp CreateEPropWithNoValueDelegate(IPropFactory propFactory,
+    public delegate IProp CreateCPropWithNoValueDelegate(IPropFactory propFactory,
         string propertyName, object extraInfo,
         PropStorageStrategyEnum storageStrategy, bool isTypeSolid,
         Delegate comparer, bool useRefEquality);
@@ -44,7 +44,7 @@ namespace DRM.TypeSafePropertyBag
 
     #endregion
 
-    #region CollectionViewSource Methods
+    #region CollectionView / CollectionViewSource Methods
 
     public delegate IProp CreateCVSPropDelegate(IPropFactory propFactory, string propertyName, IProvideAView viewProvider);
     public delegate IProp CreateCVPropDelegate(IPropFactory propFactory, string propertyName, IProvideAView viewProvider);
