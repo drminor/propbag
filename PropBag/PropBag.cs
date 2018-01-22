@@ -215,13 +215,7 @@ namespace DRM.PropBag
 
         protected void Hydrate(IPropModel pm)
         {
-            string cName = GetClassNameOfThisInstance();
-            string pCName = pm.ClassName;
-
-            if (cName != pCName)
-            {
-                System.Diagnostics.Debug.WriteLine($"CLR class name: {cName} does not match PropModel class name: {pCName}.");
-            }
+            CheckClassNames(pm);
 
             foreach (IPropItem pi in pm.Props)
             {
@@ -229,11 +223,6 @@ namespace DRM.PropBag
                 {
                     System.Diagnostics.Debug.WriteLine("We are creating prop item: PersonList.");
                 }
-
-                //if (pi.PropKind == PropKindEnum.ObservableCollectionFB)
-                //{
-                //    System.Diagnostics.Debug.WriteLine("Processing the PersonList Prop Item.");
-                //}
 
                 PropIdType propId;
                 IPropData propItem;
@@ -251,7 +240,7 @@ namespace DRM.PropBag
                     // given instance of a PropBag.
                     if (TryGetViewManager(srcPropName, pi.PropertyType, out IManageCViews cViewManager))
                     {
-                        IProvideAView viewProvider = cViewManager.GetViewProvider();
+                        IProvideAView viewProvider = cViewManager.GetDefaultViewProvider();
 
                         typedProp = _propFactory.CreateCVSProp(pi.PropertyName, viewProvider);
                         propItem = AddProp(pi.PropertyName, typedProp, out propId);
@@ -266,99 +255,8 @@ namespace DRM.PropBag
                     // Get the name of the Collection-Type PropItem that provides the data for this CollectionViewSource.
                     string srcPropName = pi.BinderField?.Path;
 
-                    // Make AddCollectionViewPropDSGen return a 
-
                     typedProp = AddCollectionViewPropDSGen(pi.PropertyType, pi.PropertyName, srcPropName, pi.MapperRequest);
                     propItem = AddProp(pi.PropertyName, typedProp, out propId);
-
-
-                    //IPropData propGen = GetPropGen(srcPropName, null, haveValue: false, value: null, alwaysRegister: false, mustBeRegistered: true,
-                    //neverCreate: true, desiredHasStoreValue: true, wasRegistered: out bool wasRegistered, propId: out PropIdType dalPropId);
-
-                    //if(propGen != null)
-                    //{
-                    //    // THIS DOES NOT WORK since it requires that the PropItem have a value at this point, when often it will not.
-                    //    object iDoCrudDataSource = propGen.TypedProp.TypedValueAsObject;
-                    //    if (iDoCrudDataSource == null)
-                    //    {
-                    //        throw new InvalidOperationException("The srcProp has not been initialized.");
-                    //    }
-
-                    //    IMapperRequest mr = pi.MapperRequest;
-                    //    IProvideADataSourceProvider dspProvider = _propFactory.GetDSProviderProvider(dalPropId, propGen.TypedProp.PropKind, iDoCrudDataSource, this._ourStoreAccessor, mr);
-
-                    //    IManageCViews viewManager = _ourStoreAccessor.GetOrAddViewManager(this, dalPropId, propGen, _propFactory.GetCViewProviderFactory(), dspProvider);
-
-                    //    IProvideAView viewProvider = viewManager.GetViewProvider();
-                    //    typedProp = _propFactory.CreateCVProp(pi.PropertyName, viewProvider);
-                    //    propItem = AddProp(pi.PropertyName, typedProp, out propId);
-                    //    //propItem = null;
-                    //    //propId = 0;
-                    //}
-                    //else
-                    //{
-                    //    throw new InvalidOperationException("The srcPropName does not (yet) exist.");
-                    //}
-
-                    //if (TryGetPropGen(srcPropName, null, out IPropData propGen)) {
-
-                    //}
-
-                    //if (_ourStoreAccessor.TryGetPropId(srcPropName, out PropIdType dalPropId))
-                    //{
-
-                    //    if (TryGetPropGen(srcPropName, typeof(IDoCRUD<object>), out IPropData propGen))
-                    //    {
-                    //        object iDoCrudDataSource = propGen.TypedProp.TypedValueAsObject;
-                    //        if(iDoCrudDataSource == null)
-                    //        {
-                    //            throw new InvalidOperationException("The srcProp has not been initialized.");
-                    //        }
-
-                    //        IMapperRequest mr = pi.MapperRequest;
-                    //        IProvideADataSourceProvider dspProvider = _propFactory.GetDSProviderProvider(dalPropId, propGen.TypedProp.PropKind, iDoCrudDataSource, this._ourStoreAccessor, mr);
-
-                    //        IManageCViews viewManager = _ourStoreAccessor.GetOrAddViewManager(this, dalPropId, propGen, _propFactory.GetCViewProviderFactory(), dspProvider);
-
-                    //        IProvideAView viewProvider = viewManager.GetViewProvider();
-                    //        typedProp = _propFactory.CreateCVProp(pi.PropertyName, viewProvider);
-                    //        propItem = AddProp(pi.PropertyName, typedProp, out propId);
-                    //    }
-                    //    else
-                    //    {
-                    //        throw new InvalidOperationException("The srcPropName does not (yet) exist.");
-                    //    }
-                    //}
-                    //else
-                    //{
-                    //    throw new InvalidOperationException("Fix me");
-                    //}
-
-                    //IPropBagMapperKeyGen mapperRequest;
-                    //mapperRequest = PropStoreServicesForThisApp.AutoMapperProvider.RegisterMapperRequest(mr.PropModelResourceKey, mr.SourceType, mr.ConfigPackageName);
-                    //_mapper = (IPropBagMapper<Person, PersonVM>)PropStoreServicesForThisApp.AutoMapperProvider.GetMapper(mapperRequest);
-
-                    //FetchData_Test(srcPropName, pi.PropertyType);
-
-                    //IProvideAView viewProvider;
-                    //if (srcPropName != null)
-                    //{
-                    //    if (TryGetViewManager(this, srcPropName, pi.PropertyType, out IManageCViews cViewManager))
-                    //    {
-                    //        viewProvider = cViewManager.GetViewProvider();
-                    //    }
-                    //    else
-                    //    {
-                    //        throw new InvalidOperationException($"Could not retrieve the (generic) CViewManager for source PropItem: {srcPropName}.");
-                    //    }
-                    //}
-                    //else
-                    //{
-                    //    viewProvider = null;
-                    //}
-
-                    //typedProp = _propFactory.CreateCVProp(pi.PropertyName, viewProvider);
-                    //propItem = AddProp(pi.PropertyName, typedProp, out propId);
                 }
                 else
                 {
@@ -479,7 +377,18 @@ namespace DRM.PropBag
             }
 
             return propData;
+        }
 
+        [Conditional("DEBUG")]
+        private void CheckClassNames(IPropModel pm)
+        {
+            string cName = GetClassNameOfThisInstance();
+            string pCName = pm.ClassName;
+
+            if (cName != pCName)
+            {
+                System.Diagnostics.Debug.WriteLine($"CLR class name: {cName} does not match PropModel class name: {pCName}.");
+            }
         }
 
         // --- Old Stuff
@@ -503,13 +412,13 @@ namespace DRM.PropBag
 
             if (TryGetViewManager(pName, pType, out IManageCViews cViewManager))
             {
-                viewProvider = cViewManager.GetViewProvider();
+                viewProvider = cViewManager.GetDefaultViewProvider();
                 lcv = viewProvider.View;
             }
 
             if (TryGetViewManager(pName, pType, out IManageCViews cViewManager2))
             {
-                viewProvider2 = cViewManager2.GetViewProvider();
+                viewProvider2 = cViewManager2.GetDefaultViewProvider();
                 lcv2 = viewProvider2.View;
             }
 
@@ -1812,7 +1721,7 @@ namespace DRM.PropBag
 
             IManageCViews cViewManager = _ourStoreAccessor.GetOrAddViewManager<TDal, TSource, TDestination>(this, dalPropId, propGen, mr, _propFactory.GetPropBagMapperFactory(), _propFactory.GetCViewProviderFactory());
 
-            IProvideAView viewProvider = cViewManager.GetViewProvider();
+            IProvideAView viewProvider = cViewManager.GetDefaultViewProvider();
             IProp result = AddCollectionViewProp(propertyName, viewProvider);
             return result;
         }
@@ -1841,7 +1750,7 @@ namespace DRM.PropBag
 
             IManageCViews cViewManager = _ourStoreAccessor.GetOrAddViewManager<TDal, TSource, TDestination>(this, dalPropId, propGen, mapper, _propFactory.GetCViewProviderFactory());
 
-            IProvideAView viewProvider = cViewManager.GetViewProvider();
+            IProvideAView viewProvider = cViewManager.GetDefaultViewProvider();
             IProp result = AddCollectionViewProp(propertyName, viewProvider);
             return result;
         }
@@ -1863,7 +1772,7 @@ namespace DRM.PropBag
 
             IManageCViews cViewManager = _ourStoreAccessor.GetOrAddViewManager<TDal, TSource, TDestination>(this, dalPropId, propGen, mapper, _propFactory.GetCViewProviderFactory());
 
-            IProvideAView viewProvider = cViewManager.GetViewProvider();
+            IProvideAView viewProvider = cViewManager.GetDefaultViewProvider();
             ICViewProp<CVT> result = (ICViewProp<CVT>)AddCollectionViewProp(propertyName, viewProvider);
             return result;
         }
