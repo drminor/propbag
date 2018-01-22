@@ -235,9 +235,6 @@ namespace DRM.PropBag
 
                     //FetchData_Test(srcPropName, pi.PropertyType);
 
-                    // TODO: Consider creating a local cache of CViewManagers, keyed by srcPropName.
-                    // This cache may be handy since several properties may reference the same CViewManager for a 
-                    // given instance of a PropBag.
                     if (TryGetViewManager(srcPropName, pi.PropertyType, out IManageCViews cViewManager))
                     {
                         IProvideAView viewProvider = cViewManager.GetDefaultViewProvider();
@@ -255,7 +252,7 @@ namespace DRM.PropBag
                     // Get the name of the Collection-Type PropItem that provides the data for this CollectionViewSource.
                     string srcPropName = pi.BinderField?.Path;
 
-                    typedProp = AddCollectionViewPropDSGen(pi.PropertyType, pi.PropertyName, srcPropName, pi.MapperRequest);
+                    typedProp = AddCollectionViewPropDSGen(pi.PropertyName, pi.PropertyType, srcPropName, pi.MapperRequest);
                     propItem = AddProp(pi.PropertyName, typedProp, out propId);
                 }
                 else
@@ -1692,7 +1689,7 @@ namespace DRM.PropBag
             return cvsProp;
         }
 
-        protected IProp AddCollectionViewPropDSGen(Type typeOfThisProperty, PropNameType propertyName, PropNameType srcPropName, IMapperRequest mr)
+        protected IProp AddCollectionViewPropDSGen(PropNameType propertyName, Type typeOfThisProperty, PropNameType srcPropName, IMapperRequest mr)
         {
             ICacheDelegatesForTypePair<CVPropFromDsDelegate> dc = _propFactory.DelegateCacheProvider.CreateCViewPropCache;
             CVPropFromDsDelegate cvPropCreator = dc.GetOrAdd(new TypePair(mr.SourceType, typeOfThisProperty));
@@ -2663,45 +2660,7 @@ namespace DRM.PropBag
                 dataSourceProvider = null;
                 return false;
             }
-
-            //if (TryGetDataSourceProviderProvider(propBag, propertyName, propertyType, out IProvideADataSourceProvider dataSourceProviderProvider))
-            //{
-            //    dataSourceProvider = dataSourceProviderProvider.DataSourceProvider;
-            //    return true;
-            //}
-            //else
-            //{
-            //    dataSourceProvider = null;
-            //    return false;
-            //}
         }
-
-        //public bool TryGetDataSourceProviderProvider(IPropBag propBag, PropNameType propertyName, Type propertyType,
-        //    out IProvideADataSourceProvider dataSourceProviderProvider)
-        //{
-        //    bool mustBeRegistered = OurMetaData.AllPropsMustBeRegistered;
-
-        //    IPropData propData = GetPropGen(propertyName, propertyType,
-        //        haveValue: false,
-        //        value: null,
-        //        alwaysRegister: false,
-        //        mustBeRegistered: mustBeRegistered,
-        //        neverCreate: false,
-        //        desiredHasStoreValue: null,
-        //        wasRegistered: out bool wasRegistered,
-        //        propId: out PropIdType propId);
-
-        //    if (propData != null)
-        //    {
-        //        dataSourceProviderProvider = _ourStoreAccessor.GetDataSourceProviderProvider(this, propId, propData, _propFactory.GetCViewProviderFactory());
-        //        return true;
-        //    }
-        //    else
-        //    {
-        //        dataSourceProviderProvider = null;
-        //        return false;
-        //    }
-        //}
 
         public IManageCViews GetOrAddViewManager(PropNameType propertyName, Type propertyType)
         {
@@ -2753,7 +2712,6 @@ namespace DRM.PropBag
                 return false;
             }
         }
-
 
         #endregion
 
