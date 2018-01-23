@@ -84,23 +84,6 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
         //    //    OnDataSourceChanged(this, EventArgs.Empty);
         //}
 
-        //private IDoCRUD<TSource> GetCurrentDS(PSAccessServiceInternalInterface storeAccessor, PropIdType propId)
-        //{
-        //    StoreNodeProp propNode = storeAccessor.GetChild(propId);
-        //    if (propNode.Int_PropData.TypedProp is IDoCRUD<TSource> dal)
-        //    {
-        //        return dal;
-        //    }
-        //    else
-        //    {
-        //        if (propNode.Int_PropData.TypedProp != null)
-        //        {
-        //            throw new InvalidOperationException($"The PropId: provided to CLR_Mapped_DSP refers to a PropItem: {propNode.CompKey} whose value does not implement: {nameof(IDoCRUD<TSource>)}.");
-        //        }
-        //        return null;
-        //    }
-        //}
-
         private void _dataAccessLayer_DataSourceChanged(object sender, EventArgs e)
         {
             OnDataSourceChanged(sender, e);
