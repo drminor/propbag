@@ -1,0 +1,8 @@
+﻿using System;
+
+namespace DRM.TypeSafePropertyBag
+{
+    using PropNameType = String;
+
+    public delegate IManageCViews CViewManagerFromDsDelegate(IPropBag target, PropNameType srcPropName, IMapperRequest mr);
+}

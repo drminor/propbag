@@ -17,7 +17,7 @@ namespace DRM.TypeSafePropertyBag
 
         #endregion
 
-        #region IObsCollection<T> and ObservableCollection<T> Prop Creation
+        #region ObservableCollection<T> Prop Creation
 
         // From Object
         private static ICProp<CT, T> CreateCPropFromObject<CT, T>(IPropFactory propFactory,
@@ -54,7 +54,7 @@ namespace DRM.TypeSafePropertyBag
         }
 
         // With No Value
-        private static ICProp<CT, T> CreateEPropWithNoValue<CT, T>(IPropFactory propFactory,
+        private static ICProp<CT, T> CreateCPropWithNoValue<CT, T>(IPropFactory propFactory,
             bool useDefault,
             PropNameType propertyName, object extraInfo,
             PropStorageStrategyEnum storageStrategy, bool isTypeSolid,
@@ -93,23 +93,6 @@ namespace DRM.TypeSafePropertyBag
 
         #region DataSource creators
 
-        //private static ClrMappedDSP<TDestination> CreateMappedDS_Typed<TSource, TDestination>
-        //    (
-        //    IPropFactory propFactory,
-        //    PropIdType propId,
-        //    PropKindEnum propKind,
-        //    IDoCRUD<TSource> dal,
-        //    PSAccessServiceInterface propStoreAccessService,
-        //    IPropBagMapper<TSource, TDestination> mapper  //, out CrudWithMapping<TSource, TDestination> mappedDs
-        //    ) where TSource : class where TDestination : INotifyItemEndEdit
-        //{
-
-        //    ClrMappedDSP<TDestination> result = propFactory.CreateMappedDS<TSource, TDestination>(propId, propKind, dal, propStoreAccessService,  mapper);
-
-        //    //mappedDs = null;
-        //    return result;
-        //}
-
         private static IProvideADataSourceProvider CreateMappedDSPProvider<TSource, TDestination>
             (
             IPropFactory propFactory,
@@ -132,6 +115,23 @@ namespace DRM.TypeSafePropertyBag
             //IProvideADataSourceProvider result = mappedDSP;
             return mappedDSP; // result;
         }
+
+        //private static ClrMappedDSP<TDestination> CreateMappedDS_Typed<TSource, TDestination>
+        //    (
+        //    IPropFactory propFactory,
+        //    PropIdType propId,
+        //    PropKindEnum propKind,
+        //    IDoCRUD<TSource> dal,
+        //    PSAccessServiceInterface propStoreAccessService,
+        //    IPropBagMapper<TSource, TDestination> mapper  //, out CrudWithMapping<TSource, TDestination> mappedDs
+        //    ) where TSource : class where TDestination : INotifyItemEndEdit
+        //{
+
+        //    ClrMappedDSP<TDestination> result = propFactory.CreateMappedDS<TSource, TDestination>(propId, propKind, dal, propStoreAccessService,  mapper);
+
+        //    //mappedDs = null;
+        //    return result;
+        //}
 
         #endregion
 

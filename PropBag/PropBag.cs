@@ -228,6 +228,8 @@ namespace DRM.PropBag
                 IPropData propItem;
                 IProp typedProp;
 
+                // Note: CollectionViewSource and CollectionView Props are 
+                // created by 
                 if (pi.PropKind == PropKindEnum.CollectionViewSource)
                 {
                     // Get the name of the Collection-Type PropItem that provides the data for this CollectionViewSource.
@@ -235,10 +237,12 @@ namespace DRM.PropBag
 
                     //FetchData_Test(srcPropName, pi.PropertyType);
 
+                    // Get the ViewManager for this source collection from the Property Store.
                     if (TryGetViewManager(srcPropName, pi.PropertyType, out IManageCViews cViewManager))
                     {
                         IProvideAView viewProvider = cViewManager.GetDefaultViewProvider();
 
+                        // Use our PropFactory to create a CollectionView PropItem using the ViewProvider.
                         typedProp = _propFactory.CreateCVSProp(pi.PropertyName, viewProvider);
                         propItem = AddProp(pi.PropertyName, typedProp, out propId);
                     }
@@ -252,7 +256,17 @@ namespace DRM.PropBag
                     // Get the name of the Collection-Type PropItem that provides the data for this CollectionViewSource.
                     string srcPropName = pi.BinderField?.Path;
 
-                    typedProp = AddCollectionViewPropDSGen(pi.PropertyName, pi.PropertyType, srcPropName, pi.MapperRequest);
+                    // Get the ViewManager for this source DataAccessLayer(IDoCRUD<T>) from the Property Store.
+                    IManageCViews cViewManager = GetOrAddCViewManagerGen(pi.PropertyType, srcPropName, pi.MapperRequest);
+
+                    //// Create a CollectionView Prop using a DataSource provided by the PropItem with the path in srcPropName.
+                    //typedProp = CreateCollectionViewPropDSGen(pi.PropertyName, pi.PropertyType, srcPropName, pi.MapperRequest);
+                    //propItem = AddProp(pi.PropertyName, typedProp, out propId);
+
+                    IProvideAView viewProvider = cViewManager.GetDefaultViewProvider();
+
+                    // Use our PropFactory to create a CollectionView PropItem using the ViewProvider.
+                    typedProp = _propFactory.CreateCVProp(pi.PropertyName, viewProvider);
                     propItem = AddProp(pi.PropertyName, typedProp, out propId);
                 }
                 else
@@ -1416,7 +1430,7 @@ namespace DRM.PropBag
                 LocalPropertyPath lpp = new LocalPropertyPath(pathToSource);
                 LocalBindingInfo bindingInfo = new LocalBindingInfo(lpp, LocalBindingMode.OneWay);
 
-                bool wasAdded = RegisterBinding<T>(propId, bindingInfo);
+                bool wasAdded = ((IRegisterBindingsFowarderType)this).RegisterBinding<T>(propId, bindingInfo);
                 return wasAdded;
             }
             else
@@ -1425,7 +1439,7 @@ namespace DRM.PropBag
             }
         }
 
-        public bool RegisterBinding<T>(PropIdType propId, LocalBindingInfo bindingInfo)
+        bool IRegisterBindingsFowarderType.RegisterBinding<T>(PropIdType propId, LocalBindingInfo bindingInfo)
         {
             bool wasAdded = _ourStoreAccessor.RegisterBinding<T>(this, propId, bindingInfo);
             return wasAdded;
@@ -1450,7 +1464,7 @@ namespace DRM.PropBag
                 LocalPropertyPath lpp = new LocalPropertyPath(pathToSource);
                 LocalBindingInfo bindingInfo = new LocalBindingInfo(lpp, LocalBindingMode.OneWay);
 
-                bool wasRemoved = UnregisterBinding<T>(propId, bindingInfo);
+                bool wasRemoved = ((IRegisterBindingsFowarderType)this).UnregisterBinding<T>(propId, bindingInfo);
                 return wasRemoved;
             }
             else
@@ -1459,7 +1473,7 @@ namespace DRM.PropBag
             }
         }
 
-        public bool UnregisterBinding<T>(PropIdType propId, LocalBindingInfo bindingInfo)
+        bool IRegisterBindingsFowarderType.UnregisterBinding<T>(PropIdType propId, LocalBindingInfo bindingInfo)
         {
             bool wasRemoved = _ourStoreAccessor.UnregisterBinding<T>(this, propId, bindingInfo);
             return wasRemoved;
@@ -1648,7 +1662,7 @@ namespace DRM.PropBag
         #region Add Enumerable-Type Props
         #endregion
 
-        #region Add ObservableCollection<T> and IObsCollection<T> Props
+        #region Add ObservableCollection<T> Props
 
         public ICProp<CT, T> AddCollectionProp<CT, T>
             (
@@ -1671,7 +1685,7 @@ namespace DRM.PropBag
 
         #endregion
 
-        #region Add CollectionViewSource-type Props
+        #region Add Collection and CollectionViewSource Props
 
         public IProp AddCollectionViewSourceProp(string propertyName, IProvideAView viewProvider)
         {
@@ -1681,15 +1695,13 @@ namespace DRM.PropBag
             return cvsProp;
         }
 
-        public IProp AddCollectionViewProp(string propertyName, IProvideAView viewProvider) 
+        public IProp CreateCollectionViewProp(string propertyName, IProvideAView viewProvider) 
         {
             IProp cvsProp = _propFactory.CreateCVProp(propertyName, viewProvider);
-
-            //AddProp(propertyName, cvsProp, out PropIdType propId);
             return cvsProp;
         }
 
-        protected IProp AddCollectionViewPropDSGen(PropNameType propertyName, Type typeOfThisProperty, PropNameType srcPropName, IMapperRequest mr)
+        protected IProp CreateCollectionViewPropDSGen(PropNameType propertyName, Type typeOfThisProperty, PropNameType srcPropName, IMapperRequest mr)
         {
             ICacheDelegatesForTypePair<CVPropFromDsDelegate> dc = _propFactory.DelegateCacheProvider.CreateCViewPropCache;
             CVPropFromDsDelegate cvPropCreator = dc.GetOrAdd(new TypePair(mr.SourceType, typeOfThisProperty));
@@ -1698,11 +1710,21 @@ namespace DRM.PropBag
             return result;
         }
 
+        protected IManageCViews GetOrAddCViewManagerGen(Type typeOfThisProperty, PropNameType srcPropName, IMapperRequest mr)
+        {
+            ICacheDelegatesForTypePair<CViewManagerFromDsDelegate> dc = _propFactory.DelegateCacheProvider.GetOrAddCViewManagerPropCache;
+            CViewManagerFromDsDelegate cViewManagerCreator = dc.GetOrAdd(new TypePair(mr.SourceType, typeOfThisProperty));
+
+            IManageCViews result = cViewManagerCreator(this, srcPropName, mr);
+
+            return result;
+        }
+
         // TODO: Allow mapper to be null on construction, and then omit mapping functionality, but instead
         // use the IDoCRUD<T> straight, without any mapping
 
         // Using a IMapperRequest and Factory
-        public IProp AddCollectionViewPropDS<TDal, TSource, TDestination>
+        public IProp CreateCollectionViewPropDS<TDal, TSource, TDestination>
         (
             PropNameType propertyName, // The name for the new property.
             PropNameType srcPropName,   // The name of the property that holds the data (of type IDoCRUD<TSource>.)
@@ -1716,23 +1738,43 @@ namespace DRM.PropBag
             IPropData propGen = GetPropGen(srcPropName, null, haveValue: false, value: null, alwaysRegister: false, mustBeRegistered: true,
             neverCreate: true, desiredHasStoreValue: true, wasRegistered: out bool wasRegistered, propId: out PropIdType dalPropId);
 
+            if (propGen.IsEmpty)
+            {
+                throw new InvalidOperationException($"The {nameof(GetOrAddCViewManager)} cannot find the source PropItem with name = {srcPropName}.");
+            }
+
             IManageCViews cViewManager = _ourStoreAccessor.GetOrAddViewManager<TDal, TSource, TDestination>(this, dalPropId, propGen, mr, _propFactory.GetPropBagMapperFactory(), _propFactory.GetCViewProviderFactory());
 
             IProvideAView viewProvider = cViewManager.GetDefaultViewProvider();
-            IProp result = AddCollectionViewProp(propertyName, viewProvider);
+            IProp result = CreateCollectionViewProp(propertyName, viewProvider);
             return result;
         }
 
-        //private IProp IPropAddCVPropDSGen(Type sourceType, Type destinationType, PropNameType propertyName, PropNameType srcPropName, IMapperRequest mr)
-        //{
-        //}
+        // new version: returns a IManageCViews Using a IMapperRequest and Factory
+        public IManageCViews GetOrAddCViewManager<TDal, TSource, TDestination>
+        (
+            PropNameType srcPropName,   // The name of the property that holds the data (of type IDoCRUD<TSource>.)
+            IMapperRequest mr   // The (non-generic) information necessary to create a AutoMapper Mapper request.
+        )
+            where TDal : class, IDoCRUD<TSource>
+            where TSource : class
+            where TDestination : INotifyItemEndEdit
+        {
+            // Get the PropItem for the property that holds the DataSource (IDoCRUD<TSource>)
+            IPropData propGen = GetPropGen(srcPropName, null, haveValue: false, value: null, alwaysRegister: false, mustBeRegistered: true,
+            neverCreate: true, desiredHasStoreValue: true, wasRegistered: out bool wasRegistered, propId: out PropIdType dalPropId);
 
-        //ICacheDelegates<DoSetDelegate> dc = _propFactory.DelegateCacheProvider.DoSetDelegateCache;
-        //DoSetDelegate setPropDel = dc.GetOrAdd(PropData.TypedProp.Type);
-        //    return setPropDel(this, propId, propertyName, PropData.TypedProp, value);
+            if(propGen.IsEmpty)
+            {
+                throw new InvalidOperationException($"The {nameof(GetOrAddCViewManager)} cannot find the source PropItem with name = {srcPropName}.");
+            }
+
+            IManageCViews cViewManager = _ourStoreAccessor.GetOrAddViewManager<TDal, TSource, TDestination>(this, dalPropId, propGen, mr, _propFactory.GetPropBagMapperFactory(), _propFactory.GetCViewProviderFactory());
+            return cViewManager;
+        }
 
         // Using a IPropBagMapper directly.
-        public IProp AddCollectionViewPropDS<TDal, TSource, TDestination>
+        public IProp CreateCollectionViewPropDS<TDal, TSource, TDestination>
         (
             PropNameType propertyName, // The name for the new property.
             PropNameType srcPropName,   // The name of the property that holds the data (of type IDoCRUD<TSource>.)
@@ -1745,10 +1787,15 @@ namespace DRM.PropBag
             IPropData propGen = GetPropGen(srcPropName, null, haveValue: false, value: null, alwaysRegister: false, mustBeRegistered: true,
             neverCreate: true, desiredHasStoreValue: true, wasRegistered: out bool wasRegistered, propId: out PropIdType dalPropId);
 
+            if (propGen.IsEmpty)
+            {
+                throw new InvalidOperationException($"The {nameof(GetOrAddCViewManager)} cannot find the source PropItem with name = {srcPropName}.");
+            }
+
             IManageCViews cViewManager = _ourStoreAccessor.GetOrAddViewManager<TDal, TSource, TDestination>(this, dalPropId, propGen, mapper, _propFactory.GetCViewProviderFactory());
 
             IProvideAView viewProvider = cViewManager.GetDefaultViewProvider();
-            IProp result = AddCollectionViewProp(propertyName, viewProvider);
+            IProp result = CreateCollectionViewProp(propertyName, viewProvider);
             return result;
         }
 
@@ -1767,10 +1814,15 @@ namespace DRM.PropBag
             IPropData propGen = GetPropGen(srcPropName, null, haveValue: false, value: null, alwaysRegister: false, mustBeRegistered: true,
             neverCreate: true, desiredHasStoreValue: true, wasRegistered: out bool wasRegistered, propId: out PropIdType dalPropId);
 
+            if (propGen.IsEmpty)
+            {
+                throw new InvalidOperationException($"The {nameof(GetOrAddCViewManager)} cannot find the source PropItem with name = {srcPropName}.");
+            }
+
             IManageCViews cViewManager = _ourStoreAccessor.GetOrAddViewManager<TDal, TSource, TDestination>(this, dalPropId, propGen, mapper, _propFactory.GetCViewProviderFactory());
 
             IProvideAView viewProvider = cViewManager.GetDefaultViewProvider();
-            ICViewProp<CVT> result = (ICViewProp<CVT>)AddCollectionViewProp(propertyName, viewProvider);
+            ICViewProp<CVT> result = (ICViewProp<CVT>)CreateCollectionViewProp(propertyName, viewProvider);
             return result;
         }
 
@@ -2293,6 +2345,20 @@ namespace DRM.PropBag
             return sc;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="propertyName"></param>
+        /// <param name="propertyType">This is only required if there's a chance the PropItem will be registered during this call.</param>
+        /// <param name="haveValue"></param>
+        /// <param name="value"></param>
+        /// <param name="alwaysRegister"></param>
+        /// <param name="mustBeRegistered"></param>
+        /// <param name="neverCreate"></param>
+        /// <param name="desiredHasStoreValue"></param>
+        /// <param name="wasRegistered"></param>
+        /// <param name="propId"></param>
+        /// <returns>The existing or newly created PropItem.</returns>
         protected IPropData GetPropGen(PropNameType propertyName, Type propertyType,
             bool haveValue, object value,
             bool alwaysRegister, bool mustBeRegistered,
@@ -2790,7 +2856,16 @@ namespace DRM.PropBag
         where TDestination : INotifyItemEndEdit
         {
             PropBag pb = (PropBag)target;
-            IProp result = pb.AddCollectionViewPropDS<IDoCRUD<TSource>, TSource, TDestination>(propertyName, srcPropName, mr);
+            IProp result = pb.CreateCollectionViewPropDS<IDoCRUD<TSource>, TSource, TDestination>(propertyName, srcPropName, mr);
+            return result;
+        }
+
+        private IManageCViews CViewManagerFromDsBridge<TSource, TDestination>(IPropBag target, PropNameType srcPropName, IMapperRequest mr)
+            where TSource : class
+            where TDestination : INotifyItemEndEdit
+        {
+            PropBag pb = (PropBag)target;
+            IManageCViews result = pb.GetOrAddCViewManager<IDoCRUD<TSource>, TSource, TDestination>(srcPropName, mr);
             return result;
         }
 

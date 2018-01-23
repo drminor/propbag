@@ -14,26 +14,26 @@ namespace DRM.PropBag.Caches
     {
         #region Public Properties
 
-        // TypeDesc<T>-based Converter Cache
-        //public ITypeDescBasedTConverterCache TypeDescBasedTConverterCache { get; }
-
         // DoSetDelegate Cache.
         public ICacheDelegates<DoSetDelegate> DoSetDelegateCache { get; }
-        public ICacheDelegatesForTypePair<CVPropFromDsDelegate> CreateCViewPropCache { get; }
 
+        // CView
+        public ICacheDelegatesForTypePair<CVPropFromDsDelegate> CreateCViewPropCache { get; }
+        // CViewManager
+        public ICacheDelegatesForTypePair<CViewManagerFromDsDelegate> GetOrAddCViewManagerPropCache { get; }
+
+        // Scalar PropItems
         public ICacheDelegates<CreatePropFromStringDelegate> CreatePropFromStringCache { get; }
         public ICacheDelegates<CreatePropWithNoValueDelegate> CreatePropWithNoValCache { get; }
         public ICacheDelegates<CreatePropFromObjectDelegate> CreatePropFromObjectCache { get; }
 
+        // ObservableCollection<T> PropItems
         public ICacheDelegatesForTypePair<CreateCPropFromStringDelegate> CreateCPropFromStringCache { get; }
         public ICacheDelegatesForTypePair<CreateCPropWithNoValueDelegate> CreateCPropWithNoValCache { get; }
         public ICacheDelegatesForTypePair<CreateCPropFromObjectDelegate> CreateCPropFromObjectCache { get; }
 
+        // DataSourceProviderProvider
         public ICacheDelegatesForTypePair<CreateMappedDSPProviderDelegate> CreateDSPProviderCache { get; }
-
-
-        //public ICacheDelegates<CreateCVSPropDelegate> CreateCVSPropCache { get; }
-        //public ICacheDelegates<CreateCVPropDelegate> CreateCVPropCache { get; }
 
         #endregion
 
@@ -41,7 +41,7 @@ namespace DRM.PropBag.Caches
 
         public SimpleDelegateCacheProvider(Type propBagType, Type propCreatorType)
         {
-            #region Converter and DoSet MethodInfo
+            #region Method on PropBag (DoSetDelegate, CVPropFromDsDelegate, and CViewManagerFromDsDelegate
 
             // TypeDesc<T>-based Converter Cache
             //TypeDescBasedTConverterCache = StaticTConverterProvider.TypeDescBasedTConverterCache; // new TypeDescBasedTConverterCache();
@@ -53,6 +53,11 @@ namespace DRM.PropBag.Caches
             // AddCollectionViewPropDS using non-generic request and factory
             MethodInfo addCollectionViewPropDS_mi = propBagType.GetMethod("CVPropFromDsBridge", BindingFlags.Instance | BindingFlags.NonPublic);
             CreateCViewPropCache = new TwoTypesDelegateCache<CVPropFromDsDelegate>(addCollectionViewPropDS_mi);
+
+            // GetOrAdd CViewManager using non-generic request and factory
+            MethodInfo getOrAddCViewManager_mi = propBagType.GetMethod("CViewManagerFromDsBridge", BindingFlags.Instance | BindingFlags.NonPublic);
+            GetOrAddCViewManagerPropCache = new TwoTypesDelegateCache<CViewManagerFromDsDelegate>(getOrAddCViewManager_mi);
+
 
             #endregion
 
