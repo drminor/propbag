@@ -14,11 +14,25 @@ namespace MVVMApplication.ViewModel
     {
         //int ITEMS_PER_PAGE = 10;
 
+        #region Constructors
+
         public PersonEditorViewModel(PropModel pm, PSAccessServiceCreatorInterface storeAccessCreator, IPropFactory propFactory, string fullClassName)
             : base(pm, storeAccessCreator, propFactory, fullClassName)
         {
             System.Diagnostics.Debug.WriteLine("Constructing PersonEditorViewModel -- with PropModel.");
         }
+
+        protected PersonEditorViewModel(PersonEditorViewModel copySource)
+            : base(copySource)
+        {
+        }
+
+        new public object Clone()
+        {
+            return new PersonEditorViewModel(this);
+        }
+
+        #endregion
 
         #region Command Handlers
 

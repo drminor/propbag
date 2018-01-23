@@ -6,12 +6,6 @@
                     xmlns:pb="clr-namespace:DRM.PropBagControlsWPF;assembly=PropBag.WPFControls"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
-    <!-- TODO: See if we can use the Resource defined in PersonVM.xaml (with key: PersonVM_Mapper_Emit_Proxy) -->
-    <!--<pb:MapperRequest x:Key="PersonVM_Mapper_Emit_Proxy2"
-                      SourceType="{x:Type mod:Person}"
-                      DestinationPropModelKey="PersonVM"
-                      ConfigPackageName="Emit_Proxy" />-->
-
     <pb:PropBagTemplate x:Key="PersonCollectionVM"
                         ClassName="PersonCollectionViewModel"
                         DeriveFromClassMode="Custom"
