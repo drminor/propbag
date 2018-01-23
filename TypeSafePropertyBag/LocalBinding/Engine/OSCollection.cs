@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
 {
-    public class OSCollection<T> : List<ObservableSource<T>>
+    internal class OSCollection<T> : List<ObservableSource<T>>
     {
         public OSCollection()
         {

@@ -28,6 +28,6 @@ namespace DRM.TypeSafePropertyBag
     internal interface IProvidePropStoreAccessService<L2T, L2TRaw> : IPropStoreAccessServiceCreator<L2T, L2TRaw>/*, IPropStoreAccessServicePerf<L2T, L2TRaw>*/, IDisposable
     {
         bool TearDown(ExKeyT compKey);
-        IPropStoreAccessService<L2T, L2TRaw> CloneService(IPropBagInternal sourcePropBag, IPropStoreAccessService<L2T, L2TRaw> sourceAccessService, IPropBagInternal targetPropBag, out StoreNodeBag sourceStoreNode, out StoreNodeBag newStoreNode);
+        IPropStoreAccessService<L2T, L2TRaw> ClonePSAccessService(IPropBagInternal sourcePropBag, IPropStoreAccessService<L2T, L2TRaw> sourceAccessService, IPropBagInternal targetPropBag, out StoreNodeBag sourceStoreNode, out StoreNodeBag newStoreNode);
     }
 }

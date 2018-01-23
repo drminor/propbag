@@ -22,7 +22,7 @@ namespace DRM.TypeSafePropertyBag
     {
         #region Private Members
 
-        readonly WeakReference<SimplePropStoreAccessService> _wrThis;
+        readonly WeakReference<PSAccessServiceInterface> _wrThis;
         readonly WeakReference<IPropBagInternal> _clientAccessToken;
         readonly ObjectIdType _objectId;
 
@@ -56,7 +56,7 @@ namespace DRM.TypeSafePropertyBag
             IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider
             )
         {
-            _wrThis = new WeakReference<SimplePropStoreAccessService>(this);
+            _wrThis = new WeakReference<PSAccessServiceInterface>(this);
             _ourNode = ourNode;
             _propStoreAccessServiceProvider = propStoreAccessServiceProvider;
             _handlerDispatchDelegateCacheProvider = handlerDispatchDelegateCacheProvider;
@@ -426,7 +426,7 @@ namespace DRM.TypeSafePropertyBag
             // the caller is using the StoreAccessor that belongs to the copySource to make this call.
             GetAndCheckObjectRef(copySource);
 
-            PSAccessServiceInterface newStoreAccessor = _propStoreAccessServiceProvider.CloneService
+            PSAccessServiceInterface newStoreAccessor = _propStoreAccessServiceProvider.ClonePSAccessService
                 (
                     copySource,
                     copySource.ItsStoreAccessor,
@@ -919,20 +919,22 @@ namespace DRM.TypeSafePropertyBag
         // A DataSourceProvider, a CollectionViewSource and a ListCollectionView are created.
         // The DataSourceProvider not only raises the standard DataChanged event, but also raises
         // EventHandler<EventArgs> ItemEndEdit events whenever an item in the list raises it's ItemEndEdit event.
-        public IManageCViews GetOrAddViewManager(IPropBag propBag, PropIdType propId, IPropData propData,
+        public IManageCViews GetOrAddViewManager
+            (
+            IPropBag propBag,
+            PropIdType propId,
+            IPropData propData,
             CViewProviderCreator viewBuilder)
         {
             ObjectIdType objectId  = GetAndCheckObjectRef(propBag);
 
             // There is one View Manager for each PropItem. The View Manager for a particular PropItem is created on first use.
             if (_genViewManagers == null)
-                _genViewManagers = new ViewManagerCollection(/*CViewGenManagerFactory*/);
+                _genViewManagers = new ViewManagerCollection();
 
             IManageCViews result = _genViewManagers.GetOrAdd(propId, CViewGenManagerFactory);
             return result;
 
-            // TODO: Since this Func<IPropData, IManageCViews> is only used on the first call to *any* GetOrAddViewManager method,
-            // we need to provide the factory on each call to _genViewManagers.GetOrAdd(
             IManageCViews CViewGenManagerFactory(PropIdType propId2)
             {
                 IProvideADataSourceProvider dSProviderProvider = new PBCollectionDSP_Provider(propId2, propData.TypedProp.PropKind, this);
@@ -941,20 +943,24 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        public IManageCViews GetOrAddViewManager(IPropBag propBag, PropIdType propId, IPropData propData,
-            CViewProviderCreator viewBuilder, IProvideADataSourceProvider dSProviderProvider)
+        public IManageCViews GetOrAddViewManager
+            (
+            IPropBag propBag,
+            PropIdType propId,
+            IPropData propData,
+            CViewProviderCreator viewBuilder,
+            IProvideADataSourceProvider dSProviderProvider
+            )
         {
             ObjectIdType objectId = GetAndCheckObjectRef(propBag);
 
             // There is one View Manager for each PropItem. The View Manager for a particular PropItem is created on first use.
             if (_genViewManagers == null)
-                _genViewManagers = new ViewManagerCollection(/*CViewGenManagerFactory*/);
+                _genViewManagers = new ViewManagerCollection();
 
             IManageCViews result = _genViewManagers.GetOrAdd(propId, CViewGenManagerFactory);
             return result;
 
-            // TODO: Since this Func<IPropData, IManageCViews> is only used on the first call to *any* GetOrAddViewManager method,
-            // we need to provide the factory on each call to _genViewManagers.GetOrAdd(
             IManageCViews CViewGenManagerFactory(PropIdType propId2)
             {
                 IManageCViews result2 = new ViewManager(dSProviderProvider, viewBuilder);
@@ -974,7 +980,7 @@ namespace DRM.TypeSafePropertyBag
             IPropBag propBag,
             PropIdType propId, // Identifies the PropItem that implements IDoCrud<TSource>
             IPropData propData, // The PropStore management wrapper for IProp<TSource> which holds the value of the 'IDoCrud<T>' data access layer.
-            IMapperRequest mr, // The information necessar to create a IPropBagMapper<TSource, TDestination>
+            IMapperRequest mr, // The information necessary to create a IPropBagMapper<TSource, TDestination>
             PropBagMapperCreator propBagMapperCreator, // A delegate that can be called to create a IPropBagMapper<TSource, TDestination> given a IMapperRequest.
             CViewProviderCreator viewBuilder // Method that can be used to create a IProvideAView from a DataSourceProvider.
             )
@@ -991,8 +997,6 @@ namespace DRM.TypeSafePropertyBag
             IManageCViews result = _genViewManagers.GetOrAdd(propId, CViewGenManagerFactory);
             return result;
 
-            // TODO: Since this Func<IPropData, IManageCViews> is only used on the first call to *any* GetOrAddViewManager method,
-            // we need to provide the factory on each call to _genViewManagers.GetOrAdd(
             IManageCViews CViewGenManagerFactory(PropIdType propId2)
             {
                 IProvideADataSourceProvider dSProviderProvider;
@@ -1041,18 +1045,15 @@ namespace DRM.TypeSafePropertyBag
             IManageCViews result = _genViewManagers.GetOrAdd(propId, CViewGenManagerFactory);
             return result;
 
-            // TODO: Since this Func<IPropData, IManageCViews> is only used on the first call to *any* GetOrAddViewManager method,
-            // we need to provide the factory on each call to _genViewManagers.GetOrAdd(
             IManageCViews CViewGenManagerFactory(PropIdType propId2)
             {
                 IProvideADataSourceProvider dSProviderProvider;
                 if (propData.TypedProp.PropKind == PropKindEnum.Prop)
                 {
-                    IWatchAPropItem<TDal> propItemWatcher = new PropItemWatcher<TDal>(this as PSAccessServiceInternalInterface, propId);
+                    IWatchAPropItem<TDal> propItemWatcher = new PropItemWatcher<TDal>(this as PSAccessServiceInternalInterface, propId2);
 
-                    //CrudWithMapping<TDal, TSource, TDestination> mappedDal = new CrudWithMapping<TDal, TSource, TDestination>(propItemWatcher, mapper);
-                    //dSProviderProvider = new ClrMappedDSP<TDestination>(mappedDal);
-                    dSProviderProvider = null;
+                    CrudWithMapping<TDal, TSource, TDestination> mappedDal = new CrudWithMapping<TDal, TSource, TDestination>(propItemWatcher, mapper);
+                    dSProviderProvider = new ClrMappedDSP<TDestination>(mappedDal);
                 }
                 else
                 {
@@ -1333,7 +1334,6 @@ namespace DRM.TypeSafePropertyBag
 
         L2KeyManType PSAccessServiceInternalInterface.Level2KeyManager => _level2KeyMan;
 
-
         bool PSAccessServiceInternalInterface.TryGetChildPropNode(StoreNodeBag propBagNode, PropNameType propertyName, out StoreNodeProp child)
         {
             bool result;
@@ -1400,6 +1400,28 @@ namespace DRM.TypeSafePropertyBag
         {
             SimpleExKey exKey = new SimpleExKey(_objectId, propId);
             return this.UnregisterHandler(exKey, eventHandler);
+        }
+
+        public WeakReference<IPropBagInternal> GetPropBagProxy(StoreNodeProp storeNodeProp)
+        {
+            WeakReference<IPropBagInternal> result = storeNodeProp?.Parent?.PropBagProxy;
+            return result;
+        }
+
+        WeakReference<IPropBag> PSAccessServiceInternalInterface.GetPublicInterface(WeakReference<IPropBagInternal> x)
+        {
+            WeakReference<IPropBag> result;
+
+            if (x.TryGetTarget(out IPropBagInternal propBagInternal))
+            {
+                System.Diagnostics.Debug.Assert(propBagInternal == null || propBagInternal is IPropBag, "This instance of IPropBagInternal does not also implement: IPropBag.");
+                result = new WeakReference<IPropBag>(propBagInternal as IPropBag);
+            }
+            else
+            {
+                result = new WeakReference<IPropBag>(null);
+            }
+            return result;
         }
 
         #endregion

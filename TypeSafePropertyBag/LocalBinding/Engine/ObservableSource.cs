@@ -4,27 +4,29 @@ using System.Threading;
 namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
 {
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
+    using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
 
-    public class ObservableSource<T> : INotifyPCTyped<T>, IDisposable
+    internal class ObservableSource<T> : INotifyPCTyped<T>, IDisposable
     {
-        #region Public events and properties
+        #region Private Members
+
+        private IDisposable ParentChangedSource { get; }
+        private IDisposable PropChangeGenUnsubscriber { get; }
+        private IDisposable PropChangedTypedUnsubscriber { get; }
+
+        public WeakReference<IPropBag> LastEventSender { get; private set; }
+
+
+
+        //private 
+
+        #endregion
+
+        #region Events
 
         public event EventHandler<PcTypedEventArgs<T>> PropertyChangedWithTVals;
         public event EventHandler<PcGenEventArgs> PropertyChangedWithVals;
         public event EventHandler ParentHasChanged;
-
-        public string BinderName { get; private set; }
-        public PathConnectorTypeEnum PathConnector => PathConnectorTypeEnum.Dot;
-
-        public string PathElement { get; set; }
-
-        public ExKeyT CompKey { get; }
-
-        public SourceKindEnum SourceKind { get; }
-
-        public IDisposable ParentChangedSource { get; }
-        public IDisposable PropChangeGenUnsubscriber { get; }
-        public IDisposable PropChangedTypedUnsubscriber { get; }
 
         #endregion
 
@@ -46,6 +48,9 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
 
         private void PropertyChangedWithTVals_Handler(object sender, PcTypedEventArgs<T> e)
         {
+            // TODO: Include the original sender in the event data (and create a new event args class for this.)
+            LastEventSender = sender as WeakReference<IPropBag>;
+
             OnPropertyChangedWithTVals(e);
         }
 
@@ -74,7 +79,6 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
 
         #region For PropStore
 
-        // TODO: Make this hold only weak references to the PropStoreBag event source.
         public ObservableSource(INotifyParentNodeChanged notifyParentChangedSource, ExKeyT compKey, 
             string pathElement, SourceKindEnum sourceKind, string binderName)
         {
@@ -104,9 +108,34 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
 
         #endregion Constructors and their handlers
 
+        #region Public Properties and Methods
+
+        public string BinderName { get; private set; }
+        public PathConnectorTypeEnum PathConnector => PathConnectorTypeEnum.Dot;
+
+        public ExKeyT CompKey { get; }
+        public string PathElement { get; set; }
+        public SourceKindEnum SourceKind { get; }
+
+        public bool TryGetStoreAccessor(out WeakReference<PSAccessServiceInterface> propStoreAccessService_wr)
+        {
+            if (SourceKind == SourceKindEnum.TerminalNode)
+            {
+                if (PropChangedTypedUnsubscriber is Unsubscriber unsubscriber)
+                {
+                    propStoreAccessService_wr = unsubscriber._propStoreAccessService_Wr;
+                    return true;
+                }
+            }
+            propStoreAccessService_wr = null;
+            return false;
+        }
+
+        #endregion
+
         #region Private Methods
 
-        public void RemoveSubscriptions()
+        private void RemoveSubscriptions()
         {
             switch (this.SourceKind)
             {
@@ -140,7 +169,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
 
         #region Raise Event Helpers
 
-        public void OnPropertyChangedWithTVals(PcTypedEventArgs<T> eArgs)
+        private void OnPropertyChangedWithTVals(PcTypedEventArgs<T> eArgs)
         {
             Interlocked.CompareExchange(ref PropertyChangedWithTVals, null, null)?.Invoke(this, eArgs);
         }

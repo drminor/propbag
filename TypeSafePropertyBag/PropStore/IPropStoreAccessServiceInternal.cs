@@ -17,7 +17,8 @@ namespace DRM.TypeSafePropertyBag
         IDisposable RegisterHandler(L2T propId, EventHandler<PcGenEventArgs> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef);
         bool UnregisterHandler(L2T propId, EventHandler<PcGenEventArgs> eventHandler);
 
+        WeakReference<IPropBagInternal> GetPropBagProxy(StoreNodeProp storeNodeProp);
 
-
+        WeakReference<IPropBag> GetPublicInterface(WeakReference<IPropBagInternal> propBagProxy_internal);
     }
 }

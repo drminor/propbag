@@ -146,7 +146,7 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        public PSAccessServiceType /*PSCloneServiceType.*/CloneService
+        public PSAccessServiceType ClonePSAccessService
             (
             IPropBagInternal sourcePropBag,
             PSAccessServiceType sourceAccessService,
