@@ -9,23 +9,29 @@ namespace MVVMApplication.Services
 {
     public class PersonDAL : IDoCRUD<Person>
     {
+        #region Private Fields
+
+        private readonly PersonDB _dbContext;
+
+        #endregion
+
         #region Constructors
 
         public PersonDAL(PersonDB dbContext)
         {
-            DbContext = dbContext;
+            _dbContext = dbContext;
         }
 
         public PersonDAL()
         {
-            DbContext = new PersonDB();
+            _dbContext = new PersonDB();
         }
 
         #endregion
 
         public event EventHandler<EventArgs> DataSourceChanged;
 
-        public PersonDB DbContext { get; }
+        public PersonDB DbContext => _dbContext;
 
         public IQueryable<Person> All()
         {
@@ -131,7 +137,17 @@ namespace MVVMApplication.Services
                 if (disposing)
                 {
                     // TODO: dispose managed state (managed objects).
-                    if (DbContext != null) DbContext.Dispose();
+                    if (_dbContext != null)
+                    {
+                        try
+                        {
+                            _dbContext.Dispose();
+                        }
+                        catch
+                        {
+                            System.Diagnostics.Debug.WriteLine("DbContext.Dispose failed.");
+                        }
+                    }
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
