@@ -2,14 +2,15 @@
 
 namespace DRM.TypeSafePropertyBag
 {
+    using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
     internal class Unsubscriber : IDisposable
     {
-        WeakReference<SimplePropStoreAccessService> _wr;
+        private WeakReference<PSAccessServiceInterface> _propStoreAccessService_Wr { get; }
         ISubscriptionKeyGen _request;
 
-        public Unsubscriber(WeakReference<SimplePropStoreAccessService> wr_us, ISubscriptionKeyGen request)
+        public Unsubscriber(WeakReference<PSAccessServiceInterface> wr_us, ISubscriptionKeyGen request)
         {
-            _wr = wr_us;
+            _propStoreAccessService_Wr = wr_us;
             _request = request;
         }
 
@@ -24,7 +25,7 @@ namespace DRM.TypeSafePropertyBag
                 if (disposing)
                 {
                     // TODO: dispose managed state (managed objects).
-                    if (_wr.TryGetTarget(out SimplePropStoreAccessService accService))
+                    if (_propStoreAccessService_Wr.TryGetTarget(out PSAccessServiceInterface accService))
                     {
                         accService.RemoveSubscription(_request);
                     }
