@@ -4,7 +4,7 @@ using System.Threading;
 namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
 {
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
-    using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
+    //using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
 
     internal class ObservableSource<T> : INotifyPCTyped<T>, IDisposable
     {
@@ -15,10 +15,6 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
         private IDisposable PropChangedTypedUnsubscriber { get; }
 
         public WeakReference<IPropBag> LastEventSender { get; private set; }
-
-
-
-        //private 
 
         #endregion
 
@@ -117,19 +113,19 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
         public string PathElement { get; set; }
         public SourceKindEnum SourceKind { get; }
 
-        public bool TryGetStoreAccessor(out WeakReference<PSAccessServiceInterface> propStoreAccessService_wr)
-        {
-            if (SourceKind == SourceKindEnum.TerminalNode)
-            {
-                if (PropChangedTypedUnsubscriber is Unsubscriber unsubscriber)
-                {
-                    propStoreAccessService_wr = unsubscriber._propStoreAccessService_Wr;
-                    return true;
-                }
-            }
-            propStoreAccessService_wr = null;
-            return false;
-        }
+        //public bool TryGetStoreAccessor(out WeakReference<PSAccessServiceInterface> propStoreAccessService_wr)
+        //{
+        //    if (SourceKind == SourceKindEnum.TerminalNode)
+        //    {
+        //        if (PropChangedTypedUnsubscriber is Unsubscriber unsubscriber)
+        //        {
+        //            propStoreAccessService_wr = unsubscriber._propStoreAccessService_Wr;
+        //            return true;
+        //        }
+        //    }
+        //    propStoreAccessService_wr = null;
+        //    return false;
+        //}
 
         #endregion
 

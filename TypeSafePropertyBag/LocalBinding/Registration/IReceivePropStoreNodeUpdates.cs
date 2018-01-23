@@ -3,17 +3,16 @@ using System;
 
 namespace DRM.TypeSafePropertyBag.LocalBinding
 {
-    internal interface IReceivePropStoreNodeUpdates<T> : IReceivePropStoreNodeUpdates
+    internal interface IReceivePropStoreNodeUpdates<T>
     {
         //void OnPropStoreNodeUpdated(StoreNodeProp newNode, bool OldValueIsUndefined, T oldValue);
-        void OnPropStoreNodeUpdated(WeakReference<IPropBag> propItemParent, bool OldValueIsUndefined, T oldValue);
-    }
 
-    internal interface IReceivePropStoreNodeUpdates
-    {
-        //void OnPropStoreNodeUpdated(StoreNodeProp newNode, bool OldValueIsUndefined, object oldValue);
+        void OnPropStoreNodeUpdated(WeakReference<IPropBag> propItemParent, T oldValue);
+        void OnPropStoreNodeUpdated(WeakReference<IPropBag> propItemParent, bool OldValueIsUndefined);
 
-        // TODO: Consider having this method return bool -- True = success; False = failure.
-        void OnPropStoreNodeUpdated(WeakReference<IPropBag> propItemParent, bool OldValueIsUndefined, object oldValue);
+        void OnPropStoreNodeUpdated(StoreNodeProp propNode, T oldValue);
+        void OnPropStoreNodeUpdated(StoreNodeProp propNode, bool OldValueIsUndefined);
+
+        // TODO: Consider including methods that take the new value.
     }
 }

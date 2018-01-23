@@ -54,6 +54,8 @@
     <Compile Include="Factories\SimpleTypeResolver.cs" />
     <Compile Include="Fundamentals\CollectionViewExtensions.cs" />
     <Compile Include="DataSourceMapping\IPropBagMapper.cs" />
+    <None Include="LocalBinding\Instances\LocalBinder - SafetyCopy.cs" />
+    <Compile Include="LocalBinding\Instances\LocalWatcher.cs" />
     <Compile Include="LocalBinding\Registration\IReceivePropStoreNodeUpdates.cs" />
     <Compile Include="PropBagInterfaces\INotifyItemEndEdit.cs" />
     <Compile Include="PropBagInterfaces\ICacheDelegates.cs" />
