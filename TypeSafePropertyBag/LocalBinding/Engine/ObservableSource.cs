@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 
-namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
+namespace DRM.TypeSafePropertyBag.LocalBinding
 {
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
     //using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;

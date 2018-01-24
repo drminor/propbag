@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
+namespace DRM.TypeSafePropertyBag.LocalBinding
 {
     internal class OSCollection<T> : List<ObservableSource<T>>
     {

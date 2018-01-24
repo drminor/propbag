@@ -1,4 +1,4 @@
-﻿namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
+﻿namespace DRM.TypeSafePropertyBag.LocalBinding
 {
     public enum DataSourceChangeTypeEnum
     {
