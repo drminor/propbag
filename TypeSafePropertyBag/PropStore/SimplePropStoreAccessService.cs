@@ -915,6 +915,7 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
+        // ViewManager from ObservableCollection
         // Build a ViewManager whose source is a PropItem of Kind = ObservableCollection
         // A DataSourceProvider, a CollectionViewSource and a ListCollectionView are created.
         // The DataSourceProvider not only raises the standard DataChanged event, but also raises
@@ -943,6 +944,7 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
+        // ViewManager from DataSourceProvider-Provider
         public IManageCViews GetOrAddViewManager
             (
             IPropBag propBag,
@@ -968,21 +970,19 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        // TODO: Create a Delegate cache very similar the delegate caches used to create TypeProps.
-
-        // Using a IMapperRequest and Factory.     
+        // ViewManager from IDoCRUD<T>, optionally using an IMapperRequest and propBagMapper factory.     
         // Build a ViewManager whose source is a PropItem of Kind = Prop and whose type is IDoCrud<T>
         // A DataSourceProvider, a CollectionViewSource and a ListCollectionView are created.
         // The DataSourceProvider not only raises the standard DataChanged event, but also raises
         // EventHandler<EventArgs> ItemEndEdit events whenever an item in the list raises it's ItemEndEdit event.
         public IManageCViews GetOrAddViewManager<TDal, TSource, TDestination> 
             (
-            IPropBag propBag,
-            PropIdType propId, // Identifies the PropItem that implements IDoCrud<TSource>
+            IPropBag propBag,   // The client of this service.
+            PropIdType propId,  // Identifies the PropItem that implements IDoCrud<TSource>
             IPropData propData, // The PropStore management wrapper for IProp<TSource> which holds the value of the 'IDoCrud<T>' data access layer.
-            IMapperRequest mr, // The information necessary to create a IPropBagMapper<TSource, TDestination>
-            PropBagMapperCreator propBagMapperCreator, // A delegate that can be called to create a IPropBagMapper<TSource, TDestination> given a IMapperRequest.
-            CViewProviderCreator viewBuilder // Method that can be used to create a IProvideAView from a DataSourceProvider.
+            IMapperRequest mr,  // The information necessary to create a IPropBagMapper<TSource, TDestination>
+            PropBagMapperCreator propBagMapperCreator,  // A delegate that can be called to create a IPropBagMapper<TSource, TDestination> given a IMapperRequest.
+            CViewProviderCreator viewBuilder            // Method that can be used to create a IProvideAView from a DataSourceProvider.
             )
             where TDal : class, IDoCRUD<TSource>
             where TSource : class
@@ -1011,7 +1011,8 @@ namespace DRM.TypeSafePropertyBag
                 }
                 else
                 {
-                    dSProviderProvider = new PBCollectionDSP_Provider(propId, propData.TypedProp.PropKind, this);
+                    throw new InvalidOperationException("This version of GetOrAddViewManager requires a PropItem of kind = Prop and PropertyType = IDoCRUD<T>.");
+                    //dSProviderProvider = new PBCollectionDSP_Provider(propId, propData.TypedProp.PropKind, this);
                 }
 
                 IManageCViews result2 = new ViewManager(dSProviderProvider, viewBuilder);
@@ -1019,18 +1020,18 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        // Using a IPropBagMapper directly.
+        // ViewManager from IDoCRUD<T>, optionally using an IPropBagMapper.     
         // Build a ViewManager whose source is a PropItem of Kind = Prop and whose type is IDoCrud<T>
         // A DataSourceProvider, a CollectionViewSource and a ListCollectionView are created.
         // The DataSourceProvider not only raises the standard DataChanged event, but also raises
         // EventHandler<EventArgs> ItemEndEdit events whenever an item in the list raises it's ItemEndEdit event.
         public IManageCViews GetOrAddViewManager<TDal, TSource, TDestination>
             (
-            IPropBag propBag,
-            PropIdType propId, // Identifies the PropItem that implements IDoCrud<TSource>
+            IPropBag propBag,   // The client of this service.
+            PropIdType propId,  // Identifies the PropItem that implements IDoCrud<TSource>
             IPropData propData, // The PropStore management wrapper for IProp<TSource> which holds the value of the 'IDoCrud<T>' data access layer.
-            IPropBagMapper<TSource, TDestination> mapper,
-            CViewProviderCreator viewBuilder // Method that can be used to create a IProvideAView from a DataSourceProvider.
+            IPropBagMapper<TSource, TDestination> mapper,   // The AutoMapper used to translate from source data to view items.
+            CViewProviderCreator viewBuilder                // Method that can be used to create a IProvideAView from a DataSourceProvider.
             )
             where TDal : class, IDoCRUD<TSource>
             where TSource : class
@@ -1057,7 +1058,8 @@ namespace DRM.TypeSafePropertyBag
                 }
                 else
                 {
-                    dSProviderProvider = new PBCollectionDSP_Provider(propId2, propData.TypedProp.PropKind, this);
+                    throw new InvalidOperationException("This version of GetOrAddViewManager requires a PropItem of kind = Prop and PropertyType = IDoCRUD<T>.");
+                    //dSProviderProvider = new PBCollectionDSP_Provider(propId2, propData.TypedProp.PropKind, this);
                 }
 
                 IManageCViews result2 = new ViewManager(dSProviderProvider, viewBuilder);
