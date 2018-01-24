@@ -1,5 +1,4 @@
 ﻿using System;
-using DRM.TypeSafePropertyBag.LocalBinding.Engine;
 
 namespace DRM.TypeSafePropertyBag.LocalBinding
 {
@@ -17,9 +16,9 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
         #region Private Properties
 
-        readonly WeakReference<PSAccessServiceType> _propStoreAccessService_wr;
+        //readonly WeakReference<PSAccessServiceType> _propStoreAccessService_wr;
 
-        readonly StoreNodeBag _ourNode;
+        //readonly StoreNodeBag _ourNode;
 
         readonly ExKeyT _bindingTarget;
         readonly WeakReference<IPropBagInternal> _targetObject;
@@ -42,8 +41,6 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
         #endregion
 
         #region Public Properties
-
-        //public bool NoTarget_NotifiesReceiverInstead => _bindingTarget.IsEmpty;
 
         public ExKeyT BindingTarget => _bindingTarget;
 
@@ -95,73 +92,38 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
         #region Constructor
 
-        public LocalBinder(PSAccessServiceType propStoreAccessService, ExKeyT ownerPropId, LocalBindingInfo bindingInfo)
+        public LocalBinder(PSAccessServiceType propStoreAccessService, ExKeyT bindingTarget, LocalBindingInfo bindingInfo)
         {
-            _propStoreAccessService_wr = new WeakReference<PSAccessServiceType>(propStoreAccessService);
+            //_propStoreAccessService_wr = new WeakReference<PSAccessServiceType>(propStoreAccessService);
 
-            _bindingTarget = ownerPropId;
+            _bindingTarget = bindingTarget;
             _bindingInfo = bindingInfo;
 
-
             // Get the PropStore Node for the IPropBag object hosting the property that is the target of the binding.
-            _ourNode = GetPropBagNode(propStoreAccessService);
+            StoreNodeBag ourNode = GetPropBagNode(propStoreAccessService);
 
-            PropIdType propId = _bindingTarget.Level2Key;
+            // Get a weak reference to the PropBag hosting the target property.
+            _targetObject = ourNode.PropBagProxy;
 
-            _targetObject = _ourNode.PropBagProxy;
-
+            // Get the name of the target property from the PropId given to us.
             if (_targetObject.TryGetTarget(out IPropBagInternal propBag))
             {
+                PropIdType propId = _bindingTarget.Level2Key;
                 _propertyName = GetPropertyName(propStoreAccessService, propBag, propId, out PropStorageStrategyEnum storageStrategy);
+                
+                // We will update the target property depending on how that PropItem stores its value.
                 _targetHasStore = storageStrategy;
             }
 
-            IReceivePropStoreNodeUpdates<T> propStoreNodeUpdateReceiver = new PropStoreNodeUpdateReceiver(this);
+            // Create a instance of our nested, internal class that reponds to Updates to the property store Nodes.
+            IReceivePropStoreNodeUpdates_PropNode<T> propStoreNodeUpdateReceiver = new PropStoreNodeUpdateReceiver(this);
 
+            // Create a new watcher, the bindingInfo specifies the PropItem for which to listen to changes,
+            // the propStoreNodeUpdateReceiver will be notfied when changes occur.
             _localWatcher = new LocalWatcher<T>(propStoreAccessService, bindingInfo, propStoreNodeUpdateReceiver);
         }
 
-        private StoreNodeBag GetPropBagNode(PSAccessServiceType propStoreAccessService)
-        {
-            if (propStoreAccessService is IHaveTheStoreNode storeNodeProvider)
-            {
-                StoreNodeBag propStoreNode = storeNodeProvider.PropStoreNode;
-                return propStoreNode;
-            }
-            else
-            {
-                throw new InvalidOperationException($"The {nameof(propStoreAccessService)} does not implement the {nameof(IHaveTheStoreNode)} interface.");
-            }
-        }
-
-        // TODO: should be able to have IPropStoreAccessServiceInternal provide all of this with a single call.
-        private PropNameType GetPropertyName(PSAccessServiceType propStoreAccessService, IPropBagInternal propBag, PropIdType propId, out PropStorageStrategyEnum storageStrategy)
-        {
-            PropNameType result;
-
-            if (propStoreAccessService.TryGetPropName(propId, out PropNameType propertyName))
-            {
-                result = propertyName;
-            }
-            else
-            {
-                throw new InvalidOperationException("Cannot retrieve the Target's property name from the TargetPropId.");
-            }
-
-            if (propStoreAccessService.TryGetValue((IPropBag) propBag, propId, out IPropData genProp))
-            {
-                storageStrategy = genProp.TypedProp.StorageStrategy;
-            }
-            else
-            {
-                throw new InvalidOperationException("Cannot retrieve the Target's property name from the TargetPropId.");
-            }
-
-            return result;
-        }
-
         #endregion
-
 
         #region Value Converter Support
 
@@ -238,94 +200,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
         #endregion
 
-
-        private bool HandleTerminalNodeUpdate(WeakReference<IPropBagInternal> bindingTarget, StoreNodeBag next, string[] pathElements, int nPtr)
-        {
-            System.Diagnostics.Debug.Assert(nPtr == pathElements.Length - 1, $"The counter variable: nPtr should be {pathElements.Length - 1}, but is {nPtr} instead.");
-
-            if (TryGetPropBag(next, out IPropBagInternal propBag))
-            {
-                string pathComp = pathElements[nPtr];
-
-                if (TryGetChildProp(next, propBag, pathComp, out StoreNodeProp child))
-                {
-                    if (UpdateTargetWithStartingValue(bindingTarget, child))
-                    {
-                        System.Diagnostics.Debug.WriteLine($"The target has been updated during refresh. " +
-                            $"Target: {((IPropBag)propBag).GetClassName()}, {pathComp}");
-                        return true;
-                    }
-                    else
-                    {
-                        System.Diagnostics.Debug.WriteLine("The binding source has been reached, but the target was not updated during refresh. " +
-                            $"Target: {((IPropBag)propBag).GetClassName()}, {pathComp}");
-                        return false;
-                    }
-                }
-                else
-                {
-                    System.Diagnostics.Debug.WriteLine("Could not get reference to the PropItem's PropStoreNode during binding update.");
-                    return false;
-                }
-            }
-            else
-            {
-                System.Diagnostics.Debug.WriteLine("The weak reference to the PropBag refers to a ProBag which 'is no longer with us.'");
-                return false;
-            }
-        }
-
-        private bool TryGetPropBag(StoreNodeBag objectNode, out IPropBagInternal propBag)
-        {
-            // Unwrap the weak reference held by the objectNode in it's PropBagProxy.PropBagRef.
-            //bool result = objectNode.PropBagProxy.PropBagRef.TryGetTarget(out propBag);
-            bool result = objectNode.TryGetPropBag(out propBag);
-
-            return result;
-        }
-
-        private bool TryGetChildProp(StoreNodeBag objectNode, IPropBagInternal propBag, string propertyName, out StoreNodeProp child)
-        {
-            PropIdType propId = ((PSAccessServiceInternalType)propBag.ItsStoreAccessor).Level2KeyManager.FromRaw(propertyName);
-            bool result = objectNode.TryGetChild(propId, out child);
-            return result;
-        }
-
-
         #region Update Target
-
-        //////UpdateTargetWithStartingValue(_localBinder._targetObject, propItemParent_wr);
-
-        private bool UpdateTargetWithStartingValue(WeakReference<IPropBagInternal> bindingTarget, WeakReference<IPropBag> propItemParent_wr)
-        {
-            if (propItemParent_wr.TryGetTarget(out IPropBag sourcePropBag))
-            {
-                if (sourcePropBag is IPropBagInternal propBag_internal)
-                {
-                    PSAccessServiceType propStoreAccessService = propBag_internal.ItsStoreAccessor;
-                    if(propStoreAccessService is PSAccessServiceInternalType propStoreAccessService_internal)
-                    {
-                        StoreNodeProp childPropItem = propStoreAccessService_internal.GetChild(this.PropId);
-
-                        UpdateTargetWithStartingValue(bindingTarget, childPropItem);
-                        return true;
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException("TODO: FIx Me.");
-                    }
-                }
-                else
-                {
-                    throw new InvalidOperationException("TODO: FIx Me.");
-                }
-            }
-            else
-            {
-                throw new InvalidOperationException("TODO: FIx Me.");
-            }
-
-        }
 
         private bool UpdateTargetWithStartingValue(WeakReference<IPropBagInternal> bindingTarget, StoreNodeProp sourcePropNode)
         {
@@ -343,12 +218,6 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
                 return false;
             }
         }
-
-        //private bool UpdateTarget(T newValue)
-        //{
-        //    bool result = UpdateTarget(_targetObject, newValue);
-        //    return result;
-        //}
 
         private bool UpdateTarget(WeakReference<IPropBagInternal> bindingTarget, T newValue)
         {
@@ -377,6 +246,63 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             }
         }
 
+        #endregion
+
+        #region Private Methods
+
+        private StoreNodeBag GetPropBagNode(PSAccessServiceType propStoreAccessService)
+        {
+            if (propStoreAccessService is IHaveTheStoreNode storeNodeProvider)
+            {
+                StoreNodeBag propStoreNode = storeNodeProvider.PropStoreNode;
+                return propStoreNode;
+            }
+            else
+            {
+                throw new InvalidOperationException($"The {nameof(propStoreAccessService)} does not implement the {nameof(IHaveTheStoreNode)} interface.");
+            }
+        }
+
+        // TODO: should be able to have IPropStoreAccessServiceInternal provide all of this with a single call.
+        private PropNameType GetPropertyName(PSAccessServiceType propStoreAccessService, IPropBagInternal propBag, PropIdType propId, out PropStorageStrategyEnum storageStrategy)
+        {
+            PropNameType result;
+
+            if (propStoreAccessService.TryGetPropName(propId, out PropNameType propertyName))
+            {
+                result = propertyName;
+            }
+            else
+            {
+                throw new InvalidOperationException("Cannot retrieve the Target's property name from the TargetPropId.");
+            }
+
+            if (propStoreAccessService.TryGetValue((IPropBag)propBag, propId, out IPropData genProp))
+            {
+                storageStrategy = genProp.TypedProp.StorageStrategy;
+            }
+            else
+            {
+                throw new InvalidOperationException("Cannot retrieve the Target's property name from the TargetPropId.");
+            }
+
+            return result;
+        }
+
+        private bool TryGetPropBag(StoreNodeBag objectNode, out IPropBagInternal propBag)
+        {
+            // Unwrap the weak reference held by the objectNode.
+            bool result = objectNode.TryGetPropBag(out propBag);
+
+            return result;
+        }
+
+        private bool TryGetChildProp(StoreNodeBag objectNode, IPropBagInternal propBag, string propertyName, out StoreNodeProp child)
+        {
+            PropIdType propId = ((PSAccessServiceInternalType)propBag.ItsStoreAccessor).Level2KeyManager.FromRaw(propertyName);
+            bool result = objectNode.TryGetChild(propId, out child);
+            return result;
+        }
 
         #endregion
 
@@ -420,7 +346,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
         #region IReceivePropStoreNodeUpdates Nested Class
 
-        internal class PropStoreNodeUpdateReceiver : IReceivePropStoreNodeUpdates<T>
+        internal class PropStoreNodeUpdateReceiver : IReceivePropStoreNodeUpdates_PropNode<T>
         {
             private readonly LocalBinder<T> _localBinder;
 
@@ -433,22 +359,23 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
             #endregion
 
-            public void OnPropStoreNodeUpdated(WeakReference<IPropBag> propItemParent_wr, T oldValue)
-            {
-                DoUpdate(propItemParent_wr);
-            }
+            //// From the PropBag that holds the source PropItem
+            //public void OnPropStoreNodeUpdated(WeakReference<IPropBag> propItemParent_wr, T oldValue)
+            //{
+            //    DoUpdate(propItemParent_wr);
+            //}
 
-            public void OnPropStoreNodeUpdated(WeakReference<IPropBag> propItemParent_wr, bool OldValueIsUndefined)
-            {
-                DoUpdate(propItemParent_wr);
-            }
+            //public void OnPropStoreNodeUpdated(WeakReference<IPropBag> propItemParent_wr)
+            //{
+            //    DoUpdate(propItemParent_wr);
+            //}
 
             public void OnPropStoreNodeUpdated(StoreNodeProp sourcePropNode, T oldValue)
             {
                 DoUpdate(sourcePropNode);
             }
 
-            public void OnPropStoreNodeUpdated(StoreNodeProp sourcePropNode, bool OldValueIsUndefined)
+            public void OnPropStoreNodeUpdated(StoreNodeProp sourcePropNode)
             {
                 DoUpdate(sourcePropNode);
             }
@@ -458,10 +385,10 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
                 _localBinder.UpdateTargetWithStartingValue(_localBinder._targetObject, sourcePropNode);
             }
 
-            private void DoUpdate(WeakReference<IPropBag> propItemParent_wr)
-            {
-                _localBinder.UpdateTargetWithStartingValue(_localBinder._targetObject, propItemParent_wr);
-            }
+            //private void DoUpdate(WeakReference<IPropBag> propItemParent_wr)
+            //{
+            //    _localBinder.UpdateTargetWithStartingValue(_localBinder._targetObject, propItemParent_wr);
+            //}
         }
 
         #endregion
