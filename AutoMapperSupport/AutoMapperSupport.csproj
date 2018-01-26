@@ -81,6 +81,10 @@
     <Compile Include="ExtraMembers\PropertyInfoWT.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ObjectSizeDiagnostics\ObjectSizeDiagnostics.csproj">
+      <Project>{9b18f82d-3ed9-49e0-9ee3-cfbfc3af9d9c}</Project>
+      <Name>ObjectSizeDiagnostics</Name>
+    </ProjectReference>
     <ProjectReference Include="..\PropBag\PropBag.csproj">
       <Project>{7387B893-FBDC-4B9C-AC9E-0B56388B46C1}</Project>
       <Name>PropBag</Name>

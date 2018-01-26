@@ -5,6 +5,7 @@ using System;
 
 using System.Collections.Generic;
 using System.Linq;
+using ObjectSizeDiagnostics;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
@@ -58,14 +59,20 @@ namespace DRM.PropBag.AutoMapperSupport
 
             if (typeof(TDestination) is ICloneable)
             {
-                if(_requiresWrappperTypeEmitServices)
+                //long gcSize = Sizer.GetSizeGC(GndForSizer);
+                ////long bsSize = Sizer.GetSizeBinSer(GndForSizer);
+
+                //System.Diagnostics.Debug.WriteLine($"Mapped Destination Template Size: GC:{gcSize}.");
+
+                TDestination temp = GetNewDestination(PropModel, _storeAccessCreator, DestinationType, PropFactory, fullClassName: null);
+                if (_requiresWrappperTypeEmitServices)
                 {
                     _template = null;
-                    _pbTemplate = (IPropBagInternal)GetNewDestination(PropModel, _storeAccessCreator, DestinationType, PropFactory, fullClassName: null);
+                    _pbTemplate = (IPropBagInternal)temp;
                 }
                 else
                 {
-                    _template = (ICloneable)GetNewDestination(PropModel, _storeAccessCreator, DestinationType, PropFactory, fullClassName: null);
+                    _template = (ICloneable)temp;
                     _pbTemplate = null;
                 }
             }
@@ -74,6 +81,13 @@ namespace DRM.PropBag.AutoMapperSupport
                 _template = null;
                 _pbTemplate = null;
             }
+
+            return;
+            //object GndForSizer()
+            //{
+            //    return GetNewDestination(PropModel, _storeAccessCreator, DestinationType, PropFactory, fullClassName: null);
+            //}
+
         }
 
         #endregion
@@ -132,6 +146,11 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public TDestination GetNewDestination()
         {
+            //long gcSize = Sizer.GetSizeGC(GndForSizer);
+            ////long bsSize = Sizer.GetSizeBinSer(GndForSizer);
+
+            //System.Diagnostics.Debug.WriteLine($"Mapped Destination Instance Size: GC:{gcSize}.");
+
             TDestination result;
 
             if (_template != null)
@@ -149,6 +168,24 @@ namespace DRM.PropBag.AutoMapperSupport
 
             //result = GetNewDestination(PropModel, RunTimeType, PropFactory, fullClassName: null);
             return result;
+
+            //object GndForSizer()
+            //{
+            //    if (_template != null)
+            //    {
+            //        result = _template.Clone() as TDestination;
+            //    }
+            //    else if (_pbTemplate != null)
+            //    {
+            //        result = GetNewDestination(RunTimeType, _pbTemplate);
+            //    }
+            //    else
+            //    {
+            //        result = GetNewDestination(PropModel, _storeAccessCreator, RunTimeType, PropFactory, fullClassName: null);
+            //    }
+            //    return result;
+            //}
+
         }
 
         private TDestination GetNewDestination(IPropModel propModel, PSAccessServiceCreatorInterface storeAccessCreator, Type destinationTypeOrProxy, IPropFactory propFactory, string fullClassName)
