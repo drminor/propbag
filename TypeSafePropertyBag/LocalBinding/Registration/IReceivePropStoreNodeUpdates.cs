@@ -10,7 +10,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
     internal interface IReceivePropStoreNodeUpdates_PropBag<T>
     {
-        void OnPropStoreNodeUpdated(WeakReference<IPropBag> propItemParent, T oldValue);
+        void OnPropStoreNodeUpdated(WeakReference<IPropBag> propItemParent, WeakReference<IPropBag> oldPropItemParent);
         void OnPropStoreNodeUpdated(WeakReference<IPropBag> propItemParent);
     }
 

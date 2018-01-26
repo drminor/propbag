@@ -828,7 +828,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             }
             else
             {
-                IProp typedProp = sourcePropNode.Int_PropData.TypedProp;
+                IProp typedProp = sourcePropNode.PropData_Internal.TypedProp;
 
                 if (typedProp.StorageStrategy == PropStorageStrategyEnum.Internal)
                 {

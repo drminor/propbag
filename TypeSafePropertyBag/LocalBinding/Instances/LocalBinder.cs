@@ -204,7 +204,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
         private bool UpdateTargetWithStartingValue(WeakReference<IPropBagInternal> bindingTarget, StoreNodeProp sourcePropNode)
         {
-            IProp typedProp = sourcePropNode.Int_PropData.TypedProp;
+            IProp typedProp = sourcePropNode.PropData_Internal.TypedProp;
 
             if (typedProp.StorageStrategy == PropStorageStrategyEnum.Internal)
             {
