@@ -29,6 +29,8 @@ namespace MVVMApplication.Services
 
         #endregion
 
+        // Note: The DataSource (i.e., DbContext) is set upon construction and is never changed,
+        // therefore this class will never raise the DataSourceChanged event.
         public event EventHandler<EventArgs> DataSourceChanged;
 
         public PersonDB DbContext => _dbContext;

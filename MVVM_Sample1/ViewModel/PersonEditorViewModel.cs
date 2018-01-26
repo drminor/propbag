@@ -13,6 +13,8 @@ namespace MVVMApplication.ViewModel
     public partial class PersonEditorViewModel : PropBag
     {
         //int ITEMS_PER_PAGE = 10;
+        string PROP_NAME = "PersonListView";
+
 
         #region Constructors
 
@@ -40,18 +42,25 @@ namespace MVVMApplication.ViewModel
         {
             try
             {
-                ListCollectionView lcv = GetIt<ListCollectionView>("PersonListView");
+                ListCollectionView lcv = GetIt<ListCollectionView>(PROP_NAME);
 
-                if (TryGetViewManager("Business", typeof(PersonDAL), out IManageCViews cViewManager))
+                if (TryGetViewManager(PROP_NAME, out IManageCViews cViewManager))
                 {
-                    PersonVM newPerson = (PersonVM) cViewManager.GetNewItem();
+                    PersonVM newPerson = (PersonVM)cViewManager.GetNewItem();
                     lcv.AddNewItem(newPerson);
                     lcv.MoveCurrentTo(newPerson);
                 }
-                else
-                {
-                    System.Diagnostics.Debug.WriteLine($"Could not get the view manager -- Fix this message.");
-                }
+
+                //if (TryGetViewManager("Business", typeof(PersonDAL), out IManageCViews cViewManager))
+                //{
+                //    PersonVM newPerson = (PersonVM) cViewManager.GetNewItem();
+                //    lcv.AddNewItem(newPerson);
+                //    lcv.MoveCurrentTo(newPerson);
+                //}
+                //else
+                //{
+                //    System.Diagnostics.Debug.WriteLine($"Could not get the view manager -- Fix this message.");
+                //}
             }
             catch (Exception ex)
             {
@@ -63,7 +72,7 @@ namespace MVVMApplication.ViewModel
         {
             try
             {
-                ListCollectionView lcv = GetIt<ListCollectionView>("PersonListView");
+                ListCollectionView lcv = GetIt<ListCollectionView>(PROP_NAME);
                 if (lcv.IsEditingItem)
                 {
                     lcv.CommitEdit();
@@ -82,7 +91,7 @@ namespace MVVMApplication.ViewModel
 
         private void DeletePerson(object o)
         {
-            ListCollectionView lcv = GetIt<ListCollectionView>("PersonListView");
+            ListCollectionView lcv = GetIt<ListCollectionView>(PROP_NAME);
 
             PersonVM selectedPerson = (PersonVM)lcv.CurrentItem;
             if (selectedPerson == null) return;
@@ -96,7 +105,7 @@ namespace MVVMApplication.ViewModel
         //    //ShowMessage("We Got a PageUp.");
         //    //if (--_page < 0) _page = 0;
         //    //FetchData(_bw, _page * ITEMS_PER_PAGE);
-        //    ListCollectionView lcv = GetIt<ListCollectionView>("PersonListView");
+        //    ListCollectionView lcv = GetIt<ListCollectionView>(PROP_NAME);
         //    int pos = lcv.CurrentPosition;
         //    pos -= ITEMS_PER_PAGE;
         //    if (pos < 0) pos = 0;
@@ -109,7 +118,7 @@ namespace MVVMApplication.ViewModel
         //    ////if (++_page > 10) _page = 10;
         //    ////FetchData(_bw, _page * ITEMS_PER_PAGE);
 
-        //    ListCollectionView lcv = GetIt<ListCollectionView>("PersonListView");
+        //    ListCollectionView lcv = GetIt<ListCollectionView>(PROP_NAME);
         //    int pos = lcv.CurrentPosition;
         //    pos += ITEMS_PER_PAGE;
         //    if (pos > lcv.Count - ITEMS_PER_PAGE) pos = lcv.Count - ITEMS_PER_PAGE;
@@ -124,13 +133,24 @@ namespace MVVMApplication.ViewModel
 
         public void RefreshIt(object o)
         {
-            if (TryGetViewManager("Business", typeof(PersonDAL), out IManageCViews cViewManager))
+            if (TryGetViewManager(PROP_NAME, out IManageCViews cViewManager))
             {
                 cViewManager.GetDefaultCollectionView().Refresh();
             }
+        }
+
+        private bool TryGetViewManager(string propertyName, out IManageCViews cViewManager)
+        {
+            if (TryGetCViewManagerProvider(PROP_NAME, out IProvideACViewManager cViewManagerProvider))
+            {
+                cViewManager = cViewManagerProvider.CViewManager;
+                return true;
+            }
             else
             {
-                System.Diagnostics.Debug.WriteLine($"Could not get the view manager -- Fix this message.");
+                System.Diagnostics.Debug.WriteLine($"Could not get the view manager provider for {PROP_NAME}.");
+                cViewManager = null;
+                return false;
             }
         }
 
@@ -152,7 +172,7 @@ namespace MVVMApplication.ViewModel
         {
             if (TryGetViewManager("Business", typeof(PersonDAL), out IManageCViews cViewManager))
             {
-                if (cViewManager.IsDataSourceReadOnly())
+                if(cViewManager == null || cViewManager.IsDataSourceReadOnly())
                 {
                     return false;
                 }
