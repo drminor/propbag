@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DRM.PropBag
 {
-    public class MapperRequest : NotifyPropertyChangedBase, IEquatable<MapperRequest>, IMapperRequest
+    public class MapperRequest : NotifyPropertyChangedBase, IEquatable<IMapperRequest>, IMapperRequest
     {
         public string _cpn;
         public string ConfigPackageName { get { return _cpn; } set { this.SetIfDifferent<string>(ref _cpn, value); } }
@@ -43,10 +43,10 @@ namespace DRM.PropBag
 
         public override bool Equals(object obj)
         {
-            return Equals(obj as MapperRequest);
+            return Equals(obj as IMapperRequest);
         }
 
-        public bool Equals(MapperRequest other)
+        public bool Equals(IMapperRequest other)
         {
             if (other == null) return false;
 
