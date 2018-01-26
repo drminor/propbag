@@ -15,10 +15,10 @@ namespace DRM.TypeSafePropertyBag
     {
         #region Constructor
 
-        public StoreNodeProp(ExKeyT ckey, IPropDataInternal int_PropData, StoreNodeBag parent)
+        public StoreNodeProp(ExKeyT ckey, IPropDataInternal propData_Internal, StoreNodeBag parent)
         {
             CompKey = ckey;
-            Int_PropData = int_PropData ?? throw new ArgumentNullException(nameof(int_PropData));
+            PropData_Internal = propData_Internal ?? throw new ArgumentNullException(nameof(propData_Internal));
 
             parent.AddChild(this);
             Parent = parent;
@@ -36,7 +36,7 @@ namespace DRM.TypeSafePropertyBag
         public ObjectIdType ObjectId => CompKey.Level1Key;
         public PropIdType PropId => CompKey.Level2Key;
 
-        internal IPropDataInternal Int_PropData { get; }
+        internal IPropDataInternal PropData_Internal { get; }
 
         public StoreNodeBag Parent { get; set; }
 

@@ -24,15 +24,25 @@ namespace DRM.TypeSafePropertyBag
             _hashCode = ComputeHashCode();
         }
 
+        //public Type GetDelegateType(MethodInfo method)
+        //{
+        //    Type result = Expression.GetDelegateType
+        //        (
+        //        ToEnumerable(method.ReflectedType) // This line used to read: new Type[] { method.ReflectedType } 
+        //        .Concat(method.GetParameters().Select(p => p.ParameterType)
+        //        .Concat(ToEnumerable(method.ReflectedType) /*new Type[] { method.ReturnType }*/))
+        //        .ToArray());
+        //    return result;
+        //}
+
         public Type GetDelegateType(MethodInfo method)
         {
-            Type result = Expression.GetDelegateType
-                (
+            List<Type> tInfo = method.GetParameters().Select(p => p.ParameterType).ToList();
+            tInfo.Insert(0, method.ReflectedType);
+            tInfo.Add(method.ReturnType);
 
-                ToEnumerable<Type>(method.ReflectedType) // This line used to read: new Type[] { method.ReflectedType } 
-                .Concat(method.GetParameters().Select(p => p.ParameterType)
-                .Concat(new Type[] { method.ReturnType }))
-                .ToArray());
+            Type result = Expression.GetDelegateType(tInfo.ToArray());
+
             return result;
         }
 

@@ -5,8 +5,10 @@ namespace DRM.TypeSafePropertyBag
     {
         ICacheDelegates<DoSetDelegate> DoSetDelegateCache { get; }
 
-        ICacheDelegatesForTypePair<CVPropFromDsDelegate> CreateCViewPropCache { get; }
-        ICacheDelegatesForTypePair<CViewManagerFromDsDelegate> GetOrAddCViewManagerPropCache { get; }
+        //ICacheDelegatesForTypePair<CVPropFromDsDelegate> CreateCViewPropCache { get; }
+        ICacheDelegatesForTypePair<CViewManagerFromDsDelegate> GetOrAddCViewManagerCache { get; }
+        ICacheDelegatesForTypePair<CViewManagerProviderFromDsDelegate> GetOrAddCViewManagerProviderCache { get; }
+       
 
         ICacheDelegates<CreatePropFromStringDelegate> CreatePropFromStringCache { get; }
 

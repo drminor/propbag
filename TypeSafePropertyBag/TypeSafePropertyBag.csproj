@@ -44,6 +44,7 @@
   <ItemGroup>
     <Compile Include="CViewManagerFromDsDelegate.cs" />
     <Compile Include="CVPropFromDsDelegate.cs" />
+    <Compile Include="DataAccessSupport\CViewManagerBinder.cs" />
     <Compile Include="DataSourceMapping\CrudWithMapping.cs" />
     <Compile Include="DataSourceMapping\IDoCrudWithMapping.cs" />
     <Compile Include="DataAccessSupport\IDoCRUD.cs" />
@@ -55,7 +56,9 @@
     <Compile Include="Fundamentals\CollectionViewExtensions.cs" />
     <Compile Include="DataSourceMapping\IPropBagMapper.cs" />
     <None Include="LocalBinding\Instances\LocalBinder - SafetyCopy.cs" />
+    <Compile Include="LocalBinding\Engine\BindingPathParser.cs" />
     <Compile Include="LocalBinding\Instances\LocalWatcher.cs" />
+    <Compile Include="LocalBinding\Instances\PropStoreNotificationKindEnum.cs" />
     <Compile Include="LocalBinding\Registration\IReceivePropStoreNodeUpdates.cs" />
     <Compile Include="PropBagInterfaces\INotifyItemEndEdit.cs" />
     <Compile Include="PropBagInterfaces\ICacheDelegates.cs" />
@@ -72,9 +75,15 @@
     <Compile Include="PropBagModel\IPropModelProvider.cs" />
     <Compile Include="PropBagModel\ITypeInfoField.cs" />
     <Compile Include="PropBagModel\WellKnownCollectionTypeEnum.cs" />
+    <Compile Include="PropInterfaces\IDataTablePropInterfaces.cs" />
+    <Compile Include="PropInterfaces\IProvideACViewManager.cs" />
     <Compile Include="PropInterfaces\IWatchPropItems.cs" />
     <Compile Include="PropStore\IProvidePropStoreServiceSingletons.cs" />
     <Compile Include="PropStore\PropStoreServices.cs" />
+    <Compile Include="PropStore\PSNodeChangedEventArgs.cs" />
+    <Compile Include="PropStore\ViewManagers\IViewManagerProviderKey.cs" />
+    <Compile Include="PropStore\ViewManagers\ViewManagerProviderCollection.cs" />
+    <Compile Include="PropStore\ViewManagers\ViewManagerProviderKey.cs" />
     <Compile Include="Props\PropItemWatcher.cs" />
     <Compile Include="TypeConverters\ChangeType.cs" />
     <Compile Include="TypeConverters\ITypeDescBasedTConverterCache.cs" />
@@ -97,7 +106,7 @@
     <Compile Include="PropStore\Subscriptions\ParentNCSubscription.cs" />
     <Compile Include="PropStore\Subscriptions\ParentNCSubscriptionRequest.cs" />
     <Compile Include="PropStore\Subscriptions\UnsubscriberForPropStore.cs" />
-    <Compile Include="Props\ViewManagerCollection.cs" />
+    <Compile Include="PropStore\ViewManagers\ViewManagerCollection.cs" />
     <Compile Include="Props\ViewManager.cs" />
     <Compile Include="PropStoreKeys\IExplodedKey.cs" />
     <Compile Include="PropStoreKeys\ILevel2KeyManager.cs" />
@@ -133,10 +142,10 @@
     <Compile Include="LocalBinding\Management\ICacheBindings.cs" />
     <Compile Include="LocalBinding\Registration\IRegisterBindings.cs" />
     <Compile Include="PropBagInterfaces\CreatePropDelegate.cs" />
-    <Compile Include="PropBagInterfaces\IPropBagProxy.cs" />
+    <Compile Include="Unused\IPropBagProxy.cs" />
     <Compile Include="PropBagInterfaces\IProvideDelegateCaches.cs" />
     <Compile Include="PropStore\INotifyParentNodeChanged.cs" />
-    <Compile Include="PropStore\PropBagProxy.cs" />
+    <Compile Include="Unused\PropBagProxy.cs" />
     <Compile Include="PropStore\PropGen.cs" />
     <Compile Include="PropStore\PSNodeParentChangedEventArgs.cs" />
     <Compile Include="PropStore\StoreNodeBag.cs" />

@@ -41,7 +41,7 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
             // TODO: Consider using the following statment, instead of the expanded version in place now.
             //DataAccessLayer = e.NewValue as TDal;
 
-            if (e.NewValueIsUndefined || e.NewValue == null)
+            if (e.NewValueIsUndefined/* || e.NewValue == null*/)
             {
                 DataAccessLayer = null;
             }
@@ -50,7 +50,7 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
                 DataAccessLayer = e.NewValue as TDal;
             }
 
-            OnDataSourceChanged(this, EventArgs.Empty);
+            //OnDataSourceChanged(this, EventArgs.Empty);
         }
 
         // TODO: Note: we could use PcTypedEventArgs if the ViewModel registered the source PropItem as type: IDoCRUD<T> instead of 
@@ -86,6 +86,7 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
 
         private void _dataAccessLayer_DataSourceChanged(object sender, EventArgs e)
         {
+            // Note: Most DataSources, for example: PersonDAL, never changes its DataSource and therefore will never raise this event.
             OnDataSourceChanged(sender, e);
         }
 
@@ -114,6 +115,10 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
                     }
 
                     OnDataSourceChanged(this, EventArgs.Empty);
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"CrudWithMapping was assigned a new DataAccessLayer, but is it the same object as the one previously assigned: The DataSourceChanged event is not being raised.");
                 }
             }
         }
@@ -199,9 +204,6 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
         }
 
         public object GetUnmappedItem(TDestination mappedItem) => GetUnmappedItem_int(mappedItem);
-
-
-
 
         private void OnDataSourceChanged(object sender, EventArgs e)
         {

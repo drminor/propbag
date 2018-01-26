@@ -113,6 +113,16 @@ namespace DRM.TypeSafePropertyBag
             where TSource : class
             where TDestination : INotifyItemEndEdit;
 
+        IProvideACViewManager GetOrAddCViewManagerProvider<TDal, TSource, TDestination>(IViewManagerProviderKey viewManagerProviderKey)
+        //(
+        //    //LocalBindingInfo bindingInfo,   // The name of the property that holds the data (of type IDoCRUD<TSource>.)
+        //    //IMapperRequest mr   // The (non-generic) information necessary to create a AutoMapper Mapper request.
+        //)
+            where TDal : class, IDoCRUD<TSource>
+            where TSource : class
+            where TDestination : INotifyItemEndEdit;
+
+
         //IPropGen this[int index] { get; }
         //int IndexOfProp(string propertyName, Type propertyType);
     }

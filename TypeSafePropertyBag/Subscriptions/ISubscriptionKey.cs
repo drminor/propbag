@@ -1,16 +1,9 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Reflection;
 
 namespace DRM.TypeSafePropertyBag
 {
-    using CompositeKeyType = UInt64;
-    using ObjectIdType = UInt64;
-
-    using PropIdType = UInt32;
-    using PropNameType = String;
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
-
     using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
 
     public interface IBindingSubscriptionKey<T> : ISubscriptionKeyGen

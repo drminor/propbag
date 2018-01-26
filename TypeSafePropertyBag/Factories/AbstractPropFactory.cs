@@ -323,17 +323,17 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        // TODO: Update execption message to inform caller that these properties can be created by calls made
-        // directly to the IPropBag instance, since no generic type parameters are required.
-        public virtual IProp CreateCVSPropFromString(Type typeOfThisProperty, PropNameType propertyName, IProvideAView viewProvider)
-        {
-            throw new NotImplementedException($"This implementation of {nameof(IPropFactory)} cannot create CVSProps (CollectionViewSource PropItems), please use WPFPropfactory or similar.");
-        }
+        //// TODO: Update execption message to inform caller that these properties can be created by calls made
+        //// directly to the IPropBag instance, since no generic type parameters are required.
+        //public virtual IProp CreateCVSPropFromString(Type typeOfThisProperty, PropNameType propertyName, IProvideAView viewProvider)
+        //{
+        //    throw new NotImplementedException($"This implementation of {nameof(IPropFactory)} cannot create CVSProps (CollectionViewSource PropItems), please use WPFPropfactory or similar.");
+        //}
 
-        public virtual IProp CreateCVPropFromString(Type typeofThisProperty, string propertyName, IProvideAView viewProvider)
-        {
-            throw new NotImplementedException($"This implementation of {nameof(IPropFactory)} cannot create CVProps (CollectionView PropItems), please use WPFPropfactory or similar.");
-        }
+        //public virtual IProp CreateCVPropFromString(Type typeofThisProperty, string propertyName, IProvideAView viewProvider)
+        //{
+        //    throw new NotImplementedException($"This implementation of {nameof(IPropFactory)} cannot create CVProps (CollectionView PropItems), please use WPFPropfactory or similar.");
+        //}
 
         #endregion
 

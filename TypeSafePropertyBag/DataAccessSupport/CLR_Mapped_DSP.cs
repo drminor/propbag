@@ -103,8 +103,9 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
                     }
                     else if(wrappedData != null)
                     {
+                        // TODO: CLR_Mapped_DSP needs to be given the name of the property from which the data is coming, if appropriate.
                         // TODO: Fix the warning message: WrappedData does not implement INotifyItemEndEdit.
-                        System.Diagnostics.Debug.WriteLine($"Warning: Wrapped Data for property: FixMe does not implement INotifyItemEndEdit.");
+                        System.Diagnostics.Debug.WriteLine($"Warning: Wrapped Data for property: 'FixMe' does not implement INotifyItemEndEdit.");
                     }
 
                     if (wrappedData is INotifyCollectionChanged inccNew)
@@ -112,6 +113,7 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
                         inccNew.CollectionChanged += Incc_CollectionChanged;
                     }
 
+                    // This will raise the DataSourceProvider.DataChanged event.
                     OnQueryFinished(wrappedData);
                 }
                 else
@@ -175,8 +177,6 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
         }
 
         public bool IsCollection() => true;
-
-
         public bool IsReadOnly() => false;
 
         public bool TryGetNewItem(out object newItem)
@@ -191,6 +191,18 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
                 newItem = null;
                 return false;
             }
+        }
+
+        // This is simply so that we can see when these events occur for diagnostic reasons.
+        // TODO: Production code should not include these.
+        protected override void BeginInit()
+        {
+            base.BeginInit();
+        }
+
+        protected override void EndInit()
+        {
+            base.EndInit();
         }
 
         #endregion

@@ -13,7 +13,7 @@ namespace DRM.TypeSafePropertyBag
     using PropNameType = String;
     using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
 
-    public interface IPropFactory 
+    public interface IPropFactory
     {
         #region Public Properties and Methods
 

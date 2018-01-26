@@ -225,38 +225,5 @@ namespace PropBagLib.Tests.AutoMapperSupport
         }
 
         #endregion
-
-        #region GET SIZE
-
-        private void GetSizeX()
-        {
-            long StopBytes = 0;
-            object myFoo;
-
-            long StartBytes = System.GC.GetTotalMemory(true);
-            myFoo = new object();
-            StopBytes = System.GC.GetTotalMemory(true);
-
-            string result = "Size is " + ((long)(StopBytes - StartBytes)).ToString();
-
-            GC.KeepAlive(myFoo); // This ensure a reference to object keeps object in memory
-        }
-
-        private void GetSizeY()
-        {
-
-            //long size = 0;
-            //object o = new object();
-            //using (Stream s = new MemoryStream())
-            //{
-            //    BinaryFormatter formatter = new BinaryFormatter();
-            //    formatter.Serialize(s, o);
-            //    size = s.Length;
-            //}
-        }
-
-        #endregion
-
-
     }
 }

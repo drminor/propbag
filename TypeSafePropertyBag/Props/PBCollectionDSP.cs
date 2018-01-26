@@ -150,7 +150,7 @@ namespace DRM.TypeSafePropertyBag
         {
             StoreNodeProp propNode = _storeAccessor.GetChild(propId);
 
-            IPropDataInternal propDataHolder = propNode.Int_PropData;
+            IPropDataInternal propDataHolder = propNode.PropData_Internal;
 
             IProp typedProp = propDataHolder.TypedProp;
 

@@ -124,7 +124,7 @@ namespace DRM.TypeSafePropertyBag
         private bool TryGetDataFromProp(PSAccessServiceInternalInterface storeAccessor, PropIdType propId, out object data)
         {
             StoreNodeProp propNode = _storeAccessor.GetChild(propId);
-            IPropDataInternal propDataHolder = propNode.Int_PropData;
+            IPropDataInternal propDataHolder = propNode.PropData_Internal;
             IProp typedProp = propDataHolder.TypedProp;
             data = typedProp.TypedValueAsObject;
             return true;

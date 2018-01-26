@@ -79,6 +79,38 @@ namespace DRM.TypeSafePropertyBag
             where TSource : class
             where TDestination : INotifyItemEndEdit;
 
+        IProvideATypedCViewManager<EndEditWrapper<TDestination>, TDestination> GetOrAddViewManagerProviderTyped<TDal, TSource, TDestination>
+            (
+                IPropBag propBag,   // The client of this service.
+                LocalBindingInfo bindingInfo,
+                IMapperRequest mr,  // The information necessary to create a IPropBagMapper<TSource, TDestination>
+                PropBagMapperCreator propBagMapperCreator,  // A delegate that can be called to create a IPropBagMapper<TSource, TDestination> given a IMapperRequest.
+                CViewProviderCreator viewBuilder            // Method that can be used to create a IProvideAView from a DataSourceProvider.
+            )
+                where TDal : class, IDoCRUD<TSource>
+                where TSource : class
+                where TDestination : INotifyItemEndEdit;
+
+        IProvideACViewManager GetOrAddViewManagerProvider<TDal, TSource, TDestination>
+        (
+            IPropBag propBag,   // The client of this service.
+            IViewManagerProviderKey viewManagerProviderKey,
+            //LocalBindingInfo bindingInfo,
+            //IMapperRequest mr,  // The information necessary to create a IPropBagMapper<TSource, TDestination>
+            PropBagMapperCreator propBagMapperCreator,  // A delegate that can be called to create a IPropBagMapper<TSource, TDestination> given a IMapperRequest.
+            CViewProviderCreator viewBuilder            // Method that can be used to create a IProvideAView from a DataSourceProvider.
+        )
+            where TDal : class, IDoCRUD<TSource>
+            where TSource : class
+            where TDestination : INotifyItemEndEdit;
+
+        bool TryGetViewManagerProvider
+        (
+            IPropBag propBag,   // The client of this service.
+            IViewManagerProviderKey viewManagerProviderKey,
+            out IProvideACViewManager provideACViewManager
+        );
+
         // Diagnostics
         void IncAccess();
         int AccessCounter { get; }

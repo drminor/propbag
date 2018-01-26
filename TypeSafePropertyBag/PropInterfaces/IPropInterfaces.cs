@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Data;
 
 namespace DRM.TypeSafePropertyBag
 {
@@ -7,18 +6,6 @@ namespace DRM.TypeSafePropertyBag
     using IRegisterBindingsProxyType = IRegisterBindingsProxy<UInt32>;
     using PropIdType = UInt32;
     using PropNameType = String;
-
-    // Typically implemented by TypedTableBase<T> Class
-    public interface IDTPropPrivate : IProp
-    {
-        DataTable DataTable { get; }
-    }
-
-    // Typically implemented by TypedTableBase<T> Class
-    public interface IDTProp : IProp
-    {
-        DataTable ReadOnlyDataTable { get; }
-    }
 
     /// <summary>
     /// All properties have these features based on the type of the property.

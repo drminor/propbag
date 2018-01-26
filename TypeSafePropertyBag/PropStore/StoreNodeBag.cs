@@ -267,6 +267,7 @@ namespace DRM.TypeSafePropertyBag
 
         #region Raise ParentNodeHasChanged
 
+        // When a StoreNodeBag gets a new host (i.e., a new StoreNodProp parent.)
         private void OnParentNodeHasChanged(StoreNodeProp oldValue, StoreNodeProp newValue)
         {
             List<ParentNCSubscription> subs = null;

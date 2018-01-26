@@ -1,5 +1,7 @@
 ﻿using DRM.TypeSafePropertyBag;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading;
 using System.Windows.Data;
@@ -8,7 +10,7 @@ namespace DRM.PropBagWPF
 {
     using PropNameType = String;
 
-    public class CViewProp : PropTypedBase<ListCollectionView>, ICViewProp<ListCollectionView>
+    public class CViewProp : PropTypedBase<ListCollectionView>, ICViewProp<ListCollectionView>, IUseAViewProvider
     {
         #region Private and Protected Members
 
@@ -17,8 +19,9 @@ namespace DRM.PropBagWPF
 
         #endregion
 
-        #region Constuctor
-        // TODO: The propertName is not used, we can remove it from the constructor.
+        #region Constructor
+
+        // TODO: The propertyName is not used, we can remove it from the constructor.
         public CViewProp(PropNameType propertyName, IProvideAView viewProvider)
             : base(typeof(ListCollectionView), true, PropStorageStrategyEnum.Virtual, true,
                   RefEqualityComparer<ListCollectionView>.Default.Equals, null, PropKindEnum.CollectionView)
@@ -40,32 +43,39 @@ namespace DRM.PropBagWPF
             {
                 if(!ReferenceEquals(_viewProvider, value))
                 {
-                    bool shouldCallReferesh;
+                    string viewName = value.ViewName;
                     if (_viewProvider != null)
                     {
-                        if(_viewProvider.ViewName != value.ViewName)
+                        if(_viewProvider.ViewName != viewName)
                         {
-                            throw new InvalidOperationException("Fix Me");
+                            throw new InvalidOperationException($"The view name: {value.ViewName}" +
+                                $" from the new IProvideAView does not match the view name:" +
+                                $" {_viewProvider.ViewName} from the previous IProvideAView," +
+                                $" when setting the ViewProvider property on CViewProp with property name: {_propertyName}.");
                         }
+
                         _viewProvider.ViewSourceRefreshed -= OurViewProviderGotRefreshed;
-                        shouldCallReferesh = true;
                     }
-                    else
-                    {
-                        shouldCallReferesh = false;
-                    }
+
+                    // save a reference to the old value.
+                    IProvideAView oldViewProvider = _viewProvider;
+
+                    // update the view provider so that future requests will use the new data source.
                     _viewProvider = value;
+
+                    // TODO: Build a unit test that proves the WPF binder is cooperating with this update strategy.
+                    // Signal to the WPF binder that the view needs to be refreshed.
+                    if (oldViewProvider != null)
+                    {
+                        oldViewProvider.DataSourceProvider.Refresh();
+                    }
 
                     if (_viewProvider != null)
                     {
                         _viewProvider.ViewSourceRefreshed += OurViewProviderGotRefreshed;
-                        RaiseViewSourceRefreshed(new ViewRefreshedEventArgs(_viewProvider.ViewName));
                     }
-                    else if(shouldCallReferesh)
-                    {
-                        // New value is null and the previous value was non-null: refresh to reflect that now the list is empty.
-                        RaiseViewSourceRefreshed(new ViewRefreshedEventArgs(_viewProvider.ViewName));
-                    }
+
+                    RaiseViewSourceRefreshed(new ViewRefreshedEventArgs(viewName));
                 }
             }
         }
@@ -89,7 +99,6 @@ namespace DRM.PropBagWPF
 
         public event EventHandler<ViewRefreshedEventArgs> ViewSourceRefreshed;
 
-
         private void RaiseViewSourceRefreshed(ViewRefreshedEventArgs e)
         {
             Interlocked.CompareExchange(ref ViewSourceRefreshed, null, null)?.Invoke(this, e);
@@ -103,9 +112,18 @@ namespace DRM.PropBagWPF
         {
             get
             {
-                ListCollectionView lcv = (ListCollectionView)_viewProvider.View;
-                System.Diagnostics.Debug.Assert(ReferenceEquals(lcv, _viewProvider.View), "The cast is not the same object as the cast source.");
-                return lcv;
+                if (_viewProvider != null)
+                {
+                    ListCollectionView lcv = (ListCollectionView)_viewProvider.View;
+                    System.Diagnostics.Debug.Assert(ReferenceEquals(lcv, _viewProvider.View), "The cast is not the same object as the cast source.");
+                    return lcv;
+                }
+                else
+                {
+                    IList<object> emptyList = new List<object>();
+                    ListCollectionView result = new ListCollectionView(emptyList as IList);
+                    return result;
+                }
             }
 
             set
@@ -135,10 +153,10 @@ namespace DRM.PropBagWPF
 
         #region IProvideAView implementation
 
-        public ICollectionView /*IProvideAView.*/View => _viewProvider.View;
-        public string ViewName => _viewProvider.ViewName;
-        public object ViewSource => _viewProvider.ViewSource;
-        public override DataSourceProvider DataSourceProvider => _viewProvider.DataSourceProvider;
+        public ICollectionView /*IProvideAView.*/View => TypedValue;
+        public string ViewName => _viewProvider?.ViewName;
+        public object ViewSource => _viewProvider?.ViewSource;
+        public override DataSourceProvider DataSourceProvider => _viewProvider?.DataSourceProvider;
 
         #endregion
     }

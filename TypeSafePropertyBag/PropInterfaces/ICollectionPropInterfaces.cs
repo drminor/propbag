@@ -68,6 +68,11 @@ namespace DRM.TypeSafePropertyBag
 
     #region Collection-Type PropItem Interfaces (All derive from IProp.)
 
+    public interface IUseAViewProvider
+    {
+        IProvideAView ViewProvider { get; set; }
+    }
+
     // Collection View Source
     public interface ICViewSourceProp<CVST> : /*IProvideADataSourceProvider,*/ IProvideAView, IProp<CVST> where CVST: class 
     {

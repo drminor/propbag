@@ -18,9 +18,12 @@ namespace DRM.PropBag.Caches
         public ICacheDelegates<DoSetDelegate> DoSetDelegateCache { get; }
 
         // CView
-        public ICacheDelegatesForTypePair<CVPropFromDsDelegate> CreateCViewPropCache { get; }
+        //public ICacheDelegatesForTypePair<CVPropFromDsDelegate> CreateCViewPropCache { get; }
+
         // CViewManager
-        public ICacheDelegatesForTypePair<CViewManagerFromDsDelegate> GetOrAddCViewManagerPropCache { get; }
+        public ICacheDelegatesForTypePair<CViewManagerFromDsDelegate> GetOrAddCViewManagerCache { get; }
+        public ICacheDelegatesForTypePair<CViewManagerProviderFromDsDelegate> GetOrAddCViewManagerProviderCache { get; }
+
 
         // Scalar PropItems
         public ICacheDelegates<CreatePropFromStringDelegate> CreatePropFromStringCache { get; }
@@ -50,13 +53,17 @@ namespace DRM.PropBag.Caches
             MethodInfo doSetMethodInfo = propBagType.GetMethod("DoSetBridge", BindingFlags.Instance | BindingFlags.NonPublic);
             DoSetDelegateCache = new DelegateCache<DoSetDelegate>(doSetMethodInfo);
 
-            // AddCollectionViewPropDS using non-generic request and factory
-            MethodInfo addCollectionViewPropDS_mi = propBagType.GetMethod("CVPropFromDsBridge", BindingFlags.Instance | BindingFlags.NonPublic);
-            CreateCViewPropCache = new TwoTypesDelegateCache<CVPropFromDsDelegate>(addCollectionViewPropDS_mi);
+            //// AddCollectionViewPropDS using non-generic request and factory
+            //MethodInfo addCollectionViewPropDS_mi = propBagType.GetMethod("CVPropFromDsBridge", BindingFlags.Instance | BindingFlags.NonPublic);
+            //CreateCViewPropCache = new TwoTypesDelegateCache<CVPropFromDsDelegate>(addCollectionViewPropDS_mi);
 
             // GetOrAdd CViewManager using non-generic request and factory
             MethodInfo getOrAddCViewManager_mi = propBagType.GetMethod("CViewManagerFromDsBridge", BindingFlags.Instance | BindingFlags.NonPublic);
-            GetOrAddCViewManagerPropCache = new TwoTypesDelegateCache<CViewManagerFromDsDelegate>(getOrAddCViewManager_mi);
+            GetOrAddCViewManagerCache = new TwoTypesDelegateCache<CViewManagerFromDsDelegate>(getOrAddCViewManager_mi);
+
+            MethodInfo getOrAddCViewManagerProvider_mi = propBagType.GetMethod("CViewManagerProviderFromDsBridge", BindingFlags.Instance | BindingFlags.NonPublic);
+            GetOrAddCViewManagerProviderCache = new TwoTypesDelegateCache<CViewManagerProviderFromDsDelegate>(getOrAddCViewManagerProvider_mi);
+
 
 
             #endregion
