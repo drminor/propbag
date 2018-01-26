@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 namespace DRM.TypeSafePropertyBag
 {
@@ -55,6 +56,12 @@ namespace DRM.TypeSafePropertyBag
                 else
                 {
                     subscription =  request.CreateSubscription(callPSParentNodeChangedEventSubsCache);
+
+                    if(subscription.OwnerPropId == null)
+                    {
+                        // TODO: See if we make this exception message more informative.
+                        throw new InvalidOperationException($"OwnerPropId is null in subscription {request.Target.GetType().ToString()}.");
+                    }
                     AddSubscription(subscription);
                     return subscription;
                 }

@@ -30,6 +30,7 @@ namespace DRM.TypeSafePropertyBag
 
         public ParentNCSubscription(ParentNCSubscriptionRequest request, ICacheDelegates<CallPSParentNodeChangedEventSubDelegate> callPSParentNodeChangedEventSubsCache)
         {
+            OwnerPropId = request.OwnerPropId;
             Target = new WeakRefKey(request.Target);
             MethodName = request.Method.Name;
 
