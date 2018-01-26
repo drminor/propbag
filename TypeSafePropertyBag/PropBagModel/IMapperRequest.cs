@@ -2,7 +2,7 @@
 
 namespace DRM.TypeSafePropertyBag
 {
-    public interface IMapperRequest
+    public interface IMapperRequest : IEquatable<IMapperRequest>
     {
         string ConfigPackageName { get; set; }
         IPropModel PropModel { get; set; }
