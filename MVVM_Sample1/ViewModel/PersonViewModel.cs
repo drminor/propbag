@@ -13,15 +13,15 @@ namespace MVVMApplication.ViewModel
         {
         }
 
-        protected PersonVM(PersonVM copySource)
-            : base(copySource)
-        {
-        }
+        //private PersonVM(PersonVM copySource)
+        //    : base(copySource, copySource._ourStoreAccessor, copySource._propFactory)
+        //{
+        //}
 
-        new public object Clone()
-        {
-            return new PersonVM(this);
-        }
+        //new public object Clone()
+        //{
+        //    return new PersonVM(this);
+        //}
 
         //public override string ToString()
         //{

@@ -41,7 +41,7 @@ namespace DRM.PropBag.ViewModelTools
             return result;
         }
 
-        public object GetNewViewModel<BT>(IPropBagInternal copySource) where BT : class, IPropBag
+        public object GetNewViewModel<BT>(IPropBag copySource) where BT : class, IPropBag
         {
             //object[] parameters = new object[] { copySource };
             //object result = Activator.CreateInstance(typeof(BT), args: parameters);
@@ -51,7 +51,7 @@ namespace DRM.PropBag.ViewModelTools
             return result;
         }
 
-        public object GetNewViewModel(Type typeToCreate, IPropBagInternal copySource)
+        public object GetNewViewModel(Type typeToCreate, IPropBag copySource)
         {
             object[] parameters = new object[] { copySource };
             object result = Activator.CreateInstance(typeToCreate, args: parameters);

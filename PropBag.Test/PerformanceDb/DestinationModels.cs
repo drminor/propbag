@@ -8,7 +8,7 @@ namespace PropBagLib.Tests.PerformanceDb
 {
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
 
-    public partial class DestinationModel1 : PropBag, ICloneable
+    public partial class DestinationModel1 : PropBag
     {
         public DestinationModel1(PropBagTypeSafetyMode typeSafetyMode, PSAccessServiceCreatorInterface storeAccessCreator,
             string fullClassName, IPropFactory propFactory)
@@ -27,11 +27,11 @@ namespace PropBagLib.Tests.PerformanceDb
         }
 
         public DestinationModel1(DestinationModel1 copySource)
-            : base(copySource)
+            : base(copySource, copySource._ourStoreAccessor, copySource._propFactory)
         {
         }
 
-        new public object Clone()
+        override public object Clone()
         {
             return new DestinationModel1(this);
         }

@@ -32,8 +32,8 @@ namespace DRM.PropBag.AutoMapperSupport
         PSAccessServiceCreatorInterface _storeAccessCreator;
 
         private readonly bool _requiresWrappperTypeEmitServices;
-        private readonly ICloneable _template;
-        private readonly IPropBagInternal _pbTemplate;
+        private readonly TDestination _template;
+        //private readonly IPropBag _pbTemplate;
 
         #endregion
 
@@ -65,21 +65,23 @@ namespace DRM.PropBag.AutoMapperSupport
                 //System.Diagnostics.Debug.WriteLine($"Mapped Destination Template Size: GC:{gcSize}.");
 
                 TDestination temp = GetNewDestination(PropModel, _storeAccessCreator, DestinationType, PropFactory, fullClassName: null);
-                if (_requiresWrappperTypeEmitServices)
-                {
-                    _template = null;
-                    _pbTemplate = (IPropBagInternal)temp;
-                }
-                else
-                {
-                    _template = (ICloneable)temp;
-                    _pbTemplate = null;
-                }
+
+                //if (_requiresWrappperTypeEmitServices)
+                //{
+                //    //_template = null;
+                //    //_pbTemplate = temp;
+                //    _template = temp;
+                //}
+                //else
+                //{
+                //    _template = temp;
+                //    //_pbTemplate = null;
+                //}
             }
             else
             {
                 _template = null;
-                _pbTemplate = null;
+                //_pbTemplate = null;
             }
 
             return;
@@ -121,18 +123,6 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public IEnumerable<TDestination> MapToDestination(IEnumerable<TSource> listOfSources)
         {
-            //if(_template != null)
-            //{
-            //    IPropBagInternal test = (IPropBagInternal)_template;
-            //    SimpleLevel2KeyMan sTest = (SimpleLevel2KeyMan) test.Level2KeyManager;
-            //}
-
-            //if (_pbTemplate != null)
-            //{
-            //    IPropBagInternal test = (IPropBagInternal)_pbTemplate;
-            //    SimpleLevel2KeyMan sTest = (SimpleLevel2KeyMan)test.Level2KeyManager;
-            //}
-
             return listOfSources.Select(s => MapToDestination(s));
         }
 
@@ -140,6 +130,7 @@ namespace DRM.PropBag.AutoMapperSupport
         {
             return listOfDestinations.Select(d => MapToSource(d));
         }
+
         #endregion
 
         #region Create Instance of TDestination
@@ -156,17 +147,44 @@ namespace DRM.PropBag.AutoMapperSupport
             if (_template != null)
             {
                 result = _template.Clone() as TDestination;
+
+                //if (_requiresWrappperTypeEmitServices)
+                //{
+                //    result = GetNewDestination(RunTimeType, _template);
+                //}
+                //else
+                //{
+                //    result = _template.Clone() as TDestination;
+                //}
+
+                //if(x is TDestination ttt)
+                //{
+                //    result = ttt;
+                //} 
+                //else
+                //{
+                //    var z = x as TDestination;
+
+                //    if (z is TDestination y)
+                //    {
+                //        result = y;
+                //    }
+                //    else
+                //    {
+                //        throw new InvalidCastException($"Cannot cast result of _template.Clone to type: {typeof(TDestination)}.");
+                //    }
+                //}
+
             }
-            else if(_pbTemplate != null)
-            {
-                result = GetNewDestination(RunTimeType, _pbTemplate);
-            }
+            //else if(_pbTemplate != null)
+            //{
+            //    result = GetNewDestination(RunTimeType, _pbTemplate);
+            //}
             else
             {
                 result = GetNewDestination(PropModel, _storeAccessCreator, RunTimeType, PropFactory, fullClassName: null);
             }
 
-            //result = GetNewDestination(PropModel, RunTimeType, PropFactory, fullClassName: null);
             return result;
 
             //object GndForSizer()
@@ -188,6 +206,7 @@ namespace DRM.PropBag.AutoMapperSupport
 
         }
 
+        // Regular Instantiation using the PropModel. 
         private TDestination GetNewDestination(IPropModel propModel, PSAccessServiceCreatorInterface storeAccessCreator, Type destinationTypeOrProxy, IPropFactory propFactory, string fullClassName)
         {
             try
@@ -202,19 +221,22 @@ namespace DRM.PropBag.AutoMapperSupport
             }
         }
 
-        private TDestination GetNewDestination(Type destinationTypeOrProxy, IPropBagInternal copySource)
-        {
-            try
-            {
-                var newViewModel = _vmActivator.GetNewViewModel(destinationTypeOrProxy, copySource);
-                return newViewModel as TDestination;
-            }
-            catch (Exception e2)
-            {
-                Type targetType = destinationTypeOrProxy ?? typeof(TDestination);
-                throw new InvalidOperationException($"Cannot create an instance of {targetType} that takes a copySource parameter.", e2);
-            }
-        }
+        //private TDestination GetNewDestination(Type destinationTypeOrProxy, TDestination copySource)
+        //{
+        //    try
+        //    {
+        //        TDestination result = (TDestination)copySource.Clone();
+        //        return result;
+
+        //        //var newViewModel = _vmActivator.GetNewViewModel(destinationTypeOrProxy, copySource);
+        //        //return newViewModel as TDestination;
+        //    }
+        //    catch (Exception e2)
+        //    {
+        //        Type targetType = destinationTypeOrProxy ?? typeof(TDestination);
+        //        throw new InvalidOperationException($"Cannot create an instance of {targetType} that takes a copySource parameter.", e2);
+        //    }
+        //}
 
         #endregion
 
@@ -256,6 +278,5 @@ namespace DRM.PropBag.AutoMapperSupport
         }
 
         #endregion
-
     }
 }

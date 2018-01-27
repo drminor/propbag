@@ -6,7 +6,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
 {
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
 
-    public partial class DestinationModel3 : PropBag, ICloneable
+    public partial class DestinationModel3 : PropBag
     {
         public DestinationModel3(PropBagTypeSafetyMode typeSafetyMode, PSAccessServiceCreatorInterface storeAccessCreator,
             string fullClassName, IPropFactory propFactory)
@@ -24,7 +24,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
         }
 
         public DestinationModel3(DestinationModel3 copySource)
-            : base(copySource)
+            : base(copySource, copySource._ourStoreAccessor, copySource._propFactory)
         {
         }
 

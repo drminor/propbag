@@ -24,15 +24,15 @@ namespace MVVMApplication.ViewModel
             System.Diagnostics.Debug.WriteLine("Constructing PersonEditorViewModel -- with PropModel.");
         }
 
-        protected PersonEditorViewModel(PersonEditorViewModel copySource)
-            : base(copySource)
-        {
-        }
+        //private PersonEditorViewModel(PersonEditorViewModel copySource)
+        //    : base(copySource, copySource._ourStoreAccessor, copySource._propFactory)
+        //{
+        //}
 
-        new public object Clone()
-        {
-            return new PersonEditorViewModel(this);
-        }
+        //new public object Clone()
+        //{
+        //    return new PersonEditorViewModel(this);
+        //}
 
         #endregion
 
@@ -141,7 +141,7 @@ namespace MVVMApplication.ViewModel
 
         private bool TryGetViewManager(string propertyName, out IManageCViews cViewManager)
         {
-            if (TryGetCViewManagerProvider(PROP_NAME, out IProvideACViewManager cViewManagerProvider))
+            if (TryGetCViewManagerProvider(propertyName, out IProvideACViewManager cViewManagerProvider))
             {
                 cViewManager = cViewManagerProvider.CViewManager;
                 return true;
@@ -170,25 +170,33 @@ namespace MVVMApplication.ViewModel
 
         private bool CanAddNewItem()
         {
-            if (TryGetViewManager("Business", typeof(PersonDAL), out IManageCViews cViewManager))
+            try
             {
-                if(cViewManager == null || cViewManager.IsDataSourceReadOnly())
+                if (TryGetViewManager(PROP_NAME, out IManageCViews cViewManager))
                 {
-                    return false;
-                }
+                    if (cViewManager == null || cViewManager.IsDataSourceReadOnly())
+                    {
+                        return false;
+                    }
 
-                if (cViewManager.GetDefaultCollectionView() is IEditableCollectionView iecv)
-                {
-                    bool result = !(iecv.IsAddingNew || iecv.IsEditingItem);
-                    return result;
+                    if (cViewManager.GetDefaultCollectionView() is IEditableCollectionView iecv)
+                    {
+                        bool result = !(iecv.IsAddingNew || iecv.IsEditingItem);
+                        return result;
+                    }
+                    else
+                    {
+                        return false;
+                    }
                 }
                 else
                 {
                     return false;
                 }
             }
-            else
+            catch
             {
+                // Ignore all exception.
                 return false;
             }
         }

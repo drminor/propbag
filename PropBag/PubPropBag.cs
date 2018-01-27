@@ -45,11 +45,6 @@ namespace DRM.PropBag
         {
         }
 
-        protected PubPropBag(IPropBagInternal copySource)
-            : base(copySource)
-        {
-        }
-
         public PubPropBag(PropBagTypeSafetyMode typeSafetyMode, PSAccessServiceCreatorInterface storeAccessCreator, IPropFactory propFactory, string fullClassName = null)
             : base(typeSafetyMode, storeAccessCreator, propFactory, fullClassName)
         {
