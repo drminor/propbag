@@ -3,14 +3,14 @@
 namespace DRM.TypeSafePropertyBag
 {
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
-    using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
-    using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
+    using PSAccessServiceProviderInterface = IProvidePropStoreAccessService<UInt32, String>;
+    using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
 
     public class SimplePropStoreServiceEP : PSAccessServiceCreatorInterface, IDisposable
     {
         #region Private Members
 
-        PSAccessServiceProviderType _propStoreAccessServiceProvider;
+        PSAccessServiceProviderInterface _propStoreAccessServiceProvider;
 
         #endregion
 
@@ -32,9 +32,9 @@ namespace DRM.TypeSafePropertyBag
 
         #region PropStoreAccessService Creation
 
-        public PSAccessServiceType CreatePropStoreService(IPropBagInternal propBag)
+        public PSAccessServiceInterface CreatePropStoreService(IPropBagInternal propBag)
         {
-            PSAccessServiceType result = _propStoreAccessServiceProvider.CreatePropStoreService(propBag);
+            PSAccessServiceInterface result = _propStoreAccessServiceProvider.CreatePropStoreService(propBag);
             return result;
         }
 
