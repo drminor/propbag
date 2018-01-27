@@ -1,19 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using DRM.TypeSafePropertyBag;
+using System;
 using System.ComponentModel;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 using System.Reflection;
 using System.ComponentModel.Design.Serialization;
-
-using DRM.PropBag.ControlModel;
 using System.Xaml;
-using System.Windows.Markup;
 
-namespace DRM.PropBag.ControlsWPF
+namespace DRM.PropBagControlsWPF
 {
     public class ComparerFuncTypeConverter : TypeConverter
     {

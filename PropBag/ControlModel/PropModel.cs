@@ -8,10 +8,10 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 
-// ToDo: Consider moving all types in the DRM.PropBag.ControlModel namespace back to the DRM.PropBag namespace.
-namespace DRM.PropBag.ControlModel
+// ToDo: Consider moving all types in the DRM.PropBag namespace back to the DRM.PropBag namespace.
+namespace DRM.PropBag
 {
-    public class PropModel : NotifyPropertyChangedBase, IEquatable<PropModel>
+    public class PropModel : NotifyPropertyChangedBase, IEquatable<PropModel>, IPropModel
     {
         #region Properties
 
@@ -26,12 +26,12 @@ namespace DRM.PropBag.ControlModel
         [XmlElement("type")]
         public Type TargetType { get { return _targetType; } set { _targetType = value; } }
 
-        TypeInfoField _wrapperTypeInfoField;
+        ITypeInfoField _wrapperTypeInfoField;
         [XmlElement("type-info")]
-        public TypeInfoField WrapperTypeInfoField
+        public ITypeInfoField WrapperTypeInfoField
         {
             get { return _wrapperTypeInfoField; }
-            set { SetIfDifferent<TypeInfoField>(ref _wrapperTypeInfoField, value); }
+            set { SetAlways<ITypeInfoField>(ref _wrapperTypeInfoField, value); }
         }
 
         string cn;
@@ -70,6 +70,10 @@ namespace DRM.PropBag.ControlModel
         [XmlIgnore]
         public IPropFactory PropFactory { get { return pf; } set { SetAlways<IPropFactory>(ref pf, value); } }
 
+        Type _propStoreServiceProviderType;
+        [XmlElement("prop-store-service-provider-type")]
+        public Type PropStoreServiceProviderType { get { return _propStoreServiceProviderType; } set { _propStoreServiceProviderType = value; } }
+
         ObservableCollection<string> _namespaces;
         [XmlArray("namespaces")]
         [XmlArrayItem("namespace")]
@@ -78,14 +82,14 @@ namespace DRM.PropBag.ControlModel
             get { return _namespaces; }
             set { this.SetCollection<ObservableCollection<string>, string>(ref _namespaces, value); }
         }
-
-        ObservableCollection<PropItem> _props;
+        
+        ObservableCollection<IPropItem> _props;
         [XmlArray("props")]
         [XmlArrayItem("prop")]
-        public ObservableCollection<PropItem> Props
+        public ObservableCollection<IPropItem> Props
         {
             get { return _props; }
-            set { this.SetCollection<ObservableCollection<PropItem>, PropItem>(ref _props, value); }
+            set { this.SetCollection<ObservableCollection<IPropItem>, IPropItem>(ref _props, value); }
         }
 
         #endregion Other Properties
@@ -97,6 +101,7 @@ namespace DRM.PropBag.ControlModel
         public PropModel(string className, string namespaceName,
             DeriveFromClassModeEnum deriveFrom,
             Type targetType,
+            Type propStoreServiceProviderType,
             IPropFactory propFactory,
             PropBagTypeSafetyMode typeSafetyMode = PropBagTypeSafetyMode.AllPropsMustBeRegistered,
             bool deferMethodRefResolution = true,
@@ -106,13 +111,14 @@ namespace DRM.PropBag.ControlModel
             NamespaceName = namespaceName;
             DeriveFromClassMode = deriveFrom;
             TargetType = targetType;
+            PropStoreServiceProviderType = propStoreServiceProviderType;
             PropFactory = propFactory;
             TypeSafetyMode = typeSafetyMode;
             DeferMethodRefResolution = deferMethodRefResolution;
             RequireExplicitInitialValue = requireExplicitInitialValue;
 
             Namespaces = new ObservableCollection<string>();
-            Props = new ObservableCollection<PropItem>();
+            Props = new ObservableCollection<IPropItem>();
         }
 
         #endregion
@@ -132,7 +138,7 @@ namespace DRM.PropBag.ControlModel
             }
         }
 
-        private Type GetTargetType(DeriveFromClassModeEnum deriveFrom, Type typeToWrap, TypeInfoField typeInfofield)
+        private Type GetTargetType(DeriveFromClassModeEnum deriveFrom, Type typeToWrap, ITypeInfoField typeInfofield)
         {
             Type result;
 
@@ -193,7 +199,7 @@ namespace DRM.PropBag.ControlModel
 
         #region IEquatable support and Object overrides
 
-        // TODO:!! Update the GetHashCode for DRM.PropBag.ControlModel.PropModel
+        // TODO:!! Update the GetHashCode for DRM.PropBag.PropModel
         public override int GetHashCode()
         {
             return ClassName.GetHashCode();

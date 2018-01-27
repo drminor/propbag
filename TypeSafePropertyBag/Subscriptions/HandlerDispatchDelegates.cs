@@ -31,6 +31,10 @@ namespace DRM.TypeSafePropertyBag
 
     public delegate void CallPChangingEventSubscriberDelegate(object target, object sender, PropertyChangingEventArgs e, Delegate d);
 
+    //public delegate void CallParentNodeChangedEventSubDelegate(object target, object sender,
+    //    PSNodeParentChangedEventArgs e, EventHandler<PSNodeParentChangedEventArgs> d);
+
+    public delegate void CallPSParentNodeChangedEventSubDelegate(object target, object sender, PSNodeParentChangedEventArgs e, Delegate d);
 
 
 

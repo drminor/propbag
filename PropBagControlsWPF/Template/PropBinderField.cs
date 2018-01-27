@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 
-namespace DRM.PropBag.ControlsWPF
+namespace DRM.PropBagControlsWPF
 {
     public class PropBinderField : Control
     {
@@ -9,21 +9,6 @@ namespace DRM.PropBag.ControlsWPF
         {
             DefaultStyleKeyProperty.OverrideMetadata(typeof(PropBinderField), new FrameworkPropertyMetadata(typeof(PropBinderField)));
         }
-
-        //static DependencyProperty TargetPropertyProperty =
-        //    DependencyProperty.Register("TargetProperty", typeof(string), typeof(PropBinderField), new PropertyMetadata(null));
-
-        //public string TargetProperty
-        //{
-        //    get
-        //    {
-        //        return (string)this.GetValue(TargetPropertyProperty);
-        //    }
-        //    set
-        //    {
-        //        this.SetValue(TargetPropertyProperty, value);
-        //    }
-        //}
 
         static DependencyProperty PathProperty =
             DependencyProperty.Register("Path", typeof(string), typeof(PropBinderField), new PropertyMetadata(null));
@@ -37,6 +22,21 @@ namespace DRM.PropBag.ControlsWPF
             set
             {
                 this.SetValue(PathProperty, value);
+            }
+        }
+
+        public static readonly DependencyProperty MapperRequestResourceKeyProperty =
+            DependencyProperty.Register("MapperRequestResourceKey", typeof(string), typeof(PropBinderField), new PropertyMetadata(null));
+
+        public string MapperRequestResourceKey
+        {
+            get
+            {
+                return (string)this.GetValue(MapperRequestResourceKeyProperty);
+            }
+            set
+            {
+                this.SetValue(MapperRequestResourceKeyProperty, value);
             }
         }
 

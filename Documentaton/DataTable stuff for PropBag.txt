@@ -1,0 +1,78 @@
+Business (No Type Parameters) : IDoCrud<Person>
+
+CrudWithMapping<Business, Person, PersonVM>
+
+CLR_Mapped_DSP<PersonVM>
+
+ViewManager (Constructed from Method with generic Type Parameters just the same as CrudWithMapping.)
+So... When the PropBag.Hydrate method needs to create a ViewManager it needs to specify at run-time
+the following Types: TDal, TSource and TDestination.
+
+
+
+
+Business (IDoCRUD<Raw>)
+	
+=> IEnumerable<Raw>
+
+CrudWithMapping (IDoCrud<Mapped)
+
+	IEnumerable<Mappped>
+	=>
+	ObservableCollection<Mapped> where Mapped items also implements IEditableObject.
+
+CLR_Mapped_DSP (DataSourceProvider / IProvideADataSourceProvider)
+
+
+=> ViewManager
+
+
+
+PersonCollectionViewModel has...
+1.	A ListCollectionView for use by the View that it serves.
+2.	A ViewManager for use by the ViewModel code to 
+		a. Filter.
+		b. Track Updates.
+		c. Get a reference to the CollectionViewSource.
+		d. Create independent CVS and Views.
+		e. Access and manage the data source.
+3.	We must do one of the following
+		a. Provide a PropItem to hold the actual list, or
+		b. Update our DataSourceProvider / DSPP to fullfill
+			the function of the PropItem that held the list.
+
+
+MainWindowViewModel has...
+1.	A DataSourceProvider to which the ViewManager of PCVM can use as source in binding the ViewManager.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+A view V has a grid which is bound to a ListCollectionView on its DataContext: VM-Sub.
+
+V states that it needs a IDoCrud data source of type Person.
+
+A view model VM-Sub has...
+1.	A list of T. And this list wraps ObservableCollection<T> and exposes the ItemEndEdit event.
+
+2.	A ListCollectionView produced from the List of T so that the View can bind to it.
+3.	
+
+The Main View Model VM-Main builds the 
+	
+which has a DataSourceProvider which provides an IList (which happens to be a wrapped ObCol<T>)
+
+
+
+

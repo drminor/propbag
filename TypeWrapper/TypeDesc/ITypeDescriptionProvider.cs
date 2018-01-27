@@ -1,12 +1,12 @@
-﻿using DRM.PropBag.ControlModel;
+﻿using DRM.TypeSafePropertyBag;
 using System;
 
-namespace DRM.TypeWrapper
+namespace DRM.PropBag.TypeWrapper
 {
     public interface ITypeDescriptionProvider
     {
         TypeDescription GetTypeDescription(NewTypeRequest newTypeRequest);
 
-        TypeDescription GetTypeDescription(PropModel propModel, Type typeToWrap, string className);
+        TypeDescription GetTypeDescription(IPropModel propModel, Type typeToWrap, string className);
     }
 }

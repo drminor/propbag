@@ -13,7 +13,7 @@
 <!ELEMENT props (prop*)>
 
 <!ELEMENT prop (name, type, initial-value?, comparer?, do-when-changed?)>
-<!ATTLIST prop caller-provides-storage (true|false) "false">
+<!ATTLIST prop storage-strategy (true|false) "false">
 
 <!ELEMENT name (#PCDATA)>
 <!ELEMENT type (#PCDATA)>

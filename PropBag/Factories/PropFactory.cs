@@ -1,181 +1,175 @@
-﻿using DRM.PropBag.Collections;
+﻿using DRM.PropBag.Caches;
+using DRM.PropBag.Collections;
 using DRM.TypeSafePropertyBag;
+using DRM.TypeSafePropertyBag.DataAccessSupport;
 using System;
 using System.Collections.Generic;
 
-using DRM.PropBag.Caches;
-
 namespace DRM.PropBag
 {
-    using PropIdType = UInt32;
-    using PropNameType = String;
-    using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
 
-    using PropBagType = PropBag;
+    using PropNameType = String;
 
     public class PropFactory : AbstractPropFactory
     {
         public override bool ProvidesStorage => true;
 
-        public override int DoSetCacheCount => DelegateCacheProvider.DoSetDelegateCache.Count;
-        public override int CreatePropFromStringCacheCount => DelegateCacheProvider.CreatePropFromStringCache.Count;
-        public override int CreatePropWithNoValCacheCount => DelegateCacheProvider.CreatePropWithNoValCache.Count;
+        //public PropFactory
+        //    (
+        //        ResolveTypeDelegate typeResolver,
+        //        IConvertValues valueConverter
+        //    )
+        //    : this
+        //    (
+        //        typeResolver, 
+        //        valueConverter,
+        //        new SimpleDelegateCacheProvider(typeof(PropBag), typeof(APFGenericMethodTemplates))
+        //    )
+        //{
+        //}
 
         public PropFactory
             (
-                PSAccessServiceProviderType propStoreAccessServiceProvider,
-                //IProvideDelegateCaches delegateCacheProvider,
-                ResolveTypeDelegate typeResolver,
-                IConvertValues valueConverter
+                IProvideDelegateCaches delegateCacheProvider,
+                IConvertValues valueConverter,
+                ResolveTypeDelegate typeResolver
             )
-            : base(propStoreAccessServiceProvider, new SimpleDelegateCacheProvider(typeof(PropBag), typeof(APFGenericMethodTemplates)), typeResolver, valueConverter)
+            : base
+            (
+                delegateCacheProvider,
+                valueConverter, // GetValueConverter(valueConverter, delegateCacheProvider)
+                typeResolver
+            )
         {
         }
 
-        //#region Collection-type property creators
+        //// TODO: Require the valueConverter parameter to be supplied.
+        //// TODO: Separate out the TypeDescBasedTConverterCache from IProvideDelegateCaches
+        ////      and make PropFactory require a supplied TypeDescBasedTConverterCache
+        ////      and create an interface that TypeDescBasedTConverterCache can implement.
+        //private static IConvertValues GetValueConverter(IConvertValues suppliedValueConverter, IProvideDelegateCaches delegateCacheProvider)
+        //{
+        //    IConvertValues result = suppliedValueConverter ?? new PropFactoryValueConverter(delegateCacheProvider.TypeDescBasedTConverterCache);
+        //    return result;
+        //}
 
-        //public override ICPropPrivate<CT, T> Create<CT, T>(
+        #region Enumerable-Type Prop Creation 
+
+        #endregion
+
+        #region IObsCollection<T> and ObservableCollection<T> Prop Creation
+
+        public override ICProp<CT, T> Create<CT, T>(
+            CT initialValue,
+            string propertyName, object extraInfo = null,
+            PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true,
+            Func<CT, CT, bool> comparer = null) 
+        {
+            if (comparer == null) comparer = EqualityComparer<CT>.Default.Equals;
+            GetDefaultValueDelegate<CT> getDefaultValFunc = ValueConverter.GetDefaultValue<CT>;
+
+            ICProp<CT, T> prop = new CProp<CT, T>(initialValue, getDefaultValFunc, typeIsSolid, storageStrategy, comparer);
+            return prop;
+        }
+
+        //public override ICPropFB<CT, T> CreateFB<CT, T>(
         //    CT initialValue,
         //    string propertyName, object extraInfo = null,
-        //    bool hasStorage = true, bool typeIsSolid = true,
-        //    Func<CT, CT, bool> comparer = null)
+        //    PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true,
+        //    Func<CT, CT, bool> comparer = null) 
         //{
         //    if (comparer == null) comparer = EqualityComparer<CT>.Default.Equals;
         //    GetDefaultValueDelegate<CT> getDefaultValFunc = ValueConverter.GetDefaultValue<CT>;
 
-        //    ICPropPrivate<CT, T> prop = new CProp<CT, T>(initialValue, getDefaultValFunc, typeIsSolid, hasStorage, comparer);
+        //    ICPropFB<CT, T> prop = new CPropFB<CT, T>(initialValue, getDefaultValFunc, typeIsSolid, hasStorage, comparer);
         //    return prop;
         //}
 
-        //public override ICPropPrivate<CT, T> CreateWithNoValue<CT, T>(
-        //    PropNameType propertyName, object extraInfo = null,
-        //    bool hasStorage = true, bool typeIsSolid = true,
-        //    Func<CT, CT, bool> comparer = null)
+        public override ICProp<CT, T> CreateWithNoValue<CT, T>(
+        PropNameType propertyName, object extraInfo = null,
+        PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true,
+        Func<CT, CT, bool> comparer = null)
+        {
+            if (comparer == null) comparer = EqualityComparer<CT>.Default.Equals;
+
+            GetDefaultValueDelegate<CT> getDefaultValFunc = ValueConverter.GetDefaultValue<CT>;
+
+            ICProp<CT, T> prop = new CProp<CT, T>(getDefaultValFunc, typeIsSolid, storageStrategy, comparer);
+            return prop;
+        }
+
+        #endregion
+
+        #region CollectionViewSource Prop Creation
+
+        //public override IProp CreateCVSProp<TCVS, T>(PropNameType propertyName)
         //{
-        //    if (comparer == null) comparer = EqualityComparer<CT>.Default.Equals;
-
-        //    GetDefaultValueDelegate<CT> getDefaultValFunc = ValueConverter.GetDefaultValue<CT>;
-
-        //    ICPropPrivate<CT, T> prop = new CProp<CT, T>(getDefaultValFunc, typeIsSolid, hasStorage, comparer);
-        //    return prop;
+        //    throw new NotImplementedException("This feature is not implemented by the 'standard' implementation, please use WPFPropfactory or similar.");
         //}
 
-        //#endregion
-
-        //#region Propety-type property creators
-
-        //public override IProp<T> Create<T>(
-        //    T initialValue,
-        //    PropNameType propertyName, object extraInfo = null,
-        //    bool hasStorage = true, bool typeIsSolid = true,
-        //    Func<T,T,bool> comparer = null)
+        //public override IProp CreateCVProp<T>(string propertyName)
         //{
-        //    if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
-
-        //    GetDefaultValueDelegate<T> getDefaultValFunc = ValueConverter.GetDefaultValue<T>; 
-        //    IProp<T> prop = new Prop<T>(initialValue, getDefaultValFunc, typeIsSolid: typeIsSolid, hasStore: hasStorage, comparer: comparer);
-        //    return prop;
+        //    throw new NotImplementedException("This feature is not implemented by the 'standard' implementation, please use WPFPropfactory or similar.");
         //}
 
-        //public override IProp<T> CreateWithNoValue<T>(
-        //    PropNameType propertyName, object extraInfo = null,
-        //    bool hasStorage = true, bool typeIsSolid = true,
-        //    Func<T,T,bool> comparer = null)
-        //{
-        //    if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
+        #endregion
 
-        //    GetDefaultValueDelegate<T> getDefaultValFunc = ValueConverter.GetDefaultValue<T>; 
-        //    IProp<T> prop = new Prop<T>(getDefaultValFunc, typeIsSolid: typeIsSolid, hasStore: hasStorage, comparer: comparer);
-        //    return prop;
-        //}
+        #region Scalar Prop Creation
 
-        //#endregion
+        public override IProp<T> Create<T>(
+            T initialValue,
+            PropNameType propertyName, object extraInfo = null,
+            PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true,
+            Func<T, T, bool> comparer = null)
+        {
+            if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
 
-        //#region Generic property creators
+            GetDefaultValueDelegate<T> getDefaultValFunc = ValueConverter.GetDefaultValue<T>;
+            IProp<T> prop = new Prop<T>(initialValue, getDefaultValFunc, typeIsSolid: typeIsSolid, storageStrategy: storageStrategy, comparer: comparer);
+            return prop;
+        }
 
-        //public override IProp CreateGenFromObject(Type typeOfThisProperty,
-        //    object value,
-        //    PropNameType propertyName, object extraInfo,
-        //    bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
-        //    Delegate comparer, bool useRefEquality = false, Type itemType = null)
-        //{
-        //    if (propKind == PropKindEnum.Prop)
-        //    {
-        //        CreatePropFromObjectDelegate propCreator = GetPropCreator(typeOfThisProperty);
-        //        IProp prop = propCreator(this, value, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
-        //            comparer: comparer, useRefEquality: useRefEquality);
+        public override IProp<T> CreateWithNoValue<T>(
+            PropNameType propertyName, object extraInfo = null,
+            PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true,
+            Func<T, T, bool> comparer = null)
+        {
+            // Supply a comparer, if one was not supplied by the caller.
+            if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
 
-        //        return prop;
-        //    }
-        //    else if (propKind == PropKindEnum.Collection)
-        //    {
-        //        CreateCPropFromObjectDelegate propCreator = GetCPropCreator(typeOfThisProperty, itemType);
-        //        IProp prop = propCreator(this, value, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
-        //            comparer: comparer, useRefEquality: useRefEquality);
+            // Use the Get Default Value function supplied or provided by this Prop Factory.
+            GetDefaultValueDelegate<T> getDefaultValFunc = ValueConverter.GetDefaultValue<T>;
 
-        //        return prop;
-        //    }
-        //    else
-        //    {
-        //        throw new InvalidOperationException($"PropKind = {propKind} is not recognized or is not supported.");
-        //    }
-        //}
+            if (storageStrategy == PropStorageStrategyEnum.Internal)
+            {
+                // Regular Prop with Internal Storage -- Just don't have a value as yet.
+                IProp<T> prop = new Prop<T>(getDefaultValFunc, typeIsSolid: typeIsSolid, storageStrategy: storageStrategy, comparer: comparer);
+                return prop;
+            }
+            else
+            {
+                // Prop With External Store, or this is a Prop that supplies a Virtual (aka Caclulated) value from an internal source or from LocalBindings
+                // This implementation simply creates a Property that will always have the default value for type T.
+                IProp<T> prop = new PropNoStore<T>(getDefaultValFunc, typeIsSolid: typeIsSolid, storageStrategy: storageStrategy, comparer: comparer);
+                return prop;
+            }
+        }
 
-        //public override IProp CreateGenFromString(Type typeOfThisProperty,
-        //    string value, bool useDefault,
-        //    PropNameType propertyName, object extraInfo,
-        //    bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
-        //    Delegate comparer, bool useRefEquality = false, Type itemType = null)
-        //{
-        //    if (propKind == PropKindEnum.Prop)
-        //    {
-        //        CreatePropFromStringDelegate propCreator = GetPropFromStringCreator(typeOfThisProperty);
-        //        IProp prop = propCreator(this, value, useDefault, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
-        //            comparer: comparer, useRefEquality: useRefEquality);
+        public override ClrMappedDSP<TDestination> CreateMappedDS<TSource, TDestination>(uint propId, PropKindEnum propKind, IDoCRUD<TSource> dal, IPropStoreAccessService<uint, string> storeAccesor, IPropBagMapper<TSource, TDestination> mapper)
+        {
+            throw new NotImplementedException();
+        }
 
-        //        return prop;
-        //    } 
-        //    else if(propKind == PropKindEnum.Collection)
-        //    {
-        //        CreateCPropFromStringDelegate propCreator = GetCPropFromStringCreator(typeOfThisProperty, itemType);
-        //        IProp prop = propCreator(this, value, useDefault, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
-        //            comparer: comparer, useRefEquality: useRefEquality);
+        public override IProvideADataSourceProvider GetDSProviderProvider(uint propId, PropKindEnum propKind, object iDoCrudDataSource, IPropStoreAccessService<uint, string> storeAccesor, IMapperRequest mr)
+        {
+            throw new NotImplementedException();
+        }
 
-        //        return prop;
-        //    }
-        //    else
-        //    {
-        //        throw new InvalidOperationException($"PropKind = {propKind} is not recognized or is not supported.");
-        //    }
-        //}
 
-        //public override IProp CreateGenWithNoValue(Type typeOfThisProperty,
-        //    PropNameType propertyName, object extraInfo,
-        //    bool hasStorage, bool isTypeSolid, PropKindEnum propKind,
-        //    Delegate comparer, bool useRefEquality = false, Type itemType = null)
-        //{
-        //    if (propKind == PropKindEnum.Prop)
-        //    {
-        //        CreatePropWithNoValueDelegate propCreator = GetPropWithNoValueCreator(typeOfThisProperty);
-        //        IProp prop = propCreator(this, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
-        //            comparer: comparer, useRefEquality: useRefEquality);
+        #endregion
 
-        //        return prop;
-        //    }
-        //    else if (propKind == PropKindEnum.Collection)
-        //    {
-        //        CreateCPropWithNoValueDelegate propCreator = GetCPropWithNoValueCreator(typeOfThisProperty, itemType);
-        //        IProp prop = propCreator(this, propertyName, extraInfo, hasStorage: true, isTypeSolid: isTypeSolid,
-        //            comparer: comparer, useRefEquality: useRefEquality);
+        #region Generic Property Creation
 
-        //        return prop;
-        //    }
-        //    else
-        //    {
-        //        throw new InvalidOperationException($"PropKind = {propKind} is not recognized or is not supported.");
-        //    }
-        //}
-
-        //#endregion
+        #endregion
     }
 }

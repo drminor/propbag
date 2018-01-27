@@ -4,7 +4,7 @@ using System.Windows.Data;
 using System.Windows.Markup;
 
 
-namespace DRM.PropBag.ControlsWPF.Binders
+namespace DRM.PropBagControlsWPF.Binders
 {
     /// <summary>
     /// Maybe used to debug bindings, or to be used where a converter is required and a NOP-Conversion is

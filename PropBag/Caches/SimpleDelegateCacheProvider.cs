@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-
 using DRM.TypeSafePropertyBag.Fundamentals;
 using DRM.TypeSafePropertyBag;
 using System.Reflection;
@@ -15,72 +14,111 @@ namespace DRM.PropBag.Caches
     {
         #region Public Properties
 
-        // TypeDesc<T>-based Converter Cache
-        public TypeDescBasedTConverterCache TypeDescBasedTConverterCache { get; }
-
         // DoSetDelegate Cache.
-        public DelegateCache<DoSetDelegate> DoSetDelegateCache { get; }
+        public ICacheDelegates<DoSetDelegate> DoSetDelegateCache { get; }
+
+        // CView
+        //public ICacheDelegatesForTypePair<CVPropFromDsDelegate> CreateCViewPropCache { get; }
+
+        // CViewManager
+        public ICacheDelegatesForTypePair<CViewManagerFromDsDelegate> GetOrAddCViewManagerCache { get; }
+        public ICacheDelegatesForTypePair<CViewManagerProviderFromDsDelegate> GetOrAddCViewManagerProviderCache { get; }
 
 
-        public DelegateCache<CreatePropFromStringDelegate> CreatePropFromStringCache { get; }
+        // Scalar PropItems
+        public ICacheDelegates<CreatePropFromStringDelegate> CreatePropFromStringCache { get; }
+        public ICacheDelegates<CreatePropWithNoValueDelegate> CreatePropWithNoValCache { get; }
+        public ICacheDelegates<CreatePropFromObjectDelegate> CreatePropFromObjectCache { get; }
 
-        public DelegateCache<CreatePropWithNoValueDelegate> CreatePropWithNoValCache { get; }
+        // ObservableCollection<T> PropItems
+        public ICacheDelegatesForTypePair<CreateCPropFromStringDelegate> CreateCPropFromStringCache { get; }
+        public ICacheDelegatesForTypePair<CreateCPropWithNoValueDelegate> CreateCPropWithNoValCache { get; }
+        public ICacheDelegatesForTypePair<CreateCPropFromObjectDelegate> CreateCPropFromObjectCache { get; }
 
-        public DelegateCache<CreatePropFromObjectDelegate> CreatePropFromObjectCache { get; }
+        // DataSourceProviderProvider
+        public ICacheDelegatesForTypePair<CreateMappedDSPProviderDelegate> CreateDSPProviderCache { get; }
 
-        public TwoTypesDelegateCache<CreateCPropFromStringDelegate> CreateCPropFromStringCache { get; }
-
-        public TwoTypesDelegateCache<CreateCPropWithNoValueDelegate> CreateCPropWithNoValCache { get; }
-
-        public TwoTypesDelegateCache<CreateCPropFromObjectDelegate> CreateCPropFromObjectCache { get; }
-
-    #endregion
+        #endregion
 
         #region Constructor
 
         public SimpleDelegateCacheProvider(Type propBagType, Type propCreatorType)
         {
-            #region Converter and DoSet
+            #region Method on PropBag (DoSetDelegate, CVPropFromDsDelegate, and CViewManagerFromDsDelegate
 
             // TypeDesc<T>-based Converter Cache
-            TypeDescBasedTConverterCache = StaticTConverterProvider.TypeDescBasedTConverterCache; // new TypeDescBasedTConverterCache();
+            //TypeDescBasedTConverterCache = StaticTConverterProvider.TypeDescBasedTConverterCache; // new TypeDescBasedTConverterCache();
 
             // DoSet 
             MethodInfo doSetMethodInfo = propBagType.GetMethod("DoSetBridge", BindingFlags.Instance | BindingFlags.NonPublic);
             DoSetDelegateCache = new DelegateCache<DoSetDelegate>(doSetMethodInfo);
 
+            //// AddCollectionViewPropDS using non-generic request and factory
+            //MethodInfo addCollectionViewPropDS_mi = propBagType.GetMethod("CVPropFromDsBridge", BindingFlags.Instance | BindingFlags.NonPublic);
+            //CreateCViewPropCache = new TwoTypesDelegateCache<CVPropFromDsDelegate>(addCollectionViewPropDS_mi);
+
+            // GetOrAdd CViewManager using non-generic request and factory
+            MethodInfo getOrAddCViewManager_mi = propBagType.GetMethod("CViewManagerFromDsBridge", BindingFlags.Instance | BindingFlags.NonPublic);
+            GetOrAddCViewManagerCache = new TwoTypesDelegateCache<CViewManagerFromDsDelegate>(getOrAddCViewManager_mi);
+
+            MethodInfo getOrAddCViewManagerProvider_mi = propBagType.GetMethod("CViewManagerProviderFromDsBridge", BindingFlags.Instance | BindingFlags.NonPublic);
+            GetOrAddCViewManagerProviderCache = new TwoTypesDelegateCache<CViewManagerProviderFromDsDelegate>(getOrAddCViewManagerProvider_mi);
+
+
+
             #endregion
 
-            #region Prop Creation
+            #region IEnumerable-Type Prop Creation MethodInfo
+            #endregion
+
+            #region ObservableCollection<T> Prop Creation MethodInfo
+
+            // Create C Prop with no value
+            MethodInfo createCPropNoVal_mi = propCreatorType.GetMethod("CreateCPropWithNoValue", BindingFlags.Static | BindingFlags.NonPublic);
+            CreateCPropWithNoValCache = new TwoTypesDelegateCache<CreateCPropWithNoValueDelegate>(createCPropNoVal_mi);
+
+            // Create C Prop From string
+            MethodInfo createCPropFromString_mi = propCreatorType.GetMethod("CreateCPropFromString", BindingFlags.Static | BindingFlags.NonPublic);
+            CreateCPropFromStringCache = new TwoTypesDelegateCache<CreateCPropFromStringDelegate>(createCPropFromString_mi);
+
+            // Create Prop From Object
+            MethodInfo createCPropFromObject_mi = propCreatorType.GetMethod("CreateCPropFromObject", BindingFlags.Static | BindingFlags.NonPublic);
+            CreateCPropFromObjectCache = new TwoTypesDelegateCache<CreateCPropFromObjectDelegate>(createCPropFromObject_mi);
+
+            #endregion
+
+            #region CollectionViewSource Prop Creation MethodInfo
+
+            //// CollectionViewSource
+            //MethodInfo createCVSProp_mi = propCreatorType.GetMethod("CreateCVSProp", BindingFlags.Static | BindingFlags.NonPublic);
+            //CreateCVSPropCache = new DelegateCache<CreateCVSPropDelegate>(createCVSProp_mi);
+
+            //// CollectionView
+            //MethodInfo createCVProp_mi = propCreatorType.GetMethod("CreateCVProp", BindingFlags.Static | BindingFlags.NonPublic);
+            //CreateCVPropCache = new DelegateCache<CreateCVPropDelegate>(createCVProp_mi);
+
+            #endregion
+
+            #region DataSource Creation MethodInfo
+
+            MethodInfo createDSPProvider_mi = propCreatorType.GetMethod("CreateMappedDSPProvider", BindingFlags.Static | BindingFlags.NonPublic);
+            CreateDSPProviderCache = new TwoTypesDelegateCache<CreateMappedDSPProviderDelegate>(createDSPProvider_mi);
+
+            #endregion
+
+            #region Scalar Prop Creation MethodInfo
 
             // Create Prop From String
-            MethodInfo createPropNoVal_mi = propCreatorType.GetMethod("CreatePropWithNoValue", BindingFlags.Static | BindingFlags.NonPublic);
-            CreatePropWithNoValCache = new DelegateCache<CreatePropWithNoValueDelegate>(createPropNoVal_mi);
-
-            // Create Prop With No Value
             MethodInfo createPropFromString_mi = propCreatorType.GetMethod("CreatePropFromString", BindingFlags.Static | BindingFlags.NonPublic);
             CreatePropFromStringCache = new DelegateCache<CreatePropFromStringDelegate>(createPropFromString_mi);
 
             // Create Prop From Object
             MethodInfo createPropFromObject_mi = propCreatorType.GetMethod("CreatePropFromObject", BindingFlags.Static | BindingFlags.NonPublic);
-            CreatePropFromObjectCache =  new DelegateCache<CreatePropFromObjectDelegate>(createPropFromObject_mi);
-
-            #endregion
-
-            #region Collection Prop  Creation
-
-            // Create Prop From String
-            MethodInfo createCPropNoVal_mi = propCreatorType.GetMethod("CreateCPropWithNoValue", BindingFlags.Static | BindingFlags.NonPublic);
-            CreateCPropWithNoValCache = new TwoTypesDelegateCache<CreateCPropWithNoValueDelegate>(createCPropNoVal_mi);
+            CreatePropFromObjectCache = new DelegateCache<CreatePropFromObjectDelegate>(createPropFromObject_mi);
 
             // Create Prop With No Value
-            MethodInfo createCPropFromString_mi = propCreatorType.GetMethod("CreateCPropFromString", BindingFlags.Static | BindingFlags.NonPublic);
-            CreateCPropFromStringCache = new TwoTypesDelegateCache<CreateCPropFromStringDelegate>(createCPropFromString_mi);
-
-            // TODO: This is not being used.
-            // Create Prop From Object
-            MethodInfo createCPropFromObject_mi = propCreatorType.GetMethod("CreateCPropFromObject", BindingFlags.Static | BindingFlags.NonPublic);
-            CreateCPropFromObjectCache = new TwoTypesDelegateCache<CreateCPropFromObjectDelegate>(createCPropFromObject_mi);
+            MethodInfo createPropNoVal_mi = propCreatorType.GetMethod("CreatePropWithNoValue", BindingFlags.Static | BindingFlags.NonPublic);
+            CreatePropWithNoValCache = new DelegateCache<CreatePropWithNoValueDelegate>(createPropNoVal_mi);
 
             #endregion
         }

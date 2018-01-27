@@ -1,9 +1,9 @@
-﻿using DRM.PropBag.ControlModel;
+﻿using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
 using System.Windows;
 using System.Windows.Data;
 
-namespace DRM.PropBag.ControlsWPF.Binders
+namespace DRM.PropBagControlsWPF.Binders
 {
     /// <summary>
     /// This binding implementation requires that the type of the property for the binding source be specified.

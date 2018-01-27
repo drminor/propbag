@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
-namespace DRM.PropBag.ControlModel
+namespace DRM.PropBag
 {
     public class NotifyPropertyChangedBase : INotifyPropertyChanged, INotifyPropertyChanging
     {
@@ -43,6 +43,18 @@ namespace DRM.PropBag.ControlModel
         }
 
         protected bool SetIfDifferentVT<T>(ref T oldVal, T newVal, string propertyName) where T : struct
+        {
+            if (!oldVal.Equals(newVal))
+            {
+                OnPropertyChanging(propertyName);
+                oldVal = newVal;
+                OnPropertyChanged(propertyName);
+                return true;
+            }
+            return false;
+        }
+
+        protected bool SetIfDifferentEnum<T>(ref T oldVal, T newVal, string propertyName) where T : struct
         {
             if (!oldVal.Equals(newVal))
             {

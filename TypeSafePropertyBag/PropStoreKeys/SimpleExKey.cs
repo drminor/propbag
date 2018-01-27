@@ -10,7 +10,9 @@ namespace DRM.TypeSafePropertyBag
 
     public struct SimpleExKey : ExKeyType, IEquatable<SimpleExKey>
     {
-        private const int LOG_BASE2_MAX_PROPERTIES = 16;
+        private readonly int _hashCode;
+
+        private static readonly int LOG_BASE2_MAX_PROPERTIES = 16;
 
         private static readonly int _maxPropPerObject = (int)Math.Pow(2, LOG_BASE2_MAX_PROPERTIES); //65536;
 
@@ -24,30 +26,7 @@ namespace DRM.TypeSafePropertyBag
         private static CompositeKeyType _botMask = ((CompositeKeyType)1 << _botFieldLen) - 1;
         private static CompositeKeyType _topMask = ((CompositeKeyType)1 << numberOfTopBits) - 1;
 
-        //static SimpleExKey()
-        //{
-        //    int numBitsForProps = LOG_BASE2_MAX_PROPERTIES;
-        //    int numberOfBitsInCKey = (int)Math.Log(CompositeKeyType.MaxValue, 2);
-        //    int numberOfTopBits = numberOfBitsInCKey - numBitsForProps;
-
-        //    _maxObjectsPerAppDomain = (long)Math.Pow(2, numberOfTopBits);
-
-        //    _shift = numberOfTopBits;
-        //    _botFieldLen = numBitsForProps; // numberOfBitsInCKey - numberOfTopBits;
-        //    _botMask = ((CompositeKeyType)1 << _botFieldLen) - 1;
-        //    _topMask = ((CompositeKeyType)1 << numberOfTopBits) - 1;
-        //}
-
         #region Constructor
-
-        //public SimpleExKey(CompositeKeyType cKey/*, WeakReference<IPropBagInternal> accessToken, ObjectIdType level1Key, PropIdType level2Key*/) : this()
-        //{
-        //    CKey = cKey;
-        //    Level1Key = level1Key;
-        //    Level2Key = level2Key;
-        //    //WR_AccessToken = accessToken ?? throw new ArgumentNullException(nameof(accessToken));
-        //}
-
 
         public SimpleExKey(ObjectIdType level1Key, PropIdType level2Key) : this(StaticFuse(level1Key, level2Key))
         {
@@ -57,22 +36,22 @@ namespace DRM.TypeSafePropertyBag
         {
             System.Diagnostics.Debug.Assert(cKey != 0, "The value 0 is reserved to indicate an empty Key. To create an empty key, use the parameterless constructor.");
             CKey = cKey;
+            _hashCode = cKey.GetHashCode();
         }
 
         #endregion
 
         #region Public Members
 
-        public bool isEmpty => CKey == 0;
         public CompositeKeyType CKey { get; }
+
+        public bool IsEmpty => CKey == 0;
+
         public ObjectIdType Level1Key => (CKey >> _botFieldLen) & _topMask;
         public PropIdType Level2Key => (PropIdType)(CKey & _botMask);
 
         public long MaxObjectsPerAppDomain => _maxObjectsPerAppDomain;
         public int MaxPropsPerObject => _maxPropPerObject;
-
-        //public object AccessToken => WR_AccessToken;
-        //public WeakReference<IPropBagInternal> WR_AccessToken { get; }
 
         #endregion
 
@@ -130,8 +109,7 @@ namespace DRM.TypeSafePropertyBag
 
         public override int GetHashCode()
         {
-            var hashCode = CKey.GetHashCode();
-            return hashCode;
+            return _hashCode;
         }
 
         public override string ToString()

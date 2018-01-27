@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DRM.TypeSafePropertyBag.Fundamentals;
+using System;
 using System.ComponentModel;
 using System.Reflection;
 
@@ -25,7 +26,7 @@ namespace DRM.TypeSafePropertyBag
         public SubscriptionPriorityGroup SubscriptionPriorityGroup { get; protected set; }
         //public SubscriptionTargetKind SubscriptionTargetKind { get; protected set; }
 
-        public WeakReference Target { get; protected set; }
+        public WeakRefKey Target { get; protected set; }
         public string MethodName { get; protected set; }
 
         public Delegate HandlerProxy { get; protected set; }

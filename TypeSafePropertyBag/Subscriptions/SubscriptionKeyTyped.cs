@@ -77,7 +77,7 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        new public static ISubscription CreateSubscriptionGen(ISubscriptionKeyGen subscriptionRequestGen, IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider)
+        private static ISubscription CreateSubscriptionGen(ISubscriptionKeyGen subscriptionRequestGen, IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider)
         {
             return (ISubscription)CreateSubscription((ISubscriptionKey<T>)subscriptionRequestGen, handlerDispatchDelegateCacheProvider);
         }

@@ -20,6 +20,9 @@ namespace DRM.TypeSafePropertyBag
 
         public DelegateCache<CallPChangingEventSubscriberDelegate> CallPChangingEventSubsCache { get; }
 
+        public DelegateCache<CallPSParentNodeChangedEventSubDelegate> CallPSParentNodeChangedEventSubsCache { get; }
+
+
         public DelegateProxyCache DelegateProxyCache { get; }
 
         #endregion
@@ -48,6 +51,12 @@ namespace DRM.TypeSafePropertyBag
             MethodInfo callPChangingEventSubscriber_mi = bridgeType.GetMethod("CallPChangingEventSubscriber", BindingFlags.Instance | BindingFlags.NonPublic);
             CallPChangingEventSubsCache = new DelegateCache<CallPChangingEventSubscriberDelegate>(callPChangingEventSubscriber_mi);
 
+            // PropStoreNode Parent Changed
+            MethodInfo callPSNodeParentChangedEventSubscriber_mi = bridgeType.GetMethod("CallPSNodeParentChangedEventSubscriber", BindingFlags.Instance | BindingFlags.NonPublic);
+            CallPSParentNodeChangedEventSubsCache = new DelegateCache<CallPSParentNodeChangedEventSubDelegate>(callPSNodeParentChangedEventSubscriber_mi);
+
+
+            // Proxy -- Holds a copy of the original delegate but without the target.
             DelegateProxyCache = new DelegateProxyCache();
         }
     }

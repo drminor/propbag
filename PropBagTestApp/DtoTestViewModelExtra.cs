@@ -1,8 +1,11 @@
 ﻿using DRM.PropBag;
-using DRM.PropBag.ControlModel;
+using DRM.TypeSafePropertyBag;
+using System;
 
 namespace PropBagTestApp
 {
+    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
+
     public class DtoTestViewModelExtra : PubPropBag
     {
         PropModel _pm;
@@ -20,7 +23,9 @@ namespace PropBagTestApp
         /// Constructor used by View to create with properties
         /// </summary>
         /// <param name="pm"></param>
-        public DtoTestViewModelExtra(PropModel pm) : base(pm)
+        
+        /// TODO: AAA
+        public DtoTestViewModelExtra(PropModel pm) : base(pm, storeAccessCreator: null, propFactory: null, fullClassName: null)
         {
             // Save a reference to the model used to defined our properties.
             _pm = pm;

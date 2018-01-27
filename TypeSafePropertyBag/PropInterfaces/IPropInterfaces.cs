@@ -1,58 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Data;
-using System.Windows.Data;
 
 namespace DRM.TypeSafePropertyBag
 {
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
-
-    using CompositeKeyType = UInt64;
-    using ObjectIdType = UInt64;
-
+    using IRegisterBindingsProxyType = IRegisterBindingsProxy<UInt32>;
     using PropIdType = UInt32;
     using PropNameType = String;
-
-    // Typically implemented by TypedTableBase<T> Class
-    public interface IDTPropPrivate : IProp
-    {
-        DataTable DataTable { get; }
-    }
-
-    // Typically implemented by TypedTableBase<T> Class
-    public interface IDTProp : IProp
-    {
-        DataTable ReadOnlyDataTable { get; }
-    }
-
-    //public interface ICViewProp<CT, T> : IProp<CT> where CT : ObservableCollection<T>
-    //{
-    //    ReadOnlyObservableCollection<T> ReadOnlyObservableCollection { get; }
-    //    bool IsListCollectionView { get; }
-    //}
-
-    public interface ICPropPrivate<CT,T> : ICProp<CT,T>, IPropPrivate<CT> where CT : IEnumerable<T>
-    {
-        ObservableCollection<T> ObservableCollection { get; }
-        void SetListSource(IListSource value);
-    }
-
-    public interface ICProp<CT,T> : IProp<CT> where CT: IEnumerable<T>
-    {
-        ReadOnlyObservableCollection<T> ReadOnlyObservableCollection { get; }
-    }
-
-    /// <summary>
-    /// Extends the IProp<typeparamref name="T"/> interface with features
-    /// that are only avaialble within the PubPropBag assembly.
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public interface IPropPrivate<T> : IProp<T>
-    {
-
-    }
 
     /// <summary>
     /// All properties have these features based on the type of the property.
@@ -72,14 +25,14 @@ namespace DRM.TypeSafePropertyBag
     /// <summary>
     /// These are the non-type specific features that every instance of IProp<typeparamref name="T"/> implement.
     /// </summary>
-    public interface IProp : ICloneable
+    public interface IProp : IRegisterBindingsProxyType, ICloneable
     {
         PropKindEnum PropKind { get; }
         Type Type { get; }
         bool TypeIsSolid { get; }
-        bool HasStore { get; }
+        PropStorageStrategyEnum StorageStrategy { get; } // True for internal, false for external. Will change to enum with items: internal, external and virtual.
 
-        IListSource ListSource { get; }
+        event EventHandler<EventArgs> ValueChanged; // Used by virtual properties.
 
         object TypedValueAsObject { get; }
         ValPlusType GetValuePlusType();
@@ -93,9 +46,6 @@ namespace DRM.TypeSafePropertyBag
         bool SetValueToUndefined();
 
         void CleanUpTyped();
-
-        bool RegisterBinding(IPropBagInternal propBag, PropIdType propId, LocalBindingInfo bindingInfo);
-        bool UnregisterBinding(IPropBagInternal propBag, PropIdType propId, LocalBindingInfo bindingInfo);
     }
 
     /// <summary>
@@ -103,7 +53,7 @@ namespace DRM.TypeSafePropertyBag
     /// </summary>
     internal interface IPropDataInternal : IPropData
     {
-        ExKeyT CKey { get; }
+        //ExKeyT CKey { get; }
         bool IsPropBag { get; }
 
         // On those occasions when the IProp starts off with Type = object, and then later, the type is firmed up,
@@ -112,15 +62,19 @@ namespace DRM.TypeSafePropertyBag
         void SetTypedProp(PropNameType propertyName, IProp value);
     }
 
+
+    // TODO: Consider merging this interface with IPropDataInternal -- all of these items are really internal.
     /// <summary>
     /// Classes that implement the IPropBag interface, keep a list of properties, each of which implements this interface.
-    /// These features are managed by the PropBag, and not by classes that inherit from AbstractProp.
+    /// These features are managed by the PropBag, and not by classes that implement IProp (derive from PropBase.)
     /// </summary>
     public interface IPropData
     {
-        PropIdType PropId { get; }
+        //PropIdType PropId { get; }
 
         bool IsEmpty { get; }
+
+        //bool IsPrivate { get; } // TODO: Consider adding the ability to register private PropItems.
 
         /// <summary>
         /// Provides access to the non-type specific features of this property.
@@ -128,7 +82,7 @@ namespace DRM.TypeSafePropertyBag
         /// </summary>
         IProp TypedProp { get; }
 
-        ValPlusType ValuePlusType();
+        ValPlusType GetValuePlusType();
 
         void CleanUp(bool doTypedCleanup);
     }

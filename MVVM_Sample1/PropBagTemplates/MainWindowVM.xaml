@@ -1,0 +1,50 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:mod="clr-namespace:MVVMApplication.Model"
+                    xmlns:dsrv="clr-namespace:MVVMApplication.Services"
+                    xmlns:vMod="clr-namespace:MVVMApplication.ViewModel"
+                    xmlns:infra="clr-namespace:MVVMApplication.Infra"
+                    xmlns:pbWPF="clr-namespace:DRM.PropBagWPF;assembly=PropBagWPF"
+                    xmlns:pb="clr-namespace:DRM.PropBagControlsWPF;assembly=PropBag.WPFControls"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+    
+
+    <pb:PropBagTemplate x:Key="MainWindowVM"
+        ClassName="MainWindowViewModel"
+        OutPutNameSpace="MVVMApplication.ViewModel"
+        DeriveFromClassMode="Custom"
+        TargetType="{x:Type vMod:MainWindowViewModel}"
+        PropStoreServiceProviderType="{x:Type infra:PSServiceRef}"
+        AutoMapperServiceProviderType="{x:Type infra:AMServiceRef}"
+        PropFactoryProviderType="{x:Type pbWPF:WPFPropFactoryProvider}"
+        TypeSafetyMode="Tight">
+
+        <pb:PropBagTemplate.Namespaces>
+            <pb:NamespaceItem Namespace="MVVMApplication.Infra"/>
+            <pb:NamespaceItem Namespace="MVVMApplication.Model"/>
+        </pb:PropBagTemplate.Namespaces>
+
+        <pb:PropBagTemplate.Props>
+
+            <pb:PropItem PropertyName="Business" PropertyType="{x:Type dsrv:PersonDAL}">
+                <pb:InitialValueField CreateNew="True"/>
+            </pb:PropItem>
+            
+            <pb:PropItem PropertyName="PersonCollectionVM" PropertyType="{x:Type vMod:PersonCollectionViewModel}">
+                <pb:InitialValueField CreateNew="True" PropBagResourceKey="PersonCollectionVM"/>
+            </pb:PropItem>
+
+            <pb:PropItem PropertyName="PersonEditorVM" PropertyType="{x:Type vMod:PersonEditorViewModel}">
+                <pb:InitialValueField CreateNew="True" PropBagResourceKey="PersonEditorVM"/>
+            </pb:PropItem>
+
+            <pb:PropItem PropertyName="WMessage" PropertyType="{x:Type sys:String}" StorageStrategy="External">
+                <pb:InitialValueField SetToNull="True"/>
+                <pb:PropBinderField Path="./PersonCollectionVM/WMessage"/>
+            </pb:PropItem>
+
+        </pb:PropBagTemplate.Props>
+    </pb:PropBagTemplate>
+
+
+</ResourceDictionary>

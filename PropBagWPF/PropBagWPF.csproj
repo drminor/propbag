@@ -43,12 +43,16 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="CViewProp_NotUsed.cs" />
+    <Compile Include="CViewProp.cs" />
+    <Compile Include="CViewSourceProp.cs" />
     <Compile Include="DoWhenChangedHelper.cs" />
+    <Compile Include="IProvideACollectionViewSource.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ViewProvider.cs" />
     <Compile Include="WPFPropFactory.cs" />
     <Compile Include="PropModelProvider.cs" />
     <Compile Include="ViewModelHelper.cs" />
+    <Compile Include="WPFPropFactoryProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AutoMapperSupport\AutoMapperSupport.csproj">

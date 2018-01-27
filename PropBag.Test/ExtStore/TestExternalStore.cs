@@ -8,10 +8,11 @@ using System;
 
 namespace PropBagLib.Tests
 {
+    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
+
     [TestFixtureAttribute]
     public class TestExternalStore
     {
-
         private ExtStoreModel mod1;
 
         bool varToEnsureWorkIsDone = false;
@@ -26,20 +27,15 @@ namespace PropBagLib.Tests
             upCntr = 0;
 
             object stuff = new object();
-            IPropFactory standardPropFactory = new AutoMapperSupport.AutoMapperHelpers().PropFactory_V1;
+            AutoMapperSupport.AutoMapperHelpers mapperHelpers = new AutoMapperSupport.AutoMapperHelpers();
 
-            //IProvideDelegateCaches delegateCacheProvider = new SimpleDelegateCacheProvider();
+            IPropFactory standardPropFactory = mapperHelpers.PropFactory_V1;
 
-            PropExtStoreFactory factory = new PropExtStoreFactory
-                (stuff: stuff,
-                propStoreAccessServiceProvider: standardPropFactory.PropStoreAccessServiceProvider,
-                //delegateCacheProvider: delegateCacheProvider,
-                typeResolver: null,
-                valueConverter: null
-                );
+            IPropFactory factory = mapperHelpers.PropFactoryExt_V1;
 
-            mod1 = ExtStoreModel.Create(factory);
+            PSAccessServiceCreatorInterface storeAccessCreator = mapperHelpers.StoreAccessCreator;
 
+            mod1 = ExtStoreModel.Create(storeAccessCreator, factory);
         }
 
         [TearDown]

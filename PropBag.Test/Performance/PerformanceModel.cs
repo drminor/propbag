@@ -14,12 +14,21 @@ namespace PropBagLib.Tests
             AutoMapperHelpers ourHelper = new AutoMapperHelpers();
             IPropFactory propFactory_V1 = ourHelper.GetNewPropFactory_V1();
 
-            PerformanceModel pm = new PerformanceModel(safetyMode, propFactory_V1);
+            // TODO: AAA
+            PerformanceModel pm = new PerformanceModel(safetyMode, ourHelper.StoreAccessCreator, null, propFactory_V1);
+
             pm.AddPropNoStore<int>("PropIntNoStore");
             pm.AddPropNoStore<string>("PropStringNoStore");
 
             return pm;
         }
+
+        new public IProp<T> GetTypedProp<T>(string propertyName)
+        {
+            IProp<T> result = base.GetTypedProp<T>(propertyName);
+            return result;
+        }
+
 
         // Regular Property Definitions Used as a control
         public event PropertyChangedEventHandler PropertyChanged2;
@@ -86,10 +95,7 @@ namespace PropBagLib.Tests
 
         protected void OnPropertyChanged2([CallerMemberName]string propertyName = null)
         {
-            PropertyChangedEventHandler handler = Interlocked.CompareExchange(ref PropertyChanged2, null, null);
-
-            if (handler != null)
-                handler(this, new PropertyChangedEventArgs(propertyName));
+            Interlocked.CompareExchange(ref PropertyChanged2, null, null)?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         protected override void Dispose(bool disposing)

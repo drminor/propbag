@@ -1,0 +1,1 @@
+java -jar .\PlantUmlEngine\plantuml.jar -r -o ".\Out" .\In\**.ClassDiagram.puml

@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>DRM.PropBag.AutoMapperSupport</RootNamespace>
-    <AssemblyName>AutoMapperSupport</AssemblyName>
+    <AssemblyName>PropBag.AutoMapperSupport</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Builders\IPropBagMapperBuilderProvider.cs" />
+    <Compile Include="Builders\IPropBagMapperKey.cs" />
     <Compile Include="Builders\SimplePropBagMapperBuilderProvider.cs" />
     <Compile Include="ConfigPackages\ConfigPackage_EmitProxy.cs" />
     <Compile Include="ConfigPackages\ConfigPackage_ExtraMembers.cs" />
@@ -71,8 +72,6 @@
     <Compile Include="Config\SimpleMapperConfigTyped.cs" />
     <Compile Include="Config\ExtraMembersConfigFinalStep.cs" />
     <Compile Include="MapTypeDefinition\IMapTypeDefinition.cs" />
-    <Compile Include="IPropBagMapper.cs" />
-    <Compile Include="Builders\IPropBagMapperKey.cs" />
     <Compile Include="ExtraMembers\ExtraMembersProvider.cs" />
     <Compile Include="MapTypeDefinition\MapTypeDefinition.cs" />
     <Compile Include="ExtraMembers\PBDispatcher.cs" />
@@ -82,6 +81,10 @@
     <Compile Include="ExtraMembers\PropertyInfoWT.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ObjectSizeDiagnostics\ObjectSizeDiagnostics.csproj">
+      <Project>{9b18f82d-3ed9-49e0-9ee3-cfbfc3af9d9c}</Project>
+      <Name>ObjectSizeDiagnostics</Name>
+    </ProjectReference>
     <ProjectReference Include="..\PropBag\PropBag.csproj">
       <Project>{7387B893-FBDC-4B9C-AC9E-0B56388B46C1}</Project>
       <Name>PropBag</Name>
@@ -106,7 +109,6 @@
   <ItemGroup>
     <None Include="Documentation\Roles and Dependencies.md" />
     <None Include="Documentation\ServiceNotes.md" />
-    <None Include="packages.config" />
     <Compile Include="PropBagMappingStrategyEnum.cs" />
   </ItemGroup>
   <ItemGroup />

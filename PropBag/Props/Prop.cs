@@ -14,26 +14,28 @@ namespace DRM.PropBag
         public Prop(T initalValue,
             GetDefaultValueDelegate<T> defaultValFunc,
             bool typeIsSolid,
-            bool hasStore,
+            PropStorageStrategyEnum storageStrategy,
             Func<T, T, bool> comparer)
-            : base(typeof(T), typeIsSolid, hasStore, true, comparer, defaultValFunc, PropKindEnum.Prop)
+            : base(typeof(T), typeIsSolid, CheckStorageStrategy(storageStrategy), true, comparer, defaultValFunc, PropKindEnum.Prop)
         {
-            if (hasStore)
+            _value = initalValue;
+        }
+
+        static PropStorageStrategyEnum CheckStorageStrategy(PropStorageStrategyEnum strategy)
+        {
+            if (strategy != PropStorageStrategyEnum.Internal)
             {
-                _value = initalValue;
+                throw new InvalidOperationException($"This implementation of IProp<T> only supports a StorageStrategy of {nameof(PropStorageStrategyEnum.Internal)}.");
             }
+            return strategy;
         }
 
         public Prop(GetDefaultValueDelegate<T> defaultValFunc,
             bool typeIsSolid,
-            bool hasStore,
+            PropStorageStrategyEnum storageStrategy,
             Func<T, T, bool> comparer)
-            : base(typeof(T), typeIsSolid, hasStore, false, comparer, defaultValFunc, PropKindEnum.Prop)
+            : base(typeof(T), typeIsSolid, CheckStorageStrategy(storageStrategy), false, comparer, defaultValFunc, PropKindEnum.Prop)
         {
-            //if (hasStore)
-            //{
-            //    ValueIsDefined = false;
-            //}
         }
 
         T _value;
@@ -41,83 +43,43 @@ namespace DRM.PropBag
         {
             get
             {
-                if (HasStore)
+                if (!ValueIsDefined)
                 {
-                    if (!ValueIsDefined)
+                    if (ReturnDefaultForUndefined)
                     {
-                        if (ReturnDefaultForUndefined)
-                        {
-                            return this.GetDefaultValFunc("Prop object doesn't know the prop's name.");
-                        }
-                        throw new InvalidOperationException("The value of this property has not yet been set.");
+                        return this.GetDefaultValFunc("Prop object doesn't know the prop's name.");
                     }
-                    return _value;
+                    throw new InvalidOperationException("The value of this property has not yet been set.");
                 }
-                else
-                {
-                    throw new InvalidOperationException();
-                }
+                return _value;
             }
             set
             {
-                if (HasStore)
-                {
-                    _value = value;
-                    ValueIsDefined = true;
-                }
-                else
-                {
-                    throw new InvalidOperationException();
-                }
+                _value = value;
+                ValueIsDefined = true;
             }
         }
-
-        //public override object TypedValueAsObject => (object)TypedValue;
-
-        //public override ValPlusType GetValuePlusType()
-        //{
-        //    return new ValPlusType(TypedValue, Type);
-        //}
-
-        //private bool _valueIsDefined;
-        //override public bool ValueIsDefined
-        //{
-        //    get
-        //    {
-        //        return _valueIsDefined;
-        //    }
-        //}
-
-        //override public bool SetValueToUndefined()
-        //{
-        //    bool oldSetting = ValueIsDefined;
-        //    ValueIsDefined = false;
-
-        //    return oldSetting;
-        //}
-
-        override public IListSource ListSource => throw new NotSupportedException($"This PropBag property is of PropKind = {PropKind}. It cannot provide a ListSource.");
 
         public override object Clone()
         {
             Prop<T> result;
             if (!ValueIsDefined)
             {
-                result = new Prop<T>(defaultValFunc: GetDefaultValFunc, typeIsSolid: TypeIsSolid, hasStore: HasStore, comparer: Comparer);
+                result = new Prop<T>(defaultValFunc: GetDefaultValFunc, typeIsSolid: TypeIsSolid, storageStrategy: StorageStrategy, comparer: Comparer);
             }
             else if (TypedValue == null || TypedValue is ValueType)
             {
-                result = new Prop<T>(initalValue: TypedValue, defaultValFunc: GetDefaultValFunc, typeIsSolid: TypeIsSolid, hasStore: HasStore, comparer: Comparer);
+                result = new Prop<T>(initalValue: TypedValue, defaultValFunc: GetDefaultValFunc, typeIsSolid: TypeIsSolid, storageStrategy: StorageStrategy, comparer: Comparer);
             }
             else if (TypedValue is ICloneable ic)
             {
-                result = new Prop<T>(initalValue: (T)ic.Clone(), defaultValFunc: GetDefaultValFunc, typeIsSolid: TypeIsSolid, hasStore: HasStore, comparer: Comparer);
+                result = new Prop<T>(initalValue: (T)ic.Clone(), defaultValFunc: GetDefaultValFunc, typeIsSolid: TypeIsSolid, storageStrategy: StorageStrategy, comparer: Comparer);
             }
             else if (typeof(T) == typeof(string))
             {
                 if(TryGetStringCopy(TypedValue, out T copy))
                 {
-                    result = new Prop<T>(initalValue: copy, defaultValFunc: GetDefaultValFunc, typeIsSolid: TypeIsSolid, hasStore: HasStore, comparer: Comparer);
+                    result = new Prop<T>(initalValue: copy, defaultValFunc: GetDefaultValFunc, typeIsSolid: TypeIsSolid, storageStrategy: StorageStrategy, comparer: Comparer);
                 }
                 else
                 {
@@ -127,7 +89,7 @@ namespace DRM.PropBag
             else
             {
                 //throw new InvalidOperationException("The Prop's value is not null, nor is it undefined nor does it implement ICloneable.");
-                result = new Prop<T>(initalValue: default(T), defaultValFunc: GetDefaultValFunc, typeIsSolid: TypeIsSolid, hasStore: HasStore, comparer: Comparer);
+                result = new Prop<T>(initalValue: default(T), defaultValFunc: GetDefaultValFunc, typeIsSolid: TypeIsSolid, storageStrategy: StorageStrategy, comparer: Comparer);
             }
 
             return result;

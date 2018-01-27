@@ -22,14 +22,14 @@ namespace DRM.PropBag.XMLModel
                 result.Add("/// </summary>");
                 result.Add("/// <param name=\"methodName\">Some public or non-public instance method in this class.</param>");
                 result.Add("/// <returns>The name, unchanged, if the method exists, otherwise null.</returns>");
-                result.Add("EventHandler<PCTypedEventArgs<T>> GetDelegate<T>(string methodName)");
+                result.Add("EventHandler<PcTypedEventArgs<T>> GetDelegate<T>(string methodName)");
                 result.Add("{");
                 result.Add("    Type pp = this.GetType();");
                 result.Add("    MethodInfo mi = pp.GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);");
                 result.Add("");
                 result.Add("    if (mi == null) return null;");
                 result.Add("");
-                result.Add("    EventHandler<PCTypedEventArgs<T>> result = (EventHandler<PCTypedEventArgs<T>>)mi.CreateDelegate(typeof(EventHandler<PCTypedEventArgs<T>>), this);");
+                result.Add("    EventHandler<PcTypedEventArgs<T>> result = (EventHandler<PcTypedEventArgs<T>>)mi.CreateDelegate(typeof(EventHandler<PcTypedEventArgs<T>>), this);");
                 result.Add("");
                 result.Add("    return result;");
                 result.Add("}");

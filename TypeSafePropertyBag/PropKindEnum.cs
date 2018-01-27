@@ -4,7 +4,24 @@ namespace DRM.TypeSafePropertyBag
     public enum PropKindEnum
     {
         Prop,
-        Collection,
-        DataTable
+        Enumerable,                 // IEProp<CT> : IProp<CT>, IReadOnlyEProp<CT> where CT : IEnumerable
+        Enumerable_RO,              // IReadOnlyEProp<CT> : IProp<CT> where CT : IEnumerable
+
+        EnumerableTyped,            // IETypedProp<CT, T> : IEProp<CT>, IReadOnlyETypedProp<CT, T> where CT : IEnumerable<T>
+        EnumerableTyped_RO,         // IReadOnlyETypedProp<CT, T> : IReadOnlyEProp<CT> where CT : IEnumerable<T>
+
+        ObservableCollection,       // ICProp<CT,T> : IETypedProp<CT, T>, IReadOnlyCProp<CT, T> where CT : IObsCollection<T>
+        ObservableCollection_RO,    // IReadOnlyCProp<CT,T> : IReadOnlyETypedProp<CT, T> where CT : IReadOnlyObsCollection<T>
+
+        //ObservableCollectionFB,     // ICPropFB<CT, T> : IProp<CT> where CT : ObservableCollection<T>
+        //ObservableCollectionFB_RO,  // IReadOnlyCPropFB<CT, T> : IProp<CT> where CT : ReadOnlyObservableCollection<T>
+
+        CollectionViewSource,       // ICViewProp<CVST, T> : IReadOnlyCViewProp<CVST, T> where CVST: class
+        CollectionViewSource_RO,    // IReadOnlyCViewProp<CVST, T> : IProp<CVST> where CVST : class
+
+        CollectionView,
+
+        DataTable,
+        DataTable_RO
     }
 }

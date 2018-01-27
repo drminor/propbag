@@ -1,5 +1,6 @@
 ﻿using DRM.PropBag.ClassGenerator;
 using DRM.PropBag.XMLModel;
+using DRM.TypeSafePropertyBag;
 using NUnit.Framework;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +20,7 @@ namespace PropBagLib.Tests
 
             string propDefsPath = System.IO.Path.Combine(projectFolderPath, "T4", PropDefsFilename);
 
-            PropModel pm = PropModelReader.ReadXml(propDefsPath);
+            XMLPropModel pm = PropModelReader.ReadXml(propDefsPath);
 
             Assert.That(pm, Is.Not.EqualTo(null), "PropModelReader returned null");
 
@@ -33,7 +34,7 @@ namespace PropBagLib.Tests
         [Test]
         public void WriteXml()
         {
-            PropModel pm = new PropModel
+            XMLPropModel pm = new XMLPropModel
             {
                 ClassName = "TestOu",
                 DeriveFromPubPropBag = false,
@@ -46,8 +47,8 @@ namespace PropBagLib.Tests
             {
                 Name = "one",
                 Type = "int",
-                InitalValueField = new PropInitialValueField("1"),
-                HasStore = true
+                InitialValueField = new PropInitialValueField("1"),
+                StorageStrategy = PropStorageStrategyEnum.Internal
             };
 
             pm.Props.Add(p);
@@ -56,8 +57,8 @@ namespace PropBagLib.Tests
             {
                 Name = "two",
                 Type = "string",
-                InitalValueField = new PropInitialValueField("1"),
-                HasStore = true
+                InitialValueField = new PropInitialValueField("1"),
+                StorageStrategy = PropStorageStrategyEnum.Internal
             };
 
             pm.Props.Add(p);

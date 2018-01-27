@@ -1,4 +1,6 @@
-﻿using System;
+﻿using DRM.TypeSafePropertyBag;
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -25,7 +27,7 @@ namespace DRM.PropBag.XMLModel
         public string Type { get; set; }
 
         [XmlElement("initial-value")]
-        public PropInitialValueField InitalValueField { get; set;}
+        public PropInitialValueField InitialValueField { get; set;}
 
         [XmlElement("comparer")]
         public PropComparerField ComparerField { get; set; }
@@ -33,8 +35,8 @@ namespace DRM.PropBag.XMLModel
         [XmlElement("do-when-changed")]
         public PropDoWhenChanged DoWhenChangedField { get; set; }
 
-        [XmlAttribute(AttributeName = "caller-provides-storage")]
-        public bool HasStore { get; set; }
+        [XmlAttribute(AttributeName = "storage-strategy")]
+        public PropStorageStrategyEnum StorageStrategy { get; set; }
 
         [XmlIgnore]
         public bool TypeIsSolid { get; set; }
@@ -45,14 +47,14 @@ namespace DRM.PropBag.XMLModel
         public PropItem() : this(null, null) { }
 
         public PropItem(string type, string name,
-            string extraInfo = null, bool hasStore = true,
+            string extraInfo = null, PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal,
             bool typeIsSolid = true,
             PropDoWhenChanged doWhenChanged = null, PropComparerField comparer = null)
         {
             Type = type;
             Name = name;
             ExtraInfo = extraInfo;
-            HasStore = hasStore;
+            StorageStrategy = storageStrategy;
             TypeIsSolid = typeIsSolid;
             ComparerField = comparer;
             DoWhenChangedField = doWhenChanged;

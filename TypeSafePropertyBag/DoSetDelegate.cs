@@ -1,5 +1,9 @@
-﻿
+﻿using System;
+
 namespace DRM.TypeSafePropertyBag
 {
-    public delegate bool DoSetDelegate(IPropBag target, uint propId, string propertyName, IProp prop, object value);
+    using PropIdType = UInt32;
+    using PropNameType = String;
+
+    public delegate bool DoSetDelegate(IPropBag target, PropIdType propId, PropNameType propertyName, IProp prop, object value);
 }

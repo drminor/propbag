@@ -17,7 +17,7 @@ namespace DRM.PropBag
             GetDefaultValueDelegate<T> defaultValFunc,
             bool typeIsSolid,
             Func<T, T, bool> comparer)
-            : base(typeof(T), typeIsSolid, false, true,  comparer, defaultValFunc, PropKindEnum.Prop)
+            : base(typeof(T), typeIsSolid, PropStorageStrategyEnum.External, true,  comparer, defaultValFunc, PropKindEnum.Prop)
         {
             Tag = Guid.NewGuid(); // tag;
             Getter = null; // getter;
@@ -71,7 +71,7 @@ namespace DRM.PropBag
         }
         public SetExtVal<T> Setter { get; set; }
 
-        override public IListSource ListSource => throw new NotSupportedException("This PropBag property is not a collection or datatable PropType.");
+        //override public IListSource ListSource => throw new NotSupportedException("This PropBag property is not a collection or datatable PropType.");
 
         public override object Clone()
         {

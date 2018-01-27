@@ -11,42 +11,37 @@ namespace DRM.TypeSafePropertyBag
     {
         #region Private Properties
 
-        private ExKeyT _cKey;
+        //private ExKeyT _cKey;
         private bool _isPropBag;
 
         #endregion
 
         #region Public PropGen Properties
 
-        public PropIdType PropId { get; }
+        //public PropIdType PropId { get; }
         public IProp TypedProp { get; private set; }
-        public bool IsEmpty => _cKey.isEmpty;
-
-        #endregion
-
-        #region Public IPropDataInternal Properties
-
-        ExKeyT IPropDataInternal.CKey => _cKey;
-        bool IPropDataInternal.IsPropBag => _isPropBag;
+        public bool IsEmpty { get; }
 
         #endregion
 
         #region Constructors
 
-        public PropGen(ExKeyT cKey, IProp genericTypedProp)
+        public PropGen(/*ExKeyT cKey, */IProp genericTypedProp)
         {
-            _cKey = cKey;
+            IsEmpty = false;
+            //_cKey = cKey;
             TypedProp = genericTypedProp ?? throw new ArgumentNullException($"{nameof(genericTypedProp)} must be non-null.");
 
-            PropId = cKey.Level2Key;
+            //PropId = cKey.Level2Key;
             _isPropBag = genericTypedProp.Type.IsPropBagBased();
         }
 
         public PropGen()
         {
+            IsEmpty = true;
             TypedProp = null;
-            _cKey = new SimpleExKey();
-            PropId = _cKey.Level2Key;
+            //_cKey = new SimpleExKey();
+            //PropId = _cKey.Level2Key;
             _isPropBag = false;
         }
 
@@ -54,13 +49,15 @@ namespace DRM.TypeSafePropertyBag
 
         #region PropGen Public Methods
 
-        public ValPlusType ValuePlusType()
+        public ValPlusType GetValuePlusType()
         {
-            return new ValPlusType(TypedProp.TypedValueAsObject, TypedProp.Type);
+            return TypedProp.GetValuePlusType();  //new ValPlusType(TypedProp.TypedValueAsObject, TypedProp.Type);
         }
 
         public void CleanUp(bool doTypedCleanup)
         {
+            // Note: We have no managed (or unmanaged) resources to cleanup, 
+            //all we have to do is call the TypeProp's Cleanup method.
             IProp typedProp = TypedProp;
 
             if (typedProp != null)
@@ -71,34 +68,17 @@ namespace DRM.TypeSafePropertyBag
 
         #endregion
 
-        #region IPropDataInternal Methods
+        #region IPropDataInternal Implementation
+
+        //ExKeyT IPropDataInternal.CKey => _cKey;
+
+        bool IPropDataInternal.IsPropBag => _isPropBag;
 
         void IPropDataInternal.SetTypedProp(PropNameType propertyName, IProp value)
         {
             TypedProp = value;
             _isPropBag = value.Type.IsPropBagBased();
         }
-
-        #endregion
-
-        #region Private Methods
-
-        //private void GenericTypedProp_PropertyChangedWithObjectVals(object sender, PCObjectEventArgs e)
-        //{
-        //    OnPropertyChangedWithObjectVals(e);
-        //}
-
-        //public void OnPropertyChangedWithObjectVals(string propertyName, object oldValue, object newValue)
-        //{
-        //    Interlocked.CompareExchange(ref PropertyChangedWithObjectVals, null, null)
-        //        ?.Invoke(this, new PCObjectEventArgs(propertyName, oldValue, newValue));
-        //}
-
-        //public void OnPropertyChangedWithObjectVals(PCObjectEventArgs e)
-        //{
-        //    Interlocked.CompareExchange(ref PropertyChangedWithObjectVals, null, null)
-        //        ?.Invoke(this, e);
-        //}
 
         #endregion
     }

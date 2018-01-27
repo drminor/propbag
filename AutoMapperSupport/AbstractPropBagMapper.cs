@@ -1,14 +1,16 @@
 ﻿using AutoMapper;
-using DRM.PropBag.ControlModel;
 using DRM.TypeSafePropertyBag;
-using DRM.ViewModelTools;
+using DRM.PropBag.ViewModelTools;
 using System;
 
 using System.Collections.Generic;
 using System.Linq;
+using ObjectSizeDiagnostics;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
+    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
+
     public abstract class AbstractPropBagMapper<TSource, TDestination> 
         : IPropBagMapper<TSource, TDestination> where TDestination : class, IPropBag
     {
@@ -17,7 +19,7 @@ namespace DRM.PropBag.AutoMapperSupport
         public Type SourceType { get; }
         public Type DestinationType { get; }
 
-        public PropModel PropModel { get; }
+        public IPropModel PropModel { get; }
         public Type RunTimeType { get; }
 
         IPropFactory PropFactory { get; }
@@ -27,17 +29,18 @@ namespace DRM.PropBag.AutoMapperSupport
         public bool SupportsMapFrom { get; }
 
         IViewModelActivator _vmActivator;
+        PSAccessServiceCreatorInterface _storeAccessCreator;
 
         private readonly bool _requiresWrappperTypeEmitServices;
-        private readonly ICloneable _template;
-        private readonly IPropBag _pbTemplate;
+        private readonly TDestination _template;
+        //private readonly IPropBag _pbTemplate;
 
         #endregion
 
         #region Constructor
 
         public AbstractPropBagMapper(IPropBagMapperKey<TSource, TDestination> mapRequest,
-            IMapper mapper, IViewModelActivator vmActivator)
+            IMapper mapper, IViewModelActivator vmActivator, PSAccessServiceCreatorInterface storeAccessCreator)
         {
             SourceType = mapRequest.SourceTypeDef.TargetType;
             DestinationType = mapRequest.DestinationTypeDef.TargetType;
@@ -48,6 +51,7 @@ namespace DRM.PropBag.AutoMapperSupport
 
             Mapper = mapper;
             _vmActivator = vmActivator;
+            _storeAccessCreator = storeAccessCreator;
 
             SupportsMapFrom = true;
 
@@ -55,22 +59,37 @@ namespace DRM.PropBag.AutoMapperSupport
 
             if (typeof(TDestination) is ICloneable)
             {
-                if(_requiresWrappperTypeEmitServices)
-                {
-                    _template = null;
-                    _pbTemplate = (IPropBag)GetNewDestination(PropModel, DestinationType, PropFactory, fullClassName: null);
-                }
-                else
-                {
-                    _template = (ICloneable)GetNewDestination(PropModel, DestinationType, PropFactory, fullClassName: null);
-                    _pbTemplate = null;
-                }
+                //long gcSize = Sizer.GetSizeGC(GndForSizer);
+                ////long bsSize = Sizer.GetSizeBinSer(GndForSizer);
+
+                //System.Diagnostics.Debug.WriteLine($"Mapped Destination Template Size: GC:{gcSize}.");
+
+                TDestination temp = GetNewDestination(PropModel, _storeAccessCreator, DestinationType, PropFactory, fullClassName: null);
+
+                //if (_requiresWrappperTypeEmitServices)
+                //{
+                //    //_template = null;
+                //    //_pbTemplate = temp;
+                //    _template = temp;
+                //}
+                //else
+                //{
+                //    _template = temp;
+                //    //_pbTemplate = null;
+                //}
             }
             else
             {
                 _template = null;
-                _pbTemplate = null;
+                //_pbTemplate = null;
             }
+
+            return;
+            //object GndForSizer()
+            //{
+            //    return GetNewDestination(PropModel, _storeAccessCreator, DestinationType, PropFactory, fullClassName: null);
+            //}
+
         }
 
         #endregion
@@ -104,18 +123,6 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public IEnumerable<TDestination> MapToDestination(IEnumerable<TSource> listOfSources)
         {
-            //if(_template != null)
-            //{
-            //    IPropBagInternal test = (IPropBagInternal)_template;
-            //    SimpleLevel2KeyMan sTest = (SimpleLevel2KeyMan) test.Level2KeyManager;
-            //}
-
-            //if (_pbTemplate != null)
-            //{
-            //    IPropBagInternal test = (IPropBagInternal)_pbTemplate;
-            //    SimpleLevel2KeyMan sTest = (SimpleLevel2KeyMan)test.Level2KeyManager;
-            //}
-
             return listOfSources.Select(s => MapToDestination(s));
         }
 
@@ -123,36 +130,88 @@ namespace DRM.PropBag.AutoMapperSupport
         {
             return listOfDestinations.Select(d => MapToSource(d));
         }
+
         #endregion
 
         #region Create Instance of TDestination
 
-        private TDestination GetNewDestination()
+        public TDestination GetNewDestination()
         {
+            //long gcSize = Sizer.GetSizeGC(GndForSizer);
+            ////long bsSize = Sizer.GetSizeBinSer(GndForSizer);
+
+            //System.Diagnostics.Debug.WriteLine($"Mapped Destination Instance Size: GC:{gcSize}.");
+
             TDestination result;
 
             if (_template != null)
             {
                 result = _template.Clone() as TDestination;
+
+                //if (_requiresWrappperTypeEmitServices)
+                //{
+                //    result = GetNewDestination(RunTimeType, _template);
+                //}
+                //else
+                //{
+                //    result = _template.Clone() as TDestination;
+                //}
+
+                //if(x is TDestination ttt)
+                //{
+                //    result = ttt;
+                //} 
+                //else
+                //{
+                //    var z = x as TDestination;
+
+                //    if (z is TDestination y)
+                //    {
+                //        result = y;
+                //    }
+                //    else
+                //    {
+                //        throw new InvalidCastException($"Cannot cast result of _template.Clone to type: {typeof(TDestination)}.");
+                //    }
+                //}
+
             }
-            else if(_pbTemplate != null)
-            {
-                result = GetNewDestination(RunTimeType, _pbTemplate);
-            }
+            //else if(_pbTemplate != null)
+            //{
+            //    result = GetNewDestination(RunTimeType, _pbTemplate);
+            //}
             else
             {
-                result = GetNewDestination(PropModel, RunTimeType, PropFactory, fullClassName: null);
+                result = GetNewDestination(PropModel, _storeAccessCreator, RunTimeType, PropFactory, fullClassName: null);
             }
 
-            //result = GetNewDestination(PropModel, RunTimeType, PropFactory, fullClassName: null);
             return result;
+
+            //object GndForSizer()
+            //{
+            //    if (_template != null)
+            //    {
+            //        result = _template.Clone() as TDestination;
+            //    }
+            //    else if (_pbTemplate != null)
+            //    {
+            //        result = GetNewDestination(RunTimeType, _pbTemplate);
+            //    }
+            //    else
+            //    {
+            //        result = GetNewDestination(PropModel, _storeAccessCreator, RunTimeType, PropFactory, fullClassName: null);
+            //    }
+            //    return result;
+            //}
+
         }
 
-        private TDestination GetNewDestination(PropModel propModel, Type destinationTypeOrProxy, IPropFactory propFactory, string fullClassName)
+        // Regular Instantiation using the PropModel. 
+        private TDestination GetNewDestination(IPropModel propModel, PSAccessServiceCreatorInterface storeAccessCreator, Type destinationTypeOrProxy, IPropFactory propFactory, string fullClassName)
         {
             try
             {
-                var newViewModel = _vmActivator.GetNewViewModel(propModel, destinationTypeOrProxy, fullClassName, propFactory);
+                var newViewModel = _vmActivator.GetNewViewModel(propModel, storeAccessCreator, destinationTypeOrProxy, propFactory, fullClassName);
                 return newViewModel as TDestination;
             }
             catch (Exception e2)
@@ -162,18 +221,60 @@ namespace DRM.PropBag.AutoMapperSupport
             }
         }
 
-        private TDestination GetNewDestination(Type destinationTypeOrProxy, IPropBag copySource)
+        //private TDestination GetNewDestination(Type destinationTypeOrProxy, TDestination copySource)
+        //{
+        //    try
+        //    {
+        //        TDestination result = (TDestination)copySource.Clone();
+        //        return result;
+
+        //        //var newViewModel = _vmActivator.GetNewViewModel(destinationTypeOrProxy, copySource);
+        //        //return newViewModel as TDestination;
+        //    }
+        //    catch (Exception e2)
+        //    {
+        //        Type targetType = destinationTypeOrProxy ?? typeof(TDestination);
+        //        throw new InvalidOperationException($"Cannot create an instance of {targetType} that takes a copySource parameter.", e2);
+        //    }
+        //}
+
+        #endregion
+
+        #region IDisposable Support
+
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
         {
-            try
+            if (!disposedValue)
             {
-                var newViewModel = _vmActivator.GetNewViewModel(destinationTypeOrProxy, copySource);
-                return newViewModel as TDestination;
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects).
+                    if (PropFactory != null && PropFactory is IDisposable disable)
+                        disable.Dispose();
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+
+                disposedValue = true;
             }
-            catch (Exception e2)
-            {
-                Type targetType = destinationTypeOrProxy ?? typeof(TDestination);
-                throw new InvalidOperationException($"Cannot create an instance of {targetType} that takes a copySource parameter.", e2);
-            }
+        }
+
+        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        // ~Temp() {
+        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        //   Dispose(false);
+        // }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            // GC.SuppressFinalize(this);
         }
 
         #endregion

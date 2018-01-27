@@ -1,10 +1,7 @@
-﻿using AutoMapper;
-using DRM.PropBag.AutoMapperSupport;
-using DRM.PropBag.ControlModel;
-using DRM.PropBag.ControlsWPF;
+﻿using DRM.PropBagControlsWPF;
+using DRM.TypeSafePropertyBag.Fundamentals;
 using PropBagTestApp.Models;
 using System;
-using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;

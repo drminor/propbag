@@ -2,22 +2,18 @@
 using System.Windows;
 using System.Windows.Controls;
 
-namespace DRM.PropBag.ControlsWPF
+namespace DRM.PropBagControlsWPF
 {
-    public class MapperRequest : Control
+    public class MapperRequestTemplate : Control
     {
-        static MapperRequest()
+        static MapperRequestTemplate()
         {
-            DefaultStyleKeyProperty.OverrideMetadata(typeof(MapperRequest),
-                new FrameworkPropertyMetadata(typeof(MapperRequest)));
-        }
-
-        public MapperRequest()
-        {
+            DefaultStyleKeyProperty.OverrideMetadata(typeof(MapperRequestTemplate),
+                new FrameworkPropertyMetadata(typeof(MapperRequestTemplate)));
         }
 
         public static readonly DependencyProperty SourceTypeProperty =
-            DependencyProperty.Register("SourceType", typeof(Type), typeof(MapperRequest));
+            DependencyProperty.Register("SourceType", typeof(Type), typeof(MapperRequestTemplate));
 
         public Type SourceType
         {
@@ -32,7 +28,7 @@ namespace DRM.PropBag.ControlsWPF
         }
 
         public static readonly DependencyProperty DestinationPropModelKeyProperty =
-            DependencyProperty.Register("DestinationPropModelKey", typeof(string), typeof(MapperRequest));
+            DependencyProperty.Register("DestinationPropModelKey", typeof(string), typeof(MapperRequestTemplate));
 
         public string DestinationPropModelKey
         {
@@ -47,7 +43,7 @@ namespace DRM.PropBag.ControlsWPF
         }
 
         public static readonly DependencyProperty ConfigPackageNameProperty =
-            DependencyProperty.Register("ConfigPackageName", typeof(string), typeof(MapperRequest));
+            DependencyProperty.Register("ConfigPackageName", typeof(string), typeof(MapperRequestTemplate));
 
         public string ConfigPackageName
         {

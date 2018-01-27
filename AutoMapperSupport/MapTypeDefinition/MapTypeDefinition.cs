@@ -1,5 +1,4 @@
-﻿using DRM.PropBag.ControlModel;
-using DRM.TypeSafePropertyBag;
+﻿using DRM.TypeSafePropertyBag;
 using System;
 using System.Collections.Generic;
 
@@ -10,13 +9,18 @@ namespace DRM.PropBag.AutoMapperSupport
         public Type TargetType { get; }
 
         public bool IsPropBag { get; }
-        public PropModel PropModel { get; }
+        public IPropModel PropModel { get; }
         public Type TypeToWrap { get; }
         public Type NewWrapperType { get; set; }
 
         IPropFactory _propFactory { get; }
-        // If specified, Use the one provided by the caller to use for this mapping operation.
+        string _fullClassName { get; }
+
+        // If specified, use the PropFactory provided by the caller instead of the one specified by the PropModel.
         public IPropFactory PropFactory => _propFactory ?? PropModel.PropFactory;
+
+        // If specified, use the FullClassName provided by the caller instead of the one specified by the PropModel.
+        public string FullClassName => _fullClassName ?? PropModel.FullClassName;
 
         #region Constructors
 
@@ -28,16 +32,23 @@ namespace DRM.PropBag.AutoMapperSupport
             PropModel = null;
             TypeToWrap = null;
             NewWrapperType = null;
+            _fullClassName = null;
             _propFactory = null;
         }
 
-        public MapTypeDefinition(PropModel pm, IPropFactory propFactory, Type typeToWrap)
+        public MapTypeDefinition(IPropModel pm, Type typeToWrap, string fullClassName, IPropFactory propFactory)
         {
+            if (typeToWrap != null && pm.TypeToCreate != typeToWrap)
+            {
+                System.Diagnostics.Debug.WriteLine($"Warning: the value for the PropModel's TypeToCreate property is not equal to the supplied typeToWrap.");
+            }
+
             TargetType = typeof(T);
             IsPropBag = true;
-            PropModel = pm;
-            TypeToWrap = typeToWrap;
+            PropModel = pm ?? throw new ArgumentNullException(nameof(pm));
+            TypeToWrap = typeToWrap ?? pm.TypeToCreate; // throw new ArgumentNullException(nameof(typeToWrap));
             NewWrapperType = null;
+            _fullClassName = fullClassName;
             _propFactory = propFactory;
         }
 

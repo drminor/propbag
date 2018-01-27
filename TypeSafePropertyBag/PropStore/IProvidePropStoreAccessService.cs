@@ -5,17 +5,31 @@ namespace DRM.TypeSafePropertyBag
 {
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
 
-    public interface IProvidePropStoreAccessService<L2T, L2TRaw> : IDisposable
+    internal interface IProvidePropStoreAccessService<L2T, L2TRaw> : IPropStoreAccessServiceCreator<L2T, L2TRaw>, IDisposable
     {
+        bool TearDown(ExKeyT compKey);
+
+        IPropStoreAccessService<L2T, L2TRaw> ClonePSAccessService
+            (
+            IPropBag sourcePropBag,
+            IPropStoreAccessService<L2T, L2TRaw> sourceAccessService,
+            IL2KeyMan<L2T, L2TRaw> level2KeyManager,
+            IPropBagInternal targetPropBag,
+            out StoreNodeBag newStoreNode
+            );
+    }
+
+    public interface IPropStoreAccessServiceCreator<L2T, L2TRaw> : IPropStoreAccessServicePerf<L2T, L2TRaw>
+    {
+        IPropStoreAccessService<L2T, L2TRaw> CreatePropStoreService(IPropBagInternal propBag);
+
         // Information necessary to create composite keys.
         long MaxObjectsPerAppDomain { get; }
         int MaxPropsPerObject { get; }
+    }
 
-        // Create and TearDown PropStoreAccessService instances.
-        IPropStoreAccessService<L2T, L2TRaw> CreatePropStoreService(IPropBagInternal propBag);
-
-        bool TearDown(ExKeyT compKey);
-
+    public interface IPropStoreAccessServicePerf<L2T, L2TRaw>
+    {
         // Diagnostics 
         void IncAccess();
         int AccessCounter { get; }
@@ -23,10 +37,5 @@ namespace DRM.TypeSafePropertyBag
 
         int TotalNumberOfAccessServicesCreated { get; }
         int NumberOfRootPropBagsInPlay { get; }
-    }
-
-    internal interface IProvidePropStoreCloneService<L2T, L2TRaw>
-    {
-        IPropStoreAccessService<L2T, L2TRaw> CloneService(IPropBagInternal sourcePropBag, IPropStoreAccessService<L2T, L2TRaw> sourceAccessService, IPropBagInternal targetPropBag, out StoreNodeBag sourceStoreNode,  out StoreNodeBag newStoreNode);
     }
 }

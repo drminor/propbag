@@ -1,0 +1,40 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:vmod="clr-namespace:MVVMApplication.ViewModel"
+                    xmlns:mod="clr-namespace:MVVMApplication.Model"
+                    xmlns:dsrv="clr-namespace:MVVMApplication.Services"
+                    xmlns:pb="clr-namespace:DRM.PropBagControlsWPF;assembly=PropBag.WPFControls"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <pb:PropBagTemplate x:Key="PersonEditorVM"
+                        ClassName="PersonEditorViewModel"
+                        DeriveFromClassMode="Custom"
+                        TargetType="{x:Type vmod:PersonEditorViewModel}"
+                        TypeSafetyMode="Tight"
+                        OutPutNameSpace="MVVMApplication.ViewModel">
+        
+        <pb:PropBagTemplate.Namespaces>
+            <pb:NamespaceItem Namespace="MVVMApplication.Infra"/>
+            <pb:NamespaceItem Namespace="MVVMApplication.Model"/>
+        </pb:PropBagTemplate.Namespaces>
+
+        <pb:PropBagTemplate.Props>
+
+            <pb:PropItem PropertyName="Business" PropertyType="{x:Type dsrv:PersonDAL}">
+                <pb:InitialValueField SetToNull="True"/>
+                <pb:PropBinderField Path="../Business"/>
+            </pb:PropItem>
+
+            <pb:PropItem PropertyName="PersonListView" PropKind="CollectionView" PropertyType="{x:Type vmod:PersonVM}">
+                <pb:InitialValueField SetToNull="True"/>
+                <pb:PropBinderField Path="../Business" MapperRequestResourceKey="PersonVM_Mapper_Emit_Proxy"/>
+            </pb:PropItem>
+
+            <pb:PropItem PropertyName="WMessage" PropertyType="{x:Type sys:String}" StorageStrategy="External">
+                <pb:InitialValueField SetToNull="True"/>
+            </pb:PropItem>
+
+        </pb:PropBagTemplate.Props>
+    </pb:PropBagTemplate>
+
+</ResourceDictionary>

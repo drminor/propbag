@@ -14,7 +14,7 @@ namespace DRM.TypeSafePropertyBag
         public SubscriptionPriorityGroup SubscriptionPriorityGroup { get; set; }
         //public SubscriptionTargetKind SubscriptionTargetKind { get; protected set; }
 
-        public WeakReference Target { get; protected set; }
+        public WeakRefKey Target { get; protected set; }
         public string MethodName { get; }
 
         public Delegate HandlerProxy { get; }
@@ -50,7 +50,7 @@ namespace DRM.TypeSafePropertyBag
             {
                 case SubscriptionKind.TypedHandler:
                     {
-                        Target = new WeakReference(sKey.Target);
+                        Target = new WeakRefKey(sKey.Target);
 
                         Delegate proxyDelegate = handlerDispatchDelegateCacheProvider.DelegateProxyCache.GetOrAdd(new MethodSubscriptionKind(sKey.Method, sKey.SubscriptionKind));
                         HandlerProxy = proxyDelegate;
@@ -71,7 +71,7 @@ namespace DRM.TypeSafePropertyBag
                 case SubscriptionKind.GenHandler:
                     {
                         //Target = new WeakReference(sKey.GenHandler.Target);
-                        Target = new WeakReference(sKey.Target);
+                        Target = new WeakRefKey(sKey.Target);
 
                         Delegate proxyDelegate = handlerDispatchDelegateCacheProvider.DelegateProxyCache.GetOrAdd(new MethodSubscriptionKind(sKey.Method, sKey.SubscriptionKind));
                         HandlerProxy = proxyDelegate;
@@ -87,7 +87,7 @@ namespace DRM.TypeSafePropertyBag
                 case SubscriptionKind.ObjHandler:
                     {
                         //Target = new WeakReference(sKey.ObjHandler.Target);
-                        Target = new WeakReference(sKey.Target);
+                        Target = new WeakRefKey(sKey.Target);
 
                         Delegate proxyDelegate = handlerDispatchDelegateCacheProvider.DelegateProxyCache.GetOrAdd(new MethodSubscriptionKind(sKey.Method, sKey.SubscriptionKind));
                         HandlerProxy = proxyDelegate;
@@ -103,7 +103,7 @@ namespace DRM.TypeSafePropertyBag
                 case SubscriptionKind.StandardHandler:
                     {
                         //Target = new WeakReference(sKey.StandardHandler.Target);
-                        Target = new WeakReference(sKey.Target);
+                        Target = new WeakRefKey(sKey.Target);
 
 
                         Delegate proxyDelegate = handlerDispatchDelegateCacheProvider.DelegateProxyCache.GetOrAdd(new MethodSubscriptionKind(sKey.Method, sKey.SubscriptionKind));
@@ -121,7 +121,7 @@ namespace DRM.TypeSafePropertyBag
                 case SubscriptionKind.ChangingHandler:
                     {
                         //Target = new WeakReference(sKey.ChangingHandler.Target);
-                        Target = new WeakReference(sKey.Target);
+                        Target = new WeakRefKey(sKey.Target);
 
 
                         Delegate proxyDelegate = handlerDispatchDelegateCacheProvider.DelegateProxyCache.GetOrAdd(new MethodSubscriptionKind(sKey.Method, sKey.SubscriptionKind));

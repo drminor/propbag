@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DRM.TypeSafePropertyBag.UnUsed
+namespace DRM.TypeSafePropertyBag.Unused
 {
     public class IDisposableTemplate : IDisposable
     {

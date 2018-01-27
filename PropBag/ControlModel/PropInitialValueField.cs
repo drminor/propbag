@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 
 using System.Xml.Serialization;
 using System.ComponentModel;
+using DRM.TypeSafePropertyBag;
 
-namespace DRM.PropBag.ControlModel
+namespace DRM.PropBag
 {
-    public class PropInitialValueField : NotifyPropertyChangedBase, IEquatable<PropInitialValueField>
+    public class PropInitialValueField : NotifyPropertyChangedBase, IEquatable<PropInitialValueField>, IPropInitialValueField
     {
         string iv;
         bool stu;
@@ -88,11 +89,35 @@ namespace DRM.PropBag.ControlModel
             }
         }
 
-        public static PropInitialValueField UndefinedInitialValueField
+        public static IPropInitialValueField UndefinedInitialValueField
         {
             get
             {
-                return new PropInitialValueField(initialValue: null, setToDefault: false, setToUndefined: true, setToNull: false, setToEmptyString: false, valueCreator: null);
+                return new PropInitialValueField
+                    (
+                    initialValue: null,
+                    setToDefault: false,
+                    setToUndefined: true,
+                    setToNull: false,
+                    setToEmptyString: false,
+                    valueCreator: null
+                    );
+            }
+        }
+
+        public static IPropInitialValueField UseDefaultInitialValueField
+        {
+            get
+            {
+                return new PropInitialValueField
+                    (
+                    initialValue: null,
+                    setToDefault: true,
+                    setToUndefined: false,
+                    setToNull: false,
+                    setToEmptyString: false,
+                    valueCreator: null
+                    );
             }
         }
     }

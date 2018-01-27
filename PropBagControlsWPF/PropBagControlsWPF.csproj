@@ -8,7 +8,7 @@
     <OutputType>library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>DRM.PropBag.ControlsWPF</RootNamespace>
-    <AssemblyName>WPFControls</AssemblyName>
+    <AssemblyName>PropBag.WPFControls</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -47,6 +47,10 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Activators\IProvideAPropFactoryCreator.cs" />
+    <Compile Include="Activators\IAMServiceRef.cs" />
+    <Compile Include="Activators\IPSServiceRef.cs" />
+    <Compile Include="Activators\MapperRequestProvider.cs" />
     <Compile Include="Binders\BindingTarget.cs" />
     <Compile Include="Binders\DataSourceChangedEventArgs.cs" />
     <Compile Include="Binders\DataSourceChangedEventHandler.cs" />
@@ -71,9 +75,7 @@
     <None Include="Converters\LocalizableDescriptionAttribute.cs" />
     <Compile Include="Mapper\MapperRequest.cs" />
     <Compile Include="Template\DoWhenChangedAction.cs" />
-    <Compile Include="Converters\DuoActionTypeConverter.cs">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Compile>
+    <Compile Include="Converters\DuoActionTypeConverter.cs" />
     <Compile Include="Template\InitialValueField.cs" />
     <Compile Include="Binders\MyMultiValueConveter.cs" />
     <Compile Include="Binders\MyBindingEngine.cs" />
@@ -125,6 +127,10 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AutoMapperSupport\AutoMapperSupport.csproj">
+      <Project>{10cf1c6f-f877-49a8-8678-6947f55e6920}</Project>
+      <Name>AutoMapperSupport</Name>
+    </ProjectReference>
     <ProjectReference Include="..\PropBag\PropBag.csproj">
       <Project>{7387b893-fbdc-4b9c-ac9e-0b56388b46c1}</Project>
       <Name>PropBag</Name>

@@ -1,17 +1,25 @@
 ﻿using System.Collections.Generic;
 using System.Windows;
 
-namespace DRM.PropBag.ControlsWPF
+namespace DRM.PropBagControlsWPF
 {
     public interface IPropBagTemplateProvider
     {
-        bool CanFindPropBagTemplateWithJustKey { get; }
+        bool CanFindPropBagTemplateWithJustAKey { get; }
 
         PropBagTemplate GetPropBagTemplate(string resourceKey);
         PropBagTemplate GetPropBagTemplate(ResourceDictionary resources, string resourceKey);
         Dictionary<string, PropBagTemplate> GetPropBagTemplates(ResourceDictionary resources);
+    }
 
-        MapperRequest GetMapperRequest(string resourceKey);
-        MapperRequest GetMapperRequest(ResourceDictionary resources, string resourceKey);
+    public interface IMapperRequestProvider
+    {
+        bool CanFindMapperRequestWithJustAKey { get; }
+
+        MapperRequestTemplate GetMapperRequest(string resourceKey);
+        MapperRequestTemplate GetMapperRequest(ResourceDictionary resources, string resourceKey);
+
+        Dictionary<string, MapperRequestTemplate> GetMapperRequests(ResourceDictionary resources);
+
     }
 }

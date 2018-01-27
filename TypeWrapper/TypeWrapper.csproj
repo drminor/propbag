@@ -7,8 +7,8 @@
     <ProjectGuid>{7C45D001-90D6-4521-82AE-41F9492F8ECE}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>DRM.TypeWrapper</RootNamespace>
-    <AssemblyName>TypeWrapper</AssemblyName>
+    <RootNamespace>DRM.PropBag.TypeWrapper</RootNamespace>
+    <AssemblyName>PropBag.TypeWrapper</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -61,10 +61,6 @@
     <Compile Include="WasEmittedAttribute.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\PropBag\PropBag.csproj">
-      <Project>{7387b893-fbdc-4b9c-ac9e-0b56388b46c1}</Project>
-      <Name>PropBag</Name>
-    </ProjectReference>
     <ProjectReference Include="..\TypeSafePropertyBag\TypeSafePropertyBag.csproj">
       <Project>{bbb1e311-374e-4c91-a313-1667d83767db}</Project>
       <Name>TypeSafePropertyBag</Name>

@@ -1,8 +1,8 @@
-﻿using DRM.PropBag.ControlModel;
+﻿using DRM.TypeSafePropertyBag;
 using System;
 using System.Collections.Generic;
 
-namespace DRM.TypeWrapper.TypeDesc
+namespace DRM.PropBag.TypeWrapper.TypeDesc
 {
     public class SimpleTypeDescriptionProvider : ITypeDescriptionProvider
     {
@@ -12,7 +12,7 @@ namespace DRM.TypeWrapper.TypeDesc
         {
         }
 
-        public TypeDescription GetTypeDescription(PropModel propModel, Type typeToWrap, string className)
+        public TypeDescription GetTypeDescription(IPropModel propModel, Type typeToWrap, string className)
         {
             NewTypeRequest request = new NewTypeRequest(propModel, typeToWrap, className);
 
@@ -33,11 +33,11 @@ namespace DRM.TypeWrapper.TypeDesc
             return result;
         }
 
-        private IEnumerable<PropertyDescription> GetPropertyDescriptions(PropModel pm)
+        private IEnumerable<PropertyDescription> GetPropertyDescriptions(IPropModel pm)
         {
             List<PropertyDescription> result = new List<PropertyDescription>();
 
-            foreach (PropItem pi in pm.Props)
+            foreach (IPropItem pi in pm.Props)
             {
                 result.Add(new PropertyDescription(pi.PropertyName, pi.PropertyType, canWrite: true));
             }

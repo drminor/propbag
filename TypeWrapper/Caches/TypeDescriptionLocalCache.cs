@@ -1,6 +1,6 @@
 ﻿using DRM.TypeSafePropertyBag.Fundamentals;
 
-namespace DRM.TypeWrapper.TypeDesc
+namespace DRM.PropBag.TypeWrapper.TypeDesc
 {
     public class TypeDescriptionLocalCache : ICacheTypeDescriptions
     {

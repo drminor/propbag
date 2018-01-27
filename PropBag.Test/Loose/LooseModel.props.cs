@@ -4,10 +4,13 @@ using DRM.PropBag;
 
 namespace PropBagLib.Tests
 {
+    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
+
     public partial class LooseModel : PropBag
     {
 
-		public LooseModel(PropBagTypeSafetyMode typeSafetyMode, IPropFactory propFactory) : base(typeSafetyMode, propFactory)
+		public LooseModel(PropBagTypeSafetyMode typeSafetyMode, PSAccessServiceCreatorInterface storeAccessCreator, IPropFactory propFactory)
+            : base(typeSafetyMode, storeAccessCreator, propFactory)
         {
             AddProp<object>("PropObject");
             AddProp<string>("PropString");

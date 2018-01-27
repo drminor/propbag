@@ -1,20 +1,32 @@
-﻿using DRM.TypeWrapper;
-using DRM.TypeWrapper.TypeDesc;
-using DRM.ViewModelTools;
-
+﻿using DRM.PropBag.TypeWrapper;
+using DRM.PropBag.TypeWrapper.TypeDesc;
+using DRM.PropBag.ViewModelTools;
 using DRM.TypeSafePropertyBag;
+using System;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
+    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
+
     public class SimplePropBagMapperBuilderProvider : IPropBagMapperBuilderProvider
     {
-        private ICreateWrapperType WrapperTypeCreator { get; }
+        private ICreateWrapperTypes WrapperTypeCreator { get; }
         private IViewModelActivator ViewModelActivator { get; }
 
-        public SimplePropBagMapperBuilderProvider(ICreateWrapperType wrapperTypeCreator, IViewModelActivator viewModelActivator)
+        private PSAccessServiceCreatorInterface _storeAccessCreator;
+
+
+        public SimplePropBagMapperBuilderProvider
+            (
+            ICreateWrapperTypes wrapperTypesCreator,
+            IViewModelActivator viewModelActivator, 
+            PSAccessServiceCreatorInterface storeAccessCreator
+            )
         {
-            WrapperTypeCreator = wrapperTypeCreator ?? GetSimpleWrapperTypeCreator();
+            WrapperTypeCreator = wrapperTypesCreator ?? GetSimpleWrapperTypeCreator();
             ViewModelActivator = viewModelActivator ?? new SimpleViewModelActivator();
+            _storeAccessCreator = storeAccessCreator ?? throw new ArgumentNullException(nameof(storeAccessCreator));
+
         }
 
         public IBuildPropBagMapper<TSource, TDestination> GetPropBagMapperBuilder<TSource, TDestination>
@@ -27,13 +39,14 @@ namespace DRM.PropBag.AutoMapperSupport
                 (
                     mapperConfigurationBuilder: mapperConfigurationBuilder,
                     wrapperTypeCreator: WrapperTypeCreator,
-                    viewModelActivator: ViewModelActivator
+                    viewModelActivator: ViewModelActivator,
+                    storeAccessCreator: _storeAccessCreator
                 );
 
             return result;
         }
 
-        private ICreateWrapperType GetSimpleWrapperTypeCreator()
+        private ICreateWrapperTypes GetSimpleWrapperTypeCreator()
         {
             // -- Build WrapperType Caching Service
             // Used by some ViewModel Activators to emit types, i.e., modules.
@@ -55,11 +68,10 @@ namespace DRM.PropBag.AutoMapperSupport
                 typeDescriptionProvider: typeDescriptionProvider
                 );
 
-            ICreateWrapperType result = new SimpleWrapperTypeCreator
+            ICreateWrapperTypes result = new SimpleWrapperTypeCreator
                 (
                 wrapperTypeCachingService: wrapperTypeCachingService,
-                typeDescCachingService: typeDescCachingService//,
-                //propModelProvider: null
+                typeDescCachingService: typeDescCachingService
                 );
 
             return result;

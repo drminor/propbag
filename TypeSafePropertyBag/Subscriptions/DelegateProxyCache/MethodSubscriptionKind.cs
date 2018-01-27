@@ -24,15 +24,44 @@ namespace DRM.TypeSafePropertyBag
             _hashCode = ComputeHashCode();
         }
 
+        //public Type GetDelegateType(MethodInfo method)
+        //{
+        //    Type result = Expression.GetDelegateType
+        //        (
+        //        ToEnumerable(method.ReflectedType) // This line used to read: new Type[] { method.ReflectedType } 
+        //        .Concat(method.GetParameters().Select(p => p.ParameterType)
+        //        .Concat(ToEnumerable(method.ReflectedType) /*new Type[] { method.ReturnType }*/))
+        //        .ToArray());
+        //    return result;
+        //}
+
         public Type GetDelegateType(MethodInfo method)
         {
-            Type result = Expression.GetDelegateType
-                (
-                new Type[] { method.ReflectedType }
-                .Concat(method.GetParameters().Select(p => p.ParameterType)
-                .Concat(new Type[] { method.ReturnType }))
-                .ToArray());
+            List<Type> tInfo = method.GetParameters().Select(p => p.ParameterType).ToList();
+            tInfo.Insert(0, method.ReflectedType);
+            tInfo.Add(method.ReturnType);
+
+            Type result = Expression.GetDelegateType(tInfo.ToArray());
+
             return result;
+        }
+
+        /// <summary>
+        /// Creates an IEnumerable<typeparamref name="T"/> from a single instance of T.
+        /// </summary>
+        /// <typeparam name="T">The type of the instance from which to create the IEnumerable<typeparamref name="T"/></typeparam>
+        /// <param name="item">The instance of type T which will be the only element in the enumeration.</param>
+        /// <returns>A new IEumerable<typeparamref name="T"/> containing item as its only member.</returns>
+        public static IEnumerable<T> ToEnumerable<T>(T item)
+        {
+            if (item == null)
+            {
+                yield break;
+            }
+            else
+            {
+                yield return item;
+            }
         }
 
         private int ComputeHashCode()

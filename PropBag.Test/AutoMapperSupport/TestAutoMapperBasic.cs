@@ -1,6 +1,5 @@
 ﻿using DRM.PropBag;
 using DRM.PropBag.AutoMapperSupport;
-using DRM.PropBag.ControlModel;
 using DRM.TypeSafePropertyBag;
 using NUnit.Framework;
 using System;
@@ -10,7 +9,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
     [TestFixtureAttribute]
     public class TestAutoMapperBasic
     {
-        SimpleAutoMapperProvider _amp;
+        IProvideAutoMappers _amp;
         IPropFactory _propFactory_V1;
 
         [OneTimeSetUp]
@@ -46,7 +45,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 _amp.RegisterMapperRequest<MyModel3, DestinationModel3>
                 (
                     propModel: propModel,
-                    targetType: typeToWrap,
+                    typeToWrap: typeToWrap,
                     configPackageName: configPackageName
                 );
 
@@ -66,7 +65,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 _amp.RegisterMapperRequest<MyModel3, DestinationModel3>
                 (
                     propModel: propModel,
-                    targetType: typeToWrap,
+                    typeToWrap: typeToWrap,
                     configPackageName: configPackageName
                 );
 
@@ -96,7 +95,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 _amp.RegisterMapperRequest<MyModel3, DestinationModel3>
                 (
                     propModel: propModel,
-                    targetType: typeToWrap,
+                    typeToWrap: typeToWrap,
                     configPackageName: configPackageName
                 );
 
@@ -119,7 +118,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 _amp.RegisterMapperRequest<MyModel3, DestinationModel3>
                 (
                     propModel: propModel,
-                    targetType: typeToWrap,
+                    typeToWrap: typeToWrap,
                     configPackageName: configPackageName
                 );
 
@@ -149,7 +148,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 _amp.RegisterMapperRequest<MyModel3, DestinationModel3>
                 (
                     propModel: propModel,
-                    targetType: typeToWrap,
+                    typeToWrap: typeToWrap,
                     configPackageName: configPackageName
                 );
 
@@ -169,6 +168,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 namespaceName: "PropBagLib.Tests.AutoMapperSupport",
                 deriveFrom: DeriveFromClassModeEnum.PropBag,
                 targetType: null,
+                propStoreServiceProviderType: null,
                 propFactory: null,
                 typeSafetyMode: PropBagTypeSafetyMode.Tight,
                 deferMethodRefResolution: true,
@@ -184,8 +184,8 @@ namespace PropBagLib.Tests.AutoMapperSupport
             PropInitialValueField pivf = new PropInitialValueField(initialValue: null,
                 setToDefault: true, setToUndefined: false, setToNull: false, setToEmptyString: false);
 
-            PropItem propItem = new PropItem(type: typeof(Guid), name: "ProductId",
-                hasStore: true, typeIsSolid: true, propKind: PropKindEnum.Prop,
+            PropItemModel propItem = new PropItemModel(type: typeof(Guid), name: "ProductId",
+                storageStrategy: PropStorageStrategyEnum.Internal, typeIsSolid: true, propKind: PropKindEnum.Prop,
                 propTypeInfoField: null, initialValueField: pivf,
                 extraInfo: null, comparer: null, itemType: null);
             result.Props.Add(propItem);
@@ -194,8 +194,8 @@ namespace PropBagLib.Tests.AutoMapperSupport
             pivf = new PropInitialValueField(initialValue: null,
                 setToDefault: true, setToUndefined: false, setToNull: false, setToEmptyString: false);
 
-            propItem = new PropItem(type: typeof(int), name: "Amount",
-                hasStore: true, typeIsSolid: true, propKind: PropKindEnum.Prop,
+            propItem = new PropItemModel(type: typeof(int), name: "Amount",
+                storageStrategy: PropStorageStrategyEnum.Internal, typeIsSolid: true, propKind: PropKindEnum.Prop,
                 propTypeInfoField: null, initialValueField: pivf,
                 extraInfo: null, comparer: null, itemType: null);
             result.Props.Add(propItem);
@@ -205,8 +205,8 @@ namespace PropBagLib.Tests.AutoMapperSupport
             pivf = new PropInitialValueField(initialValue: null,
                 setToDefault: true, setToUndefined: false, setToNull: false, setToEmptyString: false);
 
-            propItem = new PropItem(type: typeof(double), name: "Size",
-                hasStore: true, typeIsSolid: true, propKind: PropKindEnum.Prop,
+            propItem = new PropItemModel(type: typeof(double), name: "Size",
+                storageStrategy: PropStorageStrategyEnum.Internal, typeIsSolid: true, propKind: PropKindEnum.Prop,
                 propTypeInfoField: null, initialValueField: pivf,
                 extraInfo: null, comparer: null, itemType: null);
             result.Props.Add(propItem);
@@ -215,8 +215,8 @@ namespace PropBagLib.Tests.AutoMapperSupport
             pivf = new PropInitialValueField(initialValue: null,
                 setToDefault: false, setToUndefined: false, setToNull: true, setToEmptyString: false);
 
-            propItem = new PropItem(type: typeof(MyModel4), name: "Deep",
-                hasStore: true, typeIsSolid: true, propKind: PropKindEnum.Prop,
+            propItem = new PropItemModel(type: typeof(MyModel4), name: "Deep",
+                storageStrategy: PropStorageStrategyEnum.Internal, typeIsSolid: true, propKind: PropKindEnum.Prop,
                 propTypeInfoField: null, initialValueField: pivf,
                 extraInfo: null, comparer: null, itemType: null);
             result.Props.Add(propItem);
@@ -225,38 +225,5 @@ namespace PropBagLib.Tests.AutoMapperSupport
         }
 
         #endregion
-
-        #region GET SIZE
-
-        private void GetSizeX()
-        {
-            long StopBytes = 0;
-            object myFoo;
-
-            long StartBytes = System.GC.GetTotalMemory(true);
-            myFoo = new object();
-            StopBytes = System.GC.GetTotalMemory(true);
-
-            string result = "Size is " + ((long)(StopBytes - StartBytes)).ToString();
-
-            GC.KeepAlive(myFoo); // This ensure a reference to object keeps object in memory
-        }
-
-        private void GetSizeY()
-        {
-
-            //long size = 0;
-            //object o = new object();
-            //using (Stream s = new MemoryStream())
-            //{
-            //    BinaryFormatter formatter = new BinaryFormatter();
-            //    formatter.Serialize(s, o);
-            //    size = s.Length;
-            //}
-        }
-
-        #endregion
-
-
     }
 }

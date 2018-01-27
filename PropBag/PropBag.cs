@@ -1,28 +1,28 @@
 ﻿using DRM.PropBag.Caches;
-using DRM.PropBag.ControlModel;
 using DRM.TypeSafePropertyBag;
+using DRM.TypeSafePropertyBag.DataAccessSupport;
 using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Windows;
+using System.Text;
+using System.Windows.Data;
 
 namespace DRM.PropBag
 {
-    using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
-    using L2KeyManType = IL2KeyMan<UInt32, String>;
     using PropIdType = UInt32;
     using PropNameType = String;
-    using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
-    using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
-    using SubCacheType = ICacheSubscriptions<UInt32>;
+    using IRegisterBindingsFowarderType = IRegisterBindingsForwarder<UInt32>;
+
+    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
+    using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
 
     #region Summary and Remarks
 
@@ -45,33 +45,33 @@ namespace DRM.PropBag
 
     #endregion
 
-    public partial class PropBag : IPropBag, IPropBagInternal
+    public partial class PropBag : IPropBag, IPropBagInternal, IRegisterBindingsFowarderType
     {
         #region Member Declarations
 
         // These items are provided to us.
-        private IPropFactory _propFactory { get; set; }
-        private PSAccessServiceType _ourStoreAccessor { get; set; }
+        protected internal IPropFactory _propFactory { get; set; }
+        protected internal PSAccessServiceInterface _ourStoreAccessor { get; set; }
 
         // We are responsible for these
-        private ITypeSafePropBagMetaData _ourMetaData;
+        private ITypeSafePropBagMetaData _ourMetaData { get; set; }
         protected virtual ITypeSafePropBagMetaData OurMetaData { get { return _ourMetaData; } set { _ourMetaData = value; } }
-        private PropBagTypeSafetyMode _typeSafetyMode { get; set; }
+        private PropBagTypeSafetyMode _typeSafetyMode { get; }
+
+        private IDictionary<string, IViewManagerProviderKey> _foreignViewManagers; // TODO: Consider creating a lazy property accessor for this field.
 
         private object _sync = new object();
 
-        //private PB_EventHolder _eventHolder { get; set; }
-        //private readonly bool _notifyWhenOldIsUndefined;
-
         // These fulfill the IPropBagInternal contract
-        public PSAccessServiceType ItsStoreAccessor => _ourStoreAccessor;
-        public L2KeyManType Level2KeyManager => _ourStoreAccessor.Level2KeyManager;
+        public PSAccessServiceInterface /*IPropBagInternal.*/ItsStoreAccessor => _ourStoreAccessor;
 
         #endregion
 
         #region Public Events and Properties
 
         public string FullClassName => OurMetaData.FullClassName;
+
+        // TODO: Consider making the PropFactory property part of the PropBagInternal
         public IPropFactory PropFactory => _propFactory;
         public PropBagTypeSafetyMode TypeSafetyMode => _typeSafetyMode;
 
@@ -157,68 +157,48 @@ namespace DRM.PropBag
 
         #region Constructor
 
-        ///// <summary>
-        ///// This is constructor creates an instance with minimal resources, and is not operational.
-        ///// It can be called in those cases where an instance is required as a target to use when calling
-        ///// a method from the System.Reflection namespace.
-        ///// </summary>
-        ///// <param name="dummy"></param>
-        //public PropBag(byte dummy)
-        //{
-        //    _typeSafetyMode = PropBagTypeSafetyMode.None;
-        //    _propFactory = null;
-        //    _ourStoreAccessor = null;
-        //    OurMetaData = BuildMetaData(this._typeSafetyMode, classFullName: null, propFactory: null);
-        //    _eventHolder = null;
-        //}
-
-        //protected PropBag()
-        //    : this(PropBagTypeSafetyMode.None, null, null) { }
-
-        //protected PropBag(PropBagTypeSafetyMode typeSafetyMode)
-        //    : this(typeSafetyMode, null, null) { }
-
-        //// TODO: remove this constructor.
-        //protected PropBag(PropBagTypeSafetyMode typeSafetyMode, IPropFactory propFactory)
-        //    : this(typeSafetyMode, propFactory, null) { }
-
         /// <summary>
-        /// 
+        /// Creates a new PropBag using the specified PropModel and Property Store Access Creator.
         /// </summary>
-        /// <param name="pm"></param>
+        /// <param name="propModel">An instance of the class: DRM.PropBag.PropModel that defines the PropItems that this
+        /// PropBag will have.</param>
+        /// <param name="storeAcessorCreator"></param>
         /// <param name="propFactory">The PropFactory to use instead of the one specified by the PropModel.</param>
-        public PropBag(ControlModel.PropModel pm, string fullClassName = null, IPropFactory propFactory = null)
-            : this(pm.TypeSafetyMode, propFactory ?? pm.PropFactory, fullClassName)
+        /// <param name="fullClassName">The namespace and class name to use instead of the one specified by the PropMode.</param>
+        public PropBag(IPropModel propModel, PSAccessServiceCreatorInterface storeAcessorCreator, IPropFactory propFactory = null, string fullClassName = null)
+            : this(propModel.TypeSafetyMode, storeAcessorCreator, propModel.PropFactory ?? propFactory, fullClassName ?? propModel.FullClassName)
         {
-            Hydrate(pm);
-            int testc = _ourStoreAccessor.Level2KeyManager.PropertyCount;
+            Hydrate(propModel);
+            int testc = _ourStoreAccessor.PropertyCount;
         }
 
-        protected PropBag(IPropBag copySource)
-            : this(copySource.TypeSafetyMode, copySource.PropFactory, copySource.FullClassName)
+        protected PropBag(IPropBag copySource, PSAccessServiceInterface storeAccessor, IPropFactory propFactory)
         {
-            CloneProps(copySource);
+            _typeSafetyMode = copySource.TypeSafetyMode;
+            _propFactory = propFactory;
+
+            _ourMetaData = BuildMetaData(_typeSafetyMode, copySource.FullClassName, _propFactory);
+            _ourStoreAccessor = CloneProps(copySource, storeAccessor);
         }
 
-        protected PropBag(PropBagTypeSafetyMode typeSafetyMode, IPropFactory propFactory, string fullClassName = null)
+        protected PropBag(PropBagTypeSafetyMode typeSafetyMode, PSAccessServiceCreatorInterface storeAcessorCreator, IPropFactory propFactory, string fullClassName = null)
         {
+            if (storeAcessorCreator == null) throw new ArgumentNullException(nameof(storeAcessorCreator));
+
             _typeSafetyMode = typeSafetyMode;
             _propFactory = propFactory ?? throw new ArgumentNullException(nameof(propFactory));
 
             _ourMetaData = BuildMetaData(_typeSafetyMode, fullClassName, _propFactory);
 
-            _ourStoreAccessor = _propFactory.PropStoreAccessServiceProvider.CreatePropStoreService(this);
+            _foreignViewManagers = new Dictionary<string, IViewManagerProviderKey>();
 
-            //_sync = new object();
-            //_eventHolder = new PB_EventHolder();
-
-            //_notifyWhenOldIsUndefined = false;
+            _ourStoreAccessor = storeAcessorCreator.CreatePropStoreService(this);
         }
 
-        protected TypeSafePropBagMetaData BuildMetaData(PropBagTypeSafetyMode typeSafetyMode, string classFullName, IPropFactory propFactory)
+        protected ITypeSafePropBagMetaData BuildMetaData(PropBagTypeSafetyMode typeSafetyMode, string classFullName, IPropFactory propFactory)
         {
             classFullName = classFullName ?? GetFullTypeNameOfThisInstance();
-            TypeSafePropBagMetaData result = new TypeSafePropBagMetaData(classFullName, typeSafetyMode, propFactory);
+            ITypeSafePropBagMetaData result = new TypeSafePropBagMetaData(classFullName, typeSafetyMode, propFactory);
             return result;
         }
 
@@ -234,7 +214,296 @@ namespace DRM.PropBag
             return className;
         }
 
-        protected void Hydrate(PropModel pm)
+        #endregion
+
+        #region PropModel Processing
+
+        protected void Hydrate(IPropModel pm)
+        {
+            CheckClassNames(pm);
+
+            foreach (IPropItem pi in pm.Props)
+            {
+                if(pi.PropertyName == "PersonList")
+                {
+                    System.Diagnostics.Debug.WriteLine("We are creating prop item: PersonList.");
+                }
+
+                PropIdType propId;
+                IPropData newPropItem;
+                IProp typedProp;
+
+                if (pi.PropKind == PropKindEnum.CollectionViewSource)
+                {
+                    // Get the name of the Collection-Type PropItem that provides the data for this CollectionViewSource.
+                    string srcPropName = pi.BinderField.Path;
+
+                    //FetchData_Test(srcPropName, pi.PropertyType);
+
+                    // Get the ViewManager for this source collection from the Property Store.
+                    if (TryGetViewManager(srcPropName, pi.PropertyType, out IManageCViews cViewManager))
+                    {
+                        IProvideAView viewProvider = cViewManager.GetDefaultViewProvider();
+
+                        // Use our PropFactory to create a CollectionView PropItem using the ViewProvider.
+                        typedProp = _propFactory.CreateCVSProp(pi.PropertyName, viewProvider);
+                        newPropItem = AddProp(pi.PropertyName, typedProp, out propId);
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException($"Could not retrieve the (generic) CViewManager for source PropItem: {srcPropName}.");
+                    }
+                }
+                else if(pi.PropKind == PropKindEnum.CollectionView)
+                {
+                    IProvideAView viewProvider;
+                    // Get the name of the Collection-Type PropItem that provides the data for this CollectionViewSource.
+                    string binderPath = pi.BinderField?.Path;
+
+                    if(binderPath != null)
+                    {
+                        IViewManagerProviderKey viewManagerProviderKey = BuildTheViewManagerProviderKey(pi);
+
+                        IProvideACViewManager cViewManagerProvider = GetOrAddCViewManagerProviderGen(pi.PropertyType, viewManagerProviderKey);
+
+                        // Get the ViewManager for this source DataAccessLayer(IDoCRUD<T>) from the Property Store.
+                        //IManageCViews cViewManager = GetOrAddCViewManagerGen(pi.PropertyType, srcPropName, pi.MapperRequest);
+
+                        // Save the key so that we can easily fetch the ViewManagerProvider at some later time.
+
+                        if(_foreignViewManagers.ContainsKey(pi.PropertyName))
+                        {
+                            _foreignViewManagers[pi.PropertyName] = viewManagerProviderKey;
+                        }
+                        else
+                        {
+                            _foreignViewManagers.Add(pi.PropertyName, viewManagerProviderKey);
+                        }
+
+                        cViewManagerProvider.ViewManagerChanged += CViewManagerProvider_ViewManagerChanged;
+
+                        IManageCViews cViewManager = cViewManagerProvider.CViewManager;
+                        if (cViewManager != null)
+                        {
+                            viewProvider = cViewManager.GetDefaultViewProvider();
+                        }
+                        else
+                        {
+                            viewProvider = null;
+                        }
+                    }
+                    else
+                    {
+                        viewProvider = null;
+                    }
+
+                    // Use our PropFactory to create a CollectionView PropItem using the ViewProvider.
+                    typedProp = _propFactory.CreateCVProp(pi.PropertyName, viewProvider);
+                    newPropItem = AddProp(pi.PropertyName, typedProp, out propId);
+                }
+                else
+                {
+                    newPropItem = processProp(pi, out propId);
+                }
+
+                if (pi.PropKind != PropKindEnum.CollectionView && pi.PropKind != PropKindEnum.CollectionViewSource_RO && pi.BinderField?.Path != null)
+                {
+                    processBinderField(pi, propId, newPropItem);
+                }
+            }
+        }
+
+        private void CViewManagerProvider_ViewManagerChanged(object sender, EventArgs e)
+        {
+            // IS THIS LINE Executed??
+            if(sender is IProvideACViewManager cViewManagerProvider)
+            {
+                IViewManagerProviderKey viewManagerProviderKey = cViewManagerProvider.ViewManagerProviderKey;
+                PropNameType propertyName = GetTargetPropNameForView(_foreignViewManagers, viewManagerProviderKey, out Type propertyType);
+
+                try
+                {
+                    IPropData propData = GetPropGen(propertyName, propertyType,
+                        haveValue: false, value: null, alwaysRegister: false, mustBeRegistered: true,
+                        neverCreate: true, desiredHasStoreValue: null, wasRegistered: out bool wasRegistered, propId: out PropIdType propId);
+
+                    if(propData.TypedProp /*.TypedValueAsObject*/ is IUseAViewProvider viewProviderHolder)
+                    {
+                        IProvideAView viewProvider = cViewManagerProvider.CViewManager.GetDefaultViewProvider();
+                        viewProviderHolder.ViewProvider = viewProvider;
+                    }
+                }
+                catch (InvalidOperationException ioe)
+                {
+                    throw new InvalidOperationException($"The {nameof(IProvideACViewManager)} raised the ViewManagerChanged and the PropertyName associated with this ViewManger: {propertyName} could not be found in this PropBag's list of registered PropItems.");
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException($"The {nameof(IProvideACViewManager)} raised the ViewManagerChanged event but the sender was not a {nameof(IProvideACViewManager)}.");
+            }
+        }
+
+        private IViewManagerProviderKey BuildTheViewManagerProviderKey(IPropItem pi)
+        {
+            if (pi == null) throw new ArgumentNullException(nameof(pi));
+
+            if(pi.BinderField == null || pi.BinderField.Path == null)
+            {
+                throw new InvalidOperationException("The BinderField Path is null.");
+            }
+
+            LocalBindingInfo localBindingInfo = new LocalBindingInfo(new LocalPropertyPath(pi.BinderField.Path));
+            IViewManagerProviderKey result = new ViewManagerProviderKey(localBindingInfo, pi.MapperRequest);
+            return result;
+        }
+
+        private PropNameType GetTargetPropNameForView(IDictionary<PropNameType, IViewManagerProviderKey> viewManagerProviders, IViewManagerProviderKey viewManagerProviderKey, out Type propertyType)
+        {
+            KeyValuePair<string, IViewManagerProviderKey> kvp = viewManagerProviders.FirstOrDefault(x => x.Value == viewManagerProviderKey);
+            PropNameType propertyName = kvp.Key;
+            propertyType = viewManagerProviderKey.MapperRequest.PropModel.TypeToCreate;
+            return propertyName;
+        }
+
+        private void processBinderField(IPropItem pi, PropIdType propId, IPropData propItem)
+        {
+            switch (pi.PropKind)
+            {
+                case PropKindEnum.Prop:
+                    {
+                        LocalBindingInfo bindingInfo = new LocalBindingInfo(new LocalPropertyPath(pi.BinderField.Path));
+                        propItem.TypedProp.RegisterBinding((IRegisterBindingsFowarderType)this, propId, bindingInfo);
+                        break;
+                    }
+                //case PropKindEnum.Enumerable:
+                //    break;
+                //case PropKindEnum.Enumerable_RO:
+                //    break;
+                //case PropKindEnum.EnumerableTyped:
+                //    break;
+                //case PropKindEnum.EnumerableTyped_RO:
+                //    break;
+                //case PropKindEnum.ObservableCollection:
+                //    break;
+                //case PropKindEnum.ObservableCollection_RO:
+                //    break;
+
+                case PropKindEnum.CollectionViewSource:
+                    throw new InvalidOperationException($"LocalBinding for {pi.PropKind} is not handled by the {nameof(processBinderField)} method.");
+                case PropKindEnum.CollectionViewSource_RO:
+                    goto case PropKindEnum.CollectionViewSource;
+
+                //case PropKindEnum.CollectionView:
+                //    break;
+                //case PropKindEnum.DataTable:
+                //    break;
+                //case PropKindEnum.DataTable_RO:
+                //    break;
+                default:
+                    throw new InvalidOperationException($"The PropKind of {pi.PropKind} is not recognized, or LocalBinding is not supported for PropItems of this kind.");
+            }
+        }
+
+        private IPropData processProp(IPropItem pi, out PropIdType propId)
+        {
+            object ei = pi.ExtraInfo;
+
+            Delegate comparer;
+            bool useRefEquality;
+
+            if (pi.ComparerField == null)
+            {
+                comparer = null;
+                useRefEquality = false;
+            }
+            else
+            {
+                comparer = pi.ComparerField.Comparer;
+                useRefEquality = pi.ComparerField.UseRefEquality;
+            }
+
+            if (pi.InitialValueField == null)
+            {
+                pi.InitialValueField = PropInitialValueField.UndefinedInitialValueField;
+            }
+
+            //EventHandler<PcGenEventArgs> doWhenChangedAction = pi.DoWhenChangedField?.DoWhenChangedAction;
+
+            //if(doWhenChangedAction == null && (pi.DoWhenChangedField?.DoWhenGenHandlerGetter != null))
+            //{
+            //    Func<object, EventHandler<PcGenEventArgs>> rr = pi.DoWhenChangedField.DoWhenGenHandlerGetter;
+
+            //    doWhenChangedAction = rr(this);
+            //}
+
+            IProp propGen;
+
+            if (pi.StorageStrategy == PropStorageStrategyEnum.Internal && !pi.InitialValueField.SetToUndefined)
+            {
+                if (pi.InitialValueField.ValueCreator != null)
+                {
+                    object newValue = pi.InitialValueField.ValueCreator();
+                    propGen = _propFactory.CreateGenFromObject(pi.PropertyType, newValue, pi.PropertyName, ei, pi.StorageStrategy, pi.TypeIsSolid,
+                        pi.PropKind, comparer, useRefEquality, pi.ItemType);
+                }
+                else
+                {
+                    bool useDefault = pi.InitialValueField.SetToDefault;
+                    string value;
+
+                    // TODO: Fix this??
+                    if (pi.InitialValueField.SetToEmptyString && pi.PropertyType == typeof(Guid))
+                    {
+                        const string EMPTY_GUID = "00000000-0000-0000-0000-000000000000";
+                        value = EMPTY_GUID;
+                    }
+                    else
+                    {
+                        value = pi.InitialValueField.GetStringValue();
+                    }
+
+                    propGen = _propFactory.CreateGenFromString(pi.PropertyType, value, useDefault, pi.PropertyName, ei, pi.StorageStrategy, pi.TypeIsSolid,
+                        pi.PropKind, comparer, useRefEquality, pi.ItemType);
+                }
+            }
+            else
+            {
+                propGen = _propFactory.CreateGenWithNoValue(pi.PropertyType, pi.PropertyName, ei, pi.StorageStrategy, pi.TypeIsSolid,
+                    pi.PropKind, comparer, useRefEquality, pi.ItemType);
+            }
+
+            // If DoAfterNotify is true, use the 'Last' group, otherwise use the 'standard' group.
+            //SubscriptionPriorityGroup priorityGroup = pi.DoWhenChangedField?.DoAfterNotify ?? false ? SubscriptionPriorityGroup.Last : SubscriptionPriorityGroup.Standard;
+
+            IPropData propData;
+            if (pi.DoWhenChangedField != null)
+            {
+                object target;
+                if (pi.DoWhenChangedField.MethodIsLocal)
+                {
+                    target = this;
+                }
+                else
+                {
+                    throw new NotSupportedException("Only local methods are supported.");
+                }
+                propData = AddProp(pi.PropertyName, propGen,
+                    target,
+                    pi.DoWhenChangedField.Method,
+                    pi.DoWhenChangedField.SubscriptionKind,
+                    pi.DoWhenChangedField.PriorityGroup, out propId);
+            }
+            else
+            {
+                propData = AddProp(pi.PropertyName, propGen, out propId);
+            }
+
+            return propData;
+        }
+
+        [Conditional("DEBUG")]
+        private void CheckClassNames(IPropModel pm)
         {
             string cName = GetClassNameOfThisInstance();
             string pCName = pm.ClassName;
@@ -243,112 +512,75 @@ namespace DRM.PropBag
             {
                 System.Diagnostics.Debug.WriteLine($"CLR class name: {cName} does not match PropModel class name: {pCName}.");
             }
+        }
 
-            foreach (DRM.PropBag.ControlModel.PropItem pi in pm.Props)
+        // --- Old Stuff
+
+        //private object GetDalFromPropName(string srcPropName)
+        //{
+        //    if(TryGetPropGen(srcPropName, typeof(IDoCRUD<object>), out IPropData propGen))
+        //    {
+        //        object result = propGen.TypedProp.TypedValueAsObject;
+        //        return result;
+        //    }
+        //}
+
+        public void FetchData_Test(string pName, Type pType)
+        {
+            IProvideAView viewProvider = null;
+            ICollectionView lcv = null;
+
+            IProvideAView viewProvider2 = null;
+            ICollectionView lcv2 = null;
+
+            if (TryGetViewManager(pName, pType, out IManageCViews cViewManager))
             {
-                if(pi.PropertyName == "PersonListView")
-                {
-                    System.Diagnostics.Debug.WriteLine("We are creating prop item: PersonListView.");
-                }
-                object ei = pi.ExtraInfo;
-
-                Delegate comparer;
-                bool useRefEquality;
-
-                if (pi.ComparerField == null)
-                {
-                    comparer = null;
-                    useRefEquality = false;
-                }
-                else
-                {
-                    comparer = pi.ComparerField.Comparer;
-                    useRefEquality = pi.ComparerField.UseRefEquality;
-                }
-
-                if (pi.InitialValueField == null)
-                {
-                    pi.InitialValueField = PropInitialValueField.UndefinedInitialValueField;
-                }
-
-                //EventHandler<PcGenEventArgs> doWhenChangedAction = pi.DoWhenChangedField?.DoWhenChangedAction;
-
-                //if(doWhenChangedAction == null && (pi.DoWhenChangedField?.DoWhenGenHandlerGetter != null))
-                //{
-                //    Func<object, EventHandler<PcGenEventArgs>> rr = pi.DoWhenChangedField.DoWhenGenHandlerGetter;
-
-                //    doWhenChangedAction = rr(this);
-                //}
-
-                IProp pg;
-
-                if (pi.HasStore && !pi.InitialValueField.SetToUndefined)
-                {
-                    if(pi.InitialValueField.ValueCreator != null)
-                    {
-                        object newValue = pi.InitialValueField.ValueCreator();
-                        pg = _propFactory.CreateGenFromObject(pi.PropertyType, newValue, pi.PropertyName, ei, pi.HasStore, pi.TypeIsSolid,
-                            pi.PropKind, comparer, useRefEquality, pi.ItemType);
-                    }
-                    else
-                    {
-                        bool useDefault = pi.InitialValueField.SetToDefault;
-                        string value;
-
-                        // TODO: Fix this??
-                        if (pi.InitialValueField.SetToEmptyString && pi.PropertyType == typeof(Guid))
-                        {
-                            const string EMPTY_GUID = "00000000-0000-0000-0000-000000000000";
-                            value = EMPTY_GUID;
-                        }
-                        else
-                        {
-                            value = pi.InitialValueField.GetStringValue();
-                        }
-
-                        pg = _propFactory.CreateGenFromString(pi.PropertyType, value, useDefault, pi.PropertyName, ei, pi.HasStore, pi.TypeIsSolid,
-                            pi.PropKind, comparer, useRefEquality, pi.ItemType);
-                    }
-                }
-                else
-                {
-                    pg = _propFactory.CreateGenWithNoValue(pi.PropertyType, pi.PropertyName, ei, pi.HasStore, pi.TypeIsSolid,
-                        pi.PropKind, comparer, useRefEquality, pi.ItemType);
-                }
-
-                // If DoAfterNotify is true, use the 'Last' group, otherwise use the 'standard' group.
-                //SubscriptionPriorityGroup priorityGroup = pi.DoWhenChangedField?.DoAfterNotify ?? false ? SubscriptionPriorityGroup.Last : SubscriptionPriorityGroup.Standard;
-
-                IPropData propData;
-                if (pi.DoWhenChangedField != null)
-                {
-                    object target;
-                    if(pi.DoWhenChangedField.MethodIsLocal)
-                    {
-                        target = this;
-                    }
-                    else
-                    {
-                        throw new NotSupportedException("Only local methods are supported.");
-                    }
-                    propData = AddProp(pi.PropertyName, pg,
-                        target, 
-                        pi.DoWhenChangedField.Method, 
-                        pi.DoWhenChangedField.SubscriptionKind, 
-                        pi.DoWhenChangedField.PriorityGroup);
-                }
-                else
-                {
-                    propData = AddProp(pi.PropertyName, pg);
-                }
-
-
-                if (pi.BinderField?.Path != null)
-                {
-                    LocalBindingInfo bindingInfo = new LocalBindingInfo(new LocalPropertyPath(pi.BinderField.Path));
-                    propData.TypedProp.RegisterBinding(this, propData.PropId, bindingInfo);
-                }
+                viewProvider = cViewManager.GetDefaultViewProvider();
+                lcv = viewProvider.View;
             }
+
+            if (TryGetViewManager(pName, pType, out IManageCViews cViewManager2))
+            {
+                viewProvider2 = cViewManager2.GetDefaultViewProvider();
+                lcv2 = viewProvider2.View;
+            }
+
+            bool test1 = ReferenceEquals(cViewManager, cViewManager2);
+            bool test2 = ReferenceEquals(cViewManager.DataSourceProvider, cViewManager2.DataSourceProvider);
+            bool test3 = ReferenceEquals(viewProvider, viewProvider2);
+            bool test4 = ReferenceEquals(lcv, lcv2);
+
+            //var x = cvs.View;
+
+            //ListCollectionView ff = GetIt<ListCollectionView>("PersonListView");
+
+            //IEnumerable gg = ff?.SourceCollection;
+
+            //if(gg != null)
+            //{
+            //    List<object> hh = new List<object>(gg.Cast<object>());
+
+            //    int cnt = hh.Count;
+            //}
+
+
+
+            System.Diagnostics.Debug.WriteLine("You may want to set a break point here.");
+
+            //ICollectionView icv = cvs?.View;
+
+            //bool testC = ReferenceEquals(cvsPrior, cvs);
+            //bool testI = ReferenceEquals(icvPrior, icv);
+
+            //if (cvs.View is ListCollectionView lcv)
+            //{
+            //    SetIt<ListCollectionView>(lcv, "PersonListView");
+            //}
+            //else
+            //{
+            //    System.Diagnostics.Debug.WriteLine("The default view of the CollectionViewSource: CVS does not implement ListCollectionView.");
+            //    SetIt<ListCollectionView>(null, "PersonListView");
+            //}
         }
 
         #endregion
@@ -358,7 +590,7 @@ namespace DRM.PropBag
         // This will always return a valid value -- or throw an exception,
         // unless neverCreate is set, in which case it will
         // never throw an exception and always return an empty PropGen.
-        private IPropData HandleMissingProp(PropIdType propId, PropNameType propertyName, Type propertyType, out bool wasRegistered,
+        private IPropData HandleMissingProp(PropNameType propertyName, Type propertyType, out bool wasRegistered,
             bool haveValue, object value, bool alwaysRegister, bool mustBeRegistered, bool neverCreate, [CallerMemberName] string nameOfCallingMethod = null)
         {
             ReadMissingPropPolicyEnum thePolicyToUse; //= alwaysRegister ? ReadMissingPropPolicyEnum.Register : ReadMissingPropPolicy;
@@ -424,9 +656,11 @@ namespace DRM.PropBag
                         {
                             bool typeIsSolid = _propFactory.IsTypeSolid(value, propertyType);
 
+                            PropStorageStrategyEnum storageStrategy = _propFactory.ProvidesStorage ? PropStorageStrategyEnum.Internal : PropStorageStrategyEnum.External;
+
                             // TODO Create a Typed version of HandleMissingProp.
                             genericTypedProp = _propFactory.CreateGenFromObject(propertyType, value,
-                                propertyName, null, _propFactory.ProvidesStorage, typeIsSolid, PropKindEnum.Prop, null, false, null);
+                                propertyName, null, storageStrategy, typeIsSolid, PropKindEnum.Prop, null, false, null);
                         }
                         else
                         {
@@ -436,12 +670,14 @@ namespace DRM.PropBag
                             //object newValue = ThePropFactory.GetDefaultValue(propertyType, propertyName);
                             bool typeIsSolid = true;
 
+                            PropStorageStrategyEnum storageStrategy = _propFactory.ProvidesStorage ? PropStorageStrategyEnum.Internal : PropStorageStrategyEnum.External;
+
                             // On 10/8/17: Changed to use NoValue, instead of trying to generate a default value.
                             genericTypedProp = _propFactory.CreateGenWithNoValue(propertyType, propertyName,
-                                null, _propFactory.ProvidesStorage, typeIsSolid, PropKindEnum.Prop, null, false, null);
+                                null, storageStrategy, typeIsSolid, PropKindEnum.Prop, null, false, null);
                         }
 
-                        IPropData propGen = AddProp(propertyName, genericTypedProp);
+                        IPropData propGen = AddProp(propertyName, genericTypedProp, out PropIdType propId2);
 
                         wasRegistered = true;
                         return propGen;
@@ -543,7 +779,7 @@ namespace DRM.PropBag
                 alwaysRegister: false,
                 mustBeRegistered: true,
                 neverCreate: false,
-                desiredHasStoreValue: _propFactory.ProvidesStorage,
+                desiredHasStoreValue: null, // _propFactory.ProvidesStorage,
                 wasRegistered: out bool wasRegistered,
                 propId: out PropIdType propId);
 
@@ -577,27 +813,47 @@ namespace DRM.PropBag
         public ValPlusType GetValPlusType(string propertyName, Type propertyType)
         {
             IPropData pg = GetPropGen(propertyName, propertyType);
-            return pg.ValuePlusType();
-        }
+            return pg.TypedProp.GetValuePlusType(); //pg.GetValuePlusType();
+        } 
 
         public T GetIt<T>(string propertyName)
         {
             //OurStoreAccessor.IncAccess();
-            return GetTypedPropPrivate<T>(propertyName, mustBeRegistered: true).TypedValue;
+            IProp<T> typedProp = GetTypedPropPrivate<T>(propertyName, mustBeRegistered: true, neverCreate: false);
+            return typedProp.TypedValue;
         }
 
-        public IProp<T> GetTypedProp<T>(string propertyName)
+        protected IProp<T> GetTypedProp<T>(string propertyName)
         {
-            return (IProp<T>)GetTypedPropPrivate<T>(propertyName, mustBeRegistered: true);
+            return (IProp<T>)GetTypedPropPrivate<T>(propertyName, mustBeRegistered: true, neverCreate: false);
         }
 
-        private IPropPrivate<T> GetTypedPropPrivate<T>(string propertyName, bool mustBeRegistered, bool neverCreate = false)
+        protected IProp<T> GetTypedPropPrivate<T>(string propertyName, bool mustBeRegistered, bool neverCreate/* = false*/)
         {
             IPropData PropData = GetGenPropPrivate<T>(propertyName, mustBeRegistered, neverCreate, out PropIdType notUsed);
 
             if (!PropData.IsEmpty)
             {
-                return (IPropPrivate<T>)PropData.TypedProp;
+                return (IProp<T>)PropData.TypedProp;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        protected IReadOnlyCProp<CT,T> GetCProp<CT, T>(string propertyName) where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged
+        {
+            return (IReadOnlyCProp<CT,T>)GetTypedCPropPrivate<CT,T>(propertyName, mustBeRegistered: true);
+        }
+
+        protected ICProp<CT,T> GetTypedCPropPrivate<CT,T>(string propertyName, bool mustBeRegistered, bool neverCreate = false) where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged
+        {
+            IPropData PropData = GetGenPropPrivate<T>(propertyName, mustBeRegistered, neverCreate, out PropIdType notUsed);
+
+            if (!PropData.IsEmpty)
+            {
+                return (ICProp<CT,T>)  PropData.TypedProp;
             }
             else
             {
@@ -607,7 +863,7 @@ namespace DRM.PropBag
 
         private IPropData GetGenPropPrivate<T>(string propertyName, bool mustBeRegistered, bool neverCreate, out PropIdType propId)
         {
-            bool hasStore = _propFactory.ProvidesStorage;
+            PropStorageStrategyEnum storageStrategy = _propFactory.ProvidesStorage ? PropStorageStrategyEnum.Internal : PropStorageStrategyEnum.External;
 
             // TODO: Make this use a different version of GetPropGen: one that takes advantage of the 
             // compile-time type knowlege -- especially if we have to register the property in HandleMissing.
@@ -616,7 +872,7 @@ namespace DRM.PropBag
                 alwaysRegister: false,
                 mustBeRegistered: mustBeRegistered,
                 neverCreate: neverCreate,
-                desiredHasStoreValue: _propFactory.ProvidesStorage,
+                desiredHasStoreValue: null,
                 wasRegistered: out bool wasRegistered,
                 propId: out propId);
 
@@ -726,7 +982,7 @@ namespace DRM.PropBag
                 }
             }
 
-            DelegateCache<DoSetDelegate> dc = _propFactory.DelegateCacheProvider.DoSetDelegateCache;
+            ICacheDelegates<DoSetDelegate> dc = _propFactory.DelegateCacheProvider.DoSetDelegateCache;
             DoSetDelegate setPropDel = dc.GetOrAdd(PropData.TypedProp.Type);
             return setPropDel(this, propId, propertyName, PropData.TypedProp, value);
         }
@@ -736,7 +992,7 @@ namespace DRM.PropBag
         //    PropNameType propertyName = GetPropName(propId); 
         //    IPropData PropData = GetPropGen<T>(propertyName, out PropIdType dummy, desiredHasStoreValue: PropFactory.ProvidesStorage);
 
-        //    IPropPrivate<T> prop = CheckTypeInfo<T>(propId, propertyName, PropData, OurStoreAccessor);
+        //    IProp<T> prop = CheckTypeInfo<T>(propId, propertyName, PropData, OurStoreAccessor);
 
         //    return DoSet(propId, propertyName, prop, value);
         //}
@@ -761,7 +1017,7 @@ namespace DRM.PropBag
             // No point in calling DoSet, it would find that the value is the same and do nothing.
             if (wasRegistered) return true;
 
-            IPropPrivate<T> prop = CheckTypeInfo<T>(propId, propertyName, PropData, _ourStoreAccessor);
+            IProp<T> prop = CheckTypeInfo<T>(propId, propertyName, PropData, _ourStoreAccessor);
             _ourStoreAccessor.IncAccess();
 
             T curVal = PropData.TypedProp.ValueIsDefined ? (T) PropData.TypedProp.TypedValueAsObject : default(T);
@@ -799,7 +1055,7 @@ namespace DRM.PropBag
             // No point in calling DoSet, it would find that the value is the same and do nothing.
             if (wasRegistered) return true;
 
-            IPropPrivate<T> typedProp = CheckTypeInfo<T>(propId, propertyName, PropData, _ourStoreAccessor);
+            IProp<T> typedProp = CheckTypeInfo<T>(propId, propertyName, PropData, _ourStoreAccessor);
 
             //DoSet<T>(propId, propertyName, typedProp, newValue);
 
@@ -857,7 +1113,7 @@ namespace DRM.PropBag
                 alwaysRegister: false,
                 mustBeRegistered: mustBeRegistered,
                 neverCreate: false,
-                desiredHasStoreValue: _propFactory.ProvidesStorage,
+                desiredHasStoreValue: null,
                 wasRegistered: out bool wasRegistered,
                 propId: out PropIdType propId);
 
@@ -878,7 +1134,7 @@ namespace DRM.PropBag
                 alwaysRegister: false,
                 mustBeRegistered: mustBeRegistered,
                 neverCreate: false,
-                desiredHasStoreValue: _propFactory.ProvidesStorage,
+                desiredHasStoreValue: null,
                 wasRegistered: out bool wasRegistered,
                 propId: out PropIdType propId);
 
@@ -918,7 +1174,7 @@ namespace DRM.PropBag
                 alwaysRegister: false,
                 mustBeRegistered: mustBeRegistered,
                 neverCreate: false,
-                desiredHasStoreValue: _propFactory.ProvidesStorage,
+                desiredHasStoreValue: null,
                 wasRegistered: out bool wasRegistered,
                 propId: out PropIdType propId);
 
@@ -939,7 +1195,7 @@ namespace DRM.PropBag
                 alwaysRegister: false,
                 mustBeRegistered: mustBeRegistered,
                 neverCreate: false,
-                desiredHasStoreValue: _propFactory.ProvidesStorage,
+                desiredHasStoreValue: null,
                 wasRegistered: out bool wasRegistered,
                 propId: out PropIdType propId);
 
@@ -967,33 +1223,34 @@ namespace DRM.PropBag
             }
             else
             {
-                result = _ourStoreAccessor.RegisterHandler(this, propId, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
+                IDisposable disable = _ourStoreAccessor.RegisterHandler(this, propId, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
+                result = disable != null;
             }
             return result;
         }
 
-        public bool SubscribeToPropChanged<T>(EventHandler<PcTypedEventArgs<T>> eventHandler, string propertyName)
+        public IDisposable SubscribeToPropChanged<T>(EventHandler<PcTypedEventArgs<T>> eventHandler, string propertyName)
         {
             bool mustBeRegistered = OurMetaData.AllPropsMustBeRegistered;
 
             IPropData propData = GetPropGen<T>(propertyName,
                 haveValue: false,
-                value: default(T),
+                value: null,
                 alwaysRegister: false,
                 mustBeRegistered: mustBeRegistered,
                 neverCreate: false,
-                desiredHasStoreValue: _propFactory.ProvidesStorage,
+                desiredHasStoreValue: null,
                 wasRegistered: out bool wasRegistered,
                 propId: out PropIdType propId);
 
             if (propData != null)
             {
-                bool result = _ourStoreAccessor.RegisterHandler<T>(this, propId, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
-                return result;
+                IDisposable disable = _ourStoreAccessor.RegisterHandler<T>(this, propId, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
+                return disable;
             }
             else
             {
-                return false;
+                return null;
             }
         }
 
@@ -1003,11 +1260,11 @@ namespace DRM.PropBag
 
             IPropData propData = GetPropGen<T>(propertyName,
                 haveValue: false,
-                value: default(T),
+                value: null,
                 alwaysRegister: false,
                 mustBeRegistered: mustBeRegistered,
                 neverCreate: false,
-                desiredHasStoreValue: _propFactory.ProvidesStorage,
+                desiredHasStoreValue: null,
                 wasRegistered: out bool wasRegistered,
                 propId: out PropIdType propId);
 
@@ -1032,7 +1289,9 @@ namespace DRM.PropBag
         protected bool AddToPropChanged<T>(EventHandler<PcTypedEventArgs<T>> eventHandler, string eventPropertyName)
         {
             string propertyName = GetPropNameFromEventProp(eventPropertyName);
-            return SubscribeToPropChanged<T>(eventHandler, propertyName);
+            IDisposable disable = SubscribeToPropChanged<T>(eventHandler, propertyName);
+
+            return disable != null;
         }
 
         /// <summary>
@@ -1094,12 +1353,14 @@ namespace DRM.PropBag
             }
             else
             {
-                result = _ourStoreAccessor.RegisterHandler(this, propId, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
+                IDisposable disable = _ourStoreAccessor.RegisterHandler(this, propId, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
+                return disable != null;
+                //result = _ourStoreAccessor.RegisterHandler(this, propId, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
             }
             return result;
         }
 
-        public bool SubscribeToPropChanged(EventHandler<PcGenEventArgs> eventHandler, string propertyName, Type propertyType)
+        public IDisposable SubscribeToPropChanged(EventHandler<PcGenEventArgs> eventHandler, string propertyName, Type propertyType)
         {
             bool mustBeRegistered = OurMetaData.AllPropsMustBeRegistered;
 
@@ -1107,18 +1368,18 @@ namespace DRM.PropBag
                 alwaysRegister: false,
                 mustBeRegistered: mustBeRegistered,
                 neverCreate: false,
-                desiredHasStoreValue: _propFactory.ProvidesStorage,
+                desiredHasStoreValue: null,
                 wasRegistered: out bool wasRegistered,
                 propId: out PropIdType propId);
 
             if (!PropData.IsEmpty)
             {
-                bool result = _ourStoreAccessor.RegisterHandler(this, propId, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
-                return result;
+                IDisposable disable = _ourStoreAccessor.RegisterHandler(this, propId, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
+                return disable;
             }
             else
             {
-                return false;
+                return null;
             }
         }
 
@@ -1130,7 +1391,7 @@ namespace DRM.PropBag
                 alwaysRegister: false,
                 mustBeRegistered: mustBeRegistered,
                 neverCreate: false,
-                desiredHasStoreValue: _propFactory.ProvidesStorage,
+                desiredHasStoreValue: null,
                 wasRegistered: out bool wasRegistered,
                 propId: out PropIdType propId);
 
@@ -1173,7 +1434,7 @@ namespace DRM.PropBag
                 alwaysRegister: false,
                 mustBeRegistered: mustBeRegistered,
                 neverCreate: false,
-                desiredHasStoreValue: _propFactory.ProvidesStorage,
+                desiredHasStoreValue: null,
                 wasRegistered: out bool wasRegistered,
                 propId: out PropIdType propId);
 
@@ -1196,7 +1457,7 @@ namespace DRM.PropBag
                 alwaysRegister: false,
                 mustBeRegistered: mustBeRegistered,
                 neverCreate: false,
-                desiredHasStoreValue: _propFactory.ProvidesStorage,
+                desiredHasStoreValue: null,
                 wasRegistered: out bool wasRegistered,
                 propId: out PropIdType propId);
 
@@ -1268,11 +1529,11 @@ namespace DRM.PropBag
 
             IPropData propData = GetPropGen<T>(nameOfPropertyToUpdate,
                 haveValue: false,
-                value: default(T),
+                value: null,
                 alwaysRegister: false,
                 mustBeRegistered: mustBeRegistered,
                 neverCreate: false,
-                desiredHasStoreValue: _propFactory.ProvidesStorage,
+                desiredHasStoreValue: null,
                 wasRegistered: out bool wasRegistered,
                 propId: out PropIdType propId);
 
@@ -1281,7 +1542,7 @@ namespace DRM.PropBag
                 LocalPropertyPath lpp = new LocalPropertyPath(pathToSource);
                 LocalBindingInfo bindingInfo = new LocalBindingInfo(lpp, LocalBindingMode.OneWay);
 
-                bool wasAdded = ((IPropBagInternal)this).RegisterBinding<T>(propId, bindingInfo);
+                bool wasAdded = ((IRegisterBindingsFowarderType)this).RegisterBinding<T>(propId, bindingInfo);
                 return wasAdded;
             }
             else
@@ -1290,7 +1551,7 @@ namespace DRM.PropBag
             }
         }
 
-        bool IPropBagInternal.RegisterBinding<T>(PropIdType propId, LocalBindingInfo bindingInfo)
+        bool IRegisterBindingsFowarderType.RegisterBinding<T>(PropIdType propId, LocalBindingInfo bindingInfo)
         {
             bool wasAdded = _ourStoreAccessor.RegisterBinding<T>(this, propId, bindingInfo);
             return wasAdded;
@@ -1302,11 +1563,11 @@ namespace DRM.PropBag
 
             IPropData propData = GetPropGen<T>(nameOfPropertyToUpdate,
                 haveValue: false,
-                value: default(T),
+                value: null,
                 alwaysRegister: false,
                 mustBeRegistered: mustBeRegistered,
                 neverCreate: false,
-                desiredHasStoreValue: _propFactory.ProvidesStorage,
+                desiredHasStoreValue: null,
                 wasRegistered: out bool wasRegistered,
                 propId: out PropIdType propId);
 
@@ -1315,7 +1576,7 @@ namespace DRM.PropBag
                 LocalPropertyPath lpp = new LocalPropertyPath(pathToSource);
                 LocalBindingInfo bindingInfo = new LocalBindingInfo(lpp, LocalBindingMode.OneWay);
 
-                bool wasRemoved = ((IPropBagInternal)this).UnregisterBinding<T>(propId, bindingInfo);
+                bool wasRemoved = ((IRegisterBindingsFowarderType)this).UnregisterBinding<T>(propId, bindingInfo);
                 return wasRemoved;
             }
             else
@@ -1324,7 +1585,7 @@ namespace DRM.PropBag
             }
         }
 
-        bool IPropBagInternal.UnregisterBinding<T>(PropIdType propId, LocalBindingInfo bindingInfo)
+        bool IRegisterBindingsFowarderType.UnregisterBinding<T>(PropIdType propId, LocalBindingInfo bindingInfo)
         {
             bool wasRemoved = _ourStoreAccessor.UnregisterBinding<T>(this, propId, bindingInfo);
             return wasRemoved;
@@ -1334,16 +1595,18 @@ namespace DRM.PropBag
 
         #region Public Methods
 
-        public object Clone()
+        public virtual object Clone()
         {
-            return new PropBag(this);
+            return new PropBag(this, _ourStoreAccessor, _propFactory);
         }
 
-        public void CloneProps(IPropBag copySource)
+        private PSAccessServiceInterface CloneProps(IPropBag copySource, PSAccessServiceInterface storeAccessor)
         {
-            _ourStoreAccessor = _ourStoreAccessor.CloneProps(this, copySource);
+            PSAccessServiceInterface result = storeAccessor.CloneProps(this, copySource, storeAccessor);
 
             _properties = ((ICustomTypeDescriptor)copySource).GetProperties();
+
+            return result;
         }
 
         public virtual ITypeSafePropBagMetaData GetMetaData()
@@ -1360,7 +1623,8 @@ namespace DRM.PropBag
             IEnumerable<KeyValuePair<PropNameType, IPropData>> theStoreAsCollection = _ourStoreAccessor.GetCollection(this);
 
             IEnumerable<KeyValuePair<string, ValPlusType>> list = theStoreAsCollection.Select(x =>
-            new KeyValuePair<string, ValPlusType>(x.Key, x.Value.ValuePlusType())).ToList();
+            //new KeyValuePair<string, ValPlusType>(x.Key, x.Value.GetValuePlusType())).ToList();
+            new KeyValuePair<string, ValPlusType>(x.Key, x.Value.TypedProp.GetValuePlusType())).ToList();
 
             IDictionary<string, ValPlusType> result = list.ToDictionary(pair => pair.Key, pair => pair.Value);
             return result;
@@ -1439,7 +1703,7 @@ namespace DRM.PropBag
             }
         }
 
-        public System.Type GetTypeOfProperty(string propertyName)
+        public Type GetTypeOfProperty(string propertyName)
         {
             IPropData pGen = GetPropGen(propertyName, null, haveValue: false, value: null,
                 alwaysRegister: false,
@@ -1486,9 +1750,246 @@ namespace DRM.PropBag
             }
         }
 
+        public override string ToString()
+        {
+            IDictionary<string, ValPlusType> x = GetAllPropNamesAndTypes();
+
+            StringBuilder result = new StringBuilder();
+            int cnt = 0;
+            foreach (KeyValuePair<string, ValPlusType> kvp in x)
+            {
+                if (cnt++ == 0) result.Append("\n\r");
+
+                result.Append($" -- {kvp.Key}: {kvp.Value.Value}");
+            }
+            return result.ToString();
+        }
+
         #endregion
 
-        #region Property Management
+        #region Add Enumerable-Type Props
+        #endregion
+
+        #region Add ObservableCollection<T> Props
+
+        public ICProp<CT, T> AddCollectionProp<CT, T>
+            (
+                string propertyName,
+                Func<CT, CT, bool> comparer = null,
+                object extraInfo = null,
+                CT initialValue = default(CT)
+            ) where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged
+        {
+            PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal;
+            bool typeIsSolid = true;
+
+            Func<CT, CT, bool> comparerToUse = comparer ?? _propFactory.GetRefEqualityComparer<CT>();
+
+            ICProp<CT, T> typedCollectionProp = _propFactory.Create<CT,T>(initialValue, propertyName, extraInfo, storageStrategy, typeIsSolid, comparerToUse);
+
+            AddProp(propertyName, typedCollectionProp, out PropIdType propId);
+            return typedCollectionProp;
+        }
+
+        #endregion
+
+        #region Add Collection and CollectionViewSource Props
+
+        public IProp AddCollectionViewSourceProp(string propertyName, IProvideAView viewProvider)
+        {
+            IProp cvsProp = _propFactory.CreateCVSProp(propertyName, viewProvider);
+
+            AddProp(propertyName, cvsProp, out PropIdType propId);
+            return cvsProp;
+        }
+
+        public IProp CreateCollectionViewProp(string propertyName, IProvideAView viewProvider) 
+        {
+            IProp cvsProp = _propFactory.CreateCVProp(propertyName, viewProvider);
+            return cvsProp;
+        }
+
+        // MAY WANT TO KEEP THIS -- in case we decide to support this.
+        //protected IProp CreateCollectionViewPropDSGen(PropNameType propertyName, Type typeOfThisProperty, PropNameType srcPropName, IMapperRequest mr)
+        //{
+        //    ICacheDelegatesForTypePair<CVPropFromDsDelegate> dc = _propFactory.DelegateCacheProvider.CreateCViewPropCache;
+        //    CVPropFromDsDelegate cvPropCreator = dc.GetOrAdd(new TypePair(mr.SourceType, typeOfThisProperty));
+        //    IProp result = cvPropCreator(this, propertyName, srcPropName, mr);
+
+        //    return result;
+        //}
+
+        protected IManageCViews GetOrAddCViewManagerGen(Type typeOfThisProperty, PropNameType srcPropName, IMapperRequest mr)
+        {
+            // Check the delegate cache to see if a delegate for this already exists, and if not create a new delegate.
+            ICacheDelegatesForTypePair<CViewManagerFromDsDelegate> dc = _propFactory.DelegateCacheProvider.GetOrAddCViewManagerCache;
+            CViewManagerFromDsDelegate cViewManagerCreator = dc.GetOrAdd(new TypePair(mr.SourceType, typeOfThisProperty));
+
+            // Use the delegate to create or fetch the existing Collection View Manager for this propperty.
+            // This eventually calls: this.GetOrAddCViewManager
+            IManageCViews result = cViewManagerCreator(this, srcPropName, mr);
+
+            return result;
+        }
+
+        //protected IProvideACViewManager GetOrAddCViewManagerProviderGen(Type typeOfThisProperty, PropNameType srcPropName, IMapperRequest mr)
+        protected IProvideACViewManager GetOrAddCViewManagerProviderGen(Type typeOfThisProperty, IViewManagerProviderKey viewManagerProviderKey)
+        {
+            // Check the delegate cache to see if a delegate for this already exists, and if not create a new delegate.
+            ICacheDelegatesForTypePair<CViewManagerProviderFromDsDelegate> dc = _propFactory.DelegateCacheProvider.GetOrAddCViewManagerProviderCache;
+            CViewManagerProviderFromDsDelegate cViewManagerProviderCreator = dc.GetOrAdd(new TypePair(viewManagerProviderKey.MapperRequest.SourceType, typeOfThisProperty));
+
+            //LocalBindingInfo bindingInfo = new LocalBindingInfo(new LocalPropertyPath(srcPropName), LocalBindingMode.OneWay);
+
+            // Use the delegate to create or fetch the existing Collection View Manager for this propperty.
+            // This eventually calls: this.GetOrAddCViewManagerProvider
+            IProvideACViewManager result = cViewManagerProviderCreator(this, viewManagerProviderKey);
+
+            return result;
+        }
+
+        // TODO: Allow mapper to be null on construction, and then omit mapping functionality, but instead
+        // use the IDoCRUD<T> straight, without any mapping
+
+        // Using a IMapperRequest and Factory
+        public IProp CreateCollectionViewPropDS<TDal, TSource, TDestination>
+        (
+            PropNameType propertyName, // The name for the new property.
+            PropNameType srcPropName,   // The name of the property that holds the data (of type IDoCRUD<TSource>.)
+            IMapperRequest mr   // The (non-generic) information necessary to create a AutoMapper Mapper request.
+        )
+            where TDal : class, IDoCRUD<TSource>
+            where TSource : class
+            where TDestination : INotifyItemEndEdit
+        {
+            // Get the PropItem for the property that holds the DataSource (IDoCRUD<TSource>)
+            IPropData propGen = GetPropGen(srcPropName, null, haveValue: false, value: null, alwaysRegister: false, mustBeRegistered: true,
+            neverCreate: true, desiredHasStoreValue: true, wasRegistered: out bool wasRegistered, propId: out PropIdType dalPropId);
+
+            if (propGen.IsEmpty)
+            {
+                throw new InvalidOperationException($"The {nameof(GetOrAddCViewManager)} cannot find the source PropItem with name = {srcPropName}.");
+            }
+
+            IManageCViews cViewManager = _ourStoreAccessor.GetOrAddViewManager<TDal, TSource, TDestination>(this, dalPropId, propGen, mr, _propFactory.GetPropBagMapperFactory(), _propFactory.GetCViewProviderFactory());
+
+            IProvideAView viewProvider = cViewManager.GetDefaultViewProvider();
+            IProp result = CreateCollectionViewProp(propertyName, viewProvider);
+            return result;
+        }
+
+        // new version: returns a IManageCViews Using a IMapperRequest and Factory
+        public IManageCViews GetOrAddCViewManager<TDal, TSource, TDestination>
+        (
+            PropNameType srcPropName,   // The name of the property that holds the data (of type IDoCRUD<TSource>.)
+            IMapperRequest mr   // The (non-generic) information necessary to create a AutoMapper Mapper request.
+        )
+            where TDal : class, IDoCRUD<TSource>
+            where TSource : class
+            where TDestination : INotifyItemEndEdit
+        {
+            // Get the PropItem for the property that holds the DataSource (IDoCRUD<TSource>)
+            IPropData propGen = GetPropGen(srcPropName, null, haveValue: false, value: null, alwaysRegister: false, mustBeRegistered: true,
+            neverCreate: true, desiredHasStoreValue: true, wasRegistered: out bool wasRegistered, propId: out PropIdType dalPropId);
+
+            if(propGen.IsEmpty)
+            {
+                throw new InvalidOperationException($"The {nameof(GetOrAddCViewManager)} cannot find the source PropItem with name = {srcPropName}.");
+            }
+
+            IManageCViews cViewManager = _ourStoreAccessor.GetOrAddViewManager<TDal, TSource, TDestination>(this, dalPropId, propGen, mr, _propFactory.GetPropBagMapperFactory(), _propFactory.GetCViewProviderFactory());
+            return cViewManager;
+        }
+
+        public bool TryGetCViewManagerProvider(PropNameType propertyName, out IProvideACViewManager cViewManagerProvider)
+        {
+            if(_foreignViewManagers.TryGetValue(propertyName, out IViewManagerProviderKey viewManagerProviderKey))
+            {
+                if(_ourStoreAccessor.TryGetViewManagerProvider(this, viewManagerProviderKey, out cViewManagerProvider))
+                {
+                    return true;
+                }
+                else
+                {
+                    cViewManagerProvider = null;
+                    return false;
+                }
+            }
+            throw new KeyNotFoundException($"There is no CViewManagerProvider allocated for PropItem with name = {propertyName}.");
+        }
+
+        // new version: returns a IManageCViews Using a IMapperRequest and Factory
+        public IProvideACViewManager GetOrAddCViewManagerProvider<TDal, TSource, TDestination>
+        (
+            IViewManagerProviderKey viewManagerProviderKey
+            //LocalBindingInfo bindingInfo,   // The name of the property that holds the data (of type IDoCRUD<TSource>.)
+            //IMapperRequest mr   // The (non-generic) information necessary to create a AutoMapper Mapper request.
+        )
+            where TDal : class, IDoCRUD<TSource>
+            where TSource : class
+            where TDestination : INotifyItemEndEdit
+        {
+            IProvideACViewManager cViewManagerProvider = _ourStoreAccessor.GetOrAddViewManagerProvider<TDal, TSource, TDestination>
+                (this, viewManagerProviderKey, _propFactory.GetPropBagMapperFactory(), _propFactory.GetCViewProviderFactory());
+            return cViewManagerProvider;
+        }
+
+        // Using a IPropBagMapper directly.
+        public IProp CreateCollectionViewPropDS<TDal, TSource, TDestination>
+        (
+            PropNameType propertyName, // The name for the new property.
+            PropNameType srcPropName,   // The name of the property that holds the data (of type IDoCRUD<TSource>.)
+            IPropBagMapper<TSource, TDestination> mapper    // Optional. The AutoMapper to use to map data from the source to data in the view.
+        )
+            where TDal : class, IDoCRUD<TSource>
+            where TSource : class
+            where TDestination : INotifyItemEndEdit
+        {
+            IPropData propGen = GetPropGen(srcPropName, null, haveValue: false, value: null, alwaysRegister: false, mustBeRegistered: true,
+            neverCreate: true, desiredHasStoreValue: true, wasRegistered: out bool wasRegistered, propId: out PropIdType dalPropId);
+
+            if (propGen.IsEmpty)
+            {
+                throw new InvalidOperationException($"The {nameof(GetOrAddCViewManager)} cannot find the source PropItem with name = {srcPropName}.");
+            }
+
+            IManageCViews cViewManager = _ourStoreAccessor.GetOrAddViewManager<TDal, TSource, TDestination>(this, dalPropId, propGen, mapper, _propFactory.GetCViewProviderFactory());
+
+            IProvideAView viewProvider = cViewManager.GetDefaultViewProvider();
+            IProp result = CreateCollectionViewProp(propertyName, viewProvider);
+            return result;
+        }
+
+        // Typed version, using a IPropBagMapper directly. 
+        public ICViewProp<CVT> AddCollectionViewPropDS_Typed<CVT, TDal, TSource, TDestination>
+        (
+            PropNameType propertyName,
+            PropNameType srcPropName,
+            IPropBagMapper<TSource, TDestination> mapper
+        )
+            where CVT : ICollectionView
+            where TDal : class, IDoCRUD<TSource>
+            where TSource : class
+            where TDestination : INotifyItemEndEdit
+        {
+            IPropData propGen = GetPropGen(srcPropName, null, haveValue: false, value: null, alwaysRegister: false, mustBeRegistered: true,
+            neverCreate: true, desiredHasStoreValue: true, wasRegistered: out bool wasRegistered, propId: out PropIdType dalPropId);
+
+            if (propGen.IsEmpty)
+            {
+                throw new InvalidOperationException($"The {nameof(GetOrAddCViewManager)} cannot find the source PropItem with name = {srcPropName}.");
+            }
+
+            IManageCViews cViewManager = _ourStoreAccessor.GetOrAddViewManager<TDal, TSource, TDestination>(this, dalPropId, propGen, mapper, _propFactory.GetCViewProviderFactory());
+
+            IProvideAView viewProvider = cViewManager.GetDefaultViewProvider();
+            ICViewProp<CVT> result = (ICViewProp<CVT>)CreateCollectionViewProp(propertyName, viewProvider);
+            return result;
+        }
+
+        #endregion
+
+        #region Add Property-Type Props
 
         /// <summary>
         /// Register a new Prop Item for this PropBag.
@@ -1501,68 +2002,73 @@ namespace DRM.PropBag
         /// <returns></returns>
         protected IProp<T> AddProp<T>(string propertyName, Func<T, T, bool> comparer = null, object extraInfo = null, T initialValue = default(T))
         {
-            bool hasStorage = true;
+            PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal;
             bool typeIsSolid = true;
-            IProp<T> pg = _propFactory.Create<T>(initialValue, propertyName, extraInfo, hasStorage, typeIsSolid, comparer);
-            AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard);
+            IProp<T> pg = _propFactory.Create<T>(initialValue, propertyName, extraInfo, storageStrategy, typeIsSolid, comparer);
+            AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard, out PropIdType propId);
             return pg;
         }
 
         protected IProp<T> AddPropObjComp<T>(string propertyName, object extraInfo = null, T initialValue = default(T))
         {
-            bool hasStorage = true;
+            PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal;
             bool typeIsSolid = true;
             Func<T, T, bool> comparer = _propFactory.GetRefEqualityComparer<T>();
-            IProp<T> pg = _propFactory.Create<T>(initialValue, propertyName, extraInfo, hasStorage, typeIsSolid, comparer);
-            AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard);
+            IProp<T> pg = _propFactory.Create<T>(initialValue, propertyName, extraInfo, storageStrategy, typeIsSolid, comparer);
+            AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard, out PropIdType propId);
             return pg;
         }
 
         protected IProp<T> AddPropNoValue<T>(string propertyName, Func<T, T, bool> comparer = null, object extraInfo = null)
         {
-            bool hasStorage = true;
+            PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal;
             bool typeIsSolid = true;
-            IProp<T> pg = _propFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, comparer);
-            AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard);
+            IProp<T> pg = _propFactory.CreateWithNoValue<T>(propertyName, extraInfo, storageStrategy, typeIsSolid, comparer);
+            AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard, out PropIdType propId);
             return pg;
         }
 
         protected IProp<T> AddPropObjCompNoValue<T>(string propertyName, object extraInfo = null)
         {
-            bool hasStorage = true;
+            PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal;
             bool typeIsSolid = true;
             Func<T, T, bool> comparer = _propFactory.GetRefEqualityComparer<T>();
-            IProp<T> pg = _propFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, comparer);
-            AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard);
+            IProp<T> pg = _propFactory.CreateWithNoValue<T>(propertyName, extraInfo, storageStrategy, typeIsSolid, comparer);
+            AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard, out PropIdType propId);
             return pg;
         }
 
         protected IProp<T> AddPropNoStore<T>(string propertyName, Func<T, T, bool> comparer = null, object extraInfo = null)
         {
-            bool hasStorage = false;
+            PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.External;
             bool typeIsSolid = true;
-            IProp<T> pg = _propFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, comparer);
-            AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard);
+            IProp<T> pg = _propFactory.CreateWithNoValue<T>(propertyName, extraInfo, storageStrategy, typeIsSolid, comparer);
+            AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard, out PropIdType propId);
             return pg;
         }
 
         protected IProp<T> AddPropObjCompNoStore<T>(string propertyName, object extraInfo = null)
         {
-            bool hasStorage = false;
+            PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.External;
             bool typeIsSolid = true;
             Func<T, T, bool> comparer = _propFactory.GetRefEqualityComparer<T>();
-            IProp<T> pg = _propFactory.CreateWithNoValue<T>(propertyName, extraInfo, hasStorage, typeIsSolid, comparer);
-            AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard);
+            IProp<T> pg = _propFactory.CreateWithNoValue<T>(propertyName, extraInfo, storageStrategy, typeIsSolid, comparer);
+            AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard, out PropIdType propId);
             return pg;
         }
 
-        // TODO: This adds no value over the AddProp (no type parameter) version. -- Is there any way we can use the fact
-        // that we know the type at compile time to our advantage??
-        protected IPropData AddProp<T>(string propertyName, IProp<T> genericTypedProp, EventHandler<PcTypedEventArgs<T>> eventHandler, SubscriptionPriorityGroup priorityGroup)
-        {
-            PropIdType propId = AddPropId(propertyName);
+        #endregion
 
-            if (!_ourStoreAccessor.TryAdd(this, propId, genericTypedProp, out IPropData propGen))
+        #region Property Management
+
+        protected IPropData AddProp<T>(string propertyName, IProp<T> genericTypedProp,
+            EventHandler<PcTypedEventArgs<T>> doWhenChanged,
+            SubscriptionPriorityGroup priorityGroup,
+            out PropIdType propId)
+        {
+            propId = AddPropId(propertyName);
+
+            if (!_ourStoreAccessor.TryAdd(this, propId, propertyName, genericTypedProp, doWhenChanged, priorityGroup, out IPropData propGen))
             {
                 throw new ApplicationException("Could not add the new propGen to the store.");
             }
@@ -1570,22 +2076,11 @@ namespace DRM.PropBag
             return propGen;
         }
 
-        //protected IPropData AddProp(string propertyName, IProp genericTypedProp, EventHandler<PcGenEventArgs> doWhenChanged, SubscriptionPriorityGroup priorityGroup)
-        //{
-        //    PropIdType propId = GetPropId(propertyName);
-
-        //    if (!_ourStoreAccessor.TryAdd(this, propId, genericTypedProp, doWhenChanged, priorityGroup, out IPropData propGen))
-        //    {
-        //        throw new ApplicationException("Could not add the new propGen to the store.");
-        //    }
-        //    return propGen;
-        //}
-
-        protected IPropData AddProp(string propertyName, IProp genericTypedProp)
+        protected IPropData AddProp(string propertyName, IProp genericTypedProp, out PropIdType propId)
         {
-            PropIdType propId = AddPropId(propertyName);
+            propId = AddPropId(propertyName);
 
-            if (!_ourStoreAccessor.TryAdd(this, propId, genericTypedProp, out IPropData propGen))
+            if (!_ourStoreAccessor.TryAdd(this, propId, propertyName, genericTypedProp, out IPropData propGen))
             {
                 throw new ApplicationException("Could not add the new propGen to the store.");
             }
@@ -1593,11 +2088,11 @@ namespace DRM.PropBag
         }
 
         protected IPropData AddProp(string propertyName, IProp genericTypedProp, object target, MethodInfo method, 
-            SubscriptionKind subscriptionKind, SubscriptionPriorityGroup priorityGroup)
+            SubscriptionKind subscriptionKind, SubscriptionPriorityGroup priorityGroup, out PropIdType propId)
         {
-            PropIdType propId = AddPropId(propertyName);
+            propId = AddPropId(propertyName);
 
-            if (!_ourStoreAccessor.TryAdd(this, propId, genericTypedProp, target, method, subscriptionKind, priorityGroup, out IPropData propGen))
+            if (!_ourStoreAccessor.TryAdd(this, propId, propertyName, genericTypedProp, target, method, subscriptionKind, priorityGroup, out IPropData propGen))
             {
                 throw new ApplicationException("Could not add the new propGen to the store.");
             }
@@ -1667,7 +2162,7 @@ namespace DRM.PropBag
         ///// <returns>True, if there was an existing Action in place for this property.</returns>
         //protected bool RegisterDoWhenChanged<T>(Action<T, T> doWhenChanged, bool doAfterNotify, string propertyName)
         //{
-        //    IPropPrivate<T> prop = GetTypedPropPrivate<T>(propertyName, mustBeRegistered: true);
+        //    IProp<T> prop = GetTypedPropPrivate<T>(propertyName, mustBeRegistered: true);
         //    return prop.UpdateDoWhenChangedAction(doWhenChanged, doAfterNotify);
         //}
 
@@ -1692,16 +2187,16 @@ namespace DRM.PropBag
 
         #region Private Methods
 
-        private bool DoSet<T>(PropIdType propId, string propertyName, IPropPrivate<T> typedProp, ref T curValue, T newValue)
+        private bool DoSet<T>(PropIdType propId, string propertyName, IProp<T> typedProp, ref T curValue, T newValue)
         {
             IEnumerable<ISubscription> subscriptions = _ourStoreAccessor.GetSubscriptions(this, propId);
 
             IEnumerable<ISubscription> globalSubs = _ourStoreAccessor.GetSubscriptions(this, 0);
 
-            if(propertyName == "SelectedPerson")
-            {
-                int cnt = subscriptions.Count();
-            }
+            //if(propertyName == "SelectedPerson")
+            //{
+            //    int cnt = subscriptions.Count();
+            //}
 
             if (typedProp.ValueIsDefined)
             {
@@ -1714,7 +2209,7 @@ namespace DRM.PropBag
                     if(globalSubs != null) CallChangingSubscribers(globalSubs, propertyName);
 
                     // Make the update.
-                    if (typedProp.HasStore)
+                    if (typedProp.StorageStrategy == PropStorageStrategyEnum.Internal)
                     {
                         typedProp.TypedValue = newValue;
                     }
@@ -1722,7 +2217,7 @@ namespace DRM.PropBag
 
                     // Raise notify events.
                     if(subscriptions != null) DoNotifyWork(propId, propertyName, typedProp, oldValue, newValue, subscriptions);
-                    if (subscriptions != null) DoNotifyWork(propId, propertyName, typedProp, oldValue, newValue, globalSubs);
+                    if (globalSubs != null) DoNotifyWork(propId, propertyName, typedProp, oldValue, newValue, globalSubs);
                 }
                 return !theSame;
             }
@@ -1732,7 +2227,7 @@ namespace DRM.PropBag
                 if (globalSubs != null) CallChangingSubscribers(globalSubs, propertyName);
 
                 // Make the update.
-                if (typedProp.HasStore)
+                if (typedProp.StorageStrategy == PropStorageStrategyEnum.Internal)
                 {
                     typedProp.TypedValue = newValue;
                 }
@@ -1740,8 +2235,7 @@ namespace DRM.PropBag
 
                 // Raise notify events.
                 if (subscriptions != null) DoNotifyWork(propId, propertyName, typedProp, newValue, subscriptions);
-                if (subscriptions != null) DoNotifyWork(propId, propertyName, typedProp, newValue, globalSubs);
-
+                if (globalSubs != null) DoNotifyWork(propId, propertyName, typedProp, newValue, globalSubs);
 
                 // The current value is undefined and the new value is defined, therefore: their has been a real update -- return true.
                 return true;
@@ -1779,289 +2273,241 @@ namespace DRM.PropBag
                 }
                 catch (Exception e)
                 {
-                    System.Diagnostics.Debug.WriteLine($"A Changing PropertyChangingEventHandler handler raised an exception: {e.Message} with inner: {e.InnerException?.Message} ");
+                    System.Diagnostics.Debug.WriteLine($"A Changing (PropertyChangingEventHandler) handler raised an exception: {e.Message} with inner: {e.InnerException?.Message} ");
                 }
             }
         }
 
-        private void DoNotifyWork<T>(PropIdType propId, PropNameType propertyName, IPropPrivate<T> typedProp, T oldVal, T newValue, IEnumerable<ISubscription> subscriptions)
+        private void DoNotifyWork<T>(PropIdType propId, PropNameType propertyName, IProp<T> typedProp, T oldVal, T newValue, IEnumerable<ISubscription> subscriptions)
         {
             //List<ISubscription> diag_ListCheck = GetSubscriptions(propId).ToList();
 
-            if (subscriptions == null) return;
+            if (subscriptions == null)
+                return;
 
             foreach (ISubscription sub in subscriptions)
             {
-                if (sub is ISubscription<T> typedSub)
+                CheckSubScriptionObject(sub);
+
+                object target = sub.Target.Target;
+                if (target == null)
+                    return; // The subscriber has been collected by the GC.
+
+                try
                 {
-                    if (typedSub.PcTypedHandlerDispatcher == null)
+                    switch (sub.SubscriptionKind)
+                    {
+                        case SubscriptionKind.TypedHandler:
+                            PcTypedEventArgs<T> e = new PcTypedEventArgs<T>(propertyName, oldVal, newValue);
+                            sub.PcTypedHandlerDispatcher(target, this, e, sub.HandlerProxy);
+                            break;
+                        case SubscriptionKind.GenHandler:
+                            PcGenEventArgs e2 = new PcGenEventArgs(propertyName, typedProp.Type, oldVal, newValue);
+                            sub.PcGenHandlerDispatcher(target, this, e2, sub.HandlerProxy);
+                            break;
+                        case SubscriptionKind.ObjHandler:
+                            PcObjectEventArgs e3 = new PcObjectEventArgs(propertyName, oldVal, newValue);
+                            sub.PcObjHandlerDispatcher(target, this, e3, sub.HandlerProxy);
+                            break;
+                        case SubscriptionKind.StandardHandler:
+                            PropertyChangedEventArgs e4 = new PropertyChangedEventArgs(propertyName);
+                            sub.PcStandardHandlerDispatcher(target, this, e4, sub.HandlerProxy);
+                            break;
+                        case SubscriptionKind.ChangingHandler:
+                            // These are handled separately.
+                            break;
+                        //case SubscriptionKind.TypedAction:
+                        //    break;
+                        //case SubscriptionKind.ObjectAction:
+                        //    break;
+                        //case SubscriptionKind.ActionNoParams:
+                        //    break;
+                        //case SubscriptionKind.LocalBinding:
+                        //    break;
+                        default:
+                            throw new InvalidOperationException($"Handlers of kind: {sub.SubscriptionKind} are not supported.");
+                    }
+                }
+                catch (Exception e)
+                {
+                    System.Diagnostics.Debug.WriteLine($"A {sub.SubscriptionKind} handler raised an exception: {e.Message} with inner: {e.InnerException?.Message} ");
+                }
+            }
+        }
+
+        public void RaiseStandardPropertyChanged(PropNameType propertyName)
+        {
+            if(TryGetPropId(propertyName, out PropIdType propId))
+            {
+                RaiseStandardPropertyChanged(propId, propertyName);
+            }
+            else
+            {
+                throw new InvalidOperationException($"Could not get the PropId for property name = {propertyName}.");
+            }
+        }
+
+        private void RaiseStandardPropertyChanged(PropIdType propId, PropNameType propertyName)
+        {
+            IEnumerable<ISubscription> subscriptions = _ourStoreAccessor.GetSubscriptions(this, propId);
+
+            IEnumerable<ISubscription> globalSubs = _ourStoreAccessor.GetSubscriptions(this, 0);
+
+            if (subscriptions != null) RaiseStandardPropertyChangedWorker(propertyName, subscriptions);
+
+            if (globalSubs != null) RaiseStandardPropertyChangedWorker(propertyName, globalSubs);
+        }
+
+        private void RaiseStandardPropertyChangedWorker(PropNameType propertyName, IEnumerable<ISubscription> subscriptions)
+        {
+            if (subscriptions == null)
+                return;
+
+            foreach (ISubscription sub in subscriptions)
+            {
+                CheckSubScriptionObject(sub);
+
+                if (sub.SubscriptionKind == SubscriptionKind.StandardHandler)
+                {
+                    object target = sub.Target.Target;
+                    if (target == null)
+                    {
+                        return; // The subscriber has been collected by the GC.
+                    }
+
+                    try
+                    {
+                        PropertyChangedEventArgs e = new PropertyChangedEventArgs(propertyName);
+                        sub.PcStandardHandlerDispatcher(target, this, e, sub.HandlerProxy);
+                    }
+                    catch (Exception e)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"A {sub.SubscriptionKind} handler raised an exception: {e.Message} with inner: {e.InnerException?.Message} ");
+                    }
+                }
+
+            }
+        }
+
+        [Conditional("DEBUG")]
+        private void CheckSubScriptionObject(ISubscription sub)
+        {
+            if (sub.HandlerProxy == null)
+            {
+                throw new InvalidOperationException($"The {sub.SubscriptionKind} (HandlerProxy) is null.");
+            }
+
+            switch (sub.SubscriptionKind)
+            {
+                case SubscriptionKind.TypedHandler:
+                    if (sub.PcTypedHandlerDispatcher == null)
                     {
                         throw new InvalidOperationException("The Typed handler is null.");
                     }
+                    break;
 
-                    try
+                case SubscriptionKind.GenHandler:
+                    if (sub.PcGenHandlerDispatcher == null)
                     {
-                        object target = sub.Target.Target;
-                        if (target == null)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"The object listening to this event is 'no longer with us.'");
-                        }
-                        else
-                        {
-                            PcTypedEventArgs<T> e = new PcTypedEventArgs<T>(propertyName, oldVal, newValue);
-                            typedSub.PcTypedHandlerDispatcher(target, this, e, sub.HandlerProxy);
-                        }
+                        throw new InvalidOperationException("The GenHandler dispatcher is null.");
                     }
-                    catch (Exception e)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"A TypedHandler raised an exception: {e.Message} with inner: {e.InnerException?.Message} ");
-                    }
-                }
-                else if (sub.SubscriptionKind == SubscriptionKind.GenHandler)
-                {
-                    if (sub.HandlerProxy == null)
-                    {
-                        throw new InvalidOperationException("The GenHandler (HandlerProxy) is null.");
-                    }
+                    break;
 
-                    try
+                case SubscriptionKind.ObjHandler:
+                    if (sub.PcObjHandlerDispatcher == null)
                     {
-                        object target = sub.Target.Target;
-                        if (target == null)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"The object listening to this event is 'no longer with us.'");
-                        }
-                        else
-                        {
-                            PcGenEventArgs e = new PcGenEventArgs(propertyName, typedProp.Type, oldVal, newValue);
-                            sub.PcGenHandlerDispatcher(target, this, e, sub.HandlerProxy);
-                        }
+                        throw new InvalidOperationException("The ObjHandler dispatcher is null.");
                     }
-                    catch (Exception e)
+                    break;
+
+                case SubscriptionKind.StandardHandler:
+                    if (sub.PcStandardHandlerDispatcher == null)
                     {
-                        System.Diagnostics.Debug.WriteLine($"A GenHandler raised an exception: {e.Message} with inner: {e.InnerException?.Message} ");
+                        throw new InvalidOperationException("The Standard dispatcher is null.");
                     }
-                }
-                else if (sub.SubscriptionKind == SubscriptionKind.ObjHandler)
-                {
-                    if (sub.HandlerProxy == null)
+                    break;
+
+                case SubscriptionKind.ChangingHandler:
+                    if (sub.PChangingHandlerDispatcher == null)
                     {
-                        throw new InvalidOperationException("The ObjHandler (HandlerProxy) is null.");
+                        throw new InvalidOperationException("The Changing dispatcher is null.");
                     }
 
-                    try
-                    {
-                        object target = sub.Target.Target;
-                        if(target == null)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"The object listening to this event is 'no longer with us.'");
-                        }
-                        else
-                        {
-                            PcObjectEventArgs e = new PcObjectEventArgs(propertyName, oldVal, newValue);
-                            sub.PcObjHandlerDispatcher(target, this, e, sub.HandlerProxy);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"An ObjHandler raised an exception: {e.Message} with inner: {e.InnerException?.Message} ");
-                    }
-                }
-                else if (sub.SubscriptionKind == SubscriptionKind.StandardHandler)
-                {
-                    if (sub.HandlerProxy == null)
-                    {
-                        throw new InvalidOperationException("The Standard PropertyChangedEventHandler handler (HandlerProxy) is null.");
-                    }
-
-                    try
-                    {
-                        object target = sub.Target.Target;
-                        if (target == null)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"The object listening to this event is 'no longer with us.'");
-                        }
-                        else
-                        {
-                            PropertyChangedEventArgs e = new PropertyChangedEventArgs(propertyName);
-                            sub.PcStandardHandlerDispatcher(target, this, e, sub.HandlerProxy);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"A 'standard' PropertyChangedEventHandler handler raised an exception: {e.Message} with inner: {e.InnerException?.Message} ");
-                    }
-                }
-                else if (sub.SubscriptionKind == SubscriptionKind.ChangingHandler)
-                {
-                    if (sub.HandlerProxy == null)
-                    {
-                        throw new InvalidOperationException("The Changing PropertyChangingEventHandler handler (HandlerProxy) is null.");
-                    }
-
-                    try
-                    {
-                        object target = sub.Target.Target;
-                        if (target == null)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"The object listening to this event is 'no longer with us.'");
-                        }
-                        else
-                        {
-                            PropertyChangingEventArgs e = new PropertyChangingEventArgs(propertyName);
-                            sub.PChangingHandlerDispatcher(target, this, e, sub.HandlerProxy);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"A 'changing' PropertyChangingEventHandler handler raised an exception: {e.Message} with inner: {e.InnerException?.Message} ");
-                    }
-                }
-                else
-                {
+                    break;
+                //case SubscriptionKind.TypedAction:
+                //    break;
+                //case SubscriptionKind.ObjectAction:
+                //    break;
+                //case SubscriptionKind.ActionNoParams:
+                //    break;
+                //case SubscriptionKind.LocalBinding:
+                //    break;
+                default:
                     throw new InvalidOperationException($"Handlers of kind: {sub.SubscriptionKind} are not supported.");
-                }
             }
+
+            if (sub.Target.Target == null)
+            {
+                System.Diagnostics.Debug.WriteLine($"The object listening to this event is 'no longer with us.'");
+            }
+
         }
 
         // For when the current value is undefined.
-        private void DoNotifyWork<T>(PropIdType propId, PropNameType propertyName, IPropPrivate<T> typedProp, T newValue, IEnumerable<ISubscription> subscriptions)
+        private void DoNotifyWork<T>(PropIdType propId, PropNameType propertyName, IProp<T> typedProp, T newValue, IEnumerable<ISubscription> subscriptions)
         {
             //List<ISubscription> diag_ListCheck = GetSubscriptions(propId).ToList();
 
-            if (subscriptions == null) return;
+            if (subscriptions == null)
+                return;
 
             foreach (ISubscription sub in subscriptions)
             {
-                if (sub is ISubscription<T> typedSub)
-                {
-                    if (typedSub.PcTypedHandlerDispatcher == null)
-                    {
-                        throw new InvalidOperationException("The Typed PcTypedHandlerProxy is null.");
-                    }
+                CheckSubScriptionObject(sub);
 
-                    try
+                object target = sub.Target.Target;
+                if (target == null)
+                    return; // The subscriber has been collected by the GC.
+
+                try
+                {
+                    switch (sub.SubscriptionKind)
                     {
-                        object target = sub.Target.Target;
-                        if (target == null)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"The object listening to this event is 'no longer with us.'");
-                        }
-                        else
-                        {
+                        case SubscriptionKind.TypedHandler:
                             PcTypedEventArgs<T> e = new PcTypedEventArgs<T>(propertyName, newValue);
-                            typedSub.PcTypedHandlerDispatcher(target, this, e, sub.HandlerProxy);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"A TypedHandler raised an exception: {e.Message} with inner: {e.InnerException?.Message} ");
-                    }
-                }
-                else if (sub.SubscriptionKind == SubscriptionKind.GenHandler)
-                {
-                    if (sub.HandlerProxy == null)
-                    {
-                        throw new InvalidOperationException("The GenHandler (HandlerProxy) is null.");
-                    }
-
-                    try
-                    {
-                        object target = sub.Target.Target;
-                        if (target == null)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"The object listening to this event is 'no longer with us.'");
-                        }
-                        else
-                        {
-                            PcGenEventArgs e = new PcGenEventArgs(propertyName, typedProp.Type, newValue);
-                            sub.PcGenHandlerDispatcher(target, this, e, sub.HandlerProxy);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"A GenHandler raised an exception: {e.Message} with inner: {e.InnerException?.Message} ");
+                            sub.PcTypedHandlerDispatcher(target, this, e, sub.HandlerProxy);
+                            break;
+                        case SubscriptionKind.GenHandler:
+                            PcGenEventArgs e2 = new PcGenEventArgs(propertyName, typedProp.Type, newValue);
+                            sub.PcGenHandlerDispatcher(target, this, e2, sub.HandlerProxy);
+                            break;
+                        case SubscriptionKind.ObjHandler:
+                            PcObjectEventArgs e3 = new PcObjectEventArgs(propertyName, newValue);
+                            sub.PcObjHandlerDispatcher(target, this, e3, sub.HandlerProxy);
+                            break;
+                        case SubscriptionKind.StandardHandler:
+                            PropertyChangedEventArgs e4 = new PropertyChangedEventArgs(propertyName);
+                            sub.PcStandardHandlerDispatcher(target, this, e4, sub.HandlerProxy);
+                            break;
+                        case SubscriptionKind.ChangingHandler:
+                            PropertyChangingEventArgs e5 = new PropertyChangingEventArgs(propertyName);
+                            sub.PChangingHandlerDispatcher(target, this, e5, sub.HandlerProxy);
+                            break;
+                        //case SubscriptionKind.TypedAction:
+                        //    break;
+                        //case SubscriptionKind.ObjectAction:
+                        //    break;
+                        //case SubscriptionKind.ActionNoParams:
+                        //    break;
+                        //case SubscriptionKind.LocalBinding:
+                        //    break;
+                        default:
+                            throw new InvalidOperationException($"Handlers of kind: {sub.SubscriptionKind} are not supported.");
                     }
                 }
-                else if (sub.SubscriptionKind == SubscriptionKind.ObjHandler)
+                catch (Exception e)
                 {
-                    if (sub.HandlerProxy == null)
-                    {
-                        throw new InvalidOperationException("The Obj handler is null.");
-                    }
-
-                    try
-                    {
-                        object target = sub.Target.Target;
-                        if (target == null)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"The object listening to this event is 'no longer with us.'");
-                        }
-                        else
-                        {
-                            PcObjectEventArgs e = new PcObjectEventArgs(propertyName, newValue);
-                            sub.PcObjHandlerDispatcher(target, this, e, sub.HandlerProxy);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"An ObjHandler raised an exception: {e.Message} with inner: {e.InnerException?.Message} ");
-                    }
-                }
-                else if (sub.SubscriptionKind == SubscriptionKind.StandardHandler)
-                {
-                    if (sub.HandlerProxy == null)
-                    {
-                        throw new InvalidOperationException("The Standard PropertyChangedEventHandler handler (HandlerProxy) is null.");
-                    }
-
-                    try
-                    {
-                        object target = sub.Target.Target;
-                        if (target == null)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"The object listening to this event is 'no longer with us.'");
-                        }
-                        else
-                        {
-                            PropertyChangedEventArgs e = new PropertyChangedEventArgs(propertyName);
-                            sub.PcStandardHandlerDispatcher(target, this, e, sub.HandlerProxy);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"A 'standard' PropertyChangedEventHandler handler raised an exception: {e.Message} with inner: {e.InnerException?.Message} ");
-                    }
-                }
-
-                else if (sub.SubscriptionKind == SubscriptionKind.ChangingHandler)
-                {
-                    if (sub.HandlerProxy == null)
-                    {
-                        throw new InvalidOperationException("The Changing PropertyChangingEventHandler handler (HandlerProxy) is null.");
-                    }
-
-                    try
-                    {
-                        object target = sub.Target.Target;
-                        if (target == null)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"The object listening to this event is 'no longer with us.'");
-                        }
-                        else
-                        {
-                            PropertyChangingEventArgs e = new PropertyChangingEventArgs(propertyName);
-                            sub.PChangingHandlerDispatcher(target, this, e, sub.HandlerProxy);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"A 'changing' PropertyChangingEventHandler handler raised an exception: {e.Message} with inner: {e.InnerException?.Message} ");
-                    }
-                }
-                else
-                {
-                    throw new InvalidOperationException($"Handlers of kind: {sub.SubscriptionKind} are not supported.");
+                    System.Diagnostics.Debug.WriteLine($"A {sub.SubscriptionKind} handler raised an exception: {e.Message} with inner: {e.InnerException?.Message} ");
                 }
             }
         }
@@ -2072,6 +2518,20 @@ namespace DRM.PropBag
             return sc;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="propertyName"></param>
+        /// <param name="propertyType">This is only required if there's a chance the PropItem will be registered during this call.</param>
+        /// <param name="haveValue"></param>
+        /// <param name="value"></param>
+        /// <param name="alwaysRegister"></param>
+        /// <param name="mustBeRegistered"></param>
+        /// <param name="neverCreate"></param>
+        /// <param name="desiredHasStoreValue"></param>
+        /// <param name="wasRegistered"></param>
+        /// <param name="propId"></param>
+        /// <returns>The existing or newly created PropItem.</returns>
         protected IPropData GetPropGen(PropNameType propertyName, Type propertyType,
             bool haveValue, object value,
             bool alwaysRegister, bool mustBeRegistered,
@@ -2093,21 +2553,26 @@ namespace DRM.PropBag
                 }
                 else
                 {
-                    PropData = this.HandleMissingProp(propId, propertyName, propertyType, out wasRegistered, haveValue, value, alwaysRegister, mustBeRegistered, neverCreate);
+                    throw new InvalidOperationException($"The store accessor did not find the property: {propertyName}.");
+                    //PropData = this.HandleMissingProp(propId, propertyName, propertyType, out wasRegistered, haveValue, value, alwaysRegister, mustBeRegistered, neverCreate);
                 }
             }
             else
             {
-                PropData = this.HandleMissingProp(propId, propertyName, propertyType, out wasRegistered, haveValue, value, alwaysRegister, mustBeRegistered, neverCreate);
+                PropData = this.HandleMissingProp(propertyName, propertyType, out wasRegistered, haveValue, value, alwaysRegister, mustBeRegistered, neverCreate);
             }
 
-            if (!PropData.IsEmpty && desiredHasStoreValue.HasValue && desiredHasStoreValue.Value != PropData.TypedProp.HasStore)
+            if (!PropData.IsEmpty && desiredHasStoreValue.HasValue)
             {
-                if (desiredHasStoreValue.Value)
+                if (desiredHasStoreValue.Value && PropData.TypedProp.StorageStrategy != PropStorageStrategyEnum.Internal)
+                {
                     //Caller needs property to have a backing store.
                     throw new InvalidOperationException(string.Format("Property: {0} has no backing store held by this instance of PropBag. This operation can only be performed on properties for which a backing store is held by this instance.", propertyName));
-                else
+                }
+                else if (!desiredHasStoreValue.Value && PropData.TypedProp.StorageStrategy == PropStorageStrategyEnum.Internal)
+                {
                     throw new InvalidOperationException(string.Format("Property: {0} has a backing store held by this instance of PropBag. This operation can only be performed on properties for which no backing store is kept by this instance.", propertyName));
+                }
             }
 
             return (IPropData) PropData;
@@ -2124,13 +2589,17 @@ namespace DRM.PropBag
                     throw new KeyNotFoundException($"The property named: {propertyName} could not be found in the property store.");
                 }
 
-                if (!PropData.IsEmpty && desiredHasStoreValue.HasValue && desiredHasStoreValue.Value != PropData.TypedProp.HasStore)
+                if (!PropData.IsEmpty && desiredHasStoreValue.HasValue)
                 {
-                    if (desiredHasStoreValue.Value)
+                    if (desiredHasStoreValue.Value && PropData.TypedProp.StorageStrategy != PropStorageStrategyEnum.Internal)
+                    {
                         //Caller needs property to have a backing store.
                         throw new InvalidOperationException(string.Format("Property: {0} has no backing store held by this instance of PropBag. This operation can only be performed on properties for which a backing store is held by this instance.", propertyName));
-                    else
+                    }
+                    else if (!desiredHasStoreValue.Value && PropData.TypedProp.StorageStrategy == PropStorageStrategyEnum.Internal)
+                    {
                         throw new InvalidOperationException(string.Format("Property: {0} has a backing store held by this instance of PropBag. This operation can only be performed on properties for which no backing store is kept by this instance.", propertyName));
+                    }
                 }
 
                 wasRegistered = false;
@@ -2142,7 +2611,7 @@ namespace DRM.PropBag
             }
         }
 
-        private IPropPrivate<T> CheckTypeInfo<T>(PropIdType propId, PropNameType propertyName, IPropData PropData, PSAccessServiceType storeAccess)
+        private IProp<T> CheckTypeInfo<T>(PropIdType propId, PropNameType propertyName, IPropData PropData, PSAccessServiceInterface storeAccess, bool isGetOp = true)
         {
             if (!PropData.TypedProp.TypeIsSolid)
             {
@@ -2161,12 +2630,12 @@ namespace DRM.PropBag
             {
                 if (!AreTypesSame(typeof(T), PropData.TypedProp.Type))
                 {
-                    throw new ApplicationException($"Attempting to set property: {propertyName} whose type is {PropData.TypedProp.Type}, " +
+                    throw new ApplicationException($"Attempting to {(isGetOp ? "get" : "set")} property: {propertyName} whose type is {PropData.TypedProp.Type}, " +
                         $"with a call whose type parameter is {typeof(T).ToString()} is invalid.");
                 }
             }
 
-            return (IPropPrivate<T>)PropData.TypedProp;
+            return (IProp<T>)PropData.TypedProp;
         }
 
         /// <summary>
@@ -2197,7 +2666,7 @@ namespace DRM.PropBag
                 object curValue = PropData.TypedProp.TypedValueAsObject;
                 PropKindEnum propKind = PropData.TypedProp.PropKind;
 
-                IProp genericTypedProp = _propFactory.CreateGenFromObject(newType, curValue, propertyName, null, true, true, propKind, null, false, null);
+                IProp genericTypedProp = _propFactory.CreateGenFromObject(newType, curValue, propertyName, null, PropStorageStrategyEnum.Internal, true, propKind, null, false, null);
 
                 bool result = _ourStoreAccessor.SetTypedProp(this, propId, propertyName, genericTypedProp);
                 return result;
@@ -2227,9 +2696,19 @@ namespace DRM.PropBag
             {
                 return curType.IsAssignableFrom(newType);
             }
+            else if(newType.UnderlyingSystemType == curType.UnderlyingSystemType)
+            {
+                return true;
+            }
             else
             {
-                return newType.UnderlyingSystemType == curType.UnderlyingSystemType;
+                return false;
+                //bool result = curType.IsAssignableFrom(newType);
+                //if(!result)
+                //{
+                //    result = newType.IsAssignableFrom(curType);
+                //}
+                //return result;
             }
         }
 
@@ -2267,23 +2746,14 @@ namespace DRM.PropBag
 
         private bool TryGetPropId(PropNameType propertyName, out PropIdType propId)
         {
-            bool result = _ourStoreAccessor.Level2KeyManager.TryGetFromRaw(propertyName, out propId);
+            bool result = _ourStoreAccessor.TryGetPropId(propertyName, out propId);
             return result;
         }
-
-        //private PropIdType GetPropId(PropNameType propertyName)
-        //{
-        //    // Register new propertyName and get an exploded key.
-        //    PropIdType propId = _ourStoreAccessor.Level2KeyManager.FromRaw(propertyName);
-
-        //    return propId;
-        //}
 
         private PropIdType AddPropId(PropNameType propertyName)
         {
             // Register new propertyName and get an exploded key.
-            PropIdType propId = _ourStoreAccessor.Level2KeyManager.Add(propertyName);
-
+            PropIdType propId = _ourStoreAccessor.Add(propertyName);
             return propId;
         }
 
@@ -2335,28 +2805,149 @@ namespace DRM.PropBag
 
         #endregion
 
+        #region IEditableObject Members
+
+        public event EventHandler<EventArgs> ItemEndEdit;
+
+
+        public void BeginEdit()
+        {
+            System.Diagnostics.Debug.WriteLine($"BeginEdit was called on PropBag: {FullClassName}.");
+        }
+
+        public void CancelEdit()
+        {
+        }
+
+        public void EndEdit()
+        {
+            if (ItemEndEdit != null)
+            {
+                ItemEndEdit(this, EventArgs.Empty);
+            }
+        }
+
+        #endregion
+
         #region IListSource Support
 
-        public bool TryGetListSource(string propertyName, Type itemType, out IListSource listSource)
-        {
-            //PropIdType l2Key = GetPropId(propertyName);
+        //public bool TryGetListSource(string propertyName, Type itemType, out IListSource listSource)
+        //{
+        //    if (TryGetPropId(propertyName, out PropIdType propId))
+        //    {
+        //        if (_ourStoreAccessor.TryGetValue(this, propId, out IPropData value))
+        //        {
+        //            listSource = value.TypedProp.ListSource;
+        //            return true;
+        //        }
+        //        else
+        //        {
+        //            listSource = null;
+        //            return false;
+        //        }
+        //    }
+        //    else
+        //    {
+        //        listSource = null;
+        //        return false;
+        //    }
+        //}
 
-            if (TryGetPropId(propertyName, out PropIdType propId))
+        #endregion
+
+        #region DataSourceProvider Support
+
+        public IManageCViews GetOrAddViewManager<TDal, TSource, TDestination>
+        (
+            PropNameType propertyName,
+            Type propertyType,
+            IPropBagMapper<TSource, TDestination> mapper,
+            out IManageCViews cViewManager
+        )
+            where TDal : IDoCRUD<TSource>
+            where TSource : class
+            where TDestination : INotifyItemEndEdit
+        {
+            IManageCViews result = null;
+            cViewManager = null;
+
+            return result;
+        }
+
+        public bool TryGetDataSourceProvider(PropNameType propertyName, Type propertyType,
+            out DataSourceProvider dataSourceProvider)
+        {
+            bool mustBeRegistered = true; // TryGetViewManager is called in the constructor, we cannot reference the virtual property: OurMetaData.AllPropsMustBeRegistered; 
+
+            IPropData propData = GetPropGen(propertyName, propertyType,
+                haveValue: false,
+                value: null,
+                alwaysRegister: false,
+                mustBeRegistered: mustBeRegistered,
+                neverCreate: false,
+                desiredHasStoreValue: null,
+                wasRegistered: out bool wasRegistered,
+                propId: out PropIdType propId);
+
+            if (propData != null)
             {
-                if (_ourStoreAccessor.TryGetValue(this, propId, out IPropData value))
-                {
-                    listSource = value.TypedProp.ListSource;
-                    return true;
-                }
-                else
-                {
-                    listSource = null;
-                    return false;
-                }
+                dataSourceProvider = _ourStoreAccessor.GetOrAddDataSourceProvider(this, propId, propData, _propFactory.GetCViewProviderFactory());
+                return true;
             }
             else
             {
-                listSource = null;
+                dataSourceProvider = null;
+                return false;
+            }
+        }
+
+        public IManageCViews GetOrAddViewManager(PropNameType propertyName, Type propertyType)
+        {
+            bool mustBeRegistered = true; // TryGetViewManager is called in the constructor, we cannot reference the virtual property: OurMetaData.AllPropsMustBeRegistered; 
+
+            IPropData propData = GetPropGen(propertyName, propertyType,
+                haveValue: false,
+                value: null,
+                alwaysRegister: false,
+                mustBeRegistered: mustBeRegistered,
+                neverCreate: false,
+                desiredHasStoreValue: null,
+                wasRegistered: out bool wasRegistered,
+                propId: out PropIdType propId);
+
+            if (propData != null)
+            {
+                IManageCViews result = _ourStoreAccessor.GetOrAddViewManager(this, propId, propData, _propFactory.GetCViewProviderFactory());
+                return result;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public bool TryGetViewManager(PropNameType propertyName, Type propertyType, out IManageCViews cViewManager)
+        {
+            bool mustBeRegistered = true; // TryGetViewManager is called in the constructor, we cannot reference the virtual property: OurMetaData.AllPropsMustBeRegistered; 
+
+            IPropData propData = GetPropGen(propertyName, propertyType,
+                haveValue: false,
+                value: null,
+                alwaysRegister: false,
+                mustBeRegistered: mustBeRegistered,
+                neverCreate: false,
+                desiredHasStoreValue: null,
+                wasRegistered: out bool wasRegistered,
+                propId: out PropIdType propId);
+
+            if (propData != null)
+            {
+                cViewManager = _ourStoreAccessor.GetViewManager(this, propId);
+                return true;
+            }
+            else
+            {
+                cViewManager = null;
                 return false;
             }
         }
@@ -2375,11 +2966,16 @@ namespace DRM.PropBag
                 {
                     lock(_sync)
                     {
-                        _ourStoreAccessor.Dispose();
+                        _ourStoreAccessor.Dispose(); // This disposes each of our PropItems.
                         _ourStoreAccessor = null;
 
-                        OurMetaData = null;
+                        _ourMetaData = null;
                         _propFactory = null;
+
+                        // TODO: Provide WeakReference to subscribers for this event.
+                        // instead of relying on callers to call Dispose.
+                        ItemEndEdit = null;
+
                         disposedValue = true;
                     }
 
@@ -2410,12 +3006,13 @@ namespace DRM.PropBag
 
         #region Generic Method Support
 
-        // TODO: Consider creating a new interface: IPropBagInternal and making this method be a member of that interface.
-        private bool DoSetBridge<T>(IPropBag target, PropIdType propId, string propertyName, IProp prop, object value)
+        // TODO: This method is here because DoSet<T> is private.
+        // Consider creating a new interface: IPropBagInternal and making this method be a member of that interface.
+        private bool DoSetBridge<T>(IPropBag target, PropIdType propId, PropNameType propertyName, IProp prop, object value)
         {
             T typedValue = (T)value;
 
-            IPropPrivate<T> typedProp = (IPropPrivate<T>)prop;
+            IProp<T> typedProp = (IProp<T>)prop;
             bool result = ((PropBag)target).DoSet<T>(propId, propertyName, typedProp, ref typedValue, (T)value);
 
             typedProp.TypedValue = typedValue;
@@ -2423,8 +3020,37 @@ namespace DRM.PropBag
             return result;
         }
 
+        //private IProp CVPropFromDsBridge(Type sourceType, Type destinationType, PropNameType propertyName, PropNameType srcPropName, IMapperRequest mr)
+        //{
+        //}
 
+        //private IProp CVPropFromDsBridge<TSource, TDestination>(IPropBag target, PropNameType propertyName, PropNameType srcPropName, IMapperRequest mr)
+        //where TSource : class
+        //where TDestination : INotifyItemEndEdit
+        //{
+        //    PropBag pb = (PropBag)target;
+        //    IProp result = pb.CreateCollectionViewPropDS<IDoCRUD<TSource>, TSource, TDestination>(propertyName, srcPropName, mr);
+        //    return result;
+        //}
 
+        private IManageCViews CViewManagerFromDsBridge<TSource, TDestination>(IPropBag target, PropNameType srcPropName, IMapperRequest mr)
+            where TSource : class
+            where TDestination : INotifyItemEndEdit
+        {
+            PropBag pb = (PropBag)target;
+            IManageCViews result = pb.GetOrAddCViewManager<IDoCRUD<TSource>, TSource, TDestination>(srcPropName, mr);
+            return result;
+        }
+
+        //private IProvideACViewManager CViewManagerProviderFromDsBridge<TSource, TDestination>(IPropBag target, LocalBindingInfo localBindingInfo, IMapperRequest mr)
+        private IProvideACViewManager CViewManagerProviderFromDsBridge<TSource, TDestination>(IPropBag target, IViewManagerProviderKey viewManagerProviderKey)
+            where TSource : class
+            where TDestination : INotifyItemEndEdit
+        {
+            PropBag pb = (PropBag)target;
+            IProvideACViewManager result = pb.GetOrAddCViewManagerProvider<IDoCRUD<TSource>, TSource, TDestination>(viewManagerProviderKey);
+            return result;
+        }
 
         #endregion
 
@@ -2459,24 +3085,4 @@ namespace DRM.PropBag
 
         #endregion
     }
-
-    //internal class PB_EventHolder : INotifyPropertyChanged,
-    //    INotifyPropertyChanging,
-    //    INotifyPCGen,
-    //    INotifyPCObject
-    //{
-
-    //    public event PropertyChangedEventHandler PropertyChanged;
-    //    public event PropertyChangingEventHandler PropertyChanging;
-    //    public event EventHandler<PcGenEventArgs> PropertyChangedWithGenVals;
-    //    public event EventHandler<PcObjectEventArgs> PropertyChangedWithObjectVals;
-
-    //    public void OnPropertyChangedWithGenVals(PcGenEventArgs eArgs)
-    //    {
-    //        EventHandler<PcGenEventArgs> handler = Interlocked.CompareExchange(ref PropertyChangedWithGenVals, null, null);
-
-    //        if (handler != null)
-    //            handler(this, eArgs);
-    //    }
-    //}
 }

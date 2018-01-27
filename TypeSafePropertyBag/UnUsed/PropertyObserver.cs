@@ -13,7 +13,7 @@ using System.Windows;
 /// Project Coordinator: JoshSmithOnWpf
 ///</remarks>
 
-namespace DRM.TypeSafePropertyBag.UnUsed
+namespace DRM.TypeSafePropertyBag.Unused
 {
     /// <summary>
     /// Monitors the PropertyChanged event of an object that implements INotifyPropertyChanged,

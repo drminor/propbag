@@ -8,14 +8,18 @@ using System.Collections.Generic;
 
 namespace PropBagLib.Tests
 {
-	public partial class Sample : PropBag
+    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
+
+    public partial class Sample : PropBag
 	{
-		public Sample() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered, null) { }
+		//public Sample() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered, null) { }
 
-		public Sample(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
+		//public Sample(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
 
-		public Sample(PropBagTypeSafetyMode typeSafetyMode, IPropFactory factory) : base(typeSafetyMode, factory)
-		{
+		public Sample(PropBagTypeSafetyMode typeSafetyMode, PSAccessServiceCreatorInterface storeAccessCreator,
+            string fullClassName, IPropFactory propFactory)
+            : base(typeSafetyMode, storeAccessCreator, propFactory, fullClassName)
+        {
 	        AddProp<object>("PropObject", comparer:null);
 		 
 	        AddProp<string>("PropString", comparer:null);

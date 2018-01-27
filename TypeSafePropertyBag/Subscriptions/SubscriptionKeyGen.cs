@@ -13,14 +13,14 @@ namespace DRM.TypeSafePropertyBag
     using PropNameType = String;
 
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
-    using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
+    using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
 
     public class SubscriptionKeyGen : ISubscriptionKeyGen, IEquatable<SubscriptionKeyGen>
     {
         #region Private Members
 
         Func<ISubscriptionKeyGen, IProvideHandlerDispatchDelegateCaches, ISubscription> SubscriptionFactory { get; }
-        Func<ISubscriptionKeyGen, PSAccessServiceType, ISubscription> BindingFactory { get;}
+        Func<ISubscriptionKeyGen, PSAccessServiceInterface, ISubscription> BindingFactory { get;}
 
         #endregion
 
@@ -32,12 +32,6 @@ namespace DRM.TypeSafePropertyBag
         public SubscriptionKind SubscriptionKind { get; }
         public SubscriptionPriorityGroup SubscriptionPriorityGroup { get; }
         //public SubscriptionTargetKind SubscriptionTargetKind { get; }
-
-        //public EventHandler<PcGenEventArgs> GenHandler { get; private set; }
-        //public EventHandler<PcObjectEventArgs> ObjHandler { get; private set; }
-
-        //public PropertyChangedEventHandler StandardHandler { get; private set; }
-        //public PropertyChangingEventHandler ChangingHandler { get; private set; }
 
         public object Target { get; private set; } 
         public MethodInfo Method { get; }
@@ -65,10 +59,6 @@ namespace DRM.TypeSafePropertyBag
             SubscriptionPriorityGroup = subscriptionPriorityGroup;
             //SubscriptionTargetKind = GetKindOfTarget(standardDelegate.Target, keepRef);
 
-            //GenHandler = null;
-            //ObjHandler = null;
-            //StandardHandler = standardDelegate;
-
             //GenDoWhenChanged = null;
             //Action = null;
 
@@ -90,11 +80,6 @@ namespace DRM.TypeSafePropertyBag
             SubscriptionKind = SubscriptionKind.ChangingHandler;
             SubscriptionPriorityGroup = subscriptionPriorityGroup;
             //SubscriptionTargetKind = GetKindOfTarget(standardDelegate.Target, keepRef);
-
-            //GenHandler = null;
-            //ObjHandler = null;
-            //StandardHandler = null;
-            //ChangingHandler = changingDelegate;
 
             //GenDoWhenChanged = null;
             //Action = null;
@@ -118,10 +103,6 @@ namespace DRM.TypeSafePropertyBag
             SubscriptionPriorityGroup = subscriptionPriorityGroup;
             //SubscriptionTargetKind = GetKindOfTarget(genDelegate.Target, keepRef);
 
-            //StandardHandler = null;
-            //GenHandler = genDelegate;
-            //ObjHandler = null;
-
             //GenDoWhenChanged = null;
             //Action = null;
 
@@ -143,10 +124,6 @@ namespace DRM.TypeSafePropertyBag
             SubscriptionKind = SubscriptionKind.ObjHandler;
             SubscriptionPriorityGroup = subscriptionPriorityGroup;
             //SubscriptionTargetKind = GetKindOfTarget(objDelegate.Target, keepRef);
-
-            //StandardHandler = null;
-            //GenHandler = null;
-            //ObjHandler = objDelegate;
 
             //GenDoWhenChanged = null;
             //Action = null;
@@ -173,10 +150,6 @@ namespace DRM.TypeSafePropertyBag
             SubscriptionKind = kind;
             SubscriptionPriorityGroup = subscriptionPriorityGroup;
             //SubscriptionTargetKind = GetKindOfTarget(target, keepRef);
-
-            //StandardHandler = null;
-            //GenHandler = null;
-            //ObjHandler = null;
 
             //GenDoWhenChanged = null;
             //Action = null;
@@ -206,10 +179,6 @@ namespace DRM.TypeSafePropertyBag
             SubscriptionPriorityGroup = subscriptionPriorityGroup;
             //SubscriptionTargetKind = GetKindOfTarget(genAction.Target, keepRef);
 
-            //StandardHandler = null;
-            //GenHandler = null;
-            //ObjHandler = null;
-
             //GenDoWhenChanged = genAction ?? throw new ArgumentNullException(nameof(genAction));
             //Action = null;
 
@@ -233,10 +202,6 @@ namespace DRM.TypeSafePropertyBag
             SubscriptionKind = SubscriptionKind.ActionNoParams;
             SubscriptionPriorityGroup = subscriptionPriorityGroup;
             //SubscriptionTargetKind = GetKindOfTarget(action.Target, keepRef);
-
-            //StandardHandler = null;
-            //GenHandler = null;
-            //ObjHandler = null;
 
             //GenDoWhenChanged = null;
             //Action = action;
@@ -263,7 +228,7 @@ namespace DRM.TypeSafePropertyBag
             LocalBindingInfo bindingInfo,
             SubscriptionKind kind,
             SubscriptionPriorityGroup subscriptionPriorityGroup,
-            Func<ISubscriptionKeyGen, PSAccessServiceType, ISubscription> bindingFactory)
+            Func<ISubscriptionKeyGen, PSAccessServiceInterface, ISubscription> bindingFactory)
         {
             OwnerPropId = ownerPropId; // The binding is created on the target, we will go find the source of the events to listen.
             PropertyType = PropertyType;
@@ -271,10 +236,6 @@ namespace DRM.TypeSafePropertyBag
             SubscriptionKind = kind;
             SubscriptionPriorityGroup = subscriptionPriorityGroup;
             //SubscriptionTargetKind = SubscriptionTargetKind.GlobalPropId;
-
-            //StandardHandler = null;
-            //GenHandler = null;
-            //ObjHandler = null;
 
             //GenDoWhenChanged = null;
             //Action = null;
@@ -315,14 +276,14 @@ namespace DRM.TypeSafePropertyBag
             return SubscriptionFactory(this, handlerDispatchDelegateCacheProvider);
         }
 
-        public ISubscription CreateSubscriptionGen(ISubscriptionKeyGen subscriptionRequestGen, IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider)
+        private ISubscription CreateSubscriptionGen(ISubscriptionKeyGen subscriptionRequestGen, IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider)
         {
             ISubscription result = new SubscriptionGen(subscriptionRequestGen, handlerDispatchDelegateCacheProvider);
             subscriptionRequestGen.MarkAsUsed();
             return result;
         }
 
-        public virtual ISubscription CreateBinding(PSAccessServiceType propStoreAccessService)
+        public virtual ISubscription CreateBinding(PSAccessServiceInterface propStoreAccessService)
         {
             return BindingFactory(this, propStoreAccessService);
         }
@@ -330,11 +291,6 @@ namespace DRM.TypeSafePropertyBag
         public void MarkAsUsed()
         {
             Target = null;
-
-            //ObjHandler = null;
-            //GenHandler = null;
-            //StandardHandler = null;
-            //ChangingHandler = null;
 
             //GenDoWhenChanged = null;
             //Action = null;

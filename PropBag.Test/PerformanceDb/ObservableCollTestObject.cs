@@ -1,6 +1,5 @@
 ﻿using DRM.PropBag;
 using DRM.PropBag.AutoMapperSupport;
-using DRM.PropBag.ControlModel;
 using DRM.TypeSafePropertyBag;
 using NUnit.Framework;
 using PropBagLib.Tests.AutoMapperSupport;
@@ -21,14 +20,14 @@ namespace PropBagLib.Tests.PerformanceDb
             string configPackageName,
             AutoMapperHelpers ourHelper,
             IPropFactory propFactory_V1,
-            SimpleAutoMapperProvider amp,
+            IProvideAutoMappers amp,
             PropModelHelpers pmHelpers,
             int numberOfItemsToLoad
             )
         {
-            propFactory_V1.PropStoreAccessServiceProvider.ResetAccessCounter();
+            ourHelper.StoreAccessCreator.ResetAccessCounter();
 
-            Assert.That(propFactory_V1.PropStoreAccessServiceProvider.AccessCounter == 0, "The Provider of PropStoreAccessServices did not have its Access Counter reset.");
+            Assert.That(ourHelper.StoreAccessCreator.AccessCounter == 0, "The Provider of PropStoreAccessServices did not have its Access Counter reset.");
 
             // Setup Mapping between Model1 and Person
             PropModel propModel1 = pmHelpers.GetPropModelForModel1Dest(propFactory_V1);
@@ -37,7 +36,7 @@ namespace PropBagLib.Tests.PerformanceDb
             IPropBagMapperKey<Person, DestinationModel1> mapperRequest = amp.RegisterMapperRequest<Person, DestinationModel1>
                 (
                     propModel: propModel1,
-                    targetType: typeToWrap,
+                    typeToWrap: typeToWrap,
                     configPackageName: configPackageName
                 );
 
@@ -49,7 +48,8 @@ namespace PropBagLib.Tests.PerformanceDb
             PropModel propModel5 = pmHelpers.GetPropModelForModel5Dest(propFactory_V1);
 
             string fullClassName = null; // Don't override the value from the PropModel.
-            _testMainVM = new DestinationModel5(propModel5, fullClassName, propFactory_V1);
+            // TODO: AAA
+            _testMainVM = new DestinationModel5(propModel5, ourHelper.StoreAccessCreator, propFactory_V1, fullClassName);
 
             Business b = new Business();
             _testMainVM.SetIt(b, "Business"); // THIS IS A SET ACESSS OPERATION.
@@ -64,7 +64,7 @@ namespace PropBagLib.Tests.PerformanceDb
             _readyForTheView = new System.Collections.ObjectModel.ObservableCollection<DestinationModel1>(mappedPeople);
 
             // Each time a item is mapped, it is first created. (5 sets during consruction, and another 5 for the actual mapping.)
-            int totalNumberOfGets = ourHelper.PropFactory_V1.PropStoreAccessServiceProvider.AccessCounter;
+            int totalNumberOfGets = ourHelper.StoreAccessCreator.AccessCounter;
 
             if (configPackageName == "Extra_Members")
             {
@@ -75,8 +75,8 @@ namespace PropBagLib.Tests.PerformanceDb
                 Assert.That(totalNumberOfGets == 1 + (numberOfItemsToLoad * 5), $"Total # of SetIt access operations is wrong: it should be {1 + numberOfItemsToLoad * 5}, but instead it is {totalNumberOfGets}.");
             }
 
-            int currentNumRootPropBags = ourHelper.PropFactory_V1.PropStoreAccessServiceProvider.NumberOfRootPropBagsInPlay;
-            int totalRootPropBagsCreated = ourHelper.PropFactory_V1.PropStoreAccessServiceProvider.TotalNumberOfAccessServicesCreated;
+            int currentNumRootPropBags = ourHelper.StoreAccessCreator.NumberOfRootPropBagsInPlay;
+            int totalRootPropBagsCreated = ourHelper.StoreAccessCreator.TotalNumberOfAccessServicesCreated;
 
             PropBag test = (PropBag)_readyForTheView[0];
 

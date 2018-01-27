@@ -31,6 +31,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -41,10 +42,85 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CViewManagerFromDsDelegate.cs" />
+    <Compile Include="CVPropFromDsDelegate.cs" />
+    <Compile Include="DataAccessSupport\CViewManagerBinder.cs" />
+    <Compile Include="DataSourceMapping\CrudWithMapping.cs" />
+    <Compile Include="DataSourceMapping\IDoCrudWithMapping.cs" />
+    <Compile Include="DataAccessSupport\IDoCRUD.cs" />
+    <Compile Include="DataAccessSupport\CLR_Mapped_DSP.cs" />
+    <Compile Include="DataAccessSupport\EndEditWrapper.cs" />
+    <Compile Include="Factories\AbstractPropFactory.cs" />
+    <Compile Include="Factories\APFGenericMethodTemplates.cs" />
+    <Compile Include="Factories\SimpleTypeResolver.cs" />
+    <Compile Include="Fundamentals\CollectionViewExtensions.cs" />
+    <Compile Include="DataSourceMapping\IPropBagMapper.cs" />
+    <None Include="LocalBinding\Instances\LocalBinder - SafetyCopy.cs" />
+    <Compile Include="LocalBinding\Engine\BindingPathParser.cs" />
+    <Compile Include="LocalBinding\Instances\LocalWatcher.cs" />
+    <Compile Include="LocalBinding\Instances\PropStoreNotificationKindEnum.cs" />
+    <Compile Include="LocalBinding\Registration\IReceivePropStoreNodeUpdates.cs" />
+    <Compile Include="PropBagInterfaces\INotifyItemEndEdit.cs" />
+    <Compile Include="PropBagInterfaces\ICacheDelegates.cs" />
+    <Compile Include="PropBagInterfaces\ICacheDelegatesForTypePair.cs" />
+    <Compile Include="Fundamentals\TwoTypes.cs" />
+    <Compile Include="PropBagModel\DeriveFromClassModeEnum.cs" />
+    <Compile Include="PropBagModel\IMapperRequest.cs" />
+    <Compile Include="PropBagModel\IPropBinderField.cs" />
+    <Compile Include="PropBagModel\IPropComparerField.cs" />
+    <Compile Include="PropBagModel\IPropDoWhenChangedField.cs" />
+    <Compile Include="PropBagModel\IPropInitialValueField.cs" />
+    <Compile Include="PropBagModel\IPropItem.cs" />
+    <Compile Include="PropBagModel\IPropModel.cs" />
+    <Compile Include="PropBagModel\IPropModelProvider.cs" />
+    <Compile Include="PropBagModel\ITypeInfoField.cs" />
+    <Compile Include="PropBagModel\WellKnownCollectionTypeEnum.cs" />
+    <Compile Include="PropInterfaces\IDataTablePropInterfaces.cs" />
+    <Compile Include="PropInterfaces\IProvideACViewManager.cs" />
+    <Compile Include="PropInterfaces\IWatchPropItems.cs" />
+    <Compile Include="PropStore\IProvidePropStoreServiceSingletons.cs" />
+    <Compile Include="PropStore\PropStoreServices.cs" />
+    <Compile Include="PropStore\PSNodeChangedEventArgs.cs" />
+    <Compile Include="PropStore\ViewManagers\IViewManagerProviderKey.cs" />
+    <Compile Include="PropStore\ViewManagers\ViewManagerProviderCollection.cs" />
+    <Compile Include="PropStore\ViewManagers\ViewManagerProviderKey.cs" />
+    <Compile Include="Props\PropItemWatcher.cs" />
+    <Compile Include="TypeConverters\ChangeType.cs" />
+    <Compile Include="TypeConverters\ITypeDescBasedTConverterCache.cs" />
+    <Compile Include="Unused\ObsCollection.cs" />
+    <Compile Include="PropBagInterfaces\GetDefaultValueDelegate.cs" />
+    <Compile Include="PropBagInterfaces\ICreateProps.cs" />
+    <Compile Include="PropBagInterfaces\IRegisterBindingsForwarder.cs" />
+    <None Include="Unused\CollectionViewSourceReferenceCode.cs" />
+    <Compile Include="PropInterfaces\ICollectionTypedPropInterfaces.cs" />
+    <Compile Include="PropInterfaces\IListSourceProvider.cs" />
+    <Compile Include="Unused\IObsCollection.cs" />
+    <Compile Include="PropInterfaces\ICollectionPropInterfaces.cs" />
+    <Compile Include="PropInterfaces\IManageCViews.cs" />
+    <Compile Include="PropInterfaces\IProvideADataSourceProvider.cs" />
+    <Compile Include="PropInterfaces\IProvideAView.cs" />
+    <Compile Include="PropInterfaces\ViewAndViewManagerCreatorDelegates.cs" />
+    <Compile Include="PropStorageStrategyEnum.cs" />
+    <Compile Include="PropStore\SimplePropStoreServiceEP.cs" />
+    <Compile Include="PropStore\Subscriptions\ParentNCSubscriberCollection.cs" />
+    <Compile Include="PropStore\Subscriptions\ParentNCSubscription.cs" />
+    <Compile Include="PropStore\Subscriptions\ParentNCSubscriptionRequest.cs" />
+    <Compile Include="PropStore\Subscriptions\UnsubscriberForPropStore.cs" />
+    <Compile Include="PropStore\ViewManagers\ViewManagerCollection.cs" />
+    <Compile Include="Props\ViewManager.cs" />
     <Compile Include="PropStoreKeys\IExplodedKey.cs" />
     <Compile Include="PropStoreKeys\ILevel2KeyManager.cs" />
     <Compile Include="PropStoreKeys\SimpleExKey.cs" />
     <Compile Include="PropStoreKeys\SimpleLevel2KeyMan.cs" />
+    <Compile Include="PropStore\IPropStoreAccessServiceInternal.cs" />
+    <Compile Include="PropStore\Unsubscriber.cs" />
+    <Compile Include="Unused\DSProviderProviderCollection_NotUsed.cs" />
+    <Compile Include="Props\PBCollectionDSP_Provider.cs" />
+    <Compile Include="Props\PBCollectionDSP.cs" />
+    <Compile Include="Props\PropBase.cs" />
+    <Compile Include="Props\PropTypedBase.cs" />
+    <Compile Include="Props\ViewRefreshedEventArgs.cs" />
+    <Compile Include="RefEqualityComparer.cs" />
     <Compile Include="TypeConverters\ConverterDelegates.cs" />
     <Compile Include="DoSetDelegate.cs" />
     <Compile Include="Fundamentals\TwoTypesDelegateCache.cs" />
@@ -66,10 +142,10 @@
     <Compile Include="LocalBinding\Management\ICacheBindings.cs" />
     <Compile Include="LocalBinding\Registration\IRegisterBindings.cs" />
     <Compile Include="PropBagInterfaces\CreatePropDelegate.cs" />
-    <Compile Include="PropBagInterfaces\IPropBagProxy.cs" />
+    <None Include="Unused\IPropBagProxy.cs" />
     <Compile Include="PropBagInterfaces\IProvideDelegateCaches.cs" />
     <Compile Include="PropStore\INotifyParentNodeChanged.cs" />
-    <Compile Include="PropStore\PropBagProxy.cs" />
+    <None Include="Unused\PropBagProxy.cs" />
     <Compile Include="PropStore\PropGen.cs" />
     <Compile Include="PropStore\PSNodeParentChangedEventArgs.cs" />
     <Compile Include="PropStore\StoreNodeBag.cs" />
@@ -117,7 +193,7 @@
     <Compile Include="PropStore\IPropStoreAccessService.cs" />
     <Compile Include="PropStore\IHaveTheStoreNode.cs" />
     <None Include="Unused\IHaveTheSimpleKey.cs" />
-    <None Include="PropStore\SimplePropStoreAccessServiceWithExKey.cs" />
+    <None Include="Unused\SimplePropStoreAccessServiceWithExKey.cs" />
     <Compile Include="PropStore\SimplePropStoreAccessService.cs" />
     <Compile Include="PropStore\SimplePropStoreAccessServiceProvider.cs" />
     <Compile Include="Subscriptions\CollectionOfSubscriberCollections.cs" />
@@ -146,6 +222,7 @@
     <Compile Include="PropKindEnum.cs" />
     <Compile Include="PropBagInterfaces\ResolveTypeDelegate.cs" />
     <Compile Include="Unused\IDisposableTemplate.cs" />
+    <None Include="Unused\TypedBusiness_NotUsed.cs" />
     <Compile Include="Unused\TypedWeakReference.cs" />
     <Compile Include="Fundamentals\TypeExtensions.cs" />
     <Compile Include="Subscriptions\SubscriptionKeyForBinding.cs" />
@@ -155,8 +232,15 @@
     <Compile Include="Subscriptions\SubscriptionPriorityGroup.cs" />
     <Compile Include="Subscriptions\SubscriptionTargetKind.cs" />
     <Compile Include="TypeSafePropBagMetaData.cs" />
+    <Compile Include="Unused\WeakRefKeyTyped.cs" />
+    <Compile Include="Fundamentals\WeakRefKey.cs" />
     <Compile Include="ValPlusType.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\src\AutoMapper\AutoMapper.csproj">
+      <Project>{8cba8a56-9b60-4430-9d54-9a523baf1e14}</Project>
+      <Name>AutoMapper</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

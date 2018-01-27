@@ -1,29 +1,75 @@
-﻿using DRM.PropBag.AutoMapperSupport;
+﻿using DRM.PropBag;
+using DRM.PropBag.AutoMapperSupport;
+using DRM.PropBag.Caches;
 using DRM.PropBag.ControlModel;
-using DRM.PropBag.ControlsWPF;
+using DRM.PropBagControlsWPF;
+
 using DRM.PropBagWPF;
+
 using DRM.TypeSafePropertyBag;
-using DRM.ViewModelTools;
+using DRM.PropBag.ViewModelTools;
 using System;
 using System.ComponentModel;
 using System.Windows;
 
 namespace PropBagTestApp.Infra
 {
-    using PropIdType = UInt32;
-    using PropNameType = String;
+    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
 
-    using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
-
-    public class AutoMapperHelpers
+    // TODO: Fix this!!
+    public static class JustSayNo // JustSayNo to using Static-based config providers.
     {
-        public SimpleAutoMapperProvider InitializeAutoMappers(IPropModelProvider propModelProvider)
+        public static ITypeDescBasedTConverterCache TypeDescBasedTConverterCache { get; }
+
+        public static IPropFactory DefaultPropFactory { get; }
+        public static IProvidePropModels PropModelProvider { get; }
+        public static ViewModelHelper ViewModelHelper { get; }
+        public static IProvideAutoMappers AutoMapperProvider { get; }
+
+        public static string PackageConfigName { get; set; }
+
+        static JustSayNo()
         {
-            IPropBagMapperBuilderProvider propBagMapperBuilderProvider
-                = new SimplePropBagMapperBuilderProvider
+            IProvideDelegateCaches delegateCacheProvider = new SimpleDelegateCacheProvider(typeof(DRM.PropBag.PropBag), typeof(APFGenericMethodTemplates));
+
+            TypeDescBasedTConverterCache = new TypeDescBasedTConverterCache();
+            IConvertValues pfvc = new PropFactoryValueConverter(TypeDescBasedTConverterCache);
+
+            ResolveTypeDelegate typeResolver = null;
+
+            DefaultPropFactory = new WPFPropFactory(delegateCacheProvider: delegateCacheProvider, valueConverter: pfvc, typeResolver: typeResolver);
+
+            IPropBagTemplateProvider propBagTemplateProvider = new PropBagTemplateProvider(Application.Current.Resources);
+            IViewModelActivator vmActivator = new SimpleViewModelActivator();
+            PSAccessServiceCreatorInterface propStoreEntryPoint = GetPropStoreEntryPoint();
+
+            PropModelProvider = new PropModelProvider(propBagTemplateProvider, DefaultPropFactory, vmActivator, propStoreEntryPoint);
+            ViewModelHelper = new ViewModelHelper(PropModelProvider, vmActivator, propStoreEntryPoint);
+            AutoMapperProvider = GetAutoMapperProvider(PropModelProvider, propStoreEntryPoint);
+        }
+
+        public static PSAccessServiceCreatorInterface GetPropStoreEntryPoint()
+        {
+            int MAX_NUMBER_OF_PROPERTIES = 65536;
+
+            IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider = new SimpleHandlerDispatchDelegateCacheProvider();
+
+            PSAccessServiceCreatorInterface result = new SimplePropStoreServiceEP(MAX_NUMBER_OF_PROPERTIES, handlerDispatchDelegateCacheProvider);
+
+            return result;
+        }
+
+        private static IProvideAutoMappers GetAutoMapperProvider
+            (
+            IProvidePropModels propModelProvider,
+            PSAccessServiceCreatorInterface storeAccessCreator
+            )
+        {
+            IPropBagMapperBuilderProvider propBagMapperBuilderProvider = new SimplePropBagMapperBuilderProvider
                 (
-                    wrapperTypeCreator: null,
-                    viewModelActivator: null
+                wrapperTypesCreator: null,
+                viewModelActivator: null,
+                storeAccessCreator: storeAccessCreator
                 );
 
             IMapTypeDefinitionProvider mapTypeDefinitionProvider = new SimpleMapTypeDefinitionProvider();
@@ -40,70 +86,9 @@ namespace PropBagTestApp.Infra
 
             return autoMapperProvider;
         }
-    }
-
-    // TODO: Fix this!!
-    public static class JustSayNo // To using Static-based config providers.
-    {
-        // Maximum number of PropertyIds for any one given Object.
-        private const int LOG_BASE2_MAX_PROPERTIES = 16;
-        public static readonly int MAX_NUMBER_OF_PROPERTIES = (int)Math.Pow(2, LOG_BASE2_MAX_PROPERTIES); //65536;
-
-        public static PropModelProvider PropModelProvider { get; }
-        public static ViewModelHelper ViewModelHelper { get; }
-        public static SimpleAutoMapperProvider AutoMapperProvider { get; }
-        public static IPropFactory ThePropFactory { get; }
-
-        public static PSAccessServiceProviderType PropStoreAccessServiceProvider { get; }
-
-        static JustSayNo()
-        {
-            IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider = new SimpleHandlerDispatchDelegateCacheProvider();
-
-            IProvidePropStoreAccessService<PropIdType, PropNameType> result = 
-                new SimplePropStoreAccessServiceProvider(MAX_NUMBER_OF_PROPERTIES, handlerDispatchDelegateCacheProvider);
-
-            //IProvideDelegateCaches delegateCacheProvider = new SimpleDelegateCacheProvider();
-
-            ThePropFactory = new WPFPropFactory
-                (
-                    propStoreAccessServiceProvider: PropStoreAccessServiceProvider,
-                    //delegateCacheProvider: delegateCacheProvider,
-                    typeResolver: GetTypeFromName,
-                    valueConverter: null
-                );
-
-            IPropBagTemplateProvider propBagTemplateProvider = new PropBagTemplateProvider(Application.Current.Resources);
-
-            IViewModelActivator vmActivator = new SimpleViewModelActivator();
-            PropModelProvider = new PropModelProvider(propBagTemplateProvider, ThePropFactory, vmActivator);
-
-            ViewModelHelper = new ViewModelHelper(PropModelProvider, vmActivator);
-
-            AutoMapperProvider = new AutoMapperHelpers().InitializeAutoMappers(PropModelProvider);
-        }
-
-        public static Type GetTypeFromName(string typeName)
-        {
-            Type result;
-            try
-            {
-                result = Type.GetType(typeName);
-            }
-            catch (System.Exception e)
-            {
-                throw new InvalidOperationException($"Cannot create a Type instance from the string: {typeName}.", e);
-            }
-
-            if (result == null)
-            {
-                throw new InvalidOperationException($"Cannot create a Type instance from the string: {typeName}.");
-            }
-
-            return result;
-        }
 
         #region InDesign Support
+
         public static bool InDesignMode() => _isInDesignMode.HasValue && _isInDesignMode == true;
 
         public static bool? _isInDesignMode;
@@ -124,6 +109,7 @@ namespace PropBagTestApp.Infra
                 return _isInDesignMode.Value;
             }
         }
+
         #endregion
     }
 }

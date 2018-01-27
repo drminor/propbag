@@ -1,4 +1,4 @@
-﻿using DRM.PropBag.ControlModel;
+﻿using DRM.PropBag;
 using DRM.TypeSafePropertyBag;
 using System;
 using System.Collections.Generic;
@@ -76,11 +76,11 @@ namespace DRM.PropBag.TypeDescriptors
         {
             PropertyDescriptor[] descriptors = new PropertyDescriptor[pm.Props.Count];
 
-            List<PropItem> propItems = pm.Props.ToList();
+            List<IPropItem> propItems = pm.Props.ToList();
 
             for (int pdPtr = 0; pdPtr < propItems.Count; pdPtr++)
             {
-                PropItem pItem = propItems[pdPtr];
+                IPropItem pItem = propItems[pdPtr];
 
                 PropItemTypeDescriptor<IPropBag> propItemTypeDesc =
                     new PropItemTypeDescriptor<IPropBag>(pItem.PropertyName, pItem.PropertyType, new Attribute[] { });
@@ -109,6 +109,8 @@ namespace DRM.PropBag.TypeDescriptors
 
             return descriptors;
         }
+
+
 
         #region PropertyDescriptor Method Overrides
 

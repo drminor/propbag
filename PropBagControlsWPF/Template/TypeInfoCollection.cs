@@ -1,6 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 
-namespace DRM.PropBag.ControlsWPF
+namespace DRM.PropBagControlsWPF
 {
     public class TypeInfoCollection : ObservableCollection<TypeInfoField>
     {

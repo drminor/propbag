@@ -1,5 +1,5 @@
 ﻿
-using DRM.PropBag.ControlModel;
+using DRM.PropBag;
 using DRM.TypeSafePropertyBag;
 using NUnit.Framework;
 using PropBagLib.Tests.AutoMapperSupport;
@@ -32,20 +32,22 @@ namespace PropBagLib.Tests
                 className: "CreateAtRunTimeModel",
                 namespaceName: "PropBagLib.Tests",
                 deriveFrom: DeriveFromClassModeEnum.PropBag,
-                targetType: null, 
+                targetType: null,
+                propStoreServiceProviderType: null,
                 propFactory: null,
                 typeSafetyMode: PropBagTypeSafetyMode.AllPropsMustBeRegistered,
                 deferMethodRefResolution: true,
                 requireExplicitInitialValue: true);
 
-            PropItem pi = new PropItem(typeof(string), "PropString", true, true, PropKindEnum.Prop, null, new PropInitialValueField("Initial Value"), null, null, null);
+            PropItemModel pi = new PropItemModel(typeof(string), "PropString", PropStorageStrategyEnum.Internal, true, PropKindEnum.Prop, null, new PropInitialValueField("Initial Value"), null, null, null);
 
             pm.Props.Add(pi);
 
             AutoMapperHelpers ourHelper = new AutoMapperHelpers();
             IPropFactory propFactory_V1 = ourHelper.GetNewPropFactory_V1();
 
-            mod1 = new CreateAtRunTimeModel(pm, propFactory_V1);
+            // TODO: AAA
+            mod1 = new CreateAtRunTimeModel(pm, ourHelper.StoreAccessCreator, propFactory_V1);
 
             Assert.That(mod1, Is.Not.EqualTo(null), "Expected the CreateAtRunTimeModel to have been created.");
 

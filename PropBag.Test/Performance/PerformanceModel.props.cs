@@ -9,14 +9,18 @@ using PropBagLib.Tests;
 
 namespace PropBagLib.Tests
 {
-	public partial class PerformanceModel : PropBag
+    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
+
+    public partial class PerformanceModel : PropBag
 	{
-		public PerformanceModel() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered, null) { }
+		//public PerformanceModel() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered, null) { }
 
-		public PerformanceModel(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
+		//public PerformanceModel(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
 
-		public PerformanceModel(PropBagTypeSafetyMode typeSafetyMode, IPropFactory factory) : base(typeSafetyMode, factory)
-		{
+		public PerformanceModel(PropBagTypeSafetyMode typeSafetyMode, PSAccessServiceCreatorInterface storeAccessCreator,
+            string fullClassName, IPropFactory propFactory)
+            : base(typeSafetyMode, storeAccessCreator, propFactory, fullClassName)
+        {
 	        AddProp<object>("PropObject", comparer:null);
 		 
 	        AddProp<string>("PropString", null, null, initialValue:"");

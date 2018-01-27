@@ -1,6 +1,5 @@
 ﻿using DRM.PropBag;
 using DRM.PropBag.AutoMapperSupport;
-using DRM.PropBag.ControlModel;
 using DRM.TypeSafePropertyBag;
 using NUnit.Framework;
 using PropBagLib.Tests.AutoMapperSupport;
@@ -19,7 +18,7 @@ namespace PropBagLib.Tests.PerformanceDb
     {
         const int NUMBER_OF_PEOPLE = 1000;
 
-        SimpleAutoMapperProvider _amp;
+        IProvideAutoMappers _amp;
         AutoMapperHelpers _ourHelper;
         IPropFactory _propFactory_V1;
         PropModelHelpers _pmHelpers;
@@ -46,6 +45,18 @@ namespace PropBagLib.Tests.PerformanceDb
             //AutoMapperHelpers  _ourHelper = new AutoMapperHelpers();
             //_propFactory_V1 = _ourHelper.GetNewPropFactory_V1();
         }
+
+        //[Test]
+        //public void Can_ConvertIObsColl_to_ObservableColl()
+        //{
+        //    ObservableCollection<int> ocIn = new ObservableCollection<int>();
+
+        //    IObsCollection<int> dest;
+
+        //    dest = (IObsCollection<int>) ocIn;
+
+        //    ObservableCollection<int> ocOut = (ObservableCollection<int>) dest;
+        //}
 
         [Test]
         public void A_ReadIntoMappedArray()
@@ -84,13 +95,14 @@ namespace PropBagLib.Tests.PerformanceDb
             string fullClassName = "PropBagLib.Tests.PerformanceDb.DestinationModel1";
             List<DestinationModel1> destinationList = new List<DestinationModel1>();
 
-            Assert.That(propFactory_V1.PropStoreAccessServiceProvider.AccessCounter == 0, "The Provider of PropStoreAccessServices has not had its Access Counter reset.");
+            Assert.That(ourHelper.StoreAccessCreator.AccessCounter == 0, "The Provider of PropStoreAccessServices has not had its Access Counter reset.");
 
             Business b = new Business();
             List<Person> personList = b.Get().ToList();
             foreach (Person p in personList)
             {
-                DestinationModel1 dest = new DestinationModel1(PropBagTypeSafetyMode.Tight, propFactory_V1, fullClassName);
+                // TODO: AAA
+                DestinationModel1 dest = new DestinationModel1(PropBagTypeSafetyMode.Tight, ourHelper.StoreAccessCreator, fullClassName, propFactory_V1);
 
                 dest.SetIt<int>(p.Id, "Id");
                 dest.SetIt<string>(p.FirstName, "FirstName");
@@ -102,7 +114,7 @@ namespace PropBagLib.Tests.PerformanceDb
             }
             Assert.That(destinationList.Count == 1000, $"The PersonList contains {destinationList.Count}, it should contain {NUMBER_OF_PEOPLE}.");
 
-            int totalNumberOfGets = ourHelper.PropFactory_V1.PropStoreAccessServiceProvider.AccessCounter;
+            int totalNumberOfGets = ourHelper.StoreAccessCreator.AccessCounter;
             Assert.That(totalNumberOfGets == NUMBER_OF_PEOPLE * 5, $"Total # of SetIt access operations is wrong: it should be {NUMBER_OF_PEOPLE * 5}, but instead it is {totalNumberOfGets}.");
 
             PropBag test = (PropBag)destinationList[0];
@@ -256,7 +268,7 @@ namespace PropBagLib.Tests.PerformanceDb
         {
             AutoMapperHelpers ourHelper = new AutoMapperHelpers();
             IPropFactory propFactory_V1 = ourHelper.GetNewPropFactory_V1();
-            Assert.That(propFactory_V1.PropStoreAccessServiceProvider.AccessCounter == 0, "The Provider of PropStoreAccessServices has not had its Access Counter reset.");
+            Assert.That(ourHelper.StoreAccessCreator.AccessCounter == 0, "The Provider of PropStoreAccessServices has not had its Access Counter reset.");
 
             List<DestinationModel1> destinationList = new List<DestinationModel1>();
 
@@ -264,7 +276,9 @@ namespace PropBagLib.Tests.PerformanceDb
 
             // Set up Child VM (Using Model 5)
             PropModel propModel5 = pmHelpers.GetPropModelForModel5Dest(propFactory_V1);
-            DestinationModel5 testChildVM = new DestinationModel5(propModel5, null, propFactory_V1);
+
+            // TODO: AAA
+            DestinationModel5 testChildVM = new DestinationModel5(propModel5, ourHelper.StoreAccessCreator, propFactory_V1, null);
 
             Business b = new Business();
             testChildVM.SetIt(b, "Business");
@@ -277,7 +291,7 @@ namespace PropBagLib.Tests.PerformanceDb
 
             // Set up MainVM (Using Model 6)
             PropModel propModel6 = pmHelpers.GetPropModelForModel6Dest(propFactory_V1);
-            DestinationModel6 testMainVM = new DestinationModel6(propModel6, null, propFactory_V1);
+            DestinationModel6 testMainVM = new DestinationModel6(propModel6, ourHelper.StoreAccessCreator, propFactory_V1, null);
 
             Business b2 = new Business();
             testMainVM.SetIt(b2, "Business");

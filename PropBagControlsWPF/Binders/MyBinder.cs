@@ -1,6 +1,5 @@
 ﻿
-using DRM.PropBag.ControlModel;
-using DRM.PropBag.ControlsWPF.WPFHelpers;
+using DRM.PropBagControlsWPF.WPFHelpers;
 using DRM.TypeSafePropertyBag;
 using System;
 using System.Collections.Generic;
@@ -22,7 +21,7 @@ using System.Xaml;
 /// License: "The Code Project Open License (CPOL)
 /// </remarks>
 
-namespace DRM.PropBag.ControlsWPF.Binders
+namespace DRM.PropBagControlsWPF.Binders
 {
     [MarkupExtensionReturnType(typeof(object)), 
         Localizability(LocalizationCategory.None,

@@ -14,7 +14,7 @@ using System.Windows;
 
 ///</remarks>
 
-namespace DRM.TypeSafePropertyBag.UnUsed
+namespace DRM.TypeSafePropertyBag.Unused
 {
     /// <summary>
     /// Provides an implementation so that you can use the "weak event listener" pattern

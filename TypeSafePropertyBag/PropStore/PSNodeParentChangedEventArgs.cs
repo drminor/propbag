@@ -2,27 +2,21 @@
 
 namespace DRM.TypeSafePropertyBag
 {
-    using CompositeKeyType = UInt64;
-    using ObjectIdType = UInt64;
-
-    using PropIdType = UInt32;
-    using PropNameType = String;
-
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
 
+    // Used to signal that a PropBag (i.e., a View Model) now has a new PropItem host.
     public class PSNodeParentChangedEventArgs : EventArgs
     {
-        public PSNodeParentChangedEventArgs(ExKeyT propId, ExKeyT oldValue, ExKeyT newValue)
+        public PSNodeParentChangedEventArgs(ExKeyT propId, ExKeyT oldPropBagParent, ExKeyT newPropBagParent)
         {
-            PropId = propId;
-            OldValue = oldValue;
-            NewValue = newValue;
+            PropId = propId; // The node whose parent is being changed.
+            OldPropBagParent = oldPropBagParent; // The old parent.
+            NewPropBagParent = newPropBagParent; // The new parent.
         }
 
         public ExKeyT PropId { get; set; }
-        public ExKeyT OldValue { get; set; }
-        public ExKeyT NewValue { get; set; }
-
-
+        public ExKeyT OldPropBagParent { get; set; }
+        public ExKeyT NewPropBagParent { get; set; }
     }
+
 }

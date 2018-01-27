@@ -8,14 +8,18 @@ using System.Collections.Generic;
 
 namespace PropBagLib.Tests
 {
-	public partial class ExtStoreModel : PropBag
+    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
+
+    public partial class ExtStoreModel : PropBag
 	{
-		public ExtStoreModel() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered, null) { }
+		//public ExtStoreModel() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered, null) { }
 
-		public ExtStoreModel(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
+		//public ExtStoreModel(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
 
-		public ExtStoreModel(PropBagTypeSafetyMode typeSafetyMode, IPropFactory factory) : base(typeSafetyMode, factory)
-		{
+		public ExtStoreModel(PropBagTypeSafetyMode typeSafetyMode, PSAccessServiceCreatorInterface storeAccessCreator,
+            string fullClassName, IPropFactory propFactory)
+            : base(typeSafetyMode, storeAccessCreator, propFactory, fullClassName)
+        {
 	        AddProp<int>("PropInt3", comparer:null);
 		 
 	        AddProp<int>("PropInt4", comparer:null);

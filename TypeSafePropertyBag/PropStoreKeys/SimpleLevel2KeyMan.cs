@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace DRM.TypeSafePropertyBag
 {
@@ -8,7 +7,7 @@ namespace DRM.TypeSafePropertyBag
     using PropIdType = UInt32;
     using PropNameType = String;
 
-    public class SimpleLevel2KeyMan : IL2KeyMan<PropIdType, PropNameType>
+    internal class SimpleLevel2KeyMan : IL2KeyMan<PropIdType, PropNameType>
     {
         #region Private Members
 
@@ -30,18 +29,33 @@ namespace DRM.TypeSafePropertyBag
             _cookedDict = new Dictionary<PropIdType, PropNameType>();
         }
 
-        public SimpleLevel2KeyMan(SimpleLevel2KeyMan sourceToCopy)
+        //public SimpleLevel2KeyMan(IL2KeyMan<PropIdType, PropNameType> sourceToCopy)
+        //{
+        //    MaxPropsPerObject = sourceToCopy.MaxPropsPerObject;
+
+        //    _sync = new object();
+
+        //    _rawDict = new Dictionary<PropNameType, PropIdType>(sourceToCopy._rawDict);
+        //    _cookedDict = new Dictionary<PropIdType, PropNameType>(sourceToCopy._cookedDict);
+        //}
+
+        internal SimpleLevel2KeyMan(int maxPropsPerObject, Dictionary<PropNameType, PropIdType> rawDict, Dictionary<PropIdType, PropNameType> cookedDict)
         {
-            MaxPropsPerObject = sourceToCopy.MaxPropsPerObject;
+            MaxPropsPerObject = maxPropsPerObject;
 
             _sync = new object();
 
-
-            _rawDict = new Dictionary<PropNameType, PropIdType>(sourceToCopy._rawDict);
-            _cookedDict = new Dictionary<PropIdType, PropNameType>(sourceToCopy._cookedDict);
+            _rawDict = rawDict;
+            _cookedDict = cookedDict;
         }
 
         #endregion
+
+        public object Clone()
+        {
+            SimpleLevel2KeyMan result = new SimpleLevel2KeyMan(this.MaxPropsPerObject, this._rawDict, this._cookedDict);
+            return result;
+        }
 
         #region Public Members
 
@@ -170,6 +184,5 @@ namespace DRM.TypeSafePropertyBag
         }
 
         #endregion
-
     }
 }

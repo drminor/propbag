@@ -1,4 +1,4 @@
-﻿using DRM.PropBag.ControlsWPF;
+﻿using DRM.PropBagControlsWPF;
 using DRM.TypeSafePropertyBag;
 using System;
 using System.Reflection;

@@ -1,37 +1,28 @@
 ﻿using System;
-using System.Linq;
 using System.Threading;
 
-namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
+namespace DRM.TypeSafePropertyBag.LocalBinding
 {
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
-    using ObjectIdType = UInt64;
-    using PropIdType = UInt32;
+    //using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
 
-    public class ObservableSource<T> : INotifyPCTyped<T>, IDisposable
+    internal class ObservableSource<T> : INotifyPCTyped<T>, IDisposable
     {
-        #region Public events and properties
+        #region Private Members
 
-        //public event EventHandler<DataSourceChangedEventArgs>  DataSourceChanged = null;
+        private IDisposable ParentChangedSource { get; }
+        private IDisposable PropChangeGenUnsubscriber { get; }
+        private IDisposable PropChangedTypedUnsubscriber { get; }
+
+        public WeakReference<IPropBag> LastEventSender { get; private set; }
+
+        #endregion
+
+        #region Events
 
         public event EventHandler<PcTypedEventArgs<T>> PropertyChangedWithTVals;
         public event EventHandler<PcGenEventArgs> PropertyChangedWithVals;
         public event EventHandler ParentHasChanged;
-
-        public string BinderName { get; private set; }
-        public PathConnectorTypeEnum PathConnector => PathConnectorTypeEnum.Dot;
-
-        public string PathElement { get; set; }
-
-        public ExKeyT CompKey { get; }
-
-        public SourceKindEnum SourceKind { get; }
-
-        public INotifyParentNodeChanged ParentChangedSource { get; }
-
-        public IPropBag PropChangeGenSource { get; }
-
-        public IPropBag PropChangedTypedSource { get; }
 
         #endregion
 
@@ -47,12 +38,15 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
             BinderName = binderName;
 
             SourceKind = SourceKindEnum.TerminalNode;
-            PropChangedTypedSource = propBag;
-            propBag.SubscribeToPropChanged<T>(PropertyChangedWithTVals_Handler, pathElement);
+            IDisposable disable = propBag.SubscribeToPropChanged<T>(PropertyChangedWithTVals_Handler, pathElement);
+            PropChangedTypedUnsubscriber = disable;
         }
 
         private void PropertyChangedWithTVals_Handler(object sender, PcTypedEventArgs<T> e)
         {
+            // TODO: Include the original sender in the event data (and create a new event args class for this.)
+            LastEventSender = sender as WeakReference<IPropBag>;
+
             OnPropertyChangedWithTVals(e);
         }
 
@@ -68,8 +62,8 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
             BinderName = binderName;
 
             SourceKind = sourceKind;
-            PropChangeGenSource = propBag;
-            propBag.SubscribeToPropChanged(PropertyChangedWithGenVals_Handler, PathElement, typeof(T));
+            IDisposable disable = propBag.SubscribeToPropChanged(PropertyChangedWithGenVals_Handler, PathElement, typeof(T));
+            PropChangeGenUnsubscriber = disable;
         }
 
         private void PropertyChangedWithGenVals_Handler(object sender, PcGenEventArgs e)
@@ -89,20 +83,19 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
             BinderName = binderName;
 
             SourceKind = sourceKind;
-            ParentChangedSource = notifyParentChangedSource;
 
             if(sourceKind == SourceKindEnum.AbsRoot)
             {
                 // TODO: Subscribe to RootNodeChanged instead.
-                notifyParentChangedSource.ParentNodeHasChanged += ParentNodeHasChanged_Handler;
+                ParentChangedSource = notifyParentChangedSource.SubscribeToParentNodeHasChanged(ParentNodeHasChanged_Handler);
             }
             else
             {
-                notifyParentChangedSource.ParentNodeHasChanged += ParentNodeHasChanged_Handler;
+                ParentChangedSource = notifyParentChangedSource.SubscribeToParentNodeHasChanged(ParentNodeHasChanged_Handler);
             }
         }
 
-        private void ParentNodeHasChanged_Handler(object sender, EventArgs e)
+        private void ParentNodeHasChanged_Handler(object sender, PSNodeParentChangedEventArgs e)
         {
             OnParentHasChanged();
         }
@@ -111,9 +104,34 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
 
         #endregion Constructors and their handlers
 
+        #region Public Properties and Methods
+
+        public string BinderName { get; private set; }
+        public PathConnectorTypeEnum PathConnector => PathConnectorTypeEnum.Dot;
+
+        public ExKeyT CompKey { get; }
+        public string PathElement { get; set; }
+        public SourceKindEnum SourceKind { get; }
+
+        //public bool TryGetStoreAccessor(out WeakReference<PSAccessServiceInterface> propStoreAccessService_wr)
+        //{
+        //    if (SourceKind == SourceKindEnum.TerminalNode)
+        //    {
+        //        if (PropChangedTypedUnsubscriber is Unsubscriber unsubscriber)
+        //        {
+        //            propStoreAccessService_wr = unsubscriber._propStoreAccessService_Wr;
+        //            return true;
+        //        }
+        //    }
+        //    propStoreAccessService_wr = null;
+        //    return false;
+        //}
+
+        #endregion
+
         #region Private Methods
 
-        public void RemoveSubscriptions()
+        private void RemoveSubscriptions()
         {
             switch (this.SourceKind)
             {
@@ -123,17 +141,17 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
                     }
                 case SourceKindEnum.Up:
                     {
-                        ParentChangedSource.ParentNodeHasChanged -= ParentNodeHasChanged_Handler;
+                        ParentChangedSource.Dispose(); // .ParentNodeHasChanged -= ParentNodeHasChanged_Handler;
                         break;
                     }
                 case SourceKindEnum.Down:
                     {
-                        PropChangeGenSource.UnSubscribeToPropChanged(PropertyChangedWithGenVals_Handler, PathElement, typeof(T));
+                        PropChangeGenUnsubscriber.Dispose(); // .UnSubscribeToPropChanged(PropertyChangedWithGenVals_Handler, PathElement, typeof(T));
                         break;
                     }
                 case SourceKindEnum.TerminalNode:
                     {
-                        PropChangedTypedSource.UnSubscribeToPropChanged<T>(PropertyChangedWithTVals_Handler, PathElement);
+                        PropChangedTypedUnsubscriber.Dispose(); // .UnSubscribeToPropChanged<T>(PropertyChangedWithTVals_Handler, PathElement);
                         break;
                     }
                 default:
@@ -147,21 +165,19 @@ namespace DRM.TypeSafePropertyBag.LocalBinding.Engine
 
         #region Raise Event Helpers
 
-        public void OnPropertyChangedWithTVals(PcTypedEventArgs<T> eArgs)
+        private void OnPropertyChangedWithTVals(PcTypedEventArgs<T> eArgs)
         {
             Interlocked.CompareExchange(ref PropertyChangedWithTVals, null, null)?.Invoke(this, eArgs);
         }
 
         private void OnPropertyChangedWithGenVals(PcGenEventArgs eArgs)
         {
-            Interlocked.CompareExchange(ref PropertyChangedWithVals, null, null)
-                ?.Invoke(this, eArgs);
+            Interlocked.CompareExchange(ref PropertyChangedWithVals, null, null)?.Invoke(this, eArgs);
         }
 
         private void OnParentHasChanged()
         {
-            Interlocked.CompareExchange(ref ParentHasChanged, null, null)
-                ?.Invoke(this, EventArgs.Empty);
+            Interlocked.CompareExchange(ref ParentHasChanged, null, null)?.Invoke(this, EventArgs.Empty);
         }
 
         #endregion

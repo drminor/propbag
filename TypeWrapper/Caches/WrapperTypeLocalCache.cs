@@ -1,7 +1,7 @@
 ﻿using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
 
-namespace DRM.TypeWrapper
+namespace DRM.PropBag.TypeWrapper
 {
     public class WrapperTypeLocalCache : ICacheWrapperTypes
     {

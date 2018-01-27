@@ -9,6 +9,45 @@ namespace DRM.PropBag
 {
     public partial class PropBag : ICustomTypeDescriptor
     {
+        #region Custom Access for Dervied Classes
+
+        protected int PropertyDescriptorCount
+        {
+            get
+            {
+                return _properties?.Count ?? 0;
+            }
+        }
+
+        protected void ResetPropertyDescriptors()
+        {
+            _properties = null;
+        }
+
+        protected ReadOnlyCollection<PropertyDescriptor> GetPropertiesROCollection()
+        {
+            PropertyDescriptorCollection properties = GetProperties();
+            PropertyDescriptor[] pds = new PropertyDescriptor[PropertyDescriptorCount];
+
+            properties.CopyTo(pds, 0);
+
+            ReadOnlyCollection<PropertyDescriptor> result = new ReadOnlyCollection<PropertyDescriptor>(pds);
+
+            return result;
+        }
+
+        protected void RebuildPropertyDescriptors()
+        {
+            throw new NotImplementedException("PropBag.RebuildPropertyDescriptors has not yet been implemented.");
+        }
+
+        protected void AddPropertyDescriptor()
+        {
+            throw new NotImplementedException("PropBag.AddPropertyDescriptor has not yet been implemented.");
+        }
+
+        #endregion
+
         #region ICustomTypeDescriptor Support
 
         AttributeCollection ICustomTypeDescriptor.GetAttributes()

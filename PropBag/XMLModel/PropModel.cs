@@ -10,7 +10,7 @@ using System.Xml.Serialization;
 namespace DRM.PropBag.XMLModel
 {
     [XmlRoot("model")]
-    public class PropModel
+    public class XMLPropModel
     {
         [XmlAttribute(AttributeName = "derive-from-pub-prop-bag")]
         public bool DeriveFromPubPropBag { get; set; }
@@ -38,10 +38,10 @@ namespace DRM.PropBag.XMLModel
         [XmlArrayItem("prop")]
         public List<PropItem> Props { get; set; }
 
-        public PropModel() : this("UndefinedClassName", "UndefinedNameSpace") { }
+        public XMLPropModel() : this("UndefinedClassName", "UndefinedNameSpace") { }
 
 
-        public PropModel(string className, string namespaceName,
+        public XMLPropModel(string className, string namespaceName,
             bool deriveFromPubPropBag = false,
             PropBagTypeSafetyMode typeSafetyMode = PropBagTypeSafetyMode.AllPropsMustBeRegistered,
             bool deferMethodRefResolution = true,

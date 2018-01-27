@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DRM.PropBag.ControlsWPF
+namespace DRM.PropBagControlsWPF
 {
     /// <summary>
     /// Used to identify a property as returning an object that should have properties created.

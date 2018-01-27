@@ -3,7 +3,7 @@ using System;
 
 namespace DRM.TypeSafePropertyBag
 {
-    using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
+    using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
 
     internal class BindingSubscription<T> : AbstractSubscripton<T>, IBindingSubscription<T>, IEquatable<BindingSubscription<T>>, IEquatable<ISubscription>, IDisposable
     {
@@ -29,7 +29,7 @@ namespace DRM.TypeSafePropertyBag
 
         #region Constructors
 
-        public BindingSubscription(IBindingSubscriptionKey<T> sKey, PSAccessServiceType propStoreAccessService)
+        public BindingSubscription(IBindingSubscriptionKey<T> sKey, PSAccessServiceInterface propStoreAccessService)
         {
             OwnerPropId = sKey.OwnerPropId;
             BindingInfo = sKey.BindingInfo;

@@ -5,66 +5,70 @@ namespace DRM.TypeSafePropertyBag
 {
     public struct ValPlusType : IEquatable<ValPlusType>
     {
-        public object Value { get; set; }
-        public Type Type { get; set; }
+        public readonly bool ValueIsDefined;
+        public readonly object Value;
+        public readonly Type Type;
 
-        public ValPlusType(object value, Type type)
+        public ValPlusType(bool valueIsDefined, object value, Type type)
         {
+            ValueIsDefined = valueIsDefined;
             Value = value;
             Type = type;
         }
 
-        public ValPlusType(Tuple<object, Type> tuple)
+        public ValPlusType(object value, Type type)
         {
-            Value = tuple.Item1;
-            Type = tuple.Item2;
+            ValueIsDefined = value != null || !type.IsValueType;
+            Value = value;
+            Type = type;
         }
 
-        public Tuple<object, Type> Tuple
+        public ValPlusType(Type type)
         {
-            get
-            {
-                return new Tuple<object, Type>(Value, Type);
-            }
+            ValueIsDefined = false;
+            Value = null;
+            Type = type;
         }
 
-        //public bool Equals(ValPlusType other)
-        //{
-        //    // TODO: Can we do better than the default Type.Equals implementation.
-        //    return other.Value.Equals(Value) && other.Type.Equals(Type);
-        //}
+        public ValPlusType(Tuple<bool, object, Type> tuple)
+        {
+            ValueIsDefined = tuple.Item1;
+            Value = tuple.Item2;
+            Type = tuple.Item3;
+        }
 
-        //// override object.Equals
-        //public override bool Equals(object obj)
-        //{
-        //    if (obj == null || obj.GetType() != typeof(ValPlusType))
-        //    {
-        //        return false;
-        //    }
+        public Tuple<bool, object, Type> Tuple => new Tuple<bool, object, Type>(ValueIsDefined, Value, Type);
 
-        //    return this.Equals((ValPlusType)obj);
-        //}
+        public override bool Equals(object obj)
+        {
+            return obj is ValPlusType && Equals((ValPlusType)obj);
+        }
 
-        public override bool Equals(object other) => other is ValPlusType && Equals((ValPlusType)other);
-
-        /// <summary>
-        /// Uses the implementation of Equals provided by the object.
-        /// </summary>
-        /// <param name="other"></param>
-        /// <returns></returns>
-        public bool Equals(ValPlusType other) => Value.Equals(other.Value) && Type == other.Type;
+        public bool Equals(ValPlusType other)
+        {
+            return ValueIsDefined == other.ValueIsDefined
+                    && EqualityComparer<Type>.Default.Equals(Type, other.Type)
+                    && EqualityComparer<object>.Default.Equals(Value, other.Value);
+        }
 
         public override int GetHashCode()
         {
-            var hashCode = 1574892647;
+            var hashCode = -816317690;
             hashCode = hashCode * -1521134295 + base.GetHashCode();
+            hashCode = hashCode * -1521134295 + ValueIsDefined.GetHashCode();
             hashCode = hashCode * -1521134295 + EqualityComparer<object>.Default.GetHashCode(Value);
             hashCode = hashCode * -1521134295 + EqualityComparer<Type>.Default.GetHashCode(Type);
             return hashCode;
         }
 
-        public static bool operator ==(ValPlusType left, ValPlusType right) => left.Equals(right);
+        public static bool operator ==(ValPlusType type1, ValPlusType type2)
+        {
+            return type1.Equals(type2);
+        }
 
-        public static bool operator !=(ValPlusType left, ValPlusType right) => !left.Equals(right);
+        public static bool operator !=(ValPlusType type1, ValPlusType type2)
+        {
+            return !(type1 == type2);
+        }
     }
 }

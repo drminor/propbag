@@ -1,31 +1,24 @@
 ﻿using DRM.PropBag.Caches;
-using DRM.PropBag.ControlModel;
 using DRM.TypeSafePropertyBag;
+using DRM.TypeSafePropertyBag.Fundamentals;
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.ComponentModel.Design.Serialization;
 using System.Globalization;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+
 using System.Windows;
+
 
 namespace DRM.PropBag
 {
     public class PropFactoryValueConverter : IConvertValues
     {
-        //static private Type GMT_TYPE = typeof(GenericMethodTemplatesPropConv);
+        ITypeDescBasedTConverterCache _converter;
 
-        TypeDescBasedTConverterCache _converter;
-
-        public PropFactoryValueConverter(TypeDescBasedTConverterCache converterCache)
+        public PropFactoryValueConverter(ITypeDescBasedTConverterCache converterCache)
         {
             _converter = converterCache ?? throw new ArgumentNullException(nameof(converterCache));
-
-            // If the caller does not supply a value, use our default implementation.
         }
 
         // Value is native object, we need to return a targetType (hopefully a string at this point.)
@@ -77,8 +70,6 @@ namespace DRM.PropBag
         // Value is a string, we need to create a native object.
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-
-
 #if DEBUG
             TwoTypes tt = TwoTypes.FromMkUpExtParam(parameter, typeof(string));
             if (tt.IsEmpty) throw new InvalidOperationException("Type information was not available.");
@@ -98,12 +89,11 @@ namespace DRM.PropBag
             if (targetType == typeof(object)) return value;
 
             //System.Diagnostics.Debug.Assert(value == null || typeof(string).IsAssignableFrom(value.GetType()), $"PropFactory expected string input on convert back, but type was {value.GetType()}.");
-            
+
             TwoTypes tt = TwoTypes.FromMkUpExtParam(parameter, typeof(string));
             if (tt.IsEmpty) throw new InvalidOperationException("Type information was not available.");
 #endif
-
-            if(value == null)
+            if (value == null)
             {
                 if(targetType.IsValueType)
                 {
@@ -160,5 +150,4 @@ namespace DRM.PropBag
             return System.Activator.CreateInstance(propertyType);
         }
     }
-
 }

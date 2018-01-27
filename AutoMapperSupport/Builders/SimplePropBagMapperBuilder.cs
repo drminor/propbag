@@ -1,25 +1,30 @@
 ﻿using AutoMapper;
-using DRM.PropBag.ControlModel;
-using DRM.ViewModelTools;
+using DRM.PropBag.ViewModelTools;
 using System;
 
 using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
+    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
+
     public class SimplePropBagMapperBuilder<TSource, TDestination> : IBuildPropBagMapper<TSource, TDestination> where TDestination : class, IPropBag
     {
         private IBuildMapperConfigurations<TSource, TDestination> MapperConfigurationBuilder { get; }
         private IViewModelActivator ViewModelActivator { get; }
-        private ICreateWrapperType WrapperTypeCreator { get; }
+        private PSAccessServiceCreatorInterface _storeAccessCreator;
+        private ICreateWrapperTypes WrapperTypeCreator { get; }
 
         public SimplePropBagMapperBuilder(
             IBuildMapperConfigurations<TSource, TDestination> mapperConfigurationBuilder,
-            ICreateWrapperType wrapperTypeCreator,
-            IViewModelActivator viewModelActivator)
+            ICreateWrapperTypes wrapperTypeCreator,
+            IViewModelActivator viewModelActivator,
+            PSAccessServiceCreatorInterface storeAccessCreator
+            )
         {
             MapperConfigurationBuilder = mapperConfigurationBuilder;
             ViewModelActivator = viewModelActivator;
+            _storeAccessCreator = storeAccessCreator;
             WrapperTypeCreator = wrapperTypeCreator;
         }
 
@@ -33,7 +38,7 @@ namespace DRM.PropBag.AutoMapperSupport
                 // TODO: Is this really the responsibility of the PropBagMapperBuilder,
                 // or can we hand this off to the IBuildMapperConfigurations interface?
                 // Create the Proxy/Wrapper type if it does not already exist.
-                PropModel propModel = mapRequest.DestinationTypeDef.PropModel;
+                IPropModel propModel = mapRequest.DestinationTypeDef.PropModel;
 
                 // TODO: Can we avoid setting the NewWrapperType on the existing instance
                 // of the mapRequest?
@@ -50,7 +55,7 @@ namespace DRM.PropBag.AutoMapperSupport
             IMapper theMapper = configProvider.CreateMapper();
 
             IPropBagMapper <TSource, TDestination> result 
-                = new SimplePropBagMapper<TSource, TDestination>(mapRequest, theMapper, ViewModelActivator);
+                = new SimplePropBagMapper<TSource, TDestination>(mapRequest, theMapper, ViewModelActivator, _storeAccessCreator);
 
             return result;
         }

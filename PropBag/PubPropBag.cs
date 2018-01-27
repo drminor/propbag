@@ -1,7 +1,9 @@
-﻿using DRM.PropBag.ControlModel;
-using DRM.TypeSafePropertyBag;
+﻿using DRM.TypeSafePropertyBag;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Reflection;
@@ -11,7 +13,8 @@ namespace DRM.PropBag
 {
     using PropIdType = UInt32;
     using PropNameType = String;
-    using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
+    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
+
     using SubCacheType = ICacheSubscriptions<UInt32>;
 
     #region Summary and Remarks
@@ -35,33 +38,15 @@ namespace DRM.PropBag
     ///</summary>
     public class PubPropBag : PropBag, IPubPropBag
     {
-        
         #region Constructor
 
-        //public PubPropBag()
-        //    : base() { }
-
-        //public PubPropBag(PropBagTypeSafetyMode typeSafetyMode)
-        //    : base(typeSafetyMode) { }
-
-        //// TODO: remove this constructor.
-        //protected PubPropBag(PropBagTypeSafetyMode typeSafetyMode, IPropFactory propFactory)
-        //    : base(typeSafetyMode, propFactory) { }
-
-
-
-        public PubPropBag(PropModel pm, IPropFactory propFactory = null, string fullClassName = null)
-            : base(pm, fullClassName, propFactory)
+        public PubPropBag(PropModel pm, PSAccessServiceCreatorInterface storeAccessCreator, IPropFactory propFactory = null, string fullClassName = null)
+            : base(pm, storeAccessCreator, propFactory, fullClassName)
         {
         }
 
-        protected PubPropBag(IPropBag copySource)
-            : base(copySource.TypeSafetyMode, copySource.PropFactory, copySource.FullClassName)
-        {
-        }
-
-        public PubPropBag(PropBagTypeSafetyMode typeSafetyMode, IPropFactory propFactory, string fullClassName = null)
-            : base(typeSafetyMode, propFactory, fullClassName)
+        public PubPropBag(PropBagTypeSafetyMode typeSafetyMode, PSAccessServiceCreatorInterface storeAccessCreator, IPropFactory propFactory, string fullClassName = null)
+            : base(typeSafetyMode, storeAccessCreator, propFactory, fullClassName)
         {
         }
 
@@ -109,6 +94,18 @@ namespace DRM.PropBag
         {
             return base.AddPropObjCompNoStore<T>(propertyName, extraInfo);
         }
+
+        new public ICProp<CT, T> AddCollectionProp<CT, T>(string propertyName, Func<CT, CT, bool> comparer = null,
+            object extraInfo = null, CT initialValue = default(CT)) where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged
+        {
+            return base.AddCollectionProp<CT, T>(propertyName, comparer, extraInfo, initialValue);
+        }
+
+        //new public ICPropFB<CT, T> AddCollectionPropFB<CT, T>(string propertyName, Func<CT, CT, bool> comparer = null,
+        //    object extraInfo = null, CT initialValue = default(CT)) where CT : ObservableCollection<T>
+        //{
+        //    return base.AddCollectionPropFB<CT, T>(propertyName, comparer, extraInfo, initialValue);
+        //}
 
         new public void RemoveProp(string propertyName, Type propertyType)
         {

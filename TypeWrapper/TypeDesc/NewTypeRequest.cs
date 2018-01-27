@@ -1,22 +1,19 @@
-﻿using DRM.PropBag.ControlModel;
+﻿using DRM.TypeSafePropertyBag;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace DRM.TypeWrapper
+namespace DRM.PropBag.TypeWrapper
 {
     public struct NewTypeRequest : IEquatable<NewTypeRequest>
     {
-        public NewTypeRequest(PropModel propModel, Type typeToWrap, string className)
+        public NewTypeRequest(IPropModel propModel, Type typeToWrap, string className)
         {
             PropModel = propModel ?? throw new ArgumentNullException(nameof(propModel));
             TypeToWrap = typeToWrap;
             ClassName = className;
         }
 
-        public PropModel PropModel { get; }
+        public IPropModel PropModel { get; }
         public Type TypeToWrap { get; }
         public string ClassName { get; }
 
@@ -25,9 +22,11 @@ namespace DRM.TypeWrapper
             return obj is NewTypeRequest && Equals((NewTypeRequest)obj);
         }
 
+
+        // TODO: check how to compare two IPropModels.
         public bool Equals(NewTypeRequest other)
         {
-            return EqualityComparer<PropModel>.Default.Equals(PropModel, other.PropModel) &&
+            return EqualityComparer<IPropModel>.Default.Equals(PropModel, other.PropModel) &&
                    EqualityComparer<Type>.Default.Equals(TypeToWrap, other.TypeToWrap) &&
                    ClassName == other.ClassName;
         }
@@ -36,7 +35,7 @@ namespace DRM.TypeWrapper
         {
             var hashCode = 55120964;
             hashCode = hashCode * -1521134295 + base.GetHashCode();
-            hashCode = hashCode * -1521134295 + EqualityComparer<PropModel>.Default.GetHashCode(PropModel);
+            hashCode = hashCode * -1521134295 + EqualityComparer<IPropModel>.Default.GetHashCode(PropModel);
             hashCode = hashCode * -1521134295 + EqualityComparer<Type>.Default.GetHashCode(TypeToWrap);
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(ClassName);
             return hashCode;

@@ -3,13 +3,17 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace DRM.PropBag.ControlsWPF
+namespace DRM.PropBagControlsWPF
 {
     public class PropItem : ItemsControl
     {
         static PropItem()
         {
             DefaultStyleKeyProperty.OverrideMetadata(typeof(PropItem), new FrameworkPropertyMetadata(typeof(PropItem)));
+        }
+
+        public PropItem()
+        {
         }
 
         public static readonly DependencyProperty PropertyNameProperty =
@@ -58,18 +62,18 @@ namespace DRM.PropBag.ControlsWPF
             }
         }
 
-        static DependencyProperty HasStoreProperty =
-            DependencyProperty.Register("HasStore", typeof(bool), typeof(PropItem), new PropertyMetadata(true));
+        static DependencyProperty StorageStrategyProperty =
+            DependencyProperty.Register("StorageStrategy", typeof(PropStorageStrategyEnum), typeof(PropItem), new PropertyMetadata(PropStorageStrategyEnum.Internal));
 
-        public bool HasStore
+        public PropStorageStrategyEnum StorageStrategy
         {
             get
             {
-                return (bool)this.GetValue(HasStoreProperty);
+                return (PropStorageStrategyEnum)this.GetValue(StorageStrategyProperty);
             }
             set
             {
-                this.SetValue(HasStoreProperty, value);
+                this.SetValue(StorageStrategyProperty, value);
             }
         }
 

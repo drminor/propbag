@@ -1,6 +1,5 @@
-﻿using DRM.PropBag.ControlModel;
-
-namespace DRM.TypeWrapper
+﻿
+namespace DRM.PropBag.TypeWrapper
 {
     public interface ICacheTypeDescriptions
     {

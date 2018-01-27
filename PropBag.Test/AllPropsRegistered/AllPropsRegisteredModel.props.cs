@@ -8,25 +8,25 @@ using System.Collections.Generic;
 
 namespace PropBagLib.Tests
 {
-	public partial class AllPropsRegisteredModel : PropBag
+    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
+
+    public partial class AllPropsRegisteredModel : PropBag
 	{
-		public AllPropsRegisteredModel() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered, null) { }
+		//public AllPropsRegisteredModel() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered, null) { }
 
-		public AllPropsRegisteredModel(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
+		//public AllPropsRegisteredModel(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
 
-		public AllPropsRegisteredModel(PropBagTypeSafetyMode typeSafetyMode, IPropFactory factory) : base(typeSafetyMode, factory)
+		public AllPropsRegisteredModel(PropBagTypeSafetyMode typeSafetyMode, PSAccessServiceCreatorInterface storeAccessCreator, IPropFactory factory)
+            : base(typeSafetyMode, storeAccessCreator, factory)
 		{
 	        AddProp<object>("PropObject", comparer:null);
 		 
 	        AddProp<string>("PropString", comparer:null);
-		    SubscribeToPropChanged<string>(GetDelegate<string>("DoWhenStringChanged"), "PropString"); 
-
+		SubscribeToPropChanged<string>(GetDelegate<string>("DoWhenStringChanged"), "PropString"); 
 	        AddPropNoValue<string>("PropStringCallDoAfter", comparer:EqualityComparer<string>.Default.Equals);
-		    SubscribeToPropChanged<string>(GetDelegate<string>("DoWhenStringChanged"), "PropStringCallDoAfter"); 
-
+		SubscribeToPropChanged<string>(GetDelegate<string>("DoWhenStringChanged"), "PropStringCallDoAfter"); 
 	        AddPropObjComp<string>("PropStringUseRefComp", extraInfo:null);
-            SubscribeToPropChanged<string>(GetDelegate<string>("DoWhenStringChanged"), "PropStringUseRefComp");
-            
+		SubscribeToPropChanged<string>(GetDelegate<string>("DoWhenStringChanged"), "PropStringUseRefComp"); 
 	        AddProp<bool>("PropBool", comparer:null);
 		 
 	        AddProp<int>("PropInt", comparer:null);
@@ -38,10 +38,9 @@ namespace PropBagLib.Tests
 	        AddProp<Lazy<int>>("PropLazyInt", comparer:null);
 		 
 	        AddProp<Nullable<int>>("PropNullableInt", null, null, initialValue:-1);
-		    SubscribeToPropChanged<Nullable<int>>(GetDelegate<Nullable<int>>("DoWhenNullIntChanged"), "PropNullableInt");
-            
+		SubscribeToPropChanged<Nullable<int>>(GetDelegate<Nullable<int>>("DoWhenNullIntChanged"), "PropNullableInt"); 
 	        AddProp<ICollection<int>>("PropICollectionInt", comparer:null);
-		    SubscribeToPropChanged<ICollection<int>>(GetDelegate<ICollection<int>>("DoWhenICollectionIntChanged"), "PropICollectionInt"); 
+		SubscribeToPropChanged<ICollection<int>>(GetDelegate<ICollection<int>>("DoWhenICollectionIntChanged"), "PropICollectionInt"); 
 		}
 
 	#region Property Declarations

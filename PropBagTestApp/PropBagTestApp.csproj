@@ -60,8 +60,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Infra\AutoMapperHelpers.cs" />
-    <Compile Include="Infra\DataContextProvider.cs" />
+    <None Include="Infra\AutoMapperHelpers.cs" />
+    <None Include="Infra\DataContextProvider_NotUsed.cs" />
+    <Compile Include="Infra\PropStoreServicesForThisApp.cs" />
+    <Compile Include="Infra\ViewModelProvider.cs" />
     <Compile Include="ViewModels\ReferenceBindViewModelPB.cs" />
     <Compile Include="ViewModels\ReferenceBindViewModel.cs" />
     <Compile Include="Views\ReferenceBindWindow.xaml.cs">
