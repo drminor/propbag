@@ -3,7 +3,7 @@ using System;
 
 namespace DRM.TypeSafePropertyBag
 {
-    internal interface IL2KeyMan<L2T, L2TRaw> : IDisposable
+    internal interface IL2KeyMan<L2T, L2TRaw> : IDisposable, ICloneable
     {
         int MaxPropsPerObject { get; }
 
