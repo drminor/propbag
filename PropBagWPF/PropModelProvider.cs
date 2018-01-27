@@ -237,7 +237,7 @@ namespace DRM.PropBagWPF
 
                 try
                 {
-                    PropBag.PropItemModel rpi = ProcessProp(pi, propFactoryToUse, doWhenChangedHelper);
+                    IPropItem rpi = ProcessProp(pi, propFactoryToUse, doWhenChangedHelper);
                     result.Props.Add(rpi);
                 }
                 catch (Exception e)
@@ -249,13 +249,13 @@ namespace DRM.PropBagWPF
             return result;
         }
 
-        private PropBag.PropItemModel ProcessProp(PropItem pi, IPropFactory propFactory, DoWhenChangedHelper doWhenChangedHelper)
+        private IPropItem ProcessProp(PropItem pi, IPropFactory propFactory, DoWhenChangedHelper doWhenChangedHelper)
         {
             PropStorageStrategyEnum storageStrategy = pi.StorageStrategy;
             bool typeIsSolid = pi.TypeIsSolid;
             string extraInfo = pi.ExtraInfo;
 
-            PropItemModel rpi = new PropItemModel(pi.PropertyType, pi.PropertyName,
+            IPropItem rpi = new PropItemModel(pi.PropertyType, pi.PropertyName,
                 storageStrategy, typeIsSolid, pi.PropKind, extraInfo: extraInfo);
 
             bool isCProp = propFactory.IsCollection(pi.PropKind);
