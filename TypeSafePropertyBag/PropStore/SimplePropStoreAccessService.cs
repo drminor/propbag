@@ -17,7 +17,7 @@ namespace DRM.TypeSafePropertyBag
     using PropNameType = String;
     using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
     using PSAccessServiceInternalInterface = IPropStoreAccessServiceInternal<UInt32, String>;
-    using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
+    using PSAccessServiceProviderInterface = IProvidePropStoreAccessService<UInt32, String>;
 
     internal class SimplePropStoreAccessService : PSAccessServiceInterface, IHaveTheStoreNode, PSAccessServiceInternalInterface, IDisposable
     {
@@ -29,7 +29,7 @@ namespace DRM.TypeSafePropertyBag
 
         readonly StoreNodeBag _ourNode;
 
-        PSAccessServiceProviderType _propStoreAccessServiceProvider;
+        PSAccessServiceProviderInterface _propStoreAccessServiceProvider;
         readonly IProvideHandlerDispatchDelegateCaches _handlerDispatchDelegateCacheProvider;
         L2KeyManType _level2KeyMan;
 
@@ -58,7 +58,7 @@ namespace DRM.TypeSafePropertyBag
             (
             StoreNodeBag ourNode,
             L2KeyManType level2KeyManager,
-            PSAccessServiceProviderType propStoreAccessServiceProvider,
+            PSAccessServiceProviderInterface propStoreAccessServiceProvider,
             IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider
             )
         {
@@ -69,7 +69,7 @@ namespace DRM.TypeSafePropertyBag
 
             //if (!(propStoreAccessServiceProvider is PSCloneServiceType))
             //{
-            //    string msg = $"This instance of {nameof(SimplePropStoreAccessService)} was not provided a {nameof(PSAccessServiceProviderType)} that implements the {nameof(PSCloneServiceType)} interface";
+            //    string msg = $"This instance of {nameof(SimplePropStoreAccessService)} was not provided a {nameof(PSAccessServiceProviderInterface)} that implements the {nameof(PSCloneServiceType)} interface";
             //    System.Diagnostics.Debug.WriteLine($"Warning: {msg}.");
             //}
 
@@ -122,116 +122,87 @@ namespace DRM.TypeSafePropertyBag
         }
 
         // Add PropItem with no subscription.
-        public bool TryAdd(IPropBag propBag, PropIdType propId, IProp genericTypedProp, out IPropData propData)
+        public bool TryAdd(IPropBag propBag, PropIdType propId, PropNameType propertyName, IProp genericTypedProp, out IPropData propData)
         {
-            if(propBag is IPropBagInternal int_propBag)
-            {
-                StoreNodeProp newNode = TryAddFirstPart(propBag, propId, genericTypedProp);
-                propData = newNode.PropData_Internal;
+            StoreNodeProp newNode = TryAddFirstPart(propBag, propId, genericTypedProp);
+            propData = newNode.PropData_Internal;
 
-                TryAddSecondPart(int_propBag, newNode);
+            TryAddSecondPart(newNode, propertyName);
 
-                return true;
-            }
-            else
-            {
-                throw new InvalidOperationException("The propBag reference given to TryAdd does not implement the IPropBagInternal interface.");
-            }
+            return true;
         }
 
         // Add PropItem with PcTyped subscription
-        public bool TryAdd<PropT>(IPropBag propBag, PropIdType propId, IProp genericTypedProp,
+        public bool TryAdd<PropT>(IPropBag propBag, PropIdType propId, PropNameType propertyName, IProp genericTypedProp,
             EventHandler<PcTypedEventArgs<PropT>> eventHandler, SubscriptionPriorityGroup priorityGroup, out IPropData propData)
         {
-            if (propBag is IPropBagInternal int_propBag)
+            StoreNodeProp newNode = TryAddFirstPart(propBag, propId, genericTypedProp);
+            propData = newNode.PropData_Internal;
+
+            bool result;
+            if (eventHandler != null)
             {
-
-                StoreNodeProp newNode = TryAddFirstPart(propBag, propId, genericTypedProp);
-                propData = newNode.PropData_Internal;
-
-                bool result;
-                if (eventHandler != null)
-                {
-                    IDisposable disable = RegisterHandler<PropT>(newNode.CompKey, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
-                    result = disable != null;
-                }
-                else
-                {
-                    result = true;
-                }
-
-                TryAddSecondPart(int_propBag, newNode);
-
-                return result;
+                IDisposable disable = RegisterHandler<PropT>(newNode.CompKey, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
+                result = disable != null;
             }
             else
             {
-                throw new InvalidOperationException("The propBag reference given to TryAdd does not implement the IPropBagInternal interface.");
+                result = true;
             }
+
+            TryAddSecondPart(newNode, propertyName);
+
+            return result;
         }
 
         // Add PropItem with Target/Method subscription
-        public bool TryAdd(IPropBag propBag, PropIdType propId, IProp genericTypedProp,
+        public bool TryAdd(IPropBag propBag, PropIdType propId, PropNameType propertyName, IProp genericTypedProp,
             object target, MethodInfo method, SubscriptionKind subscriptionKind, SubscriptionPriorityGroup priorityGroup, out IPropData propData)
         {
-            if (propBag is IPropBagInternal int_propBag)
+            StoreNodeProp newNode = TryAddFirstPart(propBag, propId, genericTypedProp);
+            propData = newNode.PropData_Internal;
+
+            bool result;
+            if (target != null)
             {
-                StoreNodeProp newNode = TryAddFirstPart(propBag, propId, genericTypedProp);
-                propData = newNode.PropData_Internal;
+                ISubscriptionKeyGen subscriptionRequest =
+                    new SubscriptionKeyGen(newNode.CompKey, genericTypedProp.Type, target, method, subscriptionKind, priorityGroup, keepRef: false, subscriptionFactory: null);
 
-                bool result;
-                if (target != null)
-                {
-                    ISubscriptionKeyGen subscriptionRequest =
-                        new SubscriptionKeyGen(newNode.CompKey, genericTypedProp.Type, target, method, subscriptionKind, priorityGroup, keepRef: false, subscriptionFactory: null);
+                ISubscription newSubscription = AddSubscription(subscriptionRequest, out bool wasAdded);
 
-                    ISubscription newSubscription = AddSubscription(subscriptionRequest, out bool wasAdded);
-
-                    result = wasAdded;
-                }
-                else
-                {
-                    result = true;
-                }
-
-                TryAddSecondPart(int_propBag, newNode);
-
-                return result;
-            } 
+                result = wasAdded;
+            }
             else
             {
-                throw new InvalidOperationException("The propBag reference given to TryAdd does not implement the IPropBagInternal interface.");
+                result = true;
             }
+
+            TryAddSecondPart(newNode, propertyName);
+
+            return result;
         }
 
         // Add PropItem with PcGen subscription
-        public bool TryAdd(IPropBag propBag, PropIdType propId, IProp genericTypedProp,
+        public bool TryAdd(IPropBag propBag, PropIdType propId, PropNameType propertyName, IProp genericTypedProp,
             EventHandler<PcGenEventArgs> eventHandler, SubscriptionPriorityGroup priorityGroup, out IPropData propData)
         {
-            if (propBag is IPropBagInternal int_propBag)
+            StoreNodeProp newNode = TryAddFirstPart(propBag, propId, genericTypedProp);
+            propData = newNode.PropData_Internal;
+
+            bool result;
+            if (eventHandler != null)
             {
-                StoreNodeProp newNode = TryAddFirstPart(propBag, propId, genericTypedProp);
-                propData = newNode.PropData_Internal;
-
-                bool result;
-                if (eventHandler != null)
-                {
-                    IDisposable disable = RegisterHandler(newNode.CompKey, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
-                    result = disable != null;
-                }
-                else
-                {
-                    result = true;
-                }
-
-                TryAddSecondPart(int_propBag, newNode);
-
-                return result;
+                IDisposable disable = RegisterHandler(newNode.CompKey, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
+                result = disable != null;
             }
             else
             {
-                throw new InvalidOperationException("The propBag reference given to TryAdd does not implement the IPropBagInternal interface.");
+                result = true;
             }
+
+            TryAddSecondPart(newNode, propertyName);
+
+            return result;
         }
 
         private StoreNodeProp TryAddFirstPart(IPropBag propBag, PropIdType propId, IProp genericTypedProp)
@@ -244,7 +215,7 @@ namespace DRM.TypeSafePropertyBag
             return propStoreNode;
         }
 
-        private void TryAddSecondPart(IPropBagInternal int_propBag, StoreNodeProp propStoreNode)
+        private void TryAddSecondPart(StoreNodeProp propStoreNode, PropNameType propertyName)
         {
             IPropDataInternal propData = propStoreNode.PropData_Internal;
 
@@ -258,7 +229,7 @@ namespace DRM.TypeSafePropertyBag
                 object guest = propData?.TypedProp?.TypedValueAsObject;
                 if (guest != null)
                 {
-                    StoreNodeBag guestPropBagNode = GetGuestObjectNodeFromPropItemVal((IPropBag)guest);
+                    StoreNodeBag guestPropBagNode = GetGuestObjectNodeFromPropItemVal(guest);
                     guestPropBagNode.Parent =  propStoreNode;
                 }
 
@@ -268,17 +239,23 @@ namespace DRM.TypeSafePropertyBag
 
             if(propData.TypedProp.StorageStrategy == PropStorageStrategyEnum.Virtual)
             {
-                propData.TypedProp.ValueChanged += CreateVirtualValueChangedHandler(propStoreNode);
+                EventHandler<EventArgs> x = CreateVirtualValueChangedHandler(propStoreNode, propertyName);
+                if (x != null)
+                {
+                    propData.TypedProp.ValueChanged += x;
+                }
             }
         }
 
-        private EventHandler<EventArgs> CreateVirtualValueChangedHandler(StoreNodeProp propNode)
+        private EventHandler<EventArgs> CreateVirtualValueChangedHandler(StoreNodeProp propNode, PropNameType propertyName)
         {
-            StoreNodeBag hostBagNode = propNode.Parent;
+            StoreNodeBag hostBagNode = propNode?.Parent;
+
+            if (hostBagNode == null) return null;
 
             WeakReference<IPropBagInternal> propBagRef = hostBagNode.PropBagProxy;
             PropIdType propId = propNode.PropId;
-            PropNameType propertyName = GetPropNameFromKey(propNode.CompKey);
+            //PropNameType propertyName = GetPropNameFromKey(propNode.CompKey.Level2Key);
 
             return newHandler;
 
@@ -292,7 +269,7 @@ namespace DRM.TypeSafePropertyBag
         {
             if (propBagRef.TryGetTarget(out IPropBagInternal int_propBag))
             {
-                int_propBag.RaiseStandardPropertyChanged(propId, propName);
+                int_propBag.RaiseStandardPropertyChanged(/*propId, */propName);
             }
         }
 
@@ -323,7 +300,7 @@ namespace DRM.TypeSafePropertyBag
 
             Dictionary<PropNameType, IPropData> result = _ourNode.Children.ToDictionary
                 (
-                x => GetPropNameFromKey(x.CompKey),
+                x => GetPropNameFromKey(x.CompKey.Level2Key),
                 x => (IPropData)x.PropData_Internal
                 );
 
@@ -340,7 +317,7 @@ namespace DRM.TypeSafePropertyBag
         public IEnumerable<PropNameType> GetKeys(IPropBag propBag)
         {
             GetAndCheckObjectRef(propBag);
-            IEnumerable<PropNameType> result = _ourNode.Children.Select(x => GetPropNameFromKey(x.CompKey));
+            IEnumerable<PropNameType> result = _ourNode.Children.Select(x => GetPropNameFromKey(x.CompKey.Level2Key));
             return result;
         }
 
@@ -410,11 +387,11 @@ namespace DRM.TypeSafePropertyBag
 
         public int PropertyCount => _level2KeyMan.PropertyCount;
 
-        public PSAccessServiceInterface CloneProps(IPropBag callingPropBag, IPropBagInternal copySource)
+        public PSAccessServiceInterface CloneProps(IPropBag callingPropBag, IPropBag copySource, PSAccessServiceInterface sourcePropStoreAccessService)
         {
             //if (!(_propStoreAccessServiceProvider is PSCloneServiceType))
             //{
-            //    string msg = $"This instance of {nameof(SimplePropStoreAccessService)} was not provided a {nameof(PSAccessServiceProviderType)} that implements the {nameof(PSCloneServiceType)} interface";
+            //    string msg = $"This instance of {nameof(SimplePropStoreAccessService)} was not provided a {nameof(PSAccessServiceProviderInterface)} that implements the {nameof(PSCloneServiceType)} interface";
 
             //    throw new InvalidOperationException($"{msg}.");
             //}
@@ -433,12 +410,14 @@ namespace DRM.TypeSafePropertyBag
             // the caller is using the StoreAccessor that belongs to the copySource to make this call.
             GetAndCheckObjectRef(copySource);
 
+            StoreNodeBag copySourceStoreNode = GetPropBagNode(sourcePropStoreAccessService);
+
             PSAccessServiceInterface newStoreAccessor = _propStoreAccessServiceProvider.ClonePSAccessService
                 (
                     copySource,
-                    copySource.ItsStoreAccessor,
+                    sourcePropStoreAccessService,
+                    _level2KeyMan,
                     target,
-                    out StoreNodeBag copySourceStoreNode,
                     out StoreNodeBag newStoreNode
                 );
 
@@ -447,9 +426,7 @@ namespace DRM.TypeSafePropertyBag
                 message: "The PropBag clone operation was not completed: The Level2KeyManager has different contents."
                 );
 
-
             CopyChildProps(copySourceStoreNode, newStoreNode);
-
             return newStoreAccessor;
         }
 
@@ -1214,7 +1191,7 @@ namespace DRM.TypeSafePropertyBag
                     System.Diagnostics.Debug.Assert(e.OldValue.GetType().IsPropBagBased(), "The old value does not implement IPropBag on PropertyChangedWithObjectVals handler in PropStoreAccessService.");
 
                     // Make old a root.
-                    StoreNodeBag guestPropBagNode = GetGuestObjectNodeFromPropItemVal((IPropBag)e.OldValue);
+                    StoreNodeBag guestPropBagNode = GetGuestObjectNodeFromPropItemVal(e.OldValue);
                     guestPropBagNode.Parent = null;
                 }
             }
@@ -1225,10 +1202,9 @@ namespace DRM.TypeSafePropertyBag
                     System.Diagnostics.Debug.Assert(e.NewValue.GetType().IsPropBagBased(), "The new value does not implement IPropBag on PropertyChangedWithObjectVals handler in PropStoreAccessService.");
 
                     // Move to child of our property item. This object is currently a root.
-                    IPropBag propBagHost = (IPropBag)e.NewValue;
+                    StoreNodeBag guestPropBagNode = GetGuestObjectNodeFromPropItemVal(e.NewValue);
 
-                    StoreNodeBag guestPropBagNode = GetGuestObjectNodeFromPropItemVal(propBagHost);
-
+                    // TODO: IPBI -- Get PropId
                     L2KeyManType level2Man = ((PSAccessServiceInternalInterface) ((IPropBagInternal)sender).ItsStoreAccessor).Level2KeyManager;
                     if (level2Man.TryGetFromRaw(e.PropertyName, out PropIdType propId))
                     {
@@ -1246,7 +1222,7 @@ namespace DRM.TypeSafePropertyBag
                     System.Diagnostics.Debug.Assert(e.OldValue.GetType().IsPropBagBased(), "The old value does not implement IPropBag on PropertyChangedWithObjectVals handler in PropStoreAccessService.");
 
                     // Make old a root.
-                    StoreNodeBag guestPropBagNode = GetGuestObjectNodeFromPropItemVal((IPropBag)e.OldValue);
+                    StoreNodeBag guestPropBagNode = GetGuestObjectNodeFromPropItemVal(e.OldValue);
                     guestPropBagNode.Parent = null;
                 }
 
@@ -1255,11 +1231,9 @@ namespace DRM.TypeSafePropertyBag
                     System.Diagnostics.Debug.Assert(e.NewValue.GetType().IsPropBagBased(), "The new value does not implement IPropBag on PropertyChangedWithObjectVals handler in PropStoreAccessService.");
 
                     // Move to child of our property item. This object is currently a root.
-                    IPropBag propBagHost = (IPropBag)e.NewValue;
+                    StoreNodeBag guestPropBagNode = GetGuestObjectNodeFromPropItemVal(e.NewValue);
 
-                    StoreNodeBag guestPropBagNode = GetGuestObjectNodeFromPropItemVal(propBagHost);
-
-                    
+                    // TODO: IPBI -- Get PropId
                     L2KeyManType level2Man = ((PSAccessServiceInternalInterface)((IPropBagInternal)sender).ItsStoreAccessor).Level2KeyManager;
                     if (level2Man.TryGetFromRaw(e.PropertyName, out PropIdType propId))
                     {
@@ -1288,26 +1262,35 @@ namespace DRM.TypeSafePropertyBag
 
         #region Private Methods
 
-        private StoreNodeBag GetGuestObjectNodeFromPropItemVal(IPropBag propBag)
+        private StoreNodeBag GetGuestObjectNodeFromPropItemVal(object propItemValue)
         {
-            //ObjectIdType objectId = GetAndCheckObjectRef(propBag);
-
-            if (propBag is IPropBagInternal pbInternalAccess)
+            // TODO: IPBI -- GetStoreNode
+            if (propItemValue is IPropBagInternal pbInternalAccess)
             {
                 PSAccessServiceInterface accessService = pbInternalAccess.ItsStoreAccessor;
-                if (accessService is IHaveTheStoreNode storeNodeProvider)
-                {
-                    StoreNodeBag propStoreNode = storeNodeProvider.PropStoreNode;
-                    return propStoreNode;
-                }
-                else
-                {
-                    throw new InvalidOperationException($"The {nameof(propBag)}'s {nameof(pbInternalAccess.ItsStoreAccessor)} does not implement the {nameof(IHaveTheStoreNode)} interface.");
-                }
+
+                StoreNodeBag result = GetPropBagNode(accessService);
+                return result;
             }
             else
             {
-                throw new ArgumentException($"{nameof(propBag)} does not implement the {nameof(IPropBagInternal)} interface.", nameof(propBag));
+                throw new ArgumentException($"{nameof(propItemValue)} does not implement the {nameof(IPropBagInternal)} interface.", nameof(propItemValue));
+            }
+        }
+
+
+        private StoreNodeBag GetPropBagNode(PSAccessServiceInterface propStoreAccessService)
+        {
+            CheckForIHaveTheStoreNode(propStoreAccessService);
+            return ((IHaveTheStoreNode)propStoreAccessService).PropBagNode;
+        }
+
+        [System.Diagnostics.Conditional("DEBUG")]
+        private void CheckForIHaveTheStoreNode(PSAccessServiceInterface propStoreAccessService)
+        {
+            if (!(propStoreAccessService is IHaveTheStoreNode storeNodeProvider))
+            {
+                throw new InvalidOperationException($"The {nameof(propStoreAccessService)} does not implement the {nameof(IHaveTheStoreNode)} interface.");
             }
         }
 
@@ -1390,15 +1373,15 @@ namespace DRM.TypeSafePropertyBag
             return cKey;
         }
 
-        private string GetPropNameFromKey(ExKeyT cKey)
+        private string GetPropNameFromKey(PropIdType propId)
         {
-            if(_level2KeyMan.TryGetFromCooked(cKey.Level2Key, out PropNameType propertyName))
+            if(_level2KeyMan.TryGetFromCooked(propId, out PropNameType propertyName))
             {
                 return propertyName;
             }
             else
             {
-                throw new KeyNotFoundException($"The cKey: {cKey}, which includes PropId: {cKey.Level2Key} does not correspond with any registered propertyName.");
+                throw new KeyNotFoundException($"The PropId: {propId} does not correspond with any registered propertyName.");
             }
         }
 
@@ -1439,7 +1422,7 @@ namespace DRM.TypeSafePropertyBag
 
         #region Explicit Implementation of the internal interface: IHaveTheStoreNode
 
-        StoreNodeBag IHaveTheStoreNode.PropStoreNode => _ourNode;
+        StoreNodeBag IHaveTheStoreNode.PropBagNode => _ourNode;
 
         #endregion
 
@@ -1451,6 +1434,7 @@ namespace DRM.TypeSafePropertyBag
         {
             bool result;
 
+            // TODO: IPBI -- Get PropId
             if (propBagNode.TryGetPropBag(out IPropBagInternal propBag))
             {
                 if (((PSAccessServiceInternalInterface)propBag.ItsStoreAccessor).Level2KeyManager.TryGetFromRaw(propertyName, out PropIdType propId))

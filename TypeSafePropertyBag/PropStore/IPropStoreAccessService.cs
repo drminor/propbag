@@ -24,12 +24,12 @@ namespace DRM.TypeSafePropertyBag
         IEnumerable<L2TRaw> GetKeys(IPropBag propBag);
         IEnumerable<IPropData> GetValues(IPropBag propBag);
 
-        bool TryAdd(IPropBag propBag, L2T propId, IProp genericTypedProp, out IPropData propData);
+        bool TryAdd(IPropBag propBag, L2T propId, L2TRaw propertyName, IProp genericTypedProp, out IPropData propData);
 
-        bool TryAdd(IPropBag propBag, L2T propId, IProp genericTypedProp, EventHandler<PcGenEventArgs> handler, SubscriptionPriorityGroup priorityGroup, out IPropData propData);
-        bool TryAdd<PropT>(IPropBag propBag, L2T propId, IProp genericTypedProp, EventHandler<PcTypedEventArgs<PropT>> handler, SubscriptionPriorityGroup priorityGroup, out IPropData propData);
+        bool TryAdd(IPropBag propBag, L2T propId, L2TRaw propertyName, IProp genericTypedProp, EventHandler<PcGenEventArgs> handler, SubscriptionPriorityGroup priorityGroup, out IPropData propData);
+        bool TryAdd<PropT>(IPropBag propBag, L2T propId, L2TRaw propertyName, IProp genericTypedProp, EventHandler<PcTypedEventArgs<PropT>> handler, SubscriptionPriorityGroup priorityGroup, out IPropData propData);
 
-        bool TryAdd(IPropBag propBag, L2T propId, IProp genericTypedProp, object target, MethodInfo method, SubscriptionKind subscriptionKind, SubscriptionPriorityGroup priorityGroup, out IPropData propData);
+        bool TryAdd(IPropBag propBag, L2T propId, L2TRaw propertyName, IProp genericTypedProp, object target, MethodInfo method, SubscriptionKind subscriptionKind, SubscriptionPriorityGroup priorityGroup, out IPropData propData);
 
         bool TryGetValue(IPropBag propBag, L2T propId, out IPropData propData);
         bool TryRemove(IPropBag propBag, L2T propId, out IPropData propData);
@@ -37,7 +37,7 @@ namespace DRM.TypeSafePropertyBag
         // Restricted Update Method on Dictionary-like object.
         bool SetTypedProp(IPropBag propBag, L2T propId, L2TRaw propertyName, IProp genericTypedProp);
 
-        IPropStoreAccessService<L2T, L2TRaw> CloneProps(IPropBag callingPropBag, IPropBagInternal copySource);
+        IPropStoreAccessService<L2T, L2TRaw> CloneProps(IPropBag callingPropBag, IPropBag copySource, IPropStoreAccessService<L2T, L2TRaw> sourcePropStoreAccessService);
         int ClearAllProps(IPropBag propBag);
 
         // Collection View Related
