@@ -10,7 +10,7 @@ namespace DRM.TypeSafePropertyBag
 
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
 
-    using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
+    using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
     using System.Collections.Generic;
 
     public class BindingSubscriptionKey<T> : SubscriptionKeyGen, IBindingSubscriptionKey<T>, IEquatable<BindingSubscriptionKey<T>>
@@ -54,7 +54,7 @@ namespace DRM.TypeSafePropertyBag
             base.MarkAsUsed();
         }
 
-        public static IBindingSubscription<T> CreateBinding(IBindingSubscriptionKey<T> bindingRequest, PSAccessServiceType propStoreAccessService)
+        public static IBindingSubscription<T> CreateBinding(IBindingSubscriptionKey<T> bindingRequest, PSAccessServiceInterface propStoreAccessService)
         {
             IBindingSubscription<T> result = new BindingSubscription<T>(bindingRequest, propStoreAccessService);
             bindingRequest.MarkAsUsed();
@@ -62,7 +62,7 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        public static ISubscription CreateBindingGen(ISubscriptionKeyGen bindingRequestGen, PSAccessServiceType propStoreAccessService)
+        public static ISubscription CreateBindingGen(ISubscriptionKeyGen bindingRequestGen, PSAccessServiceInterface propStoreAccessService)
         {
             return (ISubscription)CreateBinding((IBindingSubscriptionKey<T>)bindingRequestGen, propStoreAccessService);
         }

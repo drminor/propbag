@@ -7,8 +7,8 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
 
-    using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
-    using PSAccessServiceInternalType = IPropStoreAccessServiceInternal<UInt32, String>;
+    using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
+    using PSAccessServiceInternalInterface = IPropStoreAccessServiceInternal<UInt32, String>;
 
     public class LocalWatcher<T> : IDisposable
     {
@@ -16,7 +16,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
         #region Private Properties
 
-        readonly WeakReference<PSAccessServiceType> _propStoreAccessService_wr;
+        readonly WeakReference<PSAccessServiceInterface> _propStoreAccessService_wr;
 
         readonly StoreNodeBag _ourNode;
 
@@ -103,7 +103,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
         // PropBag               
         internal LocalWatcher
             (
-            PSAccessServiceType propStoreAccessService,
+            PSAccessServiceInterface propStoreAccessService,
             LocalBindingInfo bindingInfo,
             IReceivePropStoreNodeUpdates_PropBag<T> storeNodeUpdateReceiver_PropBag
             ) : this(propStoreAccessService, bindingInfo)
@@ -117,7 +117,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
         // PropNode
         internal LocalWatcher
             (
-            PSAccessServiceType propStoreAccessService,
+            PSAccessServiceInterface propStoreAccessService,
             LocalBindingInfo bindingInfo,
             IReceivePropStoreNodeUpdates_PropNode<T> storeNodeUpdateReceiver_PropNode
             ) : this(propStoreAccessService, bindingInfo)
@@ -131,7 +131,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
         // Value
         internal LocalWatcher
             (
-            PSAccessServiceType propStoreAccessService,
+            PSAccessServiceInterface propStoreAccessService,
             LocalBindingInfo bindingInfo,
             IReceivePropStoreNodeUpdates_Value<T> storeNodeUpdateReceiver_Value
             ) : this(propStoreAccessService, bindingInfo)
@@ -143,9 +143,9 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
         }
 
         // Base Constructor
-        private LocalWatcher(PSAccessServiceType propStoreAccessService, LocalBindingInfo bindingInfo)
+        private LocalWatcher(PSAccessServiceInterface propStoreAccessService, LocalBindingInfo bindingInfo)
         {
-            _propStoreAccessService_wr = new WeakReference<PSAccessServiceType>(propStoreAccessService);
+            _propStoreAccessService_wr = new WeakReference<PSAccessServiceInterface>(propStoreAccessService);
             _ourNode = GetPropBagNode(propStoreAccessService);
             _bindingInfo = bindingInfo;
 
@@ -164,14 +164,16 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             }
         }
 
-        private StoreNodeBag GetPropBagNode(PSAccessServiceType propStoreAccessService)
+        private StoreNodeBag GetPropBagNode(PSAccessServiceInterface propStoreAccessService)
         {
-            if (propStoreAccessService is IHaveTheStoreNode storeNodeProvider)
-            {
-                StoreNodeBag propStoreNode = storeNodeProvider.PropStoreNode;
-                return propStoreNode;
-            }
-            else
+            CheckForIHaveTheStoreNode(propStoreAccessService);
+            return ((IHaveTheStoreNode)propStoreAccessService).PropBagNode;
+        }
+
+        [System.Diagnostics.Conditional("DEBUG")]
+        private void CheckForIHaveTheStoreNode(PSAccessServiceInterface propStoreAccessService)
+        {
+            if (!(propStoreAccessService is IHaveTheStoreNode storeNodeProvider))
             {
                 throw new InvalidOperationException($"The {nameof(propStoreAccessService)} does not implement the {nameof(IHaveTheStoreNode)} interface.");
             }
@@ -807,9 +809,9 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             {
                 case PropStoreNotificationKindEnum.PropBag:
                     {
-                        if (_propStoreAccessService_wr.TryGetTarget(out PSAccessServiceType storeAccessor))
+                        if (_propStoreAccessService_wr.TryGetTarget(out PSAccessServiceInterface storeAccessor))
                         {
-                            if (storeAccessor is PSAccessServiceInternalType storeAccessor_internal)
+                            if (storeAccessor is PSAccessServiceInternalInterface storeAccessor_internal)
                             {
                                 WeakReference<IPropBagInternal> propItemParent_Internal_wr = storeAccessor_internal.GetPropBagProxy(sourcePropNode);
                                 WeakReference<IPropBag> propItemParent_wr = storeAccessor_internal.GetPublicInterface(propItemParent_Internal_wr);
@@ -817,7 +819,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
                             }
                             else
                             {
-                                throw new InvalidOperationException($"StoreAccessor does not implement {nameof(PSAccessServiceInternalType)}.");
+                                throw new InvalidOperationException($"StoreAccessor does not implement {nameof(PSAccessServiceInternalInterface)}.");
                             }
                         }
                         else
@@ -928,16 +930,16 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
         private bool TryGetChildProp(StoreNodeBag objectNode, IPropBagInternal propBag, string propertyName, out StoreNodeProp child)
         {
             // TODO: Add additional type checking and throw exceptions if neccessary.
-            PropIdType propId = ((PSAccessServiceInternalType)propBag.ItsStoreAccessor).Level2KeyManager.FromRaw(propertyName);
+            PropIdType propId = ((PSAccessServiceInternalInterface)propBag.ItsStoreAccessor).Level2KeyManager.FromRaw(propertyName);
             bool result = objectNode.TryGetChild(propId, out child);
             return result;
         }
 
-        private WeakReference<IPropBag> GetPropItemParent(WeakReference<PSAccessServiceType> propStoreAccessService_wr, StoreNodeProp sourcePropNode)
+        private WeakReference<IPropBag> GetPropItemParent(WeakReference<PSAccessServiceInterface> propStoreAccessService_wr, StoreNodeProp sourcePropNode)
         {
-            if (propStoreAccessService_wr.TryGetTarget(out PSAccessServiceType storeAccessor))
+            if (propStoreAccessService_wr.TryGetTarget(out PSAccessServiceInterface storeAccessor))
             {
-                if (storeAccessor is PSAccessServiceInternalType storeAcessor_internal)
+                if (storeAccessor is PSAccessServiceInternalInterface storeAcessor_internal)
                 {
                     WeakReference<IPropBagInternal> propItemParentPropBag_internal_wr = storeAcessor_internal.GetPropBagProxy(sourcePropNode);
                     WeakReference<IPropBag> propItemParentPropBag_wr = storeAcessor_internal.GetPublicInterface(propItemParentPropBag_internal_wr);
@@ -1030,9 +1032,9 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
         //    return result;
         //}
 
-        //private StoreNodeBag GetBagNode(WeakReference<PSAccessServiceType> propStoreAccessService_wr)
+        //private StoreNodeBag GetBagNode(WeakReference<PSAccessServiceInterface> propStoreAccessService_wr)
         //{
-        //    if (propStoreAccessService_wr.TryGetTarget(out PSAccessServiceType accessService))
+        //    if (propStoreAccessService_wr.TryGetTarget(out PSAccessServiceInterface accessService))
         //    {
         //        if (accessService is IHaveTheStoreNode storeNodeHolder)
         //        {

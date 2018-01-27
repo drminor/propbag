@@ -4,7 +4,7 @@ using System.Reflection;
 namespace DRM.TypeSafePropertyBag
 {
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
-    using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
+    using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
 
     public interface IBindingSubscriptionKey<T> : ISubscriptionKeyGen
     {
@@ -48,6 +48,6 @@ namespace DRM.TypeSafePropertyBag
 
         // Properties for BindingSubscriptions
         LocalBindingInfo BindingInfo { get; }
-        ISubscription CreateBinding(PSAccessServiceType storeAccessor); 
+        ISubscription CreateBinding(PSAccessServiceInterface storeAccessor); 
     }
 }

@@ -166,15 +166,15 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        //private PSAccessServiceType GetRegularService(PSAccessServiceInternalType internalService)
+        //private PSAccessServiceInterface GetRegularService(PSAccessServiceInternalInterface internalService)
         //{
-        //    if (internalService is PSAccessServiceType regularService)
+        //    if (internalService is PSAccessServiceInterface regularService)
         //    {
         //        return regularService;
         //    }
         //    else
         //    {
-        //        throw new InvalidOperationException($"That {nameof(PSAccessServiceInternalType)} instance does not implement {nameof(PSAccessServiceType)}.");
+        //        throw new InvalidOperationException($"That {nameof(PSAccessServiceInternalInterface)} instance does not implement {nameof(PSAccessServiceInterface)}.");
         //    }
         //}
 

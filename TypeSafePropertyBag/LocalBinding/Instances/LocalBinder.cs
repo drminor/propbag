@@ -7,8 +7,8 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
 
-    using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
-    using PSAccessServiceInternalType = IPropStoreAccessServiceInternal<UInt32, String>;
+    using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
+    using PSAccessServiceInternalInterface = IPropStoreAccessServiceInternal<UInt32, String>;
 
     public class LocalBinder<T> : IDisposable
     {
@@ -16,7 +16,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
         #region Private Properties
 
-        //readonly WeakReference<PSAccessServiceType> _propStoreAccessService_wr;
+        //readonly WeakReference<PSAccessServiceInterface> _propStoreAccessService_wr;
 
         //readonly StoreNodeBag _ourNode;
 
@@ -92,9 +92,9 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
         #region Constructor
 
-        public LocalBinder(PSAccessServiceType propStoreAccessService, ExKeyT bindingTarget, LocalBindingInfo bindingInfo)
+        public LocalBinder(PSAccessServiceInterface propStoreAccessService, ExKeyT bindingTarget, LocalBindingInfo bindingInfo)
         {
-            //_propStoreAccessService_wr = new WeakReference<PSAccessServiceType>(propStoreAccessService);
+            //_propStoreAccessService_wr = new WeakReference<PSAccessServiceInterface>(propStoreAccessService);
 
             _bindingTarget = bindingTarget;
             _bindingInfo = bindingInfo;
@@ -109,6 +109,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             if (_targetObject.TryGetTarget(out IPropBagInternal propBag))
             {
                 PropIdType propId = _bindingTarget.Level2Key;
+
                 _propertyName = GetPropertyName(propStoreAccessService, propBag, propId, out PropStorageStrategyEnum storageStrategy);
                 
                 // We will update the target property depending on how that PropItem stores its value.
@@ -250,21 +251,23 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
         #region Private Methods
 
-        private StoreNodeBag GetPropBagNode(PSAccessServiceType propStoreAccessService)
+        private StoreNodeBag GetPropBagNode(PSAccessServiceInterface propStoreAccessService)
         {
-            if (propStoreAccessService is IHaveTheStoreNode storeNodeProvider)
-            {
-                StoreNodeBag propStoreNode = storeNodeProvider.PropStoreNode;
-                return propStoreNode;
-            }
-            else
+            CheckForIHaveTheStoreNode(propStoreAccessService);
+            return ((IHaveTheStoreNode)propStoreAccessService).PropBagNode;
+        }
+
+        [System.Diagnostics.Conditional("DEBUG")]
+        private void CheckForIHaveTheStoreNode(PSAccessServiceInterface propStoreAccessService)
+        {
+            if (!(propStoreAccessService is IHaveTheStoreNode storeNodeProvider))
             {
                 throw new InvalidOperationException($"The {nameof(propStoreAccessService)} does not implement the {nameof(IHaveTheStoreNode)} interface.");
             }
         }
 
         // TODO: should be able to have IPropStoreAccessServiceInternal provide all of this with a single call.
-        private PropNameType GetPropertyName(PSAccessServiceType propStoreAccessService, IPropBagInternal propBag, PropIdType propId, out PropStorageStrategyEnum storageStrategy)
+        private PropNameType GetPropertyName(PSAccessServiceInterface propStoreAccessService, IPropBag propBag, PropIdType propId, out PropStorageStrategyEnum storageStrategy)
         {
             PropNameType result;
 
@@ -277,7 +280,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
                 throw new InvalidOperationException("Cannot retrieve the Target's property name from the TargetPropId.");
             }
 
-            if (propStoreAccessService.TryGetValue((IPropBag)propBag, propId, out IPropData genProp))
+            if (propStoreAccessService.TryGetValue(propBag, propId, out IPropData genProp))
             {
                 storageStrategy = genProp.TypedProp.StorageStrategy;
             }
@@ -299,7 +302,8 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
         private bool TryGetChildProp(StoreNodeBag objectNode, IPropBagInternal propBag, string propertyName, out StoreNodeProp child)
         {
-            PropIdType propId = ((PSAccessServiceInternalType)propBag.ItsStoreAccessor).Level2KeyManager.FromRaw(propertyName);
+            // TODO: IPBI-GetPropId
+            PropIdType propId = ((PSAccessServiceInternalInterface)propBag.ItsStoreAccessor).Level2KeyManager.FromRaw(propertyName);
             bool result = objectNode.TryGetChild(propId, out child);
             return result;
         }

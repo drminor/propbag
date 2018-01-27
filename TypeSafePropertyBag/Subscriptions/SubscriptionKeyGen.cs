@@ -13,14 +13,14 @@ namespace DRM.TypeSafePropertyBag
     using PropNameType = String;
 
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
-    using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
+    using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
 
     public class SubscriptionKeyGen : ISubscriptionKeyGen, IEquatable<SubscriptionKeyGen>
     {
         #region Private Members
 
         Func<ISubscriptionKeyGen, IProvideHandlerDispatchDelegateCaches, ISubscription> SubscriptionFactory { get; }
-        Func<ISubscriptionKeyGen, PSAccessServiceType, ISubscription> BindingFactory { get;}
+        Func<ISubscriptionKeyGen, PSAccessServiceInterface, ISubscription> BindingFactory { get;}
 
         #endregion
 
@@ -228,7 +228,7 @@ namespace DRM.TypeSafePropertyBag
             LocalBindingInfo bindingInfo,
             SubscriptionKind kind,
             SubscriptionPriorityGroup subscriptionPriorityGroup,
-            Func<ISubscriptionKeyGen, PSAccessServiceType, ISubscription> bindingFactory)
+            Func<ISubscriptionKeyGen, PSAccessServiceInterface, ISubscription> bindingFactory)
         {
             OwnerPropId = ownerPropId; // The binding is created on the target, we will go find the source of the events to listen.
             PropertyType = PropertyType;
@@ -283,7 +283,7 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        public virtual ISubscription CreateBinding(PSAccessServiceType propStoreAccessService)
+        public virtual ISubscription CreateBinding(PSAccessServiceInterface propStoreAccessService)
         {
             return BindingFactory(this, propStoreAccessService);
         }

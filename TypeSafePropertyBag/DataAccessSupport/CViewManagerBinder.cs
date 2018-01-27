@@ -7,7 +7,7 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
     using PropIdType = UInt32;
     using PropNameType = String;
 
-    using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
+    using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
     using PSAccessServiceInternalInterface = IPropStoreAccessServiceInternal<UInt32, String>;
 
     public class CViewManagerBinder<TDal, TSource, TDestination> : IProvideATypedCViewManager<EndEditWrapper<TDestination>, TDestination>, IDisposable
@@ -55,7 +55,7 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
 
         public CViewManagerBinder
             (
-            PSAccessServiceType propStoreAccessService,
+            PSAccessServiceInterface propStoreAccessService,
             IViewManagerProviderKey viewManagerProviderKey,
             //LocalBindingInfo bindingInfo,
             //IMapperRequest mr,  // The information necessary to create a IPropBagMapper<TSource, TDestination>
@@ -85,12 +85,13 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
             {
                 if (_propItemParent_wr != null && _propItemParent_wr.TryGetTarget(out IPropBag propBagHost))
                 {
+                    // TODO: IPBI -- Get PropId
                     if (propBagHost is IPropBagInternal propBag_internal)
                     {
-                        PSAccessServiceType foreignStoreAccessor = propBag_internal.ItsStoreAccessor;
+                        PSAccessServiceInterface foreignStoreAccessor = propBag_internal.ItsStoreAccessor;
                         if (foreignStoreAccessor is PSAccessServiceInternalInterface foreignStoreAccesssor_internal)
                         {
-                            PropIdType propId = GetPropertyId(foreignStoreAccessor, propBag_internal, PropertyName);
+                            PropIdType propId = GetPropertyId(foreignStoreAccessor, PropertyName);
                             IPropDataInternal propData = foreignStoreAccesssor_internal.GetChild(propId)?.PropData_Internal;
 
                             IManageCViews result = foreignStoreAccessor.GetOrAddViewManager<TDal, TSource, TDestination>
@@ -121,7 +122,7 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
 
         #region Private Methods
 
-        private PropIdType GetPropertyId(PSAccessServiceType propStoreAccessService, IPropBagInternal propBag, PropNameType propertyName)
+        private PropIdType GetPropertyId(PSAccessServiceInterface propStoreAccessService, PropNameType propertyName)
         {
             if (propStoreAccessService.TryGetPropId(propertyName, out PropIdType propId))
             {

@@ -13,7 +13,7 @@ namespace DRM.TypeSafePropertyBag
     using PropNameType = String;
 
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
-    using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
+    using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
 
     public class ParentNCSubscriptionRequest
     {

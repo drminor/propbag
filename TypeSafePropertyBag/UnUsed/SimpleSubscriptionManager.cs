@@ -8,7 +8,7 @@ namespace DRM.TypeSafePropertyBag.Unused
     using PropIdType = UInt32;
     using PropNameType = String;
 
-    using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
+    using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
 
     using ExKeyType = IExplodedKey<UInt64, UInt64, UInt32>;
     using HaveTheKeyType = IHaveTheStoreNode<UInt64, UInt64, UInt32>;
@@ -116,7 +116,7 @@ namespace DRM.TypeSafePropertyBag.Unused
         //    return result;
         //}
 
-        //public SubscriberCollection GetSubscriptions(IPropBag host, PropIdType propId, PSAccessServiceType storeAccessor)
+        //public SubscriberCollection GetSubscriptions(IPropBag host, PropIdType propId, PSAccessServiceInterface storeAccessor)
         //{
         //    SimpleExKey exKey = GetTheKey(host, propId, storeAccessor);
 
@@ -131,7 +131,7 @@ namespace DRM.TypeSafePropertyBag.Unused
         //    return result;
         //}
 
-        //private SimpleExKey GetTheKey(IPropBag host, uint propId, PSAccessServiceType storeAccessor)
+        //private SimpleExKey GetTheKey(IPropBag host, uint propId, PSAccessServiceInterface storeAccessor)
         //{
         //    ExKeyType exKey = ((HaveTheKeyType) storeAccessor).GetTheKey(host, propId);
 

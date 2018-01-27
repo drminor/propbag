@@ -8,8 +8,8 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
 
-    using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
-    using PSAccessServiceInternalType = IPropStoreAccessServiceInternal<UInt32, String>;
+    using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
+    using PSAccessServiceInternalInterface = IPropStoreAccessServiceInternal<UInt32, String>;
 
     // TODO: Separate the two functions being peformed in this class:
     // 1. Create a copy of this class named: LocalWatcher<T> and have it only support 
@@ -22,7 +22,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
         #region Private Properties
 
-        readonly WeakReference<PSAccessServiceType> _propStoreAccessService_wr;
+        readonly WeakReference<PSAccessServiceInterface> _propStoreAccessService_wr;
 
         readonly StoreNodeBag _ourNode;
 
@@ -99,9 +99,9 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
         #region Constructor
 
-        internal LocalBinder(PSAccessServiceType propStoreAccessService, LocalBindingInfo bindingInfo, IReceivePropStoreNodeUpdates storeNodeUpdateReceiver)
+        internal LocalBinder(PSAccessServiceInterface propStoreAccessService, LocalBindingInfo bindingInfo, IReceivePropStoreNodeUpdates storeNodeUpdateReceiver)
         {
-            _propStoreAccessService_wr = new WeakReference<PSAccessServiceType>(propStoreAccessService);
+            _propStoreAccessService_wr = new WeakReference<PSAccessServiceInterface>(propStoreAccessService);
             _bindingInfo = bindingInfo;
             _storeNodeUpdateReceiver = storeNodeUpdateReceiver;
 
@@ -133,9 +133,9 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
         }
 
 
-        public LocalBinder(PSAccessServiceType propStoreAccessService, ExKeyT ownerPropId, LocalBindingInfo bindingInfo)
+        public LocalBinder(PSAccessServiceInterface propStoreAccessService, ExKeyT ownerPropId, LocalBindingInfo bindingInfo)
         {
-            _propStoreAccessService_wr = new WeakReference<PSAccessServiceType>(propStoreAccessService);
+            _propStoreAccessService_wr = new WeakReference<PSAccessServiceInterface>(propStoreAccessService);
             _bindingTarget = ownerPropId;
             _bindingInfo = bindingInfo;
             _storeNodeUpdateReceiver = null;
@@ -170,7 +170,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             _isComplete = StartBinding(_targetObject, _pathElements, _pathListeners, _isPathAbsolute);
         }
 
-        private StoreNodeBag GetPropBagNode(PSAccessServiceType propStoreAccessService)
+        private StoreNodeBag GetPropBagNode(PSAccessServiceInterface propStoreAccessService)
         {
             if (propStoreAccessService is IHaveTheStoreNode storeNodeProvider)
             {
@@ -184,7 +184,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
         }
 
         // TODO: should be able to have IPropStoreAccessServiceInternal provide all of this with a single call.
-        private PropNameType GetPropertyName(PSAccessServiceType propStoreAccessService, IPropBagInternal propBag, PropIdType propId, out PropStorageStrategyEnum storageStrategy)
+        private PropNameType GetPropertyName(PSAccessServiceInterface propStoreAccessService, IPropBagInternal propBag, PropIdType propId, out PropStorageStrategyEnum storageStrategy)
         {
             PropNameType result;
 
@@ -626,7 +626,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
         private bool TryGetChildProp(StoreNodeBag objectNode, IPropBagInternal propBag, string propertyName, out StoreNodeProp child)
         {
-            PropIdType propId = ((PSAccessServiceInternalType)propBag.ItsStoreAccessor).Level2KeyManager.FromRaw(propertyName);
+            PropIdType propId = ((PSAccessServiceInternalInterface)propBag.ItsStoreAccessor).Level2KeyManager.FromRaw(propertyName);
             bool result = objectNode.TryGetChild(propId, out child);
             return result;
         }
@@ -888,11 +888,11 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
         #region Support Methods
 
-        private WeakReference<IPropBag> GetPropItemParent(WeakReference<PSAccessServiceType> propStoreAccessService_wr, StoreNodeProp sourcePropNode)
+        private WeakReference<IPropBag> GetPropItemParent(WeakReference<PSAccessServiceInterface> propStoreAccessService_wr, StoreNodeProp sourcePropNode)
         {
-            if (propStoreAccessService_wr.TryGetTarget(out PSAccessServiceType storeAccessor))
+            if (propStoreAccessService_wr.TryGetTarget(out PSAccessServiceInterface storeAccessor))
             {
-                if (storeAccessor is PSAccessServiceInternalType storeAcessor_internal)
+                if (storeAccessor is PSAccessServiceInternalInterface storeAcessor_internal)
                 {
                     WeakReference<IPropBagInternal> propItemParentPropBag_internal_wr = storeAcessor_internal.GetPropBagProxy(sourcePropNode);
                     WeakReference<IPropBag> propItemParentPropBag_wr = storeAcessor_internal.GetPublicInterface(propItemParentPropBag_internal_wr);
@@ -985,9 +985,9 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
         //    return result;
         //}
 
-        //private StoreNodeBag GetBagNode(WeakReference<PSAccessServiceType> propStoreAccessService_wr)
+        //private StoreNodeBag GetBagNode(WeakReference<PSAccessServiceInterface> propStoreAccessService_wr)
         //{
-        //    if (propStoreAccessService_wr.TryGetTarget(out PSAccessServiceType accessService))
+        //    if (propStoreAccessService_wr.TryGetTarget(out PSAccessServiceInterface accessService))
         //    {
         //        if (accessService is IHaveTheStoreNode storeNodeHolder)
         //        {
