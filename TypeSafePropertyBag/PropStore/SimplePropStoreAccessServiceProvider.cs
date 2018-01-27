@@ -11,11 +11,11 @@ namespace DRM.TypeSafePropertyBag
 
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
 
-    using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
-    using PSAccessServiceProviderType = IProvidePropStoreAccessService<UInt32, String>;
-    using PSAccessServiceInternalType = IPropStoreAccessServiceInternal<UInt32, String>;
+    using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
+    using PSAccessServiceProviderInterface = IProvidePropStoreAccessService<UInt32, String>;
+    //using PSAccessServiceInternalInterface = IPropStoreAccessServiceInternal<UInt32, String>;
 
-    internal class SimplePropStoreAccessServiceProvider : PSAccessServiceProviderType
+    internal class SimplePropStoreAccessServiceProvider : PSAccessServiceProviderInterface
     {
         #region Private Members
 
@@ -61,7 +61,10 @@ namespace DRM.TypeSafePropertyBag
         {
             lock (_sync)
             {
-                List<KeyValuePair<ExKeyT, StoreNodeBag>> nodesThatHavePassed = _store.Where(x => HasPassed(x.Value)).ToList();
+                _store.Where(x => x.Value.IsAlive).ToList();
+                //List<KeyValuePair<ExKeyT, StoreNodeBag>> nodesThatHavePassed = _store.Where(x => HasPassed(x.Value)).ToList();
+                List<KeyValuePair<ExKeyT, StoreNodeBag>> nodesThatHavePassed = _store.Where(x => x.Value.IsAlive).ToList();
+
 
                 long totalRemoved = 0;
                 foreach(KeyValuePair<ExKeyT, StoreNodeBag> kvp in nodesThatHavePassed)
@@ -74,24 +77,24 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        private bool HasPassed(StoreNodeBag psn)
-        {
-            bool result = psn.TryGetPropBag(out IPropBagInternal dummy);
-            return result;
-        }
+        //private bool HasPassed(StoreNodeBag psn)
+        //{
+        //    bool result = psn.TryGetPropBag(out IPropBagInternal dummy);
+        //    return result;
+        //}
 
         #endregion
 
         #region PropStoreAccessService Creation and TearDown
 
-        public PSAccessServiceType CreatePropStoreService(IPropBagInternal propBag)
+        public PSAccessServiceInterface CreatePropStoreService(IPropBagInternal propBag)
         {
             L2KeyManType level2KeyManager = new SimpleLevel2KeyMan(MaxPropsPerObject);
-            PSAccessServiceType result = CreatePropStoreService(propBag, level2KeyManager, out StoreNodeBag notUsed);
+            PSAccessServiceInterface result = CreatePropStoreService(propBag, level2KeyManager, out StoreNodeBag notUsed);
             return result;
         }
 
-        private PSAccessServiceType CreatePropStoreService(IPropBagInternal propBag, L2KeyManType level2KeyManager, out StoreNodeBag newBagNode)
+        private PSAccessServiceInterface CreatePropStoreService(IPropBagInternal propBag, L2KeyManType level2KeyManager, out StoreNodeBag newBagNode)
         {
             // Issue a new, unique Id for this propBag.
             ObjectIdType objectId = NextCookedVal;
@@ -104,7 +107,7 @@ namespace DRM.TypeSafePropertyBag
             _store.Add(cKey, newBagNode);
 
             // Create the access service.
-            PSAccessServiceType result = new SimplePropStoreAccessService
+            PSAccessServiceInterface result = new SimplePropStoreAccessService
                 (
                     newBagNode,
                     level2KeyManager,
@@ -146,35 +149,41 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        public PSAccessServiceType ClonePSAccessService
+        public PSAccessServiceInterface ClonePSAccessService
             (
-            IPropBagInternal sourcePropBag,
-            PSAccessServiceType sourceAccessService,
+            IPropBag sourcePropBag,
+            PSAccessServiceInterface sourceAccessService,
+            L2KeyManType sourceLevel2KeyMan,
             IPropBagInternal targetPropBag,
-            out StoreNodeBag sourceStoreNode, 
-            out StoreNodeBag newStoreNode)
+            out StoreNodeBag newStoreNode
+            )
         {
-            if(sourceAccessService is IHaveTheStoreNode nodeProvider)
-            {
-                sourceStoreNode = nodeProvider.PropStoreNode;
+            L2KeyManType level2KeyManager_newCopy = (L2KeyManType) sourceLevel2KeyMan.Clone();
+            PSAccessServiceInterface result = CreatePropStoreService(targetPropBag, level2KeyManager_newCopy, out newStoreNode);
+            return result;
 
-                if (((PSAccessServiceInternalType)sourcePropBag.ItsStoreAccessor).Level2KeyManager is SimpleLevel2KeyMan sourceLevel2KeyMan)
-                {
-                    L2KeyManType level2KeyManager_newCopy = new SimpleLevel2KeyMan(sourceLevel2KeyMan);
 
-                    PSAccessServiceType result = CreatePropStoreService(targetPropBag, level2KeyManager_newCopy, out newStoreNode);
+            //if (sourceAccessService is IHaveTheStoreNode nodeProvider)
+            //{
+            //    sourceStoreNode = nodeProvider.PropStoreNode;
 
-                    return result;
-                }
-                else
-                {
-                    throw new InvalidOperationException($"The storeNode holds a PropBag whose Level2KeyManager is not of type: {nameof(SimpleLevel2KeyMan)}.");
-                }
-            }
-            else
-            {
-                throw new InvalidOperationException($"The {nameof(sourceAccessService)} does not implement the {nameof(IHaveTheStoreNode)} interface.");
-            }
+            //    if (((PSAccessServiceInternalInterface)sourcePropBag.ItsStoreAccessor).Level2KeyManager is SimpleLevel2KeyMan sourceLevel2KeyMan)
+            //    {
+            //        L2KeyManType level2KeyManager_newCopy = new SimpleLevel2KeyMan(sourceLevel2KeyMan);
+
+            //        PSAccessServiceInterface result = CreatePropStoreService(targetPropBag, level2KeyManager_newCopy, out newStoreNode);
+
+            //        return result;
+            //    }
+            //    else
+            //    {
+            //        throw new InvalidOperationException($"The storeNode holds a PropBag whose Level2KeyManager is not of type: {nameof(SimpleLevel2KeyMan)}.");
+            //    }
+            //}
+            //else
+            //{
+            //    throw new InvalidOperationException($"The {nameof(sourceAccessService)} does not implement the {nameof(IHaveTheStoreNode)} interface.");
+            //}
         }
 
         #endregion

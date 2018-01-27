@@ -11,9 +11,9 @@ TODO List
 			and use it as a constructor argument.
 
 3.2.	Add support to IPropBag and IPropFactory to create a CViewManager from a IDoCrud<T> with 
-			AutoMapper support.
+			AutoMapper support. DONE
 
-4. Use Attached Dependency Properties for PropItem instead of child user controls (DRM.PropBagControlsWPF)
+4. Use Attached Dependency Properties for PropItem instead of child user controls (DRM.PropBagControlsWPF) DECLINED
 
 5. Install and use Simple IOC to configure service dependencies.
 

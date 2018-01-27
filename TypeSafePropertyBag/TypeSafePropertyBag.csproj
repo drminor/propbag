@@ -142,10 +142,10 @@
     <Compile Include="LocalBinding\Management\ICacheBindings.cs" />
     <Compile Include="LocalBinding\Registration\IRegisterBindings.cs" />
     <Compile Include="PropBagInterfaces\CreatePropDelegate.cs" />
-    <Compile Include="Unused\IPropBagProxy.cs" />
+    <None Include="Unused\IPropBagProxy.cs" />
     <Compile Include="PropBagInterfaces\IProvideDelegateCaches.cs" />
     <Compile Include="PropStore\INotifyParentNodeChanged.cs" />
-    <Compile Include="Unused\PropBagProxy.cs" />
+    <None Include="Unused\PropBagProxy.cs" />
     <Compile Include="PropStore\PropGen.cs" />
     <Compile Include="PropStore\PSNodeParentChangedEventArgs.cs" />
     <Compile Include="PropStore\StoreNodeBag.cs" />
