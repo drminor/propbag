@@ -50,8 +50,8 @@ namespace DRM.PropBag
         #region Member Declarations
 
         // These items are provided to us.
-        private IPropFactory _propFactory { get; set; }
-        private PSAccessServiceInterface _ourStoreAccessor { get; set; }
+        protected internal IPropFactory _propFactory { get; set; }
+        protected internal PSAccessServiceInterface _ourStoreAccessor { get; set; }
 
         // We are responsible for these
         private ITypeSafePropBagMetaData _ourMetaData { get; set; }
@@ -172,13 +172,13 @@ namespace DRM.PropBag
             int testc = _ourStoreAccessor.PropertyCount;
         }
 
-        protected PropBag(IPropBagInternal copySource)
+        protected PropBag(IPropBag copySource, PSAccessServiceInterface storeAccessor, IPropFactory propFactory)
         {
             _typeSafetyMode = copySource.TypeSafetyMode;
-            _propFactory = copySource.PropFactory;
+            _propFactory = propFactory;
 
             _ourMetaData = BuildMetaData(_typeSafetyMode, copySource.FullClassName, _propFactory);
-            _ourStoreAccessor = CloneProps(copySource);
+            _ourStoreAccessor = CloneProps(copySource, storeAccessor);
         }
 
         protected PropBag(PropBagTypeSafetyMode typeSafetyMode, PSAccessServiceCreatorInterface storeAcessorCreator, IPropFactory propFactory, string fullClassName = null)
@@ -1595,18 +1595,14 @@ namespace DRM.PropBag
 
         #region Public Methods
 
-        public object Clone()
+        public virtual object Clone()
         {
-            return new PropBag(this);
+            return new PropBag(this, _ourStoreAccessor, _propFactory);
         }
 
-        private PSAccessServiceInterface CloneProps(IPropBagInternal copySource)
+        private PSAccessServiceInterface CloneProps(IPropBag copySource, PSAccessServiceInterface storeAccessor)
         {
-
-            //_ourStoreAccessor = _ourStoreAccessor.CloneProps(this, copySource);
-
-            PSAccessServiceInterface storeAccessor = copySource.ItsStoreAccessor;
-            PSAccessServiceInterface result = storeAccessor.CloneProps(this, copySource);
+            PSAccessServiceInterface result = storeAccessor.CloneProps(this, copySource, storeAccessor);
 
             _properties = ((ICustomTypeDescriptor)copySource).GetProperties();
 
@@ -2072,7 +2068,7 @@ namespace DRM.PropBag
         {
             propId = AddPropId(propertyName);
 
-            if (!_ourStoreAccessor.TryAdd(this, propId, genericTypedProp, doWhenChanged, priorityGroup, out IPropData propGen))
+            if (!_ourStoreAccessor.TryAdd(this, propId, propertyName, genericTypedProp, doWhenChanged, priorityGroup, out IPropData propGen))
             {
                 throw new ApplicationException("Could not add the new propGen to the store.");
             }
@@ -2084,7 +2080,7 @@ namespace DRM.PropBag
         {
             propId = AddPropId(propertyName);
 
-            if (!_ourStoreAccessor.TryAdd(this, propId, genericTypedProp, out IPropData propGen))
+            if (!_ourStoreAccessor.TryAdd(this, propId, propertyName, genericTypedProp, out IPropData propGen))
             {
                 throw new ApplicationException("Could not add the new propGen to the store.");
             }
@@ -2096,7 +2092,7 @@ namespace DRM.PropBag
         {
             propId = AddPropId(propertyName);
 
-            if (!_ourStoreAccessor.TryAdd(this, propId, genericTypedProp, target, method, subscriptionKind, priorityGroup, out IPropData propGen))
+            if (!_ourStoreAccessor.TryAdd(this, propId, propertyName, genericTypedProp, target, method, subscriptionKind, priorityGroup, out IPropData propGen))
             {
                 throw new ApplicationException("Could not add the new propGen to the store.");
             }
@@ -2339,7 +2335,19 @@ namespace DRM.PropBag
             }
         }
 
-        public void /*IPropBagInternal.*/RaiseStandardPropertyChanged(PropIdType propId, PropNameType propertyName)
+        public void RaiseStandardPropertyChanged(PropNameType propertyName)
+        {
+            if(TryGetPropId(propertyName, out PropIdType propId))
+            {
+                RaiseStandardPropertyChanged(propId, propertyName);
+            }
+            else
+            {
+                throw new InvalidOperationException($"Could not get the PropId for property name = {propertyName}.");
+            }
+        }
+
+        private void RaiseStandardPropertyChanged(PropIdType propId, PropNameType propertyName)
         {
             IEnumerable<ISubscription> subscriptions = _ourStoreAccessor.GetSubscriptions(this, propId);
 

@@ -8,17 +8,17 @@ namespace DRM.TypeSafePropertyBag
 {
     using PropIdType = UInt32;
     using PropNameType = String;
-    using PSAccessServiceType = IPropStoreAccessService<UInt32, String>;
+    using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
 
     /// <summary>
     /// All implementers of IPropBag that also want to use a shared property store must
     /// implement this interface.
     /// </summary>
-    public interface IPropBagInternal : IPropBag, ICloneable
+    public interface IPropBagInternal : IPropBag
     {
-        PSAccessServiceType ItsStoreAccessor { get; }
-        IPropFactory PropFactory { get; }
-        void RaiseStandardPropertyChanged(PropIdType propId, PropNameType propertyName);
+        PSAccessServiceInterface ItsStoreAccessor { get; }
+        //IPropFactory PropFactory { get; }
+        //void RaiseStandardPropertyChanged(PropIdType propId, PropNameType propertyName);
     }
 
     /// <summary>
@@ -33,7 +33,8 @@ namespace DRM.TypeSafePropertyBag
         INotifyPCObject,
         IEditableObject,
         INotifyItemEndEdit,
-        IDisposable
+        IDisposable,
+        ICloneable
     {
         // These are defined by ITypeSafePropBag
         //object GetValWithType(string propertyName, Type propertyType);
@@ -92,6 +93,7 @@ namespace DRM.TypeSafePropertyBag
         IDictionary<PropNameType, IPropData> GetAllPropertyValues();
         IDictionary<PropNameType, ValPlusType> GetAllPropNamesAndTypes();
 
+        void RaiseStandardPropertyChanged(PropNameType propertyName);
 
         bool TryGetDataSourceProvider(PropNameType propertyName, Type propertyType, out DataSourceProvider dataSourceProvider);
 
