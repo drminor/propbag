@@ -128,6 +128,8 @@ namespace DRM.TypeSafePropertyBag
             return PropBagProxy.TryGetTarget(out propBag);
         }
 
+        public bool IsAlive => PropBagProxy.TryGetTarget(out IPropBagInternal dummy);
+
         StoreNodeProp _parent;
         public StoreNodeProp Parent
         {
