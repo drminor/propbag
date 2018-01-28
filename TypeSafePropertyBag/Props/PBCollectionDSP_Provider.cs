@@ -7,19 +7,20 @@ namespace DRM.TypeSafePropertyBag
     using PSAccessServiceInternalInterface = IPropStoreAccessServiceInternal<UInt32, String>;
 
     // TODO: Implement INotifyPropertyChanged
-    internal class PBCollectionDSP_Provider : IProvideADataSourceProvider//, INotifyItemEndEdit
+    public class PBCollectionDSP_Provider : IProvideADataSourceProvider//, INotifyItemEndEdit
     {
         #region Private Properties
 
         PropKindEnum _propKind;
-        PropIdType _propId;
-        PSAccessServiceInternalInterface _storeAccessor;
+        //PropIdType _propId;
+        //PSAccessServiceInternalInterface _storeAccessor;
+        IWatchAPropItemGen _propItemWatcherGen;
 
         #endregion
 
         #region Constructor
 
-        public PBCollectionDSP_Provider(PropIdType propId, PropKindEnum propKind, PSAccessServiceInternalInterface storeAccesor)
+        public PBCollectionDSP_Provider(PropKindEnum propKind, IWatchAPropItemGen propItemWatcherGen)
         {
             _propKind = propKind;
             
@@ -29,8 +30,9 @@ namespace DRM.TypeSafePropertyBag
             }
 
             _isReadOnly = false;
-            _propId = propId;
-            _storeAccessor = storeAccesor;
+            //_propId = propId;
+            //_storeAccessor = storeAccesor;
+            _propItemWatcherGen = propItemWatcherGen;
         }
 
         //public event EventHandler<EventArgs> ItemEndEdit
@@ -58,7 +60,8 @@ namespace DRM.TypeSafePropertyBag
             {
                 if(_dataProvider == null)
                 {
-                    _dataProvider = new PBCollectionDSP(_storeAccessor, _propId);
+                    //IWatchAPropItemGen propItemWatcherGen = new PropItemWatcherGen(_storeAccessor, _propId);
+                    _dataProvider = new PBCollectionDSP(_propItemWatcherGen);
                 }
                 return _dataProvider;
             }
