@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DRM.TypeSafePropertyBag.Fundamentals;
+using System;
 
 namespace DRM.TypeSafePropertyBag.LocalBinding
 {
@@ -8,7 +9,6 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
 
     using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
-    using PSAccessServiceInternalInterface = IPropStoreAccessServiceInternal<UInt32, String>;
 
     public class LocalBinder<T> : IDisposable
     {
@@ -21,7 +21,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
         //readonly StoreNodeBag _ourNode;
 
         readonly ExKeyT _bindingTarget;
-        readonly WeakReference<IPropBagInternal> _targetObject;
+        readonly WeakRefKey<IPropBag> _targetObject;
         readonly PropNameType _propertyName;
 
         readonly LocalBindingInfo _bindingInfo;
@@ -106,7 +106,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             _targetObject = ourNode.PropBagProxy;
 
             // Get the name of the target property from the PropId given to us.
-            if (_targetObject.TryGetTarget(out IPropBagInternal propBag))
+            if (_targetObject.TryGetTarget(out IPropBag propBag))
             {
                 PropIdType propId = _bindingTarget.Level2Key;
 
@@ -141,7 +141,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             //}
         }
 
-        private IConvertValues GetConverter(WeakReference<IPropBagInternal> bindingTarget, LocalBindingInfo bInfo, Type sourceType,
+        private IConvertValues GetConverter(WeakRefKey<IPropBag> bindingTarget, LocalBindingInfo bInfo, Type sourceType,
             string pathElement, bool isPropBagBased, out object converterParameter)
         {
 
@@ -192,7 +192,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             return null;
         }
 
-        private object OurDefaultConverterParameterBuilder(WeakReference<IPropBagInternal> bindingTarget, LocalBindingInfo bInfo, Type sourceType,
+        private object OurDefaultConverterParameterBuilder(WeakRefKey<IPropBag> bindingTarget, LocalBindingInfo bInfo, Type sourceType,
             string pathElement)
         {
             //return new TwoTypes(sourceType, bindingTarget.PropertyType);
@@ -203,7 +203,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
         #region Update Target
 
-        private bool UpdateTargetWithStartingValue(WeakReference<IPropBagInternal> bindingTarget, StoreNodeProp sourcePropNode)
+        private bool UpdateTargetWithStartingValue(WeakRefKey<IPropBag> bindingTarget, StoreNodeProp sourcePropNode)
         {
             IProp typedProp = sourcePropNode.PropData_Internal.TypedProp;
 
@@ -220,20 +220,20 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             }
         }
 
-        private bool UpdateTarget(WeakReference<IPropBagInternal> bindingTarget, T newValue)
+        private bool UpdateTarget(WeakRefKey<IPropBag> bindingTarget, T newValue)
         {
-            if (bindingTarget.TryGetTarget(out IPropBagInternal propBag))
+            if (bindingTarget.TryGetTarget(out IPropBag propBag))
             {
                 string status;
                 if(_targetHasStore == PropStorageStrategyEnum.Internal)
                 {
-                    bool wasSet = ((IPropBag)propBag).SetIt(newValue, this.PropertyName);
+                    bool wasSet = (propBag).SetIt(newValue, this.PropertyName);
                     status = wasSet ? "has been updated" : "already had the new value";
                 }
                 else
                 {
                     T dummy = default(T);
-                    bool wasSet = ((IPropBag)propBag).SetIt(newValue, ref dummy, this.PropertyName);
+                    bool wasSet = (propBag).SetIt(newValue, ref dummy, this.PropertyName);
                     status = wasSet ? "has been updated" : "already had the new value";
                 }
 
@@ -292,7 +292,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             return result;
         }
 
-        private bool TryGetPropBag(StoreNodeBag objectNode, out IPropBagInternal propBag)
+        private bool TryGetPropBag(StoreNodeBag objectNode, out IPropBag propBag)
         {
             // Unwrap the weak reference held by the objectNode.
             bool result = objectNode.TryGetPropBag(out propBag);
@@ -300,13 +300,6 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             return result;
         }
 
-        private bool TryGetChildProp(StoreNodeBag objectNode, IPropBagInternal propBag, string propertyName, out StoreNodeProp child)
-        {
-            // TODO: IPBI-GetPropId
-            PropIdType propId = ((PSAccessServiceInternalInterface)propBag.ItsStoreAccessor).Level2KeyManager.FromRaw(propertyName);
-            bool result = objectNode.TryGetChild(propId, out child);
-            return result;
-        }
 
         #endregion
 

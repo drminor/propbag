@@ -1,4 +1,5 @@
 ﻿
+using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
 
 namespace DRM.TypeSafePropertyBag.LocalBinding
@@ -10,8 +11,8 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
     internal interface IReceivePropStoreNodeUpdates_PropBag<T>
     {
-        void OnPropStoreNodeUpdated(WeakReference<IPropBag> propItemParent, WeakReference<IPropBag> oldPropItemParent);
-        void OnPropStoreNodeUpdated(WeakReference<IPropBag> propItemParent);
+        void OnPropStoreNodeUpdated(WeakRefKey<IPropBag> propItemParent, WeakReference<IPropBag> oldPropItemParent);
+        void OnPropStoreNodeUpdated(WeakRefKey<IPropBag> propItemParent);
     }
 
     internal interface IReceivePropStoreNodeUpdates_PropNode<T>

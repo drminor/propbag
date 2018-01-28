@@ -1,4 +1,5 @@
-﻿using DRM.TypeSafePropertyBag.LocalBinding;
+﻿using DRM.TypeSafePropertyBag.Fundamentals;
+using DRM.TypeSafePropertyBag.LocalBinding;
 using System;
 using System.Threading;
 
@@ -8,7 +9,6 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
     using PropNameType = String;
 
     using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
-    using PSAccessServiceInternalInterface = IPropStoreAccessServiceInternal<UInt32, String>;
 
     public class CViewManagerBinder<TDal, TSource, TDestination> : IProvideATypedCViewManager<EndEditWrapper<TDestination>, TDestination>, IDisposable
             where TDal : class, IDoCRUD<TSource>
@@ -29,7 +29,7 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
         CViewProviderCreator _viewBuilder;          // Method that can be used to create a IProvideAView from a DataSourceProvider.
 
         // The Binding Source's PropBag
-        WeakReference<IPropBag> _propItemParent_wr { get; set; }
+        WeakRefKey<IPropBag> _propItemParent_wr { get; set; }
 
         #endregion
 
@@ -85,29 +85,35 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
             {
                 if (_propItemParent_wr != null && _propItemParent_wr.TryGetTarget(out IPropBag propBagHost))
                 {
-                    // TODO: IPBI -- Get PropId
-                    if (propBagHost is IPropBagInternal propBag_internal)
-                    {
-                        PSAccessServiceInterface foreignStoreAccessor = propBag_internal.ItsStoreAccessor;
-                        if (foreignStoreAccessor is PSAccessServiceInternalInterface foreignStoreAccesssor_internal)
-                        {
-                            PropIdType propId = GetPropertyId(foreignStoreAccessor, PropertyName);
-                            IPropDataInternal propData = foreignStoreAccesssor_internal.GetChild(propId)?.PropData_Internal;
+                    IManageCViews result = propBagHost.GetOrAddViewManager<TDal, TSource, TDestination>
+                        (PropertyName, null, ViewManagerProviderKey.MapperRequest);
 
-                            IManageCViews result = foreignStoreAccessor.GetOrAddViewManager<TDal, TSource, TDestination>
-                                (propBagHost, propId, propData as IPropData, ViewManagerProviderKey.MapperRequest, _propBagMapperCreator, _viewBuilder);
+                    return result;
 
-                            return result;
-                        }
-                        else
-                        {
-                            throw new InvalidOperationException("Fix Me. StoreAcccessor is not a PSAccessServiceInternalInterface.");
-                        }
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException("Fix Me. PropBag not a IPropBagInternal.");
-                    }
+
+                    //// TODO: IPBI -- Get PropId
+                    //if (propBagHost is IPropBagInternal propBag_internal)
+                    //{
+                    //    PSAccessServiceInterface foreignStoreAccessor = propBag_internal.ItsStoreAccessor;
+                    //    if (foreignStoreAccessor is PSAccessServiceInternalInterface foreignStoreAccesssor_internal)
+                    //    {
+                    //        PropIdType propId = GetPropertyId(foreignStoreAccessor, this.PropertyName);
+                    //        IPropDataInternal propData = foreignStoreAccesssor_internal.GetChild(propId)?.PropData_Internal;
+
+                    //        //IManageCViews result = foreignStoreAccessor.GetOrAddViewManager<TDal, TSource, TDestination>
+                    //        //    (propBagHost, propId, propData as IPropData, ViewManagerProviderKey.MapperRequest, _propBagMapperCreator, _viewBuilder);
+
+
+                    //    }
+                    //    else
+                    //    {
+                    //        throw new InvalidOperationException("Fix Me. StoreAcccessor is not a PSAccessServiceInternalInterface.");
+                    //    }
+                    //}
+                    //else
+                    //{
+                    //    throw new InvalidOperationException("Fix Me. PropBag not a IPropBagInternal.");
+                    //}
                 }
                 else
                 {
@@ -199,17 +205,17 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
             #endregion
 
             // From the PropBag that holds the source PropItem
-            public void OnPropStoreNodeUpdated(WeakReference<IPropBag> propItemParent_wr, WeakReference<IPropBag> oldPropItemParent_wr)
+            public void OnPropStoreNodeUpdated(WeakRefKey<IPropBag> propItemParent_wr, WeakReference<IPropBag> oldPropItemParent_wr)
             {
                 DoUpdate(propItemParent_wr);
             }
 
-            public void OnPropStoreNodeUpdated(WeakReference<IPropBag> propItemParent_wr)
+            public void OnPropStoreNodeUpdated(WeakRefKey<IPropBag> propItemParent_wr)
             {
                 DoUpdate(propItemParent_wr);
             }
 
-            private void DoUpdate(WeakReference<IPropBag> propItemParent_wr)
+            private void DoUpdate(WeakRefKey<IPropBag> propItemParent_wr)
             {
                 _localBinder._propItemParent_wr = propItemParent_wr;
                 _localBinder.OnViewManagerChanged();

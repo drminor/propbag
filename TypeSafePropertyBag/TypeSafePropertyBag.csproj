@@ -84,7 +84,9 @@
     <Compile Include="PropStore\ViewManagers\IViewManagerProviderKey.cs" />
     <Compile Include="PropStore\ViewManagers\ViewManagerProviderCollection.cs" />
     <Compile Include="PropStore\ViewManagers\ViewManagerProviderKey.cs" />
-    <Compile Include="Props\PropItemWatcher.cs" />
+    <None Include="Props\PBCollectionDSP - SafetyCopy.cs" />
+    <Compile Include="Props\PropItemWatcherGen.cs" />
+    <Compile Include="Props\PropItemWatcherTyped.cs" />
     <Compile Include="TypeConverters\ChangeType.cs" />
     <Compile Include="TypeConverters\ITypeDescBasedTConverterCache.cs" />
     <Compile Include="Unused\ObsCollection.cs" />
@@ -232,7 +234,7 @@
     <Compile Include="Subscriptions\SubscriptionPriorityGroup.cs" />
     <Compile Include="Subscriptions\SubscriptionTargetKind.cs" />
     <Compile Include="TypeSafePropBagMetaData.cs" />
-    <Compile Include="Unused\WeakRefKeyTyped.cs" />
+    <Compile Include="Fundamentals\WeakRefKeyTyped.cs" />
     <Compile Include="Fundamentals\WeakRefKey.cs" />
     <Compile Include="ValPlusType.cs" />
   </ItemGroup>

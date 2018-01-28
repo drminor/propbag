@@ -1,27 +1,31 @@
 ﻿
+using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
 
 namespace DRM.TypeSafePropertyBag
 {
-    using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
+    //using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
 
     internal interface IProvidePropStoreAccessService<L2T, L2TRaw> : IPropStoreAccessServiceCreator<L2T, L2TRaw>, IDisposable
     {
-        bool TearDown(ExKeyT compKey);
+        bool TryGetPropBagNode(IPropBag propBag, out StoreNodeBag propBagNode);
+        bool TryGetPropBagNode(WeakRefKey<IPropBag> propBag_wrKey, out StoreNodeBag propBagNode);
+
+        bool TearDown(StoreNodeBag propBagNode);
 
         IPropStoreAccessService<L2T, L2TRaw> ClonePSAccessService
             (
             IPropBag sourcePropBag,
             IPropStoreAccessService<L2T, L2TRaw> sourceAccessService,
             IL2KeyMan<L2T, L2TRaw> level2KeyManager,
-            IPropBagInternal targetPropBag,
+            IPropBag targetPropBag,
             out StoreNodeBag newStoreNode
             );
     }
 
     public interface IPropStoreAccessServiceCreator<L2T, L2TRaw> : IPropStoreAccessServicePerf<L2T, L2TRaw>
     {
-        IPropStoreAccessService<L2T, L2TRaw> CreatePropStoreService(IPropBagInternal propBag);
+        IPropStoreAccessService<L2T, L2TRaw> CreatePropStoreService(IPropBag propBag);
 
         // Information necessary to create composite keys.
         long MaxObjectsPerAppDomain { get; }

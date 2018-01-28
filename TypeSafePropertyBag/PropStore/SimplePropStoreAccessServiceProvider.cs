@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DRM.TypeSafePropertyBag.Fundamentals;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -13,13 +14,14 @@ namespace DRM.TypeSafePropertyBag
 
     using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
     using PSAccessServiceProviderInterface = IProvidePropStoreAccessService<UInt32, String>;
-    //using PSAccessServiceInternalInterface = IPropStoreAccessServiceInternal<UInt32, String>;
 
     internal class SimplePropStoreAccessServiceProvider : PSAccessServiceProviderInterface
     {
         #region Private Members
 
-        readonly Dictionary<ExKeyT, StoreNodeBag> _store;
+        //readonly Dictionary<ExKeyT, StoreNodeBag> _store;
+        readonly Dictionary<WeakRefKey<IPropBag>, StoreNodeBag> _store;
+
         readonly IProvideHandlerDispatchDelegateCaches _handlerDispatchDelegateCacheProvider;
 
         readonly object _sync;
@@ -48,8 +50,8 @@ namespace DRM.TypeSafePropertyBag
 
             _handlerDispatchDelegateCacheProvider = handlerDispatchDelegateCacheProvider;
 
-            _store = new Dictionary<ExKeyT, StoreNodeBag>();
-            _sync = new object();
+            _store = new Dictionary<WeakRefKey<IPropBag>, StoreNodeBag>();
+              _sync = new object();
             //_timer = new Timer(PruneStore, null, NUMBER_OF_SECONDS_BETWEEN_PRUNE_OPS * 1000, NUMBER_OF_SECONDS_BETWEEN_PRUNE_OPS * 1000);
         }
 
@@ -61,13 +63,10 @@ namespace DRM.TypeSafePropertyBag
         {
             lock (_sync)
             {
-                _store.Where(x => x.Value.IsAlive).ToList();
-                //List<KeyValuePair<ExKeyT, StoreNodeBag>> nodesThatHavePassed = _store.Where(x => HasPassed(x.Value)).ToList();
-                List<KeyValuePair<ExKeyT, StoreNodeBag>> nodesThatHavePassed = _store.Where(x => x.Value.IsAlive).ToList();
-
+                List<KeyValuePair<WeakRefKey<IPropBag>, StoreNodeBag>> nodesThatHavePassed = _store.Where(x => x.Value.IsAlive).ToList();
 
                 long totalRemoved = 0;
-                foreach(KeyValuePair<ExKeyT, StoreNodeBag> kvp in nodesThatHavePassed)
+                foreach(KeyValuePair<WeakRefKey<IPropBag>, StoreNodeBag> kvp in nodesThatHavePassed)
                 {
                     totalRemoved += kvp.Value.Count;
                     kvp.Value.Parent = null;
@@ -77,24 +76,43 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        //private bool HasPassed(StoreNodeBag psn)
-        //{
-        //    bool result = psn.TryGetPropBag(out IPropBagInternal dummy);
-        //    return result;
-        //}
+        #endregion
+
+        #region Lookup StoreNodeBag from IPropBag
+
+        public bool TryGetPropBagNode(IPropBag propBag, out StoreNodeBag propBagNode)
+        {
+            WeakRefKey<IPropBag> propBag_wrKey = new WeakRefKey<IPropBag>(propBag);
+
+            bool result = TryGetPropBagNode(propBag_wrKey, out propBagNode);
+            return result;
+        }
+
+        public bool TryGetPropBagNode(WeakRefKey<IPropBag> propBag_wrKey, out StoreNodeBag propBagNode)
+        {
+            if (_store.TryGetValue(propBag_wrKey, out propBagNode))
+            {
+                return true;
+            }
+            else
+            {
+                propBagNode = null;
+                return false;
+            }
+        }
 
         #endregion
 
         #region PropStoreAccessService Creation and TearDown
 
-        public PSAccessServiceInterface CreatePropStoreService(IPropBagInternal propBag)
+        public PSAccessServiceInterface CreatePropStoreService(IPropBag propBag)
         {
             L2KeyManType level2KeyManager = new SimpleLevel2KeyMan(MaxPropsPerObject);
             PSAccessServiceInterface result = CreatePropStoreService(propBag, level2KeyManager, out StoreNodeBag notUsed);
             return result;
         }
 
-        private PSAccessServiceInterface CreatePropStoreService(IPropBagInternal propBag, L2KeyManType level2KeyManager, out StoreNodeBag newBagNode)
+        private PSAccessServiceInterface CreatePropStoreService(IPropBag propBag, L2KeyManType level2KeyManager, out StoreNodeBag newBagNode)
         {
             // Issue a new, unique Id for this propBag.
             ObjectIdType objectId = NextCookedVal;
@@ -104,7 +122,7 @@ namespace DRM.TypeSafePropertyBag
             newBagNode = new StoreNodeBag(cKey, propBag, _handlerDispatchDelegateCacheProvider.CallPSParentNodeChangedEventSubsCache);
 
             // Add the node to the global store.
-            _store.Add(cKey, newBagNode);
+            _store.Add(newBagNode.PropBagProxy, newBagNode);
 
             // Create the access service.
             PSAccessServiceInterface result = new SimplePropStoreAccessService
@@ -121,30 +139,52 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        public bool TearDown(ExKeyT compKey)
+        public bool TearDown(StoreNodeBag propBagNode)
         {
-            if(TryRemoveBagNode(compKey, out StoreNodeBag storeNodeBag))
+            WeakRefKey<IPropBag> propBag_wrKey = propBagNode.PropBagProxy;
+
+            if (TryRemoveBagNode(propBag_wrKey))
             {
-                storeNodeBag.Dispose();
+                propBagNode.Dispose();
                 return true;
             }
             else
             {
                 return false;
             }
+
+
+            //if (propBagNode.PropBagProxy .TryGetPropBag(out IPropBagInternal ipbi))
+            //{
+            //    WeakRefKey<IPropBag> propBag_wrKey = new WeakRefKey<IPropBag>(ipbi);
+            //    if (TryRemoveBagNode(propBag_wrKey, out StoreNodeBag dummy))
+            //    {
+            //        propBagNode.Dispose();
+            //        return true;
+            //    }
+            //    else
+            //    {
+            //        return false;
+            //    }
+            //}
+            //else
+            //{
+            //    System.Diagnostics.Debug.WriteLine($"The propBagNode references a IPropBag that has been garbage collected.");
+            //    return false;
+            //}
         }
 
-        private bool TryRemoveBagNode(ExKeyT compKey, out StoreNodeBag storeNodeBag)
+        private bool TryRemoveBagNode(WeakRefKey<IPropBag> propBag_wrKey/*, out StoreNodeBag storeNodeBag*/)
         {
             try
             {
-                storeNodeBag = _store[compKey];
-                _store.Remove(compKey);
+                //storeNodeBag = _store[propBag_wrKey];
+                _store.Remove(propBag_wrKey);
                 return true;
             }
             catch
             {
-                storeNodeBag = null;
+                //storeNodeBag = null;
                 return false;
             }
         }
@@ -154,7 +194,7 @@ namespace DRM.TypeSafePropertyBag
             IPropBag sourcePropBag,
             PSAccessServiceInterface sourceAccessService,
             L2KeyManType sourceLevel2KeyMan,
-            IPropBagInternal targetPropBag,
+            IPropBag targetPropBag,
             out StoreNodeBag newStoreNode
             )
         {
@@ -278,11 +318,6 @@ namespace DRM.TypeSafePropertyBag
         private void IncAccessServicesCreated()
         {
             _numOfAccessServicesCreated++;
-        }
-
-        public SubscriberCollection GetSubscriptions(IPropBag host, uint propId)
-        {
-            throw new NotImplementedException();
         }
 
         public void ResetAccessCounter()

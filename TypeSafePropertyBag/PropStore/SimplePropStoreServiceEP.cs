@@ -32,7 +32,7 @@ namespace DRM.TypeSafePropertyBag
 
         #region PropStoreAccessService Creation
 
-        public PSAccessServiceInterface CreatePropStoreService(IPropBagInternal propBag)
+        public PSAccessServiceInterface CreatePropStoreService(IPropBag propBag)
         {
             PSAccessServiceInterface result = _propStoreAccessServiceProvider.CreatePropStoreService(propBag);
             return result;

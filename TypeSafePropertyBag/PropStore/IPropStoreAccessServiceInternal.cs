@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DRM.TypeSafePropertyBag.Fundamentals;
+using System;
 
 namespace DRM.TypeSafePropertyBag
 {
@@ -17,8 +18,9 @@ namespace DRM.TypeSafePropertyBag
         IDisposable RegisterHandler(L2T propId, EventHandler<PcGenEventArgs> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef);
         bool UnregisterHandler(L2T propId, EventHandler<PcGenEventArgs> eventHandler);
 
-        WeakReference<IPropBagInternal> GetPropBagProxy(StoreNodeProp storeNodeProp);
+        //WeakRefKey<IPropBag> GetPropBagProxy(StoreNodeProp storeNodeProp);
+        //WeakReference<IPropBag> GetPublicInterface(WeakReference<IPropBagInternal> propBagProxy_internal);
 
-        WeakReference<IPropBag> GetPublicInterface(WeakReference<IPropBagInternal> propBagProxy_internal);
+        bool TryGetPropBagProxy(StoreNodeProp storeNodeProp, out WeakRefKey<IPropBag> propBag_wrKey);
     }
 }

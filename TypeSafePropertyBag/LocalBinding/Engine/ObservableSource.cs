@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DRM.TypeSafePropertyBag.Fundamentals;
+using System;
 using System.Threading;
 
 namespace DRM.TypeSafePropertyBag.LocalBinding
@@ -14,7 +15,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
         private IDisposable PropChangeGenUnsubscriber { get; }
         private IDisposable PropChangedTypedUnsubscriber { get; }
 
-        public WeakReference<IPropBag> LastEventSender { get; private set; }
+        public WeakRefKey<IPropBag> LastEventSender { get; private set; }
 
         #endregion
 
@@ -45,7 +46,14 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
         private void PropertyChangedWithTVals_Handler(object sender, PcTypedEventArgs<T> e)
         {
             // TODO: Include the original sender in the event data (and create a new event args class for this.)
-            LastEventSender = sender as WeakReference<IPropBag>;
+            if(sender is WeakRefKey<IPropBag> propBag_wrKey)
+            {
+                LastEventSender = propBag_wrKey;
+            }
+            else
+            {
+                LastEventSender = new WeakRefKey<IPropBag>(null);
+            }
 
             OnPropertyChangedWithTVals(e);
         }

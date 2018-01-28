@@ -1602,7 +1602,7 @@ namespace DRM.PropBag
 
         private PSAccessServiceInterface CloneProps(IPropBag copySource, PSAccessServiceInterface storeAccessor)
         {
-            PSAccessServiceInterface result = storeAccessor.CloneProps(this, copySource, storeAccessor);
+            PSAccessServiceInterface result = storeAccessor.CloneProps(this, copySource);
 
             _properties = ((ICustomTypeDescriptor)copySource).GetProperties();
 
@@ -2861,17 +2861,48 @@ namespace DRM.PropBag
         (
             PropNameType propertyName,
             Type propertyType,
-            IPropBagMapper<TSource, TDestination> mapper,
-            out IManageCViews cViewManager
+            IPropBagMapper<TSource, TDestination> mapper
         )
             where TDal : IDoCRUD<TSource>
             where TSource : class
             where TDestination : INotifyItemEndEdit
         {
             IManageCViews result = null;
-            cViewManager = null;
-
             return result;
+        }
+
+        public IManageCViews GetOrAddViewManager<TDal, TSource, TDestination>
+        (
+            PropNameType propertyName,
+            Type propertyType,
+            IMapperRequest mr
+        )
+            where TDal : class, IDoCRUD<TSource>
+            where TSource : class
+            where TDestination : INotifyItemEndEdit
+        {
+            bool mustBeRegistered = true; // TryGetViewManager is called in the constructor, we cannot reference the virtual property: OurMetaData.AllPropsMustBeRegistered; 
+
+            IPropData propData = GetPropGen(propertyName, propertyType,
+                haveValue: false,
+                value: null,
+                alwaysRegister: false,
+                mustBeRegistered: mustBeRegistered,
+                neverCreate: false,
+                desiredHasStoreValue: null,
+                wasRegistered: out bool wasRegistered,
+                propId: out PropIdType propId);
+
+            if (propData != null)
+            {
+                IManageCViews result = _ourStoreAccessor.GetOrAddViewManager<TDal, TSource, TDestination>
+                    (this, propId, propData, mr, _propFactory.GetPropBagMapperFactory(), _propFactory.GetCViewProviderFactory());
+                return result;
+            }
+            else
+            {
+                return null;
+            }
         }
 
         public bool TryGetDataSourceProvider(PropNameType propertyName, Type propertyType,

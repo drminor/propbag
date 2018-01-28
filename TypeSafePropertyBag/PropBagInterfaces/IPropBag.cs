@@ -108,10 +108,19 @@ namespace DRM.TypeSafePropertyBag
         (
             PropNameType propertyName,
             Type propertyType,
-            IPropBagMapper<TSource, TDestination> mapper,
-            out IManageCViews cViewManager
+            IPropBagMapper<TSource, TDestination> mapper
         )
             where TDal : IDoCRUD<TSource>
+            where TSource : class
+            where TDestination : INotifyItemEndEdit;
+
+        IManageCViews GetOrAddViewManager<TDal, TSource, TDestination>
+        (
+            PropNameType propertyName,
+            Type propertyType,
+            IMapperRequest mr
+        )
+            where TDal : class, IDoCRUD<TSource>
             where TSource : class
             where TDestination : INotifyItemEndEdit;
 

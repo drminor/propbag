@@ -99,10 +99,10 @@ namespace DRM.TypeSafePropertyBag
 
         #region Constructor
 
-        public StoreNodeBag(ExKeyT cKey, IPropBagInternal propBag, ICacheDelegates<CallPSParentNodeChangedEventSubDelegate> callPSParentNodeChangedEventSubsCache)
+        public StoreNodeBag(ExKeyT cKey, IPropBag propBag, ICacheDelegates<CallPSParentNodeChangedEventSubDelegate> callPSParentNodeChangedEventSubsCache)
         {
             CompKey = cKey;
-            PropBagProxy = new WeakReference<IPropBagInternal>(propBag ?? throw new ArgumentNullException(nameof(propBag)));
+            PropBagProxy = new WeakRefKey<IPropBag>(propBag ?? throw new ArgumentNullException(nameof(propBag)));
 
             //PropBagProxy = propBagProxy ?? throw new ArgumentNullException(nameof(propBagProxy));
             _callPSParentNodeChangedEventSubsCache = callPSParentNodeChangedEventSubsCache ?? throw new ArgumentNullException(nameof(callPSParentNodeChangedEventSubsCache));
@@ -121,14 +121,14 @@ namespace DRM.TypeSafePropertyBag
         public ObjectIdType ObjectId => CompKey.Level1Key;
         public PropIdType PropId => 0;
 
-        public WeakReference<IPropBagInternal> PropBagProxy { get; }
+        public WeakRefKey<IPropBag> PropBagProxy { get; }
 
-        public bool TryGetPropBag(out IPropBagInternal propBag)
+        public bool TryGetPropBag(out IPropBag propBag)
         {
             return PropBagProxy.TryGetTarget(out propBag);
         }
 
-        public bool IsAlive => PropBagProxy.TryGetTarget(out IPropBagInternal dummy);
+        public bool IsAlive => PropBagProxy.TryGetTarget(out IPropBag dummy);
 
         StoreNodeProp _parent;
         public StoreNodeProp Parent
