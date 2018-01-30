@@ -33,7 +33,8 @@ namespace DRM.PropBag.AutoMapperSupport
 
         private readonly bool _requiresWrappperTypeEmitServices;
         private readonly TDestination _template;
-        //private readonly IPropBag _pbTemplate;
+
+        MemConsumptionTracker _mct = new MemConsumptionTracker(enabled: false);
 
         #endregion
 
@@ -59,32 +60,20 @@ namespace DRM.PropBag.AutoMapperSupport
 
             if (typeof(TDestination) is ICloneable)
             {
-                //long gcSize = Sizer.GetSizeGC(GndForSizer);
-                ////long bsSize = Sizer.GetSizeBinSer(GndForSizer);
+                _mct.Measure();
 
-                //System.Diagnostics.Debug.WriteLine($"Mapped Destination Template Size: GC:{gcSize}.");
+                _template = GetNewDestination(PropModel, _storeAccessCreator, DestinationType, PropFactory, fullClassName: null);
+                _template = null; // TODO: Fix Me
 
-                TDestination temp = GetNewDestination(PropModel, _storeAccessCreator, DestinationType, PropFactory, fullClassName: null);
-
-                //if (_requiresWrappperTypeEmitServices)
-                //{
-                //    //_template = null;
-                //    //_pbTemplate = temp;
-                //    _template = temp;
-                //}
-                //else
-                //{
-                //    _template = temp;
-                //    //_pbTemplate = null;
-                //}
+                _mct.MeasureAndReport("GetNewDestination(PropModel, ... [In Constructor]", "AbstractPropBagMapper");
             }
             else
             {
                 _template = null;
-                //_pbTemplate = null;
             }
 
             return;
+
             //object GndForSizer()
             //{
             //    return GetNewDestination(PropModel, _storeAccessCreator, DestinationType, PropFactory, fullClassName: null);
@@ -137,52 +126,19 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public TDestination GetNewDestination()
         {
-            //long gcSize = Sizer.GetSizeGC(GndForSizer);
-            ////long bsSize = Sizer.GetSizeBinSer(GndForSizer);
-
-            //System.Diagnostics.Debug.WriteLine($"Mapped Destination Instance Size: GC:{gcSize}.");
+            _mct.Measure();
 
             TDestination result;
 
             if (_template != null)
             {
                 result = _template.Clone() as TDestination;
-
-                //if (_requiresWrappperTypeEmitServices)
-                //{
-                //    result = GetNewDestination(RunTimeType, _template);
-                //}
-                //else
-                //{
-                //    result = _template.Clone() as TDestination;
-                //}
-
-                //if(x is TDestination ttt)
-                //{
-                //    result = ttt;
-                //} 
-                //else
-                //{
-                //    var z = x as TDestination;
-
-                //    if (z is TDestination y)
-                //    {
-                //        result = y;
-                //    }
-                //    else
-                //    {
-                //        throw new InvalidCastException($"Cannot cast result of _template.Clone to type: {typeof(TDestination)}.");
-                //    }
-                //}
-
+                _mct.MeasureAndReport("_template.Clone", "AstractPropBagMapper");
             }
-            //else if(_pbTemplate != null)
-            //{
-            //    result = GetNewDestination(RunTimeType, _pbTemplate);
-            //}
             else
             {
                 result = GetNewDestination(PropModel, _storeAccessCreator, RunTimeType, PropFactory, fullClassName: null);
+                _mct.MeasureAndReport("GetNewDestination(PropModel, ...", "AstractPropBagMapper");
             }
 
             return result;
@@ -220,23 +176,6 @@ namespace DRM.PropBag.AutoMapperSupport
                 throw new InvalidOperationException($"Cannot create an instance of {targetType} that takes a PropModel parameter.", e2);
             }
         }
-
-        //private TDestination GetNewDestination(Type destinationTypeOrProxy, TDestination copySource)
-        //{
-        //    try
-        //    {
-        //        TDestination result = (TDestination)copySource.Clone();
-        //        return result;
-
-        //        //var newViewModel = _vmActivator.GetNewViewModel(destinationTypeOrProxy, copySource);
-        //        //return newViewModel as TDestination;
-        //    }
-        //    catch (Exception e2)
-        //    {
-        //        Type targetType = destinationTypeOrProxy ?? typeof(TDestination);
-        //        throw new InvalidOperationException($"Cannot create an instance of {targetType} that takes a copySource parameter.", e2);
-        //    }
-        //}
 
         #endregion
 
