@@ -5,12 +5,14 @@ using System.Collections.Generic;
 namespace DRM.TypeSafePropertyBag
 {
     using System.Collections;
+    using System.Linq;
     using PropIdType = UInt32;
 
+    // TODO: To save RAM, consider changing to a List (and use simple locking.)
     public class CollectionOfSubscriberCollections : IEnumerable<SubscriberCollection>
     {
         const int PROP_INDEX_CONCURRENCY_LEVEL = 1; // Typical number of threads simultaneously accessing the ObjectIndexes.
-        const int EXPECTED_NO_OF_OBJECTS = 50;
+        const int EXPECTED_NO_OF_OBJECTS = 20; // Each item costs 4 bytes.
 
         private ConcurrentDictionary<PropIdType, SubscriberCollection> _subCollections;
         private readonly object _sync;
@@ -78,7 +80,7 @@ namespace DRM.TypeSafePropertyBag
             }
             else
             {
-                subs = null;
+                subs = Enumerable.Empty<ISubscription>();
                 return false;
             }
         }
