@@ -19,11 +19,11 @@ namespace DRM.TypeSafePropertyBag
         {
             TypeDescBasedTConverterKey key = new TypeDescBasedTConverterKey(sourceType, propertyType, isConvert: true);
 #if DEBUG
-            bool inCache = _converters.ContainsKey(key);
+            //bool inCache = _converters.ContainsKey(key);
             Delegate result = _converters.GetOrAdd(key);
-            System.Diagnostics.Debug.WriteLine(
-                string.Format("A StringFromT delegate is being requested for type: {0} and was {1}",
-                    propertyType.ToString(), inCache ? "found." : "not found."));
+            //System.Diagnostics.Debug.WriteLine(
+                //string.Format("A StringFromT delegate is being requested for type: {0} and was {1}",
+                //    propertyType.ToString(), inCache ? "found." : "not found."));
 #else
             Delegate result = _converters.GetOrAdd(key);
 #endif
@@ -36,11 +36,11 @@ namespace DRM.TypeSafePropertyBag
             TypeDescBasedTConverterKey key = new TypeDescBasedTConverterKey(sourceType, propertyType, isConvert: false);
 
 #if DEBUG
-            bool inCache = _converters.ContainsKey(key);
+            //bool inCache = _converters.ContainsKey(key);
             Delegate result = _converters.GetOrAdd(key);
-            System.Diagnostics.Debug.WriteLine(
-                string.Format("A TFromString delegate is being requested for type: {0} and was {1}",
-                    sourceType.ToString(), inCache ? "found." : "not found."));
+            //System.Diagnostics.Debug.WriteLine(
+            //    string.Format("A TFromString delegate is being requested for type: {0} and was {1}",
+            //        sourceType.ToString(), inCache ? "found." : "not found."));
 #else
             Delegate result = _converters.GetOrAdd(key);
 #endif
