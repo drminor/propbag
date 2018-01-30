@@ -9,7 +9,9 @@ namespace DRM.TypeSafePropertyBag
     {
         #region Private Properties
 
-        PSAccessServiceInternalInterface _storeAccessor;
+        WeakReference<PSAccessServiceInternalInterface> _storeAccessor_wr;
+        //PSAccessServiceInternalInterface _storeAccessor;
+
         PropIdType _propId;
 
         Object _sync = new object();
@@ -22,16 +24,30 @@ namespace DRM.TypeSafePropertyBag
         {
             add
             {
-                lock(_sync)
+                lock (_sync)
                 {
-                    _storeAccessor.RegisterHandler(_propId, value, priorityGroup: SubscriptionPriorityGroup.Standard, keepRef: false);
+                    if (_storeAccessor_wr.TryGetTarget(out PSAccessServiceInternalInterface storeAccessor))
+                    {
+                        storeAccessor.RegisterHandler(_propId, value, priorityGroup: SubscriptionPriorityGroup.Standard, keepRef: false);
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine("Could not RegisterHandler: PropertyChangedWithGenVal on this PropItemWatcher -- the StoreAccess has been garbage collected.");
+                    }
                 }
             }
             remove
             {
                 lock (_sync)
                 {
-                    _storeAccessor.UnregisterHandler(_propId, value);
+                    if (_storeAccessor_wr.TryGetTarget(out PSAccessServiceInternalInterface storeAccessor))
+                    {
+                        storeAccessor.UnregisterHandler(_propId, value);
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine("Could not RegisterHandler: PropertyChangedWithGenVal on this PropItemWatcher -- the StoreAccess has been garbage collected.");
+                    }
                 }
             }
         }
@@ -42,14 +58,28 @@ namespace DRM.TypeSafePropertyBag
             {
                 lock (_sync)
                 {
-                    _storeAccessor.RegisterHandler(_propId, value, priorityGroup: SubscriptionPriorityGroup.Standard, keepRef: false);
+                    if (_storeAccessor_wr.TryGetTarget(out PSAccessServiceInternalInterface storeAccessor))
+                    {
+                        storeAccessor.RegisterHandler(_propId, value, priorityGroup: SubscriptionPriorityGroup.Standard, keepRef: false);
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine("Could not RegisterHandler: PropertyChangedWithGenVal on this PropItemWatcher -- the StoreAccess has been garbage collected.");
+                    }
                 }
             }
             remove
             {
                 lock (_sync)
                 {
-                    _storeAccessor.UnregisterHandler(_propId, value);
+                    if (_storeAccessor_wr.TryGetTarget(out PSAccessServiceInternalInterface storeAccessor))
+                    {
+                        storeAccessor.UnregisterHandler(_propId, value);
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine("Could not RegisterHandler: PropertyChangedWithGenVal on this PropItemWatcher -- the StoreAccess has been garbage collected.");
+                    }
                 }
             }
         }
@@ -60,7 +90,7 @@ namespace DRM.TypeSafePropertyBag
 
         public PropItemWatcher(PSAccessServiceInternalInterface storeAccessor, PropIdType propId/*, bool isAsynchronous*/)
         {
-            _storeAccessor = storeAccessor;
+            _storeAccessor_wr = new WeakReference<PSAccessServiceInternalInterface>(storeAccessor);
             _propId = propId;
             //IsAsynchronous = isAsynchronous;
         }
@@ -77,7 +107,7 @@ namespace DRM.TypeSafePropertyBag
 
         public T GetValue()
         {
-            if (TryGetDataFromProp(this._storeAccessor, this._propId, out object rawValue))
+            if (TryGetDataFromProp(this._storeAccessor_wr, this._propId, out object rawValue))
             {
                 T result = (T)rawValue;
                 return result;
@@ -90,13 +120,13 @@ namespace DRM.TypeSafePropertyBag
 
         public bool TryGetValue(out object value)
         {
-            bool result = TryGetDataFromProp(this._storeAccessor, this._propId, out value);
+            bool result = TryGetDataFromProp(this._storeAccessor_wr, this._propId, out value);
             return result;
         }
 
         object IWatchAPropItemGen.GetValue()
         {
-            if (!TryGetDataFromProp(this._storeAccessor, this._propId, out object result))
+            if (!TryGetDataFromProp(this._storeAccessor_wr, this._propId, out object result))
             {
                 throw new InvalidOperationException("Could not retrieve the value."); // TODO: Improve this exception message.
             }
@@ -109,7 +139,7 @@ namespace DRM.TypeSafePropertyBag
 
         public bool TryGetValue(out T value)
         {
-            if(TryGetDataFromProp(this._storeAccessor, this._propId, out object rawValue))
+            if(TryGetDataFromProp(this._storeAccessor_wr, this._propId, out object rawValue))
             {
                 value = (T)rawValue;
                 return true;
@@ -121,14 +151,23 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        private bool TryGetDataFromProp(PSAccessServiceInternalInterface storeAccessor, PropIdType propId, out object data)
+        private bool TryGetDataFromProp(WeakReference<PSAccessServiceInternalInterface> storeAccessor_wr, PropIdType propId, out object data)
         {
-            StoreNodeProp propNode = _storeAccessor.GetChild(propId);
-            IPropDataInternal propDataHolder = propNode.PropData_Internal;
-            IProp typedProp = propDataHolder.TypedProp;
-            data = typedProp.TypedValueAsObject;
-            return true;
+            if (storeAccessor_wr.TryGetTarget(out PSAccessServiceInternalInterface storeAccessor))
+            {
+                StoreNodeProp propNode = storeAccessor.GetChild(propId);
+                IPropDataInternal propDataHolder = propNode.PropData_Internal;
+                IProp typedProp = propDataHolder.TypedProp;
+                data = typedProp.TypedValueAsObject;
+                return true;
+            }
+            else
+            {
+                data = null;
+                return false;
+            }
         }
+
 
         #endregion
     }
