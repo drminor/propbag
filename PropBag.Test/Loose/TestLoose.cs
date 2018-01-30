@@ -108,7 +108,7 @@ namespace PropBagLib.Tests
             mod1[typeof(object), PROP_NEW] = 0;
             Assert.That(mod1.GetTypeOfProperty(PROP_NEW), Is.EqualTo(typeof(object)));
 
-            Assert.Throws<ApplicationException>(() => mod1[typeof(string), PROP_NEW] = "0");
+            Assert.Throws<InvalidOperationException>(() => mod1[typeof(string), PROP_NEW] = "0");
         }
 
         [Test]
