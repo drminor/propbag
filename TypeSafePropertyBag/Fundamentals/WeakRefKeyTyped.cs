@@ -48,7 +48,15 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
 
         public bool TryGetTarget(out T target)
         {
-            return _weakRef.TryGetTarget(out target);
+            if(_weakRef != null)
+            {
+                return _weakRef.TryGetTarget(out target);
+            }
+            else
+            {
+                target = null;
+                return false;
+            }
         }
 
         public override int GetHashCode()
