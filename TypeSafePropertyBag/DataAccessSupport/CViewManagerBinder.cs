@@ -10,7 +10,7 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
 
     using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
 
-    public class CViewManagerBinder<TDal, TSource, TDestination> : IProvideATypedCViewManager<EndEditWrapper<TDestination>, TDestination>, IDisposable
+    public class CViewManagerBinder<TDal, TSource, TDestination> : IProvideACViewManager /*IProvideATypedCViewManager<EndEditWrapper<TDestination>, TDestination>*/, IDisposable
             where TDal : class, IDoCRUD<TSource>
             where TSource : class
             where TDestination : INotifyItemEndEdit
@@ -75,6 +75,12 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
             // Create a new watcher, the bindingInfo specifies the PropItem for which to listen to changes,
             // the propStoreNodeUpdateReceiver will be notfied when changes occur.
             _localWatcher = new LocalWatcher<TDal>(propStoreAccessService, ViewManagerProviderKey.BindingInfo, propStoreNodeUpdateReceiver);
+
+            //var x = _propItemParent_wr;
+
+            //var y = _propItemParent_wr.TryGetTarget(out IPropBag target);
+
+            //var z = target;
         }
 
         #endregion
@@ -123,7 +129,7 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
             }
         }
 
-        public IManageTypedCViews<EndEditWrapper<TDestination>, TDestination> TypedCViewManager => throw new NotImplementedException();
+        //public IManageTypedCViews<EndEditWrapper<TDestination>, TDestination> TypedCViewManager => throw new NotImplementedException();
 
 
         #region Private Methods

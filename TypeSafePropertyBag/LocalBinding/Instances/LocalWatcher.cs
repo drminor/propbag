@@ -1,5 +1,6 @@
 ﻿using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
+using System.Collections.Generic;
 
 namespace DRM.TypeSafePropertyBag.LocalBinding
 {
@@ -19,22 +20,15 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
         readonly WeakReference<PSAccessServiceInternalInterface> _propStoreAccessService_wr;
 
-        readonly StoreNodeBag _ourNode;
+        StoreNodeBag _ourNode;
 
         readonly PropStoreNotificationKindEnum _notificationKind;
 
-        readonly IReceivePropStoreNodeUpdates_PropBag<T> _storeNodeUpdateReceiver_PropBag;
-        readonly IReceivePropStoreNodeUpdates_PropNode<T> _storeNodeUpdateReceiver_PropNode;
-        readonly IReceivePropStoreNodeUpdates_Value<T> _storeNodeUpdateReceiver_Value;
-
-
-        //readonly ExKeyT _bindingTarget;
-        //readonly WeakReference<IPropBagInternal> _targetObject;
-        //readonly PropNameType _propertyName;
+        IReceivePropStoreNodeUpdates_PropBag<T> _storeNodeUpdateReceiver_PropBag;
+        IReceivePropStoreNodeUpdates_PropNode<T> _storeNodeUpdateReceiver_PropNode;
+        IReceivePropStoreNodeUpdates_Value<T> _storeNodeUpdateReceiver_Value;
 
         readonly LocalBindingInfo _bindingInfo;
-
-        //PropStorageStrategyEnum _targetHasStore;
 
         ObservableSource<T> _rootListener;
         readonly OSCollection<T> _pathListeners;
@@ -156,7 +150,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             }
 
 
-            _ourNode = GetPropBagNode(propStoreAccessService);
+            _ourNode =  GetPropBagNode(propStoreAccessService);
             _bindingInfo = bindingInfo;
 
             _pathListeners = new OSCollection<T>();
@@ -190,89 +184,6 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
         }
 
         #endregion
-
-        //#region Path Processing
-
-        //private string[] RemoveFirstItem(string[] x)
-        //{
-        //    string[] newElements = new string[x.Length - 1];
-        //    Array.Copy(x, 1, newElements, 0, x.Length - 1);
-        //    return newElements;
-        //}
-
-        //private string[] GetPathElements(LocalBindingInfo bInfo, out bool pathIsAbsolute, out int firstNamedStepIndex)
-        //{
-        //    string[] pathElements = bInfo.PropertyPath.Path.Split('/');
-        //    int compCount = pathElements.Length;
-
-        //    if (compCount == 0)
-        //    {
-        //        throw new InvalidOperationException("The path has no components.");
-        //    }
-
-        //    if (pathElements[compCount - 1] == "..")
-        //    {
-        //        throw new InvalidOperationException("The last component of the path cannot be '..'");
-        //    }
-
-        //    if (compCount == 1 && pathElements[0] == ".")
-        //    {
-        //        // Can't bind to yourself.
-        //    }
-
-        //    // Remove initial "this" component, if present.
-        //    if (pathElements[0] == ".")
-        //    {
-        //        pathElements = RemoveFirstItem(pathElements);
-        //        compCount--;
-        //        if (pathElements[0] == ".") throw new InvalidOperationException("A path that starts with '././' is not supported.");
-        //    }
-
-        //    if (pathElements[0] == string.Empty)
-        //    {
-        //        pathIsAbsolute = true;
-
-        //        // remove the initial (empty) path component.
-        //        pathElements = RemoveFirstItem(pathElements);
-        //        compCount--;
-
-        //        if (pathElements[0] == "..") throw new InvalidOperationException("Absolute Paths cannot refer to a parent. (Path begins with '/../'.");
-        //        firstNamedStepIndex = 0;
-
-        //        // TODO: Listen to changes in the value of our node's root.
-        //    }
-        //    else
-        //    {
-        //        pathIsAbsolute = false;
-        //        firstNamedStepIndex = GetFirstPathElementWithName(0, pathElements);
-
-        //    }
-
-        //    CheckForBadParRefs(firstNamedStepIndex + 1, pathElements);
-        //    return pathElements;
-        //}
-
-        //private int GetFirstPathElementWithName(int nPtr, string[] pathElements)
-        //{
-        //    for (; nPtr < pathElements.Length; nPtr++)
-        //    {
-        //        if (pathElements[nPtr] != "..") break;
-        //    }
-        //    return nPtr;
-        //}
-
-        //private void CheckForBadParRefs(int nPtr, string[] pathElements)
-        //{
-        //    for (; nPtr < pathElements.Length - 1; nPtr++)
-        //    {
-        //        if (pathElements[nPtr] == "..")
-        //        {
-        //            throw new InvalidOperationException("A path cannot refer to a parent once a path element references a property by name.");
-        //        }
-        //    }
-        //}
-
-        //#endregion
 
         #region Binding Logic
 
@@ -785,8 +696,6 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             {
                 case PropStoreNotificationKindEnum.PropBag:
                     {
-                        //WeakRefKey<IPropBag> x = (sender as ObservableSource<T>).LastEventSender;
-
                         WeakRefKey<IPropBag> propItemParent = (sender as ObservableSource<T>).LastEventSender;
                         NotifyReceiver(_storeNodeUpdateReceiver_PropBag, propItemParent);
                         break;
@@ -932,12 +841,13 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
         private bool TryGetChildProp(StoreNodeBag objectNode/*, IPropBag propBag*/, string propertyName, out StoreNodeProp child)
         {
-            // TODO: Add additional type checking and throw exceptions if neccessary.
-            // TODO: IPBI- Store Accessor Internal
+            //// TODO: Add additional type checking and throw exceptions if neccessary.
+            //// TODO: IPBI- Store Accessor Internal
 
-            //IPropBagInternal propBag_Internal = (IPropBagInternal)propBag;
-            //PSAccessServiceInternalInterface storeAccess_Internal = (PSAccessServiceInternalInterface)propBag_Internal.ItsStoreAccessor;
-            if(_propStoreAccessService_wr.TryGetTarget(out PSAccessServiceInternalInterface storeAccess_Internal))
+            ////IPropBagInternal propBag_Internal = (IPropBagInternal)propBag;
+            ////PSAccessServiceInternalInterface storeAccess_Internal = (PSAccessServiceInternalInterface)propBag_Internal.ItsStoreAccessor;
+
+            if (_propStoreAccessService_wr.TryGetTarget(out PSAccessServiceInternalInterface storeAccess_Internal))
             {
                 if (storeAccess_Internal.TryGetChildPropNode(objectNode, propertyName, out child))
                 {
@@ -951,10 +861,29 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             }
             else
             {
-                System.Diagnostics.Debug.WriteLine("Could not get ChildProp because our StoreAcessor has expired.");
+                System.Diagnostics.Debug.WriteLine("Could not get ChildProp because our StoreAccessor has expired.");
                 child = null;
                 return false;
             }
+
+
+
+            //if(objectNode.Level2KeyMan.TryGetFromRaw(propertyName, out PropIdType propId))
+            //{
+            //    if(objectNode.TryGetChild(propId, out child))
+            //    {
+            //        return true;
+            //    }
+            //    else
+            //    {
+            //        child = null;
+            //        return false;
+            //    }
+            //}
+            //else
+            //{
+            //    throw new KeyNotFoundException($"Can not find a PropItem with name = {propertyName}.");
+            //}
         }
 
         private bool TryGetPropItemParent
@@ -966,7 +895,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
         {
             if (propStoreAccessService_Internal_wr.TryGetTarget(out PSAccessServiceInternalInterface storeAcessor_internal))
             {
-                if(storeAcessor_internal.TryGetPropBagProxy(sourcePropNode, out propItemParentPropBag_wr))
+                if (storeAcessor_internal.TryGetPropBagProxy(sourcePropNode, out propItemParentPropBag_wr))
                 {
                     return true;
                 }
@@ -1017,6 +946,11 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
                     // TODO: dispose managed state (managed objects).
                     if (_rootListener != null) _rootListener.Dispose();
                     _pathListeners.Clear();
+
+                    _ourNode = null;
+                    _storeNodeUpdateReceiver_PropBag = null;
+                    _storeNodeUpdateReceiver_PropNode = null;
+                    _storeNodeUpdateReceiver_Value = null;
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
@@ -1040,41 +974,6 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             // TODO: uncomment the following line if the finalizer is overridden above.
             // GC.SuppressFinalize(this);
         }
-
-        #endregion
-
-        #region OLD_CODE
-
-        //private WeakReference<IPropBag> GetPublicVersion(WeakReference<IPropBagInternal> x)
-        //{
-        //    WeakReference<IPropBag> result;
-
-        //    if (x.TryGetTarget(out IPropBagInternal propBagInternal))
-        //    {
-        //        System.Diagnostics.Debug.Assert(propBagInternal == null || propBagInternal is IPropBag, "This instance of IPropBagInternal does not also implement: IPropBag.");
-        //        result = new WeakReference<IPropBag>(propBagInternal as IPropBag);
-        //    }
-        //    else
-        //    {
-        //        result = new WeakReference<IPropBag>(null);
-        //    }
-
-        //    return result;
-        //}
-
-        //private StoreNodeBag GetBagNode(WeakReference<PSAccessServiceInterface> propStoreAccessService_wr)
-        //{
-        //    if (propStoreAccessService_wr.TryGetTarget(out PSAccessServiceInterface accessService))
-        //    {
-        //        if (accessService is IHaveTheStoreNode storeNodeHolder)
-        //        {
-        //            StoreNodeBag result = storeNodeHolder.PropStoreNode;
-        //            return result;
-        //        }
-        //    }
-
-        //    return null;
-        //}
 
         #endregion
     }

@@ -11,7 +11,7 @@ namespace DRM.TypeSafePropertyBag
         IManageTypedCViews<CT, T> TypedCViewManager { get; }
     }
 
-    public interface IProvideACViewManager
+    public interface IProvideACViewManager : IDisposable
     {
         IManageCViews CViewManager { get; }
         IViewManagerProviderKey ViewManagerProviderKey { get; }
