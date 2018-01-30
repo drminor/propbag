@@ -16,10 +16,6 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
         #region Private Properties
 
-        //readonly WeakReference<PSAccessServiceInterface> _propStoreAccessService_wr;
-
-        //readonly StoreNodeBag _ourNode;
-
         readonly ExKeyT _bindingTarget;
         readonly WeakRefKey<IPropBag> _targetObject;
         readonly PropNameType _propertyName;
@@ -29,14 +25,6 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
         PropStorageStrategyEnum _targetHasStore;
 
         readonly LocalWatcher<T> _localWatcher;
-
-        //ObservableSource<T> _rootListener;
-        //readonly OSCollection<T> _pathListeners;
-        //string[] _pathElements;
-
-        //bool _isPathAbsolute;
-        //bool _isComplete;
-        //int _firstNamedStepIndex;
 
         #endregion
 
@@ -94,7 +82,6 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
         public LocalBinder(PSAccessServiceInterface propStoreAccessService, ExKeyT bindingTarget, LocalBindingInfo bindingInfo)
         {
-            //_propStoreAccessService_wr = new WeakReference<PSAccessServiceInterface>(propStoreAccessService);
 
             _bindingTarget = bindingTarget;
             _bindingInfo = bindingInfo;
@@ -300,7 +287,6 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             return result;
         }
 
-
         #endregion
 
         #region IDisposable Support
@@ -356,17 +342,6 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
             #endregion
 
-            //// From the PropBag that holds the source PropItem
-            //public void OnPropStoreNodeUpdated(WeakReference<IPropBag> propItemParent_wr, T oldValue)
-            //{
-            //    DoUpdate(propItemParent_wr);
-            //}
-
-            //public void OnPropStoreNodeUpdated(WeakReference<IPropBag> propItemParent_wr)
-            //{
-            //    DoUpdate(propItemParent_wr);
-            //}
-
             public void OnPropStoreNodeUpdated(StoreNodeProp sourcePropNode, T oldValue)
             {
                 DoUpdate(sourcePropNode);
@@ -381,11 +356,6 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             {
                 _localBinder.UpdateTargetWithStartingValue(_localBinder._targetObject, sourcePropNode);
             }
-
-            //private void DoUpdate(WeakReference<IPropBag> propItemParent_wr)
-            //{
-            //    _localBinder.UpdateTargetWithStartingValue(_localBinder._targetObject, propItemParent_wr);
-            //}
         }
 
         #endregion
