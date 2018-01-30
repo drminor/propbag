@@ -1,6 +1,7 @@
 ﻿using DRM.TypeSafePropertyBag.DataAccessSupport;
 using DRM.TypeSafePropertyBag.Fundamentals;
 using DRM.TypeSafePropertyBag.LocalBinding;
+using ObjectSizeDiagnostics;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -10,11 +11,13 @@ using System.Windows.Data;
 
 namespace DRM.TypeSafePropertyBag
 {
-    using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
-    using L2KeyManType = IL2KeyMan<UInt32, String>;
     using ObjectIdType = UInt64;
     using PropIdType = UInt32;
     using PropNameType = String;
+
+    using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
+    using L2KeyManType = IL2KeyMan<UInt32, String>;
+
     using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
     using PSAccessServiceInternalInterface = IPropStoreAccessServiceInternal<UInt32, String>;
     using PSAccessServiceProviderInterface = IProvidePropStoreAccessService<UInt32, String>;
@@ -31,7 +34,7 @@ namespace DRM.TypeSafePropertyBag
 
         PSAccessServiceProviderInterface _propStoreAccessServiceProvider;
         readonly IProvideHandlerDispatchDelegateCaches _handlerDispatchDelegateCacheProvider;
-        L2KeyManType _level2KeyMan;
+        //L2KeyManType _level2KeyMan;
 
         //// Subscription Management
         //const int OBJECT_INDEX_CONCURRENCY_LEVEL = 1; // Typical number of threads simultaneously accessing the ObjectIndexes.
@@ -41,7 +44,7 @@ namespace DRM.TypeSafePropertyBag
         private CollectionOfSubscriberCollections _propIndexes;
 
         // Each PropItem has zero or one binding.
-        readonly BindingsCollection _bindings;
+        private BindingsCollection _bindings;
 
         // One item for each PropItem that hosts a data source from which a view can be built.
         // The data source and the view manager are both local to this clients IPropBag.
@@ -57,33 +60,34 @@ namespace DRM.TypeSafePropertyBag
         public SimplePropStoreAccessService
             (
             StoreNodeBag ourNode,
-            L2KeyManType level2KeyManager,
+            //L2KeyManType level2KeyManager,
             PSAccessServiceProviderInterface propStoreAccessServiceProvider,
             IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider
             )
         {
+            //long startBytes = System.GC.GetTotalMemory(true);
+            //long CURbytes = startBytes;
+
             _wrThis = new WeakReference<PSAccessServiceInterface>(this);
             _ourNode = ourNode;
             _propStoreAccessServiceProvider = propStoreAccessServiceProvider;
             _handlerDispatchDelegateCacheProvider = handlerDispatchDelegateCacheProvider;
 
-            //if (!(propStoreAccessServiceProvider is PSCloneServiceType))
-            //{
-            //    string msg = $"This instance of {nameof(SimplePropStoreAccessService)} was not provided a {nameof(PSAccessServiceProviderInterface)} that implements the {nameof(PSCloneServiceType)} interface";
-            //    System.Diagnostics.Debug.WriteLine($"Warning: {msg}.");
-            //}
-
-            _level2KeyMan = level2KeyManager;
             MaxObjectsPerAppDomain = propStoreAccessServiceProvider.MaxObjectsPerAppDomain;
 
             _clientAccessToken = _ourNode.PropBagProxy;
             _objectId = _ourNode.CompKey.Level1Key;
 
+            //CURbytes = Sizer.ReportMemConsumption(startBytes, CURbytes, "Before Create PropIndexes");
+
             // Create the subscription store for this PropBag.
-            _propIndexes = new CollectionOfSubscriberCollections();
+            _propIndexes = null; // new CollectionOfSubscriberCollections();
+            //CURbytes = Sizer.ReportMemConsumption(startBytes, CURbytes, "After Create PropIndexes");
+
 
             // Create the binding store for this PropBag.
-            _bindings = new BindingsCollection();
+            _bindings = null; // new BindingsCollection();
+            //CURbytes = Sizer.ReportMemConsumption(startBytes, CURbytes, "After Create BindingsCollection");
 
             _genViewManagers = null;
             _genViewManagerProviders = null;
@@ -93,7 +97,7 @@ namespace DRM.TypeSafePropertyBag
 
         #region Public Members
 
-        public int MaxPropsPerObject => _level2KeyMan.MaxPropsPerObject;
+        public int MaxPropsPerObject => _ourNode.Level2KeyMan.MaxPropsPerObject; // _level2KeyMan.MaxPropsPerObject;
         public long MaxObjectsPerAppDomain { get; }
 
         public IPropData this[IPropBag propBag, PropIdType propId]
@@ -372,20 +376,20 @@ namespace DRM.TypeSafePropertyBag
 
         public bool TryGetPropId(PropNameType propertyName, out PropIdType propId)
         {
-            return _level2KeyMan.TryGetFromRaw(propertyName, out propId);
+            return _ourNode.Level2KeyMan.TryGetFromRaw(propertyName, out propId);
         }
 
         public bool TryGetPropName(PropIdType propId, out PropNameType propertyName)
         {
-            return _level2KeyMan.TryGetFromCooked(propId, out propertyName);
+            return _ourNode.Level2KeyMan.TryGetFromCooked(propId, out propertyName);
         }
 
         public uint Add(string propertyName)
         {
-            return _level2KeyMan.Add(propertyName);
+            return _ourNode.Level2KeyMan.Add(propertyName);
         }
 
-        public int PropertyCount => _level2KeyMan.PropertyCount;
+        public int PropertyCount => _ourNode.Level2KeyMan.PropertyCount;
 
         public PSAccessServiceInterface CloneProps(IPropBag callingPropBag, IPropBag copySource)
         {
@@ -395,7 +399,7 @@ namespace DRM.TypeSafePropertyBag
 
             StoreNodeBag copySourceStoreNode = GetPropBagNode(this);
 
-            L2KeyManType sourceLevel2KeyMan = this._level2KeyMan;
+            L2KeyManType sourceLevel2KeyMan = _ourNode.Level2KeyMan;
 
             PSAccessServiceInterface newStoreAccessor = _propStoreAccessServiceProvider.ClonePSAccessService
                 (
@@ -408,7 +412,7 @@ namespace DRM.TypeSafePropertyBag
 
             System.Diagnostics.Debug.Assert
                 (
-                condition: ((PSAccessServiceInternalInterface)newStoreAccessor).Level2KeyManager.PropertyCount == sourceLevel2KeyMan.PropertyCount,
+                condition: ((IHaveTheStoreNode)newStoreAccessor).PropBagNode.Level2KeyMan.PropertyCount == sourceLevel2KeyMan.PropertyCount,
                 message: "The PropBag clone operation was not completed: The Level2KeyManager has different contents."
                 );
 
@@ -657,6 +661,7 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
+        // TODO: Consider making this, or adding a method: TryRemoveSubscription
         public bool RemoveSubscription(ISubscriptionKeyGen subscriptionRequest)
         {
             if (TryGetSubscriptions(subscriptionRequest.OwnerPropId, out SubscriberCollection sc))
@@ -676,40 +681,50 @@ namespace DRM.TypeSafePropertyBag
 
         public IEnumerable<ISubscription> GetSubscriptions(IPropBag host, PropIdType propId)
         {
-            //ExKeyT exKey = GetCompKey(host, propId);
-
             // TODO: NOTE: This does not verify that the caller is the "correct" one.
             ExKeyT exKey = new SimpleExKey(_objectId, propId);
 
+            IEnumerable<ISubscription> result;
             if (TryGetSubscriptions(exKey, out IEnumerable<ISubscription> subs))
             {
-                return subs;
+                result = subs;
             }
             else
             {
-                IEnumerable<ISubscription> result = new SubscriberCollection();
-                return result;
+                result = new SubscriberCollection();
             }
+
+            return result;
         }
 
         public bool TryGetSubscriptions(ExKeyT exKey, out IEnumerable<ISubscription> subscriberCollection)
         {
-            bool result = _propIndexes.TryGetSubscriberCollection(exKey.Level2Key, out subscriberCollection);
-
-            //bool gResult = _propIndexes.TryGetSubscriberCollection(0, out subscriberCollection);
-
+            bool result = TryGetSubscriptions(exKey, out SubscriberCollection subs);
+            subscriberCollection = subs;
             return result;
         }
 
         public bool TryGetSubscriptions(ExKeyT exKey, out SubscriberCollection subscriberCollection)
         {
-            bool result = _propIndexes.TryGetSubscriberCollection(exKey.Level2Key, out subscriberCollection);
-
-            return result;
+            if (_propIndexes != null)
+            {
+                bool result = _propIndexes.TryGetSubscriberCollection(exKey.Level2Key, out subscriberCollection);
+                return result;
+            }
+            else
+            {
+                subscriberCollection = new SubscriberCollection();
+                return false;
+            }
         }
 
         private SubscriberCollection GetOrAddSubscriberCollection(ExKeyT exKey)
         {
+            if(_propIndexes == null)
+            {
+                _propIndexes = new CollectionOfSubscriberCollections();
+            }
+
             SubscriberCollection result = _propIndexes.GetOrCreate(exKey.Level2Key, out bool subcriberListWasCreated);
             if (subcriberListWasCreated)
             {
@@ -798,6 +813,11 @@ namespace DRM.TypeSafePropertyBag
                 throw new ApplicationException("Its already been used.");
             }
 
+            if(_bindings == null)
+            {
+                _bindings = new BindingsCollection();
+            }
+
             ISubscription result = _bindings.GetOrAdd(bindingRequest, x => bindingRequest.CreateBinding(this));
 
             if (bindingRequest.HasBeenUsed)
@@ -814,30 +834,43 @@ namespace DRM.TypeSafePropertyBag
             }
 
             return result;
-
         }
 
         public bool TryRemoveBinding(ISubscriptionKeyGen bindingRequest, out ISubscription binding)
         {
-            bool result = _bindings.TryRemoveBinding(bindingRequest, out binding);
+            bool result;
+
+            if (_bindings != null)
+            {
+                result = _bindings.TryRemoveBinding(bindingRequest, out binding);
+            }
+            else
+            {
+                binding = null;
+                result = false;
+            }
+
             return result;
         }
 
-        //public bool TryRemoveBinding(IPropBag host, uint propId)
-        //{
-        //    ExKeyT exKey = GetCompKey(host, propId);
-
-        //    bool wasRemoved = _bindings.TryRemoveBinding(exKey);
-        //    return wasRemoved;
-        //}
-
-        public IEnumerable<ISubscription> GetBindings(IPropBag host, uint propId)
+        public IEnumerable<ISubscription> GetBindings(IPropBag host, PropIdType propId)
         {
-            ExKeyT exKey = GetCompKey(host, propId);
+            IEnumerable<ISubscription> result;
 
-            IEnumerable<ISubscription> result = _bindings.TryGetBindings(exKey);
+            if (_bindings != null)
+            {
+                ExKeyT exKey = GetCompKey(host, propId);
+                result = _bindings.TryGetBindings(exKey);
+            }
+            else
+            {
+                result = Enumerable.Empty<ISubscription>();
+            }
+
             return result;
         }
+
+
 
         #endregion
 
@@ -1194,14 +1227,15 @@ namespace DRM.TypeSafePropertyBag
                     StoreNodeBag guestPropBagNode = GetGuestObjectNodeFromPropItemVal(e.NewValue);
 
                     // TODO: IPBI -- Get Store Accessor From StoreNodeBag
-                    PSAccessServiceInternalInterface storeAccessor_Internal = (PSAccessServiceInternalInterface)((IPropBagInternal)sender).ItsStoreAccessor;
+                    //PSAccessServiceInternalInterface storeAccessor_Internal = (PSAccessServiceInternalInterface)((IPropBagInternal)sender).ItsStoreAccessor;
 
-                    if(storeAccessor_Internal.TryGetChildPropNode(guestPropBagNode, e.PropertyName, out StoreNodeProp propItemNode))
+                    PSAccessServiceInternalInterface storeAccessor_Internal = this;
+
+                    if (storeAccessor_Internal.TryGetChildPropNode(guestPropBagNode, e.PropertyName, out StoreNodeProp propItemNode))
                     {
                         guestPropBagNode.Parent = propItemNode;
 
                     }
-
 
                     //storeAccessor_Internal.TryGetChildPropNode()
 
@@ -1234,7 +1268,10 @@ namespace DRM.TypeSafePropertyBag
                     StoreNodeBag guestPropBagNode = GetGuestObjectNodeFromPropItemVal(e.NewValue);
 
                     // TODO: IPBI -- Get Store Accessor From StoreNodeBag
-                    PSAccessServiceInternalInterface storeAccessor_Internal = (PSAccessServiceInternalInterface)((IPropBagInternal)sender).ItsStoreAccessor;
+                    //PSAccessServiceInternalInterface storeAccessor_Internal = (PSAccessServiceInternalInterface)((IPropBagInternal)sender).ItsStoreAccessor;
+
+                    PSAccessServiceInternalInterface storeAccessor_Internal = this;
+
 
                     if (storeAccessor_Internal.TryGetChildPropNode(guestPropBagNode, e.PropertyName, out StoreNodeProp propItemNode))
                     {
@@ -1339,22 +1376,17 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        private StoreNodeProp GetChild(ExKeyT cKey)
-        {
-            if (_ourNode.TryGetChild(cKey, out StoreNodeProp child))
-            {
-                StoreNodeProp result = child;
-                return result;
-            }
-            else
-            {
-                throw new KeyNotFoundException("That propId could not be found.");
-            }
-        }
 
         private StoreNodeProp GetChild(PropIdType propId)
         {
             ExKeyT cKey = new SimpleExKey(this._objectId, propId);
+
+            StoreNodeProp result = GetChild(cKey);
+            return result;
+        }
+
+        private StoreNodeProp GetChild(ExKeyT cKey)
+        {
             if (_ourNode.TryGetChild(cKey, out StoreNodeProp child))
             {
                 StoreNodeProp result = child;
@@ -1407,7 +1439,7 @@ namespace DRM.TypeSafePropertyBag
 
         private string GetPropNameFromKey(PropIdType propId)
         {
-            if(_level2KeyMan.TryGetFromCooked(propId, out PropNameType propertyName))
+            if(_ourNode.Level2KeyMan.TryGetFromCooked(propId, out PropNameType propertyName))
             {
                 return propertyName;
             }
@@ -1417,13 +1449,14 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        //private ExKeyT GetCompKey(IPropBag propBag, PropIdType propId)
-        //{
-        //    ObjectIdType objectId = GetAndCheckObjectRef(propBag);
-        //    ExKeyT exKey = new SimpleExKey(objectId, propId);
-        //    return exKey;
-        //}
-
+        /// <summary>
+        /// This store accessor holds a reference to a StoreNodeBag; the client IPropBag does not.
+        /// Instead of having to lookup the StoreNodeBag that belongs to the client, we can use our reference.
+        /// However before doing so we need to make sure that the calling IPropBag does in fact "belong" to this PropStoreAccessService.
+        /// 
+        /// </summary>
+        /// <param name="propBag"></param>
+        /// <returns></returns>
         private ObjectIdType GetAndCheckObjectRef(IPropBag propBag)
         {
             if(_clientAccessToken.TryGetTarget(out IPropBag ourPropBag))
@@ -1460,42 +1493,63 @@ namespace DRM.TypeSafePropertyBag
 
         #region Explicit Implementation of the internal interface: IPropStoreAccessServiceInternal
 
-        L2KeyManType PSAccessServiceInternalInterface.Level2KeyManager => _level2KeyMan;
+        //L2KeyManType PSAccessServiceInternalInterface.Level2KeyManager => _level2KeyMan;
 
         bool PSAccessServiceInternalInterface.TryGetChildPropNode(StoreNodeBag propBagNode, PropNameType propertyName, out StoreNodeProp child)
         {
             bool result;
 
-            // TODO: IPBI -- Get Store Accessor from StoreNodeBag
-            if (propBagNode.TryGetPropBag(out IPropBag propBag))
+            //// TODO: IPBI -- Get Store Accessor from StoreNodeBag
+            //if (propBagNode.TryGetPropBag(out IPropBag propBag))
+            //{
+            //    IPropBagInternal propBagInternal = (IPropBagInternal)propBag;
+            //    if (((PSAccessServiceInternalInterface)propBagInternal.ItsStoreAccessor).Level2KeyManager.TryGetFromRaw(propertyName, out PropIdType propId))
+            //    {
+            //        if (propBagNode.TryGetChild(propId, out child))
+            //        {
+            //            result = true;
+            //        }
+            //        else
+            //        {
+            //            System.Diagnostics.Debug.WriteLine($"Failed to access the child node with property name: {propertyName} on propBagNode: {propBagNode.CompKey}.");
+            //            child = null;
+            //            result = false;
+            //        }
+            //    }
+            //    else
+            //    {
+            //        System.Diagnostics.Debug.WriteLine($"Could not find that property by name: {propertyName} on propBagNode: {propBagNode.CompKey}.");
+            //        child = null;
+            //        result = false;
+            //    }
+            //}
+            //else
+            //{
+            //    System.Diagnostics.Debug.WriteLine($"The weak reference held by this StoreBagNode: {propBagNode.CompKey} holds a reference to an object that is 'no longer with us.'");
+            //    child = null;
+            //    result = false;
+            //}
+
+            if(propBagNode.Level2KeyMan.TryGetFromRaw(propertyName, out PropIdType propId))
             {
-                IPropBagInternal propBagInternal = (IPropBagInternal)propBag;
-                if (((PSAccessServiceInternalInterface)propBagInternal.ItsStoreAccessor).Level2KeyManager.TryGetFromRaw(propertyName, out PropIdType propId))
+                if (propBagNode.TryGetChild(propId, out child))
                 {
-                    if (propBagNode.TryGetChild(propId, out child))
-                    {
-                        result = true;
-                    }
-                    else
-                    {
-                        System.Diagnostics.Debug.WriteLine($"Failed to access the child node with property name: {propertyName} on propBagNode: {propBagNode.CompKey}.");
-                        child = null;
-                        result = false;
-                    }
+                    result = true;
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine($"Could not find that property by name: {propertyName} on propBagNode: {propBagNode.CompKey}.");
+                    System.Diagnostics.Debug.WriteLine($"Failed to access the child node with property name: {propertyName} on propBagNode: {propBagNode.CompKey}.");
                     child = null;
                     result = false;
                 }
             }
             else
             {
-                System.Diagnostics.Debug.WriteLine($"The weak reference held by this StoreBagNode: {propBagNode.CompKey} holds a reference to an object that is 'no longer with us.'");
+                System.Diagnostics.Debug.WriteLine($"Could not find that property by name: {propertyName} on propBagNode: {propBagNode.CompKey}.");
                 child = null;
                 result = false;
             }
+
             return result;
         }
 
@@ -1547,6 +1601,19 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
+        public WeakRefKey<IPropBag> GetPropBagProxy(StoreNodeProp storeNodeProp)
+        {
+            WeakRefKey<IPropBag>? result = storeNodeProp?.Parent?.PropBagProxy;
+            if (result.HasValue)
+            {
+                return result.Value;
+            }
+            else
+            {
+                return new WeakRefKey<IPropBag>(null);
+            }
+        }
+
         //WeakReference<IPropBag> PSAccessServiceInternalInterface.GetPublicInterface(WeakReference<IPropBagInternal> x)
         //{
         //    WeakReference<IPropBag> result;
@@ -1569,24 +1636,35 @@ namespace DRM.TypeSafePropertyBag
 
         private void ResetAllData()
         {
-            // Remove all handlers from each of our Events.
-            int numSubsRemoved = 0;
-            foreach (SubscriberCollection sc in _propIndexes)
+            if (_propIndexes != null)
             {
-                numSubsRemoved += sc.ClearSubscriptions();
+                // Remove all handlers from each of our Events.
+                int numSubsRemoved = 0;
+                foreach (SubscriberCollection sc in _propIndexes)
+                {
+                    numSubsRemoved += sc.ClearSubscriptions();
+                }
+
+                // Clear the contents of our list of Handlers, one for each property.
+                _propIndexes.ClearTheListOfSubscriptionPtrs();
             }
 
-            // Clear the contents of our list of Handlers, one for each property.
-            _propIndexes.ClearTheListOfSubscriptionPtrs();
-
-            // Dispose of each LocalBinding object.
-            foreach (ISubscription binding in _bindings)
+            if (_bindings != null)
             {
-                if (binding is IDisposable disable) disable.Dispose();
+                // Dispose of each LocalBinding object.
+                foreach (ISubscription binding in _bindings)
+                {
+                    if (binding is IDisposable disable) disable.Dispose();
+                }
+
+                // Remove our reference to each LocalBinding.
+                int numBindingsRemoved = _bindings.ClearBindings();
             }
 
-            // Remove our reference to each LocalBinding.
-            int numBindingsRemoved = _bindings.ClearBindings();
+            // Note: The _genViewManagers collection doesn't need to be disposed.
+
+            if (_genViewManagerProviders != null)
+                _genViewManagerProviders.Dispose();
 
             // Dispose each PropItem.
             foreach (StoreNodeProp prop in _ourNode.Children)
@@ -1594,11 +1672,7 @@ namespace DRM.TypeSafePropertyBag
                 prop.PropData_Internal.CleanUp(doTypedCleanup: true);
             }
 
-
             _propStoreAccessServiceProvider.TearDown(_ourNode);
-
-            _level2KeyMan.Dispose();
-            _level2KeyMan = null;
         }
 
         private bool disposedValue = false; // To detect redundant calls
@@ -1641,6 +1715,11 @@ namespace DRM.TypeSafePropertyBag
         public void IncAccess()
         {
             _propStoreAccessServiceProvider.IncAccess();
+        }
+
+        public override string ToString()
+        {
+            return _ourNode.ToString();
         }
 
         public int AccessCounter => _propStoreAccessServiceProvider.AccessCounter;

@@ -81,6 +81,7 @@
     <Compile Include="PropStore\IProvidePropStoreServiceSingletons.cs" />
     <Compile Include="PropStore\PropStoreServices.cs" />
     <Compile Include="PropStore\PSNodeChangedEventArgs.cs" />
+    <Compile Include="PropStore\SimpleLevel2KeyManRepository.cs" />
     <Compile Include="PropStore\ViewManagers\IViewManagerProviderKey.cs" />
     <Compile Include="PropStore\ViewManagers\ViewManagerProviderCollection.cs" />
     <Compile Include="PropStore\ViewManagers\ViewManagerProviderKey.cs" />
@@ -239,6 +240,10 @@
     <Compile Include="ValPlusType.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ObjectSizeDiagnostics\ObjectSizeDiagnostics.csproj">
+      <Project>{9b18f82d-3ed9-49e0-9ee3-cfbfc3af9d9c}</Project>
+      <Name>ObjectSizeDiagnostics</Name>
+    </ProjectReference>
     <ProjectReference Include="..\src\AutoMapper\AutoMapper.csproj">
       <Project>{8cba8a56-9b60-4430-9d54-9a523baf1e14}</Project>
       <Name>AutoMapper</Name>

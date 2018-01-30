@@ -1,15 +1,12 @@
-﻿
-using DRM.TypeSafePropertyBag.Fundamentals;
+﻿using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
 
 namespace DRM.TypeSafePropertyBag
 {
-    //using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
-
     internal interface IProvidePropStoreAccessService<L2T, L2TRaw> : IPropStoreAccessServiceCreator<L2T, L2TRaw>, IDisposable
     {
         bool TryGetPropBagNode(IPropBag propBag, out StoreNodeBag propBagNode);
-        bool TryGetPropBagNode(WeakRefKey<IPropBag> propBag_wrKey, out StoreNodeBag propBagNode);
+        //bool TryGetPropBagNode(WeakRefKey<IPropBag> propBag_wrKey, out StoreNodeBag propBagNode);
 
         bool TearDown(StoreNodeBag propBagNode);
 

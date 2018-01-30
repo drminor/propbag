@@ -81,6 +81,11 @@ namespace DRM.TypeSafePropertyBag
             // GC.SuppressFinalize(this);
         }
 
+        public override string ToString()
+        {
+            return CompKey.ToString();
+        }
+
         #endregion
     }
 }

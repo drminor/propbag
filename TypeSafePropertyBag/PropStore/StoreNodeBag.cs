@@ -2,23 +2,28 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 
 namespace DRM.TypeSafePropertyBag
 {
-    using CompositeKeyType = UInt64;
     using ObjectIdType = UInt64;
     using PropIdType = UInt32;
+    using PropNameType = String;
+
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
+
+    using L2KeyManType = IL2KeyMan<UInt32, String>;
+
 
     internal class StoreNodeBag : INotifyParentNodeChanged, IDisposable
     {
-        #region Private Members
+        #region Private Fields
+
+        L2KeyManType _level2KeyMan;
+        private readonly Dictionary<ExKeyT, StoreNodeProp> _children;
 
         private ICacheDelegates<CallPSParentNodeChangedEventSubDelegate> _callPSParentNodeChangedEventSubsCache;
-
-        private readonly Dictionary<ExKeyT, StoreNodeProp> _children;
         private ParentNCSubscriberCollection _parentNCSubscriberCollection;
+
         private object _sync = new object();
 
         #endregion
@@ -99,16 +104,17 @@ namespace DRM.TypeSafePropertyBag
 
         #region Constructor
 
-        public StoreNodeBag(ExKeyT cKey, IPropBag propBag, ICacheDelegates<CallPSParentNodeChangedEventSubDelegate> callPSParentNodeChangedEventSubsCache)
+        public StoreNodeBag(ExKeyT compKey, IPropBag propBag, L2KeyManType level2KeyMan, ICacheDelegates<CallPSParentNodeChangedEventSubDelegate> callPSParentNodeChangedEventSubsCache)
         {
-            CompKey = cKey;
+            CompKey = compKey;
             PropBagProxy = new WeakRefKey<IPropBag>(propBag ?? throw new ArgumentNullException(nameof(propBag)));
 
-            //PropBagProxy = propBagProxy ?? throw new ArgumentNullException(nameof(propBagProxy));
-            _callPSParentNodeChangedEventSubsCache = callPSParentNodeChangedEventSubsCache ?? throw new ArgumentNullException(nameof(callPSParentNodeChangedEventSubsCache));
+            _level2KeyMan = level2KeyMan;
 
-            _children = new Dictionary<ExKeyT, StoreNodeProp>();
+            _callPSParentNodeChangedEventSubsCache = callPSParentNodeChangedEventSubsCache ?? throw new ArgumentNullException(nameof(callPSParentNodeChangedEventSubsCache));
             _parentNCSubscriberCollection = null;
+
+            _children = new Dictionary<ExKeyT, StoreNodeProp>(25);
         }
 
         #endregion
@@ -117,17 +123,10 @@ namespace DRM.TypeSafePropertyBag
 
         // This Composite Key identifies the Object, the PropId portion will always be 0.
         public ExKeyT CompKey { get; }
-
         public ObjectIdType ObjectId => CompKey.Level1Key;
         public PropIdType PropId => 0;
 
         public WeakRefKey<IPropBag> PropBagProxy { get; }
-
-        public bool TryGetPropBag(out IPropBag propBag)
-        {
-            return PropBagProxy.TryGetTarget(out propBag);
-        }
-
         public bool IsAlive => PropBagProxy.TryGetTarget(out IPropBag dummy);
 
         StoreNodeProp _parent;
@@ -160,7 +159,17 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
+        public L2KeyManType Level2KeyMan => _level2KeyMan;
         public IEnumerable<StoreNodeProp> Children => _children.Values;
+
+        #endregion
+
+        #region Public Methods
+
+        public bool TryGetPropBag(out IPropBag propBag)
+        {
+            return PropBagProxy.TryGetTarget(out propBag);
+        }
 
         public bool ChildExists(ExKeyT cKey)
         {
@@ -326,8 +335,9 @@ namespace DRM.TypeSafePropertyBag
             {
                 if (disposing)
                 {
-                    // TODO: dispose managed state (managed objects).
+                    // Dispose managed state (managed objects).
                     ClearChildren();
+                    _level2KeyMan.Dispose();
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
@@ -350,6 +360,11 @@ namespace DRM.TypeSafePropertyBag
             Dispose(true);
             // TODO: uncomment the following line if the finalizer is overridden above.
             // GC.SuppressFinalize(this);
+        }
+
+        public override string ToString()
+        {
+            return CompKey.ToString();
         }
 
         #endregion

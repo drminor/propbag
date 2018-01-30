@@ -6,7 +6,7 @@ namespace DRM.TypeSafePropertyBag
     // TODO: Replace all L2T propId references with IExplodedKey<UInt64, UInt64, UInt32>;
     internal interface IPropStoreAccessServiceInternal<L2T, L2TRaw> 
     {
-        IL2KeyMan<L2T, L2TRaw> Level2KeyManager { get; }
+        //IL2KeyMan<L2T, L2TRaw> Level2KeyManager { get; }
 
         bool TryGetChildPropNode(StoreNodeBag sourceBagNode, L2TRaw propertyName, out StoreNodeProp child);
 
@@ -21,6 +21,7 @@ namespace DRM.TypeSafePropertyBag
         //WeakRefKey<IPropBag> GetPropBagProxy(StoreNodeProp storeNodeProp);
         //WeakReference<IPropBag> GetPublicInterface(WeakReference<IPropBagInternal> propBagProxy_internal);
 
+        WeakRefKey<IPropBag> GetPropBagProxy(StoreNodeProp storeNodeProp);
         bool TryGetPropBagProxy(StoreNodeProp storeNodeProp, out WeakRefKey<IPropBag> propBag_wrKey);
     }
 }

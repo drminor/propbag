@@ -88,7 +88,7 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        public bool TryGetPropBagNode(WeakRefKey<IPropBag> propBag_wrKey, out StoreNodeBag propBagNode)
+        internal bool TryGetPropBagNode(WeakRefKey<IPropBag> propBag_wrKey, out StoreNodeBag propBagNode)
         {
             if (_store.TryGetValue(propBag_wrKey, out propBagNode))
             {
@@ -119,7 +119,7 @@ namespace DRM.TypeSafePropertyBag
 
             // Create a new PropStoreNode for this PropBag
             ExKeyT cKey = new SimpleExKey(objectId, 0);
-            newBagNode = new StoreNodeBag(cKey, propBag, _handlerDispatchDelegateCacheProvider.CallPSParentNodeChangedEventSubsCache);
+            newBagNode = new StoreNodeBag(cKey, propBag, level2KeyManager, _handlerDispatchDelegateCacheProvider.CallPSParentNodeChangedEventSubsCache);
 
             // Add the node to the global store.
             _store.Add(newBagNode.PropBagProxy, newBagNode);
@@ -128,7 +128,6 @@ namespace DRM.TypeSafePropertyBag
             PSAccessServiceInterface result = new SimplePropStoreAccessService
                 (
                     newBagNode,
-                    level2KeyManager,
                     this,
                     _handlerDispatchDelegateCacheProvider
                 );
