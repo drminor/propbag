@@ -12,15 +12,13 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
 
         ConcurrentDictionary<PropIdType, IManageCViews> _dict;
 
-        //Func<IPropData, IManageCViews> _factory;
 
         #endregion
 
         #region Constructor
 
-        public ViewManagerCollection(/*Func<IPropData, IManageCViews> factory*/)
+        public ViewManagerCollection()
         {
-            //_factory = factory;
             // TODO: Provide Expected Currency Levels.
             _dict = new ConcurrentDictionary<PropIdType, IManageCViews>();
         }
@@ -60,5 +58,6 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
         }
 
         #endregion
+
     }
 }
