@@ -27,6 +27,8 @@ namespace DRM.TypeSafePropertyBag
 
         #endregion
 
+        #region Constructor
+
         public SimpleHandlerDispatchDelegateCacheProvider()
         {
             Type bridgeType = typeof(BridgeType);
@@ -59,5 +61,7 @@ namespace DRM.TypeSafePropertyBag
             // Proxy -- Holds a copy of the original delegate but without the target.
             DelegateProxyCache = new DelegateProxyCache();
         }
+
+        #endregion
     }
 }
