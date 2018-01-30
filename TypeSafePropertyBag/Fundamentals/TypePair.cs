@@ -6,15 +6,15 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
     public struct TypePair : IEquatable<TypePair>
     {
         private int _hashCode;
-        public readonly Type SourceType;
-        public readonly Type DestinationType;
+        public Type SourceType => TypeArguments[0];
+        public Type DestinationType => TypeArguments[1];
 
         public readonly Type[] TypeArguments;
 
         public TypePair(Type sourceType, Type destinationType) : this()
         {
-            SourceType = sourceType;
-            DestinationType = destinationType;
+            //SourceType = sourceType;
+            //DestinationType = destinationType;
             TypeArguments = new Type[] { sourceType, destinationType };
 
             _hashCode = ComputeHashCode();
