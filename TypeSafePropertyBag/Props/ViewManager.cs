@@ -25,16 +25,6 @@ namespace DRM.TypeSafePropertyBag
             //dataSourceProviderProvider.DataSourceProvider.DataChanged += DataSourceProvider_DataChanged;
         }
 
-        //private void DataSourceProvider_DataChanged(object sender, EventArgs e)
-        //{
-        //    string viewName = null;
-        //    IProvideAView viewProviderTest = _viewBuilder(viewName, DataSourceProviderProvider.DataSourceProvider);
-
-        //    IProvideAView inPlace = _defaultView;
-
-        //    System.Diagnostics.Debug.WriteLine("You may want to set a break point here.");
-        //}
-
         #endregion
 
         #region Public Properties and Methods
