@@ -180,9 +180,10 @@ namespace DRM.TypeSafePropertyBag
 
         private bool SubscriptionIsForRequest(ISubscription subscription, ISubscriptionKeyGen subscriptionRequest)
         {
-            bool t1 = subscription.OwnerPropId.Equals(subscriptionRequest.OwnerPropId);
-            bool t2 = subscription.MethodName == subscriptionRequest.Method.Name;
-            bool t3 = ReferenceEquals(subscription.Target.Target, subscriptionRequest.Target);
+            // Helpful for debugging.
+            //bool t1 = subscription.OwnerPropId.Equals(subscriptionRequest.OwnerPropId);
+            //bool t2 = subscription.MethodName == subscriptionRequest.Method.Name;
+            //bool t3 = ReferenceEquals(subscription.Target.Target, subscriptionRequest.Target);
 
             bool result =
                 subscription.OwnerPropId.Equals(subscriptionRequest.OwnerPropId) &&
