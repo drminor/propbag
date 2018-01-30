@@ -30,6 +30,8 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
 
         private T MakeTheDelegate(TypePair argumentTypes)
         {
+            System.Diagnostics.Debug.WriteLine($"Creating new delegate of type: {typeof(T)} for {argumentTypes.SourceType}/{argumentTypes.DestinationType}.");
+
             MethodInfo methInfoSetProp = _theMethod.MakeGenericMethod(argumentTypes.TypeArguments);
             Delegate result = Delegate.CreateDelegate(typeof(T), null, methInfoSetProp);
             return result as T;

@@ -38,6 +38,8 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
 
         private T MakeTheDelegate(TypeKey tKey)
         {
+            System.Diagnostics.Debug.WriteLine($"Creating new delegate of type: {typeof(T)} for {tKey.Type}.");
+
             MethodInfo methInfoSetProp = _theMethod.MakeGenericMethod(tKey.Type);
             Delegate result = Delegate.CreateDelegate(typeof(T), null, methInfoSetProp);
             return result as T;
