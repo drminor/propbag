@@ -10,16 +10,16 @@ namespace DRM.TypeSafePropertyBag
     using PropNameType = String;
     using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
 
-    /// <summary>
-    /// All implementers of IPropBag that also want to use a shared property store must
-    /// implement this interface.
-    /// </summary>
-    public interface IPropBagInternal : IPropBag
-    {
-        PSAccessServiceInterface ItsStoreAccessor { get; }
-        //IPropFactory PropFactory { get; }
-        //void RaiseStandardPropertyChanged(PropIdType propId, PropNameType propertyName);
-    }
+    ///// <summary>
+    ///// All implementers of IPropBag that also want to use a shared property store must
+    ///// implement this interface.
+    ///// </summary>
+    //public interface IPropBagInternal : IPropBag
+    //{
+    //    PSAccessServiceInterface ItsStoreAccessor { get; }
+    //    //IPropFactory PropFactory { get; }
+    //    //void RaiseStandardPropertyChanged(PropIdType propId, PropNameType propertyName);
+    //}
 
     /// <summary>
     /// Base Property Bag Features
