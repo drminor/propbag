@@ -117,10 +117,11 @@ namespace DRM.TypeSafePropertyBag
                 }
                 else
                 {
-                    PropIdType cookedVal = NextCookedVal;
-                    _rawDict.Add(rawBot, cookedVal);
-                    _cookedDict.Add(cookedVal, rawBot);
-                    return cookedVal;
+                    //PropIdType cookedVal = NextCookedVal;
+                    //_rawDict.Add(rawBot, cookedVal);
+                    //_cookedDict.Add(cookedVal, rawBot);
+                    //return cookedVal;
+                   return Add(rawBot);
                 }
             }
         }
