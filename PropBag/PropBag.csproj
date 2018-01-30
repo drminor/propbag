@@ -95,6 +95,10 @@
     <Compile Include="XMLModel\PropModelWriter.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ObjectSizeDiagnostics\ObjectSizeDiagnostics.csproj">
+      <Project>{9B18F82D-3ED9-49E0-9EE3-CFBFC3AF9D9C}</Project>
+      <Name>ObjectSizeDiagnostics</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TypeSafePropertyBag\TypeSafePropertyBag.csproj">
       <Project>{bbb1e311-374e-4c91-a313-1667d83767db}</Project>
       <Name>TypeSafePropertyBag</Name>

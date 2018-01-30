@@ -49,6 +49,13 @@ namespace ObjectSizeDiagnostics
             return size;
         }
 
+        static public long ReportMemConsumption(long startBytes, long prevBytes, string message)
+        {
+            long curBytes = System.GC.GetTotalMemory(true);
+            System.Diagnostics.Debug.WriteLine($"Used: {curBytes - prevBytes}; Total: {curBytes - startBytes}: {message}.");
+            return curBytes;
+        }
+
         #endregion
 
     }

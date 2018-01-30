@@ -40,6 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MemConsumptionTracker.cs" />
     <Compile Include="Sizer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

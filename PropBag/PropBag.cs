@@ -2,6 +2,7 @@
 using DRM.TypeSafePropertyBag;
 using DRM.TypeSafePropertyBag.DataAccessSupport;
 using DRM.TypeSafePropertyBag.Fundamentals;
+using ObjectSizeDiagnostics;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -14,6 +15,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Windows.Data;
+
 
 namespace DRM.PropBag
 {
@@ -45,7 +47,7 @@ namespace DRM.PropBag
 
     #endregion
 
-    public partial class PropBag : IPropBag, IPropBagInternal, IRegisterBindingsFowarderType
+    public partial class PropBag : IPropBag, /*IPropBagInternal,*/ IRegisterBindingsFowarderType
     {
         #region Member Declarations
 
@@ -62,8 +64,8 @@ namespace DRM.PropBag
 
         private object _sync = new object();
 
-        // These fulfill the IPropBagInternal contract
-        public PSAccessServiceInterface /*IPropBagInternal.*/ItsStoreAccessor => _ourStoreAccessor;
+        // Diagnostics
+        MemConsumptionTracker _memConsumptionTracker = new MemConsumptionTracker(enabled:false);
 
         #endregion
 
@@ -71,8 +73,7 @@ namespace DRM.PropBag
 
         public string FullClassName => OurMetaData.FullClassName;
 
-        // TODO: Consider making the PropFactory property part of the PropBagInternal
-        public IPropFactory PropFactory => _propFactory;
+        //public IPropFactory PropFactory => _propFactory;
         public PropBagTypeSafetyMode TypeSafetyMode => _typeSafetyMode;
 
         public event PropertyChangedEventHandler PropertyChanged
@@ -168,7 +169,10 @@ namespace DRM.PropBag
         public PropBag(IPropModel propModel, PSAccessServiceCreatorInterface storeAcessorCreator, IPropFactory propFactory = null, string fullClassName = null)
             : this(propModel.TypeSafetyMode, storeAcessorCreator, propModel.PropFactory ?? propFactory, fullClassName ?? propModel.FullClassName)
         {
+                long memUsedSoFar = _memConsumptionTracker.UsedSoFar;
             Hydrate(propModel);
+                _memConsumptionTracker.Report(memUsedSoFar, "---- AfterHydrate.");
+
             int testc = _ourStoreAccessor.PropertyCount;
         }
 
@@ -183,16 +187,22 @@ namespace DRM.PropBag
 
         protected PropBag(PropBagTypeSafetyMode typeSafetyMode, PSAccessServiceCreatorInterface storeAcessorCreator, IPropFactory propFactory, string fullClassName = null)
         {
+                _memConsumptionTracker.MeasureAndReport("Testing", "Top of PropBag Constructor.");
+                _memConsumptionTracker.Measure($"Top of PropBag Constructor.");
+
             if (storeAcessorCreator == null) throw new ArgumentNullException(nameof(storeAcessorCreator));
 
             _typeSafetyMode = typeSafetyMode;
             _propFactory = propFactory ?? throw new ArgumentNullException(nameof(propFactory));
 
             _ourMetaData = BuildMetaData(_typeSafetyMode, fullClassName, _propFactory);
+                _memConsumptionTracker.MeasureAndReport("BuildMetaData", $"Full Class Name: {fullClassName}");
 
-            _foreignViewManagers = new Dictionary<string, IViewManagerProviderKey>();
+            _foreignViewManagers = null; // new Dictionary<string, IViewManagerProviderKey>();
+                //_memConsumptionTracker.MeasureAndReport("New Dictionary<string, IViewManagerProviderKey>", null);
 
             _ourStoreAccessor = storeAcessorCreator.CreatePropStoreService(this);
+                _memConsumptionTracker.MeasureAndReport("CreatePropStoreService", null);
         }
 
         protected ITypeSafePropBagMetaData BuildMetaData(PropBagTypeSafetyMode typeSafetyMode, string classFullName, IPropFactory propFactory)
@@ -224,10 +234,7 @@ namespace DRM.PropBag
 
             foreach (IPropItem pi in pm.Props)
             {
-                if(pi.PropertyName == "PersonList")
-                {
-                    System.Diagnostics.Debug.WriteLine("We are creating prop item: PersonList.");
-                }
+                long amountUsedBeforeThisPropItem = _memConsumptionTracker.Measure($"Hydrating: {pi.PropertyName}");
 
                 PropIdType propId;
                 IPropData newPropItem;
@@ -257,35 +264,48 @@ namespace DRM.PropBag
                 else if(pi.PropKind == PropKindEnum.CollectionView)
                 {
                     IProvideAView viewProvider;
+
                     // Get the name of the Collection-Type PropItem that provides the data for this CollectionViewSource.
                     string binderPath = pi.BinderField?.Path;
 
                     if(binderPath != null)
                     {
+                            //_memConsumptionTracker.Measure();
                         IViewManagerProviderKey viewManagerProviderKey = BuildTheViewManagerProviderKey(pi);
+                            _memConsumptionTracker.MeasureAndReport("BuildTheViewManagerProviderKey", $"PropBag: {_ourStoreAccessor.ToString()}: {pi.PropertyName}");
 
                         IProvideACViewManager cViewManagerProvider = GetOrAddCViewManagerProviderGen(pi.PropertyType, viewManagerProviderKey);
+                            _memConsumptionTracker.MeasureAndReport("GetOrAddCViewManagerProviderGen", $"PropBag: {_ourStoreAccessor.ToString()}: {pi.PropertyName}");
 
-                        // Get the ViewManager for this source DataAccessLayer(IDoCRUD<T>) from the Property Store.
-                        //IManageCViews cViewManager = GetOrAddCViewManagerGen(pi.PropertyType, srcPropName, pi.MapperRequest);
-
-                        // Save the key so that we can easily fetch the ViewManagerProvider at some later time.
-
-                        if(_foreignViewManagers.ContainsKey(pi.PropertyName))
+                        if(_foreignViewManagers == null)
                         {
-                            _foreignViewManagers[pi.PropertyName] = viewManagerProviderKey;
+                            _foreignViewManagers = new Dictionary<PropNameType, IViewManagerProviderKey>();
+                            _foreignViewManagers.Add(pi.PropertyName, viewManagerProviderKey);
                         }
                         else
                         {
-                            _foreignViewManagers.Add(pi.PropertyName, viewManagerProviderKey);
+                            if (_foreignViewManagers.ContainsKey(pi.PropertyName))
+                            {
+                                System.Diagnostics.Debug.WriteLine($"Warning: We already have a reference to a ViewManager on a 'foreign' IPropBag. We are updating this reference while processing Property: {pi.PropertyName} with BinderPath = {binderPath}.");
+                                _foreignViewManagers[pi.PropertyName] = viewManagerProviderKey;
+                            }
+                            else
+                            {
+                                _foreignViewManagers.Add(pi.PropertyName, viewManagerProviderKey);
+                            }
                         }
 
+                        //curBytes = Sizer.ReportMemConsumption(startBytes, curBytes, "After PropBag::Hydrate -- update _foreignViewManagers");
+
                         cViewManagerProvider.ViewManagerChanged += CViewManagerProvider_ViewManagerChanged;
+                        //curBytes = Sizer.ReportMemConsumption(startBytes, curBytes, "After PropBag::Hydrate -- Add handler to ViewManagerChanged");
 
                         IManageCViews cViewManager = cViewManagerProvider.CViewManager;
+
                         if (cViewManager != null)
                         {
                             viewProvider = cViewManager.GetDefaultViewProvider();
+                                _memConsumptionTracker.MeasureAndReport("GetDefaultViewProvider", $"PropBag: {_ourStoreAccessor.ToString()}: {pi.PropertyName}");
                         }
                         else
                         {
@@ -299,7 +319,10 @@ namespace DRM.PropBag
 
                     // Use our PropFactory to create a CollectionView PropItem using the ViewProvider.
                     typedProp = _propFactory.CreateCVProp(pi.PropertyName, viewProvider);
+                        _memConsumptionTracker.MeasureAndReport("CreateCVProp", $"PropBag: {_ourStoreAccessor.ToString()} : {pi.PropertyName}");
+
                     newPropItem = AddProp(pi.PropertyName, typedProp, out propId);
+                        _memConsumptionTracker.MeasureAndReport("AddProp", $"PropBag: {_ourStoreAccessor.ToString()} : {pi.PropertyName}");
                 }
                 else
                 {
@@ -308,14 +331,17 @@ namespace DRM.PropBag
 
                 if (pi.PropKind != PropKindEnum.CollectionView && pi.PropKind != PropKindEnum.CollectionViewSource_RO && pi.BinderField?.Path != null)
                 {
+                        _memConsumptionTracker.Measure();
                     processBinderField(pi, propId, newPropItem);
+                        _memConsumptionTracker.MeasureAndReport("Process Binder Field", $"PropBag: {_ourStoreAccessor.ToString()} : {pi.PropertyName}");
                 }
+
+                _memConsumptionTracker.Report(amountUsedBeforeThisPropItem, $"--Completed Hydrate for { pi.PropertyName}");
             }
         }
 
         private void CViewManagerProvider_ViewManagerChanged(object sender, EventArgs e)
         {
-            // IS THIS LINE Executed??
             if(sender is IProvideACViewManager cViewManagerProvider)
             {
                 IViewManagerProviderKey viewManagerProviderKey = cViewManagerProvider.ViewManagerProviderKey;
@@ -366,6 +392,119 @@ namespace DRM.PropBag
             return propertyName;
         }
 
+        private IPropData processProp(IPropItem pi, out PropIdType propId)
+        {
+                _memConsumptionTracker.Measure($"Begin processProp: {pi.PropertyName}.");
+
+            object ei = pi.ExtraInfo;
+
+            Delegate comparer;
+            bool useRefEquality;
+
+            if (pi.ComparerField == null)
+            {
+                comparer = null;
+                useRefEquality = false;
+            }
+            else
+            {
+                comparer = pi.ComparerField.Comparer;
+                useRefEquality = pi.ComparerField.UseRefEquality;
+            }
+
+            if (pi.InitialValueField == null)
+            {
+                pi.InitialValueField = PropInitialValueField.UndefinedInitialValueField;
+            }
+
+            //EventHandler<PcGenEventArgs> doWhenChangedAction = pi.DoWhenChangedField?.DoWhenChangedAction;
+
+            //if(doWhenChangedAction == null && (pi.DoWhenChangedField?.DoWhenGenHandlerGetter != null))
+            //{
+            //    Func<object, EventHandler<PcGenEventArgs>> rr = pi.DoWhenChangedField.DoWhenGenHandlerGetter;
+
+            //    doWhenChangedAction = rr(this);
+            //}
+
+            IProp propGen;
+            string creationMethodDescription;
+
+                _memConsumptionTracker.MeasureAndReport("After field prepartion", $"for {pi.PropertyName}");
+
+            //curBytes = Sizer.ReportMemConsumption(startBytes, curBytes, "Before PropBag::ProcessProp -- Create Prop Gen.");
+
+            if (pi.StorageStrategy == PropStorageStrategyEnum.Internal && !pi.InitialValueField.SetToUndefined)
+            {
+                if (pi.InitialValueField.ValueCreator != null)
+                {
+                    _memConsumptionTracker.Measure();
+                    object newValue = pi.InitialValueField.ValueCreator();
+                    _memConsumptionTracker.MeasureAndReport("InitialField.ValueCreator", $"for {pi.PropertyName}");
+
+                    creationMethodDescription = "CreateGenFromObject";
+                    propGen = _propFactory.CreateGenFromObject(pi.PropertyType, newValue, pi.PropertyName, ei, pi.StorageStrategy, pi.TypeIsSolid,
+                        pi.PropKind, comparer, useRefEquality, pi.ItemType);
+                }
+                else
+                {
+                    bool useDefault = pi.InitialValueField.SetToDefault;
+                    string value;
+
+                    // TODO: Fix this??
+                    if (pi.InitialValueField.SetToEmptyString && pi.PropertyType == typeof(Guid))
+                    {
+                        const string EMPTY_GUID = "00000000-0000-0000-0000-000000000000";
+                        value = EMPTY_GUID;
+                    }
+                    else
+                    {
+                        value = pi.InitialValueField.GetStringValue();
+                    }
+
+                    creationMethodDescription = "CreateGenFromString";
+                    propGen = _propFactory.CreateGenFromString(pi.PropertyType, value, useDefault, pi.PropertyName, ei, pi.StorageStrategy, pi.TypeIsSolid,
+                        pi.PropKind, comparer, useRefEquality, pi.ItemType);
+                }
+            }
+            else
+            {
+                creationMethodDescription = "CreateGenWithNoValue";
+                propGen = _propFactory.CreateGenWithNoValue(pi.PropertyType, pi.PropertyName, ei, pi.StorageStrategy, pi.TypeIsSolid,
+                    pi.PropKind, comparer, useRefEquality, pi.ItemType);
+            }
+                _memConsumptionTracker.MeasureAndReport($"Create Prop Gen using {creationMethodDescription}", $"for {pi.PropertyName}");
+
+            // If DoAfterNotify is true, use the 'Last' group, otherwise use the 'standard' group.
+            //SubscriptionPriorityGroup priorityGroup = pi.DoWhenChangedField?.DoAfterNotify ?? false ? SubscriptionPriorityGroup.Last : SubscriptionPriorityGroup.Standard;
+
+            IPropData propData;
+            if (pi.DoWhenChangedField != null)
+            {
+                object target;
+                if (pi.DoWhenChangedField.MethodIsLocal)
+                {
+                    target = this;
+                }
+                else
+                {
+                    throw new NotSupportedException("Only local methods are supported.");
+                }
+
+                propData = AddProp(pi.PropertyName, propGen,
+                    target,
+                    pi.DoWhenChangedField.Method,
+                    pi.DoWhenChangedField.SubscriptionKind,
+                    pi.DoWhenChangedField.PriorityGroup, out propId);
+            }
+            else
+            {
+                propData = AddProp(pi.PropertyName, propGen, out propId);
+            }
+                _memConsumptionTracker.MeasureAndReport("Add the PropGen to store", $"for {pi.PropertyName}");
+
+            return propData;
+        }
+
         private void processBinderField(IPropItem pi, PropIdType propId, IPropData propItem)
         {
             switch (pi.PropKind)
@@ -405,103 +544,6 @@ namespace DRM.PropBag
             }
         }
 
-        private IPropData processProp(IPropItem pi, out PropIdType propId)
-        {
-            object ei = pi.ExtraInfo;
-
-            Delegate comparer;
-            bool useRefEquality;
-
-            if (pi.ComparerField == null)
-            {
-                comparer = null;
-                useRefEquality = false;
-            }
-            else
-            {
-                comparer = pi.ComparerField.Comparer;
-                useRefEquality = pi.ComparerField.UseRefEquality;
-            }
-
-            if (pi.InitialValueField == null)
-            {
-                pi.InitialValueField = PropInitialValueField.UndefinedInitialValueField;
-            }
-
-            //EventHandler<PcGenEventArgs> doWhenChangedAction = pi.DoWhenChangedField?.DoWhenChangedAction;
-
-            //if(doWhenChangedAction == null && (pi.DoWhenChangedField?.DoWhenGenHandlerGetter != null))
-            //{
-            //    Func<object, EventHandler<PcGenEventArgs>> rr = pi.DoWhenChangedField.DoWhenGenHandlerGetter;
-
-            //    doWhenChangedAction = rr(this);
-            //}
-
-            IProp propGen;
-
-            if (pi.StorageStrategy == PropStorageStrategyEnum.Internal && !pi.InitialValueField.SetToUndefined)
-            {
-                if (pi.InitialValueField.ValueCreator != null)
-                {
-                    object newValue = pi.InitialValueField.ValueCreator();
-                    propGen = _propFactory.CreateGenFromObject(pi.PropertyType, newValue, pi.PropertyName, ei, pi.StorageStrategy, pi.TypeIsSolid,
-                        pi.PropKind, comparer, useRefEquality, pi.ItemType);
-                }
-                else
-                {
-                    bool useDefault = pi.InitialValueField.SetToDefault;
-                    string value;
-
-                    // TODO: Fix this??
-                    if (pi.InitialValueField.SetToEmptyString && pi.PropertyType == typeof(Guid))
-                    {
-                        const string EMPTY_GUID = "00000000-0000-0000-0000-000000000000";
-                        value = EMPTY_GUID;
-                    }
-                    else
-                    {
-                        value = pi.InitialValueField.GetStringValue();
-                    }
-
-                    propGen = _propFactory.CreateGenFromString(pi.PropertyType, value, useDefault, pi.PropertyName, ei, pi.StorageStrategy, pi.TypeIsSolid,
-                        pi.PropKind, comparer, useRefEquality, pi.ItemType);
-                }
-            }
-            else
-            {
-                propGen = _propFactory.CreateGenWithNoValue(pi.PropertyType, pi.PropertyName, ei, pi.StorageStrategy, pi.TypeIsSolid,
-                    pi.PropKind, comparer, useRefEquality, pi.ItemType);
-            }
-
-            // If DoAfterNotify is true, use the 'Last' group, otherwise use the 'standard' group.
-            //SubscriptionPriorityGroup priorityGroup = pi.DoWhenChangedField?.DoAfterNotify ?? false ? SubscriptionPriorityGroup.Last : SubscriptionPriorityGroup.Standard;
-
-            IPropData propData;
-            if (pi.DoWhenChangedField != null)
-            {
-                object target;
-                if (pi.DoWhenChangedField.MethodIsLocal)
-                {
-                    target = this;
-                }
-                else
-                {
-                    throw new NotSupportedException("Only local methods are supported.");
-                }
-                propData = AddProp(pi.PropertyName, propGen,
-                    target,
-                    pi.DoWhenChangedField.Method,
-                    pi.DoWhenChangedField.SubscriptionKind,
-                    pi.DoWhenChangedField.PriorityGroup, out propId);
-            }
-            else
-            {
-                propData = AddProp(pi.PropertyName, propGen, out propId);
-            }
-
-            return propData;
-        }
-
         [Conditional("DEBUG")]
         private void CheckClassNames(IPropModel pm)
         {
@@ -514,17 +556,7 @@ namespace DRM.PropBag
             }
         }
 
-        // --- Old Stuff
-
-        //private object GetDalFromPropName(string srcPropName)
-        //{
-        //    if(TryGetPropGen(srcPropName, typeof(IDoCRUD<object>), out IPropData propGen))
-        //    {
-        //        object result = propGen.TypedProp.TypedValueAsObject;
-        //        return result;
-        //    }
-        //}
-
+        // WE WILL USE LATER FOR TESTING
         public void FetchData_Test(string pName, Type pType)
         {
             IProvideAView viewProvider = null;
@@ -562,8 +594,6 @@ namespace DRM.PropBag
 
             //    int cnt = hh.Count;
             //}
-
-
 
             System.Diagnostics.Debug.WriteLine("You may want to set a break point here.");
 
@@ -640,11 +670,10 @@ namespace DRM.PropBag
                         {
                             ReportAccessToMissing(propertyName, nameOfCallingMethod ?? nameof(HandleMissingProp));
                             throw new InvalidOperationException("ReportAccessToMissing did not raise an exception.");
-                            //throw new InvalidOperationException(string.Format("Property: {0} has not been declared by calling AddProp. Cannot use this method in this case. Declare by calling AddProp.", propertyName));
                         }
                         else
                         {
-                            throw new InvalidOperationException(string.Format("No property: {0} exists in this PropBag.", propertyName));
+                            throw new InvalidOperationException($"Property: {propertyName} does not exist in this PropBag."); 
                         }
                     }
                 case ReadMissingPropPolicyEnum.Register:
@@ -684,8 +713,7 @@ namespace DRM.PropBag
                     }
                 default:
                     {
-                        // TODO: create custom exception for this.
-                        throw new InvalidOperationException(string.Format("Unrecognized value: {0} for ReadMissingPropPolicyEnum found hile accessing property: {1}.", OurMetaData.ReadMissingPropPolicy.ToString(), propertyName));
+                        throw new InvalidOperationException($"{nameof(OurMetaData.ReadMissingPropPolicy)} is not recognized.");
                     }
             }
         }
@@ -789,13 +817,22 @@ namespace DRM.PropBag
                 {
                     if (!PropData.TypedProp.TypeIsSolid)
                     {
+                        try
+                        {
+                            MakeTypeSolid(propId, propertyName, PropData, propertyType);
+                        }
+                        catch (InvalidCastException ice)
+                        {
+                            throw new ApplicationException($"Invalid opertion: the value of property: {propertyName}, " +
+                                $"however the type specfied for retreival is {propertyType} which is a value type. Value types cannot be set to null.", ice);
+                        }
                         MakeTypeSolid(propId, propertyName, PropData, propertyType);
                     }
                     else
                     {
                         if (propertyType != PropData.TypedProp.Type)
                         {
-                            throw new InvalidOperationException(string.Format("Attempting to get property: {0} whose type is {1}, with a call whose type parameter is {2} is invalid.", propertyName, PropData.TypedProp.Type.ToString(), propertyType.ToString()));
+                            throw new InvalidOperationException($"Invalid opertion: attempting to get property: {propertyName} whose type is {PropData.TypedProp.Type}, with a call whose type parameter is {propertyType}.");
                         }
                     }
                 }
@@ -894,17 +931,9 @@ namespace DRM.PropBag
             {
                 ReportNonTypedAccess(propertyName, nameof(SetValWithNoType));
             }
-            return SetValWithType(propertyName, null, value);
+            return SetValWithType_Private(propertyName, null, value);
         }
 
-        //CHK: PropertyType may be null.
-
-        /// <summary>
-        /// Set's the value of the property with optional type information.
-        /// </summary>
-        /// <param name="propertyName"></param>
-        /// <param name="propertyType">If unknown, set this parameter to null.</param>
-        /// <param name="value"></param>
         public bool SetValWithType(string propertyName, Type propertyType, object value)
         {
             //CHK: PropertyType may be null.
@@ -912,7 +941,17 @@ namespace DRM.PropBag
             {
                 ReportNonTypedAccess(propertyName, nameof(SetValWithType));
             }
+            return SetValWithType_Private(propertyName, propertyType, value);
+        }
 
+        /// <summary>
+        /// Set's the value of the property with optional type information.
+        /// </summary>
+        /// <param name="propertyName"></param>
+        /// <param name="propertyType">If unknown, set this parameter to null.</param>
+        /// <param name="value"></param>
+        private bool SetValWithType_Private(string propertyName, Type propertyType, object value)
+        {
             // For Set operations where a type is given, 
             // Register the property if it does not exist, unless the TypeSafetyMode
             // setting is AllPropsMustBe (explictly) registered.
@@ -932,44 +971,24 @@ namespace DRM.PropBag
 
             if (value != null)
             {
+                Type newType = propertyType ?? _propFactory.GetTypeFromValue(value);
+
                 if (!PropData.TypedProp.TypeIsSolid)
                 {
                     try
                     {
-                        Type newType;
-                        if (propertyType != null)
-                        {
-                            // Use the type provided by the caller.
-                            newType = propertyType;
-                        }
-                        else
-                        {
-                            newType = _propFactory.GetTypeFromValue(value);
-                        }
-
                         MakeTypeSolid(propId, propertyName, PropData, newType);
                     }
                     catch (InvalidCastException ice)
                     {
-                        throw new ApplicationException(string.Format("The property: {0} was originally set to null, now its being set to a value whose type is a value type; value types don't allow setting to null.", propertyName), ice);
+                        throw new InvalidOperationException($"Invalid Operation: The property: {propertyName} was originally set to null, now its being set with type: {propertyType}. {propertyType} is a value type and value types cannot bet set to null.", ice);
                     }
                 }
                 else
                 {
-                    Type newType;
-                    if (propertyType != null)
-                    {
-                        // Use the type provided by the caller.
-                        newType = propertyType;
-                    }
-                    else
-                    {
-                        newType = _propFactory.GetTypeFromValue(value);
-                    }
-
                     if (!AreTypesSame(newType, PropData.TypedProp.Type))
                     {
-                        throw new ApplicationException(string.Format("Attempting to set property: {0} whose type is {1}, with a call whose type parameter is {2} is invalid.", propertyName, PropData.TypedProp.Type.ToString(), newType.ToString()));
+                        throw new InvalidOperationException($"Invalid opertion: attempting to get property: {propertyName} whose type is {PropData.TypedProp.Type}, with a call whose type parameter is {propertyType}.");
                     }
                 }
             }
@@ -978,7 +997,7 @@ namespace DRM.PropBag
                 // Check to make sure that we are not attempting to set the value of a ValueType to null.
                 if (PropData.TypedProp.TypeIsSolid && PropData.TypedProp.Type.IsValueType)
                 {
-                    throw new InvalidOperationException(string.Format("Cannot set property: {0} to null, it is a value type.", propertyName));
+                    throw new InvalidOperationException($" Invalid Operation: cannot set property: {propertyName} to null, it is of type: {propertyType} which is a value type.");
                 }
             }
 
@@ -2553,8 +2572,7 @@ namespace DRM.PropBag
                 }
                 else
                 {
-                    throw new InvalidOperationException($"The store accessor did not find the property: {propertyName}.");
-                    //PropData = this.HandleMissingProp(propId, propertyName, propertyType, out wasRegistered, haveValue, value, alwaysRegister, mustBeRegistered, neverCreate);
+                    throw new InvalidOperationException($"Critical Error: The property has been registered! However the store accessor did not find the property: {propertyName}.");
                 }
             }
             else
@@ -2562,18 +2580,7 @@ namespace DRM.PropBag
                 PropData = this.HandleMissingProp(propertyName, propertyType, out wasRegistered, haveValue, value, alwaysRegister, mustBeRegistered, neverCreate);
             }
 
-            if (!PropData.IsEmpty && desiredHasStoreValue.HasValue)
-            {
-                if (desiredHasStoreValue.Value && PropData.TypedProp.StorageStrategy != PropStorageStrategyEnum.Internal)
-                {
-                    //Caller needs property to have a backing store.
-                    throw new InvalidOperationException(string.Format("Property: {0} has no backing store held by this instance of PropBag. This operation can only be performed on properties for which a backing store is held by this instance.", propertyName));
-                }
-                else if (!desiredHasStoreValue.Value && PropData.TypedProp.StorageStrategy == PropStorageStrategyEnum.Internal)
-                {
-                    throw new InvalidOperationException(string.Format("Property: {0} has a backing store held by this instance of PropBag. This operation can only be performed on properties for which no backing store is kept by this instance.", propertyName));
-                }
-            }
+            CheckStorageStrategy(propertyName, PropData, desiredHasStoreValue);
 
             return (IPropData) PropData;
         }
@@ -2584,30 +2591,37 @@ namespace DRM.PropBag
         {
             if (TryGetPropId(propertyName, out propId))
             {
-                if (!_ourStoreAccessor.TryGetValue(this, propId, out IPropData PropData))
+                if (!_ourStoreAccessor.TryGetValue(this, propId, out IPropData propData))
                 {
                     throw new KeyNotFoundException($"The property named: {propertyName} could not be found in the property store.");
                 }
 
-                if (!PropData.IsEmpty && desiredHasStoreValue.HasValue)
-                {
-                    if (desiredHasStoreValue.Value && PropData.TypedProp.StorageStrategy != PropStorageStrategyEnum.Internal)
-                    {
-                        //Caller needs property to have a backing store.
-                        throw new InvalidOperationException(string.Format("Property: {0} has no backing store held by this instance of PropBag. This operation can only be performed on properties for which a backing store is held by this instance.", propertyName));
-                    }
-                    else if (!desiredHasStoreValue.Value && PropData.TypedProp.StorageStrategy == PropStorageStrategyEnum.Internal)
-                    {
-                        throw new InvalidOperationException(string.Format("Property: {0} has a backing store held by this instance of PropBag. This operation can only be performed on properties for which no backing store is kept by this instance.", propertyName));
-                    }
-                }
+                CheckStorageStrategy(propertyName, propData, desiredHasStoreValue);
 
                 wasRegistered = false;
-                return (IPropData)PropData;
+                return (IPropData)propData;
             }
             else
             {
                 throw new KeyNotFoundException($"The property named: {propertyName} could not be found in the Level2Key man.");
+            }
+        }
+
+        private void CheckStorageStrategy(PropNameType propertyName, IPropData propData, bool? desiredHasStoreValue)
+        {
+            if (!propData.IsEmpty && desiredHasStoreValue.HasValue)
+            {
+                if (desiredHasStoreValue.Value && propData.TypedProp.StorageStrategy != PropStorageStrategyEnum.Internal)
+                {
+                    //Caller needs property to have a backing store.
+                    throw new InvalidOperationException($"Property: {propertyName} has no backing store held by this instance of PropBag. " +
+                        $"This operation can only be performed on properties for which a backing store is held by this instance.");
+                }
+                else if (!desiredHasStoreValue.Value && propData.TypedProp.StorageStrategy == PropStorageStrategyEnum.Internal)
+                {
+                    throw new InvalidOperationException($"Property: {propertyName} has a backing store held by this instance of PropBag. " +
+                        $"This operation can only be performed on properties for which no backing store is kept by this instance.");
+                }
             }
         }
 
@@ -2646,7 +2660,7 @@ namespace DRM.PropBag
         /// <returns>True if the type was updated, otherwise false.</returns>
         private bool MakeTypeSolid(PropIdType propId, PropNameType propertyName, IPropData PropData, Type newType)
         {
-            //Type currentType = PropData.Type;
+            Type currentType = PropData.TypedProp.Type;
 
             Debug.Assert(PropData.TypedProp.TypedValueAsObject == null, "The current value of the property should be null when MakeTypeSolid is called.");
             Debug.Assert(!PropData.IsEmpty, "PropData is empty on call to MakeTypeSolid.");
@@ -2661,7 +2675,7 @@ namespace DRM.PropBag
 
             // We are using strict equality here, since we have the oportunity to update the type to anything
             // that is assignable from a value of type object (which is everything.)
-            if (newType != PropData.TypedProp.Type)
+            if (newType != currentType)
             {
                 object curValue = PropData.TypedProp.TypedValueAsObject;
                 PropKindEnum propKind = PropData.TypedProp.PropKind;

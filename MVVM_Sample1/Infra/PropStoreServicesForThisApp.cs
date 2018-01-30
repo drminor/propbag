@@ -10,6 +10,8 @@ using DRM.PropBag.ViewModelTools;
 using System;
 using System.ComponentModel;
 using System.Windows;
+using ObjectSizeDiagnostics;
+using MVVMApplication.Model;
 
 namespace MVVMApplication.Infra
 {
@@ -29,37 +31,64 @@ namespace MVVMApplication.Infra
 
         public static string PackageConfigName { get; set; }
 
+        static MemConsumptionTracker _mct = new MemConsumptionTracker();
+
+
         static PropStoreServicesForThisApp() 
         {
+            _mct.Measure("Begin PropStoreServicesForThisApp");
+
+            Person p = new Person();
+            _mct.MeasureAndReport("New Person");
+
             PropStoreServices = BuildPropStoreService(MAX_NUMBER_OF_PROPERTIES);
+            _mct.MeasureAndReport("After BuildPropStoreService");
 
             IViewModelActivator vmActivator = new SimpleViewModelActivator();
+            _mct.MeasureAndReport("After new SimpleViewModelActivator");
+
             AutoMapperProvider = GetAutoMapperProvider(vmActivator, PropStoreServices.PropStoreEntryPoint);
+            _mct.MeasureAndReport("After GetAutoMapperProvider");
 
             DefaultPropFactory = BuildDefaultPropFactory(PropStoreServices, AutoMapperProvider);
+            _mct.MeasureAndReport("After new BuildDefaultPropFactory");
 
             IPropBagTemplateProvider propBagTemplateProvider = new PropBagTemplateProvider(Application.Current.Resources);
+            _mct.MeasureAndReport("After new PropBagTemplateProvider");
+
             IMapperRequestProvider mapperRequestProvider = new MapperRequestProvider(Application.Current.Resources);
+            _mct.MeasureAndReport("After new MapperRequestProvider");
 
             PropModelProvider = new PropModelProvider(propBagTemplateProvider, mapperRequestProvider, DefaultPropFactory, vmActivator, PropStoreServices.PropStoreEntryPoint);
+            _mct.MeasureAndReport("After new PropModelProvider");
 
             ViewModelHelper = new ViewModelHelper(PropModelProvider, vmActivator, PropStoreServices.PropStoreEntryPoint);
-
+            _mct.MeasureAndReport("After new ViewModelHelper");
         }
+
 
         private static PSServiceSingletonProviderInterface BuildPropStoreService(int maxNumberOfProperties)
         {
             ITypeDescBasedTConverterCache typeDescBasedTConverterCache = new TypeDescBasedTConverterCache();
+            _mct.MeasureAndReport("After new TypeDescBasedTConverterCache");
+
             IProvideDelegateCaches delegateCacheProvider = new SimpleDelegateCacheProvider(typeof(PropBag), typeof(APFGenericMethodTemplates));
+            _mct.MeasureAndReport("After new SimpleDelegateCacheProvider");
 
             IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider = new SimpleHandlerDispatchDelegateCacheProvider();
+            _mct.MeasureAndReport("After new SimpleHandlerDispatchDelegateCacheProvider");
+
             PSAccessServiceCreatorInterface propStoreEntryPoint = new SimplePropStoreServiceEP(maxNumberOfProperties, handlerDispatchDelegateCacheProvider);
+            _mct.MeasureAndReport("After new SimplePropStoreServiceEP");
+
 
             PSServiceSingletonProviderInterface result = new PropStoreServices
                 (typeDescBasedTConverterCache,
                 delegateCacheProvider,
                 handlerDispatchDelegateCacheProvider,
                 propStoreEntryPoint);
+
+            _mct.MeasureAndReport("After New PropStoreServices");
 
             return result;
         }

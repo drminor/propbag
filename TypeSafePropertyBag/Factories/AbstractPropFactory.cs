@@ -1,6 +1,7 @@
 ﻿
 using DRM.TypeSafePropertyBag.DataAccessSupport;
 using DRM.TypeSafePropertyBag.Fundamentals;
+using ObjectSizeDiagnostics;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -276,9 +277,15 @@ namespace DRM.TypeSafePropertyBag
         {
             if (propKind == PropKindEnum.Prop)
             {
+                MemConsumptionTracker mct = new MemConsumptionTracker(enabled: false);
+
                 CreatePropFromStringDelegate propCreator = GetPropFromStringCreator(typeOfThisProperty);
+                mct.MeasureAndReport("GetPropFromStringCreator", $"for {propertyName}");
+
                 IProp prop = propCreator(this, value, useDefault, propertyName, extraInfo, storageStrategy: storageStrategy, isTypeSolid: isTypeSolid,
                     comparer: comparer, useRefEquality: useRefEquality);
+                mct.MeasureAndReport("Ran propCreator to get IProp", $"for {propertyName}");
+
 
                 return prop;
             }

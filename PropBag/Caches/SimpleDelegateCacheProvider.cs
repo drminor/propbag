@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using DRM.TypeSafePropertyBag.Fundamentals;
 using DRM.TypeSafePropertyBag;
 using System.Reflection;
+using ObjectSizeDiagnostics;
 
 namespace DRM.PropBag.Caches
 {
@@ -44,6 +45,10 @@ namespace DRM.PropBag.Caches
 
         public SimpleDelegateCacheProvider(Type propBagType, Type propCreatorType)
         {
+            long startBytes = System.GC.GetTotalMemory(true);
+            long curBytes = startBytes;
+
+
             #region Method on PropBag (DoSetDelegate, CVPropFromDsDelegate, and CViewManagerFromDsDelegate
 
             // TypeDesc<T>-based Converter Cache
@@ -51,7 +56,11 @@ namespace DRM.PropBag.Caches
 
             // DoSet 
             MethodInfo doSetMethodInfo = propBagType.GetMethod("DoSetBridge", BindingFlags.Instance | BindingFlags.NonPublic);
+            curBytes = Sizer.ReportMemConsumption(startBytes, curBytes, "After GetMethod(DoSetBridge)");
+
             DoSetDelegateCache = new DelegateCache<DoSetDelegate>(doSetMethodInfo);
+            curBytes = Sizer.ReportMemConsumption(startBytes, curBytes, "After new DelegateCache<DoSetDelegate>");
+
 
             //// AddCollectionViewPropDS using non-generic request and factory
             //MethodInfo addCollectionViewPropDS_mi = propBagType.GetMethod("CVPropFromDsBridge", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -59,7 +68,11 @@ namespace DRM.PropBag.Caches
 
             // GetOrAdd CViewManager using non-generic request and factory
             MethodInfo getOrAddCViewManager_mi = propBagType.GetMethod("CViewManagerFromDsBridge", BindingFlags.Instance | BindingFlags.NonPublic);
+            curBytes = Sizer.ReportMemConsumption(startBytes, curBytes, "After GetMethod(CViewManagerFromDsBridge)");
+
             GetOrAddCViewManagerCache = new TwoTypesDelegateCache<CViewManagerFromDsDelegate>(getOrAddCViewManager_mi);
+            curBytes = Sizer.ReportMemConsumption(startBytes, curBytes, "After TwoTypesDelegateCache<CViewManagerFromDsDelegate>");
+
 
             MethodInfo getOrAddCViewManagerProvider_mi = propBagType.GetMethod("CViewManagerProviderFromDsBridge", BindingFlags.Instance | BindingFlags.NonPublic);
             GetOrAddCViewManagerProviderCache = new TwoTypesDelegateCache<CViewManagerProviderFromDsDelegate>(getOrAddCViewManagerProvider_mi);
@@ -79,7 +92,11 @@ namespace DRM.PropBag.Caches
 
             // Create C Prop From string
             MethodInfo createCPropFromString_mi = propCreatorType.GetMethod("CreateCPropFromString", BindingFlags.Static | BindingFlags.NonPublic);
+            curBytes = Sizer.ReportMemConsumption(startBytes, curBytes, "After GetMethod(CreateCPropFromString)");
+
             CreateCPropFromStringCache = new TwoTypesDelegateCache<CreateCPropFromStringDelegate>(createCPropFromString_mi);
+            curBytes = Sizer.ReportMemConsumption(startBytes, curBytes, "After new TwoTypesDelegateCache<CreateCPropFromStringDelegate>");
+
 
             // Create Prop From Object
             MethodInfo createCPropFromObject_mi = propCreatorType.GetMethod("CreateCPropFromObject", BindingFlags.Static | BindingFlags.NonPublic);
@@ -110,7 +127,10 @@ namespace DRM.PropBag.Caches
 
             // Create Prop From String
             MethodInfo createPropFromString_mi = propCreatorType.GetMethod("CreatePropFromString", BindingFlags.Static | BindingFlags.NonPublic);
+            curBytes = Sizer.ReportMemConsumption(startBytes, curBytes, "After GetMethod(CreatePropFromString)");
+
             CreatePropFromStringCache = new DelegateCache<CreatePropFromStringDelegate>(createPropFromString_mi);
+            curBytes = Sizer.ReportMemConsumption(startBytes, curBytes, "After new DelegateCache<CreatePropFromStringDelegate>");
 
             // Create Prop From Object
             MethodInfo createPropFromObject_mi = propCreatorType.GetMethod("CreatePropFromObject", BindingFlags.Static | BindingFlags.NonPublic);

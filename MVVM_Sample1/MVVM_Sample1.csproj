@@ -164,6 +164,10 @@
       <Project>{a12af270-3e58-462c-8661-3dbd9926c777}</Project>
       <Name>CommonAppData</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ObjectSizeDiagnostics\ObjectSizeDiagnostics.csproj">
+      <Project>{9B18F82D-3ED9-49E0-9EE3-CFBFC3AF9D9C}</Project>
+      <Name>ObjectSizeDiagnostics</Name>
+    </ProjectReference>
     <ProjectReference Include="..\PropBagControlsWPF\PropBagControlsWPF.csproj">
       <Project>{9bee9979-9812-4675-8f97-a4dd1e7dba5f}</Project>
       <Name>PropBagControlsWPF</Name>
