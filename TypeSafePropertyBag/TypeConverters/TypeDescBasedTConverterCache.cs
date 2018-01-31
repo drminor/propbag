@@ -5,6 +5,7 @@ using System.Reflection;
 
 namespace DRM.TypeSafePropertyBag
 {
+    // TODO: Rename to SimpleTypeConverterCache : ITypeConverterCache
     public class TypeDescBasedTConverterCache : ITypeDescBasedTConverterCache
     {
         private LockingConcurrentDictionary<TypeDescBasedTConverterKey, Delegate> _converters;
