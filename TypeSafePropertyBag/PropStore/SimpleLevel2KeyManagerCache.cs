@@ -1,18 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace DRM.TypeSafePropertyBag.PropStore
+namespace DRM.TypeSafePropertyBag
 {
     using GenerationIdType = UInt32;
 
-    internal class SimpleLevel2KeyManRepository<L2KeyManType, L2T, L2TRaw> where L2KeyManType : class, IL2KeyMan<L2T, L2TRaw>
+    internal class SimpleLevel2KeyManagerCache<L2KeyManType, L2T, L2TRaw> : ICacheLevel2KeyManagers<L2KeyManType, L2T, L2TRaw> where L2KeyManType : class, IL2KeyMan<L2T, L2TRaw>
     {
         public const GenerationIdType GEN_ZERO = 0;
 
         IDictionary<Tuple<L2KeyManType, GenerationIdType>, L2KeyManType> _level2KeyManagers;
-        object _sync;
+        object _sync = new object();
 
-        public SimpleLevel2KeyManRepository()
+        public SimpleLevel2KeyManagerCache()
         {
             _level2KeyManagers = new Dictionary<Tuple<L2KeyManType, GenerationIdType>, L2KeyManType>();
         }
