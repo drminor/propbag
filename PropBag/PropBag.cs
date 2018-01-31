@@ -857,7 +857,14 @@ namespace DRM.PropBag
         {
             //OurStoreAccessor.IncAccess();
             IProp<T> typedProp = GetTypedPropPrivate<T>(propertyName, mustBeRegistered: true, neverCreate: false);
-            return typedProp.TypedValue;
+            if(typedProp == null)
+            {
+                throw new InvalidOperationException($"Could not retrieve value for PropItem: {propertyName}.");
+            }
+            else
+            {
+                return typedProp.TypedValue;
+            }
         }
 
         protected IProp<T> GetTypedProp<T>(string propertyName)
@@ -914,12 +921,14 @@ namespace DRM.PropBag
                 propId: out propId);
 
             if (wasRegistered)
+            {
                 return PropData;
+            }
             else
             {
                 if (!PropData.IsEmpty)
                 {
-                    CheckTypeInfo<T>(propId, propertyName, PropData, _ourStoreAccessor);
+                    CheckTypeInfo<T>(propId, propertyName, PropData);
                 }
                 return PropData;
             }
@@ -1036,7 +1045,7 @@ namespace DRM.PropBag
             // No point in calling DoSet, it would find that the value is the same and do nothing.
             if (wasRegistered) return true;
 
-            IProp<T> prop = CheckTypeInfo<T>(propId, propertyName, PropData, _ourStoreAccessor);
+            IProp<T> prop = CheckTypeInfo<T>(propId, propertyName, PropData);
             _ourStoreAccessor.IncAccess();
 
             T curVal = PropData.TypedProp.ValueIsDefined ? (T) PropData.TypedProp.TypedValueAsObject : default(T);
@@ -1074,7 +1083,7 @@ namespace DRM.PropBag
             // No point in calling DoSet, it would find that the value is the same and do nothing.
             if (wasRegistered) return true;
 
-            IProp<T> typedProp = CheckTypeInfo<T>(propId, propertyName, PropData, _ourStoreAccessor);
+            IProp<T> typedProp = CheckTypeInfo<T>(propId, propertyName, PropData);
 
             //DoSet<T>(propId, propertyName, typedProp, newValue);
 
@@ -2080,26 +2089,11 @@ namespace DRM.PropBag
 
         #region Property Management
 
-        protected IPropData AddProp<T>(string propertyName, IProp<T> genericTypedProp,
-            EventHandler<PcTypedEventArgs<T>> doWhenChanged,
-            SubscriptionPriorityGroup priorityGroup,
-            out PropIdType propId)
-        {
-            propId = AddPropId(propertyName);
-
-            if (!_ourStoreAccessor.TryAdd(this, propId, propertyName, genericTypedProp, doWhenChanged, priorityGroup, out IPropData propGen))
-            {
-                throw new ApplicationException("Could not add the new propGen to the store.");
-            }
-
-            return propGen;
-        }
-
         protected IPropData AddProp(string propertyName, IProp genericTypedProp, out PropIdType propId)
         {
-            propId = AddPropId(propertyName);
+            //propId = AddPropId(propertyName);
 
-            if (!_ourStoreAccessor.TryAdd(this, propId, propertyName, genericTypedProp, out IPropData propGen))
+            if (!_ourStoreAccessor.TryAdd(this, propertyName, genericTypedProp, out IPropData propGen, out propId))
             {
                 throw new ApplicationException("Could not add the new propGen to the store.");
             }
@@ -2109,12 +2103,27 @@ namespace DRM.PropBag
         protected IPropData AddProp(string propertyName, IProp genericTypedProp, object target, MethodInfo method, 
             SubscriptionKind subscriptionKind, SubscriptionPriorityGroup priorityGroup, out PropIdType propId)
         {
-            propId = AddPropId(propertyName);
+            //propId = AddPropId(propertyName);
 
-            if (!_ourStoreAccessor.TryAdd(this, propId, propertyName, genericTypedProp, target, method, subscriptionKind, priorityGroup, out IPropData propGen))
+            if (!_ourStoreAccessor.TryAdd(this, propertyName, genericTypedProp, target, method,
+                subscriptionKind, priorityGroup, out IPropData propGen, out propId))
             {
                 throw new ApplicationException("Could not add the new propGen to the store.");
             }
+            return propGen;
+        }
+
+        protected IPropData AddProp<T>(string propertyName, IProp<T> genericTypedProp, EventHandler<PcTypedEventArgs<T>> doWhenChanged,
+            SubscriptionPriorityGroup priorityGroup, out PropIdType propId)
+        {
+            //propId = AddPropId(propertyName);
+
+            if (!_ourStoreAccessor.TryAdd(this, propertyName, genericTypedProp, doWhenChanged,
+                priorityGroup, out IPropData propGen, out propId))
+            {
+                throw new ApplicationException("Could not add the new propGen to the store.");
+            }
+
             return propGen;
         }
 
@@ -2564,6 +2573,11 @@ namespace DRM.PropBag
 
             IPropData PropData;
 
+            if(propertyName.StartsWith("Business"))
+            {
+                System.Diagnostics.Debug.WriteLine("Acessing PropItem with name starting: 'Business'.");
+            }
+
             if (TryGetPropId(propertyName, out propId))
             {
                 if (_ourStoreAccessor.TryGetValue(this, propId, out PropData))
@@ -2625,7 +2639,7 @@ namespace DRM.PropBag
             }
         }
 
-        private IProp<T> CheckTypeInfo<T>(PropIdType propId, PropNameType propertyName, IPropData PropData, PSAccessServiceInterface storeAccess, bool isGetOp = true)
+        private IProp<T> CheckTypeInfo<T>(PropIdType propId, PropNameType propertyName, IPropData PropData, bool isGetOp = true)
         {
             if (!PropData.TypedProp.TypeIsSolid)
             {
@@ -2764,12 +2778,12 @@ namespace DRM.PropBag
             return result;
         }
 
-        private PropIdType AddPropId(PropNameType propertyName)
-        {
-            // Register new propertyName and get an exploded key.
-            PropIdType propId = _ourStoreAccessor.Add(propertyName);
-            return propId;
-        }
+        //private PropIdType AddPropId(PropNameType propertyName)
+        //{
+        //    // Register new propertyName and get an exploded key.
+        //    PropIdType propId = _ourStoreAccessor.Add(propertyName);
+        //    return propId;
+        //}
 
         #endregion
 

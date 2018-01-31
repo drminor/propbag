@@ -18,7 +18,7 @@ namespace DRM.TypeSafePropertyBag
     {
         #region Private Fields
 
-        L2KeyManType _level2KeyMan;
+        //L2KeyManType Level2KeyMan;
         private readonly Dictionary<ExKeyT, StoreNodeProp> _children;
 
         private ICacheDelegates<CallPSParentNodeChangedEventSubDelegate> _callPSParentNodeChangedEventSubsCache;
@@ -109,7 +109,7 @@ namespace DRM.TypeSafePropertyBag
             CompKey = compKey;
             PropBagProxy = new WeakRefKey<IPropBag>(propBag ?? throw new ArgumentNullException(nameof(propBag)));
 
-            _level2KeyMan = level2KeyMan;
+            Level2KeyMan = level2KeyMan;
 
             _callPSParentNodeChangedEventSubsCache = callPSParentNodeChangedEventSubsCache ?? throw new ArgumentNullException(nameof(callPSParentNodeChangedEventSubsCache));
             _parentNCSubscriberCollection = null;
@@ -125,6 +125,8 @@ namespace DRM.TypeSafePropertyBag
         public ExKeyT CompKey { get; }
         public ObjectIdType ObjectId => CompKey.Level1Key;
         public PropIdType PropId => 0;
+
+        public L2KeyManType Level2KeyMan { get; internal set; }
 
         public WeakRefKey<IPropBag> PropBagProxy { get; }
         public bool IsAlive => PropBagProxy.TryGetTarget(out IPropBag dummy);
@@ -159,7 +161,6 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        public L2KeyManType Level2KeyMan => _level2KeyMan;
         public IEnumerable<StoreNodeProp> Children => _children.Values;
 
         #endregion
@@ -276,6 +277,39 @@ namespace DRM.TypeSafePropertyBag
 
         #endregion
 
+        public StoreNodeProp CreateAndAddPropNode(IPropDataInternal propData_Internal, PropNameType propertyName)
+        {
+            ExKeyT compKey = GetNewCompKey(propertyName);
+            StoreNodeProp newPropNode = new StoreNodeProp(compKey, propData_Internal, this);
+            return newPropNode;
+        }
+
+        private ExKeyT GetNewCompKey(PropNameType propertyName)
+        {
+            return new SimpleExKey(ObjectId, RegisterNewPropertyName(propertyName));
+        }
+
+        #region Level2Key Management
+
+        public bool TryGetPropId(PropNameType propertyName, out PropIdType propId)
+        {
+            return Level2KeyMan.TryGetFromRaw(propertyName, out propId);
+        }
+
+        public bool TryGetPropName(PropIdType propId, out PropNameType propertyName)
+        {
+            return Level2KeyMan.TryGetFromCooked(propId, out propertyName);
+        }
+
+        public PropIdType RegisterNewPropertyName(string propertyName)
+        {
+            return Level2KeyMan.Add(propertyName);
+        }
+
+        public int PropertyCount => Level2KeyMan.PropertyCount;
+
+        #endregion
+
         #region Raise ParentNodeHasChanged
 
         // When a StoreNodeBag gets a new host (i.e., a new StoreNodProp parent.)
@@ -337,7 +371,7 @@ namespace DRM.TypeSafePropertyBag
                 {
                     // Dispose managed state (managed objects).
                     ClearChildren();
-                    _level2KeyMan.Dispose();
+                    Level2KeyMan.Dispose();
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.

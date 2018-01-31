@@ -38,6 +38,8 @@ namespace DRM.TypeSafePropertyBag
 
         internal IPropDataInternal PropData_Internal { get; }
 
+        public bool HoldsAPropBag => PropData_Internal.IsPropBag;
+
         public StoreNodeBag Parent { get; set; }
 
         public StoreNodeBag Child { get; set; }

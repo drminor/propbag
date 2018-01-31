@@ -1,5 +1,4 @@
-﻿using DRM.TypeSafePropertyBag.Fundamentals;
-using System;
+﻿using System;
 
 namespace DRM.TypeSafePropertyBag
 {
@@ -10,11 +9,13 @@ namespace DRM.TypeSafePropertyBag
 
         bool TearDown(StoreNodeBag propBagNode);
 
+        object FixPropItemSet(StoreNodeBag propBagNode);
+        bool TryOpenPropItemSet(StoreNodeBag propBagNode, out object propItemSet_Handle);
+
         IPropStoreAccessService<L2T, L2TRaw> ClonePSAccessService
             (
             IPropBag sourcePropBag,
             IPropStoreAccessService<L2T, L2TRaw> sourceAccessService,
-            IL2KeyMan<L2T, L2TRaw> level2KeyManager,
             IPropBag targetPropBag,
             out StoreNodeBag newStoreNode
             );

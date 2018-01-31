@@ -12,7 +12,9 @@ namespace DRM.TypeSafePropertyBag
 
         bool TryGetPropId(L2TRaw propertyName, out L2T propId);
         bool TryGetPropName(L2T propertyId, out L2TRaw propertyName);
-        L2T Add(L2TRaw propertyName);
+
+        object FixPropItemSet();
+        bool TryOpenPropItemSet(out object propItemSet_Handle);
 
         // IDictionary-Like Methods
         IPropData this[IPropBag propBag, L2T propId] { get; }
@@ -24,12 +26,19 @@ namespace DRM.TypeSafePropertyBag
         IEnumerable<L2TRaw> GetKeys(IPropBag propBag);
         IEnumerable<IPropData> GetValues(IPropBag propBag);
 
-        bool TryAdd(IPropBag propBag, L2T propId, L2TRaw propertyName, IProp genericTypedProp, out IPropData propData);
+        bool TryAdd(IPropBag propBag, L2TRaw propertyName, IProp genericTypedProp, out IPropData propData, out L2T propId);
 
-        bool TryAdd(IPropBag propBag, L2T propId, L2TRaw propertyName, IProp genericTypedProp, EventHandler<PcGenEventArgs> handler, SubscriptionPriorityGroup priorityGroup, out IPropData propData);
-        bool TryAdd<PropT>(IPropBag propBag, L2T propId, L2TRaw propertyName, IProp genericTypedProp, EventHandler<PcTypedEventArgs<PropT>> handler, SubscriptionPriorityGroup priorityGroup, out IPropData propData);
+        bool TryAdd(IPropBag propBag, L2TRaw propertyName, IProp genericTypedProp,
+            EventHandler<PcGenEventArgs> handler, SubscriptionPriorityGroup priorityGroup,
+            out IPropData propData, out L2T propId);
 
-        bool TryAdd(IPropBag propBag, L2T propId, L2TRaw propertyName, IProp genericTypedProp, object target, MethodInfo method, SubscriptionKind subscriptionKind, SubscriptionPriorityGroup priorityGroup, out IPropData propData);
+        bool TryAdd<PropT>(IPropBag propBag, L2TRaw propertyName, IProp genericTypedProp,
+            EventHandler<PcTypedEventArgs<PropT>> handler, SubscriptionPriorityGroup priorityGroup,
+            out IPropData propData, out L2T propId);
+
+        bool TryAdd(IPropBag propBag, L2TRaw propertyName, IProp genericTypedProp,
+            object target, MethodInfo method, SubscriptionKind subscriptionKind, SubscriptionPriorityGroup priorityGroup,
+            out IPropData propData, out L2T propId);
 
         bool TryGetValue(IPropBag propBag, L2T propId, out IPropData propData);
         bool TryRemove(IPropBag propBag, L2T propId, out IPropData propData);
