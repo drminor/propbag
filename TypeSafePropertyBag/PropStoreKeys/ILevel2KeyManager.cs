@@ -17,5 +17,9 @@ namespace DRM.TypeSafePropertyBag
         L2T GetOrAdd(L2TRaw rawBot);
 
         int PropertyCount { get; }
+
+        bool IsFixed { get; }
+        void Fix();
+
     }
 }

@@ -27,6 +27,8 @@ namespace DRM.TypeSafePropertyBag
             _sync = new object();
             _rawDict = new Dictionary<PropNameType, PropIdType>();
             _cookedDict = new Dictionary<PropIdType, PropNameType>();
+
+            IsFixed = false;
         }
 
         //public SimpleLevel2KeyMan(IL2KeyMan<PropIdType, PropNameType> sourceToCopy)
@@ -39,7 +41,7 @@ namespace DRM.TypeSafePropertyBag
         //    _cookedDict = new Dictionary<PropIdType, PropNameType>(sourceToCopy._cookedDict);
         //}
 
-        internal SimpleLevel2KeyMan(int maxPropsPerObject, Dictionary<PropNameType, PropIdType> rawDict, Dictionary<PropIdType, PropNameType> cookedDict)
+        internal SimpleLevel2KeyMan(int maxPropsPerObject, Dictionary<PropNameType, PropIdType> rawDict, Dictionary<PropIdType, PropNameType> cookedDict, bool isFixed)
         {
             MaxPropsPerObject = maxPropsPerObject;
 
@@ -47,19 +49,27 @@ namespace DRM.TypeSafePropertyBag
 
             _rawDict = rawDict;
             _cookedDict = cookedDict;
+            IsFixed = isFixed;
         }
 
         #endregion
 
         public object Clone()
         {
-            SimpleLevel2KeyMan result = new SimpleLevel2KeyMan(this.MaxPropsPerObject, this._rawDict, this._cookedDict);
+            SimpleLevel2KeyMan result = new SimpleLevel2KeyMan(this.MaxPropsPerObject, this._rawDict, this._cookedDict, this.IsFixed);
             return result;
         }
 
         #region Public Members
 
         public int MaxPropsPerObject { get; }
+
+        public bool IsFixed { get; private set; }
+
+        public void Fix()
+        {
+            IsFixed = true;
+        }
 
         public PropNameType FromCooked(PropIdType bot)
         {
