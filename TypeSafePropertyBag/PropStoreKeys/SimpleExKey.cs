@@ -32,7 +32,7 @@ namespace DRM.TypeSafePropertyBag
         {
         }
 
-        public SimpleExKey(CompositeKeyType cKey) : this()
+        public SimpleExKey(CompositeKeyType cKey)
         {
             System.Diagnostics.Debug.Assert(cKey != 0, "The value 0 is reserved to indicate an empty Key. To create an empty key, use the parameterless constructor.");
             CKey = cKey;
