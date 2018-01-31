@@ -82,7 +82,6 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
         public LocalBinder(PSAccessServiceInterface propStoreAccessService, ExKeyT bindingTarget, LocalBindingInfo bindingInfo)
         {
-
             _bindingTarget = bindingTarget;
             _bindingInfo = bindingInfo;
 
