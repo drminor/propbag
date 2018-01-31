@@ -57,6 +57,7 @@ namespace DRM.TypeSafePropertyBag
 
         internal Delegate MakeTheDelegate(Type delegateType, MethodInfo method)
         {
+            System.Diagnostics.Debug.WriteLine($"Creating Delegate: {delegateType} for {method.Name}. (ParentNCSubscription.");
             Delegate result = Delegate.CreateDelegate(delegateType, null, method);
             return result;
         }
