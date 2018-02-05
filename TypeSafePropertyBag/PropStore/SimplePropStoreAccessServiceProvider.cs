@@ -27,8 +27,6 @@ namespace DRM.TypeSafePropertyBag
         // TODO: This should be defined somewhere else; in some place dedicated to Level2KeyManagers.
         public const GenerationIdType GEN_ZERO = 0;
 
-
-
         #region Private Members
 
         readonly Dictionary<WeakRefKey<IPropBag>, StoreNodeBag> _store;
