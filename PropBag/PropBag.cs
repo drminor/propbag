@@ -47,7 +47,7 @@ namespace DRM.PropBag
 
     #endregion
 
-    public partial class PropBag : IPropBag, /*IPropBagInternal,*/ IRegisterBindingsFowarderType
+    public partial class PropBag : IPropBag, IRegisterBindingsFowarderType
     {
         #region Member Declarations
 
@@ -58,6 +58,7 @@ namespace DRM.PropBag
         // We are responsible for these
         private ITypeSafePropBagMetaData _ourMetaData { get; set; }
         protected virtual ITypeSafePropBagMetaData OurMetaData { get { return _ourMetaData; } set { _ourMetaData = value; } }
+        protected internal object _propItemSet_Handle { get; private set; }
         private PropBagTypeSafetyMode _typeSafetyMode { get; }
 
         private IDictionary<string, IViewManagerProviderKey> _foreignViewManagers; // TODO: Consider creating a lazy property accessor for this field.
@@ -170,13 +171,19 @@ namespace DRM.PropBag
             : this(propModel.TypeSafetyMode, storeAcessorCreator, propModel.PropFactory ?? propFactory, fullClassName ?? propModel.FullClassName)
         {
                 long memUsedSoFar = _memConsumptionTracker.UsedSoFar;
-            Hydrate(propModel);
+
+            _propItemSet_Handle = Hydrate(propModel);
                 _memConsumptionTracker.Report(memUsedSoFar, "---- AfterHydrate.");
 
             int testc = _ourStoreAccessor.PropertyCount;
         }
 
-        protected PropBag(IPropBag copySource, PSAccessServiceInterface storeAccessor, IPropFactory propFactory)
+        public PropBag(IPropBag copySource) : this(copySource, ((PropBag)copySource)._ourStoreAccessor, ((PropBag)copySource)._propFactory)
+        {
+
+        }
+
+        internal PropBag(IPropBag copySource, PSAccessServiceInterface storeAccessor, IPropFactory propFactory)
         {
             _typeSafetyMode = copySource.TypeSafetyMode;
             _propFactory = propFactory;
@@ -228,7 +235,7 @@ namespace DRM.PropBag
 
         #region PropModel Processing
 
-        protected void Hydrate(IPropModel pm)
+        protected object Hydrate(IPropModel pm)
         {
             CheckClassNames(pm);
 
@@ -338,6 +345,10 @@ namespace DRM.PropBag
 
                 _memConsumptionTracker.Report(amountUsedBeforeThisPropItem, $"--Completed Hydrate for { pi.PropertyName}");
             }
+
+            object propItemSet_Handle = _ourStoreAccessor.FixPropItemSet();
+
+            return propItemSet_Handle;
         }
 
         private void CViewManagerProvider_ViewManagerChanged(object sender, EventArgs e)
@@ -1625,7 +1636,7 @@ namespace DRM.PropBag
 
         public virtual object Clone()
         {
-            return new PropBag(this, _ourStoreAccessor, _propFactory);
+            return new PropBag(this);
         }
 
         private PSAccessServiceInterface CloneProps(IPropBag copySource, PSAccessServiceInterface storeAccessor)
@@ -3026,7 +3037,7 @@ namespace DRM.PropBag
                     lock(_sync)
                     {
                         _ourStoreAccessor.Dispose(); // This disposes each of our PropItems.
-                        _ourStoreAccessor = null;
+                        //_ourStoreAccessor = null;
 
                         _ourMetaData = null;
                         _propFactory = null;

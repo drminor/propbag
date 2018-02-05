@@ -15,7 +15,8 @@ namespace DRM.TypeSafePropertyBag
         IPropStoreAccessService<L2T, L2TRaw> ClonePSAccessService
             (
             IPropBag sourcePropBag,
-            IPropStoreAccessService<L2T, L2TRaw> sourceAccessService,
+            //IPropStoreAccessService<L2T, L2TRaw> sourceAccessService,
+            StoreNodeBag propBagNode,
             IPropBag targetPropBag,
             out StoreNodeBag newStoreNode
             );
@@ -24,6 +25,9 @@ namespace DRM.TypeSafePropertyBag
     public interface IPropStoreAccessServiceCreator<L2T, L2TRaw> : IPropStoreAccessServicePerf<L2T, L2TRaw>
     {
         IPropStoreAccessService<L2T, L2TRaw> CreatePropStoreService(IPropBag propBag);
+
+        object FixPropItemSet(IPropBag propBag);
+        bool TryOpenPropItemSet(IPropBag propBag, out object propItemSet_Handle);
 
         // Information necessary to create composite keys.
         long MaxObjectsPerAppDomain { get; }

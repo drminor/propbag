@@ -3,8 +3,6 @@ using System;
 
 namespace DRM.TypeSafePropertyBag
 {
-    using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
-    using PropIdType = UInt32;
     using PropNameType = String;
 
     public class PropGen : IPropDataInternal
@@ -12,28 +10,33 @@ namespace DRM.TypeSafePropertyBag
         #region Private Properties
 
         //private ExKeyT _cKey;
-        private bool _isPropBag;
+        //public PropIdType PropId { get; }
 
         #endregion
 
         #region Public PropGen Properties
 
-        //public PropIdType PropId { get; }
-        public IProp TypedProp { get; private set; }
+
         public bool IsEmpty { get; }
+        public bool IsPropBag { get; private set; }
+
+        public IProp TypedProp { get; private set; }
+
+        public IPropTemplate PropDef { get; private set; }
 
         #endregion
 
         #region Constructors
 
-        public PropGen(/*ExKeyT cKey, */IProp genericTypedProp)
+        public PropGen(IProp genericTypedProp)
         {
             IsEmpty = false;
-            //_cKey = cKey;
+
             TypedProp = genericTypedProp ?? throw new ArgumentNullException($"{nameof(genericTypedProp)} must be non-null.");
+            PropDef = genericTypedProp;
 
             //PropId = cKey.Level2Key;
-            _isPropBag = genericTypedProp.Type.IsPropBagBased();
+            IsPropBag = genericTypedProp.Type.IsPropBagBased();
         }
 
         public PropGen()
@@ -42,7 +45,7 @@ namespace DRM.TypeSafePropertyBag
             TypedProp = null;
             //_cKey = new SimpleExKey();
             //PropId = _cKey.Level2Key;
-            _isPropBag = false;
+            IsPropBag = false;
         }
 
         #endregion
@@ -72,12 +75,12 @@ namespace DRM.TypeSafePropertyBag
 
         //ExKeyT IPropDataInternal.CKey => _cKey;
 
-        bool IPropDataInternal.IsPropBag => _isPropBag;
+        //public bool IsPropBag => _isPropBag;
 
         void IPropDataInternal.SetTypedProp(PropNameType propertyName, IProp value)
         {
             TypedProp = value;
-            _isPropBag = value.Type.IsPropBagBased();
+            IsPropBag = value.Type.IsPropBagBased();
         }
 
         #endregion

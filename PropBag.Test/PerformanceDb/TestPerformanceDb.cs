@@ -160,7 +160,7 @@ namespace PropBagLib.Tests.PerformanceDb
 
             ObservableCollTestObject oTester = new ObservableCollTestObject();
             oTester.CanMapObservableCollection(configPackageName, _ourHelper, _propFactory_V1, _amp, _pmHelpers, NUMBER_OF_PEOPLE);
-            oTester.DoCleanup();
+            //oTester.DoCleanup();
         }
 
         [Test]

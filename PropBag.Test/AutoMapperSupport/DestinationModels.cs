@@ -24,11 +24,11 @@ namespace PropBagLib.Tests.AutoMapperSupport
         }
 
         public DestinationModel3(DestinationModel3 copySource)
-            : base(copySource, copySource._ourStoreAccessor, copySource._propFactory)
+            : base(copySource)
         {
         }
 
-        new public object Clone()
+        override public object Clone()
         {
             return new DestinationModel3(this);
         }

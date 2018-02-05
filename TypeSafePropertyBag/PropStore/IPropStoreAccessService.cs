@@ -23,6 +23,7 @@ namespace DRM.TypeSafePropertyBag
 
         IEnumerable<KeyValuePair<L2TRaw, IPropData>> GetCollection(IPropBag propBag);
         IEnumerator<KeyValuePair<L2TRaw, IPropData>> GetEnumerator(IPropBag propBag);
+
         IEnumerable<L2TRaw> GetKeys(IPropBag propBag);
         IEnumerable<IPropData> GetValues(IPropBag propBag);
 

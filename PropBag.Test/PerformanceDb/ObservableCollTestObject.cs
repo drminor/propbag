@@ -33,6 +33,17 @@ namespace PropBagLib.Tests.PerformanceDb
             PropModel propModel1 = pmHelpers.GetPropModelForModel1Dest(propFactory_V1);
             Type typeToWrap = typeof(DestinationModel1);
 
+            // Make sure we can activate (or clone as appropriate) the destination type.
+            DestinationModel1 test = new DestinationModel1(PropBagTypeSafetyMode.AllPropsMustBeRegistered, ourHelper.StoreAccessCreator, null, ourHelper.PropFactory_V1);
+            if (configPackageName == "Emit_Proxy")
+            {
+                DestinationModel1 testCopy = new DestinationModel1(test);
+            }
+            else
+            {
+                DestinationModel1 testCopy = (DestinationModel1) test.Clone();
+            }
+
             IPropBagMapperKey<Person, DestinationModel1> mapperRequest = amp.RegisterMapperRequest<Person, DestinationModel1>
                 (
                     propModel: propModel1,
@@ -78,11 +89,11 @@ namespace PropBagLib.Tests.PerformanceDb
             int currentNumRootPropBags = ourHelper.StoreAccessCreator.NumberOfRootPropBagsInPlay;
             int totalRootPropBagsCreated = ourHelper.StoreAccessCreator.TotalNumberOfAccessServicesCreated;
 
-            PropBag test = (PropBag)_readyForTheView[0];
+            PropBag sampleItem = (PropBag)_readyForTheView[0];
 
-            int howManyDoSetDelegatesGotCreated = test.NumOfDoSetDelegatesInCache;
-            int howManyCreateFromString = test.CreatePropFromStringCacheCount;
-            int howManyCreateWithNoVal = test.CreatePropWithNoValCacheCount;
+            int howManyDoSetDelegatesGotCreated = sampleItem.NumOfDoSetDelegatesInCache;
+            int howManyCreateFromString = sampleItem.CreatePropFromStringCacheCount;
+            int howManyCreateWithNoVal = sampleItem.CreatePropWithNoValCacheCount;
 
             //Thread.Sleep(new TimeSpan(0, 0, 1));
         }

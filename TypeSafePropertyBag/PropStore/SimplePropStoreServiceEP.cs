@@ -38,6 +38,19 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
+        public object FixPropItemSet(IPropBag propBag)
+        {
+            object propItemSet_Handle = _propStoreAccessServiceProvider.FixPropItemSet(propBag);
+            return propItemSet_Handle;
+        }
+
+        public bool TryOpenPropItemSet(IPropBag propBag, out object propItemSet_Handle)
+        {
+            bool result = _propStoreAccessServiceProvider.TryOpenPropItemSet(propBag, out propItemSet_Handle);
+            return result;
+        }
+
+
         #endregion
 
         #region IDisposable Support

@@ -44,25 +44,36 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public IPropBagMapperGen GetMapper(IPropBagMapperKeyGen mapRequest)
         {
+            IPropBagMapperKeyGen save = mapRequest;
+
             if (_sealedPropBagMappers.TryGetValue(mapRequest, out IPropBagMapperGen result))
             {
+                CheckForChanges(save, mapRequest, "Find in Sealed -- First Check.");
                 return result;
             }
 
             _unSealedPropBagMappers.GetOrAdd(mapRequest);
-
-            IPropBagMapperKeyGen save = mapRequest;
+            CheckForChanges(save, mapRequest, "GetOrAdd to UnSealed");
 
             int numberInThisBatch = SealThis(pCntr++);
 
-            bool ttest = save.Equals(mapRequest);
+            CheckForChanges(save, mapRequest, "Seal");
 
-            if(!_sealedPropBagMappers.TryGetValue(mapRequest, out result))
+            if (!_sealedPropBagMappers.TryGetValue(mapRequest, out result))
             {
+                CheckForChanges(save, mapRequest, "Find in Sealed -- second check.");
                 result = null;
             }
 
             return result;
+        }
+
+        private void CheckForChanges(IPropBagMapperKeyGen original, IPropBagMapperKeyGen current, string operationName)
+        {
+            if(!ReferenceEquals(original,current))
+            {
+                System.Diagnostics.Debug.WriteLine($"The mapRequest was updated by method call: {operationName}.");
+            }
         }
 
         public int SealThis(int cntr)

@@ -63,7 +63,17 @@ namespace DRM.PropBag.AutoMapperSupport
                 _mct.Measure();
 
                 _template = GetNewDestination(PropModel, _storeAccessCreator, DestinationType, PropFactory, fullClassName: null);
-                _template = null; // TODO: Fix Me
+
+                // To ensure that the template's Level2Key Manager is shared amoung all clones,
+                // make sure it is fixed.
+                _storeAccessCreator.FixPropItemSet(_template);
+
+                //if(!_storeAccessCreator.TryOpenPropItemSet(propBag: _template, propItemSet_Handle: out object dummy))
+                //{
+                //    throw new InvalidOperationException("Cannot create a template with an open PropItemSet.");
+                //}
+
+                ////_template = null; // TODO: Fix Me
 
                 _mct.MeasureAndReport("GetNewDestination(PropModel, ... [In Constructor]", "AbstractPropBagMapper");
             }
@@ -132,8 +142,18 @@ namespace DRM.PropBag.AutoMapperSupport
 
             if (_template != null)
             {
-                result = _template.Clone() as TDestination;
-                _mct.MeasureAndReport("_template.Clone", "AstractPropBagMapper");
+                if(_requiresWrappperTypeEmitServices)
+                {
+                    result = GetNewDestination(RunTimeType, _template);
+                    _mct.MeasureAndReport("GetNewDestination using the copy constructor", "AstractPropBagMapper");
+                }
+                else
+                {
+                    result = (TDestination) _template.Clone();
+                    //result = GetNewDestination(RunTimeType, _template);
+
+                    _mct.MeasureAndReport("_template.Clone", "AstractPropBagMapper");
+                }
             }
             else
             {
@@ -163,17 +183,31 @@ namespace DRM.PropBag.AutoMapperSupport
         }
 
         // Regular Instantiation using the PropModel. 
-        private TDestination GetNewDestination(IPropModel propModel, PSAccessServiceCreatorInterface storeAccessCreator, Type destinationTypeOrProxy, IPropFactory propFactory, string fullClassName)
+        private TDestination GetNewDestination(IPropModel propModel, PSAccessServiceCreatorInterface storeAccessCreator, Type destinationOrProxyType, IPropFactory propFactory, string fullClassName)
         {
             try
             {
-                var newViewModel = _vmActivator.GetNewViewModel(propModel, storeAccessCreator, destinationTypeOrProxy, propFactory, fullClassName);
+                var newViewModel = _vmActivator.GetNewViewModel(propModel, storeAccessCreator, destinationOrProxyType, propFactory, fullClassName);
                 return newViewModel as TDestination;
             }
             catch (Exception e2)
             {
-                Type targetType = destinationTypeOrProxy ?? typeof(TDestination);
-                throw new InvalidOperationException($"Cannot create an instance of {targetType} that takes a PropModel parameter.", e2);
+                //Type targetType = destinationOrProxyType ?? typeof(TDestination);
+                throw new InvalidOperationException($"Cannot create an instance of {destinationOrProxyType} that takes a PropModel argument.", e2);
+            }
+        }
+
+        // Regular Instantiation using the PropModel. 
+        private TDestination GetNewDestination(Type destinationOrProxyType, IPropBag copySource)
+        {
+            try
+            {
+                var newViewModel = _vmActivator.GetNewViewModel(destinationOrProxyType, copySource);
+                return newViewModel as TDestination;
+            }
+            catch (Exception e2)
+            {
+                throw new InvalidOperationException($"Cannot create an instance of {destinationOrProxyType} that takes a single IPropag argument.", e2);
             }
         }
 

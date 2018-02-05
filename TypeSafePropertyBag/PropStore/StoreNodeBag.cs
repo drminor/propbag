@@ -352,7 +352,7 @@ namespace DRM.TypeSafePropertyBag
 
         #region IDisposable Support
 
-        private void ClearChildren()
+        private void DisposeChildren()
         {
             foreach (KeyValuePair<ExKeyT, StoreNodeProp> kvp in _children)
             {
@@ -370,8 +370,13 @@ namespace DRM.TypeSafePropertyBag
                 if (disposing)
                 {
                     // Dispose managed state (managed objects).
-                    ClearChildren();
-                    Level2KeyMan.Dispose();
+                    DisposeChildren();
+
+                    if (!Level2KeyMan.IsFixed)
+                    {
+                        // The Level2KenMan is open (for additions) and therefore it is not shared: It can be disposed.
+                        Level2KeyMan.Dispose();
+                    }
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.

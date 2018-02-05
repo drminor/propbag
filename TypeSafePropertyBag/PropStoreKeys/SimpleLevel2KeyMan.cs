@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DRM.TypeSafePropertyBag
 {
@@ -31,32 +32,27 @@ namespace DRM.TypeSafePropertyBag
             IsFixed = false;
         }
 
-        //public SimpleLevel2KeyMan(IL2KeyMan<PropIdType, PropNameType> sourceToCopy)
-        //{
-        //    MaxPropsPerObject = sourceToCopy.MaxPropsPerObject;
-
-        //    _sync = new object();
-
-        //    _rawDict = new Dictionary<PropNameType, PropIdType>(sourceToCopy._rawDict);
-        //    _cookedDict = new Dictionary<PropIdType, PropNameType>(sourceToCopy._cookedDict);
-        //}
-
         internal SimpleLevel2KeyMan(int maxPropsPerObject, Dictionary<PropNameType, PropIdType> rawDict, Dictionary<PropIdType, PropNameType> cookedDict, bool isFixed)
         {
             MaxPropsPerObject = maxPropsPerObject;
 
             _sync = new object();
 
-            _rawDict = rawDict;
-            _cookedDict = cookedDict;
+            _rawDict = new Dictionary<PropNameType, PropIdType>(rawDict);
+            _cookedDict = new Dictionary<PropIdType, PropNameType>(cookedDict);
+
             IsFixed = isFixed;
         }
 
         #endregion
 
+        /// <summary>
+        /// Creates a new open PropItemSet from this instance.
+        /// </summary>
+        /// <returns>A new open PropItemSet.</returns>
         public object Clone()
         {
-            SimpleLevel2KeyMan result = new SimpleLevel2KeyMan(this.MaxPropsPerObject, this._rawDict, this._cookedDict, this.IsFixed);
+            SimpleLevel2KeyMan result = new SimpleLevel2KeyMan(this.MaxPropsPerObject, this._rawDict, this._cookedDict, isFixed: false);
             return result;
         }
 
@@ -192,6 +188,15 @@ namespace DRM.TypeSafePropertyBag
             Dispose(true);
             // TODO: uncomment the following line if the finalizer is overridden above.
             // GC.SuppressFinalize(this);
+        }
+
+        public override string ToString()
+        {
+            string contents = (_rawDict.Count == 0) ? "Empty" : $"First Item: {_rawDict.Keys.FirstOrDefault()}";
+
+            string state = IsFixed ? "Fixed" : "Open";
+
+            return $"With count: {_rawDict.Count}; Contents: {contents}, and state: {state}";
         }
 
         #endregion

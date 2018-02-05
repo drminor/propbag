@@ -476,7 +476,7 @@ namespace DRM.TypeSafePropertyBag
 
         public PSAccessServiceInterface CloneProps(IPropBag callingPropBag, IPropBag copySource)
         {
-            // Since the caller does not yet have a StoreAccessor (this method is responsble for creating the new StoreAccessor),
+            // Since the caller does not yet have a StoreAccessor (this method is responsble for creating its new StoreAccessor),
             // the caller is using the StoreAccessor that belongs to the copySource to make this call.
             GetAndCheckObjectRef(copySource);
 
@@ -485,7 +485,7 @@ namespace DRM.TypeSafePropertyBag
             PSAccessServiceInterface newStoreAccessor = _propStoreAccessServiceProvider.ClonePSAccessService
                 (
                     copySource,
-                    this,
+                    copySourceStoreNode,
                     callingPropBag, // The PropBag for which the newStoreAcessor will be built.
                     out StoreNodeBag newStoreNode
                 );

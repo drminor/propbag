@@ -27,7 +27,7 @@ namespace PropBagLib.Tests.PerformanceDb
         }
 
         public DestinationModel1(DestinationModel1 copySource)
-            : base(copySource, copySource._ourStoreAccessor, copySource._propFactory)
+            : base(copySource)
         {
         }
 
@@ -51,6 +51,11 @@ namespace PropBagLib.Tests.PerformanceDb
         {
         }
 
+        public DestinationModel5(DestinationModel5 copySource)
+            : base(copySource)
+        {
+        }
+
     }
 
     public partial class DestinationModel6 : PropBag
@@ -63,6 +68,11 @@ namespace PropBagLib.Tests.PerformanceDb
 
         public DestinationModel6(PropModel propModel, PSAccessServiceCreatorInterface storeAccessCreator, IPropFactory propFactory, string fullClassName)
             : base(propModel, storeAccessCreator, propFactory, fullClassName)
+        {
+        }
+
+        public DestinationModel6(DestinationModel6 copySource)
+            : base(copySource)
         {
         }
 
