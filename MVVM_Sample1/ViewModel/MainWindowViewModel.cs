@@ -28,6 +28,11 @@ namespace MVVMApplication.ViewModel
             //System.Diagnostics.Debug.WriteLine("Completed Constructing MainWindowViewModel -- From PropModel.");
         }
 
+        public MainWindowViewModel(MainWindowViewModel copySource)
+            : base(copySource)
+        {
+        }
+
         public void CloseTheWindow()
         {
             Interlocked.CompareExchange(ref RequestClose, null, null)?.Invoke(this, EventArgs.Empty);

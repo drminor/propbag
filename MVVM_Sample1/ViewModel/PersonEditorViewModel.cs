@@ -24,15 +24,15 @@ namespace MVVMApplication.ViewModel
             System.Diagnostics.Debug.WriteLine("Constructing PersonEditorViewModel -- with PropModel.");
         }
 
-        //private PersonEditorViewModel(PersonEditorViewModel copySource)
-        //    : base(copySource, copySource._ourStoreAccessor, copySource._propFactory)
-        //{
-        //}
+        private PersonEditorViewModel(PersonEditorViewModel copySource)
+            : base(copySource)
+        {
+        }
 
-        //new public object Clone()
-        //{
-        //    return new PersonEditorViewModel(this);
-        //}
+        new public object Clone()
+        {
+            return new PersonEditorViewModel(this);
+        }
 
         #endregion
 

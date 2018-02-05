@@ -6,7 +6,7 @@
                     xmlns:pb="clr-namespace:DRM.PropBagControlsWPF;assembly=PropBag.WPFControls"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
-    <pb:MapperRequestTemplate x:Key="PersonVM_Mapper_Extra_Members"
+    <!--<pb:MapperRequestTemplate x:Key="PersonVM_Mapper_Extra_Members"
                       SourceType="{x:Type mod:Person}"
                       DestinationPropModelKey="PersonVM"
                       ConfigPackageName="Extra_Members" />
@@ -14,7 +14,7 @@
     <pb:MapperRequestTemplate x:Key="PersonVM_Mapper_Emit_Proxy"
                       SourceType="{x:Type mod:Person}"
                       DestinationPropModelKey="PersonVM"
-                      ConfigPackageName="Emit_Proxy" />
+                      ConfigPackageName="Emit_Proxy" />-->
 
     <pb:PropBagTemplate x:Key="PersonVM"
                         ClassName="PersonVM"

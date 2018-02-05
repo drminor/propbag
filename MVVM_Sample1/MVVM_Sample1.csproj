@@ -68,6 +68,7 @@
     <Compile Include="ViewModel\MainWindowViewModel.cs" />
     <Compile Include="ViewModel\PersonEditorViewModel.cs" />
     <Compile Include="ViewModel\PersonCollectionViewModel.cs" />
+    <Compile Include="ViewModel\PersonViewModel.pb.cs" />
     <Compile Include="ViewModel\PersonViewModel.cs" />
     <Compile Include="View\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
@@ -101,6 +102,14 @@
     <Page Include="PropBagTemplates\MainWindowVM.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="PropBagTemplates\MapperConf_Emit.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="PropBagTemplates\MapperConf_Extra.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="PropBagTemplates\PersonEditorVM.xaml">
       <Generator>MSBuild:Compile</Generator>

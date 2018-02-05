@@ -14,15 +14,10 @@ namespace MVVMApplication.ViewModel
             System.Diagnostics.Debug.WriteLine("Constructing PersonCollectionViewModel -- with PropModel.");
         }
 
-        //protected PersonCollectionViewModel(PersonCollectionViewModel copySource)
-        //    : base(copySource, copySource._propFactory, copySource._ourStoreAccessor)
-        //{
-        //}
-
-        //private PersonCollectionViewModel(PersonCollectionViewModel copySource)
-        //    : base(copySource, copySource._ourStoreAccessor, copySource._propFactory)
-        //{
-        //}
+        protected PersonCollectionViewModel(PersonCollectionViewModel copySource)
+            : base(copySource)
+        {
+        }
 
         //new public object Clone()
         //{
