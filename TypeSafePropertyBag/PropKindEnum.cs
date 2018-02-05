@@ -1,4 +1,6 @@
 ﻿
+using System;
+
 namespace DRM.TypeSafePropertyBag
 {
     public enum PropKindEnum
@@ -23,5 +25,101 @@ namespace DRM.TypeSafePropertyBag
 
         DataTable,
         DataTable_RO
+    }
+
+    public static class PropKindEnumExtensions
+    {
+        public static bool IsCollection(this PropKindEnum propKind)
+        {
+            if (propKind == PropKindEnum.Prop)
+            {
+                return false;
+            }
+            else if
+                (
+                propKind == PropKindEnum.ObservableCollection ||
+                propKind == PropKindEnum.EnumerableTyped ||
+                propKind == PropKindEnum.Enumerable ||
+                propKind == PropKindEnum.ObservableCollection_RO ||
+                propKind == PropKindEnum.EnumerableTyped_RO ||
+                propKind == PropKindEnum.Enumerable_RO
+                )
+            {
+                return true;
+            }
+            else
+            {
+                CheckPropKindSpecial(propKind);
+                return false;
+            }
+        }
+
+        public static bool IsReadOnly(this PropKindEnum propKind)
+        {
+            if (propKind == PropKindEnum.Prop)
+            {
+                return false;
+            }
+            else if
+                (
+                propKind == PropKindEnum.CollectionViewSource_RO ||
+                propKind == PropKindEnum.ObservableCollection_RO ||
+                propKind == PropKindEnum.EnumerableTyped_RO ||
+                propKind == PropKindEnum.Enumerable_RO
+                )
+            {
+                return true;
+            }
+            else
+            {
+                CheckPropKind(propKind);
+                return false;
+            }
+        }
+
+        #region DEBUG Checks
+
+        [System.Diagnostics.Conditional("DEBUG")]
+        private static void CheckPropKind(PropKindEnum propKind)
+        {
+            if (!
+                    (
+                    propKind == PropKindEnum.CollectionView ||
+                    propKind == PropKindEnum.CollectionViewSource ||
+                    propKind == PropKindEnum.CollectionViewSource_RO ||
+                    propKind == PropKindEnum.DataTable ||
+                    propKind == PropKindEnum.DataTable_RO ||
+                    propKind == PropKindEnum.Prop ||
+                    propKind == PropKindEnum.ObservableCollection ||
+                    propKind == PropKindEnum.EnumerableTyped ||
+                    propKind == PropKindEnum.Enumerable ||
+                    propKind == PropKindEnum.ObservableCollection_RO ||
+                    propKind == PropKindEnum.EnumerableTyped_RO ||
+                    propKind == PropKindEnum.Enumerable_RO
+                    )
+                )
+            {
+                throw new InvalidOperationException($"The PropKind: {propKind} is not supported.");
+            }
+        }
+
+        [System.Diagnostics.Conditional("DEBUG")]
+        private static void CheckPropKindSpecial(PropKindEnum propKind)
+        {
+            if (!
+                    (
+                    propKind == PropKindEnum.CollectionView ||
+                    propKind == PropKindEnum.CollectionViewSource ||
+                    propKind == PropKindEnum.CollectionViewSource_RO ||
+                    propKind == PropKindEnum.DataTable ||
+                    propKind == PropKindEnum.DataTable_RO
+                    )
+                )
+            {
+                throw new InvalidOperationException($"The PropKind: {propKind} is not supported.");
+            }
+        }
+
+        #endregion 
     }
 }

@@ -30,10 +30,10 @@ namespace DRM.TypeSafePropertyBag
 
 
         bool IsCollection(IProp prop);
-        bool IsCollection(PropKindEnum propKind);
+        //bool IsCollection(PropKindEnum propKind);
 
         bool IsReadOnly(IProp prop);
-        bool IsReadOnly(PropKindEnum propKind);
+        //bool IsReadOnly(PropKindEnum propKind);
 
         #endregion
 
