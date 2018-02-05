@@ -4,8 +4,6 @@ using System.ComponentModel;
 
 namespace DRM.PropBag
 {
-    using IRegisterBindingsFowarderType = IRegisterBindingsForwarder<UInt32>;
-    using PropIdType = UInt32;
     using PropNameType = String;
 
     public class Prop<T> : PropTypedBase_New<T>

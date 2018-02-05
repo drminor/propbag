@@ -88,6 +88,8 @@
     <Compile Include="PropStore\IProvidePropStoreServiceSingletons.cs" />
     <Compile Include="PropStore\ICacheLevel2KeyManagers.cs" />
     <Compile Include="PropStore\PropStoreServices.cs" />
+    <Compile Include="PropStore\PropTemplateCache\PropTemplateCache.cs" />
+    <Compile Include="PropStore\PropTemplateCache\PropTemplateKey.cs" />
     <Compile Include="PropStore\PSNodeChangedEventArgs.cs" />
     <Compile Include="PropStore\SimpleLevel2KeyManagerCache.cs" />
     <Compile Include="PropStore\ViewManagers\IViewManagerProviderKey.cs" />

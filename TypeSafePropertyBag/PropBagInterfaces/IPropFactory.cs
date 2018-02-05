@@ -84,14 +84,23 @@ namespace DRM.TypeSafePropertyBag
         #region Scalar Prop Creation
 
         IProp<T> Create<T>(
-            bool haveValue,
-            T initialValue,
+            T value,
             PropNameType propertyName,
             object extraInfo,
             PropStorageStrategyEnum storageStrategy,
-            bool typeIsSolid,
+            bool isTypeSolid,
             Func<T, T, bool> comparer,
-            GetDefaultValueDelegate<T> getDefaultValFunc);
+            Func<string, T> getDefaultValFunc);
+
+        //IProp<T> Create<T>(
+        //    bool haveValue,
+        //    T initialValue,
+        //    PropNameType propertyName,
+        //    object extraInfo,
+        //    PropStorageStrategyEnum storageStrategy,
+        //    bool typeIsSolid,
+        //    Func<T, T, bool> comparer,
+        //    Func<string, T> getDefaultValFunc);
 
         //IProp<T> Create<T>(T initialValue, PropNameType propertyName, object extraInfo = null, 
         //    PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true, Func<T, T, bool> comparer = null);
@@ -103,7 +112,7 @@ namespace DRM.TypeSafePropertyBag
             PropStorageStrategyEnum storageStrategy,
             bool typeIsSolid,
             Func<T, T, bool> comparer,
-            GetDefaultValueDelegate<T> getDefaultValFunc
+            Func<string, T> getDefaultValFunc
             );
 
         #endregion

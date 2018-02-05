@@ -37,7 +37,7 @@ namespace DRM.TypeSafePropertyBag
             {
                 if (!ValueIsDefined)
                 {
-                    if (_template.ReturnDefaultForUndefined)
+                    if (ReturnDefaultForUndefined)
                     {
                         return _template.GetDefaultValFunc(PropertyName);
                     }
@@ -69,10 +69,14 @@ namespace DRM.TypeSafePropertyBag
 
         public object TypedValueAsObject => TypedValue;
 
-        public GetDefaultValueDelegate<T> GetDefaultValFunc => _template.GetDefaultValFunc;
-        public bool ReturnDefaultForUndefined => _template.ReturnDefaultForUndefined;
+        public bool ReturnDefaultForUndefined => _template.GetDefaultValFunc != null;
 
+        public Func<string, T> GetDefaultValFunc => _template.GetDefaultValFunc;
         public Func<T, T, bool> Comparer => _template.Comparer;
+
+        public object GetDefaultValFuncProxy => _template.GetDefaultValFuncProxy;
+        public object ComparerProxy => _template.ComparerProxy;
+
         public Attribute[] Attributes => _template.Attributes;
 
         public abstract object Clone();
@@ -99,7 +103,8 @@ namespace DRM.TypeSafePropertyBag
 
         public bool Compare(T val1, T val2)
         {
-            return _template.Compare(val1, val2);
+            //return _template.Compare(val1, val2);
+            return _template.Comparer(val1, val2);
         }
 
         public virtual ValPlusType GetValuePlusType()

@@ -16,7 +16,7 @@ namespace DRM.TypeSafePropertyBag
         public override bool ReturnDefaultForUndefined => GetDefaultValFunc != null;
 
         public Func<T, T, bool> Comparer { get; }
-        public GetDefaultValueDelegate<T> GetDefaultValFunc { get; }
+        public Func<string, T> GetDefaultValFunc { get; }
 
         public override object TypedValueAsObject => TypedValue;
 
@@ -41,7 +41,7 @@ namespace DRM.TypeSafePropertyBag
         #region Constructors
 
         protected PropTypedBase(Type typeOfThisValue, bool typeIsSolid, PropStorageStrategyEnum storageStrategy, bool valueIsDefined,
-            Func<T,T,bool> comparer, GetDefaultValueDelegate<T> defaultValFunc, PropKindEnum propKind)
+            Func<T,T,bool> comparer, Func<string, T> defaultValFunc, PropKindEnum propKind)
             : base(propKind, typeOfThisValue, typeIsSolid, storageStrategy, valueIsDefined)
         {
             Comparer = comparer;

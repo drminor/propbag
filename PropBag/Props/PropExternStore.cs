@@ -14,7 +14,7 @@ namespace DRM.PropBag
     {
         public PropExternStore(string propertyName,
             object extraInfo,
-            GetDefaultValueDelegate<T> defaultValFunc,
+            Func<string, T> defaultValFunc,
             bool typeIsSolid,
             Func<T, T, bool> comparer)
             : base(typeof(T), typeIsSolid, PropStorageStrategyEnum.External, true,  comparer, defaultValFunc, PropKindEnum.Prop)

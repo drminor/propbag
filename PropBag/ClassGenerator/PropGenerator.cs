@@ -48,7 +48,7 @@ namespace DRM.PropBag.ClassGenerator
                         initVal = factory.GetValueFromString<T>(def.InitialValue);
                     }
 
-                    prop = factory.Create<T>(true, initVal, def.PropName, def.ExtraInfo, def.StorageStrategy, def.TypeIsSolid, comparer, null);
+                    prop = factory.Create<T>(initVal, def.PropName, def.ExtraInfo, def.StorageStrategy, def.TypeIsSolid, comparer, null);
                 }
             }
             else

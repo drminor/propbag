@@ -110,14 +110,13 @@ namespace DRM.PropBag
         //}
 
         public override IProp<T> Create<T>(
-            bool haveValue,
             T initialValue,
             PropNameType propertyName,
             object extraInfo,
             PropStorageStrategyEnum storageStrategy,
             bool typeIsSolid,
             Func<T, T, bool> comparer,
-            GetDefaultValueDelegate<T> getDefaultValFunc)
+            Func<string, T> getDefaultValFunc)
         {
             throw new InvalidOperationException("External Store Factory doesn't know how to create properties with initial values.");
         }
@@ -129,7 +128,7 @@ namespace DRM.PropBag
             PropStorageStrategyEnum storageStrategy,
             bool typeIsSolid,
             Func<T, T, bool> comparer,
-            GetDefaultValueDelegate<T> getDefaultValFunc
+            Func<string, T> getDefaultValFunc
             )
         {
             // Supply a comparer, if one was not supplied by the caller.

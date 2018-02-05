@@ -31,6 +31,10 @@ namespace DRM.TypeSafePropertyBag
 
         public abstract bool ReturnDefaultForUndefined { get; }
 
+        public object ComparerProxy => throw new NotImplementedException();
+
+        public object GetDefaultValFuncProxy => throw new NotImplementedException();
+
         //DataSourceProvider _dataSourceProvider;
 
         public event EventHandler<EventArgs> ValueChanged;

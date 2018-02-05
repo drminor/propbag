@@ -68,7 +68,7 @@ namespace DRM.PropBag
         ) 
         {
             if (comparer == null) comparer = EqualityComparer<CT>.Default.Equals;
-            GetDefaultValueDelegate<CT> getDefaultValFunc = ValueConverter.GetDefaultValue<CT>;
+            Func<string, CT> getDefaultValFunc = ValueConverter.GetDefaultValue<CT>;
 
             ICProp<CT, T> prop = new CProp<CT, T>(initialValue, getDefaultValFunc, typeIsSolid, storageStrategy, comparer);
             return prop;
@@ -83,7 +83,7 @@ namespace DRM.PropBag
         {
             if (comparer == null) comparer = EqualityComparer<CT>.Default.Equals;
 
-            GetDefaultValueDelegate<CT> getDefaultValFunc = ValueConverter.GetDefaultValue<CT>;
+            Func<string, CT> getDefaultValFunc = ValueConverter.GetDefaultValue<CT>;
 
             ICProp<CT, T> prop = new CProp<CT, T>(getDefaultValFunc, typeIsSolid, storageStrategy, comparer);
             return prop;
@@ -108,22 +108,21 @@ namespace DRM.PropBag
         #region Scalar Prop Creation
 
         public override IProp<T> Create<T>(
-            bool haveValue,
             T initialValue,
             PropNameType propertyName,
             object extraInfo,
             PropStorageStrategyEnum storageStrategy,
             bool typeIsSolid,
             Func<T, T, bool> comparer,
-            GetDefaultValueDelegate<T> getDefaultValFunc)
+            Func<string, T> getDefaultValFunc)
         {
             if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
 
-            if(getDefaultValFunc == null) getDefaultValFunc = ValueConverter.GetDefaultValue<T>;
+            if (getDefaultValFunc == null) getDefaultValFunc = ValueConverter.GetDefaultValue<T>;
 
             //IProp<T> prop = new Prop<T>(initialValue, getDefaultValFunc, typeIsSolid: typeIsSolid, storageStrategy: storageStrategy, comparer: comparer);
 
-            PropTemplateTyped<T> propTemplateTyped = new PropTemplateTyped<T>(PropKindEnum.Prop, storageStrategy, typeIsSolid, comparer, getDefaultValFunc);
+            PropTemplateTyped<T> propTemplateTyped = new PropTemplateTyped<T>(PropKindEnum.Prop, storageStrategy, comparer, getDefaultValFunc);
 
             IProp<T> prop = new Prop<T>(propertyName, initialValue, typeIsSolid, propTemplateTyped);
             return prop;
@@ -149,7 +148,7 @@ namespace DRM.PropBag
             PropStorageStrategyEnum storageStrategy,
             bool typeIsSolid,
             Func<T, T, bool> comparer,
-            GetDefaultValueDelegate<T> getDefaultValFunc
+            Func<string, T> getDefaultValFunc
             )
         {
             // Supply a comparer, if one was not supplied by the caller.
@@ -158,7 +157,7 @@ namespace DRM.PropBag
             // Use the Get Default Value function supplied or provided by this Prop Factory.
             if(getDefaultValFunc == null) getDefaultValFunc = ValueConverter.GetDefaultValue<T>;
 
-            PropTemplateTyped<T> propTemplateTyped = new PropTemplateTyped<T>(PropKindEnum.Prop, storageStrategy, typeIsSolid, comparer, getDefaultValFunc);
+            PropTemplateTyped<T> propTemplateTyped = new PropTemplateTyped<T>(PropKindEnum.Prop, storageStrategy, comparer, getDefaultValFunc);
 
             //IProp<T> prop = new Prop_New<T>(propertyName, typeIsSolid, propTemplateTyped);
             //return prop;

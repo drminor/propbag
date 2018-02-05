@@ -1,21 +1,17 @@
 ﻿using DRM.TypeSafePropertyBag;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Collections.ObjectModel;
 using System.Collections;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.ComponentModel;
 
 namespace DRM.PropBag
 {
     public class CProp<CT,T> : PropTypedBase<CT>, ICProp<CT,T> where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged
     {
         public CProp(CT initalValue,
-            GetDefaultValueDelegate<CT> defaultValFunc,
+            Func<string, CT> defaultValFunc,
             bool typeIsSolid,
             PropStorageStrategyEnum storageStrategy,
             Func<CT, CT, bool> comparer)
@@ -27,7 +23,7 @@ namespace DRM.PropBag
             }
         }
 
-        public CProp(GetDefaultValueDelegate<CT> defaultValFunc,
+        public CProp(Func<string, CT> defaultValFunc,
             bool typeIsSolid,
             PropStorageStrategyEnum storageStrategy,
             Func<CT, CT, bool> comparer)

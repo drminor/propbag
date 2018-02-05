@@ -69,7 +69,6 @@ namespace DRM.TypeSafePropertyBag
         Delegate getDefaultValFunc
         );
 
-
     //// From Object
     //public delegate IProp CreatePropFromObjectDelegate(IPropFactory propFactory,
     //    object value,

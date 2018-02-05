@@ -12,7 +12,7 @@ namespace DRM.PropBag
     public class PropNoStore<T> : PropTypedBase<T>
     {
         public PropNoStore(
-            GetDefaultValueDelegate<T> defaultValFunc,
+            Func<string, T> defaultValFunc,
             bool typeIsSolid,
             PropStorageStrategyEnum storageStrategy,
             Func<T, T, bool> comparer)

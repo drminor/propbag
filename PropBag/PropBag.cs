@@ -2043,7 +2043,7 @@ namespace DRM.PropBag
         {
             PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal;
             bool typeIsSolid = true;
-            IProp<T> pg = _propFactory.Create<T>(true, initialValue, propertyName, extraInfo, storageStrategy, typeIsSolid, comparer, null);
+            IProp<T> pg = _propFactory.Create<T>(initialValue, propertyName, extraInfo, storageStrategy, typeIsSolid, comparer, null);
             AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard, out PropIdType propId);
             return pg;
         }
@@ -2053,7 +2053,7 @@ namespace DRM.PropBag
             PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal;
             bool typeIsSolid = true;
             Func<T, T, bool> comparer = _propFactory.GetRefEqualityComparer<T>();
-            IProp<T> pg = _propFactory.Create<T>(true, initialValue, propertyName, extraInfo, storageStrategy, typeIsSolid, comparer, null);
+            IProp<T> pg = _propFactory.Create<T>(initialValue, propertyName, extraInfo, storageStrategy, typeIsSolid, comparer, null);
             AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard, out PropIdType propId);
             return pg;
         }
@@ -2147,7 +2147,7 @@ namespace DRM.PropBag
 
             bool mustBeRegistered = _typeSafetyMode == PropBagTypeSafetyMode.Locked;
 
-            IPropData pGen = GetPropGen(propertyName, null, haveValue: false, value: null,
+            IPropData propData = GetPropGen(propertyName, null, haveValue: false, value: null,
                 alwaysRegister: false,
                 mustBeRegistered: false,
                 neverCreate: true,
@@ -2155,9 +2155,9 @@ namespace DRM.PropBag
                 wasRegistered: out bool wasRegistered,
                 propId: out PropIdType propId);
 
-            if (!pGen.IsEmpty)
+            if (!propData.IsEmpty)
             {
-                pGen.CleanUp(doTypedCleanup: false);
+                //PropData.CleanUp(doTypedCleanup: true);
 
                 if (!_ourStoreAccessor.TryRemove(this, propId, out IPropData foundValue))
                 {
@@ -2174,11 +2174,11 @@ namespace DRM.PropBag
         {
             bool mustBeRegistered = _typeSafetyMode == PropBagTypeSafetyMode.Locked;
 
-            IPropData PropData = GetGenPropPrivate<T>(propertyName, mustBeRegistered: mustBeRegistered, neverCreate: true, propId: out PropIdType propId);
+            IPropData propData = GetGenPropPrivate<T>(propertyName, mustBeRegistered: mustBeRegistered, neverCreate: true, propId: out PropIdType propId);
 
-            if(!PropData.IsEmpty)
+            if(!propData.IsEmpty)
             {
-                PropData.CleanUp(doTypedCleanup: true);
+                //PropData.CleanUp(doTypedCleanup: true);
 
                 if (!_ourStoreAccessor.TryRemove(this, propId, out IPropData foundValue))
                 {

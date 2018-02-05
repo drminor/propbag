@@ -153,20 +153,31 @@ namespace DRM.TypeSafePropertyBag
             Delegate getDefaultValFunc
         )
         {
-            T initialValue;
-            if (useDefault)
+            Func<T, T, bool> comparerToUse = GetComparerForProps<T>(comparer, propFactory, useRefEquality);
+
+            Func<string, T> getDefaultValFuncToUse = (Func<string, T>) getDefaultValFunc ?? propFactory.ValueConverter.GetDefaultValue<T>;
+
+            if (haveValue || useDefault)
             {
-                initialValue = propFactory.ValueConverter.GetDefaultValue<T>(propertyName);
+                T initialValue;
+                if (useDefault)
+                {
+                    initialValue = getDefaultValFuncToUse(propertyName);
+                }
+                else
+                {
+                    initialValue = propFactory.GetValueFromObject<T>(value);
+                }
+
+                return propFactory.Create(initialValue, propertyName, extraInfo, storageStrategy, isTypeSolid,
+                    comparerToUse, getDefaultValFuncToUse);
             }
             else
             {
-                initialValue = propFactory.GetValueFromObject<T>(value);
+                return propFactory.CreateWithNoValue<T>(propertyName, extraInfo, storageStrategy, isTypeSolid,
+                    comparerToUse, getDefaultValFuncToUse);
             }
 
-            GetDefaultValueDelegate<T> getDefaultValFuncTyped = (GetDefaultValueDelegate<T>)getDefaultValFunc;
-
-            return propFactory.Create<T>(haveValue, initialValue, propertyName, extraInfo, storageStrategy, isTypeSolid,
-                GetComparerForProps<T>(comparer, propFactory, useRefEquality), getDefaultValFuncTyped);
         }
 
         //// From String
