@@ -57,7 +57,7 @@ namespace DRM.PropBag
 
         #endregion
 
-        #region IObsCollection<T> and ObservableCollection<T> Prop Creation
+        #region ObservableCollection<T> Prop Creation
 
         public override ICProp<CT, T> Create<CT, T>
         (
@@ -108,40 +108,77 @@ namespace DRM.PropBag
         #region Scalar Prop Creation
 
         public override IProp<T> Create<T>(
+            bool haveValue,
             T initialValue,
-            PropNameType propertyName, object extraInfo = null,
-            PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true,
-            Func<T, T, bool> comparer = null)
+            PropNameType propertyName,
+            object extraInfo,
+            PropStorageStrategyEnum storageStrategy,
+            bool typeIsSolid,
+            Func<T, T, bool> comparer,
+            GetDefaultValueDelegate<T> getDefaultValFunc)
         {
             if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
 
-            GetDefaultValueDelegate<T> getDefaultValFunc = ValueConverter.GetDefaultValue<T>;
-            IProp<T> prop = new Prop<T>(initialValue, getDefaultValFunc, typeIsSolid: typeIsSolid, storageStrategy: storageStrategy, comparer: comparer);
+            if(getDefaultValFunc == null) getDefaultValFunc = ValueConverter.GetDefaultValue<T>;
+
+            //IProp<T> prop = new Prop<T>(initialValue, getDefaultValFunc, typeIsSolid: typeIsSolid, storageStrategy: storageStrategy, comparer: comparer);
+
+            PropTemplateTyped<T> propTemplateTyped = new PropTemplateTyped<T>(PropKindEnum.Prop, storageStrategy, typeIsSolid, comparer, getDefaultValFunc);
+
+            IProp<T> prop = new Prop_New<T>(propertyName, initialValue, typeIsSolid, propTemplateTyped);
             return prop;
         }
 
-        public override IProp<T> CreateWithNoValue<T>(
-            PropNameType propertyName, object extraInfo = null,
-            PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true,
-            Func<T, T, bool> comparer = null)
+        //public override IProp<T> Create<T>(
+        //    T initialValue,
+        //    PropNameType propertyName, object extraInfo = null,
+        //    PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true,
+        //    Func<T, T, bool> comparer = null)
+        //{
+        //    if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
+
+        //    GetDefaultValueDelegate<T> getDefaultValFunc = ValueConverter.GetDefaultValue<T>;
+        //    IProp<T> prop = new Prop<T>(initialValue, getDefaultValFunc, typeIsSolid: typeIsSolid, storageStrategy: storageStrategy, comparer: comparer);
+        //    return prop;
+        //}
+
+        public override IProp<T> CreateWithNoValue<T>
+            (
+            PropNameType propertyName,
+            object extraInfo,
+            PropStorageStrategyEnum storageStrategy,
+            bool typeIsSolid,
+            Func<T, T, bool> comparer,
+            GetDefaultValueDelegate<T> getDefaultValFunc
+            )
         {
             // Supply a comparer, if one was not supplied by the caller.
             if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
 
             // Use the Get Default Value function supplied or provided by this Prop Factory.
-            GetDefaultValueDelegate<T> getDefaultValFunc = ValueConverter.GetDefaultValue<T>;
+            if(getDefaultValFunc == null) getDefaultValFunc = ValueConverter.GetDefaultValue<T>;
+
+            PropTemplateTyped<T> propTemplateTyped = new PropTemplateTyped<T>(PropKindEnum.Prop, storageStrategy, typeIsSolid, comparer, getDefaultValFunc);
+
+            //IProp<T> prop = new Prop_New<T>(propertyName, typeIsSolid, propTemplateTyped);
+            //return prop;
 
             if (storageStrategy == PropStorageStrategyEnum.Internal)
             {
                 // Regular Prop with Internal Storage -- Just don't have a value as yet.
-                IProp<T> prop = new Prop<T>(getDefaultValFunc, typeIsSolid: typeIsSolid, storageStrategy: storageStrategy, comparer: comparer);
+                //IProp<T> prop = new Prop<T>(getDefaultValFunc, typeIsSolid: typeIsSolid, storageStrategy: storageStrategy, comparer: comparer);
+
+                IProp<T> prop = new Prop_New<T>(propertyName, typeIsSolid, propTemplateTyped);
+
                 return prop;
             }
             else
             {
                 // Prop With External Store, or this is a Prop that supplies a Virtual (aka Caclulated) value from an internal source or from LocalBindings
                 // This implementation simply creates a Property that will always have the default value for type T.
-                IProp<T> prop = new PropNoStore<T>(getDefaultValFunc, typeIsSolid: typeIsSolid, storageStrategy: storageStrategy, comparer: comparer);
+                //IProp<T> prop = new PropNoStore<T>(getDefaultValFunc, typeIsSolid: typeIsSolid, storageStrategy: storageStrategy, comparer: comparer);
+
+                IProp<T> prop = new PropNoStore_New<T>(propertyName, typeIsSolid, propTemplateTyped);
                 return prop;
             }
         }

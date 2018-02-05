@@ -13,11 +13,12 @@ namespace DRM.TypeSafePropertyBag
     public interface IProp<T> : IPropTemplate<T>, IProp 
     {
         T TypedValue { get; set; }
+        bool CompareTo(T value);
     }
 
     public interface IPropTemplate<T> : IPropTemplate
     {
-        bool CompareTo(T value);
+        //bool CompareTo(T value);
         bool Compare(T val1, T val2);
 
         bool ReturnDefaultForUndefined { get; }

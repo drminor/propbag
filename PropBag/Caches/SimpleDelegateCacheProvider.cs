@@ -27,9 +27,11 @@ namespace DRM.PropBag.Caches
 
 
         // Scalar PropItems
-        public ICacheDelegates<CreatePropFromStringDelegate> CreatePropFromStringCache { get; }
-        public ICacheDelegates<CreatePropWithNoValueDelegate> CreatePropWithNoValCache { get; }
-        public ICacheDelegates<CreatePropFromObjectDelegate> CreatePropFromObjectCache { get; }
+        public ICacheDelegates<CreateScalarProp> CreateScalarPropCache { get; }
+
+        //public ICacheDelegates<CreatePropFromStringDelegate> CreateScalarPropCache { get; }
+        //public ICacheDelegates<CreatePropWithNoValueDelegate> CreatePropWithNoValCache { get; }
+        //public ICacheDelegates<CreatePropFromObjectDelegate> CreatePropFromObjectCache { get; }
 
         // ObservableCollection<T> PropItems
         public ICacheDelegatesForTypePair<CreateCPropFromStringDelegate> CreateCPropFromStringCache { get; }
@@ -125,20 +127,27 @@ namespace DRM.PropBag.Caches
 
             #region Scalar Prop Creation MethodInfo
 
-            // Create Prop From String
-            MethodInfo createPropFromString_mi = propCreatorType.GetMethod("CreatePropFromString", BindingFlags.Static | BindingFlags.NonPublic);
-            curBytes = Sizer.ReportMemConsumption(startBytes, curBytes, "After GetMethod(CreatePropFromString)");
+            // Create Prop 
+            MethodInfo createScalarProp_mi = propCreatorType.GetMethod("CreateProp", BindingFlags.Static | BindingFlags.NonPublic);
+            curBytes = Sizer.ReportMemConsumption(startBytes, curBytes, "After GetMethod(CreateProp)");
 
-            CreatePropFromStringCache = new DelegateCache<CreatePropFromStringDelegate>(createPropFromString_mi);
+            CreateScalarPropCache = new DelegateCache<CreateScalarProp>(createScalarProp_mi);
             curBytes = Sizer.ReportMemConsumption(startBytes, curBytes, "After new DelegateCache<CreatePropFromStringDelegate>");
 
-            // Create Prop From Object
-            MethodInfo createPropFromObject_mi = propCreatorType.GetMethod("CreatePropFromObject", BindingFlags.Static | BindingFlags.NonPublic);
-            CreatePropFromObjectCache = new DelegateCache<CreatePropFromObjectDelegate>(createPropFromObject_mi);
+            //// Create Prop From String
+            //MethodInfo createPropFromString_mi = propCreatorType.GetMethod("CreatePropFromString", BindingFlags.Static | BindingFlags.NonPublic);
+            //curBytes = Sizer.ReportMemConsumption(startBytes, curBytes, "After GetMethod(CreatePropFromString)");
 
-            // Create Prop With No Value
-            MethodInfo createPropNoVal_mi = propCreatorType.GetMethod("CreatePropWithNoValue", BindingFlags.Static | BindingFlags.NonPublic);
-            CreatePropWithNoValCache = new DelegateCache<CreatePropWithNoValueDelegate>(createPropNoVal_mi);
+            //CreatePropFromStringCache = new DelegateCache<CreatePropFromStringDelegate>(createPropFromString_mi);
+            //curBytes = Sizer.ReportMemConsumption(startBytes, curBytes, "After new DelegateCache<CreatePropFromStringDelegate>");
+
+            //// Create Prop From Object
+            //MethodInfo createPropFromObject_mi = propCreatorType.GetMethod("CreatePropFromObject", BindingFlags.Static | BindingFlags.NonPublic);
+            //CreatePropFromObjectCache = new DelegateCache<CreatePropFromObjectDelegate>(createPropFromObject_mi);
+
+            //// Create Prop With No Value
+            //MethodInfo createPropNoVal_mi = propCreatorType.GetMethod("CreatePropWithNoValue", BindingFlags.Static | BindingFlags.NonPublic);
+            //CreatePropWithNoValCache = new DelegateCache<CreatePropWithNoValueDelegate>(createPropNoVal_mi);
 
             #endregion
         }

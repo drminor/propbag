@@ -2043,7 +2043,7 @@ namespace DRM.PropBag
         {
             PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal;
             bool typeIsSolid = true;
-            IProp<T> pg = _propFactory.Create<T>(initialValue, propertyName, extraInfo, storageStrategy, typeIsSolid, comparer);
+            IProp<T> pg = _propFactory.Create<T>(true, initialValue, propertyName, extraInfo, storageStrategy, typeIsSolid, comparer, null);
             AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard, out PropIdType propId);
             return pg;
         }
@@ -2053,7 +2053,7 @@ namespace DRM.PropBag
             PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal;
             bool typeIsSolid = true;
             Func<T, T, bool> comparer = _propFactory.GetRefEqualityComparer<T>();
-            IProp<T> pg = _propFactory.Create<T>(initialValue, propertyName, extraInfo, storageStrategy, typeIsSolid, comparer);
+            IProp<T> pg = _propFactory.Create<T>(true, initialValue, propertyName, extraInfo, storageStrategy, typeIsSolid, comparer, null);
             AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard, out PropIdType propId);
             return pg;
         }
@@ -2062,7 +2062,7 @@ namespace DRM.PropBag
         {
             PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal;
             bool typeIsSolid = true;
-            IProp<T> pg = _propFactory.CreateWithNoValue<T>(propertyName, extraInfo, storageStrategy, typeIsSolid, comparer);
+            IProp<T> pg = _propFactory.CreateWithNoValue<T>(propertyName, extraInfo, storageStrategy, typeIsSolid, comparer, null);
             AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard, out PropIdType propId);
             return pg;
         }
@@ -2072,7 +2072,7 @@ namespace DRM.PropBag
             PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal;
             bool typeIsSolid = true;
             Func<T, T, bool> comparer = _propFactory.GetRefEqualityComparer<T>();
-            IProp<T> pg = _propFactory.CreateWithNoValue<T>(propertyName, extraInfo, storageStrategy, typeIsSolid, comparer);
+            IProp<T> pg = _propFactory.CreateWithNoValue<T>(propertyName, extraInfo, storageStrategy, typeIsSolid, comparer, null);
             AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard, out PropIdType propId);
             return pg;
         }
@@ -2081,7 +2081,7 @@ namespace DRM.PropBag
         {
             PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.External;
             bool typeIsSolid = true;
-            IProp<T> pg = _propFactory.CreateWithNoValue<T>(propertyName, extraInfo, storageStrategy, typeIsSolid, comparer);
+            IProp<T> pg = _propFactory.CreateWithNoValue<T>(propertyName, extraInfo, storageStrategy, typeIsSolid, comparer, null);
             AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard, out PropIdType propId);
             return pg;
         }
@@ -2091,7 +2091,7 @@ namespace DRM.PropBag
             PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.External;
             bool typeIsSolid = true;
             Func<T, T, bool> comparer = _propFactory.GetRefEqualityComparer<T>();
-            IProp<T> pg = _propFactory.CreateWithNoValue<T>(propertyName, extraInfo, storageStrategy, typeIsSolid, comparer);
+            IProp<T> pg = _propFactory.CreateWithNoValue<T>(propertyName, extraInfo, storageStrategy, typeIsSolid, comparer, null);
             AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard, out PropIdType propId);
             return pg;
         }
@@ -3144,14 +3144,14 @@ namespace DRM.PropBag
             }
         }
 
-        public int CreatePropWithNoValCacheCount
-        {
-            get
-            {
-                int result = _propFactory.CreatePropWithNoValCacheCount;
-                return result;
-            }
-        }
+        //public int CreatePropWithNoValCacheCount
+        //{
+        //    get
+        //    {
+        //        int result = _propFactory.CreatePropWithNoValCacheCount;
+        //        return result;
+        //    }
+        //}
 
         #endregion
     }

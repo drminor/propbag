@@ -101,26 +101,48 @@ namespace DRM.PropBag
 
         #region Scalar Prop Creation
 
-        public override IProp<T> Create<T>(T initialValue,
-            PropNameType propertyName, object extraInfo = null,
-            PropStorageStrategyEnum dummy = PropStorageStrategyEnum.External, bool typeIsSolid = true,
-            Func<T,T,bool> comparer = null)
+        //public override IProp<T> Create<T>(T initialValue,
+        //    PropNameType propertyName, object extraInfo = null,
+        //    PropStorageStrategyEnum dummy = PropStorageStrategyEnum.External, bool typeIsSolid = true,
+        //    Func<T,T,bool> comparer = null)
+        //{
+        //    throw new InvalidOperationException("External Store Factory doesn't know how to create properties with initial values.");
+        //}
+
+        public override IProp<T> Create<T>(
+            bool haveValue,
+            T initialValue,
+            PropNameType propertyName,
+            object extraInfo,
+            PropStorageStrategyEnum storageStrategy,
+            bool typeIsSolid,
+            Func<T, T, bool> comparer,
+            GetDefaultValueDelegate<T> getDefaultValFunc)
         {
             throw new InvalidOperationException("External Store Factory doesn't know how to create properties with initial values.");
         }
 
-        public override IProp<T> CreateWithNoValue<T>(
-            PropNameType propertyName, object extraInfo = null,
-            PropStorageStrategyEnum dummy = PropStorageStrategyEnum.External, bool typeIsSolid = true,
-            Func<T,T,bool> comparer = null)
+        public override IProp<T> CreateWithNoValue<T>
+            (
+            PropNameType propertyName,
+            object extraInfo,
+            PropStorageStrategyEnum storageStrategy,
+            bool typeIsSolid,
+            Func<T, T, bool> comparer,
+            GetDefaultValueDelegate<T> getDefaultValFunc
+            )
         {
+            // Supply a comparer, if one was not supplied by the caller.
             if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
-            GetDefaultValueDelegate<T> getDefaultValFunc = this.GetDefaultValue<T>;
+
+            // Use the Get Default Value function supplied or provided by this Prop Factory.
+            if (getDefaultValFunc == null) getDefaultValFunc = ValueConverter.GetDefaultValue<T>;
 
             PropExternStore<T> propWithExtStore = new PropExternStore<T>(propertyName,
                 extraInfo, getDefaultValFunc, typeIsSolid: typeIsSolid, comparer: comparer);
 
             return propWithExtStore;
+
         }
 
         #endregion
@@ -145,23 +167,23 @@ namespace DRM.PropBag
             throw new InvalidOperationException("External Store Factory doesn't know how to create properties with initial values.");
         }
 
-        public override IProp CreateGenWithNoValue(Type typeOfThisProperty,
-            PropNameType propertyName, object extraInfo,
-            PropStorageStrategyEnum storageStrategy, bool isTypeSolid, PropKindEnum propKind,
-            Delegate comparer, bool useRefEquality = false, Type itemType = null)
-        {
-            CreatePropWithNoValueDelegate propCreator = GetPropWithNoValueCreator(typeOfThisProperty);
-            IProp prop = propCreator(this, propertyName, extraInfo, storageStrategy: storageStrategy, isTypeSolid: isTypeSolid,
-                comparer: comparer, useRefEquality: useRefEquality);
+        //public override IProp CreateGenWithNoValue(Type typeOfThisProperty,
+        //    PropNameType propertyName, object extraInfo,
+        //    PropStorageStrategyEnum storageStrategy, bool isTypeSolid, PropKindEnum propKind,
+        //    Delegate comparer, bool useRefEquality = false, Type itemType = null)
+        //{
+        //    CreatePropWithNoValueDelegate propCreator = GetPropWithNoValueCreator(typeOfThisProperty);
+        //    IProp prop = propCreator(this, propertyName, extraInfo, storageStrategy: storageStrategy, isTypeSolid: isTypeSolid,
+        //        comparer: comparer, useRefEquality: useRefEquality);
 
-            return prop;
-        }
+        //    return prop;
+        //}
 
-        // TODO: Implement GetPropWithNoValueCreator
-        protected override CreatePropWithNoValueDelegate GetPropWithNoValueCreator(Type typeOfThisValue)
-        {
-            throw new NotImplementedException("PropExtStoreFactory has not yet implemented the GetPropWithNoValueCreator method.");
-        }
+        //// TODO: Implement GetPropWithNoValueCreator
+        //protected override CreatePropWithNoValueDelegate GetPropWithNoValueCreator(Type typeOfThisValue)
+        //{
+        //    throw new NotImplementedException("PropExtStoreFactory has not yet implemented the GetPropWithNoValueCreator method.");
+        //}
 
         public override IProvideADataSourceProvider GetDSProviderProvider(uint propId, PropKindEnum propKind, object iDoCrudDataSource, IPropStoreAccessService<uint, string> storeAccesor, IMapperRequest mr)
         {

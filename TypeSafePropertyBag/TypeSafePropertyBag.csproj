@@ -95,7 +95,7 @@
     <Compile Include="PropStore\ViewManagers\ViewManagerProviderKey.cs" />
     <None Include="Props\PBCollectionDSP - SafetyCopy.cs" />
     <None Include="Props\PropBase_New_NotUsed.cs" />
-    <Compile Include="Props\PropTemplate.cs" />
+    <None Include="Props\PropTemplate_NotUsed.cs" />
     <Compile Include="Props\PropItemWatcherGen.cs" />
     <Compile Include="Props\PropItemWatcherTyped.cs" />
     <Compile Include="Props\PropTemplateTyped.cs" />

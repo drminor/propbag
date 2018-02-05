@@ -85,9 +85,16 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        public bool CompareTo(T value)
+        public bool CompareTo(T newValue)
         {
-            return _template.CompareTo(value);
+            if (StorageStrategy == PropStorageStrategyEnum.Internal)
+            {
+                return Comparer(newValue, TypedValue);
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
         }
 
         public bool Compare(T val1, T val2)

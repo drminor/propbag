@@ -53,25 +53,42 @@ namespace DRM.TypeSafePropertyBag
 
     #region Property-Type Methods
 
-    // From Object
-    public delegate IProp CreatePropFromObjectDelegate(IPropFactory propFactory,
+    // Scalar Prop
+    public delegate IProp CreateScalarProp
+        (
+        IPropFactory propFactory,
+        bool haveValue,
         object value,
-        string propertyName, object extraInfo,
-        PropStorageStrategyEnum storageStrategy, bool isTypeSolid,
-        Delegate comparer, bool useRefEquality);
+        bool useDefault,
+        string propertyName,
+        object extraInfo,
+        PropStorageStrategyEnum storageStrategy,
+        bool isTypeSolid,
+        Delegate comparer,
+        bool useRefEquality,
+        Delegate getDefaultValFunc
+        );
 
-    // From String
-    public delegate IProp CreatePropFromStringDelegate(IPropFactory propFactory,
-        string value, bool useDefault,
-        string propertyName, object extraInfo,
-        PropStorageStrategyEnum storageStrategy, bool isTypeSolid,
-        Delegate comparer, bool useRefEquality);
 
-    // With No Value
-    public delegate IProp CreatePropWithNoValueDelegate(IPropFactory propFactory,
-        string propertyName, object extraInfo,
-        PropStorageStrategyEnum storageStrategy, bool isTypeSolid,
-        Delegate comparer, bool useRefEquality);
+    //// From Object
+    //public delegate IProp CreatePropFromObjectDelegate(IPropFactory propFactory,
+    //    object value,
+    //    string propertyName, object extraInfo,
+    //    PropStorageStrategyEnum storageStrategy, bool isTypeSolid,
+    //    Delegate comparer, bool useRefEquality);
+
+    //// From String
+    //public delegate IProp CreatePropFromStringDelegate(IPropFactory propFactory,
+    //    string value, bool useDefault,
+    //    string propertyName, object extraInfo,
+    //    PropStorageStrategyEnum storageStrategy, bool isTypeSolid,
+    //    Delegate comparer, bool useRefEquality);
+
+    //// With No Value
+    //public delegate IProp CreatePropWithNoValueDelegate(IPropFactory propFactory,
+    //    string propertyName, object extraInfo,
+    //    PropStorageStrategyEnum storageStrategy, bool isTypeSolid,
+    //    Delegate comparer, bool useRefEquality);
 
     #endregion
 }

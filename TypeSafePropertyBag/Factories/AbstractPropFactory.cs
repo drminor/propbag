@@ -47,8 +47,8 @@ namespace DRM.TypeSafePropertyBag
 
         // These are used for diagnostics.
         public virtual int DoSetCacheCount => DelegateCacheProvider.DoSetDelegateCache.Count; // abstract int DoSetCacheCount { get; }
-        public virtual int CreatePropFromStringCacheCount => DelegateCacheProvider.CreatePropFromStringCache.Count; //abstract int CreatePropFromStringCacheCount { get; }
-        public virtual int CreatePropWithNoValCacheCount => DelegateCacheProvider.CreatePropWithNoValCache.Count; //abstract int CreatePropWithNoValCacheCount { get; }
+        public virtual int CreatePropFromStringCacheCount => DelegateCacheProvider.CreateScalarPropCache.Count; //abstract int CreatePropFromStringCacheCount { get; }
+        //public virtual int CreatePropWithNoValCacheCount => DelegateCacheProvider.CreatePropWithNoValCache.Count; //abstract int CreatePropWithNoValCacheCount { get; }
 
         #endregion
 
@@ -212,29 +212,50 @@ namespace DRM.TypeSafePropertyBag
         #region Scalar Prop Creation
 
         public abstract IProp<T> Create<T>(
+            bool haveValue,
             T initialValue,
-            PropNameType propertyName, object extraInfo = null,
-            PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true,
-            Func<T, T, bool> comparer = null);
-        //{
-        //    if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
+            PropNameType propertyName,
+            object extraInfo,
+            PropStorageStrategyEnum storageStrategy,
+            bool typeIsSolid,
+            Func<T, T, bool> comparer,
+            GetDefaultValueDelegate<T> getDefaultValFunc);
 
-        //    GetDefaultValueDelegate<T> getDefaultValFunc = ValueConverter.GetDefaultValue<T>;
-        //    IProp<T> prop = new Prop<T>(initialValue, getDefaultValFunc, typeIsSolid: typeIsSolid, hasStore: hasStorage, comparer: comparer);
-        //    return prop;
-        //}
+        //public abstract IProp<T> Create_OLD<T>(
+        //    T initialValue,
+        //    PropNameType propertyName, object extraInfo = null,
+        //    PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true,
+        //    Func<T, T, bool> comparer = null);
+        ////{
+        ////    if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
 
-        public abstract IProp<T> CreateWithNoValue<T>(
-            PropNameType propertyName, object extraInfo = null,
-            PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true,
-            Func<T, T, bool> comparer = null);
-        //{
-        //    if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
+        ////    GetDefaultValueDelegate<T> getDefaultValFunc = ValueConverter.GetDefaultValue<T>;
+        ////    IProp<T> prop = new Prop<T>(initialValue, getDefaultValFunc, typeIsSolid: typeIsSolid, hasStore: hasStorage, comparer: comparer);
+        ////    return prop;
+        ////}
 
-        //    GetDefaultValueDelegate<T> getDefaultValFunc = ValueConverter.GetDefaultValue<T>;
-        //    IProp<T> prop = new Prop<T>(getDefaultValFunc, typeIsSolid: typeIsSolid, hasStore: hasStorage, comparer: comparer);
-        //    return prop;
-        //}
+        public abstract IProp<T> CreateWithNoValue<T>
+            (
+            PropNameType propertyName,
+            object extraInfo,
+            PropStorageStrategyEnum storageStrategy,
+            bool typeIsSolid,
+            Func<T, T, bool> comparer,
+            GetDefaultValueDelegate<T> getDefaultValFunc
+            );
+
+
+        //public abstract IProp<T> CreateWithNoValue<T>(
+        //    PropNameType propertyName, object extraInfo = null,
+        //    PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true,
+        //    Func<T, T, bool> comparer = null);
+        ////{
+        ////    if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
+
+        ////    GetDefaultValueDelegate<T> getDefaultValFunc = ValueConverter.GetDefaultValue<T>;
+        ////    IProp<T> prop = new Prop<T>(getDefaultValFunc, typeIsSolid: typeIsSolid, hasStore: hasStorage, comparer: comparer);
+        ////    return prop;
+        ////}
 
         #endregion
 
@@ -242,27 +263,34 @@ namespace DRM.TypeSafePropertyBag
 
         public abstract IProvideADataSourceProvider GetDSProviderProvider(PropIdType propId, PropKindEnum propKind, object iDoCrudDataSource, PSAccessServiceInterface storeAccesor, IMapperRequest mr);
 
-
-
         public virtual IProp CreateGenFromObject(Type typeOfThisProperty,
             object value,
             PropNameType propertyName, object extraInfo,
             PropStorageStrategyEnum storageStrategy, bool isTypeSolid, PropKindEnum propKind,
             Delegate comparer, bool useRefEquality = false, Type itemType = null)
         {
+            MemConsumptionTracker mct = new MemConsumptionTracker(enabled: false);
+
             if (propKind == PropKindEnum.Prop)
             {
-                CreatePropFromObjectDelegate propCreator = GetPropCreator(typeOfThisProperty);
-                IProp prop = propCreator(this, value, propertyName, extraInfo, storageStrategy: storageStrategy, isTypeSolid: isTypeSolid,
-                    comparer: comparer, useRefEquality: useRefEquality);
+                CreateScalarProp propCreator = GetPropCreator(typeOfThisProperty);
+                mct.MeasureAndReport("GetPropCreator", $"for {propertyName}");
+
+                IProp prop = propCreator(this, true, value, false, propertyName, extraInfo, storageStrategy: storageStrategy, isTypeSolid: isTypeSolid,
+                    comparer: comparer, useRefEquality: useRefEquality, getDefaultValFunc: null);
+
+                mct.MeasureAndReport("Ran propCreator to get IProp", $"for {propertyName}");
 
                 return prop;
             }
             else if (propKind.IsCollection())
             {
                 CreateCPropFromObjectDelegate propCreator = GetCPropCreator(typeOfThisProperty, itemType);
+                mct.MeasureAndReport("GetCPropCreator", $"for {propertyName}");
+
                 IProp prop = propCreator(this, value, propertyName, extraInfo, storageStrategy: storageStrategy, isTypeSolid: isTypeSolid,
                     comparer: comparer, useRefEquality: useRefEquality);
+                mct.MeasureAndReport("Ran GetCPropCreator to get IProp", $"for {propertyName}");
 
                 return prop;
             }
@@ -278,25 +306,34 @@ namespace DRM.TypeSafePropertyBag
             PropStorageStrategyEnum storageStrategy, bool isTypeSolid, PropKindEnum propKind,
             Delegate comparer, bool useRefEquality = false, Type itemType = null)
         {
+            MemConsumptionTracker mct = new MemConsumptionTracker(enabled: false);
+
             if (propKind == PropKindEnum.Prop)
             {
-                MemConsumptionTracker mct = new MemConsumptionTracker(enabled: false);
+                //CreatePropFromStringDelegate propCreator = GetPropFromStringCreator(typeOfThisProperty);
+                //mct.MeasureAndReport("GetPropFromStringCreator", $"for {propertyName}");
 
-                CreatePropFromStringDelegate propCreator = GetPropFromStringCreator(typeOfThisProperty);
-                mct.MeasureAndReport("GetPropFromStringCreator", $"for {propertyName}");
+                //IProp prop = propCreator(this, value, useDefault, propertyName, extraInfo, storageStrategy: storageStrategy, isTypeSolid: isTypeSolid,
+                //    comparer: comparer, useRefEquality: useRefEquality);
 
-                IProp prop = propCreator(this, value, useDefault, propertyName, extraInfo, storageStrategy: storageStrategy, isTypeSolid: isTypeSolid,
-                    comparer: comparer, useRefEquality: useRefEquality);
+                CreateScalarProp propCreator = GetPropCreator(typeOfThisProperty);
+                mct.MeasureAndReport("GetPropCreator", $"for {propertyName}");
+
+                IProp prop = propCreator(this, true, value, useDefault, propertyName, extraInfo, storageStrategy: storageStrategy, isTypeSolid: isTypeSolid,
+                    comparer: comparer, useRefEquality: useRefEquality, getDefaultValFunc: null);
+
                 mct.MeasureAndReport("Ran propCreator to get IProp", $"for {propertyName}");
-
 
                 return prop;
             }
             else if (propKind.IsCollection())
             {
                 CreateCPropFromStringDelegate propCreator = GetCPropFromStringCreator(typeOfThisProperty, itemType);
+                mct.MeasureAndReport("GetCPropFromStringCreator", $"for {propertyName}");
+
                 IProp prop = propCreator(this, value, useDefault, propertyName, extraInfo, storageStrategy: storageStrategy, isTypeSolid: isTypeSolid,
                     comparer: comparer, useRefEquality: useRefEquality);
+                mct.MeasureAndReport("Ran GetCPropFromStringCreator to get IProp", $"for {propertyName}");
 
                 return prop;
             }
@@ -311,11 +348,21 @@ namespace DRM.TypeSafePropertyBag
             PropStorageStrategyEnum storageStrategy, bool isTypeSolid, PropKindEnum propKind,
             Delegate comparer, bool useRefEquality = false, Type itemType = null)
         {
+            MemConsumptionTracker mct = new MemConsumptionTracker(enabled: false);
+
             if (propKind == PropKindEnum.Prop)
             {
-                CreatePropWithNoValueDelegate propCreator = GetPropWithNoValueCreator(typeOfThisProperty);
-                IProp prop = propCreator(this, propertyName, extraInfo, storageStrategy: storageStrategy, isTypeSolid: isTypeSolid,
-                    comparer: comparer, useRefEquality: useRefEquality);
+                //CreatePropWithNoValueDelegate propCreator = GetPropWithNoValueCreator(typeOfThisProperty);
+                //IProp prop = propCreator(this, propertyName, extraInfo, storageStrategy: storageStrategy, isTypeSolid: isTypeSolid,
+                //    comparer: comparer, useRefEquality: useRefEquality);
+
+                CreateScalarProp propCreator = GetPropCreator(typeOfThisProperty);
+                mct.MeasureAndReport("GetPropCreator", $"for {propertyName}");
+
+                IProp prop = propCreator(this, false, null, false, propertyName, extraInfo, storageStrategy: storageStrategy, isTypeSolid: isTypeSolid,
+                    comparer: comparer, useRefEquality: useRefEquality, getDefaultValFunc: null);
+
+                mct.MeasureAndReport("Ran propCreator to get IProp", $"for {propertyName}");
 
                 return prop;
             }
@@ -576,25 +623,32 @@ namespace DRM.TypeSafePropertyBag
         #region Scalar Prop Creation Methods
 
         // From Object
-        protected virtual CreatePropFromObjectDelegate GetPropCreator(Type typeOfThisValue)
+        protected virtual CreateScalarProp GetPropCreator(Type typeOfThisValue)
         {
-            CreatePropFromObjectDelegate result = DelegateCacheProvider.CreatePropFromObjectCache.GetOrAdd(typeOfThisValue);
+            CreateScalarProp result = DelegateCacheProvider.CreateScalarPropCache.GetOrAdd(typeOfThisValue);
             return result;
         }
 
-        // From String
-        protected virtual CreatePropFromStringDelegate GetPropFromStringCreator(Type typeOfThisValue)
-        {
-            CreatePropFromStringDelegate result = DelegateCacheProvider.CreatePropFromStringCache.GetOrAdd(typeOfThisValue);
-            return result;
-        }
+        //// From Object
+        //protected virtual CreatePropFromObjectDelegate GetPropCreator(Type typeOfThisValue)
+        //{
+        //    CreatePropFromObjectDelegate result = DelegateCacheProvider.CreatePropFromObjectCache.GetOrAdd(typeOfThisValue);
+        //    return result;
+        //}
 
-        // With No Value
-        protected virtual CreatePropWithNoValueDelegate GetPropWithNoValueCreator(Type typeOfThisValue)
-        {
-            CreatePropWithNoValueDelegate result = DelegateCacheProvider.CreatePropWithNoValCache.GetOrAdd(typeOfThisValue);
-            return result;
-        }
+        //// From String
+        //protected virtual CreatePropFromStringDelegate GetPropFromStringCreator(Type typeOfThisValue)
+        //{
+        //    CreatePropFromStringDelegate result = DelegateCacheProvider.CreateScalarPropCache.GetOrAdd(typeOfThisValue);
+        //    return result;
+        //}
+
+        //// With No Value
+        //protected virtual CreatePropWithNoValueDelegate GetPropWithNoValueCreator(Type typeOfThisValue)
+        //{
+        //    CreatePropWithNoValueDelegate result = DelegateCacheProvider.CreatePropWithNoValCache.GetOrAdd(typeOfThisValue);
+        //    return result;
+        //}
 
         #endregion Property-Type Methods
 

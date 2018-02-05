@@ -93,7 +93,7 @@ namespace PropBagLib.Tests.PerformanceDb
 
             int howManyDoSetDelegatesGotCreated = sampleItem.NumOfDoSetDelegatesInCache;
             int howManyCreateFromString = sampleItem.CreatePropFromStringCacheCount;
-            int howManyCreateWithNoVal = sampleItem.CreatePropWithNoValCacheCount;
+            //int howManyCreateWithNoVal = sampleItem.CreatePropWithNoValCacheCount;
 
             //Thread.Sleep(new TimeSpan(0, 0, 1));
         }

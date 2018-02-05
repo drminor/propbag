@@ -41,7 +41,7 @@ namespace DRM.TypeSafePropertyBag
 
         #endregion
 
-        #region IObsCollection<T> and ObservableCollection<T> Prop Creation
+        #region ObservableCollection<T> Prop Creation
 
         ICProp<CT, T> Create<CT, T>(CT initialValue, PropNameType propertyName, object extraInfo = null,
             PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true,
@@ -69,7 +69,6 @@ namespace DRM.TypeSafePropertyBag
 
         //CrudWithMapping<TSource, TDestination> Test<TSource, TDestination>();
 
-
         ClrMappedDSP<TDestination> CreateMappedDS<TSource, TDestination>
             (
             PropIdType propId,
@@ -84,11 +83,28 @@ namespace DRM.TypeSafePropertyBag
 
         #region Scalar Prop Creation
 
-        IProp<T> Create<T>(T initialValue, PropNameType propertyName, object extraInfo = null, 
-            PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true, Func<T, T, bool> comparer = null);
+        IProp<T> Create<T>(
+            bool haveValue,
+            T initialValue,
+            PropNameType propertyName,
+            object extraInfo,
+            PropStorageStrategyEnum storageStrategy,
+            bool typeIsSolid,
+            Func<T, T, bool> comparer,
+            GetDefaultValueDelegate<T> getDefaultValFunc);
 
-        IProp<T> CreateWithNoValue<T>(PropNameType propertyName, object extraInfo = null, 
-            PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true, Func<T, T, bool> comparer = null);
+        //IProp<T> Create<T>(T initialValue, PropNameType propertyName, object extraInfo = null, 
+        //    PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true, Func<T, T, bool> comparer = null);
+
+        IProp<T> CreateWithNoValue<T>
+            (
+            PropNameType propertyName,
+            object extraInfo,
+            PropStorageStrategyEnum storageStrategy,
+            bool typeIsSolid,
+            Func<T, T, bool> comparer,
+            GetDefaultValueDelegate<T> getDefaultValFunc
+            );
 
         #endregion
 
@@ -138,7 +154,7 @@ namespace DRM.TypeSafePropertyBag
 
         int DoSetCacheCount { get; }
         int CreatePropFromStringCacheCount { get; }
-        int CreatePropWithNoValCacheCount { get; }
+        //int CreatePropWithNoValCacheCount { get; }
 
         #endregion
     }

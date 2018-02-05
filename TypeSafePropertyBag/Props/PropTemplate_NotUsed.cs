@@ -3,8 +3,7 @@ using System.Threading;
 
 namespace DRM.TypeSafePropertyBag
 {
-
-    public abstract class PropTemplate : IPropTemplate
+    public abstract class PropTemplate_NotUsed : IPropTemplate
     {
         #region Public Members
 
@@ -23,7 +22,7 @@ namespace DRM.TypeSafePropertyBag
 
         #region Constructors
 
-        public PropTemplate(PropKindEnum propKind, Type typeOfThisValue, bool typeIsSolid, PropStorageStrategyEnum storageStrategy)
+        public PropTemplate_NotUsed(PropKindEnum propKind, Type typeOfThisValue, bool typeIsSolid, PropStorageStrategyEnum storageStrategy)
         {
             PropKind = propKind;
             Type = typeOfThisValue;

@@ -138,24 +138,20 @@ namespace DRM.TypeSafePropertyBag
         #region Scalar Prop Creation
 
         // From Object
-        private static IProp<T> CreatePropFromObject<T>(IPropFactory propFactory,
+        private static IProp<T> CreateProp<T>
+        (
+            IPropFactory propFactory,
+            bool haveValue,
             object value,
-            PropNameType propertyName, object extraInfo,
-            PropStorageStrategyEnum storageStrategy, bool isTypeSolid,
-            Delegate comparer, bool useRefEquality = false)
-        {
-            T initialValue = propFactory.GetValueFromObject<T>(value);
-
-            return propFactory.Create<T>(initialValue, propertyName, extraInfo, storageStrategy, isTypeSolid,
-                GetComparerForProps<T>(comparer, propFactory, useRefEquality));
-        }
-
-        // From String
-        private static IProp<T> CreatePropFromString<T>(IPropFactory propFactory,
-            string value, bool useDefault,
-            PropNameType propertyName, object extraInfo,
-            PropStorageStrategyEnum storageStrategy, bool isTypeSolid,
-            Delegate comparer, bool useRefEquality = false)
+            bool useDefault,
+            PropNameType propertyName,
+            object extraInfo,
+            PropStorageStrategyEnum storageStrategy,
+            bool isTypeSolid,
+            Delegate comparer,
+            bool useRefEquality,
+            Delegate getDefaultValFunc
+        )
         {
             T initialValue;
             if (useDefault)
@@ -164,22 +160,45 @@ namespace DRM.TypeSafePropertyBag
             }
             else
             {
-                initialValue = propFactory.GetValueFromString<T>(value);
+                initialValue = propFactory.GetValueFromObject<T>(value);
             }
 
-            return propFactory.Create<T>(initialValue, propertyName, extraInfo, storageStrategy, isTypeSolid,
-                GetComparerForProps<T>(comparer, propFactory, useRefEquality));
+            GetDefaultValueDelegate<T> getDefaultValFuncTyped = (GetDefaultValueDelegate<T>)getDefaultValFunc;
+
+            return propFactory.Create<T>(haveValue, initialValue, propertyName, extraInfo, storageStrategy, isTypeSolid,
+                GetComparerForProps<T>(comparer, propFactory, useRefEquality), getDefaultValFuncTyped);
         }
 
-        // With No Value
-        private static IProp<T> CreatePropWithNoValue<T>(IPropFactory propFactory,
-            PropNameType propertyName, object extraInfo,
-            PropStorageStrategyEnum storageStrategy, bool isTypeSolid,
-            Delegate comparer, bool useRefEquality = false)
-        {
-            return propFactory.CreateWithNoValue<T>(propertyName, extraInfo, storageStrategy, isTypeSolid,
-                GetComparerForProps<T>(comparer, propFactory, useRefEquality));
-        }
+        //// From String
+        //private static IProp<T> CreatePropFromString<T>(IPropFactory propFactory,
+        //    string value, bool useDefault,
+        //    PropNameType propertyName, object extraInfo,
+        //    PropStorageStrategyEnum storageStrategy, bool isTypeSolid,
+        //    Delegate comparer, bool useRefEquality = false)
+        //{
+        //    T initialValue;
+        //    if (useDefault)
+        //    {
+        //        initialValue = propFactory.ValueConverter.GetDefaultValue<T>(propertyName);
+        //    }
+        //    else
+        //    {
+        //        initialValue = propFactory.GetValueFromString<T>(value);
+        //    }
+
+        //    return propFactory.Create<T>(initialValue, propertyName, extraInfo, storageStrategy, isTypeSolid,
+        //        GetComparerForProps<T>(comparer, propFactory, useRefEquality));
+        //}
+
+        //// With No Value
+        //private static IProp<T> CreatePropWithNoValue<T>(IPropFactory propFactory,
+        //    PropNameType propertyName, object extraInfo,
+        //    PropStorageStrategyEnum storageStrategy, bool isTypeSolid,
+        //    Delegate comparer, bool useRefEquality = false)
+        //{
+        //    return propFactory.CreateWithNoValue<T>(propertyName, extraInfo, storageStrategy, isTypeSolid,
+        //        GetComparerForProps<T>(comparer, propFactory, useRefEquality));
+        //}
 
         private static Func<T, T, bool> GetComparerForProps<T>(Delegate comparer, IPropFactory propFactory, bool useRefEquality)
         {
