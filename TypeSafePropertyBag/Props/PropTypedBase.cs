@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Threading;
 
 namespace DRM.TypeSafePropertyBag
 {
     using PropIdType = UInt32;
-    using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
+    using PropNameType = String;
 
     using IRegisterBindingsFowarderType = IRegisterBindingsForwarder<UInt32>;
 
@@ -12,12 +13,12 @@ namespace DRM.TypeSafePropertyBag
         #region Public and Protected Properties
 
         public virtual T TypedValue { get; set; }
-        public virtual bool ReturnDefaultForUndefined => GetDefaultValFunc != null;
+        public override bool ReturnDefaultForUndefined => GetDefaultValFunc != null;
 
-        protected Func<T, T, bool> Comparer { get; }
-        protected GetDefaultValueDelegate<T> GetDefaultValFunc { get; }
+        public Func<T, T, bool> Comparer { get; }
+        public GetDefaultValueDelegate<T> GetDefaultValFunc { get; }
 
-        public override object TypedValueAsObject => (object)TypedValue;
+        public override object TypedValueAsObject => TypedValue;
 
         public override ValPlusType GetValuePlusType()
         {

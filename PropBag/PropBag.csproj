@@ -46,6 +46,10 @@
     <Compile Include="ClassGenerator\PropGenerator.cs" />
     <Compile Include="ClassGenerator\PropModelExtensions.cs" />
     <Compile Include="ClassGenerator\T4Support.cs" />
+    <Compile Include="Props\CProp_New.cs" />
+    <Compile Include="Props\PropExternStore_New.cs" />
+    <Compile Include="Props\PropNoStore_New.cs" />
+    <Compile Include="Props\Prop_New.cs" />
     <Compile Include="Unused\Collections\PbListSourceProvider.cs" />
     <Compile Include="Unused\Collections\PbListSource.cs" />
     <None Include="Unused\Collections\PbCollection_NotUsed.cs" />

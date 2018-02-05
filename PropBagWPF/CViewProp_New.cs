@@ -10,22 +10,19 @@ namespace DRM.PropBagWPF
 {
     using PropNameType = String;
 
-    public class CViewProp : PropTypedBase<ListCollectionView>, ICViewProp<ListCollectionView>, IUseAViewProvider
+    public class CViewProp_New : PropTypedBase_New<ListCollectionView>, ICViewProp<ListCollectionView>, IUseAViewProvider
     {
         #region Private and Protected Members
 
-        private readonly PropNameType _propertyName;
         private IProvideAView _viewProvider;
 
         #endregion
 
         #region Constructor
 
-        public CViewProp(PropNameType propertyName, IProvideAView viewProvider)
-            : base(typeof(ListCollectionView), true, PropStorageStrategyEnum.Virtual, true,
-                  RefEqualityComparer<ListCollectionView>.Default.Equals, null, PropKindEnum.CollectionView)
+        public CViewProp_New(PropNameType propertyName, IProvideAView viewProvider, IPropTemplate<ListCollectionView> template)
+            : base(propertyName, true, template)
         {
-            _propertyName = propertyName;
             _viewProvider = viewProvider;
 
             if (_viewProvider != null)
@@ -50,7 +47,7 @@ namespace DRM.PropBagWPF
                             throw new InvalidOperationException($"The view name: {value.ViewName}" +
                                 $" from the new IProvideAView does not match the view name:" +
                                 $" {_viewProvider.ViewName} from the previous IProvideAView," +
-                                $" when setting the ViewProvider property on CViewProp with property name: {_propertyName}.");
+                                $" when setting the ViewProvider property on CViewProp with property name: {PropertyName}.");
                         }
 
                         _viewProvider.ViewSourceRefreshed -= OurViewProviderGotRefreshed;
@@ -130,8 +127,6 @@ namespace DRM.PropBagWPF
                 throw new InvalidOperationException("TODO: Fix Me");
             }
         }
-
-        public override object TypedValueAsObject => TypedValue;
 
         public override object Clone() => throw new NotSupportedException($"{nameof(CViewProp)} Prop Items do not implement the Clone method.");
 

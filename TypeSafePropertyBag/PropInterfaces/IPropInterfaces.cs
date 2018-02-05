@@ -2,9 +2,7 @@
 
 namespace DRM.TypeSafePropertyBag
 {
-    using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
     using IRegisterBindingsProxyType = IRegisterBindingsProxy<UInt32>;
-    using PropIdType = UInt32;
     using PropNameType = String;
 
     /// <summary>
@@ -12,32 +10,43 @@ namespace DRM.TypeSafePropertyBag
     /// Objects that implement this interface are often created by an instance of a class that inherits from AbstractPropFactory.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public interface IProp<T> : IProp 
+    public interface IProp<T> : IPropTemplate<T>, IProp 
     {
         T TypedValue { get; set; }
+    }
 
+    public interface IPropTemplate<T> : IPropTemplate
+    {
         bool CompareTo(T value);
         bool Compare(T val1, T val2);
 
-        Attribute[] Attributes { get; }
+        bool ReturnDefaultForUndefined { get; }
+
+        Func<T, T, bool> Comparer { get; }
+        GetDefaultValueDelegate<T> GetDefaultValFunc { get; }
     }
 
     /// <summary>
     /// These are the non-type specific features that every instance of IProp<typeparamref name="T"/> implement.
     /// </summary>
-    public interface IProp : IRegisterBindingsProxyType, ICloneable
+    public interface IProp : IPropTemplate, IRegisterBindingsProxyType, ICloneable
     {
-        PropKindEnum PropKind { get; }
-        Type Type { get; }
+        // Unique to each instance.
+        PropNameType PropertyName { get; }
         bool TypeIsSolid { get; }
-        PropStorageStrategyEnum StorageStrategy { get; } // True for internal, false for external. Will change to enum with items: internal, external and virtual.
+        bool ValueIsDefined { get; }
 
         event EventHandler<EventArgs> ValueChanged; // Used by virtual properties.
 
+        // --- Common to All Instances.
+        //PropKindEnum PropKind { get; }
+        //Type Type { get; }
+        //PropStorageStrategyEnum StorageStrategy { get; }
+
+        //Attribute[] Attributes { get; }
+
         object TypedValueAsObject { get; }
         ValPlusType GetValuePlusType();
-
-        bool ValueIsDefined { get; }
 
         /// <summary>
         /// Marks the property as having an undefined value.
@@ -45,25 +54,23 @@ namespace DRM.TypeSafePropertyBag
         /// <returns>True, if the value was defined at the time this call was made.</returns>
         bool SetValueToUndefined();
 
+        bool ReturnDefaultForUndefined { get; }
+
         void CleanUpTyped();
     }
 
-    /// <summary>
-    /// Allows access from code in the TypeSafePropertyBag assembly, but not from the PropBag assembly.
-    /// </summary>
-    internal interface IPropDataInternal : IPropData
+    // Spliting IProp into two parts:
+    // 1.   IProp holds all fields necessary to describe a particular instance.
+    // 2.   IPropTemplate defines behavior common to all instances.
+    public interface IPropTemplate
     {
-        //ExKeyT CKey { get; }
-        bool IsPropBag { get; }
-
-        // On those occasions when the IProp starts off with Type = object, and then later, the type is firmed up,
-        // The IPropBag needs to be able to have a new IProp created with the correct type
-        // and that new IProp needs to replace the original IProp.
-        void SetTypedProp(PropNameType propertyName, IProp value);
+        PropKindEnum PropKind { get; }
+        Type Type { get; }
+        PropStorageStrategyEnum StorageStrategy { get; } 
+                                                         
+        Attribute[] Attributes { get; } 
     }
 
-
-    // TODO: Consider merging this interface with IPropDataInternal -- all of these items are really internal.
     /// <summary>
     /// Classes that implement the IPropBag interface, keep a list of properties, each of which implements this interface.
     /// These features are managed by the PropBag, and not by classes that implement IProp (derive from PropBase.)
@@ -73,17 +80,30 @@ namespace DRM.TypeSafePropertyBag
         //PropIdType PropId { get; }
 
         bool IsEmpty { get; }
-
+        bool IsPropBag { get; }
         //bool IsPrivate { get; } // TODO: Consider adding the ability to register private PropItems.
+
 
         /// <summary>
         /// Provides access to the non-type specific features of this property.
         /// This allows access to these values without having to cast to the instance to its type (unknown at compile time.)
         /// </summary>
         IProp TypedProp { get; }
+        IPropTemplate PropDef { get; }
 
-        ValPlusType GetValuePlusType();
-
+        // TODO: Consider moving this to IPropDataInternal and making the store accessor handle removing PropItems.
         void CleanUp(bool doTypedCleanup);
     }
+
+    /// <summary>
+    /// This interface is used by the PropStore / PropStoreAccessService
+    /// </summary>
+    internal interface IPropDataInternal : IPropData
+    {
+        // On those occasions when the IProp starts off with Type = object, and then later, the type is firmed up,
+        // The IPropBag needs to be able to have a new IProp created with the correct type
+        // and that new IProp needs to replace the original IProp.
+        void SetTypedProp(PropNameType propertyName, IProp value);
+    }
+
 }

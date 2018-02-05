@@ -43,7 +43,9 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CViewProp_New.cs" />
     <Compile Include="CViewProp.cs" />
+    <Compile Include="CViewSourceProp_New.cs" />
     <Compile Include="CViewSourceProp.cs" />
     <Compile Include="DoWhenChangedHelper.cs" />
     <Compile Include="IProvideACollectionViewSource.cs" />

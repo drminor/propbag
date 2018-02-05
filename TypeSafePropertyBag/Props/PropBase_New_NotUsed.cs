@@ -6,13 +6,12 @@ namespace DRM.TypeSafePropertyBag
 {
     using PropIdType = UInt32;
     using PropNameType = String;
-
     using IRegisterBindingsFowarderType = IRegisterBindingsForwarder<UInt32>;
 
     /// <summary>
     /// A wrapper for an instance of IProp<typeparam name="T"/>.
     /// </summary>
-    public abstract class PropBase : IProp
+    public abstract class PropBase_New : IProp
     {
         #region Public Members
 
@@ -55,7 +54,7 @@ namespace DRM.TypeSafePropertyBag
 
         #region Constructors
 
-        public PropBase(PropKindEnum propKind, Type typeOfThisValue, bool typeIsSolid, PropStorageStrategyEnum storageStrategy, bool valueIsDefined)
+        public PropBase_New(PropKindEnum propKind, Type typeOfThisValue, bool typeIsSolid, PropStorageStrategyEnum storageStrategy, bool valueIsDefined)
         {
             PropKind = propKind;
             Type = typeOfThisValue;

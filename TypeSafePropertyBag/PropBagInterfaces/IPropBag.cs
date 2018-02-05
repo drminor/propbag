@@ -6,9 +6,7 @@ using System.Windows.Data;
 
 namespace DRM.TypeSafePropertyBag
 {
-    using PropIdType = UInt32;
     using PropNameType = String;
-    using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
 
     ///// <summary>
     ///// All implementers of IPropBag that also want to use a shared property store must

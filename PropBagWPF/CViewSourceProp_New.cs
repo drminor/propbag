@@ -8,21 +8,24 @@ namespace DRM.PropBagWPF
 {
     using PropNameType = String;
 
-    public class CViewSourceProp : PropTypedBase<CollectionViewSource>, ICViewSourceProp<CollectionViewSource>
+    public class CViewSourceProp_New : PropTypedBase_New<CollectionViewSource>, ICViewSourceProp<CollectionViewSource>
     {
         #region Private and Protected Members
 
-        private readonly PropNameType _propertyName;
         private readonly IProvideAView _viewProvider;
 
         #endregion
 
         #region Constructor
 
-        public CViewSourceProp(PropNameType propertyName, IProvideAView viewProvider)
-            : base(typeof(CollectionViewSource), true, PropStorageStrategyEnum.Virtual, true, RefEqualityComparer<CollectionViewSource>.Default.Equals, null, PropKindEnum.CollectionViewSource)
+        public CViewSourceProp_New(PropNameType propertyName, IProvideAView viewProvider, IPropTemplate<CollectionViewSource> template)
+            : base(propertyName, true, template)
         {
-            _propertyName = propertyName;
+            if(_template.StorageStrategy != PropStorageStrategyEnum.Virtual)
+            {
+                throw new InvalidOperationException($"CViewSource PropItems only support {nameof(PropStorageStrategyEnum.Virtual)}.");
+            }
+
             _viewProvider = viewProvider;
         }
 
@@ -64,7 +67,6 @@ namespace DRM.PropBagWPF
                 //_viewProvider.ViewSourceRefreshed += _viewProvider_ViewRefreshed;
                 return cvs; 
             }
-
             set
             {
                 throw new InvalidOperationException("TODO: Fix Me");
@@ -81,17 +83,7 @@ namespace DRM.PropBagWPF
         //    System.Diagnostics.Debug.WriteLine("CVS's DSP received as ViewRefreshed Event.");
         //}
 
-        public override object TypedValueAsObject => TypedValue;
-
         public override object Clone() => throw new NotSupportedException($"This Prop Item of type: {typeof(ICViewSourceProp<CollectionViewSource>).Name} does not implement the Clone method.");
-
-        public override void CleanUpTyped()
-        {
-            if (TypedValue is IDisposable disable)
-            {
-                disable.Dispose();
-            }
-        }
 
         #endregion
 

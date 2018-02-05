@@ -1,23 +1,12 @@
 ﻿using System;
 using System.Threading;
-using System.Windows.Data;
 
 namespace DRM.TypeSafePropertyBag
 {
-    using PropIdType = UInt32;
-    using PropNameType = String;
 
-    using IRegisterBindingsFowarderType = IRegisterBindingsForwarder<UInt32>;
-
-    /// <summary>
-    /// A wrapper for an instance of IProp<typeparam name="T"/>.
-    /// </summary>
-    public abstract class PropBase : IProp
+    public abstract class PropTemplate : IPropTemplate
     {
         #region Public Members
-
-        public PropNameType PropertyName => "Not Implemented.";
-
 
         public PropKindEnum PropKind { get; protected set; }
         public Type Type { get; }
@@ -26,42 +15,20 @@ namespace DRM.TypeSafePropertyBag
 
         public virtual Attribute[] Attributes { get; }
 
-        public bool ValueIsDefined { get; protected set; }
-        public abstract object TypedValueAsObject { get; }
-
         public abstract bool ReturnDefaultForUndefined { get; }
 
-        //DataSourceProvider _dataSourceProvider;
-
         public event EventHandler<EventArgs> ValueChanged;
-
-        //public virtual DataSourceProvider DataSourceProvider
-        //{
-        //    get
-        //    {
-        //        if(_dataSourceProvider == null)
-        //        {
-        //            _dataSourceProvider = GetDataSourceProvider(PropKind);
-        //        }
-        //        return _dataSourceProvider;
-        //    }
-        //}
-
-        //public virtual bool IsCollection() => IsThisACollection(PropKind);
-
-        //public virtual bool IsReadOnly() => IsThisReadOnly(PropKind);
 
         #endregion
 
         #region Constructors
 
-        public PropBase(PropKindEnum propKind, Type typeOfThisValue, bool typeIsSolid, PropStorageStrategyEnum storageStrategy, bool valueIsDefined)
+        public PropTemplate(PropKindEnum propKind, Type typeOfThisValue, bool typeIsSolid, PropStorageStrategyEnum storageStrategy)
         {
             PropKind = propKind;
             Type = typeOfThisValue;
             TypeIsSolid = typeIsSolid;
             StorageStrategy = storageStrategy;
-            ValueIsDefined = valueIsDefined;
             Attributes = new Attribute[] { };
         }
 
@@ -69,24 +36,19 @@ namespace DRM.TypeSafePropertyBag
 
         #region Public Methods 
 
-        public abstract ValPlusType GetValuePlusType();
-        public abstract bool SetValueToUndefined();
-        public abstract void CleanUpTyped();
-        public abstract object Clone();
+        //public abstract ValPlusType GetValuePlusType();
+        //public abstract bool SetValueToUndefined();
+        //public abstract void CleanUpTyped();
+        //public abstract object Clone();
 
-        public abstract bool RegisterBinding(IRegisterBindingsFowarderType forwarder, PropIdType propId, LocalBindingInfo bindingInfo);
-        public abstract bool UnregisterBinding(IRegisterBindingsFowarderType forwarder, PropIdType propId, LocalBindingInfo bindingInfo);
+        //public abstract bool RegisterBinding(IRegisterBindingsFowarderType forwarder, PropIdType propId, LocalBindingInfo bindingInfo);
+        //public abstract bool UnregisterBinding(IRegisterBindingsFowarderType forwarder, PropIdType propId, LocalBindingInfo bindingInfo);
 
         #endregion
 
         #region Private Methods
 
-        private DataSourceProvider GetDataSourceProvider(PropKindEnum propKind)
-        {
-            DataSourceProvider result = null;
-            return result;
-        }
-
+        // TODO: Make these extension methods for the PropKindEnum type.
         private bool IsThisACollection(PropKindEnum propKind)
         {
             if (propKind == PropKindEnum.Prop)
@@ -96,11 +58,9 @@ namespace DRM.TypeSafePropertyBag
             else if
                 (
                 propKind == PropKindEnum.ObservableCollection ||
-                //propKind == PropKindEnum.ObservableCollectionFB ||
                 propKind == PropKindEnum.EnumerableTyped ||
                 propKind == PropKindEnum.Enumerable ||
                 propKind == PropKindEnum.ObservableCollection_RO ||
-                //propKind == PropKindEnum.ObservableCollectionFB_RO ||
                 propKind == PropKindEnum.EnumerableTyped_RO ||
                 propKind == PropKindEnum.Enumerable_RO
                 )
@@ -124,7 +84,6 @@ namespace DRM.TypeSafePropertyBag
                 (
                 propKind == PropKindEnum.CollectionViewSource_RO ||
                 propKind == PropKindEnum.ObservableCollection_RO ||
-                //propKind == PropKindEnum.ObservableCollectionFB_RO ||
                 propKind == PropKindEnum.EnumerableTyped_RO ||
                 propKind == PropKindEnum.Enumerable_RO
                 )
