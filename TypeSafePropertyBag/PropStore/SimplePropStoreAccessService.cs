@@ -344,9 +344,14 @@ namespace DRM.TypeSafePropertyBag
             bool result = _ourNode.TryRemoveChild(cKey, out StoreNodeProp child);
 
             if (result)
+            {
+                child.PropData_Internal.CleanUp(doTypedCleanup: true);
                 propData = child.PropData_Internal;
+            }
             else
+            {
                 propData = null;
+            }
 
             return result;
         }

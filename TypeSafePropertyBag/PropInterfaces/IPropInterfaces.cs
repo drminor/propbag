@@ -13,18 +13,9 @@ namespace DRM.TypeSafePropertyBag
     public interface IProp<T> : IPropTemplate<T>, IProp 
     {
         T TypedValue { get; set; }
+
         bool CompareTo(T value);
-    }
-
-    public interface IPropTemplate<T> : IPropTemplate
-    {
-        //bool CompareTo(T value);
         bool Compare(T val1, T val2);
-
-        bool ReturnDefaultForUndefined { get; }
-
-        Func<T, T, bool> Comparer { get; }
-        GetDefaultValueDelegate<T> GetDefaultValFunc { get; }
     }
 
     /// <summary>
@@ -39,15 +30,10 @@ namespace DRM.TypeSafePropertyBag
 
         event EventHandler<EventArgs> ValueChanged; // Used by virtual properties.
 
-        // --- Common to All Instances.
-        //PropKindEnum PropKind { get; }
-        //Type Type { get; }
-        //PropStorageStrategyEnum StorageStrategy { get; }
-
-        //Attribute[] Attributes { get; }
-
         object TypedValueAsObject { get; }
         ValPlusType GetValuePlusType();
+
+        bool ReturnDefaultForUndefined { get; }
 
         /// <summary>
         /// Marks the property as having an undefined value.
@@ -55,21 +41,25 @@ namespace DRM.TypeSafePropertyBag
         /// <returns>True, if the value was defined at the time this call was made.</returns>
         bool SetValueToUndefined();
 
-        bool ReturnDefaultForUndefined { get; }
-
         void CleanUpTyped();
     }
 
-    // Spliting IProp into two parts:
-    // 1.   IProp holds all fields necessary to describe a particular instance.
-    // 2.   IPropTemplate defines behavior common to all instances.
+    public interface IPropTemplate<T> : IPropTemplate
+    {
+        Func<T, T, bool> Comparer { get; }
+        Func<string, T> GetDefaultValFunc { get; }
+    }
+
     public interface IPropTemplate
     {
         PropKindEnum PropKind { get; }
         Type Type { get; }
-        PropStorageStrategyEnum StorageStrategy { get; } 
-                                                         
-        Attribute[] Attributes { get; } 
+        PropStorageStrategyEnum StorageStrategy { get; }
+
+        Attribute[] Attributes { get; }
+
+        object ComparerProxy { get; }
+        object GetDefaultValFuncProxy { get; }
     }
 
     /// <summary>
@@ -84,16 +74,11 @@ namespace DRM.TypeSafePropertyBag
         bool IsPropBag { get; }
         //bool IsPrivate { get; } // TODO: Consider adding the ability to register private PropItems.
 
-
         /// <summary>
         /// Provides access to the non-type specific features of this property.
         /// This allows access to these values without having to cast to the instance to its type (unknown at compile time.)
         /// </summary>
         IProp TypedProp { get; }
-        //IPropTemplate PropDef { get; }
-
-        // TODO: Consider moving this to IPropDataInternal and making the store accessor handle removing PropItems.
-        void CleanUp(bool doTypedCleanup);
     }
 
     /// <summary>
@@ -105,6 +90,7 @@ namespace DRM.TypeSafePropertyBag
         // The IPropBag needs to be able to have a new IProp created with the correct type
         // and that new IProp needs to replace the original IProp.
         void SetTypedProp(PropNameType propertyName, IProp value);
-    }
 
+        void CleanUp(bool doTypedCleanup);
+    }
 }
