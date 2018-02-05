@@ -22,8 +22,6 @@ namespace DRM.TypeSafePropertyBag
 
         public IProp TypedProp { get; private set; }
 
-        public IPropTemplate PropDef { get; private set; }
-
         #endregion
 
         #region Constructors
@@ -33,7 +31,6 @@ namespace DRM.TypeSafePropertyBag
             IsEmpty = false;
 
             TypedProp = genericTypedProp ?? throw new ArgumentNullException($"{nameof(genericTypedProp)} must be non-null.");
-            PropDef = genericTypedProp;
 
             //PropId = cKey.Level2Key;
             IsPropBag = genericTypedProp.Type.IsPropBagBased();

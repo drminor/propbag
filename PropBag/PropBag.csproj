@@ -68,7 +68,7 @@
     <Compile Include="ExtValDelegates.cs" />
     <Compile Include="Factories\PropFactoryValueConverter.cs" />
     <Compile Include="Props\PropNoStore.cs" />
-    <Compile Include="Props\Prop.cs" />
+    <None Include="Props\Prop_NotUsed.cs" />
     <Compile Include="PropBag.CustomTypeDescriptor.cs" />
     <None Include="Documentation\TypeInfoField.md" />
     <None Include="Unused\PropBagDyn.cs" />

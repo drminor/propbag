@@ -90,7 +90,7 @@ namespace DRM.TypeSafePropertyBag
         /// This allows access to these values without having to cast to the instance to its type (unknown at compile time.)
         /// </summary>
         IProp TypedProp { get; }
-        IPropTemplate PropDef { get; }
+        //IPropTemplate PropDef { get; }
 
         // TODO: Consider moving this to IPropDataInternal and making the store accessor handle removing PropItems.
         void CleanUp(bool doTypedCleanup);

@@ -8,43 +8,43 @@ namespace DRM.PropBag
     using PropIdType = UInt32;
     using PropNameType = String;
 
-    public class Prop_New<T> : PropTypedBase_New<T>
+    public class Prop<T> : PropTypedBase_New<T>
     {
-        public Prop_New(PropNameType propertyName, T initalValue, bool typeIsSolid, IPropTemplate<T> template) 
+        public Prop(PropNameType propertyName, T initalValue, bool typeIsSolid, IPropTemplate<T> template) 
             : base(propertyName, initalValue, typeIsSolid, template)
         {
         }
 
-        public Prop_New(PropNameType propertyName, bool typeIsSolid, IPropTemplate<T> template)
+        public Prop(PropNameType propertyName, bool typeIsSolid, IPropTemplate<T> template)
             : base(propertyName, typeIsSolid, template)
         {
         }
 
         public override object Clone()
         {
-            Prop_New<T> result;
+            Prop<T> result;
             if (!ValueIsDefined)
             {
                 //result = new Prop<T>(defaultValFunc: GetDefaultValFunc, typeIsSolid: TypeIsSolid, storageStrategy: StorageStrategy, comparer: Comparer);
-                result = new Prop_New<T>(propertyName: PropertyName, typeIsSolid: TypeIsSolid, template: _template);
+                result = new Prop<T>(propertyName: PropertyName, typeIsSolid: TypeIsSolid, template: _template);
             }
             else if (TypedValue == null || TypedValue is ValueType)
             {
                 //result = new Prop<T>(initalValue: TypedValue, defaultValFunc: GetDefaultValFunc, typeIsSolid: TypeIsSolid, storageStrategy: StorageStrategy, comparer: Comparer);
-                result = new Prop_New<T>(propertyName: PropertyName, initalValue: TypedValue, typeIsSolid: TypeIsSolid, template: _template);
+                result = new Prop<T>(propertyName: PropertyName, initalValue: TypedValue, typeIsSolid: TypeIsSolid, template: _template);
 
             }
             else if (TypedValue is ICloneable ic)
             {
                 //result = new Prop<T>(initalValue: (T)ic.Clone(), defaultValFunc: GetDefaultValFunc, typeIsSolid: TypeIsSolid, storageStrategy: StorageStrategy, comparer: Comparer);
-                result = new Prop_New<T>(propertyName: PropertyName, initalValue: (T)ic.Clone(), typeIsSolid: TypeIsSolid, template: _template);
+                result = new Prop<T>(propertyName: PropertyName, initalValue: (T)ic.Clone(), typeIsSolid: TypeIsSolid, template: _template);
             }
             else if (typeof(T) == typeof(string))
             {
                 if(TryGetStringCopy(TypedValue, out T copy))
                 {
                     //result = new Prop<T>(initalValue: copy, defaultValFunc: GetDefaultValFunc, typeIsSolid: TypeIsSolid, storageStrategy: StorageStrategy, comparer: Comparer);
-                    result = new Prop_New<T>(propertyName: PropertyName, initalValue: copy, typeIsSolid: TypeIsSolid, template: _template);
+                    result = new Prop<T>(propertyName: PropertyName, initalValue: copy, typeIsSolid: TypeIsSolid, template: _template);
                 }
                 else
                 {
@@ -57,7 +57,7 @@ namespace DRM.PropBag
                 //throw new InvalidOperationException("The Prop's value is not null, nor is it undefined nor does it implement ICloneable.");
 
                 T hack = GetDefaultValFunc(PropertyName);
-                result = new Prop_New<T>(propertyName: PropertyName, initalValue: hack, typeIsSolid: TypeIsSolid, template: _template);
+                result = new Prop<T>(propertyName: PropertyName, initalValue: hack, typeIsSolid: TypeIsSolid, template: _template);
             }
 
             return result;

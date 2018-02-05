@@ -125,7 +125,7 @@ namespace DRM.PropBag
 
             PropTemplateTyped<T> propTemplateTyped = new PropTemplateTyped<T>(PropKindEnum.Prop, storageStrategy, typeIsSolid, comparer, getDefaultValFunc);
 
-            IProp<T> prop = new Prop_New<T>(propertyName, initialValue, typeIsSolid, propTemplateTyped);
+            IProp<T> prop = new Prop<T>(propertyName, initialValue, typeIsSolid, propTemplateTyped);
             return prop;
         }
 
@@ -168,7 +168,7 @@ namespace DRM.PropBag
                 // Regular Prop with Internal Storage -- Just don't have a value as yet.
                 //IProp<T> prop = new Prop<T>(getDefaultValFunc, typeIsSolid: typeIsSolid, storageStrategy: storageStrategy, comparer: comparer);
 
-                IProp<T> prop = new Prop_New<T>(propertyName, typeIsSolid, propTemplateTyped);
+                IProp<T> prop = new Prop<T>(propertyName, typeIsSolid, propTemplateTyped);
 
                 return prop;
             }
