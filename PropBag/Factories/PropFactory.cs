@@ -59,11 +59,13 @@ namespace DRM.PropBag
 
         #region IObsCollection<T> and ObservableCollection<T> Prop Creation
 
-        public override ICProp<CT, T> Create<CT, T>(
+        public override ICProp<CT, T> Create<CT, T>
+        (
             CT initialValue,
             string propertyName, object extraInfo = null,
             PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true,
-            Func<CT, CT, bool> comparer = null) 
+            Func<CT, CT, bool> comparer = null
+        ) 
         {
             if (comparer == null) comparer = EqualityComparer<CT>.Default.Equals;
             GetDefaultValueDelegate<CT> getDefaultValFunc = ValueConverter.GetDefaultValue<CT>;
@@ -72,23 +74,12 @@ namespace DRM.PropBag
             return prop;
         }
 
-        //public override ICPropFB<CT, T> CreateFB<CT, T>(
-        //    CT initialValue,
-        //    string propertyName, object extraInfo = null,
-        //    PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true,
-        //    Func<CT, CT, bool> comparer = null) 
-        //{
-        //    if (comparer == null) comparer = EqualityComparer<CT>.Default.Equals;
-        //    GetDefaultValueDelegate<CT> getDefaultValFunc = ValueConverter.GetDefaultValue<CT>;
-
-        //    ICPropFB<CT, T> prop = new CPropFB<CT, T>(initialValue, getDefaultValFunc, typeIsSolid, hasStorage, comparer);
-        //    return prop;
-        //}
-
-        public override ICProp<CT, T> CreateWithNoValue<CT, T>(
-        PropNameType propertyName, object extraInfo = null,
-        PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true,
-        Func<CT, CT, bool> comparer = null)
+        public override ICProp<CT, T> CreateWithNoValue<CT, T>
+        (
+            PropNameType propertyName, object extraInfo = null,
+            PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true,
+            Func<CT, CT, bool> comparer = null
+        )
         {
             if (comparer == null) comparer = EqualityComparer<CT>.Default.Equals;
 
