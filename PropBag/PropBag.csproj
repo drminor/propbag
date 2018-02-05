@@ -49,7 +49,7 @@
     <Compile Include="Props\CProp_New.cs" />
     <Compile Include="Props\PropExternStore_New.cs" />
     <Compile Include="Props\PropNoStore_New.cs" />
-    <Compile Include="Props\Prop_New.cs" />
+    <Compile Include="Props\Prop.cs" />
     <Compile Include="Unused\Collections\PbListSourceProvider.cs" />
     <Compile Include="Unused\Collections\PbListSource.cs" />
     <None Include="Unused\Collections\PbCollection_NotUsed.cs" />
@@ -68,7 +68,6 @@
     <Compile Include="ExtValDelegates.cs" />
     <Compile Include="Factories\PropFactoryValueConverter.cs" />
     <Compile Include="Props\PropNoStore.cs" />
-    <None Include="Props\Prop_NotUsed.cs" />
     <Compile Include="PropBag.CustomTypeDescriptor.cs" />
     <None Include="Documentation\TypeInfoField.md" />
     <None Include="Unused\PropBagDyn.cs" />
