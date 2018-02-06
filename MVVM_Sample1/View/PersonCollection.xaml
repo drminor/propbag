@@ -5,9 +5,6 @@
             xmlns:local="clr-namespace:MVVMApplication"
             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
             xmlns:sys="clr-namespace:System;assembly=mscorlib"
-            xmlns:Infra="clr-namespace:MVVMApplication.Infra"
-            xmlns:pbb="clr-namespace:DRM.PropBagControlsWPF.Binders;assembly=PropBag.WPFControls"
-            xmlns:vmod="clr-namespace:MVVMApplication.ViewModel"
             xmlns:mod="clr-namespace:MVVMApplication.Model"
             
             mc:Ignorable="d" 
@@ -41,7 +38,7 @@
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
 
-        <pbb:SelectedItemConverter x:Key="SelectedItemConverter"></pbb:SelectedItemConverter>
+        <!--<pbb:SelectedItemConverter x:Key="SelectedItemConverter"></pbb:SelectedItemConverter>-->
         
     </UserControl.Resources>
 
@@ -58,8 +55,8 @@
         </Grid.RowDefinitions>
 
         <DataGrid Grid.Row="0" Name="PersonListDataGrid" AutoGenerateColumns="False" Width="500" HorizontalAlignment="Center"
-                 VerticalScrollBarVisibility="Visible" VerticalAlignment="Stretch" VirtualizingStackPanel.VirtualizationMode="Standard"
-                  VirtualizingStackPanel.IsVirtualizing="True" ItemsSource="{Binding PersonListView}"
+                 VerticalScrollBarVisibility="Visible" VerticalAlignment="Stretch" VirtualizingStackPanel.VirtualizationMode="Recycling"
+                  VirtualizingStackPanel.IsVirtualizing="False" ItemsSource="{Binding PersonListView}"
                   SelectionChanged="PersonListDataGrid_SelectionChanged">
             
             <DataGrid.Columns>
@@ -70,47 +67,6 @@
             </DataGrid.Columns>
             
         </DataGrid>
-
-        <!--<Grid Grid.Row="1" Name="SelectedPersonGrid" DataContext="{Binding PersonListView/, Mode=TwoWay}" Width="500"
-              HorizontalAlignment="Center" Margin="0,10,0,0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"></RowDefinition>
-                <RowDefinition Height="Auto"></RowDefinition>
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"></ColumnDefinition>
-                <ColumnDefinition Width="Auto"></ColumnDefinition>
-                <ColumnDefinition Width="Auto"></ColumnDefinition>
-                <ColumnDefinition Width="Auto"></ColumnDefinition>
-            </Grid.ColumnDefinitions>
-
-            <TextBlock Grid.Row="0" Grid.Column="0" Text="First Name"></TextBlock>
-            <TextBlock Grid.Row="0" Grid.Column="1" Text="Last Name"></TextBlock>
-            <TextBlock Grid.Row="0" Grid.Column="2" Text="City"></TextBlock>
-            <TextBlock Grid.Row="0" Grid.Column="3" Text="Profession"></TextBlock>
-
-            <TextBox Grid.Row="1" Grid.Column="0" Text="{Binding Path=FirstName, Mode=TwoWay}"></TextBox>
-            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Path=LastName, Mode=TwoWay}"></TextBox>
-            <TextBox Grid.Row="1" Grid.Column="2" Text="{Binding Path=CityOfResidence, Mode=TwoWay}"></TextBox>
-            <ComboBox Grid.Row="1" Grid.Column="3" SelectedItem="{Binding Path=Profession, Mode=TwoWay}"
-                      ItemsSource="{Binding Source={StaticResource professionEnum}}"></ComboBox>
-        </Grid>
-
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0, 10, 0, 0">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="5, 0, 25, 0">
-                <Button Command="{Binding PageUp}" Content="Page Up"></Button>
-                <Button Command="{Binding PageDown}" Content="Page Down"></Button>
-                <Button Command="{Binding Refresh}" Content="Refresh"></Button>
-            </StackPanel>
-            
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="25, 0, 0, 0">
-                <Button Command="{Binding Add}" Content="Add New"></Button>
-                <Button Command="{Binding Save}" Content="Update"></Button>
-                <Button Command="{Binding Delete}" Content="Delete"></Button>
-                --><!--<Button Command="ApplicationCommands.Delete" Content="Delete"></Button>--><!--
-
-            </StackPanel>
-        </StackPanel>-->
 
     </Grid>
 </UserControl>

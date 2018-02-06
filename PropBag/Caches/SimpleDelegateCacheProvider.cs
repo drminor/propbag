@@ -41,6 +41,9 @@ namespace DRM.PropBag.Caches
         // DataSourceProviderProvider
         public ICacheDelegatesForTypePair<CreateMappedDSPProviderDelegate> CreateDSPProviderCache { get; }
 
+        public PropTemplateCache PropTemplateCache { get; }
+
+
         #endregion
 
         #region Constructor
@@ -148,6 +151,8 @@ namespace DRM.PropBag.Caches
             //// Create Prop With No Value
             //MethodInfo createPropNoVal_mi = propCreatorType.GetMethod("CreatePropWithNoValue", BindingFlags.Static | BindingFlags.NonPublic);
             //CreatePropWithNoValCache = new DelegateCache<CreatePropWithNoValueDelegate>(createPropNoVal_mi);
+
+            PropTemplateCache = new PropTemplateCache();
 
             #endregion
         }

@@ -35,8 +35,8 @@ namespace PropBagTestApp.Infra
 
             DefaultPropFactory = BuildDefaultPropFactory(PropStoreServices);
 
-            IPropBagTemplateProvider propBagTemplateProvider = new PropBagTemplateProvider(Application.Current.Resources);
-            IMapperRequestProvider mapperRequestProvider = new MapperRequestProvider(Application.Current.Resources);
+            IPropBagTemplateProvider propBagTemplateProvider = new PropBagTemplateProvider(Application.Current.Resources, null);
+            IMapperRequestProvider mapperRequestProvider = new MapperRequestProvider(Application.Current.Resources, null);
 
             IViewModelActivator vmActivator = new SimpleViewModelActivator();
 

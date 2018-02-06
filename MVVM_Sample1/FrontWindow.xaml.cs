@@ -30,9 +30,9 @@ namespace MVVMApplication
             ShowMain("Extra_Members");
         }
 
-        private void ShowMain(string packageConfigName)
+        private void ShowMain(string configPackageNameSuffix)
         {
-            MainWindow mw = new MainWindow(packageConfigName);
+            MainWindow mw = new MainWindow(configPackageNameSuffix);
             mw.ShowDialog();
         }
 
@@ -43,5 +43,9 @@ namespace MVVMApplication
             AppDomain.CurrentDomain.SetData("DataDirectory", cad.ApplicationFolderPath);
         }
 
+        private void Window_Closed(object sender, EventArgs e)
+        {
+
+        }
     }
 }

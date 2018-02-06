@@ -11,7 +11,11 @@
                 <ResourceDictionary Source="PropBagTemplates/PersonCollectionVM.xaml"/>
                 <ResourceDictionary Source="PropBagTemplates/PersonEditorVM.xaml"/>
                 <ResourceDictionary Source="PropBagTemplates/PersonVM.xaml"/>
-                <ResourceDictionary Source="PropBagTemplates/MapperConf_Emit.xaml"/>
+                <ResourceDictionary Source="PropBagTemplates/MapperConf_Both.xaml"/>
+
+                <!--<ResourceDictionary Source="PropBagTemplates/MapperConf_Emit.xaml"/>-->
+                <!--<ResourceDictionary Source="PropBagTemplates/MapperConf_Extra.xaml"/>-->
+
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

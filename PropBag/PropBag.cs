@@ -1039,8 +1039,8 @@ namespace DRM.PropBag
         public bool SetIt<T>(T value, string propertyName)
         {
             // For Set operations where a type is given, 
-            // Register the property if it does not exist, unless the TypeSafetyMode
-            // setting is AllPropsMustBe (explictly) registered.
+            // Register the property if it does not exist,
+            // unless the TypeSafetyMode setting is AllPropsMustBe (explictly) registered.
             bool alwaysRegister = !OurMetaData.AllPropsMustBeRegistered;
             bool mustBeRegistered = OurMetaData.AllPropsMustBeRegistered;
 
@@ -1049,7 +1049,7 @@ namespace DRM.PropBag
                 alwaysRegister: alwaysRegister,
                 mustBeRegistered: mustBeRegistered,
                 neverCreate: false,
-                desiredHasStoreValue: _propFactory.ProvidesStorage,
+                desiredHasStoreValue: null, // _propFactory.ProvidesStorage,
                 wasRegistered: out bool wasRegistered,
                 propId: out PropIdType propId);
 
@@ -2242,7 +2242,7 @@ namespace DRM.PropBag
                 bool theSame = typedProp.CompareTo(newValue);
                 if (!theSame)
                 {
-                    T oldValue = typedProp.TypedValue;
+                    T oldValue = curValue; // typedProp.TypedValue;
 
                     if(subscriptions != null) CallChangingSubscribers(subscriptions, propertyName);
                     if(globalSubs != null) CallChangingSubscribers(globalSubs, propertyName);
@@ -3080,12 +3080,15 @@ namespace DRM.PropBag
         // Consider creating a new interface: IPropBagInternal and making this method be a member of that interface.
         private bool DoSetBridge<T>(IPropBag target, PropIdType propId, PropNameType propertyName, IProp prop, object value)
         {
-            T typedValue = (T)value;
+            T newValue = (T)value;
 
             IProp<T> typedProp = (IProp<T>)prop;
-            bool result = ((PropBag)target).DoSet<T>(propId, propertyName, typedProp, ref typedValue, (T)value);
 
-            typedProp.TypedValue = typedValue;
+            T curVal = typedProp.ValueIsDefined ? (T)typedProp.TypedValueAsObject : default(T);
+
+            bool result = ((PropBag)target).DoSet<T>(propId, propertyName, typedProp, ref curVal, newValue);
+
+            //typedProp.TypedValue = newValue;
 
             return result;
         }

@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 
 /// <remarks>
 /// This was copied whole sale from the AutoMapper project on GitHub.
@@ -16,7 +18,7 @@ using System.Collections.Generic;
 ///</summary>
 namespace DRM.TypeSafePropertyBag.Fundamentals
 {
-    public struct LockingConcurrentDictionary<TKey, TValue>
+    public struct LockingConcurrentDictionary<TKey, TValue> : IEnumerable<TValue>
     {
         private readonly ConcurrentDictionary<TKey, Lazy<TValue>> _dictionary;
         private readonly Func<TKey, Lazy<TValue>> _valueFactory;
@@ -78,6 +80,19 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
         }
 
         public void Clear() => _dictionary.Clear();
+
+        public IEnumerator<TValue> GetEnumerator()
+        {
+            IEnumerable<TValue> list = _dictionary.Values.Select(x => x.Value);
+            IEnumerator<TValue> result = list.GetEnumerator();
+            return result;
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            IEnumerator<TValue> typedEnumerator = GetEnumerator();
+            return typedEnumerator;
+        }
     }
 
 }

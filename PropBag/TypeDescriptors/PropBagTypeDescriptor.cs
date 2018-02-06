@@ -31,7 +31,14 @@ namespace DRM.PropBag.TypeDescriptors
         public override string Name => _tdConfig.Name;
         public override Type PropertyType => _tdConfig.PropertyType;
 
-        public override bool SupportsChangeEvents => _tdConfig.SupportsChangeEvents;
+        public override bool SupportsChangeEvents //=> _tdConfig.SupportsChangeEvents;
+        {
+            get
+            {
+                bool result = _tdConfig.SupportsChangeEvents;
+                return result;
+            }
+        }
 
         #endregion
 

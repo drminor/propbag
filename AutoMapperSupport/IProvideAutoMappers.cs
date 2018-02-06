@@ -23,5 +23,7 @@ namespace DRM.PropBag.AutoMapperSupport
         IPropBagMapperKeyGen RegisterMapperRequest(IPropBagMapperKeyGen mapperRequest);
 
         IPropBagMapperGen GetMapper(IPropBagMapperKeyGen mapperRequest);
+
+        void Clear();
     }
 }

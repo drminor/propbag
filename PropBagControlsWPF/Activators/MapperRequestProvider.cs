@@ -34,15 +34,17 @@ namespace DRM.PropBagControlsWPF
             _resources = null;
         }
 
-        public MapperRequestProvider(ResourceDictionary resources)
+        public MapperRequestProvider(ResourceDictionary resources, string resourceKeySuffix)
         {
             _resources = resources;
+            ResourceKeySuffix = resourceKeySuffix;
         }
 
         #endregion
 
         #region Public Properties
 
+        public string ResourceKeySuffix { get; }
         public bool CanFindMapperRequestWithJustAKey => _resources != null;
 
         #endregion
@@ -60,28 +62,30 @@ namespace DRM.PropBagControlsWPF
             if (resources == null) throw new ArgumentNullException(nameof(resources));
             if (resourceKey == null) throw new ArgumentNullException(nameof(resourceKey));
 
+            string cookedKey = GetResourceKeyWithSuffix(resourceKey);
+
             object resource;
             try
             {
-                resource = resources[resourceKey];
+                resource = resources[cookedKey];
             }
             catch (KeyNotFoundException knfe)
             {
-                throw new KeyNotFoundException($"Could not find a MapperRequest with key = {resourceKey}.", knfe);
+                throw new KeyNotFoundException($"Could not find a MapperRequest with key = {cookedKey}.", knfe);
             }
 
             if (resource == null)
             {
-                throw new InvalidOperationException($"Could not find a MapperRequest with key = {resourceKey}.");
+                throw new InvalidOperationException($"Could not find a MapperRequest with key = {cookedKey}.");
             }
 
-            if (TryParse(resource, resourceKey, out MapperRequestTemplate mapperRequest))
+            if (TryParse(resource, cookedKey, out MapperRequestTemplate mapperRequest))
             {
                 return mapperRequest;
             }
             else
             {
-                throw new InvalidOperationException($"The MapperRequest with key = {resourceKey} could not be parsed.");
+                throw new InvalidOperationException($"The MapperRequest with key = {cookedKey} could not be parsed.");
             }
         }
 
@@ -131,19 +135,11 @@ namespace DRM.PropBagControlsWPF
             }
         }
 
-        //private MapperRequest GetMapperRequest(Dictionary<string, MapperRequest> mrRequests, string resourceKey)
-        //{
-        //    if (mrRequests == null) throw new ArgumentNullException(nameof(mrRequests));
-        //    try
-        //    {
-        //        MapperRequest result = mrRequests[resourceKey];
-        //        return result;
-        //    }
-        //    catch (KeyNotFoundException knfe)
-        //    {
-        //        throw new KeyNotFoundException($"Could not find a MapperRequest with key = {resourceKey}.", knfe);
-        //    }
-        //}
+        private string GetResourceKeyWithSuffix(string rawKey)
+        {
+            string result = ResourceKeySuffix != null ? $"{rawKey}_{ResourceKeySuffix}" : rawKey;
+            return result;
+        }
 
         #endregion
     }

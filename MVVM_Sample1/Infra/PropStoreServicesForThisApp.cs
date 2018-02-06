@@ -25,11 +25,36 @@ namespace MVVMApplication.Infra
 
         public static IPropFactory DefaultPropFactory { get; }
 
-        public static IProvidePropModels PropModelProvider { get; }
-        public static ViewModelHelper ViewModelHelper { get; }
+        public static IProvidePropModels PropModelProvider { get; private set; }
+
+        public static ViewModelHelper ViewModelHelper { get; private set; }
+
         public static IProvideAutoMappers AutoMapperProvider { get; }
 
-        public static string PackageConfigName { get; set; }
+        static string _configPackageNameSuffix;
+        public static string ConfigPackageNameSuffix
+        {
+            get
+            {
+                return _configPackageNameSuffix;
+            }
+
+            set
+            {
+                if(value != _configPackageNameSuffix)
+                {
+                    _configPackageNameSuffix = value;
+                    IViewModelActivator vmActivator = new SimpleViewModelActivator();
+
+                    PropModelProvider = GetPropModelProvider(vmActivator, ConfigPackageNameSuffix);
+
+                    ViewModelHelper = new ViewModelHelper(PropModelProvider, vmActivator, PropStoreServices.PropStoreEntryPoint);
+
+                    // Remove any AutoMapper that may have been previously created.
+                    AutoMapperProvider.Clear();
+                }
+            }
+        }
 
         static MemConsumptionTracker _mct = new MemConsumptionTracker();
 
@@ -53,17 +78,33 @@ namespace MVVMApplication.Infra
             DefaultPropFactory = BuildDefaultPropFactory(PropStoreServices, AutoMapperProvider);
             _mct.MeasureAndReport("After new BuildDefaultPropFactory");
 
-            IPropBagTemplateProvider propBagTemplateProvider = new PropBagTemplateProvider(Application.Current.Resources);
-            _mct.MeasureAndReport("After new PropBagTemplateProvider");
+            //IPropBagTemplateProvider propBagTemplateProvider = new PropBagTemplateProvider(Application.Current.Resources, null);
+            //_mct.MeasureAndReport("After new PropBagTemplateProvider");
 
-            IMapperRequestProvider mapperRequestProvider = new MapperRequestProvider(Application.Current.Resources);
-            _mct.MeasureAndReport("After new MapperRequestProvider");
+            //IMapperRequestProvider mapperRequestProvider = new MapperRequestProvider(Application.Current.Resources, ConfigPackageNameSuffix);
+            //_mct.MeasureAndReport("After new MapperRequestProvider");
 
-            PropModelProvider = new PropModelProvider(propBagTemplateProvider, mapperRequestProvider, DefaultPropFactory, vmActivator, PropStoreServices.PropStoreEntryPoint);
-            _mct.MeasureAndReport("After new PropModelProvider");
+
+            //PropModelProvider = new PropModelProvider(propBagTemplateProvider, mapperRequestProvider, DefaultPropFactory, vmActivator, PropStoreServices.PropStoreEntryPoint);
+            //_mct.MeasureAndReport("After new PropModelProvider");
+
+            PropModelProvider = GetPropModelProvider(vmActivator, ConfigPackageNameSuffix);
 
             ViewModelHelper = new ViewModelHelper(PropModelProvider, vmActivator, PropStoreServices.PropStoreEntryPoint);
             _mct.MeasureAndReport("After new ViewModelHelper");
+        }
+
+        private static IProvidePropModels GetPropModelProvider(IViewModelActivator vmActivator, string configPackageNameSuffix)
+        {
+            IPropBagTemplateProvider propBagTemplateProvider = new PropBagTemplateProvider(Application.Current.Resources, null);
+            _mct.MeasureAndReport("After new PropBagTemplateProvider");
+
+            IMapperRequestProvider mapperRequestProvider = new MapperRequestProvider(Application.Current.Resources, ConfigPackageNameSuffix);
+            _mct.MeasureAndReport("After new MapperRequestProvider");
+
+            IProvidePropModels propModelProvider = new PropModelProvider(propBagTemplateProvider, mapperRequestProvider, DefaultPropFactory, vmActivator, PropStoreServices.PropStoreEntryPoint);
+            _mct.MeasureAndReport("After new PropModelProvider");
+            return propModelProvider;
         }
 
 

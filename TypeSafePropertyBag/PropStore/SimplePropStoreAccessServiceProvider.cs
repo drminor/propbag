@@ -43,6 +43,8 @@ namespace DRM.TypeSafePropertyBag
         int _accessCounter = 0; // Counts Each SetIt<T> operation on all PropBags.
         int _numOfAccessServicesCreated = 0;
 
+        PropTemplateCache _propTemplateCache;
+
         #endregion
 
         #region Public Properties
@@ -65,6 +67,9 @@ namespace DRM.TypeSafePropertyBag
 
             _store = new Dictionary<WeakRefKey<IPropBag>, StoreNodeBag>();
               _sync = new object();
+
+            _propTemplateCache = new PropTemplateCache();
+
             //_timer = new Timer(PruneStore, null, NUMBER_OF_SECONDS_BETWEEN_PRUNE_OPS * 1000, NUMBER_OF_SECONDS_BETWEEN_PRUNE_OPS * 1000);
         }
 
@@ -249,6 +254,16 @@ namespace DRM.TypeSafePropertyBag
             {
                 System.Diagnostics.Debug.Assert(!ReferenceEquals(key, basePropItemSet), "The GenerationId is not 0, but the base *is* the same as the key.");
             }
+        }
+
+        #endregion
+
+        #region PropTemplate Support
+
+        public IPropTemplate GetOrAdd(IPropTemplate propTemplate)
+        {
+            IPropTemplate result = _propTemplateCache.GetOrAdd(propTemplate);
+            return result;
         }
 
         #endregion

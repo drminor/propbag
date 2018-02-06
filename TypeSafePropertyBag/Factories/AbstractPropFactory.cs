@@ -211,37 +211,16 @@ namespace DRM.TypeSafePropertyBag
 
         #region Scalar Prop Creation
 
-        public abstract IProp<T> Create<T>(
+        public abstract IProp<T> Create<T>
+            (
             T value,
             PropNameType propertyName,
             object extraInfo,
             PropStorageStrategyEnum storageStrategy,
             bool isTypeSolid,
             Func<T, T, bool> comparer,
-            Func<string, T> getDefaultValFunc);
-
-        //public abstract IProp<T> Create<T>(
-        //    bool haveValue,
-        //    T initialValue,
-        //    PropNameType propertyName,
-        //    object extraInfo,
-        //    PropStorageStrategyEnum storageStrategy,
-        //    bool typeIsSolid,
-        //    Func<T, T, bool> comparer,
-        //    Func<string, T> getDefaultValFunc);
-
-        //public abstract IProp<T> Create_OLD<T>(
-        //    T initialValue,
-        //    PropNameType propertyName, object extraInfo = null,
-        //    PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true,
-        //    Func<T, T, bool> comparer = null);
-        ////{
-        ////    if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
-
-        ////    GetDefaultValueDelegate<T> getDefaultValFunc = ValueConverter.GetDefaultValue<T>;
-        ////    IProp<T> prop = new Prop<T>(initialValue, getDefaultValFunc, typeIsSolid: typeIsSolid, hasStore: hasStorage, comparer: comparer);
-        ////    return prop;
-        ////}
+            Func<string, T> getDefaultValFunc
+            );
 
         public abstract IProp<T> CreateWithNoValue<T>
             (
@@ -252,19 +231,6 @@ namespace DRM.TypeSafePropertyBag
             Func<T, T, bool> comparer,
             Func<string, T> getDefaultValFunc
             );
-
-
-        //public abstract IProp<T> CreateWithNoValue<T>(
-        //    PropNameType propertyName, object extraInfo = null,
-        //    PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true,
-        //    Func<T, T, bool> comparer = null);
-        ////{
-        ////    if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
-
-        ////    GetDefaultValueDelegate<T> getDefaultValFunc = ValueConverter.GetDefaultValue<T>;
-        ////    IProp<T> prop = new Prop<T>(getDefaultValFunc, typeIsSolid: typeIsSolid, hasStore: hasStorage, comparer: comparer);
-        ////    return prop;
-        ////}
 
         #endregion
 
@@ -558,7 +524,7 @@ namespace DRM.TypeSafePropertyBag
 
         #endregion
 
-        #region Shared Delegate Creation Logic
+        #region Get PropItem Creation Delegates
 
         #region Enumerable-Type Prop Creation Methods
 
@@ -661,51 +627,6 @@ namespace DRM.TypeSafePropertyBag
         #endregion Property-Type Methods
 
         #endregion Shared Delegate Creation
-
-        //#region DEBUG Checks
-
-        //[System.Diagnostics.Conditional("DEBUG")]
-        //private void CheckPropKind(PropKindEnum propKind)
-        //{
-        //    if (!
-        //            (
-        //            propKind == PropKindEnum.CollectionView ||
-        //            propKind == PropKindEnum.CollectionViewSource ||
-        //            propKind == PropKindEnum.CollectionViewSource_RO ||
-        //            propKind == PropKindEnum.DataTable ||
-        //            propKind == PropKindEnum.DataTable_RO ||
-        //            propKind == PropKindEnum.Prop ||
-        //            propKind == PropKindEnum.ObservableCollection ||
-        //            propKind == PropKindEnum.EnumerableTyped ||
-        //            propKind == PropKindEnum.Enumerable ||
-        //            propKind == PropKindEnum.ObservableCollection_RO ||
-        //            propKind == PropKindEnum.EnumerableTyped_RO ||
-        //            propKind == PropKindEnum.Enumerable_RO
-        //            )
-        //        )
-        //    {
-        //        throw new InvalidOperationException($"The PropKind: {propKind} is not supported.");
-        //    }
-        //}
-
-        //[System.Diagnostics.Conditional("DEBUG")]
-        //private void CheckPropKindSpecial(PropKindEnum propKind)
-        //{
-        //    if (!
-        //            (
-        //            propKind == PropKindEnum.CollectionView ||
-        //            propKind == PropKindEnum.CollectionViewSource ||
-        //            propKind == PropKindEnum.CollectionViewSource_RO ||
-        //            propKind == PropKindEnum.DataTable ||
-        //            propKind == PropKindEnum.DataTable_RO
-        //            )
-        //        )
-        //    {
-        //        throw new InvalidOperationException($"The PropKind: {propKind} is not supported.");
-        //    }
-        //}
-
-        //#endregion 
 
         #region IDisposable Support
 

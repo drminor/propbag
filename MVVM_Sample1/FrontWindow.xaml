@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MVVMApplication"
         mc:Ignorable="d"
-        Title="FrontWindow" Height="320" Width="320" MinHeight="200" MinWidth="150">
+        Title="FrontWindow" Height="320" Width="320" MinHeight="200" MinWidth="150" Closed="Window_Closed">
     <Border BorderThickness="1" BorderBrush="Black" Margin="1,1,1,1" >
     <Grid>
         <Grid.RowDefinitions>

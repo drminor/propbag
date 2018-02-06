@@ -10,12 +10,12 @@ namespace MVVMApplication.View
     {
         MainWindowViewModel OurData => (MainWindowViewModel)this.DataContext;
 
-        public MainWindow(string packageConfigName)
+        public MainWindow(string configPackageNameSuffix)
         {
             System.Diagnostics.Debug.WriteLine("Just before MainWindow InitComp.");
 
             // TODO: Is there a more formal way of handling this global setting?
-            PropStoreServicesForThisApp.PackageConfigName = packageConfigName;
+            PropStoreServicesForThisApp.ConfigPackageNameSuffix = configPackageNameSuffix;
 
             InitializeComponent();
 

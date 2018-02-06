@@ -7,51 +7,34 @@ using System.Collections.Generic;
 
 namespace DRM.PropBag
 {
-
     using PropNameType = String;
 
     public class PropFactory : AbstractPropFactory
     {
-        public override bool ProvidesStorage => true;
-
-        //public PropFactory
-        //    (
-        //        ResolveTypeDelegate typeResolver,
-        //        IConvertValues valueConverter
-        //    )
-        //    : this
-        //    (
-        //        typeResolver, 
-        //        valueConverter,
-        //        new SimpleDelegateCacheProvider(typeof(PropBag), typeof(APFGenericMethodTemplates))
-        //    )
-        //{
-        //}
+        #region Constructor
 
         public PropFactory
-            (
-                IProvideDelegateCaches delegateCacheProvider,
-                IConvertValues valueConverter,
-                ResolveTypeDelegate typeResolver
-            )
-            : base
-            (
-                delegateCacheProvider,
-                valueConverter, // GetValueConverter(valueConverter, delegateCacheProvider)
-                typeResolver
-            )
+        (
+            IProvideDelegateCaches delegateCacheProvider,
+            IConvertValues valueConverter,
+            ResolveTypeDelegate typeResolver
+        )
+        : base
+        (
+            delegateCacheProvider,
+            valueConverter, // GetValueConverter(valueConverter, delegateCacheProvider)
+            typeResolver
+        )
         {
         }
 
-        //// TODO: Require the valueConverter parameter to be supplied.
-        //// TODO: Separate out the TypeDescBasedTConverterCache from IProvideDelegateCaches
-        ////      and make PropFactory require a supplied TypeDescBasedTConverterCache
-        ////      and create an interface that TypeDescBasedTConverterCache can implement.
-        //private static IConvertValues GetValueConverter(IConvertValues suppliedValueConverter, IProvideDelegateCaches delegateCacheProvider)
-        //{
-        //    IConvertValues result = suppliedValueConverter ?? new PropFactoryValueConverter(delegateCacheProvider.TypeDescBasedTConverterCache);
-        //    return result;
-        //}
+        #endregion
+
+        #region Public Properties
+
+        public override bool ProvidesStorage => true;
+
+        #endregion
 
         #region Enumerable-Type Prop Creation 
 
@@ -107,14 +90,16 @@ namespace DRM.PropBag
 
         #region Scalar Prop Creation
 
-        public override IProp<T> Create<T>(
+        public override IProp<T> Create<T>
+        (
             T initialValue,
             PropNameType propertyName,
             object extraInfo,
             PropStorageStrategyEnum storageStrategy,
             bool typeIsSolid,
             Func<T, T, bool> comparer,
-            Func<string, T> getDefaultValFunc)
+            Func<string, T> getDefaultValFunc
+        )
         {
             if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
 
@@ -123,33 +108,21 @@ namespace DRM.PropBag
             //IProp<T> prop = new Prop<T>(initialValue, getDefaultValFunc, typeIsSolid: typeIsSolid, storageStrategy: storageStrategy, comparer: comparer);
 
             PropTemplateTyped<T> propTemplateTyped = new PropTemplateTyped<T>(PropKindEnum.Prop, storageStrategy, comparer, getDefaultValFunc);
+            PropTemplateTyped<T> existingEntry = (PropTemplateTyped<T>)DelegateCacheProvider.PropTemplateCache.GetOrAdd(propTemplateTyped);
 
-            IProp<T> prop = new Prop<T>(propertyName, initialValue, typeIsSolid, propTemplateTyped);
+            IProp<T> prop = new Prop<T>(propertyName, initialValue, typeIsSolid, existingEntry);
             return prop;
         }
 
-        //public override IProp<T> Create<T>(
-        //    T initialValue,
-        //    PropNameType propertyName, object extraInfo = null,
-        //    PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true,
-        //    Func<T, T, bool> comparer = null)
-        //{
-        //    if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
-
-        //    GetDefaultValueDelegate<T> getDefaultValFunc = ValueConverter.GetDefaultValue<T>;
-        //    IProp<T> prop = new Prop<T>(initialValue, getDefaultValFunc, typeIsSolid: typeIsSolid, storageStrategy: storageStrategy, comparer: comparer);
-        //    return prop;
-        //}
-
         public override IProp<T> CreateWithNoValue<T>
-            (
+        (
             PropNameType propertyName,
             object extraInfo,
             PropStorageStrategyEnum storageStrategy,
             bool typeIsSolid,
             Func<T, T, bool> comparer,
             Func<string, T> getDefaultValFunc
-            )
+        )
         {
             // Supply a comparer, if one was not supplied by the caller.
             if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
@@ -159,6 +132,8 @@ namespace DRM.PropBag
 
             PropTemplateTyped<T> propTemplateTyped = new PropTemplateTyped<T>(PropKindEnum.Prop, storageStrategy, comparer, getDefaultValFunc);
 
+            PropTemplateTyped<T> existingEntry = (PropTemplateTyped<T>) DelegateCacheProvider.PropTemplateCache.GetOrAdd(propTemplateTyped);
+
             //IProp<T> prop = new Prop_New<T>(propertyName, typeIsSolid, propTemplateTyped);
             //return prop;
 
@@ -167,7 +142,7 @@ namespace DRM.PropBag
                 // Regular Prop with Internal Storage -- Just don't have a value as yet.
                 //IProp<T> prop = new Prop<T>(getDefaultValFunc, typeIsSolid: typeIsSolid, storageStrategy: storageStrategy, comparer: comparer);
 
-                IProp<T> prop = new Prop<T>(propertyName, typeIsSolid, propTemplateTyped);
+                IProp<T> prop = new Prop<T>(propertyName, typeIsSolid, existingEntry);
 
                 return prop;
             }
@@ -177,10 +152,14 @@ namespace DRM.PropBag
                 // This implementation simply creates a Property that will always have the default value for type T.
                 //IProp<T> prop = new PropNoStore<T>(getDefaultValFunc, typeIsSolid: typeIsSolid, storageStrategy: storageStrategy, comparer: comparer);
 
-                IProp<T> prop = new PropNoStore_New<T>(propertyName, typeIsSolid, propTemplateTyped);
+                IProp<T> prop = new PropNoStore_New<T>(propertyName, typeIsSolid, existingEntry);
                 return prop;
             }
         }
+
+        #endregion
+
+        #region DataSource Provider Creation
 
         public override ClrMappedDSP<TDestination> CreateMappedDS<TSource, TDestination>(uint propId, PropKindEnum propKind, IDoCRUD<TSource> dal, IPropStoreAccessService<uint, string> storeAccesor, IPropBagMapper<TSource, TDestination> mapper)
         {

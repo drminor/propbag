@@ -103,6 +103,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="PropBagTemplates\MapperConf_Both.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="PropBagTemplates\MapperConf_Emit.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

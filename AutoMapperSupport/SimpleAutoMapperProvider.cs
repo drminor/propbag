@@ -174,6 +174,11 @@ namespace DRM.PropBag.AutoMapperSupport
             return MappersCachingService.GetMapper(mapperRequest);
         }
 
+        public void Clear()
+        {
+            MappersCachingService.Clear();
+        }
+
         #endregion
 
         #region Private Methods

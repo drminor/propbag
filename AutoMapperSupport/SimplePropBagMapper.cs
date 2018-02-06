@@ -25,5 +25,6 @@ namespace DRM.PropBag.AutoMapperSupport
             )
         {
         }
+
     }
 }

@@ -10,6 +10,7 @@ namespace DRM.PropBagControlsWPF
 
         private ResourceDictionary _resources;
 
+
         // TODO: Consider parsing the entire resource file on first access.
         //private Dictionary<string, PropBagTemplate> _pbtsFromOurResources;
         //private Dictionary<string, PropBagTemplate> PbtsFromOurResources
@@ -33,15 +34,17 @@ namespace DRM.PropBagControlsWPF
             _resources = null;
         }
 
-        public PropBagTemplateProvider(ResourceDictionary resources)
+        public PropBagTemplateProvider(ResourceDictionary resources, string resourceKeySuffix)
         {
             _resources = resources;
+            ResourceKeySuffix = resourceKeySuffix;
         }
 
         #endregion
 
         #region Public Properties
 
+        public string ResourceKeySuffix { get; }
         public bool CanFindPropBagTemplateWithJustAKey => _resources != null;
 
         #endregion
@@ -59,28 +62,30 @@ namespace DRM.PropBagControlsWPF
             if (resources == null) throw new ArgumentNullException(nameof(resources));
             if (resourceKey == null) throw new ArgumentNullException(nameof(resourceKey));
 
+            string cookedKey = GetResourceKeyWithSuffix(resourceKey);
+
             object resource;
             try
             {
-                resource = resources[resourceKey];
+                resource = resources[cookedKey];
             }
             catch (KeyNotFoundException knfe)
             {
-                throw new KeyNotFoundException($"Could not find a PropBag Template with key = {resourceKey}.", knfe);
+                throw new KeyNotFoundException($"Could not find a PropBag Template with key = {cookedKey}.", knfe);
             }
 
             if (resource == null)
             {
-                throw new InvalidOperationException($"Could not find a PropBag Template with key = {resourceKey}.");
+                throw new InvalidOperationException($"Could not find a PropBag Template with key = {cookedKey}.");
             }
 
-            if (TryParse(resource, resourceKey, out PropBagTemplate pbTemplate))
+            if (TryParse(resource, cookedKey, out PropBagTemplate pbTemplate))
             {
                 return pbTemplate;
             }
             else
             {
-                throw new InvalidOperationException($"The PropBag Template with key = {resourceKey} could not be parsed.");
+                throw new InvalidOperationException($"The PropBag Template with key = {cookedKey} could not be parsed.");
             }
         }
 
@@ -137,19 +142,11 @@ namespace DRM.PropBagControlsWPF
             }
         }
 
-        //private PropBagTemplate GetPropBagTemplate(Dictionary<string, PropBagTemplate> pbts, string resourceKey)
-        //{
-        //    if (pbts == null) throw new ArgumentNullException(nameof(pbts));
-        //    try
-        //    {
-        //        PropBagTemplate result = pbts[resourceKey];
-        //        return result;
-        //    }
-        //    catch (KeyNotFoundException knfe)
-        //    {
-        //        throw new KeyNotFoundException($"Could not find a PropBag Template with key = {resourceKey}.", knfe);
-        //    }
-        //}
+        private string GetResourceKeyWithSuffix(string rawKey)
+        {
+            string result = ResourceKeySuffix != null ? $"{rawKey}_{ResourceKeySuffix}" : rawKey;
+            return result;
+        }
 
         #endregion
     }
