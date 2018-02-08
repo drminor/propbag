@@ -4,10 +4,10 @@ namespace DRM.TypeSafePropertyBag
 {
     internal class UnsubscriberForPropStore : IDisposable
     {
-        WeakReference<StoreNodeBag> _wr;
+        WeakReference<BagNode> _wr;
         ParentNCSubscriptionRequest _request;
 
-        public UnsubscriberForPropStore(WeakReference<StoreNodeBag> wr_us, ParentNCSubscriptionRequest request)
+        public UnsubscriberForPropStore(WeakReference<BagNode> wr_us, ParentNCSubscriptionRequest request)
         {
             _wr = wr_us;
             _request = request;
@@ -24,7 +24,7 @@ namespace DRM.TypeSafePropertyBag
                 if (disposing)
                 {
                     // TODO: dispose managed state (managed objects).
-                    if (_wr.TryGetTarget(out StoreNodeBag bagNode))
+                    if (_wr.TryGetTarget(out BagNode bagNode))
                     {
                         bagNode.UnsubscribeToParentNodeHasChanged(_request);
                     }

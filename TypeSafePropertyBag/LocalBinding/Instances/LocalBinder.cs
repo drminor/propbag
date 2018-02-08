@@ -86,7 +86,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             _bindingInfo = bindingInfo;
 
             // Get the PropStore Node for the IPropBag object hosting the property that is the target of the binding.
-            StoreNodeBag ourNode = GetPropBagNode(propStoreAccessService);
+            BagNode ourNode = GetPropBagNode(propStoreAccessService);
 
             // Get a weak reference to the PropBag hosting the target property.
             _targetObject = ourNode.PropBagProxy;
@@ -189,7 +189,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
         #region Update Target
 
-        private bool UpdateTargetWithStartingValue(WeakRefKey<IPropBag> bindingTarget, StoreNodeProp sourcePropNode)
+        private bool UpdateTargetWithStartingValue(WeakRefKey<IPropBag> bindingTarget, PropNode sourcePropNode)
         {
             IProp typedProp = sourcePropNode.PropData_Internal.TypedProp;
 
@@ -237,7 +237,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
         #region Private Methods
 
-        private StoreNodeBag GetPropBagNode(PSAccessServiceInterface propStoreAccessService)
+        private BagNode GetPropBagNode(PSAccessServiceInterface propStoreAccessService)
         {
             CheckForIHaveTheStoreNode(propStoreAccessService);
             return ((IHaveTheStoreNode)propStoreAccessService).PropBagNode;
@@ -278,7 +278,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             return result;
         }
 
-        private bool TryGetPropBag(StoreNodeBag objectNode, out IPropBag propBag)
+        private bool TryGetPropBag(BagNode objectNode, out IPropBag propBag)
         {
             // Unwrap the weak reference held by the objectNode.
             bool result = objectNode.TryGetPropBag(out propBag);
@@ -341,17 +341,17 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
             #endregion
 
-            public void OnPropStoreNodeUpdated(StoreNodeProp sourcePropNode, T oldValue)
+            public void OnPropStoreNodeUpdated(PropNode sourcePropNode, T oldValue)
             {
                 DoUpdate(sourcePropNode);
             }
 
-            public void OnPropStoreNodeUpdated(StoreNodeProp sourcePropNode)
+            public void OnPropStoreNodeUpdated(PropNode sourcePropNode)
             {
                 DoUpdate(sourcePropNode);
             }
 
-            private void DoUpdate(StoreNodeProp sourcePropNode)
+            private void DoUpdate(PropNode sourcePropNode)
             {
                 _localBinder.UpdateTargetWithStartingValue(_localBinder._targetObject, sourcePropNode);
             }

@@ -22,6 +22,8 @@ namespace DRM.TypeSafePropertyBag
 
         ICacheDelegatesForTypePair<CreateMappedDSPProviderDelegate> CreateDSPProviderCache { get; }
 
-        PropTemplateCache PropTemplateCache { get; }
+        // TODO: Move this property to the IProvidePropStoreServiceSingletons<L2T, L2TRaw> interface.
+        // TODO: Add IProvidePropTemplates to the constructor of all implementors of IPropFactory.
+        IProvidePropTemplates PropTemplateCache { get; }
     }
 }

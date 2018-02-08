@@ -5,17 +5,11 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Diagnostics;
-using System.Reflection;
-using System.Threading;
 
 namespace DRM.PropBag
 {
-    using PropIdType = UInt32;
     using PropNameType = String;
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
-
-    using SubCacheType = ICacheSubscriptions<UInt32>;
 
     #region Summary and Remarks
 
@@ -33,20 +27,43 @@ namespace DRM.PropBag
     #endregion
 
     ///<summary>
-    /// This class implements IPubPropBag, which allows customers of classes that dervive from this class
-    /// the ability to add and remove properties. 
+    /// This class implements IPubPropBag, which allows customers of this class (and classes that dervive from this class)
+    /// to add and remove properties. 
     ///</summary>
     public class PubPropBag : PropBag, IPubPropBag
     {
         #region Constructor
 
-        public PubPropBag(PropModel pm, PSAccessServiceCreatorInterface storeAccessCreator, IPropFactory propFactory = null, string fullClassName = null)
-            : base(pm, storeAccessCreator, propFactory, fullClassName)
+        // Starting with an empty PropItemSet
+        public PubPropBag(PropBagTypeSafetyMode typeSafetyMode, PSAccessServiceCreatorInterface storeAccessCreator, IPropFactory propFactory)
+            : this(typeSafetyMode, storeAccessCreator, propFactory, fullClassName: null)
         {
         }
 
-        public PubPropBag(PropBagTypeSafetyMode typeSafetyMode, PSAccessServiceCreatorInterface storeAccessCreator, IPropFactory propFactory, string fullClassName = null)
+        public PubPropBag(PropBagTypeSafetyMode typeSafetyMode, PSAccessServiceCreatorInterface storeAccessCreator, IPropFactory propFactory, string fullClassName)
             : base(typeSafetyMode, storeAccessCreator, propFactory, fullClassName)
+        {
+        }
+
+
+        // Using a PropModel
+        public PubPropBag(PropModel pm, PSAccessServiceCreatorInterface storeAccessCreator)
+            : this(pm, storeAccessCreator, propFactory: null, fullClassName: null)
+        {
+        }
+
+        public PubPropBag(PropModel pm, PSAccessServiceCreatorInterface storeAccessCreator, IPropFactory propFactory)
+            : this(pm, storeAccessCreator, propFactory, fullClassName: null)
+        {
+        }
+
+        public PubPropBag(PropModel pm, PSAccessServiceCreatorInterface storeAccessCreator, string fullClassName)
+            : this(pm, storeAccessCreator, propFactory: null, fullClassName: fullClassName)
+        {
+        }
+
+        public PubPropBag(PropModel pm, PSAccessServiceCreatorInterface storeAccessCreator, IPropFactory propFactory, string fullClassName)
+            : base(pm, storeAccessCreator, propFactory, fullClassName)
         {
         }
 
@@ -64,55 +81,49 @@ namespace DRM.PropBag
         /// <param name="doAfterNotify"></param>
         /// <param name="comparer">A instance of a class that implements IEqualityComparer and thus an Equals method.</param>
         /// <param name="initalValue"></param>
-        new public IProp<T> AddProp<T>(string propertyName, Func<T,T,bool> comparer = null, object extraInfo = null, T initialValue = default(T))
+        new public IProp<T> AddProp<T>(PropNameType propertyName, Func<T,T,bool> comparer = null, object extraInfo = null, T initialValue = default(T))
         {
             return base.AddProp<T>(propertyName, comparer, extraInfo, initialValue);
         }
 
         // TODO: Consider removing this method and adding a parameter to AddProp named "UseRefEquality."
-        new public IProp<T> AddPropObjComp<T>(string propertyName, object extraInfo = null, T initialValue = default(T))
+        new public IProp<T> AddPropObjComp<T>(PropNameType propertyName, object extraInfo = null, T initialValue = default(T))
         {
             return base.AddPropObjComp(propertyName, extraInfo, initialValue);
         }
 
-        new public IProp<T> AddPropNoValue<T>(string propertyName, Func<T,T,bool> comparer = null, object extraInfo = null)
+        new public IProp<T> AddPropNoValue<T>(PropNameType propertyName, Func<T,T,bool> comparer = null, object extraInfo = null)
         {
             return base.AddPropNoValue(propertyName, comparer, extraInfo);
         }
 
-        new public IProp<T> AddPropObjCompNoValue<T>(string propertyName, object extraInfo = null)
+        new public IProp<T> AddPropObjCompNoValue<T>(PropNameType propertyName, object extraInfo = null)
         {
             return base.AddPropObjCompNoValue<T>(propertyName, extraInfo);
         }
 
-        new public IProp<T> AddPropNoStore<T>(string propertyName, Func<T,T,bool> comparer = null, object extraInfo = null)
+        new public IProp<T> AddPropNoStore<T>(PropNameType propertyName, Func<T,T,bool> comparer = null, object extraInfo = null)
         {
             return base.AddPropNoStore(propertyName, comparer, extraInfo);
         }
 
-        new public IProp<T> AddPropObjCompNoStore<T>(string propertyName, object extraInfo = null)
+        new public IProp<T> AddPropObjCompNoStore<T>(PropNameType propertyName, object extraInfo = null)
         {
             return base.AddPropObjCompNoStore<T>(propertyName, extraInfo);
         }
 
-        new public ICProp<CT, T> AddCollectionProp<CT, T>(string propertyName, Func<CT, CT, bool> comparer = null,
+        new public ICProp<CT, T> AddCollectionProp<CT, T>(PropNameType propertyName, Func<CT, CT, bool> comparer = null,
             object extraInfo = null, CT initialValue = default(CT)) where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged
         {
             return base.AddCollectionProp<CT, T>(propertyName, comparer, extraInfo, initialValue);
         }
 
-        //new public ICPropFB<CT, T> AddCollectionPropFB<CT, T>(string propertyName, Func<CT, CT, bool> comparer = null,
-        //    object extraInfo = null, CT initialValue = default(CT)) where CT : ObservableCollection<T>
-        //{
-        //    return base.AddCollectionPropFB<CT, T>(propertyName, comparer, extraInfo, initialValue);
-        //}
-
-        new public void RemoveProp(string propertyName, Type propertyType)
+        new public void RemoveProp(PropNameType propertyName, Type propertyType)
         {
             base.RemoveProp(propertyName, propertyType);
         }
 
-        new public void RemoveProp<T>(string propertyName)
+        new public void RemoveProp<T>(PropNameType propertyName)
         {
             base.RemoveProp<T>(propertyName);
         }
@@ -125,7 +136,7 @@ namespace DRM.PropBag
         ///// <param name="doWhenChanged"></param>
         ///// <param name="doAfterNotify"></param>
         ///// <returns>True, if there was an existing Action in place for this property.</returns>
-        //new public bool RegisterDoWhenChanged<T>(string propertyName, Action<T, T> doWhenChanged, bool doAfterNotify = false)
+        //new public bool RegisterDoWhenChanged<T>(PropNameType propertyName, Action<T, T> doWhenChanged, bool doAfterNotify = false)
         //{
         //    return base.RegisterDoWhenChanged(doWhenChanged, doAfterNotify, propertyName);
         //}

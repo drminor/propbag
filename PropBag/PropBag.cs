@@ -59,7 +59,7 @@ namespace DRM.PropBag
         private ITypeSafePropBagMetaData _ourMetaData { get; set; }
         protected virtual ITypeSafePropBagMetaData OurMetaData { get { return _ourMetaData; } set { _ourMetaData = value; } }
         protected internal object _propItemSet_Handle { get; private set; }
-        private PropBagTypeSafetyMode _typeSafetyMode { get; }
+        //private PropBagTypeSafetyMode _typeSafetyMode { get; set; }
 
         private IDictionary<string, IViewManagerProviderKey> _foreignViewManagers; // TODO: Consider creating a lazy property accessor for this field.
 
@@ -75,7 +75,7 @@ namespace DRM.PropBag
         public string FullClassName => OurMetaData.FullClassName;
 
         //public IPropFactory PropFactory => _propFactory;
-        public PropBagTypeSafetyMode TypeSafetyMode => _typeSafetyMode;
+        public PropBagTypeSafetyMode TypeSafetyMode => _ourMetaData.TypeSafetyMode;
 
         public event PropertyChangedEventHandler PropertyChanged
         {
@@ -168,48 +168,64 @@ namespace DRM.PropBag
         /// <param name="propFactory">The PropFactory to use instead of the one specified by the PropModel.</param>
         /// <param name="fullClassName">The namespace and class name to use instead of the one specified by the PropMode.</param>
         public PropBag(IPropModel propModel, PSAccessServiceCreatorInterface storeAcessorCreator, IPropFactory propFactory = null, string fullClassName = null)
-            : this(propModel.TypeSafetyMode, storeAcessorCreator, propModel.PropFactory ?? propFactory, fullClassName ?? propModel.FullClassName)
+            //: this(propModel.TypeSafetyMode, storeAcessorCreator, propModel.PropFactory ?? propFactory, fullClassName ?? propModel.FullClassName)
         {
                 long memUsedSoFar = _memConsumptionTracker.UsedSoFar;
+
+            IPropFactory propFactoryToUse = propFactory ?? propModel.PropFactory;
+            string fullClassNameToUse = fullClassName ?? propModel.FullClassName;
+
+            BasicConstruction(propModel.TypeSafetyMode, propFactoryToUse, fullClassNameToUse);
+
+            _ourStoreAccessor = storeAcessorCreator.CreatePropStoreService(this);
+                _memConsumptionTracker.MeasureAndReport("CreatePropStoreService", null);
 
             _propItemSet_Handle = Hydrate(propModel);
                 _memConsumptionTracker.Report(memUsedSoFar, "---- AfterHydrate.");
 
-            int testc = _ourStoreAccessor.PropertyCount;
+            //int testc = _ourStoreAccessor.PropertyCount;
         }
 
-        public PropBag(IPropBag copySource) : this(copySource, ((PropBag)copySource)._ourStoreAccessor, ((PropBag)copySource)._propFactory)
+        // TODO: This assumes that all IPropBag implementations use PropBag.
+        public PropBag(IPropBag copySource)
+            //: this(copySource, ((PropBag)copySource)._ourStoreAccessor, ((PropBag)copySource)._propFactory)
         {
+            IPropFactory propFactory = ((PropBag)copySource)._propFactory;
+            BasicConstruction(copySource.TypeSafetyMode, propFactory, copySource.FullClassName);
 
-        }
-
-        internal PropBag(IPropBag copySource, PSAccessServiceInterface storeAccessor, IPropFactory propFactory)
-        {
-            _typeSafetyMode = copySource.TypeSafetyMode;
-            _propFactory = propFactory;
-
-            _ourMetaData = BuildMetaData(_typeSafetyMode, copySource.FullClassName, _propFactory);
+            PSAccessServiceInterface storeAccessor = ((PropBag)copySource)._ourStoreAccessor;
             _ourStoreAccessor = CloneProps(copySource, storeAccessor);
         }
 
-        protected PropBag(PropBagTypeSafetyMode typeSafetyMode, PSAccessServiceCreatorInterface storeAcessorCreator, IPropFactory propFactory, string fullClassName = null)
+        //internal PropBag(IPropBag copySource, PSAccessServiceInterface storeAccessor, IPropFactory propFactory)
+        //{
+        //    BasicConstruction(copySource.TypeSafetyMode, propFactory, copySource.FullClassName);
+
+        //    _ourStoreAccessor = CloneProps(copySource, storeAccessor);
+        //}
+
+        protected PropBag(PropBagTypeSafetyMode typeSafetyMode, PSAccessServiceCreatorInterface storeAcessorCreator, IPropFactory propFactory, string fullClassName)
         {
                 _memConsumptionTracker.MeasureAndReport("Testing", "Top of PropBag Constructor.");
                 _memConsumptionTracker.Measure($"Top of PropBag Constructor.");
 
             if (storeAcessorCreator == null) throw new ArgumentNullException(nameof(storeAcessorCreator));
 
-            _typeSafetyMode = typeSafetyMode;
-            _propFactory = propFactory ?? throw new ArgumentNullException(nameof(propFactory));
-
-            _ourMetaData = BuildMetaData(_typeSafetyMode, fullClassName, _propFactory);
-                _memConsumptionTracker.MeasureAndReport("BuildMetaData", $"Full Class Name: {fullClassName}");
-
-            _foreignViewManagers = null; // new Dictionary<string, IViewManagerProviderKey>();
-                //_memConsumptionTracker.MeasureAndReport("New Dictionary<string, IViewManagerProviderKey>", null);
+            BasicConstruction(typeSafetyMode, propFactory, fullClassName);
 
             _ourStoreAccessor = storeAcessorCreator.CreatePropStoreService(this);
                 _memConsumptionTracker.MeasureAndReport("CreatePropStoreService", null);
+        }
+
+        private void BasicConstruction(PropBagTypeSafetyMode typeSafetyMode, IPropFactory propFactory, string fullClassName)
+        {
+            //_typeSafetyMode = typeSafetyMode;
+            _propFactory = propFactory ?? throw new ArgumentNullException(nameof(propFactory));
+
+            _ourMetaData = BuildMetaData(typeSafetyMode, fullClassName, _propFactory);
+            _memConsumptionTracker.MeasureAndReport("BuildMetaData", $"Full Class Name: {fullClassName}");
+
+            _foreignViewManagers = null;
         }
 
         protected ITypeSafePropBagMetaData BuildMetaData(PropBagTypeSafetyMode typeSafetyMode, string classFullName, IPropFactory propFactory)
@@ -782,7 +798,7 @@ namespace DRM.PropBag
 
         public bool TryGetPropGen(string propertyName, Type propertyType, out IPropData propGen)
         {
-            bool mustBeRegistered = _typeSafetyMode == PropBagTypeSafetyMode.Locked;
+            bool mustBeRegistered = _ourMetaData.TypeSafetyMode == PropBagTypeSafetyMode.Locked;
 
             propGen = GetPropGen(propertyName, propertyType, haveValue: false, value: null,
                 alwaysRegister: false,
@@ -796,7 +812,7 @@ namespace DRM.PropBag
             {
                 return true;
             }
-            //else if(_typeSafetyMode == PropBagTypeSafetyMode.Tight)
+            //else if(_ourMetaData.TypeSafetyMode == PropBagTypeSafetyMode.Tight)
             //{
             //    return ReportAccessToMissing(propertyName, nameof(TryGetPropGen));
             //}
@@ -1687,7 +1703,7 @@ namespace DRM.PropBag
 
         public bool PropertyExists(string propertyName)
         {
-            if (_typeSafetyMode == PropBagTypeSafetyMode.Locked)
+            if (_ourMetaData.TypeSafetyMode == PropBagTypeSafetyMode.Locked)
             {
                 throw new InvalidOperationException("PropertyExists is not allowed when the TypeSafetyMode is set to 'Locked.'");
             }
@@ -1724,7 +1740,7 @@ namespace DRM.PropBag
                     type = value.TypedProp.Type;
                     return true;
                 }
-                else if (_typeSafetyMode == PropBagTypeSafetyMode.Locked)
+                else if (_ourMetaData.TypeSafetyMode == PropBagTypeSafetyMode.Locked)
                 {
                     type = null;
                     return ReportAccessToMissing(propertyName, nameof(TryGetTypeOfProperty));
@@ -1756,7 +1772,7 @@ namespace DRM.PropBag
             {
                 return pGen.TypedProp.Type;
             }
-            else if(_typeSafetyMode == PropBagTypeSafetyMode.Locked)
+            else if(_ourMetaData.TypeSafetyMode == PropBagTypeSafetyMode.Locked)
             {
                 wasRegistered = false;
                 return ReportAccessToMissing(propertyName, nameof(GetTypeOfProperty)).GetType();
@@ -2145,7 +2161,7 @@ namespace DRM.PropBag
                 ReportNonTypedAccess(propertyName, nameof(SetValWithType));
             }
 
-            bool mustBeRegistered = _typeSafetyMode == PropBagTypeSafetyMode.Locked;
+            bool mustBeRegistered = _ourMetaData.TypeSafetyMode == PropBagTypeSafetyMode.Locked;
 
             IPropData propData = GetPropGen(propertyName, null, haveValue: false, value: null,
                 alwaysRegister: false,
@@ -2172,7 +2188,7 @@ namespace DRM.PropBag
         
         protected void RemoveProp<T>(string propertyName)
         {
-            bool mustBeRegistered = _typeSafetyMode == PropBagTypeSafetyMode.Locked;
+            bool mustBeRegistered = _ourMetaData.TypeSafetyMode == PropBagTypeSafetyMode.Locked;
 
             IPropData propData = GetGenPropPrivate<T>(propertyName, mustBeRegistered: mustBeRegistered, neverCreate: true, propId: out PropIdType propId);
 
@@ -3078,34 +3094,19 @@ namespace DRM.PropBag
 
         // TODO: This method is here because DoSet<T> is private.
         // Consider creating a new interface: IPropBagInternal and making this method be a member of that interface.
-        private bool DoSetBridge<T>(IPropBag target, PropIdType propId, PropNameType propertyName, IProp prop, object value)
+        static private bool DoSetBridge<T>(IPropBag target, PropIdType propId, PropNameType propertyName, IProp prop, object value)
         {
             T newValue = (T)value;
 
             IProp<T> typedProp = (IProp<T>)prop;
-
             T curVal = typedProp.ValueIsDefined ? (T)typedProp.TypedValueAsObject : default(T);
 
-            bool result = ((PropBag)target).DoSet<T>(propId, propertyName, typedProp, ref curVal, newValue);
-
-            //typedProp.TypedValue = newValue;
-
+            PropBag pb = (PropBag)target;
+            bool result = pb.DoSet<T>(propId, propertyName, typedProp, ref curVal, newValue);
             return result;
         }
 
-        //private IProp CVPropFromDsBridge(Type sourceType, Type destinationType, PropNameType propertyName, PropNameType srcPropName, IMapperRequest mr)
-        //{
-        //}
-
-        //private IProp CVPropFromDsBridge<TSource, TDestination>(IPropBag target, PropNameType propertyName, PropNameType srcPropName, IMapperRequest mr)
-        //where TSource : class
-        //where TDestination : INotifyItemEndEdit
-        //{
-        //    PropBag pb = (PropBag)target;
-        //    IProp result = pb.CreateCollectionViewPropDS<IDoCRUD<TSource>, TSource, TDestination>(propertyName, srcPropName, mr);
-        //    return result;
-        //}
-
+        // Create a CollectionView Manager using an optional MapperRequest.
         private IManageCViews CViewManagerFromDsBridge<TSource, TDestination>(IPropBag target, PropNameType srcPropName, IMapperRequest mr)
             where TSource : class
             where TDestination : INotifyItemEndEdit
@@ -3115,7 +3116,7 @@ namespace DRM.PropBag
             return result;
         }
 
-        //private IProvideACViewManager CViewManagerProviderFromDsBridge<TSource, TDestination>(IPropBag target, LocalBindingInfo localBindingInfo, IMapperRequest mr)
+        // Create a CollectionView Manager Provider from a viewManagerProviderKey. Key consists of an optional MapperRequest and a Binding Path.)
         private IProvideACViewManager CViewManagerProviderFromDsBridge<TSource, TDestination>(IPropBag target, IViewManagerProviderKey viewManagerProviderKey)
             where TSource : class
             where TDestination : INotifyItemEndEdit

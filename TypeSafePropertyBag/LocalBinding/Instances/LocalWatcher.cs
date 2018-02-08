@@ -20,7 +20,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
         readonly WeakReference<PSAccessServiceInternalInterface> _propStoreAccessService_wr;
 
-        StoreNodeBag _ourNode;
+        BagNode _ourNode;
 
         readonly PropStoreNotificationKindEnum _notificationKind;
 
@@ -38,7 +38,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
         bool _isComplete;
         int _firstNamedStepIndex;
 
-        StoreNodeProp _sourcePropNode;
+        PropNode _sourcePropNode;
 
         #endregion
 
@@ -168,7 +168,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             }
         }
 
-        private StoreNodeBag GetPropBagNode(PSAccessServiceInterface propStoreAccessService)
+        private BagNode GetPropBagNode(PSAccessServiceInterface propStoreAccessService)
         {
             CheckForIHaveTheStoreNode(propStoreAccessService);
             return ((IHaveTheStoreNode)propStoreAccessService).PropBagNode;
@@ -187,10 +187,10 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
         #region Binding Logic
 
-        private bool StartBinding(string[] pathElements, OSCollection<T> pathListeners, bool pathIsAbsolute, out StoreNodeProp sourcePropNode)
+        private bool StartBinding(string[] pathElements, OSCollection<T> pathListeners, bool pathIsAbsolute, out PropNode sourcePropNode)
         {
             bool isComplete = false;
-            StoreNodeBag next;
+            BagNode next;
 
             if (pathIsAbsolute)
             {
@@ -212,8 +212,8 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             return isComplete;
         }
 
-        private bool HandleNodeUpdate(StoreNodeBag next,
-            string[] pathElements, OSCollection<T> pathListeners, int nPtr, out StoreNodeProp sourcePropNode)
+        private bool HandleNodeUpdate(BagNode next,
+            string[] pathElements, OSCollection<T> pathListeners, int nPtr, out PropNode sourcePropNode)
         {
             bool complete = false;
             sourcePropNode = null;
@@ -238,7 +238,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
                         string mg = listenerWasAdded ? "added" : "updated";
                         System.Diagnostics.Debug.WriteLine($"The Listener for step: {pathComp} was {mg}.");
 
-                        if (TryGetChildProp(next, /*propBag, */pathComp, out StoreNodeProp child))
+                        if (TryGetChildProp(next, /*propBag, */pathComp, out PropNode child))
                         {
                             next = child.Child;
                         }
@@ -310,7 +310,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             return complete;
         }
 
-        private bool HandleTerminalNodeUpdate(StoreNodeBag next, string[] pathElements, int nPtr, out StoreNodeProp child)
+        private bool HandleTerminalNodeUpdate(BagNode next, string[] pathElements, int nPtr, out PropNode child)
         {
             System.Diagnostics.Debug.Assert(nPtr == pathElements.Length - 1, $"The counter variable: nPtr should be {pathElements.Length - 1}, but is {nPtr} instead.");
 
@@ -347,8 +347,8 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             }
         }
 
-        private bool GetChangedNode(StoreNodeBag ourNode, ObservableSource<T> signalingNode,
-            bool pathIsAbsolute, string[] pathElements, out StoreNodeBag next, out int nPtr)
+        private bool GetChangedNode(BagNode ourNode, ObservableSource<T> signalingNode,
+            bool pathIsAbsolute, string[] pathElements, out BagNode next, out int nPtr)
         {
             int startIndex = _pathListeners.IndexOf(signalingNode);
             if (startIndex == -1) throw new InvalidOperationException($"Could not get pointer to path element while processing DataSourceChanged event for {BINDER_NAME}.");
@@ -398,7 +398,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
                 {
                     if (TryGetPropBag(next, out IPropBag propBag))
                     {
-                        if (TryGetChildProp(next, /*propBag,*/ pathComp, out StoreNodeProp child))
+                        if (TryGetChildProp(next, /*propBag,*/ pathComp, out PropNode child))
                         {
                             if (nPtr + 1 == pathElements.Length - 1)
                             {
@@ -482,7 +482,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             return result;
         }
 
-        private bool AddOrUpdateListener(StoreNodeBag propStoreNode, string pathComp, SourceKindEnum sourceKind, OSCollection<T> pathListeners, int nPtr)
+        private bool AddOrUpdateListener(BagNode propStoreNode, string pathComp, SourceKindEnum sourceKind, OSCollection<T> pathListeners, int nPtr)
         {
             bool result;
 
@@ -512,7 +512,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             return result;
         }
 
-        private ObservableSource<T> CreateAndListen(StoreNodeBag propStoreNode, string pathComp, SourceKindEnum sourceKind)
+        private ObservableSource<T> CreateAndListen(BagNode propStoreNode, string pathComp, SourceKindEnum sourceKind)
         {
             ObservableSource<T> result = new ObservableSource<T>(propStoreNode, propStoreNode.CompKey, pathComp, sourceKind, BINDER_NAME);
             result.ParentHasChanged += ParentHasChanged_Handler;
@@ -608,12 +608,12 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             _isComplete = DataSourceHasChanged_Handler((ObservableSource<T>)sender, DataSourceChangeTypeEnum.ParentHasChanged, out _sourcePropNode);
         }
 
-        private bool DataSourceHasChanged_Handler(ObservableSource<T> signalingNode, DataSourceChangeTypeEnum changeType, out StoreNodeProp sourcePropNode)
+        private bool DataSourceHasChanged_Handler(ObservableSource<T> signalingNode, DataSourceChangeTypeEnum changeType, out PropNode sourcePropNode)
         {
             sourcePropNode = null;
             bool isComplete = false;
 
-            StoreNodeBag next;
+            BagNode next;
 
             switch (signalingNode.SourceKind)
             {
@@ -722,7 +722,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
         #region Update Target
 
-        private bool NotifyReceiverWithStartingValue(StoreNodeProp sourcePropNode)
+        private bool NotifyReceiverWithStartingValue(PropNode sourcePropNode)
         {
             bool result;
 
@@ -784,7 +784,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
         }
 
         // PropNode (PropItem) -- with old value.
-        private bool NotifyReceiver(IReceivePropStoreNodeUpdates_PropNode<T> propStoreUpdateReceiver, StoreNodeProp propNode, PcTypedEventArgs<T> e)
+        private bool NotifyReceiver(IReceivePropStoreNodeUpdates_PropNode<T> propStoreUpdateReceiver, PropNode propNode, PcTypedEventArgs<T> e)
         {
             if (e.NewValueIsUndefined)
             {
@@ -798,7 +798,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
         }
 
         // PropNode (PropItem) -- no old value.
-        private bool NotifyReceiver(IReceivePropStoreNodeUpdates_PropNode<T> propStoreUpdateReceiver, StoreNodeProp propNode)
+        private bool NotifyReceiver(IReceivePropStoreNodeUpdates_PropNode<T> propStoreUpdateReceiver, PropNode propNode)
         {
             propStoreUpdateReceiver.OnPropStoreNodeUpdated(propNode);
             return true;
@@ -831,7 +831,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
         #region Support Methods
 
-        private bool TryGetPropBag(StoreNodeBag objectNode, out IPropBag propBag)
+        private bool TryGetPropBag(BagNode objectNode, out IPropBag propBag)
         {
             // Unwrap the weak reference held by the objectNode.
             bool result = objectNode.TryGetPropBag(out propBag);
@@ -839,7 +839,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             return result;
         }
 
-        private bool TryGetChildProp(StoreNodeBag objectNode/*, IPropBag propBag*/, string propertyName, out StoreNodeProp child)
+        private bool TryGetChildProp(BagNode objectNode/*, IPropBag propBag*/, string propertyName, out PropNode child)
         {
             //// TODO: Add additional type checking and throw exceptions if neccessary.
             //// TODO: IPBI- Store Accessor Internal
@@ -889,7 +889,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
         private bool TryGetPropItemParent
             (
             WeakReference<PSAccessServiceInternalInterface> propStoreAccessService_Internal_wr,
-            StoreNodeProp sourcePropNode,
+            PropNode sourcePropNode,
             out WeakRefKey<IPropBag> propItemParentPropBag_wr
             )
         {

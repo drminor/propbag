@@ -7,7 +7,7 @@ namespace DRM.TypeSafePropertyBag
     /// </summary>
     internal interface IHaveTheStoreNode
     {
-        StoreNodeBag PropBagNode { get; }
+        BagNode PropBagNode { get; }
 
         //PropStoreNode GetObjectNodeForPropVal(IPropDataInternal int_propData);
 

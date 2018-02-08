@@ -95,7 +95,7 @@ namespace DRM.TypeSafePropertyBag
         {
             if(storeAccessor_wr.TryGetTarget(out PSAccessServiceInternalInterface storeAccessor))
             {
-                StoreNodeProp propNode = storeAccessor.GetChild(propId);
+                PropNode propNode = storeAccessor.GetChild(propId);
                 IPropDataInternal propDataHolder = propNode.PropData_Internal;
                 IProp typedProp = propDataHolder.TypedProp;
                 data = typedProp.TypedValueAsObject;

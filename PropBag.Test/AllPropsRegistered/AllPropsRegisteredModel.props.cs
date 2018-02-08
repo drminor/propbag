@@ -12,12 +12,12 @@ namespace PropBagLib.Tests
 
     public partial class AllPropsRegisteredModel : PropBag
 	{
-		//public AllPropsRegisteredModel() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered, null) { }
+        //public AllPropsRegisteredModel() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered, null) { }
 
-		//public AllPropsRegisteredModel(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
+        //public AllPropsRegisteredModel(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
 
-		public AllPropsRegisteredModel(PropBagTypeSafetyMode typeSafetyMode, PSAccessServiceCreatorInterface storeAccessCreator, IPropFactory factory)
-            : base(typeSafetyMode, storeAccessCreator, factory)
+        public AllPropsRegisteredModel(PropBagTypeSafetyMode typeSafetyMode, PSAccessServiceCreatorInterface storeAccessCreator, IPropFactory factory)
+            : base(typeSafetyMode, storeAccessCreator, factory, fullClassName: null)
 		{
 	        AddProp<object>("PropObject", comparer:null);
 		 

@@ -34,7 +34,7 @@ namespace DRM.TypeSafePropertyBag
         // Use a single instance of a WeakReference to this instance for all 
         readonly WeakReference<PSAccessServiceInterface> _wrThis;
 
-        readonly StoreNodeBag _ourNode;
+        readonly BagNode _ourNode;
 
         WeakRefKey<IPropBag> _clientAccessToken => _ourNode.PropBagProxy;
         ObjectIdType _objectId => _ourNode.ObjectId;
@@ -61,7 +61,7 @@ namespace DRM.TypeSafePropertyBag
 
         public SimplePropStoreAccessService
             (
-            StoreNodeBag ourNode,
+            BagNode ourNode,
             PSAccessServiceProviderInterface propStoreAccessServiceProvider,
             IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider
             )
@@ -97,7 +97,7 @@ namespace DRM.TypeSafePropertyBag
         public bool TryGetValue(IPropBag propBag, PropIdType propId, out IPropData propData)
         {
             ExKeyT cKey = GetCompKey(propBag, propId);
-            if (_ourNode.TryGetChild(cKey, out StoreNodeProp child))
+            if (_ourNode.TryGetChild(cKey, out PropNode child))
             {
                 propData = child.PropData_Internal;
                 return true;
@@ -115,7 +115,7 @@ namespace DRM.TypeSafePropertyBag
         {
             CheckObjectRef(propBag);
 
-            StoreNodeProp newNode = AddPropItemToStore(genericTypedProp, propertyName);
+            PropNode newNode = AddPropItemToStore(genericTypedProp, propertyName);
             propData = newNode.PropData_Internal;
             propId = newNode.PropId;
 
@@ -139,7 +139,7 @@ namespace DRM.TypeSafePropertyBag
         {
             CheckObjectRef(propBag);
 
-            StoreNodeProp newNode = AddPropItemToStore(genericTypedProp, propertyName);
+            PropNode newNode = AddPropItemToStore(genericTypedProp, propertyName);
             propData = newNode.PropData_Internal;
             propId = newNode.PropId;
 
@@ -174,7 +174,7 @@ namespace DRM.TypeSafePropertyBag
         {
             CheckObjectRef(propBag);
 
-            StoreNodeProp newNode = AddPropItemToStore(genericTypedProp, propertyName);
+            PropNode newNode = AddPropItemToStore(genericTypedProp, propertyName);
             propData = newNode.PropData_Internal;
             propId = newNode.PropId;
 
@@ -213,7 +213,7 @@ namespace DRM.TypeSafePropertyBag
         {
             CheckObjectRef(propBag);
 
-            StoreNodeProp newNode = AddPropItemToStore(genericTypedProp, propertyName);
+            PropNode newNode = AddPropItemToStore(genericTypedProp, propertyName);
             propData = newNode.PropData_Internal;
             propId = newNode.PropId;
 
@@ -243,17 +243,17 @@ namespace DRM.TypeSafePropertyBag
 
         //private StoreNodeProp AddPropItemToStore(IPropBag propBag, PropIdType propId, IProp genericTypedProp)
 
-        private StoreNodeProp AddPropItemToStore(IProp genericTypedProp, PropNameType propertyName)
+        private PropNode AddPropItemToStore(IProp genericTypedProp, PropNameType propertyName)
         {
             IPropDataInternal propData_Internal = new PropGen(genericTypedProp);
 
             //ExKeyT propertyKey = GetCompKey(propBag, propId);
-            StoreNodeProp propStoreNode = _ourNode.CreateAndAddPropNode(propData_Internal, propertyName);
+            PropNode propStoreNode = _ourNode.CreateAndAddPropNode(propData_Internal, propertyName);
 
             return propStoreNode;
         }
 
-        private void HookupGuestBagNode(StoreNodeProp propStoreNode, IPropData propData)
+        private void HookupGuestBagNode(PropNode propStoreNode, IPropData propData)
         {
             // If the new property is of a type that implements IPropBag,
             // attempt to get a reference to the StoreAccessor of that IPropBag object,
@@ -263,7 +263,7 @@ namespace DRM.TypeSafePropertyBag
             object guest = propData?.TypedProp?.TypedValueAsObject;
             if (guest != null)
             {
-                StoreNodeBag guestPropBagNode = GetGuestBagNodeFromPropItemVal(guest);
+                BagNode guestPropBagNode = GetGuestBagNodeFromPropItemVal(guest);
                 guestPropBagNode.Parent = propStoreNode;
             }
 
@@ -271,7 +271,7 @@ namespace DRM.TypeSafePropertyBag
             BeginWatchingParent(propStoreNode.CompKey);
         }
 
-        private void HookupStandardPropertyChangedHandler(StoreNodeProp propNode, PropNameType propertyName)
+        private void HookupStandardPropertyChangedHandler(PropNode propNode, PropNameType propertyName)
         {
             EventHandler<EventArgs> virtualValueChangedHandler = CreateVirtualValueChangedHandler(propNode, propertyName);
             if (virtualValueChangedHandler != null)
@@ -280,9 +280,9 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        private EventHandler<EventArgs> CreateVirtualValueChangedHandler(StoreNodeProp propNode, PropNameType propertyName)
+        private EventHandler<EventArgs> CreateVirtualValueChangedHandler(PropNode propNode, PropNameType propertyName)
         {
-            StoreNodeBag hostBagNode = propNode?.Parent;
+            BagNode hostBagNode = propNode?.Parent;
 
             if (hostBagNode == null) return null;
 
@@ -339,9 +339,9 @@ namespace DRM.TypeSafePropertyBag
 
         public bool TryRemove(IPropBag propBag, PropIdType propId, out IPropData propData)
         {
-            ExKeyT cKey = GetCompKey(propBag, propId);
+            //ExKeyT cKey = GetCompKey(propBag, propId);
 
-            bool result = _ourNode.TryRemoveChild(cKey, out StoreNodeProp child);
+            bool result = _ourNode.TryRemoveChild(propId, out PropNode child);
 
             if (result)
             {
@@ -358,8 +358,8 @@ namespace DRM.TypeSafePropertyBag
 
         public bool ContainsKey(IPropBag propBag, PropIdType propId)
         {
-            ExKeyT cKey = GetCompKey(propBag, propId);
-            bool result = _ourNode.ChildExists(cKey);
+            //ExKeyT cKey = GetCompKey(propBag, propId);
+            bool result = _ourNode.ChildExists(propId);
             return result;
         }
 
@@ -469,13 +469,9 @@ namespace DRM.TypeSafePropertyBag
 
         public bool TryGetPropName(PropIdType propId, out PropNameType propertyName)
         {
-            return _ourNode.TryGetPropName(propId, out propertyName);
+            return _ourNode.TryGetPropertyName(propId, out propertyName);
         }
 
-        public PropIdType AddXXX(string propertyName)
-        {
-            return _ourNode.RegisterNewPropertyName(propertyName);
-        }
 
         public int PropertyCount => _ourNode.PropertyCount;
 
@@ -485,14 +481,14 @@ namespace DRM.TypeSafePropertyBag
             // the caller is using the StoreAccessor that belongs to the copySource to make this call.
             GetAndCheckObjectRef(copySource);
 
-            StoreNodeBag copySourceStoreNode = _ourNode;
+            BagNode copySourceStoreNode = _ourNode;
 
             PSAccessServiceInterface newStoreAccessor = _propStoreAccessServiceProvider.ClonePSAccessService
                 (
                     copySource,
                     copySourceStoreNode,
                     callingPropBag, // The PropBag for which the newStoreAcessor will be built.
-                    out StoreNodeBag newStoreNode
+                    out BagNode newStoreNode
                 );
 
             System.Diagnostics.Debug.Assert
@@ -506,9 +502,9 @@ namespace DRM.TypeSafePropertyBag
         }
 
         // TODO: What about the subscriptions and bindings that were included in the PropModel that were used to create these PropItems?
-        private void CopyChildProps(StoreNodeBag sourceBag, StoreNodeBag newBagNode)
+        private void CopyChildProps(BagNode sourceBag, BagNode newBagNode)
         {
-            foreach (StoreNodeProp childProp in sourceBag.Children)
+            foreach (PropNode childProp in sourceBag.Children)
             {
                 //// FOR DEBUGGING -- To see how well the PropBag value is cloned.
                 //if (childProp.PropData_Internal.TypedProp.Type.IsPropBagBased())
@@ -521,7 +517,7 @@ namespace DRM.TypeSafePropertyBag
 
                 IPropDataInternal newPropGen = new PropGen((IProp)childProp.PropData_Internal.TypedProp.Clone());
                 ExKeyT newCKey = new SimpleExKey(newBagNode.ObjectId, childProp.PropId);
-                StoreNodeProp newChild = new StoreNodeProp(newCKey, newPropGen, newBagNode);
+                PropNode newChild = new PropNode(newCKey, newPropGen, newBagNode);
             }
         }
 
@@ -1298,7 +1294,7 @@ namespace DRM.TypeSafePropertyBag
                     System.Diagnostics.Debug.Assert(e.OldValue.GetType().IsPropBagBased(), "The old value does not implement IPropBag on PropertyChangedWithObjectVals handler in PropStoreAccessService.");
 
                     // Make old a root.
-                    StoreNodeBag guestPropBagNode = GetGuestBagNodeFromPropItemVal(e.OldValue);
+                    BagNode guestPropBagNode = GetGuestBagNodeFromPropItemVal(e.OldValue);
                     guestPropBagNode.Parent = null;
                 }
             }
@@ -1309,14 +1305,14 @@ namespace DRM.TypeSafePropertyBag
                     System.Diagnostics.Debug.Assert(e.NewValue.GetType().IsPropBagBased(), "The new value does not implement IPropBag on PropertyChangedWithObjectVals handler in PropStoreAccessService.");
 
                     // Move to child of our property item. This object is currently a root.
-                    StoreNodeBag guestPropBagNode = GetGuestBagNodeFromPropItemVal(e.NewValue);
+                    BagNode guestPropBagNode = GetGuestBagNodeFromPropItemVal(e.NewValue);
 
                     // TODO: IPBI -- Get Store Accessor From StoreNodeBag
                     //PSAccessServiceInternalInterface storeAccessor_Internal = (PSAccessServiceInternalInterface)((IPropBagInternal)sender).ItsStoreAccessor;
 
                     PSAccessServiceInternalInterface storeAccessor_Internal = this;
 
-                    if (storeAccessor_Internal.TryGetChildPropNode(guestPropBagNode, e.PropertyName, out StoreNodeProp propItemNode))
+                    if (storeAccessor_Internal.TryGetChildPropNode(guestPropBagNode, e.PropertyName, out PropNode propItemNode))
                     {
                         guestPropBagNode.Parent = propItemNode;
 
@@ -1341,7 +1337,7 @@ namespace DRM.TypeSafePropertyBag
                     System.Diagnostics.Debug.Assert(e.OldValue.GetType().IsPropBagBased(), "The old value does not implement IPropBag on PropertyChangedWithObjectVals handler in PropStoreAccessService.");
 
                     // Make old a root.
-                    StoreNodeBag guestPropBagNode = GetGuestBagNodeFromPropItemVal(e.OldValue);
+                    BagNode guestPropBagNode = GetGuestBagNodeFromPropItemVal(e.OldValue);
                     guestPropBagNode.Parent = null;
                 }
 
@@ -1350,7 +1346,7 @@ namespace DRM.TypeSafePropertyBag
                     System.Diagnostics.Debug.Assert(e.NewValue.GetType().IsPropBagBased(), "The new value does not implement IPropBag on PropertyChangedWithObjectVals handler in PropStoreAccessService.");
 
                     // Move to child of our property item. This object is currently a root.
-                    StoreNodeBag guestPropBagNode = GetGuestBagNodeFromPropItemVal(e.NewValue);
+                    BagNode guestPropBagNode = GetGuestBagNodeFromPropItemVal(e.NewValue);
 
                     // TODO: IPBI -- Get Store Accessor From StoreNodeBag
                     //PSAccessServiceInternalInterface storeAccessor_Internal = (PSAccessServiceInternalInterface)((IPropBagInternal)sender).ItsStoreAccessor;
@@ -1358,7 +1354,7 @@ namespace DRM.TypeSafePropertyBag
                     PSAccessServiceInternalInterface storeAccessor_Internal = this;
 
 
-                    if (storeAccessor_Internal.TryGetChildPropNode(guestPropBagNode, e.PropertyName, out StoreNodeProp propItemNode))
+                    if (storeAccessor_Internal.TryGetChildPropNode(guestPropBagNode, e.PropertyName, out PropNode propItemNode))
                     {
                         // Update, if not already set.
                         if (guestPropBagNode.Parent != propItemNode)
@@ -1400,7 +1396,7 @@ namespace DRM.TypeSafePropertyBag
 
         #region Private Methods
 
-        private StoreNodeBag GetGuestBagNodeFromPropItemVal(object propItemValue)
+        private BagNode GetGuestBagNodeFromPropItemVal(object propItemValue)
         {
             //// TODO: IPBI -- GetStoreNode
             //if (propItemValue is IPropBagInternal pbInternalAccess)
@@ -1417,7 +1413,7 @@ namespace DRM.TypeSafePropertyBag
 
             if (propItemValue is IPropBag propBag)
             {
-                if(_propStoreAccessServiceProvider.TryGetPropBagNode(propBag, out StoreNodeBag propBagNode))
+                if(_propStoreAccessServiceProvider.TryGetPropBagNode(propBag, out BagNode propBagNode))
                 {
                     return propBagNode;
                 }
@@ -1433,7 +1429,7 @@ namespace DRM.TypeSafePropertyBag
         }
 
 
-        private StoreNodeBag GetPropBagNode(PSAccessServiceInterface propStoreAccessService)
+        private BagNode GetPropBagNode(PSAccessServiceInterface propStoreAccessService)
         {
             CheckForIHaveTheStoreNode(propStoreAccessService);
             return ((IHaveTheStoreNode)propStoreAccessService).PropBagNode;
@@ -1448,8 +1444,8 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        StoreNodeBag _root;
-        private StoreNodeBag Root
+        BagNode _root;
+        private BagNode Root
         {
             get
             {
@@ -1462,19 +1458,19 @@ namespace DRM.TypeSafePropertyBag
         }
 
 
-        private StoreNodeProp GetChild(PropIdType propId)
+        private PropNode GetChild(PropIdType propId)
         {
             ExKeyT cKey = new SimpleExKey(this._objectId, propId);
 
-            StoreNodeProp result = GetChild(cKey);
+            PropNode result = GetChild(cKey);
             return result;
         }
 
-        private StoreNodeProp GetChild(ExKeyT cKey)
+        private PropNode GetChild(ExKeyT cKey)
         {
-            if (_ourNode.TryGetChild(cKey, out StoreNodeProp child))
+            if (_ourNode.TryGetChild(cKey, out PropNode child))
             {
-                StoreNodeProp result = child;
+                PropNode result = child;
                 return result;
             }
             else
@@ -1483,10 +1479,10 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        private StoreNodeProp CheckAndGetChild(IPropBag propBag, PropIdType propId, out ExKeyT cKey)
+        private PropNode CheckAndGetChild(IPropBag propBag, PropIdType propId, out ExKeyT cKey)
         {
             cKey = GetCompKey(propBag, propId);
-            StoreNodeProp result = GetChild(cKey);
+            PropNode result = GetChild(cKey);
             return result;
         }
 
@@ -1593,7 +1589,7 @@ namespace DRM.TypeSafePropertyBag
 
         #region Explicit Implementation of the internal interface: IHaveTheStoreNode
 
-        StoreNodeBag IHaveTheStoreNode.PropBagNode => _ourNode;
+        BagNode IHaveTheStoreNode.PropBagNode => _ourNode;
 
         #endregion
 
@@ -1601,7 +1597,7 @@ namespace DRM.TypeSafePropertyBag
 
         //L2KeyManType PSAccessServiceInternalInterface.Level2KeyManager => _level2KeyMan;
 
-        bool PSAccessServiceInternalInterface.TryGetChildPropNode(StoreNodeBag propBagNode, PropNameType propertyName, out StoreNodeProp child)
+        bool PSAccessServiceInternalInterface.TryGetChildPropNode(BagNode propBagNode, PropNameType propertyName, out PropNode child)
         {
             bool result;
 
@@ -1629,9 +1625,9 @@ namespace DRM.TypeSafePropertyBag
         }
 
         // TODO: Provide method that returns the value of StoreNodeProp.PropData_Internal.TypedProp as IProp<T>
-        StoreNodeProp PSAccessServiceInternalInterface.GetChild(PropIdType propId)
+        PropNode PSAccessServiceInternalInterface.GetChild(PropIdType propId)
         {
-            StoreNodeProp result = GetChild(propId);
+            PropNode result = GetChild(propId);
             return result;
         }
 
@@ -1661,7 +1657,7 @@ namespace DRM.TypeSafePropertyBag
             return this.UnregisterHandler(exKey, eventHandler);
         }
 
-        public bool TryGetPropBagProxy(StoreNodeProp storeNodeProp, out WeakRefKey<IPropBag> propBag_wrKey)
+        public bool TryGetPropBagProxy(PropNode storeNodeProp, out WeakRefKey<IPropBag> propBag_wrKey)
         {
             WeakRefKey<IPropBag>? result = storeNodeProp?.Parent?.PropBagProxy;
             if(result.HasValue)
@@ -1676,7 +1672,7 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        public WeakRefKey<IPropBag> GetPropBagProxy(StoreNodeProp storeNodeProp)
+        public WeakRefKey<IPropBag> GetPropBagProxy(PropNode storeNodeProp)
         {
             WeakRefKey<IPropBag>? result = storeNodeProp?.Parent?.PropBagProxy;
             if (result.HasValue)
@@ -1742,7 +1738,7 @@ namespace DRM.TypeSafePropertyBag
                 _genViewManagerProviders.Dispose();
 
             // Dispose each PropItem.
-            foreach (StoreNodeProp prop in _ourNode.Children)
+            foreach (PropNode prop in _ourNode.Children)
             {
                 prop.PropData_Internal.CleanUp(doTypedCleanup: true);
             }

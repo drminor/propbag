@@ -41,7 +41,7 @@ namespace DRM.PropBag.Caches
         // DataSourceProviderProvider
         public ICacheDelegatesForTypePair<CreateMappedDSPProviderDelegate> CreateDSPProviderCache { get; }
 
-        public PropTemplateCache PropTemplateCache { get; }
+        public IProvidePropTemplates PropTemplateCache { get; }
 
 
         #endregion
@@ -56,33 +56,24 @@ namespace DRM.PropBag.Caches
 
             #region Method on PropBag (DoSetDelegate, CVPropFromDsDelegate, and CViewManagerFromDsDelegate
 
-            // TypeDesc<T>-based Converter Cache
-            //TypeDescBasedTConverterCache = StaticTConverterProvider.TypeDescBasedTConverterCache; // new TypeDescBasedTConverterCache();
-
-            // DoSet 
-            MethodInfo doSetMethodInfo = propBagType.GetMethod("DoSetBridge", BindingFlags.Instance | BindingFlags.NonPublic);
+            // Changed to use Static Method. (DRM 2/6/2018)
+            // DoSet (i.e., update) a PropItem's value. 
+            MethodInfo doSetMethodInfo = propBagType.GetMethod("DoSetBridge", BindingFlags.Static | BindingFlags.NonPublic);
             curBytes = Sizer.ReportMemConsumption(startBytes, curBytes, "After GetMethod(DoSetBridge)");
 
             DoSetDelegateCache = new DelegateCache<DoSetDelegate>(doSetMethodInfo);
             curBytes = Sizer.ReportMemConsumption(startBytes, curBytes, "After new DelegateCache<DoSetDelegate>");
 
-
-            //// AddCollectionViewPropDS using non-generic request and factory
-            //MethodInfo addCollectionViewPropDS_mi = propBagType.GetMethod("CVPropFromDsBridge", BindingFlags.Instance | BindingFlags.NonPublic);
-            //CreateCViewPropCache = new TwoTypesDelegateCache<CVPropFromDsDelegate>(addCollectionViewPropDS_mi);
-
-            // GetOrAdd CViewManager using non-generic request and factory
+            // CollectionView Manager using an optional MapperRequest.
             MethodInfo getOrAddCViewManager_mi = propBagType.GetMethod("CViewManagerFromDsBridge", BindingFlags.Instance | BindingFlags.NonPublic);
             curBytes = Sizer.ReportMemConsumption(startBytes, curBytes, "After GetMethod(CViewManagerFromDsBridge)");
 
             GetOrAddCViewManagerCache = new TwoTypesDelegateCache<CViewManagerFromDsDelegate>(getOrAddCViewManager_mi);
             curBytes = Sizer.ReportMemConsumption(startBytes, curBytes, "After TwoTypesDelegateCache<CViewManagerFromDsDelegate>");
 
-
+            // Collection View Manager Provider from a viewManagerProviderKey. Key consists of an optional MapperRequest and a Binding Path.)
             MethodInfo getOrAddCViewManagerProvider_mi = propBagType.GetMethod("CViewManagerProviderFromDsBridge", BindingFlags.Instance | BindingFlags.NonPublic);
             GetOrAddCViewManagerProviderCache = new TwoTypesDelegateCache<CViewManagerProviderFromDsDelegate>(getOrAddCViewManagerProvider_mi);
-
-
 
             #endregion
 
@@ -111,6 +102,7 @@ namespace DRM.PropBag.Caches
 
             #region CollectionViewSource Prop Creation MethodInfo
 
+            // NOTE: These don't require a Delegate since they are non-generic methods.
             //// CollectionViewSource
             //MethodInfo createCVSProp_mi = propCreatorType.GetMethod("CreateCVSProp", BindingFlags.Static | BindingFlags.NonPublic);
             //CreateCVSPropCache = new DelegateCache<CreateCVSPropDelegate>(createCVSProp_mi);

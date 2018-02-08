@@ -9,21 +9,18 @@ namespace DRM.TypeSafePropertyBag
     {
         public const GenerationIdType GEN_ZERO = 0;
 
-        IDictionary<Tuple<L2KeyManType, GenerationIdType>, L2KeyManType> _level2KeyManagers;
-
-        IDictionary<L2KeyManType, Tuple<L2KeyManType, GenerationIdType>> _newManagers;
+        IDictionary<L2KeyManType, Tuple<L2KeyManType, GenerationIdType>> _level2KeyManagers;
 
         object _sync = new object();
 
         public SimpleLevel2KeyManagerCache()
         {
-            _level2KeyManagers = new Dictionary<Tuple<L2KeyManType, GenerationIdType>, L2KeyManType>();
-            _newManagers = new Dictionary<L2KeyManType, Tuple<L2KeyManType, GenerationIdType>>();
+            _level2KeyManagers = new Dictionary<L2KeyManType, Tuple<L2KeyManType, GenerationIdType>>();
         }
 
         public bool TryGetValueAndGenerationId(L2KeyManType level2KeyManager, out L2KeyManType basePropItemSet, out GenerationIdType generationId)
         {
-            if (_newManagers.TryGetValue(level2KeyManager, out Tuple<L2KeyManType, GenerationIdType> value))
+            if (_level2KeyManagers.TryGetValue(level2KeyManager, out Tuple<L2KeyManType, GenerationIdType> value))
             {
                 basePropItemSet = value.Item1;
                 generationId = value.Item2;
@@ -61,7 +58,7 @@ namespace DRM.TypeSafePropertyBag
         {
             lock (_sync)
             {
-                if(_newManagers.TryGetValue(level2KeyManager, out Tuple<L2KeyManType, GenerationIdType> value))
+                if(_level2KeyManagers.TryGetValue(level2KeyManager, out Tuple<L2KeyManType, GenerationIdType> value))
                 {
                     System.Diagnostics.Debug.WriteLine($"Cannot Register Base Level2Key Manager, it is already registered as {GetDesc(value)}");
                     return false;
@@ -70,7 +67,7 @@ namespace DRM.TypeSafePropertyBag
                 {
                     Tuple<L2KeyManType, GenerationIdType> entry = new Tuple<L2KeyManType, GenerationIdType>(level2KeyManager, GEN_ZERO);
 
-                    _newManagers.Add(level2KeyManager, entry);
+                    _level2KeyManagers.Add(level2KeyManager, entry);
                     return true;
                 }
             }
@@ -78,13 +75,13 @@ namespace DRM.TypeSafePropertyBag
 
         public bool TryRegisterL2KeyMan(L2KeyManType level2KeyManager, L2KeyManType basePropItemSet, out GenerationIdType generationId)
         {
-            if (_newManagers.TryGetValue(basePropItemSet, out Tuple<L2KeyManType, GenerationIdType> value))
+            if (_level2KeyManagers.TryGetValue(basePropItemSet, out Tuple<L2KeyManType, GenerationIdType> value))
             {
                 // TODO: Have the reference base supply the next available generationId.
                 generationId = 1;
 
                 Tuple<L2KeyManType, GenerationIdType> entry = new Tuple<L2KeyManType, GenerationIdType>(level2KeyManager, generationId);
-                _newManagers.Add(level2KeyManager, entry);
+                _level2KeyManagers.Add(level2KeyManager, entry);
                 return true;
             }
             else
@@ -97,7 +94,7 @@ namespace DRM.TypeSafePropertyBag
 
         public bool TryGetGeneration(L2KeyManType level2KeyManager, out GenerationIdType generationId)
         {
-            if (_newManagers.TryGetValue(level2KeyManager, out Tuple<L2KeyManType, GenerationIdType> value))
+            if (_level2KeyManagers.TryGetValue(level2KeyManager, out Tuple<L2KeyManType, GenerationIdType> value))
             {
                 generationId = value.Item2;
                 return true;
@@ -258,7 +255,7 @@ namespace DRM.TypeSafePropertyBag
 
         private string GetDesc(Tuple<L2KeyManType, GenerationIdType> value)
         {
-            if (value.Item2 > 0)
+            if (value.Item2 == 0)
             {
                 return $"L2KMan: {value.Item1}";
             }

@@ -4,21 +4,23 @@ namespace DRM.TypeSafePropertyBag
 {
     internal interface IProvidePropStoreAccessService<L2T, L2TRaw> : IPropStoreAccessServiceCreator<L2T, L2TRaw>, IDisposable
     {
-        bool TryGetPropBagNode(IPropBag propBag, out StoreNodeBag propBagNode);
+        bool TryGetPropBagNode(IPropBag propBag, out BagNode propBagNode);
         //bool TryGetPropBagNode(WeakRefKey<IPropBag> propBag_wrKey, out StoreNodeBag propBagNode);
 
-        bool TearDown(StoreNodeBag propBagNode);
+        bool TearDown(BagNode propBagNode);
 
-        object FixPropItemSet(StoreNodeBag propBagNode);
-        bool TryOpenPropItemSet(StoreNodeBag propBagNode, out object propItemSet_Handle);
+        object FixPropItemSet(BagNode propBagNode);
+        bool TryOpenPropItemSet(BagNode propBagNode, out object propItemSet_Handle);
+
+        IPropStoreAccessService<L2T, L2TRaw> CreatePropStoreService(IPropBag propBag, BagNode template/*, L2KeyManType level2KeyManager*/, out BagNode newBagNode);
 
         IPropStoreAccessService<L2T, L2TRaw> ClonePSAccessService
             (
             IPropBag sourcePropBag,
             //IPropStoreAccessService<L2T, L2TRaw> sourceAccessService,
-            StoreNodeBag propBagNode,
+            BagNode propBagNode,
             IPropBag targetPropBag,
-            out StoreNodeBag newStoreNode
+            out BagNode newStoreNode
             );
     }
 

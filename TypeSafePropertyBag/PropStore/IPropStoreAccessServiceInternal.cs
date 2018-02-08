@@ -8,9 +8,9 @@ namespace DRM.TypeSafePropertyBag
     {
         //IL2KeyMan<L2T, L2TRaw> Level2KeyManager { get; }
 
-        bool TryGetChildPropNode(StoreNodeBag sourceBagNode, L2TRaw propertyName, out StoreNodeProp child);
+        bool TryGetChildPropNode(BagNode sourceBagNode, L2TRaw propertyName, out PropNode child);
 
-        StoreNodeProp GetChild(L2T propId);
+        PropNode GetChild(L2T propId);
 
         IDisposable RegisterHandler<T>(L2T propId, EventHandler<PcTypedEventArgs<T>> eventHandler, SubscriptionPriorityGroup priorityGroup, bool keepRef);
         bool UnregisterHandler<T>(L2T propId, EventHandler<PcTypedEventArgs<T>> eventHandler);
@@ -21,7 +21,7 @@ namespace DRM.TypeSafePropertyBag
         //WeakRefKey<IPropBag> GetPropBagProxy(StoreNodeProp storeNodeProp);
         //WeakReference<IPropBag> GetPublicInterface(WeakReference<IPropBagInternal> propBagProxy_internal);
 
-        WeakRefKey<IPropBag> GetPropBagProxy(StoreNodeProp storeNodeProp);
-        bool TryGetPropBagProxy(StoreNodeProp storeNodeProp, out WeakRefKey<IPropBag> propBag_wrKey);
+        WeakRefKey<IPropBag> GetPropBagProxy(PropNode storeNodeProp);
+        bool TryGetPropBagProxy(PropNode storeNodeProp, out WeakRefKey<IPropBag> propBag_wrKey);
     }
 }

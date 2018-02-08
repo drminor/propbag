@@ -4,7 +4,6 @@ using System.Linq;
 
 namespace DRM.TypeSafePropertyBag
 {
-    using ObjectIdType = UInt64;
     using PropIdType = UInt32;
     using PropNameType = String;
 
@@ -32,6 +31,7 @@ namespace DRM.TypeSafePropertyBag
             IsFixed = false;
         }
 
+        // Creates copies of each dictionary.
         internal SimpleLevel2KeyMan(int maxPropsPerObject, Dictionary<PropNameType, PropIdType> rawDict, Dictionary<PropIdType, PropNameType> cookedDict, bool isFixed)
         {
             MaxPropsPerObject = maxPropsPerObject;
@@ -52,7 +52,13 @@ namespace DRM.TypeSafePropertyBag
         /// <returns>A new open PropItemSet.</returns>
         public object Clone()
         {
-            SimpleLevel2KeyMan result = new SimpleLevel2KeyMan(this.MaxPropsPerObject, this._rawDict, this._cookedDict, isFixed: false);
+            SimpleLevel2KeyMan result;
+
+            lock (_sync)
+            {
+                result = new SimpleLevel2KeyMan(this.MaxPropsPerObject, this._rawDict, this._cookedDict, isFixed: false);
+            }
+
             return result;
         }
 

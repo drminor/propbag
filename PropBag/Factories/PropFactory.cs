@@ -107,8 +107,9 @@ namespace DRM.PropBag
 
             //IProp<T> prop = new Prop<T>(initialValue, getDefaultValFunc, typeIsSolid: typeIsSolid, storageStrategy: storageStrategy, comparer: comparer);
 
-            PropTemplateTyped<T> propTemplateTyped = new PropTemplateTyped<T>(PropKindEnum.Prop, storageStrategy, comparer, getDefaultValFunc);
-            PropTemplateTyped<T> existingEntry = (PropTemplateTyped<T>)DelegateCacheProvider.PropTemplateCache.GetOrAdd(propTemplateTyped);
+            IPropTemplate<T> propTemplateTyped = new PropTemplateTyped<T>(PropKindEnum.Prop, storageStrategy, comparer, getDefaultValFunc);
+
+            IPropTemplate<T> existingEntry = (IPropTemplate<T>)DelegateCacheProvider.PropTemplateCache.GetOrAdd(propTemplateTyped);
 
             IProp<T> prop = new Prop<T>(propertyName, initialValue, typeIsSolid, existingEntry);
             return prop;
@@ -130,9 +131,9 @@ namespace DRM.PropBag
             // Use the Get Default Value function supplied or provided by this Prop Factory.
             if(getDefaultValFunc == null) getDefaultValFunc = ValueConverter.GetDefaultValue<T>;
 
-            PropTemplateTyped<T> propTemplateTyped = new PropTemplateTyped<T>(PropKindEnum.Prop, storageStrategy, comparer, getDefaultValFunc);
+            IPropTemplate<T> propTemplateTyped = new PropTemplateTyped<T>(PropKindEnum.Prop, storageStrategy, comparer, getDefaultValFunc);
 
-            PropTemplateTyped<T> existingEntry = (PropTemplateTyped<T>) DelegateCacheProvider.PropTemplateCache.GetOrAdd(propTemplateTyped);
+            IPropTemplate<T> existingEntry = (IPropTemplate<T>) DelegateCacheProvider.PropTemplateCache.GetOrAdd(propTemplateTyped);
 
             //IProp<T> prop = new Prop_New<T>(propertyName, typeIsSolid, propTemplateTyped);
             //return prop;

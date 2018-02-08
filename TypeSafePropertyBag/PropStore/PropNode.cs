@@ -1,21 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace DRM.TypeSafePropertyBag
 {
-    using CompositeKeyType = UInt64;
     using ObjectIdType = UInt64;
     using PropIdType = UInt32;
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
 
-    internal class StoreNodeProp : IDisposable
+    internal class PropNode : IDisposable
     {
         #region Constructor
 
-        public StoreNodeProp(ExKeyT ckey, IPropDataInternal propData_Internal, StoreNodeBag parent)
+        public PropNode(ExKeyT ckey, IPropDataInternal propData_Internal, BagNode parent)
         {
             CompKey = ckey;
             PropData_Internal = propData_Internal ?? throw new ArgumentNullException(nameof(propData_Internal));
@@ -40,9 +36,9 @@ namespace DRM.TypeSafePropertyBag
 
         public bool HoldsAPropBag => PropData_Internal.IsPropBag;
 
-        public StoreNodeBag Parent { get; set; }
+        public BagNode Parent { get; set; }
 
-        public StoreNodeBag Child { get; set; }
+        public BagNode Child { get; set; }
 
         #endregion
 

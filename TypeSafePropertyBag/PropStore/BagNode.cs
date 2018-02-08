@@ -11,18 +11,30 @@ namespace DRM.TypeSafePropertyBag
 
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
 
-    using L2KeyManType = IL2KeyMan<UInt32, String>;
+    //using L2KeyManType = IL2KeyMan<UInt32, String>;
 
-
-    internal class StoreNodeBag : INotifyParentNodeChanged, IDisposable
+    internal class BagNode : INotifyParentNodeChanged, IDisposable
     {
         #region Private Fields
 
-        //L2KeyManType Level2KeyMan;
-        private readonly Dictionary<ExKeyT, StoreNodeProp> _children;
+        //private readonly Dictionary<PropIdType, PropNode> _children;
+
+        private readonly PropNodeCollection _propNodeCollection;
 
         private ICacheDelegates<CallPSParentNodeChangedEventSubDelegate> _callPSParentNodeChangedEventSubsCache;
+
         private ParentNCSubscriberCollection _parentNCSubscriberCollection;
+        private ParentNCSubscriberCollection ParentNCSubscriberCollection
+        {
+            get
+            {
+                if (_parentNCSubscriberCollection == null)
+                {
+                    _parentNCSubscriberCollection = new ParentNCSubscriberCollection();
+                }
+                return _parentNCSubscriberCollection;
+            }
+        }
 
         private object _sync = new object();
 
@@ -30,7 +42,6 @@ namespace DRM.TypeSafePropertyBag
 
         #region Events
 
-        // TODO: Make this use WeakReferences to the subscriber.
         public event EventHandler<PSNodeParentChangedEventArgs> ParentNodeHasChanged
         {
             add
@@ -62,7 +73,7 @@ namespace DRM.TypeSafePropertyBag
             {
                 ParentNCSubscription sub = ParentNCSubscriberCollection.GetOrAdd(subRequest, _callPSParentNodeChangedEventSubsCache);
             }
-            UnsubscriberForPropStore unsubscriber = new UnsubscriberForPropStore(new WeakReference<StoreNodeBag>(this), subRequest);
+            UnsubscriberForPropStore unsubscriber = new UnsubscriberForPropStore(new WeakReference<BagNode>(this), subRequest);
             return unsubscriber;
         }
 
@@ -87,34 +98,46 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-
         #endregion
-
-        private ParentNCSubscriberCollection ParentNCSubscriberCollection
-        {
-            get
-            {
-                if(_parentNCSubscriberCollection == null)
-                {
-                    _parentNCSubscriberCollection = new ParentNCSubscriberCollection();
-                }
-                return _parentNCSubscriberCollection;
-            }
-        }
 
         #region Constructor
 
-        public StoreNodeBag(ExKeyT compKey, IPropBag propBag, L2KeyManType level2KeyMan, ICacheDelegates<CallPSParentNodeChangedEventSubDelegate> callPSParentNodeChangedEventSubsCache)
+        public BagNode(ObjectIdType objectId, IPropBag propBag, int maxPropsPerObject, ICacheDelegates<CallPSParentNodeChangedEventSubDelegate> callPSParentNodeChangedEventSubsCache)
+            : this(objectId, propBag, null, maxPropsPerObject, callPSParentNodeChangedEventSubsCache)
         {
-            CompKey = compKey;
+        }
+
+        public BagNode(ObjectIdType objectId, IPropBag propBag, BagNode template, int maxPropsPerObject, ICacheDelegates<CallPSParentNodeChangedEventSubDelegate> callPSParentNodeChangedEventSubsCache)
+        {
+            CompKey = new SimpleExKey(objectId, 0);
             PropBagProxy = new WeakRefKey<IPropBag>(propBag ?? throw new ArgumentNullException(nameof(propBag)));
 
-            Level2KeyMan = level2KeyMan;
+            //L2KeyManType level2KeyManager = template?.Level2KeyMan;
+
+            //if(level2KeyManager == null)
+            //{
+            //    // Create a brand new PropItemSet
+            //    Level2KeyMan = new SimpleLevel2KeyMan(compKey.MaxPropsPerObject);
+            //}
+            //else
+            //{
+            //    if(level2KeyManager.IsFixed)
+            //    {
+            //        // Share the same instance: Fixed PropItemSets are immutable.
+            //        Level2KeyMan = level2KeyManager;
+            //    }
+            //    else
+            //    {
+            //        // Make a copy of the source's Level2Key Manager.
+            //        Level2KeyMan = (L2KeyManType)level2KeyManager.Clone();
+            //    }
+            //}
 
             _callPSParentNodeChangedEventSubsCache = callPSParentNodeChangedEventSubsCache ?? throw new ArgumentNullException(nameof(callPSParentNodeChangedEventSubsCache));
             _parentNCSubscriberCollection = null;
 
-            _children = new Dictionary<ExKeyT, StoreNodeProp>(25);
+            //_children = new Dictionary<PropIdType, PropNode>();
+            _propNodeCollection = new PropNodeCollection(maxPropsPerObject);
         }
 
         #endregion
@@ -123,16 +146,17 @@ namespace DRM.TypeSafePropertyBag
 
         // This Composite Key identifies the Object, the PropId portion will always be 0.
         public ExKeyT CompKey { get; }
+
         public ObjectIdType ObjectId => CompKey.Level1Key;
         public PropIdType PropId => 0;
 
-        public L2KeyManType Level2KeyMan { get; internal set; }
+        //public L2KeyManType Level2KeyMan { get; internal set; }
 
         public WeakRefKey<IPropBag> PropBagProxy { get; }
         public bool IsAlive => PropBagProxy.TryGetTarget(out IPropBag dummy);
 
-        StoreNodeProp _parent;
-        public StoreNodeProp Parent
+        PropNode _parent;
+        public PropNode Parent
         {
             get
             {
@@ -147,7 +171,7 @@ namespace DRM.TypeSafePropertyBag
                     if (_parent != null) _parent.Child = null;
 
                     // save old value to use when raising OnParentNodeHasChanged event.
-                    StoreNodeProp oldValue = _parent;
+                    PropNode oldValue = _parent;
 
                     // Use the new value to update this node's parent.
                     _parent = value;
@@ -161,7 +185,7 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        public IEnumerable<StoreNodeProp> Children => _children.Values;
+        public IEnumerable<PropNode> Children => _propNodeCollection.GetPropNodes();
 
         #endregion
 
@@ -172,33 +196,34 @@ namespace DRM.TypeSafePropertyBag
             return PropBagProxy.TryGetTarget(out propBag);
         }
 
-        public bool ChildExists(ExKeyT cKey)
+        public bool ChildExists(PropIdType propId)
         {
-            return _children.ContainsKey(cKey);
+            bool result = _propNodeCollection.Contains(propId);
+            return result;
         }
 
         #endregion
 
         #region Child Accessors
 
-
-        public int Count
+        public int PropertyCount
         {
             get
             {
-                return _children.Count;
+                return _propNodeCollection.Count;
             }
         }
 
-        public void AddChild(StoreNodeProp prop)
+        public void AddChild(PropNode prop)
         {
-            _children.Add(prop.CompKey, prop);
+            KeyValuePair<PropIdType, PropNode> kvp = new KeyValuePair<PropIdType, PropNode>(prop.PropId, prop);
+            _propNodeCollection.Add(kvp);
         }
 
-        public bool TryGetChild(PropIdType propId, out StoreNodeProp child)
+        public bool TryGetChild(PropIdType propId, out PropNode child)
         {
-            ExKeyT cKey = new SimpleExKey(this.CompKey.Level1Key, propId);
-            if (_children.TryGetValue(cKey, out child))
+            //ExKeyT cKey = new SimpleExKey(this.CompKey.Level1Key, propId);
+            if (_propNodeCollection.TryGetPropNode(propId, out child))
             {
                 return true;
             }
@@ -209,9 +234,9 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        public bool TryGetChild(ExKeyT cKey, out StoreNodeProp child)
+        public bool TryGetChild(ExKeyT cKey, out PropNode child)
         {
-            if (_children.TryGetValue(cKey, out child))
+            if (_propNodeCollection.TryGetPropNode(cKey.Level2Key, out child))
             {
                 return true;
             }
@@ -222,30 +247,17 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        public bool TryRemoveChild(ExKeyT cKey, out StoreNodeProp child)
+        public bool TryRemoveChild(PropIdType propId, out PropNode child)
         {
-            if (_children.TryGetValue(cKey, out child))
-            {
-                _children.Remove(cKey);
-                return true;
-            }
-            else
-            {
-                child = null;
-                return false;
-            }
-        }
-
-        public void RemoveChild(ExKeyT cKey)
-        {
-            _children.Remove(cKey);
+            bool result = _propNodeCollection.TryRemove(propId, out child);
+            return result;
         }
 
         #endregion
 
         #region Roots
 
-        public StoreNodeBag Owner
+        public BagNode Owner
         {
             get
             {
@@ -254,12 +266,12 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        public IEnumerable<StoreNodeBag> Ancestors
+        public IEnumerable<BagNode> Ancestors
         {
             get
             {
                 bool foundOne = false;
-                StoreNodeBag lastOwner = Owner;
+                BagNode lastOwner = Owner;
                 while (lastOwner != null)
                 {
                     foundOne = true;
@@ -273,47 +285,46 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        public StoreNodeBag Root => Ancestors.Last();
+        public BagNode Root => Ancestors.Last();
 
         #endregion
 
-        public StoreNodeProp CreateAndAddPropNode(IPropDataInternal propData_Internal, PropNameType propertyName)
+        public PropNode CreateAndAddPropNode(IPropDataInternal propData_Internal, PropNameType propertyName)
         {
-            ExKeyT compKey = GetNewCompKey(propertyName);
-            StoreNodeProp newPropNode = new StoreNodeProp(compKey, propData_Internal, this);
+            PropNode newPropNode = _propNodeCollection.Add(propData_Internal, propertyName, this);
             return newPropNode;
         }
 
-        private ExKeyT GetNewCompKey(PropNameType propertyName)
-        {
-            return new SimpleExKey(ObjectId, RegisterNewPropertyName(propertyName));
-        }
+        //private ExKeyT GetNewCompKey(PropNameType propertyName)
+        //{
+        //    return new SimpleExKey(ObjectId, RegisterNewPropertyName(propertyName));
+        //}
 
-        #region Level2Key Management
+        //#region Level2Key Management
 
         public bool TryGetPropId(PropNameType propertyName, out PropIdType propId)
         {
-            return Level2KeyMan.TryGetFromRaw(propertyName, out propId);
+            return _propNodeCollection.TryGetPropId(propertyName, out propId);
         }
 
-        public bool TryGetPropName(PropIdType propId, out PropNameType propertyName)
+        public bool TryGetPropertyName(PropIdType propId, out PropNameType propertyName)
         {
-            return Level2KeyMan.TryGetFromCooked(propId, out propertyName);
+            return _propNodeCollection.TryGetPropertyName(propId, out propertyName);
         }
 
-        public PropIdType RegisterNewPropertyName(string propertyName)
-        {
-            return Level2KeyMan.Add(propertyName);
-        }
+        //public PropIdType RegisterNewPropertyName(string propertyName)
+        //{
+        //    return Level2KeyMan.Add(propertyName);
+        //}
 
-        public int PropertyCount => Level2KeyMan.PropertyCount;
+        //public int PropertyCount => Level2KeyMan.PropertyCount;
 
-        #endregion
+        //#endregion
 
         #region Raise ParentNodeHasChanged
 
         // When a StoreNodeBag gets a new host (i.e., a new StoreNodProp parent.)
-        private void OnParentNodeHasChanged(StoreNodeProp oldValue, StoreNodeProp newValue)
+        private void OnParentNodeHasChanged(PropNode oldValue, PropNode newValue)
         {
             List<ParentNCSubscription> subs = null;
             int numberOfSubscribers = 0;
@@ -354,11 +365,11 @@ namespace DRM.TypeSafePropertyBag
 
         private void DisposeChildren()
         {
-            foreach (KeyValuePair<ExKeyT, StoreNodeProp> kvp in _children)
+            foreach (KeyValuePair<PropIdType, PropNode> kvp in _propNodeCollection)
             {
                 kvp.Value.Dispose();
             }
-            _children.Clear();
+            _propNodeCollection.Clear();
         }
 
         private bool disposedValue = false; // To detect redundant calls
@@ -372,11 +383,11 @@ namespace DRM.TypeSafePropertyBag
                     // Dispose managed state (managed objects).
                     DisposeChildren();
 
-                    if (!Level2KeyMan.IsFixed)
-                    {
-                        // The Level2KenMan is open (for additions) and therefore it is not shared: It can be disposed.
-                        Level2KeyMan.Dispose();
-                    }
+                    //if (!Level2KeyMan.IsFixed)
+                    //{
+                    //    // The Level2KenMan is open (for additions) and therefore it is not shared: It can be disposed.
+                    //    Level2KeyMan.Dispose();
+                    //}
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
