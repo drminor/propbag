@@ -9,14 +9,17 @@ using System.Threading.Tasks;
 
 namespace DRM.PropBag
 {
+    using PropNameType = String;
+
     public class PropNoStore<T> : PropTypedBase<T>
     {
         public PropNoStore(
+            PropNameType propertyName,
             Func<string, T> defaultValFunc,
             bool typeIsSolid,
             PropStorageStrategyEnum storageStrategy,
             Func<T, T, bool> comparer)
-            : base(typeof(T), typeIsSolid, CheckStorageStrategy(storageStrategy), false, comparer, defaultValFunc, PropKindEnum.Prop)
+            : base(propertyName, typeof(T), typeIsSolid, CheckStorageStrategy(storageStrategy), false, comparer, defaultValFunc, PropKindEnum.Prop)
         {
         }
 
@@ -42,7 +45,7 @@ namespace DRM.PropBag
 
         public override object Clone()
         {
-            PropNoStore<T> result = new PropNoStore<T>(this.GetDefaultValFunc, TypeIsSolid, StorageStrategy, Comparer);
+            PropNoStore<T> result = new PropNoStore<T>(PropertyName, this.GetDefaultValFunc, TypeIsSolid, StorageStrategy, Comparer);
 
             return result;
         }

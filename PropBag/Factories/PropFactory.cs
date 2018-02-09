@@ -53,7 +53,7 @@ namespace DRM.PropBag
             if (comparer == null) comparer = EqualityComparer<CT>.Default.Equals;
             Func<string, CT> getDefaultValFunc = ValueConverter.GetDefaultValue<CT>;
 
-            ICProp<CT, T> prop = new CProp<CT, T>(initialValue, getDefaultValFunc, typeIsSolid, storageStrategy, comparer);
+            ICProp<CT, T> prop = new CProp<CT, T>(propertyName, initialValue, getDefaultValFunc, typeIsSolid, storageStrategy, comparer);
             return prop;
         }
 
@@ -68,7 +68,7 @@ namespace DRM.PropBag
 
             Func<string, CT> getDefaultValFunc = ValueConverter.GetDefaultValue<CT>;
 
-            ICProp<CT, T> prop = new CProp<CT, T>(getDefaultValFunc, typeIsSolid, storageStrategy, comparer);
+            ICProp<CT, T> prop = new CProp<CT, T>(propertyName, getDefaultValFunc, typeIsSolid, storageStrategy, comparer);
             return prop;
         }
 

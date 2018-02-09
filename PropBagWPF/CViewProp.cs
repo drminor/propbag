@@ -14,7 +14,6 @@ namespace DRM.PropBagWPF
     {
         #region Private and Protected Members
 
-        private readonly PropNameType _propertyName;
         private IProvideAView _viewProvider;
 
         #endregion
@@ -22,10 +21,9 @@ namespace DRM.PropBagWPF
         #region Constructor
 
         public CViewProp(PropNameType propertyName, IProvideAView viewProvider)
-            : base(typeof(ListCollectionView), true, PropStorageStrategyEnum.Virtual, true,
+            : base(propertyName, typeof(ListCollectionView), true, PropStorageStrategyEnum.Virtual, true,
                   RefEqualityComparer<ListCollectionView>.Default.Equals, null, PropKindEnum.CollectionView)
         {
-            _propertyName = propertyName;
             _viewProvider = viewProvider;
 
             if (_viewProvider != null)
@@ -50,7 +48,7 @@ namespace DRM.PropBagWPF
                             throw new InvalidOperationException($"The view name: {value.ViewName}" +
                                 $" from the new IProvideAView does not match the view name:" +
                                 $" {_viewProvider.ViewName} from the previous IProvideAView," +
-                                $" when setting the ViewProvider property on CViewProp with property name: {_propertyName}.");
+                                $" when setting the ViewProvider property on CViewProp with property name: {PropertyName}.");
                         }
 
                         _viewProvider.ViewSourceRefreshed -= OurViewProviderGotRefreshed;

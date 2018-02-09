@@ -16,7 +16,7 @@ namespace DRM.TypeSafePropertyBag
     {
         #region Public Members
 
-        public PropNameType PropertyName => "Not Implemented.";
+        public PropNameType PropertyName { get; }
 
 
         public PropKindEnum PropKind { get; protected set; }
@@ -59,8 +59,9 @@ namespace DRM.TypeSafePropertyBag
 
         #region Constructors
 
-        public PropBase(PropKindEnum propKind, Type typeOfThisValue, bool typeIsSolid, PropStorageStrategyEnum storageStrategy, bool valueIsDefined)
+        public PropBase(PropNameType propertyName, PropKindEnum propKind, Type typeOfThisValue, bool typeIsSolid, PropStorageStrategyEnum storageStrategy, bool valueIsDefined)
         {
+            PropertyName = propertyName;
             PropKind = propKind;
             Type = typeOfThisValue;
             TypeIsSolid = typeIsSolid;
@@ -93,53 +94,56 @@ namespace DRM.TypeSafePropertyBag
 
         private bool IsThisACollection(PropKindEnum propKind)
         {
-            if (propKind == PropKindEnum.Prop)
-            {
-                return false;
-            }
-            else if
-                (
-                propKind == PropKindEnum.ObservableCollection ||
-                //propKind == PropKindEnum.ObservableCollectionFB ||
-                propKind == PropKindEnum.EnumerableTyped ||
-                propKind == PropKindEnum.Enumerable ||
-                propKind == PropKindEnum.ObservableCollection_RO ||
-                //propKind == PropKindEnum.ObservableCollectionFB_RO ||
-                propKind == PropKindEnum.EnumerableTyped_RO ||
-                propKind == PropKindEnum.Enumerable_RO
-                )
-            {
-                return true;
-            }
-            else
-            {
-                CheckPropKindSpecial(propKind);
-                return false;
-            }
+            return propKind.IsCollection();
+            //if (propKind == PropKindEnum.Prop)
+            //{
+            //    return false;
+            //}
+            //else if
+            //    (
+            //    propKind == PropKindEnum.ObservableCollection ||
+            //    //propKind == PropKindEnum.ObservableCollectionFB ||
+            //    propKind == PropKindEnum.EnumerableTyped ||
+            //    propKind == PropKindEnum.Enumerable ||
+            //    propKind == PropKindEnum.ObservableCollection_RO ||
+            //    //propKind == PropKindEnum.ObservableCollectionFB_RO ||
+            //    propKind == PropKindEnum.EnumerableTyped_RO ||
+            //    propKind == PropKindEnum.Enumerable_RO
+            //    )
+            //{
+            //    return true;
+            //}
+            //else
+            //{
+            //    CheckPropKindSpecial(propKind);
+            //    return false;
+            //}
         }
 
         private bool IsThisReadOnly(PropKindEnum propKind)
         {
-            if (propKind == PropKindEnum.Prop)
-            {
-                return false;
-            }
-            else if
-                (
-                propKind == PropKindEnum.CollectionViewSource_RO ||
-                propKind == PropKindEnum.ObservableCollection_RO ||
-                //propKind == PropKindEnum.ObservableCollectionFB_RO ||
-                propKind == PropKindEnum.EnumerableTyped_RO ||
-                propKind == PropKindEnum.Enumerable_RO
-                )
-            {
-                return true;
-            }
-            else
-            {
-                CheckPropKind(propKind);
-                return false;
-            }
+            return propKind.IsReadOnly();
+
+            //if (propKind == PropKindEnum.Prop)
+            //{
+            //    return false;
+            //}
+            //else if
+            //    (
+            //    propKind == PropKindEnum.CollectionViewSource_RO ||
+            //    propKind == PropKindEnum.ObservableCollection_RO ||
+            //    //propKind == PropKindEnum.ObservableCollectionFB_RO ||
+            //    propKind == PropKindEnum.EnumerableTyped_RO ||
+            //    propKind == PropKindEnum.Enumerable_RO
+            //    )
+            //{
+            //    return true;
+            //}
+            //else
+            //{
+            //    CheckPropKind(propKind);
+            //    return false;
+            //}
         }
 
         #endregion
@@ -153,49 +157,49 @@ namespace DRM.TypeSafePropertyBag
 
         #endregion
 
-        #region DEBUG Checks
+        //#region DEBUG Checks
 
-        [System.Diagnostics.Conditional("DEBUG")]
-        private void CheckPropKind(PropKindEnum propKind)
-        {
-            if (!
-                    (
-                    propKind == PropKindEnum.CollectionViewSource ||
-                    propKind == PropKindEnum.CollectionViewSource_RO ||
-                    propKind == PropKindEnum.DataTable ||
-                    propKind == PropKindEnum.DataTable_RO ||
-                    propKind == PropKindEnum.Prop ||
-                    propKind == PropKindEnum.ObservableCollection ||
-                    //propKind == PropKindEnum.ObservableCollectionFB ||
-                    propKind == PropKindEnum.EnumerableTyped ||
-                    propKind == PropKindEnum.Enumerable ||
-                    propKind == PropKindEnum.ObservableCollection_RO ||
-                    //propKind == PropKindEnum.ObservableCollectionFB_RO ||
-                    propKind == PropKindEnum.EnumerableTyped_RO ||
-                    propKind == PropKindEnum.Enumerable_RO
-                    )
-                )
-            {
-                throw new InvalidOperationException($"The PropKind: {propKind} is not supported.");
-            }
-        }
+        //[System.Diagnostics.Conditional("DEBUG")]
+        //private void CheckPropKind(PropKindEnum propKind)
+        //{
+        //    if (!
+        //            (
+        //            propKind == PropKindEnum.CollectionViewSource ||
+        //            propKind == PropKindEnum.CollectionViewSource_RO ||
+        //            propKind == PropKindEnum.DataTable ||
+        //            propKind == PropKindEnum.DataTable_RO ||
+        //            propKind == PropKindEnum.Prop ||
+        //            propKind == PropKindEnum.ObservableCollection ||
+        //            //propKind == PropKindEnum.ObservableCollectionFB ||
+        //            propKind == PropKindEnum.EnumerableTyped ||
+        //            propKind == PropKindEnum.Enumerable ||
+        //            propKind == PropKindEnum.ObservableCollection_RO ||
+        //            //propKind == PropKindEnum.ObservableCollectionFB_RO ||
+        //            propKind == PropKindEnum.EnumerableTyped_RO ||
+        //            propKind == PropKindEnum.Enumerable_RO
+        //            )
+        //        )
+        //    {
+        //        throw new InvalidOperationException($"The PropKind: {propKind} is not supported.");
+        //    }
+        //}
 
-        [System.Diagnostics.Conditional("DEBUG")]
-        private void CheckPropKindSpecial(PropKindEnum propKind)
-        {
-            if (!
-                    (
-                    propKind == PropKindEnum.CollectionViewSource ||
-                    propKind == PropKindEnum.CollectionViewSource_RO ||
-                    propKind == PropKindEnum.DataTable ||
-                    propKind == PropKindEnum.DataTable_RO
-                    )
-                )
-            {
-                throw new InvalidOperationException($"The PropKind: {propKind} is not supported.");
-            }
-        }
+        //[System.Diagnostics.Conditional("DEBUG")]
+        //private void CheckPropKindSpecial(PropKindEnum propKind)
+        //{
+        //    if (!
+        //            (
+        //            propKind == PropKindEnum.CollectionViewSource ||
+        //            propKind == PropKindEnum.CollectionViewSource_RO ||
+        //            propKind == PropKindEnum.DataTable ||
+        //            propKind == PropKindEnum.DataTable_RO
+        //            )
+        //        )
+        //    {
+        //        throw new InvalidOperationException($"The PropKind: {propKind} is not supported.");
+        //    }
+        //}
 
-        #endregion 
+        //#endregion 
     }
 }

@@ -17,7 +17,7 @@ namespace DRM.PropBag
             Func<string, T> defaultValFunc,
             bool typeIsSolid,
             Func<T, T, bool> comparer)
-            : base(typeof(T), typeIsSolid, PropStorageStrategyEnum.External, true,  comparer, defaultValFunc, PropKindEnum.Prop)
+            : base(propertyName, typeof(T), typeIsSolid, PropStorageStrategyEnum.External, true,  comparer, defaultValFunc, PropKindEnum.Prop)
         {
             Tag = Guid.NewGuid(); // tag;
             Getter = null; // getter;

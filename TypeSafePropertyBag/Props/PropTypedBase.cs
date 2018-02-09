@@ -40,9 +40,9 @@ namespace DRM.TypeSafePropertyBag
 
         #region Constructors
 
-        protected PropTypedBase(Type typeOfThisValue, bool typeIsSolid, PropStorageStrategyEnum storageStrategy, bool valueIsDefined,
+        protected PropTypedBase(PropNameType propertyName, Type typeOfThisValue, bool typeIsSolid, PropStorageStrategyEnum storageStrategy, bool valueIsDefined,
             Func<T,T,bool> comparer, Func<string, T> defaultValFunc, PropKindEnum propKind)
-            : base(propKind, typeOfThisValue, typeIsSolid, storageStrategy, valueIsDefined)
+            : base(propertyName, propKind, typeOfThisValue, typeIsSolid, storageStrategy, valueIsDefined)
         {
             Comparer = comparer;
             GetDefaultValFunc = defaultValFunc;

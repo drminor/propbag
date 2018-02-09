@@ -12,7 +12,6 @@ namespace DRM.PropBagWPF
     {
         #region Private and Protected Members
 
-        private readonly PropNameType _propertyName;
         private readonly IProvideAView _viewProvider;
 
         #endregion
@@ -20,9 +19,8 @@ namespace DRM.PropBagWPF
         #region Constructor
 
         public CViewSourceProp(PropNameType propertyName, IProvideAView viewProvider)
-            : base(typeof(CollectionViewSource), true, PropStorageStrategyEnum.Virtual, true, RefEqualityComparer<CollectionViewSource>.Default.Equals, null, PropKindEnum.CollectionViewSource)
+            : base(propertyName, typeof(CollectionViewSource), true, PropStorageStrategyEnum.Virtual, true, RefEqualityComparer<CollectionViewSource>.Default.Equals, null, PropKindEnum.CollectionViewSource)
         {
-            _propertyName = propertyName;
             _viewProvider = viewProvider;
         }
 

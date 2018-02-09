@@ -8,14 +8,17 @@ using System.ComponentModel;
 
 namespace DRM.PropBag
 {
+    using PropNameType = String;
+
     public class CProp<CT,T> : PropTypedBase<CT>, ICProp<CT,T> where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged
     {
-        public CProp(CT initalValue,
+        public CProp(PropNameType propertyName,
+            CT initalValue,
             Func<string, CT> defaultValFunc,
             bool typeIsSolid,
             PropStorageStrategyEnum storageStrategy,
             Func<CT, CT, bool> comparer)
-            : base(typeof(CT), typeIsSolid, storageStrategy, true, comparer, defaultValFunc, PropKindEnum.ObservableCollection)
+            : base(propertyName, typeof(CT), typeIsSolid, storageStrategy, true, comparer, defaultValFunc, PropKindEnum.ObservableCollection)
         {
             if (storageStrategy == PropStorageStrategyEnum.Internal)
             {
@@ -23,11 +26,12 @@ namespace DRM.PropBag
             }
         }
 
-        public CProp(Func<string, CT> defaultValFunc,
+        public CProp(PropNameType propertyName, 
+            Func<string, CT> defaultValFunc,
             bool typeIsSolid,
             PropStorageStrategyEnum storageStrategy,
             Func<CT, CT, bool> comparer)
-            : base(typeof(CT), typeIsSolid, storageStrategy, false, comparer, defaultValFunc, PropKindEnum.ObservableCollection)
+            : base(propertyName, typeof(CT), typeIsSolid, storageStrategy, false, comparer, defaultValFunc, PropKindEnum.ObservableCollection)
         {
             //if (hasStore)
             //{
