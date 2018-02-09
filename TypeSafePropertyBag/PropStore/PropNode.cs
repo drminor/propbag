@@ -11,12 +11,12 @@ namespace DRM.TypeSafePropertyBag
     {
         #region Constructor
 
-        public PropNode(ExKeyT ckey, IPropDataInternal propData_Internal, BagNode parent)
+        public PropNode(PropIdType propId, IPropDataInternal propData_Internal, BagNode parent)
         {
-            CompKey = ckey;
+            CompKey = new SimpleExKey(parent.ObjectId, propId);
             PropData_Internal = propData_Internal ?? throw new ArgumentNullException(nameof(propData_Internal));
 
-            parent.AddChild(this);
+            //parent.AddChild(this);
             Parent = parent;
 
             Child = null;

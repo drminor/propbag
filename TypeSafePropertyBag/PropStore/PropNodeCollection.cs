@@ -1,24 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DRM.TypeSafePropertyBag
 {
     using PropIdType = UInt32;
     using PropNameType = String;
-    using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
-    using System.Collections;
-    using System.Linq;
 
-    internal class PropNodeCollection : ICollection<KeyValuePair<PropIdType, PropNode>>
+    internal class PropNodeCollection : IPropNodeCollection
     {
         #region Private Members
 
-        private readonly Dictionary<PropIdType, PropNode> _children;
-        private Dictionary<PropNameType, PropNode> _propItemsByName;
+        readonly Dictionary<PropIdType, PropNode> _children;
 
-        private object _sync = new object();
-
-        private Dictionary<PropNameType, PropNode> PropItemsByName
+        Dictionary<PropNameType, PropNode> _propItemsByName;
+        Dictionary<PropNameType, PropNode> PropItemsByName
         {
             get
             {
@@ -37,6 +33,8 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
+        object _sync = new object();
+
         #endregion
 
         #region Constructor
@@ -48,13 +46,30 @@ namespace DRM.TypeSafePropertyBag
             _propItemsByName = null;
         }
 
+        public PropNodeCollection(IPropNodeCollection sourcePropNodes, BagNode targetParent)
+        {
+            MaxPropsPerObject = sourcePropNodes.MaxPropsPerObject;
+
+            _children = new Dictionary<PropIdType, PropNode>();
+
+            foreach(PropNode propNode in sourcePropNodes.GetPropNodes())
+            {
+                IProp newTypeProp = (IProp) propNode.PropData_Internal.TypedProp.Clone();
+
+                IPropDataInternal newPropData_Internal = new PropGen(newTypeProp);
+
+                PropNode newPropNode = new PropNode(propNode.PropId, newPropData_Internal, targetParent);
+                Add(newPropNode);
+            }
+
+            _propItemsByName = null;
+        }
+
         #endregion
 
         #region Public Members
 
         public int Count => _children.Count;
-
-        public bool IsReadOnly => ((ICollection<KeyValuePair<uint, PropNode>>)_children).IsReadOnly;
 
         public int MaxPropsPerObject { get; }
 
@@ -96,10 +111,17 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        public PropNameType GetPropertyName(PropIdType propId)
+        public bool TryGetPropNode(PropNameType propertyName, out PropNode propNode)
         {
-            PropNameType result = _children[propId].PropData_Internal.TypedProp.PropertyName;
-            return result;
+            if (PropItemsByName.TryGetValue(propertyName, out propNode))
+            {
+                return true;
+            }
+            else
+            {
+                propNode = null;
+                return false;
+            }
         }
 
         public bool TryGetPropertyName(PropIdType propId, out PropNameType propertyName)
@@ -128,12 +150,6 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        public PropIdType GetPropId(PropNameType propertyName)
-        {
-            PropIdType result = PropItemsByName[propertyName].PropId;
-            return result;
-        }
-
         public bool TryGetPropId(PropNameType propertyName, out PropIdType propId)
         {
             if (PropItemsByName.TryGetValue(propertyName, out PropNode propNode))
@@ -148,28 +164,23 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        public PropNode Add(IPropDataInternal propData_Internal, PropNameType propertyName, BagNode propBagNode)
+        public PropNode CreateAndAdd(IPropDataInternal propData_Internal, PropNameType propertyName, BagNode parent)
         {
             PropIdType nextPropId = GetNextPropId();
 
-            ExKeyT exKey = new SimpleExKey(propBagNode.ObjectId, nextPropId);
+            PropNode newPropNode = new PropNode(nextPropId, propData_Internal, parent);
 
-            PropNode newPropNode = new PropNode(exKey, propData_Internal, propBagNode);
-            _children.Add(nextPropId, newPropNode);
+            Add(newPropNode);
 
             return newPropNode;
         }
 
-        public void Add(KeyValuePair<PropIdType, PropNode> item)
-        {
-            Add(item.Key, item.Value);
-        }
-
-        public void Add(PropIdType propId, PropNode propNode)
+        public void Add(PropNode propNode)
         {
             lock(_sync)
             {
-                _children.Add(propId, propNode);
+                _children.Add(propNode.PropId, propNode);
+
                 if (_propItemsByName != null)
                 {
                     _propItemsByName.Add(propNode.PropData_Internal.TypedProp.PropertyName, propNode);
@@ -179,22 +190,14 @@ namespace DRM.TypeSafePropertyBag
 
         public void Clear()
         {
-            _children.Clear();
-        }
-
-        public bool Contains(KeyValuePair<uint, PropNode> item)
-        {
-            return ((ICollection<KeyValuePair<uint, PropNode>>)_children).Contains(item);
-        }
-
-        public void CopyTo(KeyValuePair<uint, PropNode>[] array, int arrayIndex)
-        {
-            ((ICollection<KeyValuePair<uint, PropNode>>)_children).CopyTo(array, arrayIndex);
-        }
-
-        public bool Remove(KeyValuePair<uint, PropNode> item)
-        {
-            return ((ICollection<KeyValuePair<uint, PropNode>>)_children).Remove(item);
+            lock (_sync)
+            {
+                _children.Clear();
+                if (_propItemsByName != null)
+                {
+                    _propItemsByName.Clear();
+                }
+            }
         }
 
         public bool TryRemove(PropIdType propId, out PropNode propNode)
@@ -216,16 +219,6 @@ namespace DRM.TypeSafePropertyBag
             return false;
        }
 
-        public IEnumerator<KeyValuePair<uint, PropNode>> GetEnumerator()
-        {
-            return ((ICollection<KeyValuePair<uint, PropNode>>)_children).GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return ((ICollection<KeyValuePair<uint, PropNode>>)_children).GetEnumerator();
-        }
-
         #endregion
 
         #region Private Methods
@@ -243,14 +236,12 @@ namespace DRM.TypeSafePropertyBag
         }
 
         private long m_Counter = 0;
-        private uint GetNextPropId()
+        private PropIdType GetNextPropId()
         {
             long temp = System.Threading.Interlocked.Increment(ref m_Counter);
             if (temp > MaxPropsPerObject) throw new InvalidOperationException("The SimpleLevel2Key Manager has run out of property ids.");
-            return (uint)temp;
+            return (PropIdType)temp;
         }
-
-
 
         #endregion
     }

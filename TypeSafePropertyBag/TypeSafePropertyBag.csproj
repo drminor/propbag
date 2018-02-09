@@ -85,6 +85,7 @@
     <Compile Include="PropInterfaces\IDataTablePropInterfaces.cs" />
     <Compile Include="PropInterfaces\IProvideACViewManager.cs" />
     <Compile Include="PropInterfaces\IWatchPropItems.cs" />
+    <Compile Include="PropStore\IPropNodeCollection.cs" />
     <Compile Include="PropStore\IProvidePropStoreServiceSingletons.cs" />
     <None Include="PropStore\ICacheLevel2KeyManagers.cs" />
     <Compile Include="PropStore\IProvidePropTemplates.cs" />

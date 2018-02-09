@@ -21,7 +21,7 @@ namespace DRM.TypeSafePropertyBag
         //WeakRefKey<IPropBag> GetPropBagProxy(StoreNodeProp storeNodeProp);
         //WeakReference<IPropBag> GetPublicInterface(WeakReference<IPropBagInternal> propBagProxy_internal);
 
-        WeakRefKey<IPropBag> GetPropBagProxy(PropNode storeNodeProp);
-        bool TryGetPropBagProxy(PropNode storeNodeProp, out WeakRefKey<IPropBag> propBag_wrKey);
+        //WeakRefKey<IPropBag> GetPropBagProxy(PropNode storeNodeProp);
+        bool TryGetParentPropBagProxy(PropNode storeNodeProp, out WeakRefKey<IPropBag> propBag_wrKey);
     }
 }
