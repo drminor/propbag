@@ -895,7 +895,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
         {
             if (propStoreAccessService_Internal_wr.TryGetTarget(out PSAccessServiceInternalInterface storeAcessor_internal))
             {
-                if (storeAcessor_internal.TryGetPropBagProxy(sourcePropNode, out propItemParentPropBag_wr))
+                if (storeAcessor_internal.TryGetParentPropBagProxy(sourcePropNode, out propItemParentPropBag_wr))
                 {
                     return true;
                 }
