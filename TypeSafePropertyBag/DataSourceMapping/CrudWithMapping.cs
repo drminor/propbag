@@ -10,18 +10,11 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
         #region Private Members
 
         TDal _dataAccessLayer;
-        private IPropBagMapper<TSource, TDestination> _mapper;
+        IPropBagMapper<TSource, TDestination> _mapper;
 
         #endregion
 
         #region Constructor
-
-        //public CrudWithMapping(TDal dataAccessLayer, IPropBagMapper<TSource, TDestination> mapper)
-        //{
-        //    _mapper = mapper;
-        //    _dataAccessLayer = dataAccessLayer;
-        //    _dataAccessLayer.DataSourceChanged += _dataAccessLayer_DataSourceChanged;
-        //}
 
         public CrudWithMapping(IWatchAPropItem<TDal> propItemWatcher, IPropBagMapper<TSource, TDestination> mapper)
         {
