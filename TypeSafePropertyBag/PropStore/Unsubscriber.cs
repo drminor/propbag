@@ -27,7 +27,7 @@ namespace DRM.TypeSafePropertyBag
                     // TODO: dispose managed state (managed objects).
                     if (_propStoreAccessService_Wr.TryGetTarget(out PSAccessServiceInterface accService))
                     {
-                        accService.RemoveSubscription(_request);
+                        accService.TryRemoveSubscription(_request);
                     }
                 }
                 disposedValue = true;

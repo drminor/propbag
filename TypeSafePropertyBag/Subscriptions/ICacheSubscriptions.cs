@@ -19,7 +19,7 @@ namespace DRM.TypeSafePropertyBag
     public interface ICacheSubscriptions<L2T>
     {
         ISubscription AddSubscription(ISubscriptionKeyGen subscriptionRequest, out bool wasAdded);
-        bool RemoveSubscription(ISubscriptionKeyGen subscriptionRequest);
+        bool TryRemoveSubscription(ISubscriptionKeyGen subscriptionRequest);
 
         IEnumerable<ISubscription> GetSubscriptions(IPropBag host, L2T propId);
 
