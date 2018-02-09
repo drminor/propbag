@@ -64,7 +64,6 @@ namespace DRM.TypeSafePropertyBag
 
             _handlerDispatchDelegateCacheProvider = handlerDispatchDelegateCacheProvider;
 
-            //_level2KeyManRepository = null;
 
             _store = new Dictionary<WeakRefKey<IPropBag>, BagNode>();
 
@@ -103,6 +102,10 @@ namespace DRM.TypeSafePropertyBag
             WeakRefKey<IPropBag> propBag_wrKey = new WeakRefKey<IPropBag>(propBag);
 
             bool result = TryGetPropBagNode(propBag_wrKey, out propBagNode);
+            if(!result)
+            {
+                System.Diagnostics.Debug.WriteLine($"The PropStore could not retreive a BagNode for the PropBag with full classname = {propBag.FullClassName}.");
+            }
             return result;
         }
 
@@ -372,7 +375,7 @@ namespace DRM.TypeSafePropertyBag
             //    level2KeyManager_forNewCopy = (L2KeyManType)sourceLevel2KeyMan.Clone();
             //}
 
-            PSAccessServiceInterface result = CreatePropStoreService(targetPropBag, sourcePropBagNode /*, level2KeyManager_forNewCopy*/, out newStoreNode);
+            PSAccessServiceInterface result = CreatePropStoreService(targetPropBag, sourcePropBagNode, out newStoreNode);
             return result;
         }
 
