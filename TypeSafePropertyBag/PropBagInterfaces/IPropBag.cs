@@ -88,8 +88,9 @@ namespace DRM.TypeSafePropertyBag
         // Consider moving these to the TypeSafePropBagMetaData class.
         PropBagTypeSafetyMode TypeSafetyMode { get; }
         IList<PropNameType> GetAllPropertyNames();
-        IDictionary<PropNameType, IPropData> GetAllPropertyValues();
-        IDictionary<PropNameType, ValPlusType> GetAllPropNamesAndTypes();
+        IReadOnlyDictionary<PropNameType, IPropData> GetAllPropertyValues();
+
+        IReadOnlyDictionary<PropNameType, ValPlusType> GetAllPropNamesAndTypes();
 
         void RaiseStandardPropertyChanged(PropNameType propertyName);
 

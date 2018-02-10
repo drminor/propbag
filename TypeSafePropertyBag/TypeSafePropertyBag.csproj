@@ -126,9 +126,7 @@
     <Compile Include="PropStore\ViewManagers\ViewManagerCollection.cs" />
     <Compile Include="Props\ViewManager.cs" />
     <Compile Include="PropStoreKeys\IExplodedKey.cs" />
-    <None Include="PropStoreKeys\ILevel2KeyManager_NotUsed.cs" />
     <Compile Include="PropStoreKeys\SimpleExKey.cs" />
-    <None Include="PropStoreKeys\SimpleLevel2KeyMan_NotUsed.cs" />
     <Compile Include="PropStore\IPropStoreAccessServiceInternal.cs" />
     <Compile Include="PropStore\Unsubscriber.cs" />
     <Compile Include="Unused\DSProviderProviderCollection_NotUsed.cs" />

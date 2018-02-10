@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace DRM.TypeSafePropertyBag
@@ -54,11 +55,11 @@ namespace DRM.TypeSafePropertyBag
 
             foreach(PropNode propNode in sourcePropNodes.GetPropNodes())
             {
-                IProp newTypeProp = (IProp) propNode.PropData_Internal.TypedProp.Clone();
+                //IProp newTypeProp = (IProp) propNode.PropData_Internal.TypedProp.Clone();
+                //IPropDataInternal newPropData_Internal = new PropGen(newTypeProp);
+                //PropNode newPropNode = new PropNode(propNode.PropId, newPropData_Internal, targetParent);
 
-                IPropDataInternal newPropData_Internal = new PropGen(newTypeProp);
-
-                PropNode newPropNode = new PropNode(propNode.PropId, newPropData_Internal, targetParent);
+                PropNode newPropNode = propNode.CloneForNewParent(targetParent, useExistingValues: true);
                 Add(newPropNode);
             }
 
@@ -128,7 +129,7 @@ namespace DRM.TypeSafePropertyBag
         {
             if (_children.TryGetValue(propId, out PropNode propNode))
             {
-                propertyName = propNode.PropData_Internal.TypedProp.PropertyName;
+                propertyName = propNode.PropertyName;
                 return true;
             }
             else
@@ -136,18 +137,6 @@ namespace DRM.TypeSafePropertyBag
                 propertyName = null;
                 return false;
             }
-        }
-
-        public IEnumerable<PropNode> GetPropNodes()
-        {
-            IEnumerable<PropNode> result = _children.Select(x => x.Value);
-            return result;
-        }
-
-        public IEnumerable<IPropDataInternal> GetPropDataItems()
-        {
-            IEnumerable<IPropDataInternal> result = _children.Select(x => x.Value.PropData_Internal);
-            return result;
         }
 
         public bool TryGetPropId(PropNameType propertyName, out PropIdType propId)
@@ -183,7 +172,7 @@ namespace DRM.TypeSafePropertyBag
 
                 if (_propItemsByName != null)
                 {
-                    _propItemsByName.Add(propNode.PropData_Internal.TypedProp.PropertyName, propNode);
+                    _propItemsByName.Add(propNode.PropertyName, propNode);
                 }
             }
         }
@@ -209,7 +198,7 @@ namespace DRM.TypeSafePropertyBag
                     _children.Remove(propId);
                     if (_propItemsByName != null)
                     {
-                        _propItemsByName.Remove(propNode.PropData_Internal.TypedProp.PropertyName);
+                        _propItemsByName.Remove(propNode.PropertyName);
                     }
                     return true;
                 }
@@ -217,7 +206,43 @@ namespace DRM.TypeSafePropertyBag
 
             propNode = null;
             return false;
-       }
+        }
+
+        #endregion
+
+        #region Collection Support
+
+        public IEnumerable<PropIdType> GetPropIds()
+        {
+            IEnumerable<PropIdType> result = _children.Select(x => x.Key);
+            return result;
+        }
+
+        public IEnumerable<PropNameType> GetPropNames()
+        {
+            IEnumerable<PropNameType> result = PropItemsByName.Select(x => x.Key);
+            return result;
+        }
+
+        public IEnumerable<PropNode> GetPropNodes()
+        {
+            IEnumerable<PropNode> result = _children.Select(x => x.Value);
+            return result;
+        }
+
+        public IEnumerable<IPropDataInternal> GetPropDataItems()
+        {
+            IEnumerable<IPropDataInternal> result = _children.Select(x => x.Value.PropData_Internal);
+            return result;
+        }
+
+        public IReadOnlyDictionary<PropNameType, IPropData> GetPropDataItemsDict()
+        {
+            ReadOnlyDictionary<PropNameType, IPropData> result = 
+                new ReadOnlyDictionary<PropNameType, IPropData>(PropItemsByName.ToDictionary(x => x.Key, x => (IPropData) x.Value.PropData_Internal));
+
+            return result;
+        }
 
         #endregion
 
@@ -229,7 +254,7 @@ namespace DRM.TypeSafePropertyBag
 
             foreach (KeyValuePair<PropIdType, PropNode> kvp in _children)
             {
-                result.Add(kvp.Value.PropData_Internal.TypedProp.PropertyName, kvp.Value);
+                result.Add(kvp.Value.PropertyName, kvp.Value);
             }
 
             return result;

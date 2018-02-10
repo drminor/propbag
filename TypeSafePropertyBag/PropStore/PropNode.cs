@@ -5,6 +5,8 @@ namespace DRM.TypeSafePropertyBag
 {
     using ObjectIdType = UInt64;
     using PropIdType = UInt32;
+    using PropNameType = String;
+
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
 
     internal class PropNode : IDisposable
@@ -24,6 +26,37 @@ namespace DRM.TypeSafePropertyBag
 
         #endregion
 
+        #region Public Methods
+
+        /// <summary>
+        /// Creates a new PropNode using this PropNode as a 'template.'
+        /// If useExistingValues is set to True, exceptions will be thrown if
+        /// the PropItem's value cannot be cloned.
+        /// </summary>
+        /// <param name="parent"></param>
+        /// <param name="useExistingValues">
+        /// If True, the current values are cloned,
+        /// If False the default values are used.</param>
+        /// <returns></returns>
+        public PropNode CloneForNewParent(BagNode parent, bool useExistingValues)
+        {
+            IProp newTypeProp;
+            if(useExistingValues)
+            {
+                newTypeProp = (IProp)PropData_Internal.TypedProp.Clone();
+            }
+            else
+            {
+                throw new NotImplementedException("CloneForNewParent only supports useExistingValues = true.");
+            }
+
+            IPropDataInternal newPropData_Internal = new PropGen(newTypeProp);
+            PropNode newPropNode = new PropNode(PropId, newPropData_Internal, parent);
+            return newPropNode;
+        }
+
+        #endregion
+
         #region Public Properties
 
         // This composite key identifies both the IPropBag and the Prop. Its a globally unique PropId.
@@ -31,6 +64,7 @@ namespace DRM.TypeSafePropertyBag
 
         public ObjectIdType ObjectId => CompKey.Level1Key;
         public PropIdType PropId => CompKey.Level2Key;
+        public PropNameType PropertyName => PropData_Internal.TypedProp.PropertyName;
 
         internal IPropDataInternal PropData_Internal { get; }
 

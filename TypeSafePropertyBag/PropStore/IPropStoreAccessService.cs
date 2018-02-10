@@ -21,7 +21,8 @@ namespace DRM.TypeSafePropertyBag
 
         bool ContainsKey(IPropBag propBag, L2T propId);
 
-        IEnumerable<KeyValuePair<L2TRaw, IPropData>> GetCollection(IPropBag propBag);
+        IReadOnlyDictionary<L2TRaw, IPropData> GetCollection(IPropBag propBag);
+        //IEnumerable<KeyValuePair<L2TRaw, IPropData>> GetCollection(IPropBag propBag);
         IEnumerator<KeyValuePair<L2TRaw, IPropData>> GetEnumerator(IPropBag propBag);
 
         IEnumerable<L2TRaw> GetKeys(IPropBag propBag);

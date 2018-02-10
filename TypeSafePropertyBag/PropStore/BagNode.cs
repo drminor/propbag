@@ -295,6 +295,36 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
+        public IEnumerable<PropIdType> GetPropIds()
+        {
+            IEnumerable<PropIdType> result = _propNodeCollection.GetPropIds();
+            return result;
+        }
+
+        public IEnumerable<PropNameType> GetPropNames()
+        {
+            IEnumerable<PropNameType> result = _propNodeCollection.GetPropNames();
+            return result;
+        }
+
+        public IEnumerable<PropNode> GetPropNodes()
+        {
+            IEnumerable<PropNode> result = _propNodeCollection.GetPropNodes();
+            return result;
+        }
+
+        public IEnumerable<IPropData> GetPropDataItems()
+        {
+            IEnumerable<IPropDataInternal> result = _propNodeCollection.GetPropDataItems();
+            return result;
+        }
+
+        public IReadOnlyDictionary<PropNameType, IPropData> GetPropDataItemsDict()
+        {
+            IReadOnlyDictionary<PropNameType, IPropData> result = _propNodeCollection.GetPropDataItemsDict();
+            return result;
+        }
+
         #endregion
 
         #region Roots

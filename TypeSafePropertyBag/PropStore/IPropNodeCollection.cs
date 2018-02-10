@@ -19,11 +19,15 @@ namespace DRM.TypeSafePropertyBag
         bool Contains(PropNameType propertyName);
         bool Contains(PropIdType propId);
 
-        //void Add(PropIdType propId, PropNode propNode);
         PropNode CreateAndAdd(IPropDataInternal propData_Internal, PropNameType propertyName, BagNode parent);
 
-        IEnumerable<IPropDataInternal> GetPropDataItems();
+        IEnumerable<PropIdType> GetPropIds();
+        IEnumerable<PropNameType> GetPropNames();
+
         IEnumerable<PropNode> GetPropNodes();
+
+        IEnumerable<IPropDataInternal> GetPropDataItems();
+        IReadOnlyDictionary<PropNameType, IPropData> GetPropDataItemsDict();
 
         bool TryGetPropertyName(PropIdType propId, out PropNameType propertyName);
         bool TryGetPropId(PropNameType propertyName, out PropIdType propId);

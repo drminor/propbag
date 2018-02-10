@@ -1673,25 +1673,30 @@ namespace DRM.PropBag
         /// Makes a copy of the core list.
         /// </summary>
         /// <returns></returns>
-        public IDictionary<string, ValPlusType> GetAllPropNamesAndTypes()
+        public IReadOnlyDictionary<string, ValPlusType> GetAllPropNamesAndTypes()
         {
             IEnumerable<KeyValuePair<PropNameType, IPropData>> theStoreAsCollection = _ourStoreAccessor.GetCollection(this);
 
             IEnumerable<KeyValuePair<string, ValPlusType>> list = theStoreAsCollection.Select(x =>
-            //new KeyValuePair<string, ValPlusType>(x.Key, x.Value.GetValuePlusType())).ToList();
             new KeyValuePair<string, ValPlusType>(x.Key, x.Value.TypedProp.GetValuePlusType())).ToList();
 
-            IDictionary<string, ValPlusType> result = list.ToDictionary(pair => pair.Key, pair => pair.Value);
-            return result;
+            IDictionary<string, ValPlusType> dict = list.ToDictionary(pair => pair.Key, pair => pair.Value);
+
+            IReadOnlyDictionary<string, ValPlusType> result2 = new ReadOnlyDictionary<string, ValPlusType>(dict);
+
+            return result2;
         }
 
         /// <summary>
         /// Returns all of the values in dictionary of objects, keyed by PropertyName.
         /// </summary>
-        public IDictionary<PropNameType, IPropData> GetAllPropertyValues()
+        public IReadOnlyDictionary<PropNameType, IPropData> GetAllPropertyValues()
         {
-            IEnumerable<KeyValuePair<PropNameType, IPropData>> theStoreAsCollection = _ourStoreAccessor.GetCollection(this);
-            IDictionary<PropNameType, IPropData> result = theStoreAsCollection.ToDictionary(pair => pair.Key, pair => pair.Value);
+            //IEnumerable<KeyValuePair<PropNameType, IPropData>> theStoreAsCollection = _ourStoreAccessor.GetCollection(this);
+            //IReadOnlyDictionary<PropNameType, IPropData> result = theStoreAsCollection.ToDictionary(pair => pair.Key, pair => pair.Value);
+
+            IReadOnlyDictionary<PropNameType, IPropData> result = _ourStoreAccessor.GetCollection(this);
+
             return result;
         }
 
@@ -1807,7 +1812,7 @@ namespace DRM.PropBag
 
         public override string ToString()
         {
-            IDictionary<string, ValPlusType> x = GetAllPropNamesAndTypes();
+            IReadOnlyDictionary<string, ValPlusType> x = GetAllPropNamesAndTypes();
 
             StringBuilder result = new StringBuilder();
             int cnt = 0;
