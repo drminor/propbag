@@ -73,8 +73,6 @@ namespace DRM.PropBag.AutoMapperSupport
                 //    throw new InvalidOperationException("Cannot create a template with an open PropItemSet.");
                 //}
 
-                ////_template = null; // TODO: Fix Me
-
                 _mct.MeasureAndReport("GetNewDestination(PropModel, ... [In Constructor]", "AbstractPropBagMapper");
             }
             else
