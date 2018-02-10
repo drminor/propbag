@@ -20,15 +20,6 @@
 
         <pb:PropBagTemplate.Props>
 
-            <pb:PropItem PropertyName="Business" PropertyType="{x:Type dsrv:PersonDAL}">
-                <pb:InitialValueField SetToNull="True"/>
-                <!--<pb:PropBinderField Path="../Business"/>-->
-            </pb:PropItem>
-
-            <!--<pb:PropItem PropertyName="PersonList" PropKind="ObservableCollection" PropertyType="{x:Type vmod:PersonVM}">
-                <pb:InitialValueField SetToNull="True"/>
-            </pb:PropItem>-->
-
             <pb:PropItem PropertyName="PersonListView" PropKind="CollectionView" PropertyType="{x:Type vmod:PersonVM}">
                 <pb:InitialValueField SetToNull="True"/>
                 <pb:PropBinderField Path="../Business" MapperRequestResourceKey="PersonVM_Mapper"/>
@@ -40,21 +31,5 @@
 
         </pb:PropBagTemplate.Props>
     </pb:PropBagTemplate>
-
-    <!-- OLD STUFF -->
-    <!-- <pb:PropItem PropertyName="Business" PropertyType="{x:Type dsrv:PersonDAL}">
-        <pb:InitialValueField SetToNull="True"/>-->
-    <!--<pb:PropDoWhenChangedField
-                    MethodIsLocal="True"
-                    DeclaringType="{x:Type vmod:PersonCollectionViewModel}"
-                    MethodName="DoWhenBusinessChanges"
-                    DoAfterNotify="False"/>-->
-    <!--<pb:PropBinderField Path="../Business"/>
-    </pb:PropItem>
-    -->
-    
-    <!--<pb:PropItem PropertyName="PersonList" PropKind="ObservableCollection" PropertyType="{x:Type vmod:PersonVM}">
-                <pb:InitialValueField SetToNull="True"/>
-        </pb:PropItem>-->
 
 </ResourceDictionary>
