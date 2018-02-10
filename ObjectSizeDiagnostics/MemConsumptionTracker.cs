@@ -20,18 +20,32 @@ namespace ObjectSizeDiagnostics
 
         public MemConsumptionTracker(bool enabled, long memUsedSoFar) 
         {
-            if (enabled)
-                _lastKnownTotalMemory = System.GC.GetTotalMemory(true);
-            else
-                _lastKnownTotalMemory = 0;
-
-            _enabled = enabled;
+            Enabled = enabled;
             UsedSoFar = memUsedSoFar;
         }
 
         #endregion
 
         #region Public Properties
+
+        public bool Enabled
+        {
+            get
+            {
+                return _enabled;
+            }
+            set
+            {
+                if (value == _enabled) return;
+
+                if (value)
+                    _lastKnownTotalMemory = System.GC.GetTotalMemory(true);
+                else
+                    _lastKnownTotalMemory = 0;
+
+                _enabled = value;
+            }
+        }
 
         public long UsedSoFar { get; private set; }
 
@@ -47,8 +61,8 @@ namespace ObjectSizeDiagnostics
         /// <returns>The total amount of memory used so far as tracked by this instance of MemConsumptionTracker.</returns>
         public long Measure(string message = null)
         {
-            if (!_enabled) return 0;
-            Thread.Sleep(10);
+            if (!Enabled) return 0;
+            GC.WaitForPendingFinalizers();
 
             _lastKnownTotalMemory = GC.GetTotalMemory(true);
 
@@ -66,9 +80,9 @@ namespace ObjectSizeDiagnostics
         /// <returns>The total amount of memory used so far as tracked by this instance of MemConsumptionTracker.</returns>
         public long MeasureAndReport(string nameOfOperation, string message = null)
         {
-            if (!_enabled) return 0;
+            if (!Enabled) return 0;
 
-            Thread.Sleep(10);
+            GC.WaitForPendingFinalizers();
 
             long curBytes = GC.GetTotalMemory(true);
             long usedSinceLastCheck = curBytes - _lastKnownTotalMemory;
@@ -92,12 +106,20 @@ namespace ObjectSizeDiagnostics
         /// <returns></returns>
         public long Report(long previousTotal, string nameOfOperation, string message = null)
         {
-            if (!_enabled) return 0;
+            if (!Enabled) return 0;
 
             System.Diagnostics.Debug.WriteLine($"--MT: {nameOfOperation} used {UsedSoFar - previousTotal}; Total: {UsedSoFar}");
             System.Diagnostics.Debug.WriteLine(message != null ? $" ({message})." : null);
 
             return UsedSoFar;
+        }
+
+        public long Compact(string message = null)
+        {
+            if (!Enabled) return 0;
+
+            GC.WaitForFullGCComplete();
+            return Measure(message);
         }
 
         #endregion
