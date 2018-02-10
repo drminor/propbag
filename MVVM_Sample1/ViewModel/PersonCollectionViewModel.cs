@@ -19,9 +19,9 @@ namespace MVVMApplication.ViewModel
         {
         }
 
-        //new public object Clone()
-        //{
-        //    return new PersonCollectionViewModel(this);
-        //}
+        new public object Clone()
+        {
+            return new PersonCollectionViewModel(this);
+        }
     }
 }
