@@ -14,22 +14,6 @@ namespace DRM.TypeSafePropertyBag
 
     #region Infrastructure Interfaces
 
-    // View Manager (CollectionViewSource factory)
-    //public interface IManageCViews<CT,T> : IManageCViews<CT> where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged
-    //{
-    //    new CT Data { get; set; }
-
-    //    new IProvideATypedView<CT, T> GetViewProvider();
-    //    new IProvideATypedView<CT, T> GetViewProvider(string key);
-    //}
-
-
-    //// View Provider
-    //public interface IProvideATypedView<CT, T> : IProvideAView where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged
-    //{
-    //    new ICollectionView<CT, T> View { get; } // A reference to the named view.
-    //}
-
     // Currently this is not used, along with each of the typed versions of the interfaces above.
     public interface ICollectionView<CT, T> where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged
     {
@@ -65,25 +49,6 @@ namespace DRM.TypeSafePropertyBag
     public interface IReadOnlyETypedProp<CT, T> : IReadOnlyEProp<CT>/*, IListSource*/ where CT : IEnumerable<T>
     {
     }
-
-
-
-
-    //public interface IHaveAView<CT, T> : IHaveAView where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged
-    //{
-    //    new CT SourceCollection { get; } // The original collection
-    //    new ICollectionView<CT, T> View { get; } // The default View for this collection-type PropItem.
-    //    new ICollectionView<CT, T> this[string key] { get; } // A named View of this collection-type PropItem. 
-    //}
-
-    //public interface IHaveAView
-    //{
-    //    object SourceCollection { get; } // The original collection
-    //    ICollectionView View { get; } // The default View for this collection-type PropItem.
-    //    ICollectionView this[string key] { get; } // A named View of this collection-type PropItem.
-
-    //    event EventHandler<ViewRefreshedEventArgs> ViewRefreshed;
-    //}
 
     #endregion
 }

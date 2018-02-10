@@ -1,8 +1,7 @@
-﻿using System;
+﻿
 using System.Collections;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Windows.Data;
 
 namespace DRM.TypeSafePropertyBag
 {
@@ -34,38 +33,6 @@ namespace DRM.TypeSafePropertyBag
     /// 
     /// </remarks>
 
-    #region Infrastructure Interfaces
-
-    //// Regular View Manager (CollectionViewSource factory)
-    //public interface IManageCViews
-    //{
-    //    IList Data { get; }
-
-    //    IProvideADataSourceProvider DataSourceProviderProvider { get; }
-    //    DataSourceProvider DataSourceProvider { get; }
-
-    //    ICollectionView GetDefaultCollectionView();
-    //    ICollectionView GetCollectionView(string key);
-
-    //    IProvideAView GetViewProvider();
-    //    IProvideAView GetViewProvider(string key);
-
-    //    void SetDefaultViewProvider(IProvideAView value);
-    //    void SetViewProvider(string key, IProvideAView value);
-    //}
-
-    //// Regular View Provider
-    //public interface IProvideAView
-    //{
-    //    string ViewName { get; }
-    //    ICollectionView View { get; } // A reference to the named view.
-    //    object ViewSource { get; } // A reference to the CollectionViewSource (or similar class.)
-    //    event EventHandler<ViewRefreshedEventArgs> ViewSourceRefreshed;
-    //    DataSourceProvider DataSourceProvider { get; }
-    //}
-
-    #endregion
-
     #region Collection-Type PropItem Interfaces (All derive from IProp.)
 
     public interface IUseAViewProvider
@@ -77,7 +44,6 @@ namespace DRM.TypeSafePropertyBag
     public interface ICViewSourceProp<CVST> : /*IProvideADataSourceProvider,*/ IProvideAView, IProp<CVST> where CVST: class 
     {
     }
-
 
     // Collection View 
     public interface ICViewProp<CVT> : IProp<CVT>, IProvideAView where CVT : ICollectionView
