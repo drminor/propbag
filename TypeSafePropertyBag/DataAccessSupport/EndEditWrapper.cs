@@ -1,19 +1,20 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 
 namespace DRM.TypeSafePropertyBag.DataAccessSupport
 {
-    public class EndEditWrapper<T> : ObservableCollection<T>, INotifyItemEndEdit where T: INotifyItemEndEdit
+    public class EndEditWrapper<T> : ObservableCollection<T>, ICollectionViewFactory, INotifyItemEndEdit, IDisposable where T: INotifyItemEndEdit
     {
+        #region Constructors
+
         public EndEditWrapper()
         {
         }
 
         public EndEditWrapper(List<T> list)
         {
-            // TODO: See if the base implementation does the same thing.
             foreach(T item in list)
             {
                 // This calls insert and thereby we attach our handler to each item's ItemEndEdit event.
@@ -21,10 +22,8 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
             }
         }
 
-        public EndEditWrapper(IEnumerable<T> collection) //: base(collection)
+        public EndEditWrapper(IEnumerable<T> collection)
         {
-            //TODO: Verify that the base implementation does not call Add for each item.
-            // Perhaps we can attach our handler to each item after calling base(collection)
             foreach (T item in collection)
             {
                 // This calls insert and thereby we attach our handler to each item's ItemEndEdit event.
@@ -32,15 +31,46 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
             }
         }
 
-        public event EventHandler<EventArgs> ItemEndEdit;
+        #endregion
+
+        #region ICollectionViewFactory Implementation
+
+        public ICollectionView CreateView()
+        {
+            return new BetterListCollectionView(this);
+        }
+
+        #endregion
+
+        #region ObservableCollection<T> overrides
 
         protected override void InsertItem(int index, T item)
         {
             base.InsertItem(index, item);
 
             // handle any EndEdit events relating to this item
-            item.ItemEndEdit += ItemEndEditHandler;
+            // XXTemp
+            //item.ItemEndEdit += ItemEndEditHandler;
         }
+
+        protected override void ClearItems()
+        {
+            foreach (object o in Items)
+            {
+                if (o is IDisposable disable)
+                {
+                    disable.Dispose();
+                }
+            }
+
+            base.ClearItems();
+        }
+
+        #endregion
+
+        #region Event Declartions and Helpers
+
+        public event EventHandler<EventArgs> ItemEndEdit;
 
         void ItemEndEditHandler(object sender, EventArgs e)
         {
@@ -48,5 +78,44 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
             ItemEndEdit?.Invoke(sender, e);
         }
 
+        #endregion
+
+        #region IDisposable Support
+
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // Dispose managed state (managed objects).
+                    Clear();
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        // ~Temp() {
+        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        //   Dispose(false);
+        // }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            // GC.SuppressFinalize(this);
+        }
+
+        #endregion
     }
 }
