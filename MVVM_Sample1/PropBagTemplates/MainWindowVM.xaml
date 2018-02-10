@@ -40,7 +40,7 @@
 
             <pb:PropItem PropertyName="WMessage" PropertyType="{x:Type sys:String}" StorageStrategy="External">
                 <pb:InitialValueField SetToNull="True"/>
-                <pb:PropBinderField Path="./PersonCollectionVM/WMessage"/>
+                <pb:PropBinderField Path="./PersonEditorVM/WMessage"/>
             </pb:PropItem>
 
         </pb:PropBagTemplate.Props>
