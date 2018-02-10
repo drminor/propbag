@@ -75,7 +75,7 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
             object c2 = other.Target;
 
             if (c1 != null && c2 != null)
-                return (c1 == c2);
+                return (c1 == c2); // Reference Equality, could have used ReferenceEquals(c1, c2)
             else
                 return (_weakRef == other._weakRef);
         }
