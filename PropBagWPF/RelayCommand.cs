@@ -8,7 +8,7 @@ using System.Windows.Input;
 /// Project Coordinator: JoshSmithOnWpf
 ///</remarks>
 
-namespace DRM.PropBagControlsWPF
+namespace DRM.PropBagWPF
 {
 
     /// <summary>
@@ -34,10 +34,7 @@ namespace DRM.PropBagControlsWPF
         /// <param name="canExecute">The execution status logic.</param>
         public RelayCommand(Action<T> execute, Predicate<T> canExecute)
         {
-            if (execute == null)
-                throw new ArgumentNullException("execute");
-
-            _execute = execute;
+            _execute = execute ?? throw new ArgumentNullException("execute");
             _canExecute = canExecute;
         }
 
@@ -107,10 +104,7 @@ namespace DRM.PropBagControlsWPF
         /// <param name="canExecute">The execution status logic.</param>
         public RelayCommand(Action<object> execute, Func<bool> canExecute)
         {
-            if (execute == null)
-                throw new ArgumentNullException("execute");
-
-            _execute = execute;
+            _execute = execute ?? throw new ArgumentNullException("execute");
             _canExecute = canExecute;
         }
 
