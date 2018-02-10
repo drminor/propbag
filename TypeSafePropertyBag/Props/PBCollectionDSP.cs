@@ -8,6 +8,9 @@ namespace DRM.TypeSafePropertyBag
     // It calls for a refresh, which results in the binder to call our BeginQuery method,
     // which will raise our DataChanged event, if the data produced by BeginQuery is different from the 'current data'.
 
+    // TODO: Create an application, or better yet, a unit test to exercise this class;
+    // currently it is not being used.
+
     internal class PBCollectionDSP : DataSourceProvider, INotifyItemEndEdit
     {
         #region Private Properties

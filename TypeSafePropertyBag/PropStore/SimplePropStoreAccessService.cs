@@ -1124,6 +1124,10 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
+        // TODO: Need to make sure the caller is responsible for the life-time of the dsProviderProvider
+        // or add a parameter that allows the caller to specify whether or not to dispose the DSP-Provider
+        // in its dispose method.
+        // ----
         // ViewManager from DataSourceProvider-Provider
         public IManageCViews GetOrAddViewManager
         (
@@ -1700,10 +1704,15 @@ namespace DRM.TypeSafePropertyBag
                 int numBindingsRemoved = _bindings.ClearBindings();
             }
 
-            // Note: The _genViewManagers collection doesn't need to be disposed.
+            if(_genViewManagers != null)
+            {
+                _genViewManagers.Dispose();
+            }
 
             if (_genViewManagerProviders != null)
+            {
                 _genViewManagerProviders.Dispose();
+            }
 
             // Dispose each PropItem.
             foreach (PropNode prop in _ourNode.Children)

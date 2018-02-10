@@ -73,23 +73,28 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
 
         protected override void BeginQuery()
         {
+            // Note: Data holds a reference the previously fetched data, if any.
+
             try
             {
-                // Data holds a reference the previously fetched data, if any.
                 if (Data is INotifyItemEndEdit inieeCurrent)
                 {
-                    inieeCurrent.ItemEndEdit -= Iniee_ItemEndEdit;
+                    // XXTemp
+                    //inieeCurrent.ItemEndEdit -= Iniee_ItemEndEdit;
                 }
 
                 if (Data is INotifyCollectionChanged inccCurrent)
                 {
-                    inccCurrent.CollectionChanged -= Incc_CollectionChanged;
+                    // XXTemp
+                    //inccCurrent.CollectionChanged -= Incc_CollectionChanged;
                 }
             }
             catch (Exception e)
             {
                 System.Diagnostics.Debug.WriteLine($"Warning: Could not remove ItemEndEdit handler. The exception description is {e.Message}.");
             }
+
+            DisposeOldData(Data);
 
             try
             {
@@ -99,7 +104,8 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
 
                     if (wrappedData is INotifyItemEndEdit inieeNew)
                     {
-                        inieeNew.ItemEndEdit += Iniee_ItemEndEdit;
+                        // XXTemp
+                        //inieeNew.ItemEndEdit += Iniee_ItemEndEdit;
                     }
                     else if(wrappedData != null)
                     {
@@ -110,7 +116,8 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
 
                     if (wrappedData is INotifyCollectionChanged inccNew)
                     {
-                        inccNew.CollectionChanged += Incc_CollectionChanged;
+                        // XXTemp
+                        //inccNew.CollectionChanged += Incc_CollectionChanged;
                     }
 
                     // This will raise the DataSourceProvider.DataChanged event.
@@ -193,16 +200,35 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
             }
         }
 
-        // This is simply so that we can see when these events occur for diagnostic reasons.
-        // TODO: Production code should not include these.
-        protected override void BeginInit()
-        {
-            base.BeginInit();
-        }
+        //// This is simply so that we can see when these events occur for diagnostic reasons.
+        //// TODO: Production code should not include these.
+        //protected override void BeginInit()
+        //{
+        //    base.BeginInit();
+        //}
 
-        protected override void EndInit()
+        //protected override void EndInit()
+        //{
+        //    base.EndInit();
+        //}
+
+        private void DisposeOldData(object data)
         {
-            base.EndInit();
+            if(data is IDisposable collectionDisable)
+            {
+                collectionDisable.Dispose();
+            }
+            else if (data is IEnumerable list)
+            {
+                foreach (object o in list)
+                {
+                    if (o is IDisposable disable)
+                    {
+                        // TODO: Consider wrapping this in a Try/Catch.
+                        disable.Dispose();
+                    }
+                }
+            }
         }
 
         #endregion
@@ -218,6 +244,8 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
                 if (disposing)
                 {
                     // Dispose managed state (managed objects).
+                    DisposeOldData(this.Data);
+
                     _dataAccessLayer.Dispose();
                 }
 
