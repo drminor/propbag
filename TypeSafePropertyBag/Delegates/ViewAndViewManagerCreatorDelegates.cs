@@ -13,6 +13,8 @@ namespace DRM.TypeSafePropertyBag
 
     public delegate IProvideAView CViewProviderCreator(string viewName, DataSourceProvider dataSourceProvider);
 
+    // TODO: Move CollectionView Manager support to a project separate from TypeSafePropertyBag
+    // so that the TypeSafePropertyBag does not depend on AutoMapper.
     public delegate IPropBagMapperGen PropBagMapperCreator(IMapperRequest mr);
 
     internal delegate IManageCViews CViewManagerCreator(PropIdType sourceCollectionPropId, PropKindEnum propKind,
@@ -29,10 +31,6 @@ namespace DRM.TypeSafePropertyBag
         TypedCViewProviderCreator<CT,T> typedCViewProviderCreator)
         where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>,
         IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged;
-
-
-
-
 
     public delegate IDoCRUD<TDestination> CrudWrapperCreator<TSource, TDestination>(IDoCRUD<TSource> dataAccessLayer, IPropBagMapper<TSource, TDestination> mapper) where TSource : class;
 
