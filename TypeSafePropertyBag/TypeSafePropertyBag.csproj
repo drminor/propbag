@@ -95,6 +95,7 @@
     <Compile Include="PropStore\PropTemplateCache.cs" />
     <Compile Include="PropStore\PSNodeChangedEventArgs.cs" />
     <None Include="PropStore\SimpleLevel2KeyManagerCache.cs" />
+    <Compile Include="PropStore\PropStoreServiceCreatorFactory.cs" />
     <Compile Include="PropStore\ViewManagers\IViewManagerProviderKey.cs" />
     <Compile Include="PropStore\ViewManagers\ViewManagerProviderCollection.cs" />
     <Compile Include="PropStore\ViewManagers\ViewManagerProviderKey.cs" />
@@ -119,7 +120,7 @@
     <Compile Include="PropInterfaces\IProvideADataSourceProvider.cs" />
     <Compile Include="PropInterfaces\IProvideAView.cs" />
     <Compile Include="PropStorageStrategyEnum.cs" />
-    <Compile Include="PropStore\SimplePropStoreServiceEP.cs" />
+    <Compile Include="PropStore\SimplePropStoreServiceEP_NotUsed.cs" />
     <Compile Include="PropStore\Subscriptions\ParentNCSubscriberCollection.cs" />
     <Compile Include="PropStore\Subscriptions\ParentNCSubscription.cs" />
     <Compile Include="PropStore\Subscriptions\ParentNCSubscriptionRequest.cs" />

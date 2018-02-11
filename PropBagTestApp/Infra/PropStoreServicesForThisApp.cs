@@ -49,17 +49,23 @@ namespace PropBagTestApp.Infra
 
         private static PSServiceSingletonProviderInterface BuildPropStoreService(int maxNumberOfProperties)
         {
+            PSServiceSingletonProviderInterface result;
+
             ITypeDescBasedTConverterCache typeDescBasedTConverterCache = new TypeDescBasedTConverterCache();
             IProvideDelegateCaches delegateCacheProvider = new SimpleDelegateCacheProvider(typeof(PropBag), typeof(APFGenericMethodTemplates));
 
             IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider = new SimpleHandlerDispatchDelegateCacheProvider();
-            PSAccessServiceCreatorInterface propStoreEntryPoint = new SimplePropStoreServiceEP(maxNumberOfProperties, handlerDispatchDelegateCacheProvider);
 
-            PSServiceSingletonProviderInterface result = new PropStoreServices
-                (typeDescBasedTConverterCache,
-                delegateCacheProvider,
-                handlerDispatchDelegateCacheProvider,
-                propStoreEntryPoint);
+            using (PropStoreServiceCreatorFactory epCreator = new PropStoreServiceCreatorFactory())
+            {
+                PSAccessServiceCreatorInterface propStoreEntryPoint = epCreator.GetPropStoreEntryPoint(maxNumberOfProperties, handlerDispatchDelegateCacheProvider);
+
+                result = new PropStoreServices
+                    (typeDescBasedTConverterCache,
+                    delegateCacheProvider,
+                    handlerDispatchDelegateCacheProvider,
+                    propStoreEntryPoint);
+            }
 
             return result;
         }

@@ -55,9 +55,14 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 {
                     IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider = new SimpleHandlerDispatchDelegateCacheProvider();
 
-                    _storeAccessCreator = new SimplePropStoreServiceEP(
-                        MAX_NUMBER_OF_PROPERTIES,
-                        handlerDispatchDelegateCacheProvider);
+                    using (PropStoreServiceCreatorFactory epCreator = new PropStoreServiceCreatorFactory())
+                    {
+                        _storeAccessCreator = epCreator.GetPropStoreEntryPoint(MAX_NUMBER_OF_PROPERTIES, handlerDispatchDelegateCacheProvider);
+                    }
+
+                    //_storeAccessCreator = new SimplePropStoreServiceEP(
+                    //    MAX_NUMBER_OF_PROPERTIES,
+                    //    handlerDispatchDelegateCacheProvider);
                 }
                 return _storeAccessCreator;
             }

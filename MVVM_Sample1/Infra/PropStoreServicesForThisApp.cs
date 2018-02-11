@@ -61,22 +61,22 @@ namespace MVVMApplication.Infra
 
         static PropStoreServicesForThisApp() 
         {
-            _mct.Measure("Begin PropStoreServicesForThisApp");
+                _mct.Measure("Begin PropStoreServicesForThisApp");
 
             Person p = new Person();
-            _mct.MeasureAndReport("New Person");
+                _mct.MeasureAndReport("New Person");
 
             PropStoreServices = BuildPropStoreService(MAX_NUMBER_OF_PROPERTIES);
-            _mct.MeasureAndReport("After BuildPropStoreService");
+                _mct.MeasureAndReport("After BuildPropStoreService");
 
             IViewModelActivator vmActivator = new SimpleViewModelActivator();
-            _mct.MeasureAndReport("After new SimpleViewModelActivator");
+                _mct.MeasureAndReport("After new SimpleViewModelActivator");
 
             AutoMapperProvider = GetAutoMapperProvider(vmActivator, PropStoreServices.PropStoreEntryPoint);
-            _mct.MeasureAndReport("After GetAutoMapperProvider");
+                _mct.MeasureAndReport("After GetAutoMapperProvider");
 
             DefaultPropFactory = BuildDefaultPropFactory(PropStoreServices, AutoMapperProvider);
-            _mct.MeasureAndReport("After new BuildDefaultPropFactory");
+                _mct.MeasureAndReport("After new BuildDefaultPropFactory");
 
             //IPropBagTemplateProvider propBagTemplateProvider = new PropBagTemplateProvider(Application.Current.Resources, null);
             //_mct.MeasureAndReport("After new PropBagTemplateProvider");
@@ -91,7 +91,7 @@ namespace MVVMApplication.Infra
             PropModelProvider = GetPropModelProvider(vmActivator, ConfigPackageNameSuffix);
 
             ViewModelHelper = new ViewModelHelper(PropModelProvider, vmActivator, PropStoreServices.PropStoreEntryPoint);
-            _mct.MeasureAndReport("After new ViewModelHelper");
+                _mct.MeasureAndReport("After new ViewModelHelper");
         }
 
         private static IProvidePropModels GetPropModelProvider(IViewModelActivator vmActivator, string configPackageNameSuffix)
@@ -110,6 +110,8 @@ namespace MVVMApplication.Infra
 
         private static PSServiceSingletonProviderInterface BuildPropStoreService(int maxNumberOfProperties)
         {
+            PSServiceSingletonProviderInterface result;
+
             ITypeDescBasedTConverterCache typeDescBasedTConverterCache = new TypeDescBasedTConverterCache();
             _mct.MeasureAndReport("After new TypeDescBasedTConverterCache");
 
@@ -119,15 +121,19 @@ namespace MVVMApplication.Infra
             IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider = new SimpleHandlerDispatchDelegateCacheProvider();
             _mct.MeasureAndReport("After new SimpleHandlerDispatchDelegateCacheProvider");
 
-            PSAccessServiceCreatorInterface propStoreEntryPoint = new SimplePropStoreServiceEP(maxNumberOfProperties, handlerDispatchDelegateCacheProvider);
-            _mct.MeasureAndReport("After new SimplePropStoreServiceEP");
+            using (PropStoreServiceCreatorFactory epCreator = new PropStoreServiceCreatorFactory())
+            {
+                PSAccessServiceCreatorInterface propStoreEntryPoint = epCreator.GetPropStoreEntryPoint(maxNumberOfProperties, handlerDispatchDelegateCacheProvider);
 
+                result = new PropStoreServices
+                    (typeDescBasedTConverterCache,
+                    delegateCacheProvider,
+                    handlerDispatchDelegateCacheProvider,
+                    propStoreEntryPoint);
+            }
 
-            PSServiceSingletonProviderInterface result = new PropStoreServices
-                (typeDescBasedTConverterCache,
-                delegateCacheProvider,
-                handlerDispatchDelegateCacheProvider,
-                propStoreEntryPoint);
+            //    PSAccessServiceCreatorInterface propStoreEntryPoint = new SimplePropStoreServiceEP(maxNumberOfProperties, handlerDispatchDelegateCacheProvider);
+            //_mct.MeasureAndReport("After new SimplePropStoreServiceEP");
 
             _mct.MeasureAndReport("After New PropStoreServices");
 

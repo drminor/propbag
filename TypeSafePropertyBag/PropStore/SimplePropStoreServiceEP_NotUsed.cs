@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DRM.TypeSafePropertyBag
+namespace DRM.TypeSafePropertyBag.Unused
 {
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
     using PSAccessServiceProviderInterface = IProvidePropStoreAccessService<UInt32, String>;
