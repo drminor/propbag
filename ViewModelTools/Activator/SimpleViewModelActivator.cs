@@ -17,14 +17,9 @@ namespace DRM.PropBag.ViewModelTools
 
         #region IViewModelActivator Interface
 
-        public bool HasPropModelLookupService => false;
-
         // BaseType + PropModel (BaseType known at compile time.)
         public object GetNewViewModel<BT>(IPropModel propModel, PSAccessServiceCreatorInterface storeAccessCreator, IPropFactory propFactory = null, string fullClassName = null) where BT : class, IPropBag
         {
-            //object[] parameters = new object[] { propModel, storeAccessCreator, propFactory, fullClassName };
-            //object result = Activator.CreateInstance(typeof(BT), args: parameters);
-
             object result = GetNewViewModel(propModel, storeAccessCreator, typeof(BT), propFactory, fullClassName);
             return result;
         }
@@ -43,11 +38,7 @@ namespace DRM.PropBag.ViewModelTools
 
         public object GetNewViewModel<BT>(IPropBag copySource) where BT : class, IPropBag
         {
-            //object[] parameters = new object[] { copySource };
-            //object result = Activator.CreateInstance(typeof(BT), args: parameters);
-
             object result = GetNewViewModel(typeof(BT), copySource);
-
             return result;
         }
 

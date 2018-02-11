@@ -7,8 +7,6 @@ namespace DRM.PropBag.ViewModelTools
 
     public interface IViewModelActivator
     {
-        bool HasPropModelLookupService { get; }
-
         // Create new Type that is derived from a Type known only at run time.
         //object GetNewViewModel(string resourceKey, Type typeToCreate, string fullClassName = null, IPropFactory propFactory = null);
         object GetNewViewModel(IPropModel propModel, PSAccessServiceCreatorInterface storeAccessCreator, Type typeToCreate, IPropFactory propFactory = null, string fullClassName = null);
