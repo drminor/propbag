@@ -213,22 +213,6 @@ namespace DRM.PropBagControlsWPF
             }
         }
 
-        //// TODO: need to create a typeconverter for AbstractPropFactory.
-        //static DependencyProperty PropFactoryProperty =
-        //    DependencyProperty.Register("PropFactory", typeof(IPropFactory), typeof(PropBagTemplate), new PropertyMetadata(null));
-
-        //public IPropFactory PropFactory
-        //{
-        //    get
-        //    {
-        //        return (IPropFactory)this.GetValue(PropFactoryProperty);
-        //    }
-        //    set
-        //    {
-        //        this.SetValue(PropFactoryProperty, value);
-        //    }
-        //}
-
         public static readonly DependencyProperty AutoMapperServiceProviderTypeProperty =
             DependencyProperty.Register("AutoMapperServiceProviderType", typeof(Type), typeof(PropBagTemplate));
 
@@ -401,11 +385,8 @@ namespace DRM.PropBagControlsWPF
             }
             else
             {
-                object test = Activator.CreateInstance(propFactoryProviderType, propStoreServices, autoMapperProvider);
-
-                IProvideAPropFactoryCreator funcProvider = (IProvideAPropFactoryCreator)test;
-                //IProvideAPropFactoryCreator funcProvider = (IProvideAPropFactoryCreator)Activator.CreateInstance(propFactoryProviderType, cArgType);
-
+                object factoryCreator = Activator.CreateInstance(propFactoryProviderType, propStoreServices, autoMapperProvider);
+                IProvideAPropFactoryCreator funcProvider = (IProvideAPropFactoryCreator)factoryCreator;
                 Func<IPropFactory> result = funcProvider.GetNewPropFactory;
                 return result;
             }
