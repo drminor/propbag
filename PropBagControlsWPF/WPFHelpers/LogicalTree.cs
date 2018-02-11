@@ -7,7 +7,7 @@ using System.Windows.Data;
 
 namespace DRM.PropBagControlsWPF.WPFHelpers
 {
-    public class LogicalTree
+    internal class LogicalTree
     {
         #region Get DataContext from FrameworkElement
 
