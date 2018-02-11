@@ -36,7 +36,7 @@ namespace DRM.PropBagWPF
         public object GetNewViewModel(string resourceKey)
         {
             IPropModel pm = PropModelProvider.GetPropModel(resourceKey);
-            object result = GetNewViewModel(pm, pm.PropFactory);
+            object result = GetNewViewModel(pm, null);
             return result;
         }
 
@@ -48,11 +48,6 @@ namespace DRM.PropBagWPF
         /// <returns></returns>
         public object GetNewViewModel(string resourceKey, IPropFactory propFactory)
         {
-            if(propFactory == null)
-            {
-                throw new ArgumentNullException(nameof(propFactory));
-            }
-
             IPropModel pm = PropModelProvider.GetPropModel(resourceKey);
             object result = GetNewViewModel(pm, propFactory);
             return result;
@@ -65,7 +60,7 @@ namespace DRM.PropBagWPF
                 propModel: pm,
                 storeAccessCreator: _storeAccessCreator,
                 typeToCreate: pm.TypeToCreate,
-                propFactory: propFactory,
+                propFactory: propFactory ?? pm.PropFactory,
                 fullClassName: pm.FullClassName
                 );
 
