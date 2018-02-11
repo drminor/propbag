@@ -7,12 +7,11 @@ using System.Windows.Data;
 
 namespace DRM.PropBagWPF
 {
-    public class ViewProvider : IProvideAView, IProvideACollectionViewSource, INotifyItemEndEdit, INotifyCollectionChanged
+    public class ViewProvider : IProvideAView, /*IProvideACollectionViewSource,*/ INotifyItemEndEdit, INotifyCollectionChanged
     {
         #region Private Members
 
         private readonly CollectionViewSource _viewSource;
-
 
         #endregion
 
@@ -155,11 +154,11 @@ namespace DRM.PropBagWPF
 
         #endregion
 
-        #region IProvideACollectionViewSource Implementation
+        //#region IProvideACollectionViewSource Implementation
 
-        public CollectionViewSource /*IProvideACollectionViewSource.*/CollectionViewSource => _viewSource;
+        //public CollectionViewSource /*IProvideACollectionViewSource.*/CollectionViewSource => _viewSource;
 
-        #endregion
+        //#endregion
 
         #region Private Methods
 
