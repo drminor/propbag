@@ -159,6 +159,21 @@ namespace DRM.PropBag
 
         #region Constructor
 
+        public PropBag(IPropModel propModel, PSAccessServiceCreatorInterface storeAcessorCreator)
+        {
+                long memUsedSoFar = _memConsumptionTracker.UsedSoFar;
+
+            BasicConstruction(propModel.TypeSafetyMode, propModel.PropFactory, propModel.FullClassName);
+
+            _ourStoreAccessor = storeAcessorCreator.CreatePropStoreService(this);
+                _memConsumptionTracker.MeasureAndReport("CreatePropStoreService", null);
+
+            _propItemSet_Handle = Hydrate(propModel);
+                _memConsumptionTracker.Report(memUsedSoFar, "---- AfterHydrate.");
+
+            //int testc = _ourStoreAccessor.PropertyCount;
+        }
+
         /// <summary>
         /// Creates a new PropBag using the specified PropModel and Property Store Access Creator.
         /// </summary>
@@ -168,7 +183,6 @@ namespace DRM.PropBag
         /// <param name="propFactory">The PropFactory to use instead of the one specified by the PropModel.</param>
         /// <param name="fullClassName">The namespace and class name to use instead of the one specified by the PropMode.</param>
         public PropBag(IPropModel propModel, PSAccessServiceCreatorInterface storeAcessorCreator, IPropFactory propFactory = null, string fullClassName = null)
-            //: this(propModel.TypeSafetyMode, storeAcessorCreator, propModel.PropFactory ?? propFactory, fullClassName ?? propModel.FullClassName)
         {
                 long memUsedSoFar = _memConsumptionTracker.UsedSoFar;
 
@@ -188,7 +202,6 @@ namespace DRM.PropBag
 
         // TODO: This assumes that all IPropBag implementations use PropBag.
         public PropBag(IPropBag copySource)
-            //: this(copySource, ((PropBag)copySource)._ourStoreAccessor, ((PropBag)copySource)._propFactory)
         {
             IPropFactory propFactory = ((PropBag)copySource)._propFactory;
             BasicConstruction(copySource.TypeSafetyMode, propFactory, copySource.FullClassName);
@@ -196,13 +209,6 @@ namespace DRM.PropBag
             PSAccessServiceInterface storeAccessor = ((PropBag)copySource)._ourStoreAccessor;
             _ourStoreAccessor = CloneProps(copySource, storeAccessor);
         }
-
-        //internal PropBag(IPropBag copySource, PSAccessServiceInterface storeAccessor, IPropFactory propFactory)
-        //{
-        //    BasicConstruction(copySource.TypeSafetyMode, propFactory, copySource.FullClassName);
-
-        //    _ourStoreAccessor = CloneProps(copySource, storeAccessor);
-        //}
 
         protected PropBag(PropBagTypeSafetyMode typeSafetyMode, PSAccessServiceCreatorInterface storeAcessorCreator, IPropFactory propFactory, string fullClassName)
         {
