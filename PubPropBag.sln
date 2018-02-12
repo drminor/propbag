@@ -25,6 +25,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentat
 		Documentaton\DataTable stuff for PropBag.txt = Documentaton\DataTable stuff for PropBag.txt
 		Documentaton\Dependencies.md = Documentaton\Dependencies.md
 		Documentaton\Documentation.md = Documentaton\Documentation.md
+		Documentaton\MemoryConsumptionReport.docx = Documentaton\MemoryConsumptionReport.docx
 		Documentaton\TopLevelObjectReferences.md = Documentaton\TopLevelObjectReferences.md
 	EndProjectSection
 EndProject
@@ -51,6 +52,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MVVM_Sample1", "MVVM_Sample1\MVVM_Sample1.csproj", "{6BB7FBDD-E030-4803-86DD-68619C6DB7A0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ObjectSizeDiagnostics", "ObjectSizeDiagnostics\ObjectSizeDiagnostics.csproj", "{9B18F82D-3ED9-49E0-9EE3-CFBFC3AF9D9C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PropBagLib.Tests.PropBagTemplates", "PropBagLib.Tests.PropBagTemplates\PropBagLib.Tests.PropBagTemplates.csproj", "{1E9880ED-0934-4134-A9B6-F912BD8603EB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -108,6 +111,10 @@ Global
 		{9B18F82D-3ED9-49E0-9EE3-CFBFC3AF9D9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9B18F82D-3ED9-49E0-9EE3-CFBFC3AF9D9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9B18F82D-3ED9-49E0-9EE3-CFBFC3AF9D9C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1E9880ED-0934-4134-A9B6-F912BD8603EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E9880ED-0934-4134-A9B6-F912BD8603EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E9880ED-0934-4134-A9B6-F912BD8603EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E9880ED-0934-4134-A9B6-F912BD8603EB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
