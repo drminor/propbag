@@ -6,7 +6,7 @@ namespace MVVMApplication.ViewModel
 {
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
 
-    public partial class PersonCollectionViewModel : PropBag
+    public class PersonCollectionViewModel : PropBag
     {
         public PersonCollectionViewModel(PropModel pm, PSAccessServiceCreatorInterface storeAccessCreator, IPropFactory propFactory, string fullClassName)
             : base(pm, storeAccessCreator, propFactory, fullClassName)

@@ -9,7 +9,7 @@ namespace MVVMApplication.ViewModel
 {
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
 
-    public partial class PersonEditorViewModel : PropBag
+    public class PersonEditorViewModel : PropBag
     {
         //int ITEMS_PER_PAGE = 10;
         string PROP_NAME = "PersonListView";

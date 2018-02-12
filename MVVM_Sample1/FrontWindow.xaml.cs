@@ -40,12 +40,12 @@ namespace MVVMApplication
         private void PropBagProxyEmit_Click(object sender, RoutedEventArgs e)
         {
             _mct.Enabled = true;
-            _mct.Compact("Before Starting MainWindow (EmitProxy)");
+            _mct.CompactAndMeasure("Before Starting MainWindow (EmitProxy)");
 
             ShowMain("Emit_Proxy");
 
             _mct.MeasureAndReport("The Main Window has been closed. Before Compaction.", "FrontWindow");
-            _mct.Compact();
+            _mct.CompactAndMeasure();
             _mct.MeasureAndReport("The Main Window has been closed. After Compaction.", "FrontWindow");
         }
 
