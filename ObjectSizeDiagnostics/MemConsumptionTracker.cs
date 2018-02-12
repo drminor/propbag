@@ -1,27 +1,37 @@
 ﻿using System;
-using System.Threading;
+using System.Diagnostics;
 
 namespace ObjectSizeDiagnostics
 {
     public class MemConsumptionTracker
     {
+        const string DEFAULT_MSG_PREFIX = "MT";
+
+        string _msgPrefix;
         bool _enabled;
         long _lastKnownTotalMemory;
 
         #region Constructor
 
-        public MemConsumptionTracker() : this(true, 0)
-        {
-        }
+        public MemConsumptionTracker() : this(DEFAULT_MSG_PREFIX, null, true, 0) { }
 
-        public MemConsumptionTracker(bool enabled) : this(enabled, 0)
-        {
-        }
+        public MemConsumptionTracker(bool enabled) : this(DEFAULT_MSG_PREFIX, null, enabled, 0) { }
 
-        public MemConsumptionTracker(bool enabled, long memUsedSoFar) 
+        public MemConsumptionTracker(string msgPrefix, string message) : this(msgPrefix, message, true, 0) { }
+
+        public MemConsumptionTracker(string msgPrefix, bool enabled) : this(msgPrefix, null, enabled, 0) { }
+
+        public MemConsumptionTracker(string msgPrefix, string message, bool enabled) : this(msgPrefix, message, enabled, 0) { }
+
+        public MemConsumptionTracker(string msgPrefix, string message, bool enabled, long memUsedSoFar) 
         {
+            _msgPrefix = msgPrefix;
             Enabled = enabled;
             UsedSoFar = memUsedSoFar;
+
+            if (!Enabled) return;
+
+            WriteMessage(_msgPrefix, message);
         }
 
         #endregion
@@ -62,14 +72,11 @@ namespace ObjectSizeDiagnostics
         public long Measure(string message = null)
         {
             if (!Enabled) return 0;
+
             GC.WaitForPendingFinalizers();
 
             _lastKnownTotalMemory = GC.GetTotalMemory(true);
-
-            if(message != null)
-            {
-                System.Diagnostics.Debug.WriteLine($"MT: {message}.");
-            }
+            WriteMessage(_msgPrefix, message);
             return UsedSoFar;
         }
 
@@ -91,8 +98,12 @@ namespace ObjectSizeDiagnostics
 
             _lastKnownTotalMemory = curBytes;
 
-            System.Diagnostics.Debug.Write($"MT: {nameOfOperation} used {usedSinceLastCheck}; Total: {UsedSoFar}");
-            System.Diagnostics.Debug.WriteLine(message != null ? $" ({message})." : null);
+
+            nameOfOperation = RemoveTerminatingPeriod(nameOfOperation);
+
+            Debug.Write($"{_msgPrefix}: {nameOfOperation} used {usedSinceLastCheck}; total: {UsedSoFar}  ");
+            CompleteMsgOutput(message);
+
             return UsedSoFar;
         }
 
@@ -108,18 +119,68 @@ namespace ObjectSizeDiagnostics
         {
             if (!Enabled) return 0;
 
-            System.Diagnostics.Debug.WriteLine($"--MT: {nameOfOperation} used {UsedSoFar - previousTotal}; Total: {UsedSoFar}");
-            System.Diagnostics.Debug.WriteLine(message != null ? $" ({message})." : null);
+            nameOfOperation = RemoveTerminatingPeriod(nameOfOperation);
+
+            Debug.Write($"{_msgPrefix}: ---- {nameOfOperation} used {UsedSoFar - previousTotal}; total: {UsedSoFar}  ");
+            CompleteMsgOutput(message);
 
             return UsedSoFar;
         }
 
-        public long Compact(string message = null)
+        public long CompactAndMeasure(string message = null)
         {
             if (!Enabled) return 0;
 
             GC.WaitForFullGCComplete();
             return Measure(message);
+        }
+
+        public long CompactMeasureAndReport(string nameOfOperation, string message = null)
+        {
+            if (!Enabled) return 0;
+
+            GC.WaitForFullGCComplete();
+            return MeasureAndReport(nameOfOperation, message);
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        void WriteMessage(string msgPrefix, string message)
+        {
+            if (message != null)
+            {
+                if(_msgPrefix == null)
+                {
+                    Debug.WriteLine(message);
+                }
+                else
+                {
+                    Debug.WriteLine(_msgPrefix + ": " + message);
+                }
+            }
+        }
+
+        void CompleteMsgOutput(string message)
+        {
+            if (message != null)
+            {
+                Debug.WriteLine(message);
+            }
+            else
+            {
+                Debug.WriteLine(string.Empty);
+            }
+        }
+
+        string RemoveTerminatingPeriod(string x)
+        {
+            if (x.TrimEnd().EndsWith("."))
+            {
+                x = x.TrimEnd().Remove(x.Length - 1);
+            }
+            return x;
         }
 
         #endregion
