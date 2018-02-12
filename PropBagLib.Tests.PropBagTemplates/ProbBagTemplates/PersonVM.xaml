@@ -1,0 +1,56 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:mod="clr-namespace:PropBagLib.Tests.BusinessModel;assembly=PropBag.Test"
+                    xmlns:vmod="clr-namespace:PropBagLib.Tests.SpecBasedVMTests.BasicVM.ViewModels;assembly=PropBag.Test"
+                    xmlns:pb="clr-namespace:DRM.PropBagControlsWPF;assembly=PropBag.WPFControls"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <!--<pb:MapperRequestTemplate x:Key="PersonVM_Mapper_Extra_Members"
+                      SourceType="{x:Type mod:Person}"
+                      DestinationPropModelKey="PersonVM"
+                      ConfigPackageName="Extra_Members" />
+
+    <pb:MapperRequestTemplate x:Key="PersonVM_Mapper_Emit_Proxy"
+                      SourceType="{x:Type mod:Person}"
+                      DestinationPropModelKey="PersonVM"
+                      ConfigPackageName="Emit_Proxy" />-->
+
+    <pb:PropBagTemplate x:Key="PersonVM"
+                        ClassName="PersonVM"
+                        DeriveFromClassMode="PropBag"
+                        TargetType="{x:Type vmod:PersonVM}"
+                        TypeSafetyMode="Tight"
+                        OutPutNameSpace="MVVMApplication.ViewModel">
+        
+        <pb:PropBagTemplate.Namespaces>
+            <pb:NamespaceItem Namespace="MVVMApplication.Infra"/>
+            <pb:NamespaceItem Namespace="MVVMApplication.Model"/>
+        </pb:PropBagTemplate.Namespaces>
+
+        <pb:PropBagTemplate.Props>
+
+            <pb:PropItem PropertyName="Id" PropertyType="sys:Int32">
+                <pb:InitialValueField SetToDefault="True"/>
+            </pb:PropItem>
+
+            <pb:PropItem PropertyName="FirstName" PropertyType="sys:String">
+                <pb:InitialValueField SetToDefault="True"/>
+            </pb:PropItem>
+
+            <pb:PropItem PropertyName="LastName" PropertyType="sys:String">
+                <pb:InitialValueField SetToDefault="True"/>
+            </pb:PropItem>
+
+            <pb:PropItem PropertyName="CityOfResidence" PropertyType="sys:String">
+                <pb:InitialValueField SetToDefault="True"/>
+            </pb:PropItem>
+
+            <pb:PropItem PropertyName="Profession" PropertyType="mod:Profession">
+                <pb:InitialValueField SetToDefault="True"/>
+            </pb:PropItem>
+            
+
+        </pb:PropBagTemplate.Props>
+    </pb:PropBagTemplate>
+    
+</ResourceDictionary>

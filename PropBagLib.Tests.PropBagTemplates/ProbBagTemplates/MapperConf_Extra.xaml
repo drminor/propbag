@@ -1,0 +1,12 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:mod="clr-namespace:PropBagLib.Tests.BusinessModel;assembly=PropBag.Test"
+                    xmlns:pb="clr-namespace:DRM.PropBagControlsWPF;assembly=PropBag.WPFControls">
+
+    <pb:MapperRequestTemplate x:Key="PersonVM_Mapper"
+                      SourceType="{x:Type mod:Person}"
+                      DestinationPropModelKey="PersonVM"
+                      ConfigPackageName="Extra_Members"
+    />
+        
+</ResourceDictionary>
