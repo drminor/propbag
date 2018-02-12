@@ -61,7 +61,6 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-
         // TODO: Consider using instance methods instead of static methods. This should save a few hundred nano seconds off of the time required to make each call.
         #region Internal Delegate Builders
 

@@ -6,17 +6,17 @@ using System.Threading;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
-    public class SimpleAutoMapperProvider : IProvideAutoMappers
+    public class SimpleAutoMapperProvider : IProvideAutoMappers, IDisposable
     {
         #region Private Members
 
-        string NO_PROPMODEL_LOOKUP_SERVICES = $"The {nameof(SimpleViewModelActivator)} has no PropModelProvider." +
-            $"All calls must provide a PropModel.";
+        //string NO_PROPMODEL_LOOKUP_SERVICES = $"The {nameof(SimpleViewModelActivator)} has no PropModelProvider." +
+        //    $"All calls must provide a PropModel.";
 
         IMapTypeDefinitionProvider MapTypeDefinitionProvider { get; }
         ICachePropBagMappers MappersCachingService { get; }
         IPropBagMapperBuilderProvider MapperBuilderProvider { get; }
-        IProvidePropModels PropModelProvider { get; }
+        //IProvidePropModels PropModelProvider { get; }
 
         #endregion
 
@@ -28,50 +28,50 @@ namespace DRM.PropBag.AutoMapperSupport
             (
             IMapTypeDefinitionProvider mapTypeDefinitionProvider,
             ICachePropBagMappers mappersCachingService,
-            IPropBagMapperBuilderProvider mapperBuilderProvider,
-            IProvidePropModels propModelProvider = null
+            IPropBagMapperBuilderProvider mapperBuilderProvider //,
+            //IProvidePropModels propModelProvider = null
             )
         {
             MapTypeDefinitionProvider = mapTypeDefinitionProvider ?? throw new ArgumentNullException(nameof(mapTypeDefinitionProvider));
             MappersCachingService = mappersCachingService ?? throw new ArgumentNullException(nameof(mappersCachingService));
             MapperBuilderProvider = mapperBuilderProvider ?? throw new ArgumentNullException(nameof(mapperBuilderProvider));
-            PropModelProvider = propModelProvider;
+            //PropModelProvider = propModelProvider;
 
-            if (!HasPropModelLookupService) System.Diagnostics.Debug.WriteLine(NO_PROPMODEL_LOOKUP_SERVICES);
+            //if (!HasPropModelLookupService) System.Diagnostics.Debug.WriteLine(NO_PROPMODEL_LOOKUP_SERVICES);
         }
 
         #endregion
 
         #region Public Properties
-        public bool HasPropModelLookupService => (PropModelProvider != null);
+        //public bool HasPropModelLookupService => (PropModelProvider != null);
         #endregion
 
         #region Public Methods
 
-        public IPropBagMapperKeyGen RegisterMapperRequest(MapperRequest mr)
-        {
-            //PropModel propModel = PropModelProvider.GetPropModel(mr.PropModelResourceKey);
-            //Type targetType = propModel.TargetType;
+        //public IPropBagMapperKeyGen RegisterMapperRequest(MapperRequest mr)
+        //{
+        //    //PropModel propModel = PropModelProvider.GetPropModel(mr.PropModelResourceKey);
+        //    //Type targetType = propModel.TargetType;
 
-            //RegisterMapperRequestDelegate x = GetTheRegisterMapperRequestDelegate(mr.SourceType, targetType);
-            //IPropBagMapperKeyGen result = x(propModel, targetType, mr.ConfigPackageName, this);
+        //    //RegisterMapperRequestDelegate x = GetTheRegisterMapperRequestDelegate(mr.SourceType, targetType);
+        //    //IPropBagMapperKeyGen result = x(propModel, targetType, mr.ConfigPackageName, this);
 
-            IPropBagMapperKeyGen result = RegisterMapperRequest(mr.PropModelResourceKey, mr.SourceType, mr.ConfigPackageName);
-            return result;
-        }
+        //    IPropBagMapperKeyGen result = RegisterMapperRequest(mr.PropModelResourceKey, mr.SourceType, mr.ConfigPackageName);
+        //    return result;
+        //}
 
-        public IPropBagMapperKeyGen RegisterMapperRequest(string propModelResourceKey, Type sourceType, string configPackageName)
-        {
-            IPropModel propModel = PropModelProvider.GetPropModel(propModelResourceKey);
-            //Type targetType = propModel.TargetType;
+        //public IPropBagMapperKeyGen RegisterMapperRequest(string propModelResourceKey, Type sourceType, string configPackageName)
+        //{
+        //    IPropModel propModel = PropModelProvider.GetPropModel(propModelResourceKey);
+        //    //Type targetType = propModel.TargetType;
 
-            //RegisterMapperRequestDelegate x = GetTheRegisterMapperRequestDelegate(sourceType, targetType);
-            //IPropBagMapperKeyGen result = x(propModel, targetType, configPackageName, this);
+        //    //RegisterMapperRequestDelegate x = GetTheRegisterMapperRequestDelegate(sourceType, targetType);
+        //    //IPropBagMapperKeyGen result = x(propModel, targetType, configPackageName, this);
 
-            IPropBagMapperKeyGen result = RegisterMapperRequest(propModel, sourceType, configPackageName);
+        //    IPropBagMapperKeyGen result = RegisterMapperRequest(propModel, sourceType, configPackageName);
 
-            return result;
-        }
+        //    return result;
+        //}
 
         public IPropBagMapperKeyGen RegisterMapperRequest(IPropModel propModel, Type sourceType, string configPackageName)
         {
@@ -83,29 +83,29 @@ namespace DRM.PropBag.AutoMapperSupport
             return result;
         }
 
-        // TODO: Remove dependency on PropModelProvider and make all calls supply a PropModel. 
-        public IPropBagMapperKey<TSource, TDestination> RegisterMapperRequest<TSource, TDestination>
-            (
-            string resourceKey,
-            Type targetType,
-            string configPackageName,
-            IHaveAMapperConfigurationStep configStarterForThisRequest = null,
-            IPropFactory propFactory = null
-            ) where TDestination : class, IPropBag
-        {
-            IPropModel propModel = GetPropModel(resourceKey);
+        //// TODO: Remove dependency on PropModelProvider and make all calls supply a PropModel. 
+        //public IPropBagMapperKey<TSource, TDestination> RegisterMapperRequest<TSource, TDestination>
+        //    (
+        //    string resourceKey,
+        //    Type targetType,
+        //    string configPackageName,
+        //    IHaveAMapperConfigurationStep configStarterForThisRequest = null,
+        //    IPropFactory propFactory = null
+        //    ) where TDestination : class, IPropBag
+        //{
+        //    IPropModel propModel = GetPropModel(resourceKey);
 
-            IPropBagMapperKey<TSource, TDestination> typedMapperRequest =
-                RegisterMapperRequest<TSource, TDestination>
-                (
-                    propModel,
-                    targetType,
-                    configPackageName,
-                    configStarterForThisRequest,
-                    propFactory);
+        //    IPropBagMapperKey<TSource, TDestination> typedMapperRequest =
+        //        RegisterMapperRequest<TSource, TDestination>
+        //        (
+        //            propModel,
+        //            targetType,
+        //            configPackageName,
+        //            configStarterForThisRequest,
+        //            propFactory);
 
-            return typedMapperRequest;
-        }
+        //    return typedMapperRequest;
+        //}
 
         // TODO: Consider adding a method that takes a IConfigureAMapper instead of a configPackageName.
         public IPropBagMapperKey<TSource, TDestination> RegisterMapperRequest<TSource, TDestination>
@@ -174,9 +174,20 @@ namespace DRM.PropBag.AutoMapperSupport
             return MappersCachingService.GetMapper(mapperRequest);
         }
 
-        public void Clear()
+        public long ClearEmittedTypeCache()
         {
-            MappersCachingService.Clear();
+            return MapperBuilderProvider.ClearTypeCache();
+        }
+
+        public long ClearMappersCache()
+        {
+            return MappersCachingService.ClearMappersCache();
+        }
+
+        public void ClearCaches()
+        {
+            MappersCachingService.ClearMappersCache();
+            MapperBuilderProvider.ClearTypeCache();
         }
 
         #endregion
@@ -202,16 +213,16 @@ namespace DRM.PropBag.AutoMapperSupport
             }
         }
 
-        private IPropModel GetPropModel(string resourceKey, IPropFactory propFactory = null)
-        {
-            if (!HasPropModelLookupService)
-            {
-                throw new InvalidOperationException(NO_PROPMODEL_LOOKUP_SERVICES);
-            }
+        //private IPropModel GetPropModel(string resourceKey, IPropFactory propFactory = null)
+        //{
+        //    if (!HasPropModelLookupService)
+        //    {
+        //        throw new InvalidOperationException(NO_PROPMODEL_LOOKUP_SERVICES);
+        //    }
 
-            IPropModel propModel = PropModelProvider.GetPropModel(resourceKey, propFactory);
-            return propModel;
-        }
+        //    IPropModel propModel = PropModelProvider.GetPropModel(resourceKey, propFactory);
+        //    return propModel;
+        //}
 
         #endregion
 
@@ -263,6 +274,60 @@ namespace DRM.PropBag.AutoMapperSupport
 
                 return result;
             }
+        }
+
+        #endregion
+
+        #region IDisposable Support
+
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // Dispose managed state (managed objects).
+                    ClearCaches();
+
+                    if(MapTypeDefinitionProvider is IDisposable disable)
+                    {
+                        disable.Dispose();
+                    }
+
+                    if(MappersCachingService is IDisposable disable2)
+                    {
+                        disable2.Dispose();
+                    }
+
+
+                    if(MapperBuilderProvider is IDisposable disable3)
+                    {
+                        disable3.Dispose();
+                    }
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        // ~Temp() {
+        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        //   Dispose(false);
+        // }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            // GC.SuppressFinalize(this);
         }
 
         #endregion

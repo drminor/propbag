@@ -40,7 +40,7 @@ namespace PropBagTestApp.Infra
 
             IViewModelActivator vmActivator = new SimpleViewModelActivator();
 
-            PropModelProvider = new PropModelProvider(propBagTemplateProvider, mapperRequestProvider, DefaultPropFactory, vmActivator, PropStoreServices.PropStoreEntryPoint);
+            PropModelProvider = new SimplePropModelProvider(propBagTemplateProvider, mapperRequestProvider, DefaultPropFactory, vmActivator, PropStoreServices.PropStoreEntryPoint);
 
             ViewModelHelper = new ViewModelHelper(PropModelProvider, vmActivator, PropStoreServices.PropStoreEntryPoint);
 
@@ -101,8 +101,7 @@ namespace PropBagTestApp.Infra
                 (
                 mapTypeDefinitionProvider: mapTypeDefinitionProvider,
                 mappersCachingService: mappersCachingService,
-                mapperBuilderProvider: propBagMapperBuilderProvider,
-                propModelProvider: propModelProvider
+                mapperBuilderProvider: propBagMapperBuilderProvider/*, propModelProvider: null*/
                 );
 
             return autoMapperProvider;

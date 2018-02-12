@@ -11,7 +11,7 @@ using ObjectSizeDiagnostics;
 
 namespace DRM.PropBag.Caches
 {
-    public class SimpleDelegateCacheProvider : IProvideDelegateCaches
+    public class SimpleDelegateCacheProvider : IProvideDelegateCaches, IDisposable
     {
         #region Public Properties
 
@@ -50,8 +50,8 @@ namespace DRM.PropBag.Caches
 
         public SimpleDelegateCacheProvider(Type propBagType, Type propCreatorType)
         {
-            long startBytes = System.GC.GetTotalMemory(true);
-            long curBytes = startBytes;
+            //long startBytes = System.GC.GetTotalMemory(true);
+            //long curBytes = startBytes;
 
 
             #region Method on PropBag (DoSetDelegate, CVPropFromDsDelegate, and CViewManagerFromDsDelegate
@@ -59,17 +59,17 @@ namespace DRM.PropBag.Caches
             // Changed to use Static Method. (DRM 2/6/2018)
             // DoSet (i.e., update) a PropItem's value. 
             MethodInfo doSetMethodInfo = propBagType.GetMethod("DoSetBridge", BindingFlags.Static | BindingFlags.NonPublic);
-            curBytes = Sizer.ReportMemConsumption(startBytes, curBytes, "After GetMethod(DoSetBridge)");
+            //curBytes = Sizer.ReportMemConsumption(startBytes, curBytes, "After GetMethod(DoSetBridge)");
 
             DoSetDelegateCache = new DelegateCache<DoSetDelegate>(doSetMethodInfo);
-            curBytes = Sizer.ReportMemConsumption(startBytes, curBytes, "After new DelegateCache<DoSetDelegate>");
+            //curBytes = Sizer.ReportMemConsumption(startBytes, curBytes, "After new DelegateCache<DoSetDelegate>");
 
             // CollectionView Manager using an optional MapperRequest.
             MethodInfo getOrAddCViewManager_mi = propBagType.GetMethod("CViewManagerFromDsBridge", BindingFlags.Instance | BindingFlags.NonPublic);
-            curBytes = Sizer.ReportMemConsumption(startBytes, curBytes, "After GetMethod(CViewManagerFromDsBridge)");
+            //curBytes = Sizer.ReportMemConsumption(startBytes, curBytes, "After GetMethod(CViewManagerFromDsBridge)");
 
             GetOrAddCViewManagerCache = new TwoTypesDelegateCache<CViewManagerFromDsDelegate>(getOrAddCViewManager_mi);
-            curBytes = Sizer.ReportMemConsumption(startBytes, curBytes, "After TwoTypesDelegateCache<CViewManagerFromDsDelegate>");
+            //curBytes = Sizer.ReportMemConsumption(startBytes, curBytes, "After TwoTypesDelegateCache<CViewManagerFromDsDelegate>");
 
             // Collection View Manager Provider from a viewManagerProviderKey. Key consists of an optional MapperRequest and a Binding Path.)
             MethodInfo getOrAddCViewManagerProvider_mi = propBagType.GetMethod("CViewManagerProviderFromDsBridge", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -88,10 +88,10 @@ namespace DRM.PropBag.Caches
 
             // Create C Prop From string
             MethodInfo createCPropFromString_mi = propCreatorType.GetMethod("CreateCPropFromString", BindingFlags.Static | BindingFlags.NonPublic);
-            curBytes = Sizer.ReportMemConsumption(startBytes, curBytes, "After GetMethod(CreateCPropFromString)");
+            //curBytes = Sizer.ReportMemConsumption(startBytes, curBytes, "After GetMethod(CreateCPropFromString)");
 
             CreateCPropFromStringCache = new TwoTypesDelegateCache<CreateCPropFromStringDelegate>(createCPropFromString_mi);
-            curBytes = Sizer.ReportMemConsumption(startBytes, curBytes, "After new TwoTypesDelegateCache<CreateCPropFromStringDelegate>");
+            //curBytes = Sizer.ReportMemConsumption(startBytes, curBytes, "After new TwoTypesDelegateCache<CreateCPropFromStringDelegate>");
 
 
             // Create Prop From Object
@@ -124,10 +124,10 @@ namespace DRM.PropBag.Caches
 
             // Create Prop 
             MethodInfo createScalarProp_mi = propCreatorType.GetMethod("CreateProp", BindingFlags.Static | BindingFlags.NonPublic);
-            curBytes = Sizer.ReportMemConsumption(startBytes, curBytes, "After GetMethod(CreateProp)");
+            //curBytes = Sizer.ReportMemConsumption(startBytes, curBytes, "After GetMethod(CreateProp)");
 
             CreateScalarPropCache = new DelegateCache<CreateScalarProp>(createScalarProp_mi);
-            curBytes = Sizer.ReportMemConsumption(startBytes, curBytes, "After new DelegateCache<CreatePropFromStringDelegate>");
+            //curBytes = Sizer.ReportMemConsumption(startBytes, curBytes, "After new DelegateCache<CreatePropFromStringDelegate>");
 
             //// Create Prop From String
             //MethodInfo createPropFromString_mi = propCreatorType.GetMethod("CreatePropFromString", BindingFlags.Static | BindingFlags.NonPublic);
@@ -150,5 +150,69 @@ namespace DRM.PropBag.Caches
         }
 
         #endregion Constructor
+
+        #region IDisposable Support
+
+        private void DisposeCaches()
+        {
+            List<object> dList = new List<object>
+            { 
+                DoSetDelegateCache,
+                GetOrAddCViewManagerCache,
+                GetOrAddCViewManagerProviderCache,
+                CreateScalarPropCache,
+                CreateCPropFromStringCache,
+                CreateCPropWithNoValCache,
+                CreateCPropWithNoValCache,
+                CreateDSPProviderCache,
+                PropTemplateCache
+            };
+
+            foreach(object d in dList)
+            {
+                if(d is IDisposable disable)
+                {
+                    disable.Dispose();
+                }
+            }
+        }
+
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // Dispose managed state (managed objects).
+                    DisposeCaches();
+
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        // ~Temp() {
+        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        //   Dispose(false);
+        // }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            // GC.SuppressFinalize(this);
+        }
+
+        #endregion
+
     }
 }

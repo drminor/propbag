@@ -69,8 +69,10 @@ namespace DRM.PropBag.AutoMapperSupport
             return result;
         }
 
-        public void Clear()
+        // TODO: Note: only the sealed mappers are counted.
+        public long ClearMappersCache()
         {
+            long result = _sealedPropBagMappers.Count;
             foreach (IPropBagMapperGen mapper in _sealedPropBagMappers)
             {
                 if (mapper is IDisposable disable)
@@ -88,6 +90,8 @@ namespace DRM.PropBag.AutoMapperSupport
                 }
             }
             _sealedPropBagMappers.Clear();
+
+            return result;
         }
 
         private void CheckForChanges(IPropBagMapperKeyGen original, IPropBagMapperKeyGen current, string operationName)
@@ -137,7 +141,7 @@ namespace DRM.PropBag.AutoMapperSupport
                 if (disposing)
                 {
                     // Dispose managed state (managed objects).
-                    Clear();
+                    ClearMappersCache();
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.

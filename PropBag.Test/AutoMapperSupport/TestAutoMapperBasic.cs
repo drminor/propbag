@@ -29,7 +29,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
         [Test]
         public void AutoMapperSupport_V1_ShouldBeSetup()
         {
-            bool doesAmpHavePbTConversionServices = _amp.HasPropModelLookupService;
+            Assert.That(_amp, Is.Not.Null, "AutoMapper Support was not Setup.");
         }
 
         [Test]

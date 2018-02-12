@@ -1,4 +1,7 @@
 ﻿using DRM.PropBag.AutoMapperSupport;
+using DRM.PropBag.ViewModelTools;
+using DRM.PropBagControlsWPF;
+using DRM.PropBagWPF;
 using DRM.TypeSafePropertyBag;
 using PropBagTestApp.Infra;
 using PropBagTestApp.Models;
@@ -8,6 +11,8 @@ using System.Windows;
 
 namespace PropBagTestApp.View
 {
+    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
+
     /// <summary>
     /// Interaction logic for ReferenceBindWindowPB_Simple.xaml
     /// </summary>
@@ -136,13 +141,18 @@ namespace PropBagTestApp.View
             {
                 if (_mapper == null)
                 {
+                    IProvidePropModels propModelProvider = PropStoreServicesForThisApp.PropModelProvider;
+
+                    IPropModel propModel = propModelProvider.GetPropModel(REFERENCE_BIND_VM_RES_KEY);
+
+
                     IPropBagMapperKey<MyModel, ReferenceBindViewModelPB> mapperRequest
                         = PropStoreServicesForThisApp.AutoMapperProvider.RegisterMapperRequest<MyModel, ReferenceBindViewModelPB>
-                    (
-                        REFERENCE_BIND_VM_RES_KEY,
+                        (
+                        propModel, 
                         typeof(ReferenceBindViewModelPB),
                         configPackageName: "emit_proxy"
-                    );
+                        );
 
                     _mapper = PropStoreServicesForThisApp.AutoMapperProvider.GetMapper(mapperRequest);
                 }

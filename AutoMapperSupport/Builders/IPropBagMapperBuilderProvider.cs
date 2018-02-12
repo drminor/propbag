@@ -9,5 +9,7 @@ namespace DRM.PropBag.AutoMapperSupport
             IBuildMapperConfigurations<TSource, TDestination> mapperConfigurationBuilder
             )
             where TDestination : class, IPropBag;
+
+        long ClearTypeCache();
     }
 }

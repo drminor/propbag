@@ -51,7 +51,9 @@ namespace MVVMApplication.Infra
                     ViewModelHelper = new ViewModelHelper(PropModelProvider, vmActivator, PropStoreServices.PropStoreEntryPoint);
 
                     // Remove any AutoMapper that may have been previously created.
-                    AutoMapperProvider.Clear();
+                    AutoMapperProvider.ClearMappersCache();
+                    // TODO: Consider also clearing the cache of emitted Types.
+                    //AutoMapperProvider.ClearEmittedTypeCache();
                 }
             }
         }
@@ -102,7 +104,7 @@ namespace MVVMApplication.Infra
             IMapperRequestProvider mapperRequestProvider = new MapperRequestProvider(Application.Current.Resources, ConfigPackageNameSuffix);
             _mct.MeasureAndReport("After new MapperRequestProvider");
 
-            IProvidePropModels propModelProvider = new PropModelProvider(propBagTemplateProvider, mapperRequestProvider, DefaultPropFactory, vmActivator, PropStoreServices.PropStoreEntryPoint);
+            IProvidePropModels propModelProvider = new SimplePropModelProvider(propBagTemplateProvider, mapperRequestProvider, DefaultPropFactory, vmActivator, PropStoreServices.PropStoreEntryPoint);
             _mct.MeasureAndReport("After new PropModelProvider");
             return propModelProvider;
         }
@@ -172,8 +174,7 @@ namespace MVVMApplication.Infra
                 (
                 mapTypeDefinitionProvider: mapTypeDefinitionProvider,
                 mappersCachingService: mappersCachingService,
-                mapperBuilderProvider: propBagMapperBuilderProvider,
-                propModelProvider: null
+                mapperBuilderProvider: propBagMapperBuilderProvider/*, propModelProvider: null*/
                 );
 
             return autoMapperProvider;

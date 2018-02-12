@@ -22,5 +22,12 @@ namespace DRM.PropBag.TypeWrapper
             return _emittedTypes.GetOrAdd(td);
         }
 
+        public long ClearTypeCache()
+        {
+            long result = _emittedTypes.Count;
+            _emittedTypes.Clear();
+            return result;
+        }
+
     }
 }

@@ -15,7 +15,6 @@ namespace DRM.PropBag.AutoMapperSupport
 
         private PSAccessServiceCreatorInterface _storeAccessCreator;
 
-
         public SimplePropBagMapperBuilderProvider
             (
             ICreateWrapperTypes wrapperTypesCreator,
@@ -75,6 +74,13 @@ namespace DRM.PropBag.AutoMapperSupport
                 );
 
             return result;
+        }
+
+        // TODO: Note: The WrapperTypeCreator hold two caches, the result provide is only from the cache of emitted types.
+        // The number of entries in the cache of TypeDescriptors is not included.
+        public long ClearTypeCache()
+        {
+            return WrapperTypeCreator.ClearTypeCache();
         }
     }
 }

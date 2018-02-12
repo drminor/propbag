@@ -9,8 +9,8 @@ namespace DRM.PropBag.ViewModelTools
     {
         #region Private Members
 
-        private string NO_PROPMODEL_LOOKUP_SERVICES = $"The {nameof(SimpleWrapperTypeCreator)} has no PropModelProvider." +
-            $"All calls must provide a PropModel.";
+        //private string NO_PROPMODEL_LOOKUP_SERVICES = $"The {nameof(SimpleWrapperTypeCreator)} has no PropModelProvider." +
+        //    $"All calls must provide a PropModel.";
 
         private IProvidePropModels _propModelProvider { get; }
         private ICacheWrapperTypes _wrapperTypeCachingService { get; }
@@ -32,7 +32,8 @@ namespace DRM.PropBag.ViewModelTools
             _typeDescCachingService = typeDescCachingService ?? throw new ArgumentNullException(nameof(typeDescCachingService));
             _propModelProvider = null;
 
-            System.Diagnostics.Debug.WriteLine(NO_PROPMODEL_LOOKUP_SERVICES);
+            // This could be helpful for some diagnostic work.
+            //System.Diagnostics.Debug.WriteLine(NO_PROPMODEL_LOOKUP_SERVICES);
         }
 
         public SimpleWrapperTypeCreator(
@@ -47,12 +48,12 @@ namespace DRM.PropBag.ViewModelTools
 
         #endregion
 
-        public Type GetWrapperType(string resourceKey, Type typeToCreate)
-        {
-            IPropModel propModel = GetPropModel(resourceKey);
-            Type result = GetWrapperType(propModel, typeToCreate);
-            return result;
-        }
+        //public Type GetWrapperType(string resourceKey, Type typeToCreate)
+        //{
+        //    IPropModel propModel = GetPropModel(resourceKey);
+        //    Type result = GetWrapperType(propModel, typeToCreate);
+        //    return result;
+        //}
 
         public Type GetWrapperType(IPropModel propModel, Type typeToCreate)
         {
@@ -67,12 +68,12 @@ namespace DRM.PropBag.ViewModelTools
             return newWrapperType;
         }
 
-        public Type GetWrapperType<BT>(string resourceKey) where BT : class, IPropBag
-        {
-            IPropModel propModel = GetPropModel(resourceKey);
-            Type result = GetWrapperType<BT>(propModel);
-            return result;
-        }
+        //public Type GetWrapperType<BT>(string resourceKey) where BT : class, IPropBag
+        //{
+        //    IPropModel propModel = GetPropModel(resourceKey);
+        //    Type result = GetWrapperType<BT>(propModel);
+        //    return result;
+        //}
 
         public Type GetWrapperType<BT>(IPropModel propModel) where BT : class, IPropBag
         {
@@ -83,17 +84,26 @@ namespace DRM.PropBag.ViewModelTools
             return newWrapperType;
         }
 
-        #region PropModel Lookup Support
-        private IPropModel GetPropModel(string resourceKey)
+        // TODO: Note: This class hold two caches, however only one contributes to the result.
+        public long ClearTypeCache()
         {
-            if (!HasPropModelLookupService)
-            {
-                throw new InvalidOperationException(NO_PROPMODEL_LOOKUP_SERVICES);
-            }
-
-            IPropModel propModel = _propModelProvider.GetPropModel(resourceKey);
-            return propModel;
+           long numTypeDescriptionsThatWereCached = _typeDescCachingService.ClearTypeCache();
+           return _wrapperTypeCachingService.ClearTypeCache();
         }
-        #endregion
+
+        //#region PropModel Lookup Support
+
+        //private IPropModel GetPropModel(string resourceKey)
+        //{
+        //    if (!HasPropModelLookupService)
+        //    {
+        //        throw new InvalidOperationException(NO_PROPMODEL_LOOKUP_SERVICES);
+        //    }
+
+        //    IPropModel propModel = _propModelProvider.GetPropModel(resourceKey);
+        //    return propModel;
+        //}
+
+        //#endregion
     }
 }
