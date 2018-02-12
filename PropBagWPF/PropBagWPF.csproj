@@ -53,7 +53,7 @@
     <Compile Include="RelayCommand.cs" />
     <Compile Include="ViewProvider.cs" />
     <Compile Include="WPFPropFactory.cs" />
-    <Compile Include="PropModelProvider.cs" />
+    <Compile Include="SimplePropModelProvider.cs" />
     <Compile Include="ViewModelHelper.cs" />
     <Compile Include="WPFPropFactoryProvider.cs" />
   </ItemGroup>
