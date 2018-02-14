@@ -1,5 +1,7 @@
-﻿using NUnit.Framework;
+﻿using DRM.TypeSafePropertyBag;
+using NUnit.Framework;
 using PropBagLib.Tests.BusinessModel;
+using PropBagLib.Tests.SpecBasedVMTests.BasicVM.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -117,20 +119,20 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
     [NonParallelizable]
     public class BaseLine : BasicVM
     {
-        Business b;
-        List<Person> personList;
+        PersonDAL dal = null;
+        List<Person> personList = null;
 
         protected override void Because_Of()
         {
             // This is run first, to get the database "fired up."
-            b = new Business();
-            personList = b.Get(200).ToList();
+            dal = new PersonDAL();
+            personList = dal.Get(200).ToList();
         }
 
         [Test]
         public void BaseLine_ThenTheDALIsWorking()
         {
-            Assert.That(b != null, "Business is null.");
+            Assert.That(dal != null, $"dal of type: {dal.GetType()} is null.");
             Assert.That(personList != null, "The PersonList is null.");
             Assert.That(personList.Count >= 200, "The PersonList contains fewer that 200 items.");
         }
@@ -149,5 +151,44 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
             CallContextDestroyer();
         }
     }
+
+    [TestFixture(TestName = "Load Simple Model From PersonDal.")]
+    [NonParallelizable]
+    public class SimpleModel : BasicVM
+    {
+        IPropModel personVM_PropModel = null;
+
+        protected override void Because_Of()
+        {
+            personVM_PropModel =  PropModelProvider.GetPropModel("PersonVM");
+        }
+
+        [Test]
+        public void SimpleModel_ThenGetPropModel()
+        {
+            Assert.That(personVM_PropModel != null, "personVM_PropModel is null.");
+        }
+
+        [Test]
+        public void SimpleModel_PersonPropModelHasAllTheProps()
+        {
+            Assert.That(personVM_PropModel.Props.Count == 5);
+        }
+
+        [OneTimeSetUp]
+        public void OneTimeSetup()
+        {
+            MemTrackerStartMessage = $"Starting Mem Tracking for {GetType().GetTestName()}.";
+            CallContextEstablisher();
+            CallBecause_Of();
+        }
+
+        [OneTimeTearDown]
+        public void OneTimeTearDown()
+        {
+            CallContextDestroyer();
+        }
+    }
+
 
 }
