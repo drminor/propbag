@@ -1,9 +1,10 @@
-﻿using System.Windows;
+﻿using DRM.TypeSafePropertyBag;
+using System.Windows;
 using System.Windows.Controls;
 
 namespace DRM.PropBagControlsWPF
 {
-    public class NamespaceItem : Control
+    public class NamespaceItem : Control, INamespaceItem
     {
         static NamespaceItem()
         {

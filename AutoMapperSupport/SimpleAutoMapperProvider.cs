@@ -28,8 +28,8 @@ namespace DRM.PropBag.AutoMapperSupport
             (
             IMapTypeDefinitionProvider mapTypeDefinitionProvider,
             ICachePropBagMappers mappersCachingService,
-            IPropBagMapperBuilderProvider mapperBuilderProvider //,
-            //IProvidePropModels propModelProvider = null
+            IPropBagMapperBuilderProvider mapperBuilderProvider
+            //, IProvidePropModels propModelProvider = null
             )
         {
             MapTypeDefinitionProvider = mapTypeDefinitionProvider ?? throw new ArgumentNullException(nameof(mapTypeDefinitionProvider));

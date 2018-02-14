@@ -63,14 +63,14 @@ namespace PropBagLib.Tests.PerformanceDb
         {
             // This is run first, to get the database "fired up."
             Business b = new Business();
-            List<Person> personList = b.Get().ToList();
+            List<Person> personList = b.Get(1000).ToList();
         }
 
         [Test]
         public void ReadIntoNativeArray()
         {
             Business b = new Business();
-            List<Person> personList = b.Get().ToList();
+            List<Person> personList = b.Get(1000).ToList();
             Assert.That(personList.Count == 1000, $"The PersonList contains {personList.Count}, it should contain {NUMBER_OF_PEOPLE}.");
 
             foreach(Person p in personList)
@@ -98,7 +98,7 @@ namespace PropBagLib.Tests.PerformanceDb
             Assert.That(ourHelper.StoreAccessCreator.AccessCounter == 0, "The Provider of PropStoreAccessServices has not had its Access Counter reset.");
 
             Business b = new Business();
-            List<Person> personList = b.Get().ToList();
+            List<Person> personList = b.Get(1000).ToList();
             foreach (Person p in personList)
             {
                 // TODO: AAA

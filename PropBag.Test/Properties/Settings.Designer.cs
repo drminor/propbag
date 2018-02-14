@@ -26,11 +26,33 @@ namespace PropBagLib.Tests.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.ConnectionString)]
-        [global::System.Configuration.DefaultSettingValueAttribute("Security=SSPI;AttachDBFilename=|DataDirectory|\\PubPropBag_PropBag_Test\\PersonDb.m" +
-            "df")]
+        [global::System.Configuration.DefaultSettingValueAttribute("Security=SSPI;AttachDBFilename=|DataDirectory|\\PersonDb.mdf")]
         public string DefaultConnection {
             get {
                 return ((string)(this["DefaultConnection"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.ConnectionString)]
+        [global::System.Configuration.DefaultSettingValueAttribute("Security=SSPI;AttachDBFilename=|DataDirectory|\\PubPropBag_PropBag_Test\\PersonDb.m" +
+            "df")]
+        public string OldConnection {
+            get {
+                return ((string)(this["OldConnection"]));
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Temp")]
+        public string PropFactoryFactory {
+            get {
+                return ((string)(this["PropFactoryFactory"]));
+            }
+            set {
+                this["PropFactoryFactory"] = value;
             }
         }
     }

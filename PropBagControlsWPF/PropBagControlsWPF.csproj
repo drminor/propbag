@@ -47,9 +47,8 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Activators\IProvideAPropFactoryCreator.cs" />
-    <Compile Include="Activators\IAMServiceRef.cs" />
-    <Compile Include="Activators\IPSServiceRef.cs" />
+    <None Include="Activators\IAMServiceRef_NotUsed.cs" />
+    <None Include="Activators\IPSServiceRef_NotUsed.cs" />
     <Compile Include="Activators\MapperRequestProvider.cs" />
     <Compile Include="Binders\BindingTarget.cs" />
     <Compile Include="Binders\DataSourceChangedEventArgs.cs" />
@@ -66,6 +65,7 @@
     <Compile Include="Binders\OSSExtensions.cs" />
     <Compile Include="Binders\SelectedItemConverter.cs" />
     <Compile Include="Binders\SourceKindEnum.cs" />
+    <Compile Include="IPropBagTemplateParser.cs" />
     <Compile Include="Template\PropBinderField.cs" />
     <Compile Include="Converters\ComparerFuncTypeConverter.cs" />
     <Compile Include="Binders\DepPropChangedEventArgs.cs" />

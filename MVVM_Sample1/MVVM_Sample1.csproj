@@ -91,9 +91,9 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Infra\AMServiceRef.cs" />
+    <None Include="Infra\AMServiceRef_NotUsed.cs" />
     <Compile Include="Infra\PropStoreServicesForThisApp.cs" />
-    <Compile Include="Infra\PSServiceRef.cs" />
+    <None Include="Infra\PSServiceRef_NotUsed.cs" />
     <Compile Include="Infra\ViewModelProvider.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>

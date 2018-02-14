@@ -21,6 +21,7 @@ namespace DRM.PropBag
         IPropDoWhenChangedField _propDoWhenChangedField;
         IPropBinderField _propBinderField;
         IMapperRequest _mapperRequest;
+        string _mapperRequestResourceKey;
 
         PropStorageStrategyEnum _hasStore;
         bool _typeIsSolid;
@@ -81,6 +82,9 @@ namespace DRM.PropBag
             get { return _mapperRequest; }
             set { _mapperRequest = value; }
         }
+
+        [XmlElement("mapper-request-resource-key")]
+        public string MapperRequestResourceKey { get { return _mapperRequestResourceKey; } set { SetIfDifferent<string>(ref _mapperRequestResourceKey, value); } }
 
         [XmlAttribute(AttributeName = "caller-provides-storage")]
         public PropStorageStrategyEnum StorageStrategy

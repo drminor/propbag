@@ -4,8 +4,9 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Markup;
 using System.Xml;
+using DRM.PropBagControlsWPF;
 
-namespace PropBagLib.Tests
+namespace DRM.PropBagWPF
 {
     public class ResourceDictionaryProvider
     {
@@ -66,6 +67,15 @@ namespace PropBagLib.Tests
                 result = Merge(resourceDictionary, result);
                 _mct.CompactMeasureAndReport("After Merge Source Resource Dictionary.");
             }
+
+            //object propBagTemplate = result["PersonVM"];
+
+            //if(propBagTemplate is PropBagTemplate pbt)
+            //{
+            //    string fullClassName = pbt.FullClassName;
+            //    Type propFactoryProviderType = pbt.PropFactoryProviderType; 
+
+            //}
 
             return result;
         }

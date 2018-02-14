@@ -60,6 +60,7 @@
     <Compile Include="Delegates\ViewAndViewManagerCreatorDelegates.cs" />
     <Compile Include="Factories\AbstractPropFactory.cs" />
     <Compile Include="Factories\APFGenericMethodTemplates.cs" />
+    <Compile Include="Factories\PropFactoryFactory.cs" />
     <Compile Include="Factories\SimpleTypeResolver.cs" />
     <Compile Include="Fundamentals\CollectionViewExtensions.cs" />
     <Compile Include="DataSourceMapping\IPropBagMapper.cs" />
@@ -69,9 +70,11 @@
     <Compile Include="LocalBinding\Instances\PropStoreNotificationKindEnum.cs" />
     <Compile Include="LocalBinding\Registration\IReceivePropStoreNodeUpdates.cs" />
     <Compile Include="PropBagInterfaces\INotifyItemEndEdit.cs" />
-    <Compile Include="PropBagInterfaces\ICacheDelegates.cs" />
-    <Compile Include="PropBagInterfaces\ICacheDelegatesForTypePair.cs" />
+    <Compile Include="Fundamentals\ICacheDelegates.cs" />
+    <Compile Include="Fundamentals\ICacheDelegatesForTypePair.cs" />
     <Compile Include="Fundamentals\TwoTypes.cs" />
+    <Compile Include="PropBagTemplateInterfaces\IPropBagTemplate.cs" />
+    <Compile Include="PropFactoryInterfaces\IPropFactoryFactory.cs" />
     <Compile Include="PropBagModel\DeriveFromClassModeEnum.cs" />
     <Compile Include="PropBagModel\IMapperRequest.cs" />
     <Compile Include="PropBagModel\IPropBinderField.cs" />
@@ -83,6 +86,9 @@
     <Compile Include="PropBagModel\IPropModelProvider.cs" />
     <Compile Include="PropBagModel\ITypeInfoField.cs" />
     <Compile Include="PropBagModel\WellKnownCollectionTypeEnum.cs" />
+    <Compile Include="PropBagTemplateInterfaces\INamespaceItem.cs" />
+    <Compile Include="PropBagTemplateInterfaces\IPropTemplateItem.cs" />
+    <None Include="PropFactoryInterfaces\IProvideAPropFactoryCreator_NotUsed.cs" />
     <Compile Include="PropInterfaces\IDataTablePropInterfaces.cs" />
     <Compile Include="PropInterfaces\IProvideACViewManager.cs" />
     <Compile Include="PropInterfaces\IWatchPropItems.cs" />
@@ -109,7 +115,7 @@
     <Compile Include="TypeConverters\ChangeType.cs" />
     <Compile Include="TypeConverters\ITypeDescBasedTConverterCache.cs" />
     <Compile Include="Unused\ObsCollection.cs" />
-    <Compile Include="PropBagInterfaces\ICreateProps.cs" />
+    <Compile Include="PropFactoryInterfaces\ICreateProps_NotUsed.cs" />
     <Compile Include="PropBagInterfaces\IRegisterBindingsForwarder.cs" />
     <None Include="Unused\CollectionViewSourceReferenceCode.cs" />
     <Compile Include="PropInterfaces\ICollectionTypedPropInterfaces.cs" />
@@ -194,7 +200,7 @@
     <Compile Include="PropBagInterfaces\IConvertValues.cs" />
     <Compile Include="PropBagInterfaces\INotifyPropertyChangedWithVals.cs" />
     <Compile Include="PropBagInterfaces\IPropBag.cs" />
-    <Compile Include="PropBagInterfaces\IPropFactory.cs" />
+    <Compile Include="PropFactoryInterfaces\IPropFactory.cs" />
     <Compile Include="PropInterfaces\IPropInterfaces.cs" />
     <Compile Include="PropBagInterfaces\ITypeSafePropBag.cs" />
     <Compile Include="PropBagInterfaces\ITypeSafePropBagMetaData.cs" />

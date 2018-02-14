@@ -11,7 +11,10 @@ namespace DRM.TypeSafePropertyBag
         string ExtraInfo { get; set; }
         IPropInitialValueField InitialValueField { get; set; }
         Type ItemType { get; set; }
+
         IMapperRequest MapperRequest { get; set; }
+        string MapperRequestResourceKey { get; set; }
+
         string PropertyName { get; set; }
         Type PropertyType { get; set; }
         PropKindEnum PropKind { get; set; }

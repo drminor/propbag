@@ -3,7 +3,7 @@
     public interface IProvidePropModels
     {
         IPropModel GetPropModel(string resourceKey);
-        IPropModel GetPropModel(string resourceKey, IPropFactory propFactory);
+        //IPropModel GetPropModel(string resourceKey, IPropFactory propFactory);
 
         IMapperRequest GetMapperRequest(string resourceKey);
 

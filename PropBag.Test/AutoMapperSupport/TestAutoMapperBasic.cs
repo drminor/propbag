@@ -168,7 +168,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 namespaceName: "PropBagLib.Tests.AutoMapperSupport",
                 deriveFrom: DeriveFromClassModeEnum.PropBag,
                 targetType: null,
-                propStoreServiceProviderType: null,
+                //propStoreServiceProviderType: null,
                 propFactory: null,
                 typeSafetyMode: PropBagTypeSafetyMode.Tight,
                 deferMethodRefResolution: true,

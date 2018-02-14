@@ -229,7 +229,7 @@ namespace DRM.PropBag
             _propFactory = propFactory ?? throw new ArgumentNullException(nameof(propFactory));
 
             _ourMetaData = BuildMetaData(typeSafetyMode, fullClassName, _propFactory);
-            _memConsumptionTracker.MeasureAndReport("BuildMetaData", $"Full Class Name: {fullClassName}");
+            _memConsumptionTracker.MeasureAndReport("BuildMetaData", $"Full Class Name: {fullClassName ?? "NULL"}");
 
             _foreignViewManagers = null;
         }

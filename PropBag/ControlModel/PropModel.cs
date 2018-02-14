@@ -8,12 +8,14 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 
-// ToDo: Consider moving all types in the DRM.PropBag namespace back to the DRM.PropBag namespace.
 namespace DRM.PropBag
 {
     public class PropModel : NotifyPropertyChangedBase, IEquatable<PropModel>, IPropModel
     {
         #region Properties
+
+        //public SimpleExKey TestObject { get; set; }
+
 
         #region Activation Info
 
@@ -65,14 +67,18 @@ namespace DRM.PropBag
 
 
         // TODO: This is not Serializable, consider providing string representation as a proxy
-        // Perhaps we should simply not serialize instances of PropBag Control Models.
         IPropFactory pf;
         [XmlIgnore]
         public IPropFactory PropFactory { get { return pf; } set { SetAlways<IPropFactory>(ref pf, value); } }
 
-        Type _propStoreServiceProviderType;
-        [XmlElement("prop-store-service-provider-type")]
-        public Type PropStoreServiceProviderType { get { return _propStoreServiceProviderType; } set { _propStoreServiceProviderType = value; } }
+        Type _propFactoryType;
+        [XmlElement("type")]
+        public Type PropFactoryType { get { return _propFactoryType; } set { _propFactoryType = value; } }
+
+
+        //Type _propStoreServiceProviderType;
+        //[XmlElement("prop-store-service-provider-type")]
+        //public Type PropStoreServiceProviderType { get { return _propStoreServiceProviderType; } set { _propStoreServiceProviderType = value; } }
 
         ObservableCollection<string> _namespaces;
         [XmlArray("namespaces")]
@@ -101,7 +107,6 @@ namespace DRM.PropBag
         public PropModel(string className, string namespaceName,
             DeriveFromClassModeEnum deriveFrom,
             Type targetType,
-            Type propStoreServiceProviderType,
             IPropFactory propFactory,
             PropBagTypeSafetyMode typeSafetyMode = PropBagTypeSafetyMode.AllPropsMustBeRegistered,
             bool deferMethodRefResolution = true,
@@ -111,14 +116,40 @@ namespace DRM.PropBag
             NamespaceName = namespaceName;
             DeriveFromClassMode = deriveFrom;
             TargetType = targetType;
-            PropStoreServiceProviderType = propStoreServiceProviderType;
             PropFactory = propFactory;
+            PropFactoryType = propFactory?.GetType();
             TypeSafetyMode = typeSafetyMode;
             DeferMethodRefResolution = deferMethodRefResolution;
             RequireExplicitInitialValue = requireExplicitInitialValue;
 
             Namespaces = new ObservableCollection<string>();
             Props = new ObservableCollection<IPropItem>();
+
+            //TestObject = new SimpleExKey(100, 100);
+        }
+
+        public PropModel(string className, string namespaceName,
+            DeriveFromClassModeEnum deriveFrom,
+            Type targetType,
+            Type propFactoryType,
+            PropBagTypeSafetyMode typeSafetyMode = PropBagTypeSafetyMode.AllPropsMustBeRegistered,
+            bool deferMethodRefResolution = true,
+            bool requireExplicitInitialValue = true)
+        {
+            ClassName = className;
+            NamespaceName = namespaceName;
+            DeriveFromClassMode = deriveFrom;
+            TargetType = targetType;
+            PropFactory = null;
+            PropFactoryType = propFactoryType;
+            TypeSafetyMode = typeSafetyMode;
+            DeferMethodRefResolution = deferMethodRefResolution;
+            RequireExplicitInitialValue = requireExplicitInitialValue;
+
+            Namespaces = new ObservableCollection<string>();
+            Props = new ObservableCollection<IPropItem>();
+
+            //TestObject = new SimpleExKey(100, 100);
         }
 
         #endregion

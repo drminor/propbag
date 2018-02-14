@@ -68,7 +68,7 @@ namespace PropBagLib.Tests.PerformanceDb
             b = _testMainVM.GetIt<Business>("Business");
 
             // TODO: try using IEnumerable<Person> instead.
-            List<Person> unMappedPeople = b.Get();
+            List<Person> unMappedPeople = b.Get(1000);
 
             IEnumerable<DestinationModel1> mappedPeople = mapper.MapToDestination(unMappedPeople);
 

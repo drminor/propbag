@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\NUnit3TestAdapter.3.8.0\build\net35\NUnit3TestAdapter.props" Condition="Exists('..\packages\NUnit3TestAdapter.3.8.0\build\net35\NUnit3TestAdapter.props')" />
+  <Import Project="..\packages\NUnit3TestAdapter.3.9.0\build\net35\NUnit3TestAdapter.props" Condition="Exists('..\packages\NUnit3TestAdapter.3.9.0\build\net35\NUnit3TestAdapter.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -39,8 +39,8 @@
     <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.2.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
-    <Reference Include="nunit.framework, Version=3.8.1.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
-      <HintPath>..\packages\NUnit.3.8.1\lib\net45\nunit.framework.dll</HintPath>
+    <Reference Include="nunit.framework, Version=3.9.0.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
+      <HintPath>..\packages\NUnit.3.9.0\lib\net45\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
@@ -144,11 +144,10 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="PubPropBag\PubPropBagModel.cs" />
-    <Compile Include="ResourceDictionaryProvider.cs" />
     <Compile Include="SpecBasedVMTests\AbstractSpec.cs" />
     <Compile Include="SpecBasedVMTests\BasicVM\AbstractBasicVM.cs" />
-    <Compile Include="SpecBasedVMTests\BasicVM\Infra\AMServiceRef.cs" />
-    <Compile Include="SpecBasedVMTests\BasicVM\Infra\PSServiceRef.cs" />
+    <None Include="SpecBasedVMTests\BasicVM\Infra\AMServiceRef.cs" />
+    <None Include="SpecBasedVMTests\BasicVM\Infra\PSServiceRef.cs" />
     <Compile Include="SpecBasedVMTests\BasicVM\Infra\ViewModelProvider.cs" />
     <Compile Include="SpecBasedVMTests\BasicVM\Services\PersonDAL.cs" />
     <Compile Include="SpecBasedVMTests\BasicVM\Services\PersonDB.cs" />
@@ -177,6 +176,10 @@
     <ProjectReference Include="..\AutoMapperSupport\AutoMapperSupport.csproj">
       <Project>{10cf1c6f-f877-49a8-8678-6947f55e6920}</Project>
       <Name>AutoMapperSupport</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CommonAppData\CommonAppData.csproj">
+      <Project>{A12AF270-3E58-462C-8661-3DBD9926C777}</Project>
+      <Name>CommonAppData</Name>
     </ProjectReference>
     <ProjectReference Include="..\ObjectSizeDiagnostics\ObjectSizeDiagnostics.csproj">
       <Project>{9b18f82d-3ed9-49e0-9ee3-cfbfc3af9d9c}</Project>
@@ -253,7 +256,7 @@
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\NUnit3TestAdapter.3.8.0\build\net35\NUnit3TestAdapter.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\NUnit3TestAdapter.3.8.0\build\net35\NUnit3TestAdapter.props'))" />
+    <Error Condition="!Exists('..\packages\NUnit3TestAdapter.3.9.0\build\net35\NUnit3TestAdapter.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\NUnit3TestAdapter.3.9.0\build\net35\NUnit3TestAdapter.props'))" />
   </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

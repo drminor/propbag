@@ -13,9 +13,7 @@
         OutPutNameSpace="MVVMApplication.ViewModel"
         DeriveFromClassMode="Custom"
         TargetType="{x:Type vmod:MainWindowViewModel}"
-        PropStoreServiceProviderType="{x:Type infra:PSServiceRef}"
-        AutoMapperServiceProviderType="{x:Type infra:AMServiceRef}"
-        PropFactoryProviderType="{x:Type pbWPF:WPFPropFactoryProvider}"
+        PropFactoryType="{x:Type pbWPF:WPFPropFactory}"
         TypeSafetyMode="Tight">
 
         <pb:PropBagTemplate.Namespaces>

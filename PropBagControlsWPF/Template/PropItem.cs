@@ -5,7 +5,7 @@ using System.Windows.Controls;
 
 namespace DRM.PropBagControlsWPF
 {
-    public class PropItem : ItemsControl
+    public class PropItem : ItemsControl, IPropTemplateItem
     {
         static PropItem()
         {

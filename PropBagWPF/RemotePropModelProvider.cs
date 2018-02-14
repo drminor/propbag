@@ -1,125 +1,163 @@
 ﻿using DRM.PropBag;
-using DRM.PropBag.ViewModelTools;
 using DRM.PropBagControlsWPF;
 using DRM.TypeSafePropertyBag;
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Threading;
 using System.Windows;
 
 namespace DRM.PropBagWPF
 {
-    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
-
-    public class SimplePropModelProvider : IProvidePropModels
-    { 
+    public class RemotePropModelProvider : IProvidePropModels
+    {
         #region Private Fields
 
-        private IPropBagTemplateProvider _propBagTemplateProvider;
-
-        private IMapperRequestProvider _mapperRequestProvider;
-
         private IParsePropBagTemplates _pbtParser;
+        private ResourceDictionaryProvider _resourceDictionaryProvider;
 
-        //private IViewModelActivator _viewModelActivator;
-        //private PSAccessServiceCreatorInterface _storeAccessCreator;
         private IPropFactoryFactory _propFactoryFactory;
         private IPropFactory _defaultPropFactory;
 
+        private Dictionary<string, IPropModel> _propModelCache;
+        private Dictionary<string, IMapperRequest> _mapperRequestCache;
+
         #endregion
 
-        #region Constructor
+        #region Constructors
 
-        public SimplePropModelProvider(
-            IPropBagTemplateProvider propBagTemplateProvider,
-            IMapperRequestProvider mapperRequestProvider,
+        public RemotePropModelProvider
+            (
+            ResourceDictionaryProvider resourceDictionaryProvider,
             IParsePropBagTemplates propBagTemplateParser,
-            //IViewModelActivator viewModelActivator,
-            //PSAccessServiceCreatorInterface storeAccessCreator,
             IPropFactoryFactory propFactoryFactory,
-            IPropFactory defaultPropFactory)
+            IPropFactory defaultPropFactory
+            )
+
         {
-            _propBagTemplateProvider = propBagTemplateProvider;
-            _mapperRequestProvider = mapperRequestProvider;
+            _resourceDictionaryProvider = resourceDictionaryProvider;
             _pbtParser = propBagTemplateParser;
-            //_viewModelActivator = viewModelActivator;
-            //_storeAccessCreator = storeAccessCreator;
             _propFactoryFactory = propFactoryFactory;
             _defaultPropFactory = defaultPropFactory;
+
+            _propModelCache = new Dictionary<string, IPropModel>();
+            _mapperRequestCache = new Dictionary<string, IMapperRequest>();
+
+            
+        }
+
+        #endregion
+
+        #region Bulk Parsing
+
+        public IDictionary<string, IPropModel> LoadPropModels(string basePath, string[] filenames)
+        {
+            Dictionary<string, IPropModel> result = new Dictionary<string, IPropModel>();
+
+            Thread thread = new Thread(() =>
+            {
+                ResourceDictionary rd = _resourceDictionaryProvider.Load(basePath, filenames);
+
+                foreach(ResourceDictionary rdChild in rd.MergedDictionaries)
+                {
+                    foreach(DictionaryEntry kvp in rdChild)
+                    {
+                        if(kvp.Value is PropBagTemplate pbt)
+                        {
+                            IPropModel propModel = _pbtParser.ParsePropModel(pbt);
+
+                            result.Add((string) kvp.Key, propModel);
+                            _propModelCache.Add((string)kvp.Key, propModel);
+                        }
+                    }
+                }
+            });
+
+            thread.SetApartmentState(ApartmentState.STA);
+
+            thread.Start();
+            thread.Join();
+
+            thread = null;
+
+            _propModelCache = result;
+            return result;
+        }
+
+        public IDictionary<string, IMapperRequest> LoadMapperRequests(string basePath, string[] filenames)
+        {
+            Dictionary<string, IMapperRequest> result = new Dictionary<string, IMapperRequest>();
+
+            Thread thread = new Thread(() =>
+            {
+                ResourceDictionary rd = _resourceDictionaryProvider.Load(basePath, filenames);
+
+                foreach (ResourceDictionary rdChild in rd.MergedDictionaries)
+                {
+                    foreach (DictionaryEntry kvp in rdChild)
+                    {
+                        if (kvp.Value is MapperRequestTemplate mr)
+                        {
+                            // Go ahead and fetch the PropModel from the key specified in the "template" request -- since the 
+                            // the receiver of this PropBag.MapperRequest will probably not have access to a PropModel Provider.
+                            //IPropModel propModel = GetPropModel(mr.DestinationPropModelKey);
+                            //IMapperRequest mrCooked = new MapperRequest(mr.SourceType, propModel, mr.ConfigPackageName);
+
+                            IMapperRequest mrCooked = new MapperRequest(mr.SourceType, mr.DestinationPropModelKey, mr.ConfigPackageName);
+
+                            result.Add((string)kvp.Key, mrCooked);
+                            _mapperRequestCache.Add((string)kvp.Key, mrCooked);
+                        }
+                    }
+                }
+            });
+
+            thread.SetApartmentState(ApartmentState.STA);
+
+            thread.Start();
+            thread.Join();
+
+            thread = null;
+
+            _mapperRequestCache = result;
+            return result;
         }
 
         #endregion
 
         #region PropBagTemplate Locator Support
 
-        public bool CanFindPropBagTemplateWithJustKey => _propBagTemplateProvider?.CanFindPropBagTemplateWithJustAKey != false;
-        public bool HasPbtLookupResources => _propBagTemplateProvider != null;
+        public bool CanFindPropBagTemplateWithJustKey => true;
+        public bool HasPbtLookupResources => true;
 
         public IPropModel GetPropModel(string resourceKey)
         {
-            try
+            if(_propModelCache == null)
             {
-                if (CanFindPropBagTemplateWithJustKey)
-                {
-                    PropBagTemplate pbt = _propBagTemplateProvider.GetPropBagTemplate(resourceKey);
-                    IPropModel pm = _pbtParser.ParsePropModel(pbt);
-                    FixUpPropFactory(pm, _propFactoryFactory, _defaultPropFactory);
-                    return pm;
-                }
-                else if (HasPbtLookupResources)
-                {
-                    throw new InvalidOperationException($"A call providing only a ResourceKey can only be done, " +
-                        $"if this PropModelProvider was supplied with a PropBagTemplateProvider upon construction. " +
-                        $"No class implementing: {nameof(IPropBagTemplateProvider)} was provided. " +
-                        $"Please supply a PropBagTemplate object.");
-                }
-                else
-                {
-                    throw new InvalidOperationException($"A call providing only a ResourceKey can only be done, " +
-                        $"if this PropModelProvider was supplied with the necessary resources upon construction. " +
-                        $"A {_propBagTemplateProvider.GetType()} was provided, but it does not have the necessary resources. " +
-                        $"Please supply a ResourceDictionary and ResourceKey or a ProbBagTemplate object.");
-                }
+                throw new InvalidOperationException("You must first call LoadPropModels.");
             }
-            catch (System.Exception e)
+
+            if(_propModelCache.TryGetValue(resourceKey, out IPropModel propModel))
             {
-                throw new ApplicationException($"PropBagTemplate for ResourceKey = {resourceKey} was not found.", e);
+                return FixUpPropFactory(propModel, _defaultPropFactory);
+            }
+            else
+            {
+                throw new KeyNotFoundException("No PropModel with that resource key can be found.");
             }
         }
 
-        public IPropModel GetPropModel(ResourceDictionary rd, string resourceKey)
-        {
-            try
-            {
-                if (HasPbtLookupResources)
-                {
-                    PropBagTemplate pbt = _propBagTemplateProvider.GetPropBagTemplate(resourceKey);
-                    IPropModel pm = _pbtParser.ParsePropModel(pbt);
-                    FixUpPropFactory(pm, _propFactoryFactory, _defaultPropFactory);
-                    return pm;
-                }
-                else
-                {
-                    throw new InvalidOperationException($"A call providing a ResourceDictionary and a ResouceKey can only be done, " +
-                        $"if this PropModelProvider was supplied with a resource upon construction. " +
-                        $"No class implementing: {nameof(IPropBagTemplateProvider)} was provided.");
-                }
-            }
-            catch (System.Exception e)
-            {
-                throw new ApplicationException("Resource was not found.", e);
-            }
-        }
-
-        IPropModel FixUpPropFactory(IPropModel propModel, IPropFactoryFactory propFactoryGenerator, IPropFactory fallBackPropFactory)
+        IPropModel FixUpPropFactory(IPropModel propModel, IPropFactory fallBackPropFactory)
         {
             // If the propModel does not specify a PropFactory, but it does specify a PropFactoryType,
             // use the PropFactoryFactory given to us to create a PropFactory.
-
-            if (propModel.PropFactory == null)
+            
+            if(propModel.PropFactory == null)
             {
-                if (propModel.PropFactoryType != null)
+                if(propModel.PropFactoryType != null)
                 {
-                    IPropFactory generated = propFactoryGenerator.BuildPropFactory(propModel.PropFactoryType);
-                    propModel.PropFactory = generated;
+                    IPropFactory created = _propFactoryFactory.BuildPropFactory(propModel.PropFactoryType);
+                    propModel.PropFactory = created;
                 }
                 else
                 {
@@ -137,70 +175,23 @@ namespace DRM.PropBagWPF
 
         #region AutoMapperRequest Lookup Support
 
-        public bool CanFindMapperRequestWithJustKey => _mapperRequestProvider?.CanFindMapperRequestWithJustAKey != false;
-        public bool HasMrLookupResources => _mapperRequestProvider != null;
+        public bool CanFindMapperRequestWithJustKey => true;
+        public bool HasMrLookupResources => true;
 
         public IMapperRequest GetMapperRequest(string resourceKey)
         {
-            try
+            if (_mapperRequestCache == null)
             {
-                if (CanFindMapperRequestWithJustKey)
-                {
-                    MapperRequestTemplate mr = _mapperRequestProvider.GetMapperRequest(resourceKey);
-
-                    // Go ahead and fetch the PropModel from the key specified in the "template" request -- since the 
-                    // the receiver of this PropBag.MapperRequest will probably not have access to a PropModel Provider.
-                    IPropModel propModel = GetPropModel(mr.DestinationPropModelKey);
-
-                    IMapperRequest mrCooked = new MapperRequest(mr.SourceType, propModel, mr.ConfigPackageName);
-                    return mrCooked;
-                }
-                else if (HasMrLookupResources)
-                {
-                    throw new InvalidOperationException($"A call providing only a ResourceKey can only be done, " +
-                        $"if this PropModelProvider was supplied with a MapperRequestProvider upon construction. " +
-                        $"No class implementing: {nameof(IMapperRequestProvider)} was provided. " +
-                        $"Please supply a MapperRequest object.");
-                }
-                else
-                {
-                    throw new InvalidOperationException($"A call providing only a ResourceKey can only be done, " +
-                        $"if this PropModelProvider was supplied with the necessary resources upon construction. " +
-                        $"A {_mapperRequestProvider.GetType()} was provided, but it does not have the necessary resources. " +
-                        $"Please supply a ResourceDictionary and ResourceKey or a MapperRequest object.");
-                }
+                throw new InvalidOperationException("You must first call LoadMapperRequests.");
             }
-            catch (System.Exception e)
+
+            if (_mapperRequestCache.TryGetValue(resourceKey, out IMapperRequest mrCooked))
             {
-                throw new ApplicationException($"MapperRequest for ResourceKey = {resourceKey} was not found.", e);
+                return mrCooked;
             }
-        }
-
-        public IMapperRequest GetMapperRequest(ResourceDictionary rd, string resourceKey)
-        {
-            try
+            else
             {
-                if (HasMrLookupResources)
-                {
-                    MapperRequestTemplate mr = _mapperRequestProvider.GetMapperRequest(rd, resourceKey);
-
-                    // Go ahead and fetch the PropModel from the key specified in the "template" request -- since the 
-                    // the receiver of this PropBag.MapperRequest will probably not have access to a PropModel Provider.
-                    IPropModel propModel = GetPropModel(mr.DestinationPropModelKey);
-
-                    IMapperRequest mrCooked = new MapperRequest(mr.SourceType, propModel, mr.ConfigPackageName);
-                    return mrCooked;
-                }
-                else
-                {
-                    throw new InvalidOperationException($"A call providing a ResourceDictionary and a ResouceKey can only be done, " +
-                        $"if this PropModelProvider was supplied with a resource upon construction. " +
-                        $"No class implementing: {nameof(IMapperRequestProvider)} was provided.");
-                }
-            }
-            catch (System.Exception e)
-            {
-                throw new ApplicationException("Resource was not found.", e);
+                throw new KeyNotFoundException("No MapperRequest with that resource key can be found.");
             }
         }
 
@@ -210,19 +201,45 @@ namespace DRM.PropBagWPF
 
         //private IPropModel GetPropModel(PropBagTemplate pbt, IPropFactory propFactory)
         //{
-        //    if (pbt.ClassName == "PersonCollectionViewModel")
+        //    if(pbt.ClassName == "PersonCollectionViewModel")
         //    {
         //        System.Diagnostics.Debug.WriteLine($"We are processing the {pbt.ClassName} PropItem.");
         //    }
 
+        //    //SimpleExKey test = pbt.GetTestObject();
+
         //    DeriveFromClassModeEnum deriveFrom = pbt.DeriveFromClassMode;
         //    Type targetType = pbt.TargetType;
+
+        //    //IAMServiceRef test = pbt.Au
 
         //    //TypeInfoField wrapperTypeInfoField = GetWrapperTypeInfo(pbt);
         //    //Type targetTypeFromWTInfoField = GetTypeFromInfoField(wrapperTypeInfoField, PropKindEnum.Prop, targetType, out Type itemTypeDummy);
 
+        //    IPropFactory propFactoryToUse;
+        //    //if (propFactory == null)
+        //    //{
+        //    //    IPropFactory fromTemplate = GetPropFactory(pbt);
+        //    //    if(fromTemplate == null)
+        //    //    {
+        //    //        propFactoryToUse = _defaultPropFactory;
+        //    //    }
+        //    //    else
+        //    //    {
+        //    //        propFactoryToUse = fromTemplate;
+        //    //    }
+        //    //}
+        //    //else
+        //    //{
+        //    //    propFactoryToUse = propFactory;
+        //    //}
 
-        //    IPropFactory propFactoryToUse = propFactory ?? GetPropFactory(pbt) ?? _defaultPropFactory ??
+        //    //if (propFactoryToUse == null)
+        //    //{
+        //    //    throw new InvalidOperationException($"Could not get a value for the PropFactory when fetching the PropModel: {pbt.FullClassName}");
+        //    //}
+
+        //    propFactoryToUse = propFactory ?? GetPropFactory(pbt) ?? _defaultPropFactory ??
         //        throw new InvalidOperationException($"Could not get a value for the PropFactory when fetching the PropModel: {pbt.FullClassName}");
 
         //    IPropModel result = new PropModel
@@ -231,8 +248,7 @@ namespace DRM.PropBagWPF
         //        namespaceName: pbt.OutPutNameSpace,
         //        deriveFrom: deriveFrom,
         //        targetType: targetType,
-        //        //propStoreServiceProviderType: pbt.PropStoreServiceProviderType,
-        //        propFactory: propFactoryToUse,
+        //        propFactoryType: pbt.PropFactoryType,
         //        typeSafetyMode: pbt.TypeSafetyMode,
         //        deferMethodRefResolution: pbt.DeferMethodRefResolution,
         //        requireExplicitInitialValue: pbt.RequireExplicitInitialValue
@@ -254,7 +270,7 @@ namespace DRM.PropBagWPF
 
         //        try
         //        {
-        //            IPropItem rpi = ProcessProp(pi, propFactoryToUse, doWhenChangedHelper);
+        //            IPropItem rpi = ProcessProp(pi/*, propFactoryToUse*/, doWhenChangedHelper);
         //            result.Props.Add(rpi);
         //        }
         //        catch (Exception e)
@@ -266,13 +282,12 @@ namespace DRM.PropBagWPF
         //    return result;
         //}
 
-        //// TODO: Use the PropFactoryType as an input to some implementation of IPropFactoryFactory.
         //private IPropFactory GetPropFactory(PropBagTemplate propBagTemplate)
         //{
         //    return null;
         //}
 
-        //private IPropItem ProcessProp(IPropTemplateItem pi, IPropFactory propFactory, DoWhenChangedHelper doWhenChangedHelper)
+        //private IPropItem ProcessProp(IPropTemplateItem pi, DoWhenChangedHelper doWhenChangedHelper)
         //{
         //    PropStorageStrategyEnum storageStrategy = pi.StorageStrategy;
         //    bool typeIsSolid = pi.TypeIsSolid;
@@ -281,7 +296,7 @@ namespace DRM.PropBagWPF
         //    IPropItem rpi = new PropItemModel(pi.PropertyType, pi.PropertyName,
         //        storageStrategy, typeIsSolid, pi.PropKind, extraInfo: extraInfo);
 
-        //    bool isCProp = pi.PropKind.IsCollection(); // propFactory.IsCollection(pi.PropKind);
+        //    bool isCProp = pi.PropKind.IsCollection(); 
         //    bool foundTypeInfoField = false;
 
         //    ItemCollection items = ((PropItem)pi).Items;
@@ -316,26 +331,27 @@ namespace DRM.PropBagWPF
         //            // TODO: Add error handling here.
         //            if (ivf.PropBagResourceKey != null)
         //            {
-        //                IPropModel pm = GetPropModel(ivf.PropBagResourceKey);
+        //                //IPropModel pm = GetPropModel(ivf.PropBagResourceKey);
 
-        //                Func<object> vc = () => _viewModelActivator.GetNewViewModel(pm, _storeAccessCreator, pi.PropertyType, pm.PropFactory ?? _defaultPropFactory, pm.FullClassName);
+        //                //Func<object> vc = () => _viewModelActivator.GetNewViewModel(pm, _storeAccessCreator, pi.PropertyType, pm.PropFactory ?? _defaultPropFactory, pm.FullClassName);
 
         //                rivf = new PropInitialValueField(initialValue: null, setToDefault: false, setToUndefined: false,
-        //                    setToEmptyString: false, setToNull: false, valueCreator: vc);
+        //                    setToEmptyString: false, setToNull: false, valueCreator: null, createNew: ivf.CreateNew, propBagResourceKey: ivf.PropBagResourceKey);
         //            }
         //            else if (ivf.CreateNew)
         //            {
-        //                Func<object> vc = () => Activator.CreateInstance(pi.PropertyType);
+        //                //Func<object> vc = () => Activator.CreateInstance(pi.PropertyType);
         //                rivf = new PropInitialValueField(initialValue: null, setToDefault: false, setToUndefined: false,
-        //                    setToEmptyString: false, setToNull: false, valueCreator: vc);
+        //                    setToEmptyString: false, setToNull: false, valueCreator: null, createNew: ivf.CreateNew, propBagResourceKey: ivf.PropBagResourceKey);
         //            }
         //            else
         //            {
         //                rivf = new PropInitialValueField(ivf.InitialValue, ivf.SetToDefault, ivf.SetToUndefined,
-        //                    ivf.SetToNull, ivf.SetToEmptyString, valueCreator: null);
+        //                    ivf.SetToNull, ivf.SetToEmptyString, valueCreator: null, createNew: false, propBagResourceKey: null);
         //            }
 
         //            rpi.InitialValueField = rivf;
+
         //        }
 
         //        // Do When Changed Field
@@ -372,16 +388,17 @@ namespace DRM.PropBagWPF
         //                new PropBag.PropBinderField(binderField.Path);
 
         //            rpi.BinderField = rBinderField;
+        //            rpi.MapperRequestResourceKey = binderField.MapperRequestResourceKey;
 
-        //            if (binderField.MapperRequestResourceKey != null)
-        //            {
-        //                IMapperRequest mr = GetMapperRequest(binderField.MapperRequestResourceKey);
-        //                rpi.MapperRequest = mr;
-        //            }
+        //            //if (binderField.MapperRequestResourceKey != null)
+        //            //{
+        //            //    IMapperRequest mr = GetMapperRequest(binderField.MapperRequestResourceKey);
+        //            //    rpi.MapperRequest = mr;
+        //            //}
         //        }
         //    }
 
-        //    if (!foundTypeInfoField && isCProp)
+        //    if(!foundTypeInfoField && isCProp)
         //    {
         //        Type propertyType = GetTypeFromInfoField(null, pi.PropKind, pi.PropertyType, out Type itemType);
         //        rpi.CollectionType = propertyType;
@@ -555,46 +572,5 @@ namespace DRM.PropBagWPF
         //}
 
         //#endregion
-
-        #region IDisposable Support
-
-        private bool disposedValue = false; // To detect redundant calls
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposedValue)
-            {
-                if (disposing)
-                {
-                    // Dispose managed state (managed objects).
-                    if(_defaultPropFactory is IDisposable disable)
-                    {
-                        disable.Dispose();
-                    }
-                }
-
-                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
-                // TODO: set large fields to null.
-
-                disposedValue = true;
-            }
-        }
-
-        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
-        // ~Temp() {
-        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-        //   Dispose(false);
-        // }
-
-        // This code added to correctly implement the disposable pattern.
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-            Dispose(true);
-            // TODO: uncomment the following line if the finalizer is overridden above.
-            // GC.SuppressFinalize(this);
-        }
-
-        #endregion
     }
 }

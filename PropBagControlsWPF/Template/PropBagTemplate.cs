@@ -2,6 +2,7 @@
 using DRM.TypeSafePropertyBag;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows;
@@ -9,9 +10,7 @@ using System.Windows.Controls;
 
 namespace DRM.PropBagControlsWPF
 {
-    using PSServiceSingletonProviderInterface = IProvidePropStoreServiceSingletons<UInt32, String>;
-
-    public class PropBagTemplate : ItemsControl
+    public class PropBagTemplate : ItemsControl//, IPropBagTemplate
     {
         public static byte TEST_FLAG = 0xff;
 
@@ -55,23 +54,7 @@ namespace DRM.PropBagControlsWPF
                 this.SetValue(TypeSafetyModeProperty, value);
             }
         }
-
         
-        public static readonly DependencyProperty PropStoreServiceProviderTypeProperty =
-            DependencyProperty.Register("PropStoreServiceProviderType", typeof(Type), typeof(PropBagTemplate));
-
-        public Type PropStoreServiceProviderType
-        {
-            get
-            {
-                return (Type)this.GetValue(PropStoreServiceProviderTypeProperty);
-            }
-            set
-            {
-                this.SetValue(PropStoreServiceProviderTypeProperty, value);
-            }
-        }
-
         public static readonly DependencyProperty TargetTypeProperty =
             DependencyProperty.Register("TargetType", typeof(Type), typeof(PropBagTemplate));
 
@@ -213,41 +196,27 @@ namespace DRM.PropBagControlsWPF
             }
         }
 
-        public static readonly DependencyProperty AutoMapperServiceProviderTypeProperty =
-            DependencyProperty.Register("AutoMapperServiceProviderType", typeof(Type), typeof(PropBagTemplate));
+        // TODO: Use a Child Control instead. The child control would in addition to the
+        // Type to activate, an optional ValueConverter and an optional TypeResolver.
+        static DependencyProperty PropFactoryTypeProperty =
+            DependencyProperty.Register("PropFactoryType", typeof(Type), typeof(PropBagTemplate), new PropertyMetadata(null));
 
-        public Type AutoMapperServiceProviderType
+        public Type PropFactoryType
         {
             get
             {
-                return (Type)this.GetValue(AutoMapperServiceProviderTypeProperty);
+                return (Type)this.GetValue(PropFactoryTypeProperty);
             }
             set
             {
-                this.SetValue(AutoMapperServiceProviderTypeProperty, value);
+                this.SetValue(PropFactoryTypeProperty, value);
             }
         }
-
-        static DependencyProperty PropFactoryProviderTypeProperty =
-            DependencyProperty.Register("PropFactoryProviderType", typeof(Type), typeof(PropBagTemplate), new PropertyMetadata(null));
-
-        public Type PropFactoryProviderType
-        {
-            get
-            {
-                return (Type)this.GetValue(PropFactoryProviderTypeProperty);
-            }
-            set
-            {
-                this.SetValue(PropFactoryProviderTypeProperty, value);
-            }
-        }
-
         //public static readonly DependencyProperty NamespacesProperty =
         //    DependencyProperty.Register("Namespaces", typeof(NamespacesCollection), typeof(PropBagTemplate), new PropertyMetadata(new NamespacesCollection()));
 
         NamespacesCollection _namespaces;
-        public NamespacesCollection Namespaces
+        public ObservableCollection<INamespaceItem> Namespaces
         {
             get
             {
@@ -264,7 +233,7 @@ namespace DRM.PropBagControlsWPF
         //    DependencyProperty.Register("Props", typeof(PropsCollection), typeof(PropBagTemplate), new PropertyMetadata(new PropsCollection()));
 
         PropsCollection _props;
-        public PropsCollection Props
+        public ObservableCollection<IPropTemplateItem> Props
         {
             get
             {
@@ -302,97 +271,160 @@ namespace DRM.PropBagControlsWPF
 
                 return result;
             }
-
         }
 
         #endregion
 
-        #region PropStoreService Support
+        // COULD BE USED FOR UNIT TESTING
+        //public SimpleExKey GetTestObject()
+        //{
+        //    if (AutoMapperServiceProviderType == null)
+        //    {
+        //        throw new InvalidOperationException("The AutoMapperServiceType has not been set.");
+        //    }
 
-        IPropFactory _propFactory;
-        public IPropFactory PropFactory
-        {
-            get
-            {
-                if(_propFactory == null)
-                {
-                    Func<IPropFactory> propFactoryCreator = PropFactoryCreator;
+        //    IAMServiceRef serviceRef = (IAMServiceRef)Activator.CreateInstance(AutoMapperServiceProviderType);
 
-                    if(propFactoryCreator != null)
-                    {
-                        _propFactory = propFactoryCreator();
-                    }
-                    else
-                    {
-                        System.Diagnostics.Debug.WriteLine($"The PropFactory for PropModel for class: {FullClassName} is null.");
-                    }
-                }
-                return _propFactory;
-            }
-        }
+        //    SimpleExKey result = serviceRef.ExKey;
 
-        public Func<IPropFactory> PropFactoryCreator
-        {
-            get
-            {
-                if (PropStoreServiceProviderType == null) return null;
+        //    return result;
+        //}
 
-                PSServiceSingletonProviderInterface propStoreServices = GetPropStoreServices(this.PropStoreServiceProviderType);
+        #region OLD Properties used to build an instance of IPropFactory
 
-                IProvideAutoMappers autoMapperProvider;
-                if(AutoMapperServiceProviderType == null)
-                {
-                    autoMapperProvider = null;
-                }
-                else
-                {
-                    autoMapperProvider = GetAutoMapperService(this.AutoMapperServiceProviderType);
-                }
-                
-                Func<IPropFactory> result = GetPropFactoryCreator(this.PropFactoryProviderType, propStoreServices, autoMapperProvider);
-                return result;
-            }
-        }
+        //public static readonly DependencyProperty PropStoreServiceProviderTypeProperty =
+        //    DependencyProperty.Register("PropStoreServiceProviderType", typeof(Type), typeof(PropBagTemplate));
 
-        private IProvideAutoMappers GetAutoMapperService(Type autoMapperServiceProviderType)
-        {
-            if (autoMapperServiceProviderType == null) return null;
+        //public Type PropStoreServiceProviderType
+        //{
+        //    get
+        //    {
+        //        return (Type)this.GetValue(PropStoreServiceProviderTypeProperty);
+        //    }
+        //    set
+        //    {
+        //        this.SetValue(PropStoreServiceProviderTypeProperty, value);
+        //    }
+        //}
 
-            IAMServiceRef serviceRef = (IAMServiceRef)Activator.CreateInstance(autoMapperServiceProviderType);
+        //public static readonly DependencyProperty AutoMapperServiceProviderTypeProperty =
+        //    DependencyProperty.Register("AutoMapperServiceProviderType", typeof(Type), typeof(PropBagTemplate));
 
-            IProvideAutoMappers result = serviceRef.AutoMapperProvider;
+        //public Type AutoMapperServiceProviderType
+        //{
+        //    get
+        //    {
+        //        return (Type)this.GetValue(AutoMapperServiceProviderTypeProperty);
+        //    }
+        //    set
+        //    {
+        //        this.SetValue(AutoMapperServiceProviderTypeProperty, value);
+        //    }
+        //}
 
-            return result;
-        }
+        //static DependencyProperty PropFactoryProviderTypeProperty =
+        //    DependencyProperty.Register("PropFactoryProviderType", typeof(Type), typeof(PropBagTemplate), new PropertyMetadata(null));
 
-
-        private PSServiceSingletonProviderInterface GetPropStoreServices(Type propStoreServiceProviderType)
-        {
-            if (propStoreServiceProviderType == null) return null;
-
-            IPSServiceRef serviceRef = (IPSServiceRef) Activator.CreateInstance(propStoreServiceProviderType);
-
-            PSServiceSingletonProviderInterface result = serviceRef.PropStoreServices;
-
-            return result;
-        }
-
-        private Func<IPropFactory> GetPropFactoryCreator(Type propFactoryProviderType, PSServiceSingletonProviderInterface propStoreServices, IProvideAutoMappers autoMapperProvider)
-        {
-            if(propFactoryProviderType == null)
-            {
-                return null;
-            }
-            else
-            {
-                object factoryCreator = Activator.CreateInstance(propFactoryProviderType, propStoreServices, autoMapperProvider);
-                IProvideAPropFactoryCreator funcProvider = (IProvideAPropFactoryCreator)factoryCreator;
-                Func<IPropFactory> result = funcProvider.GetNewPropFactory;
-                return result;
-            }
-        }
+        //public Type PropFactoryProviderType
+        //{
+        //    get
+        //    {
+        //        return (Type)this.GetValue(PropFactoryProviderTypeProperty);
+        //    }
+        //    set
+        //    {
+        //        this.SetValue(PropFactoryProviderTypeProperty, value);
+        //    }
+        //}
 
         #endregion
+
+        //#region PropStoreService Support
+
+        //IPropFactory _propFactory;
+        //public IPropFactory PropFactory
+        //{
+        //    get
+        //    {
+        //        if(_propFactory == null)
+        //        {
+        //            Func<IPropFactory> propFactoryCreator = PropFactoryCreator;
+
+        //            if(propFactoryCreator != null)
+        //            {
+        //                _propFactory = propFactoryCreator();
+        //            }
+        //            else
+        //            {
+        //                System.Diagnostics.Debug.WriteLine($"The PropFactory for PropModel for class: {FullClassName} is null.");
+        //            }
+        //        }
+        //        return _propFactory;
+        //    }
+        //}
+
+        //public Func<IPropFactory> PropFactoryCreator
+        //{
+        //    get
+        //    {
+        //        if (PropStoreServiceProviderType == null) return null;
+
+        //        PSServiceSingletonProviderInterface propStoreServices = GetPropStoreServices(this.PropStoreServiceProviderType);
+
+        //        IProvideAutoMappers autoMapperProvider;
+        //        if(AutoMapperServiceProviderType == null)
+        //        {
+        //            autoMapperProvider = null;
+        //        }
+        //        else
+        //        {
+        //            autoMapperProvider = GetAutoMapperService(this.AutoMapperServiceProviderType);
+        //        }
+
+        //        Func<IPropFactory> result = GetPropFactoryCreator(this.PropFactoryProviderType, propStoreServices, autoMapperProvider);
+        //        return result;
+        //    }
+        //}
+
+        //private IProvideAutoMappers GetAutoMapperService(Type autoMapperServiceProviderType)
+        //{
+        //    if (autoMapperServiceProviderType == null) return null;
+
+        //    IAMServiceRef serviceRef = (IAMServiceRef)Activator.CreateInstance(autoMapperServiceProviderType);
+
+        //    IProvideAutoMappers result = serviceRef.AutoMapperProvider;
+
+        //    return result;
+        //}
+
+        //private PSServiceSingletonProviderInterface GetPropStoreServices(Type propStoreServiceProviderType)
+        //{
+        //    if (propStoreServiceProviderType == null) return null;
+
+        //    IPSServiceRef serviceRef = (IPSServiceRef) Activator.CreateInstance(propStoreServiceProviderType);
+
+        //    PSServiceSingletonProviderInterface result = serviceRef.PropStoreServices;
+
+        //    return result;
+
+        //}
+
+        //private Func<IPropFactory> GetPropFactoryCreator(Type propFactoryProviderType, PSServiceSingletonProviderInterface propStoreServices, IProvideAutoMappers autoMapperProvider)
+        //{
+        //    if(propFactoryProviderType == null)
+        //    {
+        //        return null;
+        //    }
+        //    else
+        //    {
+        //        object factoryCreator = Activator.CreateInstance(propFactoryProviderType, propStoreServices, autoMapperProvider);
+        //        IProvideAPropFactoryCreator funcProvider = (IProvideAPropFactoryCreator)factoryCreator;
+        //        Func<IPropFactory> result = funcProvider.GetNewPropFactory;
+        //        return result;
+        //    }
+        //}
+
+        //#endregion
     }
 }
 

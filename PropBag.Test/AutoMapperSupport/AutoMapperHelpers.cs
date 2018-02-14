@@ -39,7 +39,8 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 (
                 mapTypeDefinitionProvider: mapTypeDefinitionProvider,
                 mappersCachingService: mappersCachingService,
-                mapperBuilderProvider: propBagMapperBuilderProvider/*, propModelProvider: null*/
+                mapperBuilderProvider: propBagMapperBuilderProvider
+                //, propModelProvider: null
                 );
 
             return autoMapperProvider;

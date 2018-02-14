@@ -23,7 +23,7 @@ namespace MVVMApplication.Infra
         public static int MAX_NUMBER_OF_PROPERTIES = 65536;
         public static PSServiceSingletonProviderInterface PropStoreServices { get; }
 
-        public static IPropFactory DefaultPropFactory { get; }
+        private static IPropFactory DefaultPropFactory { get; }
 
         public static IProvidePropModels PropModelProvider { get; private set; }
 
@@ -46,7 +46,8 @@ namespace MVVMApplication.Infra
                     _configPackageNameSuffix = value;
                     IViewModelActivator vmActivator = new SimpleViewModelActivator();
 
-                    PropModelProvider = GetPropModelProvider(vmActivator, ConfigPackageNameSuffix);
+
+                    PropModelProvider = GetPropModelProvider(vmActivator, PropStoreServices, DefaultPropFactory, ConfigPackageNameSuffix);
 
                     ViewModelHelper = new ViewModelHelper(PropModelProvider, vmActivator, PropStoreServices.PropStoreEntryPoint);
 
@@ -75,40 +76,58 @@ namespace MVVMApplication.Infra
                 _mct.MeasureAndReport("After new SimpleViewModelActivator");
 
             AutoMapperProvider = GetAutoMapperProvider(vmActivator, PropStoreServices.PropStoreEntryPoint);
-                _mct.MeasureAndReport("After GetAutoMapperProvider");
+            _mct.MeasureAndReport("After GetAutoMapperProvider");
 
             DefaultPropFactory = BuildDefaultPropFactory(PropStoreServices, AutoMapperProvider);
-                _mct.MeasureAndReport("After new BuildDefaultPropFactory");
+            _mct.MeasureAndReport("After new BuildDefaultPropFactory");
 
-            //IPropBagTemplateProvider propBagTemplateProvider = new PropBagTemplateProvider(Application.Current.Resources, null);
-            //_mct.MeasureAndReport("After new PropBagTemplateProvider");
-
-            //IMapperRequestProvider mapperRequestProvider = new MapperRequestProvider(Application.Current.Resources, ConfigPackageNameSuffix);
-            //_mct.MeasureAndReport("After new MapperRequestProvider");
-
-
-            //PropModelProvider = new PropModelProvider(propBagTemplateProvider, mapperRequestProvider, DefaultPropFactory, vmActivator, PropStoreServices.PropStoreEntryPoint);
-            //_mct.MeasureAndReport("After new PropModelProvider");
-
-            PropModelProvider = GetPropModelProvider(vmActivator, ConfigPackageNameSuffix);
+            PropModelProvider = GetPropModelProvider(vmActivator, PropStoreServices, DefaultPropFactory, ConfigPackageNameSuffix);
 
             ViewModelHelper = new ViewModelHelper(PropModelProvider, vmActivator, PropStoreServices.PropStoreEntryPoint);
                 _mct.MeasureAndReport("After new ViewModelHelper");
+
         }
 
-        private static IProvidePropModels GetPropModelProvider(IViewModelActivator vmActivator, string configPackageNameSuffix)
+        private static IProvidePropModels GetPropModelProvider
+            (
+            IViewModelActivator vmActivator,
+            PSServiceSingletonProviderInterface propStoreServices,
+            IPropFactory defaultPropFactory,
+            string configPackageNameSuffix
+            )
         {
             IPropBagTemplateProvider propBagTemplateProvider = new PropBagTemplateProvider(Application.Current.Resources, null);
-            _mct.MeasureAndReport("After new PropBagTemplateProvider");
+                _mct.MeasureAndReport("After new PropBagTemplateProvider");
 
             IMapperRequestProvider mapperRequestProvider = new MapperRequestProvider(Application.Current.Resources, ConfigPackageNameSuffix);
-            _mct.MeasureAndReport("After new MapperRequestProvider");
+                _mct.MeasureAndReport("After new MapperRequestProvider");
 
-            IProvidePropModels propModelProvider = new SimplePropModelProvider(propBagTemplateProvider, mapperRequestProvider, DefaultPropFactory, vmActivator, PropStoreServices.PropStoreEntryPoint);
-            _mct.MeasureAndReport("After new PropModelProvider");
+            IPropFactoryFactory propFactoryFactory = BuildThePropFactoryFactory(propStoreServices);
+
+            IParsePropBagTemplates propBagTemplateParser = new PropBagTemplateParser();
+
+            IProvidePropModels propModelProvider = new SimplePropModelProvider
+                (
+                propBagTemplateProvider,
+                mapperRequestProvider,
+                propBagTemplateParser,
+                //vmActivator,
+                //propStoreServices.PropStoreEntryPoint,
+                propFactoryFactory,
+                defaultPropFactory
+                );
+
+                _mct.MeasureAndReport("After new PropModelProvider");
+
             return propModelProvider;
         }
 
+        private static IPropFactoryFactory BuildThePropFactoryFactory(PSServiceSingletonProviderInterface propStoreServices)
+        {
+            PropFactoryValueConverter valueConverter = new PropFactoryValueConverter(propStoreServices.TypeDescBasedTConverterCache);
+            IPropFactoryFactory result = new PropFactoryFactory(propStoreServices.DelegateCacheProvider, valueConverter, typeResolver: null);
+            return result;
+        }
 
         private static PSServiceSingletonProviderInterface BuildPropStoreService(int maxNumberOfProperties)
         {
@@ -142,7 +161,11 @@ namespace MVVMApplication.Infra
             return result;
         }
 
-        private static IPropFactory BuildDefaultPropFactory(PSServiceSingletonProviderInterface propStoreServices, IProvideAutoMappers autoMapperProvider)
+        private static IPropFactory BuildDefaultPropFactory
+            (
+            PSServiceSingletonProviderInterface propStoreServices,
+            IProvideAutoMappers autoMapperProvider
+            )
         {
             IConvertValues valueConverter = new PropFactoryValueConverter(propStoreServices.TypeDescBasedTConverterCache);
             ResolveTypeDelegate typeResolver = null;
@@ -155,7 +178,12 @@ namespace MVVMApplication.Infra
             return result;
         }
 
-        private static IProvideAutoMappers GetAutoMapperProvider(IViewModelActivator viewModelActivator, PSAccessServiceCreatorInterface storeAccessCreator)
+        private static IProvideAutoMappers GetAutoMapperProvider
+            (
+            IViewModelActivator viewModelActivator,
+            PSAccessServiceCreatorInterface storeAccessCreator
+            //, IProvidePropModels propModelProvider
+            )
         {
             // TODO: Expose the creation of wrapperTypeCreator (ICreateWrapperTypes).
             IPropBagMapperBuilderProvider propBagMapperBuilderProvider = new SimplePropBagMapperBuilderProvider
@@ -174,7 +202,8 @@ namespace MVVMApplication.Infra
                 (
                 mapTypeDefinitionProvider: mapTypeDefinitionProvider,
                 mappersCachingService: mappersCachingService,
-                mapperBuilderProvider: propBagMapperBuilderProvider/*, propModelProvider: null*/
+                mapperBuilderProvider: propBagMapperBuilderProvider
+                //, propModelProvider: propModelProvider
                 );
 
             return autoMapperProvider;

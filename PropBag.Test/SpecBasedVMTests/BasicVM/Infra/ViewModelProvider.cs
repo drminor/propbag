@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 
-namespace MVVMApplication.Infra
+namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM.Infra
 {
     public class ViewModelProvider
     {

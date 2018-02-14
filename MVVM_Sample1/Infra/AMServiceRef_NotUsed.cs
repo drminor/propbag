@@ -1,5 +1,6 @@
 ﻿using DRM.PropBag.AutoMapperSupport;
 using DRM.PropBagControlsWPF;
+using DRM.TypeSafePropertyBag;
 
 namespace MVVMApplication.Infra
 {
@@ -10,5 +11,7 @@ namespace MVVMApplication.Infra
         }
 
         public IProvideAutoMappers AutoMapperProvider => PropStoreServicesForThisApp.AutoMapperProvider;
+
+        public SimpleExKey ExKey => throw new System.NotImplementedException();
     }
 }

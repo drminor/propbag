@@ -34,13 +34,18 @@ namespace DRM.PropBag
         [XmlAttribute("use-empty-string")]
         public bool SetToEmptyString { get { return stes; } set { SetIfDifferent<bool>(ref stes, value); } }
 
+        public bool CreateNew { get; set; }
+
+        public string PropBagResourceKey { get; set; }
+
         public Func<object> ValueCreator { get { return vc; } set { SetIfDifferentDelegate<Func<object>>(ref vc, value); } }
 
         public PropInitialValueField() : this(null) { }
 
         public PropInitialValueField(string initialValue, bool setToDefault = false,
             bool setToUndefined = false, bool setToNull = false,
-            bool setToEmptyString = false, Func<object> valueCreator = null)
+            bool setToEmptyString = false, Func<object> valueCreator = null,
+            bool createNew = false, string propBagResourceKey = null)
         {
             InitialValue = initialValue;
             SetToUndefined = setToUndefined;
@@ -48,8 +53,11 @@ namespace DRM.PropBag
             SetToNull = setToNull;
             SetToEmptyString = setToEmptyString;
             ValueCreator = valueCreator;
+            CreateNew = createNew;
+            PropBagResourceKey = propBagResourceKey;
         }
 
+        // TODO: Include the two new properties: CreateNew and PropBagResourceKey
         public bool Equals(PropInitialValueField other)
         {
             if (other == null) return false;

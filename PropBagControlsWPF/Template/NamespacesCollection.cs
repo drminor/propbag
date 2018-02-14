@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using DRM.TypeSafePropertyBag;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DRM.PropBagControlsWPF
 {
-    public class NamespacesCollection : ObservableCollection<NamespaceItem>
+    public class NamespacesCollection : ObservableCollection<INamespaceItem>
     {
         public NamespacesCollection() : base() {  }
     }

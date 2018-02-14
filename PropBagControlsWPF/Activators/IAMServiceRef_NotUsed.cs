@@ -1,9 +1,11 @@
 ﻿using DRM.PropBag.AutoMapperSupport;
+using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBagControlsWPF
 {
     public interface IAMServiceRef
     {
-        IProvideAutoMappers AutoMapperProvider { get; } 
+        IProvideAutoMappers AutoMapperProvider { get; }
+        SimpleExKey ExKey { get; }
     }
 }
