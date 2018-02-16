@@ -106,6 +106,10 @@
       <Project>{bbb1e311-374e-4c91-a313-1667d83767db}</Project>
       <Name>TypeSafePropertyBag</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ViewModelTools\ViewModelTools.csproj">
+      <Project>{A149EAD5-06A9-47C8-8853-1D329D553EA7}</Project>
+      <Name>ViewModelTools</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="XMLModel\PropBagModel.dtd" />

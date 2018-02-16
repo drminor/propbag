@@ -48,6 +48,8 @@ namespace DRM.TypeSafePropertyBag
         // Restricted Update Method on Dictionary-like object.
         bool SetTypedProp(IPropBag propBag, L2T propId, L2TRaw propertyName, IProp genericTypedProp);
 
+        IPropStoreAccessServiceCreator<L2T, L2TRaw> StoreAcessorCreator { get; }
+
         IPropStoreAccessService<L2T, L2TRaw> CloneProps(IPropBag callingPropBag, IPropBag copySource);
         int ClearAllProps(IPropBag propBag);
 

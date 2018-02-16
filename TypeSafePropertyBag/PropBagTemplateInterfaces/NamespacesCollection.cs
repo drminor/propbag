@@ -1,7 +1,6 @@
-﻿using DRM.TypeSafePropertyBag;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 
-namespace DRM.PropBagControlsWPF
+namespace DRM.TypeSafePropertyBag
 {
     public class NamespacesCollection : ObservableCollection<INamespaceItem>
     {

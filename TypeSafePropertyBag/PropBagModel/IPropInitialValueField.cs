@@ -9,6 +9,10 @@ namespace DRM.TypeSafePropertyBag
         bool SetToEmptyString { get; set; }
         bool SetToNull { get; set; }
         bool SetToUndefined { get; set; }
+
+        bool CreateNew { get; set; }
+        string PropBagResourceKey { get; set; }
+
         Func<object> ValueCreator { get; set; }
 
         string GetStringValue();

@@ -10,7 +10,7 @@ using System.Windows.Controls;
 
 namespace DRM.PropBagControlsWPF
 {
-    public class PropBagTemplate : ItemsControl//, IPropBagTemplate
+    public class PropBagTemplate : ItemsControl, IPropBagTemplate
     {
         public static byte TEST_FLAG = 0xff;
 
@@ -216,7 +216,7 @@ namespace DRM.PropBagControlsWPF
         //    DependencyProperty.Register("Namespaces", typeof(NamespacesCollection), typeof(PropBagTemplate), new PropertyMetadata(new NamespacesCollection()));
 
         NamespacesCollection _namespaces;
-        public ObservableCollection<INamespaceItem> Namespaces
+        public NamespacesCollection Namespaces
         {
             get
             {
@@ -233,7 +233,7 @@ namespace DRM.PropBagControlsWPF
         //    DependencyProperty.Register("Props", typeof(PropsCollection), typeof(PropBagTemplate), new PropertyMetadata(new PropsCollection()));
 
         PropsCollection _props;
-        public ObservableCollection<IPropTemplateItem> Props
+        public PropsCollection Props
         {
             get
             {

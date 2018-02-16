@@ -5,20 +5,20 @@ namespace DRM.TypeSafePropertyBag
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
     using PSServiceSingletonProviderInterface = IProvidePropStoreServiceSingletons<UInt32, String>;
 
-    public class PropStoreServices : PSServiceSingletonProviderInterface, IDisposable
+    public class PropStoreServices_NotUsed : PSServiceSingletonProviderInterface, IDisposable
     {
-        public PropStoreServices(ITypeDescBasedTConverterCache typeDescBasedTConverterCache, IProvideDelegateCaches delegateCacheProvider, IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider, PSAccessServiceCreatorInterface propStoreEntryPoint)
+        public PropStoreServices_NotUsed(ITypeDescBasedTConverterCache typeDescBasedTConverterCache, IProvideDelegateCaches delegateCacheProvider, IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider/*, PSAccessServiceCreatorInterface propStoreEntryPoint*/)
         {
             TypeDescBasedTConverterCache = typeDescBasedTConverterCache ?? throw new ArgumentNullException(nameof(typeDescBasedTConverterCache));
             DelegateCacheProvider = delegateCacheProvider ?? throw new ArgumentNullException(nameof(delegateCacheProvider));
             HandlerDispatchDelegateCacheProvider = handlerDispatchDelegateCacheProvider ?? throw new ArgumentNullException(nameof(handlerDispatchDelegateCacheProvider));
-            PropStoreEntryPoint = propStoreEntryPoint ?? throw new ArgumentNullException(nameof(propStoreEntryPoint));
+            //PropStoreEntryPoint = propStoreEntryPoint ?? throw new ArgumentNullException(nameof(propStoreEntryPoint));
         }
 
         public ITypeDescBasedTConverterCache TypeDescBasedTConverterCache { get; }
         public IProvideDelegateCaches DelegateCacheProvider { get; }
         public IProvideHandlerDispatchDelegateCaches HandlerDispatchDelegateCacheProvider { get; }
-        public PSAccessServiceCreatorInterface PropStoreEntryPoint { get; }
+        //public PSAccessServiceCreatorInterface PropStoreEntryPoint { get; }
 
         #region IDisposable Support
 
@@ -46,10 +46,10 @@ namespace DRM.TypeSafePropertyBag
                         disable3.Dispose();
                     }
 
-                    if(PropStoreEntryPoint is IDisposable disable4)
-                    {
-                        disable4.Dispose();
-                    }
+                    //if(PropStoreEntryPoint is IDisposable disable4)
+                    //{
+                    //    disable4.Dispose();
+                    //}
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.

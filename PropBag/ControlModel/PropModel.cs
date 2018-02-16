@@ -98,6 +98,11 @@ namespace DRM.PropBag
             set { this.SetCollection<ObservableCollection<IPropItem>, IPropItem>(ref _props, value); }
         }
 
+        IProvidePropModels pmp;
+        [XmlIgnore]
+        public IProvidePropModels PropModelProvider { get { return pmp; } set { SetAlways<IProvidePropModels>(ref pmp, value); } }
+
+
         #endregion Other Properties
 
         #endregion Dependency Properties
@@ -108,6 +113,7 @@ namespace DRM.PropBag
             DeriveFromClassModeEnum deriveFrom,
             Type targetType,
             IPropFactory propFactory,
+            IProvidePropModels propModelProvider,
             PropBagTypeSafetyMode typeSafetyMode = PropBagTypeSafetyMode.AllPropsMustBeRegistered,
             bool deferMethodRefResolution = true,
             bool requireExplicitInitialValue = true)
@@ -118,6 +124,9 @@ namespace DRM.PropBag
             TargetType = targetType;
             PropFactory = propFactory;
             PropFactoryType = propFactory?.GetType();
+
+            PropModelProvider = propModelProvider;
+
             TypeSafetyMode = typeSafetyMode;
             DeferMethodRefResolution = deferMethodRefResolution;
             RequireExplicitInitialValue = requireExplicitInitialValue;
@@ -132,6 +141,8 @@ namespace DRM.PropBag
             DeriveFromClassModeEnum deriveFrom,
             Type targetType,
             Type propFactoryType,
+            IProvidePropModels propModelProvider,
+
             PropBagTypeSafetyMode typeSafetyMode = PropBagTypeSafetyMode.AllPropsMustBeRegistered,
             bool deferMethodRefResolution = true,
             bool requireExplicitInitialValue = true)
@@ -142,6 +153,8 @@ namespace DRM.PropBag
             TargetType = targetType;
             PropFactory = null;
             PropFactoryType = propFactoryType;
+            PropModelProvider = propModelProvider;
+
             TypeSafetyMode = typeSafetyMode;
             DeferMethodRefResolution = deferMethodRefResolution;
             RequireExplicitInitialValue = requireExplicitInitialValue;

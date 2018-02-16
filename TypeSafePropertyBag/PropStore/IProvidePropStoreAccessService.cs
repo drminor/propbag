@@ -22,6 +22,9 @@ namespace DRM.TypeSafePropertyBag
             IPropBag targetPropBag,
             out BagNode newStoreNode
             );
+
+        IPropStoreAccessServiceCreator<L2T, L2TRaw> StoreAcessorCreator { get; }
+
     }
 
     public interface IPropStoreAccessServiceCreator<L2T, L2TRaw> : IPropStoreAccessServicePerf<L2T, L2TRaw>

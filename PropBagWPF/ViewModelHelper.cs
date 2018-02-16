@@ -14,8 +14,8 @@ namespace DRM.PropBagWPF
     {
         #region Private Members
 
-        IProvidePropModels PropModelProvider { get; }
-        IViewModelActivator ViewModelActivator { get; }
+        IProvidePropModels _propModelProvider { get; }
+        IViewModelActivator _viewModelActivator { get; }
         PSAccessServiceCreatorInterface _storeAccessCreator;
 
         #endregion
@@ -24,8 +24,8 @@ namespace DRM.PropBagWPF
 
         public ViewModelHelper(IProvidePropModels propModelProvider, IViewModelActivator viewModelActivator, PSAccessServiceCreatorInterface storeAccessCreator)
         {
-            PropModelProvider = propModelProvider ?? throw new ArgumentNullException(nameof(propModelProvider));
-            ViewModelActivator = viewModelActivator ?? throw new ArgumentNullException(nameof(viewModelActivator));
+            _propModelProvider = propModelProvider ?? throw new ArgumentNullException(nameof(propModelProvider));
+            _viewModelActivator = viewModelActivator ?? throw new ArgumentNullException(nameof(viewModelActivator));
             _storeAccessCreator = storeAccessCreator ?? throw new ArgumentNullException(nameof(storeAccessCreator));
         }
 
@@ -35,8 +35,8 @@ namespace DRM.PropBagWPF
 
         public object GetNewViewModel(string resourceKey)
         {
-            IPropModel pm = PropModelProvider.GetPropModel(resourceKey);
-            object result = GetNewViewModel(pm, null);
+            IPropModel pm = _propModelProvider.GetPropModel(resourceKey);
+            object result = GetNewViewModel(pm, null, null);
             return result;
         }
 
@@ -48,20 +48,20 @@ namespace DRM.PropBagWPF
         /// <returns></returns>
         public object GetNewViewModel(string resourceKey, IPropFactory propFactory)
         {
-            IPropModel pm = PropModelProvider.GetPropModel(resourceKey);
-            object result = GetNewViewModel(pm, propFactory);
+            IPropModel pm = _propModelProvider.GetPropModel(resourceKey);
+            object result = GetNewViewModel(pm, propFactory, null);
             return result;
         }
 
-        private object GetNewViewModel(IPropModel pm, IPropFactory propFactory)
+        private object GetNewViewModel(IPropModel pm, IPropFactory propFactory, string fullClassName)
         {
-            object result = ViewModelActivator.GetNewViewModel
+            object result = _viewModelActivator.GetNewViewModel
                 (
                 propModel: pm,
                 storeAccessCreator: _storeAccessCreator,
                 typeToCreate: pm.TypeToCreate,
-                propFactory: propFactory ?? pm.PropFactory,
-                fullClassName: pm.FullClassName
+                propFactory: propFactory,
+                fullClassName: fullClassName
                 );
 
             return result;

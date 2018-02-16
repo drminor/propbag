@@ -12,14 +12,17 @@ using System.Windows;
 namespace PropBagLib.Tests.SpecBasedVMTests
 {
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
-    using PSServiceSingletonProviderInterface = IProvidePropStoreServiceSingletons<UInt32, String>;
 
     public abstract class PropBagVMTestBase : Specification
     {
         MemConsumptionTracker _mct; // This is only used to measure the amount of memory used during EstablishContext.
 
         protected int MaxPropsPerObject { get; private set; }
-        protected PSServiceSingletonProviderInterface PropStoreServices { get; private set; }
+
+        private SimplePropStoreAccessServiceProviderProxy _theStore { get; set; }
+
+        //protected PSServiceSingletonProviderInterface CoreDelegateCaches { get; private set; }
+
         protected IProvidePropModels PropModelProvider { get; private set; }
         protected ViewModelHelper ViewModelHelper { get; private set; }
         protected IProvideAutoMappers AutoMapperProvider { get; private set; }
@@ -33,6 +36,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests
             bool _memTrackerEnabledState = false;
             _mct = new MemConsumptionTracker("PSMT", "Starting MemTracker for PropStoreServices, AutoMapperSupport and related.", _memTrackerEnabledState);
 
+            // ***** SETTINGS BEGIN
             MaxPropsPerObject = 65536;
 
             string resourceFolderPath = @"C:\DEV\VS2013Projects\PubPropBag\PropBagLib.Tests.PropBagTemplates\ProbBagTemplates";
@@ -48,29 +52,64 @@ namespace PropBagLib.Tests.SpecBasedVMTests
             {
                 "MapperConf_Both.xaml",
             };
+            // ***** SETTINGS END
 
-            PropStoreServices = BuildPropStoreService(MaxPropsPerObject);
-            _mct.MeasureAndReport("After BuildPropStoreService");
+            // Core delegate caches.
+            //CoreDelegateCaches = CreateTheDelegateCaches();
+            //    _mct.MeasureAndReport("After BuildPropStoreService");
 
+            ITypeDescBasedTConverterCache typeDescBasedTConverterCache = new TypeDescBasedTConverterCache();
+            _mct.MeasureAndReport("After new TypeDescBasedTConverterCache");
+
+            IProvideDelegateCaches delegateCacheProvider = new SimpleDelegateCacheProvider(typeof(PropBag), typeof(APFGenericMethodTemplates));
+            _mct.MeasureAndReport("After new SimpleDelegateCacheProvider");
+
+            IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider = new SimpleHandlerDispatchDelegateCacheProvider();
+            _mct.MeasureAndReport("After new SimpleHandlerDispatchDelegateCacheProvider");
+
+            // Property Store
+            _theStore = new SimplePropStoreAccessServiceProviderProxy(MaxPropsPerObject, handlerDispatchDelegateCacheProvider);
+
+            // PropStoreAccessService Factory.
+            PSAccessServiceCreatorInterface psAccessServiceFactory = _theStore.PropStoreAccessServiceFactory;
+
+            // ViewModelActivator.
             IViewModelActivator vmActivator = new SimpleViewModelActivator();
             _mct.MeasureAndReport("After new SimpleViewModelActivator");
 
-            AutoMapperProvider = GetAutoMapperProvider(vmActivator, PropStoreServices.PropStoreEntryPoint);
+            // AutoMapper Services
+            AutoMapperProvider = GetAutoMapperProvider(vmActivator, psAccessServiceFactory);
             _mct.MeasureAndReport("After GetAutoMapperProvider");
 
-            IPropFactory defaultPropFactory = BuildDefaultPropFactory(PropStoreServices, AutoMapperProvider);
+            IConvertValues valueConverter = new PropFactoryValueConverter(typeDescBasedTConverterCache);
+
+            // Default PropFactory
+            IPropFactory defaultPropFactory = BuildDefaultPropFactory
+                (
+                valueConverter,
+                delegateCacheProvider,
+                AutoMapperProvider
+                );
             _mct.MeasureAndReport("After BuildDefaultPropFactory");
 
-            IPropFactoryFactory propFactoryFactory = BuildThePropFactoryFactory(PropStoreServices);
+            // The Factory used to build PropFactories.
+            IPropFactoryFactory propFactoryFactory = BuildThePropFactoryFactory
+                (
+                valueConverter,
+                delegateCacheProvider
+                );
 
-            RemotePropModelProvider remotePropModelProvider = GetPropModelProvider(vmActivator, PropStoreServices.PropStoreEntryPoint, propFactoryFactory, defaultPropFactory, ConfigPackageNameSuffix);
+            // PropModel Provider
+            RemotePropModelProvider remotePropModelProvider = GetPropModelProvider(propFactoryFactory, defaultPropFactory, ConfigPackageNameSuffix);
             PropModelProvider = remotePropModelProvider;
             _mct.MeasureAndReport("After GetPropModelProvider");
 
+            // Load the PropBag and Mapper Templates
             LoadPropModelsAndMappers(remotePropModelProvider, resourceFolderPath, pbTemplateFilenames, mapperRequestFilenames);
             _mct.MeasureAndReport("After LoadPropModelsAndMappers");
 
-            ViewModelHelper = new ViewModelHelper(PropModelProvider, vmActivator, PropStoreServices.PropStoreEntryPoint);
+            // Create the ViewModelHelper
+            ViewModelHelper = new ViewModelHelper(PropModelProvider, vmActivator, psAccessServiceFactory);
             _mct.MeasureAndReport("After new ViewModelHelper");
 
             return OurCleanupRoutine;
@@ -78,13 +117,6 @@ namespace PropBagLib.Tests.SpecBasedVMTests
             void OurCleanupRoutine()
             {
                 _mct.CompactMeasureAndReport("Before Context Cleanup");
-
-                // PropStoreServices
-                if (PropStoreServices is IDisposable disable1)
-                {
-                    disable1.Dispose();
-                }
-                PropStoreServices = null;
 
                 // AutoMapperProvider
                 if (AutoMapperProvider is IDisposable disable2)
@@ -107,53 +139,52 @@ namespace PropBagLib.Tests.SpecBasedVMTests
                 }
                 ViewModelHelper = null;
 
+                _theStore.Dispose();
+
+                if (typeDescBasedTConverterCache is IDisposable disable5)
+                {
+                    disable5.Dispose();
+                }
+
+                if (delegateCacheProvider is IDisposable disable6)
+                {
+                    disable6.Dispose();
+                }
+
+                if (handlerDispatchDelegateCacheProvider is IDisposable disable7)
+                {
+                    disable7.Dispose();
+                }
+
                 _mct.CompactMeasureAndReport("After Context Cleanup");
             }
         }
 
-        protected virtual IPropFactoryFactory BuildThePropFactoryFactory(PSServiceSingletonProviderInterface propStoreServices)
+        protected virtual IPropFactoryFactory BuildThePropFactoryFactory
+            (
+            IConvertValues valueConverter,
+            IProvideDelegateCaches delegateCacheProvider
+            )
         {
-            PropFactoryValueConverter valueConverter = new PropFactoryValueConverter(propStoreServices.TypeDescBasedTConverterCache);
-            IPropFactoryFactory result = new PropFactoryFactory(propStoreServices.DelegateCacheProvider, valueConverter, typeResolver: null);
-            return result;
-        }
+            ResolveTypeDelegate typeResolver = null;
 
-        protected virtual PSServiceSingletonProviderInterface BuildPropStoreService(int maxNumberOfProperties)
-        {
-            PSServiceSingletonProviderInterface result;
-
-            ITypeDescBasedTConverterCache typeDescBasedTConverterCache = new TypeDescBasedTConverterCache();
-            _mct.MeasureAndReport("After new TypeDescBasedTConverterCache");
-
-            IProvideDelegateCaches delegateCacheProvider = new SimpleDelegateCacheProvider(typeof(PropBag), typeof(APFGenericMethodTemplates));
-            _mct.MeasureAndReport("After new SimpleDelegateCacheProvider");
-
-            IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider = new SimpleHandlerDispatchDelegateCacheProvider();
-            _mct.MeasureAndReport("After new SimpleHandlerDispatchDelegateCacheProvider");
-
-            using (PropStoreServiceCreatorFactory epCreator = new PropStoreServiceCreatorFactory())
-            {
-                PSAccessServiceCreatorInterface propStoreEntryPoint = epCreator.GetPropStoreEntryPoint(maxNumberOfProperties, handlerDispatchDelegateCacheProvider);
-
-                result = new PropStoreServices
-                    (typeDescBasedTConverterCache,
-                    delegateCacheProvider,
-                    handlerDispatchDelegateCacheProvider,
-                    propStoreEntryPoint);
-            }
-            _mct.MeasureAndReport("After New PropStoreServices");
+            IPropFactoryFactory result = new PropFactoryFactory
+                (
+                delegateCacheProvider,
+                valueConverter,
+                typeResolver: typeResolver
+                );
 
             return result;
         }
 
         private IPropFactory BuildDefaultPropFactory
             (
-            PSServiceSingletonProviderInterface propStoreServices,
+            IConvertValues valueConverter,
+            IProvideDelegateCaches delegateCacheProvider,
             IProvideAutoMappers autoMapperProvider
             )
         {
-            IProvideDelegateCaches delegateCacheProvider = PropStoreServices.DelegateCacheProvider;
-            IConvertValues valueConverter = new PropFactoryValueConverter(propStoreServices.TypeDescBasedTConverterCache);
             ResolveTypeDelegate typeResolver = null;
 
             IPropFactory result = new WPFPropFactory
@@ -169,30 +200,16 @@ namespace PropBagLib.Tests.SpecBasedVMTests
 
         protected virtual RemotePropModelProvider GetPropModelProvider
             (
-            IViewModelActivator vmActivator,
-            PSAccessServiceCreatorInterface storeAccessCreator,
             IPropFactoryFactory propFactoryFactory,
             IPropFactory defaultPropFactory,
             string configPackageNameSuffix
             )
         {
-            //IPropBagTemplateProvider propBagTemplateProvider = new PropBagTemplateProvider(resources, null);
-            //_mct.MeasureAndReport("After new PropBagTemplateProvider");
-
-            //IMapperRequestProvider mapperRequestProvider = new MapperRequestProvider(resources, ConfigPackageNameSuffix);
-            //_mct.MeasureAndReport("After new MapperRequestProvider");
-
-            //IPropFactory fallBackPropFactory = null;
-            //IProvidePropModels propModelProvider = new SimplePropModelProvider(propBagTemplateProvider, mapperRequestProvider, vmActivator, PropStoreServices.PropStoreEntryPoint, fallBackPropFactory);
-            //_mct.MeasureAndReport("After new PropModelProvider");
-
-            //return propModelProvider;
-
             ResourceDictionaryProvider rdProvider = new ResourceDictionaryProvider();
 
             PropBagTemplateParser pbtParser = new PropBagTemplateParser();
 
-            RemotePropModelProvider propModelProvider = new RemotePropModelProvider(rdProvider, pbtParser, propFactoryFactory, defaultPropFactory);
+            RemotePropModelProvider propModelProvider = new RemotePropModelProvider(rdProvider, pbtParser, propFactoryFactory, defaultPropFactory, configPackageNameSuffix);
             _mct.MeasureAndReport("After new PropModelProvider");
 
             return propModelProvider;
@@ -243,7 +260,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests
         protected virtual IProvideAutoMappers GetAutoMapperProvider
             (
             IViewModelActivator viewModelActivator,
-            PSAccessServiceCreatorInterface storeAccessCreator
+            PSAccessServiceCreatorInterface psAccessServiceFactory
             )
         {
             // TODO: Expose the creation of wrapperTypeCreator (ICreateWrapperTypes).
@@ -251,7 +268,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests
                 (
                 wrapperTypesCreator: null,
                 viewModelActivator: viewModelActivator,
-                storeAccessCreator: storeAccessCreator
+                storeAccessCreator: psAccessServiceFactory
                 );
 
             IMapTypeDefinitionProvider mapTypeDefinitionProvider = new SimpleMapTypeDefinitionProvider();
@@ -263,7 +280,6 @@ namespace PropBagLib.Tests.SpecBasedVMTests
                 mapTypeDefinitionProvider: mapTypeDefinitionProvider,
                 mappersCachingService: mappersCachingService,
                 mapperBuilderProvider: propBagMapperBuilderProvider
-                //, propModelProvider: propModelProvider
                 );
 
             return autoMapperProvider;

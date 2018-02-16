@@ -1,4 +1,5 @@
 ﻿using DRM.PropBag.Caches;
+using DRM.PropBag.ViewModelTools;
 using DRM.TypeSafePropertyBag;
 using DRM.TypeSafePropertyBag.DataAccessSupport;
 using DRM.TypeSafePropertyBag.Fundamentals;
@@ -59,7 +60,6 @@ namespace DRM.PropBag
         private ITypeSafePropBagMetaData _ourMetaData { get; set; }
         protected virtual ITypeSafePropBagMetaData OurMetaData { get { return _ourMetaData; } set { _ourMetaData = value; } }
         protected internal object _propItemSet_Handle { get; private set; }
-        //private PropBagTypeSafetyMode _typeSafetyMode { get; set; }
 
         private IDictionary<string, IViewManagerProviderKey> _foreignViewManagers; // TODO: Consider creating a lazy property accessor for this field.
 
@@ -160,18 +160,13 @@ namespace DRM.PropBag
         #region Constructor
 
         public PropBag(IPropModel propModel, PSAccessServiceCreatorInterface storeAcessorCreator)
+            : this(propModel, storeAcessorCreator, null, null)
         {
-                long memUsedSoFar = _memConsumptionTracker.UsedSoFar;
+        }
 
-            BasicConstruction(propModel.TypeSafetyMode, propModel.PropFactory, propModel.FullClassName);
-
-            _ourStoreAccessor = storeAcessorCreator.CreatePropStoreService(this);
-                _memConsumptionTracker.MeasureAndReport("CreatePropStoreService", null);
-
-            _propItemSet_Handle = Hydrate(propModel);
-                _memConsumptionTracker.Report(memUsedSoFar, "---- AfterHydrate.");
-
-            //int testc = _ourStoreAccessor.PropertyCount;
+        public PropBag(IPropModel propModel, PSAccessServiceCreatorInterface storeAcessorCreator, IPropFactory propFactory)
+            : this(propModel, storeAcessorCreator, propFactory, null)
+        {
         }
 
         /// <summary>
@@ -182,20 +177,22 @@ namespace DRM.PropBag
         /// <param name="storeAcessorCreator"></param>
         /// <param name="propFactory">The PropFactory to use instead of the one specified by the PropModel.</param>
         /// <param name="fullClassName">The namespace and class name to use instead of the one specified by the PropMode.</param>
-        public PropBag(IPropModel propModel, PSAccessServiceCreatorInterface storeAcessorCreator, IPropFactory propFactory = null, string fullClassName = null)
+        public PropBag(IPropModel propModel, PSAccessServiceCreatorInterface storeAcessorCreator, IPropFactory propFactory, string fullClassName)
         {
-                long memUsedSoFar = _memConsumptionTracker.UsedSoFar;
+            long memUsedSoFar = _memConsumptionTracker.UsedSoFar;
 
-            IPropFactory propFactoryToUse = propFactory ?? propModel.PropFactory;
+            if (storeAcessorCreator == null) throw new ArgumentNullException(nameof(storeAcessorCreator));
+
+            IPropFactory propFactoryToUse = propFactory ?? propModel.PropFactory ?? throw new InvalidOperationException("The propModel has no PropFactory and one was not provided in the constructor.");
             string fullClassNameToUse = fullClassName ?? propModel.FullClassName;
 
             BasicConstruction(propModel.TypeSafetyMode, propFactoryToUse, fullClassNameToUse);
 
             _ourStoreAccessor = storeAcessorCreator.CreatePropStoreService(this);
-                _memConsumptionTracker.MeasureAndReport("CreatePropStoreService", null);
+            _memConsumptionTracker.MeasureAndReport("CreatePropStoreService", null);
 
             _propItemSet_Handle = Hydrate(propModel);
-                _memConsumptionTracker.Report(memUsedSoFar, "---- AfterHydrate.");
+            _memConsumptionTracker.Report(memUsedSoFar, "---- AfterHydrate.");
 
             //int testc = _ourStoreAccessor.PropertyCount;
         }
@@ -212,27 +209,31 @@ namespace DRM.PropBag
 
         protected PropBag(PropBagTypeSafetyMode typeSafetyMode, PSAccessServiceCreatorInterface storeAcessorCreator, IPropFactory propFactory, string fullClassName)
         {
-                _memConsumptionTracker.MeasureAndReport("Testing", "Top of PropBag Constructor.");
-                _memConsumptionTracker.Measure($"Top of PropBag Constructor.");
+            _memConsumptionTracker.MeasureAndReport("Testing", "Top of PropBag Constructor.");
+            _memConsumptionTracker.Measure($"Top of PropBag Constructor.");
 
             if (storeAcessorCreator == null) throw new ArgumentNullException(nameof(storeAcessorCreator));
+            if (propFactory == null) throw new ArgumentNullException(nameof(propFactory));
 
             BasicConstruction(typeSafetyMode, propFactory, fullClassName);
 
             _ourStoreAccessor = storeAcessorCreator.CreatePropStoreService(this);
-                _memConsumptionTracker.MeasureAndReport("CreatePropStoreService", null);
+            _memConsumptionTracker.MeasureAndReport("CreatePropStoreService", null);
         }
 
         private void BasicConstruction(PropBagTypeSafetyMode typeSafetyMode, IPropFactory propFactory, string fullClassName)
         {
-            //_typeSafetyMode = typeSafetyMode;
-            _propFactory = propFactory ?? throw new ArgumentNullException(nameof(propFactory));
+            if(propFactory == null)
+                throw new ArgumentNullException(nameof(propFactory));
+
+            _propFactory = propFactory; // ?? throw new ArgumentNullException(nameof(propFactory));
 
             _ourMetaData = BuildMetaData(typeSafetyMode, fullClassName, _propFactory);
             _memConsumptionTracker.MeasureAndReport("BuildMetaData", $"Full Class Name: {fullClassName ?? "NULL"}");
 
             _foreignViewManagers = null;
         }
+
 
         protected ITypeSafePropBagMetaData BuildMetaData(PropBagTypeSafetyMode typeSafetyMode, string classFullName, IPropFactory propFactory)
         {
@@ -300,7 +301,7 @@ namespace DRM.PropBag
                     if(binderPath != null)
                     {
                             //_memConsumptionTracker.Measure();
-                        IViewManagerProviderKey viewManagerProviderKey = BuildTheViewManagerProviderKey(pi);
+                        IViewManagerProviderKey viewManagerProviderKey = BuildTheViewManagerProviderKey(pi, pm.PropModelProvider);
                             _memConsumptionTracker.MeasureAndReport("BuildTheViewManagerProviderKey", $"PropBag: {_ourStoreAccessor.ToString()}: {pi.PropertyName}");
 
                         IProvideACViewManager cViewManagerProvider = GetOrAddCViewManagerProviderGen(pi.PropertyType, viewManagerProviderKey);
@@ -355,7 +356,7 @@ namespace DRM.PropBag
                 }
                 else
                 {
-                    newPropItem = processProp(pi, out propId);
+                    newPropItem = processProp(pi, pm.PropModelProvider, out propId);
                 }
 
                 if (pi.PropKind != PropKindEnum.CollectionView && pi.PropKind != PropKindEnum.CollectionViewSource_RO && pi.BinderField?.Path != null)
@@ -377,24 +378,57 @@ namespace DRM.PropBag
         {
             if(sender is IProvideACViewManager cViewManagerProvider)
             {
+                // Get the Id for this ViewManager Provider
                 IViewManagerProviderKey viewManagerProviderKey = cViewManagerProvider.ViewManagerProviderKey;
+
+                // Get the name and type of property for which this ViewManager Provider was created.
                 PropNameType propertyName = GetTargetPropNameForView(_foreignViewManagers, viewManagerProviderKey, out Type propertyType);
 
+                // Retreive the management Item from the PropStore for this property.
+                IPropData propData;
                 try
                 {
-                    IPropData propData = GetPropGen(propertyName, propertyType,
+                    propData = GetPropGen(propertyName, propertyType,
                         haveValue: false, value: null, alwaysRegister: false, mustBeRegistered: true,
                         neverCreate: true, desiredHasStoreValue: null, wasRegistered: out bool wasRegistered, propId: out PropIdType propId);
-
-                    if(propData.TypedProp /*.TypedValueAsObject*/ is IUseAViewProvider viewProviderHolder)
-                    {
-                        IProvideAView viewProvider = cViewManagerProvider.CViewManager.GetDefaultViewProvider();
-                        viewProviderHolder.ViewProvider = viewProvider;
-                    }
                 }
                 catch (InvalidOperationException ioe)
                 {
-                    throw new InvalidOperationException($"The {nameof(IProvideACViewManager)} raised the ViewManagerChanged and the PropertyName associated with this ViewManger: {propertyName} could not be found in this PropBag's list of registered PropItems.");
+                    throw new InvalidOperationException
+                        ($"The {nameof(IProvideACViewManager)} raised the ViewManagerChanged and the PropertyName associated with this ViewManger:" +
+                        $" {propertyName} could not be found in this PropBag's list of registered PropItems.");
+                }
+
+                // Retrieve the ViewProvider from the Property's value.
+                if (propData.TypedProp is IUseAViewProvider viewProviderHolder)
+                {
+                    IProvideAView viewProvider;
+                    try
+                    {
+                        // Get the Default ViewProvider from the ViewProvider Manager.
+                        viewProvider = cViewManagerProvider.CViewManager.GetDefaultViewProvider();
+                    }
+                    catch 
+                    {
+                        // TODO: Raise new exception with more detail.
+                        throw;
+                    }
+
+                    try
+                    {
+                        // Update the ViewProvider that is used by the Property's value.
+                        viewProviderHolder.ViewProvider = viewProvider;
+                    }
+                    catch
+                    {
+                        // TODO: Raise new exception with more detail.
+                        throw;
+                    }
+                }
+                else
+                {
+                    throw new InvalidOperationException($"The property for which the ViewManagerProvider was created, does not implement " +
+                        $"the {nameof(IUseAViewProvider)} interface. (PropBag::ViewManagerChanged event handler");
                 }
             }
             else
@@ -403,7 +437,7 @@ namespace DRM.PropBag
             }
         }
 
-        private IViewManagerProviderKey BuildTheViewManagerProviderKey(IPropItem pi)
+        private IViewManagerProviderKey BuildTheViewManagerProviderKey(IPropItem pi, IProvidePropModels propModelProvider)
         {
             if (pi == null) throw new ArgumentNullException(nameof(pi));
 
@@ -413,6 +447,12 @@ namespace DRM.PropBag
             }
 
             LocalBindingInfo localBindingInfo = new LocalBindingInfo(new LocalPropertyPath(pi.BinderField.Path));
+
+            if(pi.MapperRequest == null && pi.MapperRequestResourceKey != null)
+            {
+                pi.MapperRequest = propModelProvider.GetMapperRequest(pi.MapperRequestResourceKey);
+            }
+
             IViewManagerProviderKey result = new ViewManagerProviderKey(localBindingInfo, pi.MapperRequest);
             return result;
         }
@@ -425,7 +465,57 @@ namespace DRM.PropBag
             return propertyName;
         }
 
-        private IPropData processProp(IPropItem pi, out PropIdType propId)
+//                    if (pi.StorageStrategy == PropStorageStrategyEnum.Internal && !pi.InitialValueField.SetToUndefined)
+//            {
+//                //_memConsumptionTracker.Measure();
+//                //object newValue = pi.InitialValueField.ValueCreator();
+//                //_memConsumptionTracker.MeasureAndReport("InitialField.ValueCreator", $"for {pi.PropertyName}");
+
+//                //creationMethodDescription = "CreateGenFromObject";
+//                //propGen = _propFactory.CreateGenFromObject(pi.PropertyType, newValue, pi.PropertyName, ei, pi.StorageStrategy, pi.TypeIsSolid,
+//                //    pi.PropKind, comparer, useRefEquality, pi.ItemType);
+
+//                // Create New PropBag-based Object
+//                if (pi.InitialValueField.PropBagResourceKey != null)
+//                {
+//                    IViewModelActivator vmActivator = new SimpleViewModelActivator();
+
+//        //IPropModel propModel = 
+//        //IPropBag newObject = vmActivator.GetNewViewModel()
+//        propGen = _propFactory.CreateGenFromObject(pi.PropertyType, newObject, pi.PropertyName, ei, pi.StorageStrategy, pi.TypeIsSolid,
+//            pi.PropKind, comparer, useRefEquality, pi.ItemType);
+//                }
+
+//                // Create New CLR Type
+//                else if(pi.InitialValueField.CreateNew)
+//                {
+//                    object newValue = Activator.CreateInstance(pi.PropertyType);
+
+//    propGen = _propFactory.CreateGenFromObject(pi.PropertyType, newValue, pi.PropertyName, ei, pi.StorageStrategy, pi.TypeIsSolid,
+//        pi.PropKind, comparer, useRefEquality, pi.ItemType);
+//                }
+//                else
+//                {
+//                    bool useDefault = pi.InitialValueField.SetToDefault;
+//string value;
+
+//                    // TODO: Fix this??
+//                    if (pi.InitialValueField.SetToEmptyString && pi.PropertyType == typeof(Guid))
+//                    {
+//                        const string EMPTY_GUID = "00000000-0000-0000-0000-000000000000";
+//value = EMPTY_GUID;
+//                    }
+//                    else
+//                    {
+//                        value = pi.InitialValueField.GetStringValue();
+//                    }
+
+//                    creationMethodDescription = "CreateGenFromString";
+//                    propGen = _propFactory.CreateGenFromString(pi.PropertyType, value, useDefault, pi.PropertyName, ei, pi.StorageStrategy, pi.TypeIsSolid,
+//                        pi.PropKind, comparer, useRefEquality, pi.ItemType);
+//                }
+
+        private IPropData processProp(IPropItem pi, IProvidePropModels propModelProvider, out PropIdType propId)
         {
                 _memConsumptionTracker.Measure($"Begin processProp: {pi.PropertyName}.");
 
@@ -464,15 +554,34 @@ namespace DRM.PropBag
 
                 _memConsumptionTracker.MeasureAndReport("After field prepartion", $"for {pi.PropertyName}");
 
-            //curBytes = Sizer.ReportMemConsumption(startBytes, curBytes, "Before PropBag::ProcessProp -- Create Prop Gen.");
-
             if (pi.StorageStrategy == PropStorageStrategyEnum.Internal && !pi.InitialValueField.SetToUndefined)
             {
-                if (pi.InitialValueField.ValueCreator != null)
+                //_memConsumptionTracker.Measure();
+                //object newValue = pi.InitialValueField.ValueCreator();
+                //_memConsumptionTracker.MeasureAndReport("InitialField.ValueCreator", $"for {pi.PropertyName}");
+
+                //creationMethodDescription = "CreateGenFromObject";
+                //propGen = _propFactory.CreateGenFromObject(pi.PropertyType, newValue, pi.PropertyName, ei, pi.StorageStrategy, pi.TypeIsSolid,
+                //    pi.PropKind, comparer, useRefEquality, pi.ItemType);
+
+                // Create New PropBag-based Object
+                if (pi.InitialValueField.PropBagResourceKey != null)
                 {
-                    _memConsumptionTracker.Measure();
-                    object newValue = pi.InitialValueField.ValueCreator();
-                    _memConsumptionTracker.MeasureAndReport("InitialField.ValueCreator", $"for {pi.PropertyName}");
+                    IViewModelActivator vmActivator = new SimpleViewModelActivator();
+
+                    IPropModel propModel = propModelProvider.GetPropModel(pi.InitialValueField.PropBagResourceKey);
+
+                    IPropBag newObject = (IPropBag) vmActivator.GetNewViewModel(propModel, _ourStoreAccessor.StoreAcessorCreator, pi.PropertyType, propFactory: null, fullClassName: null);
+
+                    creationMethodDescription = "CreateGenFromObject";
+                    propGen = _propFactory.CreateGenFromObject(pi.PropertyType, newObject, pi.PropertyName, ei, pi.StorageStrategy, pi.TypeIsSolid,
+                        pi.PropKind, comparer, useRefEquality, pi.ItemType);
+                }
+
+                // Create New CLR Type
+                else if (pi.InitialValueField.CreateNew)
+                {
+                    object newValue = Activator.CreateInstance(pi.PropertyType);
 
                     creationMethodDescription = "CreateGenFromObject";
                     propGen = _propFactory.CreateGenFromObject(pi.PropertyType, newValue, pi.PropertyName, ei, pi.StorageStrategy, pi.TypeIsSolid,
@@ -1937,7 +2046,10 @@ namespace DRM.PropBag
                 throw new InvalidOperationException($"The {nameof(GetOrAddCViewManager)} cannot find the source PropItem with name = {srcPropName}.");
             }
 
-            IManageCViews cViewManager = _ourStoreAccessor.GetOrAddViewManager<TDal, TSource, TDestination>(this, dalPropId, propGen, mr, _propFactory.GetPropBagMapperFactory(), _propFactory.GetCViewProviderFactory());
+            IManageCViews cViewManager = _ourStoreAccessor.GetOrAddViewManager<TDal, TSource, TDestination>
+                (
+                this, dalPropId, propGen, mr, _propFactory.GetPropBagMapperFactory(), _propFactory.GetCViewProviderFactory()
+                );
 
             IProvideAView viewProvider = cViewManager.GetDefaultViewProvider();
             IProp result = CreateCollectionViewProp(propertyName, viewProvider);
@@ -1963,7 +2075,10 @@ namespace DRM.PropBag
                 throw new InvalidOperationException($"The {nameof(GetOrAddCViewManager)} cannot find the source PropItem with name = {srcPropName}.");
             }
 
-            IManageCViews cViewManager = _ourStoreAccessor.GetOrAddViewManager<TDal, TSource, TDestination>(this, dalPropId, propGen, mr, _propFactory.GetPropBagMapperFactory(), _propFactory.GetCViewProviderFactory());
+            IManageCViews cViewManager = _ourStoreAccessor.GetOrAddViewManager<TDal, TSource, TDestination>
+                (
+                this, dalPropId, propGen, mr, _propFactory.GetPropBagMapperFactory(), _propFactory.GetCViewProviderFactory()
+                );
             return cViewManager;
         }
 
@@ -1996,7 +2111,9 @@ namespace DRM.PropBag
             where TDestination : INotifyItemEndEdit
         {
             IProvideACViewManager cViewManagerProvider = _ourStoreAccessor.GetOrAddViewManagerProvider<TDal, TSource, TDestination>
-                (this, viewManagerProviderKey, _propFactory.GetPropBagMapperFactory(), _propFactory.GetCViewProviderFactory());
+                (
+                this, viewManagerProviderKey, _propFactory.GetPropBagMapperFactory(), _propFactory.GetCViewProviderFactory()
+                );
             return cViewManagerProvider;
         }
 

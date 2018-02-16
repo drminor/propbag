@@ -79,7 +79,6 @@
     <Compile Include="Binders\MyMultiValueConveter.cs" />
     <Compile Include="Binders\MyBindingEngine.cs" />
     <Compile Include="Template\NamespaceItem.cs" />
-    <Compile Include="Template\NamespacesCollection.cs" />
     <Compile Include="Binders\MyBinder.cs" />
     <Compile Include="PropBagInstanceAttribute.cs" />
     <Compile Include="Template\PropBagTemplate.cs" />
@@ -88,7 +87,7 @@
     <Compile Include="Template\TypeInfoField.cs" />
     <Compile Include="Template\PropDoWhenChangedField.cs" />
     <Compile Include="Template\PropItem.cs" />
-    <Compile Include="Template\PropsCollection.cs" />
+    <None Include="Template\PropsCollection_Moved.cs" />
     <Compile Include="Template\TypeInfoCollection.cs" />
     <Compile Include="Converters\PropValueConverter.cs" />
     <Compile Include="ReflectionHelpers.cs" />

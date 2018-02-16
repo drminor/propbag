@@ -19,6 +19,9 @@ namespace DRM.PropBagWPF
         private IPropFactoryFactory _propFactoryFactory;
         private IPropFactory _defaultPropFactory;
 
+        public string MapperConfigPackageNameSuffix { get; }
+
+
         private Dictionary<string, IPropModel> _propModelCache;
         private Dictionary<string, IMapperRequest> _mapperRequestCache;
 
@@ -31,7 +34,8 @@ namespace DRM.PropBagWPF
             ResourceDictionaryProvider resourceDictionaryProvider,
             IParsePropBagTemplates propBagTemplateParser,
             IPropFactoryFactory propFactoryFactory,
-            IPropFactory defaultPropFactory
+            IPropFactory defaultPropFactory,
+            string mapperConfigPackageNameSuffix
             )
 
         {
@@ -39,6 +43,7 @@ namespace DRM.PropBagWPF
             _pbtParser = propBagTemplateParser;
             _propFactoryFactory = propFactoryFactory;
             _defaultPropFactory = defaultPropFactory;
+            MapperConfigPackageNameSuffix = mapperConfigPackageNameSuffix;
 
             _propModelCache = new Dictionary<string, IPropModel>();
             _mapperRequestCache = new Dictionary<string, IMapperRequest>();
@@ -139,7 +144,7 @@ namespace DRM.PropBagWPF
 
             if(_propModelCache.TryGetValue(resourceKey, out IPropModel propModel))
             {
-                return FixUpPropFactory(propModel, _defaultPropFactory);
+                return FixUpPropFactory(propModel, _propFactoryFactory, _defaultPropFactory);
             }
             else
             {
@@ -147,24 +152,34 @@ namespace DRM.PropBagWPF
             }
         }
 
-        IPropModel FixUpPropFactory(IPropModel propModel, IPropFactory fallBackPropFactory)
+        IPropModel FixUpPropFactory(IPropModel propModel, IPropFactoryFactory propFactoryGenerator, IPropFactory fallBackPropFactory)
         {
+            // Include a reference to this PropModelProvider
+            propModel.PropModelProvider = this;
+
+            // TOOD: We are working on moving all PropFactory creation logic 
+            // to the caller's level: PropModelProviders should not have truck with creating PropFactories.
+
             // If the propModel does not specify a PropFactory, but it does specify a PropFactoryType,
             // use the PropFactoryFactory given to us to create a PropFactory.
-            
-            if(propModel.PropFactory == null)
+            //if (propModel.PropFactory == null)
+            //{
+            //    if (propModel.PropFactoryType != null)
+            //    {
+            //        IPropFactory generated = propFactoryGenerator.BuildPropFactory(propModel.PropFactoryType);
+            //        propModel.PropFactory = generated;
+            //    }
+            //    else
+            //    {
+            //        // If no value was supplied for either the PropFactory or the PropFactoryType,
+            //        // then use the default or 'fallback' propFactory.
+            //        propModel.PropFactory = fallBackPropFactory;
+            //    }
+            //}
+
+            if (propModel.PropFactory == null)
             {
-                if(propModel.PropFactoryType != null)
-                {
-                    IPropFactory created = _propFactoryFactory.BuildPropFactory(propModel.PropFactoryType);
-                    propModel.PropFactory = created;
-                }
-                else
-                {
-                    // If no value was supplied for either the PropFactory or the PropFactoryType,
-                    // then use the default or 'fallback' propFactory.
-                    propModel.PropFactory = fallBackPropFactory;
-                }
+                propModel.PropFactory = fallBackPropFactory;
             }
 
             // If the propModel does not supply a PropFactory, use the one assigned to us upon construction.
@@ -185,14 +200,23 @@ namespace DRM.PropBagWPF
                 throw new InvalidOperationException("You must first call LoadMapperRequests.");
             }
 
-            if (_mapperRequestCache.TryGetValue(resourceKey, out IMapperRequest mrCooked))
+            string cookedKey = GetResourceKeyWithSuffix(resourceKey);
+
+
+            if (_mapperRequestCache.TryGetValue(cookedKey, out IMapperRequest mrCooked))
             {
                 return mrCooked;
             }
             else
             {
-                throw new KeyNotFoundException("No MapperRequest with that resource key can be found.");
+                throw new KeyNotFoundException($"No MapperRequest with resource key: {cookedKey} can be found.");
             }
+        }
+
+        private string GetResourceKeyWithSuffix(string rawKey)
+        {
+            string result = MapperConfigPackageNameSuffix != null ? $"{rawKey}_{MapperConfigPackageNameSuffix}" : rawKey;
+            return result;
         }
 
         #endregion

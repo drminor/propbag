@@ -18,12 +18,14 @@ namespace DRM.TypeSafePropertyBag
         Type TypeToCreate { get; }
         ITypeInfoField WrapperTypeInfoField { get; set; }
 
-        IPropFactory PropFactory { get; set; } // Is beging phased out.
+        IPropFactory PropFactory { get; set; } // Is being phased out.
         Type PropFactoryType { get; set; }
 
         bool DeferMethodRefResolution { get; set; } // Probably will not be used.
 
         string FullClassName { get; } // Provides Canonical version of the Namespace + Class Name
+
+        IProvidePropModels PropModelProvider { get; set; }
 
         //SimpleExKey TestObject { get; }
     }

@@ -1,6 +1,9 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:dsrv="clr-namespace:PropBagLib.Tests.SpecBasedVMTests.BasicVM.Services;assembly=PropBag.Test"
                     xmlns:vmod="clr-namespace:PropBagLib.Tests.SpecBasedVMTests.BasicVM.ViewModels;assembly=PropBag.Test"
+                    xmlns:infra="clr-namespace:PropBagLib.Tests.SpecBasedVMTests.BasicVM.Infra;assembly=PropBag.Test"
+                    xmlns:pbWPF="clr-namespace:DRM.PropBagWPF;assembly=PropBagWPF"
                     xmlns:pb="clr-namespace:DRM.PropBagControlsWPF;assembly=PropBag.WPFControls"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
@@ -9,6 +12,7 @@
                         DeriveFromClassMode="Custom"
                         TargetType="{x:Type vmod:PersonCollectionViewModel}"
                         TypeSafetyMode="Tight"
+                        PropFactoryType="{x:Type pbWPF:WPFPropFactory}"
                         OutPutNameSpace="MVVMApplication.ViewModel">
         
         <pb:PropBagTemplate.Namespaces>

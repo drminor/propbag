@@ -7,7 +7,7 @@ using System.Windows;
 
 namespace DRM.PropBagWPF
 {
-    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
+    //using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
 
     public class SimplePropModelProvider : IProvidePropModels
     { 
@@ -111,22 +111,32 @@ namespace DRM.PropBagWPF
 
         IPropModel FixUpPropFactory(IPropModel propModel, IPropFactoryFactory propFactoryGenerator, IPropFactory fallBackPropFactory)
         {
-            // If the propModel does not specify a PropFactory, but it does specify a PropFactoryType,
-            // use the PropFactoryFactory given to us to create a PropFactory.
+            // Include a reference to this PropModelProvider
+            propModel.PropModelProvider = this;
+
+            //TOOD: We are working on moving all PropFactory creation logic
+            //to the caller's level: PropModelProviders should not have truck with creating PropFactories.
+
+            //// If the propModel does not specify a PropFactory, but it does specify a PropFactoryType,
+            //// use the PropFactoryFactory given to us to create a PropFactory.
+            //if (propModel.PropFactory == null)
+            //{
+            //    if (propModel.PropFactoryType != null)
+            //    {
+            //        IPropFactory generated = propFactoryGenerator.BuildPropFactory(propModel.PropFactoryType);
+            //        propModel.PropFactory = generated;
+            //    }
+            //    else
+            //    {
+            //        // If no value was supplied for either the PropFactory or the PropFactoryType,
+            //        // then use the default or 'fallback' propFactory.
+            //        propModel.PropFactory = fallBackPropFactory;
+            //    }
+            //}
 
             if (propModel.PropFactory == null)
             {
-                if (propModel.PropFactoryType != null)
-                {
-                    IPropFactory generated = propFactoryGenerator.BuildPropFactory(propModel.PropFactoryType);
-                    propModel.PropFactory = generated;
-                }
-                else
-                {
-                    // If no value was supplied for either the PropFactory or the PropFactoryType,
-                    // then use the default or 'fallback' propFactory.
-                    propModel.PropFactory = fallBackPropFactory;
-                }
+                propModel.PropFactory = fallBackPropFactory;
             }
 
             // If the propModel does not supply a PropFactory, use the one assigned to us upon construction.

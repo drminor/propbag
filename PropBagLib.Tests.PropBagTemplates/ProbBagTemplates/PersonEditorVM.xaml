@@ -1,8 +1,6 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:vmod="clr-namespace:PropBagLib.Tests.SpecBasedVMTests.BasicVM.ViewModels;assembly=PropBag.Test"
-                    xmlns:mod="clr-namespace:MVVMApplication.Model"
-                    xmlns:dsrv="clr-namespace:MVVMApplication.Services"
                     xmlns:pb="clr-namespace:DRM.PropBagControlsWPF;assembly=PropBag.WPFControls"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 

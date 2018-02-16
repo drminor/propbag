@@ -33,8 +33,8 @@ namespace PropBagLib.Tests
                 namespaceName: "PropBagLib.Tests",
                 deriveFrom: DeriveFromClassModeEnum.PropBag,
                 targetType: null,
-                //propStoreServiceProviderType: null,
                 propFactory: null,
+                propModelProvider: null,
                 typeSafetyMode: PropBagTypeSafetyMode.AllPropsMustBeRegistered,
                 deferMethodRefResolution: true,
                 requireExplicitInitialValue: true);

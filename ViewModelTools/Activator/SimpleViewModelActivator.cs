@@ -27,7 +27,9 @@ namespace DRM.PropBag.ViewModelTools
         // BaseType + PropModel (BaseType known only at run time.
         public object GetNewViewModel(IPropModel propModel, PSAccessServiceCreatorInterface storeAccessCreator, Type typeToCreate, IPropFactory propFactory = null, string fullClassName = null)
         {
-            object[] parameters = new object[] { propModel, storeAccessCreator, propFactory ?? propModel.PropFactory, fullClassName ?? propModel.FullClassName };
+            //object[] parameters = new object[] { propModel, storeAccessCreator, propFactory ?? propModel.PropFactory, fullClassName ?? propModel.FullClassName };
+
+            object[] parameters = new object[] { propModel, storeAccessCreator, propFactory, fullClassName};
 
             //BindingFlags bFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.CreateInstance;
             //object result = Activator.CreateInstance(typeToCreate, bFlags, binder: null, args: parameters, culture: null);

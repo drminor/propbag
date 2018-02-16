@@ -11,16 +11,12 @@ namespace DRM.TypeSafePropertyBag
     using PropIdType = UInt32;
     using PropNameType = String;
 
-    //using L2KeyManType = IL2KeyMan<UInt32, String>;
-
-    //using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
-
     using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
     using PSAccessServiceProviderInterface = IProvidePropStoreAccessService<UInt32, String>;
+    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
 
     //using Level2KeyManagerCacheInterface = ICacheLevel2KeyManagers<IL2KeyMan<UInt32, String>, UInt32, String>;
     using GenerationIdType = UInt32;
-
 
     internal class SimplePropStoreAccessServiceProvider : PSAccessServiceProviderInterface
     {
@@ -64,9 +60,9 @@ namespace DRM.TypeSafePropertyBag
 
             _handlerDispatchDelegateCacheProvider = handlerDispatchDelegateCacheProvider;
 
-
             _store = new Dictionary<WeakRefKey<IPropBag>, BagNode>();
 
+            // TODO: Have the caller provide a PropTemplateCache.
             _propTemplateCache = new PropTemplateCache();
 
             //_timer = new Timer(PruneStore, null, NUMBER_OF_SECONDS_BETWEEN_PRUNE_OPS * 1000, NUMBER_OF_SECONDS_BETWEEN_PRUNE_OPS * 1000);
@@ -381,6 +377,8 @@ namespace DRM.TypeSafePropertyBag
 
         #endregion
 
+        public PSAccessServiceCreatorInterface StoreAcessorCreator => this;
+
         #region Private Methods
 
         private long m_Counter = 0;
@@ -430,9 +428,19 @@ namespace DRM.TypeSafePropertyBag
             {
                 if (disposing)
                 {
-                    // TODO: dispose managed state (managed objects).
-                    //_theGlobalStore.Clear();
-                    //_tree.Clear();
+                    // Dispose managed state (managed objects).
+
+                    // Stop the timer, and wait for the Prune 'service' to stop.
+
+                    lock(_sync)
+                    {
+                        foreach(BagNode propBagNode in _store.Values)
+                        {
+                            propBagNode.Dispose();
+                        }
+                        _store.Clear();
+                        _handlerDispatchDelegateCacheProvider.Dispose();
+                    }
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.

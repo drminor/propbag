@@ -121,7 +121,8 @@ namespace DRM.PropBagWPF
 
         private IPropBagMapperGen GetPropBagMapper(IMapperRequest mr)
         {
-            IProvideAutoMappers autoMapperProvider = this._autoMapperProvider ?? throw new InvalidOperationException($"This WPFPropFactory instance cannot create IProvideDataSourceProvider instances: No AutoMapperSupport was supplied upon construction.");
+            IProvideAutoMappers autoMapperProvider = this._autoMapperProvider ?? throw new InvalidOperationException
+                ($"This WPFPropFactory instance cannot create IProvideDataSourceProvider instances: No AutoMapperSupport was supplied upon construction.");
 
             IPropBagMapperKeyGen realMapperRequest = autoMapperProvider.RegisterMapperRequest(mr.PropModel, mr.SourceType, mr.ConfigPackageName);
             IPropBagMapperGen genMapper = autoMapperProvider.GetMapper(realMapperRequest);
@@ -214,7 +215,8 @@ namespace DRM.PropBagWPF
         public override IProvideADataSourceProvider GetDSProviderProvider(PropIdType propId, PropKindEnum propKind, 
             object iDoCrudDataSource, PSAccessServiceInterface propStoreAccessService, IMapperRequest mr)
         {
-            IProvideAutoMappers autoMapperProvider = this._autoMapperProvider ?? throw new InvalidOperationException($"This WPFPropFactory instance cannot create IProvideDataSourceProvider instances: No AutoMapperSupport was supplied upon construction.");
+            IProvideAutoMappers autoMapperProvider = this._autoMapperProvider ?? throw new InvalidOperationException
+                ($"This WPFPropFactory instance cannot create IProvideDataSourceProvider instances: No AutoMapperSupport was supplied upon construction.");
 
             IPropBagMapperKeyGen realMapperRequest = autoMapperProvider.RegisterMapperRequest(mr.PropModel, mr.SourceType, mr.ConfigPackageName);
             IPropBagMapperGen genMapper = autoMapperProvider.GetMapper(realMapperRequest);

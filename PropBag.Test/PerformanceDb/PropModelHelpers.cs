@@ -18,8 +18,8 @@ namespace PropBagLib.Tests.PerformanceDb
                 namespaceName: "PropBagLib.Tests.PerformanceDb",
                 deriveFrom: DeriveFromClassModeEnum.PropBag,
                 targetType: null,
-                //propStoreServiceProviderType: null,
                 propFactory: null,
+                propModelProvider: null,
                 typeSafetyMode: PropBagTypeSafetyMode.Tight,
                 deferMethodRefResolution: true,
                 requireExplicitInitialValue: true
@@ -86,8 +86,8 @@ namespace PropBagLib.Tests.PerformanceDb
                 namespaceName: "PropBagLib.Tests.PerformanceDb",
                 deriveFrom: DeriveFromClassModeEnum.PropBag,
                 targetType: null,
-                //propStoreServiceProviderType: null,
                 propFactory: null,
+                propModelProvider: null,
                 typeSafetyMode: PropBagTypeSafetyMode.Tight,
                 deferMethodRefResolution: true,
                 requireExplicitInitialValue: true
@@ -145,8 +145,8 @@ namespace PropBagLib.Tests.PerformanceDb
                 namespaceName: "PropBagLib.Tests.PerformanceDb",
                 deriveFrom: DeriveFromClassModeEnum.PropBag,
                 targetType: null,
-                //propStoreServiceProviderType: null,
                 propFactory: null,
+                propModelProvider: null,
                 typeSafetyMode: PropBagTypeSafetyMode.Tight,
                 deferMethodRefResolution: true,
                 requireExplicitInitialValue: true

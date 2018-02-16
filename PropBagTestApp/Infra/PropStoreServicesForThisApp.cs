@@ -14,90 +14,122 @@ using System.Windows;
 namespace PropBagTestApp.Infra
 {
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
-    using PSServiceSingletonProviderInterface = IProvidePropStoreServiceSingletons<UInt32, String>;
 
     public static class PropStoreServicesForThisApp
     {
-        public static int MAX_NUMBER_OF_PROPERTIES = 65536;
-        public static PSServiceSingletonProviderInterface PropStoreServices { get; }
+        private readonly static SimplePropStoreAccessServiceProviderProxy _theStore;
 
-        //public static IPropFactory DefaultPropFactory { get; }
+        public static int MAX_NUMBER_OF_PROPERTIES = 65536;
+        //public static PSServiceSingletonProviderInterface PropStoreServices { get; }
+
+        public static IPropFactory DefaultPropFactory { get; }
 
         public static IProvidePropModels PropModelProvider { get; }
         public static ViewModelHelper ViewModelHelper { get; }
         public static IProvideAutoMappers AutoMapperProvider { get; }
 
-        public static string PackageConfigName { get; set; }
+        public static string ConfigPackageNameSuffix { get; set; }
+
+        //static PropStoreServicesForThisApp()
+        //{
+        //    PropStoreServices = BuildPropStoreService(MAX_NUMBER_OF_PROPERTIES);
+
+        //    IPropBagTemplateProvider propBagTemplateProvider = new PropBagTemplateProvider(Application.Current.Resources, null);
+        //    IMapperRequestProvider mapperRequestProvider = new MapperRequestProvider(Application.Current.Resources, null);
+
+        //    IViewModelActivator vmActivator = new SimpleViewModelActivator();
+
+        //    AutoMapperProvider = GetAutoMapperProvider(vmActivator, PropStoreServices.PropStoreEntryPoint);
+
+        //    IPropFactory defaultPropFactory = BuildDefaultPropFactory(PropStoreServices, AutoMapperProvider);
+
+        //    IPropFactoryFactory propFactoryFactory = BuildThePropFactoryFactory(PropStoreServices);
+
+        //    IParsePropBagTemplates propBagTemplateParser = new PropBagTemplateParser();
+
+        //    PropModelProvider = new SimplePropModelProvider
+        //        (
+        //        propBagTemplateProvider,
+        //        mapperRequestProvider,
+        //        propBagTemplateParser,
+        //        //vmActivator,
+        //        //PropStoreServices.PropStoreEntryPoint,
+        //        propFactoryFactory,
+        //        defaultPropFactory
+        //        );
+
+        //    ViewModelHelper = new ViewModelHelper(PropModelProvider, vmActivator, PropStoreServices.PropStoreEntryPoint);
+        //}
 
         static PropStoreServicesForThisApp()
         {
-            PropStoreServices = BuildPropStoreService(MAX_NUMBER_OF_PROPERTIES);
+            // Create the 3 core cha
+            ITypeDescBasedTConverterCache typeDescBasedTConverterCache = new TypeDescBasedTConverterCache();
+            IProvideDelegateCaches delegateCacheProvider = new SimpleDelegateCacheProvider(typeof(PropBag), typeof(APFGenericMethodTemplates));
+            IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider = new SimpleHandlerDispatchDelegateCacheProvider();
 
-            IPropBagTemplateProvider propBagTemplateProvider = new PropBagTemplateProvider(Application.Current.Resources, null);
-            IMapperRequestProvider mapperRequestProvider = new MapperRequestProvider(Application.Current.Resources, null);
+            _theStore = new SimplePropStoreAccessServiceProviderProxy(MAX_NUMBER_OF_PROPERTIES, handlerDispatchDelegateCacheProvider);
+
+            // Get a reference to the PropStoreAccessService Factory.
+            PSAccessServiceCreatorInterface psAccessServiceFactory = _theStore.PropStoreAccessServiceFactory;
 
             IViewModelActivator vmActivator = new SimpleViewModelActivator();
 
-            AutoMapperProvider = GetAutoMapperProvider(vmActivator, PropStoreServices.PropStoreEntryPoint);
+            AutoMapperProvider = GetAutoMapperProvider(vmActivator, psAccessServiceFactory);
 
-            IPropFactory defaultPropFactory = BuildDefaultPropFactory(PropStoreServices, AutoMapperProvider);
+            IConvertValues valueConverter = new PropFactoryValueConverter(typeDescBasedTConverterCache);
 
-            IPropFactoryFactory propFactoryFactory = BuildThePropFactoryFactory(PropStoreServices);
-
-            IParsePropBagTemplates propBagTemplateParser = new PropBagTemplateParser();
-
-            PropModelProvider = new SimplePropModelProvider
+            // Default PropFactory
+            IPropFactory defaultPropFactory = BuildDefaultPropFactory
                 (
-                propBagTemplateProvider,
-                mapperRequestProvider,
-                propBagTemplateParser,
-                //vmActivator,
-                //PropStoreServices.PropStoreEntryPoint,
-                propFactoryFactory,
-                defaultPropFactory
+                valueConverter,
+                delegateCacheProvider,
+                AutoMapperProvider
                 );
 
-            ViewModelHelper = new ViewModelHelper(PropModelProvider, vmActivator, PropStoreServices.PropStoreEntryPoint);
+            // The Factory used to build PropFactories.
+            IPropFactoryFactory propFactoryFactory = BuildThePropFactoryFactory
+                (
+                valueConverter,
+                delegateCacheProvider
+                );
+
+            PropModelProvider = GetPropModelProvider(propFactoryFactory, DefaultPropFactory, ConfigPackageNameSuffix);
+
+            ViewModelHelper = new ViewModelHelper(PropModelProvider, vmActivator, psAccessServiceFactory);
         }
 
-        private static IPropFactoryFactory BuildThePropFactoryFactory(PSServiceSingletonProviderInterface propStoreServices)
+
+        private static IPropFactoryFactory BuildThePropFactoryFactory
+            (
+            IConvertValues valueConverter,
+            IProvideDelegateCaches delegateCacheProvider
+            )
         {
-            PropFactoryValueConverter valueConverter = new PropFactoryValueConverter(propStoreServices.TypeDescBasedTConverterCache);
-            IPropFactoryFactory result = new PropFactoryFactory(propStoreServices.DelegateCacheProvider, valueConverter, typeResolver: null);
+            ResolveTypeDelegate typeResolver = null;
+
+            IPropFactoryFactory result = new PropFactoryFactory
+                (
+                delegateCacheProvider,
+                valueConverter,
+                typeResolver: typeResolver
+                );
+
             return result;
         }
 
-        private static PSServiceSingletonProviderInterface BuildPropStoreService(int maxNumberOfProperties)
+        private static IPropFactory BuildDefaultPropFactory
+            (
+            IConvertValues valueConverter,
+            IProvideDelegateCaches delegateCacheProvider,
+            IProvideAutoMappers autoMapperProvider
+            )
         {
-            PSServiceSingletonProviderInterface result;
-
-            ITypeDescBasedTConverterCache typeDescBasedTConverterCache = new TypeDescBasedTConverterCache();
-            IProvideDelegateCaches delegateCacheProvider = new SimpleDelegateCacheProvider(typeof(PropBag), typeof(APFGenericMethodTemplates));
-
-            IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider = new SimpleHandlerDispatchDelegateCacheProvider();
-
-            using (PropStoreServiceCreatorFactory epCreator = new PropStoreServiceCreatorFactory())
-            {
-                PSAccessServiceCreatorInterface propStoreEntryPoint = epCreator.GetPropStoreEntryPoint(maxNumberOfProperties, handlerDispatchDelegateCacheProvider);
-
-                result = new PropStoreServices
-                    (typeDescBasedTConverterCache,
-                    delegateCacheProvider,
-                    handlerDispatchDelegateCacheProvider,
-                    propStoreEntryPoint);
-            }
-
-            return result;
-        }
-
-        private static IPropFactory BuildDefaultPropFactory(PSServiceSingletonProviderInterface propStoreServices, IProvideAutoMappers autoMapperProvider)
-        {
-            IProvideDelegateCaches delegateCacheProvider = propStoreServices.DelegateCacheProvider;
-            IConvertValues valueConverter = new PropFactoryValueConverter(propStoreServices.TypeDescBasedTConverterCache);
             ResolveTypeDelegate typeResolver = null;
 
             IPropFactory result = new WPFPropFactory
-                (delegateCacheProvider: delegateCacheProvider,
+                (
+                delegateCacheProvider: delegateCacheProvider,
                 valueConverter: valueConverter,
                 typeResolver: typeResolver,
                 autoMapperProvider: autoMapperProvider
@@ -105,6 +137,106 @@ namespace PropBagTestApp.Infra
 
             return result;
         }
+
+        //private static PSServiceSingletonProviderInterface BuildPropStoreService(int maxNumberOfProperties)
+        //{
+        //    PSServiceSingletonProviderInterface result;
+
+        //    ITypeDescBasedTConverterCache typeDescBasedTConverterCache = new TypeDescBasedTConverterCache();
+
+        //    IProvideDelegateCaches delegateCacheProvider = new SimpleDelegateCacheProvider
+        //        (
+        //        typeof(PropBag),
+        //        typeof(APFGenericMethodTemplates)
+        //        );
+
+        //    IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider = new SimpleHandlerDispatchDelegateCacheProvider();
+
+        //    using (SimplePropStoreAccessServiceProviderProxy epCreator = new SimplePropStoreAccessServiceProviderProxy())
+        //    {
+        //        PSAccessServiceCreatorInterface propStoreEntryPoint = epCreator.GetPropStoreEntryPoint(maxNumberOfProperties, handlerDispatchDelegateCacheProvider);
+
+        //        result = new PropStoreServices
+        //            (typeDescBasedTConverterCache,
+        //            delegateCacheProvider,
+        //            handlerDispatchDelegateCacheProvider,
+        //            propStoreEntryPoint);
+        //    }
+
+        //    return result;
+        //}
+
+        //private static PSServiceSingletonProviderInterface BuildPropStoreService(int maxNumberOfProperties)
+        //{
+        //    PSServiceSingletonProviderInterface result;
+
+        //    ITypeDescBasedTConverterCache typeDescBasedTConverterCache = new TypeDescBasedTConverterCache();
+
+        //    IProvideDelegateCaches delegateCacheProvider = new SimpleDelegateCacheProvider(typeof(PropBag), typeof(APFGenericMethodTemplates));
+
+        //    IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider = new SimpleHandlerDispatchDelegateCacheProvider();
+
+        //    result = new PropStoreServices_NotUsed
+        //        (
+        //        typeDescBasedTConverterCache,
+        //        delegateCacheProvider,
+        //        handlerDispatchDelegateCacheProvider
+        //        );
+
+
+        //    return result;
+        //}
+
+        //private static IPropFactory BuildDefaultPropFactory
+        //    (
+        //    PSServiceSingletonProviderInterface propStoreServices,
+        //    IProvideAutoMappers autoMapperProvider
+        //    )
+        //{
+        //    IConvertValues valueConverter = new PropFactoryValueConverter(propStoreServices.TypeDescBasedTConverterCache);
+        //    ResolveTypeDelegate typeResolver = null;
+
+        //    IPropFactory result = new WPFPropFactory
+        //        (
+        //        delegateCacheProvider: propStoreServices.DelegateCacheProvider,
+        //        valueConverter: valueConverter,
+        //        typeResolver: typeResolver,
+        //        autoMapperProvider: autoMapperProvider
+        //        );
+
+        //    return result;
+        //}
+
+        private static IProvidePropModels GetPropModelProvider
+            (
+            //IViewModelActivator vmActivator,
+            //PSServiceSingletonProviderInterface propStoreServices,
+            IPropFactoryFactory propFactoryFactory,
+            IPropFactory defaultPropFactory,
+            string configPackageNameSuffix
+            )
+        {
+            IPropBagTemplateProvider propBagTemplateProvider = new PropBagTemplateProvider(Application.Current.Resources, null);
+
+            IMapperRequestProvider mapperRequestProvider = new MapperRequestProvider(Application.Current.Resources, configPackageNameSuffix);
+
+
+            IParsePropBagTemplates propBagTemplateParser = new PropBagTemplateParser();
+
+            IProvidePropModels propModelProvider = new SimplePropModelProvider
+                (
+                propBagTemplateProvider,
+                mapperRequestProvider,
+                propBagTemplateParser,
+                //vmActivator,
+                //psAccessServiceFactory,
+                propFactoryFactory,
+                defaultPropFactory
+                );
+
+            return propModelProvider;
+        }
+
 
         private static IProvideAutoMappers GetAutoMapperProvider(IViewModelActivator viewModelActivator, PSAccessServiceCreatorInterface storeAccessCreator)
         {

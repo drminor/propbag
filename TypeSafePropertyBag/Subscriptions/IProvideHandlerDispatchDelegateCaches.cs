@@ -1,8 +1,9 @@
 ﻿using DRM.TypeSafePropertyBag.Fundamentals;
+using System;
 
 namespace DRM.TypeSafePropertyBag
 {
-    public interface IProvideHandlerDispatchDelegateCaches
+    public interface IProvideHandlerDispatchDelegateCaches : IDisposable
     {
         DelegateCache<CallPcGenEventSubscriberDelegate> CallPcGenEventSubsCache { get; }
         DelegateCache<CallPChangingEventSubscriberDelegate> CallPChangingEventSubsCache { get; }

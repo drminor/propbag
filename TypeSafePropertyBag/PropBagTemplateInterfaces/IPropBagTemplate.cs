@@ -9,8 +9,8 @@ namespace DRM.TypeSafePropertyBag
         string ClassName { get; set; }
         string OutPutNameSpace { get; set; }
 
-        ObservableCollection<INamespaceItem> Namespaces { get; }
-        ObservableCollection<IPropTemplateItem> Props { get; }
+        NamespacesCollection Namespaces { get; }
+        PropsCollection Props { get; }
 
         PropBagTypeSafetyMode TypeSafetyMode { get; set; }
 

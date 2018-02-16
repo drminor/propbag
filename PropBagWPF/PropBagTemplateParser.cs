@@ -46,6 +46,7 @@ namespace DRM.PropBagWPF
                 deriveFrom: deriveFrom,
                 targetType: targetType,
                 propFactoryType: pbt.PropFactoryType,
+                propModelProvider: null,
                 typeSafetyMode: pbt.TypeSafetyMode,
                 deferMethodRefResolution: pbt.DeferMethodRefResolution,
                 requireExplicitInitialValue: pbt.RequireExplicitInitialValue
@@ -67,7 +68,7 @@ namespace DRM.PropBagWPF
 
                 try
                 {
-                    IPropItem rpi = ProcessProp(pi/*, propFactoryToUse*/, doWhenChangedHelper);
+                    IPropItem rpi = ProcessProp(pi, doWhenChangedHelper);
                     result.Props.Add(rpi);
                 }
                 catch (Exception e)

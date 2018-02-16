@@ -168,11 +168,12 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 namespaceName: "PropBagLib.Tests.AutoMapperSupport",
                 deriveFrom: DeriveFromClassModeEnum.PropBag,
                 targetType: null,
-                //propStoreServiceProviderType: null,
                 propFactory: null,
+                propModelProvider: null,
                 typeSafetyMode: PropBagTypeSafetyMode.Tight,
                 deferMethodRefResolution: true,
-                requireExplicitInitialValue: true);
+                requireExplicitInitialValue: true
+                );
 
             //result.Namespaces.Add("System");
             result.Namespaces.Add("DRM.PropBag");

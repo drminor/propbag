@@ -19,8 +19,8 @@ namespace MVVMApplication
 
         public FrontWindow()
         {
-            SetDataDirLocation();
             InitializeComponent();
+            SetDataDirLocation();
         }
 
         #endregion

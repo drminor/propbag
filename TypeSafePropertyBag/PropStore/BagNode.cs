@@ -387,9 +387,17 @@ namespace DRM.TypeSafePropertyBag
                                 sub.Dispatcher(target, this, new PSNodeParentChangedEventArgs(this.CompKey, oldNodeKey, newNodeKey), sub.Proxy);
                                 numDispatched++;
                             }
-                            catch
+                            catch (InvalidOperationException ioe)
                             {
-                                System.Diagnostics.Debug.WriteLine("ParentNodeChanged Handler registered with StoreNodeBag, threw an exception.");
+                                System.Diagnostics.Debug.WriteLine($"ParentNodeChanged Handler registered with StoreNodeBag, threw an exception: {ioe.Message}");
+                                if(ioe.InnerException != null)
+                                {
+                                    System.Diagnostics.Debug.WriteLine($"The inner exception is {ioe.InnerException.Message}");
+                                    if(ioe.InnerException.InnerException != null)
+                                    {
+                                        System.Diagnostics.Debug.WriteLine($"And that exception's inner exception is {ioe.InnerException.InnerException.Message}");
+                                    }
+                                }
                             }
                         }
                     }

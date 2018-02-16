@@ -18,6 +18,8 @@ namespace DRM.TypeSafePropertyBag
     using PSAccessServiceInternalInterface = IPropStoreAccessServiceInternal<UInt32, String>;
     using PSAccessServiceProviderInterface = IProvidePropStoreAccessService<UInt32, String>;
 
+    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
+    
     internal class SimplePropStoreAccessService : PSAccessServiceInterface, IHaveTheStoreNode, PSAccessServiceInternalInterface, IDisposable
     {
         #region Unused Operational Constants
@@ -84,6 +86,8 @@ namespace DRM.TypeSafePropertyBag
 
         public int MaxPropsPerObject => _propStoreAccessServiceProvider.MaxPropsPerObject; 
         public long MaxObjectsPerAppDomain => _propStoreAccessServiceProvider.MaxObjectsPerAppDomain;
+
+        public PSAccessServiceCreatorInterface StoreAcessorCreator => _propStoreAccessServiceProvider.StoreAcessorCreator;
 
         public IPropData this[IPropBag propBag, PropIdType propId]
         {
