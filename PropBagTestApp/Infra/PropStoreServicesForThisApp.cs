@@ -80,11 +80,11 @@ namespace PropBagTestApp.Infra
             IConvertValues valueConverter = new PropFactoryValueConverter(typeDescBasedTConverterCache);
 
             // Default PropFactory
-            IPropFactory defaultPropFactory = BuildDefaultPropFactory
+            DefaultPropFactory = BuildDefaultPropFactory
                 (
                 valueConverter,
-                delegateCacheProvider,
-                AutoMapperProvider
+                delegateCacheProvider//,
+                //AutoMapperProvider
                 );
 
             // The Factory used to build PropFactories.
@@ -121,8 +121,8 @@ namespace PropBagTestApp.Infra
         private static IPropFactory BuildDefaultPropFactory
             (
             IConvertValues valueConverter,
-            IProvideDelegateCaches delegateCacheProvider,
-            IProvideAutoMappers autoMapperProvider
+            IProvideDelegateCaches delegateCacheProvider//,
+            //IProvideAutoMappers autoMapperProvider
             )
         {
             ResolveTypeDelegate typeResolver = null;
@@ -131,11 +131,65 @@ namespace PropBagTestApp.Infra
                 (
                 delegateCacheProvider: delegateCacheProvider,
                 valueConverter: valueConverter,
-                typeResolver: typeResolver,
-                autoMapperProvider: autoMapperProvider
+                typeResolver: typeResolver//,
+                //autoMapperProvider: autoMapperProvider
                 );
 
             return result;
+        }
+
+
+        private static IProvidePropModels GetPropModelProvider
+            (
+            //IViewModelActivator vmActivator,
+            //PSServiceSingletonProviderInterface propStoreServices,
+            IPropFactoryFactory propFactoryFactory,
+            IPropFactory defaultPropFactory,
+            string configPackageNameSuffix
+            )
+        {
+            IPropBagTemplateProvider propBagTemplateProvider = new PropBagTemplateProvider(Application.Current.Resources, null);
+
+            IMapperRequestProvider mapperRequestProvider = new MapperRequestProvider(Application.Current.Resources, configPackageNameSuffix);
+
+
+            IParsePropBagTemplates propBagTemplateParser = new PropBagTemplateParser();
+
+            IProvidePropModels propModelProvider = new SimplePropModelProvider
+                (
+                propBagTemplateProvider,
+                mapperRequestProvider,
+                propBagTemplateParser,
+                propFactoryFactory
+                );
+
+            return propModelProvider;
+        }
+
+
+        private static IProvideAutoMappers GetAutoMapperProvider(IViewModelActivator viewModelActivator, PSAccessServiceCreatorInterface storeAccessCreator)
+        {
+            // TODO: Expose the creation of wrapperTypeCreator (ICreateWrapperTypes).
+            IPropBagMapperBuilderProvider propBagMapperBuilderProvider = new SimplePropBagMapperBuilderProvider
+                (
+                wrapperTypesCreator: null,
+                viewModelActivator: viewModelActivator,
+                storeAccessCreator: storeAccessCreator
+                );
+
+            IMapTypeDefinitionProvider mapTypeDefinitionProvider = new SimpleMapTypeDefinitionProvider();
+
+            ICachePropBagMappers mappersCachingService = new SimplePropBagMapperCache();
+
+            // TODO: Remove the dependency on IProvidePropModels. (See TODO note in SimpleAutoMapperProvider.)
+            SimpleAutoMapperProvider autoMapperProvider = new SimpleAutoMapperProvider
+                (
+                mapTypeDefinitionProvider: mapTypeDefinitionProvider,
+                mappersCachingService: mappersCachingService,
+                mapperBuilderProvider: propBagMapperBuilderProvider/*, propModelProvider: null*/
+                );
+
+            return autoMapperProvider;
         }
 
         //private static PSServiceSingletonProviderInterface BuildPropStoreService(int maxNumberOfProperties)
@@ -206,62 +260,6 @@ namespace PropBagTestApp.Infra
 
         //    return result;
         //}
-
-        private static IProvidePropModels GetPropModelProvider
-            (
-            //IViewModelActivator vmActivator,
-            //PSServiceSingletonProviderInterface propStoreServices,
-            IPropFactoryFactory propFactoryFactory,
-            IPropFactory defaultPropFactory,
-            string configPackageNameSuffix
-            )
-        {
-            IPropBagTemplateProvider propBagTemplateProvider = new PropBagTemplateProvider(Application.Current.Resources, null);
-
-            IMapperRequestProvider mapperRequestProvider = new MapperRequestProvider(Application.Current.Resources, configPackageNameSuffix);
-
-
-            IParsePropBagTemplates propBagTemplateParser = new PropBagTemplateParser();
-
-            IProvidePropModels propModelProvider = new SimplePropModelProvider
-                (
-                propBagTemplateProvider,
-                mapperRequestProvider,
-                propBagTemplateParser,
-                //vmActivator,
-                //psAccessServiceFactory,
-                propFactoryFactory,
-                defaultPropFactory
-                );
-
-            return propModelProvider;
-        }
-
-
-        private static IProvideAutoMappers GetAutoMapperProvider(IViewModelActivator viewModelActivator, PSAccessServiceCreatorInterface storeAccessCreator)
-        {
-            // TODO: Expose the creation of wrapperTypeCreator (ICreateWrapperTypes).
-            IPropBagMapperBuilderProvider propBagMapperBuilderProvider = new SimplePropBagMapperBuilderProvider
-                (
-                wrapperTypesCreator: null,
-                viewModelActivator: viewModelActivator,
-                storeAccessCreator: storeAccessCreator
-                );
-
-            IMapTypeDefinitionProvider mapTypeDefinitionProvider = new SimpleMapTypeDefinitionProvider();
-
-            ICachePropBagMappers mappersCachingService = new SimplePropBagMapperCache();
-
-            // TODO: Remove the dependency on IProvidePropModels. (See TODO note in SimpleAutoMapperProvider.)
-            SimpleAutoMapperProvider autoMapperProvider = new SimpleAutoMapperProvider
-                (
-                mapTypeDefinitionProvider: mapTypeDefinitionProvider,
-                mappersCachingService: mappersCachingService,
-                mapperBuilderProvider: propBagMapperBuilderProvider/*, propModelProvider: null*/
-                );
-
-            return autoMapperProvider;
-        }
 
         #region InDesign Support
 

@@ -2,7 +2,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 
@@ -23,16 +22,11 @@ namespace DRM.TypeSafePropertyBag
 
         IProvideDelegateCaches DelegateCacheProvider { get; }
 
-        //Func<string, DataSourceProvider, IProvideAView> ViewProviderFactory { get; }
         CViewProviderCreator GetCViewProviderFactory();
-        PropBagMapperCreator GetPropBagMapperFactory();
-
 
         bool IsCollection(IProp prop);
-        //bool IsCollection(PropKindEnum propKind);
 
         bool IsReadOnly(IProp prop);
-        //bool IsReadOnly(PropKindEnum propKind);
 
         #endregion
 
@@ -91,19 +85,6 @@ namespace DRM.TypeSafePropertyBag
             Func<T, T, bool> comparer,
             Func<string, T> getDefaultValFunc);
 
-        //IProp<T> Create<T>(
-        //    bool haveValue,
-        //    T initialValue,
-        //    PropNameType propertyName,
-        //    object extraInfo,
-        //    PropStorageStrategyEnum storageStrategy,
-        //    bool typeIsSolid,
-        //    Func<T, T, bool> comparer,
-        //    Func<string, T> getDefaultValFunc);
-
-        //IProp<T> Create<T>(T initialValue, PropNameType propertyName, object extraInfo = null, 
-        //    PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true, Func<T, T, bool> comparer = null);
-
         IProp<T> CreateWithNoValue<T>
             (
             PropNameType propertyName,
@@ -132,9 +113,7 @@ namespace DRM.TypeSafePropertyBag
 
         //IPropGen CreatePropInferType(object value, PropNameType propertyName, object extraInfo, bool hasStorage);
 
-        IProvideADataSourceProvider GetDSProviderProvider(PropIdType propId, PropKindEnum propKind, object iDoCrudDataSource, PSAccessServiceInterface storeAccesor, IMapperRequest mr);
-
-
+        //IProvideADataSourceProvider GetDSProviderProvider(PropIdType propId, PropKindEnum propKind, object iDoCrudDataSource, PSAccessServiceInterface storeAccesor, IMapperRequest mr);
 
         #endregion
 

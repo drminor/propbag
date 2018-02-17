@@ -3,6 +3,7 @@
                     xmlns:infra="clr-namespace:PropBagLib.Tests.SpecBasedVMTests.BasicVM.Infra;assembly=PropBag.Test"
                     xmlns:mod="clr-namespace:PropBagLib.Tests.BusinessModel;assembly=PropBag.Test"
                     xmlns:vmod="clr-namespace:PropBagLib.Tests.SpecBasedVMTests.BasicVM.ViewModels;assembly=PropBag.Test"
+                    xmlns:pbWPF="clr-namespace:DRM.PropBagWPF;assembly=PropBagWPF"
                     xmlns:pb="clr-namespace:DRM.PropBagControlsWPF;assembly=PropBag.WPFControls"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
@@ -11,6 +12,7 @@
                         DeriveFromClassMode="PropBag"
                         TargetType="{x:Type vmod:PersonVM}"
                         TypeSafetyMode="Tight"
+                        PropFactoryType="{x:Type pbWPF:WPFPropFactory}"
                         OutPutNameSpace="MVVMApplication.ViewModel">
 
         <pb:PropBagTemplate.Namespaces>

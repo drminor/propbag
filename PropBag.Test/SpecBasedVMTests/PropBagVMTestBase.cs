@@ -87,8 +87,8 @@ namespace PropBagLib.Tests.SpecBasedVMTests
             IPropFactory defaultPropFactory = BuildDefaultPropFactory
                 (
                 valueConverter,
-                delegateCacheProvider,
-                AutoMapperProvider
+                delegateCacheProvider//,
+                //AutoMapperProvider
                 );
             _mct.MeasureAndReport("After BuildDefaultPropFactory");
 
@@ -181,8 +181,8 @@ namespace PropBagLib.Tests.SpecBasedVMTests
         private IPropFactory BuildDefaultPropFactory
             (
             IConvertValues valueConverter,
-            IProvideDelegateCaches delegateCacheProvider,
-            IProvideAutoMappers autoMapperProvider
+            IProvideDelegateCaches delegateCacheProvider//,
+            //IProvideAutoMappers autoMapperProvider
             )
         {
             ResolveTypeDelegate typeResolver = null;
@@ -191,8 +191,8 @@ namespace PropBagLib.Tests.SpecBasedVMTests
                 (
                 delegateCacheProvider: delegateCacheProvider,
                 valueConverter: valueConverter,
-                typeResolver: typeResolver,
-                autoMapperProvider: autoMapperProvider
+                typeResolver: typeResolver//,
+                //autoMapperProvider: autoMapperProvider
                 );
 
             return result;
@@ -209,7 +209,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests
 
             PropBagTemplateParser pbtParser = new PropBagTemplateParser();
 
-            RemotePropModelProvider propModelProvider = new RemotePropModelProvider(rdProvider, pbtParser, propFactoryFactory, defaultPropFactory, configPackageNameSuffix);
+            RemotePropModelProvider propModelProvider = new RemotePropModelProvider(rdProvider, pbtParser, propFactoryFactory, configPackageNameSuffix);
             _mct.MeasureAndReport("After new PropModelProvider");
 
             return propModelProvider;

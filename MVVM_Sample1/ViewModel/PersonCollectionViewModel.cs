@@ -1,6 +1,8 @@
 ﻿using DRM.PropBag;
+using DRM.PropBag.AutoMapperSupport;
 using DRM.TypeSafePropertyBag;
 using System;
+
 
 namespace MVVMApplication.ViewModel
 {
@@ -8,8 +10,8 @@ namespace MVVMApplication.ViewModel
 
     public class PersonCollectionViewModel : PropBag
     {
-        public PersonCollectionViewModel(PropModel pm, PSAccessServiceCreatorInterface storeAccessCreator, IPropFactory propFactory, string fullClassName)
-            : base(pm, storeAccessCreator, propFactory, fullClassName)
+        public PersonCollectionViewModel(PropModel pm, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
+            : base(pm, storeAccessCreator, autoMapperService, propFactory, fullClassName)
         {
             System.Diagnostics.Debug.WriteLine("Constructing PersonCollectionViewModel -- with PropModel.");
         }

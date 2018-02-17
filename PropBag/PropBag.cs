@@ -207,10 +207,10 @@ namespace DRM.PropBag
         // TODO: This assumes that all IPropBag implementations use PropBag.
         public PropBag(IPropBag copySource)
         {
+            IProvideAutoMappers autoMapperService = ((PropBag)copySource)._autoMapperService;
             IPropFactory propFactory = ((PropBag)copySource)._propFactory;
-            IProvideAutoMappers autoMapperSerice = ((PropBag)copySource)._autoMapperService;
 
-            BasicConstruction(copySource.TypeSafetyMode, autoMapperSerice, propFactory, copySource.FullClassName);
+            BasicConstruction(copySource.TypeSafetyMode, autoMapperService, propFactory, copySource.FullClassName);
 
             PSAccessServiceInterface storeAccessor = ((PropBag)copySource)._ourStoreAccessor;
             _ourStoreAccessor = CloneProps(copySource, storeAccessor);
@@ -234,10 +234,17 @@ namespace DRM.PropBag
 
         private void BasicConstruction(PropBagTypeSafetyMode typeSafetyMode, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
         {
-            if(propFactory == null)
-                throw new ArgumentNullException(nameof(propFactory));
+            if(autoMapperService == null)
+            {
+                System.Diagnostics.Debug.WriteLine($"Note: IPropBag with FullClassName: {fullClassName} does not have a AutoMapperService.");
+            }
+            _autoMapperService = autoMapperService;
 
-            _propFactory = propFactory; // ?? throw new ArgumentNullException(nameof(propFactory));
+            //if (propFactory == null)
+            //{
+            //    throw new ArgumentNullException(nameof(propFactory));
+            //}
+            _propFactory = propFactory ?? throw new ArgumentNullException(nameof(propFactory));
 
             _ourMetaData = BuildMetaData(typeSafetyMode, fullClassName, _propFactory);
             _memConsumptionTracker.MeasureAndReport("BuildMetaData", $"Full Class Name: {fullClassName ?? "NULL"}");
@@ -484,55 +491,25 @@ namespace DRM.PropBag
             return propertyName;
         }
 
-//                    if (pi.StorageStrategy == PropStorageStrategyEnum.Internal && !pi.InitialValueField.SetToUndefined)
-//            {
-//                //_memConsumptionTracker.Measure();
-//                //object newValue = pi.InitialValueField.ValueCreator();
-//                //_memConsumptionTracker.MeasureAndReport("InitialField.ValueCreator", $"for {pi.PropertyName}");
+        private PropBagMapperCreator GetPropBagMapperFactory()
+        {
+            return GetPropBagMapper;
+        }
 
-//                //creationMethodDescription = "CreateGenFromObject";
-//                //propGen = _propFactory.CreateGenFromObject(pi.PropertyType, newValue, pi.PropertyName, ei, pi.StorageStrategy, pi.TypeIsSolid,
-//                //    pi.PropKind, comparer, useRefEquality, pi.ItemType);
+        private IPropBagMapperGen GetPropBagMapper(IMapperRequest mr)
+        {
+            return GetPropBagMapper_Internal(mr, out IPropBagMapperKeyGen dummy);
+        }
 
-//                // Create New PropBag-based Object
-//                if (pi.InitialValueField.PropBagResourceKey != null)
-//                {
-//                    IViewModelActivator vmActivator = new SimpleViewModelActivator();
+        private IPropBagMapperGen GetPropBagMapper_Internal(IMapperRequest mr, out IPropBagMapperKeyGen mapperRequest)
+        {
+            IProvideAutoMappers autoMapperProvider = this._autoMapperService ?? throw new InvalidOperationException
+                ($"This PropBag instance cannot create IProvideDataSourceProvider instances: No AutoMapperSupport was supplied upon construction.");
 
-//        //IPropModel propModel = 
-//        //IPropBag newObject = vmActivator.GetNewViewModel()
-//        propGen = _propFactory.CreateGenFromObject(pi.PropertyType, newObject, pi.PropertyName, ei, pi.StorageStrategy, pi.TypeIsSolid,
-//            pi.PropKind, comparer, useRefEquality, pi.ItemType);
-//                }
-
-//                // Create New CLR Type
-//                else if(pi.InitialValueField.CreateNew)
-//                {
-//                    object newValue = Activator.CreateInstance(pi.PropertyType);
-
-//    propGen = _propFactory.CreateGenFromObject(pi.PropertyType, newValue, pi.PropertyName, ei, pi.StorageStrategy, pi.TypeIsSolid,
-//        pi.PropKind, comparer, useRefEquality, pi.ItemType);
-//                }
-//                else
-//                {
-//                    bool useDefault = pi.InitialValueField.SetToDefault;
-//string value;
-
-//                    // TODO: Fix this??
-//                    if (pi.InitialValueField.SetToEmptyString && pi.PropertyType == typeof(Guid))
-//                    {
-//                        const string EMPTY_GUID = "00000000-0000-0000-0000-000000000000";
-//value = EMPTY_GUID;
-//                    }
-//                    else
-//                    {
-//                        value = pi.InitialValueField.GetStringValue();
-//                    }
-
-//                    creationMethodDescription = "CreateGenFromString";
-//                    propGen = _propFactory.CreateGenFromString(pi.PropertyType, value, useDefault, pi.PropertyName, ei, pi.StorageStrategy, pi.TypeIsSolid,
-//                        pi.PropKind, comparer, useRefEquality, pi.ItemType);
-//                }
+            mapperRequest = autoMapperProvider.RegisterMapperRequest(mr.PropModel, mr.SourceType, mr.ConfigPackageName);
+            IPropBagMapperGen genMapper = autoMapperProvider.GetMapper(mapperRequest);
+            return genMapper;
+        }
 
         private IPropData processProp(IPropItem pi, IProvidePropModels propModelProvider, out PropIdType propId)
         {
@@ -576,21 +553,15 @@ namespace DRM.PropBag
             if (pi.StorageStrategy == PropStorageStrategyEnum.Internal && !pi.InitialValueField.SetToUndefined)
             {
                 //_memConsumptionTracker.Measure();
-                //object newValue = pi.InitialValueField.ValueCreator();
-                //_memConsumptionTracker.MeasureAndReport("InitialField.ValueCreator", $"for {pi.PropertyName}");
-
-                //creationMethodDescription = "CreateGenFromObject";
-                //propGen = _propFactory.CreateGenFromObject(pi.PropertyType, newValue, pi.PropertyName, ei, pi.StorageStrategy, pi.TypeIsSolid,
-                //    pi.PropKind, comparer, useRefEquality, pi.ItemType);
 
                 // Create New PropBag-based Object
                 if (pi.InitialValueField.PropBagResourceKey != null)
                 {
-                    IViewModelActivator vmActivator = new SimpleViewModelActivator();
+                    //IViewModelActivator vmActivator = new SimpleViewModelActivator();
+                    //IPropModel propModel = propModelProvider.GetPropModel(pi.InitialValueField.PropBagResourceKey);
+                    //IPropBag newObject = (IPropBag) vmActivator.GetNewViewModel(propModel, _ourStoreAccessor.StoreAcessorCreator, pi.PropertyType, _autoMapperService, propFactory: null, fullClassName: null);
 
-                    IPropModel propModel = propModelProvider.GetPropModel(pi.InitialValueField.PropBagResourceKey);
-
-                    IPropBag newObject = (IPropBag) vmActivator.GetNewViewModel(propModel, _ourStoreAccessor.StoreAcessorCreator, pi.PropertyType, propFactory: null, fullClassName: null);
+                    IPropBag newObject = GetNewViewModel(pi, propModelProvider);
 
                     creationMethodDescription = "CreateGenFromObject";
                     propGen = _propFactory.CreateGenFromObject(pi.PropertyType, newObject, pi.PropertyName, ei, pi.StorageStrategy, pi.TypeIsSolid,
@@ -664,6 +635,26 @@ namespace DRM.PropBag
                 _memConsumptionTracker.MeasureAndReport("Add the PropGen to store", $"for {pi.PropertyName}");
 
             return propData;
+        }
+
+        private IPropBag GetNewViewModel(IPropItem pi, IProvidePropModels propModelProvider)
+        {
+            IPropModel propModel = propModelProvider.GetPropModel(pi.InitialValueField.PropBagResourceKey);
+            IPropBag newObject = (IPropBag)VmActivator.GetNewViewModel(propModel, _ourStoreAccessor.StoreAcessorCreator, pi.PropertyType, _autoMapperService, propFactory: null, fullClassName: null);
+            return newObject;
+        }
+
+        private IViewModelActivator _vmActivator;
+        private IViewModelActivator VmActivator
+        {
+            get
+            {
+                if(_vmActivator == null)
+                {
+                    _vmActivator = new SimpleViewModelActivator();
+                }
+                return _vmActivator;
+            }
         }
 
         private void processBinderField(IPropItem pi, PropIdType propId, IPropData propItem)
@@ -2067,7 +2058,7 @@ namespace DRM.PropBag
 
             IManageCViews cViewManager = _ourStoreAccessor.GetOrAddViewManager<TDal, TSource, TDestination>
                 (
-                this, dalPropId, propGen, mr, _propFactory.GetPropBagMapperFactory(), _propFactory.GetCViewProviderFactory()
+                this, dalPropId, propGen, mr, GetPropBagMapperFactory(), _propFactory.GetCViewProviderFactory()
                 );
 
             IProvideAView viewProvider = cViewManager.GetDefaultViewProvider();
@@ -2096,7 +2087,7 @@ namespace DRM.PropBag
 
             IManageCViews cViewManager = _ourStoreAccessor.GetOrAddViewManager<TDal, TSource, TDestination>
                 (
-                this, dalPropId, propGen, mr, _propFactory.GetPropBagMapperFactory(), _propFactory.GetCViewProviderFactory()
+                this, dalPropId, propGen, mr, GetPropBagMapperFactory(), _propFactory.GetCViewProviderFactory()
                 );
             return cViewManager;
         }
@@ -2131,7 +2122,7 @@ namespace DRM.PropBag
         {
             IProvideACViewManager cViewManagerProvider = _ourStoreAccessor.GetOrAddViewManagerProvider<TDal, TSource, TDestination>
                 (
-                this, viewManagerProviderKey, _propFactory.GetPropBagMapperFactory(), _propFactory.GetCViewProviderFactory()
+                this, viewManagerProviderKey, GetPropBagMapperFactory(), _propFactory.GetCViewProviderFactory()
                 );
             return cViewManagerProvider;
         }
@@ -3098,7 +3089,7 @@ namespace DRM.PropBag
             if (propData != null)
             {
                 IManageCViews result = _ourStoreAccessor.GetOrAddViewManager<TDal, TSource, TDestination>
-                    (this, propId, propData, mr, _propFactory.GetPropBagMapperFactory(), _propFactory.GetCViewProviderFactory());
+                    (this, propId, propData, mr, GetPropBagMapperFactory(), _propFactory.GetCViewProviderFactory());
                 return result;
             }
             else

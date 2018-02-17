@@ -278,7 +278,7 @@ namespace PropBagLib.Tests.PerformanceDb
             PropModel propModel5 = pmHelpers.GetPropModelForModel5Dest(propFactory_V1);
 
             // TODO: AAA
-            DestinationModel5 testChildVM = new DestinationModel5(propModel5, ourHelper.StoreAccessCreator, propFactory_V1, null);
+            DestinationModel5 testChildVM = new DestinationModel5(propModel5, ourHelper.StoreAccessCreator, _amp, propFactory_V1, null);
 
             Business b = new Business();
             testChildVM.SetIt(b, "Business");
@@ -291,7 +291,7 @@ namespace PropBagLib.Tests.PerformanceDb
 
             // Set up MainVM (Using Model 6)
             PropModel propModel6 = pmHelpers.GetPropModelForModel6Dest(propFactory_V1);
-            DestinationModel6 testMainVM = new DestinationModel6(propModel6, ourHelper.StoreAccessCreator, propFactory_V1, null);
+            DestinationModel6 testMainVM = new DestinationModel6(propModel6, ourHelper.StoreAccessCreator, _amp, propFactory_V1, null);
 
             Business b2 = new Business();
             testMainVM.SetIt(b2, "Business");

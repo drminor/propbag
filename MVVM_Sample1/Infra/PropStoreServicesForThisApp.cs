@@ -48,10 +48,9 @@ namespace MVVMApplication.Infra
                 if(value != _configPackageNameSuffix)
                 {
                     _configPackageNameSuffix = value;
+                    PropModelProvider = GetPropModelProvider(PropFactoryFactory, ConfigPackageNameSuffix);
+
                     IViewModelActivator vmActivator = new SimpleViewModelActivator();
-
-                    PropModelProvider = GetPropModelProvider(PropFactoryFactory, DefaultPropFactory, ConfigPackageNameSuffix);
-
                     ViewModelHelper = new ViewModelHelper(PropModelProvider, vmActivator, _theStore.PropStoreAccessServiceFactory, AutoMapperProvider);
 
                     // Remove any AutoMapper that may have been previously created.
@@ -100,11 +99,12 @@ namespace MVVMApplication.Infra
             IConvertValues valueConverter = new PropFactoryValueConverter(typeDescBasedTConverterCache);
 
             IPropFactoryFactory propFactoryFactory = BuildThePropFactoryFactory(valueConverter, delegateCacheProvider);
+            PropFactoryFactory = propFactoryFactory;
 
-            DefaultPropFactory = BuildDefaultPropFactory(valueConverter, delegateCacheProvider, AutoMapperProvider);
+            DefaultPropFactory = BuildDefaultPropFactory(valueConverter, delegateCacheProvider/*, AutoMapperProvider*/);
             _mct.MeasureAndReport("After new BuildDefaultPropFactory");
 
-            PropModelProvider = GetPropModelProvider(propFactoryFactory, DefaultPropFactory, ConfigPackageNameSuffix);
+            PropModelProvider = GetPropModelProvider(propFactoryFactory, ConfigPackageNameSuffix);
 
             ViewModelHelper = new ViewModelHelper(PropModelProvider, vmActivator, psAccessServiceFactory, AutoMapperProvider);
             _mct.MeasureAndReport("After new ViewModelHelper");
@@ -113,10 +113,7 @@ namespace MVVMApplication.Infra
 
         private static IProvidePropModels GetPropModelProvider
             (
-            //IViewModelActivator vmActivator,
-            //PSServiceSingletonProviderInterface propStoreServices,
             IPropFactoryFactory propFactoryFactory,
-            IPropFactory defaultPropFactory,
             string configPackageNameSuffix
             )
         {
@@ -134,10 +131,7 @@ namespace MVVMApplication.Infra
                 propBagTemplateProvider,
                 mapperRequestProvider,
                 propBagTemplateParser,
-                //vmActivator,
-                //psAccessServiceFactory,
-                propFactoryFactory,
-                defaultPropFactory
+                propFactoryFactory
                 );
 
                 _mct.MeasureAndReport("After new PropModelProvider");
@@ -166,8 +160,8 @@ namespace MVVMApplication.Infra
         private static IPropFactory BuildDefaultPropFactory
             (
             IConvertValues valueConverter,
-            IProvideDelegateCaches delegateCacheProvider,
-            IProvideAutoMappers autoMapperProvider
+            IProvideDelegateCaches delegateCacheProvider//,
+            //IProvideAutoMappers autoMapperProvider
             )
         {
             ResolveTypeDelegate typeResolver = null;
@@ -176,8 +170,8 @@ namespace MVVMApplication.Infra
                 (
                 delegateCacheProvider: delegateCacheProvider,
                 valueConverter: valueConverter,
-                typeResolver: typeResolver,
-                autoMapperProvider: autoMapperProvider
+                typeResolver: typeResolver//,
+                //autoMapperProvider: autoMapperProvider
                 );
 
             return result;
@@ -207,7 +201,6 @@ namespace MVVMApplication.Infra
 
         //    return result;
         //}
-
 
         private static IProvideAutoMappers GetAutoMapperProvider
             (

@@ -1,4 +1,5 @@
 ﻿using DRM.PropBag;
+using DRM.PropBag.AutoMapperSupport;
 using DRM.TypeSafePropertyBag;
 using System;
 
@@ -9,8 +10,8 @@ namespace MVVMApplication.ViewModel
 
     public partial class PersonVM : PropBag, ICloneable
     {
-        public PersonVM(PropModel pm, PSAccessServiceCreatorInterface storeAccessCreator, IPropFactory propFactory, string fullClassName)
-            : base(pm, storeAccessCreator, propFactory, fullClassName)
+        public PersonVM(PropModel pm, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
+            : base(pm, storeAccessCreator, autoMapperService, propFactory, fullClassName)
         {
         }
 

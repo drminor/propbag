@@ -4,6 +4,7 @@
                     xmlns:mod="clr-namespace:MVVMApplication.Model"
                     xmlns:dsrv="clr-namespace:MVVMApplication.Services"
                     xmlns:pb="clr-namespace:DRM.PropBagControlsWPF;assembly=PropBag.WPFControls"
+                    xmlns:pbWPF="clr-namespace:DRM.PropBagWPF;assembly=PropBagWPF"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
     <pb:PropBagTemplate x:Key="PersonCollectionVM"
@@ -11,6 +12,8 @@
                         DeriveFromClassMode="Custom"
                         TargetType="{x:Type vmod:PersonCollectionViewModel}"
                         TypeSafetyMode="Tight"
+                        PropFactoryType="{x:Type pbWPF:WPFPropFactory}"
+
                         OutPutNameSpace="MVVMApplication.ViewModel">
         
         <pb:PropBagTemplate.Namespaces>

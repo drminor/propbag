@@ -4,6 +4,7 @@
                     xmlns:mod="clr-namespace:MVVMApplication.Model"
                     xmlns:vmod="clr-namespace:MVVMApplication.ViewModel"
                     xmlns:pb="clr-namespace:DRM.PropBagControlsWPF;assembly=PropBag.WPFControls"
+                    xmlns:pbWPF="clr-namespace:DRM.PropBagWPF;assembly=PropBagWPF"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
     <!--<pb:MapperRequestTemplate x:Key="PersonVM_Mapper_Extra_Members"
@@ -21,6 +22,7 @@
                         DeriveFromClassMode="PropBag"
                         TargetType="{x:Type vmod:PersonVM}"
                         TypeSafetyMode="Tight"
+                        PropFactoryType="{x:Type pbWPF:WPFPropFactory}"
                         OutPutNameSpace="MVVMApplication.ViewModel">
         
         <pb:PropBagTemplate.Namespaces>

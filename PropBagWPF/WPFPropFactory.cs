@@ -1,5 +1,4 @@
 ﻿using DRM.PropBag;
-using DRM.PropBag.AutoMapperSupport;
 using DRM.TypeSafePropertyBag;
 using DRM.TypeSafePropertyBag.DataAccessSupport;
 using System;
@@ -15,7 +14,7 @@ namespace DRM.PropBagWPF
     {
         #region Private Properties
 
-        IProvideAutoMappers _autoMapperProvider { get; }
+        //IProvideAutoMappers _autoMapperProvider { get; }
 
         #endregion
 
@@ -29,19 +28,7 @@ namespace DRM.PropBagWPF
             )
             : base(delegateCacheProvider, valueConverter, typeResolver)
         {
-            _autoMapperProvider = null;
-        }
-
-        public WPFPropFactory
-            (
-                IProvideDelegateCaches delegateCacheProvider,
-                IConvertValues valueConverter,
-                ResolveTypeDelegate typeResolver,
-                IProvideAutoMappers autoMapperProvider
-            )
-            : base(delegateCacheProvider, valueConverter, typeResolver)
-        {
-            _autoMapperProvider = autoMapperProvider;
+            //_autoMapperProvider = null;
         }
 
         #endregion
@@ -114,25 +101,15 @@ namespace DRM.PropBagWPF
 
         #region CollectionViewSource property creators
 
-        public override PropBagMapperCreator GetPropBagMapperFactory()
-        {
-            return GetPropBagMapper;
-        }
+        //private IPropBagMapperGen GetPropBagMapper(IMapperRequest mr, out IPropBagMapperKeyGen mapperRequest)
+        //{
+        //    IProvideAutoMappers autoMapperProvider = this._autoMapperProvider ?? throw new InvalidOperationException
+        //        ($"This WPFPropFactory instance cannot create IProvideDataSourceProvider instances: No AutoMapperSupport was supplied upon construction.");
 
-        private IPropBagMapperGen GetPropBagMapper(IMapperRequest mr)
-        {
-            return GetPropBagMapper_Internal(mr, out IPropBagMapperKeyGen dummy);
-        }
-
-        private IPropBagMapperGen GetPropBagMapper_Internal(IMapperRequest mr, out IPropBagMapperKeyGen mapperRequest)
-        {
-            IProvideAutoMappers autoMapperProvider = this._autoMapperProvider ?? throw new InvalidOperationException
-                ($"This WPFPropFactory instance cannot create IProvideDataSourceProvider instances: No AutoMapperSupport was supplied upon construction.");
-
-            mapperRequest = autoMapperProvider.RegisterMapperRequest(mr.PropModel, mr.SourceType, mr.ConfigPackageName);
-            IPropBagMapperGen genMapper = autoMapperProvider.GetMapper(mapperRequest);
-            return genMapper;
-        }
+        //    mapperRequest = autoMapperProvider.RegisterMapperRequest(mr.PropModel, mr.SourceType, mr.ConfigPackageName);
+        //    IPropBagMapperGen genMapper = autoMapperProvider.GetMapper(mapperRequest);
+        //    return genMapper;
+        //}
 
         public override CViewProviderCreator GetCViewProviderFactory()
         {
@@ -153,37 +130,13 @@ namespace DRM.PropBagWPF
 
         public override IProp CreateCVProp(string propertyName, IProvideAView viewProvider)
         {
-            //ListCollectionView newVal;
-            //if(initialValue == null)
-            //{
-            //    newVal = null;
-            //}
-            //else
-            //{
-            //    if (initialValue is ListCollectionView lcv)
-            //    {
-            //        newVal = lcv;
-            //    }
-            //    else
-            //    {
-            //        throw new ArgumentException($"The initialValue is not a ListCollectionView.", nameof(initialValue));
-            //    }
-            //}
-
             CViewProp result = new CViewProp(propertyName, viewProvider);
             return result;
         }
 
-        //public IProp CreateCVPropGen(string propertyName, ICollectionView initialValue)
-        //{
-        //    CViewProp result = new CViewPropGen(propertyName, initialValue );
-        //    return result;
-        //}
-
         #endregion
 
         #region DataSource creators
-
 
         //public override ClrMappedDSP<TDestination> CreateMappedDS<TSource, TDestination>
         //    (
@@ -207,7 +160,6 @@ namespace DRM.PropBagWPF
         //    return mappedDSP;
         //}
 
-
         #endregion
 
         #region Property-type property creators
@@ -223,35 +175,27 @@ namespace DRM.PropBagWPF
             //IProvideAutoMappers autoMapperProvider = this._autoMapperProvider ?? throw new InvalidOperationException
             //    ($"This WPFPropFactory instance cannot create IProvideDataSourceProvider instances: No AutoMapperSupport was supplied upon construction.");
 
-
             //IPropBagMapperKeyGen realMapperRequest = autoMapperProvider.RegisterMapperRequest(mr.PropModel, mr.SourceType, mr.ConfigPackageName);
             //IPropBagMapperGen genMapper = autoMapperProvider.GetMapper(realMapperRequest);
 
-            IPropBagMapperGen genMapper = GetPropBagMapper_Internal(mr, out IPropBagMapperKeyGen mapperRequest);
+            IPropBagMapperGen genMapper = null; // GetPropBagMapper(mr, out IPropBagMapperKeyGen mapperRequest);
 
-
-            Type sourceType = mapperRequest.SourceTypeGenDef.TargetType;
-            Type destinationType = mapperRequest.DestinationTypeGenDef.TargetType;
+            Type sourceType = mr.SourceType; // mapperRequest.SourceTypeGenDef.TargetType;
+            Type destinationType = mr.PropModel.TargetType; // mapperRequest.DestinationTypeGenDef.TargetType;
 
             CreateMappedDSPProviderDelegate dspProviderCreator = GetDSPProviderCreator(sourceType, destinationType.BaseType.BaseType);
-            IProvideADataSourceProvider result = dspProviderCreator(this, propId, propKind, iDoCrudDataSource, propStoreAccessService, genMapper);
+            IProvideADataSourceProvider result = dspProviderCreator
+                (
+                this,
+                propId,
+                propKind,
+                iDoCrudDataSource,
+                propStoreAccessService,
+                genMapper
+                );
 
             return result;
         }
-
-        //public override IProp CreateCVSPropFromString(Type typeOfThisProperty, PropNameType propertyName, DataSourceProvider initialValue)
-        //{
-        //    CreateCVSPropDelegate propCreator = GetCVSPropCreator(typeOfThisProperty);
-        //    IProp prop = propCreator(this, propertyName, initialValue);
-        //    return prop;
-        //}
-
-        //public override IProp CreateCVPropFromString(Type typeofThisProperty, PropNameType propertyName, ICollectionView initialValue)
-        //{
-        //    CreateCVPropDelegate propCreator = GetCVPropCreator(typeofThisProperty);
-        //    IProp prop = propCreator(this, propertyName, initialValue);
-        //    return prop;
-        //}
 
         #endregion
     }

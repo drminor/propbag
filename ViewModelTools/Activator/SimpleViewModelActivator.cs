@@ -42,9 +42,7 @@ namespace DRM.PropBag.ViewModelTools
 
         public object GetNewViewModel(IPropModel propModel, PSAccessServiceCreatorInterface storeAccessCreator, Type typeToCreate, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
         {
-            //object[] parameters = new object[] { propModel, storeAccessCreator, propFactory ?? propModel.PropFactory, fullClassName ?? propModel.FullClassName };
-
-            object[] parameters = new object[] { propModel, storeAccessCreator, propFactory, fullClassName };
+            object[] parameters = new object[] { propModel, storeAccessCreator, autoMapperService, propFactory, fullClassName };
 
             //BindingFlags bFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.CreateInstance;
             //object result = Activator.CreateInstance(typeToCreate, bFlags, binder: null, args: parameters, culture: null);

@@ -1,4 +1,5 @@
 ﻿using DRM.PropBag;
+using DRM.PropBag.AutoMapperSupport;
 using DRM.TypeSafePropertyBag;
 using PropBagLib.Tests.BusinessModel;
 using System;
@@ -21,8 +22,8 @@ namespace PropBagLib.Tests.PerformanceDb
             AddProp<Profession>("Profession", null, null, Profession.Default);
         }
 
-        public DestinationModel1(PropModel propModel, PSAccessServiceCreatorInterface storeAccessCreator, IPropFactory propFactory, string fullClassName)
-            : base(propModel, storeAccessCreator, propFactory, fullClassName)
+        public DestinationModel1(PropModel propModel, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
+            : base(propModel, storeAccessCreator, autoMapperService, propFactory, fullClassName)
         {
         }
 
@@ -46,8 +47,8 @@ namespace PropBagLib.Tests.PerformanceDb
             AddProp<Guid>("ProductId", null, null, Guid.NewGuid());
         }
 
-        public DestinationModel5(PropModel propModel, PSAccessServiceCreatorInterface storeAccessCreator, IPropFactory propFactory, string fullClassName)
-            : base(propModel, storeAccessCreator, propFactory, fullClassName)
+        public DestinationModel5(PropModel propModel, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
+            : base(propModel, storeAccessCreator, autoMapperService, propFactory, fullClassName)
         {
         }
 
@@ -66,8 +67,8 @@ namespace PropBagLib.Tests.PerformanceDb
         //    AddProp<Guid>("ProductId", null, false, null, null, Guid.NewGuid());
         //}
 
-        public DestinationModel6(PropModel propModel, PSAccessServiceCreatorInterface storeAccessCreator, IPropFactory propFactory, string fullClassName)
-            : base(propModel, storeAccessCreator, propFactory, fullClassName)
+        public DestinationModel6(PropModel propModel, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
+            : base(propModel, storeAccessCreator, autoMapperService, propFactory, fullClassName)
         {
         }
 
