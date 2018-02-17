@@ -2,9 +2,11 @@
 using NUnit.Framework;
 using PropBagLib.Tests.BusinessModel;
 using PropBagLib.Tests.SpecBasedVMTests.BasicVM.Services;
+using PropBagLib.Tests.SpecBasedVMTests.BasicVM.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using DRM.ObjectIdDictionary;
 
 namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
 {
@@ -45,6 +47,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
         }
     }
 
+
     [TestFixture(TestName = "NoResources_Run2")]
     [NonParallelizable]
     public class AA_EmptyTest2 : BasicVM
@@ -79,6 +82,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
             CallContextDestroyer();
         }
     }
+
 
     [TestFixture(TestName = "Regular Resource Set")]
     [NonParallelizable]
@@ -152,9 +156,10 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
         }
     }
 
+
     [TestFixture(TestName = "Load Simple Model From PersonDal.")]
     [NonParallelizable]
-    public class SimpleModel : BasicVM
+    public class GetPropModel : BasicVM
     {
         IPropModel personVM_PropModel = null;
 
@@ -173,6 +178,58 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
         public void SimpleModel_PersonPropModelHasAllTheProps()
         {
             Assert.That(personVM_PropModel.Props.Count == 5);
+        }
+
+        [OneTimeSetUp]
+        public void OneTimeSetup()
+        {
+            MemTrackerStartMessage = $"Starting Mem Tracking for {GetType().GetTestName()}.";
+            CallContextEstablisher();
+            CallBecause_Of();
+        }
+
+        [OneTimeTearDown]
+        public void OneTimeTearDown()
+        {
+            CallContextDestroyer();
+        }
+    }
+
+
+    [TestFixture(TestName = "CreateVM_CreateMainWindowVM.")]
+    [NonParallelizable]
+    public class CreateVM : BasicVM
+    {
+        IPropModel mainWindowPropModel;
+        MainWindowViewModel mainWindowViewModel; 
+        
+
+        protected override void Because_Of()
+        {
+            //ConfigPackageNameSuffix = "Emit_Proxy";
+            mainWindowPropModel = PropModelProvider.GetPropModel("MainWindowVM");
+
+            mainWindowViewModel = new MainWindowViewModel(mainWindowPropModel, PropStoreAccessService_Factory, AutoMapperProvider, propFactory: null, fullClassName: null);
+        }
+
+        [Test]
+        public void CreateVM_ThenGetPropModel()
+        {
+            Assert.That(mainWindowPropModel != null, "mainWindowPropModel is null.");
+        }
+
+        [Test]
+        public void CreateVM_MainWindowPropModelHasAllTheProps()
+        {
+            Assert.That(mainWindowPropModel.Props.Count == 4, "mainWindowPropModel does not have 4 PropItems.");
+        }
+
+        [Test]
+        public void CreateVM_PersonCollectionViewModel_WasCreated()
+        {
+            PersonCollectionViewModel personCollectionViewModel = (PersonCollectionViewModel)mainWindowViewModel[typeof(PersonCollectionViewModel), "PersonCollectionVM"];
+
+            Assert.That(personCollectionViewModel != null, "The personCollectionViewModel could not be found.");
         }
 
         [OneTimeSetUp]
