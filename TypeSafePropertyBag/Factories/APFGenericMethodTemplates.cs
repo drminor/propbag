@@ -93,6 +93,8 @@ namespace DRM.TypeSafePropertyBag
 
         #region DataSource creators
 
+        // TODO: replace IPropBagMapperGen with a IMapperRequest.
+        // So that the Mapper gets created only if it's needed.
         private static IProvideADataSourceProvider CreateMappedDSPProvider<TSource, TDestination>
             (
             IPropFactory propFactory,
