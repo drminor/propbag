@@ -37,12 +37,5 @@ namespace DRM.PropBag.AutoMapperSupport
         void ClearCaches();
     }
 
-    public interface ICachePropBagMappers
-    {
-        IPropBagMapperKeyGen RegisterMapperRequest(IPropBagMapperKeyGen mapperRequest);
 
-        IPropBagMapperGen GetMapper(IPropBagMapperKeyGen mapperRequest);
-
-        long ClearMappersCache();
-    }
 }

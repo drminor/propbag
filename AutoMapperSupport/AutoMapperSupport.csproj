@@ -52,7 +52,6 @@
     <Compile Include="MapTypeDefinition\SimpleMapTypeDefinitionProvider.cs" />
     <Compile Include="Caches\ICacheConfigPackages.cs" />
     <Compile Include="Caches\SimplePropBagMapperCache.cs" />
-    <Compile Include="Caches\ICachePropBagMappers.cs" />
     <Compile Include="Config\SimpleMapperConfigurationBuilderGenBase.cs" />
     <Compile Include="Config\SimpleMapperConfigurationBuilder.cs" />
     <Compile Include="Config\AbstractMapperConfigGen.cs" />

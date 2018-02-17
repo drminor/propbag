@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IBuildPropBagMapper.cs" />
+    <Compile Include="ICachePropBagMappers.cs" />
     <Compile Include="IConfigureAMapper.cs" />
     <Compile Include="ICreateMappingExpressions.cs" />
     <Compile Include="IHaveAMapperConfigurationStep.cs" />
