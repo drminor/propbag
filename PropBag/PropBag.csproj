@@ -98,6 +98,10 @@
     <Compile Include="XMLModel\PropModelWriter.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AutoMapperSupportInterfaces\AutoMapperSupportInterfaces.csproj">
+      <Project>{f0903390-0628-434c-8d27-80fb263955b6}</Project>
+      <Name>AutoMapperSupportInterfaces</Name>
+    </ProjectReference>
     <ProjectReference Include="..\AutoMapperSupport\AutoMapperSupport.csproj">
       <Project>{10cf1c6f-f877-49a8-8678-6947f55e6920}</Project>
       <Name>AutoMapperSupport</Name>

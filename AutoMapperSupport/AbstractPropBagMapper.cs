@@ -30,6 +30,7 @@ namespace DRM.PropBag.AutoMapperSupport
 
         IViewModelActivator _vmActivator;
         PSAccessServiceCreatorInterface _storeAccessCreator;
+        IProvideAutoMappers _autoMapperService;
 
         private readonly bool _requiresWrappperTypeEmitServices;
         private readonly TDestination _template;
@@ -41,7 +42,7 @@ namespace DRM.PropBag.AutoMapperSupport
         #region Constructor
 
         public AbstractPropBagMapper(IPropBagMapperKey<TSource, TDestination> mapRequest,
-            IMapper mapper, IViewModelActivator vmActivator, PSAccessServiceCreatorInterface storeAccessCreator)
+            IMapper mapper, IViewModelActivator vmActivator, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService)
         {
             SourceType = mapRequest.SourceTypeDef.TargetType;
             DestinationType = mapRequest.DestinationTypeDef.TargetType;
@@ -53,6 +54,7 @@ namespace DRM.PropBag.AutoMapperSupport
             Mapper = mapper;
             _vmActivator = vmActivator;
             _storeAccessCreator = storeAccessCreator;
+            _autoMapperService = autoMapperService;
 
             SupportsMapFrom = true;
 
@@ -62,7 +64,7 @@ namespace DRM.PropBag.AutoMapperSupport
             {
                 _mct.Measure();
 
-                _template = GetNewDestination(PropModel, _storeAccessCreator, DestinationType, PropFactory, fullClassName: null);
+                _template = GetNewDestination(PropModel, _storeAccessCreator, DestinationType, _autoMapperService, PropFactory, fullClassName: null);
 
                 // To ensure that the template's Level2Key Manager is shared amoung all clones,
                 // make sure it is fixed.
@@ -155,7 +157,7 @@ namespace DRM.PropBag.AutoMapperSupport
             }
             else
             {
-                result = GetNewDestination(PropModel, _storeAccessCreator, RunTimeType, PropFactory, fullClassName: null);
+                result = GetNewDestination(PropModel, _storeAccessCreator, RunTimeType, _autoMapperService, PropFactory, fullClassName: null);
                 _mct.MeasureAndReport("GetNewDestination(PropModel, ...", "AstractPropBagMapper");
             }
 
@@ -181,11 +183,11 @@ namespace DRM.PropBag.AutoMapperSupport
         }
 
         // Regular Instantiation using the PropModel. 
-        private TDestination GetNewDestination(IPropModel propModel, PSAccessServiceCreatorInterface storeAccessCreator, Type destinationOrProxyType, IPropFactory propFactory, string fullClassName)
+        private TDestination GetNewDestination(IPropModel propModel, PSAccessServiceCreatorInterface storeAccessCreator, Type destinationOrProxyType, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
         {
             try
             {
-                var newViewModel = _vmActivator.GetNewViewModel(propModel, storeAccessCreator, destinationOrProxyType, propFactory, fullClassName);
+                var newViewModel = _vmActivator.GetNewViewModel(propModel, storeAccessCreator, destinationOrProxyType, autoMapperService, propFactory, fullClassName);
                 return newViewModel as TDestination;
             }
             catch (Exception e2)

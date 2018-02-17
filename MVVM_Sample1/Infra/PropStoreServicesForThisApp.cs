@@ -52,7 +52,7 @@ namespace MVVMApplication.Infra
 
                     PropModelProvider = GetPropModelProvider(PropFactoryFactory, DefaultPropFactory, ConfigPackageNameSuffix);
 
-                    ViewModelHelper = new ViewModelHelper(PropModelProvider, vmActivator, _theStore.PropStoreAccessServiceFactory);
+                    ViewModelHelper = new ViewModelHelper(PropModelProvider, vmActivator, _theStore.PropStoreAccessServiceFactory, AutoMapperProvider);
 
                     // Remove any AutoMapper that may have been previously created.
                     AutoMapperProvider.ClearMappersCache();
@@ -106,8 +106,8 @@ namespace MVVMApplication.Infra
 
             PropModelProvider = GetPropModelProvider(propFactoryFactory, DefaultPropFactory, ConfigPackageNameSuffix);
 
-            ViewModelHelper = new ViewModelHelper(PropModelProvider, vmActivator, psAccessServiceFactory);
-                _mct.MeasureAndReport("After new ViewModelHelper");
+            ViewModelHelper = new ViewModelHelper(PropModelProvider, vmActivator, psAccessServiceFactory, AutoMapperProvider);
+            _mct.MeasureAndReport("After new ViewModelHelper");
 
         }
 

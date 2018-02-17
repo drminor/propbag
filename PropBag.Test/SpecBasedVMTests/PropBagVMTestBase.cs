@@ -109,7 +109,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests
             _mct.MeasureAndReport("After LoadPropModelsAndMappers");
 
             // Create the ViewModelHelper
-            ViewModelHelper = new ViewModelHelper(PropModelProvider, vmActivator, psAccessServiceFactory);
+            ViewModelHelper = new ViewModelHelper(PropModelProvider, vmActivator, psAccessServiceFactory, AutoMapperProvider);
             _mct.MeasureAndReport("After new ViewModelHelper");
 
             return OurCleanupRoutine;

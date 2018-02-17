@@ -14,14 +14,16 @@ namespace DRM.PropBag.AutoMapperSupport
                 IPropBagMapperKey<TSource, TDestination> mapRequest,
                 IMapper mapper,
                 IViewModelActivator vmActivator,
-                PSAccessServiceCreatorInterface storeAccessCreator
+                PSAccessServiceCreatorInterface storeAccessCreator,
+                IProvideAutoMappers autoMapperService
             )
             : base
             (
                 mapRequest,
                 mapper,
                 vmActivator,
-                storeAccessCreator
+                storeAccessCreator,
+                autoMapperService
             )
         {
         }

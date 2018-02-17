@@ -1,6 +1,7 @@
 ﻿using DRM.TypeSafePropertyBag;
 using DRM.PropBag.ViewModelTools;
 using System;
+using DRM.PropBag.AutoMapperSupport;
 
 namespace DRM.PropBagWPF
 {
@@ -17,16 +18,24 @@ namespace DRM.PropBagWPF
         IProvidePropModels _propModelProvider { get; }
         IViewModelActivator _viewModelActivator { get; }
         PSAccessServiceCreatorInterface _storeAccessCreator;
+        IProvideAutoMappers _autoMapperService;
 
         #endregion
 
         #region Constructors
 
-        public ViewModelHelper(IProvidePropModels propModelProvider, IViewModelActivator viewModelActivator, PSAccessServiceCreatorInterface storeAccessCreator)
+        public ViewModelHelper
+            (
+            IProvidePropModels propModelProvider,
+            IViewModelActivator viewModelActivator,
+            PSAccessServiceCreatorInterface storeAccessCreator,
+            IProvideAutoMappers autoMapperService
+            )
         {
             _propModelProvider = propModelProvider ?? throw new ArgumentNullException(nameof(propModelProvider));
             _viewModelActivator = viewModelActivator ?? throw new ArgumentNullException(nameof(viewModelActivator));
             _storeAccessCreator = storeAccessCreator ?? throw new ArgumentNullException(nameof(storeAccessCreator));
+            _autoMapperService = autoMapperService ?? throw new ArgumentNullException(nameof(autoMapperService));
         }
 
         #endregion
@@ -60,6 +69,7 @@ namespace DRM.PropBagWPF
                 propModel: pm,
                 storeAccessCreator: _storeAccessCreator,
                 typeToCreate: pm.TypeToCreate,
+                autoMapperService: _autoMapperService,
                 propFactory: propFactory,
                 fullClassName: fullClassName
                 );

@@ -11,20 +11,25 @@ namespace DRM.PropBag.AutoMapperSupport
     public class SimplePropBagMapperBuilder<TSource, TDestination> : IBuildPropBagMapper<TSource, TDestination> where TDestination : class, IPropBag
     {
         private IBuildMapperConfigurations<TSource, TDestination> MapperConfigurationBuilder { get; }
+
         private IViewModelActivator ViewModelActivator { get; }
         private PSAccessServiceCreatorInterface _storeAccessCreator;
+        private IProvideAutoMappers _autoMapperService;
+
         private ICreateWrapperTypes WrapperTypeCreator { get; }
 
         public SimplePropBagMapperBuilder(
             IBuildMapperConfigurations<TSource, TDestination> mapperConfigurationBuilder,
             ICreateWrapperTypes wrapperTypeCreator,
             IViewModelActivator viewModelActivator,
-            PSAccessServiceCreatorInterface storeAccessCreator
+            PSAccessServiceCreatorInterface storeAccessCreator,
+            IProvideAutoMappers autoMapperService
             )
         {
             MapperConfigurationBuilder = mapperConfigurationBuilder;
             ViewModelActivator = viewModelActivator;
             _storeAccessCreator = storeAccessCreator;
+            _autoMapperService = autoMapperService;
             WrapperTypeCreator = wrapperTypeCreator;
         }
 
@@ -55,7 +60,7 @@ namespace DRM.PropBag.AutoMapperSupport
             IMapper theMapper = configProvider.CreateMapper();
 
             IPropBagMapper <TSource, TDestination> result 
-                = new SimplePropBagMapper<TSource, TDestination>(mapRequest, theMapper, ViewModelActivator, _storeAccessCreator);
+                = new SimplePropBagMapper<TSource, TDestination>(mapRequest, theMapper, ViewModelActivator, _storeAccessCreator, _autoMapperService);
 
             return result;
         }

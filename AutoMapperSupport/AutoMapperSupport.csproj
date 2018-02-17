@@ -30,6 +30,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="netstandard, Version=2.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -41,14 +42,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Builders\IPropBagMapperBuilderProvider.cs" />
-    <Compile Include="Builders\IPropBagMapperKey.cs" />
     <Compile Include="Builders\SimplePropBagMapperBuilderProvider.cs" />
     <Compile Include="ConfigPackages\ConfigPackage_EmitProxy.cs" />
     <Compile Include="ConfigPackages\ConfigPackage_ExtraMembers.cs" />
     <Compile Include="ConfigPackages\ICreateMapperRequests.cs" />
     <Compile Include="ConfigPackages\IProvideAMapperConfiguration.cs" />
-    <Compile Include="Config\ICreateMappingExpressions.cs" />
-    <Compile Include="IProvideAutoMappers.cs" />
     <Compile Include="MapTypeDefinition\IMapTypeDefinitionProvider.cs" />
     <Compile Include="Builders\PropBagMapperKeyGen.cs" />
     <Compile Include="MapTypeDefinition\SimpleMapTypeDefinitionProvider.cs" />
@@ -58,20 +56,16 @@
     <Compile Include="Config\SimpleMapperConfigurationBuilderGenBase.cs" />
     <Compile Include="Config\SimpleMapperConfigurationBuilder.cs" />
     <Compile Include="Config\AbstractMapperConfigGen.cs" />
-    <Compile Include="Builders\IBuildPropBagMapper.cs" />
     <Compile Include="Builders\SimplePropBagMapperBuilder.cs" />
     <Compile Include="SimplePropBagMapper.cs" />
     <Compile Include="SimpleAutoMapperProvider.cs" />
     <Compile Include="Config\EmitProxyConfigFinalStep.cs" />
     <Compile Include="Config\ExtraMembersConfigInitialStep.cs" />
-    <Compile Include="Config\IHaveAMapperConfigurationStep.cs" />
-    <Compile Include="Config\IConfigureAMapper.cs" />
     <Compile Include="Config\MapperConfigStarter_Empty.cs" />
     <Compile Include="Config\MapperConfigStarter_Default.cs" />
     <Compile Include="Config\IBuildMapperConfigurations.cs" />
     <Compile Include="Config\SimpleMapperConfigTyped.cs" />
     <Compile Include="Config\ExtraMembersConfigFinalStep.cs" />
-    <Compile Include="MapTypeDefinition\IMapTypeDefinition.cs" />
     <Compile Include="ExtraMembers\ExtraMembersProvider.cs" />
     <Compile Include="MapTypeDefinition\MapTypeDefinition.cs" />
     <Compile Include="ExtraMembers\PBDispatcher.cs" />
@@ -81,6 +75,10 @@
     <Compile Include="ExtraMembers\PropertyInfoWT.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AutoMapperSupportInterfaces\AutoMapperSupportInterfaces.csproj">
+      <Project>{f0903390-0628-434c-8d27-80fb263955b6}</Project>
+      <Name>AutoMapperSupportInterfaces</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ObjectSizeDiagnostics\ObjectSizeDiagnostics.csproj">
       <Project>{9b18f82d-3ed9-49e0-9ee3-cfbfc3af9d9c}</Project>
       <Name>ObjectSizeDiagnostics</Name>
@@ -98,7 +96,7 @@
       <Name>TypeWrapper</Name>
     </ProjectReference>
     <ProjectReference Include="..\ViewModelTools\ViewModelTools.csproj">
-      <Project>{A149EAD5-06A9-47C8-8853-1D329D553EA7}</Project>
+      <Project>{a149ead5-06a9-47c8-8853-1d329d553ea7}</Project>
       <Name>ViewModelTools</Name>
     </ProjectReference>
   </ItemGroup>

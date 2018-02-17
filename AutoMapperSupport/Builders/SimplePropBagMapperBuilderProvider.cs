@@ -25,13 +25,14 @@ namespace DRM.PropBag.AutoMapperSupport
             WrapperTypeCreator = wrapperTypesCreator ?? GetSimpleWrapperTypeCreator();
             ViewModelActivator = viewModelActivator ?? new SimpleViewModelActivator();
             _storeAccessCreator = storeAccessCreator ?? throw new ArgumentNullException(nameof(storeAccessCreator));
-
         }
 
         public IBuildPropBagMapper<TSource, TDestination> GetPropBagMapperBuilder<TSource, TDestination>
             (
-            IBuildMapperConfigurations<TSource, TDestination> mapperConfigurationBuilder
-            ) where TDestination: class, IPropBag
+            IBuildMapperConfigurations<TSource, TDestination> mapperConfigurationBuilder,
+            IProvideAutoMappers autoMapperService
+            )
+            where TDestination: class, IPropBag
         {
             IBuildPropBagMapper<TSource, TDestination> result
                 = new SimplePropBagMapperBuilder<TSource, TDestination>
@@ -39,7 +40,8 @@ namespace DRM.PropBag.AutoMapperSupport
                     mapperConfigurationBuilder: mapperConfigurationBuilder,
                     wrapperTypeCreator: WrapperTypeCreator,
                     viewModelActivator: ViewModelActivator,
-                    storeAccessCreator: _storeAccessCreator
+                    storeAccessCreator: _storeAccessCreator,
+                    autoMapperService: autoMapperService
                 );
 
             return result;

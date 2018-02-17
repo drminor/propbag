@@ -121,10 +121,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AutoMapperSupport\AutoMapperSupport.csproj">
-      <Project>{10cf1c6f-f877-49a8-8678-6947f55e6920}</Project>
-      <Name>AutoMapperSupport</Name>
-    </ProjectReference>
     <ProjectReference Include="..\PropBag.Test\PropBagLib.Tests.csproj">
       <Project>{7578349d-63e0-4b73-bc1a-25b667008b9d}</Project>
       <Name>PropBagLib.Tests</Name>

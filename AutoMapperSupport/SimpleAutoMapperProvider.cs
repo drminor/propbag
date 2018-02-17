@@ -10,13 +10,9 @@ namespace DRM.PropBag.AutoMapperSupport
     {
         #region Private Members
 
-        //string NO_PROPMODEL_LOOKUP_SERVICES = $"The {nameof(SimpleViewModelActivator)} has no PropModelProvider." +
-        //    $"All calls must provide a PropModel.";
-
         IMapTypeDefinitionProvider MapTypeDefinitionProvider { get; }
         ICachePropBagMappers MappersCachingService { get; }
         IPropBagMapperBuilderProvider MapperBuilderProvider { get; }
-        //IProvidePropModels PropModelProvider { get; }
 
         #endregion
 
@@ -29,49 +25,16 @@ namespace DRM.PropBag.AutoMapperSupport
             IMapTypeDefinitionProvider mapTypeDefinitionProvider,
             ICachePropBagMappers mappersCachingService,
             IPropBagMapperBuilderProvider mapperBuilderProvider
-            //, IProvidePropModels propModelProvider = null
             )
         {
             MapTypeDefinitionProvider = mapTypeDefinitionProvider ?? throw new ArgumentNullException(nameof(mapTypeDefinitionProvider));
             MappersCachingService = mappersCachingService ?? throw new ArgumentNullException(nameof(mappersCachingService));
             MapperBuilderProvider = mapperBuilderProvider ?? throw new ArgumentNullException(nameof(mapperBuilderProvider));
-            //PropModelProvider = propModelProvider;
-
-            //if (!HasPropModelLookupService) System.Diagnostics.Debug.WriteLine(NO_PROPMODEL_LOOKUP_SERVICES);
         }
 
         #endregion
 
-        #region Public Properties
-        //public bool HasPropModelLookupService => (PropModelProvider != null);
-        #endregion
-
         #region Public Methods
-
-        //public IPropBagMapperKeyGen RegisterMapperRequest(MapperRequest mr)
-        //{
-        //    //PropModel propModel = PropModelProvider.GetPropModel(mr.PropModelResourceKey);
-        //    //Type targetType = propModel.TargetType;
-
-        //    //RegisterMapperRequestDelegate x = GetTheRegisterMapperRequestDelegate(mr.SourceType, targetType);
-        //    //IPropBagMapperKeyGen result = x(propModel, targetType, mr.ConfigPackageName, this);
-
-        //    IPropBagMapperKeyGen result = RegisterMapperRequest(mr.PropModelResourceKey, mr.SourceType, mr.ConfigPackageName);
-        //    return result;
-        //}
-
-        //public IPropBagMapperKeyGen RegisterMapperRequest(string propModelResourceKey, Type sourceType, string configPackageName)
-        //{
-        //    IPropModel propModel = PropModelProvider.GetPropModel(propModelResourceKey);
-        //    //Type targetType = propModel.TargetType;
-
-        //    //RegisterMapperRequestDelegate x = GetTheRegisterMapperRequestDelegate(sourceType, targetType);
-        //    //IPropBagMapperKeyGen result = x(propModel, targetType, configPackageName, this);
-
-        //    IPropBagMapperKeyGen result = RegisterMapperRequest(propModel, sourceType, configPackageName);
-
-        //    return result;
-        //}
 
         public IPropBagMapperKeyGen RegisterMapperRequest(IPropModel propModel, Type sourceType, string configPackageName)
         {
@@ -82,30 +45,6 @@ namespace DRM.PropBag.AutoMapperSupport
 
             return result;
         }
-
-        //// TODO: Remove dependency on PropModelProvider and make all calls supply a PropModel. 
-        //public IPropBagMapperKey<TSource, TDestination> RegisterMapperRequest<TSource, TDestination>
-        //    (
-        //    string resourceKey,
-        //    Type targetType,
-        //    string configPackageName,
-        //    IHaveAMapperConfigurationStep configStarterForThisRequest = null,
-        //    IPropFactory propFactory = null
-        //    ) where TDestination : class, IPropBag
-        //{
-        //    IPropModel propModel = GetPropModel(resourceKey);
-
-        //    IPropBagMapperKey<TSource, TDestination> typedMapperRequest =
-        //        RegisterMapperRequest<TSource, TDestination>
-        //        (
-        //            propModel,
-        //            targetType,
-        //            configPackageName,
-        //            configStarterForThisRequest,
-        //            propFactory);
-
-        //    return typedMapperRequest;
-        //}
 
         // TODO: Consider adding a method that takes a IConfigureAMapper instead of a configPackageName.
         public IPropBagMapperKey<TSource, TDestination> RegisterMapperRequest<TSource, TDestination>
@@ -127,17 +66,17 @@ namespace DRM.PropBag.AutoMapperSupport
 
             // Create a MapperBuilder for this request.
             IBuildPropBagMapper<TSource, TDestination> propBagMapperBuilder
-                = MapperBuilderProvider.GetPropBagMapperBuilder<TSource, TDestination>(propBagMapperConfigurationBuilder);
+                = MapperBuilderProvider.GetPropBagMapperBuilder<TSource, TDestination>(propBagMapperConfigurationBuilder, this);
 
             // Lookup the package name and return a mapping configuration.
             IConfigureAMapper<TSource, TDestination> mappingConfiguration
                 = GetMappingConfiguration<TSource, TDestination>(configPackageName);
 
             IMapTypeDefinition<TSource> srcMapTypeDef
-                = MapTypeDefinitionProvider.GetTypeDescription<TSource>(propModel, targetType, className: null, propFactory: propFactory);
+                = MapTypeDefinitionProvider.GetTypeDescription<TSource>(propModel, targetType, propFactory: propFactory, className: null);
 
             IMapTypeDefinition<TDestination> dstMapTypeDef
-                = MapTypeDefinitionProvider.GetTypeDescription<TDestination>(propModel, targetType, className: null, propFactory: propFactory);
+                = MapTypeDefinitionProvider.GetTypeDescription<TDestination>(propModel, targetType, propFactory: propFactory, className: null);
 
 
             // Create the mapper request.
@@ -212,17 +151,6 @@ namespace DRM.PropBag.AutoMapperSupport
                     }
             }
         }
-
-        //private IPropModel GetPropModel(string resourceKey, IPropFactory propFactory = null)
-        //{
-        //    if (!HasPropModelLookupService)
-        //    {
-        //        throw new InvalidOperationException(NO_PROPMODEL_LOOKUP_SERVICES);
-        //    }
-
-        //    IPropModel propModel = PropModelProvider.GetPropModel(resourceKey, propFactory);
-        //    return propModel;
-        //}
 
         #endregion
 
