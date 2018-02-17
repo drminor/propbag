@@ -18,7 +18,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests
 
         protected int MaxPropsPerObject { get; private set; }
 
-        private SimplePropStoreAccessServiceProviderProxy _theStore { get; set; }
+        private SimplePropStoreProxy _theStore { get; set; }
         protected PSAccessServiceCreatorInterface PropStoreAccessService_Factory { get; set; }
         protected IPropFactory DefaultPropFactory { get; set; }
 
@@ -65,7 +65,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests
             _mct.MeasureAndReport("After new SimpleHandlerDispatchDelegateCacheProvider");
 
             // Property Store
-            _theStore = new SimplePropStoreAccessServiceProviderProxy(MaxPropsPerObject, handlerDispatchDelegateCacheProvider);
+            _theStore = new SimplePropStoreProxy(MaxPropsPerObject, handlerDispatchDelegateCacheProvider);
 
             // PropStoreAccessService Factory.
             PropStoreAccessService_Factory = _theStore.PropStoreAccessServiceFactory;

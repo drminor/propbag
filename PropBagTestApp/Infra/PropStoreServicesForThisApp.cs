@@ -17,7 +17,7 @@ namespace PropBagTestApp.Infra
 
     public static class PropStoreServicesForThisApp
     {
-        private readonly static SimplePropStoreAccessServiceProviderProxy _theStore;
+        private readonly static SimplePropStoreProxy _theStore;
 
         public static int MAX_NUMBER_OF_PROPERTIES = 65536;
 
@@ -36,7 +36,7 @@ namespace PropBagTestApp.Infra
             IProvideDelegateCaches delegateCacheProvider = new SimpleDelegateCacheProvider(typeof(PropBag), typeof(APFGenericMethodTemplates));
             IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider = new SimpleHandlerDispatchDelegateCacheProvider();
 
-            _theStore = new SimplePropStoreAccessServiceProviderProxy(MAX_NUMBER_OF_PROPERTIES, handlerDispatchDelegateCacheProvider);
+            _theStore = new SimplePropStoreProxy(MAX_NUMBER_OF_PROPERTIES, handlerDispatchDelegateCacheProvider);
 
             // Get a reference to the PropStoreAccessService Factory.
             PSAccessServiceCreatorInterface psAccessServiceFactory = _theStore.PropStoreAccessServiceFactory;

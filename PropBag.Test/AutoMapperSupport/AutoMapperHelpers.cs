@@ -19,7 +19,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
         private const int LOG_BASE2_MAX_PROPERTIES = 16;
         public static readonly int MAX_NUMBER_OF_PROPERTIES = (int)Math.Pow(2, LOG_BASE2_MAX_PROPERTIES); //65536;
 
-        private SimplePropStoreAccessServiceProviderProxy _theStore { get; set; }
+        private SimplePropStoreProxy _theStore { get; set; }
 
         public IProvideAutoMappers InitializeAutoMappers(PSAccessServiceCreatorInterface storeAccessCreator)
         {
@@ -56,7 +56,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
                     IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider = new SimpleHandlerDispatchDelegateCacheProvider();
 
                     // Create the Property Store
-                    _theStore = new SimplePropStoreAccessServiceProviderProxy(MAX_NUMBER_OF_PROPERTIES, handlerDispatchDelegateCacheProvider);
+                    _theStore = new SimplePropStoreProxy(MAX_NUMBER_OF_PROPERTIES, handlerDispatchDelegateCacheProvider);
                 }
 
                 PSAccessServiceCreatorInterface psAccessServiceFactory = _theStore.PropStoreAccessServiceFactory;
