@@ -1,4 +1,5 @@
-﻿using DRM.PropBag.Caches;
+﻿using DRM.PropBag.AutoMapperSupport;
+using DRM.PropBag.Caches;
 using DRM.PropBag.ViewModelTools;
 using DRM.TypeSafePropertyBag;
 using DRM.TypeSafePropertyBag.DataAccessSupport;
@@ -55,6 +56,7 @@ namespace DRM.PropBag
         // These items are provided to us.
         protected internal IPropFactory _propFactory { get; set; }
         protected internal PSAccessServiceInterface _ourStoreAccessor { get; set; }
+        protected internal IProvideAutoMappers _autoMapperService { get; set; }
 
         // We are responsible for these
         private ITypeSafePropBagMetaData _ourMetaData { get; set; }
@@ -160,12 +162,17 @@ namespace DRM.PropBag
         #region Constructor
 
         public PropBag(IPropModel propModel, PSAccessServiceCreatorInterface storeAcessorCreator)
-            : this(propModel, storeAcessorCreator, null, null)
+            : this(propModel, storeAcessorCreator, autoMapperService: null, propFactory: null, fullClassName: null)
         {
         }
 
         public PropBag(IPropModel propModel, PSAccessServiceCreatorInterface storeAcessorCreator, IPropFactory propFactory)
-            : this(propModel, storeAcessorCreator, propFactory, null)
+            : this(propModel, storeAcessorCreator, autoMapperService: null, propFactory: propFactory, fullClassName: null)
+        {
+        }
+
+        public PropBag(IPropModel propModel, PSAccessServiceCreatorInterface storeAcessorCreator, IPropFactory propFactory, string fullClassName)
+            : this(propModel, storeAcessorCreator, autoMapperService: null, propFactory: propFactory, fullClassName: fullClassName)
         {
         }
 
@@ -177,7 +184,7 @@ namespace DRM.PropBag
         /// <param name="storeAcessorCreator"></param>
         /// <param name="propFactory">The PropFactory to use instead of the one specified by the PropModel.</param>
         /// <param name="fullClassName">The namespace and class name to use instead of the one specified by the PropMode.</param>
-        public PropBag(IPropModel propModel, PSAccessServiceCreatorInterface storeAcessorCreator, IPropFactory propFactory, string fullClassName)
+        public PropBag(IPropModel propModel, PSAccessServiceCreatorInterface storeAcessorCreator, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
         {
             long memUsedSoFar = _memConsumptionTracker.UsedSoFar;
 
@@ -186,7 +193,7 @@ namespace DRM.PropBag
             IPropFactory propFactoryToUse = propFactory ?? propModel.PropFactory ?? throw new InvalidOperationException("The propModel has no PropFactory and one was not provided in the constructor.");
             string fullClassNameToUse = fullClassName ?? propModel.FullClassName;
 
-            BasicConstruction(propModel.TypeSafetyMode, propFactoryToUse, fullClassNameToUse);
+            BasicConstruction(propModel.TypeSafetyMode, autoMapperService, propFactoryToUse, fullClassNameToUse);
 
             _ourStoreAccessor = storeAcessorCreator.CreatePropStoreService(this);
             _memConsumptionTracker.MeasureAndReport("CreatePropStoreService", null);
@@ -201,7 +208,9 @@ namespace DRM.PropBag
         public PropBag(IPropBag copySource)
         {
             IPropFactory propFactory = ((PropBag)copySource)._propFactory;
-            BasicConstruction(copySource.TypeSafetyMode, propFactory, copySource.FullClassName);
+            IProvideAutoMappers autoMapperSerice = ((PropBag)copySource)._autoMapperService;
+
+            BasicConstruction(copySource.TypeSafetyMode, autoMapperSerice, propFactory, copySource.FullClassName);
 
             PSAccessServiceInterface storeAccessor = ((PropBag)copySource)._ourStoreAccessor;
             _ourStoreAccessor = CloneProps(copySource, storeAccessor);
@@ -215,13 +224,15 @@ namespace DRM.PropBag
             if (storeAcessorCreator == null) throw new ArgumentNullException(nameof(storeAcessorCreator));
             if (propFactory == null) throw new ArgumentNullException(nameof(propFactory));
 
-            BasicConstruction(typeSafetyMode, propFactory, fullClassName);
+            IProvideAutoMappers autoMapperService = null;
+
+            BasicConstruction(typeSafetyMode, autoMapperService, propFactory, fullClassName);
 
             _ourStoreAccessor = storeAcessorCreator.CreatePropStoreService(this);
             _memConsumptionTracker.MeasureAndReport("CreatePropStoreService", null);
         }
 
-        private void BasicConstruction(PropBagTypeSafetyMode typeSafetyMode, IPropFactory propFactory, string fullClassName)
+        private void BasicConstruction(PropBagTypeSafetyMode typeSafetyMode, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
         {
             if(propFactory == null)
                 throw new ArgumentNullException(nameof(propFactory));
@@ -451,6 +462,14 @@ namespace DRM.PropBag
             if(pi.MapperRequest == null && pi.MapperRequestResourceKey != null)
             {
                 pi.MapperRequest = propModelProvider.GetMapperRequest(pi.MapperRequestResourceKey);
+            }
+
+            if(pi.MapperRequest != null)
+            {
+                if (pi.MapperRequest.PropModel == null && pi.MapperRequest.PropModelResourceKey != null)
+                {
+                    pi.MapperRequest.PropModel = propModelProvider.GetPropModel(pi.MapperRequest.PropModelResourceKey);
+                }
             }
 
             IViewManagerProviderKey result = new ViewManagerProviderKey(localBindingInfo, pi.MapperRequest);
