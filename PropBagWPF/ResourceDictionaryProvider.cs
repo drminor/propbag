@@ -1,10 +1,8 @@
 ﻿using ObjectSizeDiagnostics;
-using System;
 using System.Threading;
 using System.Windows;
 using System.Windows.Markup;
 using System.Xml;
-using DRM.PropBagControlsWPF;
 
 namespace DRM.PropBagWPF
 {
@@ -13,7 +11,7 @@ namespace DRM.PropBagWPF
         static bool memTrackerEnabledState = false;
 
         MemConsumptionTracker _mct = 
-            new MemConsumptionTracker("RDictProv", "Starting Mem Tracker for Resource Dictionary Provider.", memTrackerEnabledState);
+            new MemConsumptionTracker("ResDictProv", "Starting Mem Tracker for Resource Dictionary Provider.", memTrackerEnabledState);
 
         /// <summary>
         /// Builds a set of MergedDictionaries from the list of filenames at the basePath
@@ -37,8 +35,6 @@ namespace DRM.PropBagWPF
 
             thread.Start();
             thread.Join();
-
-            thread = null;
 
             _mct.CompactMeasureAndReport("About to return from LoadUsingSTA.");
 
@@ -102,8 +98,6 @@ namespace DRM.PropBagWPF
 
             thread.Start();
             thread.Join();
-
-            thread = null;
 
             _mct.CompactMeasureAndReport("About to return from LoadUsingSTA");
 
