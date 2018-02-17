@@ -2,7 +2,6 @@
 using DRM.PropBag.AutoMapperSupport;
 using DRM.PropBag.Caches;
 using DRM.PropBag.ViewModelTools;
-using DRM.PropBagControlsWPF;
 using DRM.PropBagWPF;
 using DRM.TypeSafePropertyBag;
 using ObjectSizeDiagnostics;
@@ -20,14 +19,14 @@ namespace PropBagLib.Tests.SpecBasedVMTests
         protected int MaxPropsPerObject { get; private set; }
 
         private SimplePropStoreAccessServiceProviderProxy _theStore { get; set; }
-
-        //protected PSServiceSingletonProviderInterface CoreDelegateCaches { get; private set; }
+        protected PSAccessServiceCreatorInterface PropStoreAccessService_Factory { get; set; }
+        protected IPropFactory DefaultPropFactory { get; set; }
 
         protected IProvidePropModels PropModelProvider { get; private set; }
         protected ViewModelHelper ViewModelHelper { get; private set; }
         protected IProvideAutoMappers AutoMapperProvider { get; private set; }
 
-        protected string ConfigPackageNameSuffix { get; private set; }
+        protected string ConfigPackageNameSuffix { get; set; }
 
         protected string DataDirPath { get; set; }
 
@@ -52,11 +51,9 @@ namespace PropBagLib.Tests.SpecBasedVMTests
             {
                 "MapperConf_Both.xaml",
             };
-            // ***** SETTINGS END
 
-            // Core delegate caches.
-            //CoreDelegateCaches = CreateTheDelegateCaches();
-            //    _mct.MeasureAndReport("After BuildPropStoreService");
+            ConfigPackageNameSuffix = "Emit_Proxy";
+            // ***** SETTINGS END
 
             ITypeDescBasedTConverterCache typeDescBasedTConverterCache = new TypeDescBasedTConverterCache();
             _mct.MeasureAndReport("After new TypeDescBasedTConverterCache");
@@ -71,24 +68,24 @@ namespace PropBagLib.Tests.SpecBasedVMTests
             _theStore = new SimplePropStoreAccessServiceProviderProxy(MaxPropsPerObject, handlerDispatchDelegateCacheProvider);
 
             // PropStoreAccessService Factory.
-            PSAccessServiceCreatorInterface psAccessServiceFactory = _theStore.PropStoreAccessServiceFactory;
+            PropStoreAccessService_Factory = _theStore.PropStoreAccessServiceFactory;
 
             // ViewModelActivator.
             IViewModelActivator vmActivator = new SimpleViewModelActivator();
             _mct.MeasureAndReport("After new SimpleViewModelActivator");
 
             // AutoMapper Services
-            AutoMapperProvider = GetAutoMapperProvider(vmActivator, psAccessServiceFactory);
+            AutoMapperProvider = GetAutoMapperProvider(vmActivator, PropStoreAccessService_Factory);
             _mct.MeasureAndReport("After GetAutoMapperProvider");
 
             IConvertValues valueConverter = new PropFactoryValueConverter(typeDescBasedTConverterCache);
 
             // Default PropFactory
-            IPropFactory defaultPropFactory = BuildDefaultPropFactory
+            DefaultPropFactory = BuildDefaultPropFactory
                 (
                 valueConverter,
                 delegateCacheProvider//,
-                //AutoMapperProvider
+                                     //AutoMapperProvider
                 );
             _mct.MeasureAndReport("After BuildDefaultPropFactory");
 
@@ -100,7 +97,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests
                 );
 
             // PropModel Provider
-            RemotePropModelProvider remotePropModelProvider = GetPropModelProvider(propFactoryFactory, defaultPropFactory, ConfigPackageNameSuffix);
+            RemotePropModelProvider remotePropModelProvider = GetPropModelProvider(propFactoryFactory, ConfigPackageNameSuffix);
             PropModelProvider = remotePropModelProvider;
             _mct.MeasureAndReport("After GetPropModelProvider");
 
@@ -109,7 +106,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests
             _mct.MeasureAndReport("After LoadPropModelsAndMappers");
 
             // Create the ViewModelHelper
-            ViewModelHelper = new ViewModelHelper(PropModelProvider, vmActivator, psAccessServiceFactory, AutoMapperProvider);
+            ViewModelHelper = new ViewModelHelper(PropModelProvider, vmActivator, PropStoreAccessService_Factory, AutoMapperProvider);
             _mct.MeasureAndReport("After new ViewModelHelper");
 
             return OurCleanupRoutine;
@@ -181,8 +178,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests
         private IPropFactory BuildDefaultPropFactory
             (
             IConvertValues valueConverter,
-            IProvideDelegateCaches delegateCacheProvider//,
-            //IProvideAutoMappers autoMapperProvider
+            IProvideDelegateCaches delegateCacheProvider
             )
         {
             ResolveTypeDelegate typeResolver = null;
@@ -191,8 +187,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests
                 (
                 delegateCacheProvider: delegateCacheProvider,
                 valueConverter: valueConverter,
-                typeResolver: typeResolver//,
-                //autoMapperProvider: autoMapperProvider
+                typeResolver: typeResolver
                 );
 
             return result;
@@ -201,7 +196,6 @@ namespace PropBagLib.Tests.SpecBasedVMTests
         protected virtual RemotePropModelProvider GetPropModelProvider
             (
             IPropFactoryFactory propFactoryFactory,
-            IPropFactory defaultPropFactory,
             string configPackageNameSuffix
             )
         {
@@ -250,9 +244,9 @@ namespace PropBagLib.Tests.SpecBasedVMTests
             //    "MapperConf_Both.xaml",
             //};
 
-            ResourceDictionaryProvider x = new ResourceDictionaryProvider();
-            ResourceDictionary resources = x.LoadUsingSTA(resourceFolderPath, filenames);
-            x = null;
+            ResourceDictionaryProvider resourceDictionaryProvider = new ResourceDictionaryProvider();
+            ResourceDictionary resources = resourceDictionaryProvider.LoadUsingSTA(resourceFolderPath, filenames);
+            resourceDictionaryProvider = null;
 
             return resources;
         }
