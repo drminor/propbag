@@ -23,8 +23,6 @@ namespace MVVMApplication.Infra
 
         public static int MAX_NUMBER_OF_PROPERTIES = 65536;
 
-        //public static PSServiceSingletonProviderInterface PropStoreServices { get; }
-
         private static IPropFactoryFactory PropFactoryFactory { get; }
 
         private static IPropFactory DefaultPropFactory { get; }
@@ -71,9 +69,6 @@ namespace MVVMApplication.Infra
 
             Person p = new Person();
                 _mct.MeasureAndReport("New Person");
-
-            //PropStoreServices = BuildPropStoreService();
-            //    _mct.MeasureAndReport("After BuildPropStoreService");
 
             ITypeDescBasedTConverterCache typeDescBasedTConverterCache = new TypeDescBasedTConverterCache();
             _mct.MeasureAndReport("After new TypeDescBasedTConverterCache");
@@ -160,8 +155,7 @@ namespace MVVMApplication.Infra
         private static IPropFactory BuildDefaultPropFactory
             (
             IConvertValues valueConverter,
-            IProvideDelegateCaches delegateCacheProvider//,
-            //IProvideAutoMappers autoMapperProvider
+            IProvideDelegateCaches delegateCacheProvider
             )
         {
             ResolveTypeDelegate typeResolver = null;
@@ -170,8 +164,7 @@ namespace MVVMApplication.Infra
                 (
                 delegateCacheProvider: delegateCacheProvider,
                 valueConverter: valueConverter,
-                typeResolver: typeResolver//,
-                //autoMapperProvider: autoMapperProvider
+                typeResolver: typeResolver
                 );
 
             return result;
