@@ -13,7 +13,7 @@ namespace MVVMApplication.ViewModel
     {
         public event EventHandler<EventArgs> RequestClose;
 
-        public MainWindowViewModel(PropModel pm, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
+        public MainWindowViewModel(IPropModel pm, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
             : base(pm, storeAccessCreator, autoMapperService, propFactory, fullClassName)
         {
             //System.Diagnostics.Debug.WriteLine("Beginning to construct MainWindowViewModel -- From PropModel.");

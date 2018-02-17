@@ -10,7 +10,7 @@ namespace MVVMApplication.ViewModel
 
     public partial class PersonVM : PropBag, ICloneable
     {
-        public PersonVM(PropModel pm, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
+        public PersonVM(IPropModel pm, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
             : base(pm, storeAccessCreator, autoMapperService, propFactory, fullClassName)
         {
         }

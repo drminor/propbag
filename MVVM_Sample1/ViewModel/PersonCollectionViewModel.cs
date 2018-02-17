@@ -10,7 +10,7 @@ namespace MVVMApplication.ViewModel
 
     public class PersonCollectionViewModel : PropBag
     {
-        public PersonCollectionViewModel(PropModel pm, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
+        public PersonCollectionViewModel(IPropModel pm, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
             : base(pm, storeAccessCreator, autoMapperService, propFactory, fullClassName)
         {
             System.Diagnostics.Debug.WriteLine("Constructing PersonCollectionViewModel -- with PropModel.");

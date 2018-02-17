@@ -1,4 +1,5 @@
-﻿using DRM.PropBag;
+﻿using DRM.PropBag.AutoMapperSupport;
+using DRM.PropBag;
 using DRM.PropBagWPF;
 using DRM.TypeSafePropertyBag;
 using System;
@@ -12,8 +13,8 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM.ViewModels
     {
         public event EventHandler<EventArgs> RequestClose;
 
-        public MainWindowViewModel(PropModel pm, PSAccessServiceCreatorInterface storeAccessCreator, IPropFactory propFactory, string fullClassName)
-            : base(pm, storeAccessCreator, propFactory, fullClassName)
+        public MainWindowViewModel(IPropModel pm, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
+            : base(pm, storeAccessCreator, autoMapperService, propFactory, fullClassName)
         {
             //System.Diagnostics.Debug.WriteLine("Beginning to construct MainWindowViewModel -- From PropModel.");
 

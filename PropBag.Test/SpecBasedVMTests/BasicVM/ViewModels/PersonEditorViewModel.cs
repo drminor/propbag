@@ -1,4 +1,5 @@
 ﻿using DRM.PropBag;
+using DRM.PropBag.AutoMapperSupport;
 using DRM.PropBagWPF;
 using DRM.TypeSafePropertyBag;
 using System;
@@ -17,8 +18,8 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM.ViewModels
 
         #region Constructors
 
-        public PersonEditorViewModel(PropModel pm, PSAccessServiceCreatorInterface storeAccessCreator, IPropFactory propFactory, string fullClassName)
-            : base(pm, storeAccessCreator, propFactory, fullClassName)
+        public PersonEditorViewModel(IPropModel pm, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
+            : base(pm, storeAccessCreator, autoMapperService, propFactory, fullClassName)
         {
             System.Diagnostics.Debug.WriteLine("Constructing PersonEditorViewModel -- with PropModel.");
         }
