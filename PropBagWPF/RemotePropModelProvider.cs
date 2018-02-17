@@ -101,17 +101,17 @@ namespace DRM.PropBagWPF
                 {
                     foreach (DictionaryEntry kvp in rdChild)
                     {
-                        if (kvp.Value is MapperRequestTemplate mr)
+                        if (kvp.Value is MapperRequestTemplate mrTemplate)
                         {
                             // Go ahead and fetch the PropModel from the key specified in the "template" request -- since the 
                             // the receiver of this PropBag.MapperRequest will probably not have access to a PropModel Provider.
                             //IPropModel propModel = GetPropModel(mr.DestinationPropModelKey);
                             //IMapperRequest mrCooked = new MapperRequest(mr.SourceType, propModel, mr.ConfigPackageName);
 
-                            IMapperRequest mrCooked = new MapperRequest(mr.SourceType, mr.DestinationPropModelKey, mr.ConfigPackageName);
+                            IMapperRequest mr = new MapperRequest(mrTemplate.SourceType, mrTemplate.DestinationPropModelKey, mrTemplate.ConfigPackageName);
 
-                            result.Add((string)kvp.Key, mrCooked);
-                            _mapperRequestCache.Add((string)kvp.Key, mrCooked);
+                            result.Add((string)kvp.Key, mr);
+                            _mapperRequestCache.Add((string)kvp.Key, mr);
                         }
                     }
                 }
