@@ -34,7 +34,6 @@ namespace DRM.PropBagWPF
             IPropFactoryFactory propFactoryFactory,
             string mapperConfigPackageNameSuffix
             )
-
         {
             _resourceDictionaryProvider = resourceDictionaryProvider;
             _pbtParser = propBagTemplateParser;
@@ -43,8 +42,6 @@ namespace DRM.PropBagWPF
 
             _propModelCache = new Dictionary<string, IPropModel>();
             _mapperRequestCache = new Dictionary<string, IMapperRequest>();
-
-            
         }
 
         #endregion
@@ -99,11 +96,6 @@ namespace DRM.PropBagWPF
                     {
                         if (kvp.Value is MapperRequestTemplate mrTemplate)
                         {
-                            // Go ahead and fetch the PropModel from the key specified in the "template" request -- since the 
-                            // the receiver of this PropBag.MapperRequest will probably not have access to a PropModel Provider.
-                            //IPropModel propModel = GetPropModel(mr.DestinationPropModelKey);
-                            //IMapperRequest mrCooked = new MapperRequest(mr.SourceType, propModel, mr.ConfigPackageName);
-
                             IMapperRequest mr = new MapperRequest(mrTemplate.SourceType, mrTemplate.DestinationPropModelKey, mrTemplate.ConfigPackageName);
 
                             result.Add((string)kvp.Key, mr);
@@ -153,26 +145,6 @@ namespace DRM.PropBagWPF
             // Include a reference to this PropModelProvider
             propModel.PropModelProvider = this;
 
-            //TOOD: We are working on moving all PropFactory creation logic
-            //to the caller's level: PropModelProviders should not have truck with creating PropFactories.
-
-            //// If the propModel does not specify a PropFactory, but it does specify a PropFactoryType,
-            //// use the PropFactoryFactory given to us to create a PropFactory.
-            //if (propModel.PropFactory == null)
-            //{
-            //    if (propModel.PropFactoryType != null)
-            //    {
-            //        IPropFactory generated = propFactoryGenerator.BuildPropFactory(propModel.PropFactoryType);
-            //        propModel.PropFactory = generated;
-            //    }
-            //    else
-            //    {
-            //        // If no value was supplied for either the PropFactory or the PropFactoryType,
-            //        // then use the default or 'fallback' propFactory.
-            //        propModel.PropFactory = fallBackPropFactory;
-            //    }
-            //}
-
             if (propModel.PropFactory == null)
             {
                 if(propModel.PropFactoryType != null)
@@ -188,12 +160,6 @@ namespace DRM.PropBagWPF
                 }
             }
 
-            //if (propModel.PropFactory == null)
-            //{
-            //    propModel.PropFactory = fallBackPropFactory;
-            //}
-
-            // If the propModel does not supply a PropFactory, use the one assigned to us upon construction.
             return propModel;
         }
         #endregion
