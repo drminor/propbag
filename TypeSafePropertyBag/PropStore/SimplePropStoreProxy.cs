@@ -9,7 +9,7 @@ namespace DRM.TypeSafePropertyBag
     /// This class is used to create the main PropStore and return a PropStoreService Creator.
     /// It is necessary to use this class since the PSAccessServiceProviderInterface is internal to the TypeSafePropertyBag assembly.
     /// </summary>
-    public class SimplePropStoreAccessServiceProviderProxy : IDisposable
+    public class SimplePropStoreProxy : IDisposable
     {
         #region Private Members
 
@@ -19,13 +19,13 @@ namespace DRM.TypeSafePropertyBag
 
         #region Constructor
 
-        public SimplePropStoreAccessServiceProviderProxy(int maxPropsPerObject, IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider)
+        public SimplePropStoreProxy(int maxPropsPerObject, IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider)
         {
             _theStore = new SimplePropStoreAccessServiceProvider(maxPropsPerObject, handlerDispatchDelegateCacheProvider);
         }
 
         // Disallow the use of the parameterless contructor
-        private SimplePropStoreAccessServiceProviderProxy()
+        private SimplePropStoreProxy()
         {
         }
 
@@ -42,18 +42,6 @@ namespace DRM.TypeSafePropertyBag
         }
 
         #endregion
-
-        //#region Public Methods
-
-        //public PSAccessServiceCreatorInterface GetPropStoreEntryPoint(int maxPropsPerObject, IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider)
-        //{
-        //    PSAccessServiceProviderInterface propStoreAccessServiceProvider = new SimplePropStoreAccessServiceProvider(maxPropsPerObject, handlerDispatchDelegateCacheProvider);
-
-        //    PSAccessServiceCreatorInterface result = propStoreAccessServiceProvider;
-        //    return result;
-        //}
-
-        //#endregion
 
         #region IDisposable Support
 
