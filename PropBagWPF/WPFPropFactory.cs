@@ -138,7 +138,7 @@ namespace DRM.PropBagWPF
 
         #region DataSource creators
 
-        //public override IMappedDSP<TDestination> CreateMappedDS<TSource, TDestination>
+        //public override ClrMappedDSP<TDestination> CreateMappedDS<TSource, TDestination>
         //    (
         //    PropIdType propId,
         //    PropKindEnum propKind,
@@ -155,7 +155,7 @@ namespace DRM.PropBagWPF
         //        new CrudWithMapping<IDoCRUD<TSource>, TSource, TDestination>(dal, mapper);
 
         //    //Create a IProvideADataSourceProvider using the IDoCRUD<TDestination> DataAccessLayer.
-        //    IMappedDSP<TDestination> mappedDSP = new IMappedDSP<TDestination>(mappedDal);
+        //    ClrMappedDSP<TDestination> mappedDSP = new ClrMappedDSP<TDestination>(mappedDal);
 
         //    return mappedDSP;
         //}

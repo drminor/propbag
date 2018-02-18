@@ -73,67 +73,67 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
 
         protected override void BeginQuery()
         {
-            // Note: Data holds a reference the previously fetched data, if any.
+            //// Note: Data holds a reference the previously fetched data, if any.
 
-            try
-            {
-                if (Data is INotifyItemEndEdit inieeCurrent)
-                {
-                    // XXTemp
-                    //inieeCurrent.ItemEndEdit -= Iniee_ItemEndEdit;
-                }
+            //try
+            //{
+            //    if (Data is INotifyItemEndEdit inieeCurrent)
+            //    {
+            //        // XXTemp
+            //        //inieeCurrent.ItemEndEdit -= Iniee_ItemEndEdit;
+            //    }
 
-                if (Data is INotifyCollectionChanged inccCurrent)
-                {
-                    // XXTemp
-                    //inccCurrent.CollectionChanged -= Incc_CollectionChanged;
-                }
-            }
-            catch (Exception e)
-            {
-                System.Diagnostics.Debug.WriteLine($"Warning: Could not remove ItemEndEdit handler. The exception description is {e.Message}.");
-            }
+            //    if (Data is INotifyCollectionChanged inccCurrent)
+            //    {
+            //        // XXTemp
+            //        //inccCurrent.CollectionChanged -= Incc_CollectionChanged;
+            //    }
+            //}
+            //catch (Exception e)
+            //{
+            //    System.Diagnostics.Debug.WriteLine($"Warning: Could not remove ItemEndEdit handler. The exception description is {e.Message}.");
+            //}
 
-            DisposeOldData(Data);
+            //DisposeOldData(Data);
 
-            try
-            {
-                if (TryGetDataFromProp(_dataAccessLayer, out IEnumerable<T> rawData))
-                {
-                    EndEditWrapper<T> wrappedData = new EndEditWrapper<T>(rawData);
+            //try
+            //{
+            //    if (TryGetDataFromProp(_dataAccessLayer, out IEnumerable<T> rawData))
+            //    {
+            //        EndEditWrapper<T> wrappedData = new EndEditWrapper<T>(rawData);
 
-                    if (wrappedData is INotifyItemEndEdit inieeNew)
-                    {
-                        // XXTemp
-                        //inieeNew.ItemEndEdit += Iniee_ItemEndEdit;
-                    }
-                    else if (wrappedData != null)
-                    {
-                        // TODO: CLR_Mapped_DSP needs to be given the name of the property from which the data is coming, if appropriate.
-                        // TODO: Fix the warning message: WrappedData does not implement INotifyItemEndEdit.
-                        System.Diagnostics.Debug.WriteLine($"Warning: Wrapped Data for property: 'FixMe' does not implement INotifyItemEndEdit.");
-                    }
+            //        if (wrappedData is INotifyItemEndEdit inieeNew)
+            //        {
+            //            // XXTemp
+            //            //inieeNew.ItemEndEdit += Iniee_ItemEndEdit;
+            //        }
+            //        else if(wrappedData != null)
+            //        {
+            //            // TODO: CLR_Mapped_DSP needs to be given the name of the property from which the data is coming, if appropriate.
+            //            // TODO: Fix the warning message: WrappedData does not implement INotifyItemEndEdit.
+            //            System.Diagnostics.Debug.WriteLine($"Warning: Wrapped Data for property: 'FixMe' does not implement INotifyItemEndEdit.");
+            //        }
 
-                    if (wrappedData is INotifyCollectionChanged inccNew)
-                    {
-                        // XXTemp
-                        //inccNew.CollectionChanged += Incc_CollectionChanged;
-                    }
+            //        if (wrappedData is INotifyCollectionChanged inccNew)
+            //        {
+            //            // XXTemp
+            //            //inccNew.CollectionChanged += Incc_CollectionChanged;
+            //        }
 
-                    // This will raise the DataSourceProvider.DataChanged event.
-                    OnQueryFinished(wrappedData);
-                }
-                else
-                {
-                    // TODO: Fix this error message -- need to identify the data source and path.
-                    throw new InvalidOperationException($"{nameof(ClrMappedDSP<T>)} cannot access property with Id = FixMe.");
-                }
-            }
-            catch (Exception e2)
-            {
-                // TODO: Fix this error message -- need to identify the data source and path.
-                throw new InvalidOperationException($"{nameof(ClrMappedDSP<T>)} cannot access property with Id = FixMe.", e2);
-            }
+            //        // This will raise the DataSourceProvider.DataChanged event.
+            //        OnQueryFinished(wrappedData);
+            //    }
+            //    else
+            //    {
+            //        // TODO: Fix this error message -- need to identify the data source and path.
+            //        throw new InvalidOperationException($"{nameof(ClrMappedDSP<T>)} cannot access property with Id = FixMe.");
+            //    }
+            //}
+            //catch (Exception e2)
+            //{
+            //    // TODO: Fix this error message -- need to identify the data source and path.
+            //    throw new InvalidOperationException($"{nameof(ClrMappedDSP<T>)} cannot access property with Id = FixMe.", e2);
+            //}
         }
 
         private void Iniee_ItemEndEdit(object sender, EventArgs e)

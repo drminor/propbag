@@ -112,13 +112,13 @@ namespace DRM.TypeSafePropertyBag
             IPropBagMapper<TSource, TDestination> mapper = (IPropBagMapper<TSource, TDestination>)genMapper;
 
             // Now that we have performed the type casts, we can call the propFactory using "compile-time" type parameters.
-            IMappedDSP<TDestination> mappedDSP = propFactory.CreateMappedDS<TSource, TDestination>(propId, propKind, dal, propStoreAccessService, mapper);
+            ClrMappedDSP<TDestination> mappedDSP = propFactory.CreateMappedDS<TSource, TDestination>(propId, propKind, dal, propStoreAccessService, mapper);
 
             //IProvideADataSourceProvider result = mappedDSP;
             return mappedDSP; // result;
         }
 
-        //private static IMappedDSP<TDestination> CreateMappedDS_Typed<TSource, TDestination>
+        //private static ClrMappedDSP<TDestination> CreateMappedDS_Typed<TSource, TDestination>
         //    (
         //    IPropFactory propFactory,
         //    PropIdType propId,
@@ -129,7 +129,7 @@ namespace DRM.TypeSafePropertyBag
         //    ) where TSource : class where TDestination : INotifyItemEndEdit
         //{
 
-        //    IMappedDSP<TDestination> result = propFactory.CreateMappedDS<TSource, TDestination>(propId, propKind, dal, propStoreAccessService,  mapper);
+        //    ClrMappedDSP<TDestination> result = propFactory.CreateMappedDS<TSource, TDestination>(propId, propKind, dal, propStoreAccessService,  mapper);
 
         //    //mappedDs = null;
         //    return result;
