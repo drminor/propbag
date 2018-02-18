@@ -5,7 +5,10 @@ namespace ObjectSizeDiagnostics
 {
     public class MemConsumptionTracker
     {
+        static TrackerStore _trackerStore = new TrackerStore();
+
         const string DEFAULT_MSG_PREFIX = "MT";
+        const string AMOUNT_REPORT_FORMAT = "##,#";
 
         string _msgPrefix;
         bool _enabled;
@@ -13,25 +16,27 @@ namespace ObjectSizeDiagnostics
 
         #region Constructor
 
-        public MemConsumptionTracker() : this(DEFAULT_MSG_PREFIX, null, true, 0) { }
+        public MemConsumptionTracker() : this(DEFAULT_MSG_PREFIX, null, true, null) { }
 
-        public MemConsumptionTracker(bool enabled) : this(DEFAULT_MSG_PREFIX, null, enabled, 0) { }
+        public MemConsumptionTracker(bool enabled) : this(DEFAULT_MSG_PREFIX, null, enabled, null) { }
 
-        public MemConsumptionTracker(string msgPrefix, string message) : this(msgPrefix, message, true, 0) { }
+        public MemConsumptionTracker(string msgPrefix, string message) : this(msgPrefix, message, true, null) { }
 
-        public MemConsumptionTracker(string msgPrefix, bool enabled) : this(msgPrefix, null, enabled, 0) { }
+        public MemConsumptionTracker(string msgPrefix, bool enabled) : this(msgPrefix, null, enabled, null) { }
 
-        public MemConsumptionTracker(string msgPrefix, string message, bool enabled) : this(msgPrefix, message, enabled, 0) { }
+        public MemConsumptionTracker(string msgPrefix, string message, bool enabled) : this(msgPrefix, message, enabled, null) { }
 
-        public MemConsumptionTracker(string msgPrefix, string message, bool enabled, long memUsedSoFar) 
+        public MemConsumptionTracker(string msgPrefix, string message, bool enabled, long memUsedSoFar) : this(msgPrefix, message, enabled, (long?)memUsedSoFar) { }
+
+        private MemConsumptionTracker(string msgPrefix, string message, bool enabled, long? memUsedSoFar = null) 
         {
             _msgPrefix = msgPrefix;
             Enabled = enabled;
-            UsedSoFar = memUsedSoFar;
+            UsedSoFar = memUsedSoFar ?? _trackerStore.GetOrAddTrackValue(_msgPrefix, 0);
 
             if (!Enabled) return;
 
-            WriteMessage(_msgPrefix, message);
+            WriteMessage(_msgPrefix, message + $" [Used So Far: {UsedSoFar.ToString(AMOUNT_REPORT_FORMAT)}]");
         }
 
         #endregion
@@ -57,7 +62,16 @@ namespace ObjectSizeDiagnostics
             }
         }
 
-        public long UsedSoFar { get; private set; }
+        private long _usedSoFar;
+        public long UsedSoFar
+        {
+            get { return _usedSoFar; }
+            set
+            {
+                _usedSoFar = value;
+                _trackerStore.UpdateTrack(_msgPrefix, value);
+            }
+        }
 
         #endregion
 
@@ -101,7 +115,7 @@ namespace ObjectSizeDiagnostics
 
             nameOfOperation = RemoveTerminatingPeriod(nameOfOperation);
 
-            Debug.Write($"{_msgPrefix}: {nameOfOperation} used {usedSinceLastCheck}; total: {UsedSoFar}  ");
+            Debug.Write($"{_msgPrefix}: {nameOfOperation} used {usedSinceLastCheck.ToString(AMOUNT_REPORT_FORMAT)}; total: {UsedSoFar.ToString(AMOUNT_REPORT_FORMAT)}  ");
             CompleteMsgOutput(message);
 
             return UsedSoFar;
@@ -121,7 +135,7 @@ namespace ObjectSizeDiagnostics
 
             nameOfOperation = RemoveTerminatingPeriod(nameOfOperation);
 
-            Debug.Write($"{_msgPrefix}: ---- {nameOfOperation} used {UsedSoFar - previousTotal}; total: {UsedSoFar}  ");
+            Debug.Write($"{_msgPrefix}: ---- {nameOfOperation} used {(UsedSoFar - previousTotal).ToString(AMOUNT_REPORT_FORMAT)}; total: {UsedSoFar.ToString(AMOUNT_REPORT_FORMAT)}  ");
             CompleteMsgOutput(message);
 
             return UsedSoFar;
