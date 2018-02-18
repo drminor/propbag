@@ -6,13 +6,12 @@ using PropBagLib.Tests.SpecBasedVMTests.BasicVM.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using DRM.ObjectIdDictionary;
 
 namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
 {
-    [TestFixture(TestName = "NoResources_Run1")]
+    [TestFixture(TestName = "AAA No Resources Run1")]
     [NonParallelizable]
-    public class AA_EmptyTest1 : BasicVM
+    public class AAEmptyTest1 : BasicVM
     {
         // Override the base EstablishContext so that no resources are used (and the cleanup action is null.)
         protected override Action EstablishContext()
@@ -25,7 +24,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
         }
 
         [Test]
-        public void AA_EmptyTest1_NoResources()
+        public void AAEmptyTest1_NoResources()
         {
             Assert.That(1 == 1, "One does not equal one.");
         }
@@ -48,9 +47,9 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
     }
 
 
-    [TestFixture(TestName = "NoResources_Run2")]
+    [TestFixture(TestName = "AAA No Resources Run2")]
     [NonParallelizable]
-    public class AA_EmptyTest2 : BasicVM
+    public class AAEmptyTest2 : BasicVM
     {
         // Override the base EstablishContext so that no resources are used (and the cleanup action is null.)
         protected override Action EstablishContext()
@@ -63,7 +62,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
         }
 
         [Test]
-        public void AA_EmptyTest2_NoResources_Run2()
+        public void AAEmptyTest2_NoResources_Run2()
         {
             Assert.That(1 == 1, "One does not equal one.");
         }
@@ -84,9 +83,9 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
     }
 
 
-    [TestFixture(TestName = "Regular Resource Set")]
+    [TestFixture(TestName = "AAA Regular Resource Set")]
     [NonParallelizable]
-    public class AA_EmptyTest3 : BasicVM
+    public class AAEmptyTest3 : BasicVM
     {
         protected override Action EstablishContext()
         {
@@ -98,7 +97,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
         }
 
         [Test]
-        public void AA_EmptyTest3_RegularResourceSet()
+        public void AAEmptyTest3_RegularResourceSet()
         {
             Assert.That(1 == 1, "One does not equal one.");
         }
@@ -157,7 +156,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
     }
 
 
-    [TestFixture(TestName = "Load Simple Model From PersonDal.")]
+    [TestFixture(TestName = "Load Simple Model From PersonDal")]
     [NonParallelizable]
     public class GetPropModel : BasicVM
     {
@@ -169,13 +168,13 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
         }
 
         [Test]
-        public void SimpleModel_ThenGetPropModel()
+        public void GetPropModel_ThenGetPropModel()
         {
             Assert.That(personVM_PropModel != null, "personVM_PropModel is null.");
         }
 
         [Test]
-        public void SimpleModel_PersonPropModelHasAllTheProps()
+        public void GetPropModel_PersonPropModelHasAllTheProps()
         {
             Assert.That(personVM_PropModel.Props.Count == 5);
         }
@@ -196,7 +195,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
     }
 
 
-    [TestFixture(TestName = "CreateVM_CreateMainWindowVM.")]
+    [TestFixture(TestName = "CreateVM_CreateMainWindowVM_Run1")]
     [NonParallelizable]
     public class CreateVM : BasicVM
     {
@@ -208,8 +207,13 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
         {
             //ConfigPackageNameSuffix = "Emit_Proxy";
             mainWindowPropModel = PropModelProvider.GetPropModel("MainWindowVM");
+            BaseMemTracker.CompactMeasureAndReport("After get mainWindow_PropModel.", "CreateVM_CreateMainWindowVM_Run1");
 
             mainWindowViewModel = new MainWindowViewModel(mainWindowPropModel, PropStoreAccessService_Factory, AutoMapperProvider, propFactory: null, fullClassName: null);
+            BaseMemTracker.CompactMeasureAndReport("After create the mainWindowViewModel.", "CreateVM_CreateMainWindowVM_Run1");
+
+            mainWindowViewModel.Dispose();
+            BaseMemTracker.CompactMeasureAndReport("After dispose of the mainWindowViewModel.", "CreateVM_CreateMainWindowVM_Run1");
         }
 
         [Test]
@@ -226,6 +230,124 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
 
         [Test]
         public void CreateVM_PersonCollectionViewModel_WasCreated()
+        {
+            PersonCollectionViewModel personCollectionViewModel = (PersonCollectionViewModel)mainWindowViewModel[typeof(PersonCollectionViewModel), "PersonCollectionVM"];
+
+            Assert.That(personCollectionViewModel != null, "The personCollectionViewModel could not be found.");
+        }
+
+        [OneTimeSetUp]
+        public void OneTimeSetup()
+        {
+            MemTrackerStartMessage = $"Starting Mem Tracking for {GetType().GetTestName()}.";
+            CallContextEstablisher();
+            CallBecause_Of();
+        }
+
+        [OneTimeTearDown]
+        public void OneTimeTearDown()
+        {
+            CallContextDestroyer();
+        }
+    }
+
+    [TestFixture(TestName = "CreateVM_CreateMainWindowVM_Run2")]
+    [NonParallelizable]
+    public class CreateVM2 : BasicVM
+    {
+        IPropModel mainWindowPropModel;
+        MainWindowViewModel mainWindowViewModel;
+
+
+        protected override void Because_Of()
+        {
+            //ConfigPackageNameSuffix = "Emit_Proxy";
+            mainWindowPropModel = PropModelProvider.GetPropModel("MainWindowVM");
+            BaseMemTracker.CompactMeasureAndReport("After get mainWindow_PropModel.", "CreateVM_CreateMainWindowVM_Run2");
+
+            mainWindowViewModel = new MainWindowViewModel(mainWindowPropModel, PropStoreAccessService_Factory, AutoMapperProvider, propFactory: null, fullClassName: null);
+            BaseMemTracker.CompactMeasureAndReport("After create the first mainWindowViewModel.", "CreateVM_CreateMainWindowVM_Run2");
+
+            mainWindowViewModel.Dispose();
+            BaseMemTracker.CompactMeasureAndReport("After dispose of the first mainWindowViewModel.", "CreateVM_CreateMainWindowVM_Run2");
+
+            mainWindowViewModel = new MainWindowViewModel(mainWindowPropModel, PropStoreAccessService_Factory, AutoMapperProvider, propFactory: null, fullClassName: null);
+            BaseMemTracker.CompactMeasureAndReport("After create the second mainWindowViewModel.", "CreateVM_CreateMainWindowVM_Run2");
+
+            mainWindowViewModel.Dispose();
+            BaseMemTracker.CompactMeasureAndReport("After dispose of the second mainWindowViewModel.", "CreateVM_CreateMainWindowVM_Run2");
+        }
+
+        [Test]
+        public void CreateVM2_ThenGetPropModel()
+        {
+            Assert.That(mainWindowPropModel != null, "mainWindowPropModel is null.");
+        }
+
+        [Test]
+        public void CreateVM2_MainWindowPropModelHasAllTheProps()
+        {
+            Assert.That(mainWindowPropModel.Props.Count == 4, "mainWindowPropModel does not have 4 PropItems.");
+        }
+
+        [Test]
+        public void CreateVM2_PersonCollectionViewModel_WasCreated()
+        {
+            PersonCollectionViewModel personCollectionViewModel = (PersonCollectionViewModel)mainWindowViewModel[typeof(PersonCollectionViewModel), "PersonCollectionVM"];
+
+            Assert.That(personCollectionViewModel != null, "The personCollectionViewModel could not be found.");
+        }
+
+        [OneTimeSetUp]
+        public void OneTimeSetup()
+        {
+            MemTrackerStartMessage = $"Starting Mem Tracking for {GetType().GetTestName()}.";
+            CallContextEstablisher();
+            CallBecause_Of();
+        }
+
+        [OneTimeTearDown]
+        public void OneTimeTearDown()
+        {
+            CallContextDestroyer();
+        }
+    }
+
+    [TestFixture(TestName = "CreateVM_CreateMainWindowVM_Run3")]
+    [NonParallelizable]
+    public class CreateVM3 : BasicVM
+    {
+        IPropModel mainWindowPropModel;
+        MainWindowViewModel mainWindowViewModel;
+
+
+        protected override void Because_Of()
+        {
+            //ConfigPackageNameSuffix = "Emit_Proxy";
+            mainWindowPropModel = PropModelProvider.GetPropModel("MainWindowVM");
+            BaseMemTracker.CompactMeasureAndReport("After get mainWindow_PropModel.", "CreateVM_CreateMainWindowVM_Run1");
+
+            mainWindowViewModel = new MainWindowViewModel(mainWindowPropModel, PropStoreAccessService_Factory, AutoMapperProvider, propFactory: null, fullClassName: null);
+            BaseMemTracker.CompactMeasureAndReport("After create the mainWindowViewModel.", "CreateVM_CreateMainWindowVM_Run1");
+
+            mainWindowViewModel.Dispose();
+            BaseMemTracker.CompactMeasureAndReport("After dispose of the mainWindowViewModel.", "CreateVM_CreateMainWindowVM_Run1");
+        }
+
+        [Test]
+        public void CreateVM3_ThenGetPropModel()
+        {
+            Assert.That(mainWindowPropModel != null, "mainWindowPropModel is null.");
+        }
+
+        [Test]
+        public void CreateVM3_MainWindowPropModelHasAllTheProps()
+        {
+            Assert.That(mainWindowPropModel.Props.Count == 4, "mainWindowPropModel does not have 4 PropItems.");
+        }
+
+        [Test]
+        public void CreateVM3_PersonCollectionViewModel_WasCreated()
         {
             PersonCollectionViewModel personCollectionViewModel = (PersonCollectionViewModel)mainWindowViewModel[typeof(PersonCollectionViewModel), "PersonCollectionVM"];
 

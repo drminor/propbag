@@ -14,46 +14,141 @@ namespace PropBagLib.Tests.SpecBasedVMTests
 
     public abstract class PropBagVMTestBase : Specification
     {
-        MemConsumptionTracker _mct; // This is only used to measure the amount of memory used during EstablishContext.
+        private MemConsumptionTracker _mct; // This is only used to measure the amount of memory used during EstablishContext.
 
-        protected int MaxPropsPerObject { get; private set; }
+        #region Settings
 
-        private SimplePropStoreProxy _theStore { get; set; }
-        protected PSAccessServiceCreatorInterface PropStoreAccessService_Factory { get; set; }
-        protected IPropFactory DefaultPropFactory { get; set; }
+        private bool _trackerEnabledState = false;
+        private const int MAX_PROPS_PER_OBJECT = 65536;
+        private string _resourceFolderPath = @"C:\DEV\VS2013Projects\PubPropBag\PropBagLib.Tests.PropBagTemplates\ProbBagTemplates";
 
-        protected IProvidePropModels PropModelProvider { get; private set; }
-        protected ViewModelHelper ViewModelHelper { get; private set; }
-        protected IProvideAutoMappers AutoMapperProvider { get; private set; }
-
-        protected string ConfigPackageNameSuffix { get; set; }
-
-        protected string DataDirPath { get; set; }
-
-        protected override Action EstablishContext()
+        private string[] _pbTemplateFilenames = new string[]
         {
-            bool _memTrackerEnabledState = false;
-            _mct = new MemConsumptionTracker("PSMT", "Starting MemTracker for PropStoreServices, AutoMapperSupport and related.", _memTrackerEnabledState);
-
-            // ***** SETTINGS BEGIN
-            MaxPropsPerObject = 65536;
-
-            string resourceFolderPath = @"C:\DEV\VS2013Projects\PubPropBag\PropBagLib.Tests.PropBagTemplates\ProbBagTemplates";
-            string[] pbTemplateFilenames = new string[]
-            {
                 "MainWindowVM.xaml",
                 "PersonCollectionVM.xaml",
                 "PersonEditorVM.xaml",
                 "PersonVM.xaml"
-            };
+        };
 
-            string[] mapperRequestFilenames = new string[]
-            {
+        private string[] _mapperRequestFilenames = new string[]
+        {
                 "MapperConf_Both.xaml",
-            };
+        };
 
-            ConfigPackageNameSuffix = "Emit_Proxy";
-            // ***** SETTINGS END
+        string _configPackageNameSuffix = "Emit_Proxy";
+
+        #endregion
+
+        #region Getter/Setters for the Settings
+
+        protected virtual bool IntitialMemConsumptionTrackerEnabledState
+        {
+            get
+            {
+                return _trackerEnabledState;
+            }
+            set
+            {
+                _trackerEnabledState = value;
+            }
+        }
+
+        public virtual int MaxPropsPerObject
+        {
+            get
+            {
+                return MAX_PROPS_PER_OBJECT;
+            }
+            protected set
+            {
+                throw new NotSupportedException("These tests do not support changing the value of MaxPropsPerObject.");
+            }
+        }
+
+        protected virtual string ResourceFolderPath
+        {
+            get
+            {
+                return _resourceFolderPath;
+            }
+            set
+            {
+                _resourceFolderPath = value;
+            }
+        }
+
+
+        string[] PBTemplateFilenames
+        {
+            get
+            {
+                return _pbTemplateFilenames;
+            }
+            set
+            {
+                _pbTemplateFilenames = value;
+            }
+        }
+
+        string[] MapperRequestFilenames
+        {
+            get
+            {
+                return _mapperRequestFilenames;
+            }
+            set
+            {
+                _mapperRequestFilenames = value;
+            }
+        }
+
+        string ConfigPackageNameSuffix
+        {
+            get
+            {
+                return _configPackageNameSuffix;
+            }
+            set
+            {
+                _configPackageNameSuffix = value;
+            }
+        }
+
+        #endregion
+
+        #region Service Properties
+
+        protected SimplePropStoreProxy _theStore { get; set; }
+        protected PSAccessServiceCreatorInterface PropStoreAccessService_Factory { get; set; }
+        protected IPropFactory DefaultPropFactory { get; set; }
+
+        protected IProvidePropModels PropModelProvider { get; set; }
+        protected ViewModelHelper ViewModelHelper { get; set; }
+        protected IProvideAutoMappers AutoMapperProvider { get; set; }
+
+        protected string DataDirPath { get; set; }
+
+        #endregion
+
+        #region Constructor
+
+        public PropBagVMTestBase()
+        {
+
+        }
+
+        #endregion
+
+        #region Specification Implementation
+
+        protected override Action EstablishContext()
+        {
+            _mct = new MemConsumptionTracker
+                (
+                "PSMT",
+                "Starting MemTracker for PropStoreServices, AutoMapperSupport and related.",
+                IntitialMemConsumptionTrackerEnabledState
+                );
 
             ITypeDescBasedTConverterCache typeDescBasedTConverterCache = new TypeDescBasedTConverterCache();
             _mct.MeasureAndReport("After new TypeDescBasedTConverterCache");
@@ -102,7 +197,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests
             _mct.MeasureAndReport("After GetPropModelProvider");
 
             // Load the PropBag and Mapper Templates
-            LoadPropModelsAndMappers(remotePropModelProvider, resourceFolderPath, pbTemplateFilenames, mapperRequestFilenames);
+            LoadPropModelsAndMappers(remotePropModelProvider, ResourceFolderPath, PBTemplateFilenames, MapperRequestFilenames);
             _mct.MeasureAndReport("After LoadPropModelsAndMappers");
 
             // Create the ViewModelHelper
@@ -156,6 +251,10 @@ namespace PropBagLib.Tests.SpecBasedVMTests
                 _mct.CompactMeasureAndReport("After Context Cleanup");
             }
         }
+
+        #endregion
+
+        #region Methods Used to Establish the Context
 
         protected virtual IPropFactoryFactory BuildThePropFactoryFactory
             (
@@ -227,23 +326,8 @@ namespace PropBagLib.Tests.SpecBasedVMTests
             //SimpleExKey testObject = test.TestObject;
         }
 
-        protected virtual ResourceDictionary GetResources()
+        protected virtual ResourceDictionary GetResources(string resourceFolderPath, string[] filenames)
         {
-            string resourceFolderPath = @"C:\DEV\VS2013Projects\PubPropBag\PropBagLib.Tests.PropBagTemplates\ProbBagTemplates";
-            string[] filenames = new string[]
-            {
-                "MainWindowVM.xaml",
-                "MapperConf_Both.xaml",
-                "PersonCollectionVM.xaml",
-                "PersonEditorVM.xaml",
-                "PersonVM.xaml"
-            };
-
-            //string[] filenames = new string[]
-            //{
-            //    "MapperConf_Both.xaml",
-            //};
-
             ResourceDictionaryProvider resourceDictionaryProvider = new ResourceDictionaryProvider();
             ResourceDictionary resources = resourceDictionaryProvider.LoadUsingSTA(resourceFolderPath, filenames);
             resourceDictionaryProvider = null;
@@ -279,5 +363,6 @@ namespace PropBagLib.Tests.SpecBasedVMTests
             return autoMapperProvider;
         }
 
+        #endregion
     }
 }

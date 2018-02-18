@@ -80,6 +80,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>OnlyTypedAccessModel.props.tt</DependentUpon>
     </Compile>
+    <Compile Include="SetupFixture1.cs" />
     <Compile Include="TypeExtensionsForUnitTesting.cs" />
     <None Include="PerformanceDynamic\PerformanceDynModel.cs" />
     <None Include="PerformanceDynamic\PerformanceDynModel.props.cs">
