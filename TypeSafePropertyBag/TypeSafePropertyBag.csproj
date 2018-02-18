@@ -44,6 +44,7 @@
   <ItemGroup>
     <Compile Include="DataAccessSupport\BetterListCollectionView.cs" />
     <Compile Include="DataAccessSupport\CViewManagerBinder.cs" />
+    <Compile Include="DataAccessSupport\IMappedDSP.cs" />
     <Compile Include="DataSourceMapping\CrudWithMapping.cs" />
     <Compile Include="DataSourceMapping\IDoCrudWithMapping.cs" />
     <Compile Include="DataAccessSupport\IDoCRUD.cs" />
