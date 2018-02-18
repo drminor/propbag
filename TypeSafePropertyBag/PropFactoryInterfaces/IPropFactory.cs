@@ -62,7 +62,7 @@ namespace DRM.TypeSafePropertyBag
 
         //CrudWithMapping<TSource, TDestination> Test<TSource, TDestination>();
 
-        ClrMappedDSP<TDestination> CreateMappedDS<TSource, TDestination>
+        IMappedDSP<TDestination> CreateMappedDS<TSource, TDestination>
             (
             PropIdType propId,
             PropKindEnum propKind,
