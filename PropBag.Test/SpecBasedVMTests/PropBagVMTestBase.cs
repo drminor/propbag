@@ -41,7 +41,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests
 
         #region Getter/Setters for the Settings
 
-        protected virtual bool IntitialMemConsumptionTrackerEnabledState
+        protected virtual bool TrackMemConsumptionUsedToEstablishContext
         {
             get
             {
@@ -147,7 +147,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests
                 (
                 "PSMT",
                 "Starting MemTracker for PropStoreServices, AutoMapperSupport and related.",
-                IntitialMemConsumptionTrackerEnabledState
+                TrackMemConsumptionUsedToEstablishContext
                 );
 
             ITypeDescBasedTConverterCache typeDescBasedTConverterCache = new TypeDescBasedTConverterCache();
