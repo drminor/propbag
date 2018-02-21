@@ -144,7 +144,7 @@ namespace DRM.PropBag.Caches
             //MethodInfo createPropNoVal_mi = propCreatorType.GetMethod("CreatePropWithNoValue", BindingFlags.Static | BindingFlags.NonPublic);
             //CreatePropWithNoValCache = new DelegateCache<CreatePropWithNoValueDelegate>(createPropNoVal_mi);
 
-            PropTemplateCache = new PropTemplateCache();
+            PropTemplateCache = new SimplePropTemplateCache();
 
             #endregion
         }
