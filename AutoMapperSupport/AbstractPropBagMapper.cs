@@ -41,8 +41,14 @@ namespace DRM.PropBag.AutoMapperSupport
 
         #region Constructor
 
-        public AbstractPropBagMapper(IPropBagMapperKey<TSource, TDestination> mapRequest,
-            IMapper mapper, IViewModelActivator vmActivator, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService)
+        public AbstractPropBagMapper
+            (
+            IPropBagMapperKey<TSource, TDestination> mapRequest,
+            IMapper mapper,
+            IViewModelActivator vmActivator,
+            PSAccessServiceCreatorInterface storeAccessCreator,
+            IProvideAutoMappers autoMapperService
+            )
         {
             SourceType = mapRequest.SourceTypeDef.TargetType;
             DestinationType = mapRequest.DestinationTypeDef.TargetType;
@@ -66,14 +72,9 @@ namespace DRM.PropBag.AutoMapperSupport
 
                 _template = GetNewDestination(PropModel, _storeAccessCreator, DestinationType, _autoMapperService, PropFactory, fullClassName: null);
 
-                // To ensure that the template's Level2Key Manager is shared amoung all clones,
+                // To ensure that the template's PropItemSet is shared amoung all clones,
                 // make sure it is fixed.
                 _storeAccessCreator.FixPropItemSet(_template);
-
-                //if(!_storeAccessCreator.TryOpenPropItemSet(propBag: _template, propItemSet_Handle: out object dummy))
-                //{
-                //    throw new InvalidOperationException("Cannot create a template with an open PropItemSet.");
-                //}
 
                 _mct.MeasureAndReport("GetNewDestination(PropModel, ... [In Constructor]", "AbstractPropBagMapper");
             }
@@ -83,12 +84,6 @@ namespace DRM.PropBag.AutoMapperSupport
             }
 
             return;
-
-            //object GndForSizer()
-            //{
-            //    return GetNewDestination(PropModel, _storeAccessCreator, DestinationType, PropFactory, fullClassName: null);
-            //}
-
         }
 
         #endregion
@@ -150,8 +145,6 @@ namespace DRM.PropBag.AutoMapperSupport
                 else
                 {
                     result = (TDestination) _template.Clone();
-                    //result = GetNewDestination(RunTimeType, _template);
-
                     _mct.MeasureAndReport("_template.Clone", "AstractPropBagMapper");
                 }
             }
@@ -162,24 +155,6 @@ namespace DRM.PropBag.AutoMapperSupport
             }
 
             return result;
-
-            //object GndForSizer()
-            //{
-            //    if (_template != null)
-            //    {
-            //        result = _template.Clone() as TDestination;
-            //    }
-            //    else if (_pbTemplate != null)
-            //    {
-            //        result = GetNewDestination(RunTimeType, _pbTemplate);
-            //    }
-            //    else
-            //    {
-            //        result = GetNewDestination(PropModel, _storeAccessCreator, RunTimeType, PropFactory, fullClassName: null);
-            //    }
-            //    return result;
-            //}
-
         }
 
         // Regular Instantiation using the PropModel. 

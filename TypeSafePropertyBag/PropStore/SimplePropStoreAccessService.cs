@@ -19,7 +19,11 @@ namespace DRM.TypeSafePropertyBag
     using PSAccessServiceProviderInterface = IProvidePropStoreAccessService<UInt32, String>;
 
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
-    
+
+    using PropItemSetInternalInterface = IPropNodeCollection_Internal<UInt32, String>;
+    using PropItemSetInterface = IPropNodeCollection<UInt32, String>;
+
+
     internal class SimplePropStoreAccessService : PSAccessServiceInterface, IHaveTheStoreNode, PSAccessServiceInternalInterface, IDisposable
     {
         #region Unused Operational Constants
@@ -527,11 +531,11 @@ namespace DRM.TypeSafePropertyBag
 
         #endregion
 
-        #region Level2Key Management
+        #region PropItemSet Management
 
         public object FixPropItemSet()
         {
-            object result = _propStoreAccessServiceProvider.FixPropItemSet(_ourNode);
+            object result = _propStoreAccessServiceProvider.FixPropItemSet(_ourNode.PropNodeCollection);
             return result;
         }
 
@@ -558,7 +562,6 @@ namespace DRM.TypeSafePropertyBag
             return _ourNode.TryGetPropertyName(propId, out propertyName);
         }
 
-
         public int PropertyCount => _ourNode.PropertyCount;
 
         public PSAccessServiceInterface CloneProps(IPropBag callingPropBag, IPropBag copySource)
@@ -567,12 +570,34 @@ namespace DRM.TypeSafePropertyBag
             // the caller is using the StoreAccessor that belongs to the copySource to make this call.
             CheckObjectRef(copySource);
 
-            BagNode copySourceStoreNode = _ourNode;
+            PSAccessServiceInterface newStoreAccessor= CloneProps(callingPropBag, _ourNode.PropNodeCollection);
+            return newStoreAccessor;
+
+            //BagNode copySourceStoreNode = _ourNode;
+
+            //PSAccessServiceInterface newStoreAccessor = _propStoreAccessServiceProvider.ClonePSAccessService
+            //    (
+            //        copySourceStoreNode.PropNodeCollection,
+            //        callingPropBag, // The PropBag for which the newStoreAcessor will be built.
+            //        out BagNode newStoreNode
+            //    );
+
+            //System.Diagnostics.Debug.Assert
+            //    (
+            //    condition: newStoreAccessor.PropertyCount == this.PropertyCount,
+            //    message: "The PropBag clone operation was not completed: The PropItemSet has different contents."
+            //    );
+
+            //return newStoreAccessor;
+        }
+
+        public PSAccessServiceInterface CloneProps(IPropBag callingPropBag, PropItemSetInterface template)
+        {
+            CheckTemplate(template);
 
             PSAccessServiceInterface newStoreAccessor = _propStoreAccessServiceProvider.ClonePSAccessService
                 (
-                    copySource,
-                    copySourceStoreNode,
+                    (PropItemSetInternalInterface) template,
                     callingPropBag, // The PropBag for which the newStoreAcessor will be built.
                     out BagNode newStoreNode
                 );
@@ -580,32 +605,20 @@ namespace DRM.TypeSafePropertyBag
             System.Diagnostics.Debug.Assert
                 (
                 condition: newStoreAccessor.PropertyCount == this.PropertyCount,
-                message: "The PropBag clone operation was not completed: The Level2KeyManager has different contents."
+                message: "The PropBag clone operation was not completed: The PropItemSet has different contents."
                 );
 
-            //CopyChildProps(copySourceStoreNode, newStoreNode);
             return newStoreAccessor;
         }
 
-        //// TODO: What about the subscriptions and bindings that were included in the PropModel that were used to create these PropItems?
-        //private void CopyChildProps(BagNode sourceBag, BagNode newBagNode)
-        //{
-        //    foreach (PropNode childProp in sourceBag.Children)
-        //    {
-        //        //// FOR DEBUGGING -- To see how well the PropBag value is cloned.
-        //        //if (childProp.PropData_Internal.TypedProp.Type.IsPropBagBased())
-        //        //{
-        //        //    if (childProp.PropData_Internal.TypedProp.TypedValueAsObject != null)
-        //        //    {
-        //        //        IPropBagInternal propBagInternal = (IPropBagInternal)childProp.PropData_Internal.TypedProp.TypedValueAsObject;
-        //        //    }
-        //        //}
-
-        //        IPropDataInternal newPropGen = new PropGen((IProp)childProp.PropData_Internal.TypedProp.Clone());
-        //        ExKeyT newCKey = new SimpleExKey(newBagNode.ObjectId, childProp.PropId);
-        //        PropNode newChild = new PropNode(newCKey, newPropGen, newBagNode);
-        //    }
-        //}
+        [System.Diagnostics.Conditional("DEBUG")]
+        private void CheckTemplate(PropItemSetInterface pnc)
+        {
+            if(!(pnc is PropItemSetInternalInterface))
+            {
+                throw new InvalidOperationException("The template argument must implement the IPropNodeCollection_Internal interface.");
+            }
+        }
 
         #endregion
 

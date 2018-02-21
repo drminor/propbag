@@ -27,6 +27,6 @@ namespace DRM.TypeSafePropertyBag
 
         IProvidePropModels PropModelProvider { get; set; }
 
-        //SimpleExKey TestObject { get; }
+        object PropItemSetHandle { get; set; }
     }
 }

@@ -15,24 +15,24 @@ namespace DRM.TypeSafePropertyBag
     using PSAccessServiceProviderInterface = IProvidePropStoreAccessService<UInt32, String>;
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
 
-    //using Level2KeyManagerCacheInterface = ICacheLevel2KeyManagers<IL2KeyMan<UInt32, String>, UInt32, String>;
-    using GenerationIdType = UInt32;
+    using PropItemSetInternalInterface = IPropNodeCollection_Internal<UInt32, String>;
+
+    using PropItemSetCacheInterface = ICachePropItemSets<IPropNodeCollection_Internal<UInt32, String>, UInt32, String>;
+
+    using GenerationIdType = Int64;
 
     internal class SimplePropStoreAccessServiceProvider : PSAccessServiceProviderInterface
     {
-        // TODO: This should be defined somewhere else; in some place dedicated to Level2KeyManagers.
-        public const GenerationIdType GEN_ZERO = 0;
-
         #region Private Members
 
         readonly Dictionary<WeakRefKey<IPropBag>, BagNode> _store;
 
         readonly IProvideHandlerDispatchDelegateCaches _handlerDispatchDelegateCacheProvider;
 
-        //Level2KeyManagerCacheInterface _level2KeyManRepository;
+        PropItemSetCacheInterface _propItemSetCache;
 
         readonly object _sync = new object();
-        readonly object _syncForLev2KeyMan = new object();
+        readonly object _syncForPropItemSetCache = new object();
 
         const int NUMBER_OF_SECONDS_BETWEEN_PRUNE_OPS = 20;
         //private Timer _timer;
@@ -40,7 +40,7 @@ namespace DRM.TypeSafePropertyBag
         int _accessCounter = 0; // Counts Each SetIt<T> operation on all PropBags.
         int _numOfAccessServicesCreated = 0;
 
-        PropTemplateCache _propTemplateCache;
+        IProvidePropTemplates _propTemplateCache;
 
         #endregion
 
@@ -63,7 +63,7 @@ namespace DRM.TypeSafePropertyBag
             _store = new Dictionary<WeakRefKey<IPropBag>, BagNode>();
 
             // TODO: Have the caller provide a PropTemplateCache.
-            _propTemplateCache = new PropTemplateCache();
+            _propTemplateCache = new SimplePropTemplateCache();
 
             //_timer = new Timer(PruneStore, null, NUMBER_OF_SECONDS_BETWEEN_PRUNE_OPS * 1000, NUMBER_OF_SECONDS_BETWEEN_PRUNE_OPS * 1000);
         }
@@ -121,14 +121,14 @@ namespace DRM.TypeSafePropertyBag
 
         #endregion
 
-        #region Level2Key Management
+        #region PropItemSet Management
 
         public object FixPropItemSet(IPropBag propBag)
         {
             object propItemSet_Handle;
             if (TryGetPropBagNode(propBag, out BagNode propBagNode))
             {
-                propItemSet_Handle = FixPropItemSet(propBagNode);
+                propItemSet_Handle = FixPropItemSet(propBagNode.PropNodeCollection);
             }
             else
             {
@@ -138,33 +138,41 @@ namespace DRM.TypeSafePropertyBag
             return propItemSet_Handle;
         }
 
-        public object FixPropItemSet(BagNode propBagNode)
+        public object FixPropItemSet(PropItemSetInternalInterface pnc_int)
         {
             object result;
 
-            //L2KeyManType level2KeyManager = propBagNode.Level2KeyMan;
-            //if (level2KeyManager.IsFixed)
-            //{
-            //    System.Diagnostics.Debug.WriteLine("Warning: PropStoreAccessServiceProvider is being asked to fix an already fixed Level2Key Manager.");
-            //    result = level2KeyManager;
-            //}
-            //else
-            //{
-            //    lock (_syncForLev2KeyMan)
-            //    {
-            //        if (_level2KeyManRepository == null) _level2KeyManRepository = new SimpleLevel2KeyManagerCache<L2KeyManType, PropIdType, PropNameType>();
+            if(pnc_int.IsFixed)
+            {
+                System.Diagnostics.Debug.WriteLine("Warning: PropStoreAccessServiceProvider is being asked to fix an already fixed PropItemSet.");
+                result = pnc_int;
+            }
+            else
+            {
+                lock (_syncForPropItemSetCache)
+                {
+                    if (_propItemSetCache == null) _propItemSetCache = new SimplePropItemSetCache<PropItemSetInternalInterface, PropIdType, PropNameType>();
 
-            //        level2KeyManager.Fix();
+                    pnc_int.Fix();
 
-            //        if (!_level2KeyManRepository.TryRegisterBaseL2KeyMan(level2KeyManager))
-            //        {
-            //            throw new InvalidOperationException("Could not register this PropBagNode's PropItemSet as a base PropItemSet.");
-            //        }
+                    if(_propItemSetCache.TryGetValueAndGenerationId(pnc_int, out PropItemSetInternalInterface basePropItemSet, out GenerationIdType generationId))
+                    {
+                        // There's nothing to do here. We have just fixed the open generation that was registered
+                        // when the PropItemSet was 're-opened.'
+                    }
+                    else
+                    {
+                        // This PropItem set has no base, register it as a base PropItemSet.
+                        if (!_propItemSetCache.TryRegisterBasePropItemSet(pnc_int))
+                        {
+                            throw new InvalidOperationException("Could not register this PropBagNode's PropItemSet as a base PropItemSet.");
+                        }
+                    }
 
-            //        result = level2KeyManager; // We are using an instance of an internal class as an access token.
-            //    }
-            //}
-            result = null;
+                    result = pnc_int; // We are using an instance of an internal class as an access token.
+                }
+            }
+
             return result;
         }
 
@@ -188,85 +196,82 @@ namespace DRM.TypeSafePropertyBag
         {
             bool result;
 
-            //L2KeyManType level2KeyManager = propBagNode.Level2KeyMan;
-            //if (!level2KeyManager.IsFixed)
-            //{
-            //    System.Diagnostics.Debug.WriteLine("Warning: PropStoreAccessServiceProvider is being asked to open a Level2Key Manager that is already open.");
-            //    propItemSet_Handle = level2KeyManager;
-            //    result = true;
-            //}
-            //else
-            //{
-            //    if (propBagNode.PropBagProxy.TryGetTarget(out IPropBag propBag))
-            //    {
-            //        if (_level2KeyManRepository == null)
-            //        {
-            //            throw new InvalidOperationException($"The Level2Key Manager Repository has not been initialized during call to OpenPropItemSet for PropBag:  .");
-            //        }
+            PropItemSetInternalInterface propNodeCollection = propBagNode.PropNodeCollection;
+            if (!propNodeCollection.IsFixed)
+            {
+                System.Diagnostics.Debug.WriteLine("Warning: PropStoreAccessServiceProvider is being asked to open a PropItemSet that is already open.");
+                propItemSet_Handle = propNodeCollection;
+                result = true;
+            }
+            else
+            {
+                if (propBagNode.PropBagProxy.TryGetTarget(out IPropBag propBag))
+                {
+                    if (_propItemSetCache == null)
+                    {
+                        throw new InvalidOperationException($"The PropItemSet Cache has not been initialized during call to OpenPropItemSet for PropBag:  .");
+                    }
 
-            //        // TODO: Move these locks to the Level2Key Manager Repository
-            //        // These resources are independent of the _store.
-            //        lock (_syncForLev2KeyMan)
-            //        {
-            //            // Determine the following:
-            //            // 1. If the existing Level2KeyManager has been registered.
-            //            // 2. Its base, if it has one.
+                    // TODO: Move these locks to the PropItemSet Cache
+                    // These resources are independent of the _store.
+                    lock (_syncForPropItemSetCache)
+                    {
+                        // Determine the following:
+                        // 1. If the existing PropItemSet has been registered.
+                        // 2. Its base, if it has one.
 
-            //            if (_level2KeyManRepository.TryGetValueAndGenerationId(level2KeyManager, out L2KeyManType basePropItemSet, out GenerationIdType generationId))
-            //            {
-            //                CheckGenerationRef(level2KeyManager, basePropItemSet, generationId);
+                        if (_propItemSetCache.TryGetValueAndGenerationId(propNodeCollection, out PropItemSetInternalInterface basePropItemSet, out GenerationIdType generationId))
+                        {
+                            CheckGenerationRef(propNodeCollection, basePropItemSet, generationId);
 
-            //                L2KeyManType copy = (L2KeyManType)level2KeyManager.Clone(); // Note: the copy is open, i.e., not fixed.
+                            // Create an open version of the current Fixed copy in use by the PropBag node.
+                            PropItemSetInternalInterface copy = new PropNodeCollection(propNodeCollection, propBagNode);
 
-            //                // Attempt to register the new, open PropItemSet as a derivative of the orignal (or its base).
-            //                if (_level2KeyManRepository.TryRegisterL2KeyMan(copy, basePropItemSet, out generationId))
-            //                {
-            //                    // We are using an instance of a internal class as an access token.
-            //                    propItemSet_Handle = copy;
+                            // Attempt to register the new, open PropItemSet as a derivative of the orignal (or its base).
+                            if (_propItemSetCache.TryRegisterPropItemSet(copy, basePropItemSet, out generationId))
+                            {
+                                // We are using an instance of a internal class as an access token.
+                                propItemSet_Handle = copy;
 
-            //                    // Replace the original, fixed PropSet with a new copy that is open (for the addition of new PropItems.)
-            //                    propBagNode.Level2KeyMan = copy;
-            //                    result = true;
-            //                }
-            //                else
-            //                {
-            //                    // TODO: Consider automatically registering the 'original' if not already registered.
-            //                    throw new InvalidOperationException("Could not register the new Level2Key Manager.");
-            //                }
-            //            }
-            //            else
-            //            {
-            //                throw new InvalidOperationException("The existing Level2Key Manager cannot be found in the store.");
-            //            }
-            //        } // end Lock(_syncForLev2KeyMan)
+                                // Replace PropBag Node's original, fixed PropSet with a the copy that is open (for the addition of new PropItems.)
+                                propBagNode.PropNodeCollection = copy;
+                                result = true;
+                            }
+                            else
+                            {
+                                throw new InvalidOperationException("Could not register the new PropItemSet.");
+                            }
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("The existing PropItemSet cannot be found in the store.");
+                        }
+                    } // end Lock(_syncForPropItemSetCache)
 
-            //    }
-            //    else
-            //    {
-            //        System.Diagnostics.Debug.WriteLine("The PropBag has been garbage collected. (During call to OpenPropItemSet.)");
-            //        propItemSet_Handle = null;
-            //        result = false;
-            //    }
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine("The PropBag has been garbage collected. (During call to OpenPropItemSet.)");
+                    propItemSet_Handle = null;
+                    result = false;
+                }
+            }
 
-            //}
-
-            result = false;
-            propItemSet_Handle = null;
             return result;
         }
 
-        //[System.Diagnostics.Conditional("DEBUG")]
-        //private void CheckGenerationRef(L2KeyManType key, L2KeyManType basePropItemSet, GenerationIdType generationId)
-        //{
-        //    if(generationId == 0)
-        //    {
-        //        System.Diagnostics.Debug.Assert(ReferenceEquals(key, basePropItemSet), "The GenerationId is 0, but the base is not the same as the key.");
-        //    }
-        //    else
-        //    {
-        //        System.Diagnostics.Debug.Assert(!ReferenceEquals(key, basePropItemSet), "The GenerationId is not 0, but the base *is* the same as the key.");
-        //    }
-        //}
+        [System.Diagnostics.Conditional("DEBUG")]
+        private void CheckGenerationRef(PropItemSetInternalInterface key, PropItemSetInternalInterface basePropItemSet, GenerationIdType generationId)
+        {
+            if (generationId == 0)
+            {
+                System.Diagnostics.Debug.Assert(ReferenceEquals(key, basePropItemSet), "The GenerationId is 0, but the base is not the same as the key.");
+            }
+            else
+            {
+                System.Diagnostics.Debug.Assert(!ReferenceEquals(key, basePropItemSet), "The GenerationId is not 0, but the base *is* the same as the key.");
+            }
+        }
 
         #endregion
 
@@ -288,7 +293,20 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        public PSAccessServiceInterface CreatePropStoreService(IPropBag propBag, BagNode template, out BagNode newBagNode)
+        public PSAccessServiceInterface CreatePropStoreService(IPropBag propBag, object propItemSetHandle)
+        {
+            if(propItemSetHandle is PropItemSetInternalInterface template)
+            {
+                PSAccessServiceInterface propStoreService = CreatePropStoreService(propBag, template, out BagNode dummy);
+                return propStoreService;
+            }
+            else
+            {
+                throw new InvalidOperationException("The PropItemSetHandle does not implement the required interface.");
+            }
+        }
+
+        public PSAccessServiceInterface CreatePropStoreService(IPropBag propBag, PropItemSetInternalInterface template, out BagNode newBagNode)
         {
             // Issue a new, unique Id for this propBag.
             ObjectIdType objectId = NextCookedVal;
@@ -351,27 +369,12 @@ namespace DRM.TypeSafePropertyBag
 
         public PSAccessServiceInterface ClonePSAccessService
             (
-            IPropBag sourcePropBag,
-            BagNode sourcePropBagNode,
+            PropItemSetInternalInterface sourcePropNodeCollection,
             IPropBag targetPropBag,
             out BagNode newStoreNode
             )
         {
-            //L2KeyManType sourceLevel2KeyMan = propBagNode.Level2KeyMan; 
-
-            //L2KeyManType level2KeyManager_forNewCopy;
-            //if (sourceLevel2KeyMan.IsFixed)
-            //{
-            //    // Share the same instance: Fixed PropItemSets are immutable.
-            //    level2KeyManager_forNewCopy = sourceLevel2KeyMan;
-            //}
-            //else
-            //{
-            //    //Make a new copy, changes to the source PropBag's Level2KeyManager will not change this new copy.
-            //    level2KeyManager_forNewCopy = (L2KeyManType)sourceLevel2KeyMan.Clone();
-            //}
-
-            PSAccessServiceInterface result = CreatePropStoreService(targetPropBag, sourcePropBagNode, out newStoreNode);
+            PSAccessServiceInterface result = CreatePropStoreService(targetPropBag, sourcePropNodeCollection, out newStoreNode);
             return result;
         }
 

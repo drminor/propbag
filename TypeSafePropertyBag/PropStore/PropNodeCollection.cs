@@ -8,7 +8,9 @@ namespace DRM.TypeSafePropertyBag
     using PropIdType = UInt32;
     using PropNameType = String;
 
-    internal class PropNodeCollection : IPropNodeCollection
+    using PropItemSetInternalInterface = IPropNodeCollection_Internal<UInt32, String>;
+
+    internal class PropNodeCollection : PropItemSetInternalInterface, IEquatable<PropNodeCollection>
     {
         #region Private Members
 
@@ -47,7 +49,7 @@ namespace DRM.TypeSafePropertyBag
             _propItemsByName = null;
         }
 
-        public PropNodeCollection(IPropNodeCollection sourcePropNodes, BagNode targetParent)
+        public PropNodeCollection(PropItemSetInternalInterface sourcePropNodes, BagNode targetParent)
         {
             MaxPropsPerObject = sourcePropNodes.MaxPropsPerObject;
 
@@ -55,15 +57,12 @@ namespace DRM.TypeSafePropertyBag
 
             foreach(PropNode propNode in sourcePropNodes.GetPropNodes())
             {
-                //IProp newTypeProp = (IProp) propNode.PropData_Internal.TypedProp.Clone();
-                //IPropDataInternal newPropData_Internal = new PropGen(newTypeProp);
-                //PropNode newPropNode = new PropNode(propNode.PropId, newPropData_Internal, targetParent);
-
                 PropNode newPropNode = propNode.CloneForNewParent(targetParent, useExistingValues: true);
                 Add(newPropNode);
             }
 
             _propItemsByName = null;
+            _isFixed = false;
         }
 
         #endregion
@@ -74,11 +73,22 @@ namespace DRM.TypeSafePropertyBag
 
         public int MaxPropsPerObject { get; }
 
-        public bool IsFixed { get; private set; }
+        private bool _isFixed;
+        public bool IsFixed
+        {
+            get
+            {
+                return _isFixed;
+            }
+        }
 
         public void Fix()
         {
-            IsFixed = true;
+            lock(_sync)
+            {
+                _hashCode = ComputeHashCode();
+                _isFixed = true;
+            }
         }
 
         public bool Contains(PropIdType propId)
@@ -153,14 +163,17 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
+        // TODO: Handle the case when the PropItemSet is fixed.
         public PropNode CreateAndAdd(IPropDataInternal propData_Internal, PropNameType propertyName, BagNode parent)
         {
+            if (_isFixed)
+            {
+                throw new InvalidOperationException("Cannot Add PropItems to a Fixed PropItemSet.");
+            }
+
             PropIdType nextPropId = GetNextPropId();
-
             PropNode newPropNode = new PropNode(nextPropId, propData_Internal, parent);
-
             Add(newPropNode);
-
             return newPropNode;
         }
 
@@ -168,6 +181,11 @@ namespace DRM.TypeSafePropertyBag
         {
             lock(_sync)
             {
+                if(_isFixed)
+                {
+                    throw new InvalidOperationException("Cannot Add PropItems to a Fixed PropItemSet.");
+                }
+
                 _children.Add(propNode.PropId, propNode);
 
                 if (_propItemsByName != null)
@@ -177,10 +195,16 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
+        // TODO: Cannot clear, must delete from Cache.
         public void Clear()
         {
             lock (_sync)
             {
+                if(_isFixed)
+                {
+                    throw new InvalidOperationException("A fixed PropItemSet cannot be cleared.");
+                }
+
                 _children.Clear();
                 if (_propItemsByName != null)
                 {
@@ -193,6 +217,11 @@ namespace DRM.TypeSafePropertyBag
         {
             lock (_sync)
             {
+                if (_isFixed)
+                {
+                    throw new InvalidOperationException("PropItems cannot be remvoed from a fixed PropItemSet.");
+                }
+
                 if (_children.TryGetValue(propId, out propNode))
                 {
                     _children.Remove(propId);
@@ -246,28 +275,106 @@ namespace DRM.TypeSafePropertyBag
 
         #endregion
 
-        #region Private Methods
+        #region Object Overrides and IEquatable Support
 
-        private Dictionary<PropNameType, PropNode> BuildByNameDict(IDictionary<PropIdType, PropNode> sourceDict)
+        public override string ToString()
         {
-            Dictionary<PropNameType, PropNode> result = new Dictionary<PropNameType, PropNode>();
+            string @fixed = IsFixed ? "Fixed" : "Open";
 
-            foreach (KeyValuePair<PropIdType, PropNode> kvp in _children)
+            return $"{@fixed} PropItemSet with {Count} items.";
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as PropNodeCollection);
+        }
+
+        public bool Equals(PropNodeCollection other)
+        {
+            return other != null &&
+                   EqualityComparer<Dictionary<uint, PropNode>>.Default.Equals(_children, other._children) &&
+                   _isFixed == other._isFixed;
+        }
+
+        int _hashCode;
+        public override int GetHashCode()
+        {
+            int result;
+            if (IsFixed)
             {
-                result.Add(kvp.Value.PropertyName, kvp.Value);
+                result = _hashCode;
+            }
+            else
+            {
+                result = ComputeHashCode();
             }
 
             return result;
         }
 
-        private long m_Counter = 0;
-        private PropIdType GetNextPropId()
+        private int ComputeHashCode()
         {
-            long temp = System.Threading.Interlocked.Increment(ref m_Counter);
-            if (temp > MaxPropsPerObject) throw new InvalidOperationException("The SimpleLevel2Key Manager has run out of property ids.");
-            return (PropIdType)temp;
+            var hashCode = 1667222605;
+            hashCode = hashCode * -1521134295 + EqualityComparer<Dictionary<uint, PropNode>>.Default.GetHashCode(_children);
+            hashCode = hashCode * -1521134295 + _isFixed.GetHashCode();
+            return hashCode;
+        }
+
+        public static bool operator ==(PropNodeCollection collection1, PropNodeCollection collection2)
+        {
+            return EqualityComparer<PropNodeCollection>.Default.Equals(collection1, collection2);
+        }
+
+        public static bool operator !=(PropNodeCollection collection1, PropNodeCollection collection2)
+        {
+            return !(collection1 == collection2);
         }
 
         #endregion
+
+        #region Private Methods
+
+        private Dictionary<PropNameType, PropNode> BuildByNameDict(IDictionary<PropIdType, PropNode> sourceDict)
+        {
+            //Dictionary<PropNameType, PropNode> result = new Dictionary<PropNameType, PropNode>();
+
+            //foreach (KeyValuePair<PropIdType, PropNode> kvp in _children)
+            //{
+            //    result.Add(kvp.Value.PropertyName, kvp.Value);
+            //}
+
+            Dictionary<PropNameType, PropNode> result = _children.ToDictionary(k => k.Value.PropertyName, v => v.Value);
+            return result;
+        }
+
+        private long m_PropIdCounter = 0;
+        private PropIdType GetNextPropId()
+        {
+            long temp = System.Threading.Interlocked.Increment(ref m_PropIdCounter);
+            if (temp > MaxPropsPerObject) throw new InvalidOperationException("The PropNodeCollection has run out of property ids.");
+            return (PropIdType)temp;
+        }
+
+        private long m_GenerationId = 0;
+        public long GetNextGenerationId()
+        {
+            if (m_GenerationId == long.MaxValue -  1) throw new InvalidOperationException("This PropNodeCollection has over x generations: the next GenerationId exceeds the size of a long intenger.");
+            return System.Threading.Interlocked.Increment(ref m_GenerationId);
+        }
+
+        #endregion
+    }
+
+    internal class SimplePropItemSetComparer : IEqualityComparer<PropItemSetInternalInterface>
+    {
+        public bool Equals(PropItemSetInternalInterface x, PropItemSetInternalInterface y)
+        {
+            return object.ReferenceEquals(x, y);
+        }
+
+        public int GetHashCode(PropItemSetInternalInterface obj)
+        {
+            return obj.GetHashCode();
+        }
     }
 }

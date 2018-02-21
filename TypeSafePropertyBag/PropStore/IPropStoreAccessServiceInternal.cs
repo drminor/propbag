@@ -6,8 +6,6 @@ namespace DRM.TypeSafePropertyBag
     // TODO: Replace all L2T propId references with IExplodedKey<UInt64, UInt64, UInt32>;
     internal interface IPropStoreAccessServiceInternal<L2T, L2TRaw> 
     {
-        //IL2KeyMan<L2T, L2TRaw> Level2KeyManager { get; }
-
         bool TryGetChildPropNode(BagNode sourceBagNode, L2TRaw propertyName, out PropNode child);
 
         PropNode GetChild(L2T propId);

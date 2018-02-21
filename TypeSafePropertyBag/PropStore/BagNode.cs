@@ -11,11 +11,13 @@ namespace DRM.TypeSafePropertyBag
 
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
 
+    using PropNodeCollectionIntInterface = IPropNodeCollection_Internal<UInt32, String>;
+
     internal class BagNode : INotifyParentNodeChanged, IDisposable
     {
         #region Private Fields
 
-        private readonly IPropNodeCollection _propNodeCollection;
+        private PropNodeCollectionIntInterface _propNodeCollection;
 
         private ICacheDelegates<CallPSParentNodeChangedEventSubDelegate> _callPSParentNodeChangedEventSubsCache;
 
@@ -108,36 +110,13 @@ namespace DRM.TypeSafePropertyBag
 
         // TODO: What about the subscriptions and bindings that were included in the PropModel that were used to create these PropItems?
 
-        public BagNode(ObjectIdType objectId, IPropBag propBag, BagNode template, int maxPropsPerObject, ICacheDelegates<CallPSParentNodeChangedEventSubDelegate> callPSParentNodeChangedEventSubsCache)
+        public BagNode(ObjectIdType objectId, IPropBag propBag, PropNodeCollectionIntInterface template, int maxPropsPerObject, ICacheDelegates<CallPSParentNodeChangedEventSubDelegate> callPSParentNodeChangedEventSubsCache)
         {
             CompKey = new SimpleExKey(objectId, 0);
             PropBagProxy = new WeakRefKey<IPropBag>(propBag ?? throw new ArgumentNullException(nameof(propBag)));
 
-            //L2KeyManType level2KeyManager = template?.Level2KeyMan;
-
-            //if(level2KeyManager == null)
-            //{
-            //    // Create a brand new PropItemSet
-            //    Level2KeyMan = new SimpleLevel2KeyMan(compKey.MaxPropsPerObject);
-            //}
-            //else
-            //{
-            //    if(level2KeyManager.IsFixed)
-            //    {
-            //        // Share the same instance: Fixed PropItemSets are immutable.
-            //        Level2KeyMan = level2KeyManager;
-            //    }
-            //    else
-            //    {
-            //        // Make a copy of the source's Level2Key Manager.
-            //        Level2KeyMan = (L2KeyManType)level2KeyManager.Clone();
-            //    }
-            //}
-
             _callPSParentNodeChangedEventSubsCache = callPSParentNodeChangedEventSubsCache ?? throw new ArgumentNullException(nameof(callPSParentNodeChangedEventSubsCache));
             _parentNCSubscriberCollection = null;
-
-            //_children = new Dictionary<PropIdType, PropNode>();
 
             if (template == null)
             {
@@ -147,11 +126,12 @@ namespace DRM.TypeSafePropertyBag
             {
                 if(template.IsFixed)
                 {
-                    _propNodeCollection = new PropNodeCollection(template.PropNodeCollection, this);
+                    _propNodeCollection = new PropNodeCollection(template, this);
                 }
                 else
                 {
-                    _propNodeCollection = new PropNodeCollection(template.PropNodeCollection, this);
+                    // TODO: Handle the case when the template is not fixed.
+                    _propNodeCollection = new PropNodeCollection(template, this);
                 }
             }
         }
@@ -203,7 +183,20 @@ namespace DRM.TypeSafePropertyBag
 
         public bool IsFixed => _propNodeCollection.IsFixed;
 
-        public IPropNodeCollection PropNodeCollection => _propNodeCollection;
+        public PropNodeCollectionIntInterface PropNodeCollection
+        {
+            get
+            {
+                return _propNodeCollection;
+            }
+            set
+            {
+                lock(_sync)
+                {
+                    _propNodeCollection = value;
+                }
+            }
+        }
 
         #endregion
 
@@ -429,13 +422,11 @@ namespace DRM.TypeSafePropertyBag
                 if (disposing)
                 {
                     // Dispose managed state (managed objects).
-                    DisposeChildren();
-
-                    //if (!Level2KeyMan.IsFixed)
-                    //{
-                    //    // The Level2KenMan is open (for additions) and therefore it is not shared: It can be disposed.
-                    //    Level2KeyMan.Dispose();
-                    //}
+                    if (!_propNodeCollection.IsFixed)
+                    {
+                        // The PropNodeCollection is open (for additions) and therefore it is not shared: It can be disposed.
+                        DisposeChildren();
+                    }
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.

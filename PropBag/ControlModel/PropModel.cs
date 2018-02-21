@@ -102,6 +102,8 @@ namespace DRM.PropBag
         [XmlIgnore]
         public IProvidePropModels PropModelProvider { get { return pmp; } set { SetAlways<IProvidePropModels>(ref pmp, value); } }
 
+        object _propItemSetHandle;
+        public object PropItemSetHandle { get { return _propItemSetHandle; } set { SetAlways<object>(ref _propItemSetHandle, value); } }
 
         #endregion Other Properties
 
