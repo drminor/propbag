@@ -78,7 +78,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests
         }
 
 
-        string[] PBTemplateFilenames
+        protected virtual string[] PBTemplateFilenames
         {
             get
             {
@@ -90,7 +90,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests
             }
         }
 
-        string[] MapperRequestFilenames
+        protected virtual string[] MapperRequestFilenames
         {
             get
             {
@@ -102,7 +102,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests
             }
         }
 
-        string ConfigPackageNameSuffix
+        protected virtual string ConfigPackageNameSuffix
         {
             get
             {
