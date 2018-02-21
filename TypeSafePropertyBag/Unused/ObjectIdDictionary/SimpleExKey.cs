@@ -63,7 +63,7 @@ namespace DRM.ObjectIdDictionary
 
         #region Public Members
 
-        public bool isEmpty => CKey == 0;
+        public bool IsEmpty => CKey == 0;
         public CompositeKeyType CKey { get; }
         public ObjectIdType Level1Key => (CKey >> _botFieldLen) & _topMask;
         public PropIdType Level2Key => (PropIdType)(CKey & _botMask);
