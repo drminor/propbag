@@ -12,12 +12,6 @@ namespace DRM.PropBagWPF
 
     public class WPFPropFactory : PropFactory
     {
-        #region Private Properties
-
-        //IProvideAutoMappers _autoMapperProvider { get; }
-
-        #endregion
-
         #region Constructor
 
         public WPFPropFactory
@@ -28,7 +22,6 @@ namespace DRM.PropBagWPF
             )
             : base(delegateCacheProvider, valueConverter, typeResolver)
         {
-            //_autoMapperProvider = null;
         }
 
         #endregion
@@ -101,16 +94,6 @@ namespace DRM.PropBagWPF
 
         #region CollectionViewSource property creators
 
-        //private IPropBagMapperGen GetPropBagMapper(IMapperRequest mr, out IPropBagMapperKeyGen mapperRequest)
-        //{
-        //    IProvideAutoMappers autoMapperProvider = this._autoMapperProvider ?? throw new InvalidOperationException
-        //        ($"This WPFPropFactory instance cannot create IProvideDataSourceProvider instances: No AutoMapperSupport was supplied upon construction.");
-
-        //    mapperRequest = autoMapperProvider.RegisterMapperRequest(mr.PropModel, mr.SourceType, mr.ConfigPackageName);
-        //    IPropBagMapperGen genMapper = autoMapperProvider.GetMapper(mapperRequest);
-        //    return genMapper;
-        //}
-
         public override CViewProviderCreator GetCViewProviderFactory()
         {
             return CreateAView;
@@ -138,7 +121,7 @@ namespace DRM.PropBagWPF
 
         #region DataSource creators
 
-        //public override ClrMappedDSP<TDestination> CreateMappedDS<TSource, TDestination>
+        //public override IMappedDSP<TDestination> CreateMappedDS<TSource, TDestination>
         //    (
         //    PropIdType propId,
         //    PropKindEnum propKind,
@@ -155,7 +138,7 @@ namespace DRM.PropBagWPF
         //        new CrudWithMapping<IDoCRUD<TSource>, TSource, TDestination>(dal, mapper);
 
         //    //Create a IProvideADataSourceProvider using the IDoCRUD<TDestination> DataAccessLayer.
-        //    ClrMappedDSP<TDestination> mappedDSP = new ClrMappedDSP<TDestination>(mappedDal);
+        //    IMappedDSP<TDestination> mappedDSP = new IMappedDSP<TDestination>(mappedDal);
 
         //    return mappedDSP;
         //}

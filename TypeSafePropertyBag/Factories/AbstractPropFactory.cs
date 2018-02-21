@@ -197,7 +197,7 @@ namespace DRM.TypeSafePropertyBag
 
         #region DataSource creation
 
-        //public abstract ClrMappedDSP<TDestination> CreateMappedDS<TSource, TDestination>(
+        //public abstract IMappedDSP<TDestination> CreateMappedDS<TSource, TDestination>(
         //    IDoCRUD<TSource> dal,
         //    IPropBagMapper<TSource, TDestination> mapper
         //    /*, out CrudWithMapping<TSource, TDestination> mappedDal*/) where TSource : class where TDestination : INotifyItemEndEdit;

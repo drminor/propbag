@@ -95,13 +95,13 @@
     <Compile Include="PropInterfaces\IProvideACViewManager.cs" />
     <Compile Include="PropInterfaces\IWatchPropItems.cs" />
     <Compile Include="PropStore\IPropNodeCollection.cs" />
-    <None Include="PropStore\ICacheLevel2KeyManagers.cs" />
+    <Compile Include="PropStore\ICachePropItemSets.cs" />
     <Compile Include="PropStore\IProvidePropTemplates.cs" />
     <Compile Include="PropStore\PropNodeCollection.cs" />
     <None Include="PropStore\PropStoreServices.cs" />
-    <Compile Include="PropStore\PropTemplateCache.cs" />
+    <Compile Include="PropStore\SimplePropTemplateCache.cs" />
     <Compile Include="PropStore\PSNodeChangedEventArgs.cs" />
-    <None Include="PropStore\SimpleLevel2KeyManagerCache.cs" />
+    <Compile Include="PropStore\SimplePropItemSetCache.cs" />
     <Compile Include="PropStore\SimplePropStoreProxy.cs" />
     <Compile Include="PropStore\ViewManagers\IViewManagerProviderKey.cs" />
     <Compile Include="PropStore\ViewManagers\ViewManagerProviderCollection.cs" />

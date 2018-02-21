@@ -865,25 +865,6 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
                 child = null;
                 return false;
             }
-
-
-
-            //if(objectNode.Level2KeyMan.TryGetFromRaw(propertyName, out PropIdType propId))
-            //{
-            //    if(objectNode.TryGetChild(propId, out child))
-            //    {
-            //        return true;
-            //    }
-            //    else
-            //    {
-            //        child = null;
-            //        return false;
-            //    }
-            //}
-            //else
-            //{
-            //    throw new KeyNotFoundException($"Can not find a PropItem with name = {propertyName}.");
-            //}
         }
 
         private bool TryGetPropItemParent
