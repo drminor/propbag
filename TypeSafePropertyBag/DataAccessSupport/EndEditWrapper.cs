@@ -13,14 +13,15 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
         {
         }
 
-        public EndEditWrapper(List<T> list)
-        {
-            foreach(T item in list)
-            {
-                // This calls insert and thereby we attach our handler to each item's ItemEndEdit event.
-                Add(item);
-            }
-        }
+        // TODO: Do we need this? We already take an IEnumerable<T> and IList<T> implements IEnumerable<T>
+        //public EndEditWrapper(List<T> list)
+        //{
+        //    foreach(T item in list)
+        //    {
+        //        // This calls insert and thereby we attach our handler to each item's ItemEndEdit event.
+        //        Add(item);
+        //    }
+        //}
 
         public EndEditWrapper(IEnumerable<T> collection)
         {
@@ -50,7 +51,7 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
 
             // handle any EndEdit events relating to this item
             // XXTemp
-            //item.ItemEndEdit += ItemEndEditHandler;
+            item.ItemEndEdit += ItemEndEditHandler;
         }
 
         protected override void ClearItems()
