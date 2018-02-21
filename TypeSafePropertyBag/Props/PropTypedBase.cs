@@ -36,6 +36,18 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
+        public override DoSetDelegate DoSetDelegate
+        {
+            get
+            {
+                return null;
+            }
+            set
+            {
+                // Ingore the call. (This class is going away and will be replaced by PropTypedBase_New
+            }
+        }
+
         #endregion
 
         #region Constructors

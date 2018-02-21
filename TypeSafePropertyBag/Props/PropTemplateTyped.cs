@@ -22,6 +22,8 @@ namespace DRM.TypeSafePropertyBag
         public object ComparerProxy => Comparer;
         public object GetDefaultValFuncProxy => GetDefaultValFunc;
 
+        public DoSetDelegate DoSetDelegate { get; set; }
+
         #endregion
 
         #region Constructors

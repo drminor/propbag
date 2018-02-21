@@ -61,7 +61,7 @@ namespace DRM.PropBag
         // We are responsible for these
         private ITypeSafePropBagMetaData _ourMetaData { get; set; }
         protected virtual ITypeSafePropBagMetaData OurMetaData { get { return _ourMetaData; } set { _ourMetaData = value; } }
-        protected internal object _propItemSet_Handle { get; private set; }
+        //protected internal object _propItemSet_Handle { get; private set; }
 
         private IDictionary<string, IViewManagerProviderKey> _foreignViewManagers; // TODO: Consider creating a lazy property accessor for this field.
 
@@ -195,10 +195,28 @@ namespace DRM.PropBag
 
             BasicConstruction(propModel.TypeSafetyMode, autoMapperService, propFactoryToUse, fullClassNameToUse);
 
-            _ourStoreAccessor = storeAcessorCreator.CreatePropStoreService(this);
-            _memConsumptionTracker.MeasureAndReport("CreatePropStoreService", null);
+            //if(propModel.PropItemSetHandle != null)
+            //{
+            //    _ourStoreAccessor = storeAcessorCreator.CreatePropStoreService(this, propModel.PropItemSetHandle);
+            //    _memConsumptionTracker.MeasureAndReport("CreatePropStoreService from Template.", null);
+            //}
+            //else
+            //{
+            //    _ourStoreAccessor = storeAcessorCreator.CreatePropStoreService(this);
+            //    _memConsumptionTracker.MeasureAndReport("CreatePropStoreService from Scratch.", null);
 
-            _propItemSet_Handle = Hydrate(propModel);
+            //    object propItemSetHandle = Hydrate(propModel);
+            //    propModel.PropItemSetHandle = propItemSetHandle;
+
+            //    _memConsumptionTracker.Report(memUsedSoFar, "---- AfterHydrate.");
+            //}
+
+            _ourStoreAccessor = storeAcessorCreator.CreatePropStoreService(this);
+            _memConsumptionTracker.MeasureAndReport("CreatePropStoreService from Scratch.", null);
+
+            object propItemSetHandle = Hydrate(propModel);
+            propModel.PropItemSetHandle = propItemSetHandle;
+
             _memConsumptionTracker.Report(memUsedSoFar, "---- AfterHydrate.");
 
             //int testc = _ourStoreAccessor.PropertyCount;
@@ -1119,7 +1137,7 @@ namespace DRM.PropBag
             bool alwaysRegister = !OurMetaData.AllPropsMustBeRegistered;
             bool mustBeRegistered = OurMetaData.AllPropsMustBeRegistered;
 
-            IPropData PropData = GetPropGen(propertyName, propertyType, haveValue: true, value: value,
+            IPropData propData = GetPropGen(propertyName, propertyType, haveValue: true, value: value,
                 alwaysRegister: alwaysRegister,
                 mustBeRegistered: mustBeRegistered,
                 neverCreate: false,
@@ -1134,11 +1152,11 @@ namespace DRM.PropBag
             {
                 Type newType = propertyType ?? _propFactory.GetTypeFromValue(value);
 
-                if (!PropData.TypedProp.TypeIsSolid)
+                if (!propData.TypedProp.TypeIsSolid)
                 {
                     try
                     {
-                        MakeTypeSolid(propId, propertyName, PropData, newType);
+                        MakeTypeSolid(propId, propertyName, propData, newType);
                     }
                     catch (InvalidCastException ice)
                     {
@@ -1147,24 +1165,42 @@ namespace DRM.PropBag
                 }
                 else
                 {
-                    if (!AreTypesSame(newType, PropData.TypedProp.Type))
+                    if (!AreTypesSame(newType, propData.TypedProp.Type))
                     {
-                        throw new InvalidOperationException($"Invalid opertion: attempting to get property: {propertyName} whose type is {PropData.TypedProp.Type}, with a call whose type parameter is {propertyType}.");
+                        throw new InvalidOperationException($"Invalid opertion: attempting to get property: {propertyName} whose type is {propData.TypedProp.Type}, with a call whose type parameter is {propertyType}.");
                     }
                 }
             }
             else
             {
                 // Check to make sure that we are not attempting to set the value of a ValueType to null.
-                if (PropData.TypedProp.TypeIsSolid && PropData.TypedProp.Type.IsValueType)
+                if (propData.TypedProp.TypeIsSolid && propData.TypedProp.Type.IsValueType)
                 {
                     throw new InvalidOperationException($" Invalid Operation: cannot set property: {propertyName} to null, it is of type: {propertyType} which is a value type.");
                 }
             }
 
-            ICacheDelegates<DoSetDelegate> dc = _propFactory.DelegateCacheProvider.DoSetDelegateCache;
-            DoSetDelegate setPropDel = dc.GetOrAdd(PropData.TypedProp.Type);
-            return setPropDel(this, propId, propertyName, PropData.TypedProp, value);
+            //ICacheDelegates<DoSetDelegate> dc = _propFactory.DelegateCacheProvider.DoSetDelegateCache;
+            //DoSetDelegate setPropDel = dc.GetOrAdd(propData.TypedProp.Type);
+
+            DoSetDelegate setPropDel = GetTheDoSetDelegate(propData);
+            return setPropDel(this, propId, propertyName, propData.TypedProp, value);
+        }
+
+
+        private DoSetDelegate GetTheDoSetDelegate(IPropData propData)
+        {
+            if(propData.DoSetDelegate == null)
+            {
+                ICacheDelegates<DoSetDelegate> dc = _propFactory.DelegateCacheProvider.DoSetDelegateCache;
+                DoSetDelegate setPropDel = dc.GetOrAdd(propData.TypedProp.Type);
+                propData.TypedProp.DoSetDelegate = setPropDel;
+                return setPropDel;
+            }
+            else
+            {
+                return propData.DoSetDelegate;
+            }
         }
 
         //public bool SetIt<T>(T value, PropIdType propId)
@@ -2772,7 +2808,7 @@ namespace DRM.PropBag
             {
                 if (!_ourStoreAccessor.TryGetValue(this, propId, out IPropData propData))
                 {
-                    throw new KeyNotFoundException($"The property named: {propertyName} could not be found in the property store.");
+                    throw new KeyNotFoundException($"The property named: {propertyName} could not be fetched from the property store.");
                 }
 
                 CheckStorageStrategy(propertyName, propData, desiredHasStoreValue);
@@ -2782,7 +2818,7 @@ namespace DRM.PropBag
             }
             else
             {
-                throw new KeyNotFoundException($"The property named: {propertyName} could not be found in the Level2Key man.");
+                throw new KeyNotFoundException($"The property named: {propertyName} could not be found in the PropCollection for this PropBag.");
             }
         }
 
@@ -3231,7 +3267,7 @@ namespace DRM.PropBag
         #region Generic Method Support
 
         // TODO: This method is here because DoSet<T> is private.
-        // Consider creating a new interface: IPropBagInternal and making this method be a member of that interface.
+        // Consider creating a new interface: IPropBagInternal and making this method a member of that interface.
         static private bool DoSetBridge<T>(IPropBag target, PropIdType propId, PropNameType propertyName, IProp prop, object value)
         {
             T newValue = (T)value;

@@ -16,11 +16,22 @@ namespace DRM.TypeSafePropertyBag
 
         #region Public PropGen Properties
 
-
         public bool IsEmpty { get; }
         public bool IsPropBag { get; private set; }
 
         public IProp TypedProp { get; private set; }
+
+        public DoSetDelegate DoSetDelegate
+        {
+            get
+            {
+                return TypedProp.DoSetDelegate;
+            }
+            set
+            {
+                TypedProp.DoSetDelegate = value;
+            }
+        }
 
         #endregion
 

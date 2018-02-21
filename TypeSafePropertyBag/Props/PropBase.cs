@@ -18,7 +18,6 @@ namespace DRM.TypeSafePropertyBag
 
         public PropNameType PropertyName { get; }
 
-
         public PropKindEnum PropKind { get; protected set; }
         public Type Type { get; }
         public bool TypeIsSolid { get; set; }
@@ -34,6 +33,8 @@ namespace DRM.TypeSafePropertyBag
         public object ComparerProxy => throw new NotImplementedException();
 
         public object GetDefaultValFuncProxy => throw new NotImplementedException();
+
+        public abstract DoSetDelegate DoSetDelegate { get; set; }
 
         //DataSourceProvider _dataSourceProvider;
 
@@ -156,50 +157,5 @@ namespace DRM.TypeSafePropertyBag
         }
 
         #endregion
-
-        //#region DEBUG Checks
-
-        //[System.Diagnostics.Conditional("DEBUG")]
-        //private void CheckPropKind(PropKindEnum propKind)
-        //{
-        //    if (!
-        //            (
-        //            propKind == PropKindEnum.CollectionViewSource ||
-        //            propKind == PropKindEnum.CollectionViewSource_RO ||
-        //            propKind == PropKindEnum.DataTable ||
-        //            propKind == PropKindEnum.DataTable_RO ||
-        //            propKind == PropKindEnum.Prop ||
-        //            propKind == PropKindEnum.ObservableCollection ||
-        //            //propKind == PropKindEnum.ObservableCollectionFB ||
-        //            propKind == PropKindEnum.EnumerableTyped ||
-        //            propKind == PropKindEnum.Enumerable ||
-        //            propKind == PropKindEnum.ObservableCollection_RO ||
-        //            //propKind == PropKindEnum.ObservableCollectionFB_RO ||
-        //            propKind == PropKindEnum.EnumerableTyped_RO ||
-        //            propKind == PropKindEnum.Enumerable_RO
-        //            )
-        //        )
-        //    {
-        //        throw new InvalidOperationException($"The PropKind: {propKind} is not supported.");
-        //    }
-        //}
-
-        //[System.Diagnostics.Conditional("DEBUG")]
-        //private void CheckPropKindSpecial(PropKindEnum propKind)
-        //{
-        //    if (!
-        //            (
-        //            propKind == PropKindEnum.CollectionViewSource ||
-        //            propKind == PropKindEnum.CollectionViewSource_RO ||
-        //            propKind == PropKindEnum.DataTable ||
-        //            propKind == PropKindEnum.DataTable_RO
-        //            )
-        //        )
-        //    {
-        //        throw new InvalidOperationException($"The PropKind: {propKind} is not supported.");
-        //    }
-        //}
-
-        //#endregion 
     }
 }

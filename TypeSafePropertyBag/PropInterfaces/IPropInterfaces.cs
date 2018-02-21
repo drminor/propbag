@@ -60,6 +60,7 @@ namespace DRM.TypeSafePropertyBag
 
         object ComparerProxy { get; }
         object GetDefaultValFuncProxy { get; }
+        DoSetDelegate DoSetDelegate { get; set; }
     }
 
     /// <summary>
@@ -79,6 +80,7 @@ namespace DRM.TypeSafePropertyBag
         /// This allows access to these values without having to cast to the instance to its type (unknown at compile time.)
         /// </summary>
         IProp TypedProp { get; }
+        DoSetDelegate DoSetDelegate { get; set; }
     }
 
     /// <summary>

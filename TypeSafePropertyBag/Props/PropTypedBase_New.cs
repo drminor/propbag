@@ -69,6 +69,18 @@ namespace DRM.TypeSafePropertyBag
 
         public object TypedValueAsObject => TypedValue;
 
+        public DoSetDelegate DoSetDelegate
+        {
+            get
+            {
+                return _template.DoSetDelegate;
+            }
+            set
+            {
+                _template.DoSetDelegate = value;
+            }
+        }
+
         public bool ReturnDefaultForUndefined => _template.GetDefaultValFunc != null;
 
         public Func<string, T> GetDefaultValFunc => _template.GetDefaultValFunc;
