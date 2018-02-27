@@ -19,36 +19,28 @@ namespace DRM.PropBag.ViewModelTools
         #region IViewModelActivator Interface
 
         // BaseType + PropModel (BaseType known at compile time.)
-        public object GetNewViewModel<BT>(IPropModel propModel, PSAccessServiceCreatorInterface storeAccessCreator,
-            IPropFactory propFactory, string fullClassName) where BT : class, IPropBag
+        public object GetNewViewModel<BT>(IPropModel propModel, PSAccessServiceCreatorInterface storeAccessCreator, IPropFactory propFactory = null, string fullClassName = null) where BT : class, IPropBag
         {
             IProvideAutoMappers autoMapperService = null;
-            object result = GetNewViewModel(typeof(BT), propModel, storeAccessCreator, autoMapperService, propFactory, fullClassName);
+            object result = GetNewViewModel(propModel, storeAccessCreator, typeof(BT), autoMapperService, propFactory, fullClassName);
             return result;
         }
 
-        // With AutoMapper Support
-        // BaseType + PropModel (BaseType known at compile time.)
-        object IViewModelActivator.GetNewViewModel<BT>(IPropModel propModel, PSAccessServiceCreatorInterface storeAccessCreator,
-            IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
+        object IViewModelActivator.GetNewViewModel<BT>(IPropModel propModel, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
         {
-            object result = GetNewViewModel(typeof(BT), propModel, storeAccessCreator, autoMapperService, propFactory, fullClassName);
+            object result = GetNewViewModel(propModel, storeAccessCreator, typeof(BT), autoMapperService, propFactory, fullClassName);
             return result;
         }
 
-        // BaseType + PropModel (BaseType known only at run time.)
-        public object GetNewViewModel(Type typeToCreate, IPropModel propModel, PSAccessServiceCreatorInterface storeAccessCreator,
-            IPropFactory propFactory, string fullClassName)
+        // BaseType + PropModel (BaseType known only at run time.
+        public object GetNewViewModel(IPropModel propModel, PSAccessServiceCreatorInterface storeAccessCreator, Type typeToCreate, IPropFactory propFactory = null, string fullClassName = null)
         {
             IProvideAutoMappers autoMapperService = null;
-            object result = GetNewViewModel(typeToCreate, propModel, storeAccessCreator, autoMapperService, propFactory, fullClassName);
+            object result = GetNewViewModel(propModel, storeAccessCreator, typeToCreate, autoMapperService, propFactory, fullClassName);
             return result;
         }
 
-        // With AutoMapper Support
-        // BaseType + PropModel (BaseType known only at run time.)
-        public object GetNewViewModel(Type typeToCreate, IPropModel propModel, PSAccessServiceCreatorInterface storeAccessCreator,
-            IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
+        public object GetNewViewModel(IPropModel propModel, PSAccessServiceCreatorInterface storeAccessCreator, Type typeToCreate, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
         {
             object[] parameters = new object[] { propModel, storeAccessCreator, autoMapperService, propFactory, fullClassName };
 
