@@ -18,9 +18,14 @@ namespace DRM.PropBagWPF
 
         #region Constructor
 
-        public CViewSourceProp(PropNameType propertyName, IProvideAView viewProvider)
-            : base(propertyName, typeof(CollectionViewSource), true, PropStorageStrategyEnum.Virtual, true, RefEqualityComparer<CollectionViewSource>.Default.Equals, null, PropKindEnum.CollectionViewSource)
+        public CViewSourceProp(PropNameType propertyName, IProvideAView viewProvider, IPropTemplate<CollectionViewSource> template)
+            : base(propertyName, typeIsSolid: true, template: template)
         {
+            if(_template.StorageStrategy != PropStorageStrategyEnum.Virtual)
+            {
+                throw new InvalidOperationException($"CViewSource PropItems only support {nameof(PropStorageStrategyEnum.Virtual)}.");
+            }
+
             _viewProvider = viewProvider;
         }
 
@@ -62,7 +67,6 @@ namespace DRM.PropBagWPF
                 //_viewProvider.ViewSourceRefreshed += _viewProvider_ViewRefreshed;
                 return cvs; 
             }
-
             set
             {
                 throw new InvalidOperationException("TODO: Fix Me");
@@ -79,16 +83,11 @@ namespace DRM.PropBagWPF
         //    System.Diagnostics.Debug.WriteLine("CVS's DSP received as ViewRefreshed Event.");
         //}
 
-        public override object TypedValueAsObject => TypedValue;
-
-        public override object Clone() => throw new NotSupportedException($"This Prop Item of type: {typeof(ICViewSourceProp<CollectionViewSource>).Name} does not implement the Clone method.");
-
-        public override void CleanUpTyped()
+        public override object Clone()
         {
-            if (TypedValue is IDisposable disable)
-            {
-                disable.Dispose();
-            }
+            //throw new NotSupportedException($"This Prop Item of type: {typeof(ICViewSourceProp<CollectionViewSource>).Name} does not implement the Clone method.");
+            object result = new CViewSourceProp(this.PropertyName, null, this._template);
+            return result;
         }
 
         #endregion

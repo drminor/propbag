@@ -2,10 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace DRM.PropBag
 {
@@ -13,30 +9,31 @@ namespace DRM.PropBag
 
     public class PropNoStore<T> : PropTypedBase<T>
     {
-        public PropNoStore(
-            PropNameType propertyName,
-            Func<string, T> defaultValFunc,
-            bool typeIsSolid,
-            PropStorageStrategyEnum storageStrategy,
-            Func<T, T, bool> comparer)
-            : base(propertyName, typeof(T), typeIsSolid, CheckStorageStrategy(storageStrategy), false, comparer, defaultValFunc, PropKindEnum.Prop)
+        public PropNoStore(PropNameType propertyName, bool typeIsSolid, IPropTemplate<T> template)
+            : base(propertyName, typeIsSolid, template)
         {
-        }
-
-        static PropStorageStrategyEnum CheckStorageStrategy(PropStorageStrategyEnum strategy)
-        {
-            if (strategy == PropStorageStrategyEnum.Internal)
+            if(template.StorageStrategy == PropStorageStrategyEnum.Internal)
             {
                 throw new InvalidOperationException($"This implementation of IProp<T> does not support the {nameof(PropStorageStrategyEnum.Internal)} StorageStrategy.");
             }
-            return strategy;
+
+            _haveFetchedValue = false;
         }
 
-        T _value = default(T);
-        override public T TypedValue 
-        {
-            get => _value;
+        bool _haveFetchedValue;
 
+        T _value;
+        override public T TypedValue
+        {
+            get
+            {
+                if (!_haveFetchedValue)
+                {
+                    _value = _template.GetDefaultVal(PropertyName);
+                    _haveFetchedValue = true;
+                }
+                return _value;
+            }
             set
             {
                 // It's as if this call never happened.
@@ -45,15 +42,16 @@ namespace DRM.PropBag
 
         public override object Clone()
         {
-            PropNoStore<T> result = new PropNoStore<T>(PropertyName, this.GetDefaultValFunc, TypeIsSolid, StorageStrategy, Comparer);
-
+            PropNoStore<T> result = new PropNoStore<T>(this.PropertyName, TypeIsSolid, this._template);
             return result;
         }
 
-
         public override void CleanUpTyped()
         {
-            // There's nothing to clean up.
+            if(_haveFetchedValue)
+            {
+                base.CleanUpTyped();
+            }
         }
 
     }

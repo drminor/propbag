@@ -12,85 +12,33 @@ namespace DRM.PropBag
 
     public class CProp<CT,T> : PropTypedBase<CT>, ICProp<CT,T> where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged
     {
-        public CProp(PropNameType propertyName,
-            CT initalValue,
-            Func<string, CT> defaultValFunc,
-            bool typeIsSolid,
-            PropStorageStrategyEnum storageStrategy,
-            Func<CT, CT, bool> comparer)
-            : base(propertyName, typeof(CT), typeIsSolid, storageStrategy, true, comparer, defaultValFunc, PropKindEnum.ObservableCollection)
+        public CProp(PropNameType propertyName, CT initalValue, bool typeIsSolid, IPropTemplate<CT> template)
+            : base(propertyName, initalValue, typeIsSolid, template)
         {
-            if (storageStrategy == PropStorageStrategyEnum.Internal)
-            {
-                _value = initalValue;
-            }
         }
 
-        public CProp(PropNameType propertyName, 
-            Func<string, CT> defaultValFunc,
-            bool typeIsSolid,
-            PropStorageStrategyEnum storageStrategy,
-            Func<CT, CT, bool> comparer)
-            : base(propertyName, typeof(CT), typeIsSolid, storageStrategy, false, comparer, defaultValFunc, PropKindEnum.ObservableCollection)
+        public CProp(PropNameType propertyName, bool typeIsSolid, IPropTemplate<CT> template)
+            : base(propertyName, typeIsSolid, template)
         {
-            //if (hasStore)
-            //{
-            //    _valueIsDefined = false;
-            //}
-        }
-
-        CT _value;
-        override public CT TypedValue
-        {
-            get
-            {
-                if (StorageStrategy == PropStorageStrategyEnum.Internal)
-                {
-                    if (!ValueIsDefined)
-                    {
-                        if (ReturnDefaultForUndefined)
-                        {
-                            return this.GetDefaultValFunc("Prop object doesn't know the prop's name.");
-                        }
-                        throw new InvalidOperationException("The value of this property has not yet been set.");
-                    }
-                    return _value;
-                }
-                else
-                {
-                    throw new InvalidOperationException();
-                }
-            }
-            set
-            {
-                if (StorageStrategy == PropStorageStrategyEnum.Internal)
-                {
-                    _value = value;
-                    ValueIsDefined = true;
-                    // TODO: Update our IList
-                }
-                else
-                {
-                    throw new InvalidOperationException();
-                }
-            }
-        }
-
-        public override object TypedValueAsObject => (object)TypedValue;
-
-        public override ValPlusType GetValuePlusType()
-        {
-            return new ValPlusType(TypedValue, Type);
         }
 
         public override object Clone()
         {
-            throw new NotImplementedException();
-        }
+            //throw new NotImplementedException();
 
-        public override void CleanUpTyped()
-        {
-            // TODO: Dispose of our items.
+            object result;
+            CT curVal = this.TypedValue;
+
+            if(curVal is ICloneable cloneable)
+            {
+                result = new CProp<CT, T>(this.PropertyName, (CT)cloneable.Clone(), this.TypeIsSolid, this._template);
+            }
+            else
+            {
+                result = new CProp<CT, T>(this.PropertyName, this.TypeIsSolid, this._template);
+            }
+
+            return result;
         }
 
         #region ICProp<CT, T> Implementation

@@ -6,13 +6,15 @@ namespace DRM.PropBag
 {
     using PropNameType = String;
 
-    public class Prop<T> : PropTypedBase_New<T>
+    public class Prop<T> : PropTypedBase<T>
     {
+        // With an initial value.
         public Prop(PropNameType propertyName, T initalValue, bool typeIsSolid, IPropTemplate<T> template) 
             : base(propertyName, initalValue, typeIsSolid, template)
         {
         }
 
+        // No initial value.
         public Prop(PropNameType propertyName, bool typeIsSolid, IPropTemplate<T> template)
             : base(propertyName, typeIsSolid, template)
         {
@@ -54,7 +56,7 @@ namespace DRM.PropBag
                 // TODO: This should throw an invalid operation exeception. Need to test before switching code back.
                 //throw new InvalidOperationException("The Prop's value is not null, nor is it undefined nor does it implement ICloneable.");
 
-                T hack = GetDefaultValFunc(PropertyName);
+                T hack = _template.GetDefaultVal(PropertyName);
                 result = new Prop<T>(propertyName: PropertyName, initalValue: hack, typeIsSolid: TypeIsSolid, template: _template);
             }
 

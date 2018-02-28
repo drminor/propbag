@@ -2,29 +2,27 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace DRM.PropBag
 {
     // TODO: The ExternStore" contract does not define a way for the external store to create undefined values.
     public class PropExternStore<T> : PropTypedBase<T>
     {
-        public PropExternStore(string propertyName,
-            object extraInfo,
-            Func<string, T> defaultValFunc,
-            bool typeIsSolid,
-            Func<T, T, bool> comparer)
-            : base(propertyName, typeof(T), typeIsSolid, PropStorageStrategyEnum.External, true,  comparer, defaultValFunc, PropKindEnum.Prop)
+        object _extraInfo { get; }
+
+        public PropExternStore(string propertyName, object extraInfo, bool typeIsSolid, IPropTemplate<T> template)
+            : base(propertyName, typeIsSolid, template)
         {
+            _extraInfo = extraInfo;
             Tag = Guid.NewGuid(); // tag;
             Getter = null; // getter;
             Setter = null; // setter;
+
+            ValueIsDefined = Getter != null;
         }
 
-        override public T TypedValue {
+        override public T TypedValue
+        {
             get
             {
                 return Getter(Tag);
@@ -34,21 +32,6 @@ namespace DRM.PropBag
                 Setter(Tag, value);
             }
         }
-
-        public override object TypedValueAsObject => (object)TypedValue;
-
-        public override ValPlusType GetValuePlusType()
-        {
-            return new ValPlusType(TypedValue, Type);
-        }
-
-        //override public bool ValueIsDefined
-        //{
-        //    get
-        //    {
-        //        return Getter != null;
-        //    }
-        //}
 
         override public bool SetValueToUndefined()
         {
@@ -71,16 +54,17 @@ namespace DRM.PropBag
         }
         public SetExtVal<T> Setter { get; set; }
 
-        //override public IListSource ListSource => throw new NotSupportedException("This PropBag property is not a collection or datatable PropType.");
-
         public override object Clone()
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
+            object result = new PropExternStore<T>(this.PropertyName, this._extraInfo, this.TypeIsSolid, this._template);
+            return result;
         }
 
         public override void CleanUpTyped()
         {
-            // There's nothing to clean up.
+            // TODO: Consider including in the constructor a way to opt out of this behaviour.
+            base.CleanUpTyped();
         }
     }
 }

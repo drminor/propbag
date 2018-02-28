@@ -20,9 +20,8 @@ namespace DRM.PropBagWPF
 
         #region Constructor
 
-        public CViewProp(PropNameType propertyName, IProvideAView viewProvider)
-            : base(propertyName, typeof(ListCollectionView), true, PropStorageStrategyEnum.Virtual, true,
-                  RefEqualityComparer<ListCollectionView>.Default.Equals, null, PropKindEnum.CollectionView)
+        public CViewProp(PropNameType propertyName, IProvideAView viewProvider, IPropTemplate<ListCollectionView> template)
+            : base(propertyName, typeIsSolid: true, template: template)
         {
             _viewProvider = viewProvider;
 
@@ -129,9 +128,13 @@ namespace DRM.PropBagWPF
             }
         }
 
-        public override object TypedValueAsObject => TypedValue;
+        public override object Clone()
+        {
+            //throw new NotSupportedException($"{nameof(CViewProp)} Prop Items do not implement the Clone method.");
 
-        public override object Clone() => throw new NotSupportedException($"{nameof(CViewProp)} Prop Items do not implement the Clone method.");
+            object result = new CViewProp(this.PropertyName, null, this._template);
+            return result;
+        }
 
         public override void CleanUpTyped()
         {
