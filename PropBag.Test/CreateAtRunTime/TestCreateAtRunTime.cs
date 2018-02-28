@@ -39,7 +39,8 @@ namespace PropBagLib.Tests
                 deferMethodRefResolution: true,
                 requireExplicitInitialValue: true);
 
-            PropItemModel pi = new PropItemModel(typeof(string), "PropString", PropStorageStrategyEnum.Internal, true, PropKindEnum.Prop, null, new PropInitialValueField("Initial Value"), null, null, null);
+            PropItemModel pi = new PropItemModel(typeof(string), "PropString",
+                PropStorageStrategyEnum.Internal, propKind: PropKindEnum.Prop, initialValueField: new PropInitialValueField("Initial Value"));
 
             pm.Props.Add(pi);
 

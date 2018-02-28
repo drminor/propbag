@@ -14,7 +14,7 @@ namespace DRM.PropBag.AutoMapperSupport
         {
             List<MemberInfo> result = new List<MemberInfo>();
 
-            foreach (IPropItem propItem in pm.Props)
+            foreach (IPropModelItem propItem in pm.Props)
             {
                 string propertyName = propItem.PropertyName;
                 Type propertyType = propItem.PropertyType;

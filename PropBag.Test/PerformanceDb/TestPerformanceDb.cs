@@ -307,6 +307,9 @@ namespace PropBagLib.Tests.PerformanceDb
         [Test]
         public void MapOcAndCleanUp()
         {
+            GC.WaitForPendingFinalizers();
+            GC.WaitForFullGCComplete();
+
             _ourHelper = new AutoMapperHelpers();
             _propFactory_V1 = _ourHelper.GetNewPropFactory_V1();
             _amp = _ourHelper.GetAutoMapperSetup_V1();
@@ -327,7 +330,8 @@ namespace PropBagLib.Tests.PerformanceDb
             {
                 // Yield for 1 seconds.
                 Thread.Sleep(new TimeSpan(0, 0, 1));
-                GC.Collect(1, GCCollectionMode.Forced);
+                GC.WaitForPendingFinalizers();
+                GC.WaitForFullGCComplete();
             }
         }
 

@@ -112,12 +112,11 @@ namespace MVVMApplication.Infra
             string configPackageNameSuffix
             )
         {
-            IPropBagTemplateProvider propBagTemplateProvider = new PropBagTemplateProvider(Application.Current.Resources, null);
+            IPropBagTemplateProvider propBagTemplateProvider = new PropBagTemplateProvider(Application.Current.Resources/*, null*/);
                 _mct.MeasureAndReport("After new PropBagTemplateProvider");
 
-            IMapperRequestProvider mapperRequestProvider = new MapperRequestProvider(Application.Current.Resources, configPackageNameSuffix);
+            IMapperRequestProvider mapperRequestProvider = new MapperRequestProvider(Application.Current.Resources/*, configPackageNameSuffix*/);
                 _mct.MeasureAndReport("After new MapperRequestProvider");
-
 
             IParsePropBagTemplates propBagTemplateParser = new PropBagTemplateParser();
 
@@ -126,7 +125,8 @@ namespace MVVMApplication.Infra
                 propBagTemplateProvider,
                 mapperRequestProvider,
                 propBagTemplateParser,
-                propFactoryFactory
+                propFactoryFactory,
+                configPackageNameSuffix
                 );
 
                 _mct.MeasureAndReport("After new PropModelProvider");

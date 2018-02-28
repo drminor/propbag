@@ -168,7 +168,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 namespaceName: "PropBagLib.Tests.AutoMapperSupport",
                 deriveFrom: DeriveFromClassModeEnum.PropBag,
                 targetType: null,
-                propFactory: null,
+                propFactory: propFactory,
                 propModelProvider: null,
                 typeSafetyMode: PropBagTypeSafetyMode.Tight,
                 deferMethodRefResolution: true,
@@ -179,47 +179,33 @@ namespace PropBagLib.Tests.AutoMapperSupport
             result.Namespaces.Add("DRM.PropBag");
             result.Namespaces.Add("DRM.TypeSafePropertyBag");
 
-            result.PropFactory = propFactory;
-
             // ProductId (Guid - default)
-            PropInitialValueField pivf = new PropInitialValueField(initialValue: null,
-                setToDefault: true, setToUndefined: false, setToNull: false, setToEmptyString: false);
+            IPropInitialValueField pivf = PropInitialValueField.UseDefault;
 
             PropItemModel propItem = new PropItemModel(type: typeof(Guid), name: "ProductId",
-                storageStrategy: PropStorageStrategyEnum.Internal, typeIsSolid: true, propKind: PropKindEnum.Prop,
-                propTypeInfoField: null, initialValueField: pivf,
-                extraInfo: null, comparer: null, itemType: null);
+                storageStrategy: PropStorageStrategyEnum.Internal, propKind: PropKindEnum.Prop,
+                initialValueField: pivf);
             result.Props.Add(propItem);
 
             // Amount (int - default)
-            pivf = new PropInitialValueField(initialValue: null,
-                setToDefault: true, setToUndefined: false, setToNull: false, setToEmptyString: false);
-
             propItem = new PropItemModel(type: typeof(int), name: "Amount",
-                storageStrategy: PropStorageStrategyEnum.Internal, typeIsSolid: true, propKind: PropKindEnum.Prop,
-                propTypeInfoField: null, initialValueField: pivf,
-                extraInfo: null, comparer: null, itemType: null);
+                storageStrategy: PropStorageStrategyEnum.Internal, propKind: PropKindEnum.Prop,
+                initialValueField: pivf);
             result.Props.Add(propItem);
 
 
             // Size (double - default)
-            pivf = new PropInitialValueField(initialValue: null,
-                setToDefault: true, setToUndefined: false, setToNull: false, setToEmptyString: false);
-
             propItem = new PropItemModel(type: typeof(double), name: "Size",
-                storageStrategy: PropStorageStrategyEnum.Internal, typeIsSolid: true, propKind: PropKindEnum.Prop,
-                propTypeInfoField: null, initialValueField: pivf,
-                extraInfo: null, comparer: null, itemType: null);
+                storageStrategy: PropStorageStrategyEnum.Internal, propKind: PropKindEnum.Prop,
+                initialValueField: pivf);
             result.Props.Add(propItem);
 
             // Deep (MyModel4 - null)
-            pivf = new PropInitialValueField(initialValue: null,
-                setToDefault: false, setToUndefined: false, setToNull: true, setToEmptyString: false);
+            pivf = PropInitialValueField.UseNull;
 
             propItem = new PropItemModel(type: typeof(MyModel4), name: "Deep",
-                storageStrategy: PropStorageStrategyEnum.Internal, typeIsSolid: true, propKind: PropKindEnum.Prop,
-                propTypeInfoField: null, initialValueField: pivf,
-                extraInfo: null, comparer: null, itemType: null);
+                storageStrategy: PropStorageStrategyEnum.Internal, propKind: PropKindEnum.Prop,
+                initialValueField: pivf);
             result.Props.Add(propItem);
 
             return result;

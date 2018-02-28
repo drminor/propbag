@@ -18,7 +18,7 @@ namespace PropBagLib.Tests.PerformanceDb
                 namespaceName: "PropBagLib.Tests.PerformanceDb",
                 deriveFrom: DeriveFromClassModeEnum.PropBag,
                 targetType: null,
-                propFactory: null,
+                propFactory: propFactory,
                 propModelProvider: null,
                 typeSafetyMode: PropBagTypeSafetyMode.Tight,
                 deferMethodRefResolution: true,
@@ -29,50 +29,40 @@ namespace PropBagLib.Tests.PerformanceDb
             result.Namespaces.Add("DRM.PropBag");
             result.Namespaces.Add("DRM.TypeSafePropertyBag");
 
-            result.PropFactory = propFactory;
-
             // Id (Int - 0)
-            PropInitialValueField pivf = new PropInitialValueField(initialValue: "0",
-                setToDefault: false, setToUndefined: false, setToNull: false, setToEmptyString: false);
+            IPropInitialValueField pivf = new PropInitialValueField(initialValue: "0");
 
             PropItemModel propItem = new PropItemModel(type: typeof(int), name: "Id",
-                storageStrategy: PropStorageStrategyEnum.Internal, typeIsSolid: true, propKind: PropKindEnum.Prop,
-                propTypeInfoField: null, initialValueField: pivf,
-                extraInfo: null, comparer: null, itemType: null);
+                storageStrategy: PropStorageStrategyEnum.Internal, propKind: PropKindEnum.Prop,
+                initialValueField: pivf);
             result.Props.Add(propItem);
 
-            pivf = new PropInitialValueField(initialValue: null,
-                setToDefault: false, setToUndefined: false, setToNull: true, setToEmptyString: false);
+            pivf = PropInitialValueField.UseNull;
 
             // First Name (string - null)
             propItem = new PropItemModel(type: typeof(string), name: "FirstName",
-                storageStrategy: PropStorageStrategyEnum.Internal, typeIsSolid: true, propKind: PropKindEnum.Prop,
-                propTypeInfoField: null, initialValueField: pivf,
-                extraInfo: null, comparer: null, itemType: null);
+                storageStrategy: PropStorageStrategyEnum.Internal, propKind: PropKindEnum.Prop,
+                initialValueField: pivf);
             result.Props.Add(propItem);
 
             // Last Name (string - null)
             propItem = new PropItemModel(type: typeof(string), name: "LastName",
-                storageStrategy: PropStorageStrategyEnum.Internal, typeIsSolid: true, propKind: PropKindEnum.Prop,
-                propTypeInfoField: null, initialValueField: pivf,
-                extraInfo: null, comparer: null, itemType: null);
+                storageStrategy: PropStorageStrategyEnum.Internal, propKind: PropKindEnum.Prop,
+                initialValueField: pivf);
             result.Props.Add(propItem);
 
             // City Of Residence (string - null)
             propItem = new PropItemModel(type: typeof(string), name: "CityOfResidence",
-               storageStrategy: PropStorageStrategyEnum.Internal, typeIsSolid: true, propKind: PropKindEnum.Prop,
-                propTypeInfoField: null, initialValueField: pivf,
-                extraInfo: null, comparer: null, itemType: null);
+                storageStrategy: PropStorageStrategyEnum.Internal, propKind: PropKindEnum.Prop,
+                initialValueField: pivf);
             result.Props.Add(propItem);
 
-            pivf = new PropInitialValueField(initialValue: null,
-                setToDefault: true, setToUndefined: false, setToNull: true, setToEmptyString: false);
+            pivf = PropInitialValueField.UseDefault;
 
             // Profession
             propItem = new PropItemModel(type: typeof(Profession), name: "Profession",
-                storageStrategy: PropStorageStrategyEnum.Internal, typeIsSolid: true, propKind: PropKindEnum.Prop,
-                propTypeInfoField: null, initialValueField: pivf,
-                extraInfo: null, comparer: null, itemType: null);
+                storageStrategy: PropStorageStrategyEnum.Internal, propKind: PropKindEnum.Prop,
+                initialValueField: pivf);
             result.Props.Add(propItem);
 
             return result;
@@ -86,7 +76,7 @@ namespace PropBagLib.Tests.PerformanceDb
                 namespaceName: "PropBagLib.Tests.PerformanceDb",
                 deriveFrom: DeriveFromClassModeEnum.PropBag,
                 targetType: null,
-                propFactory: null,
+                propFactory: propFactory,
                 propModelProvider: null,
                 typeSafetyMode: PropBagTypeSafetyMode.Tight,
                 deferMethodRefResolution: true,
@@ -97,41 +87,28 @@ namespace PropBagLib.Tests.PerformanceDb
             result.Namespaces.Add("DRM.PropBag");
             result.Namespaces.Add("DRM.TypeSafePropertyBag");
 
-            result.PropFactory = propFactory;
-
             // ProductId (Guid - default)
-            PropInitialValueField pivf = new PropInitialValueField(initialValue: null,
-                setToDefault: true, setToUndefined: false, setToNull: false, setToEmptyString: false);
+            IPropInitialValueField pivf = PropInitialValueField.UseDefault;
 
             PropItemModel propItem = new PropItemModel(type: typeof(Guid), name: "ProductId",
-                storageStrategy:  PropStorageStrategyEnum.Internal,
-                typeIsSolid: true, propKind: PropKindEnum.Prop,
-                propTypeInfoField: null, initialValueField: pivf,
-                extraInfo: null, comparer: null, itemType: null);
+                storageStrategy: PropStorageStrategyEnum.Internal, propKind: PropKindEnum.Prop,
+                initialValueField: pivf);
             result.Props.Add(propItem);
 
 
             // Business (Business - null)
-            pivf = new PropInitialValueField(initialValue: null,
-                setToDefault: false, setToUndefined: false, setToNull: true, setToEmptyString: false);
+            pivf = PropInitialValueField.UseNull;
 
             propItem = new PropItemModel(type: typeof(Business), name: "Business",
-                storageStrategy: PropStorageStrategyEnum.Internal,
-                typeIsSolid: true, propKind: PropKindEnum.Prop,
-                propTypeInfoField: null, initialValueField: pivf,
-                extraInfo: null, comparer: null, itemType: null);
+                storageStrategy: PropStorageStrategyEnum.Internal, propKind: PropKindEnum.Prop,
+                initialValueField: pivf);
             result.Props.Add(propItem);
 
 
             // PersonCollection (ObservableCollection<Person> - null)
-            pivf = new PropInitialValueField(initialValue: null,
-                setToDefault: false, setToUndefined: false, setToNull: true, setToEmptyString: false);
-
             propItem = new PropItemModel(type: typeof(ObservableCollection<Person>), name: "PersonCollection",
-                storageStrategy: PropStorageStrategyEnum.Internal, typeIsSolid: true, propKind: PropKindEnum.ObservableCollection,
-                propTypeInfoField: null,
-                initialValueField: pivf,
-                extraInfo: null, comparer: null, itemType: typeof(Person));
+                storageStrategy: PropStorageStrategyEnum.Internal, propKind: PropKindEnum.ObservableCollection,
+                initialValueField: pivf, itemType: typeof(Person));
             result.Props.Add(propItem);
 
             return result;
@@ -145,7 +122,7 @@ namespace PropBagLib.Tests.PerformanceDb
                 namespaceName: "PropBagLib.Tests.PerformanceDb",
                 deriveFrom: DeriveFromClassModeEnum.PropBag,
                 targetType: null,
-                propFactory: null,
+                propFactory: propFactory,
                 propModelProvider: null,
                 typeSafetyMode: PropBagTypeSafetyMode.Tight,
                 deferMethodRefResolution: true,
@@ -156,59 +133,41 @@ namespace PropBagLib.Tests.PerformanceDb
             result.Namespaces.Add("DRM.PropBag");
             result.Namespaces.Add("DRM.TypeSafePropertyBag");
 
-            result.PropFactory = propFactory;
-
             // Business (Business - null)
-            PropInitialValueField pivf = new PropInitialValueField(initialValue: null,
-                setToDefault: false, setToUndefined: false, setToNull: true, setToEmptyString: false);
+            IPropInitialValueField pivf = PropInitialValueField.UseNull;
 
             PropItemModel propItem = new PropItemModel(type: typeof(Business), name: "Business",
-                storageStrategy: PropStorageStrategyEnum.Internal, typeIsSolid: true, propKind: PropKindEnum.Prop,
-                propTypeInfoField: null, initialValueField: pivf,
-                extraInfo: null, comparer: null, itemType: null);
+                storageStrategy: PropStorageStrategyEnum.Internal, propKind: PropKindEnum.Prop,
+                initialValueField: pivf);
             result.Props.Add(propItem);
-
 
             //// PersonCollection (ObservableCollection<Person> - null)
             //pivf = new PropInitialValueField(initialValue: null,
             //    setToDefault: false, setToUndefined: false, setToNull: true, setToEmptyString: false);
 
             //propItem = new PropItem(type: typeof(ObservableCollection<Person>), name: "PersonCollection",
-            //    hasStore: true, typeIsSolid: true, propKind: PropKindEnum.Collection,
+            //    hasStore: true, propKind: PropKindEnum.Collection,
             //    propTypeInfoField: null,
             //    initialValueField: pivf,
             //    doWhenChanged: null, extraInfo: null, comparer: null, itemType: typeof(Person));
             //result.Props.Add(propItem);
 
             // ChildVM (DestinationModel5 - null)
-            pivf = new PropInitialValueField(initialValue: null,
-                setToDefault: false, setToUndefined: false, setToNull: true, setToEmptyString: false);
-
             propItem = new PropItemModel(type: typeof(DestinationModel5), name: "ChildVM",
-                storageStrategy: PropStorageStrategyEnum.Internal, typeIsSolid: true, propKind: PropKindEnum.Prop,
-                propTypeInfoField: null,
-                initialValueField: pivf,
-                extraInfo: null, comparer: null, itemType: typeof(Person));
+                storageStrategy: PropStorageStrategyEnum.Internal, propKind: PropKindEnum.Prop,
+                initialValueField: pivf);
             result.Props.Add(propItem);
 
             // SelectedPerson (Business - null)
-            pivf = new PropInitialValueField(initialValue: null,
-                setToDefault: false, setToUndefined: false, setToNull: true, setToEmptyString: false);
-
             propItem = new PropItemModel(type: typeof(Person), name: "SelectedPerson",
-                storageStrategy: PropStorageStrategyEnum.Internal, typeIsSolid: true, propKind: PropKindEnum.Prop,
-                propTypeInfoField: null, initialValueField: pivf,
-                extraInfo: null, comparer: null, itemType: null);
+                storageStrategy: PropStorageStrategyEnum.Internal, propKind: PropKindEnum.Prop,
+                initialValueField: pivf);
             result.Props.Add(propItem);
 
             // WMessage (String - null)
-            pivf = new PropInitialValueField(initialValue: null,
-                setToDefault: false, setToUndefined: false, setToNull: true, setToEmptyString: false);
-
             propItem = new PropItemModel(type: typeof(string), name: "WMessage",
-                storageStrategy: PropStorageStrategyEnum.Internal, typeIsSolid: true, propKind: PropKindEnum.Prop,
-                propTypeInfoField: null, initialValueField: pivf,
-                extraInfo: null, comparer: null, itemType: null);
+                storageStrategy: PropStorageStrategyEnum.Internal, propKind: PropKindEnum.Prop,
+                initialValueField: pivf);
             result.Props.Add(propItem);
 
             return result;

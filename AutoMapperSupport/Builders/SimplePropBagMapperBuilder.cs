@@ -42,6 +42,7 @@ namespace DRM.PropBag.AutoMapperSupport
             {
                 // TODO: Is this really the responsibility of the PropBagMapperBuilder,
                 // or can we hand this off to the IBuildMapperConfigurations interface?
+
                 // Create the Proxy/Wrapper type if it does not already exist.
                 IPropModel propModel = mapRequest.DestinationTypeDef.PropModel;
 

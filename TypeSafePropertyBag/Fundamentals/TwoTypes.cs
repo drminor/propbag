@@ -90,7 +90,7 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
             }
             else if (parameter is IPropData && destinationType != null)
             {
-                return new TwoTypes(((IPropData)parameter).TypedProp.Type, destinationType);
+                return new TwoTypes(((IPropData)parameter).TypedProp.PropTemplate.Type, destinationType);
             }
             else
             {

@@ -110,9 +110,9 @@ namespace PropBagTestApp.Infra
             string configPackageNameSuffix
             )
         {
-            IPropBagTemplateProvider propBagTemplateProvider = new PropBagTemplateProvider(Application.Current.Resources, null);
+            IPropBagTemplateProvider propBagTemplateProvider = new PropBagTemplateProvider(Application.Current.Resources);
 
-            IMapperRequestProvider mapperRequestProvider = new MapperRequestProvider(Application.Current.Resources, configPackageNameSuffix);
+            IMapperRequestProvider mapperRequestProvider = new MapperRequestProvider(Application.Current.Resources);
 
 
             IParsePropBagTemplates propBagTemplateParser = new PropBagTemplateParser();
@@ -122,7 +122,8 @@ namespace PropBagTestApp.Infra
                 propBagTemplateProvider,
                 mapperRequestProvider,
                 propBagTemplateParser,
-                propFactoryFactory
+                propFactoryFactory,
+                configPackageNameSuffix
                 );
 
             return propModelProvider;

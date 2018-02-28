@@ -307,7 +307,9 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
         {
             // Take Heap SnapShot here. (CreateVM_CreateMainWindowVM_Run1 has completed and the Context has been cleaned up.)
 
-            ConfigPackageNameSuffix = "Emit_Proxy";
+            //ConfigPackageNameSuffix = "Emit_Proxy";
+            ConfigPackageNameSuffix = "Extra_Members";
+
             return base.EstablishContext();
         }
 
