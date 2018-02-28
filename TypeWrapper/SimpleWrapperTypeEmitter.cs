@@ -24,21 +24,29 @@ namespace DRM.PropBag.TypeWrapper
         private Type EmitWrapper(TypeDescription typeDescription, IModuleBuilderInfo moduleBuilderInfo)
         {
             string name = BuildTypeName(typeDescription.TypeName, moduleBuilderInfo.AssemblyId);
-            Type interfaceType = typeDescription.BaseType;
-            Type[] implementedTypes = interfaceType.GetTypeInfo().ImplementedInterfaces.ToArray();
+            Type parentType = typeDescription.BaseType;
+            Type[] typesToImplement = GetTypesToImplement(parentType);
 
-            System.Diagnostics.Debug.WriteLine(name, $"Emitting new wrapper type: {name} based on: {interfaceType}.");
+            System.Diagnostics.Debug.WriteLine(name, $"Emitting new wrapper type: {name} based on: {parentType}.");
 
             TypeBuilder typeBuilder = moduleBuilderInfo.ModuleBuilder.DefineType
                 (
                 name,
                 TypeAttributes.Class | TypeAttributes.Sealed | TypeAttributes.Public,
-                interfaceType,
-                implementedTypes
+                parentType,
+                typesToImplement
                 );
 
-            IEnumerable<ConstructorInfo> ctors = interfaceType.GetDeclaredConstructors();
+            IEnumerable<ConstructorInfo> ctors = parentType.GetDeclaredConstructors();
             BuildConstructors(typeBuilder, ctors);
+
+            // Build the Clone method.  //override public object Clone() { return new <<ClassName>>(this);  }
+            //MethodAttributes attributesForCloneMethod = MethodAttributes.Public | MethodAttributes.ReuseSlot | MethodAttributes.Virtual | MethodAttributes.HideBySig;
+
+            MethodAttributes attributesForCloneMethod = MethodAttributes.Public | MethodAttributes.HideBySig;
+
+            MethodBuilder mb = typeBuilder.DefineMethod("Clone", attributesForCloneMethod, typeof(object), new Type[0]);
+            BuildCloneMethod(mb);
 
             var propertiesToImplement = new List<PropertyDescription>();
 
@@ -65,7 +73,7 @@ namespace DRM.PropBag.TypeWrapper
                     {
                         throw new ArgumentException(
                             $"The interface has a conflicting property {property.Name}",
-                            nameof(interfaceType));
+                            nameof(parentType));
                     }
                 }
                 else
@@ -82,6 +90,17 @@ namespace DRM.PropBag.TypeWrapper
         private string BuildTypeName(TypeName typeName, int moduleId)
         {
             return $"{moduleId}.{typeName.Name}";
+        }
+
+        private Type[] GetTypesToImplement(Type baseType)
+        {
+            // Used to be just the next line.
+            //Type[] implementedTypes = interfaceType.GetTypeInfo().ImplementedInterfaces.ToArray();
+
+            IEnumerable<Type> typesImplementedByBase = baseType.GetTypeInfo().ImplementedInterfaces;
+            Type[] result = typesImplementedByBase.Where(x => x.Name != "ICustomTypeDescriptor").ToArray();
+
+            return result;
         }
 
         //private static string BuildTypeName_OLD(TypeName typeName, Type interfaceType)
@@ -142,6 +161,38 @@ namespace DRM.PropBag.TypeWrapper
 
             ctorIl.Emit(OpCodes.Call, ci);
             ctorIl.Emit(OpCodes.Ret);
+        }
+
+  //      .method public hidebysig virtual instance object
+  //      Clone() cil managed
+  //      {
+  //// Code size       12 (0xc)
+  //.maxstack  1
+  //.locals init ([0] object V_0)
+  //IL_0000:  nop
+  //IL_0001:  ldarg.0
+  //IL_0002:  newobj instance void MVVMApplication.ViewModel.PersonVM::.ctor(class MVVMApplication.ViewModel.PersonVM)
+  //IL_0007:  stloc.0
+  //IL_0008:  br.s IL_000a
+  //IL_000a:  ldloc.0
+  //IL_000b:  ret
+
+  //  } // end of method PersonVM::Clone
+
+      //override public object Clone() { return new <<ClassName>>(this);  }
+    private void BuildCloneMethod(MethodBuilder mb)
+        {
+            ILGenerator mbIl = mb.GetILGenerator();
+            //mbIl.Emit(OpCodes.Nop);
+            mbIl.Emit(OpCodes.Ldarg_0); // Load reference to this.
+            mbIl.Emit(OpCodes.Newobj);
+
+            mbIl.Emit(OpCodes.Stloc_0);
+
+            mbIl.Emit(OpCodes.Br_S);
+            mbIl.Emit(OpCodes.Ldloc_0);
+
+            mbIl.Emit(OpCodes.Ret);
         }
 
         #region DevelopementWork Get Key Pair
