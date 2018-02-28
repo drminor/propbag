@@ -17,7 +17,7 @@ namespace PropBagLib.Tests
 		//public ExtStoreModel(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
 
 		public ExtStoreModel(PropBagTypeSafetyMode typeSafetyMode, PSAccessServiceCreatorInterface storeAccessCreator,
-            string fullClassName, IPropFactory propFactory)
+            IPropFactory propFactory, string fullClassName)
             : base(typeSafetyMode, storeAccessCreator, propFactory, fullClassName)
         {
 	        AddProp<int>("PropInt3", comparer:null);

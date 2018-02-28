@@ -10,8 +10,8 @@ namespace PropBagLib.Tests
     {
         static public ExtStoreModel Create(PSAccessServiceCreatorInterface storeAccessCreator, IPropFactory factory)
         {
-            // TODO: AAA
-            ExtStoreModel esm = new ExtStoreModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered, storeAccessCreator, null, factory);
+            // TODO: AAA,
+            ExtStoreModel esm = new ExtStoreModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered, storeAccessCreator, factory, null);
 
             PropExternStore<int> pi = (PropExternStore<int>)esm.AddPropNoStore<int>("PropInt", null);
             PropExternStore<string> ps = (PropExternStore<string>)esm.AddPropNoStore<string>("PropString", null);
