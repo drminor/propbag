@@ -14,7 +14,7 @@ namespace DRM.PropBag
     using PropNameType = String;
     using PropItemSetInterface = IPropItemSet<String>;
 
-    public class PropModel : NotifyPropertyChangedBase, IEquatable<PropModel>, IPropModel, IDisposable
+    public class PropModel : NotifyPropertyChangedBase, IEquatable<IPropModel>, IPropModel, IDisposable
     {
         #region Properties
 
@@ -144,8 +144,6 @@ namespace DRM.PropBag
 
             Namespaces = new ObservableCollection<string>();
             Props = new ObservableCollection<IPropModelItem>();
-
-            //TestObject = new SimpleExKey(100, 100);
         }
 
         public PropModel(string className, string namespaceName,
@@ -162,7 +160,6 @@ namespace DRM.PropBag
             NamespaceName = namespaceName;
             DeriveFromClassMode = deriveFrom;
             TargetType = targetType;
-            PropFactory = null;
             PropFactoryType = propFactoryType;
             PropModelProvider = propModelProvider;
 
@@ -173,7 +170,7 @@ namespace DRM.PropBag
             Namespaces = new ObservableCollection<string>();
             Props = new ObservableCollection<IPropModelItem>();
 
-            //TestObject = new SimpleExKey(100, 100);
+            PropFactory = null;
         }
 
         #endregion
@@ -254,45 +251,41 @@ namespace DRM.PropBag
 
         #region IEquatable support and Object overrides
 
-        // TODO:!! Update the GetHashCode for DRM.PropBag.PropModel
         public override int GetHashCode()
         {
-            return ClassName.GetHashCode();
-            //return GenerateHash.CustomHash(Name.GetHashCode(), Type.GetHashCode());
-            //var hashCode = Type.GetHashCode();
-            //foreach (var property in AdditionalProperties)
-            //{
-            //    hashCode = GenerateHash.CustomHash(hashCode, property.GetHashCode());
-            //}
-            //return hashCode;
+            var hashCode = -1621535375;
+            hashCode = hashCode * -1521134295 + DeriveFromClassMode.GetHashCode();
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(FullClassName);
+            hashCode = hashCode * -1521134295 + Props?.Count.GetHashCode() ?? 1521134295;
+            hashCode = hashCode * -1521134295 + TypeSafetyMode.GetHashCode();
+            hashCode = hashCode * -1521134295 + RequireExplicitInitialValue.GetHashCode();
+            hashCode = hashCode * -1521134295 + EqualityComparer<Type>.Default.GetHashCode(TypeToCreate);
+            hashCode = hashCode * -1521134295 + EqualityComparer<Type>.Default.GetHashCode(TargetType);
+            hashCode = hashCode * -1521134295 + EqualityComparer<IPropFactory>.Default.GetHashCode(PropFactory);
+            hashCode = hashCode * -1521134295 + EqualityComparer<Type>.Default.GetHashCode(PropFactoryType);
+            return hashCode;
         }
 
         public override bool Equals(object other)
         {
-            if (Object.ReferenceEquals(other, null) || !(other is PropModel)) return false;
-            return Equals((PropModel)other);
+            if(ReferenceEquals(other, null) || !(other is IPropModel)) return false;
+            return Equals((IPropModel)other);
         }
 
-        // TODO: This needs to be improved!!
-        public bool Equals(PropModel other)
+        public bool Equals(IPropModel other)
         {
             // If parameter is null, return false.
-            if (Object.ReferenceEquals(other, null))
+            if (ReferenceEquals(other, null))
             {
                 return false;
             }
 
-            // Optimization for a common success case.
             if (Object.ReferenceEquals(this, other))
             {
                 return true;
             }
 
-            // If run-time types are not exactly the same, return false.
-            if (this.GetType() != other.GetType())
-            {
-                return false;
-            }
+            // TODO: This needs to be improved.
             return this.ClassName == other.ClassName
                 && NamespaceName == other.NamespaceName
                 && Props.Count == other.Props.Count;
@@ -302,19 +295,32 @@ namespace DRM.PropBag
         {
 
             // Check for null on left side.
-            if (Object.ReferenceEquals(left, null))
+            if (ReferenceEquals(left, null))
             {
-                if (Object.ReferenceEquals(right, null))
+                if (ReferenceEquals(right, null))
                 {
                     // null == null = true.
                     return true;
                 }
-
-                // Only the left side is null.
-                return false;
+                else
+                {
+                    // Only the left side is null.
+                    return false;
+                }
             }
-            // Equals handles case of null on right side.
-            return left.Equals(right);
+            else
+            {
+                if(ReferenceEquals(right, null))
+                {
+                    // Left is not null, right is null.
+                    return false;
+                }
+                else
+                {
+                    return left.Equals(right);
+                }
+            }
+
         }
 
         public static bool operator !=(PropModel left, PropModel right)
