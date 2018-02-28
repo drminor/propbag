@@ -8,17 +8,21 @@ using System.Text;
 using System.Threading.Tasks;
 namespace DRM.PropBag
 {
-
     using PropNameType = String;
 
     public class PropExtStoreFactory : AbstractPropFactory
     {
+        #region Private Members
+
         object Stuff { get; }
 
-        public override bool ProvidesStorage
-        {
-            get { return false; }
-        }
+        #endregion
+
+        #region Public Properties
+
+        public override bool ProvidesStorage => false;
+
+        #endregion
 
         #region Constructors
 
@@ -46,26 +50,19 @@ namespace DRM.PropBag
 
         #endregion
 
-        #region IObsCollection<T> and ObservableCollection<T> Prop Creation
+        #region ObservableCollection<T> Prop Creation
 
         // TODO: Implement Create Collection With Initial Value.
         public override ICProp<CT, T> Create<CT, T>(
             CT initialValue,
-            PropNameType propertyName, object extraInfo = null,
-            PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true,
-            Func<CT, CT, bool> comparer = null)
+            PropNameType propertyName,
+            object extraInfo,
+            PropStorageStrategyEnum storageStrategy,
+            bool typeIsSolid,
+            Func<CT, CT, bool> comparer)
         {
             throw new NotImplementedException("PropExtStoreFactory has not implemented the Create Collection Prop with Initial Value.");
         }
-
-        //public override ICPropFB<CT, T> CreateFB<CT, T>(
-        //    CT initialValue,
-        //    string propertyName, object extraInfo = null,
-        //    PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true,
-        //    Func<CT, CT, bool> comparer = null)
-        //{
-        //    throw new NotImplementedException("PropExtStoreFactory has not implemented the Create Collection Prop with Initial Value.");
-        //}
 
         // TODO: Implement Create Collection With No Value.
         public override ICProp<CT, T> CreateWithNoValue<CT, T>(
@@ -74,19 +71,13 @@ namespace DRM.PropBag
             Func<CT, CT, bool> comparer = null)
         {
             throw new NotImplementedException("PropExtStoreFactory has not implemented the Create Collection Prop with No Value.");
-
-            //ICPropPrivate<CT, T> prop = null;
-            //return prop;
         }
 
         #endregion
 
         #region CollectionViewSource Prop Creation
 
-        //public override IProp CreateCVSProp<TCVS, T>(PropNameType propertyName)
-        //{
-        //    throw new NotImplementedException("This feature is not implemented by the 'standard' implementation, please use WPFPropfactory or similar.");
-        //}
+        #endregion
 
         #region DataSource Creation
 
@@ -97,17 +88,7 @@ namespace DRM.PropBag
 
         #endregion
 
-        #endregion
-
         #region Scalar Prop Creation
-
-        //public override IProp<T> Create<T>(T initialValue,
-        //    PropNameType propertyName, object extraInfo = null,
-        //    PropStorageStrategyEnum dummy = PropStorageStrategyEnum.External, bool typeIsSolid = true,
-        //    Func<T,T,bool> comparer = null)
-        //{
-        //    throw new InvalidOperationException("External Store Factory doesn't know how to create properties with initial values.");
-        //}
 
         public override IProp<T> Create<T>(
             T initialValue,
@@ -131,17 +112,38 @@ namespace DRM.PropBag
             Func<string, T> getDefaultValFunc
             )
         {
-            // Supply a comparer, if one was not supplied by the caller.
-            if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
+            IPropTemplate<T> propTemplate = GetPropTemplate<T>(PropKindEnum.Prop, storageStrategy, comparer, getDefaultValFunc);
 
-            // Use the Get Default Value function supplied or provided by this Prop Factory.
-            if (getDefaultValFunc == null) getDefaultValFunc = ValueConverter.GetDefaultValue<T>;
+            IProp<T> prop;
 
-            PropExternStore<T> propWithExtStore = new PropExternStore<T>(propertyName,
-                extraInfo, getDefaultValFunc, typeIsSolid: typeIsSolid, comparer: comparer);
+            switch (storageStrategy)
+            {
+                case PropStorageStrategyEnum.Internal:
+                    {
+                        // Regular Prop with Internal Storage -- Just don't have a value as yet.
+                        prop = new Prop<T>(propertyName, typeIsSolid, propTemplate);
+                        break;
+                    }
+                case PropStorageStrategyEnum.External:
+                    {
+                        // Create a Prop that uses an external storage source.
+                        prop = new PropExternStore<T>(propertyName, extraInfo, typeIsSolid, propTemplate);
+                        break;
+                    }
+                case PropStorageStrategyEnum.Virtual:
+                    {
+                        // This is a Prop that supplies a Virtual (aka Caclulated) value from an internal source or from LocalBindings
+                        // This implementation simply creates a Property that will always have the default value for type T.
+                        prop = new PropNoStore<T>(propertyName, typeIsSolid, propTemplate);
+                        break;
+                    }
+                default:
+                    {
+                        throw new InvalidOperationException($"{storageStrategy} is not supported or is not recognized.");
+                    }
+            }
 
-            return propWithExtStore;
-
+            return prop;
         }
 
         #endregion
@@ -166,29 +168,10 @@ namespace DRM.PropBag
             throw new InvalidOperationException("External Store Factory doesn't know how to create properties with initial values.");
         }
 
-        //public override IProp CreateGenWithNoValue(Type typeOfThisProperty,
-        //    PropNameType propertyName, object extraInfo,
-        //    PropStorageStrategyEnum storageStrategy, bool isTypeSolid, PropKindEnum propKind,
-        //    Delegate comparer, bool useRefEquality = false, Type itemType = null)
-        //{
-        //    CreatePropWithNoValueDelegate propCreator = GetPropWithNoValueCreator(typeOfThisProperty);
-        //    IProp prop = propCreator(this, propertyName, extraInfo, storageStrategy: storageStrategy, isTypeSolid: isTypeSolid,
-        //        comparer: comparer, useRefEquality: useRefEquality);
-
-        //    return prop;
-        //}
-
-        //// TODO: Implement GetPropWithNoValueCreator
-        //protected override CreatePropWithNoValueDelegate GetPropWithNoValueCreator(Type typeOfThisValue)
-        //{
-        //    throw new NotImplementedException("PropExtStoreFactory has not yet implemented the GetPropWithNoValueCreator method.");
-        //}
-
         public override IProvideADataSourceProvider GetDSProviderProvider(uint propId, PropKindEnum propKind, object iDoCrudDataSource, IPropStoreAccessService<uint, string> storeAccesor, IMapperRequest mr)
         {
             throw new NotImplementedException();
         }
-
 
         #endregion
     }

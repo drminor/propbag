@@ -2,8 +2,12 @@
 using System.Collections.Generic;
 using System.Threading;
 
+using DRM.TypeSafePropertyBag.Fundamentals;
+
 namespace DRM.TypeSafePropertyBag
 {
+    using PropNameType = String;
+
     public class PropTemplateTyped<T> : IPropTemplate<T>, IEquatable<IPropTemplate>, IEquatable<PropTemplateTyped<T>>
     {
         #region Public and Protected Properties
@@ -12,17 +16,23 @@ namespace DRM.TypeSafePropertyBag
 
         public PropKindEnum PropKind { get; protected set; }
         public Type Type { get; }
+        public bool IsPropBag => Type.IsPropBagBased();
+
         public PropStorageStrategyEnum StorageStrategy { get; protected set; }
 
         public Attribute[] Attributes { get; }
 
         public Func<T, T, bool> Comparer { get; }
-        public Func<string, T> GetDefaultValFunc { get; }
+        public Func<string, T> GetDefaultVal { get; }
 
         public object ComparerProxy => Comparer;
-        public object GetDefaultValFuncProxy => GetDefaultValFunc;
+        public object GetDefaultValFuncProxy => GetDefaultVal;
 
         public DoSetDelegate DoSetDelegate { get; set; }
+
+        //public ActivationInfo ActivationInfo { get; set; }
+
+        public Func<PropNameType, object, bool, IPropTemplate, IProp> PropCreator { get; set; }
 
         #endregion
 
@@ -37,7 +47,7 @@ namespace DRM.TypeSafePropertyBag
             Attributes = new Attribute[] { };
 
             Comparer = comparer;
-            GetDefaultValFunc = defaultValFunc;
+            GetDefaultVal = defaultValFunc;
 
             _hashCode = ComputetHashCode();
         }
@@ -58,13 +68,14 @@ namespace DRM.TypeSafePropertyBag
 
         public bool Equals(PropTemplateTyped<T> other)
         {
-            return other != null &&
-                   PropKind == other.PropKind &&
-                   EqualityComparer<Type>.Default.Equals(Type, other.Type) &&
-                   StorageStrategy == other.StorageStrategy &&
-                   EqualityComparer<Attribute[]>.Default.Equals(Attributes, other.Attributes) &&
-                   EqualityComparer<object>.Default.Equals(ComparerProxy, other.ComparerProxy) &&
-                   EqualityComparer<object>.Default.Equals(GetDefaultValFuncProxy, other.GetDefaultValFuncProxy);
+            return Equals(other as IPropTemplate);
+            //return other != null &&
+            //       PropKind == other.PropKind &&
+            //       EqualityComparer<Type>.Default.Equals(Type, other.Type) &&
+            //       StorageStrategy == other.StorageStrategy &&
+            //       EqualityComparer<Attribute[]>.Default.Equals(Attributes, other.Attributes) &&
+            //       EqualityComparer<object>.Default.Equals(ComparerProxy, other.ComparerProxy) &&
+            //       EqualityComparer<object>.Default.Equals(GetDefaultValFuncProxy, other.GetDefaultValFuncProxy);
         }
 
         public bool Equals(IPropTemplate other)

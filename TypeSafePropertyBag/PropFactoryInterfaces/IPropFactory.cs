@@ -1,4 +1,5 @@
 ﻿using DRM.TypeSafePropertyBag.DataAccessSupport;
+using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -36,17 +37,13 @@ namespace DRM.TypeSafePropertyBag
 
         #region ObservableCollection<T> Prop Creation
 
-        ICProp<CT, T> Create<CT, T>(CT initialValue, PropNameType propertyName, object extraInfo = null,
-            PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true,
-            Func<CT, CT, bool> comparer = null) where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged;
+        ICProp<CT, T> Create<CT, T>(CT initialValue, PropNameType propertyName, object extraInfo,
+            PropStorageStrategyEnum storageStrategy, bool typeIsSolid,
+            Func<CT, CT, bool> comparer) where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged;
 
-        //ICPropFB<CT, T> CreateFB<CT, T>(CT initialValue, PropNameType propertyName, object extraInfo = null,
-        //    PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true,
-        //    Func<CT, CT, bool> comparer = null) where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged;
-
-        ICProp<CT, T> CreateWithNoValue<CT, T>(PropNameType propertyName, object extraInfo = null,
-            PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true,
-            Func<CT, CT, bool> comparer = null) where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged;
+        ICProp<CT, T> CreateWithNoValue<CT, T>(PropNameType propertyName, object extraInfo,
+            PropStorageStrategyEnum storageStrategy, bool typeIsSolid,
+            Func<CT, CT, bool> comparer) where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged;
 
         #endregion
 

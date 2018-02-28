@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DRM.TypeSafePropertyBag.Fundamentals;
+using System;
 
 namespace DRM.TypeSafePropertyBag
 {
@@ -6,66 +7,8 @@ namespace DRM.TypeSafePropertyBag
     using PropNameType = String;
 
     /// <summary>
-    /// All properties have these features based on the type of the property.
-    /// Objects that implement this interface are often created by an instance of a class that inherits from AbstractPropFactory.
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public interface IProp<T> : IPropTemplate<T>, IProp 
-    {
-        T TypedValue { get; set; }
-
-        bool CompareTo(T value);
-        bool Compare(T val1, T val2);
-    }
-
-    /// <summary>
-    /// These are the non-type specific features that every instance of IProp<typeparamref name="T"/> implement.
-    /// </summary>
-    public interface IProp : IPropTemplate, IRegisterBindingsProxyType, ICloneable
-    {
-        // Unique to each instance.
-        PropNameType PropertyName { get; }
-        bool TypeIsSolid { get; }
-        bool ValueIsDefined { get; }
-
-        event EventHandler<EventArgs> ValueChanged; // Used by virtual properties.
-
-        object TypedValueAsObject { get; }
-        ValPlusType GetValuePlusType();
-
-        bool ReturnDefaultForUndefined { get; }
-
-        /// <summary>
-        /// Marks the property as having an undefined value.
-        /// </summary>
-        /// <returns>True, if the value was defined at the time this call was made.</returns>
-        bool SetValueToUndefined();
-
-        void CleanUpTyped();
-    }
-
-    public interface IPropTemplate<T> : IPropTemplate
-    {
-        Func<T, T, bool> Comparer { get; }
-        Func<string, T> GetDefaultValFunc { get; }
-    }
-
-    public interface IPropTemplate
-    {
-        PropKindEnum PropKind { get; }
-        Type Type { get; }
-        PropStorageStrategyEnum StorageStrategy { get; }
-
-        Attribute[] Attributes { get; }
-
-        object ComparerProxy { get; }
-        object GetDefaultValFuncProxy { get; }
-        DoSetDelegate DoSetDelegate { get; set; }
-    }
-
-    /// <summary>
     /// Classes that implement the IPropBag interface, keep a list of properties, each of which implements this interface.
-    /// These features are managed by the PropBag, and not by classes that implement IProp (derive from PropBase.)
+    /// These features are managed by the PropBag, and not by classes that implement IProp.)
     /// </summary>
     public interface IPropData
     {
@@ -94,5 +37,74 @@ namespace DRM.TypeSafePropertyBag
         void SetTypedProp(PropNameType propertyName, IProp value);
 
         void CleanUp(bool doTypedCleanup);
+    }
+
+    public interface IPropTemplate
+    {
+        PropKindEnum PropKind { get; }
+        Type Type { get; }
+        bool IsPropBag { get; }
+        PropStorageStrategyEnum StorageStrategy { get; }
+
+        Attribute[] Attributes { get; }
+
+        object ComparerProxy { get; }
+        object GetDefaultValFuncProxy { get; }
+        DoSetDelegate DoSetDelegate { get; set; }
+
+        // TODO: The PropCreator property is just being used to carry the value temporarily.
+        // We need to have the PropFactory return this in a separate, dedicated, out field in 
+        // each of the Create<T>, etc. methods.
+        // Reason: We want the IPropTemplate to be as generic as possible. If we
+        // include the PropCreator value when comparing for equality we will have one for each PropItem.
+        Func<PropNameType, object, bool, IPropTemplate, IProp> PropCreator { get; set; }
+    }
+
+    public interface IPropTemplate<T> : IPropTemplate
+    {
+        Func<T, T, bool> Comparer { get; }
+        Func<string, T> GetDefaultVal { get; }
+    }
+
+    /// <summary>
+    /// These are the non-type specific features that every instance of IProp<typeparamref name="T"/> implement.
+    /// </summary>
+    public interface IProp : IRegisterBindingsProxyType, ICloneable
+    {
+        PropNameType PropertyName { get; }
+        bool TypeIsSolid { get; }
+        bool ValueIsDefined { get; }
+
+        event EventHandler<EventArgs> ValueChanged; // Used by virtual properties.
+
+        object TypedValueAsObject { get; }
+        ValPlusType GetValuePlusType();
+
+        bool ReturnDefaultForUndefined { get; }
+
+        /// <summary>
+        /// Marks the property as having an undefined value.
+        /// </summary>
+        /// <returns>True, if the value was defined at the time this call was made.</returns>
+        bool SetValueToUndefined();
+
+        void CleanUpTyped();
+
+        IPropTemplate PropTemplate { get; }
+    }
+
+    /// <summary>
+    /// All properties have these features based on the type of the property.
+    /// Objects that implement this interface are often created by an instance of a class that inherits from AbstractPropFactory.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public interface IProp<T> : IProp 
+    {
+        T TypedValue { get; set; }
+
+        bool CompareTo(T value);
+        bool Compare(T val1, T val2);
+
+        IPropTemplate<T> TypedPropTemplate { get; }
     }
 }

@@ -22,7 +22,7 @@ namespace DRM.PropBag
         : base
         (
             delegateCacheProvider,
-            valueConverter, // GetValueConverter(valueConverter, delegateCacheProvider)
+            valueConverter,
             typeResolver
         )
         {
@@ -45,30 +45,31 @@ namespace DRM.PropBag
         public override ICProp<CT, T> Create<CT, T>
         (
             CT initialValue,
-            string propertyName, object extraInfo = null,
-            PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true,
-            Func<CT, CT, bool> comparer = null
+            string propertyName,
+            object extraInfo,
+            PropStorageStrategyEnum storageStrategy,
+            bool typeIsSolid,
+            Func<CT, CT, bool> comparer
         ) 
         {
-            if (comparer == null) comparer = EqualityComparer<CT>.Default.Equals;
-            Func<string, CT> getDefaultValFunc = ValueConverter.GetDefaultValue<CT>;
+            IPropTemplate<CT> propTemplate = GetPropTemplate<CT>(PropKindEnum.ObservableCollection, storageStrategy, comparer, null);
 
-            ICProp<CT, T> prop = new CProp<CT, T>(propertyName, initialValue, getDefaultValFunc, typeIsSolid, storageStrategy, comparer);
+            ICProp<CT, T> prop = new CProp<CT, T>(propertyName, initialValue, typeIsSolid, propTemplate);
             return prop;
         }
 
         public override ICProp<CT, T> CreateWithNoValue<CT, T>
         (
-            PropNameType propertyName, object extraInfo = null,
-            PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal, bool typeIsSolid = true,
-            Func<CT, CT, bool> comparer = null
+            PropNameType propertyName,
+            object extraInfo,
+            PropStorageStrategyEnum storageStrategy,
+            bool typeIsSolid,
+            Func<CT, CT, bool> comparer
         )
         {
-            if (comparer == null) comparer = EqualityComparer<CT>.Default.Equals;
+            IPropTemplate<CT> propTemplate = GetPropTemplate<CT>(PropKindEnum.ObservableCollection, storageStrategy, comparer, null);
 
-            Func<string, CT> getDefaultValFunc = ValueConverter.GetDefaultValue<CT>;
-
-            ICProp<CT, T> prop = new CProp<CT, T>(propertyName, getDefaultValFunc, typeIsSolid, storageStrategy, comparer);
+            ICProp<CT, T> prop = new CProp<CT, T>(propertyName, typeIsSolid, propTemplate);
             return prop;
         }
 
@@ -101,18 +102,17 @@ namespace DRM.PropBag
             Func<string, T> getDefaultValFunc
         )
         {
-            if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
+            IPropTemplate<T> propTemplate = GetPropTemplate<T>(PropKindEnum.Prop, storageStrategy, comparer, getDefaultValFunc);
+            propTemplate.PropCreator = CookedPropCreator;
 
-            if (getDefaultValFunc == null) getDefaultValFunc = ValueConverter.GetDefaultValue<T>;
-
-            //IProp<T> prop = new Prop<T>(initialValue, getDefaultValFunc, typeIsSolid: typeIsSolid, storageStrategy: storageStrategy, comparer: comparer);
-
-            IPropTemplate<T> propTemplateTyped = new PropTemplateTyped<T>(PropKindEnum.Prop, storageStrategy, comparer, getDefaultValFunc);
-
-            IPropTemplate<T> existingEntry = (IPropTemplate<T>)DelegateCacheProvider.PropTemplateCache.GetOrAdd(propTemplateTyped);
-
-            IProp<T> prop = new Prop<T>(propertyName, initialValue, typeIsSolid, existingEntry);
+            IProp<T> prop = new Prop<T>(propertyName, initialValue, typeIsSolid, propTemplate);
             return prop;
+
+            IProp CookedPropCreator(string propertyName2, object initialValue2, bool typeIsSolid2, IPropTemplate propTemplate2)
+            {
+                IProp<T> prop2 = new Prop<T>(propertyName2, (T)initialValue2, typeIsSolid2, (IPropTemplate<T>) propTemplate2);
+                return prop2;
+            }
         }
 
         public override IProp<T> CreateWithNoValue<T>
@@ -125,37 +125,46 @@ namespace DRM.PropBag
             Func<string, T> getDefaultValFunc
         )
         {
-            // Supply a comparer, if one was not supplied by the caller.
-            if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
+            IPropTemplate<T> propTemplate = GetPropTemplate<T>(PropKindEnum.Prop, storageStrategy, comparer, getDefaultValFunc);
 
-            // Use the Get Default Value function supplied or provided by this Prop Factory.
-            if(getDefaultValFunc == null) getDefaultValFunc = ValueConverter.GetDefaultValue<T>;
-
-            IPropTemplate<T> propTemplateTyped = new PropTemplateTyped<T>(PropKindEnum.Prop, storageStrategy, comparer, getDefaultValFunc);
-
-            IPropTemplate<T> existingEntry = (IPropTemplate<T>) DelegateCacheProvider.PropTemplateCache.GetOrAdd(propTemplateTyped);
-
-            //IProp<T> prop = new Prop_New<T>(propertyName, typeIsSolid, propTemplateTyped);
-            //return prop;
+            if(storageStrategy == PropStorageStrategyEnum.Internal)
+            {
+                propTemplate.PropCreator = CookedPropCreator;
+            }
+            else
+            {
+                propTemplate.PropCreator = CookedPropCreatorNoStore;
+            }
 
             if (storageStrategy == PropStorageStrategyEnum.Internal)
             {
                 // Regular Prop with Internal Storage -- Just don't have a value as yet.
-                //IProp<T> prop = new Prop<T>(getDefaultValFunc, typeIsSolid: typeIsSolid, storageStrategy: storageStrategy, comparer: comparer);
-
-                IProp<T> prop = new Prop<T>(propertyName, typeIsSolid, existingEntry);
-
+                IProp<T> prop = new Prop<T>(propertyName, typeIsSolid, propTemplate);
                 return prop;
             }
             else
             {
                 // Prop With External Store, or this is a Prop that supplies a Virtual (aka Caclulated) value from an internal source or from LocalBindings
                 // This implementation simply creates a Property that will always have the default value for type T.
-                //IProp<T> prop = new PropNoStore<T>(getDefaultValFunc, typeIsSolid: typeIsSolid, storageStrategy: storageStrategy, comparer: comparer);
-
-                IProp<T> prop = new PropNoStore_New<T>(propertyName, typeIsSolid, existingEntry);
+                IProp<T> prop = new PropNoStore<T>(propertyName, typeIsSolid, propTemplate);
                 return prop;
             }
+
+            IProp CookedPropCreator(string propertyName2, object initialValue2, bool typeIsSolid2, IPropTemplate propTemplate2)
+            {
+                // Regular Prop with Internal Storage -- Just don't have a value as yet.
+                IProp<T> prop = new Prop<T>(propertyName2, typeIsSolid2, (IPropTemplate<T>)propTemplate2);
+                return prop;
+            }
+
+            IProp CookedPropCreatorNoStore(string propertyName2, object initialValue2, bool typeIsSolid2, IPropTemplate propTemplate2)
+            {
+                // Prop With External Store, or this is a Prop that supplies a Virtual (aka Caclulated) value from an internal source or from LocalBindings
+                // This implementation simply creates a Property that will always have the default value for type T.
+                IProp<T> prop = new PropNoStore<T>(propertyName2, typeIsSolid2, (IPropTemplate<T>)propTemplate2);
+                return prop;
+            }
+
         }
 
         #endregion
@@ -171,7 +180,6 @@ namespace DRM.PropBag
         {
             throw new NotImplementedException();
         }
-
 
         #endregion
 

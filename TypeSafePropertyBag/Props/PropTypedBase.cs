@@ -3,80 +3,113 @@ using System.Threading;
 
 namespace DRM.TypeSafePropertyBag
 {
+    using IRegisterBindingsFowarderType = IRegisterBindingsForwarder<UInt32>;
     using PropIdType = UInt32;
     using PropNameType = String;
 
-    using IRegisterBindingsFowarderType = IRegisterBindingsForwarder<UInt32>;
-
-    public abstract class PropTypedBase<T> : PropBase, IProp<T>
+    public abstract class PropTypedBase<T> : IProp<T>
     {
-        #region Public and Protected Properties
+        protected IPropTemplate<T> _template { get; }
 
-        public virtual T TypedValue { get; set; }
-        public override bool ReturnDefaultForUndefined => GetDefaultValFunc != null;
-
-        public Func<T, T, bool> Comparer { get; }
-        public Func<string, T> GetDefaultValFunc { get; }
-
-        public override object TypedValueAsObject => TypedValue;
-
-        public override ValPlusType GetValuePlusType()
+        public PropTypedBase(PropNameType propertyName, T initalValue, bool typeIsSolid, IPropTemplate<T> template)
         {
-            ValPlusType result;
-
-            if(StorageStrategy == PropStorageStrategyEnum.Internal)
-            {
-                result = ValueIsDefined ? new ValPlusType(true, TypedValue, Type) : new ValPlusType(Type);
-            }
-            else
-            {
-                result = new ValPlusType(Type);
-            }
-
-            return result;
+            PropertyName = propertyName;
+            _value = initalValue;
+            TypeIsSolid = typeIsSolid;
+            ValueIsDefined = true;
+            _template = template;
         }
 
-        public override DoSetDelegate DoSetDelegate
+        public PropTypedBase(PropNameType propertyName, bool typeIsSolid, IPropTemplate<T> template)
+        {
+            PropertyName = propertyName;
+            TypeIsSolid = typeIsSolid;
+            ValueIsDefined = false;
+            _template = template;
+        }
+
+        public event EventHandler<EventArgs> ValueChanged;
+
+        T _value;
+        public virtual T TypedValue
         {
             get
             {
-                return null;
+                if (!ValueIsDefined)
+                {
+                    if (ReturnDefaultForUndefined)
+                    {
+                        return _template.GetDefaultVal(PropertyName);
+                    }
+                    throw new InvalidOperationException("The value of this property has not yet been set.");
+                }
+                return _value;
             }
             set
             {
-                // Ingore the call. (This class is going away and will be replaced by PropTypedBase_New
+                if (_template.StorageStrategy == PropStorageStrategyEnum.Internal)
+                {
+                    _value = value;
+                    ValueIsDefined = true;
+                }
+                else
+                {
+                    throw new InvalidOperationException($"PropItem: {PropertyName} uses a {nameof(_template.StorageStrategy)} store: Its value cannot be set.");
+                }
             }
         }
 
-        #endregion
+        public PropNameType PropertyName { get; }
+        public bool TypeIsSolid { get; set; }
+        public bool ValueIsDefined { get; protected set; }
 
-        #region Constructors
+        public IPropTemplate PropTemplate => _template;
 
-        protected PropTypedBase(PropNameType propertyName, Type typeOfThisValue, bool typeIsSolid, PropStorageStrategyEnum storageStrategy, bool valueIsDefined,
-            Func<T,T,bool> comparer, Func<string, T> defaultValFunc, PropKindEnum propKind)
-            : base(propertyName, propKind, typeOfThisValue, typeIsSolid, storageStrategy, valueIsDefined)
+        public IPropTemplate<T> TypedPropTemplate => _template;
+
+        //public Type Type => _template.Type;
+        //public PropKindEnum PropKind => _template.PropKind;
+        //public PropStorageStrategyEnum StorageStrategy => _template.StorageStrategy;
+
+        public object TypedValueAsObject => TypedValue;
+
+        public DoSetDelegate DoSetDelegate
         {
-            Comparer = comparer;
-            GetDefaultValFunc = defaultValFunc;
+            get
+            {
+                return _template.DoSetDelegate;
+            }
+            set
+            {
+                _template.DoSetDelegate = value;
+            }
         }
 
-        #endregion
+        public bool ReturnDefaultForUndefined => _template.GetDefaultVal != null;
 
-        #region Public Methods
+        //public Func<string, T> GetDefaultVal => _template.GetDefaultVal;
+        //public Func<T, T, bool> Comparer => _template.Comparer;
 
-        override public bool SetValueToUndefined()
+        //public object GetDefaultValFuncProxy => _template.GetDefaultValFuncProxy;
+        //public object ComparerProxy => _template.ComparerProxy;
+
+        //public Attribute[] Attributes => _template.Attributes;
+
+        public abstract object Clone();
+
+        public virtual void CleanUpTyped()
         {
-            bool oldSetting = ValueIsDefined;
-            ValueIsDefined = false;
-
-            return oldSetting;
+            if (TypedValue is IDisposable disable)
+            {
+                disable.Dispose();
+            }
         }
 
         public bool CompareTo(T newValue)
         {
-            if(StorageStrategy == PropStorageStrategyEnum.Internal)
+            if (_template.StorageStrategy == PropStorageStrategyEnum.Internal)
             {
-                return Comparer(newValue, TypedValue);
+                return _template.Comparer(newValue, TypedValue);
             }
             else
             {
@@ -86,22 +119,52 @@ namespace DRM.TypeSafePropertyBag
 
         public bool Compare(T val1, T val2)
         {
-            //if (!ValueIsDefined) return false;
-
-            return Comparer(val1, val2);
+            //return _template.Compare(val1, val2);
+            return _template.Comparer(val1, val2);
         }
 
-        public override bool RegisterBinding(IRegisterBindingsFowarderType forwarder, PropIdType propId, LocalBindingInfo bindingInfo)
+        public virtual ValPlusType GetValuePlusType()
         {
-            return forwarder.RegisterBinding<T>(propId, bindingInfo);
+            ValPlusType result;
+
+            if (_template.StorageStrategy == PropStorageStrategyEnum.Internal)
+            {
+                result = ValueIsDefined ? new ValPlusType(true, TypedValue, _template.Type) : new ValPlusType(_template.Type);
+            }
+            else
+            {
+                result = new ValPlusType(_template.Type);
+            }
+
+            return result;
         }
 
-        public override bool UnregisterBinding(IRegisterBindingsFowarderType forwarder, PropIdType propId, LocalBindingInfo bindingInfo)
+        public virtual bool SetValueToUndefined()
         {
-            return forwarder.RegisterBinding<T>(propId, bindingInfo);
+            bool oldSetting = ValueIsDefined;
+            ValueIsDefined = false;
+
+            return oldSetting;
+        }
+
+        #region Methods to Raise Events
+
+        protected void OnValueChanged()
+        {
+            Interlocked.CompareExchange(ref ValueChanged, null, null)?.Invoke(this, EventArgs.Empty);
         }
 
         #endregion
+
+        public virtual bool RegisterBinding(IRegisterBindingsFowarderType forwarder, PropIdType propId, LocalBindingInfo bindingInfo)
+        {
+            return forwarder.RegisterBinding<T>(propId, bindingInfo);
+        }
+
+        public virtual bool UnregisterBinding(IRegisterBindingsFowarderType forwarder, PropIdType propId, LocalBindingInfo bindingInfo)
+        {
+            return forwarder.RegisterBinding<T>(propId, bindingInfo);
+        }
     }
 }
          
