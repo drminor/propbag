@@ -8,9 +8,9 @@ namespace DRM.TypeSafePropertyBag
     using PropIdType = UInt32;
     using PropNameType = String;
 
-    using PropItemSetInternalInterface = IPropNodeCollection_Internal<UInt32, String>;
+    using PropNodeCollectionIntInterface = IPropNodeCollection_Internal<UInt32, String>;
 
-    internal class PropNodeCollection : PropItemSetInternalInterface/*, IEquatable<PropItemSetInternalInterface>*/
+    internal class PropNodeCollection : PropNodeCollectionIntInterface/*, IEquatable<PropItemSetInternalInterface>*/
     {
         #region Private Members
 
@@ -47,7 +47,7 @@ namespace DRM.TypeSafePropertyBag
         {
         }
 
-        public PropNodeCollection(PropItemSetInternalInterface sourcePropNodes)
+        public PropNodeCollection(PropNodeCollectionIntInterface sourcePropNodes)
             : this(sourcePropNodes.GetPropNodes(), sourcePropNodes.MaxPropsPerObject)
         {
         }
@@ -297,10 +297,10 @@ namespace DRM.TypeSafePropertyBag
 
         public override bool Equals(object obj)
         {
-            return Equals(obj as PropItemSetInternalInterface);
+            return Equals(obj as PropNodeCollectionIntInterface);
         }
 
-        public bool Equals(PropItemSetInternalInterface other)
+        public bool Equals(PropNodeCollectionIntInterface other)
         {
             return other != null &&
                 _isFixed == other.IsFixed &&

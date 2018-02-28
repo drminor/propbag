@@ -96,8 +96,7 @@ namespace DRM.TypeSafePropertyBag
         IProvideATypedCViewManager<EndEditWrapper<TDestination>, TDestination> GetOrAddViewManagerProviderTyped<TDal, TSource, TDestination>
             (
                 IPropBag propBag,   // The client of this service.
-                LocalBindingInfo bindingInfo,
-                IMapperRequest mr,  // The information necessary to create a IPropBagMapper<TSource, TDestination>
+                IViewManagerProviderKey viewManagerProviderKey,
                 PropBagMapperCreator propBagMapperCreator,  // A delegate that can be called to create a IPropBagMapper<TSource, TDestination> given a IMapperRequest.
                 CViewProviderCreator viewBuilder            // Method that can be used to create a IProvideAView from a DataSourceProvider.
             )

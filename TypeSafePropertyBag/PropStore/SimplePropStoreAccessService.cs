@@ -20,8 +20,8 @@ namespace DRM.TypeSafePropertyBag
 
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
 
-    using PropItemSetInternalInterface = IPropNodeCollection_Internal<UInt32, String>;
-    using PropItemSetInterface = IPropNodeCollection<UInt32, String>;
+    using PropNodeCollectionIntInterface = IPropNodeCollection_Internal<UInt32, String>;
+    using PropNodeCollectionInterface = IPropNodeCollection<UInt32, String>;
 
 
     internal class SimplePropStoreAccessService : PSAccessServiceInterface, IHaveTheStoreNode, PSAccessServiceInternalInterface, IDisposable
@@ -593,13 +593,13 @@ namespace DRM.TypeSafePropertyBag
             //return newStoreAccessor;
         }
 
-        public PSAccessServiceInterface CloneProps(IPropBag callingPropBag, PropItemSetInterface template)
+        public PSAccessServiceInterface CloneProps(IPropBag callingPropBag, PropNodeCollectionInterface template)
         {
             CheckTemplate(template);
 
             PSAccessServiceInterface newStoreAccessor = _propStoreAccessServiceProvider.ClonePSAccessService
                 (
-                    (PropItemSetInternalInterface) template,
+                    (PropNodeCollectionIntInterface) template,
                     callingPropBag, // The PropBag for which the newStoreAcessor will be built.
                     out BagNode newStoreNode
                 );
@@ -614,9 +614,9 @@ namespace DRM.TypeSafePropertyBag
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
-        private void CheckTemplate(PropItemSetInterface pnc)
+        private void CheckTemplate(PropNodeCollectionInterface pnc)
         {
-            if(!(pnc is PropItemSetInternalInterface))
+            if(!(pnc is PropNodeCollectionIntInterface))
             {
                 throw new InvalidOperationException("The template argument must implement the IPropNodeCollection_Internal interface.");
             }
@@ -1071,7 +1071,13 @@ namespace DRM.TypeSafePropertyBag
         // Provides thread-safe, lazy production of a single DataSourceProvider for each PropItem.
 
         // Get a DataSourceProvider
-        public DataSourceProvider GetOrAddDataSourceProvider(IPropBag propBag, PropIdType propId, IPropData propData, CViewProviderCreator viewBuilder)
+        public DataSourceProvider GetOrAddDataSourceProvider
+            (
+            IPropBag propBag,
+            PropIdType propId,
+            IPropData propData,
+            CViewProviderCreator viewBuilder
+            )
         {
             IManageCViews CViewManagerGen = GetOrAddViewManager(propBag, propId, propData, viewBuilder);
             DataSourceProvider result = CViewManagerGen.DataSourceProvider;
@@ -1279,8 +1285,7 @@ namespace DRM.TypeSafePropertyBag
         public IProvideATypedCViewManager<EndEditWrapper<TDestination>, TDestination> GetOrAddViewManagerProviderTyped<TDal, TSource, TDestination>
         (
             IPropBag propBag,   // The client of this service.
-            LocalBindingInfo bindingInfo,
-            IMapperRequest mr,  // The information necessary to create a IPropBagMapper<TSource, TDestination>
+            IViewManagerProviderKey viewManagerProviderKey,
             PropBagMapperCreator propBagMapperCreator,  // A delegate that can be called to create a IPropBagMapper<TSource, TDestination> given a IMapperRequest.
             CViewProviderCreator viewBuilder            // Method that can be used to create a IProvideAView from a DataSourceProvider.
         )
@@ -1297,8 +1302,6 @@ namespace DRM.TypeSafePropertyBag
         (
             IPropBag propBag,   // The client of this service.
             IViewManagerProviderKey viewManagerProviderKey,
-            //LocalBindingInfo bindingInfo, 
-            //IMapperRequest mr,  // The information necessary to create a IPropBagMapper<TSource, TDestination>
             PropBagMapperCreator propBagMapperCreator,  // A delegate that can be called to create a IPropBagMapper<TSource, TDestination> given a IMapperRequest.
             CViewProviderCreator viewBuilder            // Method that can be used to create a IProvideAView from a DataSourceProvider.
         )
