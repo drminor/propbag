@@ -66,9 +66,9 @@ namespace DRM.PropBagWPF
         {
             object result = _viewModelActivator.GetNewViewModel
                 (
+                typeToCreate: pm.TypeToCreate,
                 propModel: pm,
                 storeAccessCreator: _storeAccessCreator,
-                typeToCreate: pm.TypeToCreate,
                 autoMapperService: _autoMapperService,
                 propFactory: propFactory,
                 fullClassName: fullClassName
