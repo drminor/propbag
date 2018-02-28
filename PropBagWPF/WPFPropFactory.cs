@@ -26,73 +26,11 @@ namespace DRM.PropBagWPF
 
         #endregion
 
-        #region CollectionViewSource property creators
-
-        #endregion
-
         #region Collection-type property creators
 
-        //public override IETypedProp<CT, T> Create<CT, T>
-        //    (
-        //    CT initialValue,
-        //    string propertyName,
-        //    object extraInfo = null,
-        //    PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal,
-        //    bool typeIsSolid = true,
-        //    Func<CT, CT, bool> comparer = null
-        //    )
-        //{
-        //    IETypedProp<CT, T> newProp;
-        //    if(typeof(CT).IOListCollectionViewBased())
-        //    {
-        //        IOListCollectionView<T> newVal;
-        //        if (initialValue == null)
-        //        {
-        //            newVal = new OListCollectionView<T>(new ObservableCollection<T>());
-        //        }
-        //        else
-        //        {
-        //            newVal = initialValue as IOListCollectionView<T>;
-        //        }
-
-        //        // Use reference equality.
-        //        Func<IOListCollectionView<T>, IOListCollectionView<T>, bool> newComparer = RefEqualityComparer<IOListCollectionView<T>>.Default.Equals;
-
-        //        // Get the function used to create default values from our ValueConverter.
-        //        GetDefaultValueDelegate<IOListCollectionView<T>> defaultValFunc = ValueConverter.GetDefaultValue<IOListCollectionView<T>>;
-
-        //        IListCViewProp<IOListCollectionView<T>, T> fancyNewProp = 
-        //            CreateListViewProp<IOListCollectionView<T>, T>(newVal, defaultValFunc,  propertyName, extraInfo, hasStorage, typeIsSolid, newComparer);
-
-        //        newProp = (IETypedProp<CT,T>) fancyNewProp;
-        //    }
-        //    else
-        //    {
-        //        newProp = base.Create<CT, T>(initialValue, propertyName, extraInfo, hasStorage, typeIsSolid, comparer);
-        //    }
-
-        //    return newProp;
-        //}
-
-        //private IListCViewProp<CT,T> CreateListViewProp<CT, T>
-        //    (
-        //    CT initialValue,
-        //    GetDefaultValueDelegate<CT> defaultValFunc,
-        //    string propertyName,
-        //    object extraInfo = null,
-        //    PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal,
-        //    bool typeIsSolid = true,
-        //    Func<CT, CT, bool> comparer = null
-        //    ) where CT: IOListCollectionView<T>
-        //{
-        //    IListCViewProp<CT, T> result = new ListCViewProp<CT, T>(initialValue, defaultValFunc, typeIsSolid, hasStorage, comparer);
-
-        //    return result;
-        //}
-
         #endregion
 
-        #region CollectionViewSource property creators
+        #region Collection View Provider Factory Support
 
         public override CViewProviderCreator GetCViewProviderFactory()
         {
@@ -105,16 +43,38 @@ namespace DRM.PropBagWPF
             return result;
         }
 
+        #endregion
+
+        #region CollectionViewSource property creators
+
         public override IProp CreateCVSProp(PropNameType propertyName, IProvideAView viewProvider) 
         {
-            ICViewSourceProp<CollectionViewSource> result = new CViewSourceProp(propertyName, viewProvider);
-            return (IProp)result;
+            IPropTemplate<CollectionViewSource> propTemplate = GetPropTemplate<CollectionViewSource>(PropKindEnum.CollectionViewSource, PropStorageStrategyEnum.Internal, null, null);
+            propTemplate.PropCreator = CookedPropCreator;
+
+            ICViewSourceProp<CollectionViewSource> result = new CViewSourceProp(propertyName, viewProvider, propTemplate);
+            return result;
+
+            IProp CookedPropCreator(string propertyName2, object initialValue2, bool typeIsSolid2, IPropTemplate propTemplate2)
+            {
+                ICViewSourceProp<CollectionViewSource> result2 = new CViewSourceProp(propertyName2, (IProvideAView)initialValue2, (IPropTemplate<CollectionViewSource>) propTemplate2);
+                return result2;
+            }
         }
 
         public override IProp CreateCVProp(string propertyName, IProvideAView viewProvider)
         {
-            CViewProp result = new CViewProp(propertyName, viewProvider);
+            IPropTemplate<ListCollectionView> propTemplate = GetPropTemplate<ListCollectionView>(PropKindEnum.CollectionView, PropStorageStrategyEnum.Internal, null, null);
+            propTemplate.PropCreator = CookedPropCreator;
+
+            CViewProp result = new CViewProp(propertyName, viewProvider, propTemplate);
             return result;
+
+            IProp CookedPropCreator(string propertyName2, object initialValue2, bool typeIsSolid2, IPropTemplate propTemplate2)
+            {
+                CViewProp result2 = new CViewProp(propertyName2, (IProvideAView)initialValue2, (IPropTemplate<ListCollectionView>)propTemplate2);
+                return result2;
+            }
         }
 
         #endregion
@@ -167,6 +127,7 @@ namespace DRM.PropBagWPF
             Type destinationType = mr.PropModel.TargetType; // mapperRequest.DestinationTypeGenDef.TargetType;
 
             CreateMappedDSPProviderDelegate dspProviderCreator = GetDSPProviderCreator(sourceType, destinationType.BaseType.BaseType);
+
             IProvideADataSourceProvider result = dspProviderCreator
                 (
                 this,
