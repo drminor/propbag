@@ -16,7 +16,7 @@ namespace DRM.TypeSafePropertyBag
 
         bool TryRemove(L2T propId, out PropNode propNode);
 
-        long GetNextGenerationId();
+        //long GetNextGenerationId();
     }
 
     public interface IPropNodeCollection<L2T, L2TRaw>

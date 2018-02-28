@@ -9,8 +9,8 @@ namespace DRM.TypeSafePropertyBag
 
         bool TearDown(BagNode propBagNode);
 
-        //object FixPropItemSet(BagNode propBagNode);
-        object FixPropItemSet(IPropNodeCollection_Internal<L2T, L2TRaw> pnc_int);
+        bool IsPropItemSetFixed(BagNode propBagNode);
+        object FixPropItemSet(BagNode propBagNode);
         bool TryOpenPropItemSet(BagNode propBagNode, out object propItemSet_Handle);
 
         IPropStoreAccessService<L2T, L2TRaw> CreatePropStoreService(IPropBag propBag, IPropNodeCollection_Internal<L2T, L2TRaw> template, out BagNode newBagNode);
@@ -23,14 +23,13 @@ namespace DRM.TypeSafePropertyBag
             );
 
         IPropStoreAccessServiceCreator<L2T, L2TRaw> StoreAcessorCreator { get; }
-
     }
 
     public interface IPropStoreAccessServiceCreator<L2T, L2TRaw> : IPropStoreAccessServicePerf<L2T, L2TRaw>
     {
         IPropStoreAccessService<L2T, L2TRaw> CreatePropStoreService(IPropBag propBag);
 
-        IPropStoreAccessService<L2T, L2TRaw> CreatePropStoreService(IPropBag propBag, object propItemSetHandle);
+        IPropStoreAccessService<L2T, L2TRaw> CreatePropStoreService(IPropBag propBag, IPropNodeCollection<L2T, L2TRaw> template);
 
 
         object FixPropItemSet(IPropBag propBag);

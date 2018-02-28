@@ -13,6 +13,7 @@ namespace DRM.TypeSafePropertyBag
         bool TryGetPropId(L2TRaw propertyName, out L2T propId);
         bool TryGetPropName(L2T propertyId, out L2TRaw propertyName);
 
+        bool IsPropItemSetFixed { get; }
         object FixPropItemSet();
         bool TryOpenPropItemSet(out object propItemSet_Handle);
 

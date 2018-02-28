@@ -134,7 +134,7 @@ namespace DRM.TypeSafePropertyBag
                 HookupGuestBagNode(newNode);
             }
 
-            if (propData.TypedProp.StorageStrategy == PropStorageStrategyEnum.Virtual)
+            if (propData.TypedProp.PropTemplate.StorageStrategy == PropStorageStrategyEnum.Virtual)
             {
                 HookupStandardPropertyChangedHandler(newNode, propertyName);
             }
@@ -169,7 +169,7 @@ namespace DRM.TypeSafePropertyBag
                 HookupGuestBagNode(newNode);
             }
 
-            if (propData.TypedProp.StorageStrategy == PropStorageStrategyEnum.Virtual)
+            if (propData.TypedProp.PropTemplate.StorageStrategy == PropStorageStrategyEnum.Virtual)
             {
                 HookupStandardPropertyChangedHandler(newNode, propertyName);
             }
@@ -192,7 +192,7 @@ namespace DRM.TypeSafePropertyBag
             if (target != null)
             {
                 ISubscriptionKeyGen subscriptionRequest =
-                    new SubscriptionKeyGen(newNode.CompKey, genericTypedProp.Type, target, method, subscriptionKind, priorityGroup, keepRef: false, subscriptionFactory: null);
+                    new SubscriptionKeyGen(newNode.CompKey, genericTypedProp.PropTemplate.Type, target, method, subscriptionKind, priorityGroup, keepRef: false, subscriptionFactory: null);
 
                 ISubscription newSubscription = AddSubscription(subscriptionRequest, out bool wasAdded);
 
@@ -208,7 +208,7 @@ namespace DRM.TypeSafePropertyBag
                 HookupGuestBagNode(newNode);
             }
 
-            if (propData.TypedProp.StorageStrategy == PropStorageStrategyEnum.Virtual)
+            if (propData.TypedProp.PropTemplate.StorageStrategy == PropStorageStrategyEnum.Virtual)
             {
                 HookupStandardPropertyChangedHandler(newNode, propertyName);
             }
@@ -243,7 +243,7 @@ namespace DRM.TypeSafePropertyBag
                 HookupGuestBagNode(newNode);
             }
 
-            if (propData.TypedProp.StorageStrategy == PropStorageStrategyEnum.Virtual)
+            if (propData.TypedProp.PropTemplate.StorageStrategy == PropStorageStrategyEnum.Virtual)
             {
                 HookupStandardPropertyChangedHandler(newNode, propertyName);
             }
@@ -533,9 +533,11 @@ namespace DRM.TypeSafePropertyBag
 
         #region PropItemSet Management
 
+        public bool IsPropItemSetFixed => _propStoreAccessServiceProvider.IsPropItemSetFixed(_ourNode);
+
         public object FixPropItemSet()
         {
-            object result = _propStoreAccessServiceProvider.FixPropItemSet(_ourNode.PropNodeCollection);
+            object result = _propStoreAccessServiceProvider.FixPropItemSet(_ourNode);
             return result;
         }
 
@@ -1135,7 +1137,7 @@ namespace DRM.TypeSafePropertyBag
                 
                 IWatchAPropItemGen propItemWatcherGen = new PropItemWatcherGen(this, propId2);
 
-                IProvideADataSourceProvider dSProviderProvider = new PBCollectionDSP_Provider(propData.TypedProp.PropKind, propItemWatcherGen);
+                IProvideADataSourceProvider dSProviderProvider = new PBCollectionDSP_Provider(propData.TypedProp.PropTemplate.PropKind, propItemWatcherGen);
                 IManageCViews result2 = new ViewManager(dSProviderProvider, viewBuilder);
                 return result2;
             }
@@ -1201,7 +1203,7 @@ namespace DRM.TypeSafePropertyBag
             IManageCViews CViewGenManagerFactory(PropIdType propId2)
             {
                 IProvideADataSourceProvider dSProviderProvider;
-                if (propData.TypedProp.PropKind == PropKindEnum.Prop)
+                if (propData.TypedProp.PropTemplate.PropKind == PropKindEnum.Prop)
                 {
                     IWatchAPropItem<TDal> propItemWatcher = new PropItemWatcher<TDal>(this as PSAccessServiceInternalInterface, propId2);
 
@@ -1252,7 +1254,7 @@ namespace DRM.TypeSafePropertyBag
             IManageCViews CViewGenManagerFactory(PropIdType propId2)
             {
                 IProvideADataSourceProvider dSProviderProvider;
-                if (propData.TypedProp.PropKind == PropKindEnum.Prop)
+                if (propData.TypedProp.PropTemplate.PropKind == PropKindEnum.Prop)
                 {
                     IWatchAPropItem<TDal> propItemWatcher = new PropItemWatcher<TDal>(this as PSAccessServiceInternalInterface, propId2);
 

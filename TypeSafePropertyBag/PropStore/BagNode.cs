@@ -105,11 +105,16 @@ namespace DRM.TypeSafePropertyBag
         {
         }
 
-        // Create a new BagNode using an existing BagNode as template.
-        // This is the core of IPropBag.Clone()
-
-        // TODO: What about the subscriptions and bindings that were included in the PropModel that were used to create these PropItems?
-
+        /// <summary>
+        /// Creates a new BagNode for the specified PropBag, optionally using a collection of PropNodes as the source.
+        /// The source PropNodes are cloned. If the value of a PropNode cannot be cloned, an InvalidOperation exception will be thrown.
+        /// This is the core of IPropBag.Clone()
+        /// </summary>
+        /// <param name="objectId">The new globally unique Id to use for this new BagNode.</param>
+        /// <param name="propBag">The client IPropBag.</param>
+        /// <param name="template">A Collection of PropNodes to use as a template for the new PropBag's Child PropItems. Can be null.</param>
+        /// <param name="maxPropsPerObject">The maximum number of PropItems a single PropBag can have.</param>
+        /// <param name="callPSParentNodeChangedEventSubsCache">A reference to a service that caches Parent Node Change Event dispatchers.</param>
         public BagNode(ObjectIdType objectId, IPropBag propBag, PropNodeCollectionIntInterface template, int maxPropsPerObject, ICacheDelegates<CallPSParentNodeChangedEventSubDelegate> callPSParentNodeChangedEventSubsCache)
         {
             CompKey = new SimpleExKey(objectId, 0);
@@ -124,16 +129,39 @@ namespace DRM.TypeSafePropertyBag
             }
             else
             {
-                if(template.IsFixed)
-                {
-                    _propNodeCollection = new PropNodeCollection(template, this);
-                }
-                else
-                {
-                    // TODO: Handle the case when the template is not fixed.
-                    _propNodeCollection = new PropNodeCollection(template, this);
-                }
+                _propNodeCollection = ClonePropNodes(template, this);
             }
+        }
+
+        private PropNodeCollectionIntInterface ClonePropNodes(PropNodeCollectionIntInterface sourcePNC, BagNode targetParent)
+        {
+            PropNodeCollectionIntInterface result;
+
+            if (sourcePNC.IsFixed)
+            {
+                List<PropNode> temp = new List<PropNode>();
+                foreach (PropNode propNode in sourcePNC.GetPropNodes())
+                {
+                    PropNode newPropNode = propNode.CloneForNewParent(targetParent, useExistingValues: true);
+                    temp.Add(newPropNode);
+                }
+
+                // Create a Fixed PropNodeCollection.
+                result = new PropNodeCollectionFixed(temp, sourcePNC.MaxPropsPerObject);
+            }
+            else
+            {
+                // Create an open PropNodeCollection.
+                PropNodeCollection temp = new PropNodeCollection(sourcePNC.MaxPropsPerObject);
+                foreach (PropNode propNode in sourcePNC.GetPropNodes())
+                {
+                    PropNode newPropNode = propNode.CloneForNewParent(targetParent, useExistingValues: true);
+                    temp.Add(newPropNode);
+                }
+                result = temp;
+            }
+
+            return result;
         }
 
         #endregion

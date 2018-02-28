@@ -5,31 +5,31 @@ namespace DRM.TypeSafePropertyBag
 {
     using GenerationIdType = Int64;
 
-    internal class SimplePropItemSetCache<PropItemSetType, L2T, L2TRaw> : ICachePropItemSets<PropItemSetType, L2T, L2TRaw> where PropItemSetType : class, IPropNodeCollection_Internal<L2T, L2TRaw>
+    internal class SimplePropNodeCollectionCache<PropNodeCollectionInterface, L2T, L2TRaw> : ICachePropNodeCollections<PropNodeCollectionInterface, L2T, L2TRaw> where PropNodeCollectionInterface : class, IPropNodeCollection_Internal<L2T, L2TRaw>
     {
         public const GenerationIdType GEN_ZERO = 0;
 
         #region Private Members
 
-        IDictionary<PropItemSetType, Tuple<PropItemSetType, GenerationIdType>> _dict;
+        IDictionary<PropNodeCollectionInterface, Tuple<PropNodeCollectionInterface, GenerationIdType>> _dict;
         object _sync = new object();
 
         #endregion
 
         #region Constructor
 
-        public SimplePropItemSetCache()
+        public SimplePropNodeCollectionCache()
         {
-            _dict = new Dictionary<PropItemSetType, Tuple<PropItemSetType, GenerationIdType>>();
+            _dict = new Dictionary<PropNodeCollectionInterface, Tuple<PropNodeCollectionInterface, GenerationIdType>>();
         }
 
         #endregion
 
         #region Public Methods
 
-        public bool TryGetValueAndGenerationId(PropItemSetType propItemSet, out PropItemSetType basePropItemSet, out GenerationIdType generationId)
+        public bool TryGetValueAndGenerationId(PropNodeCollectionInterface propItemSet, out PropNodeCollectionInterface basePropItemSet, out GenerationIdType generationId)
         {
-            if (_dict.TryGetValue(propItemSet, out Tuple<PropItemSetType, GenerationIdType> value))
+            if (_dict.TryGetValue(propItemSet, out Tuple<PropNodeCollectionInterface, GenerationIdType> value))
             {
                 basePropItemSet = value.Item1;
                 generationId = value.Item2;
@@ -43,18 +43,18 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        public bool TryRegisterBasePropItemSet(PropItemSetType propItemSet)
+        public bool TryRegisterBasePropItemSet(PropNodeCollectionInterface propItemSet)
         {
             lock (_sync)
             {
-                if(_dict.TryGetValue(propItemSet, out Tuple<PropItemSetType, GenerationIdType> value))
+                if(_dict.TryGetValue(propItemSet, out Tuple<PropNodeCollectionInterface, GenerationIdType> value))
                 {
                     System.Diagnostics.Debug.WriteLine($"Cannot Register Base PropItemSet, it is already registered as {GetDesc(value)}");
                     return false;
                 }
                 else
                 {
-                    Tuple<PropItemSetType, GenerationIdType> entry = new Tuple<PropItemSetType, GenerationIdType>(propItemSet, GEN_ZERO);
+                    Tuple<PropNodeCollectionInterface, GenerationIdType> entry = new Tuple<PropNodeCollectionInterface, GenerationIdType>(propItemSet, GEN_ZERO);
 
                     _dict.Add(propItemSet, entry);
                     return true;
@@ -62,14 +62,14 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        public bool TryRegisterPropItemSet(PropItemSetType propItemSet, PropItemSetType basePropItemSet, out GenerationIdType generationId)
+        public bool TryRegisterPropItemSet(PropNodeCollectionInterface propItemSet, PropNodeCollectionInterface basePropItemSet, out GenerationIdType generationId)
         {
-            if (_dict.TryGetValue(basePropItemSet, out Tuple<PropItemSetType, GenerationIdType> value))
+            if (_dict.TryGetValue(basePropItemSet, out Tuple<PropNodeCollectionInterface, GenerationIdType> value))
             {
                 // TODO: Have the reference base supply the next available generationId.
                 generationId = basePropItemSet.GetNextGenerationId();
 
-                Tuple<PropItemSetType, GenerationIdType> entry = new Tuple<PropItemSetType, GenerationIdType>(propItemSet, generationId);
+                Tuple<PropNodeCollectionInterface, GenerationIdType> entry = new Tuple<PropNodeCollectionInterface, GenerationIdType>(propItemSet, generationId);
                 _dict.Add(propItemSet, entry);
                 return true;
             }
@@ -81,9 +81,9 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        public bool TryGetGeneration(PropItemSetType propItemSet, out GenerationIdType generationId)
+        public bool TryGetGeneration(PropNodeCollectionInterface propItemSet, out GenerationIdType generationId)
         {
-            if (_dict.TryGetValue(propItemSet, out Tuple<PropItemSetType, GenerationIdType> value))
+            if (_dict.TryGetValue(propItemSet, out Tuple<PropNodeCollectionInterface, GenerationIdType> value))
             {
                 generationId = value.Item2;
                 return true;
@@ -99,7 +99,7 @@ namespace DRM.TypeSafePropertyBag
 
         #region Private Methods
 
-        private string GetDesc(Tuple<PropItemSetType, GenerationIdType> value)
+        private string GetDesc(Tuple<PropNodeCollectionInterface, GenerationIdType> value)
         {
             if (value.Item2 == 0)
             {

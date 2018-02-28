@@ -10,7 +10,7 @@ namespace DRM.TypeSafePropertyBag
 
     using PropItemSetInternalInterface = IPropNodeCollection_Internal<UInt32, String>;
 
-    internal class PropNodeCollection : PropItemSetInternalInterface, IEquatable<PropNodeCollection>
+    internal class PropNodeCollection : PropItemSetInternalInterface/*, IEquatable<PropItemSetInternalInterface>*/
     {
         #region Private Members
 
@@ -43,26 +43,39 @@ namespace DRM.TypeSafePropertyBag
         #region Constructor
 
         public PropNodeCollection(int maxPropsPerObject)
+            : this(null, maxPropsPerObject)
         {
-            MaxPropsPerObject = maxPropsPerObject;
-            _children = new Dictionary<PropIdType, PropNode>();
-            _propItemsByName = null;
         }
 
-        public PropNodeCollection(PropItemSetInternalInterface sourcePropNodes, BagNode targetParent)
+        public PropNodeCollection(PropItemSetInternalInterface sourcePropNodes)
+            : this(sourcePropNodes.GetPropNodes(), sourcePropNodes.MaxPropsPerObject)
         {
-            MaxPropsPerObject = sourcePropNodes.MaxPropsPerObject;
+        }
 
-            _children = new Dictionary<PropIdType, PropNode>();
-
-            foreach(PropNode propNode in sourcePropNodes.GetPropNodes())
+        public PropNodeCollection(IEnumerable<PropNode> propNodes, int maxPropsPerObject) 
+        {
+            MaxPropsPerObject = maxPropsPerObject;
+            if(propNodes == null)
             {
-                PropNode newPropNode = propNode.CloneForNewParent(targetParent, useExistingValues: true);
-                Add(newPropNode);
+                _children = new Dictionary<PropIdType, PropNode>();
+            }
+            else
+            {
+                _children = propNodes.ToDictionary(k => k.PropId, v => v);
+                CheckChildCount(_children.Count);
             }
 
             _propItemsByName = null;
             _isFixed = false;
+        }
+
+        [System.Diagnostics.Conditional("DEBUG")]
+        private void CheckChildCount(long childCount)
+        {
+            if (childCount > MaxPropsPerObject)
+            {
+                throw new InvalidOperationException("Cannot create a PropNodeCollection with more PropNodes than the MaxPropsPerObject setting.");
+            }
         }
 
         #endregion
@@ -163,7 +176,6 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        // TODO: Handle the case when the PropItemSet is fixed.
         public PropNode CreateAndAdd(IPropDataInternal propData_Internal, PropNameType propertyName, BagNode parent)
         {
             if (_isFixed)
@@ -195,7 +207,6 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        // TODO: Cannot clear, must delete from Cache.
         public void Clear()
         {
             lock (_sync)
@@ -286,14 +297,15 @@ namespace DRM.TypeSafePropertyBag
 
         public override bool Equals(object obj)
         {
-            return Equals(obj as PropNodeCollection);
+            return Equals(obj as PropItemSetInternalInterface);
         }
 
-        public bool Equals(PropNodeCollection other)
+        public bool Equals(PropItemSetInternalInterface other)
         {
             return other != null &&
-                   EqualityComparer<Dictionary<uint, PropNode>>.Default.Equals(_children, other._children) &&
-                   _isFixed == other._isFixed;
+                _isFixed == other.IsFixed &&
+                EqualityComparer<IReadOnlyDictionary<PropNameType, IPropData>>.Default.Equals
+                    (GetPropDataItemsDict(), other.GetPropDataItemsDict());
         }
 
         int _hashCode;
@@ -343,7 +355,7 @@ namespace DRM.TypeSafePropertyBag
             //    result.Add(kvp.Value.PropertyName, kvp.Value);
             //}
 
-            Dictionary<PropNameType, PropNode> result = _children.ToDictionary(k => k.Value.PropertyName, v => v.Value);
+            Dictionary<PropNameType, PropNode> result = sourceDict.ToDictionary(k => k.Value.PropertyName, v => v.Value);
             return result;
         }
 
@@ -355,26 +367,33 @@ namespace DRM.TypeSafePropertyBag
             return (PropIdType)temp;
         }
 
-        private long m_GenerationId = 0;
-        public long GetNextGenerationId()
-        {
-            if (m_GenerationId == long.MaxValue -  1) throw new InvalidOperationException("This PropNodeCollection has over x generations: the next GenerationId exceeds the size of a long intenger.");
-            return System.Threading.Interlocked.Increment(ref m_GenerationId);
-        }
+        //private long m_GenerationId = 0;
+        //public long GetNextGenerationId()
+        //{
+        //    if (m_GenerationId == long.MaxValue -  1) throw new InvalidOperationException("This PropNodeCollection has over x generations: the next GenerationId exceeds the size of a long intenger.");
+        //    return System.Threading.Interlocked.Increment(ref m_GenerationId);
+        //}
 
         #endregion
     }
 
-    internal class SimplePropItemSetComparer : IEqualityComparer<PropItemSetInternalInterface>
-    {
-        public bool Equals(PropItemSetInternalInterface x, PropItemSetInternalInterface y)
-        {
-            return object.ReferenceEquals(x, y);
-        }
+    //internal class SimplePropItemSetComparer : IEqualityComparer<PropItemSetInternalInterface>
+    //{
+    //    public bool Equals(PropItemSetInternalInterface x, PropItemSetInternalInterface y)
+    //    {
+    //        if (x == null && y == null)
+    //            return true;
 
-        public int GetHashCode(PropItemSetInternalInterface obj)
-        {
-            return obj.GetHashCode();
-        }
-    }
+    //        if (x == null || y == null)
+    //            return false;
+
+    //        return x.IsFixed == y.IsFixed
+    //            && EqualityComparer<IReadOnlyDictionary<PropNameType, IPropData>>.Default.Equals(x.GetPropDataItemsDict(), y.GetPropDataItemsDict());
+    //    }
+
+    //    public int GetHashCode(PropItemSetInternalInterface obj)
+    //    {
+    //        return obj.GetHashCode();
+    //    }
+    //}
 }

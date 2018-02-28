@@ -15,9 +15,11 @@ namespace DRM.TypeSafePropertyBag
     using PSAccessServiceProviderInterface = IProvidePropStoreAccessService<UInt32, String>;
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
 
-    using PropItemSetInternalInterface = IPropNodeCollection_Internal<UInt32, String>;
+    using PropNodeCollectionInternalInterface = IPropNodeCollection_Internal<UInt32, String>;
+    using PropNodeCollectionInterface = IPropNodeCollection<UInt32, String>;
 
-    using PropItemSetCacheInterface = ICachePropItemSets<IPropNodeCollection_Internal<UInt32, String>, UInt32, String>;
+
+    //using PropNodeCollectionCacheInterface = ICachePropNodeCollections<IPropNodeCollection_Internal<UInt32, String>, UInt32, String>;
 
     using GenerationIdType = Int64;
 
@@ -29,7 +31,7 @@ namespace DRM.TypeSafePropertyBag
 
         readonly IProvideHandlerDispatchDelegateCaches _handlerDispatchDelegateCacheProvider;
 
-        PropItemSetCacheInterface _propItemSetCache;
+        //PropNodeCollectionCacheInterface _propNodeCollectionCache;
 
         readonly object _sync = new object();
         readonly object _syncForPropItemSetCache = new object();
@@ -123,12 +125,17 @@ namespace DRM.TypeSafePropertyBag
 
         #region PropItemSet Management
 
+        public bool IsPropItemSetFixed(BagNode propBagNode)
+        {
+            return propBagNode.IsFixed;
+        }
+
         public object FixPropItemSet(IPropBag propBag)
         {
             object propItemSet_Handle;
             if (TryGetPropBagNode(propBag, out BagNode propBagNode))
             {
-                propItemSet_Handle = FixPropItemSet(propBagNode.PropNodeCollection);
+                propItemSet_Handle = FixPropItemSet(propBagNode);
             }
             else
             {
@@ -138,39 +145,45 @@ namespace DRM.TypeSafePropertyBag
             return propItemSet_Handle;
         }
 
-        public object FixPropItemSet(PropItemSetInternalInterface pnc_int)
+        public object FixPropItemSet(BagNode propBagNode)
         {
             object result;
 
-            if(pnc_int.IsFixed)
+            PropNodeCollectionInternalInterface pnc_int = propBagNode.PropNodeCollection;
+
+            if (pnc_int.IsFixed)
             {
                 System.Diagnostics.Debug.WriteLine("Warning: PropStoreAccessServiceProvider is being asked to fix an already fixed PropItemSet.");
-                result = pnc_int;
+                result = propBagNode.PropNodeCollection.IsFixed;
             }
             else
             {
-                lock (_syncForPropItemSetCache)
-                {
-                    if (_propItemSetCache == null) _propItemSetCache = new SimplePropItemSetCache<PropItemSetInternalInterface, PropIdType, PropNameType>();
+                PropNodeCollection newFixedCollection = new PropNodeCollection(pnc_int);
+                propBagNode.PropNodeCollection = newFixedCollection;
+                result = newFixedCollection;
 
-                    pnc_int.Fix();
+                //lock (_syncForPropItemSetCache)
+                //{
+                //    if (_propNodeCollectionCache == null) _propNodeCollectionCache = new SimplePropNodeCollectionCache<PropNodeCollectionInternalInterface, PropIdType, PropNameType>();
 
-                    if(_propItemSetCache.TryGetValueAndGenerationId(pnc_int, out PropItemSetInternalInterface basePropItemSet, out GenerationIdType generationId))
-                    {
-                        // There's nothing to do here. We have just fixed the open generation that was registered
-                        // when the PropItemSet was 're-opened.'
-                    }
-                    else
-                    {
-                        // This PropItem set has no base, register it as a base PropItemSet.
-                        if (!_propItemSetCache.TryRegisterBasePropItemSet(pnc_int))
-                        {
-                            throw new InvalidOperationException("Could not register this PropBagNode's PropItemSet as a base PropItemSet.");
-                        }
-                    }
+                //    pnc_int.Fix();
 
-                    result = pnc_int; // We are using an instance of an internal class as an access token.
-                }
+                //    if(_propNodeCollectionCache.TryGetValueAndGenerationId(pnc_int, out PropNodeCollectionInternalInterface basePropItemSet, out GenerationIdType generationId))
+                //    {
+                //        // There's nothing to do here. We have just fixed the open generation that was registered
+                //        // when the PropItemSet was 're-opened.'
+                //    }
+                //    else
+                //    {
+                //        // This PropItem set has no base, register it as a base PropItemSet.
+                //        if (!_propNodeCollectionCache.TryRegisterBasePropItemSet(pnc_int))
+                //        {
+                //            throw new InvalidOperationException("Could not register this PropBagNode's PropItemSet as a base PropItemSet.");
+                //        }
+                //    }
+
+                //    result = pnc_int; // We are using an instance of an internal class as an access token.
+                //}
             }
 
             return result;
@@ -196,72 +209,74 @@ namespace DRM.TypeSafePropertyBag
         {
             bool result;
 
-            PropItemSetInternalInterface propNodeCollection = propBagNode.PropNodeCollection;
-            if (!propNodeCollection.IsFixed)
+            PropNodeCollectionInternalInterface pnc_int = propBagNode.PropNodeCollection;
+            propItemSet_Handle = pnc_int;
+
+            if (!pnc_int.IsFixed)
             {
                 System.Diagnostics.Debug.WriteLine("Warning: PropStoreAccessServiceProvider is being asked to open a PropItemSet that is already open.");
-                propItemSet_Handle = propNodeCollection;
+                propItemSet_Handle = pnc_int;
                 result = true;
             }
             else
             {
-                if (propBagNode.PropBagProxy.TryGetTarget(out IPropBag propBag))
-                {
-                    if (_propItemSetCache == null)
-                    {
-                        throw new InvalidOperationException($"The PropItemSet Cache has not been initialized during call to OpenPropItemSet for PropBag:  .");
-                    }
+                // Create a new collection. (New Collections are open by default.)
+                PropNodeCollectionInternalInterface newOpenCollection = new PropNodeCollection(pnc_int);
+                
+                // Replace the exixting collection with the new one.
+                propBagNode.PropNodeCollection = newOpenCollection;
 
-                    // TODO: Move these locks to the PropItemSet Cache
-                    // These resources are independent of the _store.
-                    lock (_syncForPropItemSetCache)
-                    {
-                        // Determine the following:
-                        // 1. If the existing PropItemSet has been registered.
-                        // 2. Its base, if it has one.
+                // return a reference to the new once cast as an object.
+                propItemSet_Handle = newOpenCollection;
+                result = true;
 
-                        if (_propItemSetCache.TryGetValueAndGenerationId(propNodeCollection, out PropItemSetInternalInterface basePropItemSet, out GenerationIdType generationId))
-                        {
-                            CheckGenerationRef(propNodeCollection, basePropItemSet, generationId);
+                //if (_propNodeCollectionCache == null)
+                //{
+                //    throw new InvalidOperationException($"The PropItemSet Cache has not been initialized during call to OpenPropItemSet for PropBag:  .");
+                //}
 
-                            // Create an open version of the current Fixed copy in use by the PropBag node.
-                            PropItemSetInternalInterface copy = new PropNodeCollection(propNodeCollection, propBagNode);
+                //// TODO: Move these locks to the PropItemSet Cache
+                //// These resources are independent of the _store.
+                //lock (_syncForPropItemSetCache)
+                //{
+                //    // Determine the following:
+                //    // 1. If the existing PropItemSet has been registered.
+                //    // 2. Its base, if it has one.
 
-                            // Attempt to register the new, open PropItemSet as a derivative of the orignal (or its base).
-                            if (_propItemSetCache.TryRegisterPropItemSet(copy, basePropItemSet, out generationId))
-                            {
-                                // We are using an instance of a internal class as an access token.
-                                propItemSet_Handle = copy;
+                //    if (_propNodeCollectionCache.TryGetValueAndGenerationId(propNodeCollection, out PropNodeCollectionInternalInterface basePropItemSet, out GenerationIdType generationId))
+                //    {
+                //        CheckGenerationRef(propNodeCollection, basePropItemSet, generationId);
 
-                                // Replace PropBag Node's original, fixed PropSet with a the copy that is open (for the addition of new PropItems.)
-                                propBagNode.PropNodeCollection = copy;
-                                result = true;
-                            }
-                            else
-                            {
-                                throw new InvalidOperationException("Could not register the new PropItemSet.");
-                            }
-                        }
-                        else
-                        {
-                            throw new InvalidOperationException("The existing PropItemSet cannot be found in the store.");
-                        }
-                    } // end Lock(_syncForPropItemSetCache)
+                //        // Create an open version of the current Fixed copy in use by the PropBag node.
+                //        PropNodeCollectionInternalInterface copy = new PropNodeCollection(propNodeCollection, propBagNode);
 
-                }
-                else
-                {
-                    System.Diagnostics.Debug.WriteLine("The PropBag has been garbage collected. (During call to OpenPropItemSet.)");
-                    propItemSet_Handle = null;
-                    result = false;
-                }
+                //        // Attempt to register the new, open PropItemSet as a derivative of the orignal (or its base).
+                //        if (_propNodeCollectionCache.TryRegisterPropItemSet(copy, basePropItemSet, out generationId))
+                //        {
+                //            // We are using an instance of a internal class as an access token.
+                //            propItemSet_Handle = copy;
+
+                //            // Replace PropBag Node's original, fixed PropSet with a the copy that is open (for the addition of new PropItems.)
+                //            propBagNode.PropNodeCollection = copy;
+                //            result = true;
+                //        }
+                //        else
+                //        {
+                //            throw new InvalidOperationException("Could not register the new PropItemSet.");
+                //        }
+                //    }
+                //    else
+                //    {
+                //        throw new InvalidOperationException("The existing PropItemSet cannot be found in the store.");
+                //    }
+                //} // end Lock(_syncForPropItemSetCache)
             }
 
             return result;
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
-        private void CheckGenerationRef(PropItemSetInternalInterface key, PropItemSetInternalInterface basePropItemSet, GenerationIdType generationId)
+        private void CheckGenerationRef(PropNodeCollectionInternalInterface key, PropNodeCollectionInternalInterface basePropItemSet, GenerationIdType generationId)
         {
             if (generationId == 0)
             {
@@ -293,26 +308,26 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-        public PSAccessServiceInterface CreatePropStoreService(IPropBag propBag, object propItemSetHandle)
+        public PSAccessServiceInterface CreatePropStoreService(IPropBag propBag, PropNodeCollectionInterface propNodes)
         {
-            if(propItemSetHandle is PropItemSetInternalInterface template)
+            if(propNodes is PropNodeCollectionInternalInterface pisii)
             {
-                PSAccessServiceInterface propStoreService = CreatePropStoreService(propBag, template, out BagNode dummy);
+                PSAccessServiceInterface propStoreService = CreatePropStoreService(propBag, pisii, out BagNode dummy);
                 return propStoreService;
             }
             else
             {
-                throw new InvalidOperationException("The PropItemSetHandle does not implement the required interface.");
+                throw new InvalidOperationException("propNodes does not implement the PropItemSetInternalInterface.");
             }
         }
 
-        public PSAccessServiceInterface CreatePropStoreService(IPropBag propBag, PropItemSetInternalInterface template, out BagNode newBagNode)
+        public PSAccessServiceInterface CreatePropStoreService(IPropBag propBag, PropNodeCollectionInternalInterface propNodes, out BagNode newBagNode)
         {
             // Issue a new, unique Id for this propBag.
             ObjectIdType objectId = NextCookedVal;
 
             // Create a new PropStoreNode for this PropBag
-            newBagNode = new BagNode(objectId, propBag, template, MaxPropsPerObject, _handlerDispatchDelegateCacheProvider.CallPSParentNodeChangedEventSubsCache);
+            newBagNode = new BagNode(objectId, propBag, propNodes, MaxPropsPerObject, _handlerDispatchDelegateCacheProvider.CallPSParentNodeChangedEventSubsCache);
 
             WeakRefKey<IPropBag> propBagProxy = newBagNode.PropBagProxy;
 
@@ -369,7 +384,7 @@ namespace DRM.TypeSafePropertyBag
 
         public PSAccessServiceInterface ClonePSAccessService
             (
-            PropItemSetInternalInterface sourcePropNodeCollection,
+            PropNodeCollectionInternalInterface sourcePropNodeCollection,
             IPropBag targetPropBag,
             out BagNode newStoreNode
             )
