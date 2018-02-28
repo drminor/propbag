@@ -23,7 +23,7 @@ namespace DRM.PropBag.AutoMapperSupport
             )
         {
             WrapperTypeCreator = wrapperTypesCreator ?? GetSimpleWrapperTypeCreator();
-            ViewModelActivator = viewModelActivator ?? new SimpleViewModelActivator();
+            ViewModelActivator = viewModelActivator ?? throw new ArgumentNullException(nameof(viewModelActivator)); // new SimpleViewModelActivator();
             _storeAccessCreator = storeAccessCreator ?? throw new ArgumentNullException(nameof(storeAccessCreator));
         }
 
