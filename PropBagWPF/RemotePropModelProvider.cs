@@ -140,7 +140,7 @@ namespace DRM.PropBagWPF
             }
         }
 
-        IPropModel FixUpPropFactory(IPropModel propModel, IPropFactoryFactory propFactoryGenerator/*, IPropFactory fallBackPropFactory*/)
+        private IPropModel FixUpPropFactory(IPropModel propModel, IPropFactoryFactory propFactoryGenerator)
         {
             // Include a reference to this PropModelProvider
             propModel.PropModelProvider = this;

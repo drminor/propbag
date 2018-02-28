@@ -3,6 +3,7 @@ using DRM.PropBag.ViewModelTools;
 using DRM.PropBagControlsWPF;
 using DRM.TypeSafePropertyBag;
 using System;
+using System.Collections.Generic;
 using System.Windows;
 
 namespace DRM.PropBagWPF
@@ -16,6 +17,9 @@ namespace DRM.PropBagWPF
         private IParsePropBagTemplates _pbtParser;
         private IPropFactoryFactory _propFactoryFactory;
 
+        private Dictionary<string, IPropModel> _propModelCache;
+        private Dictionary<string, IMapperRequest> _mapperRequestCache;
+
         #endregion
 
         #region Constructor
@@ -25,14 +29,26 @@ namespace DRM.PropBagWPF
             IPropBagTemplateProvider propBagTemplateProvider,
             IMapperRequestProvider mapperRequestProvider,
             IParsePropBagTemplates propBagTemplateParser,
-            IPropFactoryFactory propFactoryFactory
+            IPropFactoryFactory propFactoryFactory,
+            string resourceKeySuffix
             )
         {
             _propBagTemplateProvider = propBagTemplateProvider;
             _mapperRequestProvider = mapperRequestProvider;
             _pbtParser = propBagTemplateParser;
             _propFactoryFactory = propFactoryFactory ?? throw new ArgumentNullException(nameof(propFactoryFactory));
+            ResourceKeySuffix = resourceKeySuffix;
+
+            _propModelCache = new Dictionary<string, IPropModel>();
+            _mapperRequestCache = new Dictionary<string, IMapperRequest>();
+
         }
+
+        #endregion
+
+        #region Public Properties
+
+        public string ResourceKeySuffix { get; }
 
         #endregion
 
@@ -41,7 +57,22 @@ namespace DRM.PropBagWPF
         public bool CanFindPropBagTemplateWithJustKey => _propBagTemplateProvider?.CanFindPropBagTemplateWithJustAKey != false;
         public bool HasPbtLookupResources => _propBagTemplateProvider != null;
 
+        // TODO: Add locks to this code.
         public IPropModel GetPropModel(string resourceKey)
+        {
+            if(_propModelCache.TryGetValue(resourceKey, out IPropModel value))
+            {
+                return value;
+            }
+            else
+            {
+                IPropModel result = FetchPropModel(resourceKey);
+                _propModelCache.Add(resourceKey, result);
+                return result;
+            }
+        }
+
+        private IPropModel FetchPropModel(string resourceKey)
         {
             try
             {
@@ -97,7 +128,7 @@ namespace DRM.PropBagWPF
             }
         }
 
-        IPropModel FixUpPropFactory(IPropModel propModel, IPropFactoryFactory propFactoryGenerator/*, IPropFactory fallBackPropFactory*/)
+        private IPropModel FixUpPropFactory(IPropModel propModel, IPropFactoryFactory propFactoryGenerator)
         {
             // Include a reference to this PropModelProvider
             propModel.PropModelProvider = this;
@@ -129,56 +160,96 @@ namespace DRM.PropBagWPF
 
         public IMapperRequest GetMapperRequest(string resourceKey)
         {
-            try
+            string cookedKey = GetResourceKeyWithSuffix(resourceKey);
+
+            if(_mapperRequestCache.TryGetValue(cookedKey, out IMapperRequest value))
             {
-                if (CanFindMapperRequestWithJustKey)
+                return value;
+            }
+            else
+            {
+                IMapperRequest result = FetchMapperRequest(cookedKey);
+                _mapperRequestCache.Add(cookedKey, result);
+                return result;
+            }
+        }
+
+        private IMapperRequest FetchMapperRequest(string resourceKey)
+        {
+            if (CanFindMapperRequestWithJustKey)
+            {
+                try
                 {
                     MapperRequestTemplate mr = _mapperRequestProvider.GetMapperRequest(resourceKey);
                     IMapperRequest mrCooked = new MapperRequest(mr.SourceType, mr.DestinationPropModelKey, mr.ConfigPackageName);
                     return mrCooked;
                 }
-                else if (HasMrLookupResources)
+                catch (System.Exception e)
                 {
-                    throw new InvalidOperationException($"A call providing only a ResourceKey can only be done, " +
-                        $"if this PropModelProvider was supplied with a MapperRequestProvider upon construction. " +
-                        $"No class implementing: {nameof(IMapperRequestProvider)} was provided. " +
-                        $"Please supply a MapperRequest object.");
-                }
-                else
-                {
-                    throw new InvalidOperationException($"A call providing only a ResourceKey can only be done, " +
-                        $"if this PropModelProvider was supplied with the necessary resources upon construction. " +
-                        $"A {_mapperRequestProvider.GetType()} was provided, but it does not have the necessary resources. " +
-                        $"Please supply a ResourceDictionary and ResourceKey or a MapperRequest object.");
+                    throw new ApplicationException($"MapperRequest for ResourceKey = {resourceKey} was not found.", e);
                 }
             }
-            catch (System.Exception e)
+            else if (HasMrLookupResources)
             {
-                throw new ApplicationException($"MapperRequest for ResourceKey = {resourceKey} was not found.", e);
+                throw new InvalidOperationException($"A call providing only a ResourceKey can only be done, " +
+                    $"if this PropModelProvider was supplied with a MapperRequestProvider upon construction. " +
+                    $"No class implementing: {nameof(IMapperRequestProvider)} was provided. " +
+                    $"Please supply a MapperRequest object.");
+            }
+            else
+            {
+                throw new InvalidOperationException($"A call providing only a ResourceKey can only be done, " +
+                    $"if this PropModelProvider was supplied with the necessary resources upon construction. " +
+                    $"A {_mapperRequestProvider.GetType()} was provided, but it does not have the necessary resources. " +
+                    $"Please supply a ResourceDictionary and ResourceKey or a MapperRequest object.");
             }
         }
 
         public IMapperRequest GetMapperRequest(ResourceDictionary rd, string resourceKey)
         {
-            try
+            if (HasMrLookupResources)
             {
-                if (HasMrLookupResources)
+                try
                 {
                     MapperRequestTemplate mr = _mapperRequestProvider.GetMapperRequest(rd, resourceKey);
-
                     IMapperRequest mapperRequest = new MapperRequest(mr.SourceType, mr.DestinationPropModelKey, mr.ConfigPackageName);
                     return mapperRequest;
                 }
-                else
+                catch (System.Exception e)
                 {
-                    throw new InvalidOperationException($"A call providing a ResourceDictionary and a ResouceKey can only be done, " +
-                        $"if this PropModelProvider was supplied with a resource upon construction. " +
-                        $"No class implementing: {nameof(IMapperRequestProvider)} was provided.");
+                    throw new ApplicationException("Resource was not found.", e);
                 }
             }
-            catch (System.Exception e)
+            else
             {
-                throw new ApplicationException("Resource was not found.", e);
+                throw new InvalidOperationException($"A call providing a ResourceDictionary and a ResouceKey can only be done, " +
+                    $"if this PropModelProvider was supplied with a resource upon construction. " +
+                    $"No class implementing: {nameof(IMapperRequestProvider)} was provided.");
+            }
+        }
+
+        private string GetResourceKeyWithSuffix(string rawKey)
+        {
+            string result = ResourceKeySuffix != null ? $"{rawKey}_{ResourceKeySuffix}" : rawKey;
+            return result;
+        }
+
+        #endregion
+
+        #region Diagnostics
+
+        /// <summary>
+        /// Only used for Diagnostics.
+        /// </summary>
+        public void ClearPropItemSets()
+        {
+            foreach (var x in _propModelCache)
+            {
+                x.Value.PropItemSet = null;
+                foreach (var y in x.Value.Props)
+                {
+                    y.InitialValueCooked = null;
+                }
             }
         }
 

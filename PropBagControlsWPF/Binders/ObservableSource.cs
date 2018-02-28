@@ -500,8 +500,8 @@ namespace DRM.PropBagControlsWPF.Binders
 
             if (data.TryGetPropGen(pathElement, null, out IPropData iPg))
             {
-                newData = iPg?.TypedProp?.TypedValueAsObject;
-                newType = iPg?.TypedProp?.Type;
+                newData = iPg?.TypedProp.TypedValueAsObject;
+                newType = iPg?.TypedProp.PropTemplate.Type;
 
                 if (newData != null)
                 {
