@@ -200,7 +200,15 @@ namespace DRM.PropBag
             _ourStoreAccessor = storeAcessorCreator.CreatePropStoreService(this);
                 _memConsumptionTracker.MeasureAndReport("CreatePropStoreService from Scratch.", null);
 
-            if (propModel.PropItemSet == null) propModel.PropItemSet = new PropItemSet();
+            if (propModel.PropItemSet == null)
+            {
+                propModel.PropItemSet = new PropItemSet();
+                System.Diagnostics.Debug.WriteLine($"Building PropItems for {_ourStoreAccessor.ToString()} / ({propModel.ClassName}) with a 'raw' model.");
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"Building PropItems for {_ourStoreAccessor.ToString()} / ({propModel.ClassName}) with a 'cooked' model.");
+            }
 
             BuildPropItems(propModel, propModel.PropItemSet, storeAcessorCreator);
                 _memConsumptionTracker.Report(memUsedSoFar, "---- After BuildPropItems.");
@@ -308,11 +316,14 @@ namespace DRM.PropBag
                     propTemplate = null;
                     typedProp = BuildPropFromRaw(pi, pm.PropModelProvider, storeAccessCreator);
 
-                    // Save the PropTemplate in our PropItemSet
+                    // Get a reference to the PropTemplate assigned to this Prop.
                     propTemplate = typedProp.PropTemplate;
 
+                    // Remove the PropCreator function from the PropTemplate and store it in the PropModel
+                    // A single PropTemplate may serve many PropItems and this value will be overwritten if left in the PropTemplate.
                     pi.PropCreator = propTemplate.PropCreator;
 
+                    // Save the initial value of the Prop into the PropItemModel.
                     if (!propTemplate.IsPropBag && !pi.InitialValueField.CreateNew && typedProp.ValueIsDefined)
                     {
                         pi.InitialValueCooked = typedProp.TypedValueAsObject;
@@ -322,12 +333,14 @@ namespace DRM.PropBag
                         pi.InitialValueCooked = UN_SET_COOKED_INIT_VAL;
                     }
 
+                    // Save the PropTemplate in our PropItemSet
                     propItemSet.Add(pi.PropertyName, propTemplate);
                 }
 
                 // Make sure the propTemplate doesn't hold a referene to the class implementing the IProp interface.
                 propTemplate.PropCreator = null;
 
+                // Add the new Prop to the PropertyStore and retreive the new PropItem that is created in the process.
                 IPropData newPropItem;
                 PropIdType propId;
 
@@ -356,6 +369,7 @@ namespace DRM.PropBag
 
                 _memConsumptionTracker.MeasureAndReport("Add the TypedProp to the property store", $"for {pi.PropertyName}");
 
+                // Add Bindings
                 if (pi.BinderField?.Path != null && pi.PropKind != PropKindEnum.CollectionView && pi.PropKind != PropKindEnum.CollectionViewSource_RO)
                 {
                     _memConsumptionTracker.Measure();
@@ -366,8 +380,11 @@ namespace DRM.PropBag
                 _memConsumptionTracker.Report(amountUsedBeforeThisPropItem, $"--Completed BuildPropFromRaw for { pi.PropertyName}");
             }
 
+            // Cache or Set the PropertyDescriptors (for our ICustomTypeDescriptor implementation.)
+            // Let the PropertyStore know that we are finshed adding Props and that it should fix the PropNodeCollection for this PropBag.
             if(!propItemSetHadValues)
             {
+                // Store the Property Descriptors into the PropModel.
                 pm.PropertyDescriptorCollection = this.GetProperties();
                 _ourStoreAccessor.FixPropItemSet();
             }
@@ -377,6 +394,8 @@ namespace DRM.PropBag
                 {
                     System.Diagnostics.Debug.WriteLine($"Notice: We just created a new PropBag using an open PropNodeCollection for {_ourStoreAccessor.ToString()}.");
                 }
+
+                // Set our PropertyDescriptors from the copy cached in the PropModel.
                 this._properties = pm.PropertyDescriptorCollection;
             }
         }
@@ -641,11 +660,13 @@ namespace DRM.PropBag
 
             if(pi.MapperRequest == null && pi.MapperRequestResourceKey != null)
             {
+                // Get the MapperRequestTemplate specified by this PropModelItem.
                 pi.MapperRequest = propModelProvider.GetMapperRequest(pi.MapperRequestResourceKey);
             }
 
             if(pi.MapperRequest != null)
             {
+                // Get the PropModel specified by this MapperRequestTemplate.
                 if (pi.MapperRequest.PropModel == null && pi.MapperRequest.PropModelResourceKey != null)
                 {
                     pi.MapperRequest.PropModel = propModelProvider.GetPropModel(pi.MapperRequest.PropModelResourceKey);
@@ -679,6 +700,7 @@ namespace DRM.PropBag
             IProvideAutoMappers autoMapperProvider = this._autoMapperService ?? throw new InvalidOperationException
                 ($"This PropBag instance cannot create IProvideDataSourceProvider instances: No AutoMapperSupport was supplied upon construction.");
 
+            // TODO: Look at me: This is where the PropModel is used to define the Mapper 
             mapperRequest = autoMapperProvider.RegisterMapperRequest(mr.PropModel, mr.SourceType, mr.ConfigPackageName);
             IPropBagMapperGen genMapper = autoMapperProvider.GetMapper(mapperRequest);
             return genMapper;
