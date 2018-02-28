@@ -50,31 +50,31 @@ namespace DRM.PropBagWPF
         public override IProp CreateCVSProp(PropNameType propertyName, IProvideAView viewProvider) 
         {
             IPropTemplate<CollectionViewSource> propTemplate = GetPropTemplate<CollectionViewSource>(PropKindEnum.CollectionViewSource, PropStorageStrategyEnum.Internal, null, null);
-            propTemplate.PropCreator = CookedPropCreator;
+            propTemplate.PropCreator = CookedCVSPropCreator;
 
             ICViewSourceProp<CollectionViewSource> result = new CViewSourceProp(propertyName, viewProvider, propTemplate);
             return result;
+        }
 
-            IProp CookedPropCreator(string propertyName2, object initialValue2, bool typeIsSolid2, IPropTemplate propTemplate2)
-            {
-                ICViewSourceProp<CollectionViewSource> result2 = new CViewSourceProp(propertyName2, (IProvideAView)initialValue2, (IPropTemplate<CollectionViewSource>) propTemplate2);
-                return result2;
-            }
+        private static IProp CookedCVSPropCreator(string propertyName2, object initialValue2, bool typeIsSolid2, IPropTemplate propTemplate2)
+        {
+            ICViewSourceProp<CollectionViewSource> result2 = new CViewSourceProp(propertyName2, (IProvideAView)initialValue2, (IPropTemplate<CollectionViewSource>)propTemplate2);
+            return result2;
         }
 
         public override IProp CreateCVProp(string propertyName, IProvideAView viewProvider)
         {
             IPropTemplate<ListCollectionView> propTemplate = GetPropTemplate<ListCollectionView>(PropKindEnum.CollectionView, PropStorageStrategyEnum.Internal, null, null);
-            propTemplate.PropCreator = CookedPropCreator;
+            propTemplate.PropCreator = CookedCVPropCreator;
 
             CViewProp result = new CViewProp(propertyName, viewProvider, propTemplate);
             return result;
+        }
 
-            IProp CookedPropCreator(string propertyName2, object initialValue2, bool typeIsSolid2, IPropTemplate propTemplate2)
-            {
-                CViewProp result2 = new CViewProp(propertyName2, (IProvideAView)initialValue2, (IPropTemplate<ListCollectionView>)propTemplate2);
-                return result2;
-            }
+        private static IProp CookedCVPropCreator(string propertyName2, object initialValue2, bool typeIsSolid2, IPropTemplate propTemplate2)
+        {
+            CViewProp result2 = new CViewProp(propertyName2, (IProvideAView)initialValue2, (IPropTemplate<ListCollectionView>)propTemplate2);
+            return result2;
         }
 
         #endregion

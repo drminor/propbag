@@ -20,11 +20,11 @@ namespace DRM.PropBag
             ResolveTypeDelegate typeResolver
         )
         : base
-        (
-            delegateCacheProvider,
-            valueConverter,
-            typeResolver
-        )
+            (
+                delegateCacheProvider,
+                valueConverter,
+                typeResolver
+            )
         {
         }
 
@@ -103,16 +103,16 @@ namespace DRM.PropBag
         )
         {
             IPropTemplate<T> propTemplate = GetPropTemplate<T>(PropKindEnum.Prop, storageStrategy, comparer, getDefaultValFunc);
-            propTemplate.PropCreator = CookedPropCreator;
+            propTemplate.PropCreator = CookedScalarPropCreator<T>;
 
             IProp<T> prop = new Prop<T>(propertyName, initialValue, typeIsSolid, propTemplate);
             return prop;
+        }
 
-            IProp CookedPropCreator(string propertyName2, object initialValue2, bool typeIsSolid2, IPropTemplate propTemplate2)
-            {
-                IProp<T> prop2 = new Prop<T>(propertyName2, (T)initialValue2, typeIsSolid2, (IPropTemplate<T>) propTemplate2);
-                return prop2;
-            }
+        private static IProp CookedScalarPropCreator<T>(string propertyName2, object initialValue2, bool typeIsSolid2, IPropTemplate propTemplate2)
+        {
+            IProp<T> prop2 = new Prop<T>(propertyName2, (T)initialValue2, typeIsSolid2, (IPropTemplate<T>)propTemplate2);
+            return prop2;
         }
 
         public override IProp<T> CreateWithNoValue<T>
@@ -129,11 +129,11 @@ namespace DRM.PropBag
 
             if(storageStrategy == PropStorageStrategyEnum.Internal)
             {
-                propTemplate.PropCreator = CookedPropCreator;
+                propTemplate.PropCreator = CookedScalarPropCreatorNoVal<T>;
             }
             else
             {
-                propTemplate.PropCreator = CookedPropCreatorNoStore;
+                propTemplate.PropCreator = CookedScalarPropCreatorNoStore<T>;
             }
 
             if (storageStrategy == PropStorageStrategyEnum.Internal)
@@ -149,23 +149,23 @@ namespace DRM.PropBag
                 IProp<T> prop = new PropNoStore<T>(propertyName, typeIsSolid, propTemplate);
                 return prop;
             }
-
-            IProp CookedPropCreator(string propertyName2, object initialValue2, bool typeIsSolid2, IPropTemplate propTemplate2)
-            {
-                // Regular Prop with Internal Storage -- Just don't have a value as yet.
-                IProp<T> prop = new Prop<T>(propertyName2, typeIsSolid2, (IPropTemplate<T>)propTemplate2);
-                return prop;
-            }
-
-            IProp CookedPropCreatorNoStore(string propertyName2, object initialValue2, bool typeIsSolid2, IPropTemplate propTemplate2)
-            {
-                // Prop With External Store, or this is a Prop that supplies a Virtual (aka Caclulated) value from an internal source or from LocalBindings
-                // This implementation simply creates a Property that will always have the default value for type T.
-                IProp<T> prop = new PropNoStore<T>(propertyName2, typeIsSolid2, (IPropTemplate<T>)propTemplate2);
-                return prop;
-            }
-
         }
+
+        private static IProp CookedScalarPropCreatorNoVal<T>(string propertyName2, object initialValue2, bool typeIsSolid2, IPropTemplate propTemplate2)
+        {
+            // Regular Prop with Internal Storage -- Just don't have a value as yet.
+            IProp<T> prop = new Prop<T>(propertyName2, typeIsSolid2, (IPropTemplate<T>)propTemplate2);
+            return prop;
+        }
+
+        private static IProp CookedScalarPropCreatorNoStore<T>(string propertyName2, object initialValue2, bool typeIsSolid2, IPropTemplate propTemplate2)
+        {
+            // Prop With External Store, or this is a Prop that supplies a Virtual (aka Caclulated) value from an internal source or from LocalBindings
+            // This implementation simply creates a Property that will always have the default value for type T.
+            IProp<T> prop = new PropNoStore<T>(propertyName2, typeIsSolid2, (IPropTemplate<T>)propTemplate2);
+            return prop;
+        }
+
 
         #endregion
 
