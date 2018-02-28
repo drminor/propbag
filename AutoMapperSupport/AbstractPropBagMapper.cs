@@ -33,7 +33,7 @@ namespace DRM.PropBag.AutoMapperSupport
         IProvideAutoMappers _autoMapperService;
 
         private readonly bool _requiresWrappperTypeEmitServices;
-        private readonly TDestination _template;
+        private readonly TDestination _destPropBagTemplate;
 
         MemConsumptionTracker _mct = new MemConsumptionTracker(enabled: false);
 
@@ -66,24 +66,56 @@ namespace DRM.PropBag.AutoMapperSupport
 
             _requiresWrappperTypeEmitServices = mapRequest.MappingConfiguration.RequiresWrappperTypeEmitServices;
 
-            if (typeof(TDestination) is ICloneable)
+            _mct.Measure();
+
+            _destPropBagTemplate = GetDestinationTemplate(RunTimeType);
+
+            _mct.MeasureAndReport("GetNewDestination(PropModel, ... [In Constructor]", "AbstractPropBagMapper");
+
+            return;
+        }
+
+        private TDestination GetDestinationTemplate(Type targetType)
+        {
+            //Type tType;
+
+            //if (_requiresWrappperTypeEmitServices)
+            //{
+            //    tType = RunTimeType;
+            //}
+            //else
+            //{
+            //    tType = DestinationType;
+            //}
+            //_destPropBagTemplate = GetNewDestination(PropModel, _storeAccessCreator, tType, _autoMapperService, PropFactory, fullClassName: null);
+
+            TDestination result = GetNewDestination(DestinationType, PropModel, _storeAccessCreator, _autoMapperService, PropFactory, fullClassName: null);
+
+            if (TestCreateDest(targetType, result))
             {
-                _mct.Measure();
-
-                _template = GetNewDestination(PropModel, _storeAccessCreator, DestinationType, _autoMapperService, PropFactory, fullClassName: null);
-
-                // To ensure that the template's PropItemSet is shared amoung all clones,
-                // make sure it is fixed.
-                _storeAccessCreator.FixPropItemSet(_template);
-
-                _mct.MeasureAndReport("GetNewDestination(PropModel, ... [In Constructor]", "AbstractPropBagMapper");
+                // Fix the template's PropNodeCollection to improve performance.
+                _storeAccessCreator.FixPropItemSet(result);
             }
             else
             {
-                _template = null;
+                // It turns out that we cannot use the template after all.
+                result = null;
             }
 
-            return;
+            return result;
+        }
+
+        private bool TestCreateDest(Type targetType, TDestination template)
+        {
+            try
+            {
+                GetNewDestination(targetType, template);
+                return true;
+            }
+            catch 
+            {
+                return false;
+            }
         }
 
         #endregion
@@ -135,22 +167,39 @@ namespace DRM.PropBag.AutoMapperSupport
 
             TDestination result;
 
-            if (_template != null)
+            if (_destPropBagTemplate != null)
             {
-                if(_requiresWrappperTypeEmitServices)
+                if (_requiresWrappperTypeEmitServices)
                 {
-                    result = GetNewDestination(RunTimeType, _template);
+                    result = GetNewDestination(RunTimeType, _destPropBagTemplate);
                     _mct.MeasureAndReport("GetNewDestination using the copy constructor", "AstractPropBagMapper");
                 }
                 else
                 {
-                    result = (TDestination) _template.Clone();
+                    result = (TDestination)_destPropBagTemplate.Clone();
                     _mct.MeasureAndReport("_template.Clone", "AstractPropBagMapper");
                 }
+
+                //if (_requiresWrappperTypeEmitServices)
+                //{
+                //    object xx = _template.Clone();
+
+                //    result = (TDestination)_template.Clone();
+                //    _mct.MeasureAndReport("_template.Clone of Emitted Type", "AstractPropBagMapper");
+                //}
+                //else
+                //{
+                //    result = (TDestination)_template.Clone();
+                //    _mct.MeasureAndReport("_template.Clone", "AstractPropBagMapper");
+                //}
+
+                //result = (TDestination)_template.Clone();
+                //_mct.MeasureAndReport("_template.Clone", "AstractPropBagMapper");
+
             }
             else
             {
-                result = GetNewDestination(PropModel, _storeAccessCreator, RunTimeType, _autoMapperService, PropFactory, fullClassName: null);
+                result = GetNewDestination(RunTimeType, PropModel, _storeAccessCreator, _autoMapperService, PropFactory, fullClassName: null);
                 _mct.MeasureAndReport("GetNewDestination(PropModel, ...", "AstractPropBagMapper");
             }
 
@@ -158,11 +207,11 @@ namespace DRM.PropBag.AutoMapperSupport
         }
 
         // Regular Instantiation using the PropModel. 
-        private TDestination GetNewDestination(IPropModel propModel, PSAccessServiceCreatorInterface storeAccessCreator, Type destinationOrProxyType, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
+        private TDestination GetNewDestination(Type destinationOrProxyType, IPropModel propModel, PSAccessServiceCreatorInterface storeAccessCreator,  IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
         {
             try
             {
-                var newViewModel = _vmActivator.GetNewViewModel(propModel, storeAccessCreator, destinationOrProxyType, autoMapperService, propFactory, fullClassName);
+                var newViewModel = _vmActivator.GetNewViewModel(destinationOrProxyType, propModel, storeAccessCreator, autoMapperService, propFactory, fullClassName);
                 return newViewModel as TDestination;
             }
             catch (Exception e2)
@@ -172,7 +221,8 @@ namespace DRM.PropBag.AutoMapperSupport
             }
         }
 
-        // Regular Instantiation using the PropModel. 
+        // Emitted Types do not implement clone for the Emitted Type (Clone calls the base type.)
+        // So this uses the emitted type's constructor that takes a source IPropBag.
         private TDestination GetNewDestination(Type destinationOrProxyType, IPropBag copySource)
         {
             try
