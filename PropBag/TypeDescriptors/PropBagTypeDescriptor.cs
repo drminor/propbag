@@ -11,16 +11,29 @@ namespace DRM.PropBag.TypeDescriptors
 {
     public class PropBagTypeDescriptor<BagT> : PropertyDescriptor, IPropBagTypeDescriptor where BagT : IPropBag
     {
+
+        #region Static Members
+
+        static PropertyDescriptorCollection _basePropertyDescriptors;
+
+        static PropBagTypeDescriptor()
+        {
+            _basePropertyDescriptors = GetBasePropertyCollection();
+        }
+
+        #endregion
+
         #region Private Members
 
-        IPropBag _propBag;
-        PropModel _propModel;
-        IPropFactory _propFactory;
+        //IPropBag _propBag;
+        //PropModel _propModel;
+        //IPropFactory _propFactory;
+
         TypeDescriptorConfig _tdConfig;
 
         PropertyDescriptorCollection _children;
 
-        TypeSafePropBagMetaData _metadata;
+        //TypeSafePropBagMetaData _metadata;
 
         #endregion
 
@@ -44,17 +57,19 @@ namespace DRM.PropBag.TypeDescriptors
 
         #region Constructors
 
-        public PropBagTypeDescriptor(PropModel propModel, IPropFactory propFactory, string propertyName = null)
-            : base(propertyName ?? propModel.ClassName, new Attribute[] { })
+        public PropBagTypeDescriptor(PropModel propModel, string propertyName = null)
+            : base(GetPropertyName(propertyName, propModel), new Attribute[] { })
         {
-            _propModel = propModel;
-            _propFactory = propFactory;
+            //_propModel = propModel;
+            //_propFactory = propFactory;
 
-            _tdConfig = new TypeDescriptorConfig(new Attribute[] { }, typeof(object), true, propertyName, typeof(PropBag), true);
+            string propertyNameToUse = base.Name;
 
-            _children = this.GetChildProperties();
+            _tdConfig = new TypeDescriptorConfig(new Attribute[] { }, typeof(object), true, propertyNameToUse, typeof(PropBag), true);
 
-            PropertyDescriptor[] propDescriptors = BuildPropDescriptors(_propModel, _propFactory);
+            _children = GetBasePropertyCollection();
+
+            PropertyDescriptor[] propDescriptors = BuildPropDescriptors(propModel/*, propFactory*/);
 
             foreach (PropertyDescriptor pDesc in propDescriptors)
             {
@@ -62,32 +77,52 @@ namespace DRM.PropBag.TypeDescriptors
             }
         }
 
-        public PropBagTypeDescriptor(IPropBag propBag, string propertyName = null)
+        public PropBagTypeDescriptor(IPropBag propBag, string propertyName)
             //: base(propertyName ?? (propBag.GetMetaData()).ClassName, new Attribute[] { })
-            : base(propertyName, new Attribute[] { })
+            : base(GetPropertyName(propertyName, propBag), new Attribute[] { })
         {
-            _propBag = propBag;
+            ////_propBag = propBag;
+            //ITypeSafePropBagMetaData metadata = propBag.GetMetaData();
+            //propertyName = propertyName ?? metadata.ClassName;
 
-            ITypeSafePropBagMetaData metadata = propBag.GetMetaData();
+            //string propertyNameToUse = GetPropertyName(propertyName, propBag);
 
-            propertyName = propertyName ?? metadata.ClassName;
-            _tdConfig = new TypeDescriptorConfig(new Attribute[] { }, typeof(object), true, propertyName, typeof(PropBag), true);
+            string propertyNameToUse = base.Name;
 
-            _children = this.GetChildProperties();
+            _tdConfig = new TypeDescriptorConfig(new Attribute[] { }, typeof(object), true, propertyNameToUse, typeof(PropBag), true);
+
+            //_children = this.GetChildProperties();
+            _children = GetBasePropertyCollection();
         }
 
         #endregion
 
+        static private PropertyDescriptorCollection GetBasePropertyCollection()
+        {
+            PropertyDescriptorCollection result;
+            result = TypeDescriptor.GetProperties(typeof(BagT));
+            return result;
+        }
 
-        public PropertyDescriptor[] BuildPropDescriptors(PropModel pm, IPropFactory pf)
+        static private string GetPropertyName(string className, IPropModel propModel)
+        {
+            return className ?? propModel.ClassName;
+        }
+
+        static private string GetPropertyName(string className, IPropBag propBag)
+        {
+            return className ?? propBag.GetMetaData().ClassName;
+        }
+
+        public PropertyDescriptor[] BuildPropDescriptors(PropModel pm/*, IPropFactory pf*/)
         {
             PropertyDescriptor[] descriptors = new PropertyDescriptor[pm.Props.Count];
 
-            List<IPropItem> propItems = pm.Props.ToList();
+            List<IPropModelItem> propItems = pm.Props.ToList();
 
             for (int pdPtr = 0; pdPtr < propItems.Count; pdPtr++)
             {
-                IPropItem pItem = propItems[pdPtr];
+                IPropModelItem pItem = propItems[pdPtr];
 
                 PropItemTypeDescriptor<IPropBag> propItemTypeDesc =
                     new PropItemTypeDescriptor<IPropBag>(pItem.PropertyName, pItem.PropertyType, new Attribute[] { });
@@ -102,7 +137,13 @@ namespace DRM.PropBag.TypeDescriptors
         {
             List<KeyValuePair<string, ValPlusType>> propDefs = propBag.GetAllPropNamesAndTypes().ToList();
 
-            PropertyDescriptor[] descriptors = new PropertyDescriptor[propDefs.Count];
+            PropertyDescriptor[] descriptors = new PropertyDescriptor[propDefs.Count + _basePropertyDescriptors.Count];
+
+            int mainPdPtr;
+            for(mainPdPtr = 0; mainPdPtr < _basePropertyDescriptors.Count; mainPdPtr++)
+            {
+                descriptors[mainPdPtr] = _basePropertyDescriptors[mainPdPtr];
+            }
 
             for (int pdPtr = 0; pdPtr < propDefs.Count; pdPtr++)
             {
@@ -111,13 +152,11 @@ namespace DRM.PropBag.TypeDescriptors
                 PropItemTypeDescriptor<IPropBag> propItemTypeDesc = 
                     new PropItemTypeDescriptor<IPropBag>(kvp.Key, kvp.Value.Type, new Attribute[] { });
 
-                descriptors[pdPtr] = propItemTypeDesc;
+                descriptors[mainPdPtr++] = propItemTypeDesc;
             }
 
             return descriptors;
         }
-
-
 
         #region PropertyDescriptor Method Overrides
 
@@ -165,9 +204,11 @@ namespace DRM.PropBag.TypeDescriptors
         // Returns:
         //     A System.ComponentModel.PropertyDescriptorCollection with the properties that
         //     match the specified attributes for the specified component.
-        new public virtual PropertyDescriptorCollection GetChildProperties(object instance, Attribute[] filter)
+        override public PropertyDescriptorCollection GetChildProperties(object instance, Attribute[] filter)
         {
-            return base.GetChildProperties(instance, filter);
+            PropertyDescriptorCollection result;
+            result =  base.GetChildProperties(instance, filter);
+            return result;
         }
 
         //
@@ -181,10 +222,10 @@ namespace DRM.PropBag.TypeDescriptors
         //
         // Returns:
         //     An instance of the requested editor type, or null if an editor cannot be found.
-        new public virtual object GetEditor(Type editorBaseType)
-        {
-            throw new NotImplementedException();
-        }
+        //new public virtual object GetEditor(Type editorBaseType)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
         //
         // Summary:
@@ -196,7 +237,7 @@ namespace DRM.PropBag.TypeDescriptors
         //
         //   e:
         //     An System.EventArgs that contains the event data.
-        new protected virtual void OnValueChanged(object component, EventArgs e)
+        override protected void OnValueChanged(object component, EventArgs e)
         {
             base.OnValueChanged(component, e);
         }

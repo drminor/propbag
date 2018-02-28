@@ -46,16 +46,15 @@
     <Compile Include="ClassGenerator\PropGenerator.cs" />
     <Compile Include="ClassGenerator\PropModelExtensions.cs" />
     <Compile Include="ClassGenerator\T4Support.cs" />
-    <Compile Include="Props\CProp_New.cs" />
-    <Compile Include="Props\PropExternStore_New.cs" />
-    <Compile Include="Props\PropNoStore_New.cs" />
+    <Compile Include="Props\CProp.cs" />
+    <Compile Include="Props\PropExternStore.cs" />
+    <Compile Include="Props\PropNoStore.cs" />
     <Compile Include="Props\Prop.cs" />
     <Compile Include="Unused\Collections\PbListSourceProvider.cs" />
     <Compile Include="Unused\Collections\PbListSource.cs" />
     <None Include="Unused\Collections\PbCollection_NotUsed.cs" />
     <None Include="Documentation\GlobalCompositePropId.md" />
     <Compile Include="ControlModel\PropBinderField.cs" />
-    <Compile Include="Props\CProp.cs" />
     <Compile Include="Unused\Collections\PbAbstractListSource.cs" />
     <Compile Include="ControlModel\MapperRequest.cs" />
     <Compile Include="ControlModel\NotifyPropertyChangedBase.cs" />
@@ -67,7 +66,6 @@
     <Compile Include="ControlModel\PropModel.cs" />
     <Compile Include="ExtValDelegates.cs" />
     <Compile Include="Factories\PropFactoryValueConverter.cs" />
-    <Compile Include="Props\PropNoStore.cs" />
     <Compile Include="PropBag.CustomTypeDescriptor.cs" />
     <None Include="Documentation\TypeInfoField.md" />
     <None Include="Unused\PropBagDyn.cs" />
@@ -76,7 +74,6 @@
     <Compile Include="TypeDescriptors\MyTypeDescriptorBase.cs" />
     <Compile Include="TypeDescriptors\PbCollectionItemTypeDescriptor.cs" />
     <Compile Include="TypeDescriptors\IPbCollectionTypeDescriptor.cs" />
-    <Compile Include="Props\PropExternStore.cs" />
     <Compile Include="Factories\PropExtStoreFactory.cs" />
     <Compile Include="Factories\PropFactory.cs" />
     <Compile Include="PubPropBag.cs" />

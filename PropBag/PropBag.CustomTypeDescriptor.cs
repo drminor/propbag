@@ -166,10 +166,12 @@ namespace DRM.PropBag
         {
             if (_properties == null)
             {
-                PropBagTypeDescriptor<PropBag> pbTypeDescriptor = new PropBagTypeDescriptor<PropBag>(this, "PropBag - Base-Test");
+                PropBagTypeDescriptor<PropBag> pbTypeDescriptor = new PropBagTypeDescriptor<PropBag>(this, null /*"PropBag - Base-Test"*/);
                 PropertyDescriptor[] propDescriptors = pbTypeDescriptor.BuildPropDescriptors(this);
 
                 _properties = new PropertyDescriptorCollection(propDescriptors);
+
+                ICustomTypeDescriptor ctd = this as ICustomTypeDescriptor;
             }
             return _properties;
         }
@@ -191,7 +193,7 @@ namespace DRM.PropBag
 
         protected object GetPropertyOwner(PropertyDescriptor pd)
         {
-            throw new NotImplementedException();
+            return null;
         }
 
         #endregion

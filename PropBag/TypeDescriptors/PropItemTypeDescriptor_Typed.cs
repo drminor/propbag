@@ -48,12 +48,12 @@ namespace DRM.PropBag.TypeDescriptors
         //}
 
         public PropItemTypeDescriptor_Typed(string propertyName, BagT propBag, PT propItem)
-            : base(propertyName, propItem.Attributes)
+            : base(propertyName, propItem.TypedPropTemplate.Attributes)
         {
             _propBag = propBag;
             _propItem = propItem;
 
-            _tdConfig = new TypeDescriptorConfig(_propItem.Attributes, typeof(PropBag), false, propertyName, _propItem.Type, true);
+            _tdConfig = new TypeDescriptorConfig(_propItem.TypedPropTemplate.Attributes, typeof(PropBag), false, propertyName, _propItem.TypedPropTemplate.Type, true);
 
             _children = this.GetChildProperties();
         }
