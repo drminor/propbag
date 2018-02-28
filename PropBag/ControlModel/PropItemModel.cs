@@ -9,9 +9,13 @@ using System.Xml.Serialization;
 
 namespace DRM.PropBag
 {
-    public class PropItemModel : NotifyPropertyChangedBase, IPropItem
+    using PropNameType = String;
+
+    using PropCreatorType = Func<String, object, bool, IPropTemplate, IProp>;
+
+    public class PropItemModel : NotifyPropertyChangedBase, IPropModelItem
     {
-        string _propertyName;
+        PropNameType _propertyName;
         PropKindEnum _propKind;
         Type _propertyType; // Also used to store the collection type.
         Type _itemType;
@@ -26,9 +30,10 @@ namespace DRM.PropBag
         PropStorageStrategyEnum _hasStore;
         bool _typeIsSolid;
         string _extraInfo;
+        PropCreatorType _propCreator;
 
         [XmlElement("name")]
-        public string PropertyName { get {return _propertyName;}  set { SetIfDifferent<string>(ref _propertyName, value); } }
+        public PropNameType PropertyName { get {return _propertyName;}  set { SetIfDifferent<PropNameType>(ref _propertyName, value); } }
 
         [XmlElement("prop-kind")]
         public PropKindEnum PropKind { get { return _propKind; } set { _propKind = value; } }
@@ -108,15 +113,91 @@ namespace DRM.PropBag
         [XmlIgnore]
         public string ExtraInfo { get { return _extraInfo; } set { SetIfDifferent<string>(ref _extraInfo, value); } }
 
-        //public PropItem() : this(null, null, null, true, true, PropKindEnum.Prop, null, null, null, null) { }
+        [XmlIgnore]
+        public PropCreatorType PropCreator
+            { get { return _propCreator; } set { SetAlways<PropCreatorType>(ref _propCreator, value); } }
 
-        //public PropItem(Type type, string name) : this(type, name, null, true, true, PropKindEnum.Prop,
-        //    null, null, null, null) { }
+        [XmlIgnore]
+        public object InitialValueCooked { get; set; }
 
-        public PropItemModel(Type type, string name, PropStorageStrategyEnum storageStrategy, bool typeIsSolid, PropKindEnum propKind,
-            ITypeInfoField propTypeInfoField = null,
-            IPropInitialValueField initialValueField = null,
-            string extraInfo = null, PropComparerField comparer = null, Type itemType = null)
+        public PropItemModel(Type type, string name)
+            : this
+            (
+            type: type,
+            name: name,
+            storageStrategy: PropStorageStrategyEnum.Internal,
+            typeIsSolid: true,
+            propKind: PropKindEnum.Prop,
+            propTypeInfoField: null,
+            initialValueField: null,
+            extraInfo: null,
+            comparer: null,
+            itemType: null,
+            binderField: null,
+            mapperRequest: null,
+            propCreator: null
+            )
+        {
+        }
+
+        public PropItemModel(Type type, string name, PropStorageStrategyEnum storageStrategy, 
+                PropKindEnum propKind, IPropInitialValueField initialValueField)
+            : this
+            (
+            type: type,
+            name: name,
+            storageStrategy: storageStrategy,
+            typeIsSolid: true,
+            propKind: propKind,
+            propTypeInfoField: null,
+            initialValueField: initialValueField,
+            extraInfo: null,
+            comparer: null,
+            itemType: null,
+            binderField: null,
+            mapperRequest: null,
+            propCreator: null
+            )
+        {
+        }
+
+        public PropItemModel(Type type, string name, PropStorageStrategyEnum storageStrategy,
+                PropKindEnum propKind, IPropInitialValueField initialValueField, Type itemType)
+            : this
+            (
+            type: type,
+            name: name,
+            storageStrategy: storageStrategy,
+            typeIsSolid: true,
+            propKind: propKind,
+            propTypeInfoField: null,
+            initialValueField: initialValueField,
+            extraInfo: null,
+            comparer: null,
+            itemType: itemType,
+            binderField: null,
+            mapperRequest: null,
+            propCreator: null
+            )
+        {
+        }
+
+        public PropItemModel
+            (
+            Type type,
+            string name,
+            PropStorageStrategyEnum storageStrategy,
+            bool typeIsSolid,
+            PropKindEnum propKind,
+            ITypeInfoField propTypeInfoField,
+            IPropInitialValueField initialValueField,
+            string extraInfo,
+            PropComparerField comparer,
+            Type itemType,
+            IPropBinderField binderField,
+            IMapperRequest mapperRequest,
+            PropCreatorType propCreator
+            )
         {
             PropertyType = type;
             PropertyName = name;
@@ -128,8 +209,65 @@ namespace DRM.PropBag
             InitialValueField = initialValueField;
             ComparerField = comparer;
             _itemType = itemType;
-            _propBinderField = null;
-            _mapperRequest = null;
+            _propBinderField = binderField;
+            _mapperRequest = mapperRequest;
+            _propCreator = propCreator;
+
+            InitialValueCooked = null;
         }
+
+        #region IDisposable Support
+
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // Dispose managed state (managed objects).
+                    _propCreator = null;
+                    if(ComparerField is IDisposable disable1)
+                    {
+                        disable1.Dispose();
+                    }
+
+                    if(_propInitialValueField is IDisposable disable2)
+                    {
+                        disable2.Dispose();
+                    }
+
+                    if(InitialValueCooked is IDisposable disable3)
+                    {
+                        disable3.Dispose();
+                    }
+
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        // ~Temp() {
+        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        //   Dispose(false);
+        // }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            // GC.SuppressFinalize(this);
+        }
+
+        #endregion
+
     }
 }

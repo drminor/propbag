@@ -10,14 +10,14 @@ using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBag
 {
-    public class PropInitialValueField : NotifyPropertyChangedBase, IEquatable<PropInitialValueField>, IPropInitialValueField
+    public class PropInitialValueField : NotifyPropertyChangedBase, IEquatable<PropInitialValueField>, IPropInitialValueField, IDisposable
     {
         string iv;
         bool stu;
         bool std;
         bool stn;
         bool stes;
-        Func<object> vc;
+        Func<object> _valueCreator;
 
         [XmlText]
         public string InitialValue { get { return iv; } set { SetIfDifferent<string>(ref iv, value); } }
@@ -38,14 +38,34 @@ namespace DRM.PropBag
 
         public string PropBagResourceKey { get; set; }
 
-        public Func<object> ValueCreator { get { return vc; } set { SetIfDifferentDelegate<Func<object>>(ref vc, value); } }
+        public Func<object> ValueCreator { get { return _valueCreator; } set { SetIfDifferentDelegate<Func<object>>(ref _valueCreator, value); } }
 
-        public PropInitialValueField() : this(null) { }
+        /// <summary>
+        /// This is the same as static IPropInitialValueField UseDefault.
+        /// </summary>
+        public PropInitialValueField()
+            : this(initialValue: null, setToDefault: true, setToUndefined: false, setToNull: false, setToEmptyString: false,
+                  valueCreator: null, createNew: false, propBagResourceKey: null)
+        {
+        }
 
-        public PropInitialValueField(string initialValue, bool setToDefault = false,
-            bool setToUndefined = false, bool setToNull = false,
-            bool setToEmptyString = false, Func<object> valueCreator = null,
-            bool createNew = false, string propBagResourceKey = null)
+        public PropInitialValueField(string initialValue)
+            : this(initialValue: initialValue, setToDefault: false, setToUndefined: false, setToNull: false, setToEmptyString: false,
+          valueCreator: null, createNew: false, propBagResourceKey: null)
+        {
+        }
+
+        public PropInitialValueField
+            (
+            string initialValue,
+            bool setToDefault,
+            bool setToUndefined,
+            bool setToNull,
+            bool setToEmptyString,
+            Func<object> valueCreator,
+            bool createNew,
+            string propBagResourceKey
+            )
         {
             InitialValue = initialValue;
             SetToUndefined = setToUndefined;
@@ -85,19 +105,13 @@ namespace DRM.PropBag
             {
                 return "";
             }
-            //else if (CreateNew)
-            //{
-            //    // TODO: We need another parameter in the Create method to avoid using this 'magic' string.
-            //    string MAGIC_VAL = "-0.-0.-0";
-            //    return MAGIC_VAL;
-            //}
             else
             {
                 return InitialValue;
             }
         }
 
-        public static IPropInitialValueField UndefinedInitialValueField
+        public static IPropInitialValueField UseUndefined
         {
             get
             {
@@ -108,25 +122,104 @@ namespace DRM.PropBag
                     setToUndefined: true,
                     setToNull: false,
                     setToEmptyString: false,
-                    valueCreator: null
+                    valueCreator: null,
+                    createNew: false,
+                    propBagResourceKey: null
                     );
             }
         }
 
-        public static IPropInitialValueField UseDefaultInitialValueField
+        public static IPropInitialValueField UseDefault
+        {
+            get
+            {
+                return new PropInitialValueField();
+                    //(
+                    //initialValue: null,
+                    //setToDefault: true,
+                    //setToUndefined: false,
+                    //setToNull: false,
+                    //setToEmptyString: false,
+                    //valueCreator: null,
+                    //createNew: false,
+                    //propBagResourceKey: null
+                    //);
+            }
+        }
+
+        public static IPropInitialValueField UseNull
         {
             get
             {
                 return new PropInitialValueField
-                    (
-                    initialValue: null,
-                    setToDefault: true,
-                    setToUndefined: false,
-                    setToNull: false,
-                    setToEmptyString: false,
-                    valueCreator: null
-                    );
+                (
+                initialValue: null,
+                setToDefault: false,
+                setToUndefined: false,
+                setToNull: true,
+                setToEmptyString: false,
+                valueCreator: null,
+                createNew: false,
+                propBagResourceKey: null
+                );
             }
         }
+
+        public static IPropInitialValueField UseEmptyString
+        {
+            get
+            {
+                return new PropInitialValueField
+                (
+                initialValue: null,
+                setToDefault: false,
+                setToUndefined: false,
+                setToNull: true,
+                setToEmptyString: false,
+                valueCreator: null,
+                createNew: false,
+                propBagResourceKey: null
+                );
+            }
+        }
+
+        #region IDisposable Support
+
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // Dispose managed state (managed objects).
+                    _valueCreator = null;
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        // ~Temp() {
+        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        //   Dispose(false);
+        // }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            // GC.SuppressFinalize(this);
+        }
+
+        #endregion
+
     }
 }

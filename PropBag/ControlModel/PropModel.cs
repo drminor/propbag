@@ -3,6 +3,7 @@ using DRM.TypeSafePropertyBag;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,7 +11,10 @@ using System.Xml.Serialization;
 
 namespace DRM.PropBag
 {
-    public class PropModel : NotifyPropertyChangedBase, IEquatable<PropModel>, IPropModel
+    using PropNameType = String;
+    using PropItemSetInterface = IPropItemSet<String>;
+
+    public class PropModel : NotifyPropertyChangedBase, IEquatable<PropModel>, IPropModel, IDisposable
     {
         #region Properties
 
@@ -89,21 +93,26 @@ namespace DRM.PropBag
             set { this.SetCollection<ObservableCollection<string>, string>(ref _namespaces, value); }
         }
         
-        ObservableCollection<IPropItem> _props;
+        ObservableCollection<IPropModelItem> _props;
         [XmlArray("props")]
         [XmlArrayItem("prop")]
-        public ObservableCollection<IPropItem> Props
+        public ObservableCollection<IPropModelItem> Props
         {
             get { return _props; }
-            set { this.SetCollection<ObservableCollection<IPropItem>, IPropItem>(ref _props, value); }
+            set { this.SetCollection<ObservableCollection<IPropModelItem>, IPropModelItem>(ref _props, value); }
         }
 
         IProvidePropModels pmp;
         [XmlIgnore]
         public IProvidePropModels PropModelProvider { get { return pmp; } set { SetAlways<IProvidePropModels>(ref pmp, value); } }
 
-        object _propItemSetHandle;
-        public object PropItemSetHandle { get { return _propItemSetHandle; } set { SetAlways<object>(ref _propItemSetHandle, value); } }
+        PropItemSetInterface _propItemSet;
+        [XmlIgnore]
+        public PropItemSetInterface PropItemSet { get { return _propItemSet; } set { SetAlways<PropItemSetInterface>(ref _propItemSet, value); } }
+
+        [XmlIgnore]
+        public PropertyDescriptorCollection PropertyDescriptorCollection { get; set; }
+
 
         #endregion Other Properties
 
@@ -134,7 +143,7 @@ namespace DRM.PropBag
             RequireExplicitInitialValue = requireExplicitInitialValue;
 
             Namespaces = new ObservableCollection<string>();
-            Props = new ObservableCollection<IPropItem>();
+            Props = new ObservableCollection<IPropModelItem>();
 
             //TestObject = new SimpleExKey(100, 100);
         }
@@ -162,7 +171,7 @@ namespace DRM.PropBag
             RequireExplicitInitialValue = requireExplicitInitialValue;
 
             Namespaces = new ObservableCollection<string>();
-            Props = new ObservableCollection<IPropItem>();
+            Props = new ObservableCollection<IPropModelItem>();
 
             //TestObject = new SimpleExKey(100, 100);
         }
@@ -314,5 +323,48 @@ namespace DRM.PropBag
         }
 
         #endregion
+
+        #region IDisposable Support
+
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    //Dispose managed state (managed objects).
+                    foreach(IPropModelItem pi in Props)
+                    {
+                        pi.Dispose();
+                    }
+                    Props.Clear();
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        // ~Temp() {
+        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        //   Dispose(false);
+        // }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            // GC.SuppressFinalize(this);
+        }
+
+        #endregion
+
     }
 }
