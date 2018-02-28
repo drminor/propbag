@@ -68,7 +68,7 @@ namespace DRM.PropBagWPF
 
                 try
                 {
-                    IPropItem rpi = ProcessProp(pi, doWhenChangedHelper);
+                    IPropModelItem rpi = ProcessProp(pi, doWhenChangedHelper);
                     result.Props.Add(rpi);
                 }
                 catch (Exception e)
@@ -85,14 +85,28 @@ namespace DRM.PropBagWPF
             return null;
         }
 
-        private IPropItem ProcessProp(IPropTemplateItem pi, DoWhenChangedHelper doWhenChangedHelper)
+        private IPropModelItem ProcessProp(IPropTemplateItem pi, DoWhenChangedHelper doWhenChangedHelper)
         {
             PropStorageStrategyEnum storageStrategy = pi.StorageStrategy;
             bool typeIsSolid = pi.TypeIsSolid;
             string extraInfo = pi.ExtraInfo;
 
-            IPropItem rpi = new PropItemModel(pi.PropertyType, pi.PropertyName,
-                storageStrategy, typeIsSolid, pi.PropKind, extraInfo: extraInfo);
+            IPropModelItem rpi = new PropItemModel
+                (
+                type: pi.PropertyType,
+                name: pi.PropertyName,
+                storageStrategy: storageStrategy,
+                typeIsSolid: typeIsSolid,
+                propKind: pi.PropKind,
+                propTypeInfoField: null,
+                initialValueField: null,
+                extraInfo: extraInfo,
+                comparer: null,
+                itemType: null,
+                binderField: null,
+                mapperRequest: null,
+                propCreator: null 
+                );
 
             bool isCProp = pi.PropKind.IsCollection();
             bool foundTypeInfoField = false;

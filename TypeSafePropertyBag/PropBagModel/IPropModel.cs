@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 
 namespace DRM.TypeSafePropertyBag
 {
+    using PropNameType = String;
+    using PropItemSetInterface = IPropItemSet<String>;
+
     public interface IPropModel
     {
         string ClassName { get; set; }
@@ -10,7 +14,7 @@ namespace DRM.TypeSafePropertyBag
         PropBagTypeSafetyMode TypeSafetyMode { get; set; }
         bool RequireExplicitInitialValue { get; set; }
 
-        ObservableCollection<IPropItem> Props { get; set; }
+        ObservableCollection<IPropModelItem> Props { get; set; }
 
         DeriveFromClassModeEnum DeriveFromClassMode { get; set; }
         ObservableCollection<string> Namespaces { get; set; }
@@ -27,6 +31,8 @@ namespace DRM.TypeSafePropertyBag
 
         IProvidePropModels PropModelProvider { get; set; }
 
-        object PropItemSetHandle { get; set; }
+        PropItemSetInterface PropItemSet { get; set; }
+
+        PropertyDescriptorCollection PropertyDescriptorCollection { get; set; }
     }
 }

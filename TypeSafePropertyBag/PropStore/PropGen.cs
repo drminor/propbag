@@ -25,11 +25,11 @@ namespace DRM.TypeSafePropertyBag
         {
             get
             {
-                return TypedProp.DoSetDelegate;
+                return TypedProp.PropTemplate.DoSetDelegate;
             }
             set
             {
-                TypedProp.DoSetDelegate = value;
+                TypedProp.PropTemplate.DoSetDelegate = value;
             }
         }
 
@@ -44,7 +44,7 @@ namespace DRM.TypeSafePropertyBag
             TypedProp = genericTypedProp ?? throw new ArgumentNullException($"{nameof(genericTypedProp)} must be non-null.");
 
             //PropId = cKey.Level2Key;
-            IsPropBag = genericTypedProp.Type.IsPropBagBased();
+            IsPropBag = genericTypedProp.PropTemplate.Type.IsPropBagBased();
         }
 
         public PropGen()
@@ -88,7 +88,7 @@ namespace DRM.TypeSafePropertyBag
         void IPropDataInternal.SetTypedProp(PropNameType propertyName, IProp value)
         {
             TypedProp = value;
-            IsPropBag = value.Type.IsPropBagBased();
+            IsPropBag = value.PropTemplate.Type.IsPropBagBased();
         }
 
         #endregion

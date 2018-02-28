@@ -2,7 +2,9 @@
 
 namespace DRM.TypeSafePropertyBag
 {
-    public interface IPropItem
+    using PropNameType = String;
+
+    public interface IPropModelItem : IDisposable
     {
         IPropBinderField BinderField { get; set; }
         Type CollectionType { get; set; }
@@ -21,5 +23,9 @@ namespace DRM.TypeSafePropertyBag
         ITypeInfoField PropTypeInfoField { get; set; }
         PropStorageStrategyEnum StorageStrategy { get; set; }
         bool TypeIsSolid { get; set; }
+
+        Func<PropNameType, object, bool, IPropTemplate, IProp> PropCreator { get; set; }
+
+        object InitialValueCooked { get; set; }
     }
 }

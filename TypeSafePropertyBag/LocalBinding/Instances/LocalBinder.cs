@@ -193,7 +193,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
         {
             IProp typedProp = sourcePropNode.PropData_Internal.TypedProp;
 
-            if (typedProp.StorageStrategy == PropStorageStrategyEnum.Internal)
+            if (typedProp.PropTemplate.StorageStrategy == PropStorageStrategyEnum.Internal)
             {
                 T newValue = (T)typedProp.TypedValueAsObject;
                 bool result = UpdateTarget(bindingTarget, newValue);
@@ -268,7 +268,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
             if (propStoreAccessService.TryGetValue(propBag, propId, out IPropData genProp))
             {
-                storageStrategy = genProp.TypedProp.StorageStrategy;
+                storageStrategy = genProp.TypedProp.PropTemplate.StorageStrategy;
             }
             else
             {
