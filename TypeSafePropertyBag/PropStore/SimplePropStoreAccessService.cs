@@ -1311,12 +1311,8 @@ namespace DRM.TypeSafePropertyBag
         {
             CheckObjectRef(propBag);
 
-            //string bindingPath = bindingInfo.PropertyPath.Path;
-
             if (_genViewManagerProviders == null)
                 _genViewManagerProviders = new ViewManagerProviderCollection();
-
-            //IViewManagerProviderKey viewManagerProviderKey = new ViewManagerProviderKey(bindingInfo, mr, propBagMapperCreator, viewBuilder);
 
             IProvideACViewManager result = _genViewManagerProviders.GetOrAdd(viewManagerProviderKey, CViewGenManagerProviderFactory);
             return result;
