@@ -4,24 +4,20 @@ namespace DRM.TypeSafePropertyBag
 {
     public interface IPropItemSet<L2TRaw>
     {
-        //int MaxPropsPerObject { get; }
-
-        //bool IsFixed { get; }
-        //void Fix();
-
         int Count { get; }
 
-        void Add(L2TRaw propertyName, IPropTemplate propTemplate);
+        void Add(L2TRaw propertyName, IPropModelItem propModelItem);
 
         bool Contains(L2TRaw propertyName);
-        bool Contains(IPropTemplate propTemplate);
+        bool Contains(IPropModelItem propModelItem);
 
         IEnumerable<L2TRaw> GetPropNames();
-        IEnumerable<IPropTemplate> GetPropTemplates();
+        IEnumerable<IPropModelItem> GetPropItems();
 
-        bool TryGetPropTemplate(L2TRaw propertyName, out IPropTemplate propTemplate);
-        bool TryRemove(L2TRaw propertyName, out IPropTemplate propTemplate);
+        bool TryGetPropModelItem(L2TRaw propertyName, out IPropModelItem propModelItem);
+        bool TryRemove(L2TRaw propertyName, out IPropModelItem propModelItem);
 
         void Clear();
     }
+
 }
