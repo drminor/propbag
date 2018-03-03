@@ -40,7 +40,8 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
             SourceKind = SourceKindEnum.TerminalNode;
             IDisposable disable = propBag.SubscribeToPropChanged<T>(PropertyChangedWithTVals_Handler, pathElement);
-            PropChangedTypedUnsubscriber = disable;
+
+            PropChangedTypedUnsubscriber = disable ?? throw new InvalidOperationException($"Could not subscribe to EventHandler<PcTypedEventArgs<{typeof(T)}>> PropertyChangedWithTVals for {PathElement}.");
         }
 
         private void PropertyChangedWithTVals_Handler(object sender, PcTypedEventArgs<T> e)
@@ -71,7 +72,8 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
             SourceKind = sourceKind;
             IDisposable disable = propBag.SubscribeToPropChanged(PropertyChangedWithGenVals_Handler, PathElement, typeof(T));
-            PropChangeGenUnsubscriber = disable;
+
+            PropChangeGenUnsubscriber = disable ?? throw new InvalidOperationException($"Could not subscribe to EventHandler<PcGenEventArgs> PropertyChangedWithGenVals for {PathElement}.");
         }
 
         private void PropertyChangedWithGenVals_Handler(object sender, PcGenEventArgs e)
@@ -92,14 +94,18 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
             SourceKind = sourceKind;
 
-            if(sourceKind == SourceKindEnum.AbsRoot)
+            IDisposable disable;
+
+            if (sourceKind == SourceKindEnum.AbsRoot)
             {
                 // TODO: Subscribe to RootNodeChanged instead.
-                ParentChangedSource = notifyParentChangedSource.SubscribeToParentNodeHasChanged(ParentNodeHasChanged_Handler);
+                disable = notifyParentChangedSource.SubscribeToParentNodeHasChanged(ParentNodeHasChanged_Handler);
+                ParentChangedSource = disable ?? throw new InvalidOperationException($"Could not subscribe to EventHandler<PSNodeParentChangedEventArgs> ParentNodeHasChanged for {PathElement}.");
             }
             else
             {
-                ParentChangedSource = notifyParentChangedSource.SubscribeToParentNodeHasChanged(ParentNodeHasChanged_Handler);
+                disable = notifyParentChangedSource.SubscribeToParentNodeHasChanged(ParentNodeHasChanged_Handler);
+                ParentChangedSource = disable ?? throw new InvalidOperationException($"Could not subscribe to EventHandler<PSNodeParentChangedEventArgs> ParentNodeHasChanged for {PathElement}.");
             }
         }
 
