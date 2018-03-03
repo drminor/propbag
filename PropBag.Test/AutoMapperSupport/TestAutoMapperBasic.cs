@@ -6,6 +6,9 @@ using System;
 
 namespace PropBagLib.Tests.AutoMapperSupport
 {
+    using PropNameType = String;
+    using PropModelType = IPropModel<String>;
+
     [TestFixtureAttribute]
     public class TestAutoMapperBasic
     {
@@ -169,6 +172,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 deriveFrom: DeriveFromClassModeEnum.PropBag,
                 targetType: null,
                 propFactory: propFactory,
+                propFactoryType: null,
                 propModelProvider: null,
                 typeSafetyMode: PropBagTypeSafetyMode.Tight,
                 deferMethodRefResolution: true,
@@ -185,20 +189,20 @@ namespace PropBagLib.Tests.AutoMapperSupport
             PropItemModel propItem = new PropItemModel(type: typeof(Guid), name: "ProductId",
                 storageStrategy: PropStorageStrategyEnum.Internal, propKind: PropKindEnum.Prop,
                 initialValueField: pivf);
-            result.Props.Add(propItem);
+            result.Add(propItem.PropertyName, propItem);
 
             // Amount (int - default)
             propItem = new PropItemModel(type: typeof(int), name: "Amount",
                 storageStrategy: PropStorageStrategyEnum.Internal, propKind: PropKindEnum.Prop,
                 initialValueField: pivf);
-            result.Props.Add(propItem);
+            result.Add(propItem.PropertyName, propItem);
 
 
             // Size (double - default)
             propItem = new PropItemModel(type: typeof(double), name: "Size",
                 storageStrategy: PropStorageStrategyEnum.Internal, propKind: PropKindEnum.Prop,
                 initialValueField: pivf);
-            result.Props.Add(propItem);
+            result.Add(propItem.PropertyName, propItem);
 
             // Deep (MyModel4 - null)
             pivf = PropInitialValueField.UseNull;
@@ -206,7 +210,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
             propItem = new PropItemModel(type: typeof(MyModel4), name: "Deep",
                 storageStrategy: PropStorageStrategyEnum.Internal, propKind: PropKindEnum.Prop,
                 initialValueField: pivf);
-            result.Props.Add(propItem);
+            result.Add(propItem.PropertyName, propItem);
 
             return result;
         }

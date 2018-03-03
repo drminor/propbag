@@ -10,10 +10,13 @@ using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBag.ClassGenerator
 {
+    using PropNameType = String;
+    using PropModelType = IPropModel<String>;
+
     public class T4Support
     {
 
-        static public string GetBaseClassName(IPropModel propModel)
+        static public string GetBaseClassName(PropModelType propModel)
         {
             switch(propModel.DeriveFromClassMode)
             {

@@ -4,16 +4,19 @@ using System.Collections.Generic;
 
 namespace DRM.PropBag.TypeWrapper
 {
+    using PropNameType = String;
+    using PropModelType = IPropModel<String>;
+
     public struct NewTypeRequest : IEquatable<NewTypeRequest>
     {
-        public NewTypeRequest(IPropModel propModel, Type typeToWrap, string className)
+        public NewTypeRequest(PropModelType propModel, Type typeToWrap, string className)
         {
             PropModel = propModel ?? throw new ArgumentNullException(nameof(propModel));
             TypeToWrap = typeToWrap;
             ClassName = className;
         }
 
-        public IPropModel PropModel { get; }
+        public PropModelType PropModel { get; }
         public Type TypeToWrap { get; }
         public string ClassName { get; }
 
@@ -26,7 +29,7 @@ namespace DRM.PropBag.TypeWrapper
         // TODO: check how to compare two IPropModels.
         public bool Equals(NewTypeRequest other)
         {
-            return EqualityComparer<IPropModel>.Default.Equals(PropModel, other.PropModel) &&
+            return EqualityComparer<PropModelType>.Default.Equals(PropModel, other.PropModel) &&
                    EqualityComparer<Type>.Default.Equals(TypeToWrap, other.TypeToWrap) &&
                    ClassName == other.ClassName;
         }
@@ -35,7 +38,7 @@ namespace DRM.PropBag.TypeWrapper
         {
             var hashCode = 55120964;
             hashCode = hashCode * -1521134295 + base.GetHashCode();
-            hashCode = hashCode * -1521134295 + EqualityComparer<IPropModel>.Default.GetHashCode(PropModel);
+            hashCode = hashCode * -1521134295 + EqualityComparer<PropModelType>.Default.GetHashCode(PropModel);
             hashCode = hashCode * -1521134295 + EqualityComparer<Type>.Default.GetHashCode(TypeToWrap);
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(ClassName);
             return hashCode;

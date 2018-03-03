@@ -6,6 +6,9 @@ using System.Reflection;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
+    using PropNameType = String;
+    using PropModelType = IPropModel<String>;
+
     public class ExtraMembersConfigFinalStep<TSource, TDestination>
         : ICreateMappingExpressions<TSource, TDestination> where TDestination : class, IPropBag
     {
@@ -22,7 +25,7 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public void BuildExtraMemberConfig(IPropBagMapperKey<TSource, TDestination> mapRequest, IMapperConfigurationExpression cfg)
         {
-            IPropModel propModel = mapRequest.DestinationTypeDef.PropModel;
+            PropModelType propModel = mapRequest.DestinationTypeDef.PropModel;
 
             IEnumerable<MemberInfo> extraMembers = new ExtraMembersProvider().GetExtraMembers(propModel);
 

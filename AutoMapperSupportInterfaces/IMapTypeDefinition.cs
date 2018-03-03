@@ -3,6 +3,9 @@ using System;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
+    using PropNameType = String;
+    using PropModelType = IPropModel<String>;
+
     /// <summary>
     /// This is the typed version of the IMapTypeDefinitionGen interface.
     /// It allows one to create a MapTypeDefinition using a type known at compile time.
@@ -14,6 +17,8 @@ namespace DRM.PropBag.AutoMapperSupport
 
     public interface IMapTypeDefinitionGen : IEquatable<IMapTypeDefinitionGen>
     {
+        string FullClassName { get; }
+
         /// <summary>
         /// The type of object that will serve as the source or destination in
         /// Mapping operations. This is the type parameter in the Generic IMapTypeDefinition[T]
@@ -28,7 +33,7 @@ namespace DRM.PropBag.AutoMapperSupport
         /// <summary>
         /// The PropModel to use when constructing new instances of objects of Type: Type or of Type: NewWrapperType.
         /// </summary>
-        IPropModel PropModel { get; }
+        PropModelType PropModel { get; }
 
         /// <summary>
         /// The PropFactory to use when constructing new instances.

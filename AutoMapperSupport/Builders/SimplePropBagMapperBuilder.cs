@@ -6,6 +6,9 @@ using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
+    using PropNameType = String;
+    using PropModelType = IPropModel<String>;
+
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
 
     public class SimplePropBagMapperBuilder<TSource, TDestination> : IBuildPropBagMapper<TSource, TDestination> where TDestination : class, IPropBag
@@ -44,7 +47,7 @@ namespace DRM.PropBag.AutoMapperSupport
                 // or can we hand this off to the IBuildMapperConfigurations interface?
 
                 // Create the Proxy/Wrapper type if it does not already exist.
-                IPropModel propModel = mapRequest.DestinationTypeDef.PropModel;
+                PropModelType propModel = mapRequest.DestinationTypeDef.PropModel;
 
                 // TODO: Can we avoid setting the NewWrapperType on the existing instance
                 // of the mapRequest?

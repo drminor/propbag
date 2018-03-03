@@ -1,9 +1,13 @@
 ﻿using DRM.PropBag;
 using DRM.TypeSafePropertyBag;
 using PropBagTestApp.Infra;
+using System;
 
 namespace PropBagTestApp.ViewModels
 {
+    using PropNameType = String;
+    using PropModelType = IPropModel<String>;
+
     public class ReferenceBindViewModelPB : PropBag
     {
 
@@ -25,7 +29,7 @@ namespace PropBagTestApp.ViewModels
         //}
 
         // TODO: AAA
-        public ReferenceBindViewModelPB(IPropModel pm) : base(pm, null, null, null)
+        public ReferenceBindViewModelPB(PropModelType pm) : base(pm, null, null, null)
         {
 
         }

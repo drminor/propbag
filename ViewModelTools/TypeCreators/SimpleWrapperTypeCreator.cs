@@ -5,6 +5,9 @@ using System;
 
 namespace DRM.PropBag.ViewModelTools
 {
+    using PropNameType = String;
+    using PropModelType = IPropModel<String>;
+
     public class SimpleWrapperTypeCreator : ICreateWrapperTypes
     {
         #region Private Members
@@ -50,12 +53,12 @@ namespace DRM.PropBag.ViewModelTools
 
         //public Type GetWrapperType(string resourceKey, Type typeToCreate)
         //{
-        //    IPropModel propModel = GetPropModel(resourceKey);
+        //    PropModelType propModel = GetPropModel(resourceKey);
         //    Type result = GetWrapperType(propModel, typeToCreate);
         //    return result;
         //}
 
-        public Type GetWrapperType(IPropModel propModel, Type typeToCreate)
+        public Type GetWrapperType(PropModelType propModel, Type typeToCreate)
         {
             if (!typeToCreate.IsPropBagBased())
             {
@@ -70,12 +73,12 @@ namespace DRM.PropBag.ViewModelTools
 
         //public Type GetWrapperType<BT>(string resourceKey) where BT : class, IPropBag
         //{
-        //    IPropModel propModel = GetPropModel(resourceKey);
+        //    PropModelType propModel = GetPropModel(resourceKey);
         //    Type result = GetWrapperType<BT>(propModel);
         //    return result;
         //}
 
-        public Type GetWrapperType<BT>(IPropModel propModel) where BT : class, IPropBag
+        public Type GetWrapperType<BT>(PropModelType propModel) where BT : class, IPropBag
         {
 
             TypeDescription td = _typeDescCachingService.GetOrAdd(new NewTypeRequest(propModel, typeof(BT), null));
@@ -93,14 +96,14 @@ namespace DRM.PropBag.ViewModelTools
 
         //#region PropModel Lookup Support
 
-        //private IPropModel GetPropModel(string resourceKey)
+        //private PropModelType GetPropModel(string resourceKey)
         //{
         //    if (!HasPropModelLookupService)
         //    {
         //        throw new InvalidOperationException(NO_PROPMODEL_LOOKUP_SERVICES);
         //    }
 
-        //    IPropModel propModel = _propModelProvider.GetPropModel(resourceKey);
+        //    PropModelType propModel = _propModelProvider.GetPropModel(resourceKey);
         //    return propModel;
         //}
 

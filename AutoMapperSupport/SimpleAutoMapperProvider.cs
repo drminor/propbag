@@ -6,6 +6,9 @@ using System.Threading;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
+    using PropNameType = String;
+    using PropModelType = IPropModel<String>;
+
     public class SimpleAutoMapperProvider : IProvideAutoMappers, IDisposable
     {
         #region Private Members
@@ -36,12 +39,12 @@ namespace DRM.PropBag.AutoMapperSupport
 
         #region Public Methods
 
-        public IPropBagMapperKeyGen RegisterMapperRequest(IPropModel propModel, Type sourceType, string configPackageName)
+        public IPropBagMapperKeyGen RegisterMapperRequest(PropModelType propModel, Type sourceType, string configPackageName)
         {
             Type targetType = propModel.TargetType;
 
-            RegisterMapperRequestDelegate x = GetTheRegisterMapperRequestDelegate(sourceType, targetType);
-            IPropBagMapperKeyGen result = x(propModel, targetType, configPackageName, this);
+            RegisterMapperRequestDelegate submitMapperRequest = GetTheRegisterMapperRequestDelegate(sourceType, targetType);
+            IPropBagMapperKeyGen result = submitMapperRequest(propModel, targetType, configPackageName, this);
 
             return result;
         }
@@ -49,7 +52,7 @@ namespace DRM.PropBag.AutoMapperSupport
         // TODO: Consider adding a method that takes a IConfigureAMapper instead of a configPackageName.
         public IPropBagMapperKey<TSource, TDestination> RegisterMapperRequest<TSource, TDestination>
             (
-            IPropModel propModel,
+            PropModelType propModel,
             Type targetType,
             string configPackageName,
             IHaveAMapperConfigurationStep configStarterForThisRequest = null,
@@ -60,6 +63,8 @@ namespace DRM.PropBag.AutoMapperSupport
             // TODO: check to make sure that the "configStarterForThisRequest" value is being sent to the correct place.
 
             // TODO: Consider making the caller supply a IBuildMapperConfigurations "service."
+
+
             // Create a Configuration Builder for this request.
             IBuildMapperConfigurations<TSource, TDestination> propBagMapperConfigurationBuilder
                 = new SimpleMapperConfigurationBuilder<TSource, TDestination>(configStarter: configStarterForThisRequest);
@@ -165,7 +170,7 @@ namespace DRM.PropBag.AutoMapperSupport
         }
 
         internal delegate IPropBagMapperKeyGen RegisterMapperRequestDelegate
-            (IPropModel propModel, Type targetType, string configPackageName, IProvideAutoMappers autoMapperProvider);
+            (PropModelType propModel, Type targetType, string configPackageName, IProvideAutoMappers autoMapperProvider);
 
         /// <summary>
         /// Used to create Delegates when the type of the value is not known at run time.
@@ -187,7 +192,7 @@ namespace DRM.PropBag.AutoMapperSupport
 
             // The Typed Method
             static IPropBagMapperKey<TSource, TDestination> RegisterMapperRequest<TSource, TDestination>
-                (IPropModel propModel, Type targetType, string configPackageName, IProvideAutoMappers autoMapperProvider) where TDestination : class, IPropBag
+                (PropModelType propModel, Type targetType, string configPackageName, IProvideAutoMappers autoMapperProvider) where TDestination : class, IPropBag
             {
 
                 IPropBagMapperKey<TSource, TDestination> result

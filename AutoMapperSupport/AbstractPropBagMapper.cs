@@ -10,6 +10,7 @@ using ObjectSizeDiagnostics;
 namespace DRM.PropBag.AutoMapperSupport
 {
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
+    using PropModelType = IPropModel<String>;
 
     public abstract class AbstractPropBagMapper<TSource, TDestination> 
         : IPropBagMapper<TSource, TDestination> where TDestination : class, IPropBag
@@ -19,7 +20,7 @@ namespace DRM.PropBag.AutoMapperSupport
         public Type SourceType { get; }
         public Type DestinationType { get; }
 
-        public IPropModel PropModel { get; }
+        public PropModelType PropModel { get; }
         public Type RunTimeType { get; }
 
         IPropFactory PropFactory { get; }
@@ -207,7 +208,7 @@ namespace DRM.PropBag.AutoMapperSupport
         }
 
         // Regular Instantiation using the PropModel. 
-        private TDestination GetNewDestination(Type destinationOrProxyType, IPropModel propModel, PSAccessServiceCreatorInterface storeAccessCreator,  IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
+        private TDestination GetNewDestination(Type destinationOrProxyType, PropModelType propModel, PSAccessServiceCreatorInterface storeAccessCreator,  IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
         {
             try
             {

@@ -9,6 +9,9 @@ using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBag.ClassGenerator
 {
+    using PropNameType = String;
+    using PropModelType = IPropModel<String>;
+
     /// <summary>
     /// Extends the DRM.PropBag.XMLModel.PropModel class.
     /// </summary>
@@ -34,7 +37,7 @@ namespace DRM.PropBag.ClassGenerator
 
         }
 
-        public static DRM.PropBag.XMLModel.PropDoWhenChanged PrepareDoWhenChangedField(this IPropModel pm, PropItem pi)
+        public static DRM.PropBag.XMLModel.PropDoWhenChanged PrepareDoWhenChangedField(this PropModelType pm, PropItem pi)
         {
             DRM.PropBag.XMLModel.PropDoWhenChanged dwcf = pi.DoWhenChangedField;
             if (dwcf == null) return new DRM.PropBag.XMLModel.PropDoWhenChanged("null");

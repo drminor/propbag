@@ -4,9 +4,12 @@ using System;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
+    using PropNameType = String;
+    using PropModelType = IPropModel<String>;
+
     public class SimpleMapTypeDefinitionProvider : IMapTypeDefinitionProvider
     {
-        public IMapTypeDefinition<T> GetTypeDescription<T>(IPropModel propModel, Type typeToWrap, IPropFactory propFactory, string fullClassName)
+        public IMapTypeDefinition<T> GetTypeDescription<T>(PropModelType propModel, Type typeToWrap, IPropFactory propFactory, string fullClassName)
         {
             if (typeof(T).IsPropBagBased())
             {
@@ -15,7 +18,7 @@ namespace DRM.PropBag.AutoMapperSupport
             }
             else
             {
-                return new MapTypeDefinition<T>();
+                return new MapTypeDefinition<T>(typeof(T).FullName);
             }
         }
     }

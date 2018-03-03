@@ -4,6 +4,9 @@ using System.Collections.Generic;
 
 namespace DRM.PropBag.TypeWrapper.TypeDesc
 {
+    using PropNameType = String;
+    using PropModelType = IPropModel<String>;
+
     public class SimpleTypeDescriptionProvider : ITypeDescriptionProvider
     {
         private string _defaultNamespaceName { get; }
@@ -12,7 +15,7 @@ namespace DRM.PropBag.TypeWrapper.TypeDesc
         {
         }
 
-        public TypeDescription GetTypeDescription(IPropModel propModel, Type typeToWrap, string className)
+        public TypeDescription GetTypeDescription(PropModelType propModel, Type typeToWrap, string className)
         {
             NewTypeRequest request = new NewTypeRequest(propModel, typeToWrap, className);
 
@@ -33,11 +36,11 @@ namespace DRM.PropBag.TypeWrapper.TypeDesc
             return result;
         }
 
-        private IEnumerable<PropertyDescription> GetPropertyDescriptions(IPropModel pm)
+        private IEnumerable<PropertyDescription> GetPropertyDescriptions(PropModelType pm)
         {
             List<PropertyDescription> result = new List<PropertyDescription>();
 
-            foreach (IPropModelItem pi in pm.Props)
+            foreach (IPropModelItem pi in pm.GetPropItems())
             {
                 result.Add(new PropertyDescription(pi.PropertyName, pi.PropertyType, canWrite: true));
             }

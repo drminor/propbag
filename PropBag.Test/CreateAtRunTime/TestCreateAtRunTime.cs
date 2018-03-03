@@ -26,6 +26,8 @@ namespace PropBagLib.Tests
         [Test]
         public void Test1()
         {
+            AutoMapperHelpers ourHelper = new AutoMapperHelpers();
+            IPropFactory propFactory_V1 = ourHelper.GetNewPropFactory_V1();
 
             PropModel pm = new PropModel
                 (
@@ -33,7 +35,8 @@ namespace PropBagLib.Tests
                 namespaceName: "PropBagLib.Tests",
                 deriveFrom: DeriveFromClassModeEnum.PropBag,
                 targetType: null,
-                propFactory: null,
+                propFactory: propFactory_V1,
+                propFactoryType: null,
                 propModelProvider: null,
                 typeSafetyMode: PropBagTypeSafetyMode.AllPropsMustBeRegistered,
                 deferMethodRefResolution: true,
@@ -42,13 +45,10 @@ namespace PropBagLib.Tests
             PropItemModel pi = new PropItemModel(typeof(string), "PropString",
                 PropStorageStrategyEnum.Internal, propKind: PropKindEnum.Prop, initialValueField: new PropInitialValueField("Initial Value"));
 
-            pm.Props.Add(pi);
+            pm.Add(pi.PropertyName, pi);
 
-            AutoMapperHelpers ourHelper = new AutoMapperHelpers();
-            IPropFactory propFactory_V1 = ourHelper.GetNewPropFactory_V1();
 
-            // TODO: AAA
-            mod1 = new CreateAtRunTimeModel(pm, ourHelper.StoreAccessCreator, propFactory_V1);
+            mod1 = new CreateAtRunTimeModel(pm, ourHelper.StoreAccessCreator);
 
             Assert.That(mod1, Is.Not.EqualTo(null), "Expected the CreateAtRunTimeModel to have been created.");
 

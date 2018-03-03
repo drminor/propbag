@@ -322,7 +322,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests
             remotePropModelProvider.LoadPropModels(resourceFolderPath, pbTemplateFilenames);
             _mct.MeasureAndReport("After LoadPropModels");
 
-            //IPropModel test = remotePropModelProvider.GetPropModel("PersonVM");
+            //PropModelType test = remotePropModelProvider.GetPropModel("PersonVM");
             //SimpleExKey testObject = test.TestObject;
         }
 

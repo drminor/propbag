@@ -3,12 +3,15 @@ using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
+    using PropNameType = String;
+    using PropModelType = IPropModel<String>;
+
     // TODO: Change Register<xxx> to Submit<xxx>. (We are submitting a notice that we will need this at some point -- remember: GetMapper creates a mapper for all pending requests on first access to any request.)
     public interface IProvideAutoMappers : ICachePropBagMappers
     {
         IPropBagMapperKey<TSource, TDestination> RegisterMapperRequest<TSource, TDestination>
             (
-            IPropModel propModel,
+            PropModelType propModel,
             Type typeToWrap,
             string configPackageName,
             IHaveAMapperConfigurationStep configStarterForThisRequest = null,
@@ -19,7 +22,7 @@ namespace DRM.PropBag.AutoMapperSupport
         // The PropModel supplies the TDestination type and the Type that will be wrapped.
         IPropBagMapperKeyGen RegisterMapperRequest
             (
-            IPropModel propModel,
+            PropModelType propModel,
             Type sourceType,
             string configPackageName
             );

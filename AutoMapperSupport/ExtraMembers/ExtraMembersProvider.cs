@@ -5,16 +5,19 @@ using System.Reflection;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
+    using PropNameType = String;
+    using PropModelType = IPropModel<String>;
+
     /// <summary>
     /// Extends objects that implement the DRM.PropBag.IPropBag interface.
     /// </summary>
     public class ExtraMembersProvider
     {
-        public IEnumerable<MemberInfo> GetExtraMembers(IPropModel pm)
+        public IEnumerable<MemberInfo> GetExtraMembers(PropModelType pm)
         {
             List<MemberInfo> result = new List<MemberInfo>();
 
-            foreach (IPropModelItem propItem in pm.Props)
+            foreach (IPropModelItem propItem in pm.GetPropItems())
             {
                 string propertyName = propItem.PropertyName;
                 Type propertyType = propItem.PropertyType;

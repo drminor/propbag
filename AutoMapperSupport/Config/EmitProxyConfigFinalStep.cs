@@ -4,6 +4,9 @@ using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
+    using PropNameType = String;
+    using PropModelType = IPropModel<String>;
+
     /// <summary>
     /// For use with EmitProxy. EmitProxy produces "real" properties,
     /// so no custom AutoMapper support is required.
@@ -25,7 +28,7 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public void BuildEmitProxyConfig(IPropBagMapperKey<TSource, TDestination> mapRequest, IMapperConfigurationExpression cfg)
         {
-            IPropModel propModel = mapRequest.DestinationTypeDef.PropModel;
+            PropModelType propModel = mapRequest.DestinationTypeDef.PropModel;
 
             Func<TDestination, TSource> regularInstanceCreator = mapRequest.MappingConfiguration.SourceConstructor;
 

@@ -1,7 +1,5 @@
 ﻿using DRM.PropBag.AutoMapperSupport;
-using DRM.PropBag.ViewModelTools;
-using DRM.PropBagControlsWPF;
-using DRM.PropBagWPF;
+
 using DRM.TypeSafePropertyBag;
 using PropBagTestApp.Infra;
 using PropBagTestApp.Models;
@@ -11,6 +9,9 @@ using System.Windows;
 
 namespace PropBagTestApp.View
 {
+    using PropNameType = String;
+    using PropModelType = IPropModel<String>;
+
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
 
     /// <summary>
@@ -143,7 +144,7 @@ namespace PropBagTestApp.View
                 {
                     IProvidePropModels propModelProvider = PropStoreServicesForThisApp.PropModelProvider;
 
-                    IPropModel propModel = propModelProvider.GetPropModel(REFERENCE_BIND_VM_RES_KEY);
+                    PropModelType propModel = propModelProvider.GetPropModel(REFERENCE_BIND_VM_RES_KEY);
 
 
                     IPropBagMapperKey<MyModel, ReferenceBindViewModelPB> mapperRequest

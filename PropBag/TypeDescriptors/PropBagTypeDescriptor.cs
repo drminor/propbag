@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 
 namespace DRM.PropBag.TypeDescriptors
 {
+    using PropNameType = String;
+    using PropModelType = IPropModel<String>;
+
     public class PropBagTypeDescriptor<BagT> : PropertyDescriptor, IPropBagTypeDescriptor where BagT : IPropBag
     {
 
@@ -104,7 +107,7 @@ namespace DRM.PropBag.TypeDescriptors
             return result;
         }
 
-        static private string GetPropertyName(string className, IPropModel propModel)
+        static private string GetPropertyName(string className, PropModelType propModel)
         {
             return className ?? propModel.ClassName;
         }
@@ -116,9 +119,9 @@ namespace DRM.PropBag.TypeDescriptors
 
         public PropertyDescriptor[] BuildPropDescriptors(PropModel pm/*, IPropFactory pf*/)
         {
-            PropertyDescriptor[] descriptors = new PropertyDescriptor[pm.Props.Count];
+            PropertyDescriptor[] descriptors = new PropertyDescriptor[pm.Count];
 
-            List<IPropModelItem> propItems = pm.Props.ToList();
+            List<IPropModelItem> propItems = pm.GetPropItems().ToList();
 
             for (int pdPtr = 0; pdPtr < propItems.Count; pdPtr++)
             {

@@ -9,6 +9,10 @@ using System.Linq;
 
 namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
 {
+    using PropNameType = String;
+    using PropModelType = IPropModel<String>;
+
+
     [TestFixture(TestName = "AAA No Resources Run1")]
     [NonParallelizable]
     public class AAEmptyTest1 : BasicVM
@@ -201,7 +205,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
     [NonParallelizable]
     public class BBGetPropModel : BasicVM
     {
-        IPropModel personVM_PropModel = null;
+        PropModelType personVM_PropModel = null;
 
         protected override void Because_Of()
         {
@@ -217,7 +221,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
         [Test]
         public void BBGetPropModel_PersonPropModelHasAllTheProps()
         {
-            Assert.That(personVM_PropModel.Props.Count == 5);
+            Assert.That(personVM_PropModel.Count == 5);
         }
 
         [OneTimeSetUp]
@@ -240,7 +244,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
     [NonParallelizable]
     public class CreateVM : BasicVM
     {
-        IPropModel mainWindowPropModel;
+        PropModelType mainWindowPropModel;
         MainWindowViewModel mainWindowViewModel;
 
         protected override Action EstablishContext()
@@ -270,7 +274,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
         [Test]
         public void CreateVM_MainWindowPropModelHasAllTheProps()
         {
-            Assert.That(mainWindowPropModel.Props.Count == 4, "mainWindowPropModel does not have 4 PropItems.");
+            Assert.That(mainWindowPropModel.Count == 4, "mainWindowPropModel does not have 4 PropItems.");
         }
 
         //[Test]
@@ -300,7 +304,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
     [NonParallelizable]
     public class CreateVM2 : BasicVM
     {
-        IPropModel mainWindowPropModel;
+        PropModelType mainWindowPropModel;
         MainWindowViewModel mainWindowViewModel;
 
         protected override Action EstablishContext()
@@ -342,7 +346,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
         [Test]
         public void CreateVM2_MainWindowPropModelHasAllTheProps()
         {
-            Assert.That(mainWindowPropModel.Props.Count == 4, "mainWindowPropModel does not have 4 PropItems.");
+            Assert.That(mainWindowPropModel.Count == 4, "mainWindowPropModel does not have 4 PropItems.");
         }
 
         [Test]
@@ -372,7 +376,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
     [NonParallelizable]
     public class CreateVM3 : BasicVM
     {
-        IPropModel mainWindowPropModel;
+        PropModelType mainWindowPropModel;
         MainWindowViewModel mainWindowViewModel;
 
         protected override Action EstablishContext()
@@ -402,7 +406,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
         [Test]
         public void CreateVM3_MainWindowPropModelHasAllTheProps()
         {
-            Assert.That(mainWindowPropModel.Props.Count == 4, "mainWindowPropModel does not have 4 PropItems.");
+            Assert.That(mainWindowPropModel.Count == 4, "mainWindowPropModel does not have 4 PropItems.");
         }
 
         [Test]
