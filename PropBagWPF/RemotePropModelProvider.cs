@@ -9,6 +9,9 @@ using System.Windows;
 
 namespace DRM.PropBagWPF
 {
+    using PropNameType = String;
+    using PropModelType = IPropModel<String>;
+
     public class RemotePropModelProvider : IProvidePropModels
     {
         #region Private Fields
@@ -20,7 +23,7 @@ namespace DRM.PropBagWPF
 
         public string MapperConfigPackageNameSuffix { get; }
 
-        private Dictionary<string, IPropModel> _propModelCache;
+        private Dictionary<string, PropModelType> _propModelCache;
         private Dictionary<string, IMapperRequest> _mapperRequestCache;
 
         #endregion
@@ -40,7 +43,7 @@ namespace DRM.PropBagWPF
             _propFactoryFactory = propFactoryFactory;
             MapperConfigPackageNameSuffix = mapperConfigPackageNameSuffix;
 
-            _propModelCache = new Dictionary<string, IPropModel>();
+            _propModelCache = new Dictionary<string, PropModelType>();
             _mapperRequestCache = new Dictionary<string, IMapperRequest>();
         }
 
@@ -48,9 +51,9 @@ namespace DRM.PropBagWPF
 
         #region Bulk Parsing
 
-        public IDictionary<string, IPropModel> LoadPropModels(string basePath, string[] filenames)
+        public IDictionary<string, PropModelType> LoadPropModels(string basePath, string[] filenames)
         {
-            Dictionary<string, IPropModel> result = new Dictionary<string, IPropModel>();
+            Dictionary<string, PropModelType> result = new Dictionary<string, PropModelType>();
 
             Thread thread = new Thread(() =>
             {
@@ -62,7 +65,7 @@ namespace DRM.PropBagWPF
                     {
                         if(kvp.Value is PropBagTemplate pbt)
                         {
-                            IPropModel propModel = _pbtParser.ParsePropModel(pbt);
+                            PropModelType propModel = _pbtParser.ParsePropModel(pbt);
 
                             result.Add((string) kvp.Key, propModel);
                             _propModelCache.Add((string)kvp.Key, propModel);
@@ -123,14 +126,14 @@ namespace DRM.PropBagWPF
         public bool CanFindPropBagTemplateWithJustKey => true;
         public bool HasPbtLookupResources => true;
 
-        public IPropModel GetPropModel(string resourceKey)
+        public PropModelType GetPropModel(string resourceKey)
         {
             if(_propModelCache == null)
             {
                 throw new InvalidOperationException("You must first call LoadPropModels.");
             }
 
-            if(_propModelCache.TryGetValue(resourceKey, out IPropModel propModel))
+            if(_propModelCache.TryGetValue(resourceKey, out PropModelType propModel))
             {
                 return FixUpPropFactory(propModel, _propFactoryFactory);
             }
@@ -140,7 +143,7 @@ namespace DRM.PropBagWPF
             }
         }
 
-        private IPropModel FixUpPropFactory(IPropModel propModel, IPropFactoryFactory propFactoryGenerator)
+        private PropModelType FixUpPropFactory(PropModelType propModel, IPropFactoryFactory propFactoryGenerator)
         {
             // Include a reference to this PropModelProvider
             propModel.PropModelProvider = this;

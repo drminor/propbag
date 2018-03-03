@@ -5,6 +5,9 @@ using DRM.PropBag.AutoMapperSupport;
 
 namespace DRM.PropBagWPF
 {
+    using PropNameType = String;
+    using PropModelType = IPropModel<String>;
+
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
 
     /// <summary>
@@ -44,7 +47,7 @@ namespace DRM.PropBagWPF
 
         public object GetNewViewModel(string resourceKey)
         {
-            IPropModel pm = _propModelProvider.GetPropModel(resourceKey);
+            PropModelType pm = _propModelProvider.GetPropModel(resourceKey);
             object result = GetNewViewModel(pm, null, null);
             return result;
         }
@@ -57,12 +60,12 @@ namespace DRM.PropBagWPF
         /// <returns></returns>
         public object GetNewViewModel(string resourceKey, IPropFactory propFactory)
         {
-            IPropModel pm = _propModelProvider.GetPropModel(resourceKey);
+            PropModelType pm = _propModelProvider.GetPropModel(resourceKey);
             object result = GetNewViewModel(pm, propFactory, null);
             return result;
         }
 
-        private object GetNewViewModel(IPropModel pm, IPropFactory propFactory, string fullClassName)
+        private object GetNewViewModel(PropModelType pm, IPropFactory propFactory, string fullClassName)
         {
             object result = _viewModelActivator.GetNewViewModel
                 (

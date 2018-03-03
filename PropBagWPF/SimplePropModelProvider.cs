@@ -8,6 +8,9 @@ using System.Windows;
 
 namespace DRM.PropBagWPF
 {
+    using PropNameType = String;
+    using PropModelType = IPropModel<String>;
+
     public class SimplePropModelProvider : IProvidePropModels
     { 
         #region Private Fields
@@ -17,7 +20,7 @@ namespace DRM.PropBagWPF
         private IParsePropBagTemplates _pbtParser;
         private IPropFactoryFactory _propFactoryFactory;
 
-        private Dictionary<string, IPropModel> _propModelCache;
+        private Dictionary<string, PropModelType> _propModelCache;
         private Dictionary<string, IMapperRequest> _mapperRequestCache;
 
         #endregion
@@ -39,7 +42,7 @@ namespace DRM.PropBagWPF
             _propFactoryFactory = propFactoryFactory ?? throw new ArgumentNullException(nameof(propFactoryFactory));
             ResourceKeySuffix = resourceKeySuffix;
 
-            _propModelCache = new Dictionary<string, IPropModel>();
+            _propModelCache = new Dictionary<string, PropModelType>();
             _mapperRequestCache = new Dictionary<string, IMapperRequest>();
 
         }
@@ -58,28 +61,28 @@ namespace DRM.PropBagWPF
         public bool HasPbtLookupResources => _propBagTemplateProvider != null;
 
         // TODO: Add locks to this code.
-        public IPropModel GetPropModel(string resourceKey)
+        public PropModelType GetPropModel(string resourceKey)
         {
-            if(_propModelCache.TryGetValue(resourceKey, out IPropModel value))
+            if(_propModelCache.TryGetValue(resourceKey, out PropModelType value))
             {
                 return value;
             }
             else
             {
-                IPropModel result = FetchPropModel(resourceKey);
+                PropModelType result = FetchPropModel(resourceKey);
                 _propModelCache.Add(resourceKey, result);
                 return result;
             }
         }
 
-        private IPropModel FetchPropModel(string resourceKey)
+        private PropModelType FetchPropModel(string resourceKey)
         {
             try
             {
                 if (CanFindPropBagTemplateWithJustKey)
                 {
                     PropBagTemplate pbt = _propBagTemplateProvider.GetPropBagTemplate(resourceKey);
-                    IPropModel pm = _pbtParser.ParsePropModel(pbt);
+                    PropModelType pm = _pbtParser.ParsePropModel(pbt);
                     FixUpPropFactory(pm, _propFactoryFactory);
                     return pm;
                 }
@@ -104,14 +107,14 @@ namespace DRM.PropBagWPF
             }
         }
 
-        public IPropModel GetPropModel(ResourceDictionary rd, string resourceKey)
+        public PropModelType GetPropModel(ResourceDictionary rd, string resourceKey)
         {
             try
             {
                 if (HasPbtLookupResources)
                 {
                     PropBagTemplate pbt = _propBagTemplateProvider.GetPropBagTemplate(resourceKey);
-                    IPropModel pm = _pbtParser.ParsePropModel(pbt);
+                    PropModelType pm = _pbtParser.ParsePropModel(pbt);
                     FixUpPropFactory(pm, _propFactoryFactory);
                     return pm;
                 }
@@ -128,7 +131,7 @@ namespace DRM.PropBagWPF
             }
         }
 
-        private IPropModel FixUpPropFactory(IPropModel propModel, IPropFactoryFactory propFactoryGenerator)
+        private PropModelType FixUpPropFactory(PropModelType propModel, IPropFactoryFactory propFactoryGenerator)
         {
             // Include a reference to this PropModelProvider
             propModel.PropModelProvider = this;
@@ -243,12 +246,13 @@ namespace DRM.PropBagWPF
         /// </summary>
         public void ClearPropItemSets()
         {
-            foreach (var x in _propModelCache)
+            foreach (KeyValuePair<string, PropModelType> kvp in _propModelCache)
             {
-                x.Value.PropItemSet = null;
-                foreach (var y in x.Value.Props)
+                foreach (IPropModelItem pi in kvp.Value.GetPropItems())
                 {
-                    y.InitialValueCooked = null;
+                    pi.PropTemplate = null;
+                    pi.PropCreator = null;
+                    pi.InitialValueCooked = null;
                 }
             }
         }

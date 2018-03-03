@@ -1,5 +1,4 @@
 ﻿using DRM.PropBag;
-using DRM.PropBag.ViewModelTools;
 using DRM.PropBagControlsWPF;
 using DRM.TypeSafePropertyBag;
 using System;
@@ -12,6 +11,9 @@ using System.Windows.Data;
 
 namespace DRM.PropBagWPF
 {
+    using PropNameType = String;
+    using PropModelType = IPropModel<String>;
+
     public class PropBagTemplateParser : IParsePropBagTemplates
     {
         #region Constructors
@@ -24,14 +26,12 @@ namespace DRM.PropBagWPF
 
         #region Parsing Logic
 
-        public IPropModel ParsePropModel(PropBagTemplate pbt)
+        public PropModelType ParsePropModel(PropBagTemplate pbt)
         {
             if (pbt.ClassName == "PersonCollectionViewModel")
             {
                 System.Diagnostics.Debug.WriteLine($"We are processing the {nameof(pbt.ClassName)} PropItem.");
             }
-
-            //SimpleExKey test = pbt.GetTestObject();
 
             DeriveFromClassModeEnum deriveFrom = pbt.DeriveFromClassMode;
             Type targetType = pbt.TargetType;
@@ -39,12 +39,13 @@ namespace DRM.PropBagWPF
             //TypeInfoField wrapperTypeInfoField = GetWrapperTypeInfo(pbt);
             //Type targetTypeFromWTInfoField = GetTypeFromInfoField(wrapperTypeInfoField, PropKindEnum.Prop, targetType, out Type itemTypeDummy);
 
-            IPropModel result = new PropModel
+            PropModelType result = new PropModel
                 (
                 className: pbt.ClassName,
                 namespaceName: pbt.OutPutNameSpace,
                 deriveFrom: deriveFrom,
                 targetType: targetType,
+                propFactory: null,
                 propFactoryType: pbt.PropFactoryType,
                 propModelProvider: null,
                 typeSafetyMode: pbt.TypeSafetyMode,
@@ -69,7 +70,7 @@ namespace DRM.PropBagWPF
                 try
                 {
                     IPropModelItem rpi = ProcessProp(pi, doWhenChangedHelper);
-                    result.Props.Add(rpi);
+                    result.Add(rpi.PropertyName, rpi);
                 }
                 catch (Exception e)
                 {
@@ -138,32 +139,24 @@ namespace DRM.PropBagWPF
                 // Initial Value Field
                 else if (uc is InitialValueField ivf)
                 {
-                    PropInitialValueField rivf;
+                    IPropInitialValueField rivf;
 
                     // TODO: Add error handling here.
                     if (ivf.PropBagResourceKey != null)
                     {
-                        //IPropModel pm = GetPropModel(ivf.PropBagResourceKey);
-
-                        //Func<object> vc = () => _viewModelActivator.GetNewViewModel(pm, _storeAccessCreator, pi.PropertyType, pm.PropFactory ?? _defaultPropFactory, pm.FullClassName);
-
-                        rivf = new PropInitialValueField(initialValue: null, setToDefault: false, setToUndefined: false,
-                            setToEmptyString: false, setToNull: false, valueCreator: null, createNew: ivf.CreateNew, propBagResourceKey: ivf.PropBagResourceKey);
+                        rivf = PropInitialValueField.FromPropBagResourceKey(ivf.PropBagResourceKey);
                     }
                     else if (ivf.CreateNew)
                     {
-                        //Func<object> vc = () => Activator.CreateInstance(pi.PropertyType);
-                        rivf = new PropInitialValueField(initialValue: null, setToDefault: false, setToUndefined: false,
-                            setToEmptyString: false, setToNull: false, valueCreator: null, createNew: ivf.CreateNew, propBagResourceKey: ivf.PropBagResourceKey);
+                        rivf = PropInitialValueField.UseCreateNew;
                     }
                     else
                     {
                         rivf = new PropInitialValueField(ivf.InitialValue, ivf.SetToDefault, ivf.SetToUndefined,
-                            ivf.SetToNull, ivf.SetToEmptyString, valueCreator: null, createNew: false, propBagResourceKey: null);
+                            ivf.SetToNull, ivf.SetToEmptyString);
                     }
 
                     rpi.InitialValueField = rivf;
-
                 }
 
                 // Do When Changed Field
@@ -187,8 +180,7 @@ namespace DRM.PropBagWPF
                 // Comparer Field
                 else if (uc is DRM.PropBagControlsWPF.PropComparerField pcf)
                 {
-                    PropBag.PropComparerField rpcf =
-                        new PropBag.PropComparerField(pcf.ComparerFunc.Comparer, pcf.UseRefEquality);
+                    IPropComparerField rpcf = new PropBag.PropComparerField(pcf.ComparerFunc.Comparer, pcf.UseRefEquality);
 
                     rpi.ComparerField = rpcf;
                 }
@@ -196,17 +188,10 @@ namespace DRM.PropBagWPF
                 // Local Binder Field
                 else if (uc is DRM.PropBagControlsWPF.PropBinderField binderField)
                 {
-                    PropBag.PropBinderField rBinderField =
-                        new PropBag.PropBinderField(binderField.Path);
+                    IPropBinderField rBinderField = new PropBag.PropBinderField(binderField.Path);
 
                     rpi.BinderField = rBinderField;
                     rpi.MapperRequestResourceKey = binderField.MapperRequestResourceKey;
-
-                    //if (binderField.MapperRequestResourceKey != null)
-                    //{
-                    //    IMapperRequest mr = GetMapperRequest(binderField.MapperRequestResourceKey);
-                    //    rpi.MapperRequest = mr;
-                    //}
                 }
             }
 
@@ -281,11 +266,11 @@ namespace DRM.PropBagWPF
 
         private Type GetTypeFromCollInfoField(DRM.PropBagControlsWPF.TypeInfoField tif, Type propertyType, out Type itemType)
         {
-            WellKnownCollectionTypeEnum collectionType = tif?.CollectionType ?? WellKnownCollectionTypeEnum.ObservableCollectionFB;
+            WellKnownCollectionTypeEnum collectionType = tif?.CollectionType ?? WellKnownCollectionTypeEnum.ObservableCollection;
 
             switch (collectionType)
             {
-                case WellKnownCollectionTypeEnum.ObservableCollectionFB:
+                case WellKnownCollectionTypeEnum.ObservableCollection:
                     {
                         Type cType;
                         if (tif == null)
@@ -299,24 +284,16 @@ namespace DRM.PropBagWPF
                         }
                         return cType;
                     }
-                //case WellKnownCollectionTypeEnum.ObservableCollection:
-                //    {
-                //        Type cType;
-                //        if (tif == null)
-                //        {
-                //            itemType = propertyType;
-                //            cType = GetObsCollType(itemType);
-                //        }
-                //        else
-                //        {
-                //            cType = GetObsCollectionType(tif, out itemType, GetObsCollType);
-                //        }
 
-                //        return cType;
+                // Not Yet Supported
+                //case WellKnownCollectionTypeEnum.TypedEnumerable:
+                //    {
+                //        break;
                 //    }
+
                 case WellKnownCollectionTypeEnum.Enumerable:
                     {
-                        goto case WellKnownCollectionTypeEnum.ObservableCollectionFB;
+                        goto case WellKnownCollectionTypeEnum.ObservableCollection;
                     }
                 default:
                     {
@@ -387,7 +364,7 @@ namespace DRM.PropBagWPF
 
         //#region OLD Parsing Logic
 
-        //public IPropModel GetPropModel(PropBagTemplate pbt, IPropFactory propFactory)
+        //public PropModelType GetPropModel(PropBagTemplate pbt, IPropFactory propFactory)
         //{
         //    if(pbt.ClassName == "PersonCollectionViewModel")
         //    {
@@ -403,7 +380,7 @@ namespace DRM.PropBagWPF
         //    IPropFactory propFactoryToUse = propFactory ?? pbt.PropFactory ?? _defaultPropFactory ??
         //        throw new InvalidOperationException($"Could not get a value for the PropFactory when fetching the PropModel: {pbt.FullClassName}");
 
-        //    IPropModel result = new PropModel
+        //    PropModelType result = new PropModel
         //        (
         //        className: pbt.ClassName,
         //        namespaceName: pbt.OutPutNameSpace,
@@ -486,7 +463,7 @@ namespace DRM.PropBagWPF
         //            // TODO: Add error handling here.
         //            if (ivf.PropBagResourceKey != null)
         //            {
-        //                IPropModel pm = _propModelProvider.GetPropModel(ivf.PropBagResourceKey);
+        //                PropModelType pm = _propModelProvider.GetPropModel(ivf.PropBagResourceKey);
 
         //                Func<object> vc = () => _viewModelActivator.GetNewViewModel(pm, _storeAccessCreator, pi.PropertyType, pm.PropFactory ?? _defaultPropFactory, pm.FullClassName);
 

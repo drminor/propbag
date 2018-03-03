@@ -5,12 +5,15 @@ using System;
 
 namespace MVVMApplication.ViewModel
 {
+    using PropNameType = String;
+    using PropModelType = IPropModel<String>;
+
     // This code could be created by a VS Extension.
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
 
     public partial class PersonVM : PropBag, ICloneable
     {
-        public PersonVM(IPropModel pm, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
+        public PersonVM(PropModelType pm, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
             : base(pm, storeAccessCreator, autoMapperService, propFactory, fullClassName)
         {
         }

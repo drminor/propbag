@@ -8,6 +8,9 @@ using System.Windows.Data;
 
 namespace MVVMApplication.ViewModel
 {
+    using PropNameType = String;
+    using PropModelType = IPropModel<String>;
+
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
 
     public class PersonEditorViewModel : PropBag
@@ -18,7 +21,7 @@ namespace MVVMApplication.ViewModel
 
         #region Constructors
 
-        public PersonEditorViewModel(IPropModel pm, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
+        public PersonEditorViewModel(PropModelType pm, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
             : base(pm, storeAccessCreator, autoMapperService, propFactory, fullClassName)
         {
             System.Diagnostics.Debug.WriteLine("Constructing PersonEditorViewModel -- with PropModel.");
