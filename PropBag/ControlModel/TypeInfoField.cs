@@ -49,7 +49,7 @@ namespace DRM.PropBag
         }
 
         public TypeInfoField(Type memberType, string typeName, string fullyQualifiedTypeName,
-            WellKnownCollectionTypeEnum wkCollectionType,
+            WellKnownCollectionTypeEnum? wkCollectionType,
             Type typeParameter1, Type typeParameter2, Type typeParameter3, ObservableCollection<ITypeInfoField> children)
         {
             MemberType = memberType;
@@ -65,6 +65,21 @@ namespace DRM.PropBag
             {
                 throw new ArgumentException("One of TypeName, FullyQualifiedTypeName or PropertyType must be specified.");
             }
+        }
+
+        public Object Clone()
+        {
+            ObservableCollection<ITypeInfoField> children = new ObservableCollection<ITypeInfoField>();
+
+            foreach(ITypeInfoField tif in _children)
+            {
+                ITypeInfoField copy = (ITypeInfoField)tif.Clone();
+                children.Add(copy);
+            }
+
+            TypeInfoField result = new TypeInfoField(MemberType, TypeName, FullyQualifiedTypeName, WellKnownCollectionType,
+                TypeParameter1, TypeParameter2, TypeParameter3, children);
+            return result;
         }
 
         public bool Equals(TypeInfoField other)

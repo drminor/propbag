@@ -4,17 +4,14 @@ using System.ComponentModel;
 
 namespace DRM.TypeSafePropertyBag
 {
-    using PropNameType = String;
-    using PropItemSetInterface = IPropItemSet<String>;
-
-    public interface IPropModel
+    public interface IPropModel<L2TRaw> : IPropItemSet<L2TRaw>, ICloneable
     {
         string ClassName { get; set; }
         string NamespaceName { get; set; }
         PropBagTypeSafetyMode TypeSafetyMode { get; set; }
         bool RequireExplicitInitialValue { get; set; }
 
-        ObservableCollection<IPropModelItem> Props { get; set; }
+        //ObservableCollection<IPropModelItem> Props { get; set; }
 
         DeriveFromClassModeEnum DeriveFromClassMode { get; set; }
         ObservableCollection<string> Namespaces { get; set; }
@@ -31,7 +28,11 @@ namespace DRM.TypeSafePropertyBag
 
         IProvidePropModels PropModelProvider { get; set; }
 
-        PropItemSetInterface PropItemSet { get; set; }
+        bool IsFixed { get; }
+        void Fix();
+
+        IPropModel<L2TRaw> Parent { get; set; }
+        long GenerationId { get; set; }
 
         PropertyDescriptorCollection PropertyDescriptorCollection { get; set; }
     }

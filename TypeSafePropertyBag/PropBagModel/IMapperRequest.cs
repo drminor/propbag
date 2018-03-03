@@ -2,10 +2,13 @@
 
 namespace DRM.TypeSafePropertyBag
 {
-    public interface IMapperRequest : IEquatable<IMapperRequest>
+    using PropNameType = String;
+    using PropModelType = IPropModel<String>;
+
+    public interface IMapperRequest : IEquatable<IMapperRequest>, ICloneable
     {
         string ConfigPackageName { get; set; }
-        IPropModel PropModel { get; set; }
+        PropModelType PropModel { get; set; }
         string PropModelResourceKey { get; set; }
         Type SourceType { get; set; }
     }

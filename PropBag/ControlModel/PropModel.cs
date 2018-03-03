@@ -12,14 +12,11 @@ using System.Xml.Serialization;
 namespace DRM.PropBag
 {
     using PropNameType = String;
-    using PropItemSetInterface = IPropItemSet<String>;
+    using PropModelType = IPropModel<String>;
 
-    public class PropModel : NotifyPropertyChangedBase, IEquatable<IPropModel>, IPropModel, IDisposable
+    public class PropModel : NotifyPropertyChangedBase, PropModelType, IEquatable<PropModelType>, IDisposable
     {
         #region Properties
-
-        //public SimpleExKey TestObject { get; set; }
-
 
         #region Activation Info
 
@@ -43,10 +40,6 @@ namespace DRM.PropBag
         string cn;
         [XmlAttribute(AttributeName = "class-name")]
         public string ClassName { get { return cn; } set { SetIfDifferent<string>(ref cn, value); } }
-
-        //string ik;
-        //[XmlIgnore]
-        //public string InstanceKey { get { return ik; } set { SetIfDifferent<string>(ref ik, value); } }
 
         string ns;
         [XmlAttribute(AttributeName = "output-namespace")]
@@ -79,11 +72,6 @@ namespace DRM.PropBag
         [XmlElement("type")]
         public Type PropFactoryType { get { return _propFactoryType; } set { _propFactoryType = value; } }
 
-
-        //Type _propStoreServiceProviderType;
-        //[XmlElement("prop-store-service-provider-type")]
-        //public Type PropStoreServiceProviderType { get { return _propStoreServiceProviderType; } set { _propStoreServiceProviderType = value; } }
-
         ObservableCollection<string> _namespaces;
         [XmlArray("namespaces")]
         [XmlArrayItem("namespace")]
@@ -93,22 +81,28 @@ namespace DRM.PropBag
             set { this.SetCollection<ObservableCollection<string>, string>(ref _namespaces, value); }
         }
         
-        ObservableCollection<IPropModelItem> _props;
+        
+        Dictionary<PropNameType, IPropModelItem> _propDictionary { get; set; }
+
+        [XmlElement, Browsable(false), EditorBrowsable(EditorBrowsableState.Never)]
         [XmlArray("props")]
         [XmlArrayItem("prop")]
-        public ObservableCollection<IPropModelItem> Props
+        public List<IPropModelItem> Props
         {
-            get { return _props; }
-            set { this.SetCollection<ObservableCollection<IPropModelItem>, IPropModelItem>(ref _props, value); }
+            get => GetPropItems().ToList();
+            set
+            {
+                if(_propDictionary != null)
+                {
+                    Clear();
+                }
+                _propDictionary = value.ToDictionary(k => k.PropertyName, v=> v);
+            }
         }
 
         IProvidePropModels pmp;
         [XmlIgnore]
         public IProvidePropModels PropModelProvider { get { return pmp; } set { SetAlways<IProvidePropModels>(ref pmp, value); } }
-
-        PropItemSetInterface _propItemSet;
-        [XmlIgnore]
-        public PropItemSetInterface PropItemSet { get { return _propItemSet; } set { SetAlways<PropItemSetInterface>(ref _propItemSet, value); } }
 
         [XmlIgnore]
         public PropertyDescriptorCollection PropertyDescriptorCollection { get; set; }
@@ -120,21 +114,30 @@ namespace DRM.PropBag
 
         #region Constructors
 
+        private PropModel()
+        {
+            throw new NotSupportedException("PropModels cannot be created using the parameterless constructor.");
+        }
+
+        // Create with resolved PropFactory
         public PropModel(string className, string namespaceName,
             DeriveFromClassModeEnum deriveFrom,
             Type targetType,
             IPropFactory propFactory,
+            Type propFactoryType,
             IProvidePropModels propModelProvider,
             PropBagTypeSafetyMode typeSafetyMode = PropBagTypeSafetyMode.AllPropsMustBeRegistered,
             bool deferMethodRefResolution = true,
-            bool requireExplicitInitialValue = true)
+            bool requireExplicitInitialValue = true,
+            PropModelType parent = null
+            )
         {
-            ClassName = className;
+            ClassName = className ?? throw new ArgumentNullException(nameof(className));
             NamespaceName = namespaceName;
             DeriveFromClassMode = deriveFrom;
             TargetType = targetType;
             PropFactory = propFactory;
-            PropFactoryType = propFactory?.GetType();
+            PropFactoryType = propFactoryType ?? propFactory?.GetType() ?? throw new ArgumentNullException("Either the propFactory or the propFactoryType must be specified when creating a PropModel.");
 
             PropModelProvider = propModelProvider;
 
@@ -142,36 +145,54 @@ namespace DRM.PropBag
             DeferMethodRefResolution = deferMethodRefResolution;
             RequireExplicitInitialValue = requireExplicitInitialValue;
 
-            Namespaces = new ObservableCollection<string>();
-            Props = new ObservableCollection<IPropModelItem>();
-        }
+            Parent = parent;
 
-        public PropModel(string className, string namespaceName,
-            DeriveFromClassModeEnum deriveFrom,
-            Type targetType,
-            Type propFactoryType,
-            IProvidePropModels propModelProvider,
+            _isFixed = false;
 
-            PropBagTypeSafetyMode typeSafetyMode = PropBagTypeSafetyMode.AllPropsMustBeRegistered,
-            bool deferMethodRefResolution = true,
-            bool requireExplicitInitialValue = true)
-        {
-            ClassName = className;
-            NamespaceName = namespaceName;
-            DeriveFromClassMode = deriveFrom;
-            TargetType = targetType;
-            PropFactoryType = propFactoryType;
-            PropModelProvider = propModelProvider;
-
-            TypeSafetyMode = typeSafetyMode;
-            DeferMethodRefResolution = deferMethodRefResolution;
-            RequireExplicitInitialValue = requireExplicitInitialValue;
+            if (deriveFrom == DeriveFromClassModeEnum.Custom)
+            {
+                if (targetType == null)
+                {
+                    throw new ArgumentNullException("The targetType must be specified when the deriveFrom is set to 'Custom'.");
+                }
+            }
 
             Namespaces = new ObservableCollection<string>();
-            Props = new ObservableCollection<IPropModelItem>();
-
-            PropFactory = null;
+            _propDictionary = new Dictionary<PropNameType, IPropModelItem>();
         }
+
+        //// Create with PropFactory Factory
+        //public PropModel(string className, string namespaceName,
+        //    DeriveFromClassModeEnum deriveFrom,
+        //    Type targetType,
+        //    Type propFactoryType,
+        //    IProvidePropModels propModelProvider,
+
+        //    PropBagTypeSafetyMode typeSafetyMode = PropBagTypeSafetyMode.AllPropsMustBeRegistered,
+        //    bool deferMethodRefResolution = true,
+        //    bool requireExplicitInitialValue = true,
+        //    PropModelType parent = null
+        //    )
+        //{
+        //    ClassName = className;
+        //    NamespaceName = namespaceName;
+        //    DeriveFromClassMode = deriveFrom;
+        //    TargetType = targetType;
+        //    PropFactoryType = propFactoryType;
+        //    PropModelProvider = propModelProvider;
+
+        //    TypeSafetyMode = typeSafetyMode;
+        //    DeferMethodRefResolution = deferMethodRefResolution;
+        //    RequireExplicitInitialValue = requireExplicitInitialValue;
+
+        //    Namespaces = new ObservableCollection<string>();
+        //    Props = new Dictionary<PropNameType, IPropModelItem>();
+
+        //    Parent = parent;
+
+        //    PropFactory = null;
+        //    _isFixed = false;
+        //}
 
         #endregion
 
@@ -184,13 +205,13 @@ namespace DRM.PropBag
             {
                 if(_typeToCreate == null)
                 {
-                    _typeToCreate = GetTargetType(this.DeriveFromClassMode, this.TargetType, this.WrapperTypeInfoField);
+                    _typeToCreate = GetTypeToCreate(this.DeriveFromClassMode, this.TargetType, this.WrapperTypeInfoField);
                 }
                 return _typeToCreate;
             }
         }
 
-        private Type GetTargetType(DeriveFromClassModeEnum deriveFrom, Type typeToWrap, ITypeInfoField typeInfofield)
+        private Type GetTypeToCreate(DeriveFromClassModeEnum deriveFrom, Type targetType, ITypeInfoField typeInfofield)
         {
             Type result;
 
@@ -209,7 +230,7 @@ namespace DRM.PropBag
                 case DeriveFromClassModeEnum.Custom:
                     {
                         // TODO: This needs (lots) more work.
-                        result = typeToWrap;
+                        result = targetType;
                         break;
                     }
                 default:
@@ -229,6 +250,144 @@ namespace DRM.PropBag
             }
         }
 
+        #endregion
+
+        #region Public Members
+
+        public object Clone()
+        {
+            PropModelType result = CloneIt();
+            return result;
+        }
+
+        public PropModelType CloneIt()
+        {
+            PropModel result = new PropModel(ClassName, NamespaceName, DeriveFromClassMode, TargetType, 
+                PropFactory, PropFactoryType, PropModelProvider,
+                TypeSafetyMode, DeferMethodRefResolution, RequireExplicitInitialValue);
+
+            result.Namespaces = new ObservableCollection<PropNameType>();
+            foreach(string ns in Namespaces)
+            {
+                result.Namespaces.Add(ns);
+            }
+
+            result._propDictionary = new Dictionary<PropNameType, IPropModelItem>();
+            foreach(IPropModelItem pi in GetPropItems())
+            {
+                if (pi is IPropModelItem pmi)
+                {
+                    result._propDictionary.Add(pi.PropertyName, (IPropModelItem) pi.Clone());
+                }
+            }
+
+            return result;
+        }
+
+        bool _isFixed;
+        public bool IsFixed => _isFixed;
+
+        public int Count => _propDictionary.Count;
+
+        PropModelType _parent;
+        public PropModelType Parent
+        {
+            get => _parent;
+
+            set
+            {
+                if(_isFixed) throw new InvalidOperationException();
+
+                if(_parent != value)
+                {
+                    _parent = value;
+                }
+
+            }
+        }
+
+        long _generationId;
+        public long GenerationId
+        {
+            get => _generationId;
+            set
+            {
+                if (_isFixed) throw new InvalidOperationException();
+                _generationId = value;
+            }
+        }
+
+        public void Fix()
+        {
+            _hashCode = ComputeHashCode();
+            _isFixed = true;
+        }
+
+        public void Add(string propertyName, IPropModelItem propModelItem)
+        {
+            if (IsFixed) throw new InvalidOperationException();
+            _propDictionary.Add(propertyName, propModelItem);
+        }
+
+        public bool Contains(string propertyName)
+        {
+            bool result = _propDictionary.ContainsKey(propertyName);
+            return result;
+        }
+
+        public bool Contains(IPropModelItem propModelItem)
+        {
+            bool result = _propDictionary.ContainsValue(propModelItem);
+            return result;
+        }
+
+        public IEnumerable<string> GetPropNames()
+        {
+            IEnumerable<PropNameType> result = _propDictionary.Select(x => x.Key);
+            return result;
+        }
+
+        public IEnumerable<IPropModelItem> GetPropItems()
+        {
+            IEnumerable<IPropModelItem> result = _propDictionary.Select(x => x.Value);
+            return result;
+        }
+
+        public bool TryGetPropModelItem(string propertyName, out IPropModelItem propModelItem)
+        {
+            bool result = _propDictionary.TryGetValue(propertyName, out propModelItem);
+            return result;
+        }
+
+        public bool TryRemove(string propertyName, out IPropModelItem propModelItem)
+        {
+            if (IsFixed) throw new InvalidOperationException();
+
+            if (_propDictionary.TryGetValue(propertyName, out propModelItem))
+            {
+                return true;
+            }
+            else
+            {
+                propModelItem = null;
+                return false;
+            }
+        }
+
+        public void Clear()
+        {
+            foreach (KeyValuePair<PropNameType, IPropModelItem> kvp in _propDictionary)
+            {
+                kvp.Value.Dispose();
+            }
+
+            _propDictionary.Clear();
+        }
+
+        #endregion
+
+        #region Private Methods
+
         private string GetFullClassName(string namespaceName, string className)
         {
             if (namespaceName == null)
@@ -247,16 +406,42 @@ namespace DRM.PropBag
             }
         }
 
+        //private void AssignGenerationId()
+        //{
+        //    if (_parent != null)
+        //    {
+        //        _generationId = _parent.GetNextGenerationId();
+        //    }
+        //    else
+        //    {
+        //        _generationId = GetNextGenerationId();
+        //    }
+        //}
+
         #endregion
 
         #region IEquatable support and Object overrides
 
+        int _hashCode;
         public override int GetHashCode()
+        {
+            if(IsFixed)
+            {
+                return _hashCode;
+            }
+            else
+            {
+                int result = ComputeHashCode();
+                return result;
+            }
+        }
+
+        private int ComputeHashCode()
         {
             var hashCode = -1621535375;
             hashCode = hashCode * -1521134295 + DeriveFromClassMode.GetHashCode();
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(FullClassName);
-            hashCode = hashCode * -1521134295 + Props?.Count.GetHashCode() ?? 1521134295;
+            hashCode = hashCode * -1521134295 + _propDictionary?.Count.GetHashCode() ?? 1521134295;
             hashCode = hashCode * -1521134295 + TypeSafetyMode.GetHashCode();
             hashCode = hashCode * -1521134295 + RequireExplicitInitialValue.GetHashCode();
             hashCode = hashCode * -1521134295 + EqualityComparer<Type>.Default.GetHashCode(TypeToCreate);
@@ -268,11 +453,11 @@ namespace DRM.PropBag
 
         public override bool Equals(object other)
         {
-            if(ReferenceEquals(other, null) || !(other is IPropModel)) return false;
-            return Equals((IPropModel)other);
+            if(ReferenceEquals(other, null) || !(other is PropModelType)) return false;
+            return Equals((PropModelType)other);
         }
 
-        public bool Equals(IPropModel other)
+        public bool Equals(PropModelType other)
         {
             // If parameter is null, return false.
             if (ReferenceEquals(other, null))
@@ -288,7 +473,7 @@ namespace DRM.PropBag
             // TODO: This needs to be improved.
             return this.ClassName == other.ClassName
                 && NamespaceName == other.NamespaceName
-                && Props.Count == other.Props.Count;
+                && Count == other.Count;
         }
 
         public static bool operator ==(PropModel left, PropModel right)
@@ -341,11 +526,7 @@ namespace DRM.PropBag
                 if (disposing)
                 {
                     //Dispose managed state (managed objects).
-                    foreach(IPropModelItem pi in Props)
-                    {
-                        pi.Dispose();
-                    }
-                    Props.Clear();
+                    Clear();
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
@@ -371,6 +552,5 @@ namespace DRM.PropBag
         }
 
         #endregion
-
     }
 }

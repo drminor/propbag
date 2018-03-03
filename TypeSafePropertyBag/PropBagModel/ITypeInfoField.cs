@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 
 namespace DRM.TypeSafePropertyBag
 {
-    public interface ITypeInfoField
+    public interface ITypeInfoField : ICloneable
     {
         ObservableCollection<ITypeInfoField> Children { get; set; }
         string FullyQualifiedTypeName { get; set; }

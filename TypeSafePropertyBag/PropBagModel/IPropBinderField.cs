@@ -1,6 +1,8 @@
-﻿namespace DRM.TypeSafePropertyBag
+﻿using System;
+
+namespace DRM.TypeSafePropertyBag
 {
-    public interface IPropBinderField
+    public interface IPropBinderField : ICloneable
     {
         string Path { get; set; }
     }

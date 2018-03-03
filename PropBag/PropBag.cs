@@ -30,6 +30,8 @@ namespace DRM.PropBag
 
     using PropItemSetInterface = IPropItemSet<String>;
 
+    using PropModelType = IPropModel<String>;
+
     #region Summary and Remarks
 
     /// <summary>
@@ -163,17 +165,17 @@ namespace DRM.PropBag
 
         #region Constructor
 
-        public PropBag(IPropModel propModel, PSAccessServiceCreatorInterface storeAcessorCreator)
+        public PropBag(PropModelType propModel, PSAccessServiceCreatorInterface storeAcessorCreator)
             : this(propModel, storeAcessorCreator, autoMapperService: null, propFactory: null, fullClassName: null)
         {
         }
 
-        public PropBag(IPropModel propModel, PSAccessServiceCreatorInterface storeAcessorCreator, IPropFactory propFactory)
+        public PropBag(PropModelType propModel, PSAccessServiceCreatorInterface storeAcessorCreator, IPropFactory propFactory)
             : this(propModel, storeAcessorCreator, autoMapperService: null, propFactory: propFactory, fullClassName: null)
         {
         }
 
-        public PropBag(IPropModel propModel, PSAccessServiceCreatorInterface storeAcessorCreator, IPropFactory propFactory, string fullClassName)
+        public PropBag(PropModelType propModel, PSAccessServiceCreatorInterface storeAcessorCreator, IPropFactory propFactory, string fullClassName)
             : this(propModel, storeAcessorCreator, autoMapperService: null, propFactory: propFactory, fullClassName: fullClassName)
         {
         }
@@ -186,7 +188,7 @@ namespace DRM.PropBag
         /// <param name="storeAcessorCreator"></param>
         /// <param name="propFactory">The PropFactory to use instead of the one specified by the PropModel.</param>
         /// <param name="fullClassName">The namespace and class name to use instead of the one specified by the PropMode.</param>
-        public PropBag(IPropModel propModel, PSAccessServiceCreatorInterface storeAcessorCreator, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
+        public PropBag(PropModelType propModel, PSAccessServiceCreatorInterface storeAcessorCreator, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
         {
             long memUsedSoFar = _memConsumptionTracker.UsedSoFar;
 
@@ -200,17 +202,17 @@ namespace DRM.PropBag
             _ourStoreAccessor = storeAcessorCreator.CreatePropStoreService(this);
                 _memConsumptionTracker.MeasureAndReport("CreatePropStoreService from Scratch.", null);
 
-            if (propModel.PropItemSet == null)
-            {
-                propModel.PropItemSet = new PropItemSet();
-                System.Diagnostics.Debug.WriteLine($"Building PropItems for {_ourStoreAccessor.ToString()} / ({propModel.ClassName}) with a 'raw' model.");
-            }
-            else
-            {
-                System.Diagnostics.Debug.WriteLine($"Building PropItems for {_ourStoreAccessor.ToString()} / ({propModel.ClassName}) with a 'cooked' model.");
-            }
+            //if (propModel.PropItemSet == null)
+            //{
+            //    propModel.PropItemSet = new PropItemSet();
+            //    System.Diagnostics.Debug.WriteLine($"Building PropItems for {_ourStoreAccessor.ToString()} / ({propModel.ClassName}) with a 'raw' model.");
+            //}
+            //else
+            //{
+            //    System.Diagnostics.Debug.WriteLine($"Building PropItems for {_ourStoreAccessor.ToString()} / ({propModel.ClassName}) with a 'cooked' model.");
+            //}
 
-            BuildPropItems(propModel, propModel.PropItemSet, storeAcessorCreator);
+            BuildPropItems(propModel, storeAcessorCreator);
                 _memConsumptionTracker.Report(memUsedSoFar, "---- After BuildPropItems.");
 
             //int testc = _ourStoreAccessor.PropertyCount;
@@ -285,24 +287,26 @@ namespace DRM.PropBag
 
         const string UN_SET_COOKED_INIT_VAL = "XxYy001122334455";
 
-        protected void BuildPropItems(IPropModel pm, PropItemSetInterface propItemSet, PSAccessServiceCreatorInterface storeAccessCreator)
+        protected void BuildPropItems(PropModelType pm, PSAccessServiceCreatorInterface storeAccessCreator)
         {
             CheckClassNames(pm);
 
-            bool propItemSetHadValues = propItemSet.Count > 0;
+            // TODO: Fix Me.
+            bool propItemSetHadValues = false; // propItemSet.Count > 0;
 
-            foreach (IPropModelItem pi in pm.Props)
+            foreach (IPropModelItem pi in pm.GetPropItems())
             {
                 long amountUsedBeforeThisPropItem = _memConsumptionTracker.Measure($"Building Prop Item: {pi.PropertyName}");
 
                 IProp typedProp;
                 IPropTemplate propTemplate;
 
-                if (propItemSetHadValues && propItemSet.TryGetPropTemplate(pi.PropertyName, out propTemplate))
+                if (propItemSetHadValues /*&& propItemSet.TryGetPropTemplate(pi.PropertyName, out propTemplate)*/)
                 {
                     // BuildPropFromCooked
                     try
                     {
+                        propTemplate = pi.PropTemplate;
                         typedProp = BuildPropFromCooked(pi, propTemplate, pm.PropModelProvider, storeAccessCreator);
                     }
                     catch
@@ -313,7 +317,6 @@ namespace DRM.PropBag
                 else
                 {
                     // BuildPropFromRaw
-                    propTemplate = null;
                     typedProp = BuildPropFromRaw(pi, pm.PropModelProvider, storeAccessCreator);
 
                     // Get a reference to the PropTemplate assigned to this Prop.
@@ -334,7 +337,8 @@ namespace DRM.PropBag
                     }
 
                     // Save the PropTemplate in our PropItemSet
-                    propItemSet.Add(pi.PropertyName, propTemplate);
+                    //propItemSet.Add(pi.PropertyName, propTemplate);
+                    pi.PropTemplate = propTemplate;
                 }
 
                 // Make sure the propTemplate doesn't hold a referene to the class implementing the IProp interface.
@@ -434,6 +438,8 @@ namespace DRM.PropBag
                     //_memConsumptionTracker.Measure();
                     IViewManagerProviderKey viewManagerProviderKey = BuildTheViewManagerProviderKey(pi, propModelProvider);
                     _memConsumptionTracker.MeasureAndReport("BuildTheViewManagerProviderKey", $"PropBag: {_ourStoreAccessor.ToString()}: {pi.PropertyName}");
+
+
 
                     IProvideACViewManager cViewManagerProvider = GetOrAddCViewManagerProviderGen(pi.PropertyType, viewManagerProviderKey);
                     _memConsumptionTracker.MeasureAndReport("GetOrAddCViewManagerProviderGen", $"PropBag: {_ourStoreAccessor.ToString()}: {pi.PropertyName}");
@@ -716,7 +722,7 @@ namespace DRM.PropBag
 
             if (pi.InitialValueField == null) pi.InitialValueField = PropInitialValueField.UseUndefined;
 
-                _memConsumptionTracker.MeasureAndReport("After field prepartion", $"for {pi.PropertyName}");
+                _memConsumptionTracker.MeasureAndReport("After field preparation", $"for {pi.PropertyName}");
 
             string creationMethodDescription;
             if (pi.StorageStrategy == PropStorageStrategyEnum.Internal && !pi.InitialValueField.SetToUndefined)
@@ -783,7 +789,7 @@ namespace DRM.PropBag
 
             if (pi.InitialValueField == null) pi.InitialValueField = PropInitialValueField.UseUndefined;
 
-            _memConsumptionTracker.MeasureAndReport("After field prepartion", $"for {pi.PropertyName}");
+            _memConsumptionTracker.MeasureAndReport("After field preparation", $"for {pi.PropertyName}");
 
             string creationMethodDescription;
             if (pi.StorageStrategy == PropStorageStrategyEnum.Internal && !pi.InitialValueField.SetToUndefined)
@@ -890,7 +896,7 @@ namespace DRM.PropBag
 
         private IPropBag GetNewViewModel(IPropModelItem pi, IProvidePropModels propModelProvider, PSAccessServiceCreatorInterface storeAccessCreator)
         {
-            IPropModel propModel = propModelProvider.GetPropModel(pi.InitialValueField.PropBagResourceKey);
+            PropModelType propModel = propModelProvider.GetPropModel(pi.InitialValueField.PropBagResourceKey);
             IPropBag newObject = (IPropBag)VmActivator.GetNewViewModel(pi.PropertyType, propModel, storeAccessCreator, _autoMapperService, propFactory: null, fullClassName: null);
             return newObject;
         }
@@ -948,7 +954,7 @@ namespace DRM.PropBag
         }
 
         [Conditional("DEBUG")]
-        private void CheckClassNames(IPropModel pm)
+        private void CheckClassNames(PropModelType pm)
         {
             string cName = GetClassNameOfThisInstance();
             string pCName = pm.ClassName;
@@ -1857,7 +1863,7 @@ namespace DRM.PropBag
         {
             bool mustBeRegistered = OurMetaData.AllPropsMustBeRegistered;
 
-            IPropData PropData = GetPropGen(propertyName, null, haveValue: false, value: null,
+            IPropData PropData = GetPropGen(propertyName, propertyType: null, haveValue: false, value: null,
                 alwaysRegister: false,
                 mustBeRegistered: mustBeRegistered,
                 neverCreate: false,
@@ -3080,22 +3086,29 @@ namespace DRM.PropBag
             bool haveValue, object value,
             bool alwaysRegister, bool mustBeRegistered, bool neverCreate, bool? desiredHasStoreValue, out bool wasRegistered, out PropIdType propId)
         {
-            if (TryGetPropId(propertyName, out propId))
-            {
-                if (!_ourStoreAccessor.TryGetValue(this, propId, out IPropData propData))
-                {
-                    throw new KeyNotFoundException($"The property named: {propertyName} could not be fetched from the property store.");
-                }
+            // Commented this out, in favor of calling the non-generic GetPropGen
+            // because this does not check the type of the registered property to see if matches typeof(T).
+            //if (TryGetPropId(propertyName, out propId))
+            //{
+            //    if (!_ourStoreAccessor.TryGetValue(this, propId, out IPropData propData))
+            //    {
+            //        throw new KeyNotFoundException($"The property named: {propertyName} could not be fetched from the property store.");
+            //    }
 
-                CheckStorageStrategy(propertyName, propData, desiredHasStoreValue);
+            //    CheckStorageStrategy(propertyName, propData, desiredHasStoreValue);
 
-                wasRegistered = false;
-                return (IPropData)propData;
-            }
-            else
-            {
-                throw new KeyNotFoundException($"The property named: {propertyName} could not be found in the PropCollection for this PropBag.");
-            }
+            //    wasRegistered = false;
+            //    return (IPropData)propData;
+            //}
+            //else
+            //{
+            //    throw new KeyNotFoundException($"The property named: {propertyName} could not be found in the PropCollection for this PropBag.");
+            //}
+
+            IPropData result = GetPropGen(propertyName, typeof(T), haveValue, value, alwaysRegister, mustBeRegistered,
+                neverCreate, desiredHasStoreValue, out wasRegistered, out propId);
+
+            return result;
         }
 
         private void CheckStorageStrategy(PropNameType propertyName, IPropData propData, bool? desiredHasStoreValue)

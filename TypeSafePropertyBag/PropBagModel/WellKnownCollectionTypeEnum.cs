@@ -3,9 +3,8 @@ namespace DRM.TypeSafePropertyBag
 {
     public enum WellKnownCollectionTypeEnum
     {
-        Enumerable,
-        TypedEnumerable,
-        ObservableCollection,   // IObsCollection<T>
-        ObservableCollectionFB  // ObservableCollection<T>
+        Enumerable,             // IEnumerable
+        TypedEnumerable,        // IEnumerable<T>
+        ObservableCollection    // ObservableCollection<T>
     }
 }

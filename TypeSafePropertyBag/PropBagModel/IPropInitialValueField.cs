@@ -2,7 +2,7 @@
 
 namespace DRM.TypeSafePropertyBag
 {
-    public interface IPropInitialValueField
+    public interface IPropInitialValueField : ICloneable
     {
         string InitialValue { get; set; }
         bool SetToDefault { get; set; }

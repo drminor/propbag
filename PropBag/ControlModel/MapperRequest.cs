@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace DRM.PropBag
 {
+    using PropNameType = String;
+    using PropModelType = IPropModel<String>;
+
     public class MapperRequest : NotifyPropertyChangedBase, IEquatable<IMapperRequest>, IMapperRequest
     {
         public string _cpn;
@@ -18,10 +21,10 @@ namespace DRM.PropBag
         private string _pmrk;
         public string PropModelResourceKey { get { return _pmrk; } set { this.SetIfDifferent<string>(ref _pmrk, value); } }
 
-        private IPropModel _pm;
-        public IPropModel PropModel { get { return _pm; } set
+        private PropModelType _pm;
+        public PropModelType PropModel { get { return _pm; } set
             {
-                this.SetAlways<IPropModel>(ref _pm, value);
+                this.SetAlways<PropModelType>(ref _pm, value);
             }
         }
 
@@ -33,7 +36,7 @@ namespace DRM.PropBag
             PropModel = null;
         }
 
-        public MapperRequest(Type sourceType, IPropModel propModel, string configPackageName)
+        public MapperRequest(Type sourceType, PropModelType propModel, string configPackageName)
         {
             SourceType = sourceType ?? throw new ArgumentNullException(nameof(sourceType));
             PropModelResourceKey = null;
@@ -74,6 +77,13 @@ namespace DRM.PropBag
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(PropModelResourceKey);
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(ConfigPackageName);
             return hashCode;
+        }
+
+        public object Clone()
+        {
+            MapperRequest result = new MapperRequest(SourceType, PropModelResourceKey, ConfigPackageName);
+            result.PropModel = PropModel;
+            return result;
         }
 
         public static bool operator ==(MapperRequest request1, MapperRequest request2)

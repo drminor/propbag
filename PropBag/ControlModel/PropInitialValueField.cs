@@ -51,7 +51,13 @@ namespace DRM.PropBag
 
         public PropInitialValueField(string initialValue)
             : this(initialValue: initialValue, setToDefault: false, setToUndefined: false, setToNull: false, setToEmptyString: false,
-          valueCreator: null, createNew: false, propBagResourceKey: null)
+                valueCreator: null, createNew: false, propBagResourceKey: null)
+        {
+        }
+
+        public PropInitialValueField(string initialValue, bool setToDefault, bool setToUndefined, bool setToNull, bool setToEmptyString)
+            : this(initialValue: initialValue, setToDefault: setToDefault, setToUndefined: setToUndefined, setToNull: setToNull, setToEmptyString: setToEmptyString,
+                valueCreator: null, createNew: false, propBagResourceKey: null)
         {
         }
 
@@ -75,6 +81,14 @@ namespace DRM.PropBag
             ValueCreator = valueCreator;
             CreateNew = createNew;
             PropBagResourceKey = propBagResourceKey;
+        }
+
+        public object Clone()
+        {
+            PropInitialValueField result = new PropInitialValueField(InitialValue, SetToDefault, SetToUndefined, SetToNull, SetToEmptyString,
+                valueCreator: null, createNew: CreateNew, propBagResourceKey: PropBagResourceKey);
+
+            return result;
         }
 
         // TODO: Include the two new properties: CreateNew and PropBagResourceKey
@@ -181,6 +195,39 @@ namespace DRM.PropBag
                 propBagResourceKey: null
                 );
             }
+        }
+
+        public static IPropInitialValueField UseCreateNew
+        {
+            get
+            {
+                return new PropInitialValueField
+                (
+                initialValue: null,
+                setToDefault: false,
+                setToUndefined: false,
+                setToNull: false,
+                setToEmptyString: false,
+                valueCreator: null,
+                createNew: true,
+                propBagResourceKey: null
+                );
+            }
+        }
+
+        public static IPropInitialValueField FromPropBagResourceKey(string propBagResourceKey)
+        {
+            return new PropInitialValueField
+            (
+            initialValue: null,
+            setToDefault: false,
+            setToUndefined: false,
+            setToNull: false,
+            setToEmptyString: false,
+            valueCreator: null,
+            createNew: true,
+            propBagResourceKey: propBagResourceKey
+            );
         }
 
         #region IDisposable Support

@@ -9,7 +9,7 @@ using System.Xml.Serialization;
 
 namespace DRM.PropBag
 {
-    public class PropBinderField : NotifyPropertyChangedBase, IEquatable<PropBinderField>, IPropBinderField
+    public class PropBinderField : NotifyPropertyChangedBase, IPropBinderField, IEquatable<PropBinderField>
     {
         #region Private Properties
         //string targetProperty;
@@ -53,6 +53,12 @@ namespace DRM.PropBag
             //hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(TargetProperty);
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Path);
             return hashCode;
+        }
+
+        public object Clone()
+        {
+            PropBinderField result = new PropBinderField(Path);
+            return result;
         }
 
         public static bool operator ==(PropBinderField field1, PropBinderField field2)

@@ -29,7 +29,7 @@ namespace DRM.PropBag
 
         PropStorageStrategyEnum _hasStore;
         bool _typeIsSolid;
-        string _extraInfo;
+        object _extraInfo;
         PropCreatorType _propCreator;
 
         [XmlElement("name")]
@@ -111,7 +111,10 @@ namespace DRM.PropBag
         public bool TypeIsSolid { get { return _typeIsSolid; } set { SetIfDifferent<bool>(ref _typeIsSolid, value); } }
 
         [XmlIgnore]
-        public string ExtraInfo { get { return _extraInfo; } set { SetIfDifferent<string>(ref _extraInfo, value); } }
+        public object ExtraInfo { get { return _extraInfo; } set { SetAlways<object>(ref _extraInfo, value); } }
+
+        [XmlIgnore]
+        public IPropTemplate PropTemplate { get; set; }
 
         [XmlIgnore]
         public PropCreatorType PropCreator
@@ -191,8 +194,8 @@ namespace DRM.PropBag
             PropKindEnum propKind,
             ITypeInfoField propTypeInfoField,
             IPropInitialValueField initialValueField,
-            string extraInfo,
-            PropComparerField comparer,
+            object extraInfo,
+            IPropComparerField comparer,
             Type itemType,
             IPropBinderField binderField,
             IMapperRequest mapperRequest,
@@ -214,6 +217,32 @@ namespace DRM.PropBag
             _propCreator = propCreator;
 
             InitialValueCooked = null;
+        }
+
+        public object Clone()
+        {
+            object extraInfo;
+
+            if(ExtraInfo is ICloneable cloneable)
+            {
+                extraInfo = cloneable.Clone();
+            }
+            else
+            {
+                extraInfo = ExtraInfo;
+            }
+
+            PropItemModel result = new PropItemModel(PropertyType, PropertyName, StorageStrategy, TypeIsSolid, PropKind,
+                (ITypeInfoField)PropTypeInfoField.Clone(),
+                (IPropInitialValueField)InitialValueField.Clone(),
+                extraInfo,
+                ComparerField,
+                ItemType,
+                (IPropBinderField) BinderField.Clone(),
+                (IMapperRequest) MapperRequest.Clone(),
+                propCreator: null);
+                
+                return result;
         }
 
         #region IDisposable Support
