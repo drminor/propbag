@@ -37,6 +37,10 @@ namespace DRM.PropBag
             set { SetAlways<ITypeInfoField>(ref _wrapperTypeInfoField, value); }
         }
 
+        Type _newEmittedType;
+        [XmlIgnore]
+        public Type NewEmittedType { get { return _newEmittedType; } set { _newEmittedType = value; } }
+
         string cn;
         [XmlAttribute(AttributeName = "class-name")]
         public string ClassName { get { return cn; } set { SetIfDifferent<string>(ref cn, value); } }

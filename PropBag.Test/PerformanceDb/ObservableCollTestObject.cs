@@ -44,7 +44,7 @@ namespace PropBagLib.Tests.PerformanceDb
                 DestinationModel1 testCopy = (DestinationModel1) test.Clone();
             }
 
-            IPropBagMapperKey<Person, DestinationModel1> mapperRequest = amp.RegisterMapperRequest<Person, DestinationModel1>
+            IPropBagMapperKey<Person, DestinationModel1> mapperRequest = amp.SubmitMapperRequest<Person, DestinationModel1>
                 (
                     propModel: propModel1,
                     typeToWrap: typeToWrap,

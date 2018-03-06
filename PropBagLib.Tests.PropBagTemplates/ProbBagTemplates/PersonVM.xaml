@@ -9,7 +9,7 @@
 
     <pb:PropBagTemplate x:Key="PersonVM"
                         ClassName="PersonVM"
-                        DeriveFromClassMode="PropBag"
+                        DeriveFromClassMode="Custom"
                         TargetType="{x:Type vmod:PersonVM}"
                         TypeSafetyMode="Tight"
                         PropFactoryType="{x:Type pbWPF:WPFPropFactory}"

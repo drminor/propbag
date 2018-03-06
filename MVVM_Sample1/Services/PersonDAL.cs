@@ -55,7 +55,7 @@ namespace MVVMApplication.Services
             }
             else
             {
-                IEnumerable<Person> result = DbContext.Person.Take(top).ToList();
+                IEnumerable<Person> result = DbContext.Person.OrderBy(x => x.Id).Take(top).ToList();
                 return result;
             }
         }

@@ -15,8 +15,22 @@ namespace DRM.TypeSafePropertyBag
 
         DeriveFromClassModeEnum DeriveFromClassMode { get; set; }
         ObservableCollection<string> Namespaces { get; set; }
+
+        /// <summary>
+        /// The Type To Wrap if DeriveFromClassMode = custom
+        /// </summary>
         Type TargetType { get; set; }
+
+        /// <summary>
+        /// PropBag, PubPropBag, or TargetType depending on the DeriveFromClassMode.
+        /// </summary>
         Type TypeToCreate { get; }
+
+        /// <summary>
+        /// The emitted type used for this PropModel, if an emitted type has been generated, otherwise null.
+        /// </summary>
+        Type NewEmittedType { get; set; }
+
         ITypeInfoField WrapperTypeInfoField { get; set; }
 
         IPropFactory PropFactory { get; set; } // Is being phased out.

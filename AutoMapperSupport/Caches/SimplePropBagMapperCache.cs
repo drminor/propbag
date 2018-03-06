@@ -167,7 +167,5 @@ namespace DRM.PropBag.AutoMapperSupport
         }
 
         #endregion
-
-
     }
 }

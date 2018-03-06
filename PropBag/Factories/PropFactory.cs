@@ -77,16 +77,6 @@ namespace DRM.PropBag
 
         #region CollectionViewSource Prop Creation
 
-        //public override IProp CreateCVSProp<TCVS, T>(PropNameType propertyName)
-        //{
-        //    throw new NotImplementedException("This feature is not implemented by the 'standard' implementation, please use WPFPropfactory or similar.");
-        //}
-
-        //public override IProp CreateCVProp<T>(string propertyName)
-        //{
-        //    throw new NotImplementedException("This feature is not implemented by the 'standard' implementation, please use WPFPropfactory or similar.");
-        //}
-
         #endregion
 
         #region Scalar Prop Creation

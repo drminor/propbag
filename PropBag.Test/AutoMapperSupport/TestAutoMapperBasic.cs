@@ -45,7 +45,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
             string configPackageName = "Emit_Proxy";
 
             IPropBagMapperKey<MyModel3, DestinationModel3> mapperRequest =
-                _amp.RegisterMapperRequest<MyModel3, DestinationModel3>
+                _amp.SubmitMapperRequest<MyModel3, DestinationModel3>
                 (
                     propModel: propModel,
                     typeToWrap: typeToWrap,
@@ -64,11 +64,15 @@ namespace PropBagLib.Tests.AutoMapperSupport
             Type typeToWrap = typeof(PropBag);
             string configPackageName = "Emit_Proxy";
 
+            Type et = _amp.WrapperTypeCreator.GetWrapperType(propModel, typeToWrap);
+
+            propModel.NewEmittedType = et;
+
             IPropBagMapperKey<MyModel3, DestinationModel3> mapperRequest =
-                _amp.RegisterMapperRequest<MyModel3, DestinationModel3>
+                _amp.SubmitMapperRequest<MyModel3, DestinationModel3>
                 (
                     propModel: propModel,
-                    typeToWrap: typeToWrap,
+                    typeToWrap: et, //typeToWrap
                     configPackageName: configPackageName
                 );
 
@@ -95,7 +99,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
             DestinationModel3 testDest = mapper.MapToDestination(testSource);
 
             IPropBagMapperKey<MyModel3, DestinationModel3> mapperRequest2 =
-                _amp.RegisterMapperRequest<MyModel3, DestinationModel3>
+                _amp.SubmitMapperRequest<MyModel3, DestinationModel3>
                 (
                     propModel: propModel,
                     typeToWrap: typeToWrap,
@@ -118,7 +122,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
             string configPackageName = "Extra_Members"; // "Emit_Proxy";
 
             IPropBagMapperKey<MyModel3, DestinationModel3> mapperRequest =
-                _amp.RegisterMapperRequest<MyModel3, DestinationModel3>
+                _amp.SubmitMapperRequest<MyModel3, DestinationModel3>
                 (
                     propModel: propModel,
                     typeToWrap: typeToWrap,
@@ -148,7 +152,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
             DestinationModel3 testDest = mapper.MapToDestination(testSource);
 
             IPropBagMapperKey<MyModel3, DestinationModel3> mapperRequest2 =
-                _amp.RegisterMapperRequest<MyModel3, DestinationModel3>
+                _amp.SubmitMapperRequest<MyModel3, DestinationModel3>
                 (
                     propModel: propModel,
                     typeToWrap: typeToWrap,
@@ -169,8 +173,8 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 (
                 className: "DestinationModel3",
                 namespaceName: "PropBagLib.Tests.AutoMapperSupport",
-                deriveFrom: DeriveFromClassModeEnum.PropBag,
-                targetType: null,
+                deriveFrom: DeriveFromClassModeEnum.Custom,
+                targetType: typeof(DestinationModel3),
                 propFactory: propFactory,
                 propFactoryType: null,
                 propModelProvider: null,

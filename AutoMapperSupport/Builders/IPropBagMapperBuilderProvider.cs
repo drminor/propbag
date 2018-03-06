@@ -1,14 +1,11 @@
-﻿using DRM.TypeSafePropertyBag;
+﻿using DRM.PropBag.TypeWrapper;
+using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
     public interface IPropBagMapperBuilderProvider
     {
-        //IBuildPropBagMapper<TSource, TDestination> GetPropBagMapperBuilder<TSource, TDestination>
-        //    (
-        //    IBuildMapperConfigurations<TSource, TDestination> mapperConfigurationBuilder
-        //    )
-        //    where TDestination : class, IPropBag;
+        ICreateWrapperTypes WrapperTypeCreator { get; }
 
         IBuildPropBagMapper<TSource, TDestination> GetPropBagMapperBuilder<TSource, TDestination>
             (

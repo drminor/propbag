@@ -32,7 +32,7 @@ namespace DRM.PropBag.AutoMapperSupport
 
             Func<TDestination, TSource> regularInstanceCreator = mapRequest.MappingConfiguration.SourceConstructor;
 
-            Type newWrapperType = mapRequest.DestinationTypeDef.NewWrapperType;
+            Type newWrapperType = mapRequest.DestinationTypeDef.NewEmittedType;
 
             cfg.CreateMap(typeof(TSource), newWrapperType);
 

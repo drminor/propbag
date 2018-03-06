@@ -77,17 +77,17 @@ namespace DRM.TypeSafePropertyBag
 
         #region CollectionViewSource Prop Creation
 
-        // CollectionViewSource
-        private static IProp CreateCVSProp(IPropFactory propFactory, PropNameType propertyName, IProvideAView viewProvider)
-        {
-            return propFactory.CreateCVSProp(propertyName, viewProvider);
-        }
+        //// CollectionViewSource
+        //private static IProp CreateCVSProp(IPropFactory propFactory, PropNameType propertyName, IProvideAView viewProvider, IPropTemplate propTemplate)
+        //{
+        //    return propFactory.CreateCVSProp(propertyName, viewProvider, propTemplate);
+        //}
 
-        // CollectionView
-        private static IProp CreateCVProp(IPropFactory propFactory, PropNameType propertyName, IProvideAView viewProvider)
-        {
-            return propFactory.CreateCVProp(propertyName, viewProvider);
-        }
+        //// CollectionView
+        //private static IProp CreateCVProp(IPropFactory propFactory, PropNameType propertyName, IProvideAView viewProvider, IPropTemplate propTemplate)
+        //{
+        //    return propFactory.CreateCVProp(propertyName, viewProvider, propTemplate);
+        //}
 
         #endregion
 
@@ -179,7 +179,6 @@ namespace DRM.TypeSafePropertyBag
                 return propFactory.CreateWithNoValue<T>(propertyName, extraInfo, storageStrategy, isTypeSolid,
                     comparerToUse, getDefaultValFuncToUse);
             }
-
         }
 
         //// From String

@@ -85,6 +85,8 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
 
         #endregion
 
+        public IPropBagMapper<TSource, TDestination> Mapper => _mapper;
+
         public TDal DataAccessLayer
         {
             get

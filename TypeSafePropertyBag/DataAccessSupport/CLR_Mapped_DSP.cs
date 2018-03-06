@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Windows.Data;
 using System.Linq;
+using System.Collections.ObjectModel;
 
 namespace DRM.TypeSafePropertyBag.DataAccessSupport
 {
@@ -17,6 +18,7 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
         #region Private Properties
 
         IDoCRUD<T> _dataAccessLayer;
+        BetterLCVCreatorDelegate<T> _betterLCVCreatorDelegate;
 
         #endregion
 
@@ -24,9 +26,10 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
 
         #region Constructor
 
-        public ClrMappedDSP(IDoCRUD<T> dataAccessLayer/*, bool isAsynchronous*/)
+        public ClrMappedDSP(IDoCRUD<T> dataAccessLayer, BetterLCVCreatorDelegate<T> betterLCVCreatorDelegate/*, bool isAsynchronous*/)
         {
             _dataAccessLayer = dataAccessLayer;
+            _betterLCVCreatorDelegate = betterLCVCreatorDelegate;
             //IsAsynchronous = isAsynchronous;
 
             _dataAccessLayer.DataSourceChanged += _dataAccessLayer_DataSourceChanged;
@@ -101,7 +104,7 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
             {
                 if (TryGetDataFromProp(_dataAccessLayer, out IEnumerable<T> rawData))
                 {
-                    EndEditWrapper<T> wrappedData = new EndEditWrapper<T>(rawData);
+                    EndEditWrapper<T> wrappedData = new EndEditWrapper<T>(rawData, _betterLCVCreatorDelegate);
 
                     if (wrappedData is INotifyItemEndEdit inieeNew)
                     {

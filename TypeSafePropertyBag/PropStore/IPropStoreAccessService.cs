@@ -73,7 +73,8 @@ namespace DRM.TypeSafePropertyBag
             L2T propId, // Identifies the PropItem that implements IDoCrud<TSource>
             IPropData propData, // The PropStore management wrapper for IProp<TSource> which holds the value of the 'IDoCrud<T>' data access layer.
             IPropBagMapper<TSource, TDestination> mapper,
-            CViewProviderCreator viewBuilder // Method that can be used to create a IProvideAView from a DataSourceProvider.
+            CViewProviderCreator viewBuilder, // Method that can be used to create a IProvideAView from a DataSourceProvider.
+            BetterLCVCreatorDelegate<TDestination> betterLCVCreatorDelegate
             )
             where TDal : class, IDoCRUD<TSource>
             where TSource : class
@@ -87,7 +88,8 @@ namespace DRM.TypeSafePropertyBag
             IPropData propData, // The PropStore management wrapper for IProp<TSource> which holds the value of the 'IDoCrud<T>' data access layer.
             IMapperRequest mr, // The information necessar to create a IPropBagMapper<TSource, TDestination>
             PropBagMapperCreator propBagMapperCreator, // A delegate that can be called to create a IPropBagMapper<TSource, TDestination> given a IMapperRequest.
-            CViewProviderCreator viewBuilder // Method that can be used to create a IProvideAView from a DataSourceProvider.
+            CViewProviderCreator viewBuilder, // Method that can be used to create a IProvideAView from a DataSourceProvider.
+            BetterLCVCreatorDelegate<TDestination> betterLCVCreatorDelegate
             )
             where TDal : class, IDoCRUD<TSource>
             where TSource : class

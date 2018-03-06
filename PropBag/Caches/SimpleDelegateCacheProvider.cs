@@ -82,6 +82,8 @@ namespace DRM.PropBag.Caches
 
             #region ObservableCollection<T> Prop Creation MethodInfo
 
+            // TODO: Consolidate these into a single Method, as was done for Scalar Props.
+
             // Create C Prop with no value
             MethodInfo createCPropNoVal_mi = propCreatorType.GetMethod("CreateCPropWithNoValue", BindingFlags.Static | BindingFlags.NonPublic);
             CreateCPropWithNoValCache = new TwoTypesDelegateCache<CreateCPropWithNoValueDelegate>(createCPropNoVal_mi);
@@ -92,7 +94,6 @@ namespace DRM.PropBag.Caches
 
             CreateCPropFromStringCache = new TwoTypesDelegateCache<CreateCPropFromStringDelegate>(createCPropFromString_mi);
             //curBytes = Sizer.ReportMemConsumption(startBytes, curBytes, "After new TwoTypesDelegateCache<CreateCPropFromStringDelegate>");
-
 
             // Create Prop From Object
             MethodInfo createCPropFromObject_mi = propCreatorType.GetMethod("CreateCPropFromObject", BindingFlags.Static | BindingFlags.NonPublic);

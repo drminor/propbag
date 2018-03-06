@@ -5,6 +5,8 @@ using DRM.PropBagWPF;
 using DRM.TypeSafePropertyBag;
 using DRM.PropBag.ViewModelTools;
 using System;
+using DRM.PropBag.TypeWrapper;
+using DRM.PropBag.TypeWrapper.TypeDesc;
 
 namespace PropBagLib.Tests.AutoMapperSupport
 {
@@ -25,10 +27,13 @@ namespace PropBagLib.Tests.AutoMapperSupport
         {
             IViewModelActivator vmActivator = new SimpleViewModelActivator();
 
+
+            ICreateWrapperTypes simpleWrapperTypeCreator = GetSimpleWrapperTypeCreator();
+
             IPropBagMapperBuilderProvider propBagMapperBuilderProvider
                 = new SimplePropBagMapperBuilderProvider
                 (
-                    wrapperTypesCreator: null,
+                    wrapperTypesCreator: simpleWrapperTypeCreator,
                     viewModelActivator: vmActivator,
                     storeAccessCreator: storeAccessCreator
                 );
@@ -122,6 +127,40 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 _autoMapperProvider_V1 = new AutoMapperHelpers().InitializeAutoMappers(storeAccessCreator: StoreAccessCreator);
             }
             return _autoMapperProvider_V1;
+        }
+
+        protected virtual ICreateWrapperTypes GetSimpleWrapperTypeCreator()
+        {
+            // -- Build WrapperType Caching Service
+            // Used by some ViewModel Activators to emit types, i.e., modules.
+            IModuleBuilderInfo moduleBuilderInfo = new SimpleModuleBuilderInfo();
+
+            IEmitWrapperType emitWrapperType = new SimpleWrapperTypeEmitter
+                (
+                mbInfo: moduleBuilderInfo
+                );
+
+            ICacheWrapperTypes wrapperTypeCachingService = new WrapperTypeLocalCache
+                (
+                emitterEngine: emitWrapperType
+                );
+
+            // -- Build TypeDesc Caching Service
+            // Used only by some ModuleBuilders.
+            ITypeDescriptionProvider typeDescriptionProvider = new SimpleTypeDescriptionProvider();
+
+            ICacheTypeDescriptions typeDescCachingService = new TypeDescriptionLocalCache
+                (
+                typeDescriptionProvider: typeDescriptionProvider
+                );
+
+            ICreateWrapperTypes result = new SimpleWrapperTypeCreator
+                (
+                wrapperTypeCachingService: wrapperTypeCachingService,
+                typeDescCachingService: typeDescCachingService
+                );
+
+            return result;
         }
 
         //public Type GetTypeFromName(string typeName)

@@ -51,6 +51,6 @@ namespace DRM.PropBag.AutoMapperSupport
         /// When a Proxy or Wrapper Type must be created to support the mapping operation, this holds the
         /// new emitted type.
         /// </summary>
-        Type NewWrapperType { get; set; }
+        Type NewEmittedType { get; set; }
     }
 }

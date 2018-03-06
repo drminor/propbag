@@ -1,5 +1,5 @@
-﻿using DRM.TypeSafePropertyBag;
-using DRM.PropBag.ViewModelTools;
+﻿using DRM.PropBag.TypeWrapper;
+using DRM.TypeSafePropertyBag;
 using System;
 using System.Reflection;
 using System.Threading;
@@ -13,15 +13,19 @@ namespace DRM.PropBag.AutoMapperSupport
     {
         #region Private Members
 
-        IMapTypeDefinitionProvider MapTypeDefinitionProvider { get; }
-        ICachePropBagMappers MappersCachingService { get; }
-        IPropBagMapperBuilderProvider MapperBuilderProvider { get; }
+        private readonly IMapTypeDefinitionProvider _mapTypeDefinitionProvider;
+        private readonly ICachePropBagMappers _mappersCachingService;
+        private readonly IPropBagMapperBuilderProvider _mapperBuilderProvider;
 
         #endregion
 
         #region Constructors
 
-        private SimpleAutoMapperProvider() { } // Disallow the parameterless constructor.
+        // Disallow the parameterless constructor.
+        private SimpleAutoMapperProvider()
+        {
+            throw new NotSupportedException("Use of the paremeterless constructor for SimpleAutoMapperProvider is not supported.");
+        }
 
         public SimpleAutoMapperProvider
             (
@@ -30,27 +34,38 @@ namespace DRM.PropBag.AutoMapperSupport
             IPropBagMapperBuilderProvider mapperBuilderProvider
             )
         {
-            MapTypeDefinitionProvider = mapTypeDefinitionProvider ?? throw new ArgumentNullException(nameof(mapTypeDefinitionProvider));
-            MappersCachingService = mappersCachingService ?? throw new ArgumentNullException(nameof(mappersCachingService));
-            MapperBuilderProvider = mapperBuilderProvider ?? throw new ArgumentNullException(nameof(mapperBuilderProvider));
+            _mapTypeDefinitionProvider = mapTypeDefinitionProvider ?? throw new ArgumentNullException(nameof(mapTypeDefinitionProvider));
+            _mappersCachingService = mappersCachingService ?? throw new ArgumentNullException(nameof(mappersCachingService));
+            _mapperBuilderProvider = mapperBuilderProvider ?? throw new ArgumentNullException(nameof(mapperBuilderProvider));
         }
+
+        #endregion
+
+        #region Public Properties
+
+        public ICreateWrapperTypes WrapperTypeCreator => _mapperBuilderProvider.WrapperTypeCreator;
 
         #endregion
 
         #region Public Methods
 
-        public IPropBagMapperKeyGen RegisterMapperRequest(PropModelType propModel, Type sourceType, string configPackageName)
+        public IPropBagMapperKeyGen SubmitMapperRequest(PropModelType propModel, Type sourceType, string configPackageName)
         {
-            Type targetType = propModel.TargetType;
+            //Type targetType = propModel.TargetType;
 
-            RegisterMapperRequestDelegate submitMapperRequest = GetTheRegisterMapperRequestDelegate(sourceType, targetType);
-            IPropBagMapperKeyGen result = submitMapperRequest(propModel, targetType, configPackageName, this);
+            Type typeToCreate = propModel.NewEmittedType ?? propModel.TypeToCreate;
+
+            //MapperRequestSubmitterDelegate mapperRequestSubmitter = GetTheMapperRequestSubmitterDelegate(sourceType, targetType);
+            MapperRequestSubmitterDelegate mapperRequestSubmitter = GetTheMapperRequestSubmitterDelegate(sourceType, typeToCreate);
+
+            //IPropBagMapperKeyGen result = mapperRequestSubmitter(propModel, targetType, configPackageName, this);
+            IPropBagMapperKeyGen result = mapperRequestSubmitter(propModel, typeToCreate, configPackageName, this);
 
             return result;
         }
 
         // TODO: Consider adding a method that takes a IConfigureAMapper instead of a configPackageName.
-        public IPropBagMapperKey<TSource, TDestination> RegisterMapperRequest<TSource, TDestination>
+        public IPropBagMapperKey<TSource, TDestination> SubmitMapperRequest<TSource, TDestination>
             (
             PropModelType propModel,
             Type targetType,
@@ -71,17 +86,17 @@ namespace DRM.PropBag.AutoMapperSupport
 
             // Create a MapperBuilder for this request.
             IBuildPropBagMapper<TSource, TDestination> propBagMapperBuilder
-                = MapperBuilderProvider.GetPropBagMapperBuilder<TSource, TDestination>(propBagMapperConfigurationBuilder, this);
+                = _mapperBuilderProvider.GetPropBagMapperBuilder<TSource, TDestination>(propBagMapperConfigurationBuilder, this);
 
             // Lookup the package name and return a mapping configuration.
             IConfigureAMapper<TSource, TDestination> mappingConfiguration
                 = GetMappingConfiguration<TSource, TDestination>(configPackageName);
 
             IMapTypeDefinition<TSource> srcMapTypeDef
-                = MapTypeDefinitionProvider.GetTypeDescription<TSource>(propModel, targetType, propFactory: propFactory, className: null);
+                = _mapTypeDefinitionProvider.GetTypeDescription<TSource>(propModel, targetType, propFactory: propFactory, className: null);
 
             IMapTypeDefinition<TDestination> dstMapTypeDef
-                = MapTypeDefinitionProvider.GetTypeDescription<TDestination>(propModel, targetType, propFactory: propFactory, className: null);
+                = _mapTypeDefinitionProvider.GetTypeDescription<TDestination>(propModel, targetType, propFactory: propFactory, className: null);
 
 
             // Create the mapper request.
@@ -94,9 +109,20 @@ namespace DRM.PropBag.AutoMapperSupport
                     destinationMapTypeDef: dstMapTypeDef
                 );
 
-            IPropBagMapperKeyGen newMapRequest = this.RegisterMapperRequest(typedMapperRequest);
+            IPropBagMapperKeyGen newMapRequest = RegisterMapperRequest(typedMapperRequest);
 
             return (IPropBagMapperKey<TSource, TDestination>) newMapRequest;
+        }
+
+        public long ClearEmittedTypeCache()
+        {
+            return _mapperBuilderProvider.ClearTypeCache();
+        }
+
+        public void ClearCaches()
+        {
+            ClearMappersCache();
+            ClearEmittedTypeCache();
         }
 
         #endregion
@@ -105,33 +131,22 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public IPropBagMapper<TSource,TDestination> GetMapper<TSource, TDestination>(IPropBagMapperKey<TSource, TDestination> mapperRequest) where TDestination : class, IPropBag
         {
-            return (IPropBagMapper<TSource, TDestination>)MappersCachingService.GetMapper(mapperRequest);
+            return (IPropBagMapper<TSource, TDestination>)_mappersCachingService.GetMapper(mapperRequest);
         }
 
         public IPropBagMapperKeyGen RegisterMapperRequest(IPropBagMapperKeyGen mapperRequest)
         {
-            return MappersCachingService.RegisterMapperRequest(mapperRequest);
+            return _mappersCachingService.RegisterMapperRequest(mapperRequest);
         }
 
         public IPropBagMapperGen GetMapper(IPropBagMapperKeyGen mapperRequest)
         {
-            return MappersCachingService.GetMapper(mapperRequest);
-        }
-
-        public long ClearEmittedTypeCache()
-        {
-            return MapperBuilderProvider.ClearTypeCache();
+            return _mappersCachingService.GetMapper(mapperRequest);
         }
 
         public long ClearMappersCache()
         {
-            return MappersCachingService.ClearMappersCache();
-        }
-
-        public void ClearCaches()
-        {
-            MappersCachingService.ClearMappersCache();
-            MapperBuilderProvider.ClearTypeCache();
+            return _mappersCachingService.ClearMappersCache();
         }
 
         #endregion
@@ -161,15 +176,15 @@ namespace DRM.PropBag.AutoMapperSupport
 
         #region Generic Method Support
 
-        static RegisterMapperRequestDelegate GetTheRegisterMapperRequestDelegate(Type sourceType, Type destinationType)
+        static MapperRequestSubmitterDelegate GetTheMapperRequestSubmitterDelegate(Type sourceType, Type destinationType)
         {
-            MethodInfo TypedRegisterMapperRequest_MI = GenericMethodTemplates.GenRegisterMapperRequest_MI.MakeGenericMethod(sourceType, destinationType);
-            RegisterMapperRequestDelegate result = (RegisterMapperRequestDelegate)Delegate.CreateDelegate(typeof(RegisterMapperRequestDelegate), TypedRegisterMapperRequest_MI);
+            MethodInfo TypedRegisterMapperRequest_MI = GenericMethodTemplates.GenMapperRequestSubmitter_MI.MakeGenericMethod(sourceType, destinationType);
+            MapperRequestSubmitterDelegate result = (MapperRequestSubmitterDelegate)Delegate.CreateDelegate(typeof(MapperRequestSubmitterDelegate), TypedRegisterMapperRequest_MI);
 
             return result;
         }
 
-        internal delegate IPropBagMapperKeyGen RegisterMapperRequestDelegate
+        internal delegate IPropBagMapperKeyGen MapperRequestSubmitterDelegate
             (PropModelType propModel, Type targetType, string configPackageName, IProvideAutoMappers autoMapperProvider);
 
         /// <summary>
@@ -180,23 +195,23 @@ namespace DRM.PropBag.AutoMapperSupport
         // Method Templates for Property Bag
         internal static class GenericMethodTemplates
         {
-            static Lazy<MethodInfo> theSingleGenRegisterMapperRequest_MI;
-            public static MethodInfo GenRegisterMapperRequest_MI { get { return theSingleGenRegisterMapperRequest_MI.Value; } }
+            static Lazy<MethodInfo> theSingleGenMapperRequestSubmitter_MI;
+            public static MethodInfo GenMapperRequestSubmitter_MI { get { return theSingleGenMapperRequestSubmitter_MI.Value; } }
 
             static GenericMethodTemplates()
             {
-                theSingleGenRegisterMapperRequest_MI = new Lazy<MethodInfo>(() =>
-                    GMT_TYPE.GetMethod("RegisterMapperRequest", BindingFlags.Static | BindingFlags.NonPublic),
+                theSingleGenMapperRequestSubmitter_MI = new Lazy<MethodInfo>(() =>
+                    GMT_TYPE.GetMethod("SubmitMapperRequest", BindingFlags.Static | BindingFlags.NonPublic),
                     LazyThreadSafetyMode.PublicationOnly);
             }
 
             // The Typed Method
-            static IPropBagMapperKey<TSource, TDestination> RegisterMapperRequest<TSource, TDestination>
+            static IPropBagMapperKey<TSource, TDestination> SubmitMapperRequest<TSource, TDestination>
                 (PropModelType propModel, Type targetType, string configPackageName, IProvideAutoMappers autoMapperProvider) where TDestination : class, IPropBag
             {
 
                 IPropBagMapperKey<TSource, TDestination> result
-                    = autoMapperProvider.RegisterMapperRequest<TSource, TDestination>
+                    = autoMapperProvider.SubmitMapperRequest<TSource, TDestination>
                     (
                         propModel: propModel,
                         typeToWrap: targetType,
@@ -224,18 +239,18 @@ namespace DRM.PropBag.AutoMapperSupport
                     // Dispose managed state (managed objects).
                     ClearCaches();
 
-                    if(MapTypeDefinitionProvider is IDisposable disable)
+                    if(_mapTypeDefinitionProvider is IDisposable disable)
                     {
                         disable.Dispose();
                     }
 
-                    if(MappersCachingService is IDisposable disable2)
+                    if(_mappersCachingService is IDisposable disable2)
                     {
                         disable2.Dispose();
                     }
 
 
-                    if(MapperBuilderProvider is IDisposable disable3)
+                    if(_mapperBuilderProvider is IDisposable disable3)
                     {
                         disable3.Dispose();
                     }

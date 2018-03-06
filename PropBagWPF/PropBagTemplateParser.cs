@@ -33,8 +33,8 @@ namespace DRM.PropBagWPF
                 System.Diagnostics.Debug.WriteLine($"We are processing the {nameof(pbt.ClassName)} PropItem.");
             }
 
-            DeriveFromClassModeEnum deriveFrom = pbt.DeriveFromClassMode;
-            Type targetType = pbt.TargetType;
+            //DeriveFromClassModeEnum deriveFrom = pbt.DeriveFromClassMode;
+            //Type targetType = pbt.TargetType;
 
             //TypeInfoField wrapperTypeInfoField = GetWrapperTypeInfo(pbt);
             //Type targetTypeFromWTInfoField = GetTypeFromInfoField(wrapperTypeInfoField, PropKindEnum.Prop, targetType, out Type itemTypeDummy);
@@ -43,8 +43,8 @@ namespace DRM.PropBagWPF
                 (
                 className: pbt.ClassName,
                 namespaceName: pbt.OutPutNameSpace,
-                deriveFrom: deriveFrom,
-                targetType: targetType,
+                deriveFrom: pbt.DeriveFromClassMode,
+                targetType: pbt.TargetType,
                 propFactory: null,
                 propFactoryType: pbt.PropFactoryType,
                 propModelProvider: null,

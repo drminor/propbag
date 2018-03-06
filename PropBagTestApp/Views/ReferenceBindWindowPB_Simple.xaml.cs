@@ -148,7 +148,7 @@ namespace PropBagTestApp.View
 
 
                     IPropBagMapperKey<MyModel, ReferenceBindViewModelPB> mapperRequest
-                        = PropStoreServicesForThisApp.AutoMapperProvider.RegisterMapperRequest<MyModel, ReferenceBindViewModelPB>
+                        = PropStoreServicesForThisApp.AutoMapperProvider.SubmitMapperRequest<MyModel, ReferenceBindViewModelPB>
                         (
                         propModel, 
                         typeof(ReferenceBindViewModelPB),

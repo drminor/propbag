@@ -5,8 +5,11 @@ using System.ComponentModel;
 
 namespace DRM.TypeSafePropertyBag.DataAccessSupport
 {
-    public class EndEditWrapper<T> : ObservableCollection<T>, ICollectionViewFactory, INotifyItemEndEdit, IDisposable where T: INotifyItemEndEdit
+    public class EndEditWrapper<T> : ObservableCollection<T>, ICollectionViewFactory, INotifyItemEndEdit, IDisposable
+        where T: INotifyItemEndEdit
     {
+        private BetterLCVCreatorDelegate<T> _betterListCollViewCreator;
+
         #region Constructors
 
         public EndEditWrapper()
@@ -23,8 +26,10 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
         //    }
         //}
 
-        public EndEditWrapper(IEnumerable<T> collection)
+        public EndEditWrapper(IEnumerable<T> collection, BetterLCVCreatorDelegate<T> betterLCVCreatorDelegate)
         {
+            _betterListCollViewCreator = betterLCVCreatorDelegate;
+
             foreach (T item in collection)
             {
                 // This calls insert and thereby we attach our handler to each item's ItemEndEdit event.
@@ -38,7 +43,8 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
 
         public ICollectionView CreateView()
         {
-            return new BetterListCollectionView(this);
+            ICollectionView result = _betterListCollViewCreator(this);
+            return result;
         }
 
         #endregion

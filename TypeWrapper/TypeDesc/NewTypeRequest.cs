@@ -9,29 +9,30 @@ namespace DRM.PropBag.TypeWrapper
 
     public struct NewTypeRequest : IEquatable<NewTypeRequest>
     {
-        public NewTypeRequest(PropModelType propModel, Type typeToWrap, string className)
+
+        public NewTypeRequest(PropModelType propModel, Type typeToWrap, string fullClassName)
         {
             PropModel = propModel ?? throw new ArgumentNullException(nameof(propModel));
             TypeToWrap = typeToWrap;
-            ClassName = className;
+            FullClassName = fullClassName ?? propModel.FullClassName;
         }
 
         public PropModelType PropModel { get; }
         public Type TypeToWrap { get; }
-        public string ClassName { get; }
+        public string FullClassName { get; }
 
         public override bool Equals(object obj)
         {
             return obj is NewTypeRequest && Equals((NewTypeRequest)obj);
         }
 
-
-        // TODO: check how to compare two IPropModels.
+        // Note: The PropModel references must point to the same instance.
+        // Callers should cache PropModel refereneces to avoid creating duplicate types.
         public bool Equals(NewTypeRequest other)
         {
             return EqualityComparer<PropModelType>.Default.Equals(PropModel, other.PropModel) &&
                    EqualityComparer<Type>.Default.Equals(TypeToWrap, other.TypeToWrap) &&
-                   ClassName == other.ClassName;
+                   FullClassName == other.FullClassName;
         }
 
         public override int GetHashCode()
@@ -40,7 +41,7 @@ namespace DRM.PropBag.TypeWrapper
             hashCode = hashCode * -1521134295 + base.GetHashCode();
             hashCode = hashCode * -1521134295 + EqualityComparer<PropModelType>.Default.GetHashCode(PropModel);
             hashCode = hashCode * -1521134295 + EqualityComparer<Type>.Default.GetHashCode(TypeToWrap);
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(ClassName);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(FullClassName);
             return hashCode;
         }
 

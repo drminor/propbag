@@ -2,6 +2,10 @@
 using DRM.TypeSafePropertyBag;
 using DRM.TypeSafePropertyBag.DataAccessSupport;
 using System;
+using System.Collections;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Windows.Data;
 
 namespace DRM.PropBagWPF
@@ -43,16 +47,21 @@ namespace DRM.PropBagWPF
             return result;
         }
 
+        public override BetterLCVCreatorDelegate<T> ListCollectionViewCreator<T>()
+        {
+            return BetterListCollectionViewCreator<T>.ProduceView;
+        }
+
         #endregion
 
         #region CollectionViewSource property creators
 
-        public override IProp CreateCVSProp(PropNameType propertyName, IProvideAView viewProvider) 
+        public override IProp CreateCVSProp(PropNameType propertyName, IProvideAView viewProvider, IPropTemplate propTemplate) 
         {
-            IPropTemplate<CollectionViewSource> propTemplate = GetPropTemplate<CollectionViewSource>(PropKindEnum.CollectionViewSource, PropStorageStrategyEnum.Internal, null, null);
+            if(propTemplate == null) propTemplate = GetPropTemplate<CollectionViewSource>(PropKindEnum.CollectionViewSource, PropStorageStrategyEnum.Internal, null, null);
             propTemplate.PropCreator = CookedCVSPropCreator;
 
-            ICViewSourceProp<CollectionViewSource> result = new CViewSourceProp(propertyName, viewProvider, propTemplate);
+            ICViewSourceProp<CollectionViewSource> result = new CViewSourceProp(propertyName, viewProvider, (IPropTemplate<CollectionViewSource>) propTemplate);
             return result;
         }
 
@@ -62,12 +71,12 @@ namespace DRM.PropBagWPF
             return result2;
         }
 
-        public override IProp CreateCVProp(string propertyName, IProvideAView viewProvider)
+        public override IProp CreateCVProp(string propertyName, IProvideAView viewProvider, IPropTemplate propTemplate)
         {
-            IPropTemplate<ListCollectionView> propTemplate = GetPropTemplate<ListCollectionView>(PropKindEnum.CollectionView, PropStorageStrategyEnum.Internal, null, null);
+            if (propTemplate == null) propTemplate = GetPropTemplate<ListCollectionView>(PropKindEnum.CollectionView, PropStorageStrategyEnum.Internal, null, null);
             propTemplate.PropCreator = CookedCVPropCreator;
 
-            CViewProp result = new CViewProp(propertyName, viewProvider, propTemplate);
+            CViewProp result = new CViewProp(propertyName, viewProvider, (IPropTemplate<ListCollectionView>)propTemplate);
             return result;
         }
 

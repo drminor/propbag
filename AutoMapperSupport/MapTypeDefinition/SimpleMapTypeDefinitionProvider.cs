@@ -13,7 +13,6 @@ namespace DRM.PropBag.AutoMapperSupport
         {
             if (typeof(T).IsPropBagBased())
             {
-                // TODO: Honor the DeriveFromClassMode specified in the PropModel.
                 return new MapTypeDefinition<T>(propModel, typeToWrap, fullClassName, propFactory);
             }
             else

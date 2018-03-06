@@ -1,12 +1,10 @@
 ﻿using DRM.PropBag;
 using DRM.PropBag.AutoMapperSupport;
 using DRM.PropBag.Caches;
-using DRM.PropBagControlsWPF;
-
-using DRM.PropBagWPF;
-
-using DRM.TypeSafePropertyBag;
 using DRM.PropBag.ViewModelTools;
+using DRM.PropBagControlsWPF;
+using DRM.PropBagWPF;
+using DRM.TypeSafePropertyBag;
 using System;
 using System.ComponentModel;
 using System.Windows;

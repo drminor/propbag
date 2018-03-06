@@ -8,16 +8,10 @@ namespace DRM.TypeSafePropertyBag
         public LocalBindingInfo BindingInfo { get; }
         public IMapperRequest MapperRequest { get; }
 
-        //PropBagMapperCreator _propBagMapperCreator;
-        //CViewProviderCreator _viewBuilder;
-
-        public ViewManagerProviderKey(LocalBindingInfo bindingInfo, IMapperRequest mr/*, PropBagMapperCreator propBagMapperCreator, CViewProviderCreator viewBuilder*/)
+        public ViewManagerProviderKey(LocalBindingInfo bindingInfo, IMapperRequest mapperRequest)
         {
             BindingInfo = bindingInfo;
-            MapperRequest = mr ?? throw new ArgumentNullException(nameof(mr));
-
-            //_propBagMapperCreator = propBagMapperCreator ?? throw new ArgumentNullException(nameof(propBagMapperCreator));
-            //_viewBuilder = viewBuilder ?? throw new ArgumentNullException(nameof(viewBuilder));
+            MapperRequest = mapperRequest ?? throw new ArgumentNullException(nameof(mapperRequest));
         }
 
         public override bool Equals(object obj)

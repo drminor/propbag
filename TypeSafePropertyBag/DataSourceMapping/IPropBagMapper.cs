@@ -17,6 +17,8 @@ namespace DRM.TypeSafePropertyBag
         IEnumerable<TSource> MapToSource(IEnumerable<TDestination> listOfDestinations);
 
         TDestination GetNewDestination();
+
+        Type TargetRunTimeType { get; }
     }
 
     public interface IPropBagMapperGen : IDisposable

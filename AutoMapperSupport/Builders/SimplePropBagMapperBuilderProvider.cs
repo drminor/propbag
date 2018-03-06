@@ -1,5 +1,4 @@
 ﻿using DRM.PropBag.TypeWrapper;
-using DRM.PropBag.TypeWrapper.TypeDesc;
 using DRM.PropBag.ViewModelTools;
 using DRM.TypeSafePropertyBag;
 using System;
@@ -10,10 +9,15 @@ namespace DRM.PropBag.AutoMapperSupport
 
     public class SimplePropBagMapperBuilderProvider : IPropBagMapperBuilderProvider
     {
-        private ICreateWrapperTypes WrapperTypeCreator { get; }
-        private IViewModelActivator ViewModelActivator { get; }
+        #region Private Properties
 
+        private readonly ICreateWrapperTypes _wrapperTypeCreator;
+        private readonly IViewModelActivator _viewModelActivator;
         private PSAccessServiceCreatorInterface _storeAccessCreator;
+
+        #endregion
+
+        #region Constructor
 
         public SimplePropBagMapperBuilderProvider
             (
@@ -22,10 +26,20 @@ namespace DRM.PropBag.AutoMapperSupport
             PSAccessServiceCreatorInterface storeAccessCreator
             )
         {
-            WrapperTypeCreator = wrapperTypesCreator ?? GetSimpleWrapperTypeCreator();
-            ViewModelActivator = viewModelActivator ?? throw new ArgumentNullException(nameof(viewModelActivator)); // new SimpleViewModelActivator();
+            _wrapperTypeCreator = wrapperTypesCreator ?? throw new ArgumentNullException(nameof(wrapperTypesCreator)); // GetSimpleWrapperTypeCreator();
+            _viewModelActivator = viewModelActivator ?? throw new ArgumentNullException(nameof(viewModelActivator)); // new SimpleViewModelActivator();
             _storeAccessCreator = storeAccessCreator ?? throw new ArgumentNullException(nameof(storeAccessCreator));
         }
+
+        #endregion
+
+        #region Public Properties
+
+        public ICreateWrapperTypes WrapperTypeCreator => _wrapperTypeCreator;
+
+        #endregion
+
+        #region Public Methods
 
         public IBuildPropBagMapper<TSource, TDestination> GetPropBagMapperBuilder<TSource, TDestination>
             (
@@ -38,41 +52,10 @@ namespace DRM.PropBag.AutoMapperSupport
                 = new SimplePropBagMapperBuilder<TSource, TDestination>
                 (
                     mapperConfigurationBuilder: mapperConfigurationBuilder,
-                    wrapperTypeCreator: WrapperTypeCreator,
-                    viewModelActivator: ViewModelActivator,
+                    wrapperTypeCreator: _wrapperTypeCreator,
+                    viewModelActivator: _viewModelActivator,
                     storeAccessCreator: _storeAccessCreator,
                     autoMapperService: autoMapperService
-                );
-
-            return result;
-        }
-
-        private ICreateWrapperTypes GetSimpleWrapperTypeCreator()
-        {
-            // -- Build WrapperType Caching Service
-            // Used by some ViewModel Activators to emit types, i.e., modules.
-            IModuleBuilderInfo moduleBuilderInfo = new SimpleModuleBuilderInfo();
-
-            IEmitWrapperType emitWrapperType = new SimpleWrapperTypeEmitter(mbInfo: moduleBuilderInfo);
-
-            ICacheWrapperTypes wrapperTypeCachingService = new WrapperTypeLocalCache
-                (
-                emitterEngine: emitWrapperType
-                );
-
-            // -- Build TypeDesc Caching Service
-            // Used only by some ModuleBuilders.
-            ITypeDescriptionProvider typeDescriptionProvider = new SimpleTypeDescriptionProvider();
-
-            ICacheTypeDescriptions typeDescCachingService = new TypeDescriptionLocalCache
-                (
-                typeDescriptionProvider: typeDescriptionProvider
-                );
-
-            ICreateWrapperTypes result = new SimpleWrapperTypeCreator
-                (
-                wrapperTypeCachingService: wrapperTypeCachingService,
-                typeDescCachingService: typeDescCachingService
                 );
 
             return result;
@@ -82,7 +65,9 @@ namespace DRM.PropBag.AutoMapperSupport
         // The number of entries in the cache of TypeDescriptors is not included.
         public long ClearTypeCache()
         {
-            return WrapperTypeCreator.ClearTypeCache();
+            return _wrapperTypeCreator.ClearTypeCache();
         }
+
+        #endregion
     }
 }

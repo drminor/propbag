@@ -48,10 +48,16 @@ namespace DRM.PropBag.AutoMapperSupport
             //SourceConstructor = mappingConfiguration.SourceConstructor;
             //DestinationConstructor = mappingConfiguration.DestinationConstructor;
 
-            PropBagMapperBuilder.Validate(this);
+            ValidateBuilder();
         }
 
         #endregion
+
+        [System.Diagnostics.Conditional("DEBUG")]
+        private void ValidateBuilder()
+        {
+            PropBagMapperBuilder.Validate(this);
+        }
 
         #region IEquatable Support and Object Overrides
         public override bool Equals(object obj)

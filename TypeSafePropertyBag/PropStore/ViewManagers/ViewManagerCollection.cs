@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 
-namespace DRM.TypeSafePropertyBag.Fundamentals
+namespace DRM.TypeSafePropertyBag
 {
     using PropIdType = UInt32;
     using PSAccessServiceInternalInterface = IPropStoreAccessServiceInternal<UInt32, String>;

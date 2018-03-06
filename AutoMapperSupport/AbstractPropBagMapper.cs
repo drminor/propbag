@@ -29,6 +29,8 @@ namespace DRM.PropBag.AutoMapperSupport
         //public Func<TDestination, TSource> RegularInstanceCreator { get; }
         public bool SupportsMapFrom { get; }
 
+        public Type TargetRunTimeType => RunTimeType;
+
         IViewModelActivator _vmActivator;
         PSAccessServiceCreatorInterface _storeAccessCreator;
         IProvideAutoMappers _autoMapperService;
@@ -54,7 +56,7 @@ namespace DRM.PropBag.AutoMapperSupport
             SourceType = mapRequest.SourceTypeDef.TargetType;
             DestinationType = mapRequest.DestinationTypeDef.TargetType;
 
-            RunTimeType = mapRequest.DestinationTypeDef.NewWrapperType ?? DestinationType; 
+            RunTimeType = mapRequest.DestinationTypeDef.NewEmittedType ?? DestinationType; 
             PropModel = mapRequest.DestinationTypeDef.PropModel;
             PropFactory = mapRequest.DestinationTypeDef.PropFactory;
 
@@ -88,7 +90,7 @@ namespace DRM.PropBag.AutoMapperSupport
             //{
             //    tType = DestinationType;
             //}
-            //_destPropBagTemplate = GetNewDestination(PropModel, _storeAccessCreator, tType, _autoMapperService, PropFactory, fullClassName: null);
+            //_destPropBagTemplate = GetNewDestination(tType, PropModel, _storeAccessCreator, _autoMapperService, PropFactory, fullClassName: null);
 
             TDestination result = GetNewDestination(DestinationType, PropModel, _storeAccessCreator, _autoMapperService, PropFactory, fullClassName: null);
 
@@ -121,17 +123,28 @@ namespace DRM.PropBag.AutoMapperSupport
 
         #endregion
 
+
+
         #region Type Mapper Function
 
         public TDestination MapToDestination(TSource s)
         {
             TDestination result = MapToDestination(s, GetNewDestination());
+
+            //object d = GetNewDestinationTest(RunTimeType, _destPropBagTemplate);
+            //TDestination result = MapToDestination(s, d);
+
             return result;
         }
 
         public TDestination MapToDestination(TSource s, TDestination d)
         {
             return (TDestination) Mapper.Map(s, d, SourceType, RunTimeType);
+        }
+
+        public TDestination MapToDestination(TSource s, object d)
+        {
+            return (TDestination)Mapper.Map(s, d, SourceType, RunTimeType);
         }
 
         public TSource MapToSource(TDestination d)
@@ -236,6 +249,19 @@ namespace DRM.PropBag.AutoMapperSupport
                 throw new InvalidOperationException($"Cannot create an instance of {destinationOrProxyType} that takes a single IPropag argument.", e2);
             }
         }
+
+        //private object GetNewDestinationTest(Type destinationOrProxyType, IPropBag copySource)
+        //{
+        //    try
+        //    {
+        //        var newViewModel = _vmActivator.GetNewViewModel(destinationOrProxyType, copySource);
+        //        return newViewModel;
+        //    }
+        //    catch (Exception e2)
+        //    {
+        //        throw new InvalidOperationException($"Cannot create an instance of {destinationOrProxyType} that takes a single IPropag argument.", e2);
+        //    }
+        //}
 
         #endregion
 

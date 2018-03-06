@@ -3,6 +3,7 @@ using DRM.TypeSafePropertyBag.Fundamentals;
 using DRM.TypeSafePropertyBag.LocalBinding;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
@@ -1191,7 +1192,8 @@ namespace DRM.TypeSafePropertyBag
             IPropData propData, // The PropStore management wrapper for IProp<TSource> which holds the value of the 'IDoCrud<T>' data access layer.
             IMapperRequest mr,  // The information necessary to create a IPropBagMapper<TSource, TDestination>
             PropBagMapperCreator propBagMapperCreator,  // A delegate that can be called to create a IPropBagMapper<TSource, TDestination> given a IMapperRequest.
-            CViewProviderCreator viewBuilder            // Method that can be used to create a IProvideAView from a DataSourceProvider.
+            CViewProviderCreator viewBuilder,            // Method that can be used to create a IProvideAView from a DataSourceProvider.
+            BetterLCVCreatorDelegate<TDestination> betterLCVCreatorDelegate
         )
             where TDal : class, IDoCRUD<TSource>
             where TSource : class
@@ -1218,7 +1220,7 @@ namespace DRM.TypeSafePropertyBag
                     CrudWithMapping<TDal, TSource, TDestination> mappedDal = 
                         new CrudWithMapping<TDal, TSource, TDestination>(propItemWatcher, mapper);
 
-                    dSProviderProvider = new ClrMappedDSP<TDestination>(mappedDal);
+                    dSProviderProvider = new ClrMappedDSP<TDestination>(mappedDal, betterLCVCreatorDelegate);
                 }
                 else
                 {
@@ -1242,7 +1244,8 @@ namespace DRM.TypeSafePropertyBag
             PropIdType propId,  // Identifies the PropItem that implements IDoCrud<TSource>
             IPropData propData, // The PropStore management wrapper for IProp<TSource> which holds the value of the 'IDoCrud<T>' data access layer.
             IPropBagMapper<TSource, TDestination> mapper,   // The AutoMapper used to translate from source data to view items.
-            CViewProviderCreator viewBuilder                // Method that can be used to create a IProvideAView from a DataSourceProvider.
+            CViewProviderCreator viewBuilder,                // Method that can be used to create a IProvideAView from a DataSourceProvider.
+            BetterLCVCreatorDelegate<TDestination> betterLCVCreatorDelegate
         )
             where TDal : class, IDoCRUD<TSource>
             where TSource : class
@@ -1264,8 +1267,10 @@ namespace DRM.TypeSafePropertyBag
                 {
                     IWatchAPropItem<TDal> propItemWatcher = new PropItemWatcher<TDal>(this as PSAccessServiceInternalInterface, propId2);
 
-                    CrudWithMapping<TDal, TSource, TDestination> mappedDal = new CrudWithMapping<TDal, TSource, TDestination>(propItemWatcher, mapper);
-                    dSProviderProvider = new ClrMappedDSP<TDestination>(mappedDal);
+                    CrudWithMapping<TDal, TSource, TDestination> mappedDal = 
+                        new CrudWithMapping<TDal, TSource, TDestination>(propItemWatcher, mapper);
+
+                    dSProviderProvider = new ClrMappedDSP<TDestination>(mappedDal, betterLCVCreatorDelegate);
                 }
                 else
                 {
@@ -1324,14 +1329,6 @@ namespace DRM.TypeSafePropertyBag
 
                 return result2;
             }
-
-            //IProvideACViewManager CViewGenManagerProviderFactory(IViewManagerProviderKey viewManagerProviderKey)
-            //{
-            //    CViewManagerBinder<TDal, TSource, TDestination> result2 = 
-            //        new CViewManagerBinder<TDal, TSource, TDestination>(this, bindingInfo, mr, propBagMapperCreator, viewBuilder);
-
-            //    return result2;
-            //}
         }
 
         public bool TryGetViewManagerProvider

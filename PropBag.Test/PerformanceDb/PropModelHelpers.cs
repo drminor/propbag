@@ -16,7 +16,7 @@ namespace PropBagLib.Tests.PerformanceDb
                 (
                 className: "DestinationModel1",
                 namespaceName: "PropBagLib.Tests.PerformanceDb",
-                deriveFrom: DeriveFromClassModeEnum.PropBag,
+                deriveFrom: DeriveFromClassModeEnum.Custom,
                 targetType: typeof(DestinationModel1),
                 propFactory: propFactory,
                 propFactoryType: null,
@@ -75,8 +75,8 @@ namespace PropBagLib.Tests.PerformanceDb
                 (
                 className: "DestinationModel5",
                 namespaceName: "PropBagLib.Tests.PerformanceDb",
-                deriveFrom: DeriveFromClassModeEnum.PropBag,
-                targetType: null,
+                deriveFrom: DeriveFromClassModeEnum.Custom,
+                targetType: typeof(DestinationModel5),
                 propFactory: propFactory,
                 propFactoryType: null,
                 propModelProvider: null,
@@ -122,8 +122,8 @@ namespace PropBagLib.Tests.PerformanceDb
                 (
                 className: "DestinationModel6",
                 namespaceName: "PropBagLib.Tests.PerformanceDb",
-                deriveFrom: DeriveFromClassModeEnum.PropBag,
-                targetType: null,
+                deriveFrom: DeriveFromClassModeEnum.Custom,
+                targetType: typeof(DestinationModel6),
                 propFactory: propFactory,
                 propFactoryType: null,
                 propModelProvider: null,

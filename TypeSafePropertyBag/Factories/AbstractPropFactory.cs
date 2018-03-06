@@ -8,9 +8,11 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Globalization;
+using System.Windows.Data;
 
 namespace DRM.TypeSafePropertyBag
 {
+    using System.Collections.ObjectModel;
     using PropIdType = UInt32;
     using PropNameType = String;
     using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
@@ -63,19 +65,7 @@ namespace DRM.TypeSafePropertyBag
             DelegateCacheProvider = delegateCacheProvider ?? throw new ArgumentNullException(nameof(delegateCacheProvider));
             ValueConverter = valueConverter ?? throw new ArgumentNullException(nameof(valueConverter));
 
-            if (typeResolver != null)
-            {
-                TypeResolver = typeResolver;
-            }
-            else
-            {
-                // Use our default implementation, if the caller did not supply one.
-                TypeResolver = new SimpleTypeResolver().GetTypeFromName;
-            }
-            ////TypeResolver = typeResolver ??  this.GetTypeFromName;
-
-            //// Temporarily, for testing, always use our implementation.
-            //TypeResolver = new SimpleTypeResolver().GetTypeFromName;
+            TypeResolver = typeResolver ?? new SimpleTypeResolver().GetTypeFromName;
 
             IndexerName = "Item[]";
         }
@@ -90,60 +80,12 @@ namespace DRM.TypeSafePropertyBag
             return prop.PropTemplate.PropKind.IsCollection();
         }
 
-        //public virtual bool IsCollection(PropKindEnum propKind)
-        //{
-        //    if (propKind == PropKindEnum.Prop)
-        //    {
-        //        return false;
-        //    }
-        //    else if
-        //        (
-        //        propKind == PropKindEnum.ObservableCollection ||
-        //        propKind == PropKindEnum.EnumerableTyped ||
-        //        propKind == PropKindEnum.Enumerable ||
-        //        propKind == PropKindEnum.ObservableCollection_RO ||
-        //        propKind == PropKindEnum.EnumerableTyped_RO ||
-        //        propKind == PropKindEnum.Enumerable_RO
-        //        )
-        //    {
-        //        return true;
-        //    }
-        //    else
-        //    {
-        //        CheckPropKindSpecial(propKind);
-        //        return false;
-        //    }
-        //}
-
         public virtual bool IsReadOnly(IProp prop)
         {
             //return IsReadOnly(prop.PropKind);
             return prop.PropTemplate.PropKind.IsReadOnly();
 
         }
-
-        //public virtual bool IsReadOnly(PropKindEnum propKind)
-        //{
-        //    if (propKind == PropKindEnum.Prop)
-        //    {
-        //        return false;
-        //    }
-        //    else if
-        //        (
-        //        propKind == PropKindEnum.CollectionViewSource_RO ||
-        //        propKind == PropKindEnum.ObservableCollection_RO ||
-        //        propKind == PropKindEnum.EnumerableTyped_RO ||
-        //        propKind == PropKindEnum.Enumerable_RO
-        //        )
-        //    {
-        //        return true;
-        //    }
-        //    else
-        //    {
-        //        CheckPropKind(propKind);
-        //        return false;
-        //    }
-        //}
 
         #endregion
 
@@ -183,12 +125,12 @@ namespace DRM.TypeSafePropertyBag
 
         #region CollectionViewSource Prop Creation
 
-        public virtual IProp CreateCVSProp(PropNameType propertyName, IProvideAView viewProvider) 
+        public virtual IProp CreateCVSProp(PropNameType propertyName, IProvideAView viewProvider, IPropTemplate propTemplate) 
         {
             throw new NotImplementedException($"This implementation of {nameof(IPropFactory)} cannot create CVSProps (CollectionViewSource PropItems), please use WPFPropfactory or similar.");
         }
 
-        public virtual IProp CreateCVProp(PropNameType propertyName, IProvideAView viewProvider)
+        public virtual IProp CreateCVProp(PropNameType propertyName, IProvideAView viewProvider, IPropTemplate propTemplate)
         {
             throw new NotImplementedException($"This implementation of {nameof(IPropFactory)} cannot create CVProps (CollectionView PropItems), please use WPFPropfactory or similar.");
         }
@@ -618,6 +560,11 @@ namespace DRM.TypeSafePropertyBag
         {
             CreateScalarProp result = DelegateCacheProvider.CreateScalarPropCache.GetOrAdd(typeOfThisValue);
             return result;
+        }
+
+        public virtual BetterLCVCreatorDelegate<T> ListCollectionViewCreator<T>() where T: INotifyItemEndEdit
+        {
+            throw new NotImplementedException();
         }
 
         #endregion Property-Type Methods

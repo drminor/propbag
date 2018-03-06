@@ -19,11 +19,7 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
 
         #region Private Properties
 
-        //readonly LocalBindingInfo _bindingInfo;
-        //IMapperRequest _mr;                         // The information necessary to create a IPropBagMapper<TSource, TDestination>
-
         readonly LocalWatcher<TDal> _localWatcher;
-
 
         PropBagMapperCreator _propBagMapperCreator; // A delegate that can be called to create a IPropBagMapper<TSource, TDestination> given a IMapperRequest.
         CViewProviderCreator _viewBuilder;          // Method that can be used to create a IProvideAView from a DataSourceProvider.
@@ -57,14 +53,10 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
             (
             PSAccessServiceInterface propStoreAccessService,
             IViewManagerProviderKey viewManagerProviderKey,
-            //LocalBindingInfo bindingInfo,
-            //IMapperRequest mr,  // The information necessary to create a IPropBagMapper<TSource, TDestination>
             PropBagMapperCreator propBagMapperCreator,  // A delegate that can be called to create a IPropBagMapper<TSource, TDestination> given a IMapperRequest.
             CViewProviderCreator viewBuilder            // Method that can be used to create a IProvideAView from a DataSourceProvider.
             )
         {
-            //_bindingInfo = bindingInfo;
-            //_mr = mr;
             ViewManagerProviderKey = viewManagerProviderKey;
             _propBagMapperCreator = propBagMapperCreator;
             _viewBuilder = viewBuilder;
@@ -92,34 +84,13 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
                 if (_propItemParent_wr != null && _propItemParent_wr.TryGetTarget(out IPropBag propBagHost))
                 {
                     IManageCViews result = propBagHost.GetOrAddViewManager<TDal, TSource, TDestination>
-                        (PropertyName, null, ViewManagerProviderKey.MapperRequest);
+                        (
+                        propertyName: PropertyName,
+                        propertyType: null, // We only know that this property implements IDoCRUD<TSource>
+                        mapperRequest: ViewManagerProviderKey.MapperRequest
+                        );
 
                     return result;
-
-
-                    //// TODO: IPBI -- Get PropId
-                    //if (propBagHost is IPropBagInternal propBag_internal)
-                    //{
-                    //    PSAccessServiceInterface foreignStoreAccessor = propBag_internal.ItsStoreAccessor;
-                    //    if (foreignStoreAccessor is PSAccessServiceInternalInterface foreignStoreAccesssor_internal)
-                    //    {
-                    //        PropIdType propId = GetPropertyId(foreignStoreAccessor, this.PropertyName);
-                    //        IPropDataInternal propData = foreignStoreAccesssor_internal.GetChild(propId)?.PropData_Internal;
-
-                    //        //IManageCViews result = foreignStoreAccessor.GetOrAddViewManager<TDal, TSource, TDestination>
-                    //        //    (propBagHost, propId, propData as IPropData, ViewManagerProviderKey.MapperRequest, _propBagMapperCreator, _viewBuilder);
-
-
-                    //    }
-                    //    else
-                    //    {
-                    //        throw new InvalidOperationException("Fix Me. StoreAcccessor is not a PSAccessServiceInternalInterface.");
-                    //    }
-                    //}
-                    //else
-                    //{
-                    //    throw new InvalidOperationException("Fix Me. PropBag not a IPropBagInternal.");
-                    //}
                 }
                 else
                 {

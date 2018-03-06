@@ -15,9 +15,9 @@ namespace DRM.PropBag.TypeWrapper.TypeDesc
         {
         }
 
-        public TypeDescription GetTypeDescription(PropModelType propModel, Type typeToWrap, string className)
+        public TypeDescription GetTypeDescription(PropModelType propModel, Type typeToWrap, string fullClassName)
         {
-            NewTypeRequest request = new NewTypeRequest(propModel, typeToWrap, className);
+            NewTypeRequest request = new NewTypeRequest(propModel, typeToWrap, fullClassName);
 
             TypeDescription result = GetTypeDescription(request);
             return result;
@@ -25,9 +25,12 @@ namespace DRM.PropBag.TypeWrapper.TypeDesc
 
         public TypeDescription GetTypeDescription(NewTypeRequest newTypeRequest)
         {
-            string nsName = newTypeRequest.PropModel.NamespaceName;
+            //string nsName = newTypeRequest.PropModel.NamespaceName;
 
-            TypeName tn = new TypeName(newTypeRequest.TypeToWrap.Name, nsName);
+            // TODO: Consider using the fullClassName: newTypeRequest.FullClassName.
+            //TypeName tn = new TypeName(newTypeRequest.TypeToWrap.Name, nsName);
+
+            TypeName tn = new TypeName(newTypeRequest.FullClassName);
 
             IEnumerable<PropertyDescription> propDescs = GetPropertyDescriptions(newTypeRequest.PropModel);
 

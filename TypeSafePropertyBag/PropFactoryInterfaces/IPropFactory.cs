@@ -3,8 +3,10 @@ using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Windows.Data;
 
 namespace DRM.TypeSafePropertyBag
 {
@@ -24,6 +26,7 @@ namespace DRM.TypeSafePropertyBag
         IProvideDelegateCaches DelegateCacheProvider { get; }
 
         CViewProviderCreator GetCViewProviderFactory();
+        BetterLCVCreatorDelegate<T> ListCollectionViewCreator<T>() where T: INotifyItemEndEdit;
 
         bool IsCollection(IProp prop);
 
@@ -49,9 +52,14 @@ namespace DRM.TypeSafePropertyBag
 
         #region CollectionViewSource Prop Creation
 
-        IProp CreateCVSProp(PropNameType propertyName, IProvideAView viewProvider);
+        IProp CreateCVSProp(PropNameType propertyName, IProvideAView viewProvider, IPropTemplate propTemplate);
 
-        IProp CreateCVProp(PropNameType propertyName, IProvideAView viewProvider);
+        IProp CreateCVProp(PropNameType propertyName, IProvideAView viewProvider, IPropTemplate propTemplate);
+
+
+        //IProp CreateCVSProp(PropNameType propertyName, IProvideAView viewProvider);
+
+        //IProp CreateCVProp(PropNameType propertyName, IProvideAView viewProvider);
 
         #endregion
 

@@ -14,7 +14,7 @@ namespace DRM.PropBag.AutoMapperSupport
         public bool IsPropBag { get; }
         public PropModelType PropModel { get; }
         public Type TypeToWrap { get; }
-        public Type NewWrapperType { get; set; }
+        public Type NewEmittedType { get; set; }
 
         IPropFactory _propFactory { get; }
         string _fullClassName { get; }
@@ -34,7 +34,7 @@ namespace DRM.PropBag.AutoMapperSupport
             IsPropBag = false;
             PropModel = null;
             TypeToWrap = null;
-            NewWrapperType = null;
+            NewEmittedType = null;
             _fullClassName = fullClassName;
             _propFactory = null;
             _hashCode = TargetType.GetHashCode();
@@ -51,7 +51,7 @@ namespace DRM.PropBag.AutoMapperSupport
             IsPropBag = true;
             PropModel = pm ?? throw new ArgumentNullException(nameof(pm));
             TypeToWrap = typeToWrap ?? pm.TypeToCreate; // throw new ArgumentNullException(nameof(typeToWrap));
-            NewWrapperType = null;
+            NewEmittedType = pm.NewEmittedType;
             _fullClassName = fullClassName;
             _propFactory = propFactory;
             _hashCode = ComputeHashCode();

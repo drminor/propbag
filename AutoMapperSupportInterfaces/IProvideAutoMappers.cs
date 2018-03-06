@@ -1,5 +1,6 @@
 ﻿using System;
 using DRM.TypeSafePropertyBag;
+using DRM.PropBag.TypeWrapper;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
@@ -9,7 +10,9 @@ namespace DRM.PropBag.AutoMapperSupport
     // TODO: Change Register<xxx> to Submit<xxx>. (We are submitting a notice that we will need this at some point -- remember: GetMapper creates a mapper for all pending requests on first access to any request.)
     public interface IProvideAutoMappers : ICachePropBagMappers
     {
-        IPropBagMapperKey<TSource, TDestination> RegisterMapperRequest<TSource, TDestination>
+        ICreateWrapperTypes WrapperTypeCreator { get; }
+
+        IPropBagMapperKey<TSource, TDestination> SubmitMapperRequest<TSource, TDestination>
             (
             PropModelType propModel,
             Type typeToWrap,
@@ -20,7 +23,7 @@ namespace DRM.PropBag.AutoMapperSupport
             where TDestination : class, IPropBag;
 
         // The PropModel supplies the TDestination type and the Type that will be wrapped.
-        IPropBagMapperKeyGen RegisterMapperRequest
+        IPropBagMapperKeyGen SubmitMapperRequest
             (
             PropModelType propModel,
             Type sourceType,

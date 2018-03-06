@@ -1,4 +1,5 @@
-﻿using DRM.TypeSafePropertyBag;
+﻿using DRM.PropBag.AutoMapperSupport;
+using DRM.TypeSafePropertyBag;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -45,6 +46,10 @@ namespace DRM.PropBag
         {
         }
 
+        protected PubPropBag(PropBagTypeSafetyMode typeSafetyMode, PSAccessServiceCreatorInterface storeAcessorCreator, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
+            :base(typeSafetyMode, storeAcessorCreator, autoMapperService, propFactory, fullClassName)
+        {
+        }
 
         // Using a PropModel
         public PubPropBag(PropModel pm, PSAccessServiceCreatorInterface storeAccessCreator)
