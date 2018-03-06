@@ -21,18 +21,17 @@ namespace MVVMApplication.Infra
 
     public static class PropStoreServicesForThisApp 
     {
-        private readonly static SimplePropStoreProxy _theStore;
-
         public static int MAX_NUMBER_OF_PROPERTIES = 65536;
 
-        private static IPropFactoryFactory PropFactoryFactory { get; }
-
-        private static IPropFactory DefaultPropFactory { get; }
+        private static MemConsumptionTracker _mct = new MemConsumptionTracker();
+        private readonly static SimplePropStoreProxy _theStore;
+        private static IPropFactoryFactory _propFactoryFactory { get; }
+        private static IViewModelActivator _vmActivator { get; }
+        //private static IPropFactory _defaultPropFactory { get; }
 
         public static IProvidePropModels PropModelProvider { get; private set; }
-
         public static ViewModelHelper ViewModelHelper { get; private set; }
-
+        public static ICreateWrapperTypes WrapperTypeCreator { get; }
         public static IProvideAutoMappers AutoMapperProvider { get; }
 
         static string _configPackageNameSuffix;
@@ -48,10 +47,9 @@ namespace MVVMApplication.Infra
                 if(value != _configPackageNameSuffix)
                 {
                     _configPackageNameSuffix = value;
-                    PropModelProvider = GetPropModelProvider(PropFactoryFactory, ConfigPackageNameSuffix);
+                    PropModelProvider = GetPropModelProvider(_propFactoryFactory, ConfigPackageNameSuffix);
 
-                    IViewModelActivator vmActivator = new SimpleViewModelActivator();
-                    ViewModelHelper = new ViewModelHelper(PropModelProvider, vmActivator, _theStore.PropStoreAccessServiceFactory, AutoMapperProvider);
+                    ViewModelHelper = new ViewModelHelper(PropModelProvider, _vmActivator, _theStore.PropStoreAccessServiceFactory, AutoMapperProvider);
 
                     // Remove any AutoMapper that may have been previously created.
                     AutoMapperProvider.ClearMappersCache();
@@ -61,9 +59,6 @@ namespace MVVMApplication.Infra
                 }
             }
         }
-
-        static MemConsumptionTracker _mct = new MemConsumptionTracker();
-
 
         static PropStoreServicesForThisApp() 
         {
@@ -87,26 +82,27 @@ namespace MVVMApplication.Infra
             // Get a reference to the PropStoreAccessService Factory.
             PSAccessServiceCreatorInterface psAccessServiceFactory = _theStore.PropStoreAccessServiceFactory;
 
-            IViewModelActivator vmActivator = new SimpleViewModelActivator();
+            _vmActivator = new SimpleViewModelActivator();
                 _mct.MeasureAndReport("After new SimpleViewModelActivator");
 
-            ICreateWrapperTypes SimpleWrapperTypeCreator = null; // This will be provisioned by the SimplePropBagMapperBuilderProvider
-
-            AutoMapperProvider = GetAutoMapperProvider(SimpleWrapperTypeCreator, vmActivator, psAccessServiceFactory);
-            _mct.MeasureAndReport("After GetAutoMapperProvider");
-
             IConvertValues valueConverter = new PropFactoryValueConverter(typeDescBasedTConverterCache);
+            ResolveTypeDelegate typeResolver = null;
 
-            IPropFactoryFactory propFactoryFactory = BuildThePropFactoryFactory(valueConverter, delegateCacheProvider);
-            PropFactoryFactory = propFactoryFactory;
+            _propFactoryFactory = BuildThePropFactoryFactory(valueConverter, delegateCacheProvider, typeResolver);
 
-            PropModelProvider = GetPropModelProvider(propFactoryFactory, ConfigPackageNameSuffix);
+            PropModelProvider = GetPropModelProvider(_propFactoryFactory, ConfigPackageNameSuffix);
 
-            ViewModelHelper = new ViewModelHelper(PropModelProvider, vmActivator, psAccessServiceFactory, AutoMapperProvider);
-            _mct.MeasureAndReport("After new ViewModelHelper");
+            WrapperTypeCreator = GetSimpleWrapperTypeCreator();
+                _mct.MeasureAndReport("After GetSimpleWrapperTypeCreator");
 
-            DefaultPropFactory = BuildDefaultPropFactory(valueConverter, delegateCacheProvider/*, AutoMapperProvider*/);
-            _mct.MeasureAndReport("After new BuildDefaultPropFactory");
+            AutoMapperProvider = GetAutoMapperProvider(WrapperTypeCreator, _vmActivator, psAccessServiceFactory);
+                _mct.MeasureAndReport("After GetAutoMapperProvider");
+
+            ViewModelHelper = new ViewModelHelper(PropModelProvider, _vmActivator, psAccessServiceFactory, AutoMapperProvider);
+                _mct.MeasureAndReport("After new ViewModelHelper");
+
+            //_defaultPropFactory = BuildDefaultPropFactory(valueConverter, delegateCacheProvider, typeResolver);
+            //_mct.MeasureAndReport("After new BuildDefaultPropFactory");
         }
 
         private static IProvidePropModels GetPropModelProvider
@@ -115,10 +111,10 @@ namespace MVVMApplication.Infra
             string configPackageNameSuffix
             )
         {
-            IPropBagTemplateProvider propBagTemplateProvider = new PropBagTemplateProvider(Application.Current.Resources/*, null*/);
+            IPropBagTemplateProvider propBagTemplateProvider = new PropBagTemplateProvider(Application.Current.Resources);
                 _mct.MeasureAndReport("After new PropBagTemplateProvider");
 
-            IMapperRequestProvider mapperRequestProvider = new MapperRequestProvider(Application.Current.Resources/*, configPackageNameSuffix*/);
+            IMapperRequestProvider mapperRequestProvider = new MapperRequestProvider(Application.Current.Resources);
                 _mct.MeasureAndReport("After new MapperRequestProvider");
 
             IParsePropBagTemplates propBagTemplateParser = new PropBagTemplateParser();
@@ -140,11 +136,10 @@ namespace MVVMApplication.Infra
         private static IPropFactoryFactory BuildThePropFactoryFactory
             (
             IConvertValues valueConverter,
-            IProvideDelegateCaches delegateCacheProvider
+            IProvideDelegateCaches delegateCacheProvider,
+            ResolveTypeDelegate typeResolver
             )
         {
-            ResolveTypeDelegate typeResolver = null;
-
             IPropFactoryFactory result = new PropFactoryFactory
                 (
                 delegateCacheProvider,
@@ -158,11 +153,10 @@ namespace MVVMApplication.Infra
         private static IPropFactory BuildDefaultPropFactory
             (
             IConvertValues valueConverter,
-            IProvideDelegateCaches delegateCacheProvider
+            IProvideDelegateCaches delegateCacheProvider,
+            ResolveTypeDelegate typeResolver
             )
         {
-            ResolveTypeDelegate typeResolver = null;
-
             IPropFactory result = new WPFPropFactory
                 (
                 delegateCacheProvider: delegateCacheProvider,
@@ -199,6 +193,40 @@ namespace MVVMApplication.Infra
                 );
 
             return autoMapperProvider;
+        }
+
+        private static ICreateWrapperTypes GetSimpleWrapperTypeCreator()
+        {
+            // -- Build WrapperType Caching Service
+            // Used by some ViewModel Activators to emit types, i.e., modules.
+            IModuleBuilderInfo moduleBuilderInfo = new SimpleModuleBuilderInfo();
+
+            IEmitWrapperType emitWrapperType = new SimpleWrapperTypeEmitter
+                (
+                mbInfo: moduleBuilderInfo
+                );
+
+            ICacheWrapperTypes wrapperTypeCachingService = new WrapperTypeLocalCache
+                (
+                emitterEngine: emitWrapperType
+                );
+
+            // -- Build TypeDesc Caching Service
+            // Used only by some ModuleBuilders.
+            ITypeDescriptionProvider typeDescriptionProvider = new SimpleTypeDescriptionProvider();
+
+            ICacheTypeDescriptions typeDescCachingService = new TypeDescriptionLocalCache
+                (
+                typeDescriptionProvider: typeDescriptionProvider
+                );
+
+            ICreateWrapperTypes result = new SimpleWrapperTypeCreator
+                (
+                wrapperTypeCachingService: wrapperTypeCachingService,
+                typeDescCachingService: typeDescCachingService
+                );
+
+            return result;
         }
 
         #region InDesign Support

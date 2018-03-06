@@ -1,6 +1,8 @@
 ﻿using DRM.PropBag;
 using DRM.PropBag.AutoMapperSupport;
 using DRM.PropBag.Caches;
+using DRM.PropBag.TypeWrapper;
+using DRM.PropBag.TypeWrapper.TypeDesc;
 using DRM.PropBag.ViewModelTools;
 using DRM.PropBagWPF;
 using DRM.TypeSafePropertyBag;
@@ -120,11 +122,14 @@ namespace PropBagLib.Tests.SpecBasedVMTests
 
         protected SimplePropStoreProxy _theStore { get; set; }
         protected PSAccessServiceCreatorInterface PropStoreAccessService_Factory { get; set; }
-        protected IPropFactory DefaultPropFactory { get; set; }
+
+        protected ICreateWrapperTypes WrapperTypeCreator { get; set; }
+        protected IProvideAutoMappers AutoMapperProvider { get; set; }
 
         protected IProvidePropModels PropModelProvider { get; set; }
         protected ViewModelHelper ViewModelHelper { get; set; }
-        protected IProvideAutoMappers AutoMapperProvider { get; set; }
+
+        //protected IPropFactory DefaultPropFactory { get; set; }
 
         protected string DataDirPath { get; set; }
 
@@ -169,26 +174,23 @@ namespace PropBagLib.Tests.SpecBasedVMTests
             IViewModelActivator vmActivator = new SimpleViewModelActivator();
             _mct.MeasureAndReport("After new SimpleViewModelActivator");
 
+            WrapperTypeCreator = GetSimpleWrapperTypeCreator();
+            _mct.MeasureAndReport("After GetSimpleWrapperTypeCreator");
+
             // AutoMapper Services
-            AutoMapperProvider = GetAutoMapperProvider(vmActivator, PropStoreAccessService_Factory);
+            AutoMapperProvider = GetAutoMapperProvider(WrapperTypeCreator, vmActivator, PropStoreAccessService_Factory);
             _mct.MeasureAndReport("After GetAutoMapperProvider");
 
             IConvertValues valueConverter = new PropFactoryValueConverter(typeDescBasedTConverterCache);
+            ResolveTypeDelegate typeResolver = null;
 
-            // Default PropFactory
-            DefaultPropFactory = BuildDefaultPropFactory
-                (
-                valueConverter,
-                delegateCacheProvider//,
-                                     //AutoMapperProvider
-                );
-            _mct.MeasureAndReport("After BuildDefaultPropFactory");
 
             // The Factory used to build PropFactories.
             IPropFactoryFactory propFactoryFactory = BuildThePropFactoryFactory
                 (
                 valueConverter,
-                delegateCacheProvider
+                delegateCacheProvider,
+                typeResolver
                 );
 
             // PropModel Provider
@@ -204,49 +206,78 @@ namespace PropBagLib.Tests.SpecBasedVMTests
             ViewModelHelper = new ViewModelHelper(PropModelProvider, vmActivator, PropStoreAccessService_Factory, AutoMapperProvider);
             _mct.MeasureAndReport("After new ViewModelHelper");
 
+            //// Default PropFactory
+            //DefaultPropFactory = BuildDefaultPropFactory
+            //    (
+            //    valueConverter,
+            //    delegateCacheProvider,
+            //    typeResolver
+            //    );
+
+            //_mct.MeasureAndReport("After BuildDefaultPropFactory");
+
             return OurCleanupRoutine;
 
             void OurCleanupRoutine()
             {
                 _mct.CompactMeasureAndReport("Before Context Cleanup");
 
-                // AutoMapperProvider
+                // Wrapper Type Creator
+                if(WrapperTypeCreator is IDisposable disable1)
+                {
+                    disable1.Dispose();
+                }
+
+                // AutoMapper Provider
                 if (AutoMapperProvider is IDisposable disable2)
                 {
                     disable2.Dispose();
                 }
                 AutoMapperProvider = null;
 
-                // PropModelProvider
+                // PropModel Provider
                 if (PropModelProvider is IDisposable disable3)
                 {
                     disable3.Dispose();
                 }
                 PropModelProvider = null;
 
-                // ViewModelHelper
+                // ViewModel Helper
                 if (ViewModelHelper is IDisposable disable4)
                 {
                     disable4.Dispose();
                 }
                 ViewModelHelper = null;
 
+                // The Property Store
                 _theStore.Dispose();
 
+                // Type Converter Cache
                 if (typeDescBasedTConverterCache is IDisposable disable5)
                 {
                     disable5.Dispose();
                 }
 
+                // Delegate Cache Provider
                 if (delegateCacheProvider is IDisposable disable6)
                 {
                     disable6.Dispose();
                 }
 
+                // Event Handler Dispatcher Delegate Cache Provider
                 if (handlerDispatchDelegateCacheProvider is IDisposable disable7)
                 {
                     disable7.Dispose();
                 }
+
+                // PropModel Provider
+                if(remotePropModelProvider is IDisposable disable8)
+                {
+                    disable8.Dispose();
+                }
+
+                propFactoryFactory = null;
+                //DefaultPropFactory = null;
 
                 _mct.CompactMeasureAndReport("After Context Cleanup");
             }
@@ -259,11 +290,10 @@ namespace PropBagLib.Tests.SpecBasedVMTests
         protected virtual IPropFactoryFactory BuildThePropFactoryFactory
             (
             IConvertValues valueConverter,
-            IProvideDelegateCaches delegateCacheProvider
+            IProvideDelegateCaches delegateCacheProvider,
+            ResolveTypeDelegate typeResolver
             )
         {
-            ResolveTypeDelegate typeResolver = null;
-
             IPropFactoryFactory result = new PropFactoryFactory
                 (
                 delegateCacheProvider,
@@ -277,11 +307,10 @@ namespace PropBagLib.Tests.SpecBasedVMTests
         private IPropFactory BuildDefaultPropFactory
             (
             IConvertValues valueConverter,
-            IProvideDelegateCaches delegateCacheProvider
+            IProvideDelegateCaches delegateCacheProvider,
+            ResolveTypeDelegate typeResolver
             )
         {
-            ResolveTypeDelegate typeResolver = null;
-
             IPropFactory result = new WPFPropFactory
                 (
                 delegateCacheProvider: delegateCacheProvider,
@@ -337,6 +366,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests
 
         protected virtual IProvideAutoMappers GetAutoMapperProvider
             (
+            ICreateWrapperTypes wrapperTypesCreator,
             IViewModelActivator viewModelActivator,
             PSAccessServiceCreatorInterface psAccessServiceFactory
             )
@@ -344,7 +374,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests
             // TODO: Expose the creation of wrapperTypeCreator (ICreateWrapperTypes).
             IPropBagMapperBuilderProvider propBagMapperBuilderProvider = new SimplePropBagMapperBuilderProvider
                 (
-                wrapperTypesCreator: null,
+                wrapperTypesCreator: wrapperTypesCreator,
                 viewModelActivator: viewModelActivator,
                 storeAccessCreator: psAccessServiceFactory
                 );
@@ -361,6 +391,40 @@ namespace PropBagLib.Tests.SpecBasedVMTests
                 );
 
             return autoMapperProvider;
+        }
+
+        protected virtual ICreateWrapperTypes GetSimpleWrapperTypeCreator()
+        {
+            // -- Build WrapperType Caching Service
+            // Used by some ViewModel Activators to emit types, i.e., modules.
+            IModuleBuilderInfo moduleBuilderInfo = new SimpleModuleBuilderInfo();
+
+            IEmitWrapperType emitWrapperType = new SimpleWrapperTypeEmitter
+                (
+                mbInfo: moduleBuilderInfo
+                );
+
+            ICacheWrapperTypes wrapperTypeCachingService = new WrapperTypeLocalCache
+                (
+                emitterEngine: emitWrapperType
+                );
+
+            // -- Build TypeDesc Caching Service
+            // Used only by some ModuleBuilders.
+            ITypeDescriptionProvider typeDescriptionProvider = new SimpleTypeDescriptionProvider();
+
+            ICacheTypeDescriptions typeDescCachingService = new TypeDescriptionLocalCache
+                (
+                typeDescriptionProvider: typeDescriptionProvider
+                );
+
+            ICreateWrapperTypes result = new SimpleWrapperTypeCreator
+                (
+                wrapperTypeCachingService: wrapperTypeCachingService,
+                typeDescCachingService: typeDescCachingService
+                );
+
+            return result;
         }
 
         #endregion
