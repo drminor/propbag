@@ -40,15 +40,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="TypeCreators\SimpleWrapperTypeCreator.cs" />
     <Compile Include="Activator\IViewModelActivator.cs" />
     <Compile Include="Activator\SimpleViewModelActivator.cs" />
-    <Compile Include="TypeCreators\ICreateWrapperType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AutoMapperSupportInterfaces\AutoMapperSupportInterfaces.csproj">
-      <Project>{F0903390-0628-434C-8D27-80FB263955B6}</Project>
+      <Project>{f0903390-0628-434c-8d27-80fb263955b6}</Project>
       <Name>AutoMapperSupportInterfaces</Name>
     </ProjectReference>
     <ProjectReference Include="..\TypeSafePropertyBag\TypeSafePropertyBag.csproj">
@@ -60,6 +58,8 @@
       <Name>TypeWrapper</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="TypeCreators\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
