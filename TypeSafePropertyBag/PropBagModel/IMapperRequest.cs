@@ -7,9 +7,11 @@ namespace DRM.TypeSafePropertyBag
 
     public interface IMapperRequest : IEquatable<IMapperRequest>, ICloneable
     {
-        string ConfigPackageName { get; set; }
-        PropModelType PropModel { get; set; }
-        string PropModelResourceKey { get; set; }
         Type SourceType { get; set; }
+
+        string ConfigPackageName { get; set; }
+
+        string PropModelResourceKey { get; set; }
+        PropModelType PropModel { get; set; }
     }
 }
