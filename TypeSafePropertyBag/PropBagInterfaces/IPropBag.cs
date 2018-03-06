@@ -117,7 +117,7 @@ namespace DRM.TypeSafePropertyBag
         (
             PropNameType propertyName,
             Type propertyType,
-            IMapperRequest mr
+            IMapperRequest mapperRequest
         )
             where TDal : class, IDoCRUD<TSource>
             where TSource : class
