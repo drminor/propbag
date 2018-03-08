@@ -1,12 +1,16 @@
 ﻿using DRM.PropBag;
 using DRM.TypeSafePropertyBag;
 using PropBagLib.Tests.AutoMapperSupport;
+using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace PropBagLib.Tests
 {
+    using PropModelType = IPropModel<String>;
+    using PropModelCacheInterface = ICachePropModels<String>;
+
     public partial class PerformanceModel : PropBag
     {
         static public PerformanceModel Create(PropBagTypeSafetyMode safetyMode)
@@ -14,8 +18,23 @@ namespace PropBagLib.Tests
             AutoMapperHelpers ourHelper = new AutoMapperHelpers();
             IPropFactory propFactory_V1 = ourHelper.GetNewPropFactory_V1();
 
+            PropModelType propModel = new PropModel
+                (
+                "PerformanceModel",
+                "PropBagLib.Tests",
+                DeriveFromClassModeEnum.Custom,
+                typeof(PerformanceModel),
+                propFactory_V1,
+                propFactoryType: null,
+                propModelProvider: null,
+                typeSafetyMode: safetyMode,
+                deferMethodRefResolution: true,
+                requireExplicitInitialValue: true,
+                parent: null
+                );
+
             // TODO: AAA
-            PerformanceModel pm = new PerformanceModel(safetyMode, ourHelper.StoreAccessCreator, null, propFactory_V1);
+            PerformanceModel pm = new PerformanceModel(propModel, ourHelper.StoreAccessCreator, autoMapperService: null, propFactory: null, fullClassName: null);
 
             pm.AddPropNoStore<int>("PropIntNoStore");
             pm.AddPropNoStore<string>("PropStringNoStore");

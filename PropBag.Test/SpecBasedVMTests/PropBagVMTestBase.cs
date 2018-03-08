@@ -12,6 +12,9 @@ using System.Windows;
 
 namespace PropBagLib.Tests.SpecBasedVMTests
 {
+    using PropNameType = String;
+    using PropModelType = IPropModel<String>;
+    using PropModelCacheInterface = ICachePropModels<String>;
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
 
     public abstract class PropBagVMTestBase : Specification
@@ -126,7 +129,9 @@ namespace PropBagLib.Tests.SpecBasedVMTests
         protected ICreateWrapperTypes WrapperTypeCreator { get; set; }
         protected IProvideAutoMappers AutoMapperProvider { get; set; }
 
-        protected IProvidePropModels PropModelProvider { get; set; }
+        //protected IProvidePropModels PropModelProvider { get; set; }
+        protected PropModelCacheInterface PropModelCache { get; set; }
+
         protected ViewModelHelper ViewModelHelper { get; set; }
 
         //protected IPropFactory DefaultPropFactory { get; set; }
@@ -184,7 +189,6 @@ namespace PropBagLib.Tests.SpecBasedVMTests
             IConvertValues valueConverter = new PropFactoryValueConverter(typeDescBasedTConverterCache);
             ResolveTypeDelegate typeResolver = null;
 
-
             // The Factory used to build PropFactories.
             IPropFactoryFactory propFactoryFactory = BuildThePropFactoryFactory
                 (
@@ -195,15 +199,17 @@ namespace PropBagLib.Tests.SpecBasedVMTests
 
             // PropModel Provider
             RemotePropModelProvider remotePropModelProvider = GetPropModelProvider(propFactoryFactory, ConfigPackageNameSuffix);
-            PropModelProvider = remotePropModelProvider;
+            //PropModelProvider = remotePropModelProvider;
             _mct.MeasureAndReport("After GetPropModelProvider");
 
             // Load the PropBag and Mapper Templates
             LoadPropModelsAndMappers(remotePropModelProvider, ResourceFolderPath, PBTemplateFilenames, MapperRequestFilenames);
             _mct.MeasureAndReport("After LoadPropModelsAndMappers");
 
+            PropModelCache = new SimplePropModelCache(remotePropModelProvider);
+
             // Create the ViewModelHelper
-            ViewModelHelper = new ViewModelHelper(PropModelProvider, vmActivator, PropStoreAccessService_Factory, AutoMapperProvider);
+            ViewModelHelper = new ViewModelHelper(remotePropModelProvider, vmActivator, PropStoreAccessService_Factory, AutoMapperProvider);
             _mct.MeasureAndReport("After new ViewModelHelper");
 
             //// Default PropFactory
@@ -236,11 +242,11 @@ namespace PropBagLib.Tests.SpecBasedVMTests
                 AutoMapperProvider = null;
 
                 // PropModel Provider
-                if (PropModelProvider is IDisposable disable3)
+                if (PropModelCache is IDisposable disable3)
                 {
                     disable3.Dispose();
                 }
-                PropModelProvider = null;
+                PropModelCache = null;
 
                 // ViewModel Helper
                 if (ViewModelHelper is IDisposable disable4)

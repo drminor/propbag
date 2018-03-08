@@ -13,6 +13,7 @@ namespace DRM.PropBag
 {
     using PropNameType = String;
     using PropModelType = IPropModel<String>;
+    using PropModelCacheInterface = ICachePropModels<String>;
 
     public class PropModel : NotifyPropertyChangedBase, PropModelType, IEquatable<PropModelType>, IDisposable
     {
@@ -85,7 +86,6 @@ namespace DRM.PropBag
             set { this.SetCollection<ObservableCollection<string>, string>(ref _namespaces, value); }
         }
         
-        
         Dictionary<PropNameType, IPropModelItem> _propDictionary { get; set; }
 
         [XmlElement, Browsable(false), EditorBrowsable(EditorBrowsableState.Never)]
@@ -104,13 +104,12 @@ namespace DRM.PropBag
             }
         }
 
-        IProvidePropModels pmp;
+        PropModelCacheInterface pmp;
         [XmlIgnore]
-        public IProvidePropModels PropModelProvider { get { return pmp; } set { SetAlways<IProvidePropModels>(ref pmp, value); } }
+        public PropModelCacheInterface PropModelCache { get { return pmp; } set { SetAlways<PropModelCacheInterface>(ref pmp, value); } }
 
         [XmlIgnore]
         public PropertyDescriptorCollection PropertyDescriptorCollection { get; set; }
-
 
         #endregion Other Properties
 
@@ -129,7 +128,7 @@ namespace DRM.PropBag
             Type targetType,
             IPropFactory propFactory,
             Type propFactoryType,
-            IProvidePropModels propModelProvider,
+            PropModelCacheInterface propModelProvider,
             PropBagTypeSafetyMode typeSafetyMode = PropBagTypeSafetyMode.AllPropsMustBeRegistered,
             bool deferMethodRefResolution = true,
             bool requireExplicitInitialValue = true,
@@ -143,7 +142,7 @@ namespace DRM.PropBag
             PropFactory = propFactory;
             PropFactoryType = propFactoryType ?? propFactory?.GetType() ?? throw new ArgumentNullException("Either the propFactory or the propFactoryType must be specified when creating a PropModel.");
 
-            PropModelProvider = propModelProvider;
+            PropModelCache = propModelProvider;
 
             TypeSafetyMode = typeSafetyMode;
             DeferMethodRefResolution = deferMethodRefResolution;
@@ -163,6 +162,7 @@ namespace DRM.PropBag
 
             Namespaces = new ObservableCollection<string>();
             _propDictionary = new Dictionary<PropNameType, IPropModelItem>();
+            PropertyDescriptorCollection = null;
         }
 
         //// Create with PropFactory Factory
@@ -267,7 +267,7 @@ namespace DRM.PropBag
         public PropModelType CloneIt()
         {
             PropModel result = new PropModel(ClassName, NamespaceName, DeriveFromClassMode, TargetType, 
-                PropFactory, PropFactoryType, PropModelProvider,
+                PropFactory, PropFactoryType, PropModelCache,
                 TypeSafetyMode, DeferMethodRefResolution, RequireExplicitInitialValue);
 
             result.Namespaces = new ObservableCollection<PropNameType>();

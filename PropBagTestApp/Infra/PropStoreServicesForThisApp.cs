@@ -11,6 +11,9 @@ using System.Windows;
 
 namespace PropBagTestApp.Infra
 {
+    using PropNameType = String;
+    using PropModelType = IPropModel<String>;
+    using PropModelCacheInterface = ICachePropModels<String>;
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
 
     public static class PropStoreServicesForThisApp
@@ -21,7 +24,9 @@ namespace PropBagTestApp.Infra
 
         public static IPropFactory DefaultPropFactory { get; }
 
-        public static IProvidePropModels PropModelProvider { get; }
+        //public static IProvidePropModels PropModelProvider { get; }
+        public static PropModelCacheInterface PropModelCache { get; set; }
+
         public static ViewModelHelper ViewModelHelper { get; }
         public static IProvideAutoMappers AutoMapperProvider { get; }
 
@@ -59,11 +64,12 @@ namespace PropBagTestApp.Infra
                 delegateCacheProvider
                 );
 
-            PropModelProvider = GetPropModelProvider(propFactoryFactory, ConfigPackageNameSuffix);
+            IProvidePropModels propModelProvider = GetPropModelProvider(propFactoryFactory, ConfigPackageNameSuffix);
 
-            ViewModelHelper = new ViewModelHelper(PropModelProvider, vmActivator, psAccessServiceFactory, AutoMapperProvider);
+            PropModelCache = new SimplePropModelCache(propModelProvider);
+
+            ViewModelHelper = new ViewModelHelper(propModelProvider, vmActivator, psAccessServiceFactory, AutoMapperProvider);
         }
-
 
         private static IPropFactoryFactory BuildThePropFactoryFactory
             (

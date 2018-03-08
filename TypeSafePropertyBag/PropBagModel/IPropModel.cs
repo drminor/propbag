@@ -40,7 +40,8 @@ namespace DRM.TypeSafePropertyBag
 
         string FullClassName { get; } // Provides Canonical version of the Namespace + Class Name
 
-        IProvidePropModels PropModelProvider { get; set; }
+        ICachePropModels<L2TRaw> PropModelCache { get; set; }
+        //IProvidePropModels PropModelProvider { get; set; }
 
         bool IsFixed { get; }
         void Fix();

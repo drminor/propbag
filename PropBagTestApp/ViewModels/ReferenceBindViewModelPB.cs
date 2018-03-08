@@ -12,7 +12,7 @@ namespace PropBagTestApp.ViewModels
     {
 
         public ReferenceBindViewModelPB()
-            : this (PropStoreServicesForThisApp.PropModelProvider.GetPropModel("ReferenceBindViewModelPB"))
+            : this (PropStoreServicesForThisApp.PropModelCache.GetPropModel("ReferenceBindViewModelPB"))
         {
             System.Diagnostics.Debug.WriteLine
                 (

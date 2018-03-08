@@ -209,7 +209,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
 
         protected override void Because_Of()
         {
-            personVM_PropModel =  PropModelProvider.GetPropModel("PersonVM");
+            personVM_PropModel = PropModelCache.GetPropModel("PersonVM");
         }
 
         [Test]
@@ -255,7 +255,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
 
         protected override void Because_Of()
         {
-            mainWindowPropModel = PropModelProvider.GetPropModel("MainWindowVM");
+            mainWindowPropModel = PropModelCache.GetPropModel("MainWindowVM");
             BaseMemTracker.CompactMeasureAndReport("After get mainWindow_PropModel.", "CreateVM_CreateMainWindowVM_Run1");
 
             mainWindowViewModel = new MainWindowViewModel(mainWindowPropModel, PropStoreAccessService_Factory, AutoMapperProvider, propFactory: null, fullClassName: null);
@@ -319,7 +319,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
 
         protected override void Because_Of()
         {
-            mainWindowPropModel = PropModelProvider.GetPropModel("MainWindowVM");
+            mainWindowPropModel = PropModelCache.GetPropModel("MainWindowVM");
             BaseMemTracker.CompactMeasureAndReport("After get mainWindow_PropModel.", "CreateVM_CreateMainWindowVM_Run2");
 
             // To see how much memory is not being cleaned up after one is created and then disposed.
@@ -387,7 +387,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
 
         protected override void Because_Of()
         {
-            mainWindowPropModel = PropModelProvider.GetPropModel("MainWindowVM");
+            mainWindowPropModel = PropModelCache.GetPropModel("MainWindowVM");
             BaseMemTracker.CompactMeasureAndReport("After get mainWindow_PropModel.", "CreateVM_CreateMainWindowVM_Run1");
 
             mainWindowViewModel = new MainWindowViewModel(mainWindowPropModel, PropStoreAccessService_Factory, AutoMapperProvider, propFactory: null, fullClassName: null);

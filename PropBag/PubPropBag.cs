@@ -36,18 +36,21 @@ namespace DRM.PropBag
         #region Constructor
 
         // Starting with an empty PropItemSet
-        public PubPropBag(PropBagTypeSafetyMode typeSafetyMode, PSAccessServiceCreatorInterface storeAccessCreator, IPropFactory propFactory)
+        public PubPropBag(PropBagTypeSafetyMode typeSafetyMode, PSAccessServiceCreatorInterface storeAccessCreator,
+            IPropFactory propFactory)
             : this(typeSafetyMode, storeAccessCreator, propFactory, fullClassName: null)
         {
         }
 
-        public PubPropBag(PropBagTypeSafetyMode typeSafetyMode, PSAccessServiceCreatorInterface storeAccessCreator, IPropFactory propFactory, string fullClassName)
+        public PubPropBag(PropBagTypeSafetyMode typeSafetyMode, PSAccessServiceCreatorInterface storeAccessCreator,
+            IPropFactory propFactory, string fullClassName)
             : base(typeSafetyMode, storeAccessCreator, propFactory, fullClassName)
         {
         }
 
-        protected PubPropBag(PropBagTypeSafetyMode typeSafetyMode, PSAccessServiceCreatorInterface storeAcessorCreator, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
-            :base(typeSafetyMode, storeAcessorCreator, autoMapperService, propFactory, fullClassName)
+        protected PubPropBag(PropBagTypeSafetyMode typeSafetyMode, PSAccessServiceCreatorInterface storeAcessorCreator,
+            IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
+            : base(typeSafetyMode, storeAcessorCreator, autoMapperService, propFactory, fullClassName)
         {
         }
 

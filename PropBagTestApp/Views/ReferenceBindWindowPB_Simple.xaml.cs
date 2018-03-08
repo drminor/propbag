@@ -11,7 +11,7 @@ namespace PropBagTestApp.View
 {
     using PropNameType = String;
     using PropModelType = IPropModel<String>;
-
+    using PropModelCacheInterface = ICachePropModels<String>;
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
 
     /// <summary>
@@ -142,9 +142,9 @@ namespace PropBagTestApp.View
             {
                 if (_mapper == null)
                 {
-                    IProvidePropModels propModelProvider = PropStoreServicesForThisApp.PropModelProvider;
+                    PropModelCacheInterface propModelCache = PropStoreServicesForThisApp.PropModelCache;
 
-                    PropModelType propModel = propModelProvider.GetPropModel(REFERENCE_BIND_VM_RES_KEY);
+                    PropModelType propModel = propModelCache.GetPropModel(REFERENCE_BIND_VM_RES_KEY);
 
 
                     IPropBagMapperKey<MyModel, ReferenceBindViewModelPB> mapperRequest

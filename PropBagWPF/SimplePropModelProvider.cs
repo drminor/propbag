@@ -133,9 +133,10 @@ namespace DRM.PropBagWPF
 
         private PropModelType FixUpPropFactory(PropModelType propModel, IPropFactoryFactory propFactoryGenerator)
         {
-            // Include a reference to this PropModelProvider
-            propModel.PropModelProvider = this;
+            //// Include a reference to this PropModelProvider
+            //propModel.PropModelProvider = this;
 
+            // If the propModel does not supply a PropFactory, create one using the PropFactoryType.
             if (propModel.PropFactory == null)
             {
                 if (propModel.PropFactoryType != null)
@@ -150,7 +151,7 @@ namespace DRM.PropBagWPF
                     throw new InvalidOperationException("The PropModel does not have a value for PropFactory, nor does it have a value for PropFactoryType.");
                 }
             }
-            // If the propModel does not supply a PropFactory, use the one assigned to us upon construction.
+
             return propModel;
         }
 

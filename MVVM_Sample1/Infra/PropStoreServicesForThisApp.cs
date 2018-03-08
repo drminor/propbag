@@ -17,6 +17,9 @@ using DRM.PropBag.TypeWrapper.TypeDesc;
 
 namespace MVVMApplication.Infra
 {
+    using PropNameType = String;
+    using PropModelType = IPropModel<String>;
+    using PropModelCacheInterface = ICachePropModels<String>;
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
 
     public static class PropStoreServicesForThisApp 
@@ -29,7 +32,9 @@ namespace MVVMApplication.Infra
         private static IViewModelActivator _vmActivator { get; }
         //private static IPropFactory _defaultPropFactory { get; }
 
-        public static IProvidePropModels PropModelProvider { get; private set; }
+        //public static IProvidePropModels PropModelProvider { get; private set; }
+        public static PropModelCacheInterface PropModelCache { get; private set; }
+
         public static ViewModelHelper ViewModelHelper { get; private set; }
         public static ICreateWrapperTypes WrapperTypeCreator { get; }
         public static IProvideAutoMappers AutoMapperProvider { get; }
@@ -47,9 +52,9 @@ namespace MVVMApplication.Infra
                 if(value != _configPackageNameSuffix)
                 {
                     _configPackageNameSuffix = value;
-                    PropModelProvider = GetPropModelProvider(_propFactoryFactory, ConfigPackageNameSuffix);
+                    IProvidePropModels propModelProvider = GetPropModelProvider(_propFactoryFactory, ConfigPackageNameSuffix);
 
-                    ViewModelHelper = new ViewModelHelper(PropModelProvider, _vmActivator, _theStore.PropStoreAccessServiceFactory, AutoMapperProvider);
+                    ViewModelHelper = new ViewModelHelper(propModelProvider, _vmActivator, _theStore.PropStoreAccessServiceFactory, AutoMapperProvider);
 
                     // Remove any AutoMapper that may have been previously created.
                     AutoMapperProvider.ClearMappersCache();
@@ -90,7 +95,9 @@ namespace MVVMApplication.Infra
 
             _propFactoryFactory = BuildThePropFactoryFactory(valueConverter, delegateCacheProvider, typeResolver);
 
-            PropModelProvider = GetPropModelProvider(_propFactoryFactory, ConfigPackageNameSuffix);
+            IProvidePropModels propModelProvider = GetPropModelProvider(_propFactoryFactory, ConfigPackageNameSuffix);
+
+            PropModelCache = new SimplePropModelCache(propModelProvider);
 
             WrapperTypeCreator = GetSimpleWrapperTypeCreator();
                 _mct.MeasureAndReport("After GetSimpleWrapperTypeCreator");
@@ -98,7 +105,7 @@ namespace MVVMApplication.Infra
             AutoMapperProvider = GetAutoMapperProvider(WrapperTypeCreator, _vmActivator, psAccessServiceFactory);
                 _mct.MeasureAndReport("After GetAutoMapperProvider");
 
-            ViewModelHelper = new ViewModelHelper(PropModelProvider, _vmActivator, psAccessServiceFactory, AutoMapperProvider);
+            ViewModelHelper = new ViewModelHelper(propModelProvider, _vmActivator, psAccessServiceFactory, AutoMapperProvider);
                 _mct.MeasureAndReport("After new ViewModelHelper");
 
             //_defaultPropFactory = BuildDefaultPropFactory(valueConverter, delegateCacheProvider, typeResolver);

@@ -13,6 +13,9 @@ namespace PropBagLib.Tests.AutoMapperSupport
     using PropIdType = UInt32;
     using PropNameType = String;
 
+    using PropModelType = IPropModel<String>;
+    using PropModelCacheInterface = ICachePropModels<String>;
+
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
 
     public class AutoMapperHelpers : IDisposable
@@ -26,7 +29,6 @@ namespace PropBagLib.Tests.AutoMapperSupport
         public IProvideAutoMappers InitializeAutoMappers(PSAccessServiceCreatorInterface storeAccessCreator)
         {
             IViewModelActivator vmActivator = new SimpleViewModelActivator();
-
 
             ICreateWrapperTypes simpleWrapperTypeCreator = GetSimpleWrapperTypeCreator();
 
@@ -128,6 +130,9 @@ namespace PropBagLib.Tests.AutoMapperSupport
             }
             return _autoMapperProvider_V1;
         }
+
+        public PropModelCacheInterface PropModelCache { get; private set; }
+
 
         protected virtual ICreateWrapperTypes GetSimpleWrapperTypeCreator()
         {

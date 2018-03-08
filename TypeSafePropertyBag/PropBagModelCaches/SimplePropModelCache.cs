@@ -10,12 +10,17 @@ namespace DRM.TypeSafePropertyBag
 
     public class SimplePropModelCache : PropModelCacheInterface
     {
+        public const long GEN_ZERO = 0;
+
         private readonly Dictionary<string, PropBagModelCachesCollInterface> _cache;
+        private readonly List<IProvidePropModels> _propModelProviders;
 
         private object _syncLock = new object();
 
-        public SimplePropModelCache()
+        public SimplePropModelCache(params IProvidePropModels[] propModelProviders)
         {
+            _propModelProviders = new List<IProvidePropModels>(propModelProviders);
+
             _cache = new Dictionary<PropNameType, PropBagModelCachesCollInterface>();
         }
 
@@ -28,8 +33,8 @@ namespace DRM.TypeSafePropertyBag
             }
             else
             {
-                long generationId = Add(propModel);
-                propModel.GenerationId = generationId;
+                //long generationId = Add(propModel);
+                //propModel.GenerationId = generationId;
                 propModel.Fix();
             }
         }
@@ -45,12 +50,12 @@ namespace DRM.TypeSafePropertyBag
             else
             {
                 PropModelType result = (PropModelType)propModel.Clone();
-                generationId = this.Add(result);
+                generationId = Add(result);
                 return result;
             }
         }
 
-        public long Add(IPropModel<string> propModel)
+        public long Add(PropModelType propModel)
         {
             string fullClassName = propModel.FullClassName ?? throw new InvalidOperationException("The PropModel must have a non-null FullClassName.");
 
@@ -65,6 +70,7 @@ namespace DRM.TypeSafePropertyBag
                 {
                     familyCollection = new SimplePropModelFamilyCollection();
                     generationId = familyCollection.Add(propModel);
+                    propModel.GenerationId = generationId;
                 }
             }
 
@@ -85,16 +91,40 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        public bool TryGetValue(string fullClassName, long generationId, out IPropModel<string> propModel)
+        public bool TryGetValue(string fullClassName, out PropModelType propModel)
         {
-            if (_cache.TryGetValue(fullClassName, out PropBagModelCachesCollInterface familyCollection))
+            bool result = TryGetValue(fullClassName, GEN_ZERO, out propModel);
+            return result;
+        }
+
+        public bool TryGetValue(string fullClassName, long generationId, out PropModelType propModel)
+        {
+            lock(_syncLock)
             {
-                if (familyCollection.TryGetPropModel(generationId, out propModel))
+                if (_cache.TryGetValue(fullClassName, out PropBagModelCachesCollInterface familyCollection))
                 {
-                    return true;
+                    if (familyCollection.TryGetPropModel(generationId, out propModel))
+                    {
+                        return true;
+                    }
+                }
+
+                if (generationId == GEN_ZERO)
+                {
+                    if (TryFetchFromSourceProviders(fullClassName, out propModel))
+                    {
+                        Add(propModel);
+                        return true;
+                    }
                 }
             }
 
+            propModel = null;
+            return false;
+        }
+
+        private bool TryFetchFromSourceProviders(string fullClassName, out PropModelType propModel)
+        {
             propModel = null;
             return false;
         }
@@ -113,8 +143,47 @@ namespace DRM.TypeSafePropertyBag
                 generationId = -1;
                 return false;
             }
-
         }
 
+        public PropModelType GetPropModel(string resourceKey)
+        {
+            PropModelType result = null;
+            foreach (IProvidePropModels propModelProvider in _propModelProviders)
+            {
+                try
+                {
+                    result = propModelProvider.GetPropModel(resourceKey);
+                    result.PropModelCache = this;
+                    break;
+                }
+                catch
+                {
+                    // ignore the exception.
+                }
+
+            }
+
+            return result;
+        }
+
+        public IMapperRequest GetMapperRequest(string resourceKey)
+        {
+            IMapperRequest result = null;
+            foreach (IProvidePropModels propModelProvider in _propModelProviders)
+            {
+                try
+                {
+                    result = propModelProvider.GetMapperRequest(resourceKey);
+                    break;
+                }
+                catch
+                {
+                    // ignore the exception.
+                }
+
+            }
+
+            return result;
+        }
     }
 }
