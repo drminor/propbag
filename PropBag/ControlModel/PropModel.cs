@@ -111,6 +111,9 @@ namespace DRM.PropBag
         [XmlIgnore]
         public PropertyDescriptorCollection PropertyDescriptorCollection { get; set; }
 
+        object _syncLock = new object();
+        public const long GEN_NONE = -1;
+
         #endregion Other Properties
 
         #endregion Dependency Properties
@@ -122,7 +125,6 @@ namespace DRM.PropBag
             throw new NotSupportedException("PropModels cannot be created using the parameterless constructor.");
         }
 
-        // Create with resolved PropFactory
         public PropModel(string className, string namespaceName,
             DeriveFromClassModeEnum deriveFrom,
             Type targetType,
@@ -151,6 +153,7 @@ namespace DRM.PropBag
             Parent = parent;
 
             _isFixed = false;
+            _generationId = GEN_NONE;
 
             if (deriveFrom == DeriveFromClassModeEnum.Custom)
             {
@@ -164,39 +167,6 @@ namespace DRM.PropBag
             _propDictionary = new Dictionary<PropNameType, IPropModelItem>();
             PropertyDescriptorCollection = null;
         }
-
-        //// Create with PropFactory Factory
-        //public PropModel(string className, string namespaceName,
-        //    DeriveFromClassModeEnum deriveFrom,
-        //    Type targetType,
-        //    Type propFactoryType,
-        //    IProvidePropModels propModelProvider,
-
-        //    PropBagTypeSafetyMode typeSafetyMode = PropBagTypeSafetyMode.AllPropsMustBeRegistered,
-        //    bool deferMethodRefResolution = true,
-        //    bool requireExplicitInitialValue = true,
-        //    PropModelType parent = null
-        //    )
-        //{
-        //    ClassName = className;
-        //    NamespaceName = namespaceName;
-        //    DeriveFromClassMode = deriveFrom;
-        //    TargetType = targetType;
-        //    PropFactoryType = propFactoryType;
-        //    PropModelProvider = propModelProvider;
-
-        //    TypeSafetyMode = typeSafetyMode;
-        //    DeferMethodRefResolution = deferMethodRefResolution;
-        //    RequireExplicitInitialValue = requireExplicitInitialValue;
-
-        //    Namespaces = new ObservableCollection<string>();
-        //    Props = new Dictionary<PropNameType, IPropModelItem>();
-
-        //    Parent = parent;
-
-        //    PropFactory = null;
-        //    _isFixed = false;
-        //}
 
         #endregion
 
@@ -233,7 +203,6 @@ namespace DRM.PropBag
                     }
                 case DeriveFromClassModeEnum.Custom:
                     {
-                        // TODO: This needs (lots) more work.
                         result = targetType;
                         break;
                     }
@@ -266,30 +235,52 @@ namespace DRM.PropBag
 
         public PropModelType CloneIt()
         {
-            PropModel result = new PropModel(ClassName, NamespaceName, DeriveFromClassMode, TargetType, 
+            PropModel result;
+
+            lock (_syncLock)
+            {
+                result = new PropModel(ClassName, NamespaceName, DeriveFromClassMode, TargetType,
                 PropFactory, PropFactoryType, PropModelCache,
                 TypeSafetyMode, DeferMethodRefResolution, RequireExplicitInitialValue);
 
-            result.Namespaces = new ObservableCollection<PropNameType>();
-            foreach(string ns in Namespaces)
-            {
-                result.Namespaces.Add(ns);
-            }
-
-            result._propDictionary = new Dictionary<PropNameType, IPropModelItem>();
-            foreach(IPropModelItem pi in GetPropItems())
-            {
-                if (pi is IPropModelItem pmi)
+                result.Namespaces = new ObservableCollection<PropNameType>();
+                foreach (string ns in Namespaces)
                 {
-                    result._propDictionary.Add(pi.PropertyName, (IPropModelItem) pi.Clone());
+                    result.Namespaces.Add(ns);
+                }
+
+                result._propDictionary = new Dictionary<PropNameType, IPropModelItem>();
+                foreach (IPropModelItem pi in GetPropItems())
+                {
+                    if (pi is IPropModelItem pmi)
+                    {
+                        result._propDictionary.Add(pi.PropertyName, (IPropModelItem)pi.Clone());
+                    }
                 }
             }
 
             return result;
+
         }
 
         bool _isFixed;
         public bool IsFixed => _isFixed;
+
+        private void OpenIfNotRegisteredWithCache()
+        {
+            if (IsFixed)
+            {
+                if (PropModelCache == null)
+                {
+                    System.Diagnostics.Debug.Assert(GenerationId == GEN_NONE, $"The PropModel with Full Class Name: {FullClassName}, {GenerationId} has no PropModelCache assigned to it, however the GenerationId is not {GEN_NONE}.");
+                    Open();
+                }
+                else
+                {
+                    throw new InvalidOperationException($"The PropModel with Full Class Name: {FullClassName}, {GenerationId} is fixed. Cannot make changed to this PropModel.");
+                }
+            }
+        }
 
         public int Count => _propDictionary.Count;
 
@@ -300,9 +291,9 @@ namespace DRM.PropBag
 
             set
             {
-                if(_isFixed) throw new InvalidOperationException();
+                OpenIfNotRegisteredWithCache();
 
-                if(_parent != value)
+                if (_parent != value)
                 {
                     _parent = value;
                 }
@@ -316,7 +307,13 @@ namespace DRM.PropBag
             get => _generationId;
             set
             {
-                if (_isFixed) throw new InvalidOperationException();
+                if(PropModelCache == null)
+                {
+                    throw new InvalidOperationException($"The PropModel with Full Class Name: {FullClassName}, {GenerationId} has no PropModelCache assigned to it. Setting the GenerationId is not allowed in this context.");
+                }
+
+                if (_isFixed) throw new InvalidOperationException($"The PropModel with Full Class Name: {FullClassName}, {GenerationId} is fixed. The GenerationId cannot be changed.");
+
                 _generationId = value;
             }
         }
@@ -327,22 +324,37 @@ namespace DRM.PropBag
             _isFixed = true;
         }
 
+        public void Open()
+        {
+            _isFixed = false;
+        }
+
         public void Add(string propertyName, IPropModelItem propModelItem)
         {
-            if (IsFixed) throw new InvalidOperationException();
-            _propDictionary.Add(propertyName, propModelItem);
+            lock(_syncLock)
+            {
+                OpenIfNotRegisteredWithCache();
+
+                _propDictionary.Add(propertyName, propModelItem);
+            }
         }
 
         public bool Contains(string propertyName)
         {
-            bool result = _propDictionary.ContainsKey(propertyName);
-            return result;
+            lock(_syncLock)
+            {
+                bool result = _propDictionary.ContainsKey(propertyName);
+                return result;
+            }
         }
 
         public bool Contains(IPropModelItem propModelItem)
         {
-            bool result = _propDictionary.ContainsValue(propModelItem);
-            return result;
+            lock (_syncLock)
+            {
+                bool result = _propDictionary.ContainsValue(propModelItem);
+                return result;
+            }
         }
 
         public IEnumerable<string> GetPropNames()
@@ -359,27 +371,34 @@ namespace DRM.PropBag
 
         public bool TryGetPropModelItem(string propertyName, out IPropModelItem propModelItem)
         {
-            bool result = _propDictionary.TryGetValue(propertyName, out propModelItem);
-            return result;
+            lock(_syncLock)
+            {
+                bool result = _propDictionary.TryGetValue(propertyName, out propModelItem);
+                return result;
+            }
         }
 
         public bool TryRemove(string propertyName, out IPropModelItem propModelItem)
         {
-            if (IsFixed) throw new InvalidOperationException();
+            lock (_syncLock)
+            {
+                OpenIfNotRegisteredWithCache();
 
-            if (_propDictionary.TryGetValue(propertyName, out propModelItem))
-            {
-                return true;
+                if (_propDictionary.TryGetValue(propertyName, out propModelItem))
+                {
+                    _propDictionary.Remove(propertyName);
+                    return true;
+                }
             }
-            else
-            {
-                propModelItem = null;
-                return false;
-            }
+
+            propModelItem = null;
+            return false;
         }
 
         public void Clear()
         {
+            OpenIfNotRegisteredWithCache();
+
             foreach (KeyValuePair<PropNameType, IPropModelItem> kvp in _propDictionary)
             {
                 kvp.Value.Dispose();
@@ -409,18 +428,6 @@ namespace DRM.PropBag
                 return result;
             }
         }
-
-        //private void AssignGenerationId()
-        //{
-        //    if (_parent != null)
-        //    {
-        //        _generationId = _parent.GetNextGenerationId();
-        //    }
-        //    else
-        //    {
-        //        _generationId = GetNextGenerationId();
-        //    }
-        //}
 
         #endregion
 
@@ -530,6 +537,7 @@ namespace DRM.PropBag
                 if (disposing)
                 {
                     //Dispose managed state (managed objects).
+                    Open();
                     Clear();
                 }
 

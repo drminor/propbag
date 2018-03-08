@@ -45,6 +45,7 @@ namespace DRM.TypeSafePropertyBag
 
         bool IsFixed { get; }
         void Fix();
+        void Open();
 
         IPropModel<L2TRaw> Parent { get; set; }
         long GenerationId { get; set; }
