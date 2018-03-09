@@ -51,14 +51,10 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public IPropBagMapperKeyGen SubmitMapperRequest(PropModelType propModel, Type sourceType, string configPackageName)
         {
-            //Type targetType = propModel.TargetType;
-
             Type typeToCreate = propModel.NewEmittedType ?? propModel.TypeToCreate;
 
-            //MapperRequestSubmitterDelegate mapperRequestSubmitter = GetTheMapperRequestSubmitterDelegate(sourceType, targetType);
             MapperRequestSubmitterDelegate mapperRequestSubmitter = GetTheMapperRequestSubmitterDelegate(sourceType, typeToCreate);
 
-            //IPropBagMapperKeyGen result = mapperRequestSubmitter(propModel, targetType, configPackageName, this);
             IPropBagMapperKeyGen result = mapperRequestSubmitter(propModel, typeToCreate, configPackageName, this);
 
             return result;
