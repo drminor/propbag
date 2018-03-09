@@ -98,7 +98,7 @@ namespace DRM.PropBag.TypeWrapper
             //Type[] implementedTypes = interfaceType.GetTypeInfo().ImplementedInterfaces.ToArray();
 
             IEnumerable<Type> typesImplementedByBase = baseType.GetTypeInfo().ImplementedInterfaces;
-            Type[] result = typesImplementedByBase.Where(x => x.Name != "ICustomTypeDescriptor").ToArray();
+            Type[] result = typesImplementedByBase/*.Where(x => x.Name != "ICustomTypeDescriptor")*/.ToArray();
 
             return result;
         }
