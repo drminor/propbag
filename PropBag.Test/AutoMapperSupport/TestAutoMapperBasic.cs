@@ -177,7 +177,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 targetType: typeof(DestinationModel3),
                 propFactory: propFactory,
                 propFactoryType: null,
-                propModelProvider: null,
+                propModelCache: null,
                 typeSafetyMode: PropBagTypeSafetyMode.Tight,
                 deferMethodRefResolution: true,
                 requireExplicitInitialValue: true

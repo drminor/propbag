@@ -8,11 +8,15 @@ using System.Collections.ObjectModel;
 
 namespace PropBagLib.Tests.PerformanceDb
 {
+    using PropNameType = String;
+    using PropModelType = IPropModel<String>;
+    using PropModelCacheInterface = ICachePropModels<String>;
+
     public class PropModelHelpers
     {
-        public PropModel GetPropModelForModel1Dest(IPropFactory propFactory)
+        public PropModelType GetPropModelForModel1Dest(IPropFactory propFactory, PropModelCacheInterface propModelCache)
         {
-            PropModel result = new PropModel
+            PropModelType result = new PropModel
                 (
                 className: "DestinationModel1",
                 namespaceName: "PropBagLib.Tests.PerformanceDb",
@@ -20,7 +24,7 @@ namespace PropBagLib.Tests.PerformanceDb
                 targetType: typeof(DestinationModel1),
                 propFactory: propFactory,
                 propFactoryType: null,
-                propModelProvider: null,
+                propModelCache: propModelCache,
                 typeSafetyMode: PropBagTypeSafetyMode.Tight,
                 deferMethodRefResolution: true,
                 requireExplicitInitialValue: true
@@ -69,9 +73,9 @@ namespace PropBagLib.Tests.PerformanceDb
             return result;
         }
 
-        public PropModel GetPropModelForModel5Dest(IPropFactory propFactory)
+        public PropModelType GetPropModelForModel5Dest(IPropFactory propFactory)
         {
-            PropModel result = new PropModel
+            PropModelType result = new PropModel
                 (
                 className: "DestinationModel5",
                 namespaceName: "PropBagLib.Tests.PerformanceDb",
@@ -79,7 +83,7 @@ namespace PropBagLib.Tests.PerformanceDb
                 targetType: typeof(DestinationModel5),
                 propFactory: propFactory,
                 propFactoryType: null,
-                propModelProvider: null,
+                propModelCache: null,
                 typeSafetyMode: PropBagTypeSafetyMode.Tight,
                 deferMethodRefResolution: true,
                 requireExplicitInitialValue: true
@@ -116,9 +120,9 @@ namespace PropBagLib.Tests.PerformanceDb
             return result;
         }
 
-        public PropModel GetPropModelForModel6Dest(IPropFactory propFactory)
+        public PropModelType GetPropModelForModel6Dest(IPropFactory propFactory)
         {
-            PropModel result = new PropModel
+            PropModelType result = new PropModel
                 (
                 className: "DestinationModel6",
                 namespaceName: "PropBagLib.Tests.PerformanceDb",
@@ -126,7 +130,7 @@ namespace PropBagLib.Tests.PerformanceDb
                 targetType: typeof(DestinationModel6),
                 propFactory: propFactory,
                 propFactoryType: null,
-                propModelProvider: null,
+                propModelCache: null,
                 typeSafetyMode: PropBagTypeSafetyMode.Tight,
                 deferMethodRefResolution: true,
                 requireExplicitInitialValue: true

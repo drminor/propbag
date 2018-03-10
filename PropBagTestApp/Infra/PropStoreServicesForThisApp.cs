@@ -68,7 +68,7 @@ namespace PropBagTestApp.Infra
 
             PropModelCache = new SimplePropModelCache(propModelProvider);
 
-            ViewModelHelper = new ViewModelHelper(propModelProvider, vmActivator, psAccessServiceFactory, AutoMapperProvider);
+            ViewModelHelper = new ViewModelHelper(PropModelCache, vmActivator, psAccessServiceFactory, AutoMapperProvider);
         }
 
         private static IPropFactoryFactory BuildThePropFactoryFactory
@@ -79,7 +79,7 @@ namespace PropBagTestApp.Infra
         {
             ResolveTypeDelegate typeResolver = null;
 
-            IPropFactoryFactory result = new PropFactoryFactory
+            IPropFactoryFactory result = new SimplePropFactoryFactory
                 (
                 delegateCacheProvider,
                 valueConverter,

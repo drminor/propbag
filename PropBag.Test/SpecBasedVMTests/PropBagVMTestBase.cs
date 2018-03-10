@@ -209,7 +209,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests
             PropModelCache = new SimplePropModelCache(remotePropModelProvider);
 
             // Create the ViewModelHelper
-            ViewModelHelper = new ViewModelHelper(remotePropModelProvider, vmActivator, PropStoreAccessService_Factory, AutoMapperProvider);
+            ViewModelHelper = new ViewModelHelper(PropModelCache, vmActivator, PropStoreAccessService_Factory, AutoMapperProvider);
             _mct.MeasureAndReport("After new ViewModelHelper");
 
             //// Default PropFactory
@@ -300,7 +300,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests
             ResolveTypeDelegate typeResolver
             )
         {
-            IPropFactoryFactory result = new PropFactoryFactory
+            IPropFactoryFactory result = new SimplePropFactoryFactory
                 (
                 delegateCacheProvider,
                 valueConverter,
@@ -356,19 +356,16 @@ namespace PropBagLib.Tests.SpecBasedVMTests
 
             remotePropModelProvider.LoadPropModels(resourceFolderPath, pbTemplateFilenames);
             _mct.MeasureAndReport("After LoadPropModels");
-
-            //PropModelType test = remotePropModelProvider.GetPropModel("PersonVM");
-            //SimpleExKey testObject = test.TestObject;
         }
 
-        protected virtual ResourceDictionary GetResources(string resourceFolderPath, string[] filenames)
-        {
-            ResourceDictionaryProvider resourceDictionaryProvider = new ResourceDictionaryProvider();
-            ResourceDictionary resources = resourceDictionaryProvider.LoadUsingSTA(resourceFolderPath, filenames);
-            resourceDictionaryProvider = null;
+        //protected virtual ResourceDictionary GetResources(string resourceFolderPath, string[] filenames)
+        //{
+        //    ResourceDictionaryProvider resourceDictionaryProvider = new ResourceDictionaryProvider();
+        //    ResourceDictionary resources = resourceDictionaryProvider.LoadUsingSTA(resourceFolderPath, filenames);
+        //    resourceDictionaryProvider = null;
 
-            return resources;
-        }
+        //    return resources;
+        //}
 
         protected virtual IProvideAutoMappers GetAutoMapperProvider
             (
@@ -410,7 +407,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests
                 mbInfo: moduleBuilderInfo
                 );
 
-            ICacheWrapperTypes wrapperTypeCachingService = new WrapperTypeLocalCache
+            ICacheEmittedTypes wrapperTypeCachingService = new SimpleEmittedTypesCache
                 (
                 emitterEngine: emitWrapperType
                 );

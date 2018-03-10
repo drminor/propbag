@@ -7,6 +7,7 @@ namespace DRM.PropBagWPF
 {
     using PropNameType = String;
     using PropModelType = IPropModel<String>;
+    using PropModelCacheInterface = ICachePropModels<String>;
 
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
 
@@ -18,7 +19,7 @@ namespace DRM.PropBagWPF
     {
         #region Private Members
 
-        IProvidePropModels _propModelProvider { get; }
+        PropModelCacheInterface _propModelCache { get; }
         IViewModelActivator _viewModelActivator { get; }
         PSAccessServiceCreatorInterface _storeAccessCreator;
         IProvideAutoMappers _autoMapperService;
@@ -29,13 +30,13 @@ namespace DRM.PropBagWPF
 
         public ViewModelHelper
             (
-            IProvidePropModels propModelProvider,
+            PropModelCacheInterface propModelCache,
             IViewModelActivator viewModelActivator,
             PSAccessServiceCreatorInterface storeAccessCreator,
             IProvideAutoMappers autoMapperService
             )
         {
-            _propModelProvider = propModelProvider ?? throw new ArgumentNullException(nameof(propModelProvider));
+            _propModelCache = propModelCache ?? throw new ArgumentNullException(nameof(propModelCache));
             _viewModelActivator = viewModelActivator ?? throw new ArgumentNullException(nameof(viewModelActivator));
             _storeAccessCreator = storeAccessCreator ?? throw new ArgumentNullException(nameof(storeAccessCreator));
             _autoMapperService = autoMapperService ?? throw new ArgumentNullException(nameof(autoMapperService));
@@ -47,7 +48,7 @@ namespace DRM.PropBagWPF
 
         public object GetNewViewModel(string resourceKey)
         {
-            PropModelType pm = _propModelProvider.GetPropModel(resourceKey);
+            PropModelType pm = _propModelCache.GetPropModel(resourceKey);
             object result = GetNewViewModel(pm, null, null);
             return result;
         }
@@ -60,7 +61,7 @@ namespace DRM.PropBagWPF
         /// <returns></returns>
         public object GetNewViewModel(string resourceKey, IPropFactory propFactory)
         {
-            PropModelType pm = _propModelProvider.GetPropModel(resourceKey);
+            PropModelType pm = _propModelCache.GetPropModel(resourceKey);
             object result = GetNewViewModel(pm, propFactory, null);
             return result;
         }

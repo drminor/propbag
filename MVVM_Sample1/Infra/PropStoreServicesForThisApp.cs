@@ -54,7 +54,9 @@ namespace MVVMApplication.Infra
                     _configPackageNameSuffix = value;
                     IProvidePropModels propModelProvider = GetPropModelProvider(_propFactoryFactory, ConfigPackageNameSuffix);
 
-                    ViewModelHelper = new ViewModelHelper(propModelProvider, _vmActivator, _theStore.PropStoreAccessServiceFactory, AutoMapperProvider);
+                    PropModelCache = new SimplePropModelCache(propModelProvider);
+
+                    ViewModelHelper = new ViewModelHelper(PropModelCache, _vmActivator, _theStore.PropStoreAccessServiceFactory, AutoMapperProvider);
 
                     // Remove any AutoMapper that may have been previously created.
                     AutoMapperProvider.ClearMappersCache();
@@ -105,7 +107,7 @@ namespace MVVMApplication.Infra
             AutoMapperProvider = GetAutoMapperProvider(WrapperTypeCreator, _vmActivator, psAccessServiceFactory);
                 _mct.MeasureAndReport("After GetAutoMapperProvider");
 
-            ViewModelHelper = new ViewModelHelper(propModelProvider, _vmActivator, psAccessServiceFactory, AutoMapperProvider);
+            ViewModelHelper = new ViewModelHelper(PropModelCache, _vmActivator, psAccessServiceFactory, AutoMapperProvider);
                 _mct.MeasureAndReport("After new ViewModelHelper");
 
             //_defaultPropFactory = BuildDefaultPropFactory(valueConverter, delegateCacheProvider, typeResolver);
@@ -147,7 +149,7 @@ namespace MVVMApplication.Infra
             ResolveTypeDelegate typeResolver
             )
         {
-            IPropFactoryFactory result = new PropFactoryFactory
+            IPropFactoryFactory result = new SimplePropFactoryFactory
                 (
                 delegateCacheProvider,
                 valueConverter,
@@ -213,7 +215,7 @@ namespace MVVMApplication.Infra
                 mbInfo: moduleBuilderInfo
                 );
 
-            ICacheWrapperTypes wrapperTypeCachingService = new WrapperTypeLocalCache
+            ICacheEmittedTypes wrapperTypeCachingService = new SimpleEmittedTypesCache
                 (
                 emitterEngine: emitWrapperType
                 );

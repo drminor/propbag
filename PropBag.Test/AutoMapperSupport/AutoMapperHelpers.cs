@@ -7,6 +7,8 @@ using DRM.PropBag.ViewModelTools;
 using System;
 using DRM.PropBag.TypeWrapper;
 using DRM.PropBag.TypeWrapper.TypeDesc;
+using DRM.PropBagControlsWPF;
+using System.Windows;
 
 namespace PropBagLib.Tests.AutoMapperSupport
 {
@@ -23,6 +25,22 @@ namespace PropBagLib.Tests.AutoMapperSupport
         // Maximum number of PropertyIds for any one given Object.
         private const int LOG_BASE2_MAX_PROPERTIES = 16;
         public static readonly int MAX_NUMBER_OF_PROPERTIES = (int)Math.Pow(2, LOG_BASE2_MAX_PROPERTIES); //65536;
+
+        public static string _resourceFolderPath = @"C:\DEV\VS2013Projects\PubPropBag\PropBagLib.Tests.PropBagTemplates\ProbBagTemplates";
+
+        public static string[] _pbTemplateFilenames = new string[]
+            {
+                "MainWindowVM.xaml",
+                "PersonCollectionVM.xaml",
+                "PersonEditorVM.xaml",
+                "PersonVM.xaml"
+            };
+
+        public static string[] _mapperRequestFilenames = new string[]
+            {
+                "MapperConf_Both.xaml",
+            };
+
 
         private SimplePropStoreProxy _theStore { get; set; }
 
@@ -131,8 +149,85 @@ namespace PropBagLib.Tests.AutoMapperSupport
             return _autoMapperProvider_V1;
         }
 
-        public PropModelCacheInterface PropModelCache { get; private set; }
+        PropModelCacheInterface _propModelCache_V1;
+        public PropModelCacheInterface GetPropModelCache_V1()
+        {
+            if(_propModelCache_V1 == null)
+            {
+                IPropFactoryFactory propFactoryFactory = GetThePropFactoryFactory();
 
+                // PropModel Provider
+                RemotePropModelProvider remotePropModelProvider = GetPropModelProvider(propFactoryFactory, configPackageNameSuffix: null);
+
+
+                // Load the PropBag and Mapper Templates
+                LoadPropModelsAndMappers(remotePropModelProvider, _resourceFolderPath, _pbTemplateFilenames, _mapperRequestFilenames);
+
+                _propModelCache_V1 = new SimplePropModelCache(remotePropModelProvider);
+
+            }
+            return _propModelCache_V1;
+        }
+
+        private IPropFactoryFactory GetThePropFactoryFactory()
+        {
+            ITypeDescBasedTConverterCache typeDescBasedTConverterCache = new TypeDescBasedTConverterCache();
+
+            IProvideDelegateCaches delegateCacheProvider = new SimpleDelegateCacheProvider(typeof(PropBag), typeof(APFGenericMethodTemplates));
+
+
+            IConvertValues valueConverter = new PropFactoryValueConverter(typeDescBasedTConverterCache);
+            ResolveTypeDelegate typeResolver = null;
+
+            IPropFactoryFactory result = BuildThePropFactoryFactory(valueConverter, delegateCacheProvider, typeResolver);
+
+            return result;
+        }
+
+        private static IPropFactoryFactory BuildThePropFactoryFactory
+            (
+            IConvertValues valueConverter,
+            IProvideDelegateCaches delegateCacheProvider,
+            ResolveTypeDelegate typeResolver
+            )
+        {
+            IPropFactoryFactory result = new SimplePropFactoryFactory
+                (
+                delegateCacheProvider,
+                valueConverter,
+                typeResolver: typeResolver
+                );
+
+            return result;
+        }
+
+        private RemotePropModelProvider GetPropModelProvider
+            (
+            IPropFactoryFactory propFactoryFactory,
+            string configPackageNameSuffix
+            )
+        {
+            ResourceDictionaryProvider rdProvider = new ResourceDictionaryProvider();
+
+            PropBagTemplateParser pbtParser = new PropBagTemplateParser();
+
+            RemotePropModelProvider propModelProvider = new RemotePropModelProvider(rdProvider, pbtParser, propFactoryFactory, configPackageNameSuffix);
+
+            return propModelProvider;
+        }
+
+        void LoadPropModelsAndMappers
+            (
+            RemotePropModelProvider remotePropModelProvider,
+            string resourceFolderPath,
+            string[] pbTemplateFilenames,
+            string[] mapperRequestFilenames
+            )
+        {
+            remotePropModelProvider.LoadMapperRequests(resourceFolderPath, mapperRequestFilenames);
+
+            remotePropModelProvider.LoadPropModels(resourceFolderPath, pbTemplateFilenames);
+        }
 
         protected virtual ICreateWrapperTypes GetSimpleWrapperTypeCreator()
         {
@@ -145,7 +240,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 mbInfo: moduleBuilderInfo
                 );
 
-            ICacheWrapperTypes wrapperTypeCachingService = new WrapperTypeLocalCache
+            ICacheEmittedTypes wrapperTypeCachingService = new SimpleEmittedTypesCache
                 (
                 emitterEngine: emitWrapperType
                 );

@@ -47,7 +47,7 @@ namespace DRM.PropBagWPF
                 targetType: pbt.TargetType,
                 propFactory: null,
                 propFactoryType: pbt.PropFactoryType,
-                propModelProvider: null,
+                propModelCache: null,
                 typeSafetyMode: pbt.TypeSafetyMode,
                 deferMethodRefResolution: pbt.DeferMethodRefResolution,
                 requireExplicitInitialValue: pbt.RequireExplicitInitialValue
