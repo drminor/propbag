@@ -130,7 +130,7 @@ namespace DRM.PropBag
             Type targetType,
             IPropFactory propFactory,
             Type propFactoryType,
-            PropModelCacheInterface propModelProvider,
+            PropModelCacheInterface propModelCache,
             PropBagTypeSafetyMode typeSafetyMode = PropBagTypeSafetyMode.AllPropsMustBeRegistered,
             bool deferMethodRefResolution = true,
             bool requireExplicitInitialValue = true,
@@ -142,9 +142,14 @@ namespace DRM.PropBag
             DeriveFromClassMode = deriveFrom;
             TargetType = targetType;
             PropFactory = propFactory;
-            PropFactoryType = propFactoryType ?? propFactory?.GetType() ?? throw new ArgumentNullException("Either the propFactory or the propFactoryType must be specified when creating a PropModel.");
+            PropFactoryType = propFactoryType; // ?? propFactory?.GetType() ?? throw new ArgumentNullException("Either the propFactory or the propFactoryType must be specified when creating a PropModel.");
 
-            PropModelCache = propModelProvider;
+            if(propFactory == null && propFactoryType == null)
+            {
+                throw new ArgumentNullException("Either the propFactory or the propFactoryType must be specified when creating a PropModel.");
+            }
+
+            PropModelCache = propModelCache;
 
             TypeSafetyMode = typeSafetyMode;
             DeferMethodRefResolution = deferMethodRefResolution;
@@ -239,8 +244,17 @@ namespace DRM.PropBag
 
             lock (_syncLock)
             {
+                //// Set the propFactory to null, if we have a PropFactoryType.
+                //IPropFactory propFactoryToUse = PropFactoryType != null ? null : PropFactory;
+
+                // Use the PropFactory currently set on the PropModel.
+                // Note: This PropFactory could have been "generated on the fly" from the PropFactoryFactory.
+                // Note: This single PropFactory could potentially be used by many PropBag instances.
+
+                IPropFactory propFactoryToUse = PropFactory;  //PropFactoryType != null ? null : PropFactory;
+
                 result = new PropModel(ClassName, NamespaceName, DeriveFromClassMode, TargetType,
-                PropFactory, PropFactoryType, PropModelCache,
+                propFactoryToUse, PropFactoryType, PropModelCache,
                 TypeSafetyMode, DeferMethodRefResolution, RequireExplicitInitialValue);
 
                 result.Namespaces = new ObservableCollection<PropNameType>();
@@ -272,12 +286,12 @@ namespace DRM.PropBag
             {
                 if (PropModelCache == null)
                 {
-                    System.Diagnostics.Debug.Assert(GenerationId == GEN_NONE, $"The PropModel with Full Class Name: {FullClassName}, {GenerationId} has no PropModelCache assigned to it, however the GenerationId is not {GEN_NONE}.");
+                    System.Diagnostics.Debug.Assert(GenerationId == GEN_NONE, $"The PropModel with Full Class Name: {this} has no PropModelCache assigned to it, however the GenerationId is not {GEN_NONE}.");
                     Open();
                 }
                 else
                 {
-                    throw new InvalidOperationException($"The PropModel with Full Class Name: {FullClassName}, {GenerationId} is fixed. Cannot make changed to this PropModel.");
+                    throw new InvalidOperationException($"The PropModel with Full Class Name: {this} is fixed. Cannot make changed to this PropModel.");
                 }
             }
         }
@@ -309,10 +323,10 @@ namespace DRM.PropBag
             {
                 if(PropModelCache == null)
                 {
-                    throw new InvalidOperationException($"The PropModel with Full Class Name: {FullClassName}, {GenerationId} has no PropModelCache assigned to it. Setting the GenerationId is not allowed in this context.");
+                    throw new InvalidOperationException($"The PropModel with Full Class Name: {this} has no PropModelCache assigned to it. Setting the GenerationId is not allowed in this context.");
                 }
 
-                if (_isFixed) throw new InvalidOperationException($"The PropModel with Full Class Name: {FullClassName}, {GenerationId} is fixed. The GenerationId cannot be changed.");
+                if (_isFixed) throw new InvalidOperationException($"The PropModel with Full Class Name: {this} is fixed. The GenerationId cannot be changed.");
 
                 _generationId = value;
             }
@@ -561,6 +575,11 @@ namespace DRM.PropBag
             Dispose(true);
             // TODO: uncomment the following line if the finalizer is overridden above.
             // GC.SuppressFinalize(this);
+        }
+
+        public override string ToString()
+        {
+            return $"{FullClassName}, {GenerationId}";
         }
 
         #endregion
