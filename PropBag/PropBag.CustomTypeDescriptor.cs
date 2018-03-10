@@ -1,4 +1,4 @@
-﻿using DRM.PropBag.TypeDescriptors;
+﻿using DRM.TypeSafePropertyBag.TypeDescriptors;
 using System;
 using System.Collections;
 using System.Collections.Generic;

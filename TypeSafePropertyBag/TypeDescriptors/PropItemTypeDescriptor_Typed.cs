@@ -1,15 +1,7 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-using DRM.PropBag;
-using DRM.TypeSafePropertyBag;
-
-namespace DRM.PropBag.TypeDescriptors
+namespace DRM.TypeSafePropertyBag.TypeDescriptors
 {
     // ToDo: This is not used.
     public class PropItemTypeDescriptor_Typed<T, PT, BagT> : PropertyDescriptor, IPropItemTypeDescriptor where PT : class, IProp<T> where BagT : class, IPropBag
@@ -53,7 +45,7 @@ namespace DRM.PropBag.TypeDescriptors
             _propBag = propBag;
             _propItem = propItem;
 
-            _tdConfig = new TypeDescriptorConfig(_propItem.TypedPropTemplate.Attributes, typeof(PropBag), false, propertyName, _propItem.TypedPropTemplate.Type, true);
+            _tdConfig = new TypeDescriptorConfig(_propItem.TypedPropTemplate.Attributes, typeof(BagT), false, propertyName, _propItem.TypedPropTemplate.Type, true);
 
             _children = this.GetChildProperties();
         }

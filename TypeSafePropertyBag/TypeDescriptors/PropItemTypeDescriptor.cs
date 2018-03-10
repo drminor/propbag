@@ -1,15 +1,7 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-using DRM.PropBag;
-using DRM.TypeSafePropertyBag;
-
-namespace DRM.PropBag.TypeDescriptors
+namespace DRM.TypeSafePropertyBag.TypeDescriptors
 {
     public class PropItemTypeDescriptor<BagT> : PropertyDescriptor, IPropItemTypeDescriptor where BagT : class, IPropBag
     {

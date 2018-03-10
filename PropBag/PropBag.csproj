@@ -70,21 +70,11 @@
     <None Include="Documentation\TypeInfoField.md" />
     <None Include="Unused\PropBagDyn.cs" />
     <None Include="Unused\PropBagExperimental.cs" />
-    <Compile Include="TypeDescriptors\IMyTypeDescriptor.cs" />
-    <Compile Include="TypeDescriptors\MyTypeDescriptorBase.cs" />
-    <Compile Include="TypeDescriptors\PbCollectionItemTypeDescriptor.cs" />
-    <Compile Include="TypeDescriptors\IPbCollectionTypeDescriptor.cs" />
     <Compile Include="Factories\PropExtStoreFactory.cs" />
     <Compile Include="Factories\PropFactory.cs" />
     <Compile Include="PubPropBag.cs" />
     <Compile Include="PropBag.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TypeDescriptors\IPropBagTypeDescriptor.cs" />
-    <Compile Include="TypeDescriptors\IPropItemTypeDescriptor.cs" />
-    <Compile Include="TypeDescriptors\PropBagTypeDescriptor.cs" />
-    <Compile Include="TypeDescriptors\PropItemTypeDescriptor_Typed.cs" />
-    <Compile Include="TypeDescriptors\PropItemTypeDescriptor.cs" />
-    <Compile Include="TypeDescriptors\TypeDescriptorConfig.cs" />
     <Compile Include="XMLModel\PropComparerField.cs" />
     <Compile Include="XMLModel\PropDoWhenChanged.cs" />
     <Compile Include="XMLModel\PropInitalValueField.cs" />
@@ -126,7 +116,9 @@
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="TypeDescriptors\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -1,22 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace DRM.PropBag.TypeDescriptors
+namespace DRM.TypeSafePropertyBag.TypeDescriptors
 {
 
-//    public delegate void AddValueChangedDelegate(object component, EventHandler handler);
-//    public delegate bool CanResetValueDelegate(object component);
-//    public delegate PropertyDescriptorCollection GetChildPropertiesDelegate(object instance, Attribute[] filter);
-//    public delegate object GetEditorDelegate(Type editorBaseType);
-//    public delegate object GetValueDelegate(object component);
-//    public delegate void RemoveValueChangedDelegate(object component, EventHandler handler);
-//    public delegate void ResetValueDelegate(object component);
-//    public delegate void SetValueDelegate(object component, object value);
-//    public delegate bool ShouldSerializeValueDelegate(object component);
+    //    public delegate void AddValueChangedDelegate(object component, EventHandler handler);
+    //    public delegate bool CanResetValueDelegate(object component);
+    //    public delegate PropertyDescriptorCollection GetChildPropertiesDelegate(object instance, Attribute[] filter);
+    //    public delegate object GetEditorDelegate(Type editorBaseType);
+    //    public delegate object GetValueDelegate(object component);
+    //    public delegate void RemoveValueChangedDelegate(object component, EventHandler handler);
+    //    public delegate void ResetValueDelegate(object component);
+    //    public delegate void SetValueDelegate(object component, object value);
+    //    public delegate bool ShouldSerializeValueDelegate(object component);
 
 
     public struct TypeDescriptorConfig

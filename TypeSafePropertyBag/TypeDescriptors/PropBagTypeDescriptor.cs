@@ -1,15 +1,10 @@
-﻿using DRM.PropBag;
-using DRM.TypeSafePropertyBag;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace DRM.PropBag.TypeDescriptors
+namespace DRM.TypeSafePropertyBag.TypeDescriptors
 {
-    using PropNameType = String;
     using PropModelType = IPropModel<String>;
 
     public class PropBagTypeDescriptor<BagT> : PropertyDescriptor, IPropBagTypeDescriptor where BagT : IPropBag
@@ -53,12 +48,12 @@ namespace DRM.PropBag.TypeDescriptors
 
         #region Constructors
 
-        public PropBagTypeDescriptor(PropModel propModel, string propertyName = null)
+        public PropBagTypeDescriptor(PropModelType propModel, string propertyName = null)
             : base(GetPropertyName(propertyName, propModel), new Attribute[] { })
         {
             string propertyNameToUse = base.Name;
 
-            _tdConfig = new TypeDescriptorConfig(new Attribute[] { }, typeof(object), true, propertyNameToUse, typeof(PropBag), true);
+            _tdConfig = new TypeDescriptorConfig(new Attribute[] { }, typeof(object), true, propertyNameToUse, typeof(BagT), true);
 
             _children = GetBasePropertyCollection();
 
@@ -75,7 +70,7 @@ namespace DRM.PropBag.TypeDescriptors
         {
             string propertyNameToUse = base.Name;
 
-            _tdConfig = new TypeDescriptorConfig(new Attribute[] { }, typeof(object), true, propertyNameToUse, typeof(PropBag), true);
+            _tdConfig = new TypeDescriptorConfig(new Attribute[] { }, typeof(object), true, propertyNameToUse, typeof(BagT), true);
 
             _children = GetBasePropertyCollection();
         }
@@ -99,7 +94,7 @@ namespace DRM.PropBag.TypeDescriptors
             return className ?? propBag.GetMetaData().ClassName;
         }
 
-        public PropertyDescriptor[] BuildPropDescriptors(PropModel pm/*, IPropFactory pf*/)
+        public PropertyDescriptor[] BuildPropDescriptors(PropModelType pm/*, IPropFactory pf*/)
         {
             PropertyDescriptor[] descriptors = new PropertyDescriptor[pm.Count];
 
