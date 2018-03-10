@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
 {
-    public abstract class BasicVM : PropBagVMTestBase
+    public abstract class BasicVMSetup : PropBagVMTestBase
     {
         protected override Action EstablishContext()
         {

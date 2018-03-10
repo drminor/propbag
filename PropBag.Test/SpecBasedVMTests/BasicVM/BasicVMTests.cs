@@ -15,7 +15,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
 
     [TestFixture(TestName = "AAA No Resources Run1")]
     [NonParallelizable]
-    public class AAEmptyTest1 : BasicVM
+    public class AAEmptyTest1 : BasicVMSetup
     {
         // Override the base EstablishContext so that no resources are used (and the cleanup action is null.)
         protected override Action EstablishContext()
@@ -52,7 +52,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
 
     [TestFixture(TestName = "ZZZ No Resources End Run")]
     [NonParallelizable]
-    public class ZZEmptyTest1 : BasicVM
+    public class ZZEmptyTest1 : BasicVMSetup
     {
         // Override the base EstablishContext so that no resources are used (and the cleanup action is null.)
         protected override Action EstablishContext()
@@ -94,7 +94,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
 
     [TestFixture(TestName = "AAA No Resources Run2")]
     [NonParallelizable]
-    public class AAEmptyTest2 : BasicVM
+    public class AAEmptyTest2 : BasicVMSetup
     {
         // Override the base EstablishContext so that no resources are used (and the cleanup action is null.)
         protected override Action EstablishContext()
@@ -130,7 +130,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
 
     [TestFixture(TestName = "AAA Regular Resource Set")]
     [NonParallelizable]
-    public class AAEmptyTest3 : BasicVM
+    public class AAEmptyTest3 : BasicVMSetup
     {
         protected override Action EstablishContext()
         {
@@ -165,7 +165,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
 
     [TestFixture(TestName = "BaseLine (New Business, Get 200 Person Records.)")]
     [NonParallelizable]
-    public class BaseLine : BasicVM
+    public class BaseLine : BasicVMSetup
     {
         PersonDAL dal = null;
         List<Person> personList = null;
@@ -203,7 +203,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
 
     [TestFixture(TestName = "Load Simple Model From PersonDal")]
     [NonParallelizable]
-    public class BBGetPropModel : BasicVM
+    public class BBGetPropModel : BasicVMSetup
     {
         PropModelType personVM_PropModel = null;
 
@@ -242,7 +242,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
 
     [TestFixture(TestName = "CreateVM_CreateMainWindowVM_Run1")]
     [NonParallelizable]
-    public class CreateVM : BasicVM
+    public class CreateVM : BasicVMSetup
     {
         PropModelType mainWindowPropModel;
         MainWindowViewModel mainWindowViewModel;
@@ -302,7 +302,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
 
     [TestFixture(TestName = "CreateVM_CreateMainWindowVM_Run2")]
     [NonParallelizable]
-    public class CreateVM2 : BasicVM
+    public class CreateVM2 : BasicVMSetup
     {
         PropModelType mainWindowPropModel;
         MainWindowViewModel mainWindowViewModel;
@@ -374,7 +374,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
 
     [TestFixture(TestName = "CreateVM_CreateMainWindowVM_Run3")]
     [NonParallelizable]
-    public class CreateVM3 : BasicVM
+    public class CreateVM3 : BasicVMSetup
     {
         PropModelType mainWindowPropModel;
         MainWindowViewModel mainWindowViewModel;
