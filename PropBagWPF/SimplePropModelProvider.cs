@@ -145,10 +145,12 @@ namespace DRM.PropBagWPF
                     // use the PropFactoryFactory given to us to create a PropFactory.
                     IPropFactory generated = propFactoryGenerator.BuildPropFactory(propModel.PropFactoryType);
                     propModel.PropFactory = generated;
+
+                    System.Diagnostics.Debug.WriteLine($"Just created a new PropFactory of type: {propModel.PropFactoryType} for the propModel with FullClassName: {propModel}.");
                 }
                 else
                 {
-                    throw new InvalidOperationException("The PropModel does not have a value for PropFactory, nor does it have a value for PropFactoryType.");
+                    throw new InvalidOperationException($"The PropModel with FullClassName: {propModel} does not have a value for PropFactory, nor does it have a value for PropFactoryType.");
                 }
             }
 
