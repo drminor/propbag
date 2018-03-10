@@ -81,6 +81,9 @@
       <DependentUpon>OnlyTypedAccessModel.props.tt</DependentUpon>
     </Compile>
     <Compile Include="SetupFixture1.cs" />
+    <Compile Include="SpecBasedVMTests\TypeDescriptorTests\TypeDescriptorTestGroup1.cs" />
+    <Compile Include="SpecBasedVMTests\TypeDescriptorTests\TypeInspectorUtility.cs" />
+    <Compile Include="SpecBasedVMTests\TypeDescriptorTests\TypeDescriptorSetup.cs" />
     <Compile Include="TypeExtensionsForUnitTesting.cs" />
     <None Include="PerformanceDynamic\PerformanceDynModel.cs" />
     <None Include="PerformanceDynamic\PerformanceDynModel.props.cs">
@@ -146,16 +149,13 @@
     </Compile>
     <Compile Include="PubPropBag\PubPropBagModel.cs" />
     <Compile Include="SpecBasedVMTests\AbstractSpec.cs" />
-    <Compile Include="SpecBasedVMTests\BasicVM\AbstractBasicVM.cs" />
-    <None Include="SpecBasedVMTests\BasicVM\Infra\AMServiceRef.cs" />
-    <None Include="SpecBasedVMTests\BasicVM\Infra\PSServiceRef.cs" />
-    <Compile Include="SpecBasedVMTests\BasicVM\Infra\ViewModelProvider.cs" />
+    <Compile Include="SpecBasedVMTests\BasicVM\BasicVMSetup.cs" />
     <Compile Include="SpecBasedVMTests\BasicVM\Services\PersonDAL.cs" />
     <Compile Include="SpecBasedVMTests\BasicVM\Services\PersonDB.cs" />
     <Content Include="SpecBasedVMTests\BasicVM\UnusedTests.cs" />
     <Compile Include="SpecBasedVMTests\ContextCleaner.cs" />
     <Compile Include="SpecBasedVMTests\PropBagVMTestBase.cs" />
-    <Compile Include="SpecBasedVMTests\BasicVM\Test1.cs" />
+    <Compile Include="SpecBasedVMTests\BasicVM\BasicVMTests.cs" />
     <Compile Include="SpecBasedVMTests\BasicVM\ViewModels\MainWindowViewModel.cs" />
     <Compile Include="SpecBasedVMTests\BasicVM\ViewModels\PersonCollectionViewModel.cs" />
     <Compile Include="SpecBasedVMTests\BasicVM\ViewModels\PersonEditorViewModel.cs" />
