@@ -58,11 +58,13 @@ namespace DRM.TypeSafePropertyBag
             if(propNodes == null)
             {
                 _children = new Dictionary<PropIdType, PropNode>();
+                m_PropIdCounter = -1;
             }
             else
             {
                 _children = propNodes.ToDictionary(k => k.PropId, v => v);
                 CheckChildCount(_children.Count);
+                m_PropIdCounter = _children.Count - 1;
             }
 
             _propItemsByName = null;
@@ -348,18 +350,11 @@ namespace DRM.TypeSafePropertyBag
 
         private Dictionary<PropNameType, PropNode> BuildByNameDict(IDictionary<PropIdType, PropNode> sourceDict)
         {
-            //Dictionary<PropNameType, PropNode> result = new Dictionary<PropNameType, PropNode>();
-
-            //foreach (KeyValuePair<PropIdType, PropNode> kvp in _children)
-            //{
-            //    result.Add(kvp.Value.PropertyName, kvp.Value);
-            //}
-
             Dictionary<PropNameType, PropNode> result = sourceDict.ToDictionary(k => k.Value.PropertyName, v => v.Value);
             return result;
         }
 
-        private long m_PropIdCounter = 0;
+        private long m_PropIdCounter;
         private PropIdType GetNextPropId()
         {
             long temp = System.Threading.Interlocked.Increment(ref m_PropIdCounter);
@@ -367,33 +362,6 @@ namespace DRM.TypeSafePropertyBag
             return (PropIdType)temp;
         }
 
-        //private long m_GenerationId = 0;
-        //public long GetNextGenerationId()
-        //{
-        //    if (m_GenerationId == long.MaxValue -  1) throw new InvalidOperationException("This PropNodeCollection has over x generations: the next GenerationId exceeds the size of a long intenger.");
-        //    return System.Threading.Interlocked.Increment(ref m_GenerationId);
-        //}
-
         #endregion
     }
-
-    //internal class SimplePropItemSetComparer : IEqualityComparer<PropItemSetInternalInterface>
-    //{
-    //    public bool Equals(PropItemSetInternalInterface x, PropItemSetInternalInterface y)
-    //    {
-    //        if (x == null && y == null)
-    //            return true;
-
-    //        if (x == null || y == null)
-    //            return false;
-
-    //        return x.IsFixed == y.IsFixed
-    //            && EqualityComparer<IReadOnlyDictionary<PropNameType, IPropData>>.Default.Equals(x.GetPropDataItemsDict(), y.GetPropDataItemsDict());
-    //    }
-
-    //    public int GetHashCode(PropItemSetInternalInterface obj)
-    //    {
-    //        return obj.GetHashCode();
-    //    }
-    //}
 }

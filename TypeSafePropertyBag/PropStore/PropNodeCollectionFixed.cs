@@ -61,6 +61,7 @@ namespace DRM.TypeSafePropertyBag
 
         public void Fix()
         {
+            System.Diagnostics.Debug.WriteLine("The Fix method is being called on a PropNodeCollectionFixed instance.");
             // We are always fixed: so nothing to do here.
         }
 
@@ -253,21 +254,6 @@ namespace DRM.TypeSafePropertyBag
             Dictionary<PropNameType, PropNode> result = propNodes.ToDictionary(k => k.PropertyName, v => v);
             return result;
         }
-
-        private long m_PropIdCounter = 0;
-        private PropIdType GetNextPropId()
-        {
-            long temp = System.Threading.Interlocked.Increment(ref m_PropIdCounter);
-            if (temp > MaxPropsPerObject) throw new InvalidOperationException("The PropNodeCollection has run out of property ids.");
-            return (PropIdType)temp;
-        }
-
-        //private long m_GenerationId = 0;
-        //public long GetNextGenerationId()
-        //{
-        //    if (m_GenerationId == long.MaxValue -  1) throw new InvalidOperationException("This PropNodeCollection has over x generations: the next GenerationId exceeds the size of a long intenger.");
-        //    return System.Threading.Interlocked.Increment(ref m_GenerationId);
-        //}
 
         #endregion
     }

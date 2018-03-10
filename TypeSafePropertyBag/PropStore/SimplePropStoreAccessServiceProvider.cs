@@ -158,32 +158,9 @@ namespace DRM.TypeSafePropertyBag
             }
             else
             {
-                PropNodeCollection newFixedCollection = new PropNodeCollection(pnc_int);
+                PropNodeCollectionFixed newFixedCollection = new PropNodeCollectionFixed(pnc_int);
                 propBagNode.PropNodeCollection = newFixedCollection;
                 result = newFixedCollection;
-
-                //lock (_syncForPropItemSetCache)
-                //{
-                //    if (_propNodeCollectionCache == null) _propNodeCollectionCache = new SimplePropNodeCollectionCache<PropNodeCollectionInternalInterface, PropIdType, PropNameType>();
-
-                //    pnc_int.Fix();
-
-                //    if(_propNodeCollectionCache.TryGetValueAndGenerationId(pnc_int, out PropNodeCollectionInternalInterface basePropItemSet, out GenerationIdType generationId))
-                //    {
-                //        // There's nothing to do here. We have just fixed the open generation that was registered
-                //        // when the PropItemSet was 're-opened.'
-                //    }
-                //    else
-                //    {
-                //        // This PropItem set has no base, register it as a base PropItemSet.
-                //        if (!_propNodeCollectionCache.TryRegisterBasePropItemSet(pnc_int))
-                //        {
-                //            throw new InvalidOperationException("Could not register this PropBagNode's PropItemSet as a base PropItemSet.");
-                //        }
-                //    }
-
-                //    result = pnc_int; // We are using an instance of an internal class as an access token.
-                //}
             }
 
             return result;
@@ -229,47 +206,6 @@ namespace DRM.TypeSafePropertyBag
                 // return a reference to the new once cast as an object.
                 propItemSet_Handle = newOpenCollection;
                 result = true;
-
-                //if (_propNodeCollectionCache == null)
-                //{
-                //    throw new InvalidOperationException($"The PropItemSet Cache has not been initialized during call to OpenPropItemSet for PropBag:  .");
-                //}
-
-                //// TODO: Move these locks to the PropItemSet Cache
-                //// These resources are independent of the _store.
-                //lock (_syncForPropItemSetCache)
-                //{
-                //    // Determine the following:
-                //    // 1. If the existing PropItemSet has been registered.
-                //    // 2. Its base, if it has one.
-
-                //    if (_propNodeCollectionCache.TryGetValueAndGenerationId(propNodeCollection, out PropNodeCollectionInternalInterface basePropItemSet, out GenerationIdType generationId))
-                //    {
-                //        CheckGenerationRef(propNodeCollection, basePropItemSet, generationId);
-
-                //        // Create an open version of the current Fixed copy in use by the PropBag node.
-                //        PropNodeCollectionInternalInterface copy = new PropNodeCollection(propNodeCollection, propBagNode);
-
-                //        // Attempt to register the new, open PropItemSet as a derivative of the orignal (or its base).
-                //        if (_propNodeCollectionCache.TryRegisterPropItemSet(copy, basePropItemSet, out generationId))
-                //        {
-                //            // We are using an instance of a internal class as an access token.
-                //            propItemSet_Handle = copy;
-
-                //            // Replace PropBag Node's original, fixed PropSet with a the copy that is open (for the addition of new PropItems.)
-                //            propBagNode.PropNodeCollection = copy;
-                //            result = true;
-                //        }
-                //        else
-                //        {
-                //            throw new InvalidOperationException("Could not register the new PropItemSet.");
-                //        }
-                //    }
-                //    else
-                //    {
-                //        throw new InvalidOperationException("The existing PropItemSet cannot be found in the store.");
-                //    }
-                //} // end Lock(_syncForPropItemSetCache)
             }
 
             return result;
