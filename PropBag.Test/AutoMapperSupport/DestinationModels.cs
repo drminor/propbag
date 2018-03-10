@@ -7,7 +7,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
 {
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
 
-    public partial class DestinationModel3 : PropBag
+    public class DestinationModel3 : PropBag
     {
         //public DestinationModel3(PropBagTypeSafetyMode typeSafetyMode, PSAccessServiceCreatorInterface storeAccessCreator,
         //    string fullClassName, IPropFactory propFactory)
