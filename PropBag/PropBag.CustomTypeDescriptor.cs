@@ -48,28 +48,11 @@ namespace DRM.PropBag
 
         #endregion
 
-        #region ICustomTypeDescriptor Support
-
-        AttributeCollection ICustomTypeDescriptor.GetAttributes()
-        {
-            return GetAttributes();
-        }
+        #region ICustomTypeDescriptor - Protected Access
 
         protected AttributeCollection GetAttributes()
         {
             return AttributeCollection.Empty;
-        }
-
-        // Get Class and Component Name
-        string ICustomTypeDescriptor.GetClassName()
-        {
-            return GetClassName();
-        }
-
-        string ICustomTypeDescriptor.GetComponentName()
-        {
-            // The class and component names are the same.
-            return GetClassName();
         }
 
         protected string GetComponentName()
@@ -82,22 +65,9 @@ namespace DRM.PropBag
             return this.OurMetaData.ClassName;
         }
 
-        // Get Converter
-        TypeConverter ICustomTypeDescriptor.GetConverter()
-        {
-            return GetConverter();
-        }
-
         protected TypeConverter GetConverter()
         {
             throw new NotImplementedException();
-
-        }
-
-        // Get Default Event
-        EventDescriptor ICustomTypeDescriptor.GetDefaultEvent()
-        {
-            return GetDefaultEvent();
         }
 
         protected EventDescriptor GetDefaultEvent()
@@ -105,32 +75,9 @@ namespace DRM.PropBag
             throw new NotImplementedException();
         }
 
-        // Get Default Property
-        PropertyDescriptor ICustomTypeDescriptor.GetDefaultProperty()
-        {
-            return GetDefaultProperty();
-        }
-
         protected PropertyDescriptor GetDefaultProperty()
         {
             throw new NotImplementedException();
-        }
-
-        // Get Editor
-        object ICustomTypeDescriptor.GetEditor(Type editorBaseType)
-        {
-            return GetEditor(editorBaseType);
-        }
-
-        protected object GetEditor(Type editorBaseType)
-        {
-            throw new NotImplementedException();
-        }
-
-        // Get Events
-        EventDescriptorCollection ICustomTypeDescriptor.GetEvents()
-        {
-            return GetEvents();
         }
 
         protected EventDescriptorCollection GetEvents()
@@ -138,27 +85,14 @@ namespace DRM.PropBag
             throw new NotImplementedException();
         }
 
-        // Get Events(attributes)
-        EventDescriptorCollection ICustomTypeDescriptor.GetEvents(Attribute[] attributes)
+        protected object GetEditor(Type editorBaseType)
         {
-            return GetEvents(attributes);
+            throw new NotImplementedException();
         }
 
         protected EventDescriptorCollection GetEvents(Attribute[] attributes)
         {
             throw new NotImplementedException();
-        }
-
-        PropertyDescriptorCollection ICustomTypeDescriptor.GetProperties()
-        {
-            return this.GetProperties();
-        }
-
-        PropertyDescriptorCollection ICustomTypeDescriptor.GetProperties(Attribute[] attributes)
-        {
-            // TODO: Filter results using the list of attributes.
-            System.Diagnostics.Debug.WriteLine("GetProperties was called with attributes filter.");
-            return this.GetProperties();
         }
 
         PropertyDescriptorCollection _properties;
@@ -176,7 +110,6 @@ namespace DRM.PropBag
             return _properties;
         }
 
-
         protected PropertyDescriptorCollection GetProperties(Attribute[] attributes)
         {
             // TODO: Filter results using the list of attributes.
@@ -186,11 +119,6 @@ namespace DRM.PropBag
             return result;
         }
 
-        object ICustomTypeDescriptor.GetPropertyOwner(PropertyDescriptor pd)
-        {
-            return GetPropertyOwner(pd);
-        }
-
         protected object GetPropertyOwner(PropertyDescriptor pd)
         {
             return null;
@@ -198,5 +126,78 @@ namespace DRM.PropBag
 
         #endregion
 
+        #region ICustomTypeDescriptor Explicit Implementation
+
+        AttributeCollection ICustomTypeDescriptor.GetAttributes()
+        {
+            return GetAttributes();
+        }
+
+        // Get Class and Component Name
+        string ICustomTypeDescriptor.GetClassName()
+        {
+            return GetClassName();
+        }
+
+        string ICustomTypeDescriptor.GetComponentName()
+        {
+            // The class and component names are the same.
+            return GetClassName();
+        }
+
+        // Get Converter
+        TypeConverter ICustomTypeDescriptor.GetConverter()
+        {
+            return GetConverter();
+        }
+
+        // Get Default Event
+        EventDescriptor ICustomTypeDescriptor.GetDefaultEvent()
+        {
+            return GetDefaultEvent();
+        }
+
+        // Get Default Property
+        PropertyDescriptor ICustomTypeDescriptor.GetDefaultProperty()
+        {
+            return GetDefaultProperty();
+        }
+
+        // Get Editor
+        object ICustomTypeDescriptor.GetEditor(Type editorBaseType)
+        {
+            return GetEditor(editorBaseType);
+        }
+
+        // Get Events
+        EventDescriptorCollection ICustomTypeDescriptor.GetEvents()
+        {
+            return GetEvents();
+        }
+
+        // Get Events(attributes)
+        EventDescriptorCollection ICustomTypeDescriptor.GetEvents(Attribute[] attributes)
+        {
+            return GetEvents(attributes);
+        }
+
+        PropertyDescriptorCollection ICustomTypeDescriptor.GetProperties()
+        {
+            return this.GetProperties();
+        }
+
+        PropertyDescriptorCollection ICustomTypeDescriptor.GetProperties(Attribute[] attributes)
+        {
+            // TODO: Filter results using the list of attributes.
+            System.Diagnostics.Debug.WriteLine("GetProperties was called with attributes filter.");
+            return this.GetProperties();
+        }
+
+        object ICustomTypeDescriptor.GetPropertyOwner(PropertyDescriptor pd)
+        {
+            return GetPropertyOwner(pd);
+        }
+
+        #endregion
     }
 }
