@@ -28,15 +28,8 @@ namespace DRM.PropBag.TypeDescriptors
 
         #region Private Members
 
-        //IPropBag _propBag;
-        //PropModel _propModel;
-        //IPropFactory _propFactory;
-
         TypeDescriptorConfig _tdConfig;
-
         PropertyDescriptorCollection _children;
-
-        //TypeSafePropBagMetaData _metadata;
 
         #endregion
 
@@ -63,16 +56,13 @@ namespace DRM.PropBag.TypeDescriptors
         public PropBagTypeDescriptor(PropModel propModel, string propertyName = null)
             : base(GetPropertyName(propertyName, propModel), new Attribute[] { })
         {
-            //_propModel = propModel;
-            //_propFactory = propFactory;
-
             string propertyNameToUse = base.Name;
 
             _tdConfig = new TypeDescriptorConfig(new Attribute[] { }, typeof(object), true, propertyNameToUse, typeof(PropBag), true);
 
             _children = GetBasePropertyCollection();
 
-            PropertyDescriptor[] propDescriptors = BuildPropDescriptors(propModel/*, propFactory*/);
+            PropertyDescriptor[] propDescriptors = BuildPropDescriptors(propModel);
 
             foreach (PropertyDescriptor pDesc in propDescriptors)
             {
@@ -81,20 +71,12 @@ namespace DRM.PropBag.TypeDescriptors
         }
 
         public PropBagTypeDescriptor(IPropBag propBag, string propertyName)
-            //: base(propertyName ?? (propBag.GetMetaData()).ClassName, new Attribute[] { })
             : base(GetPropertyName(propertyName, propBag), new Attribute[] { })
         {
-            ////_propBag = propBag;
-            //ITypeSafePropBagMetaData metadata = propBag.GetMetaData();
-            //propertyName = propertyName ?? metadata.ClassName;
-
-            //string propertyNameToUse = GetPropertyName(propertyName, propBag);
-
             string propertyNameToUse = base.Name;
 
             _tdConfig = new TypeDescriptorConfig(new Attribute[] { }, typeof(object), true, propertyNameToUse, typeof(PropBag), true);
 
-            //_children = this.GetChildProperties();
             _children = GetBasePropertyCollection();
         }
 
