@@ -60,7 +60,7 @@
     <Compile Include="Delegates\ViewAndViewManagerCreatorDelegates.cs" />
     <Compile Include="Factories\AbstractPropFactory.cs" />
     <Compile Include="Factories\APFGenericMethodTemplates.cs" />
-    <Compile Include="Factories\PropFactoryFactory.cs" />
+    <Compile Include="Factories\SimplePropFactoryFactory.cs" />
     <Compile Include="Factories\SimpleTypeResolver.cs" />
     <Compile Include="Fundamentals\ActivationInfo.cs" />
     <Compile Include="Fundamentals\CollectionViewExtensions.cs" />
@@ -119,6 +119,9 @@
     <Compile Include="Props\PropTypedBase.cs" />
     <Compile Include="TypeConverters\ChangeType.cs" />
     <Compile Include="TypeConverters\ITypeDescBasedTConverterCache.cs" />
+    <None Include="Unused\HyperTypeDescriptors\ChainingPropertyDescriptor.cs" />
+    <None Include="Unused\HyperTypeDescriptors\HyperTypeDescriptionProvider.cs" />
+    <None Include="Unused\HyperTypeDescriptors\HyperTypeDescriptor.cs" />
     <Compile Include="Unused\ObsCollection.cs" />
     <Compile Include="PropFactoryInterfaces\ICreateProps_NotUsed.cs" />
     <Compile Include="PropBagInterfaces\IRegisterBindingsForwarder.cs" />
