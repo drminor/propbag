@@ -11,6 +11,10 @@ using System.Collections.ObjectModel;
 
 namespace PropBagLib.Tests.PerformanceDb
 {
+    using PropNameType = String;
+    using PropModelType = IPropModel<String>;
+    using PropModelCacheInterface = ICachePropModels<String>;
+
     public class ObservableCollTestObject
     {
         private DestinationModel5 _testMainVM { get; set; }
@@ -20,6 +24,7 @@ namespace PropBagLib.Tests.PerformanceDb
             string configPackageName,
             AutoMapperHelpers ourHelper,
             IPropFactory propFactory_V1,
+            PropModelCacheInterface propModelCache,
             IProvideAutoMappers amp,
             PropModelHelpers pmHelpers,
             int numberOfItemsToLoad
@@ -30,7 +35,7 @@ namespace PropBagLib.Tests.PerformanceDb
             Assert.That(ourHelper.StoreAccessCreator.AccessCounter == 0, "The Provider of PropStoreAccessServices did not have its Access Counter reset.");
 
             // Setup Mapping between Model1 and Person
-            PropModel propModel1 = pmHelpers.GetPropModelForModel1Dest(propFactory_V1);
+            PropModelType propModel1 = pmHelpers.GetPropModelForModel1Dest(propFactory_V1, propModelCache);
             Type typeToWrap = typeof(DestinationModel1);
 
             // Make sure we can activate (or clone as appropriate) the destination type.
@@ -44,6 +49,11 @@ namespace PropBagLib.Tests.PerformanceDb
                 DestinationModel1 testCopy = (DestinationModel1) test.Clone();
             }
 
+            DestinationModel1 test2 = new DestinationModel1(propModel1, ourHelper.StoreAccessCreator, null, ourHelper.PropFactory_V1, null);
+            
+            DestinationModel1 test2Copy = new DestinationModel1(test2);
+
+
             IPropBagMapperKey<Person, DestinationModel1> mapperRequest = amp.SubmitMapperRequest<Person, DestinationModel1>
                 (
                     propModel: propModel1,
@@ -56,7 +66,7 @@ namespace PropBagLib.Tests.PerformanceDb
             IPropBagMapper<Person, DestinationModel1> mapper = amp.GetMapper<Person, DestinationModel1>(mapperRequest);
             Assert.That(mapper, Is.Not.Null, "mapper should be non-null");
 
-            PropModel propModel5 = pmHelpers.GetPropModelForModel5Dest(propFactory_V1);
+            PropModelType propModel5 = pmHelpers.GetPropModelForModel5Dest(propFactory_V1);
 
             string fullClassName = null; // Don't override the value from the PropModel.
             // TODO: AAA

@@ -26,7 +26,7 @@ namespace PropBagLib.Tests
                 typeof(PerformanceModel),
                 propFactory_V1,
                 propFactoryType: null,
-                propModelProvider: null,
+                propModelCache: null,
                 typeSafetyMode: safetyMode,
                 deferMethodRefResolution: true,
                 requireExplicitInitialValue: true,
@@ -42,12 +42,11 @@ namespace PropBagLib.Tests
             return pm;
         }
 
-        new public IProp<T> GetTypedProp<T>(string propertyName)
+        new public IProp<T> GetTypedProp<T>(string propertyName, bool mustBeRegistered, bool neverCreate)
         {
-            IProp<T> result = base.GetTypedProp<T>(propertyName);
+            IProp<T> result = base.GetTypedProp<T>(propertyName, mustBeRegistered, neverCreate); 
             return result;
         }
-
 
         // Regular Property Definitions Used as a control
         public event PropertyChangedEventHandler PropertyChanged2;

@@ -152,7 +152,7 @@ namespace PropBagLib.Tests
             mod1.PropertyChanged += Mod1_PropertyChangedNoStore;
             mod1.PropertyChanged2 += Mod1_PropertyChanged2;
 
-            IProp<int> typedProp = mod1.GetTypedProp<int>("PropInt");
+            IProp<int> typedProp = mod1.GetTypedProp<int>("PropInt", mustBeRegistered: true, neverCreate: false);
 
             for (int cntr = 0; cntr < InterationCount - 1; cntr++)
             {

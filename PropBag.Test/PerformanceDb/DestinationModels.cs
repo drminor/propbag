@@ -7,6 +7,9 @@ using System.Collections.Generic;
 
 namespace PropBagLib.Tests.PerformanceDb
 {
+    using PropNameType = String;
+    using PropModelType = IPropModel<String>;
+    using PropModelCacheInterface = ICachePropModels<String>;
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
 
     public partial class DestinationModel1 : PropBag
@@ -22,9 +25,12 @@ namespace PropBagLib.Tests.PerformanceDb
             AddProp<Profession>("Profession", null, null, Profession.Default);
         }
 
-        public DestinationModel1(PropModel propModel, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
+        public DestinationModel1(PropModelType propModel, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
             : base(propModel, storeAccessCreator, autoMapperService, propFactory, fullClassName)
         {
+            TryOpenPropSet();
+            AddProp<int>("NewAfterFixedProp", null, null, 0);
+            TryFixPropSet();
         }
 
         public DestinationModel1(DestinationModel1 copySource)
@@ -47,7 +53,7 @@ namespace PropBagLib.Tests.PerformanceDb
             AddProp<Guid>("ProductId", null, null, Guid.NewGuid());
         }
 
-        public DestinationModel5(PropModel propModel, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
+        public DestinationModel5(PropModelType propModel, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
             : base(propModel, storeAccessCreator, autoMapperService, propFactory, fullClassName)
         {
         }
@@ -67,7 +73,7 @@ namespace PropBagLib.Tests.PerformanceDb
         //    AddProp<Guid>("ProductId", null, false, null, null, Guid.NewGuid());
         //}
 
-        public DestinationModel6(PropModel propModel, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
+        public DestinationModel6(PropModelType propModel, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
             : base(propModel, storeAccessCreator, autoMapperService, propFactory, fullClassName)
         {
         }

@@ -37,7 +37,7 @@ namespace PropBagLib.Tests
                 targetType: null,
                 propFactory: propFactory_V1,
                 propFactoryType: null,
-                propModelProvider: null,
+                propModelCache: null,
                 typeSafetyMode: PropBagTypeSafetyMode.AllPropsMustBeRegistered,
                 deferMethodRefResolution: true,
                 requireExplicitInitialValue: true);

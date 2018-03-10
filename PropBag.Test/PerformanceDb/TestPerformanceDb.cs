@@ -13,6 +13,10 @@ using System.Threading;
 
 namespace PropBagLib.Tests.PerformanceDb
 {
+    using PropNameType = String;
+    using PropModelType = IPropModel<String>;
+    using PropModelCacheInterface = ICachePropModels<String>;
+
     [TestFixture]
     public class TestPerformanceDb
     {
@@ -21,6 +25,8 @@ namespace PropBagLib.Tests.PerformanceDb
         IProvideAutoMappers _amp;
         AutoMapperHelpers _ourHelper;
         IPropFactory _propFactory_V1;
+        PropModelCacheInterface _propModelCache;
+
         PropModelHelpers _pmHelpers;
 
 
@@ -127,6 +133,8 @@ namespace PropBagLib.Tests.PerformanceDb
         {
             _ourHelper = new AutoMapperHelpers();
             _propFactory_V1 = _ourHelper.GetNewPropFactory_V1();
+            _propModelCache = _ourHelper.GetPropModelCache_V1();
+
             _amp = _ourHelper.GetAutoMapperSetup_V1();
 
             _pmHelpers = new PropModelHelpers();
@@ -134,7 +142,7 @@ namespace PropBagLib.Tests.PerformanceDb
             string configPackageName = "Extra_Members";
 
             ObservableCollTestObject oTester = new ObservableCollTestObject();
-            oTester.CanMapObservableCollection(configPackageName, _ourHelper, _propFactory_V1, _amp, _pmHelpers, NUMBER_OF_PEOPLE);
+            oTester.CanMapObservableCollection(configPackageName, _ourHelper, _propFactory_V1, _propModelCache, _amp, _pmHelpers, NUMBER_OF_PEOPLE);
             oTester.DoCleanup();
         }
 
@@ -143,7 +151,7 @@ namespace PropBagLib.Tests.PerformanceDb
         {
             string configPackageName = "Extra_Members";
             ObservableCollTestObject oTester = new ObservableCollTestObject();
-            oTester.CanMapObservableCollection(configPackageName, _ourHelper, _propFactory_V1, _amp, _pmHelpers, NUMBER_OF_PEOPLE);
+            oTester.CanMapObservableCollection(configPackageName, _ourHelper, _propFactory_V1, _propModelCache, _amp, _pmHelpers, NUMBER_OF_PEOPLE);
             oTester.DoCleanup();
         }
 
@@ -153,13 +161,14 @@ namespace PropBagLib.Tests.PerformanceDb
             _ourHelper = new AutoMapperHelpers();
             _propFactory_V1 = _ourHelper.GetNewPropFactory_V1();
             _amp = _ourHelper.GetAutoMapperSetup_V1();
+            _propModelCache = _ourHelper.GetPropModelCache_V1();
 
             _pmHelpers = new PropModelHelpers();
 
             string configPackageName = "Emit_Proxy";
 
             ObservableCollTestObject oTester = new ObservableCollTestObject();
-            oTester.CanMapObservableCollection(configPackageName, _ourHelper, _propFactory_V1, _amp, _pmHelpers, NUMBER_OF_PEOPLE);
+            oTester.CanMapObservableCollection(configPackageName, _ourHelper, _propFactory_V1, _propModelCache, _amp, _pmHelpers, NUMBER_OF_PEOPLE);
             //oTester.DoCleanup();
         }
 
@@ -168,7 +177,7 @@ namespace PropBagLib.Tests.PerformanceDb
         {
             string configPackageName = "Emit_Proxy";
             ObservableCollTestObject oTester = new ObservableCollTestObject();
-            oTester.CanMapObservableCollection(configPackageName, _ourHelper, _propFactory_V1, _amp, _pmHelpers, NUMBER_OF_PEOPLE);
+            oTester.CanMapObservableCollection(configPackageName, _ourHelper, _propFactory_V1, _propModelCache, _amp, _pmHelpers, NUMBER_OF_PEOPLE);
             oTester.DoCleanup();
         }
 
@@ -275,7 +284,7 @@ namespace PropBagLib.Tests.PerformanceDb
             PropModelHelpers pmHelpers = new PropModelHelpers();
 
             // Set up Child VM (Using Model 5)
-            PropModel propModel5 = pmHelpers.GetPropModelForModel5Dest(propFactory_V1);
+            PropModelType propModel5 = pmHelpers.GetPropModelForModel5Dest(propFactory_V1);
 
             // TODO: AAA
             DestinationModel5 testChildVM = new DestinationModel5(propModel5, ourHelper.StoreAccessCreator, _amp, propFactory_V1, null);
@@ -290,7 +299,7 @@ namespace PropBagLib.Tests.PerformanceDb
 
 
             // Set up MainVM (Using Model 6)
-            PropModel propModel6 = pmHelpers.GetPropModelForModel6Dest(propFactory_V1);
+            PropModelType propModel6 = pmHelpers.GetPropModelForModel6Dest(propFactory_V1);
             DestinationModel6 testMainVM = new DestinationModel6(propModel6, ourHelper.StoreAccessCreator, _amp, propFactory_V1, null);
 
             Business b2 = new Business();
@@ -312,6 +321,8 @@ namespace PropBagLib.Tests.PerformanceDb
 
             _ourHelper = new AutoMapperHelpers();
             _propFactory_V1 = _ourHelper.GetNewPropFactory_V1();
+            _propModelCache = _ourHelper.GetPropModelCache_V1();
+
             _amp = _ourHelper.GetAutoMapperSetup_V1();
 
             _pmHelpers = new PropModelHelpers();
@@ -319,7 +330,7 @@ namespace PropBagLib.Tests.PerformanceDb
             string configPackageName = "Extra_Members";
 
             ObservableCollTestObject oTester = new ObservableCollTestObject();
-            oTester.CanMapObservableCollection(configPackageName, _ourHelper, _propFactory_V1, _amp, _pmHelpers, NUMBER_OF_PEOPLE);
+            oTester.CanMapObservableCollection(configPackageName, _ourHelper, _propFactory_V1, _propModelCache, _amp, _pmHelpers, NUMBER_OF_PEOPLE);
 
             oTester.DoCleanup();
             oTester = null;
