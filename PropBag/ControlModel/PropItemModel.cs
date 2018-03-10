@@ -13,7 +13,7 @@ namespace DRM.PropBag
 
     using PropCreatorType = Func<String, object, bool, IPropTemplate, IProp>;
 
-    public class PropItemModel : NotifyPropertyChangedBase, IPropModelItem
+    public class PropItemModel : NotifyPropertyChangedBase, IPropItemModel
     {
         PropNameType _propertyName;
         PropKindEnum _propKind;

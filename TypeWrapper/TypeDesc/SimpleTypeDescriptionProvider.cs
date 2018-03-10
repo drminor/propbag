@@ -43,7 +43,7 @@ namespace DRM.PropBag.TypeWrapper.TypeDesc
         {
             List<PropertyDescription> result = new List<PropertyDescription>();
 
-            foreach (IPropModelItem pi in pm.GetPropItems())
+            foreach (IPropItemModel pi in pm.GetPropItems())
             {
                 result.Add(new PropertyDescription(pi.PropertyName, pi.PropertyType, canWrite: true));
             }

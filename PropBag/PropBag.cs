@@ -263,7 +263,7 @@ namespace DRM.PropBag
 
         private bool IsPropModelRaw(PropModelType propModel)
         {
-            foreach(IPropModelItem pi in propModel.GetPropItems())
+            foreach(IPropItemModel pi in propModel.GetPropItems())
             {
                 if(pi.PropTemplate != null)
                 {
@@ -358,7 +358,7 @@ namespace DRM.PropBag
         {
             CheckClassNames(pm);
 
-            foreach (IPropModelItem pi in pm.GetPropItems())
+            foreach (IPropItemModel pi in pm.GetPropItems())
             {
                 long amountUsedBeforeThisPropItem = _memConsumptionTracker.Measure($"Building Prop Item: {pi.PropertyName}");
 
@@ -417,7 +417,7 @@ namespace DRM.PropBag
             }
         }
 
-        private IPropData RegisterPropWithStore(IPropModelItem pi, IProp typedProp, out PropIdType propId)
+        private IPropData RegisterPropWithStore(IPropItemModel pi, IProp typedProp, out PropIdType propId)
         {
             object target;
             MethodInfo method;
@@ -455,7 +455,7 @@ namespace DRM.PropBag
         // TODO: The PropModel given to the PropBag is not immutable: The PropBag updates the PropModel in place as it goes from 'raw' to 'cooked'.
         // Consider providing a separate class (and associated caches) for 'cooked' PropModels.
         // In this way, we can make PropModels fetched from XAML, XML, or other sources immutable.
-        protected IProp BuildPropFromRaw(IPropModelItem pi, PropModelCacheInterface propModelProvider, PSAccessServiceCreatorInterface storeAccessCreator,
+        protected IProp BuildPropFromRaw(IPropItemModel pi, PropModelCacheInterface propModelProvider, PSAccessServiceCreatorInterface storeAccessCreator,
             IProvideAutoMappers autoMapperService, ICreateWrapperTypes wrapperTypeCreator)
         {
             IProp typedProp;
@@ -476,7 +476,7 @@ namespace DRM.PropBag
             return typedProp;
         }
 
-        private IProp BuildCollectionViewSourceProp(IPropModelItem pi)
+        private IProp BuildCollectionViewSourceProp(IPropItemModel pi)
         {
             // Get the name of the Collection-Type PropItem that provides the data for this CollectionViewSource.
             string srcPropName = pi.BinderField.Path;
@@ -496,7 +496,7 @@ namespace DRM.PropBag
             }
         }
 
-        private IProp BuildCollectionViewProp(IPropModelItem pi, PropModelCacheInterface propModelProvider, ICreateWrapperTypes wrapperTypeCreator)
+        private IProp BuildCollectionViewProp(IPropItemModel pi, PropModelCacheInterface propModelProvider, ICreateWrapperTypes wrapperTypeCreator)
         {
             IProvideAView viewProvider;
 
@@ -638,7 +638,7 @@ namespace DRM.PropBag
             }
         }
 
-        private IViewManagerProviderKey BuildTheViewManagerProviderKey(IPropModelItem pi, PropModelCacheInterface propModelProvider)
+        private IViewManagerProviderKey BuildTheViewManagerProviderKey(IPropItemModel pi, PropModelCacheInterface propModelProvider)
         {
             if (pi == null) throw new ArgumentNullException(nameof(pi));
 
@@ -723,7 +723,7 @@ namespace DRM.PropBag
             return genMapper;
         }
 
-        private IProp BuildStandardPropFromRaw(IPropModelItem pi, PropModelCacheInterface propModelProvider, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService)
+        private IProp BuildStandardPropFromRaw(IPropItemModel pi, PropModelCacheInterface propModelProvider, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService)
         {
                 _memConsumptionTracker.Measure($"Begin BuildStandardPropFromRaw: {pi.PropertyName}.");
 
@@ -795,7 +795,7 @@ namespace DRM.PropBag
             return result;
         }
 
-        protected IProp BuildPropFromCooked(IPropModelItem pi, IPropTemplate propTemplate, PropModelCacheInterface propModelProvider,
+        protected IProp BuildPropFromCooked(IPropItemModel pi, IPropTemplate propTemplate, PropModelCacheInterface propModelProvider,
             PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService, ICreateWrapperTypes wrapperTypeCreator)
         {
             IProp typedProp;
@@ -816,7 +816,7 @@ namespace DRM.PropBag
             return typedProp;
         }
 
-        private IProp BuildStandardPropFromCooked(IPropModelItem pi, IPropTemplate propTemplate, PropModelCacheInterface propModelProvider, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService)
+        private IProp BuildStandardPropFromCooked(IPropItemModel pi, IPropTemplate propTemplate, PropModelCacheInterface propModelProvider, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService)
         {
             _memConsumptionTracker.Measure($"Begin BuildStandardPropFromCooked: {pi.PropertyName}.");
 
@@ -920,7 +920,7 @@ namespace DRM.PropBag
             }
         }
 
-        private string GetValue(IPropModelItem pi)
+        private string GetValue(IPropItemModel pi)
         {
             if (pi.InitialValueField.SetToEmptyString && pi.PropertyType == typeof(Guid))
             {
@@ -933,7 +933,7 @@ namespace DRM.PropBag
             }
         }
 
-        private IPropBag GetNewViewModel(IPropModelItem pi, PropModelCacheInterface propModelProvider, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService)
+        private IPropBag GetNewViewModel(IPropItemModel pi, PropModelCacheInterface propModelProvider, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService)
         {
             PropModelType propModel = propModelProvider.GetPropModel(pi.InitialValueField.PropBagResourceKey);
             IPropBag newObject = (IPropBag)VmActivator.GetNewViewModel(pi.PropertyType, propModel, storeAccessCreator, autoMapperService, propFactory: null, fullClassName: null);
@@ -953,7 +953,7 @@ namespace DRM.PropBag
             }
         }
 
-        private void processBinderField(IPropModelItem pi, PropIdType propId, IPropData propItem)
+        private void processBinderField(IPropItemModel pi, PropIdType propId, IPropData propItem)
         {
             switch (pi.PropKind)
             {
@@ -2681,7 +2681,7 @@ namespace DRM.PropBag
 
             if (addToModel && _propModel != null)
             {
-                IPropModelItem propItem = GetPropItemRecord(propertyName, propGen);
+                IPropItemModel propItem = GetPropItemRecord(propertyName, propGen);
                 _propModel.Add(propertyName, propItem);
             }
 

@@ -98,11 +98,11 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
         {
             PropertyDescriptor[] descriptors = new PropertyDescriptor[pm.Count];
 
-            List<IPropModelItem> propItems = pm.GetPropItems().ToList();
+            List<IPropItemModel> propItems = pm.GetPropItems().ToList();
 
             for (int pdPtr = 0; pdPtr < propItems.Count; pdPtr++)
             {
-                IPropModelItem pItem = propItems[pdPtr];
+                IPropItemModel pItem = propItems[pdPtr];
 
                 PropItemTypeDescriptor<IPropBag> propItemTypeDesc =
                     new PropItemTypeDescriptor<IPropBag>(pItem.PropertyName, pItem.PropertyType, new Attribute[] { });

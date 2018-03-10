@@ -86,12 +86,12 @@ namespace DRM.PropBag
             set { this.SetCollection<ObservableCollection<string>, string>(ref _namespaces, value); }
         }
         
-        Dictionary<PropNameType, IPropModelItem> _propDictionary { get; set; }
+        Dictionary<PropNameType, IPropItemModel> _propDictionary { get; set; }
 
         [XmlElement, Browsable(false), EditorBrowsable(EditorBrowsableState.Never)]
         [XmlArray("props")]
         [XmlArrayItem("prop")]
-        public List<IPropModelItem> Props
+        public List<IPropItemModel> Props
         {
             get => GetPropItems().ToList();
             set
@@ -169,7 +169,7 @@ namespace DRM.PropBag
             }
 
             Namespaces = new ObservableCollection<string>();
-            _propDictionary = new Dictionary<PropNameType, IPropModelItem>();
+            _propDictionary = new Dictionary<PropNameType, IPropItemModel>();
             PropertyDescriptorCollection = null;
         }
 
@@ -263,12 +263,12 @@ namespace DRM.PropBag
                     result.Namespaces.Add(ns);
                 }
 
-                result._propDictionary = new Dictionary<PropNameType, IPropModelItem>();
-                foreach (IPropModelItem pi in GetPropItems())
+                result._propDictionary = new Dictionary<PropNameType, IPropItemModel>();
+                foreach (IPropItemModel pi in GetPropItems())
                 {
-                    if (pi is IPropModelItem pmi)
+                    if (pi is IPropItemModel pmi)
                     {
-                        result._propDictionary.Add(pi.PropertyName, (IPropModelItem)pi.Clone());
+                        result._propDictionary.Add(pi.PropertyName, (IPropItemModel)pi.Clone());
                     }
                 }
             }
@@ -343,7 +343,7 @@ namespace DRM.PropBag
             _isFixed = false;
         }
 
-        public void Add(string propertyName, IPropModelItem propModelItem)
+        public void Add(string propertyName, IPropItemModel propModelItem)
         {
             lock(_syncLock)
             {
@@ -362,7 +362,7 @@ namespace DRM.PropBag
             }
         }
 
-        public bool Contains(IPropModelItem propModelItem)
+        public bool Contains(IPropItemModel propModelItem)
         {
             lock (_syncLock)
             {
@@ -377,13 +377,13 @@ namespace DRM.PropBag
             return result;
         }
 
-        public IEnumerable<IPropModelItem> GetPropItems()
+        public IEnumerable<IPropItemModel> GetPropItems()
         {
-            IEnumerable<IPropModelItem> result = _propDictionary.Select(x => x.Value);
+            IEnumerable<IPropItemModel> result = _propDictionary.Select(x => x.Value);
             return result;
         }
 
-        public bool TryGetPropModelItem(string propertyName, out IPropModelItem propModelItem)
+        public bool TryGetPropModelItem(string propertyName, out IPropItemModel propModelItem)
         {
             lock(_syncLock)
             {
@@ -392,7 +392,7 @@ namespace DRM.PropBag
             }
         }
 
-        public bool TryRemove(string propertyName, out IPropModelItem propModelItem)
+        public bool TryRemove(string propertyName, out IPropItemModel propModelItem)
         {
             lock (_syncLock)
             {
@@ -413,7 +413,7 @@ namespace DRM.PropBag
         {
             OpenIfNotRegisteredWithCache();
 
-            foreach (KeyValuePair<PropNameType, IPropModelItem> kvp in _propDictionary)
+            foreach (KeyValuePair<PropNameType, IPropItemModel> kvp in _propDictionary)
             {
                 kvp.Value.Dispose();
             }

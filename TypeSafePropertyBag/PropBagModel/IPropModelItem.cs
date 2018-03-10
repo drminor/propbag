@@ -4,7 +4,7 @@ namespace DRM.TypeSafePropertyBag
 {
     using PropNameType = String;
 
-    public interface IPropModelItem : IDisposable, ICloneable
+    public interface IPropItemModel : IDisposable, ICloneable
     {
         string PropertyName { get; set; }
         Type PropertyType { get; set; }

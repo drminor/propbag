@@ -251,7 +251,7 @@ namespace DRM.PropBagWPF
         {
             foreach (KeyValuePair<string, PropModelType> kvp in _propModelCache)
             {
-                foreach (IPropModelItem pi in kvp.Value.GetPropItems())
+                foreach (IPropItemModel pi in kvp.Value.GetPropItems())
                 {
                     pi.PropTemplate = null;
                     pi.PropCreator = null;
