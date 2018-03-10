@@ -113,6 +113,7 @@ namespace DRM.PropBag
         [XmlIgnore]
         public object ExtraInfo { get { return _extraInfo; } set { SetAlways<object>(ref _extraInfo, value); } }
 
+        // TODO: If we have a new non-null value, then we can clear out the ComparerField, TypeInfoField, PropKind, etc.
         [XmlIgnore]
         public IPropTemplate PropTemplate { get; set; }
 
@@ -233,13 +234,13 @@ namespace DRM.PropBag
             }
 
             PropItemModel result = new PropItemModel(PropertyType, PropertyName, StorageStrategy, TypeIsSolid, PropKind,
-                (ITypeInfoField)PropTypeInfoField.Clone(),
-                (IPropInitialValueField)InitialValueField.Clone(),
+                (ITypeInfoField)PropTypeInfoField?.Clone(),
+                (IPropInitialValueField)InitialValueField?.Clone(),
                 extraInfo,
                 ComparerField,
                 ItemType,
-                (IPropBinderField) BinderField.Clone(),
-                (IMapperRequest) MapperRequest.Clone(),
+                (IPropBinderField) BinderField?.Clone(),
+                (IMapperRequest) MapperRequest?.Clone(),
                 propCreator: null);
                 
                 return result;
