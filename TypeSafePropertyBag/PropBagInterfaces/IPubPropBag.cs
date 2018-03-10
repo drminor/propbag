@@ -12,6 +12,10 @@ namespace DRM.TypeSafePropertyBag
     /// </summary>
     public interface IPubPropBag
     {
+        bool IsPropSetFixed { get; }
+        bool TryFixPropSet();
+        bool TryOpenPropSet();
+
         //object this[string typeName, string propertyName] { get; set; }
 
         IProp<T> AddProp<T>(string propertyName, Func<T,T,bool> comparer = null, object extraInfo = null, T initalValue = default(T));
@@ -33,8 +37,8 @@ namespace DRM.TypeSafePropertyBag
         //ICPropFB<CT, T> AddCollectionPropFB<CT, T>(string propertyName, Func<CT, CT, bool> comparer = null,
         //    object extraInfo = null, CT initialValue = default(CT)) where CT : ObservableCollection<T>;
 
-        void RemoveProp(string propertyName, Type propertyType);
-        void RemoveProp<T>(string propertyName);
+        bool TryRemoveProp(string propertyName, Type propertyType);
+        bool TryRemoveProp<T>(string propertyName);
 
         void ClearAllProps();
    }
