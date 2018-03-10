@@ -3,11 +3,11 @@ using System;
 
 namespace DRM.PropBag.TypeWrapper
 {
-    public class WrapperTypeLocalCache : ICacheWrapperTypes
+    public class SimpleEmittedTypesCache : ICacheEmittedTypes
     {
         LockingConcurrentDictionary<TypeDescription, Type> _emittedTypes;
 
-        public WrapperTypeLocalCache(IEmitWrapperType emitterEngine)
+        public SimpleEmittedTypesCache(IEmitWrapperType emitterEngine)
         {
             _emittedTypes = new LockingConcurrentDictionary<TypeDescription, Type>(emitterEngine.EmitWrapperType);
         }

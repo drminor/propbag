@@ -11,7 +11,7 @@ namespace DRM.PropBag.TypeWrapper
     {
         #region Private Members
 
-        private ICacheWrapperTypes _wrapperTypeCachingService { get; }
+        private ICacheEmittedTypes _wrapperTypeCachingService { get; }
         ICacheTypeDescriptions _typeDescCachingService { get; }
 
         #endregion
@@ -19,7 +19,7 @@ namespace DRM.PropBag.TypeWrapper
         #region Constructor 
 
         public SimpleWrapperTypeCreator(
-            ICacheWrapperTypes wrapperTypeCachingService,
+            ICacheEmittedTypes wrapperTypeCachingService,
             ICacheTypeDescriptions typeDescCachingService)
         {
             _wrapperTypeCachingService = wrapperTypeCachingService ?? throw new ArgumentNullException(nameof(wrapperTypeCachingService));

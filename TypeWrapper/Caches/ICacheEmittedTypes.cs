@@ -2,7 +2,7 @@
 
 namespace DRM.PropBag.TypeWrapper
 {
-    public interface ICacheWrapperTypes
+    public interface ICacheEmittedTypes
     {
         Type GetOrAdd(TypeDescription td);
 

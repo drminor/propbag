@@ -42,8 +42,8 @@
   <ItemGroup>
     <Compile Include="AssemblyIdIssuer.cs" />
     <Compile Include="AttributeEmitter.cs" />
-    <Compile Include="Caches\ICacheWrapperTypes.cs" />
-    <Compile Include="Caches\WrapperTypeLocalCache.cs" />
+    <Compile Include="Caches\ICacheEmittedTypes.cs" />
+    <Compile Include="Caches\SimpleEmittedTypesCache.cs" />
     <Compile Include="IEmitWrapperType.cs" />
     <Compile Include="IModuleBuilderInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
