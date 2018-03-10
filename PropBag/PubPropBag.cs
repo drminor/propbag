@@ -77,6 +77,12 @@ namespace DRM.PropBag
 
         #endregion
 
+        new public bool IsPropSetFixed => base.IsPropSetFixed;
+
+        new public bool TryFixPropSet() => base.TryFixPropSet();
+
+        new public bool TryOpenPropSet() => base.TryOpenPropSet();
+
         #region Property Management
 
         /// <summary>
@@ -126,14 +132,14 @@ namespace DRM.PropBag
             return base.AddCollectionProp<CT, T>(propertyName, comparer, extraInfo, initialValue);
         }
 
-        new public void RemoveProp(PropNameType propertyName, Type propertyType)
+        new public bool TryRemoveProp(PropNameType propertyName, Type propertyType)
         {
-            base.RemoveProp(propertyName, propertyType);
+            return base.TryRemoveProp(propertyName, propertyType);
         }
 
-        new public void RemoveProp<T>(PropNameType propertyName)
+        new public bool TryRemoveProp<T>(PropNameType propertyName)
         {
-            base.RemoveProp<T>(propertyName);
+            return base.TryRemoveProp<T>(propertyName);
         }
 
         ///// <summary>

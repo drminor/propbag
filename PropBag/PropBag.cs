@@ -217,13 +217,15 @@ namespace DRM.PropBag
             _ourStoreAccessor = storeAcessorCreator.CreatePropStoreService(this);
                 _memConsumptionTracker.MeasureAndReport("CreatePropStoreService from Scratch.", null);
 
+            bool propModelWasRaw = IsPropModelRaw(propModel);
+
             BuildPropItems(propModel, _propModelCache, storeAcessorCreator, autoMapperService, _wrapperTypeCreator);
                 _memConsumptionTracker.Report(memUsedSoFar, "---- After BuildPropItems.");
 
             // Cache or Set the PropertyDescriptors (for our ICustomTypeDescriptor implementation.)
             // If not already fixed, fix the PropModel.
 
-            if (propModel.PropertyDescriptorCollection == null)
+            if (propModelWasRaw)
             {
                 // This must be the first time this PropModel has been applied.
                 // Store the Property Descriptors into the PropModel,
@@ -234,22 +236,41 @@ namespace DRM.PropBag
                 _propModelCache?.Fix(propModel);
 
                 // Also, to improve performance, let the PropertyStore know that the set of PropItems can be fixed as well.
-                _ourStoreAccessor.FixPropItemSet();
+                // TODO: Restore this line and implement way for the store accessor to automatically open a fixed PropNodeCollection on add.
+                //_ourStoreAccessor.FixPropItemSet();
             }
             else
             {
                 // Set our PropertyDescriptors from the copy cached in the PropModel.
                 this._properties = propModel.PropertyDescriptorCollection;
 
-                if (_ourStoreAccessor.IsPropItemSetFixed)
+                if (!IsPropSetFixed)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Notice: We just created a new PropBag using an open PropNodeCollection for {_ourStoreAccessor.ToString()}.");
+                    System.Diagnostics.Debug.WriteLine($"Notice: We just created a new PropBag using a 'cooked', but open PropModel with FullClassName: {_propModel} for {_ourStoreAccessor}.");
                 }
+
+                // TODO: Put This back into place, once we implement being able to automatically (re)open a PropNodeCollection.
+                //if (!_ourStoreAccessor.IsPropItemSetFixed)
+                //{
+                //    System.Diagnostics.Debug.WriteLine($"Notice: We just created a new PropBag using an open PropNodeCollection for {_ourStoreAccessor}.");
+                //}
 
             }
 
 
             //int testc = _ourStoreAccessor.PropertyCount;
+        }
+
+        private bool IsPropModelRaw(PropModelType propModel)
+        {
+            foreach(IPropModelItem pi in propModel.GetPropItems())
+            {
+                if(pi.PropTemplate != null)
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         // TODO: This assumes that all IPropBag implementations use PropBag.
@@ -332,15 +353,10 @@ namespace DRM.PropBag
 
         #region PropModel Processing
 
-        const string UN_SET_COOKED_INIT_VAL = "XxYy001122334455";
-
         protected void BuildPropItems(PropModelType pm, PropModelCacheInterface propModelCache, PSAccessServiceCreatorInterface storeAccessCreator,
             IProvideAutoMappers autoMapperService, ICreateWrapperTypes wrapperTypeCreator)
         {
             CheckClassNames(pm);
-
-            // TODO: Fix Me.
-            bool somePropTemplatesPresent = false; // propItemSet.Count > 0;
 
             foreach (IPropModelItem pi in pm.GetPropItems())
             {
@@ -351,17 +367,9 @@ namespace DRM.PropBag
 
                 if (pi.PropTemplate != null) // propItemSetHadValues /*&& propItemSet.TryGetPropTemplate(pi.PropertyName, out propTemplate)*/)
                 {
-                    somePropTemplatesPresent = true; // This one had a propTemplate.
                     // BuildPropFromCooked
-                    try
-                    {
-                        propTemplate = pi.PropTemplate;
-                        typedProp = BuildPropFromCooked(pi, propTemplate, propModelCache, storeAccessCreator, autoMapperService, wrapperTypeCreator);
-                    }
-                    catch
-                    {
-                        throw;
-                    }
+                    propTemplate = pi.PropTemplate;
+                    typedProp = BuildPropFromCooked(pi, propTemplate, propModelCache, storeAccessCreator, autoMapperService, wrapperTypeCreator);
                 }
                 else
                 {
@@ -386,39 +394,14 @@ namespace DRM.PropBag
                     }
 
                     // Save the PropTemplate in our PropItemSet
-                    //propItemSet.Add(pi.PropertyName, propTemplate);
                     pi.PropTemplate = propTemplate;
                 }
 
-                // Make sure the propTemplate doesn't hold a referene to the class implementing the IProp interface.
+                // Make sure the propTemplate doesn't hold a reference to the class implementing the IProp interface.
                 propTemplate.PropCreator = null;
 
                 // Add the new Prop to the PropertyStore and retreive the new PropItem that is created in the process.
-                IPropData newPropItem;
-                PropIdType propId;
-
-                if (pi.DoWhenChangedField != null)
-                {
-                    object target;
-                    if (pi.DoWhenChangedField.MethodIsLocal)
-                    {
-                        target = this;
-                    }
-                    else
-                    {
-                        throw new NotSupportedException("Only local methods are supported.");
-                    }
-
-                    newPropItem = AddProp(pi.PropertyName, typedProp,
-                        target,
-                        pi.DoWhenChangedField.Method,
-                        pi.DoWhenChangedField.SubscriptionKind,
-                        pi.DoWhenChangedField.PriorityGroup, out propId);
-                }
-                else
-                {
-                    newPropItem = AddProp(pi.PropertyName, typedProp, out propId);
-                }
+                IPropData newPropItem = RegisterPropWithStore(pi, typedProp, out PropIdType propId);
 
                 _memConsumptionTracker.MeasureAndReport("Add the TypedProp to the property store", $"for {pi.PropertyName}");
 
@@ -432,6 +415,41 @@ namespace DRM.PropBag
 
                 _memConsumptionTracker.Report(amountUsedBeforeThisPropItem, $"--Completed BuildPropFromRaw for { pi.PropertyName}");
             }
+        }
+
+        private IPropData RegisterPropWithStore(IPropModelItem pi, IProp typedProp, out PropIdType propId)
+        {
+            object target;
+            MethodInfo method;
+            SubscriptionKind subscriptionKind;
+            SubscriptionPriorityGroup subscriptionPriorityGroup;
+
+            if (pi.DoWhenChangedField != null)
+            {
+                if (pi.DoWhenChangedField.MethodIsLocal)
+                {
+                    target = this;
+                }
+                else
+                {
+                    throw new NotSupportedException("Only local methods are supported.");
+                }
+
+                method = pi.DoWhenChangedField.Method;
+                subscriptionKind = pi.DoWhenChangedField.SubscriptionKind;
+                subscriptionPriorityGroup = pi.DoWhenChangedField.PriorityGroup;
+            }
+            else
+            {
+                target = null;
+                method = null;
+                subscriptionKind = SubscriptionKind.GenHandler;
+                subscriptionPriorityGroup = SubscriptionPriorityGroup.Standard;
+            }
+
+            IPropData newPropItem = AddProp_Internal(pi.PropertyName, typedProp, target, method, subscriptionKind, subscriptionPriorityGroup, addToModel: false, propId: out propId);
+
+            return newPropItem;
         }
 
         // TODO: The PropModel given to the PropBag is not immutable: The PropBag updates the PropModel in place as it goes from 'raw' to 'cooked'.
@@ -493,7 +511,7 @@ namespace DRM.PropBag
 
                 IMapperRequest mr = viewManagerProviderKey.MapperRequest;
 
-                // TODO: Make IProvideAutoMapppers return requiresWrappperTypeEmitServices (of type bool)
+                // TODO: Make IProvideAutoMapppers return 'requiresWrappperTypeEmitServices' (of type bool)
                 // when given a ConfigPackageName (of type string)
                 if (mr.ConfigPackageName.ToLower().Contains("emit"))
                 {
@@ -503,9 +521,7 @@ namespace DRM.PropBag
                     {
                         Type et = wrapperTypeCreator.GetWrapperType(propModel, propModel.TypeToCreate);
                         propModel.NewEmittedType = et;
-
-                        _memConsumptionTracker.MeasureAndReport("After GetWrapperType", $"PropBag: {_ourStoreAccessor.ToString()}: {pi.PropertyName}, Created Type: {propModel.TypeToCreate}");
-
+                            _memConsumptionTracker.MeasureAndReport("After GetWrapperType", $"PropBag: {_ourStoreAccessor.ToString()}: {pi.PropertyName}, Created Type: {propModel.TypeToCreate}");
                     }
                 }
 
@@ -892,6 +908,8 @@ namespace DRM.PropBag
 
             return result;
         }
+
+        const string UN_SET_COOKED_INIT_VAL = "&&&&_UN_SET_COOKED_INIT_VAL_&&&&";
 
         [System.Diagnostics.Conditional("DEBUG")]
         private void CheckCookedInitialValue(object val)
@@ -1330,7 +1348,7 @@ namespace DRM.PropBag
         public T GetIt<T>(string propertyName)
         {
             //OurStoreAccessor.IncAccess();
-            IProp<T> typedProp = GetTypedPropPrivate<T>(propertyName, mustBeRegistered: true, neverCreate: false);
+            IProp<T> typedProp = GetTypedProp<T>(propertyName, mustBeRegistered: true, neverCreate: false);
             if(typedProp == null)
             {
                 throw new InvalidOperationException($"Could not retrieve value for PropItem: {propertyName}.");
@@ -1338,73 +1356,6 @@ namespace DRM.PropBag
             else
             {
                 return typedProp.TypedValue;
-            }
-        }
-
-        protected IProp<T> GetTypedProp<T>(string propertyName)
-        {
-            return (IProp<T>)GetTypedPropPrivate<T>(propertyName, mustBeRegistered: true, neverCreate: false);
-        }
-
-        protected IProp<T> GetTypedPropPrivate<T>(string propertyName, bool mustBeRegistered, bool neverCreate/* = false*/)
-        {
-            IPropData PropData = GetGenPropPrivate<T>(propertyName, mustBeRegistered, neverCreate, out PropIdType notUsed);
-
-            if (!PropData.IsEmpty)
-            {
-                return (IProp<T>)PropData.TypedProp;
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-        protected IReadOnlyCProp<CT,T> GetCProp<CT, T>(string propertyName) where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged
-        {
-            return (IReadOnlyCProp<CT,T>)GetTypedCPropPrivate<CT,T>(propertyName, mustBeRegistered: true);
-        }
-
-        protected ICProp<CT,T> GetTypedCPropPrivate<CT,T>(string propertyName, bool mustBeRegistered, bool neverCreate = false) where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged
-        {
-            IPropData PropData = GetGenPropPrivate<T>(propertyName, mustBeRegistered, neverCreate, out PropIdType notUsed);
-
-            if (!PropData.IsEmpty)
-            {
-                return (ICProp<CT,T>)  PropData.TypedProp;
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-        private IPropData GetGenPropPrivate<T>(string propertyName, bool mustBeRegistered, bool neverCreate, out PropIdType propId)
-        {
-            PropStorageStrategyEnum storageStrategy = _propFactory.ProvidesStorage ? PropStorageStrategyEnum.Internal : PropStorageStrategyEnum.External;
-
-            // TODO: Make this use a different version of GetPropGen: one that takes advantage of the 
-            // compile-time type knowlege -- especially if we have to register the property in HandleMissing.
-
-            IPropData PropData = GetPropGen(propertyName, typeof(T), haveValue: false, value: null,
-                alwaysRegister: false,
-                mustBeRegistered: mustBeRegistered,
-                neverCreate: neverCreate,
-                desiredHasStoreValue: null,
-                wasRegistered: out bool wasRegistered,
-                propId: out propId);
-
-            if (wasRegistered)
-            {
-                return PropData;
-            }
-            else
-            {
-                if (!PropData.IsEmpty)
-                {
-                    CheckTypeInfo<T>(propId, propertyName, PropData);
-                }
-                return PropData;
             }
         }
 
@@ -2658,39 +2609,145 @@ namespace DRM.PropBag
 
         #region Property Management
 
+        protected IPropData AddProp<T>(string propertyName, IProp<T> genericTypedProp, EventHandler<PcTypedEventArgs<T>> doWhenChanged,
+            SubscriptionPriorityGroup priorityGroup, out PropIdType propId)
+        {
+            //if (!_ourStoreAccessor.TryAdd(this, propertyName, genericTypedProp, doWhenChanged,
+            //    priorityGroup, out IPropData propGen, out propId))
+            //{
+            //    throw new ApplicationException("Could not add the new propGen to the store.");
+            //}
+
+            //return propGen;
+
+            bool addToModel = true;
+
+            object target = doWhenChanged?.Target;
+            MethodInfo method = doWhenChanged?.Method;
+            SubscriptionKind subscriptionKind = SubscriptionKind.GenHandler;
+
+            IPropData result = AddProp_Internal(propertyName, genericTypedProp,
+                target: target, method: method, subscriptionKind: subscriptionKind, priorityGroup: priorityGroup,
+                addToModel: addToModel, propId: out propId);
+
+            return result;
+        }
+
         protected IPropData AddProp(string propertyName, IProp genericTypedProp, out PropIdType propId)
         {
-            if (!_ourStoreAccessor.TryAdd(this, propertyName, genericTypedProp, out IPropData propGen, out propId))
-            {
-                throw new ApplicationException("Could not add the new propGen to the store.");
-            }
-            return propGen;
+            //if (!_ourStoreAccessor.TryAdd(this, propertyName, genericTypedProp, out IPropData propGen, out propId))
+            //{
+            //    throw new ApplicationException("Could not add the new propGen to the store.");
+            //}
+            //return propGen;
+
+            bool addToModel = true;
+
+            IPropData result = AddProp_Internal(propertyName, genericTypedProp, 
+                target: null, method: null, subscriptionKind: SubscriptionKind.GenHandler, priorityGroup: SubscriptionPriorityGroup.Standard,
+                addToModel: addToModel, propId: out propId);
+
+            return result;
         }
 
         protected IPropData AddProp(string propertyName, IProp genericTypedProp, object target, MethodInfo method, 
             SubscriptionKind subscriptionKind, SubscriptionPriorityGroup priorityGroup, out PropIdType propId)
         {
-            if (!_ourStoreAccessor.TryAdd(this, propertyName, genericTypedProp, target, method,
-                subscriptionKind, priorityGroup, out IPropData propGen, out propId))
-            {
-                throw new ApplicationException("Could not add the new propGen to the store.");
-            }
-            return propGen;
+            //if (!_ourStoreAccessor.TryAdd(this, propertyName, genericTypedProp, target, method,
+            //    subscriptionKind, priorityGroup, out IPropData propGen, out propId))
+            //{
+            //    throw new ApplicationException("Could not add the new propGen to the store.");
+            //}
+
+            //return propGen;
+
+            bool addToModel = true;
+
+            IPropData result = AddProp_Internal(propertyName, genericTypedProp,
+                target, method, subscriptionKind, priorityGroup,
+                addToModel, out propId);
+
+            return result;
         }
 
-        protected IPropData AddProp<T>(string propertyName, IProp<T> genericTypedProp, EventHandler<PcTypedEventArgs<T>> doWhenChanged,
-            SubscriptionPriorityGroup priorityGroup, out PropIdType propId)
+        private IPropData AddProp_Internal(string propertyName, IProp genericTypedProp, object target, MethodInfo method,
+            SubscriptionKind subscriptionKind, SubscriptionPriorityGroup priorityGroup, bool addToModel, out PropIdType propId)
         {
-            if (!_ourStoreAccessor.TryAdd(this, propertyName, genericTypedProp, doWhenChanged,
-                priorityGroup, out IPropData propGen, out propId))
+            if (!_ourStoreAccessor.TryAdd(this, propertyName, genericTypedProp, target, method, subscriptionKind, priorityGroup,
+                out IPropData propGen, out propId))
             {
                 throw new ApplicationException("Could not add the new propGen to the store.");
+            }
+
+            if (addToModel && _propModel != null)
+            {
+                IPropModelItem propItem = GetPropItemRecord(propertyName, propGen);
+                _propModel.Add(propertyName, propItem);
             }
 
             return propGen;
         }
 
-        protected void RemoveProp(string propertyName, Type propertyType)
+        protected bool IsPropSetFixed => _propModel?.IsFixed ?? false;
+
+        protected bool TryFixPropSet()
+        {
+            if (_propModel == null) return true;
+
+            if (_propModelCache == null)
+            {
+                _propModel.Fix();
+                return true;
+            }
+            else
+            {
+                _propModelCache.Fix(_propModel);
+                return true;
+            }
+        }
+
+        protected bool TryOpenPropSet()
+        {
+            if (_propModel == null) return true;
+
+            if(_propModelCache == null)
+            {
+                _propModel.Open();
+                return true;
+            }
+            else
+            {
+                _propModel = _propModelCache.Open(_propModel, out long generationId);
+                return true;
+            }
+        }
+
+        private PropItemModel GetPropItemRecord(PropNameType propertyName, IPropData propGen)
+        {
+            IPropTemplate propTemplate = propGen.TypedProp.PropTemplate;
+
+            PropItemModel propItem = new PropItemModel
+                (
+                type: propTemplate.Type,
+                name: propertyName,
+                storageStrategy: propTemplate.StorageStrategy,
+                typeIsSolid: propGen.TypedProp.TypeIsSolid,
+                propKind: propTemplate.PropKind,
+                propTypeInfoField: null,
+                initialValueField: null,
+                extraInfo: null,
+                comparer: null, //new PropComparerField(propTemplate.ComparerProxy, false),
+                itemType: null,
+                binderField: null,
+                mapperRequest: null,
+                propCreator: propTemplate.PropCreator
+                );
+
+            return propItem;
+        }
+
+        // TODO: Also remove the Prop from the PropModel.
+        protected bool TryRemoveProp(string propertyName, Type propertyType)
         {
             if (propertyType == null && OurMetaData.OnlyTypedAccess)
             {
@@ -2709,37 +2766,45 @@ namespace DRM.PropBag
 
             if (!propData.IsEmpty)
             {
-                //PropData.CleanUp(doTypedCleanup: true);
-
-                if (!_ourStoreAccessor.TryRemove(this, propId, out IPropData foundValue))
+                if (_ourStoreAccessor.TryRemove(this, propId, out IPropData foundValue))
+                {
+                    return true;
+                }
+                else
                 {
                     System.Diagnostics.Debug.WriteLine($"The prop was found, but could not be removed. Property: {propertyName}.");
+                    return false;
                 }
             }
             else
             {
                 System.Diagnostics.Debug.WriteLine($"Could not remove property: {propertyName}.");
+                return false;
             }
         }
         
-        protected void RemoveProp<T>(string propertyName)
+        protected bool TryRemoveProp<T>(string propertyName)
         {
             bool mustBeRegistered = _ourMetaData.TypeSafetyMode == PropBagTypeSafetyMode.Locked;
 
-            IPropData propData = GetGenPropPrivate<T>(propertyName, mustBeRegistered: mustBeRegistered, neverCreate: true, propId: out PropIdType propId);
+            IPropData propData = GetPropGenPrivate<T>(propertyName, mustBeRegistered: mustBeRegistered, neverCreate: true, propId: out PropIdType propId);
 
-            if(!propData.IsEmpty)
+            if (!propData.IsEmpty)
             {
-                //PropData.CleanUp(doTypedCleanup: true);
-
-                if (!_ourStoreAccessor.TryRemove(this, propId, out IPropData foundValue))
+                if (_ourStoreAccessor.TryRemove(this, propId, out IPropData foundValue))
+                {
+                    return true;
+                }
+                else
                 {
                     System.Diagnostics.Debug.WriteLine($"The prop was found, but could not be removed. Property: {propertyName}.");
+                    return false;
                 }
             }
             else
             {
                 System.Diagnostics.Debug.WriteLine($"Could not remove property: {propertyName}.");
+                return false;
             }
         }
 
@@ -3111,6 +3176,106 @@ namespace DRM.PropBag
             return sc;
         }
 
+        //protected IProp<T> GetTypedProp<T>(string propertyName)
+        //{
+        //    return (IProp<T>)GetTypedPropPrivate<T>(propertyName, mustBeRegistered: true, neverCreate: false);
+        //}
+
+        protected IProp<T> GetTypedProp<T>(string propertyName, bool mustBeRegistered, bool neverCreate)
+        {
+            IPropData PropData = GetPropGenPrivate<T>(propertyName, mustBeRegistered, neverCreate, out PropIdType notUsed);
+
+            if (!PropData.IsEmpty)
+            {
+                return (IProp<T>)PropData.TypedProp;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        //protected IReadOnlyCProp<CT, T> GetCProp<CT, T>(string propertyName) where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged
+        //{
+        //    return (IReadOnlyCProp<CT, T>)GetTypedCPropPrivate<CT, T>(propertyName, mustBeRegistered: true);
+        //}
+
+        protected ICProp<CT, T> GetTypedProp<CT, T>(string propertyName, bool mustBeRegistered, bool neverCreate = false) where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>, IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged
+        {
+            IPropData PropData = GetPropGenPrivate<T>(propertyName, mustBeRegistered, neverCreate, out PropIdType notUsed);
+
+            if (!PropData.IsEmpty)
+            {
+                return (ICProp<CT, T>)PropData.TypedProp;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        // Used when the value (for type checking) is not available.
+        private IPropData GetPropGenPrivate<T>(string propertyName,
+            bool mustBeRegistered, bool neverCreate, out PropIdType propId)
+        {
+            PropStorageStrategyEnum storageStrategy = _propFactory.ProvidesStorage ? PropStorageStrategyEnum.Internal : PropStorageStrategyEnum.External;
+
+            // TODO: Make this use a different version of GetPropGen: one that takes advantage of the 
+            // compile-time type knowlege -- especially if we have to register the property in HandleMissing.
+
+            IPropData PropData = GetPropGen(propertyName, typeof(T), haveValue: false, value: null,
+                alwaysRegister: false,
+                mustBeRegistered: mustBeRegistered,
+                neverCreate: neverCreate,
+                desiredHasStoreValue: null,
+                wasRegistered: out bool wasRegistered,
+                propId: out propId);
+
+            if (wasRegistered)
+            {
+                return PropData;
+            }
+            else
+            {
+                if (!PropData.IsEmpty)
+                {
+                    CheckTypeInfo<T>(propId, propertyName, PropData);
+                }
+                return PropData;
+            }
+        }
+
+        protected IPropData GetPropGen<T>(PropNameType propertyName,
+            bool haveValue, object value, bool alwaysRegister,
+            bool mustBeRegistered, bool neverCreate, bool? desiredHasStoreValue, out bool wasRegistered, out PropIdType propId)
+        {
+            // Commented this out, in favor of calling the non-generic GetPropGen
+            // because this does not check the type of the registered property to see if matches typeof(T).
+            //if (TryGetPropId(propertyName, out propId))
+            //{
+            //    if (!_ourStoreAccessor.TryGetValue(this, propId, out IPropData propData))
+            //    {
+            //        throw new KeyNotFoundException($"The property named: {propertyName} could not be fetched from the property store.");
+            //    }
+
+            //    CheckStorageStrategy(propertyName, propData, desiredHasStoreValue);
+
+            //    wasRegistered = false;
+            //    return (IPropData)propData;
+            //}
+            //else
+            //{
+            //    throw new KeyNotFoundException($"The property named: {propertyName} could not be found in the PropCollection for this PropBag.");
+            //}
+
+            IPropData result = GetPropGen(propertyName, typeof(T), haveValue, value, alwaysRegister, mustBeRegistered,
+                neverCreate, desiredHasStoreValue, out wasRegistered, out propId);
+
+            return result;
+        }
+
+
+
         /// <summary>
         /// 
         /// </summary>
@@ -3162,35 +3327,6 @@ namespace DRM.PropBag
             CheckStorageStrategy(propertyName, PropData, desiredHasStoreValue);
 
             return (IPropData) PropData;
-        }
-
-        protected IPropData GetPropGen<T>(PropNameType propertyName,
-            bool haveValue, object value,
-            bool alwaysRegister, bool mustBeRegistered, bool neverCreate, bool? desiredHasStoreValue, out bool wasRegistered, out PropIdType propId)
-        {
-            // Commented this out, in favor of calling the non-generic GetPropGen
-            // because this does not check the type of the registered property to see if matches typeof(T).
-            //if (TryGetPropId(propertyName, out propId))
-            //{
-            //    if (!_ourStoreAccessor.TryGetValue(this, propId, out IPropData propData))
-            //    {
-            //        throw new KeyNotFoundException($"The property named: {propertyName} could not be fetched from the property store.");
-            //    }
-
-            //    CheckStorageStrategy(propertyName, propData, desiredHasStoreValue);
-
-            //    wasRegistered = false;
-            //    return (IPropData)propData;
-            //}
-            //else
-            //{
-            //    throw new KeyNotFoundException($"The property named: {propertyName} could not be found in the PropCollection for this PropBag.");
-            //}
-
-            IPropData result = GetPropGen(propertyName, typeof(T), haveValue, value, alwaysRegister, mustBeRegistered,
-                neverCreate, desiredHasStoreValue, out wasRegistered, out propId);
-
-            return result;
         }
 
         private void CheckStorageStrategy(PropNameType propertyName, IPropData propData, bool? desiredHasStoreValue)
