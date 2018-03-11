@@ -281,12 +281,12 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
                         if (NotifyReceiverWithStartingValue(sourcePropNode))
                         {
                             System.Diagnostics.Debug.WriteLine($"The receiver has been notified during refresh. " +
-                                $"Source: {((IPropBag)propBag).GetClassName()}, {pathComp}");
+                                $"Source: {((IPropBag)propBag).FullClassName}, {pathComp}");
                         }
                         else
                         {
                             System.Diagnostics.Debug.WriteLine("The binding source has been reached, but the receiver was not notified during refresh. " +
-                                $"Source: {((IPropBag)propBag).GetClassName()}, {pathComp}");
+                                $"Source: {((IPropBag)propBag).FullClassName}, {pathComp}");
                         }
                     }
                     else
@@ -323,13 +323,13 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
                     if (NotifyReceiverWithStartingValue(child))
                     {
                         System.Diagnostics.Debug.WriteLine($"The receiver has been notified during refresh. " +
-                            $"Source: {((IPropBag)propBag).GetClassName()}, {pathComp}");
+                            $"Source: {((IPropBag)propBag).FullClassName}, {pathComp}");
                         return true;
                     }
                     else
                     {
                         System.Diagnostics.Debug.WriteLine("The binding source has been reached, but the receiver was not notified during refresh. " +
-                            $"Source: {((IPropBag)propBag).GetClassName()}, {pathComp}");
+                            $"Source: {((IPropBag)propBag).FullClassName}, {pathComp}");
                         return false;
                     }
                 }
