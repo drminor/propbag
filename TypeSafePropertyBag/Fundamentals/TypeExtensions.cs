@@ -144,6 +144,23 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
             }
         }
 
+        static public string GetNamespace(string fullClassName, out string className)
+        {
+            int pos = fullClassName.LastIndexOf('.');
+
+            if(pos < 0)
+            {
+                className = fullClassName;
+                return null;
+            }
+            else
+            {
+                className = fullClassName.Substring(pos + 1);
+                string ns = fullClassName.Substring(0, pos - 1);
+                return ns;
+            }
+        }
+
 
     }
 
