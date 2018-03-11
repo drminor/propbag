@@ -54,7 +54,7 @@ namespace DRM.PropBag.Caches
             //long curBytes = startBytes;
 
 
-            #region Method on PropBag (DoSetDelegate, CVPropFromDsDelegate, and CViewManagerFromDsDelegate
+            #region Method on PropBag (DoSetDelegate, CVPropFromDsDelegate, and CViewManagerFromDsDelegate)
 
             // Changed to use Static Method. (DRM 2/6/2018)
             // DoSet (i.e., update) a PropItem's value. 
