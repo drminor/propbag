@@ -12,6 +12,13 @@ namespace DRM.PropBag.XMLModel
     [XmlRoot("model")]
     public class XMLPropModel
     {
+        DeriveFromClassModeEnum _deriveFromClassMode;
+        [XmlAttribute(AttributeName = "derive-from-class-mode")]
+        public DeriveFromClassModeEnum DeriveFromClassMode { get; set; }
+
+        [XmlAttribute(AttributeName = "name-of-class-to-wrap")]
+        public string NameOfClassToWrap { get; set; }
+
         [XmlAttribute(AttributeName = "derive-from-pub-prop-bag")]
         public bool DeriveFromPubPropBag { get; set; }
 
@@ -36,25 +43,29 @@ namespace DRM.PropBag.XMLModel
 
         [XmlArray("props")]
         [XmlArrayItem("prop")]
-        public List<PropItem> Props { get; set; }
+        public List<XMLPropItemModel> Props { get; set; }
 
         public XMLPropModel() : this("UndefinedClassName", "UndefinedNameSpace") { }
 
 
-        public XMLPropModel(string className, string namespaceName,
-            bool deriveFromPubPropBag = false,
+        public XMLPropModel
+            (
+            string className,
+            string namespaceName,
+            DeriveFromClassModeEnum deriveFromClassMode = DeriveFromClassModeEnum.Custom,
             PropBagTypeSafetyMode typeSafetyMode = PropBagTypeSafetyMode.AllPropsMustBeRegistered,
             bool deferMethodRefResolution = true,
-            bool requireExplicitInitialValue = true)
+            bool requireExplicitInitialValue = true
+            )
         {
-            DeriveFromPubPropBag = deriveFromPubPropBag;
+            DeriveFromClassMode = deriveFromClassMode;
             ClassName = className;
             Namespace = namespaceName;
             TypeSafetyMode = typeSafetyMode;
             DeferMethodRefResolution = deferMethodRefResolution;
             RequireExplicitInitialValue = requireExplicitInitialValue;
             Namespaces = new List<string>();
-            Props = new List<PropItem>();
+            Props = new List<XMLPropItemModel>();
         }
     }
 

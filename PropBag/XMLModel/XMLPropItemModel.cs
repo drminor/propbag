@@ -10,15 +10,7 @@ using System.Xml.Serialization;
 
 namespace DRM.PropBag.XMLModel
 {
-
-    //public enum PropStorageType
-    //{
-    //    @internal,
-    //    external,
-    //    none
-    //}
-
-    public class PropItem
+    public class XMLPropItemModel
     {
         [XmlElement("name")]
         public string Name { get; set; }
@@ -44,9 +36,9 @@ namespace DRM.PropBag.XMLModel
         [XmlIgnore]
         public string ExtraInfo { get; set; }
 
-        public PropItem() : this(null, null) { }
+        public XMLPropItemModel() : this(null, null) { }
 
-        public PropItem(string type, string name,
+        public XMLPropItemModel(string type, string name,
             string extraInfo = null, PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal,
             bool typeIsSolid = true,
             PropDoWhenChanged doWhenChanged = null, PropComparerField comparer = null)
