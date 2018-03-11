@@ -48,7 +48,7 @@ namespace DRM.TypeSafePropertyBag
 
         Attribute[] Attributes { get; }
 
-        object ComparerProxy { get; }
+        Delegate ComparerProxy { get; }
         object GetDefaultValFuncProxy { get; }
         DoSetDelegate DoSetDelegate { get; set; }
 

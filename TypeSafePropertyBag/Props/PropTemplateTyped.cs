@@ -25,7 +25,7 @@ namespace DRM.TypeSafePropertyBag
         public Func<T, T, bool> Comparer { get; }
         public Func<string, T> GetDefaultVal { get; }
 
-        public object ComparerProxy => Comparer;
+        public Delegate ComparerProxy => Comparer;
         public object GetDefaultValFuncProxy => GetDefaultVal;
 
         public DoSetDelegate DoSetDelegate { get; set; }
