@@ -14,19 +14,31 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
     //    public delegate bool ShouldSerializeValueDelegate(object component);
 
 
-    public struct PropertyDescriptorValues
+    public struct PropertyDescriptorValues<T> where T : IPropBag
     {
         # region Constructor
 
-        public PropertyDescriptorValues(Attribute[] attributes, /*string category, */Type componentType, 
-            //TypeConverter converter, string description, bool designTimeOnly, string displayName, 
-           /* bool isBrowsable, bool isLocalizable,*/ bool isReadOnly, string name, 
-            Type propertyType, bool supportsChangeEvents) 
+        public PropertyDescriptorValues
+            (
+            Attribute[] attributes,
+            //string category,
+            //Type componentType, 
+            //TypeConverter converter,
+            //string description,
+            //bool designTimeOnly,
+            //string displayName, 
+            //bool isBrowsable,
+            //bool isLocalizable,
+            bool isReadOnly,
+            string name, 
+            Type propertyType,
+            bool supportsChangeEvents
+            ) 
             
         {
             Attributes = attributes;
             //Category = category;
-            ComponentType = componentType;
+            ComponentType = typeof(T); // componentType;
             //Converter = converter;
             //Description = description;
             //DesignTimeOnly = designTimeOnly;

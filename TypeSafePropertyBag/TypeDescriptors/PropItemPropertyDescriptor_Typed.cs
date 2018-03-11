@@ -9,7 +9,7 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
         #region Private Members
 
         PT _propItem;
-        PropertyDescriptorValues _tdConfig;
+        PropertyDescriptorValues<BagT> _tdConfig;
 
         PropertyDescriptorCollection _children;
 
@@ -43,7 +43,14 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
         {
             _propItem = propItem;
 
-            _tdConfig = new PropertyDescriptorValues(_propItem.TypedPropTemplate.Attributes, typeof(BagT), false, propertyName, _propItem.TypedPropTemplate.Type, true);
+            _tdConfig = new PropertyDescriptorValues<BagT>
+                (
+                attributes: _propItem.TypedPropTemplate.Attributes,
+                isReadOnly: false,
+                name: propertyName,
+                propertyType: _propItem.TypedPropTemplate.Type,
+                supportsChangeEvents: true
+                );
 
             _children = this.GetChildProperties();
         }

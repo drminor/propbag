@@ -8,7 +8,7 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
     {
         #region Private Members
 
-        PropertyDescriptorValues _tdConfig;
+        PropertyDescriptorValues<T> _tdConfig;
 
         //PropertyDescriptorCollection _children;
 
@@ -29,7 +29,15 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
         public PropItemPropertyDescriptor(string propertyName, Type propertyType, Attribute[] attributes)
             : base(propertyName, attributes)
         {
-            _tdConfig = new PropertyDescriptorValues(attributes, typeof(IPropBag), false, propertyName, propertyType, true);
+            _tdConfig = new PropertyDescriptorValues<T>
+                (
+                attributes: attributes,
+                isReadOnly: false,
+                name: propertyName,
+                propertyType: propertyType,
+                supportsChangeEvents: true
+                );
+
             //_children = this.GetChildProperties();
         }
 
