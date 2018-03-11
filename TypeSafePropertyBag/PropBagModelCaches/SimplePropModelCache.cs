@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DRM.TypeSafePropertyBag.Fundamentals;
+using System;
 using System.Collections.Generic;
 
 namespace DRM.TypeSafePropertyBag
@@ -6,13 +7,13 @@ namespace DRM.TypeSafePropertyBag
     using PropNameType = String;
     using PropModelType = IPropModel<String>;
     using PropModelCacheInterface = ICachePropModels<String>;
-    using PropBagModelCachesCollInterface = IPropModelFamilyCollection<String>;
+    using PropBagModelFamilyCollInterface = IPropModelFamilyCollection<String>;
 
     public class SimplePropModelCache : PropModelCacheInterface
     {
         public const long GEN_ZERO = 0;
 
-        private readonly Dictionary<string, PropBagModelCachesCollInterface> _cache;
+        private readonly Dictionary<string, PropBagModelFamilyCollInterface> _cache;
         private readonly List<IProvidePropModels> _propModelProviders;
 
         private object _syncLock = new object();
@@ -21,7 +22,7 @@ namespace DRM.TypeSafePropertyBag
         {
             _propModelProviders = new List<IProvidePropModels>(propModelProviders);
 
-            _cache = new Dictionary<PropNameType, PropBagModelCachesCollInterface>();
+            _cache = new Dictionary<PropNameType, PropBagModelFamilyCollInterface>();
         }
 
         public void Fix(PropModelType propModel)
@@ -33,27 +34,54 @@ namespace DRM.TypeSafePropertyBag
             }
             else
             {
-                //long generationId = Add(propModel);
-                //propModel.GenerationId = generationId;
                 propModel.Fix();
             }
         }
 
+        // Make a copy within the same family, the copy is given the next available generationId.
         public PropModelType Open(PropModelType propModel, out long generationId)
         {
-            if(!propModel.IsFixed)
+            PropModelType result = Open(propModel, null, out generationId);
+            return result;
+        }
+
+        // Make a copy and if a new class name is given, start a new family of Type definitions.
+        public PropModelType Open(PropModelType propModel, string fullClassName, out long generationId)
+        {
+            if (!propModel.IsFixed)
             {
-                System.Diagnostics.Debug.WriteLine("Already Open.");
-                generationId = propModel.GenerationId;
-                return propModel;
+                if(fullClassName == null)
+                {
+                    System.Diagnostics.Debug.WriteLine("Already Open.");
+                    generationId = propModel.GenerationId;
+                    return propModel;
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Cannot open the PropModel with FullClassName: {this} it is already open.");
+                }
             }
             else
             {
                 PropModelType result = (PropModelType)propModel.Clone();
+
+                if(fullClassName != null)
+                {
+                    string ns = TypeExtensions.GetNamespace(fullClassName, out string className);
+
+                    if (ns != null)
+                    {
+                        result.NamespaceName = ns;
+                    }
+
+                    result.ClassName = className;
+                }
+
                 generationId = Add(result);
                 return result;
             }
         }
+
 
         public long Add(PropModelType propModel)
         {
@@ -62,7 +90,7 @@ namespace DRM.TypeSafePropertyBag
             long generationId;
             lock(_syncLock)
             {
-                if (_cache.TryGetValue(fullClassName, out PropBagModelCachesCollInterface familyCollection))
+                if (_cache.TryGetValue(fullClassName, out PropBagModelFamilyCollInterface familyCollection))
                 {
                     generationId = familyCollection.Add(propModel);
                 }
@@ -79,7 +107,7 @@ namespace DRM.TypeSafePropertyBag
 
         public bool TryGetAllGenerations(string fullClassName, out IReadOnlyDictionary<long, PropModelType> familyCollection)
         {
-            if(_cache.TryGetValue(fullClassName, out PropBagModelCachesCollInterface list))
+            if(_cache.TryGetValue(fullClassName, out PropBagModelFamilyCollInterface list))
             {
                 familyCollection = list.GetAll();
                 return true;
@@ -101,7 +129,7 @@ namespace DRM.TypeSafePropertyBag
         {
             lock(_syncLock)
             {
-                if (_cache.TryGetValue(fullClassName, out PropBagModelCachesCollInterface familyCollection))
+                if (_cache.TryGetValue(fullClassName, out PropBagModelFamilyCollInterface familyCollection))
                 {
                     if (familyCollection.TryGetPropModel(generationId, out propModel))
                     {
@@ -133,7 +161,7 @@ namespace DRM.TypeSafePropertyBag
         {
             string fullClassName = propModel.FullClassName ?? throw new ArgumentException("propModel.FullClassName cannot be null.");
 
-            if (_cache.TryGetValue(propModel.FullClassName, out PropBagModelCachesCollInterface list))
+            if (_cache.TryGetValue(propModel.FullClassName, out PropBagModelFamilyCollInterface list))
             {
                 generationId = list.Find(propModel);
                 return true;
@@ -178,7 +206,7 @@ namespace DRM.TypeSafePropertyBag
                 }
                 catch
                 {
-                    // ignore the exception.
+                    // Ignore the exception.
                 }
 
             }
