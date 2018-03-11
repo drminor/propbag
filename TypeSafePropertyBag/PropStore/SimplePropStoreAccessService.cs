@@ -470,7 +470,9 @@ namespace DRM.TypeSafePropertyBag
         public IEnumerator<KeyValuePair<PropNameType, IPropData>> GetEnumerator(IPropBag propBag)
         {
             CheckObjectRef(propBag);
+
             IEnumerator<KeyValuePair<PropNameType, IPropData>> result = GetCollection(propBag).GetEnumerator();
+
             return result;
         }
 
@@ -487,6 +489,14 @@ namespace DRM.TypeSafePropertyBag
             IEnumerable<IPropData> result = _ourNode.GetPropDataItems(); // .Children.Select(x => x.PropData_Internal);
             return result;
         }
+
+        public IEnumerable<KeyValuePair<PropNameType, IPropData>> GetPropDataItemsWithNames(IPropBag propBag)
+        {
+            CheckObjectRef(propBag);
+            IEnumerable<KeyValuePair<PropNameType, IPropData>> result = _ourNode.GetPropDataItemsWithNames();
+            return result;
+        }
+
 
         // TODO: transfer subscriptions and bindings, if any, to the new PropItem.
         public bool SetTypedProp(IPropBag propBag, PropIdType propId, PropNameType propertyName, IProp genericTypedProp)

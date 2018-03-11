@@ -278,6 +278,12 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
+        public IEnumerable<KeyValuePair<PropNameType, IPropData>> GetPropDataItemsWithNames()
+        {
+            IEnumerable<KeyValuePair<PropNameType, IPropData>> result = PropItemsByName.Select(kvp => new KeyValuePair<PropNameType, IPropData>(kvp.Key, kvp.Value.PropData_Internal));
+            return result;
+        }
+
         public IReadOnlyDictionary<PropNameType, IPropData> GetPropDataItemsDict()
         {
             ReadOnlyDictionary<PropNameType, IPropData> result = 

@@ -35,6 +35,7 @@ namespace DRM.TypeSafePropertyBag
         IEnumerable<L2T> GetPropIds();
 
         IReadOnlyDictionary<L2TRaw, IPropData> GetPropDataItemsDict();
+        IEnumerable<KeyValuePair<L2TRaw, IPropData>> GetPropDataItemsWithNames();
 
         bool TryGetPropertyName(L2T propId, out L2TRaw propertyName);
         bool TryGetPropId(L2TRaw propertyName, out L2T propId);

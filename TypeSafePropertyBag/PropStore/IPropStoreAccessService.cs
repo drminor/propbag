@@ -28,6 +28,7 @@ namespace DRM.TypeSafePropertyBag
 
         IEnumerable<L2TRaw> GetKeys(IPropBag propBag);
         IEnumerable<IPropData> GetValues(IPropBag propBag);
+        IEnumerable<KeyValuePair<L2TRaw, IPropData>> GetPropDataItemsWithNames(IPropBag propBag);
 
         bool TryAdd(IPropBag propBag, L2TRaw propertyName, IProp genericTypedProp, out IPropData propData, out L2T propId);
 
