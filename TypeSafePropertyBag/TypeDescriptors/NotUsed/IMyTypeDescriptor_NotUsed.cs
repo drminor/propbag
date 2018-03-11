@@ -3,7 +3,7 @@ using System.ComponentModel;
 
 namespace DRM.TypeSafePropertyBag.TypeDescriptors
 {
-    public interface IMyTypeDescriptor
+    public interface IMyTypeDescriptor_NotUsed
     {
         AttributeCollection Attributes { get; }
         string Category { get; }

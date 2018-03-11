@@ -3,10 +3,13 @@ using System.ComponentModel;
 
 namespace DRM.TypeSafePropertyBag.TypeDescriptors
 {
-    public class PropItemTypeDescriptor<BagT> : PropertyDescriptor, IPropItemTypeDescriptor where BagT : class, IPropBag
+    // ToDo: This is not used.
+    public class PropItemPropertyDescriptor_Typed<T, PT, BagT> : PropertyDescriptor/*, IPropItemTypeDescriptor*/ where PT : class, IProp<T> where BagT : class, IPropBag
     {
         #region Private Members
 
+        BagT _propBag;
+        PT _propItem;
         TypeDescriptorConfig _tdConfig;
 
         PropertyDescriptorCollection _children;
@@ -25,10 +28,25 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
 
         #region Constructors
 
-        public PropItemTypeDescriptor(string propertyName, Type propertyType, Attribute[] attributes)
-            : base(propertyName, attributes)
+        //public PropItemTypeDescriptor_Typed(string propertyName, Type propertyType, Attribute[] attributes)
+        //    : base(propertyName, attributes)
+        //{
+        //    _propBag = null;
+        //    _propItem = null;
+
+        //    _tdConfig = new TypeDescriptorConfig(attributes, typeof(IPropBag), false, propertyName, propertyType, true);
+
+        //    _children = this.GetChildProperties();
+        //}
+
+        public PropItemPropertyDescriptor_Typed(string propertyName, BagT propBag, PT propItem)
+            : base(propertyName, propItem.TypedPropTemplate.Attributes)
         {
-            _tdConfig = new TypeDescriptorConfig(attributes, typeof(IPropBag), false, propertyName, propertyType, true);
+            _propBag = propBag;
+            _propItem = propItem;
+
+            _tdConfig = new TypeDescriptorConfig(_propItem.TypedPropTemplate.Attributes, typeof(BagT), false, propertyName, _propItem.TypedPropTemplate.Type, true);
+
             _children = this.GetChildProperties();
         }
 
@@ -48,7 +66,12 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
 
         public override object GetValue(object component)
         {
-            return ((BagT)component)[_tdConfig.PropertyType, Name];
+            return _propItem.TypedValue;
+
+            //if (_propItem != null)
+            //    return _propItem.TypedValue;
+            //else
+            //    return ((BagT)component)[_tdConfig.PropertyType, Name];
         }
 
         public override void ResetValue(object component)
@@ -58,7 +81,12 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
 
         public override void SetValue(object component, object value)
         {
-            ((BagT)component)[_tdConfig.PropertyType, Name] = value;
+            _propItem.TypedValue = (T)value;
+
+            //if (_propItem != null)
+            //    _propItem.TypedValue = (T)value;
+            //else
+            //    ((BagT)component)[_tdConfig.PropertyType, Name] = (T)value;
         }
 
         public override bool ShouldSerializeValue(object component)

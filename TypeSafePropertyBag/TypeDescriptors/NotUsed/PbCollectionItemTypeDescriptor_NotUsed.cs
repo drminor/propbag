@@ -3,7 +3,7 @@ using System.ComponentModel;
 
 namespace DRM.TypeSafePropertyBag.TypeDescriptors
 {
-    public class PbCollectionItemTypeDescriptor : PropertyDescriptor, IPbCollectionTypeDescriptor
+    public class PbCollectionItemTypeDescriptor_NotUsed : PropertyDescriptor, IPbCollectionTypeDescriptor
     {
         #region PropertyDescriptor Property Overrides
         Type _componentType;
@@ -18,19 +18,19 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
         #endregion
 
         #region Constructors
-        protected PbCollectionItemTypeDescriptor(MemberDescriptor descr) : base(descr)
+        protected PbCollectionItemTypeDescriptor_NotUsed(MemberDescriptor descr) : base(descr)
         {
         }
 
-        protected PbCollectionItemTypeDescriptor(string name, Attribute[] attrs) : base(name, attrs)
+        protected PbCollectionItemTypeDescriptor_NotUsed(string name, Attribute[] attrs) : base(name, attrs)
         {
         }
 
-        protected PbCollectionItemTypeDescriptor(MemberDescriptor descr, Attribute[] attrs) : base(descr, attrs)
+        protected PbCollectionItemTypeDescriptor_NotUsed(MemberDescriptor descr, Attribute[] attrs) : base(descr, attrs)
         {
         }
 
-        protected PbCollectionItemTypeDescriptor(string name) : base(name, new Attribute[] { })
+        protected PbCollectionItemTypeDescriptor_NotUsed(string name) : base(name, new Attribute[] { })
         {
         }
 

@@ -10,32 +10,49 @@ using System.Diagnostics;
  * 20 Apr 2007  Marc Gravell    Renamed
  */
 
-namespace Hyper.ComponentModel {
-    sealed class HyperTypeDescriptor : CustomTypeDescriptor {
+namespace Hyper.ComponentModel
+{
+    sealed class HyperTypeDescriptor : CustomTypeDescriptor
+    {
         private readonly PropertyDescriptorCollection propertyCollections;
+
         static readonly Dictionary<PropertyInfo, PropertyDescriptor> properties = new Dictionary<PropertyInfo, PropertyDescriptor>();
+
         internal HyperTypeDescriptor(ICustomTypeDescriptor parent)
-            : base(parent) {
+            : base(parent)
+        {
             propertyCollections = WrapProperties(parent.GetProperties());
         }
-        public sealed override PropertyDescriptorCollection GetProperties(Attribute[] attributes) {
+
+        public sealed override PropertyDescriptorCollection GetProperties(Attribute[] attributes)
+        {
             return propertyCollections;
         }
-        public sealed override PropertyDescriptorCollection GetProperties() {
+
+        public sealed override PropertyDescriptorCollection GetProperties()
+        {
             return propertyCollections;
         }
-        private static PropertyDescriptorCollection WrapProperties(PropertyDescriptorCollection oldProps) {
+
+        private static PropertyDescriptorCollection WrapProperties(PropertyDescriptorCollection oldProps)
+        {
             PropertyDescriptor[] newProps = new PropertyDescriptor[oldProps.Count];
             int index = 0;
             bool changed = false;
+
             // HACK: how to identify reflection, given that the class is internal...
             Type wrapMe = Assembly.GetAssembly(typeof(PropertyDescriptor)).GetType("System.ComponentModel.ReflectPropertyDescriptor");
-            foreach (PropertyDescriptor oldProp in oldProps) {
+
+            foreach (PropertyDescriptor oldProp in oldProps)
+            {
                 PropertyDescriptor pd = oldProp;
+
                 // if it looks like reflection, try to create a bespoke descriptor
-                if (ReferenceEquals(wrapMe, pd.GetType()) && TryCreatePropertyDescriptor(ref pd)) {
+                if (ReferenceEquals(wrapMe, pd.GetType()) && TryCreatePropertyDescriptor(ref pd))
+                {
                     changed = true;
                 }
+
                 newProps[index++] = pd;
             }
 
@@ -43,22 +60,28 @@ namespace Hyper.ComponentModel {
         }
 
         static readonly ModuleBuilder moduleBuilder;
+
         static int counter;
-        static HyperTypeDescriptor() {
+
+        static HyperTypeDescriptor()
+        {
             AssemblyName an = new AssemblyName("Hyper.ComponentModel.dynamic");
             AssemblyBuilder ab = AppDomain.CurrentDomain.DefineDynamicAssembly(an, AssemblyBuilderAccess.Run);
             moduleBuilder = ab.DefineDynamicModule("Hyper.ComponentModel.dynamic.dll");
-
         }
 
-        private static bool TryCreatePropertyDescriptor(ref PropertyDescriptor descriptor) {
-            try {
+        private static bool TryCreatePropertyDescriptor(ref PropertyDescriptor descriptor)
+        {
+            try
+            {
                 PropertyInfo property = descriptor.ComponentType.GetProperty(descriptor.Name);
                 if (property == null) return false;
 
-                lock (properties) {
+                lock (properties)
+                {
                     PropertyDescriptor foundBuiltAlready;
-                    if (properties.TryGetValue(property, out foundBuiltAlready)) {
+                    if (properties.TryGetValue(property, out foundBuiltAlready))
+                    {
                         descriptor = foundBuiltAlready;
                         return true;
                     }
@@ -76,34 +99,44 @@ namespace Hyper.ComponentModel {
 
                     MethodBuilder mb;
                     MethodInfo baseMethod;
-                    if (property.CanRead) {
+
+                    if (property.CanRead)
+                    {
                         // obtain the implementation that we want to override
                         baseMethod = typeof(ChainingPropertyDescriptor).GetMethod("GetValue");
+
                         // create a new method that accepts an object and returns an object (as per the base)
                         mb = tb.DefineMethod(baseMethod.Name,
                             MethodAttributes.HideBySig | MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.Final,
                             baseMethod.CallingConvention, baseMethod.ReturnType, new Type[] { typeof(object) });
+
                         // start writing IL into the method
                         il = mb.GetILGenerator();
-                        if (property.DeclaringType.IsValueType) {
+                        if (property.DeclaringType.IsValueType)
+                        {
                             // upbox the object argument into our known (instance) struct type
                             LocalBuilder lb = il.DeclareLocal(property.DeclaringType);
                             il.Emit(OpCodes.Ldarg_1);
                             il.Emit(OpCodes.Unbox_Any, property.DeclaringType);
                             il.Emit(OpCodes.Stloc_0);
                             il.Emit(OpCodes.Ldloca_S, lb);
-                        } else {
+                        }
+                        else
+                        {
                             // cast the object argument into our known class type
                             il.Emit(OpCodes.Ldarg_1);
                             il.Emit(OpCodes.Castclass, property.DeclaringType);
                         }
+
                         // call the "get" method
                         il.Emit(OpCodes.Callvirt, property.GetGetMethod());
 
-                        if (property.PropertyType.IsValueType) {
+                        if (property.PropertyType.IsValueType)
+                        {
                             // box it from the known (value) struct type
                             il.Emit(OpCodes.Box, property.PropertyType);
                         }
+
                         // return the value
                         il.Emit(OpCodes.Ret);
                         // signal that this method should override the base
@@ -116,11 +149,16 @@ namespace Hyper.ComponentModel {
                     baseMethod = typeof(ChainingPropertyDescriptor).GetProperty("SupportsChangeEvents").GetGetMethod();
                     mb = tb.DefineMethod(baseMethod.Name, MethodAttributes.HideBySig | MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.Final | MethodAttributes.SpecialName, baseMethod.CallingConvention, baseMethod.ReturnType, Type.EmptyTypes);
                     il = mb.GetILGenerator();
-                    if (supportsChangeEvents) {
+
+                    if (supportsChangeEvents)
+                    {
                         il.Emit(OpCodes.Ldc_I4_1);
-                    } else {
+                    }
+                    else
+                    {
                         il.Emit(OpCodes.Ldc_I4_0);
                     }
+
                     il.Emit(OpCodes.Ret);
                     tb.DefineMethodOverride(mb, baseMethod);
 
@@ -128,11 +166,16 @@ namespace Hyper.ComponentModel {
                     baseMethod = typeof(ChainingPropertyDescriptor).GetProperty("IsReadOnly").GetGetMethod();
                     mb = tb.DefineMethod(baseMethod.Name, MethodAttributes.HideBySig | MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.Final | MethodAttributes.SpecialName, baseMethod.CallingConvention, baseMethod.ReturnType, Type.EmptyTypes);
                     il = mb.GetILGenerator();
-                    if (isReadOnly) {
+
+                    if (isReadOnly)
+                    {
                         il.Emit(OpCodes.Ldc_I4_1);
-                    } else {
+                    }
+                    else
+                    {
                         il.Emit(OpCodes.Ldc_I4_0);
                     }
+
                     il.Emit(OpCodes.Ret);
                     tb.DefineMethodOverride(mb, baseMethod);
 
@@ -157,8 +200,10 @@ namespace Hyper.ComponentModel {
                     */
 
                     // for classes, implement write (would be lost in unbox for structs)
-                    if (!property.DeclaringType.IsValueType) {
-                        if (!isReadOnly && property.CanWrite) {
+                    if (!property.DeclaringType.IsValueType)
+                    {
+                        if (!isReadOnly && property.CanWrite)
+                        {
                             // override set method
                             baseMethod = typeof(ChainingPropertyDescriptor).GetMethod("SetValue");
                             mb = tb.DefineMethod(baseMethod.Name, MethodAttributes.HideBySig | MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.Final, baseMethod.CallingConvention, baseMethod.ReturnType, new Type[] { typeof(object), typeof(object) });
@@ -166,19 +211,26 @@ namespace Hyper.ComponentModel {
                             il.Emit(OpCodes.Ldarg_1);
                             il.Emit(OpCodes.Castclass, property.DeclaringType);
                             il.Emit(OpCodes.Ldarg_2);
-                            if (property.PropertyType.IsValueType) {
+
+                            if (property.PropertyType.IsValueType)
+                            {
                                 il.Emit(OpCodes.Unbox_Any, property.PropertyType);
-                            } else {
+                            }
+                            else
+                            {
                                 il.Emit(OpCodes.Castclass, property.PropertyType);
                             }
+
                             il.Emit(OpCodes.Callvirt, property.GetSetMethod());
                             il.Emit(OpCodes.Ret);
                             tb.DefineMethodOverride(mb, baseMethod);
                         }
 
-                        if (supportsChangeEvents) {
+                        if (supportsChangeEvents)
+                        {
                             EventInfo ei = property.DeclaringType.GetEvent(property.Name + "Changed");
-                            if (ei != null) {
+                            if (ei != null)
+                            {
                                 baseMethod = typeof(ChainingPropertyDescriptor).GetMethod("AddValueChanged");
                                 mb = tb.DefineMethod(baseMethod.Name, MethodAttributes.HideBySig | MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.Final | MethodAttributes.SpecialName, baseMethod.CallingConvention, baseMethod.ReturnType, new Type[] { typeof(object), typeof(EventHandler) });
                                 il = mb.GetILGenerator();
@@ -202,17 +254,25 @@ namespace Hyper.ComponentModel {
                         }
 
                     }
-                    PropertyDescriptor newDesc = tb.CreateType().GetConstructor(new Type[] { typeof(PropertyDescriptor) }).Invoke(new object[] { descriptor }) as PropertyDescriptor;
+
+                    PropertyDescriptor newDesc = tb.CreateType().GetConstructor(new Type[] { typeof(PropertyDescriptor) })
+                        .Invoke(new object[] { descriptor }) as PropertyDescriptor;
+
                     if (newDesc == null) {
                         return false;
                     }
+
                     descriptor = newDesc;
                     properties.Add(property, descriptor);
+
                     return true;
                 }
-            } catch {
+            }
+            catch
+            {
                 return false;
             }
+
         }
     }
 }

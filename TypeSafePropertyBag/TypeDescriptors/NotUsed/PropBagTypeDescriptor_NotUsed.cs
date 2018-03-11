@@ -9,7 +9,6 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
 
     public class PropBagTypeDescriptor<BagT> : PropertyDescriptor, IPropBagTypeDescriptor where BagT : IPropBag
     {
-
         #region Static Members
 
         static PropertyDescriptorCollection _basePropertyDescriptors;
@@ -104,8 +103,8 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
             {
                 IPropItemModel pItem = propItems[pdPtr];
 
-                PropItemTypeDescriptor<IPropBag> propItemTypeDesc =
-                    new PropItemTypeDescriptor<IPropBag>(pItem.PropertyName, pItem.PropertyType, new Attribute[] { });
+                PropItemPropertyDescriptor<IPropBag> propItemTypeDesc =
+                    new PropItemPropertyDescriptor<IPropBag>(pItem.PropertyName, pItem.PropertyType, new Attribute[] { });
 
                 descriptors[pdPtr] = propItemTypeDesc;
             }
@@ -115,7 +114,7 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
 
         public PropertyDescriptor[] BuildPropDescriptors(IPropBag propBag)
         {
-            List<KeyValuePair<string, ValPlusType>> propDefs = propBag.GetAllPropNamesAndTypes().ToList();
+            List<KeyValuePair<string, ValPlusType>> propDefs = propBag.GetAllPropNamesValuesAndTypes().ToList();
 
             PropertyDescriptor[] descriptors = new PropertyDescriptor[propDefs.Count + _basePropertyDescriptors.Count];
 
@@ -129,8 +128,8 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
             {
                 KeyValuePair<string, ValPlusType> kvp = propDefs[pdPtr];
 
-                PropItemTypeDescriptor<IPropBag> propItemTypeDesc = 
-                    new PropItemTypeDescriptor<IPropBag>(kvp.Key, kvp.Value.Type, new Attribute[] { });
+                PropItemPropertyDescriptor<IPropBag> propItemTypeDesc = 
+                    new PropItemPropertyDescriptor<IPropBag>(kvp.Key, kvp.Value.Type, new Attribute[] { });
 
                 descriptors[mainPdPtr++] = propItemTypeDesc;
             }
