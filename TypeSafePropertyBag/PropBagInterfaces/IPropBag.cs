@@ -24,7 +24,7 @@ namespace DRM.TypeSafePropertyBag
     /// </summary>
     public interface IPropBag 
         : ITypeSafePropBag,
-        ICustomTypeDescriptor,
+        //ICustomTypeDescriptor,
         INotifyPropertyChanged,
         INotifyPropertyChanging,
         INotifyPCGen,
@@ -90,7 +90,10 @@ namespace DRM.TypeSafePropertyBag
         IList<PropNameType> GetAllPropertyNames();
         IReadOnlyDictionary<PropNameType, IPropData> GetAllPropertyValues();
 
-        IReadOnlyDictionary<PropNameType, ValPlusType> GetAllPropNamesAndTypes();
+        IEnumerable<KeyValuePair<PropNameType, ValPlusType>> GetAllPropNamesValuesAndTypes();
+
+        bool HasPropModel { get; }
+        IEnumerable<IPropItemModel> GetPropItemModels();
 
         void RaiseStandardPropertyChanged(PropNameType propertyName);
 
