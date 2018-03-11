@@ -14,11 +14,11 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
     //    public delegate bool ShouldSerializeValueDelegate(object component);
 
 
-    public struct TypeDescriptorConfig
+    public struct PropertyDescriptorValues
     {
         # region Constructor
 
-        public TypeDescriptorConfig(Attribute[] attributes, /*string category, */Type componentType, 
+        public PropertyDescriptorValues(Attribute[] attributes, /*string category, */Type componentType, 
             //TypeConverter converter, string description, bool designTimeOnly, string displayName, 
            /* bool isBrowsable, bool isLocalizable,*/ bool isReadOnly, string name, 
             Type propertyType, bool supportsChangeEvents) 
