@@ -14,7 +14,7 @@ namespace MVVMApplication.Infra
             _dataGetter = new Lazy<object>
             (
                 () => PropStoreServicesForThisApp.ViewModelHelper.GetNewViewModel(ResourceKey),
-                LazyThreadSafetyMode.PublicationOnly
+                    LazyThreadSafetyMode.PublicationOnly
             );
         }
 
