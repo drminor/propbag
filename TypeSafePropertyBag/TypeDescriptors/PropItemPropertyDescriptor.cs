@@ -1,15 +1,16 @@
 ﻿using System;
+using System.Collections;
 using System.ComponentModel;
 
 namespace DRM.TypeSafePropertyBag.TypeDescriptors
 {
-    public class PropItemPropertyDescriptor<T> : PropertyDescriptor/*, IPropItemTypeDescriptor*/ where T : /*class,*/ IPropBag
+    public class PropItemPropertyDescriptor<T> : PropertyDescriptor where T : IPropBag
     {
         #region Private Members
 
-        TypeDescriptorConfig _tdConfig;
+        PropertyDescriptorValues _tdConfig;
 
-        PropertyDescriptorCollection _children;
+        //PropertyDescriptorCollection _children;
 
         #endregion
 
@@ -28,16 +29,16 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
         public PropItemPropertyDescriptor(string propertyName, Type propertyType, Attribute[] attributes)
             : base(propertyName, attributes)
         {
-            _tdConfig = new TypeDescriptorConfig(attributes, typeof(IPropBag), false, propertyName, propertyType, true);
-            _children = this.GetChildProperties();
+            _tdConfig = new PropertyDescriptorValues(attributes, typeof(IPropBag), false, propertyName, propertyType, true);
+            //_children = this.GetChildProperties();
         }
 
         #endregion
 
-        public void Add(PropertyDescriptor pd)
-        {
-            _children.Add(pd);
-        }
+        //public void Add(PropertyDescriptor pd)
+        //{
+        //    _children.Add(pd);
+        //}
 
         #region PropertyDescriptor Method Overrides
 
@@ -48,7 +49,7 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
 
         public override object GetValue(object component)
         {
-            return ((T)component)[_tdConfig.PropertyType, Name];
+            return ((T)component)[PropertyType, Name];
         }
 
         public override void ResetValue(object component)
@@ -58,7 +59,7 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
 
         public override void SetValue(object component, object value)
         {
-            ((T)component)[_tdConfig.PropertyType, Name] = value;
+            ((T)component)[PropertyType, Name] = value;
         }
 
         public override bool ShouldSerializeValue(object component)
@@ -85,7 +86,7 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
         // Returns:
         //     A System.ComponentModel.PropertyDescriptorCollection with the properties that
         //     match the specified attributes for the specified component.
-        new public virtual PropertyDescriptorCollection GetChildProperties(object instance, Attribute[] filter)
+        public override PropertyDescriptorCollection GetChildProperties(object instance, Attribute[] filter)
         {
             return base.GetChildProperties(instance, filter);
         }
@@ -101,9 +102,10 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
         //
         // Returns:
         //     An instance of the requested editor type, or null if an editor cannot be found.
-        new public virtual object GetEditor(Type editorBaseType)
+        public override object GetEditor(Type editorBaseType)
         {
-            throw new NotImplementedException();
+            object x = base.GetEditor(editorBaseType);
+            return x;
         }
 
         //
@@ -116,9 +118,19 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
         //
         //   e:
         //     An System.EventArgs that contains the event data.
-        new protected virtual void OnValueChanged(object component, EventArgs e)
+        protected override void OnValueChanged(object component, EventArgs e)
         {
             base.OnValueChanged(component, e);
+        }
+
+        protected override void FillAttributes(IList attributeList)
+        {
+            base.FillAttributes(attributeList);
+
+            foreach(Attribute a in _tdConfig.Attributes)
+            {
+                attributeList.Add(a);
+            }
         }
 
         #endregion

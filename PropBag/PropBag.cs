@@ -5,6 +5,7 @@ using DRM.PropBag.ViewModelTools;
 using DRM.TypeSafePropertyBag;
 using DRM.TypeSafePropertyBag.DataAccessSupport;
 using DRM.TypeSafePropertyBag.Fundamentals;
+using DRM.TypeSafePropertyBag.TypeDescriptors;
 using ObjectSizeDiagnostics;
 using System;
 using System.Collections;
@@ -230,7 +231,7 @@ namespace DRM.PropBag
                 // This must be the first time this PropModel has been applied.
                 // Store the Property Descriptors into the PropModel,
 
-                propModel.PropertyDescriptorCollection = this.GetProperties();
+                //propModel.PropertyDescriptorCollection = this.GetProperties();
 
                 // If we were given a PropModelCache, let the cache know that we are finished addding PropItems.
                 _propModelCache?.Fix(propModel);
@@ -242,23 +243,35 @@ namespace DRM.PropBag
             else
             {
                 // Set our PropertyDescriptors from the copy cached in the PropModel.
-                this._properties = propModel.PropertyDescriptorCollection;
+                //this._properties = propModel.PropertyDescriptorCollection;
 
-                if (!IsPropSetFixed)
-                {
-                    System.Diagnostics.Debug.WriteLine($"Notice: We just created a new PropBag using a 'cooked', but open PropModel with FullClassName: {_propModel} for {_ourStoreAccessor}.");
-                }
+                CheckForOpenPropSet();
 
                 // TODO: Put This back into place, once we implement being able to automatically (re)open a PropNodeCollection.
-                //if (!_ourStoreAccessor.IsPropItemSetFixed)
-                //{
-                //    System.Diagnostics.Debug.WriteLine($"Notice: We just created a new PropBag using an open PropNodeCollection for {_ourStoreAccessor}.");
-                //}
-
+                CheckForOpenPropNodeCollection();
             }
 
+            RegisterTypeDescriptorProvider(propModel);
 
             //int testc = _ourStoreAccessor.PropertyCount;
+        }
+
+        [System.Diagnostics.Conditional("DEBUG")]
+        private void CheckForOpenPropSet()
+        {
+            if (!IsPropSetFixed)
+            {
+                System.Diagnostics.Debug.WriteLine($"Notice: We just created a new PropBag using a 'cooked', but open PropModel with FullClassName: {_propModel} for {_ourStoreAccessor}.");
+            }
+        }
+
+        [System.Diagnostics.Conditional("DEBUG")]
+        private void CheckForOpenPropNodeCollection()
+        {
+            if (!_ourStoreAccessor.IsPropItemSetFixed)
+            {
+                System.Diagnostics.Debug.WriteLine($"Notice: We just created a new PropBag using an open PropNodeCollection for {_ourStoreAccessor}.");
+            }
         }
 
         private bool IsPropModelRaw(PropModelType propModel)
@@ -273,6 +286,38 @@ namespace DRM.PropBag
             return true;
         }
 
+        protected void RegisterTypeDescriptorProvider(PropModelType propModel)
+        {
+            PropBagTypeDescriptionProvider<PropBag> typeDescriptionProvider;
+
+            // Note: PropModels, once fixed, will not be changed in any way that affects the set of PropertyDescriptors
+            // appropriate for all IPropBag instances created using that PropModel.
+
+            if (propModel != null && propModel.IsFixed)
+            {
+                // Check to see if our PropModel already has a TypeDescriptionProvider of the correct type assigned to it.
+                if (propModel.TypeDescriptionProvider is PropBagTypeDescriptionProvider<PropBag> pbTypeDescriptionProvider)
+                {
+                    // Use the one assigned to our PropModel 
+                    typeDescriptionProvider = pbTypeDescriptionProvider;
+                }
+                else
+                {
+                    // Create a brand new TypeDescriptionProvider
+                    typeDescriptionProvider = new PropBagTypeDescriptionProvider<PropBag>();
+                    // And assign it to our PropModel.
+                    propModel.TypeDescriptionProvider = typeDescriptionProvider;
+                }
+            }
+            else
+            {
+                // Build a brand new TypeDescriptionProvider just for this instance.
+                typeDescriptionProvider = new PropBagTypeDescriptionProvider<PropBag>();
+            }
+
+            TypeDescriptor.AddProvider(typeDescriptionProvider, this);
+        }
+
         // TODO: This assumes that all IPropBag implementations use PropBag.
         public PropBag(IPropBag copySource)
         {
@@ -285,6 +330,8 @@ namespace DRM.PropBag
 
             PSAccessServiceInterface storeAccessor = ((PropBag)copySource)._ourStoreAccessor;
             _ourStoreAccessor = CloneProps(copySource, storeAccessor);
+
+            RegisterTypeDescriptorProvider(propModel);
         }
 
         protected PropBag(PropBagTypeSafetyMode typeSafetyMode, PSAccessServiceCreatorInterface storeAcessorCreator,
@@ -353,6 +400,10 @@ namespace DRM.PropBag
 
         #region PropModel Processing
 
+        // TODO: The PropModel given to the PropBag is not immutable: The PropBag updates the PropModel in place as it goes from 'raw' to 'cooked'.
+        // Consider providing a separate class (and associated caches) for 'cooked' PropModels.
+        // In this way, we can make PropModels fetched from XAML, XML, or other sources immutable.
+
         protected void BuildPropItems(PropModelType pm, PropModelCacheInterface propModelCache, PSAccessServiceCreatorInterface storeAccessCreator,
             IProvideAutoMappers autoMapperService, ICreateWrapperTypes wrapperTypeCreator)
         {
@@ -362,22 +413,47 @@ namespace DRM.PropBag
             {
                 long amountUsedBeforeThisPropItem = _memConsumptionTracker.Measure($"Building Prop Item: {pi.PropertyName}");
 
-                IProp typedProp;
-                IPropTemplate propTemplate;
+                //IProp typedProp;
+                //IPropTemplate propTemplate;
 
-                if (pi.PropTemplate != null) // propItemSetHadValues /*&& propItemSet.TryGetPropTemplate(pi.PropertyName, out propTemplate)*/)
-                {
-                    // BuildPropFromCooked
-                    propTemplate = pi.PropTemplate;
-                    typedProp = BuildPropFromCooked(pi, propTemplate, propModelCache, storeAccessCreator, autoMapperService, wrapperTypeCreator);
-                }
-                else
-                {
-                    // BuildPropFromRaw
-                    typedProp = BuildPropFromRaw(pi, pm.PropModelCache, storeAccessCreator, autoMapperService, wrapperTypeCreator);
+                //if (pi.PropTemplate != null) // propItemSetHadValues /*&& propItemSet.TryGetPropTemplate(pi.PropertyName, out propTemplate)*/)
+                //{
+                //    // BuildPropFromCooked
+                //    propTemplate = pi.PropTemplate;
+                //    typedProp = BuildProp(pi, propModelCache, storeAccessCreator, autoMapperService, wrapperTypeCreator);
+                //}
+                //else
+                //{
+                //    // BuildPropFromRaw
+                //    typedProp = BuildPropFromRaw(pi, pm.PropModelCache, storeAccessCreator, autoMapperService, wrapperTypeCreator);
 
-                    // Get a reference to the PropTemplate assigned to this Prop.
-                    propTemplate = typedProp.PropTemplate;
+                //    // Get a reference to the PropTemplate assigned to this Prop.
+                //    propTemplate = typedProp.PropTemplate;
+
+                //    // Remove the PropCreator function from the PropTemplate and store it in the PropModel
+                //    // A single PropTemplate may serve many PropItems and this value will be overwritten if left in the PropTemplate.
+                //    pi.PropCreator = propTemplate.PropCreator;
+
+                //    // Save the initial value of the Prop into the PropItemModel.
+                //    if (!propTemplate.IsPropBag && !pi.InitialValueField.CreateNew && typedProp.ValueIsDefined)
+                //    {
+                //        pi.InitialValueCooked = typedProp.TypedValueAsObject;
+                //    }
+                //    else
+                //    {
+                //        pi.InitialValueCooked = UN_SET_COOKED_INIT_VAL;
+                //    }
+
+                //    // Save the PropTemplate in our PropItemSet
+                //    pi.PropTemplate = propTemplate;
+                //}
+
+                bool weHadAPropTemplate = pi.PropTemplate != null;
+                IProp typedProp = BuildProp(pi, propModelCache, storeAccessCreator, autoMapperService, wrapperTypeCreator);
+
+                if(!weHadAPropTemplate)
+                {
+                    IPropTemplate propTemplate = typedProp.PropTemplate;
 
                     // Remove the PropCreator function from the PropTemplate and store it in the PropModel
                     // A single PropTemplate may serve many PropItems and this value will be overwritten if left in the PropTemplate.
@@ -392,13 +468,13 @@ namespace DRM.PropBag
                     {
                         pi.InitialValueCooked = UN_SET_COOKED_INIT_VAL;
                     }
-
-                    // Save the PropTemplate in our PropItemSet
-                    pi.PropTemplate = propTemplate;
                 }
 
                 // Make sure the propTemplate doesn't hold a reference to the class implementing the IProp interface.
-                propTemplate.PropCreator = null;
+                if (pi.PropTemplate?.PropCreator != null)
+                {
+                    pi.PropTemplate.PropCreator = null;
+                }
 
                 // Add the new Prop to the PropertyStore and retreive the new PropItem that is created in the process.
                 IPropData newPropItem = RegisterPropWithStore(pi, typedProp, out PropIdType propId);
@@ -417,46 +493,8 @@ namespace DRM.PropBag
             }
         }
 
-        private IPropData RegisterPropWithStore(IPropItemModel pi, IProp typedProp, out PropIdType propId)
-        {
-            object target;
-            MethodInfo method;
-            SubscriptionKind subscriptionKind;
-            SubscriptionPriorityGroup subscriptionPriorityGroup;
-
-            if (pi.DoWhenChangedField != null)
-            {
-                if (pi.DoWhenChangedField.MethodIsLocal)
-                {
-                    target = this;
-                }
-                else
-                {
-                    throw new NotSupportedException("Only local methods are supported.");
-                }
-
-                method = pi.DoWhenChangedField.Method;
-                subscriptionKind = pi.DoWhenChangedField.SubscriptionKind;
-                subscriptionPriorityGroup = pi.DoWhenChangedField.PriorityGroup;
-            }
-            else
-            {
-                target = null;
-                method = null;
-                subscriptionKind = SubscriptionKind.GenHandler;
-                subscriptionPriorityGroup = SubscriptionPriorityGroup.Standard;
-            }
-
-            IPropData newPropItem = AddProp_Internal(pi.PropertyName, typedProp, target, method, subscriptionKind, subscriptionPriorityGroup, addToModel: false, propId: out propId);
-
-            return newPropItem;
-        }
-
-        // TODO: The PropModel given to the PropBag is not immutable: The PropBag updates the PropModel in place as it goes from 'raw' to 'cooked'.
-        // Consider providing a separate class (and associated caches) for 'cooked' PropModels.
-        // In this way, we can make PropModels fetched from XAML, XML, or other sources immutable.
-        protected IProp BuildPropFromRaw(IPropItemModel pi, PropModelCacheInterface propModelProvider, PSAccessServiceCreatorInterface storeAccessCreator,
-            IProvideAutoMappers autoMapperService, ICreateWrapperTypes wrapperTypeCreator)
+        protected IProp BuildProp(IPropItemModel pi, PropModelCacheInterface propModelCache,
+            PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService, ICreateWrapperTypes wrapperTypeCreator)
         {
             IProp typedProp;
 
@@ -466,11 +504,11 @@ namespace DRM.PropBag
             }
             else if (pi.PropKind == PropKindEnum.CollectionView)
             {
-                typedProp = BuildCollectionViewProp(pi, propModelProvider, wrapperTypeCreator);
+                typedProp = BuildCollectionViewProp(pi, propModelCache, wrapperTypeCreator);
             }
             else
             {
-                typedProp = BuildStandardPropFromRaw(pi, propModelProvider, storeAccessCreator, autoMapperService);
+                typedProp = BuildStandardProp(pi, propModelCache, storeAccessCreator, autoMapperService);
             }
 
             return typedProp;
@@ -521,14 +559,14 @@ namespace DRM.PropBag
                     {
                         Type et = wrapperTypeCreator.GetWrapperType(propModel, propModel.TypeToCreate);
                         propModel.NewEmittedType = et;
-                            _memConsumptionTracker.MeasureAndReport("After GetWrapperType", $"PropBag: {_ourStoreAccessor.ToString()}: {pi.PropertyName}, Created Type: {propModel.TypeToCreate}");
+                        _memConsumptionTracker.MeasureAndReport("After GetWrapperType", $"PropBag: {_ourStoreAccessor.ToString()}: {pi.PropertyName}, Created Type: {propModel.TypeToCreate}");
                     }
                 }
 
-                Type destinationType = mr.PropModel.NewEmittedType ?? pi.PropertyType;
+                Type destinationType = mr.PropModel.NewEmittedType ?? pi.ItemType;
 
                 IProvideACViewManager cViewManagerProvider = GetOrAddCViewManagerProviderGen(destinationType, viewManagerProviderKey);
-                    _memConsumptionTracker.MeasureAndReport("After GetOrAddCViewManagerProviderGen", $"PropBag: {_ourStoreAccessor.ToString()}: {pi.PropertyName}");
+                _memConsumptionTracker.MeasureAndReport("After GetOrAddCViewManagerProviderGen", $"PropBag: {_ourStoreAccessor.ToString()}: {pi.PropertyName}");
 
                 if (_foreignViewManagers == null)
                 {
@@ -555,7 +593,7 @@ namespace DRM.PropBag
                 if (cViewManager != null)
                 {
                     viewProvider = cViewManager.GetDefaultViewProvider();
-                        _memConsumptionTracker.MeasureAndReport("GetDefaultViewProvider", $"PropBag: {_ourStoreAccessor.ToString()}: {pi.PropertyName}");
+                    _memConsumptionTracker.MeasureAndReport("GetDefaultViewProvider", $"PropBag: {_ourStoreAccessor.ToString()}: {pi.PropertyName}");
                 }
                 else
                 {
@@ -569,15 +607,14 @@ namespace DRM.PropBag
 
             // Use our PropFactory to create a CollectionView PropItem using the ViewProvider.
             IProp typedProp = _propFactory.CreateCVProp(pi.PropertyName, viewProvider, pi.PropTemplate);
-                _memConsumptionTracker.MeasureAndReport("CreateCVProp", $"PropBag: {_ourStoreAccessor.ToString()} : {pi.PropertyName}");
+            _memConsumptionTracker.MeasureAndReport("CreateCVProp", $"PropBag: {_ourStoreAccessor.ToString()} : {pi.PropertyName}");
 
             return typedProp;
-
         }
 
         private void CViewManagerProvider_ViewManagerChanged(object sender, EventArgs e)
         {
-            if(sender is IProvideACViewManager cViewManagerProvider)
+            if (sender is IProvideACViewManager cViewManagerProvider)
             {
                 // Get the Id for this ViewManager Provider
                 IViewManagerProviderKey viewManagerProviderKey = cViewManagerProvider.ViewManagerProviderKey;
@@ -609,7 +646,7 @@ namespace DRM.PropBag
                         // Get the Default ViewProvider from the ViewProvider Manager.
                         viewProvider = cViewManagerProvider.CViewManager.GetDefaultViewProvider();
                     }
-                    catch 
+                    catch
                     {
                         // TODO: Raise new exception with more detail.
                         throw;
@@ -646,7 +683,7 @@ namespace DRM.PropBag
 
             LocalBindingInfo localBindingInfo = new LocalBindingInfo(new LocalPropertyPath(bindingPath));
 
-            if(pi.MapperRequest == null)
+            if (pi.MapperRequest == null)
             {
                 if (pi.MapperRequestResourceKey != null)
                 {
@@ -662,7 +699,7 @@ namespace DRM.PropBag
             // Get the PropModel specified by this MapperRequestTemplate.
             if (pi.MapperRequest.PropModel == null)
             {
-                if(pi.MapperRequest.PropModelResourceKey != null)
+                if (pi.MapperRequest.PropModelResourceKey != null)
                 {
                     pi.MapperRequest.PropModel = propModelProvider.GetPropModel(pi.MapperRequest.PropModelResourceKey);
                 }
@@ -723,100 +760,79 @@ namespace DRM.PropBag
             return genMapper;
         }
 
-        private IProp BuildStandardPropFromRaw(IPropItemModel pi, PropModelCacheInterface propModelProvider, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService)
-        {
-                _memConsumptionTracker.Measure($"Begin BuildStandardPropFromRaw: {pi.PropertyName}.");
+        //private IProp BuildStandardPropFromRaw(IPropItemModel pi, PropModelCacheInterface propModelProvider, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService)
+        //{
+        //    _memConsumptionTracker.Measure($"Begin BuildStandardPropFromRaw: {pi.PropertyName}.");
 
-            IProp result;
+        //    IProp result;
 
-            if (pi.ComparerField == null) pi.ComparerField = new PropComparerField();
+        //    if (pi.ComparerField == null) pi.ComparerField = new PropComparerField();
 
-            if (pi.InitialValueField == null) pi.InitialValueField = PropInitialValueField.UseUndefined;
+        //    if (pi.InitialValueField == null) pi.InitialValueField = PropInitialValueField.UseUndefined;
 
-                _memConsumptionTracker.MeasureAndReport("After field preparation", $"for {pi.PropertyName}");
+        //    _memConsumptionTracker.MeasureAndReport("After field preparation", $"for {pi.PropertyName}");
 
-            string creationMethodDescription;
-            if (pi.StorageStrategy == PropStorageStrategyEnum.Internal && !pi.InitialValueField.SetToUndefined)
-            {
-                // Create New PropBag-based Object
-                if (pi.InitialValueField.PropBagResourceKey != null)
-                {
-                    System.Diagnostics.Debug.Assert(pi.TypeIsSolid == true,
-                        "Creating new PropItem of type IPropBag and the Type is not Solid!");
+        //    string creationMethodDescription;
+        //    if (pi.StorageStrategy == PropStorageStrategyEnum.Internal && !pi.InitialValueField.SetToUndefined)
+        //    {
+        //        // Create New PropBag-based Object
+        //        if (pi.InitialValueField.PropBagResourceKey != null)
+        //        {
+        //            System.Diagnostics.Debug.Assert(pi.TypeIsSolid == true,
+        //                "Creating new PropItem of type IPropBag and the Type is not Solid!");
 
-                    if (autoMapperService == null)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"Note: IPropBag with FullClassName: {FullClassName} does not have a AutoMapperService.");
-                    }
+        //            if (autoMapperService == null)
+        //            {
+        //                System.Diagnostics.Debug.WriteLine($"Note: IPropBag with FullClassName: {FullClassName} does not have a AutoMapperService.");
+        //            }
 
-                    IPropBag newObject = GetNewViewModel(pi, propModelProvider, storeAccessCreator, autoMapperService);
+        //            IPropBag newObject = GetNewViewModel(pi, propModelProvider, storeAccessCreator, autoMapperService);
 
-                    creationMethodDescription = "CreateGenFromObject";
-                    result = _propFactory.CreateGenFromObject(pi.PropertyType, newObject, pi.PropertyName, pi.ExtraInfo, pi.StorageStrategy, pi.TypeIsSolid,
-                        pi.PropKind, pi.ComparerField.Comparer, pi.ComparerField.UseRefEquality, pi.ItemType);
-                }
+        //            creationMethodDescription = "CreateGenFromObject";
+        //            result = _propFactory.CreateGenFromObject(pi.PropertyType, newObject, pi.PropertyName, pi.ExtraInfo, pi.StorageStrategy, pi.TypeIsSolid,
+        //                pi.PropKind, pi.ComparerField.Comparer, pi.ComparerField.UseRefEquality, pi.ItemType);
+        //        }
 
-                // Create New CLR Type
-                else if (pi.InitialValueField.CreateNew)
-                {
-                    object newValue = Activator.CreateInstance(pi.PropertyType);
+        //        // Create New CLR Type
+        //        else if (pi.InitialValueField.CreateNew)
+        //        {
+        //            object newValue = Activator.CreateInstance(pi.PropertyType);
 
-                    pi.TypeIsSolid = _propFactory.IsTypeSolid(newValue, pi.PropertyType);
+        //            pi.TypeIsSolid = _propFactory.IsTypeSolid(newValue, pi.PropertyType);
 
-                    creationMethodDescription = "CreateGenFromObject";
-                    result = _propFactory.CreateGenFromObject(pi.PropertyType, newValue, pi.PropertyName, pi.ExtraInfo, pi.StorageStrategy, pi.TypeIsSolid,
-                        pi.PropKind, pi.ComparerField.Comparer, pi.ComparerField.UseRefEquality, pi.ItemType);
-                }
+        //            creationMethodDescription = "CreateGenFromObject";
+        //            result = _propFactory.CreateGenFromObject(pi.PropertyType, newValue, pi.PropertyName, pi.ExtraInfo, pi.StorageStrategy, pi.TypeIsSolid,
+        //                pi.PropKind, pi.ComparerField.Comparer, pi.ComparerField.UseRefEquality, pi.ItemType);
+        //        }
 
-                // Using the initial value specified by the PropModelItem.
-                else
-                {
-                    bool useDefault = pi.InitialValueField.SetToDefault;
-                    string value = GetValue(pi);
+        //        // Using the initial value specified by the PropModelItem.
+        //        else
+        //        {
+        //            bool useDefault = pi.InitialValueField.SetToDefault;
+        //            string value = GetValue(pi);
 
-                    pi.TypeIsSolid = _propFactory.IsTypeSolid(value, pi.PropertyType);
+        //            pi.TypeIsSolid = _propFactory.IsTypeSolid(value, pi.PropertyType);
 
-                    creationMethodDescription = "CreateGenFromString";
-                    result = _propFactory.CreateGenFromString(pi.PropertyType, value, useDefault, pi.PropertyName, pi.ExtraInfo, pi.StorageStrategy, pi.TypeIsSolid,
-                        pi.PropKind, pi.ComparerField.Comparer, pi.ComparerField.UseRefEquality, pi.ItemType);
-                }
-            }
-            else
-            {
-                creationMethodDescription = "CreateGenWithNoValue";
+        //            creationMethodDescription = "CreateGenFromString";
+        //            result = _propFactory.CreateGenFromString(pi.PropertyType, value, useDefault, pi.PropertyName, pi.ExtraInfo, pi.StorageStrategy, pi.TypeIsSolid,
+        //                pi.PropKind, pi.ComparerField.Comparer, pi.ComparerField.UseRefEquality, pi.ItemType);
+        //        }
+        //    }
+        //    else
+        //    {
+        //        creationMethodDescription = "CreateGenWithNoValue";
 
-                pi.TypeIsSolid = pi.PropertyType != typeof(object);
+        //        pi.TypeIsSolid = pi.PropertyType != typeof(object);
 
-                result = _propFactory.CreateGenWithNoValue(pi.PropertyType, pi.PropertyName, pi.ExtraInfo, pi.StorageStrategy, pi.TypeIsSolid,
-                    pi.PropKind, pi.ComparerField.Comparer, pi.ComparerField.UseRefEquality, pi.ItemType);
-            }
-                _memConsumptionTracker.MeasureAndReport($"Built Standard Typed Prop using {creationMethodDescription}", $" for {pi.PropertyName} (Raw.)");
+        //        result = _propFactory.CreateGenWithNoValue(pi.PropertyType, pi.PropertyName, pi.ExtraInfo, pi.StorageStrategy, pi.TypeIsSolid,
+        //            pi.PropKind, pi.ComparerField.Comparer, pi.ComparerField.UseRefEquality, pi.ItemType);
+        //    }
+        //    _memConsumptionTracker.MeasureAndReport($"Built Standard Typed Prop using {creationMethodDescription}", $" for {pi.PropertyName} (Raw.)");
 
-            return result;
-        }
+        //    return result;
+        //}
 
-        protected IProp BuildPropFromCooked(IPropItemModel pi, IPropTemplate propTemplate, PropModelCacheInterface propModelProvider,
-            PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService, ICreateWrapperTypes wrapperTypeCreator)
-        {
-            IProp typedProp;
-
-            if (pi.PropKind == PropKindEnum.CollectionViewSource)
-            {
-                typedProp = BuildCollectionViewSourceProp(pi);
-            }
-            else if (pi.PropKind == PropKindEnum.CollectionView)
-            {
-                typedProp = BuildCollectionViewProp(pi, propModelProvider, wrapperTypeCreator);
-            }
-            else
-            {
-                typedProp = BuildStandardPropFromCooked(pi, propTemplate, propModelProvider, storeAccessCreator, autoMapperService);
-            }
-
-            return typedProp;
-        }
-
-        private IProp BuildStandardPropFromCooked(IPropItemModel pi, IPropTemplate propTemplate, PropModelCacheInterface propModelProvider, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService)
+        private IProp BuildStandardProp(IPropItemModel pi, PropModelCacheInterface propModelProvider, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService)
         {
             _memConsumptionTracker.Measure($"Begin BuildStandardPropFromCooked: {pi.PropertyName}.");
 
@@ -836,10 +852,10 @@ namespace DRM.PropBag
                 {
                     IPropBag newObject = GetNewViewModel(pi, propModelProvider, storeAccessCreator, autoMapperService);
 
-                    if (pi.PropCreator != null)
+                    if (pi.PropTemplate != null && pi.PropCreator != null)
                     {
                         creationMethodDescription = "CreateGenFromObject - Using PropCreator.";
-                        result = pi.PropCreator(pi.PropertyName, newObject, pi.TypeIsSolid, propTemplate);
+                        result = pi.PropCreator(pi.PropertyName, newObject, pi.TypeIsSolid, pi.PropTemplate);
                     }
                     else
                     {
@@ -855,10 +871,10 @@ namespace DRM.PropBag
                     object newValue = Activator.CreateInstance(pi.PropertyType);
                     pi.TypeIsSolid = _propFactory.IsTypeSolid(newValue, pi.PropertyType);
 
-                    if (pi.PropCreator != null)
+                    if (pi.PropTemplate != null && pi.PropCreator != null)
                     {
                         creationMethodDescription = "CreateGenFromObject - Using PropCreator.";
-                        result = pi.PropCreator(pi.PropertyName, newValue, pi.TypeIsSolid, propTemplate);
+                        result = pi.PropCreator(pi.PropertyName, newValue, pi.TypeIsSolid, pi.PropTemplate);
                     }
                     else
                     {
@@ -871,11 +887,11 @@ namespace DRM.PropBag
                 // Using the initial value specified by the PropModelItem.
                 else
                 {
-                    if (pi.PropCreator != null)
+                    if (pi.PropTemplate != null && pi.PropCreator != null)
                     {
                         creationMethodDescription = "CreateGenFromString - Using PropCreator.";
                         CheckCookedInitialValue(pi.InitialValueCooked);
-                        result = pi.PropCreator(pi.PropertyName, pi.InitialValueCooked, pi.TypeIsSolid, propTemplate);
+                        result = pi.PropCreator(pi.PropertyName, pi.InitialValueCooked, pi.TypeIsSolid, pi.PropTemplate);
                     }
                     else
                     {
@@ -890,12 +906,14 @@ namespace DRM.PropBag
                     }
                 }
             }
+
+            // Intitial Value is Undefined or the Storage Strategy is External or Virtual
             else
             {
-                if(pi.PropCreator != null)
+                if (pi.PropTemplate != null && pi.PropCreator != null)
                 {
                     creationMethodDescription = "CreateGenWithNoValue - Using PropCreator.";
-                    result = pi.PropCreator(pi.PropertyName, null, pi.TypeIsSolid, propTemplate);
+                    result = pi.PropCreator(pi.PropertyName, null, pi.TypeIsSolid, pi.PropTemplate);
                 }
                 else
                 {
@@ -904,11 +922,47 @@ namespace DRM.PropBag
                         pi.PropKind, pi.ComparerField.Comparer, pi.ComparerField.UseRefEquality, pi.ItemType);
                 }
             }
+
             _memConsumptionTracker.MeasureAndReport($"Built Standard Typed Prop using {creationMethodDescription}", $" for {pi.PropertyName} (Cooked.");
 
             return result;
         }
 
+        private IPropData RegisterPropWithStore(IPropItemModel pi, IProp typedProp, out PropIdType propId)
+        {
+            object target;
+            MethodInfo method;
+            SubscriptionKind subscriptionKind;
+            SubscriptionPriorityGroup subscriptionPriorityGroup;
+
+            if (pi.DoWhenChangedField != null)
+            {
+                if (pi.DoWhenChangedField.MethodIsLocal)
+                {
+                    target = this;
+                }
+                else
+                {
+                    throw new NotSupportedException("Only local methods are supported.");
+                }
+
+                method = pi.DoWhenChangedField.Method;
+                subscriptionKind = pi.DoWhenChangedField.SubscriptionKind;
+                subscriptionPriorityGroup = pi.DoWhenChangedField.PriorityGroup;
+            }
+            else
+            {
+                target = null;
+                method = null;
+                subscriptionKind = SubscriptionKind.GenHandler;
+                subscriptionPriorityGroup = SubscriptionPriorityGroup.Standard;
+            }
+
+            IPropData newPropItem = AddProp_Internal(pi.PropertyName, typedProp, target, method, subscriptionKind, subscriptionPriorityGroup, addToModel: false, propId: out propId);
+
+            return newPropItem;
+        }
+        
         const string UN_SET_COOKED_INIT_VAL = "&&&&_UN_SET_COOKED_INIT_VAL_&&&&";
 
         [System.Diagnostics.Conditional("DEBUG")]
@@ -2075,10 +2129,11 @@ namespace DRM.PropBag
         {
             PSAccessServiceInterface result = storeAccessor.CloneProps(this, copySource);
 
-            if(copySource is ICustomTypeDescriptor ictd)
-            {
-                _properties = ictd.GetProperties();
-            }
+            // TODO: FixMe -- PD
+            //if (copySource is ICustomTypeDescriptor ictd)
+            //{
+            //    _properties = ictd.GetProperties();
+            //}
 
             return result;
         }
@@ -2088,22 +2143,32 @@ namespace DRM.PropBag
             return OurMetaData;
         }
 
-        /// <summary>
-        /// Makes a copy of the core list.
-        /// </summary>
-        /// <returns></returns>
-        public IReadOnlyDictionary<string, ValPlusType> GetAllPropNamesAndTypes()
+        ///// <summary>
+        ///// Makes a copy of the core list.
+        ///// </summary>
+        ///// <returns></returns>
+        //public IReadOnlyDictionary<string, ValPlusType> GetAllPropNamesAndTypes()
+        //{
+        //    IEnumerable<KeyValuePair<PropNameType, IPropData>> theStoreAsCollection = _ourStoreAccessor.GetCollection(this);
+
+        //    IEnumerable<KeyValuePair<string, ValPlusType>> list = theStoreAsCollection.Select(x =>
+        //    new KeyValuePair<string, ValPlusType>(x.Key, x.Value.TypedProp.GetValuePlusType())).ToList();
+
+        //    IDictionary<string, ValPlusType> dict = list.ToDictionary(pair => pair.Key, pair => pair.Value);
+
+        //    IReadOnlyDictionary<string, ValPlusType> result2 = new ReadOnlyDictionary<string, ValPlusType>(dict);
+
+        //    return result2;
+        //}
+
+        public IEnumerable<KeyValuePair<PropNameType, ValPlusType>> GetAllPropNamesValuesAndTypes()
         {
-            IEnumerable<KeyValuePair<PropNameType, IPropData>> theStoreAsCollection = _ourStoreAccessor.GetCollection(this);
+            IEnumerable<KeyValuePair<PropNameType, IPropData>> theStoreAsCollection = _ourStoreAccessor.GetPropDataItemsWithNames(this);
 
             IEnumerable<KeyValuePair<string, ValPlusType>> list = theStoreAsCollection.Select(x =>
-            new KeyValuePair<string, ValPlusType>(x.Key, x.Value.TypedProp.GetValuePlusType())).ToList();
+            new KeyValuePair<string, ValPlusType>(x.Key, x.Value.TypedProp.GetValuePlusType()));
 
-            IDictionary<string, ValPlusType> dict = list.ToDictionary(pair => pair.Key, pair => pair.Value);
-
-            IReadOnlyDictionary<string, ValPlusType> result2 = new ReadOnlyDictionary<string, ValPlusType>(dict);
-
-            return result2;
+            return list;
         }
 
         /// <summary>
@@ -2122,6 +2187,14 @@ namespace DRM.PropBag
         public IList<PropNameType> GetAllPropertyNames()
         {
             var result = _ourStoreAccessor.GetKeys(this).ToList();
+            return result;
+        }
+
+        public bool HasPropModel => _propModel != null;
+
+        public IEnumerable<IPropItemModel> GetPropItemModels()
+        {
+            IEnumerable<IPropItemModel> result = _propModel?.GetPropItems() ?? Enumerable.Empty<IPropItemModel>();
             return result;
         }
 
@@ -2231,11 +2304,12 @@ namespace DRM.PropBag
 
         public override string ToString()
         {
-            IReadOnlyDictionary<string, ValPlusType> x = GetAllPropNamesAndTypes();
+            IEnumerable<KeyValuePair<PropNameType, ValPlusType>> namesTypesAndValues = GetAllPropNamesValuesAndTypes();
 
             StringBuilder result = new StringBuilder();
             int cnt = 0;
-            foreach (KeyValuePair<string, ValPlusType> kvp in x)
+
+            foreach (KeyValuePair<string, ValPlusType> kvp in namesTypesAndValues)
             {
                 if (cnt++ == 0) result.Append("\n\r");
 
@@ -2539,6 +2613,18 @@ namespace DRM.PropBag
 
         #region Add Property-Type Props
 
+        protected IProp<T> AddProp<T>(string propertyName)
+        {
+            IProp<T> result = AddProp<T>(propertyName, comparer: null, extraInfo: null, initialValue: default(T));
+            return result;
+        }
+
+        protected IProp<T> AddProp<T>(string propertyName, T initialValue)
+        {
+            IProp<T> result = AddProp<T>(propertyName, comparer: null, extraInfo: null, initialValue: initialValue);
+            return result;
+        }
+
         /// <summary>
         /// Register a new Prop Item for this PropBag.
         /// </summary>
@@ -2548,11 +2634,14 @@ namespace DRM.PropBag
         /// <param name="extraInfo"></param>
         /// <param name="initialValue"></param>
         /// <returns></returns>
-        protected IProp<T> AddProp<T>(string propertyName, Func<T, T, bool> comparer = null, object extraInfo = null, T initialValue = default(T))
+        protected IProp<T> AddProp<T>(string propertyName, Func<T, T, bool> comparer, object extraInfo, T initialValue)
         {
             PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal;
             bool typeIsSolid = true;
-            IProp<T> pg = _propFactory.Create<T>(initialValue, propertyName, extraInfo, storageStrategy, typeIsSolid, comparer, null);
+            Func<PropNameType, T> getDefaultValueFunc = null;
+
+            IProp<T> pg = _propFactory.Create<T>(initialValue, propertyName, extraInfo, storageStrategy, typeIsSolid, comparer, getDefaultValueFunc);
+
             AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard, out PropIdType propId);
             return pg;
         }
@@ -2562,7 +2651,9 @@ namespace DRM.PropBag
             PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal;
             bool typeIsSolid = true;
             Func<T, T, bool> comparer = _propFactory.GetRefEqualityComparer<T>();
+
             IProp<T> pg = _propFactory.Create<T>(initialValue, propertyName, extraInfo, storageStrategy, typeIsSolid, comparer, null);
+
             AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard, out PropIdType propId);
             return pg;
         }
@@ -2581,7 +2672,9 @@ namespace DRM.PropBag
             PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal;
             bool typeIsSolid = true;
             Func<T, T, bool> comparer = _propFactory.GetRefEqualityComparer<T>();
+
             IProp<T> pg = _propFactory.CreateWithNoValue<T>(propertyName, extraInfo, storageStrategy, typeIsSolid, comparer, null);
+
             AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard, out PropIdType propId);
             return pg;
         }
@@ -2590,6 +2683,7 @@ namespace DRM.PropBag
         {
             PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.External;
             bool typeIsSolid = true;
+
             IProp<T> pg = _propFactory.CreateWithNoValue<T>(propertyName, extraInfo, storageStrategy, typeIsSolid, comparer, null);
             AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard, out PropIdType propId);
             return pg;
@@ -2724,7 +2818,7 @@ namespace DRM.PropBag
 
         private PropItemModel GetPropItemRecord(PropNameType propertyName, IPropData propGen)
         {
-            IPropTemplate propTemplate = propGen.TypedProp.PropTemplate;
+            IPropTemplate propTemplate = propGen.TypedProp?.PropTemplate ?? throw new InvalidOperationException("The PropTemplate is null during call to GetPropItemRecord.");
 
             PropItemModel propItem = new PropItemModel
                 (
@@ -2736,13 +2830,14 @@ namespace DRM.PropBag
                 propTypeInfoField: null,
                 initialValueField: null,
                 extraInfo: null,
-                comparer: null, //new PropComparerField(propTemplate.ComparerProxy, false),
+                comparer: new PropComparerField(propTemplate.ComparerProxy, false),
                 itemType: null,
                 binderField: null,
                 mapperRequest: null,
                 propCreator: propTemplate.PropCreator
                 );
 
+            propItem.InitialValueCooked = propGen.TypedProp.TypedValueAsObject;
             return propItem;
         }
 

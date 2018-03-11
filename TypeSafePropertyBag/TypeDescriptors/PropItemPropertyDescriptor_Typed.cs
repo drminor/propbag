@@ -4,13 +4,12 @@ using System.ComponentModel;
 namespace DRM.TypeSafePropertyBag.TypeDescriptors
 {
     // ToDo: This is not used.
-    public class PropItemPropertyDescriptor_Typed<T, PT, BagT> : PropertyDescriptor/*, IPropItemTypeDescriptor*/ where PT : class, IProp<T> where BagT : class, IPropBag
+    public class PropItemPropertyDescriptor_Typed<T, PT, BagT> : PropertyDescriptor where PT : IProp<T> where BagT : IPropBag
     {
         #region Private Members
 
-        BagT _propBag;
         PT _propItem;
-        TypeDescriptorConfig _tdConfig;
+        PropertyDescriptorValues _tdConfig;
 
         PropertyDescriptorCollection _children;
 
@@ -42,10 +41,9 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
         public PropItemPropertyDescriptor_Typed(string propertyName, BagT propBag, PT propItem)
             : base(propertyName, propItem.TypedPropTemplate.Attributes)
         {
-            _propBag = propBag;
             _propItem = propItem;
 
-            _tdConfig = new TypeDescriptorConfig(_propItem.TypedPropTemplate.Attributes, typeof(BagT), false, propertyName, _propItem.TypedPropTemplate.Type, true);
+            _tdConfig = new PropertyDescriptorValues(_propItem.TypedPropTemplate.Attributes, typeof(BagT), false, propertyName, _propItem.TypedPropTemplate.Type, true);
 
             _children = this.GetChildProperties();
         }

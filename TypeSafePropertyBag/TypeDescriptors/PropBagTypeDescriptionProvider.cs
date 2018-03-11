@@ -148,6 +148,9 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
                     if (pi.PropKind == PropKindEnum.CollectionView || pi.PropKind == PropKindEnum.ObservableCollection || pi.PropKind == PropKindEnum.Prop)
                     {
                         propItemTypeDesc = new PropItemPropertyDescriptor<T>(pi.PropertyName, pi.PropertyType, new Attribute[] { });
+
+                        // TODO: Implement a way to create a Typed PropertyDescriptor for fast Get/Set methods.
+                        //propItemTypeDesc = new PropItemPropertyDescriptor_Typed<<T>(pi.PropertyName, pi.PropertyType, new Attribute[] { });
                     }
                     else
                     {
