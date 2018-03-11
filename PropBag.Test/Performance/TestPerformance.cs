@@ -1,6 +1,7 @@
 ﻿
 using DRM.TypeSafePropertyBag;
 using NUnit.Framework;
+using System.Collections.Generic;
 
 namespace PropBagLib.Tests
 {
@@ -83,6 +84,10 @@ namespace PropBagLib.Tests
         public void ASetInt1000WithTypeTypedSub()
         {
             mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+
+            IList<string> testList = mod1.GetAllPropertyNames();
+
+
             mod1.SubscribeToPropChanged<int>(Mod1_PropertyChangedTyped, "PropInt");
 
             for (int cntr = 0; cntr < InterationCount - 1; cntr++)
@@ -109,6 +114,8 @@ namespace PropBagLib.Tests
         public void ASetInt1000WithTypeGenSub()
         {
             mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+
+
             mod1.SubscribeToPropChanged(Mod1_PropertyChangedGen, "PropInt", typeof(int));
 
             for (int cntr = 0; cntr < InterationCount - 1; cntr++)

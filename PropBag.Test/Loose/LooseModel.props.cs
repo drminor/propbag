@@ -15,7 +15,7 @@ namespace PropBagLib.Tests
             AddProp<object>("PropObject");
             AddProp<string>("PropString");
             AddProp<string>("PropString2", null, null, "12");
-            AddProp<bool>("PropBool", null, initialValue: false);
+            AddProp<bool>("PropBool", initialValue: false);
             AddProp<int>("PropInt");
             AddProp<TimeSpan>("PropTimeSpan");
             AddProp<Uri>("PropUri");

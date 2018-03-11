@@ -2,6 +2,7 @@
 <model
   class-name="TestPerformance"
   output-namespace="PropBagLib.Tests"
+  derive-from-class-mode="PropBag"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
   xsi:schemaLocation="https://www.swamphillproductions.com/PropBagModel ../../PropBag/XMLModel/PropBagModel.xsd">

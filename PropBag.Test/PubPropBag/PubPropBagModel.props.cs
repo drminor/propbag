@@ -21,27 +21,27 @@ namespace PropBagLib.Tests
             : base(typeSafetyMode, storeAccessCreator, propFactory, fullClassName)
 
 		{
-	        AddProp<object>("PropObject", comparer:null);
+	        AddProp<object>("PropObject");
 		 
-	        AddProp<string>("PropString", comparer:null);
+	        AddProp<string>("PropString");
 		SubscribeToPropChanged<string>(GetDelegate<string>("DoWhenStringChanged"), "PropString"); 
 	        AddPropNoValue<string>("PropStringCallDoAfter", comparer:EqualityComparer<string>.Default.Equals);
 		SubscribeToPropChanged<string>(GetDelegate<string>("DoWhenStringChanged"), "PropStringCallDoAfter"); 
 	        AddPropObjComp<string>("PropStringUseRefComp", extraInfo:null);
 		SubscribeToPropChanged<string>(GetDelegate<string>("DoWhenStringChanged"), "PropStringUseRefComp"); 
-	        AddProp<bool>("PropBool", comparer:null);
+	        AddProp<bool>("PropBool");
 		 
-	        AddProp<int>("PropInt", comparer:null);
+	        AddProp<int>("PropInt");
 		 
-	        AddProp<TimeSpan>("PropTimeSpan", comparer:null);
+	        AddProp<TimeSpan>("PropTimeSpan");
 		 
-	        AddProp<Uri>("PropUri", comparer:null);
+	        AddProp<Uri>("PropUri");
 		 
-	        AddProp<Lazy<int>>("PropLazyInt", comparer:null);
+	        AddProp<Lazy<int>>("PropLazyInt");
 		 
 	        AddProp<Nullable<int>>("PropNullableInt", null, null, initialValue:-1);
 		SubscribeToPropChanged<Nullable<int>>(GetDelegate<Nullable<int>>("DoWhenNullIntChanged"), "PropNullableInt"); 
-	        AddProp<ICollection<int>>("PropICollectionInt", comparer:null);
+	        AddProp<ICollection<int>>("PropICollectionInt");
 		SubscribeToPropChanged<ICollection<int>>(GetDelegate<ICollection<int>>("DoWhenICollectionIntChanged"), "PropICollectionInt"); 
 		}
 

@@ -5,6 +5,10 @@
 <#@ import namespace="System.Text" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ assembly name="$(SolutionDir)PropBag\bin\Debug\PropBag.dll" #>
+<#@ assembly name="$(SolutionDir)PropBag\bin\Debug\TypeSafePropertyBag.dll" #>
+
+<#@ import namespace="DRM.TypeSafePropertyBag" #>
+
 <#@ import namespace="DRM.PropBag.XMLModel" #>
 <#@ import namespace="DRM.PropBag.ClassGenerator" #>
 <#@ output extension=".cs" #>
@@ -18,7 +22,7 @@
 	//defFileName = "TestNullablePropDefs.xml";
 
 	string path = this.Host.ResolvePath(defFileName);
-	PropModel pm = PropModelReader.ReadXml(path);
+	XMLPropModel pm = PropModelReader.ReadXml(path);
 
 	pm.ClassName = className;
 #>
@@ -34,14 +38,14 @@ namespace <#= pm.Namespace #>
 
 		public <#= pm.ClassName #>(PropBagTypeSafetyMode typeSafetyMode, IPropFactory factory) : base(typeSafetyMode, factory)
 		{
-	<# foreach (PropItem pi in pm.Props) {#>
+	<# foreach (XMLPropItemModel pi in pm.Props) {#>
         <#= T4Support.GetAddPropMethodCallText(pm, pi) #>;
 		<#= T4Support.GetSubscribeMethodCallText(pm, pi) #> 
 	<#  } #>
 	}
 
 	#region Property Declarations
-		<# foreach (PropItem pi in pm.Props)  { #>  
+		<# foreach (XMLPropItemModel pi in pm.Props)  { #>  
 		public <#= pi.Type #> <#= pi.Name #>
 		{
 			get
@@ -57,7 +61,7 @@ namespace <#= pm.Namespace #>
 	#endregion
 	
 	#region PropetyChangedWithTVals Event Declarations
-		<# foreach (PropItem pi in pm.Props)  { #>  
+		<# foreach (XMLPropItemModel pi in pm.Props)  { #>  
 			public event EventHandler<PcTypedEventArgs<<#= pi.Type #>>> <#= pi.Name #>Changed
 			{
 				add

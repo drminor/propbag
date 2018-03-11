@@ -18,6 +18,10 @@ namespace DRM.TypeSafePropertyBag
 
         //object this[string typeName, string propertyName] { get; set; }
 
+        IProp<T> AddProp<T>(string propertyName);
+
+        IProp<T> AddProp<T>(string propertyName, T initialValue);
+
         IProp<T> AddProp<T>(string propertyName, Func<T,T,bool> comparer = null, object extraInfo = null, T initalValue = default(T));
 
         IProp<T> AddPropObjComp<T>(string propertyName, object extraInfo = null, T initalValue = default(T));

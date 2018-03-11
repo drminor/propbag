@@ -37,7 +37,7 @@ namespace DRM.PropBag.ClassGenerator
 
         }
 
-        public static DRM.PropBag.XMLModel.PropDoWhenChanged PrepareDoWhenChangedField(this PropModelType pm, PropItem pi)
+        public static DRM.PropBag.XMLModel.PropDoWhenChanged PrepareDoWhenChangedField(this XMLPropModel pm, XMLPropItemModel pi)
         {
             DRM.PropBag.XMLModel.PropDoWhenChanged dwcf = pi.DoWhenChangedField;
             if (dwcf == null) return new DRM.PropBag.XMLModel.PropDoWhenChanged("null");
@@ -53,7 +53,7 @@ namespace DRM.PropBag.ClassGenerator
             return new PropDoWhenChanged(doWhenChanged, dwcf.DoAfterNotify);
         }
 
-        public static DRM.PropBag.XMLModel.PropComparerField PrepareComparerField(this PropModel pm, DRM.PropBag.XMLModel.PropComparerField cf)
+        public static DRM.PropBag.XMLModel.PropComparerField PrepareComparerField(this XMLPropModel pm, DRM.PropBag.XMLModel.PropComparerField cf)
         {
             if (cf == null) return new DRM.PropBag.XMLModel.PropComparerField("null", false);
 
@@ -65,7 +65,7 @@ namespace DRM.PropBag.ClassGenerator
             return new DRM.PropBag.XMLModel.PropComparerField(cf.Comparer ?? "null", cf.UseRefEquality);
         }
 
-        public static DRM.PropBag.XMLModel.PropInitialValueField PrepareInitialField(this PropModel pm, PropItem pi)
+        public static DRM.PropBag.XMLModel.PropInitialValueField PrepareInitialField(this XMLPropModel pm, XMLPropItemModel pi)
         {
             DRM.PropBag.XMLModel.PropInitialValueField pivf = pi.InitialValueField;
             if (pivf == null)

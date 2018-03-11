@@ -66,7 +66,7 @@
     <Compile Include="ControlModel\PropModel.cs" />
     <Compile Include="ExtValDelegates.cs" />
     <Compile Include="Factories\PropFactoryValueConverter.cs" />
-    <Compile Include="PropBag.CustomTypeDescriptor.cs" />
+    <None Include="PropBag.CustomTypeDescriptor.cs" />
     <None Include="Documentation\TypeInfoField.md" />
     <None Include="Unused\PropBagDyn.cs" />
     <None Include="Unused\PropBagExperimental.cs" />
@@ -78,8 +78,8 @@
     <Compile Include="XMLModel\PropComparerField.cs" />
     <Compile Include="XMLModel\PropDoWhenChanged.cs" />
     <Compile Include="XMLModel\PropInitalValueField.cs" />
-    <Compile Include="XMLModel\PropItem.cs" />
-    <Compile Include="XMLModel\PropModel.cs" />
+    <Compile Include="XMLModel\XMLPropItemModel.cs" />
+    <Compile Include="XMLModel\XMLPropModel.cs" />
     <Compile Include="XMLModel\PropModelReader.cs" />
     <Compile Include="XMLModel\PropModelStaticText.cs" />
     <Compile Include="XMLModel\PropModelWriter.cs" />

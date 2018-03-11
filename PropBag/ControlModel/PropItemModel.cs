@@ -10,27 +10,35 @@ using System.Xml.Serialization;
 namespace DRM.PropBag
 {
     using PropNameType = String;
-
     using PropCreatorType = Func<String, object, bool, IPropTemplate, IProp>;
 
     public class PropItemModel : NotifyPropertyChangedBase, IPropItemModel
     {
+        #region Priviate Properties
+
         PropNameType _propertyName;
         PropKindEnum _propKind;
         Type _propertyType; // Also used to store the collection type.
         Type _itemType;
         ITypeInfoField _propTypeInfoField;
+
+        PropStorageStrategyEnum _storageStrategy;
+        bool _typeIsSolid;
+        object _extraInfo;
+
         IPropInitialValueField _propInitialValueField;
         IPropComparerField _propComparerField;
         IPropDoWhenChangedField _propDoWhenChangedField;
         IPropBinderField _propBinderField;
-        IMapperRequest _mapperRequest;
-        string _mapperRequestResourceKey;
 
-        PropStorageStrategyEnum _hasStore;
-        bool _typeIsSolid;
-        object _extraInfo;
+        string _mapperRequestResourceKey;
+        IMapperRequest _mapperRequest;
+
         PropCreatorType _propCreator;
+
+        #endregion
+
+        #region Public Properties
 
         [XmlElement("name")]
         public PropNameType PropertyName { get {return _propertyName;}  set { SetIfDifferent<PropNameType>(ref _propertyName, value); } }
@@ -96,14 +104,14 @@ namespace DRM.PropBag
         {
             get
             {
-                return _hasStore;
+                return _storageStrategy;
             }
             set
             {
-                int ov = (int)_hasStore;
+                int ov = (int)_storageStrategy;
                 int nv = (int)value;
                 SetIfDifferentEnum<int>(ref ov, nv, "storageStrategy");
-                _hasStore = (PropStorageStrategyEnum) ov;
+                _storageStrategy = (PropStorageStrategyEnum) ov;
             }
         }
 
@@ -124,6 +132,11 @@ namespace DRM.PropBag
         [XmlIgnore]
         public object InitialValueCooked { get; set; }
 
+        #endregion
+
+        #region Constructors
+
+        // Type and Name
         public PropItemModel(Type type, string name)
             : this
             (
@@ -144,6 +157,7 @@ namespace DRM.PropBag
         {
         }
 
+        // Type, Name, StorageStrategy, Kinde and Initial Value
         public PropItemModel(Type type, string name, PropStorageStrategyEnum storageStrategy, 
                 PropKindEnum propKind, IPropInitialValueField initialValueField)
             : this
@@ -165,6 +179,7 @@ namespace DRM.PropBag
         {
         }
 
+        // Type, Name, StorageStrategy, Kinde and Initial Value -- With ItemType
         public PropItemModel(Type type, string name, PropStorageStrategyEnum storageStrategy,
                 PropKindEnum propKind, IPropInitialValueField initialValueField, Type itemType)
             : this
@@ -186,6 +201,7 @@ namespace DRM.PropBag
         {
         }
 
+        // Complete
         public PropItemModel
             (
             Type type,
@@ -246,6 +262,8 @@ namespace DRM.PropBag
                 return result;
         }
 
+        #endregion
+
         #region IDisposable Support
 
         private bool disposedValue = false; // To detect redundant calls
@@ -298,6 +316,5 @@ namespace DRM.PropBag
         }
 
         #endregion
-
     }
 }

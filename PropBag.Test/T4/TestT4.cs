@@ -26,7 +26,7 @@ namespace PropBagLib.Tests
 
             string nameSpaceText = T4Support.GetNamespaces(pm);
 
-            List<PropItem> test = pm.Props;
+            List<XMLPropItemModel> test = pm.Props;
 
             Assert.That(pm.Props.Count(), Is.EqualTo(11));
         }
@@ -40,10 +40,10 @@ namespace PropBagLib.Tests
                 DeriveFromPubPropBag = false,
                 DeferMethodRefResolution = false,
                 Namespace = "PropBagLib.Tests",
-                Props = new List<PropItem>()
+                Props = new List<XMLPropItemModel>()
             };
 
-            PropItem p = new PropItem
+            XMLPropItemModel p = new XMLPropItemModel
             {
                 Name = "one",
                 Type = "int",
@@ -53,7 +53,7 @@ namespace PropBagLib.Tests
 
             pm.Props.Add(p);
 
-            p = new PropItem
+            p = new XMLPropItemModel
             {
                 Name = "two",
                 Type = "string",

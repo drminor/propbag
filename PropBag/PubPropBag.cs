@@ -85,6 +85,19 @@ namespace DRM.PropBag
 
         #region Property Management
 
+
+        new public IProp<T> AddProp<T>(string propertyName)
+        {
+            IProp<T> result = AddProp<T>(propertyName, comparer: null, extraInfo: null, initialValue: default(T));
+            return result;
+        }
+
+        new public IProp<T> AddProp<T>(string propertyName, T initialValue)
+        {
+            IProp<T> result = AddProp<T>(propertyName, comparer: null, extraInfo: null, initialValue: initialValue);
+            return result;
+        }
+
         /// <summary>
         /// Use when you want to specify an Action<typeparamref name="T"/> to be performed
         /// either before or after the PropertyChanged event has been raised.

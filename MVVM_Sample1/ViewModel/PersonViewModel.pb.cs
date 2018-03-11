@@ -1,7 +1,9 @@
 ﻿using DRM.PropBag;
 using DRM.PropBag.AutoMapperSupport;
 using DRM.TypeSafePropertyBag;
+using DRM.TypeSafePropertyBag.TypeDescriptors;
 using System;
+using System.ComponentModel;
 
 namespace MVVMApplication.ViewModel
 {
@@ -16,6 +18,8 @@ namespace MVVMApplication.ViewModel
         public PersonVM(PropModelType pm, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
             : base(pm, storeAccessCreator, autoMapperService, propFactory, fullClassName)
         {
+            //RegisterTypeDescriptorProvider();
+            System.Diagnostics.Debug.WriteLine("PersonVM is being created with a PropModel.");
         }
 
         // This constructor is required for AutoMapperSupport when using "Emit_Proxy."
@@ -24,6 +28,8 @@ namespace MVVMApplication.ViewModel
         public PersonVM(PersonVM copySource)
             : base(copySource)
         {
+            //RegisterTypeDescriptorProvider();
+            System.Diagnostics.Debug.WriteLine("PersonVM is being created from an existing instance of a PersonVM.");
         }
 
         // This constructor is required for AutoMapperSupport when using "Extra_Members."

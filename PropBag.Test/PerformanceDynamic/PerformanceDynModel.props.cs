@@ -17,14 +17,14 @@ namespace PropBagLib.Tests
 
 		public PerformanceDynModel(PropBagTypeSafetyMode typeSafetyMode, IPropFactory factory) : base(typeSafetyMode, factory)
 		{
-	        AddProp<object>("PropObject", comparer:null);
+	        AddProp<object>("PropObject");
 	        AddProp<string>("PropString", null, null, initialValue:"");
 	        AddPropObjComp<string>("PropStringUseRefComp", extraInfo:null);
 	        AddProp<bool>("PropBool", null, null, initialValue:false);
-	        AddProp<int>("PropInt", comparer:null);
-	        AddProp<TimeSpan>("PropTimeSpan", comparer:null);
-	        AddProp<Uri>("PropUri", comparer:null);
-	        AddProp<Lazy<int>>("PropLazyInt", comparer:null);
+	        AddProp<int>("PropInt");
+	        AddProp<TimeSpan>("PropTimeSpan");
+	        AddProp<Uri>("PropUri");
+	        AddProp<Lazy<int>>("PropLazyInt");
 	        AddProp<Nullable<int>>("PropNullableInt", null, null, initialValue:-1);
 	        AddProp<ICollection<int>>("PropICollectionInt", null, null, initialValue:null);
 		}

@@ -1,46 +1,47 @@
-﻿using System.Reflection;
+﻿
+
+
+using System.Reflection;
 using DRM.PropBag;
 using DRM.TypeSafePropertyBag;
 using System;
 using System.Collections.Generic;
-using DRM.PropBag.AutoMapperSupport;
+using PropBagLib.Tests;
+
 
 namespace PropBagLib.Tests
 {
-    using PropModelType = IPropModel<String>;
-    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
-
-    public partial class PerformanceModel : PropBag
+	public partial class PerformanceModel : PropBag
 	{
-        //public PerformanceModel() : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered, null) { }
+		public PerformanceModel(IPropStoreAccessServiceCreator<UInt32, String> storeCreator) : this(PropBagTypeSafetyMode.AllPropsMustBeRegistered, storeCreator, null, null) { }
+         
+		public PerformanceModel(PropBagTypeSafetyMode typeSafetyMode, IPropStoreAccessServiceCreator<UInt32, String> storeCreator) : this(typeSafetyMode, storeCreator, null, null) { }
 
-        //public PerformanceModel(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
+		public PerformanceModel(PropBagTypeSafetyMode typeSafetyMode, IPropStoreAccessServiceCreator<UInt32, String> storeCreator, IPropFactory factory, string fullClassName) : base(typeSafetyMode, storeCreator, factory, null)
+		{
+	        AddProp<object>("PropObject");
+		 
+	        AddProp<string>("PropString", null, null, initialValue:"");
+		 
+	        AddPropObjComp<string>("PropStringUseRefComp");
+		 
+	        AddProp<bool>("PropBool", null, null, initialValue:false);
+		 
+	        AddProp<int>("PropInt");
+		 
+	        AddProp<TimeSpan>("PropTimeSpan");
+		 
+	        AddProp<Uri>("PropUri");
+		 
+	        AddProp<Lazy<int>>("PropLazyInt");
+		 
+	        AddProp<Nullable<int>>("PropNullableInt", null, null, initialValue:-1);
+		 
+	        AddProp<ICollection<int>>("PropICollectionInt", null, null, initialValue:null);
+		 
+		}
 
-        public PerformanceModel(PropModelType propModel, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
-            : base(propModel, storeAccessCreator, autoMapperService, propFactory, fullClassName)
-        {
-            AddProp<object>("PropObject", comparer: null);
-
-            AddProp<string>("PropString", null, null, initialValue: "");
-
-            AddPropObjComp<string>("PropStringUseRefComp", extraInfo: null);
-
-            AddProp<bool>("PropBool", null, null, initialValue: false);
-
-            AddProp<int>("PropInt", comparer: null);
-
-            AddProp<TimeSpan>("PropTimeSpan", comparer: null);
-
-            AddProp<Uri>("PropUri", comparer: null);
-
-            AddProp<Lazy<int>>("PropLazyInt", comparer: null);
-
-            AddProp<Nullable<int>>("PropNullableInt", null, null, initialValue: -1);
-
-            AddProp<ICollection<int>>("PropICollectionInt", null, null, initialValue: null);
-        }
-
-	    #region Property Declarations
+	#region Property Declarations
 		  
 		public object PropObject
 		{

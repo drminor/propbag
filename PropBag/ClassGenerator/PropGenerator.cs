@@ -78,7 +78,7 @@ namespace DRM.PropBag.ClassGenerator
             return result;
         }
 
-        static public PropDefRaw GetPropDef(PropModel propModel, PropItem pi, bool typeIsSolid = true)
+        static public PropDefRaw GetPropDef(XMLPropModel propModel, XMLPropItemModel pi, bool typeIsSolid = true)
         {
             PropDoWhenChanged doWhenPrepped = propModel.PrepareDoWhenChangedField(pi);
 

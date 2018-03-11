@@ -10,9 +10,18 @@ namespace PropBagLib.Tests
 {
     using PropModelType = IPropModel<String>;
     using PropModelCacheInterface = ICachePropModels<String>;
+    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
+
 
     public partial class PerformanceModel : PropBag
     {
+
+        public PerformanceModel(PropModelType propModel, PSAccessServiceCreatorInterface storeCreator) :
+            base(propModel, storeCreator)
+        {
+
+        }
+
         static public PerformanceModel Create(PropBagTypeSafetyMode safetyMode)
         {
             AutoMapperHelpers ourHelper = new AutoMapperHelpers();
@@ -34,10 +43,12 @@ namespace PropBagLib.Tests
                 );
 
             // TODO: AAA
-            PerformanceModel pm = new PerformanceModel(propModel, ourHelper.StoreAccessCreator, autoMapperService: null, propFactory: null, fullClassName: null);
+            PerformanceModel pm = new PerformanceModel(propModel, ourHelper.StoreAccessCreator);
 
             pm.AddPropNoStore<int>("PropIntNoStore");
             pm.AddPropNoStore<string>("PropStringNoStore");
+            pm.AddProp<int>("PropInt");
+            pm.AddProp<string>("PropString");
 
             return pm;
         }

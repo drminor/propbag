@@ -6,6 +6,20 @@
         <xs:element ref="namespaces" minOccurs="0" maxOccurs="1" />
         <xs:element ref="props" />
       </xs:sequence>
+
+      <xs:attribute name="derive-from-class-mode" default="Custom" >
+        <xs:simpleType>
+          <xs:restriction base="xs:NMTOKEN">
+            <xs:enumeration value="PropBag" />
+            <xs:enumeration value="PubPropBag" />
+            <xs:enumeration value="Custom" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+
+      <xs:attribute name="name-of-class-to-wrap" type="xs:string" default="" />
+
+
       <xs:attribute name="derive-from-pub-prop-bag" type="xs:boolean" default="false"/>
       <xs:attribute name="class-name" type="xs:string" use="required" />
       <xs:attribute name="output-namespace" type="xs:string" use="required" />

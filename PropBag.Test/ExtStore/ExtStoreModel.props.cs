@@ -20,9 +20,9 @@ namespace PropBagLib.Tests
             IPropFactory propFactory, string fullClassName)
             : base(typeSafetyMode, storeAccessCreator, propFactory, fullClassName)
         {
-	        AddProp<int>("PropInt3", comparer:null);
+	        AddProp<int>("PropInt3");
 		 
-	        AddProp<int>("PropInt4", comparer:null);
+	        AddProp<int>("PropInt4");
 		 
 		}
 

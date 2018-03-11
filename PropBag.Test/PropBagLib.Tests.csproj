@@ -80,6 +80,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>OnlyTypedAccessModel.props.tt</DependentUpon>
     </Compile>
+    <Compile Include="Performance\PerformanceModel.props.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>PerformanceModel.props.tt</DependentUpon>
+    </Compile>
     <Compile Include="SetupFixture1.cs" />
     <Compile Include="SpecBasedVMTests\TypeDescriptorTests\TypeDescriptorTestGroup1.cs" />
     <Compile Include="SpecBasedVMTests\TypeDescriptorTests\TypeInspectorUtility.cs" />
@@ -98,12 +103,6 @@
     <Compile Include="PerformanceDb\PropModelHelpers.cs" />
     <Compile Include="PerformanceDb\TestPerformanceDb.cs" />
     <Compile Include="Performance\PerformanceModel.cs" />
-    <Compile Include="Performance\PerformanceModel.props.cs">
-      <DependentUpon>PerformanceModel.props.tt</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Loose\LooseModel.cs" />
     <Compile Include="OnlyTypedAccess\OnlyTypedAccessModel.cs" />
     <Compile Include="Loose\TestLoose.cs" />

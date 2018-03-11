@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" derive-from-pub-prop-bag="false" class-name="TestOu" output-namespace="PropBagLib.Tests" type-safety-mode="AllPropsMustBeRegistered" defer-method-ref-resolution="false" require-explicit-initial-value="true">
+<model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" derive-from-class-mode="Custom" derive-from-pub-prop-bag="false" class-name="TestOu" output-namespace="PropBagLib.Tests" type-safety-mode="AllPropsMustBeRegistered" defer-method-ref-resolution="false" require-explicit-initial-value="true">
   <namespaces />
   <props>
     <prop storage-strategy="Internal">
@@ -13,4 +13,4 @@
       <initial-value use-undefined="false" use-default="false" use-null="false" use-empty-string="false" create-new="false">1</initial-value>
     </prop>
   </props>
-</model>>
+</model>

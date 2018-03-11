@@ -16,24 +16,24 @@ namespace DRM.PropBag.ClassGenerator
     public class T4Support
     {
 
-        static public string GetBaseClassName(PropModelType propModel)
+        static public string GetBaseClassName(XMLPropModel propModel)
         {
             switch(propModel.DeriveFromClassMode)
             {
                 case DeriveFromClassModeEnum.PropBag: return "PropBag";
                 case DeriveFromClassModeEnum.PubPropBag: return "PubPropBag";
-                case DeriveFromClassModeEnum.Custom: return propModel.TypeToCreate.FullName;
+                case DeriveFromClassModeEnum.Custom: return propModel.NameOfClassToWrap;
                 default: throw new InvalidOperationException($"The {propModel.DeriveFromClassMode} is not recognized or is not supported.");
             }
             //return propModel.DeriveFromClassMode == DeriveFromClassModeEnum. .DeriveFromPubPropBag ? "PubPropBag" : "PropBag";
         }
 
-        static public string GetSafetyModeString(PropModel propModel)
+        static public string GetSafetyModeString(XMLPropModel propModel)
         {
             return propModel.TypeSafetyMode.ToString();
         }
 
-        static public string GetNamespaces(DRM.PropBag.XMLModel.XMLPropModel propModel)
+        static public string GetNamespaces(XMLPropModel propModel)
         {
             StringBuilder r = new StringBuilder();
 
@@ -52,7 +52,7 @@ namespace DRM.PropBag.ClassGenerator
             return r.AppendLine().ToString();
         }
 
-        static public string GetSubscribeMethodCallText(PropModel propModel, PropItem pi)
+        static public string GetSubscribeMethodCallText(XMLPropModel propModel, XMLPropItemModel pi)
         {
             PropDoWhenChanged doWhenPrepped = propModel.PrepareDoWhenChangedField(pi);
 
@@ -71,7 +71,7 @@ namespace DRM.PropBag.ClassGenerator
             return result;
         }
 
-        static public string GetAddPropMethodCallText(PropModel propModel, PropItem pi)
+        static public string GetAddPropMethodCallText(XMLPropModel propModel, XMLPropItemModel pi)
         {
             PropDoWhenChanged doWhenPrepped = propModel.PrepareDoWhenChangedField(pi);
 
@@ -105,9 +105,9 @@ namespace DRM.PropBag.ClassGenerator
 
                     if (initialValPrepped.SetToDefault) // (pi.InitalValueField.SetToDefault)
                     {
-                        if (comparerPrepped.UseRefEquality)
+                        if (comparerPrepped.UseRefEquality || comparerPrepped.Comparer == null)
                         {
-                            formatString = "AddProp{0}{1}<{2}>(\"{3}\", extraInfo:null)";
+                            formatString = "AddProp{0}{1}<{2}>(\"{3}\")";
                         }
                         else
                         {
@@ -139,9 +139,9 @@ namespace DRM.PropBag.ClassGenerator
                     //      object extraInfo = null,
 
                     vals[1] = "NoValue";
-                    if (comparerPrepped.UseRefEquality)
+                    if (comparerPrepped.UseRefEquality || comparerPrepped.Comparer == null)
                     {
-                        formatString = "AddProp{0}{1}<{2}>(\"{3}\", extraInfo:null)";
+                        formatString = "AddProp{0}{1}<{2}>(\"{3}\")";
                     }
                     else
                     {
@@ -159,9 +159,9 @@ namespace DRM.PropBag.ClassGenerator
                 //      Func<T,T,bool> comparer = null)
 
                 vals[1] = "NoStore";
-                if (comparerPrepped.UseRefEquality)
+                if (comparerPrepped.UseRefEquality || comparerPrepped.Comparer == null)
                 {
-                    formatString = "AddProp{0}{1}<{2}>(\"{3}\"), extraInfo:null)";
+                    formatString = "AddProp{0}{1}<{2}>(\"{3}\")";
                 }
                 else
                 {

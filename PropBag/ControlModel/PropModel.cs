@@ -44,11 +44,27 @@ namespace DRM.PropBag
 
         string cn;
         [XmlAttribute(AttributeName = "class-name")]
-        public string ClassName { get { return cn; } set { SetIfDifferent<string>(ref cn, value); } }
+        public string ClassName
+        {
+            get { return cn; }
+            set
+            {
+                OpenIfNotRegisteredWithCache();
+                SetIfDifferent<string>(ref cn, value);
+            }
+        }
 
         string ns;
         [XmlAttribute(AttributeName = "output-namespace")]
-        public string NamespaceName { get { return ns; } set { SetIfDifferent<string>(ref ns, value); } }
+        public string NamespaceName
+        {
+            get { return ns; }
+            set
+            {
+                OpenIfNotRegisteredWithCache();
+                SetIfDifferent<string>(ref ns, value);
+            }
+        }
 
         #endregion
 
@@ -96,7 +112,9 @@ namespace DRM.PropBag
             get => GetPropItems().ToList();
             set
             {
-                if(_propDictionary != null)
+                OpenIfNotRegisteredWithCache();
+
+                if (_propDictionary != null)
                 {
                     Clear();
                 }
@@ -108,8 +126,14 @@ namespace DRM.PropBag
         [XmlIgnore]
         public PropModelCacheInterface PropModelCache { get { return pmp; } set { SetAlways<PropModelCacheInterface>(ref pmp, value); } }
 
+        //[XmlIgnore]
+        //public PropertyDescriptorCollection PropertyDescriptorCollection { get; set; }
+
+        //[XmlIgnore]
+        //public ICustomTypeDescriptor CustomTypeDescriptor { get; set; }
+
         [XmlIgnore]
-        public PropertyDescriptorCollection PropertyDescriptorCollection { get; set; }
+        public object TypeDescriptionProvider { get; set; }
 
         object _syncLock = new object();
         public const long GEN_NONE = -1;
@@ -170,7 +194,10 @@ namespace DRM.PropBag
 
             Namespaces = new ObservableCollection<string>();
             _propDictionary = new Dictionary<PropNameType, IPropItemModel>();
-            PropertyDescriptorCollection = null;
+
+            //PropertyDescriptorCollection = null;
+            //CustomTypeDescriptor = null;
+            TypeDescriptionProvider = null;
         }
 
         #endregion
@@ -266,15 +293,11 @@ namespace DRM.PropBag
                 result._propDictionary = new Dictionary<PropNameType, IPropItemModel>();
                 foreach (IPropItemModel pi in GetPropItems())
                 {
-                    if (pi is IPropItemModel pmi)
-                    {
-                        result._propDictionary.Add(pi.PropertyName, (IPropItemModel)pi.Clone());
-                    }
+                    result._propDictionary.Add(pi.PropertyName, (IPropItemModel)pi.Clone());
                 }
             }
 
             return result;
-
         }
 
         bool _isFixed;
