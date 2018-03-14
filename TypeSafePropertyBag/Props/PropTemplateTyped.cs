@@ -128,16 +128,12 @@ namespace DRM.TypeSafePropertyBag
             {
                 return a.Equals(y);
             }
-            throw new NotImplementedException("This item does not implement IEquatable<IPropTemplate>");
+            return false; // throw new NotImplementedException("This item does not implement IEquatable<IPropTemplate>");
         }
 
         public int GetHashCode(IPropTemplate obj)
         {
-            if(obj is IEquatable<IPropTemplate> a)
-            {
-                return a.GetHashCode();
-            }
-            throw new NotImplementedException("This item does not implement IEquatable<IPropTemplate>");
+            return obj.GetHashCode();
         }
     }
 }
