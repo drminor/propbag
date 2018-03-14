@@ -42,10 +42,9 @@ namespace DRM.TypeSafePropertyBag
             {
                 if (disposing)
                 {
-                    // TODO: dispose managed state (managed objects).
+                    // Dispose managed state (managed objects) here.
                 }
 
-                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
                 // Set large fields to null.
                 _cache.Clear();
 
@@ -69,7 +68,5 @@ namespace DRM.TypeSafePropertyBag
         }
 
         #endregion
-
-
     }
 }
