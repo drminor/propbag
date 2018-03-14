@@ -35,18 +35,6 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
 
         #endregion
 
-        #region Public Properties
-
-        public IViewManagerProviderKey ViewManagerProviderKey { get; }
-
-        public LocalBindingInfo BindingInfo => ViewManagerProviderKey.BindingInfo;
-        public bool PathIsAbsolute => _localWatcher.PathIsAbsolute;
-        public bool Complete => _localWatcher.Complete;
-
-        public PropNameType PropertyName => _localWatcher.PropertyName;
-
-        #endregion
-
         #region Constructor
 
         public CViewManagerBinder
@@ -77,6 +65,20 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
 
         #endregion
 
+        #region Public Properties
+
+        public IViewManagerProviderKey ViewManagerProviderKey { get; }
+
+        public LocalBindingInfo BindingInfo => ViewManagerProviderKey.BindingInfo;
+        public bool PathIsAbsolute => _localWatcher.PathIsAbsolute;
+        public bool Complete => _localWatcher.Complete;
+
+        public PropNameType PropertyName => _localWatcher.PropertyName;
+
+        #endregion
+
+        #region Public Methods
+
         public IManageCViews CViewManager
         {
             get
@@ -102,6 +104,7 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
 
         //public IManageTypedCViews<EndEditWrapper<TDestination>, TDestination> TypedCViewManager => throw new NotImplementedException();
 
+        #endregion
 
         #region Private Methods
 
