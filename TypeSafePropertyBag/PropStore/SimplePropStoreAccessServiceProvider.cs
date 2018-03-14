@@ -125,6 +125,19 @@ namespace DRM.TypeSafePropertyBag
 
         #region PropItemSet Management
 
+        public bool IsPropItemSetFixed(IPropBag propBag)
+        {
+            if (TryGetPropBagNode(propBag, out BagNode propBagNode))
+            {
+                bool result = IsPropItemSetFixed(propBagNode);
+                return result;
+            }
+            else
+            {
+                throw new InvalidOperationException("Could not access the PropBagNode for the given PropBag.");
+            }
+        }
+
         public bool IsPropItemSetFixed(BagNode propBagNode)
         {
             return propBagNode.IsFixed;
@@ -203,7 +216,7 @@ namespace DRM.TypeSafePropertyBag
                 // Replace the exixting collection with the new one.
                 propBagNode.PropNodeCollection = newOpenCollection;
 
-                // return a reference to the new once cast as an object.
+                // return a reference to the new one cast as an object.
                 propItemSet_Handle = newOpenCollection;
                 result = true;
             }

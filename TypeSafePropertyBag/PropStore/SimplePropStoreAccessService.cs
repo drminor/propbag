@@ -256,6 +256,14 @@ namespace DRM.TypeSafePropertyBag
         {
             IPropDataInternal propData_Internal = new PropGen(genericTypedProp);
 
+            if (IsPropItemSetFixed)
+            {
+                if (!TryOpenPropItemSet(out object propItemSet_Handle_NotUsed))
+                {
+                    throw new InvalidOperationException("Can not add props to a fixed PropItemSet, and the attempt to open the PropItemSet failed.");
+                }
+            }
+
             PropNode propStoreNode = _ourNode.CreateAndAddPropNode(propData_Internal, propertyName);
 
             return propStoreNode;
@@ -315,7 +323,13 @@ namespace DRM.TypeSafePropertyBag
 
         public bool TryRemove(IPropBag propBag, PropIdType propId, out IPropData propData)
         {
-            //ExKeyT cKey = GetCompKey(propBag, propId);
+            if (IsPropItemSetFixed)
+            {
+                if (!TryOpenPropItemSet(out object propItemSet_Handle_NotUsed))
+                {
+                    throw new InvalidOperationException("Can not remove props to a fixed PropItemSet, and the attempt to open the PropItemSet failed.");
+                }
+            }
 
             bool result = _ourNode.TryRemoveChild(propId, out PropNode child);
 
@@ -544,7 +558,7 @@ namespace DRM.TypeSafePropertyBag
 
         #region PropItemSet Management
 
-        public bool IsPropItemSetFixed => _propStoreAccessServiceProvider.IsPropItemSetFixed(_ourNode);
+        public bool IsPropItemSetFixed => _ourNode.IsFixed; // _propStoreAccessServiceProvider.IsPropItemSetFixed(_ourNode);
 
         public object FixPropItemSet()
         {
@@ -1077,7 +1091,16 @@ namespace DRM.TypeSafePropertyBag
 
         #endregion
 
-        #region ViewManger and Data Source Provider Support
+        #region Data Source Provider Support
+
+        public DataSourceProvider GetDataSourceProvider(IPropBag propBag, PropIdType propId)
+        {
+            IManageCViews cViewManager = GetViewManager(propBag, propId);
+
+            if (cViewManager == null) return null;
+
+            return cViewManager.DataSourceProvider;
+        }
 
         // Provides thread-safe, lazy production of a single DataSourceProvider for each PropItem.
 
@@ -1093,15 +1116,6 @@ namespace DRM.TypeSafePropertyBag
             IManageCViews CViewManagerGen = GetOrAddViewManager(propBag, propId, propData, viewBuilder);
             DataSourceProvider result = CViewManagerGen.DataSourceProvider;
             return result;
-        }
-
-        public DataSourceProvider GetDataSourceProvider(IPropBag propBag, PropIdType propId)
-        {
-            IManageCViews cViewManager = GetViewManager(propBag, propId);
-
-            if (cViewManager == null) return null;
-
-            return cViewManager.DataSourceProvider;
         }
 
         public IManageCViews GetViewManager(IPropBag propBag, PropIdType propId)
@@ -1127,6 +1141,10 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
+        #endregion
+
+        #region Collection View Manager Support
+
         // ViewManager from ObservableCollection
         // Build a ViewManager whose source is a PropItem of Kind = ObservableCollection
         // A DataSourceProvider, a CollectionViewSource and a ListCollectionView are created.
@@ -1151,8 +1169,8 @@ namespace DRM.TypeSafePropertyBag
 
             IManageCViews CViewGenManagerFactory(PropIdType propId2)
             {
-                
-                IWatchAPropItemGen propItemWatcherGen = new PropItemWatcherGen(this, propId2);
+                Type propertyType = propData.TypedProp.PropTemplate.Type;
+                IWatchAPropItemGen propItemWatcherGen = new PropItemWatcherGen(this, propId2, propertyType);
 
                 IProvideADataSourceProvider dSProviderProvider = new PBCollectionDSP_Provider(propData.TypedProp.PropTemplate.PropKind, propItemWatcherGen);
                 IManageCViews result2 = new ViewManager(dSProviderProvider, viewBuilder);
@@ -1295,7 +1313,7 @@ namespace DRM.TypeSafePropertyBag
 
         #endregion
 
-        #region CViewManager Provider Support
+        #region Collection ViewManager Provider Support
 
         public IProvideATypedCViewManager<EndEditWrapper<TDestination>, TDestination> GetOrAddViewManagerProviderTyped<TDal, TSource, TDestination>
         (

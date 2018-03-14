@@ -35,7 +35,6 @@ namespace DRM.PropBag
     using PropModelType = IPropModel<String>;
     using PropModelCacheInterface = ICachePropModels<String>;
 
-
     #region Summary and Remarks
 
     /// <summary>
@@ -57,32 +56,25 @@ namespace DRM.PropBag
 
     #endregion
 
-    public partial class PropBag : IPropBag, IRegisterBindingsFowarderType
+    public partial class PropBag : IPropBag, IRegisterBindingsFowarderType, IDisposable
     {
         #region Member Declarations
 
-        // These items are provided to us.
-        protected internal IPropFactory _propFactory { get; set; }
-        protected internal PSAccessServiceInterface _ourStoreAccessor { get; set; }
-
-        protected internal PropModelCacheInterface _propModelCache { get; set; }
-        protected internal ICreateWrapperTypes _wrapperTypeCreator { get; set; }
-        protected internal IProvideAutoMappers _autoMapperService { get; set; }
-
-        protected internal PropModelType _propModel { get; set; }
-
-
-        // We are responsible for these
         private ITypeSafePropBagMetaData _ourMetaData { get; set; }
-        protected virtual ITypeSafePropBagMetaData OurMetaData { get { return _ourMetaData; } set { _ourMetaData = value; } }
-        //protected internal object _propItemSet_Handle { get; private set; }
-
         private IDictionary<string, IViewManagerProviderKey> _foreignViewManagers; // TODO: Consider creating a lazy property accessor for this field.
-
         private object _sync = new object();
+        private MemConsumptionTracker _memConsumptionTracker = new MemConsumptionTracker(enabled: false);
 
-        // Diagnostics
-        MemConsumptionTracker _memConsumptionTracker = new MemConsumptionTracker(enabled:false);
+        // These items are provided to us and are only set during construction.
+        protected internal IPropFactory _propFactory { get; private set; }
+        protected internal PSAccessServiceInterface _ourStoreAccessor { get; private set; }
+        protected internal PropModelCacheInterface _propModelCache { get; private set; }
+        protected internal ICreateWrapperTypes _wrapperTypeCreator { get; private set; }
+        protected internal IProvideAutoMappers _autoMapperService { get; private set; }
+        protected internal PropModelType _propModel { get; private set;}
+
+        // Inheritors may override this Property
+        protected internal virtual ITypeSafePropBagMetaData OurMetaData { get { return _ourMetaData; } private set { _ourMetaData = value; } }
 
         #endregion
 
@@ -91,7 +83,7 @@ namespace DRM.PropBag
         public string FullClassName => OurMetaData.FullClassName;
 
         //public IPropFactory PropFactory => _propFactory;
-        public PropBagTypeSafetyMode TypeSafetyMode => _ourMetaData.TypeSafetyMode;
+        protected internal PropBagTypeSafetyMode TypeSafetyMode => _ourMetaData.TypeSafetyMode;
 
         public event PropertyChangedEventHandler PropertyChanged
         {
@@ -229,48 +221,36 @@ namespace DRM.PropBag
             if (propModelWasRaw)
             {
                 // This must be the first time this PropModel has been applied.
-                // Store the Property Descriptors into the PropModel,
-
-                //propModel.PropertyDescriptorCollection = this.GetProperties();
 
                 // If we were given a PropModelCache, let the cache know that we are finished addding PropItems.
                 _propModelCache?.Fix(propModel);
 
                 // Also, to improve performance, let the PropertyStore know that the set of PropItems can be fixed as well.
-                // TODO: Restore this line and implement way for the store accessor to automatically open a fixed PropNodeCollection on add.
-                //_ourStoreAccessor.FixPropItemSet();
+                _ourStoreAccessor.FixPropItemSet();
             }
             else
             {
-                // Set our PropertyDescriptors from the copy cached in the PropModel.
-                //this._properties = propModel.PropertyDescriptorCollection;
-
+                // Diagnostic Checks
                 CheckForOpenPropSet();
-
-                // TODO: Put This back into place, once we implement being able to automatically (re)open a PropNodeCollection.
                 CheckForOpenPropNodeCollection();
             }
-
-            RegisterTypeDescriptorProvider(propModel);
-
-            //int testc = _ourStoreAccessor.PropertyCount;
         }
 
-        [System.Diagnostics.Conditional("DEBUG")]
+        [Conditional("DEBUG")]
         private void CheckForOpenPropSet()
         {
             if (!IsPropSetFixed)
             {
-                System.Diagnostics.Debug.WriteLine($"Notice: We just created a new PropBag using a 'cooked', but open PropModel with FullClassName: {_propModel} for {_ourStoreAccessor}.");
+                Debug.WriteLine($"Notice: We just created a new PropBag using a 'cooked', but open PropModel with FullClassName: {_propModel} for {_ourStoreAccessor}.");
             }
         }
 
-        [System.Diagnostics.Conditional("DEBUG")]
+        [Conditional("DEBUG")]
         private void CheckForOpenPropNodeCollection()
         {
             if (!_ourStoreAccessor.IsPropItemSetFixed)
             {
-                System.Diagnostics.Debug.WriteLine($"Notice: We just created a new PropBag using an open PropNodeCollection for {_ourStoreAccessor}.");
+                Debug.WriteLine($"Notice: We just created a new PropBag using an open PropNodeCollection for {_ourStoreAccessor}.");
             }
         }
 
@@ -286,52 +266,20 @@ namespace DRM.PropBag
             return true;
         }
 
-        protected void RegisterTypeDescriptorProvider(PropModelType propModel)
-        {
-            PropBagTypeDescriptionProvider<PropBag> typeDescriptionProvider;
-
-            // Note: PropModels, once fixed, will not be changed in any way that affects the set of PropertyDescriptors
-            // appropriate for all IPropBag instances created using that PropModel.
-
-            if (propModel != null && propModel.IsFixed)
-            {
-                // Check to see if our PropModel already has a TypeDescriptionProvider of the correct type assigned to it.
-                if (propModel.TypeDescriptionProvider is PropBagTypeDescriptionProvider<PropBag> pbTypeDescriptionProvider)
-                {
-                    // Use the one assigned to our PropModel 
-                    typeDescriptionProvider = pbTypeDescriptionProvider;
-                }
-                else
-                {
-                    // Create a brand new TypeDescriptionProvider
-                    typeDescriptionProvider = new PropBagTypeDescriptionProvider<PropBag>();
-                    // And assign it to our PropModel.
-                    propModel.TypeDescriptionProvider = typeDescriptionProvider;
-                }
-            }
-            else
-            {
-                // Build a brand new TypeDescriptionProvider just for this instance.
-                typeDescriptionProvider = new PropBagTypeDescriptionProvider<PropBag>();
-            }
-
-            TypeDescriptor.AddProvider(typeDescriptionProvider, this);
-        }
-
-        // TODO: This assumes that all IPropBag implementations use PropBag.
         public PropBag(IPropBag copySource)
         {
+            // TODO: This assumes that all IPropBag implementations use PropBag.
+
+            PropBagTypeSafetyMode typeSafetyMode = ((PropBag)copySource).TypeSafetyMode;
             IProvideAutoMappers autoMapperService = ((PropBag)copySource)._autoMapperService;
             IPropFactory propFactory = ((PropBag)copySource)._propFactory;
             PropModelCacheInterface propModelCache = ((PropBag)copySource)._propModelCache;
             PropModelType propModel = ((PropBag)copySource)._propModel;
 
-            BasicConstruction(copySource.TypeSafetyMode, autoMapperService, autoMapperService?.WrapperTypeCreator, propModelCache, propModel, propFactory, copySource.FullClassName);
+            BasicConstruction(typeSafetyMode, autoMapperService, autoMapperService?.WrapperTypeCreator, propModelCache, propModel, propFactory, copySource.FullClassName);
 
             PSAccessServiceInterface storeAccessor = ((PropBag)copySource)._ourStoreAccessor;
             _ourStoreAccessor = CloneProps(copySource, storeAccessor);
-
-            RegisterTypeDescriptorProvider(propModel);
         }
 
         protected PropBag(PropBagTypeSafetyMode typeSafetyMode, PSAccessServiceCreatorInterface storeAcessorCreator,
@@ -360,7 +308,7 @@ namespace DRM.PropBag
         {
             if (autoMapperService == null)
             {
-                System.Diagnostics.Debug.WriteLine($"Note: IPropBag with FullClassName: {fullClassName} does not have a AutoMapperService.");
+                Debug.WriteLine($"Note: IPropBag with FullClassName: {fullClassName} does not have a AutoMapperService.");
             }
 
             _autoMapperService = autoMapperService;
@@ -374,8 +322,8 @@ namespace DRM.PropBag
             _memConsumptionTracker.MeasureAndReport("BuildMetaData", $"Full Class Name: {fullClassName ?? "NULL"}");
 
             _foreignViewManagers = null;
+            _propertyDescriptors = null;
         }
-
 
         protected ITypeSafePropBagMetaData BuildMetaData(PropBagTypeSafetyMode typeSafetyMode, string classFullName, IPropFactory propFactory)
         {
@@ -412,41 +360,6 @@ namespace DRM.PropBag
             foreach (IPropItemModel pi in pm.GetPropItems())
             {
                 long amountUsedBeforeThisPropItem = _memConsumptionTracker.Measure($"Building Prop Item: {pi.PropertyName}");
-
-                //IProp typedProp;
-                //IPropTemplate propTemplate;
-
-                //if (pi.PropTemplate != null) // propItemSetHadValues /*&& propItemSet.TryGetPropTemplate(pi.PropertyName, out propTemplate)*/)
-                //{
-                //    // BuildPropFromCooked
-                //    propTemplate = pi.PropTemplate;
-                //    typedProp = BuildProp(pi, propModelCache, storeAccessCreator, autoMapperService, wrapperTypeCreator);
-                //}
-                //else
-                //{
-                //    // BuildPropFromRaw
-                //    typedProp = BuildPropFromRaw(pi, pm.PropModelCache, storeAccessCreator, autoMapperService, wrapperTypeCreator);
-
-                //    // Get a reference to the PropTemplate assigned to this Prop.
-                //    propTemplate = typedProp.PropTemplate;
-
-                //    // Remove the PropCreator function from the PropTemplate and store it in the PropModel
-                //    // A single PropTemplate may serve many PropItems and this value will be overwritten if left in the PropTemplate.
-                //    pi.PropCreator = propTemplate.PropCreator;
-
-                //    // Save the initial value of the Prop into the PropItemModel.
-                //    if (!propTemplate.IsPropBag && !pi.InitialValueField.CreateNew && typedProp.ValueIsDefined)
-                //    {
-                //        pi.InitialValueCooked = typedProp.TypedValueAsObject;
-                //    }
-                //    else
-                //    {
-                //        pi.InitialValueCooked = UN_SET_COOKED_INIT_VAL;
-                //    }
-
-                //    // Save the PropTemplate in our PropItemSet
-                //    pi.PropTemplate = propTemplate;
-                //}
 
                 bool weHadAPropTemplate = pi.PropTemplate != null;
                 IProp typedProp = BuildProp(pi, propModelCache, storeAccessCreator, autoMapperService, wrapperTypeCreator);
@@ -577,7 +490,7 @@ namespace DRM.PropBag
                 {
                     if (_foreignViewManagers.ContainsKey(pi.PropertyName))
                     {
-                        System.Diagnostics.Debug.WriteLine($"Warning: We already have a reference to a ViewManager on a 'foreign' IPropBag. We are updating this reference while processing Property: {pi.PropertyName} with BinderPath = {binderPath}.");
+                        Debug.WriteLine($"Warning: We already have a reference to a ViewManager on a 'foreign' IPropBag. We are updating this reference while processing Property: {pi.PropertyName} with BinderPath = {binderPath}.");
                         _foreignViewManagers[pi.PropertyName] = viewManagerProviderKey;
                     }
                     else
@@ -620,7 +533,10 @@ namespace DRM.PropBag
                 IViewManagerProviderKey viewManagerProviderKey = cViewManagerProvider.ViewManagerProviderKey;
 
                 // Get the name and type of property for which this ViewManager Provider was created.
-                PropNameType propertyName = GetTargetPropNameForView(_foreignViewManagers, viewManagerProviderKey, out Type propertyType);
+                if(!TryGetTargetPropNameForView(_foreignViewManagers, viewManagerProviderKey, out PropNameType propertyName, out Type propertyType))
+                {
+                    throw new InvalidOperationException($"The {nameof(IProvideACViewManager)} raised the ViewManagerChanged event but could not get the Target PropName from our list of foreign view managers.");
+                }
 
                 // Retreive the management Item from the PropStore for this property.
                 IPropData propData;
@@ -715,22 +631,36 @@ namespace DRM.PropBag
             return result;
         }
 
-        //[System.Diagnostics.Conditional("DEBUG")]
+        //[Conditional("DEBUG")]
         //private void CheckMapperRequestPropModelType(IPropModelItem pi)
         //{
         //    PropModelType propModel = pi.MapperRequest.PropModel;
 
-        //    System.Diagnostics.Debug.Assert(propModel.TargetType == pi.PropertyType,
+        //    Debug.Assert(propModel.TargetType == pi.PropertyType,
         //        $"The TargetType {propModel.TargetType} does not match the PropertyType: {pi.PropertyType}" +
         //        $" when creating a CollectionViewProp.");
         //}
 
-        private PropNameType GetTargetPropNameForView(IDictionary<PropNameType, IViewManagerProviderKey> viewManagerProviders, IViewManagerProviderKey viewManagerProviderKey, out Type propertyType)
+        private bool TryGetTargetPropNameForView(IDictionary<PropNameType, IViewManagerProviderKey> viewManagerProviders, IViewManagerProviderKey viewManagerProviderKey, out PropNameType propertyName, out Type propertyType)
         {
+            if(viewManagerProviders == null)
+            {
+                propertyName = null;
+                propertyType = typeof(object);
+                return false;
+            }
+
             KeyValuePair<string, IViewManagerProviderKey> kvp = viewManagerProviders.FirstOrDefault(x => x.Value == viewManagerProviderKey);
-            PropNameType propertyName = kvp.Key;
+            if(kvp.Equals(default(KeyValuePair<string, IViewManagerProviderKey>)))
+            {
+                propertyName = null;
+                propertyType = typeof(object);
+                return false;
+            }
+
+            propertyName = kvp.Key;
             propertyType = viewManagerProviderKey.MapperRequest.PropModel.TypeToCreate;
-            return propertyName;
+            return true;
         }
 
         private PropBagMapperCreator GetPropBagMapperFactory()
@@ -759,78 +689,6 @@ namespace DRM.PropBag
             IPropBagMapperGen genMapper = autoMapperService.GetMapper(mapperKey);
             return genMapper;
         }
-
-        //private IProp BuildStandardPropFromRaw(IPropItemModel pi, PropModelCacheInterface propModelProvider, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService)
-        //{
-        //    _memConsumptionTracker.Measure($"Begin BuildStandardPropFromRaw: {pi.PropertyName}.");
-
-        //    IProp result;
-
-        //    if (pi.ComparerField == null) pi.ComparerField = new PropComparerField();
-
-        //    if (pi.InitialValueField == null) pi.InitialValueField = PropInitialValueField.UseUndefined;
-
-        //    _memConsumptionTracker.MeasureAndReport("After field preparation", $"for {pi.PropertyName}");
-
-        //    string creationMethodDescription;
-        //    if (pi.StorageStrategy == PropStorageStrategyEnum.Internal && !pi.InitialValueField.SetToUndefined)
-        //    {
-        //        // Create New PropBag-based Object
-        //        if (pi.InitialValueField.PropBagResourceKey != null)
-        //        {
-        //            System.Diagnostics.Debug.Assert(pi.TypeIsSolid == true,
-        //                "Creating new PropItem of type IPropBag and the Type is not Solid!");
-
-        //            if (autoMapperService == null)
-        //            {
-        //                System.Diagnostics.Debug.WriteLine($"Note: IPropBag with FullClassName: {FullClassName} does not have a AutoMapperService.");
-        //            }
-
-        //            IPropBag newObject = GetNewViewModel(pi, propModelProvider, storeAccessCreator, autoMapperService);
-
-        //            creationMethodDescription = "CreateGenFromObject";
-        //            result = _propFactory.CreateGenFromObject(pi.PropertyType, newObject, pi.PropertyName, pi.ExtraInfo, pi.StorageStrategy, pi.TypeIsSolid,
-        //                pi.PropKind, pi.ComparerField.Comparer, pi.ComparerField.UseRefEquality, pi.ItemType);
-        //        }
-
-        //        // Create New CLR Type
-        //        else if (pi.InitialValueField.CreateNew)
-        //        {
-        //            object newValue = Activator.CreateInstance(pi.PropertyType);
-
-        //            pi.TypeIsSolid = _propFactory.IsTypeSolid(newValue, pi.PropertyType);
-
-        //            creationMethodDescription = "CreateGenFromObject";
-        //            result = _propFactory.CreateGenFromObject(pi.PropertyType, newValue, pi.PropertyName, pi.ExtraInfo, pi.StorageStrategy, pi.TypeIsSolid,
-        //                pi.PropKind, pi.ComparerField.Comparer, pi.ComparerField.UseRefEquality, pi.ItemType);
-        //        }
-
-        //        // Using the initial value specified by the PropModelItem.
-        //        else
-        //        {
-        //            bool useDefault = pi.InitialValueField.SetToDefault;
-        //            string value = GetValue(pi);
-
-        //            pi.TypeIsSolid = _propFactory.IsTypeSolid(value, pi.PropertyType);
-
-        //            creationMethodDescription = "CreateGenFromString";
-        //            result = _propFactory.CreateGenFromString(pi.PropertyType, value, useDefault, pi.PropertyName, pi.ExtraInfo, pi.StorageStrategy, pi.TypeIsSolid,
-        //                pi.PropKind, pi.ComparerField.Comparer, pi.ComparerField.UseRefEquality, pi.ItemType);
-        //        }
-        //    }
-        //    else
-        //    {
-        //        creationMethodDescription = "CreateGenWithNoValue";
-
-        //        pi.TypeIsSolid = pi.PropertyType != typeof(object);
-
-        //        result = _propFactory.CreateGenWithNoValue(pi.PropertyType, pi.PropertyName, pi.ExtraInfo, pi.StorageStrategy, pi.TypeIsSolid,
-        //            pi.PropKind, pi.ComparerField.Comparer, pi.ComparerField.UseRefEquality, pi.ItemType);
-        //    }
-        //    _memConsumptionTracker.MeasureAndReport($"Built Standard Typed Prop using {creationMethodDescription}", $" for {pi.PropertyName} (Raw.)");
-
-        //    return result;
-        //}
 
         private IProp BuildStandardProp(IPropItemModel pi, PropModelCacheInterface propModelProvider, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService)
         {
@@ -965,7 +823,7 @@ namespace DRM.PropBag
         
         const string UN_SET_COOKED_INIT_VAL = "&&&&_UN_SET_COOKED_INIT_VAL_&&&&";
 
-        [System.Diagnostics.Conditional("DEBUG")]
+        [Conditional("DEBUG")]
         private void CheckCookedInitialValue(object val)
         {
             if(val is string s && s == UN_SET_COOKED_INIT_VAL)
@@ -1054,7 +912,7 @@ namespace DRM.PropBag
 
             if (cName != pCName)
             {
-                System.Diagnostics.Debug.WriteLine($"CLR class name: {cName} does not match PropModel class name: {pCName}.");
+                Debug.WriteLine($"CLR class name: {cName} does not match PropModel class name: {pCName}.");
             }
         }
 
@@ -1148,7 +1006,7 @@ namespace DRM.PropBag
             //    int cnt = hh.Count;
             //}
 
-            System.Diagnostics.Debug.WriteLine("You may want to set a break point here.");
+            Debug.WriteLine("You may want to set a break point here.");
 
             //ICollectionView icv = cvs?.View;
 
@@ -1161,7 +1019,7 @@ namespace DRM.PropBag
             //}
             //else
             //{
-            //    System.Diagnostics.Debug.WriteLine("The default view of the CollectionViewSource: CVS does not implement ListCollectionView.");
+            //    Debug.WriteLine("The default view of the CollectionViewSource: CVS does not implement ListCollectionView.");
             //    SetIt<ListCollectionView>(null, "PersonListView");
             //}
         }
@@ -2120,6 +1978,55 @@ namespace DRM.PropBag
 
         #region Public Methods
 
+        public ICustomTypeDescriptor GetCustomTypeDescriptor() 
+        {
+            // Get the type of this instance.
+            Type t = GetType();
+
+            // Get the Default TypeDescriptor for the type of this instance.
+            ICustomTypeDescriptor parent = TypeDescriptor.GetProvider(t).GetTypeDescriptor(t);
+
+            // Get our Custom TypeDescriptor using the default TypeDescriptor as the base.
+            ICustomTypeDescriptor result = GetCustomTypeDescriptor(parent);
+            return result;
+        }
+
+        ICustomTypeDescriptor _ctd;
+        public ICustomTypeDescriptor GetCustomTypeDescriptor(ICustomTypeDescriptor parent)
+        {
+            if (_propModel == null || !_propModel.IsFixed)
+            {
+                if (_ctd == null)
+                {
+                    _ctd = new PropBagCustomTypeDescriptor(parent, this.CustomPropsGetter);
+                }
+                return _ctd;
+            }
+            else
+            {
+                if (_propModel.CustomTypeDescriptor == null)
+                {
+                    // Create a new PropertyDescriptorListProvider to hold the fixed list of PropertyDescriptors 
+                    // for this fixed PropModel.
+                    // This class, instead of this instance the PropBag, will be held by the new CustomTypeDescriptor,
+                    // allowing this instance of the PropBag to be Garbage Collected, without interferring with 
+                    // the opertion of the other users of this PropModel.
+                    IList<PropertyDescriptor> propertyDescriptors = GetCustomProps();
+                    PropertyDescriptorStaticListProvider pdList = new PropertyDescriptorStaticListProvider(propertyDescriptors);
+
+                    // Store the CustomTypeDescriptor in the PropModel for all to use.
+                    _propModel.CustomTypeDescriptor = new PropBagCustomTypeDescriptor(parent, pdList.CustomPropsGetter);
+                }
+                return _propModel.CustomTypeDescriptor;
+            }
+        }
+
+        //protected internal virtual ICustomTypeDescriptor GetCustomTypeDescriptor_Int()
+        //{
+        //    CustomTypeDescriptor x = null;
+        //    return x;
+        //}
+
         public virtual object Clone()
         {
             return new PropBag(this);
@@ -2143,30 +2050,12 @@ namespace DRM.PropBag
             return OurMetaData;
         }
 
-        ///// <summary>
-        ///// Makes a copy of the core list.
-        ///// </summary>
-        ///// <returns></returns>
-        //public IReadOnlyDictionary<string, ValPlusType> GetAllPropNamesAndTypes()
-        //{
-        //    IEnumerable<KeyValuePair<PropNameType, IPropData>> theStoreAsCollection = _ourStoreAccessor.GetCollection(this);
-
-        //    IEnumerable<KeyValuePair<string, ValPlusType>> list = theStoreAsCollection.Select(x =>
-        //    new KeyValuePair<string, ValPlusType>(x.Key, x.Value.TypedProp.GetValuePlusType())).ToList();
-
-        //    IDictionary<string, ValPlusType> dict = list.ToDictionary(pair => pair.Key, pair => pair.Value);
-
-        //    IReadOnlyDictionary<string, ValPlusType> result2 = new ReadOnlyDictionary<string, ValPlusType>(dict);
-
-        //    return result2;
-        //}
-
         public IEnumerable<KeyValuePair<PropNameType, ValPlusType>> GetAllPropNamesValuesAndTypes()
         {
             IEnumerable<KeyValuePair<PropNameType, IPropData>> theStoreAsCollection = _ourStoreAccessor.GetPropDataItemsWithNames(this);
 
             IEnumerable<KeyValuePair<string, ValPlusType>> list = theStoreAsCollection.Select(x =>
-            new KeyValuePair<string, ValPlusType>(x.Key, x.Value.TypedProp.GetValuePlusType()));
+                new KeyValuePair<string, ValPlusType>(x.Key, x.Value.TypedProp.GetValuePlusType()));
 
             return list;
         }
@@ -2176,9 +2065,6 @@ namespace DRM.PropBag
         /// </summary>
         public IReadOnlyDictionary<PropNameType, IPropData> GetAllPropertyValues()
         {
-            //IEnumerable<KeyValuePair<PropNameType, IPropData>> theStoreAsCollection = _ourStoreAccessor.GetCollection(this);
-            //IReadOnlyDictionary<PropNameType, IPropData> result = theStoreAsCollection.ToDictionary(pair => pair.Key, pair => pair.Value);
-
             IReadOnlyDictionary<PropNameType, IPropData> result = _ourStoreAccessor.GetCollection(this);
 
             return result;
@@ -2192,11 +2078,11 @@ namespace DRM.PropBag
 
         public bool HasPropModel => _propModel != null;
 
-        public IEnumerable<IPropItemModel> GetPropItemModels()
-        {
-            IEnumerable<IPropItemModel> result = _propModel?.GetPropItems() ?? Enumerable.Empty<IPropItemModel>();
-            return result;
-        }
+        //public IEnumerable<IPropItemModel> GetPropItemModels()
+        //{
+        //    IEnumerable<IPropItemModel> result = _propModel?.GetPropItems() ?? Enumerable.Empty<IPropItemModel>();
+        //    return result;
+        //}
 
         public bool PropertyExists(string propertyName)
         {
@@ -2320,10 +2206,10 @@ namespace DRM.PropBag
 
         #endregion
 
-        #region Add Enumerable-Type Props
+        #region Register Enumerable-Type Props
         #endregion
 
-        #region Add ObservableCollection<T> Props
+        #region Register ObservableCollection<T> Props
 
         public ICProp<CT, T> AddCollectionProp<CT, T>
             (
@@ -2346,7 +2232,7 @@ namespace DRM.PropBag
 
         #endregion
 
-        #region Add Collection and CollectionViewSource Props
+        #region Register Collection and CollectionViewSource Props
 
         public IProp AddCollectionViewSourceProp(string propertyName, IProvideAView viewProvider, IPropTemplate propTemplate)
         {
@@ -2447,21 +2333,21 @@ namespace DRM.PropBag
 
         public bool TryGetCViewManagerProvider(PropNameType propertyName, out IProvideACViewManager cViewManagerProvider)
         {
-            if(_foreignViewManagers.TryGetValue(propertyName, out IViewManagerProviderKey viewManagerProviderKey))
+            if(_foreignViewManagers == null || !_foreignViewManagers.TryGetValue(propertyName, out IViewManagerProviderKey viewManagerProviderKey))
             {
-                if(_ourStoreAccessor.TryGetViewManagerProvider(this, viewManagerProviderKey, out cViewManagerProvider))
-                {
-                    return true;
-                }
-                else
-                {
-                    cViewManagerProvider = null;
-                    return false;
-                }
+                cViewManagerProvider = null;
+                return false;
+                //throw new KeyNotFoundException($"There is no CViewManagerProvider allocated for PropItem with name = {propertyName}.");
+            }
+
+            if (_ourStoreAccessor.TryGetViewManagerProvider(this, viewManagerProviderKey, out cViewManagerProvider))
+            {
+                return true;
             }
             else
             {
-                throw new KeyNotFoundException($"There is no CViewManagerProvider allocated for PropItem with name = {propertyName}.");
+                cViewManagerProvider = null;
+                return false;
             }
         }
 
@@ -2611,7 +2497,7 @@ namespace DRM.PropBag
 
         #endregion
 
-        #region Add Property-Type Props
+        #region Register Property-Type Props
 
         protected IProp<T> AddProp<T>(string propertyName)
         {
@@ -2807,11 +2693,13 @@ namespace DRM.PropBag
             if(_propModelCache == null)
             {
                 _propModel.Open();
+                _propertyDescriptors = null;
                 return true;
             }
             else
             {
                 _propModel = _propModelCache.Open(_propModel, out long generationId);
+                _propertyDescriptors = null;
                 return true;
             }
         }
@@ -2867,13 +2755,13 @@ namespace DRM.PropBag
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine($"The prop was found, but could not be removed. Property: {propertyName}.");
+                    Debug.WriteLine($"The prop was found, but could not be removed. Property: {propertyName}.");
                     return false;
                 }
             }
             else
             {
-                System.Diagnostics.Debug.WriteLine($"Could not remove property: {propertyName}.");
+                Debug.WriteLine($"Could not remove property: {propertyName}.");
                 return false;
             }
         }
@@ -2892,13 +2780,13 @@ namespace DRM.PropBag
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine($"The prop was found, but could not be removed. Property: {propertyName}.");
+                    Debug.WriteLine($"The prop was found, but could not be removed. Property: {propertyName}.");
                     return false;
                 }
             }
             else
             {
-                System.Diagnostics.Debug.WriteLine($"Could not remove property: {propertyName}.");
+                Debug.WriteLine($"Could not remove property: {propertyName}.");
                 return false;
             }
         }
@@ -3016,7 +2904,7 @@ namespace DRM.PropBag
                     object target = sub.Target.Target;
                     if (target == null)
                     {
-                        System.Diagnostics.Debug.WriteLine($"The object listening to this event is 'no longer with us.'");
+                        Debug.WriteLine($"The object listening to this event is 'no longer with us.'");
                     }
                     else
                     {
@@ -3026,7 +2914,7 @@ namespace DRM.PropBag
                 }
                 catch (Exception e)
                 {
-                    System.Diagnostics.Debug.WriteLine($"A Changing (PropertyChangingEventHandler) handler raised an exception: {e.Message} with inner: {e.InnerException?.Message} ");
+                    Debug.WriteLine($"A Changing (PropertyChangingEventHandler) handler raised an exception: {e.Message} with inner: {e.InnerException?.Message} ");
                 }
             }
         }
@@ -3083,62 +2971,8 @@ namespace DRM.PropBag
                 }
                 catch (Exception e)
                 {
-                    System.Diagnostics.Debug.WriteLine($"A {sub.SubscriptionKind} handler raised an exception: {e.Message} with inner: {e.InnerException?.Message} ");
+                    Debug.WriteLine($"A {sub.SubscriptionKind} handler raised an exception: {e.Message} with inner: {e.InnerException?.Message} ");
                 }
-            }
-        }
-
-        public void RaiseStandardPropertyChanged(PropNameType propertyName)
-        {
-            if(TryGetPropId(propertyName, out PropIdType propId))
-            {
-                RaiseStandardPropertyChanged(propId, propertyName);
-            }
-            else
-            {
-                throw new InvalidOperationException($"Could not get the PropId for property name = {propertyName}.");
-            }
-        }
-
-        private void RaiseStandardPropertyChanged(PropIdType propId, PropNameType propertyName)
-        {
-            IEnumerable<ISubscription> subscriptions = _ourStoreAccessor.GetSubscriptions(this, propId);
-
-            IEnumerable<ISubscription> globalSubs = _ourStoreAccessor.GetSubscriptions(this, 0);
-
-            if (subscriptions != null) RaiseStandardPropertyChangedWorker(propertyName, subscriptions);
-
-            if (globalSubs != null) RaiseStandardPropertyChangedWorker(propertyName, globalSubs);
-        }
-
-        private void RaiseStandardPropertyChangedWorker(PropNameType propertyName, IEnumerable<ISubscription> subscriptions)
-        {
-            if (subscriptions == null)
-                return;
-
-            foreach (ISubscription sub in subscriptions)
-            {
-                CheckSubScriptionObject(sub);
-
-                if (sub.SubscriptionKind == SubscriptionKind.StandardHandler)
-                {
-                    object target = sub.Target.Target;
-                    if (target == null)
-                    {
-                        return; // The subscriber has been collected by the GC.
-                    }
-
-                    try
-                    {
-                        PropertyChangedEventArgs e = new PropertyChangedEventArgs(propertyName);
-                        sub.PcStandardHandlerDispatcher(target, this, e, sub.HandlerProxy);
-                    }
-                    catch (Exception e)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"A {sub.SubscriptionKind} handler raised an exception: {e.Message} with inner: {e.InnerException?.Message} ");
-                    }
-                }
-
             }
         }
 
@@ -3201,9 +3035,8 @@ namespace DRM.PropBag
 
             if (sub.Target.Target == null)
             {
-                System.Diagnostics.Debug.WriteLine($"The object listening to this event is 'no longer with us.'");
+                Debug.WriteLine($"The object listening to this event is 'no longer with us.'");
             }
-
         }
 
         // For when the current value is undefined.
@@ -3260,7 +3093,7 @@ namespace DRM.PropBag
                 }
                 catch (Exception e)
                 {
-                    System.Diagnostics.Debug.WriteLine($"A {sub.SubscriptionKind} handler raised an exception: {e.Message} with inner: {e.InnerException?.Message} ");
+                    Debug.WriteLine($"A {sub.SubscriptionKind} handler raised an exception: {e.Message} with inner: {e.InnerException?.Message} ");
                 }
             }
         }
@@ -3369,8 +3202,6 @@ namespace DRM.PropBag
             return result;
         }
 
-
-
         /// <summary>
         /// 
         /// </summary>
@@ -3400,7 +3231,7 @@ namespace DRM.PropBag
 
             if(propertyName.StartsWith("Business"))
             {
-                System.Diagnostics.Debug.WriteLine("Acessing PropItem with name starting: 'Business'.");
+                Debug.WriteLine("Acessing PropItem with name starting: 'Business'.");
             }
 
             if (TryGetPropId(propertyName, out propId))
@@ -3592,6 +3423,60 @@ namespace DRM.PropBag
 
         #region Methods to Raise Events
 
+        public void RaiseStandardPropertyChanged(PropNameType propertyName)
+        {
+            if (TryGetPropId(propertyName, out PropIdType propId))
+            {
+                RaiseStandardPropertyChanged(propId, propertyName);
+            }
+            else
+            {
+                throw new InvalidOperationException($"Could not get the PropId for property name = {propertyName}.");
+            }
+        }
+
+        private void RaiseStandardPropertyChanged(PropIdType propId, PropNameType propertyName)
+        {
+            IEnumerable<ISubscription> subscriptions = _ourStoreAccessor.GetSubscriptions(this, propId);
+
+            IEnumerable<ISubscription> globalSubs = _ourStoreAccessor.GetSubscriptions(this, 0);
+
+            if (subscriptions != null) RaiseStandardPropertyChangedWorker(propertyName, subscriptions);
+
+            if (globalSubs != null) RaiseStandardPropertyChangedWorker(propertyName, globalSubs);
+        }
+
+        private void RaiseStandardPropertyChangedWorker(PropNameType propertyName, IEnumerable<ISubscription> subscriptions)
+        {
+            if (subscriptions == null)
+                return;
+
+            foreach (ISubscription sub in subscriptions)
+            {
+                CheckSubScriptionObject(sub);
+
+                if (sub.SubscriptionKind == SubscriptionKind.StandardHandler)
+                {
+                    object target = sub.Target.Target;
+                    if (target == null)
+                    {
+                        return; // The subscriber has been collected by the GC.
+                    }
+
+                    try
+                    {
+                        PropertyChangedEventArgs e = new PropertyChangedEventArgs(propertyName);
+                        sub.PcStandardHandlerDispatcher(target, this, e, sub.HandlerProxy);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.WriteLine($"A {sub.SubscriptionKind} handler raised an exception: {e.Message} with inner: {e.InnerException?.Message} ");
+                    }
+                }
+            }
+        }
+
+        // OLD CODE
         // Raise Standard Events
         //protected void OnPropertyChanged(string propertyName)
         //{
@@ -3643,7 +3528,7 @@ namespace DRM.PropBag
 
         public void BeginEdit()
         {
-            System.Diagnostics.Debug.WriteLine($"BeginEdit was called on PropBag: {FullClassName}.");
+            Debug.WriteLine($"BeginEdit was called on PropBag: {FullClassName}.");
         }
 
         public void CancelEdit()
@@ -3687,6 +3572,37 @@ namespace DRM.PropBag
         #endregion
 
         #region DataSourceProvider Support
+
+        public bool TryGetDataSourceProvider(PropNameType propertyName, Type propertyType,
+            out DataSourceProvider dataSourceProvider)
+        {
+            bool mustBeRegistered = true; // TryGetViewManager is called in the constructor, we cannot reference the virtual property: OurMetaData.AllPropsMustBeRegistered; 
+
+            IPropData propData = GetPropGen(propertyName, propertyType,
+                haveValue: false,
+                value: null,
+                alwaysRegister: false,
+                mustBeRegistered: mustBeRegistered,
+                neverCreate: false,
+                desiredHasStoreValue: null,
+                wasRegistered: out bool wasRegistered,
+                propId: out PropIdType propId);
+
+            if (propData != null)
+            {
+                dataSourceProvider = _ourStoreAccessor.GetOrAddDataSourceProvider(this, propId, propData, _propFactory.GetCViewProviderFactory());
+                return true;
+            }
+            else
+            {
+                dataSourceProvider = null;
+                return false;
+            }
+        }
+
+        #endregion
+
+        #region View Manager Support
 
         public IManageCViews GetOrAddViewManager<TDal, TSource, TDestination>
         (
@@ -3747,87 +3663,19 @@ namespace DRM.PropBag
                 return null;
             }
 
-            void DataSourceProvider_DataChanged(object sender, EventArgs e)
-            {
-                if(sender is DataSourceProvider dsp)
-                {
-                    Type rtt = GetViewsItemRunTimeType<TDal, TSource, TDestination>(dsp);
+            //// Just for Diagnostics
+            //void DataSourceProvider_DataChanged(object sender, EventArgs e)
+            //{
+            //    if(sender is DataSourceProvider dsp)
+            //    {
+            //        Type rtt = GetCollectionItemRunTimeType<TDal, TSource, TDestination>(dsp);
 
-                    if (rtt != null)
-                    {
-                        _propFactory.CreateGenWithNoValue(rtt, "test", null, PropStorageStrategyEnum.Internal, true, PropKindEnum.Prop, null, false, null);
-                    }
-                }
-
-            }
-        }
-
-        private Type GetViewsItemRunTimeType<TDal, TSource, TDestination>(DataSourceProvider dsp)
-            where TDal : class, IDoCRUD<TSource>
-            where TSource : class
-            where TDestination : INotifyItemEndEdit
-        {
-            var y = dsp as ClrMappedDSP<TDestination>;  //  CrudWithMapping<TDal, TSource, TDestination>;
-
-            if (y != null)
-            {
-                var z = y.CrudWithMapping;
-
-                var a = z as CrudWithMapping<TDal, TSource, TDestination>;
-                return a.Mapper.TargetRunTimeType;
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-        private Type GetViewsItemRunTimeType<TDal, TSource, TDestination>(IManageCViews cViewManager)
-            where TDal : class, IDoCRUD<TSource>
-            where TSource : class
-            where TDestination : INotifyItemEndEdit
-        {
-            DataSourceProvider dsp = cViewManager.DataSourceProvider;
-
-            var y = dsp as CrudWithMapping<TDal, TSource, TDestination>;
-
-            if (y != null)
-            {
-                var z = y.Mapper;
-                Type rtt = z.TargetRunTimeType;
-                return rtt;
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-        public bool TryGetDataSourceProvider(PropNameType propertyName, Type propertyType,
-            out DataSourceProvider dataSourceProvider)
-        {
-            bool mustBeRegistered = true; // TryGetViewManager is called in the constructor, we cannot reference the virtual property: OurMetaData.AllPropsMustBeRegistered; 
-
-            IPropData propData = GetPropGen(propertyName, propertyType,
-                haveValue: false,
-                value: null,
-                alwaysRegister: false,
-                mustBeRegistered: mustBeRegistered,
-                neverCreate: false,
-                desiredHasStoreValue: null,
-                wasRegistered: out bool wasRegistered,
-                propId: out PropIdType propId);
-
-            if (propData != null)
-            {
-                dataSourceProvider = _ourStoreAccessor.GetOrAddDataSourceProvider(this, propId, propData, _propFactory.GetCViewProviderFactory());
-                return true;
-            }
-            else
-            {
-                dataSourceProvider = null;
-                return false;
-            }
+            //        if (rtt != null)
+            //        {
+            //            _propFactory.CreateGenWithNoValue(rtt, "test", null, PropStorageStrategyEnum.Internal, true, PropKindEnum.Prop, null, false, null);
+            //        }
+            //    }
+            //}
         }
 
         public IManageCViews GetOrAddViewManager(PropNameType propertyName, Type propertyType)
@@ -3855,6 +3703,14 @@ namespace DRM.PropBag
             }
         }
 
+        /// <summary>
+        /// In those cases where the View's data is retreived from a 'foreign' PropItem, this should be called on 
+        /// the foreign View Model (i.e., PropBag.)
+        /// </summary>
+        /// <param name="propertyName"></param>
+        /// <param name="propertyType"></param>
+        /// <param name="cViewManager"></param>
+        /// <returns></returns>
         public bool TryGetViewManager(PropNameType propertyName, Type propertyType, out IManageCViews cViewManager)
         {
             bool mustBeRegistered = true; // TryGetViewManager is called in the constructor, we cannot reference the virtual property: OurMetaData.AllPropsMustBeRegistered; 
@@ -3871,6 +3727,26 @@ namespace DRM.PropBag
 
             if (propData != null)
             {
+                // TODO: Consider fixing up this commented-out code to handle cases 
+                // when the property specified is the target of a CollectionViewManagerBinding.
+
+                //if(propData.TypedProp.PropTemplate.PropKind == PropKindEnum.CollectionView)
+                //{
+                //    if(propData.TypedProp is IProvideAView viewProvider)
+                //    {
+                //        if(viewProvider.DataSourceProvider is IProvideADataSourceProvider dsProviderProvider)
+                //        {
+                //            Type collectionItemRunTimeType = dsProviderProvider.CollectionItemRunTimeType;
+                //            // Next try to get the CLR_Mapped_DSP<DestinationT>
+                //        }
+                //    }
+                //}
+
+                //if(_foreignViewManagers.TryGetValue(propertyName, out IViewManagerProviderKey vmpKey))
+                //{
+
+                //}
+
                 cViewManager = _ourStoreAccessor.GetViewManager(this, propId);
                 return true;
             }
@@ -3879,6 +3755,152 @@ namespace DRM.PropBag
                 cViewManager = null;
                 return false;
             }
+        }
+
+        protected internal Type GetCollectionItemRunTimeType(IManageCViews cViewManager)
+        {
+            DataSourceProvider dsp = cViewManager.DataSourceProvider;
+
+            try
+            {
+                Type result = GetCollectionItemRunTimeType(dsp);
+
+                return result;
+            }
+            catch (InvalidOperationException e)
+            {
+                throw new InvalidOperationException($"The CollectionViewManager's DataSourceProvider does not implement the IProvideADataSourceProvider interface.");
+            }
+        }
+
+        protected internal Type GetCollectionItemRunTimeType(DataSourceProvider dsp)
+        {
+            if(dsp is IProvideADataSourceProvider dsProviderProvider)
+            {
+                Type result = dsProviderProvider.CollectionItemRunTimeType;
+                return result;
+            }
+            else
+            {
+                throw new InvalidOperationException($"The DataSourceProvider does not implement the IProvideADataSourceProvider interface.");
+            }
+        }
+
+        protected internal Type GetCollectionItemRunTimeType<TDal, TSource, TDestination>(IManageCViews cViewManager)
+            where TDal : class, IDoCRUD<TSource>
+            where TSource : class
+            where TDestination : INotifyItemEndEdit
+        {
+            DataSourceProvider dsp = cViewManager.DataSourceProvider;
+            Type result = GetCollectionItemRunTimeType<TDal, TSource, TDestination>(dsp);
+            return result;
+        }
+
+        protected internal Type GetCollectionItemRunTimeType<TDal, TSource, TDestination>(DataSourceProvider dsp)
+            where TDal : class, IDoCRUD<TSource>
+            where TSource : class
+            where TDestination : INotifyItemEndEdit
+        {
+            ClrMappedDSP<TDestination> mappedDsp = dsp as ClrMappedDSP<TDestination>;  //  CrudWithMapping<TDal, TSource, TDestination>;
+
+            if (mappedDsp != null)
+            {
+                //var z = y.CrudWithMapping;
+
+                //var a = z as CrudWithMapping<TDal, TSource, TDestination>;
+                //return a.Mapper.TargetRunTimeType;
+
+                Type result = (mappedDsp as IProvideADataSourceProvider)?.CollectionItemRunTimeType;
+                return result;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        #endregion
+
+        #region Custom Type Descriptor Support
+
+        // TOOD: Consider building the PropertyDescriptors directly from our list of PropData Items.
+        //_ourStoreAccessor.GetPropDataItemsWithNames(this);
+
+        protected internal Func<IList<PropertyDescriptor>> CustomPropsGetter => GetCustomProps;
+
+        private IList<PropertyDescriptor> _propertyDescriptors;
+
+        private IList<PropertyDescriptor> GetCustomProps()
+        {
+            IList<PropertyDescriptor> result;
+
+            if (HasPropModel)
+            {
+                // Use the List of PropItems from the PropModel
+                if (_propModel.IsFixed)
+                {
+                    // Build and Cache.
+                    if (_propertyDescriptors == null)
+                    {
+                        //if(_propModel.ClassName == "MainWindowViewModel")
+                        //{
+                        //    Debug.WriteLine("Getting Custom Props for the MainWindowViewModel.");
+                        //}
+
+                        IEnumerable<IPropItemModel> propItemModels = _propModel.GetPropItems();
+                        _propertyDescriptors = BuildCustomProps(propItemModels);
+                    }
+                    result = _propertyDescriptors;
+                }
+                else
+                {
+                    // Build a new set every time.
+                    IEnumerable<IPropItemModel> propItemModels = _propModel.GetPropItems();
+                    result = BuildCustomProps(propItemModels);
+                }
+            }
+            else
+            {
+                // Use the list of registered IProps.
+                // TODO: See if we can cache this list of PropertyDescriptors.
+                result = new List<PropertyDescriptor>();
+
+                foreach (KeyValuePair<string, ValPlusType> kvp in GetAllPropNamesValuesAndTypes())
+                {
+                    PropertyDescriptor propItemTypeDesc =
+                        new PropItemPropertyDescriptor<PropBag>(kvp.Key, kvp.Value.Type, new Attribute[] { });
+
+                    result.Add(propItemTypeDesc);
+                }
+            }
+
+            return result;
+        }
+
+        private IList<PropertyDescriptor> BuildCustomProps(IEnumerable<IPropItemModel> propItemModels)
+        {
+            IList<PropertyDescriptor> result = new List<PropertyDescriptor>();
+
+            foreach (IPropItemModel pi in propItemModels)
+            {
+                PropItemPropertyDescriptor<PropBag> propItemTypeDesc;
+
+                if (pi.PropKind == PropKindEnum.CollectionView || pi.PropKind == PropKindEnum.ObservableCollection || pi.PropKind == PropKindEnum.Prop)
+                {
+                    propItemTypeDesc = new PropItemPropertyDescriptor<PropBag>(pi.PropertyName, pi.PropertyType, new Attribute[] { });
+
+                    // TODO: Implement a way to create a Typed PropertyDescriptor for fast Get/Set methods.
+                    //propItemTypeDesc = new PropItemPropertyDescriptor_Typed<<T>(pi.PropertyName, pi.PropertyType, new Attribute[] { });
+                }
+                else
+                {
+                    throw new InvalidOperationException($"The {nameof(PropBagTypeDescriptionProvider<PropBag>)} does not recognized or does not support Props of Kind = {pi.PropKind}.");
+                }
+
+                result.Add(propItemTypeDesc);
+            }
+
+            return result;
         }
 
         #endregion
@@ -3990,15 +4012,6 @@ namespace DRM.PropBag
                 return result;
             }
         }
-
-        //public int CreatePropWithNoValCacheCount
-        //{
-        //    get
-        //    {
-        //        int result = _propFactory.CreatePropWithNoValCacheCount;
-        //        return result;
-        //    }
-        //}
 
         #endregion
     }

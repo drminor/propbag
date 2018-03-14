@@ -237,6 +237,10 @@ namespace DRM.TypeSafePropertyBag
 
         public PropNode CreateAndAddPropNode(IPropDataInternal propData_Internal, PropNameType propertyName)
         {
+            if(_propNodeCollection.IsFixed)
+            {
+                
+            }
             PropNode newPropNode = _propNodeCollection.CreateAndAdd(propData_Internal, propertyName, this);
             return newPropNode;
         }

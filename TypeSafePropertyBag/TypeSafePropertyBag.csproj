@@ -66,10 +66,12 @@
     <Compile Include="Fundamentals\CollectionViewExtensions.cs" />
     <Compile Include="DataSourceMapping\IPropBagMapper.cs" />
     <None Include="LocalBinding\Instances\LocalBinder - SafetyCopy.cs" />
+    <Compile Include="Fundamentals\TypeInspectorUtility.cs" />
     <Compile Include="LocalBinding\Engine\BindingPathParser.cs" />
     <Compile Include="LocalBinding\Instances\LocalWatcher.cs" />
     <Compile Include="LocalBinding\Instances\PropStoreNotificationKindEnum.cs" />
     <Compile Include="LocalBinding\Registration\IReceivePropStoreNodeUpdates.cs" />
+    <Compile Include="PropBagInterfaces\IHaveACustomTypeDesriptor.cs" />
     <Compile Include="PropBagInterfaces\INotifyItemEndEdit.cs" />
     <Compile Include="Fundamentals\ICacheDelegates.cs" />
     <Compile Include="Fundamentals\ICacheDelegatesForTypePair.cs" />
@@ -128,8 +130,10 @@
     <None Include="TypeDescriptors\NotUsed\IPropItemTypeDescriptor_NotUsed.cs" />
     <Compile Include="TypeDescriptors\NotUsed\MyTypeDescriptorBase_NotUsed.cs" />
     <None Include="TypeDescriptors\NotUsed\PbCollectionItemTypeDescriptor_NotUsed.cs" />
+    <Compile Include="TypeDescriptors\PropBagCustomTypeDescriptor.cs" />
     <Compile Include="TypeDescriptors\PropBagTypeDescriptionProvider.cs" />
     <None Include="TypeDescriptors\NotUsed\PropBagTypeDescriptor_NotUsed.cs" />
+    <Compile Include="TypeDescriptors\PropertyDescriptorStaticListProvider.cs" />
     <Compile Include="TypeDescriptors\PropItemPropertyDescriptor.cs" />
     <Compile Include="TypeDescriptors\PropItemPropertyDescriptor_Typed.cs" />
     <Compile Include="TypeDescriptors\PropertyDescriptorValues.cs" />

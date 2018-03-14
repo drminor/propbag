@@ -31,6 +31,7 @@ namespace DRM.TypeSafePropertyBag
 
         IPropStoreAccessService<L2T, L2TRaw> CreatePropStoreService(IPropBag propBag, IPropNodeCollection<L2T, L2TRaw> template);
 
+        bool IsPropItemSetFixed(IPropBag propBag);
 
         object FixPropItemSet(IPropBag propBag);
         bool TryOpenPropItemSet(IPropBag propBag, out object propItemSet_Handle);
