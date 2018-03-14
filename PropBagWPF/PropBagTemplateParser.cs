@@ -242,7 +242,7 @@ namespace DRM.PropBagWPF
 
                 case PropKindEnum.CollectionView:
                     itemType = propertyType;
-                    Type pType = typeof(ICollectionView);
+                    Type pType = typeof(ListCollectionView); // typeof(ICollectionView);
                     return pType;
 
                 case PropKindEnum.Enumerable_RO:
