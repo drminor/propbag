@@ -17,6 +17,8 @@ namespace DRM.TypeSafePropertyBag
             Mode = mode;
         }
 
+        public static LocalBindingInfo Empty => new LocalBindingInfo();
+
         public LocalPropertyPath PropertyPath { get; set; }
         public LocalBindingMode Mode { get; set; }
 
