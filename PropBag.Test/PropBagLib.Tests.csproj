@@ -86,8 +86,15 @@
       <DependentUpon>PerformanceModel.props.tt</DependentUpon>
     </Compile>
     <Compile Include="SetupFixture1.cs" />
+    <Compile Include="SpecBasedVMTests\BasicVM\ViewModels\MainWindowViewModel.cs" />
+    <Compile Include="SpecBasedVMTests\BasicVM\ViewModels\MainWindowViewModel.pb.cs" />
+    <Compile Include="SpecBasedVMTests\BasicVM\ViewModels\PersonCollectionViewModel.cs" />
+    <Compile Include="SpecBasedVMTests\BasicVM\ViewModels\PersonCollectionViewModel.pb.cs" />
+    <Compile Include="SpecBasedVMTests\BasicVM\ViewModels\PersonEditorViewModel.cs" />
+    <Compile Include="SpecBasedVMTests\BasicVM\ViewModels\PersonEditorViewModel.pb.cs" />
+    <Compile Include="SpecBasedVMTests\BasicVM\ViewModels\PersonViewModel.cs" />
+    <Compile Include="SpecBasedVMTests\BasicVM\ViewModels\PersonViewModel.pb.cs" />
     <Compile Include="SpecBasedVMTests\TypeDescriptorTests\TypeDescriptorTestGroup1.cs" />
-    <Compile Include="SpecBasedVMTests\TypeDescriptorTests\TypeInspectorUtility.cs" />
     <Compile Include="SpecBasedVMTests\TypeDescriptorTests\TypeDescriptorSetup.cs" />
     <Compile Include="TypeExtensionsForUnitTesting.cs" />
     <None Include="PerformanceDynamic\PerformanceDynModel.cs" />
@@ -155,11 +162,6 @@
     <Compile Include="SpecBasedVMTests\ContextCleaner.cs" />
     <Compile Include="SpecBasedVMTests\PropBagVMTestBase.cs" />
     <Compile Include="SpecBasedVMTests\BasicVM\BasicVMTests.cs" />
-    <Compile Include="SpecBasedVMTests\BasicVM\ViewModels\MainWindowViewModel.cs" />
-    <Compile Include="SpecBasedVMTests\BasicVM\ViewModels\PersonCollectionViewModel.cs" />
-    <Compile Include="SpecBasedVMTests\BasicVM\ViewModels\PersonEditorViewModel.cs" />
-    <Compile Include="SpecBasedVMTests\BasicVM\ViewModels\PersonViewModel.cs" />
-    <Compile Include="SpecBasedVMTests\BasicVM\ViewModels\PersonViewModel.pb.cs" />
     <Compile Include="T4\Sample.cs">
       <DependentUpon>Sample.tt</DependentUpon>
       <AutoGen>True</AutoGen>
@@ -242,6 +244,7 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+    <None Include="SpecBasedVMTests\BasicVM\TestResults\1.docx" />
     <None Include="T4\Sample.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Sample.cs</LastGenOutput>
