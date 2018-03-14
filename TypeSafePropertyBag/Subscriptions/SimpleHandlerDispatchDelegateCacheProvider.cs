@@ -10,20 +10,26 @@ namespace DRM.TypeSafePropertyBag
     {
         #region Public Properties
 
-        public TwoTypesDelegateCache<CallPcTypedEventSubscriberDelegate> CallPcTypedEventSubsCache { get; }
+        TwoTypesDelegateCache<CallPcTypedEventSubscriberDelegate> _callPcTypedEventSubsCache;
+        public TwoTypesDelegateCache<CallPcTypedEventSubscriberDelegate> CallPcTypedEventSubsCache => _callPcTypedEventSubsCache;
 
-        public DelegateCache<CallPcObjEventSubscriberDelegate> CallPcObjEventSubsCache { get; }
+        DelegateCache<CallPcObjEventSubscriberDelegate> _callPcObjEventSubsCache;
+        public DelegateCache<CallPcObjEventSubscriberDelegate> CallPcObjEventSubsCache => _callPcObjEventSubsCache;
 
-        public DelegateCache<CallPcGenEventSubscriberDelegate> CallPcGenEventSubsCache { get; }
+        DelegateCache<CallPcGenEventSubscriberDelegate> _callPcGenEventSubsCache;
+        public DelegateCache<CallPcGenEventSubscriberDelegate> CallPcGenEventSubsCache => _callPcGenEventSubsCache;
 
-        public DelegateCache<CallPcStandardEventSubscriberDelegate> CallPcStEventSubsCache { get; }
+        DelegateCache<CallPcStandardEventSubscriberDelegate> _callPcStEventSubsCache;
+        public DelegateCache<CallPcStandardEventSubscriberDelegate> CallPcStEventSubsCache => _callPcStEventSubsCache;
 
-        public DelegateCache<CallPChangingEventSubscriberDelegate> CallPChangingEventSubsCache { get; }
+        DelegateCache<CallPChangingEventSubscriberDelegate> _callPChangingEventSubsCache;
+        public DelegateCache<CallPChangingEventSubscriberDelegate> CallPChangingEventSubsCache => _callPChangingEventSubsCache;
 
-        public DelegateCache<CallPSParentNodeChangedEventSubDelegate> CallPSParentNodeChangedEventSubsCache { get; }
+        DelegateCache<CallPSParentNodeChangedEventSubDelegate> _callPSParentNodeChangedEventSubsCache;
+        public DelegateCache<CallPSParentNodeChangedEventSubDelegate> CallPSParentNodeChangedEventSubsCache => _callPSParentNodeChangedEventSubsCache;
 
-
-        public DelegateProxyCache DelegateProxyCache { get; }
+        DelegateProxyCache _delegateProxyCache;
+        public DelegateProxyCache DelegateProxyCache => _delegateProxyCache;
 
         #endregion
 
@@ -35,30 +41,30 @@ namespace DRM.TypeSafePropertyBag
 
             // PcTyped
             MethodInfo callPcTypedEventSubscriber_mi = bridgeType.GetMethod("CallPcTypedEventSubscriber", BindingFlags.Instance | BindingFlags.NonPublic);
-            CallPcTypedEventSubsCache = new TwoTypesDelegateCache<CallPcTypedEventSubscriberDelegate>(callPcTypedEventSubscriber_mi);
+            _callPcTypedEventSubsCache = new TwoTypesDelegateCache<CallPcTypedEventSubscriberDelegate>(callPcTypedEventSubscriber_mi);
 
             // PcGen
             MethodInfo callPcGenEventSubscriber_mi = bridgeType.GetMethod("CallPcGenEventSubscriber", BindingFlags.Instance | BindingFlags.NonPublic);
-            CallPcGenEventSubsCache = new DelegateCache<CallPcGenEventSubscriberDelegate>(callPcGenEventSubscriber_mi);
+            _callPcGenEventSubsCache = new DelegateCache<CallPcGenEventSubscriberDelegate>(callPcGenEventSubscriber_mi);
 
             // PcObject
             MethodInfo callPcObjEventSubscriber_mi = bridgeType.GetMethod("CallPcObjectEventSubscriber", BindingFlags.Instance | BindingFlags.NonPublic);
-            CallPcObjEventSubsCache = new DelegateCache<CallPcObjEventSubscriberDelegate>(callPcObjEventSubscriber_mi);
+            _callPcObjEventSubsCache = new DelegateCache<CallPcObjEventSubscriberDelegate>(callPcObjEventSubscriber_mi);
 
             // PcStandard
             MethodInfo callPcStEventSubscriber_mi = bridgeType.GetMethod("CallPcStEventSubscriber", BindingFlags.Instance | BindingFlags.NonPublic);
-            CallPcStEventSubsCache = new DelegateCache<CallPcStandardEventSubscriberDelegate>(callPcStEventSubscriber_mi);
+            _callPcStEventSubsCache = new DelegateCache<CallPcStandardEventSubscriberDelegate>(callPcStEventSubscriber_mi);
 
             // PcChanging
             MethodInfo callPChangingEventSubscriber_mi = bridgeType.GetMethod("CallPChangingEventSubscriber", BindingFlags.Instance | BindingFlags.NonPublic);
-            CallPChangingEventSubsCache = new DelegateCache<CallPChangingEventSubscriberDelegate>(callPChangingEventSubscriber_mi);
+            _callPChangingEventSubsCache = new DelegateCache<CallPChangingEventSubscriberDelegate>(callPChangingEventSubscriber_mi);
 
             // PropStoreNode Parent Changed
             MethodInfo callPSNodeParentChangedEventSubscriber_mi = bridgeType.GetMethod("CallPSNodeParentChangedEventSubscriber", BindingFlags.Instance | BindingFlags.NonPublic);
-            CallPSParentNodeChangedEventSubsCache = new DelegateCache<CallPSParentNodeChangedEventSubDelegate>(callPSNodeParentChangedEventSubscriber_mi);
+            _callPSParentNodeChangedEventSubsCache = new DelegateCache<CallPSParentNodeChangedEventSubDelegate>(callPSNodeParentChangedEventSubscriber_mi);
 
             // Proxy -- Holds a copy of the original delegate but without the target.
-            DelegateProxyCache = new DelegateProxyCache();
+            _delegateProxyCache = new DelegateProxyCache();
         }
 
         #endregion
@@ -74,15 +80,14 @@ namespace DRM.TypeSafePropertyBag
                 if (disposing)
                 {
                     // Dispose managed state (managed objects).
-                    CallPcGenEventSubsCache.Dispose();
-                    CallPChangingEventSubsCache.Dispose();
-                    CallPcObjEventSubsCache.Dispose();
-                    CallPcStEventSubsCache.Dispose();
-                    CallPcTypedEventSubsCache.Dispose();
-                    CallPSParentNodeChangedEventSubsCache.Dispose();
+                    _callPcGenEventSubsCache.Dispose();
+                    _callPChangingEventSubsCache.Dispose();
+                    _callPcObjEventSubsCache.Dispose();
+                    _callPcStEventSubsCache.Dispose();
+                    _callPcTypedEventSubsCache.Dispose();
+                    _callPSParentNodeChangedEventSubsCache.Dispose();
 
-                    // TODO: Dispose of the DelegateProxyCache
-
+                    _delegateProxyCache.Dispose();
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
