@@ -77,14 +77,12 @@ namespace DRM.PropBag
 
         #endregion
 
+        new public PropBagTypeSafetyMode TypeSafetyMode => base.TypeSafetyMode;
         new public bool IsPropSetFixed => base.IsPropSetFixed;
-
         new public bool TryFixPropSet() => base.TryFixPropSet();
-
         new public bool TryOpenPropSet() => base.TryOpenPropSet();
 
         #region Property Management
-
 
         new public IProp<T> AddProp<T>(string propertyName)
         {
