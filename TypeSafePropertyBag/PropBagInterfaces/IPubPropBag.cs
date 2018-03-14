@@ -10,8 +10,11 @@ namespace DRM.TypeSafePropertyBag
     /// <summary>
     /// Adds AddProp, RemoveProp and ClearAllProps to IPropBag.
     /// </summary>
-    public interface IPubPropBag
+    public interface IPubPropBag : IPropBag
     {
+
+        PropBagTypeSafetyMode TypeSafetyMode { get; }
+
         bool IsPropSetFixed { get; }
         bool TryFixPropSet();
         bool TryOpenPropSet();

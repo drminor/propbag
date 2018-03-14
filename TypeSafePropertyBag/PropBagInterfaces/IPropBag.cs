@@ -24,6 +24,7 @@ namespace DRM.TypeSafePropertyBag
     /// </summary>
     public interface IPropBag 
         : ITypeSafePropBag,
+        IHaveACustomTypeDescriptor,
         //ICustomTypeDescriptor,
         INotifyPropertyChanged,
         INotifyPropertyChanging,
@@ -31,7 +32,7 @@ namespace DRM.TypeSafePropertyBag
         INotifyPCObject,
         IEditableObject,
         INotifyItemEndEdit,
-        IDisposable,
+        //IDisposable,
         ICloneable
     {
         // These are defined by ITypeSafePropBag
@@ -85,15 +86,13 @@ namespace DRM.TypeSafePropertyBag
 
         string FullClassName { get; }
 
-        // Consider moving these to the TypeSafePropBagMetaData class.
-        PropBagTypeSafetyMode TypeSafetyMode { get; }
         IList<PropNameType> GetAllPropertyNames();
         IReadOnlyDictionary<PropNameType, IPropData> GetAllPropertyValues();
-
         IEnumerable<KeyValuePair<PropNameType, ValPlusType>> GetAllPropNamesValuesAndTypes();
 
         bool HasPropModel { get; }
-        IEnumerable<IPropItemModel> GetPropItemModels();
+        //IEnumerable<IPropItemModel> GetPropItemModels();
+        //IList<PropertyDescriptor> PropertyDescriptors { get; }
 
         void RaiseStandardPropertyChanged(PropNameType propertyName);
 
