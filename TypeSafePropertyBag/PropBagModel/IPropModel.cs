@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 
@@ -50,9 +51,11 @@ namespace DRM.TypeSafePropertyBag
         IPropModel<L2TRaw> Parent { get; set; }
         long GenerationId { get; set; }
 
+        //object TypeDescriptionProvider { get; set; }
         //PropertyDescriptorCollection PropertyDescriptorCollection { get; set; }
 
-        //ICustomTypeDescriptor CustomTypeDescriptor { get; set; }
-        object TypeDescriptionProvider { get; set; }
+        ICustomTypeDescriptor CustomTypeDescriptor { get; set; }
+
+        //IList<PropertyDescriptor> PropertyDescriptors { get; set; }
     }
 }
