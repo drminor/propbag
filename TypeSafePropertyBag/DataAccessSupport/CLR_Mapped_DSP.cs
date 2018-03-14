@@ -71,6 +71,8 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
 
         public IDoCrudWithMapping<T> CrudWithMapping => _dataAccessLayer as IDoCrudWithMapping<T>;
 
+        public Type CollectionItemRunTimeType => typeof(T);
+
         #endregion
 
         #region DataSourceProvider Overrides
