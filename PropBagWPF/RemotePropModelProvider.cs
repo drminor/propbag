@@ -165,7 +165,32 @@ namespace DRM.PropBagWPF
 
             return propModel;
         }
+
         #endregion
+
+        public IDictionary<string, string> GetTypeToKeyMap()
+        {
+            if (_propModelCache == null)
+            {
+                throw new InvalidOperationException("You must first call LoadPropModels.");
+            }
+
+            Dictionary<string, string> result = new Dictionary<string, string>();
+
+            foreach (KeyValuePair<string, PropModelType> kvp in _propModelCache)
+            {
+                string fullClassName = kvp.Value.FullClassName;
+
+                if (result.ContainsKey(fullClassName))
+                {
+                    throw new InvalidOperationException("Found duplicate class name.");
+                }
+
+                result.Add(fullClassName, kvp.Key);
+            }
+
+            return result;
+        }
 
         #region AutoMapperRequest Lookup Support
 

@@ -58,7 +58,7 @@ namespace DRM.TypeSafePropertyBag
                 }
                 else
                 {
-                    throw new InvalidOperationException($"Cannot open the PropModel with FullClassName: {this} it is already open.");
+                    throw new InvalidOperationException($"Cannot open the PropModel with FullClassName: {this}; it is already open.");
                 }
             }
             else
@@ -87,6 +87,11 @@ namespace DRM.TypeSafePropertyBag
         {
             string fullClassName = propModel.FullClassName ?? throw new InvalidOperationException("The PropModel must have a non-null FullClassName.");
 
+            if(propModel.IsFixed)
+            {
+                throw new InvalidOperationException("Only open (IsFixed = false) PropModels can be added to the Cache.");
+            }
+
             long generationId;
             lock(_syncLock)
             {
@@ -97,6 +102,8 @@ namespace DRM.TypeSafePropertyBag
                 else
                 {
                     familyCollection = new SimplePropModelFamilyCollection();
+                    _cache.Add(fullClassName, familyCollection);
+
                     generationId = familyCollection.Add(propModel);
                     propModel.GenerationId = generationId;
                 }
@@ -153,6 +160,21 @@ namespace DRM.TypeSafePropertyBag
 
         private bool TryFetchFromSourceProviders(string fullClassName, out PropModelType propModel)
         {
+            //throw new NotSupportedException("The SimplePropModelCache cannot yet fetch PropModels from a list of providers using the fullClassName.");
+
+            IDictionary<string, string> classNameToKeyMap;
+
+            foreach (IProvidePropModels propModelProvider in _propModelProviders)
+            {
+                classNameToKeyMap = propModelProvider.GetTypeToKeyMap();
+
+                if(classNameToKeyMap.TryGetValue(fullClassName, out string resourceKey))
+                {
+                    propModel = propModelProvider.GetPropModel(resourceKey);
+                    return true;
+                }
+            }
+
             propModel = null;
             return false;
         }
@@ -182,13 +204,20 @@ namespace DRM.TypeSafePropertyBag
                 {
                     result = propModelProvider.GetPropModel(resourceKey);
                     result.PropModelCache = this;
+
+                    lock (_syncLock)
+                    {
+                        if (!TryGetValue(result.FullClassName, out PropModelType test))
+                        {
+                            Add(result);
+                        }
+                    }
                     break;
                 }
                 catch
                 {
-                    // ignore the exception.
+                    // Ignore the exception and continue.
                 }
-
             }
 
             return result;

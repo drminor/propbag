@@ -1,5 +1,4 @@
 ﻿using DRM.PropBag;
-using DRM.PropBag.ViewModelTools;
 using DRM.PropBagControlsWPF;
 using DRM.TypeSafePropertyBag;
 using System;
@@ -8,7 +7,6 @@ using System.Windows;
 
 namespace DRM.PropBagWPF
 {
-    using PropNameType = String;
     using PropModelType = IPropModel<String>;
 
     public class SimplePropModelProvider : IProvidePropModels
@@ -158,6 +156,30 @@ namespace DRM.PropBagWPF
         }
 
         #endregion
+
+        public IDictionary<string, string> GetTypeToKeyMap()
+        {
+            if (_propModelCache == null)
+            {
+                throw new InvalidOperationException("You must first call LoadPropModels.");
+            }
+
+            Dictionary<string, string> result = new Dictionary<string, string>();
+
+            foreach (KeyValuePair<string, PropModelType> kvp in _propModelCache)
+            {
+                string fullClassName = kvp.Value.FullClassName;
+
+                if (result.ContainsKey(fullClassName))
+                {
+                    throw new InvalidOperationException("Found duplicate class name.");
+                }
+
+                result.Add(fullClassName, kvp.Key);
+            }
+
+            return result;
+        }
 
         #region AutoMapperRequest Lookup Support
 

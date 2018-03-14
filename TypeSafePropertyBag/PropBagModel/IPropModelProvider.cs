@@ -11,6 +11,8 @@ namespace DRM.TypeSafePropertyBag
 
         IMapperRequest GetMapperRequest(string resourceKey);
 
+        IDictionary<string, string> GetTypeToKeyMap();
+
         // In order to include these methods, a reference to PresentationFramework must be added.
         //PropModel GetPropModel(ResourceDictionary rd, string resourceKey);
         //PropModel GetPropModel(ResourceDictionary rd, string resourceKey, IPropFactory propFactory);
