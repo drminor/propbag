@@ -42,27 +42,34 @@ namespace DRM.PropBag
         [XmlIgnore]
         public Type NewEmittedType { get { return _newEmittedType; } set { _newEmittedType = value; } }
 
-        string cn;
+        string _className;
         [XmlAttribute(AttributeName = "class-name")]
         public string ClassName
         {
-            get { return cn; }
+            get { return _className; }
             set
             {
                 OpenIfNotRegisteredWithCache();
-                SetIfDifferent<string>(ref cn, value);
+
+                if(SetIfDifferent<string>(ref _className, value))
+                {
+                    _fullClassName = null; // This will force a rebuild of the public FullClassName property.
+                }
             }
         }
 
-        string ns;
+        string _namespaceName;
         [XmlAttribute(AttributeName = "output-namespace")]
         public string NamespaceName
         {
-            get { return ns; }
+            get { return _namespaceName; }
             set
             {
                 OpenIfNotRegisteredWithCache();
-                SetIfDifferent<string>(ref ns, value);
+                if(SetIfDifferent<string>(ref _namespaceName, value))
+                {
+                    _fullClassName = null; // This will force a rebuild of the public FullClassName property.
+                }
             }
         }
 
@@ -126,14 +133,28 @@ namespace DRM.PropBag
         [XmlIgnore]
         public PropModelCacheInterface PropModelCache { get { return pmp; } set { SetAlways<PropModelCacheInterface>(ref pmp, value); } }
 
-        //[XmlIgnore]
-        //public PropertyDescriptorCollection PropertyDescriptorCollection { get; set; }
-
-        //[XmlIgnore]
-        //public ICustomTypeDescriptor CustomTypeDescriptor { get; set; }
-
+        ICustomTypeDescriptor _ctd;
         [XmlIgnore]
-        public object TypeDescriptionProvider { get; set; }
+        public ICustomTypeDescriptor CustomTypeDescriptor
+        {
+            get => _ctd;
+            set
+            {
+                if(IsFixed)
+                {
+                    if(_ctd != null)
+                    {
+                        string theSameNote = ReferenceEquals(_ctd, value) ? "is the same" : "is not the same";
+                        System.Diagnostics.Debug.WriteLine($"WARNING: A PropModel that has previously been assigned a CustomTypeDesriptor is being assigned a CustomTypeDescriptor. The new value {theSameNote} as the old value.");
+                    }
+                    _ctd = value;
+                }
+                else
+                {
+                    throw new InvalidOperationException("The CustomTypeDescriptor can only be set on fixed PropModels.");
+                }
+            }
+        }
 
         object _syncLock = new object();
         public const long GEN_NONE = -1;
@@ -181,9 +202,6 @@ namespace DRM.PropBag
 
             Parent = parent;
 
-            _isFixed = false;
-            _generationId = GEN_NONE;
-
             if (deriveFrom == DeriveFromClassModeEnum.Custom)
             {
                 if (targetType == null)
@@ -192,12 +210,19 @@ namespace DRM.PropBag
                 }
             }
 
+            IsFixed = false;
+
+            // Use the backing store to avoid the "No PropModelCache" error.
+            _generationId = GEN_NONE;
+
+            WrapperTypeInfoField = null;
+            NewEmittedType = null;
+
+            // Use the backing store to avoid the "Can only be set on fixed PropModels" error.
+            _ctd = null;
+
             Namespaces = new ObservableCollection<string>();
             _propDictionary = new Dictionary<PropNameType, IPropItemModel>();
-
-            //PropertyDescriptorCollection = null;
-            //CustomTypeDescriptor = null;
-            TypeDescriptionProvider = null;
         }
 
         #endregion
@@ -246,12 +271,17 @@ namespace DRM.PropBag
 
             return result;
         }
-        
+
+        string _fullClassName;
         public string FullClassName
         {
             get
             {
-                return GetFullClassName(this.NamespaceName, this.ClassName.Trim());
+                if(_fullClassName == null)
+                {
+                    _fullClassName = GetFullClassName(this.NamespaceName, this.ClassName.Trim());
+                }
+                return _fullClassName;
             }
         }
 
@@ -281,8 +311,12 @@ namespace DRM.PropBag
                 IPropFactory propFactoryToUse = PropFactory;  //PropFactoryType != null ? null : PropFactory;
 
                 result = new PropModel(ClassName, NamespaceName, DeriveFromClassMode, TargetType,
-                propFactoryToUse, PropFactoryType, PropModelCache,
-                TypeSafetyMode, DeferMethodRefResolution, RequireExplicitInitialValue);
+                    propFactoryToUse, PropFactoryType, PropModelCache,
+                    TypeSafetyMode, DeferMethodRefResolution, RequireExplicitInitialValue);
+
+                result.WrapperTypeInfoField = WrapperTypeInfoField;
+                result.NewEmittedType = NewEmittedType;
+                result.CustomTypeDescriptor = CustomTypeDescriptor;
 
                 result.Namespaces = new ObservableCollection<PropNameType>();
                 foreach (string ns in Namespaces)
@@ -300,8 +334,7 @@ namespace DRM.PropBag
             return result;
         }
 
-        bool _isFixed;
-        public bool IsFixed => _isFixed;
+        public bool IsFixed { get; private set; }
 
         private void OpenIfNotRegisteredWithCache()
         {
@@ -334,14 +367,17 @@ namespace DRM.PropBag
                 {
                     _parent = value;
                 }
-
             }
         }
 
         long _generationId;
         public long GenerationId
         {
-            get => _generationId;
+            get
+            {
+                return _generationId;
+            }
+
             set
             {
                 if(PropModelCache == null)
@@ -349,7 +385,7 @@ namespace DRM.PropBag
                     throw new InvalidOperationException($"The PropModel with Full Class Name: {this} has no PropModelCache assigned to it. Setting the GenerationId is not allowed in this context.");
                 }
 
-                if (_isFixed) throw new InvalidOperationException($"The PropModel with Full Class Name: {this} is fixed. The GenerationId cannot be changed.");
+                if (IsFixed) throw new InvalidOperationException($"The PropModel with Full Class Name: {this} is fixed. The GenerationId cannot be changed.");
 
                 _generationId = value;
             }
@@ -358,12 +394,16 @@ namespace DRM.PropBag
         public void Fix()
         {
             _hashCode = ComputeHashCode();
-            _isFixed = true;
+            IsFixed = true;
         }
 
         public void Open()
         {
-            _isFixed = false;
+            lock(_syncLock)
+            {
+                IsFixed = false;
+                //CustomTypeDescriptor = null;
+            }
         }
 
         public void Add(string propertyName, IPropItemModel propModelItem)
@@ -442,6 +482,7 @@ namespace DRM.PropBag
             }
 
             _propDictionary.Clear();
+            CustomTypeDescriptor = null;
         }
 
         #endregion
@@ -468,7 +509,12 @@ namespace DRM.PropBag
 
         #endregion
 
-        #region IEquatable support and Object overrides
+        #region IEquatable Support and Object Overrides
+
+        public override string ToString()
+        {
+            return $"{FullClassName}, {GenerationId}";
+        }
 
         int _hashCode;
         public override int GetHashCode()
@@ -598,11 +644,6 @@ namespace DRM.PropBag
             Dispose(true);
             // TODO: uncomment the following line if the finalizer is overridden above.
             // GC.SuppressFinalize(this);
-        }
-
-        public override string ToString()
-        {
-            return $"{FullClassName}, {GenerationId}";
         }
 
         #endregion
