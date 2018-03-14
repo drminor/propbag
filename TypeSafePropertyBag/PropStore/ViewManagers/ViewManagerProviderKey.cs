@@ -8,6 +8,12 @@ namespace DRM.TypeSafePropertyBag
         public LocalBindingInfo BindingInfo { get; }
         public IMapperRequest MapperRequest { get; }
 
+        public ViewManagerProviderKey(IMapperRequest mapperRequest)
+        {
+            BindingInfo = LocalBindingInfo.Empty;
+            MapperRequest = mapperRequest ?? throw new ArgumentNullException(nameof(mapperRequest));
+        }
+
         public ViewManagerProviderKey(LocalBindingInfo bindingInfo, IMapperRequest mapperRequest)
         {
             BindingInfo = bindingInfo;

@@ -22,6 +22,7 @@ namespace DRM.TypeSafePropertyBag
         IList Data { get; }
 
         DataSourceProvider DataSourceProvider { get; }
+        Type CollectionItemRunTimeType { get; }
 
         bool IsDataSourceReadOnly();
         bool IsGetNewItemSupported { get; }

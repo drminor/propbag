@@ -155,6 +155,9 @@ namespace DRM.TypeSafePropertyBag
         public bool IsDataSourceReadOnly() => DataSourceProviderProvider.IsReadOnly();
         public bool IsGetNewItemSupported => DataSourceProviderProvider is ISupplyNewItem;
 
+
+        public Type CollectionItemRunTimeType => DataSourceProviderProvider.CollectionItemRunTimeType;
+
         public IProvideAView this[string viewName]
         {
             get

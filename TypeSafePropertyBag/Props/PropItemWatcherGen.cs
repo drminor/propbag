@@ -55,10 +55,11 @@ namespace DRM.TypeSafePropertyBag
 
         #region Constructor
 
-        public PropItemWatcherGen(PSAccessServiceInternalInterface storeAccessor, PropIdType propId/*, bool isAsynchronous*/)
+        public PropItemWatcherGen(PSAccessServiceInternalInterface storeAccessor, PropIdType propId, Type propertyType/*, bool isAsynchronous*/)
         {
             _storeAccessor_wr = new WeakReference<PSAccessServiceInternalInterface>(storeAccessor);
             _propId = propId;
+            PropertyType = propertyType;
             //IsAsynchronous = isAsynchronous;
         }
 
@@ -67,6 +68,8 @@ namespace DRM.TypeSafePropertyBag
         #region Public Properties
 
         public bool IsAsynchronous => false;
+
+        public Type PropertyType { get; }
 
         #endregion
 

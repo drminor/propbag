@@ -10,6 +10,7 @@ namespace DRM.TypeSafePropertyBag
 
     public interface IWatchAPropItemGen : INotifyPCGen
     {
+        Type PropertyType { get; }
         bool IsAsynchronous { get; }
         bool TryGetValue(out object value);
         Object GetValue();

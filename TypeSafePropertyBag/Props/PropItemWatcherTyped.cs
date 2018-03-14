@@ -101,6 +101,8 @@ namespace DRM.TypeSafePropertyBag
 
         public bool IsAsynchronous => false;
 
+        public Type PropertyType => typeof(T);
+
         #endregion
 
         #region Public Methods

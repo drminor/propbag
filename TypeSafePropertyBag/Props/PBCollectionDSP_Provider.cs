@@ -60,6 +60,8 @@ namespace DRM.TypeSafePropertyBag
             //}
         }
 
+        public Type CollectionItemRunTimeType => _propItemWatcherGen.PropertyType;
+
         public bool IsCollection() => true;
 
         bool _isReadOnly;
