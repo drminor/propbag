@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 
 /// <remarks>
-/// This code is based on code written by Nish Nishant in a code project article
-/// entitled: "Using a TypeDescriptionProvider to support dynamic run-time properties"
+/// This code was inspired by the code written by Nish Nishant described in a Code Project article
+/// entitled: "Using a TypeDescriptionProvider to support dynamic run-time properties", which can be
 /// found here: https://www.codeproject.com/Articles/26992/Using-a-TypeDescriptionProvider-to-support-dynamic
 /// 
 /// The code is covered by the Code Project Open License (CPOL).
@@ -14,20 +12,23 @@ using System.Linq;
 
 namespace DRM.TypeSafePropertyBag.TypeDescriptors
 {
-    public class PropBagTypeDescriptionProvider<T> : TypeDescriptionProvider where T : IPropBag
+    public class PropBagTypeDescriptionProvider<T> : TypeDescriptionProvider where T : IHaveACustomTypeDescriptor
     {
         #region Private Properties
 
-        private static TypeDescriptionProvider _defaultTypeProvider = TypeDescriptor.GetProvider(typeof(T));
-        private static ICustomTypeDescriptor _defaultTypeDescriptor;
+        // Elected not to 'cache' this value because other agents may register a different provider at some later point.
+        //private static TypeDescriptionProvider _defaultTypeDescriptionProvider = TypeDescriptor.GetProvider(typeof(T));
 
         #endregion
 
         #region Constuctors
 
-        public PropBagTypeDescriptionProvider() : base(_defaultTypeProvider)
+        public PropBagTypeDescriptionProvider() : this(TypeDescriptor.GetProvider(typeof(T)))
         {
-            _defaultTypeDescriptor = base.GetTypeDescriptor(typeof(T), null);
+        }
+
+        public PropBagTypeDescriptionProvider(TypeDescriptionProvider parent) : base(parent)
+        {
         }
 
         #endregion
@@ -36,25 +37,39 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
 
         public override ICustomTypeDescriptor GetTypeDescriptor(Type objectType, object instance)
         {
+            if(objectType == null)
+            {
+                throw new InvalidOperationException($"The objectType is null. On call to {nameof(PropBagTypeDescriptionProvider<T>)}::GetTypeDescriptor.");
+            }
+
+            if (objectType != typeof(T))
+            {
+                //throw new InvalidOperationException($"The objectType is {objectType}, expected type: {typeof(T)}. On call to {nameof(PropBagTypeDescriptionProvider<T>)}::GetTypeDescriptor.");
+                System.Diagnostics.Debug.WriteLine($"Calling GetTypeDesciptor with instance of type: {objectType}, expected type: {typeof(T)}. Returning Null.");
+            }
+
+            ICustomTypeDescriptor defaultTypeDescriptor = base.GetTypeDescriptor(typeof(T), null);
+
             if (instance == null)
             {
-                //throw new InvalidOperationException($"The {nameof(PropBagTypeDescriptionProvider<T>)} does not support building a CustomTypeDescriptor for a type; It only builds CustomTypeDescriptors for a single instance.");
-
-                ICustomTypeDescriptor defaultDescriptor = base.GetTypeDescriptor(typeof(T), instance);
-                return defaultDescriptor;
+                return defaultTypeDescriptor;
             }
             else
             {
-                if(instance is T propBag)
+                if(instance is T ctdSource)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Building a new PropBagCustomTypeDescriptor for Type: {typeof(T)} .");
-                    PropBagCustomTypeDescriptor<T> result = new PropBagCustomTypeDescriptor<T>(_defaultTypeDescriptor, propBag);
+                    //if(instance.GetType().Name == "MainWindowViewModel")
+                    //{
+                    //    System.Diagnostics.Debug.WriteLine("The PropBagTypeDescriptor is getting the CustomTypeDescriptor for the MainWindowViewModel.");
+                    //}
+                    ICustomTypeDescriptor result = ctdSource.GetCustomTypeDescriptor(defaultTypeDescriptor);
                     return result;
                 }
                 else
                 {
                     Type actual = instance.GetType();
-                    throw new InvalidOperationException($"Instance must be of type: {typeof(T)}, instead it is of type: {actual}.");
+                    System.Diagnostics.Debug.WriteLine($"Calling GetTypeDesciptor with instance of type: {actual}, expected type: {typeof(T)} (The objectType is {objectType}.) Returning Null.");
+                    return null;
                 }
             }
         }
@@ -91,144 +106,6 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
         public override bool IsSupportedType(Type type)
         {
             return base.IsSupportedType(type);
-        }
-
-        #endregion
-    }
-
-    public class PropBagCustomTypeDescriptor<T> : CustomTypeDescriptor where T : IPropBag
-    {
-        #region Private Properties
-
-        private readonly List<PropertyDescriptor> _customFields;
-
-        #endregion
-
-        #region Constructor
-
-        public PropBagCustomTypeDescriptor(ICustomTypeDescriptor parent, T instance)
-            : base(parent)
-        {
-            _customFields = new List<PropertyDescriptor>();
-            _customFields.AddRange(GetCustomProps(instance).Cast<PropertyDescriptor>());
-        }
-
-        private IEnumerable<PropItemPropertyDescriptor<T>> GetCustomProps(T propBag)
-        {
-            //List<PropItemPropertyDescriptor<T>> piPropertyDescriptors = new List<PropItemPropertyDescriptor<T>>();
-
-            if (propBag.HasPropModel)
-            {
-                foreach(IPropItemModel pi in propBag.GetPropItemModels())
-                {
-                    //PropItemPropertyDescriptor<T> propItemTypeDesc;
-
-                    //if (pi.PropKind == PropKindEnum.CollectionView)
-                    //{
-                    //    propItemTypeDesc = new PropItemPropertyDescriptor<T>(pi.PropertyName, pi.CollectionType, new Attribute[] {});
-                    //}
-                    //else if(pi.PropKind == PropKindEnum.ObservableCollection)
-                    //{
-                    //    propItemTypeDesc = new PropItemPropertyDescriptor<T>(pi.PropertyName, pi.CollectionType, new Attribute[] {});
-                    //}
-                    //else if(pi.PropKind == PropKindEnum.Prop)
-                    //{
-                    //   propItemTypeDesc = new PropItemPropertyDescriptor<T>(pi.PropertyName, pi.PropertyType, new Attribute[] {});
-                    //}
-                    //else
-                    //{
-                    //    throw new InvalidOperationException($"The {nameof(PropBagTypeDescriptionProvider<T>)} does not recognized or does not support Props of Kind = {pi.PropKind}.");
-                    //}
-
-                    ////piPropertyDescriptors.Add(propItemTypeDesc);
-                    //yield return propItemTypeDesc;
-
-                    PropItemPropertyDescriptor<T> propItemTypeDesc;
-
-                    if (pi.PropKind == PropKindEnum.CollectionView || pi.PropKind == PropKindEnum.ObservableCollection || pi.PropKind == PropKindEnum.Prop)
-                    {
-                        propItemTypeDesc = new PropItemPropertyDescriptor<T>(pi.PropertyName, pi.PropertyType, new Attribute[] { });
-
-                        // TODO: Implement a way to create a Typed PropertyDescriptor for fast Get/Set methods.
-                        //propItemTypeDesc = new PropItemPropertyDescriptor_Typed<<T>(pi.PropertyName, pi.PropertyType, new Attribute[] { });
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException($"The {nameof(PropBagTypeDescriptionProvider<T>)} does not recognized or does not support Props of Kind = {pi.PropKind}.");
-                    }
-
-                    //piPropertyDescriptors.Add(propItemTypeDesc);
-                    yield return propItemTypeDesc;
-                }
-            }
-            else
-            {
-                foreach(KeyValuePair<string, ValPlusType> kvp in propBag.GetAllPropNamesValuesAndTypes())
-                {
-                    PropItemPropertyDescriptor<T> propItemTypeDesc =
-                        new PropItemPropertyDescriptor<T>(kvp.Key, kvp.Value.Type, new Attribute[] { });
-
-                    //piPropertyDescriptors.Add(propItemTypeDesc);
-                    yield return propItemTypeDesc;
-                }
-            }
-
-            //return piPropertyDescriptors;
-        }
-
-        #endregion
-
-        #region Methods with Logic
-
-        public override PropertyDescriptorCollection GetProperties()
-        {
-            return new PropertyDescriptorCollection(base.GetProperties()
-                .Cast<PropertyDescriptor>().Union(_customFields).ToArray());
-        }
-
-        public override PropertyDescriptorCollection GetProperties(Attribute[] attributes)
-        {
-            return new PropertyDescriptorCollection(base.GetProperties(attributes)
-                .Cast<PropertyDescriptor>().Union(_customFields).ToArray());
-        }
-
-        #endregion
-
-        #region Pass Through Methods
-
-        public override AttributeCollection GetAttributes()
-        {
-            return base.GetAttributes();
-        }
-
-        public override string GetClassName()
-        {
-            return base.GetClassName();
-        }
-
-        public override string GetComponentName()
-        {
-            return base.GetComponentName();
-        }
-
-        public override TypeConverter GetConverter()
-        {
-            return base.GetConverter();
-        }
-
-        public override EventDescriptorCollection GetEvents()
-        {
-            return base.GetEvents();
-        }
-
-        public override EventDescriptorCollection GetEvents(Attribute[] attributes)
-        {
-            return base.GetEvents(attributes);
-        }
-
-        public override object GetPropertyOwner(PropertyDescriptor pd)
-        {
-            return base.GetPropertyOwner(pd);
         }
 
         #endregion
