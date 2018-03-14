@@ -96,8 +96,16 @@ namespace DRM.PropBag.AutoMapperSupport
 
             if (TestCreateDest(targetType, result))
             {
-                // Fix the template's PropNodeCollection to improve performance.
-                _storeAccessCreator.FixPropItemSet(result);
+                if (!PropModel.IsFixed)
+                {
+                    PropModel.Fix();
+                }
+
+                if (!_storeAccessCreator.IsPropItemSetFixed(result))
+                {
+                    // Fix the template's PropNodeCollection to improve performance.
+                    _storeAccessCreator.FixPropItemSet(result);
+                }
             }
             else
             {
@@ -159,7 +167,16 @@ namespace DRM.PropBag.AutoMapperSupport
 
         #endregion
 
-        #region Mapper Functions for Lists
+        #region Generic Mapper Functions
+
+        public object MapToDestination(object source)
+        {
+            return Mapper.Map(source, GetNewDestination(), typeof(TSource), typeof(TDestination));
+        }
+
+        #endregion
+
+        #region Typed Mapper Functions for Lists
 
         public IEnumerable<TDestination> MapToDestination(IEnumerable<TSource> listOfSources)
         {
@@ -169,6 +186,15 @@ namespace DRM.PropBag.AutoMapperSupport
         public IEnumerable<TSource> MapToSource(IEnumerable<TDestination> listOfDestinations)
         {
             return listOfDestinations.Select(d => MapToSource(d));
+        }
+
+        #endregion
+
+        #region Generic Mapper Functions for Lists
+
+        public IEnumerable<object> MapToDestination(IEnumerable<object> listOfSources)
+        {
+            return listOfSources.Select(s => MapToDestination(s));
         }
 
         #endregion

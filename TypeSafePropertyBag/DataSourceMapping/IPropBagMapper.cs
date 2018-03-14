@@ -27,8 +27,14 @@ namespace DRM.TypeSafePropertyBag
         Type DestinationType { get; }
 
         bool SupportsMapFrom { get; }
+
         //IMapperConfigurationExpression Configure(IMapperConfigurationExpression cfg);
+
         IMapper Mapper { get; }
+
+        object MapToDestination(object source);
+        IEnumerable<object> MapToDestination(IEnumerable<object> listOfSources);
+
     }
 
 }
