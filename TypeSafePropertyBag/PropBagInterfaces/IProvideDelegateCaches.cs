@@ -10,9 +10,6 @@ namespace DRM.TypeSafePropertyBag
         ICacheDelegatesForTypePair<CViewManagerProviderFromDsDelegate> GetOrAddCViewManagerProviderCache { get; }
 
         ICacheDelegates<CreateScalarProp> CreateScalarPropCache { get; }
-        //ICacheDelegates<CreatePropFromStringDelegate> CreateScalarPropCache { get; }
-        //ICacheDelegates<CreatePropWithNoValueDelegate> CreatePropWithNoValCache { get; }
-        //ICacheDelegates<CreatePropFromObjectDelegate> CreatePropFromObjectCache { get; }
 
         ICacheDelegatesForTypePair<CreateCPropFromStringDelegate> CreateCPropFromStringCache { get; }
 
@@ -22,8 +19,6 @@ namespace DRM.TypeSafePropertyBag
 
         ICacheDelegatesForTypePair<CreateMappedDSPProviderDelegate> CreateDSPProviderCache { get; }
 
-        // TODO: Move this property to the IProvidePropStoreServiceSingletons<L2T, L2TRaw> interface.
-        // TODO: Add IProvidePropTemplates to the constructor of all implementors of IPropFactory.
         IProvidePropTemplates PropTemplateCache { get; }
     }
 }
