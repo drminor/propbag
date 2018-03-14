@@ -10,8 +10,6 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
 
         PropertyDescriptorValues<T> _tdConfig;
 
-        //PropertyDescriptorCollection _children;
-
         #endregion
 
         #region PropertyDescriptor Property Overrides
@@ -37,16 +35,9 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
                 propertyType: propertyType,
                 supportsChangeEvents: true
                 );
-
-            //_children = this.GetChildProperties();
         }
 
         #endregion
-
-        //public void Add(PropertyDescriptor pd)
-        //{
-        //    _children.Add(pd);
-        //}
 
         #region PropertyDescriptor Method Overrides
 
@@ -57,7 +48,9 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
 
         public override object GetValue(object component)
         {
-            return ((T)component)[PropertyType, Name];
+            ReportAccessCounter();
+            object x = ((T)component)[PropertyType, Name];
+            return x;
         }
 
         public override void ResetValue(object component)
@@ -76,10 +69,6 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
             return false;
         }
 
-        #endregion
-
-        #region PropertyDescriptor Method Replacements
-        //
         // Summary:
         //     Returns a System.ComponentModel.PropertyDescriptorCollection for a given object
         //     using a specified array of attributes as a filter.
@@ -97,23 +86,6 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
         public override PropertyDescriptorCollection GetChildProperties(object instance, Attribute[] filter)
         {
             return base.GetChildProperties(instance, filter);
-        }
-
-        //
-        // Summary:
-        //     Gets an editor of the specified type.
-        //
-        // Parameters:
-        //   editorBaseType:
-        //     The base type of editor, which is used to differentiate between multiple editors
-        //     that a property supports.
-        //
-        // Returns:
-        //     An instance of the requested editor type, or null if an editor cannot be found.
-        public override object GetEditor(Type editorBaseType)
-        {
-            object x = base.GetEditor(editorBaseType);
-            return x;
         }
 
         //
@@ -140,6 +112,18 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
                 attributeList.Add(a);
             }
         }
+
+        #endregion
+
+        #region Diagnostics
+
+        long access_counter = 0;
+
+        [System.Diagnostics.Conditional("DEBUG")]
+        void ReportAccessCounter()
+        {
+            System.Diagnostics.Debug.WriteLine($"{ComponentType.Name}::{Name} has been accessed {++access_counter} times.");
+        } 
 
         #endregion
     }
