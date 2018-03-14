@@ -130,9 +130,9 @@ namespace DRM.PropBag.AutoMapperSupport
                 hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(FullClassName);
                 return hashCode;
             } 
-            catch (Exception e)
+            catch
             {
-                throw e;
+                throw;
             }
         }
 
