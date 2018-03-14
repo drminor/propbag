@@ -8,6 +8,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
 {
     using PropNameType = String;
     using PropModelType = IPropModel<String>;
+    using PropModelCacheInterface = ICachePropModels<String>;
 
     [TestFixtureAttribute]
     public class TestAutoMapperBasic
@@ -22,6 +23,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
 
             _propFactory_V1 = ourHelper.PropFactory_V1;
             _amp = ourHelper.GetAutoMapperSetup_V1();
+            PropModelCacheInterface _propModelCache = ourHelper.GetPropModelCache_V1();
         }
 
         [TearDown]
@@ -64,23 +66,31 @@ namespace PropBagLib.Tests.AutoMapperSupport
             Type typeToWrap = typeof(PropBag);
             string configPackageName = "Emit_Proxy";
 
+            IMapperRequest mapperRequest = new MapperRequest(typeof(MyModel3), propModel, configPackageName);
+
             Type et = _amp.WrapperTypeCreator.GetWrapperType(propModel, typeToWrap);
 
             propModel.NewEmittedType = et;
 
-            IPropBagMapperKey<MyModel3, DestinationModel3> mapperRequest =
-                _amp.SubmitMapperRequest<MyModel3, DestinationModel3>
-                (
-                    propModel: propModel,
-                    typeToWrap: et, //typeToWrap
-                    configPackageName: configPackageName
-                );
+            IPropBagMapperKeyGen mapperKey = _amp.SubmitMapperRequest(mapperRequest.PropModel, mapperRequest.SourceType, mapperRequest.ConfigPackageName);
 
-            Assert.That(mapperRequest, Is.Not.Null, "mapperRequest should be non-null.");
+            // Get the AutoMapper mapping function associated with the mapper request already submitted.
+            IPropBagMapperGen genMapper = _amp.GetMapper(mapperKey);
 
-            IPropBagMapper<MyModel3, DestinationModel3> mapper = _amp.GetMapper<MyModel3, DestinationModel3>(mapperRequest);
 
-            Assert.That(mapper, Is.Not.Null, "mapper should be non-null");
+            //IPropBagMapperKey<MyModel3, DestinationModel3> mapperRequest =
+            //    _amp.SubmitMapperRequest<MyModel3, DestinationModel3>
+            //    (
+            //        propModel: propModel,
+            //        typeToWrap: et, //typeToWrap
+            //        configPackageName: configPackageName
+            //    );
+
+            Assert.That(mapperKey, Is.Not.Null, "mapperRequest should be non-null.");
+
+            //IPropBagMapper<MyModel3, DestinationModel3> mapper = _amp.GetMapper<MyModel3, DestinationModel3>(mapperRequest);
+
+            Assert.That(genMapper, Is.Not.Null, "mapper should be non-null");
 
             MyModel4 dp = new MyModel4
             {
@@ -96,19 +106,19 @@ namespace PropBagLib.Tests.AutoMapperSupport
             };
 
 
-            DestinationModel3 testDest = mapper.MapToDestination(testSource);
+            var testDest = genMapper.MapToDestination(testSource);
 
-            IPropBagMapperKey<MyModel3, DestinationModel3> mapperRequest2 =
-                _amp.SubmitMapperRequest<MyModel3, DestinationModel3>
-                (
-                    propModel: propModel,
-                    typeToWrap: typeToWrap,
-                    configPackageName: configPackageName
-                );
+            //IPropBagMapperKey<MyModel3, DestinationModel3> mapperRequest2 =
+            //    _amp.SubmitMapperRequest<MyModel3, DestinationModel3>
+            //    (
+            //        propModel: propModel,
+            //        typeToWrap: typeToWrap,
+            //        configPackageName: configPackageName
+            //    );
 
-            IPropBagMapper<MyModel3, DestinationModel3> mapper2 = _amp.GetMapper<MyModel3, DestinationModel3>(mapperRequest2);
+            //IPropBagMapper<MyModel3, DestinationModel3> mapper2 = _amp.GetMapper<MyModel3, DestinationModel3>(mapperRequest2);
 
-            DestinationModel3 testDest2 = mapper.MapToDestination(testSource);
+            //DestinationModel3 testDest2 = mapper.MapToDestination(testSource);
 
         }
 
