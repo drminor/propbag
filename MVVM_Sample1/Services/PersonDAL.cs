@@ -1,11 +1,11 @@
 ﻿using DRM.TypeSafePropertyBag.DataAccessSupport;
-using MVVMApplication.Model;
+using MVVM_Sample1.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
-namespace MVVMApplication.Services
+namespace MVVM_Sample1.Services
 {
     public class PersonDAL : IDoCRUD<Person>
     {
@@ -55,7 +55,7 @@ namespace MVVMApplication.Services
             }
             else
             {
-                IEnumerable<Person> result = DbContext.Person.OrderBy(x => x.Id).Take(top).ToList();
+                IEnumerable<Person> result = DbContext.Person/*.OrderBy(x => x.Id)*/.Take(top).ToList();
                 return result;
             }
         }

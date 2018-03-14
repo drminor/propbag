@@ -1,7 +1,7 @@
-﻿using MVVMApplication.Model;
+﻿using MVVM_Sample1.Model;
 using System.Data.Entity;
 
-namespace MVVMApplication.Services
+namespace MVVM_Sample1.Services
 {
     public class PersonDB : DbContext
     {

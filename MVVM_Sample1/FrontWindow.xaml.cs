@@ -1,11 +1,10 @@
 ﻿using CommonAppData;
-using MVVMApplication.View;
 using ObjectSizeDiagnostics;
 using System;
 using System.Reflection;
 using System.Windows;
 
-namespace MVVMApplication
+namespace MVVM_Sample1.View
 {
     public partial class FrontWindow : Window
     {

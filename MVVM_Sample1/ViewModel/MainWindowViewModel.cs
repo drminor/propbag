@@ -1,38 +1,13 @@
 ﻿using DRM.PropBag;
-using DRM.PropBag.AutoMapperSupport;
 using DRM.PropBagWPF;
-using DRM.TypeSafePropertyBag;
 using System;
 using System.Threading;
 
-namespace MVVMApplication.ViewModel
+namespace MVVM_Sample1.ViewModel
 {
-    using PropNameType = String;
-    using PropModelType = IPropModel<String>;
-
-    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
-
-    public class MainWindowViewModel : PropBag
+    public partial class MainWindowViewModel : PropBag
     {
         public event EventHandler<EventArgs> RequestClose;
-
-        public MainWindowViewModel(PropModelType pm, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
-            : base(pm, storeAccessCreator, autoMapperService, propFactory, fullClassName)
-        {
-            //System.Diagnostics.Debug.WriteLine("Beginning to construct MainWindowViewModel -- From PropModel.");
-
-            //IHaveADbContext dBActivator = new DBActivator<PersonDB>(System.Environment.SpecialFolder.CommonApplicationData);
-            //PersonDB personDb = (PersonDB)dBActivator.DbContext;
-            //PersonDAL b = new PersonDAL(personDb);
-            //SetIt(b, "Business");
-
-            //System.Diagnostics.Debug.WriteLine("Completed Constructing MainWindowViewModel -- From PropModel.");
-        }
-
-        public MainWindowViewModel(MainWindowViewModel copySource)
-            : base(copySource)
-        {
-        }
 
         public void CloseTheWindow()
         {

@@ -1,6 +1,6 @@
 ﻿using System.Windows.Controls;
 
-namespace MVVMApplication.View
+namespace MVVM_Sample1.View
 {
     /// <summary>
     /// Interaction logic for PersonEditor.xaml

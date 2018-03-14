@@ -1,8 +1,4 @@
-﻿using DRM.PropBag;
-using DRM.TypeSafePropertyBag;
-using System;
-
-namespace MVVMApplication.ViewModel
+﻿namespace MVVM_Sample1.ViewModel
 {
     public partial class PersonVM
     {

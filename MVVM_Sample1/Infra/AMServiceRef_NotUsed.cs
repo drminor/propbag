@@ -2,7 +2,7 @@
 using DRM.PropBagControlsWPF;
 using DRM.TypeSafePropertyBag;
 
-namespace MVVMApplication.Infra
+namespace MVVM_Sample1.Infra
 {
     public class AMServiceRef : IAMServiceRef
     {

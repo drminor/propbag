@@ -1,5 +1,5 @@
 ﻿
-namespace MVVMApplication.Model
+namespace MVVM_Sample1.Model
 {
     public class Person
     {

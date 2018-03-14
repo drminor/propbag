@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 
-namespace MVVMApplication.Infra
+namespace MVVM_Sample1.Infra
 {
     public class ViewModelProvider
     {

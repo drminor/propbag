@@ -1,7 +1,7 @@
-﻿using MVVMApplication.ViewModel;
+﻿using MVVM_Sample1.ViewModel;
 using System.Windows.Controls;
 
-namespace MVVMApplication.View
+namespace MVVM_Sample1.View
 {
     public partial class PersonCollection : UserControl
     {

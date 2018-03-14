@@ -1,8 +1,8 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:vmod="clr-namespace:MVVMApplication.ViewModel"
-                    xmlns:mod="clr-namespace:MVVMApplication.Model"
-                    xmlns:dsrv="clr-namespace:MVVMApplication.Services"
+                    xmlns:vmod="clr-namespace:MVVM_Sample1.ViewModel"
+                    xmlns:mod="clr-namespace:MVVM_Sample1.Model"
+                    xmlns:dsrv="clr-namespace:MVVM_Sample1.Services"
                     xmlns:pb="clr-namespace:DRM.PropBagControlsWPF;assembly=PropBag.WPFControls"
                     xmlns:pbWPF="clr-namespace:DRM.PropBagWPF;assembly=PropBagWPF"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
@@ -10,15 +10,15 @@
 
     <pb:PropBagTemplate x:Key="MainWindowVM"
         ClassName="MainWindowViewModel"
-        OutPutNameSpace="MVVMApplication.ViewModel"
+        OutPutNameSpace="MVVM_Sample1.ViewModel"
         DeriveFromClassMode="Custom"
         TargetType="{x:Type vmod:MainWindowViewModel}"
         PropFactoryType="{x:Type pbWPF:WPFPropFactory}"
         TypeSafetyMode="Tight">
 
         <pb:PropBagTemplate.Namespaces>
-            <pb:NamespaceItem Namespace="MVVMApplication.Infra"/>
-            <pb:NamespaceItem Namespace="MVVMApplication.Model"/>
+            <pb:NamespaceItem Namespace="MVVM_Sample1.Infra"/>
+            <pb:NamespaceItem Namespace="MVVM_Sample1.Model"/>
         </pb:PropBagTemplate.Namespaces>
 
         <pb:PropBagTemplate.Props>

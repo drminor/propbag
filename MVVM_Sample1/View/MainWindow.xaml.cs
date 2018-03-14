@@ -1,10 +1,10 @@
 ﻿using DRM.TypeSafePropertyBag;
-using MVVMApplication.Infra;
-using MVVMApplication.ViewModel;
+using MVVM_Sample1.Infra;
+using MVVM_Sample1.ViewModel;
 using System;
 using System.Windows;
 
-namespace MVVMApplication.View
+namespace MVVM_Sample1.View
 {
     public partial class MainWindow : Window
     {

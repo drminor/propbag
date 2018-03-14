@@ -1,43 +1,16 @@
 ﻿using DRM.PropBag;
-using DRM.PropBag.AutoMapperSupport;
 using DRM.PropBagWPF;
 using DRM.TypeSafePropertyBag;
 using System;
 using System.ComponentModel;
 using System.Windows.Data;
 
-namespace MVVMApplication.ViewModel
+namespace MVVM_Sample1.ViewModel
 {
-    using PropNameType = String;
-    using PropModelType = IPropModel<String>;
-
-    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
-
-    public class PersonEditorViewModel : PropBag
+    public partial class PersonEditorViewModel : PropBag
     {
         //int ITEMS_PER_PAGE = 10;
         string PROP_NAME = "PersonListView";
-
-
-        #region Constructors
-
-        public PersonEditorViewModel(PropModelType pm, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
-            : base(pm, storeAccessCreator, autoMapperService, propFactory, fullClassName)
-        {
-            System.Diagnostics.Debug.WriteLine("Constructing PersonEditorViewModel -- with PropModel.");
-        }
-
-        private PersonEditorViewModel(PersonEditorViewModel copySource)
-            : base(copySource)
-        {
-        }
-
-        new public object Clone()
-        {
-            return new PersonEditorViewModel(this);
-        }
-
-        #endregion
 
         #region Command Handlers
 

@@ -2,7 +2,7 @@
 using DRM.TypeSafePropertyBag;
 using System;
 
-namespace MVVMApplication.Infra
+namespace MVVM_Sample1.Infra
 {
     using PSServiceSingletonProviderInterface = IProvidePropStoreServiceSingletons<UInt32, String>;
 

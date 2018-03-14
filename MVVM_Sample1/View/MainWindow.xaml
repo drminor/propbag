@@ -1,10 +1,10 @@
-﻿<Window x:Class="MVVMApplication.View.MainWindow"
+﻿<Window x:Class="MVVM_Sample1.View.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:infra="clr-namespace:MVVMApplication.Infra"
-        xmlns:view="clr-namespace:MVVMApplication.View"
+        xmlns:infra="clr-namespace:MVVM_Sample1.Infra"
+        xmlns:view="clr-namespace:MVVM_Sample1.View"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         Title="MainWindow" Height="400" Width="725">

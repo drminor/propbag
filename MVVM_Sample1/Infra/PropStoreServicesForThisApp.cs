@@ -11,11 +11,11 @@ using System;
 using System.ComponentModel;
 using System.Windows;
 using ObjectSizeDiagnostics;
-using MVVMApplication.Model;
+using MVVM_Sample1.Model;
 using DRM.PropBag.TypeWrapper;
 using DRM.PropBag.TypeWrapper.TypeDesc;
 
-namespace MVVMApplication.Infra
+namespace MVVM_Sample1.Infra
 {
     using PropNameType = String;
     using PropModelType = IPropModel<String>;

@@ -5,9 +5,8 @@ using DRM.TypeSafePropertyBag.TypeDescriptors;
 using System;
 using System.ComponentModel;
 
-namespace MVVMApplication.ViewModel
+namespace MVVM_Sample1.ViewModel
 {
-    using PropNameType = String;
     using PropModelType = IPropModel<String>;
 
     // This code could be created by a VS Extension.
@@ -15,10 +14,26 @@ namespace MVVMApplication.ViewModel
 
     public partial class PersonVM : PropBag, ICloneable
     {
+        private static PropBagTypeDescriptionProvider<PersonVM> _typeDescriptionProvider = new PropBagTypeDescriptionProvider<PersonVM>();
+
+        static PersonVM()
+        {
+            TypeDescriptor.AddProvider(_typeDescriptionProvider, typeof(PersonVM));
+        }
+
         public PersonVM(PropModelType pm, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
             : base(pm, storeAccessCreator, autoMapperService, propFactory, fullClassName)
         {
-            //RegisterTypeDescriptorProvider();
+            //PropBagTypeDescriptionProvider<PersonVM> tdp = RegisterTypeDescriptorProvider<PersonVM>(pm);
+            //pm.TypeDescriptionProvider = tdp;
+            //TypeDescriptor.AddProvider(tdp, this);
+
+            //List<string> pNamesFromOurProvider = tdp.GetPropertyDescriptors(this).Select(x => x.Name).ToList();
+
+            //List<string> pNamesFromOurPropModel = pm.PropertyDescriptors.Select(x => x.Name).ToList();
+
+            //List<string> pNames = TypeInspectorUtility.GetPropertyNames(this);
+
             System.Diagnostics.Debug.WriteLine("PersonVM is being created with a PropModel.");
         }
 
@@ -28,7 +43,10 @@ namespace MVVMApplication.ViewModel
         public PersonVM(PersonVM copySource)
             : base(copySource)
         {
-            //RegisterTypeDescriptorProvider();
+            //PropBagTypeDescriptionProvider<PersonVM> tdp = RegisterTypeDescriptorProvider<PersonVM>(_propModel);
+            //_propModel.TypeDescriptionProvider = tdp;
+
+            //TypeDescriptor.AddProvider(tdp, this);
             System.Diagnostics.Debug.WriteLine("PersonVM is being created from an existing instance of a PersonVM.");
         }
 
