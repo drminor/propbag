@@ -7,8 +7,8 @@
                     xmlns:pbWPF="clr-namespace:DRM.PropBagWPF;assembly=PropBagWPF"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
-    <pb:PropBagTemplate x:Key="PersonEditorVM"
-                        ClassName="PersonEditorViewModel"
+    <pb:PropBagTemplate x:Key="PersonEditorVM_Emit"
+                        ClassName="PersonEditorVM_Emit"
                         DeriveFromClassMode="Custom"
                         TargetType="{x:Type vmod:PersonEditorViewModel}"
                         TypeSafetyMode="Tight"
@@ -24,7 +24,7 @@
 
             <pb:PropItem PropertyName="PersonListView" PropKind="CollectionView" PropertyType="{x:Type vmod:PersonVM}">
                 <pb:InitialValueField SetToNull="True"/>
-                <pb:PropBinderField Path="../Business" MapperRequestResourceKey="PersonVM_Mapper"/>
+                <pb:PropBinderField Path="../Business" MapperRequestResourceKey="PersonVM_Mapper_Emit_Proxy"/>
             </pb:PropItem>
 
             <pb:PropItem PropertyName="WMessage" PropertyType="{x:Type sys:String}" StorageStrategy="External">

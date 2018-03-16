@@ -8,8 +8,8 @@
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
     
 
-    <pb:PropBagTemplate x:Key="MainWindowVM"
-        ClassName="MainWindowViewModel"
+    <pb:PropBagTemplate x:Key="MainWindowVM_Extra"
+        ClassName="MainWindowVM_Extra"
         OutPutNameSpace="MVVM_Sample1.ViewModel"
         DeriveFromClassMode="Custom"
         TargetType="{x:Type vmod:MainWindowViewModel}"
@@ -28,11 +28,11 @@
             </pb:PropItem>
             
             <pb:PropItem PropertyName="PersonCollectionVM" PropertyType="{x:Type vmod:PersonCollectionViewModel}">
-                <pb:InitialValueField CreateNew="True" PropBagResourceKey="PersonCollectionVM"/>
+                <pb:InitialValueField CreateNew="True" PropBagResourceKey="PersonCollectionVM_Extra"/>
             </pb:PropItem>
 
             <pb:PropItem PropertyName="PersonEditorVM" PropertyType="{x:Type vmod:PersonEditorViewModel}">
-                <pb:InitialValueField CreateNew="True" PropBagResourceKey="PersonEditorVM"/>
+                <pb:InitialValueField CreateNew="True" PropBagResourceKey="PersonEditorVM_Extra"/>
             </pb:PropItem>
 
             <pb:PropItem PropertyName="WMessage" PropertyType="{x:Type sys:String}" StorageStrategy="External">

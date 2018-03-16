@@ -1,18 +1,19 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:Infra="clr-namespace:MVVM_Sample1.Infra"
-                    xmlns:mod="clr-namespace:MVVM_Sample1.Model"
                     xmlns:vmod="clr-namespace:MVVM_Sample1.ViewModel"
+                    xmlns:mod="clr-namespace:MVVM_Sample1.Model"
+                    xmlns:dsrv="clr-namespace:MVVM_Sample1.Services"
                     xmlns:pb="clr-namespace:DRM.PropBagControlsWPF;assembly=PropBag.WPFControls"
                     xmlns:pbWPF="clr-namespace:DRM.PropBagWPF;assembly=PropBagWPF"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
-    <pb:PropBagTemplate x:Key="PersonVM"
-                        ClassName="PersonVM"
+    <pb:PropBagTemplate x:Key="PersonCollectionVM_Emit"
+                        ClassName="PersonCollectionVM_Emit"
                         DeriveFromClassMode="Custom"
-                        TargetType="{x:Type vmod:PersonVM}"
+                        TargetType="{x:Type vmod:PersonCollectionViewModel}"
                         TypeSafetyMode="Tight"
                         PropFactoryType="{x:Type pbWPF:WPFPropFactory}"
+
                         OutPutNameSpace="MVVM_Sample1.ViewModel">
         
         <pb:PropBagTemplate.Namespaces>
@@ -22,28 +23,16 @@
 
         <pb:PropBagTemplate.Props>
 
-            <pb:PropItem PropertyName="Id" PropertyType="sys:Int32">
-                <pb:InitialValueField SetToDefault="True"/>
+            <pb:PropItem PropertyName="PersonListView" PropKind="CollectionView" PropertyType="{x:Type vmod:PersonVM}">
+                <pb:InitialValueField SetToNull="True"/>
+                <pb:PropBinderField Path="../Business" MapperRequestResourceKey="PersonVM_Mapper_Emit_Proxy"/>
             </pb:PropItem>
 
-            <pb:PropItem PropertyName="FirstName" PropertyType="sys:String">
-                <pb:InitialValueField SetToDefault="True"/>
+            <pb:PropItem PropertyName="WMessage" PropertyType="{x:Type sys:String}" StorageStrategy="External">
+                <pb:InitialValueField SetToNull="True"/>
             </pb:PropItem>
-
-            <pb:PropItem PropertyName="LastName" PropertyType="sys:String">
-                <pb:InitialValueField SetToDefault="True"/>
-            </pb:PropItem>
-
-            <pb:PropItem PropertyName="CityOfResidence" PropertyType="sys:String">
-                <pb:InitialValueField SetToDefault="True"/>
-            </pb:PropItem>
-
-            <pb:PropItem PropertyName="Profession" PropertyType="mod:Profession">
-                <pb:InitialValueField SetToDefault="True"/>
-            </pb:PropItem>
-            
 
         </pb:PropBagTemplate.Props>
     </pb:PropBagTemplate>
-    
+
 </ResourceDictionary>

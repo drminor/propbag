@@ -7,13 +7,12 @@
                     xmlns:pbWPF="clr-namespace:DRM.PropBagWPF;assembly=PropBagWPF"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
-    <pb:PropBagTemplate x:Key="PersonCollectionVM"
-                        ClassName="PersonCollectionViewModel"
+    <pb:PropBagTemplate x:Key="PersonEditorVM_Extra"
+                        ClassName="PersonEditorVM_Extra"
                         DeriveFromClassMode="Custom"
-                        TargetType="{x:Type vmod:PersonCollectionViewModel}"
+                        TargetType="{x:Type vmod:PersonEditorViewModel}"
                         TypeSafetyMode="Tight"
                         PropFactoryType="{x:Type pbWPF:WPFPropFactory}"
-
                         OutPutNameSpace="MVVM_Sample1.ViewModel">
         
         <pb:PropBagTemplate.Namespaces>
@@ -25,7 +24,7 @@
 
             <pb:PropItem PropertyName="PersonListView" PropKind="CollectionView" PropertyType="{x:Type vmod:PersonVM}">
                 <pb:InitialValueField SetToNull="True"/>
-                <pb:PropBinderField Path="../Business" MapperRequestResourceKey="PersonVM_Mapper"/>
+                <pb:PropBinderField Path="../Business" MapperRequestResourceKey="PersonVM_Mapper_Extra_Members"/>
             </pb:PropItem>
 
             <pb:PropItem PropertyName="WMessage" PropertyType="{x:Type sys:String}" StorageStrategy="External">
