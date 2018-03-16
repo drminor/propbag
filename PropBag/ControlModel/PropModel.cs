@@ -156,6 +156,15 @@ namespace DRM.PropBag
             }
         }
 
+        internal void SetCustomTypeDescriptor(ICustomTypeDescriptor newValue)
+        {
+            if(_ctd != null)
+            {
+                throw new InvalidOperationException("The internal SetCustomTypeDescriptor can only be used on PropModels for which no CustomTypeDescriptor has been set.");
+            }
+            _ctd = newValue;
+        }
+
         object _syncLock = new object();
         public const long GEN_NONE = -1;
 
@@ -316,7 +325,9 @@ namespace DRM.PropBag
 
                 result.WrapperTypeInfoField = WrapperTypeInfoField;
                 result.NewEmittedType = NewEmittedType;
-                result.CustomTypeDescriptor = CustomTypeDescriptor;
+
+                // Use our internal Set routine.
+                result.SetCustomTypeDescriptor(CustomTypeDescriptor);
 
                 result.Namespaces = new ObservableCollection<PropNameType>();
                 foreach (string ns in Namespaces)
