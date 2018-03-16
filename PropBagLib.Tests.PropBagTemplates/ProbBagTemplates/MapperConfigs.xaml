@@ -3,15 +3,16 @@
                     xmlns:mod="clr-namespace:PropBagLib.Tests.BusinessModel;assembly=PropBag.Test"
                     xmlns:pb="clr-namespace:DRM.PropBagControlsWPF;assembly=PropBag.WPFControls">
 
+   
     <pb:MapperRequestTemplate x:Key="PersonVM_Mapper_Emit_Proxy"
                     SourceType="{x:Type mod:Person}"
-                    DestinationPropModelKey="PersonVM"
+                    DestinationPropModelKey="MVVMApplication.ViewModel.PersonVM"
                     ConfigPackageName="Emit_Proxy"
     />
 
     <pb:MapperRequestTemplate x:Key="PersonVM_Mapper_Extra_Members"
                       SourceType="{x:Type mod:Person}"
-                      DestinationPropModelKey="PersonVM"
+                      DestinationPropModelKey="MVVMApplication.ViewModel.PersonVM"
                       ConfigPackageName="Extra_Members"
     />
 </ResourceDictionary>

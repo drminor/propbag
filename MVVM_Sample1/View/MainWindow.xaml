@@ -15,7 +15,7 @@
                             ObjectType="{x:Type infra:ViewModelProvider}"
                             MethodName="GetData">
             <ObjectDataProvider.ConstructorParameters>
-                <sys:String>MainWindowVM</sys:String>
+                <sys:String>MVVM_Sample1.ViewModel.MainWindowVM</sys:String>
             </ObjectDataProvider.ConstructorParameters>
         </ObjectDataProvider>
     </Window.Resources>

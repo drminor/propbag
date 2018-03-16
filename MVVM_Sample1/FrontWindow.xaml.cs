@@ -42,7 +42,7 @@ namespace MVVM_Sample1.View
             _mct.Enabled = true;
             _mct.CompactAndMeasure("Before Starting MainWindow (EmitProxy)");
 
-            ShowMain("Emit_Proxy");
+            ShowMain("Emit");
 
             _mct.MeasureAndReport("The Main Window has been closed. Before Compaction.", "FrontWindow");
             _mct.CompactAndMeasure();
@@ -51,7 +51,7 @@ namespace MVVM_Sample1.View
 
         private void PropBagExtraMembers_Click(object sender, RoutedEventArgs e)
         {
-            ShowMain("Extra_Members");
+            ShowMain("Extra");
         }
 
         private void Window_Closed(object sender, EventArgs e)

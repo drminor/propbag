@@ -5,13 +5,13 @@
 
     <pb:MapperRequestTemplate x:Key="PersonVM_Mapper_Emit_Proxy"
                     SourceType="{x:Type mod:Person}"
-                    DestinationPropModelKey="PersonVM"
+                    DestinationPropModelKey="MVVM_Sample1.ViewModel.PersonVM"
                     ConfigPackageName="Emit_Proxy"
     />
 
     <pb:MapperRequestTemplate x:Key="PersonVM_Mapper_Extra_Members"
                       SourceType="{x:Type mod:Person}"
-                      DestinationPropModelKey="PersonVM"
+                      DestinationPropModelKey="MVVM_Sample1.ViewModel.PersonVM"
                       ConfigPackageName="Extra_Members"
     />
 </ResourceDictionary>

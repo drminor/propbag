@@ -77,14 +77,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="ProbBagTemplates\MapperConf_Emit.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="ProbBagTemplates\MapperConf_Extra.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="ProbBagTemplates\PersonCollectionVM_Extra.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
