@@ -131,7 +131,29 @@ namespace DRM.PropBag
 
         PropModelCacheInterface pmp;
         [XmlIgnore]
-        public PropModelCacheInterface PropModelCache { get { return pmp; } set { SetAlways<PropModelCacheInterface>(ref pmp, value); } }
+        public PropModelCacheInterface PropModelCache
+        {
+            get
+            {
+                return pmp;
+            }
+            set
+            {
+                if(ReferenceEquals(pmp, value))
+                {
+                    // The new value is the same as the existing value.
+                    return;
+                }
+                else
+                {
+                    if(value != null && pmp != null)
+                    {
+                        throw new InvalidOperationException("Once a PropModel has been associated with a PropModelCache, it cannot be associated with a different PropModelCache.");
+                    }
+                }
+                SetAlways<PropModelCacheInterface>(ref pmp, value, nameof(PropModelCache));
+            }
+        }
 
         ICustomTypeDescriptor _ctd;
         [XmlIgnore]
@@ -179,16 +201,53 @@ namespace DRM.PropBag
             throw new NotSupportedException("PropModels cannot be created using the parameterless constructor.");
         }
 
-        public PropModel(string className, string namespaceName,
+        public PropModel
+            (
+            string className,
+            string namespaceName,
             DeriveFromClassModeEnum deriveFrom,
             Type targetType,
             IPropFactory propFactory,
             Type propFactoryType,
             PropModelCacheInterface propModelCache,
-            PropBagTypeSafetyMode typeSafetyMode = PropBagTypeSafetyMode.AllPropsMustBeRegistered,
-            bool deferMethodRefResolution = true,
-            bool requireExplicitInitialValue = true,
-            PropModelType parent = null
+            PropBagTypeSafetyMode typeSafetyMode,
+            bool deferMethodRefResolution,
+            bool requireExplicitInitialValue
+            )
+            : this
+            (
+                className, namespaceName, deriveFrom, targetType, propFactory, propFactoryType, propModelCache,
+                typeSafetyMode: typeSafetyMode,
+                deferMethodRefResolution: deferMethodRefResolution,
+                requireExplicitInitialValue: requireExplicitInitialValue,
+                wrapperTypeInfo: null,
+                newEmittedType: null,
+                parent: null,
+                isFixed: false,
+                generationId: GEN_NONE,
+                customTypeDescriptor: null
+            )
+        {
+        }
+
+        public PropModel
+            (
+            string className,
+            string namespaceName,
+            DeriveFromClassModeEnum deriveFrom,
+            Type targetType,
+            IPropFactory propFactory,
+            Type propFactoryType,
+            PropModelCacheInterface propModelCache,
+            PropBagTypeSafetyMode typeSafetyMode,
+            bool deferMethodRefResolution,
+            bool requireExplicitInitialValue,
+            ITypeInfoField wrapperTypeInfo,
+            Type newEmittedType,
+            PropModelType parent,
+            bool isFixed,
+            long generationId,
+            ICustomTypeDescriptor customTypeDescriptor
             )
         {
             ClassName = className ?? throw new ArgumentNullException(nameof(className));
@@ -209,7 +268,6 @@ namespace DRM.PropBag
             DeferMethodRefResolution = deferMethodRefResolution;
             RequireExplicitInitialValue = requireExplicitInitialValue;
 
-            Parent = parent;
 
             if (deriveFrom == DeriveFromClassModeEnum.Custom)
             {
@@ -219,13 +277,14 @@ namespace DRM.PropBag
                 }
             }
 
-            IsFixed = false;
+            WrapperTypeInfoField = wrapperTypeInfo;
+            NewEmittedType = newEmittedType;
+
+            Parent = parent;
+            IsFixed = isFixed;
 
             // Use the backing store to avoid the "No PropModelCache" error.
-            _generationId = GEN_NONE;
-
-            WrapperTypeInfoField = null;
-            NewEmittedType = null;
+            _generationId = generationId;
 
             // Use the backing store to avoid the "Can only be set on fixed PropModels" error.
             _ctd = null;
@@ -300,12 +359,39 @@ namespace DRM.PropBag
 
         public object Clone()
         {
-            PropModelType result = CloneIt();
+            object result;
+            if(PropModelCache != null)
+            {
+                result = CloneIt(GEN_NONE);
+            }
+            else
+            {
+                if(PropModelCache.TryClone(this, out PropModelType clonedCopy))
+                {
+                    result = clonedCopy;
+                }
+                else
+                {
+                    throw new InvalidOperationException("The PropModel cache could not clone this instance.");
+                }
+            }
             return result;
         }
 
         public PropModelType CloneIt()
         {
+            PropModelType clonedCopy = CloneIt(GEN_NONE);
+            return clonedCopy;
+        }
+
+
+        public PropModelType CloneIt(long generationId)
+        {
+            if (PropModelCache != null)
+            {
+                throw new InvalidOperationException("Cannot clone PropModels that are associated with a PropModel cache directly. Use the TryClone method on the PropModel Cache.");
+            }
+
             PropModel result;
 
             lock (_syncLock)
@@ -319,15 +405,20 @@ namespace DRM.PropBag
 
                 IPropFactory propFactoryToUse = PropFactory;  //PropFactoryType != null ? null : PropFactory;
 
-                result = new PropModel(ClassName, NamespaceName, DeriveFromClassMode, TargetType,
+                result = new PropModel
+                    (
+                    ClassName, NamespaceName, DeriveFromClassMode, TargetType,
                     propFactoryToUse, PropFactoryType, PropModelCache,
-                    TypeSafetyMode, DeferMethodRefResolution, RequireExplicitInitialValue);
+                    TypeSafetyMode, DeferMethodRefResolution, RequireExplicitInitialValue,
+                    WrapperTypeInfoField, NewEmittedType, Parent,
+                    IsFixed, generationId, CustomTypeDescriptor
+                    );
 
-                result.WrapperTypeInfoField = WrapperTypeInfoField;
-                result.NewEmittedType = NewEmittedType;
+                //result.WrapperTypeInfoField = WrapperTypeInfoField;
+                //result.NewEmittedType = NewEmittedType;
 
-                // Use our internal Set routine.
-                result.SetCustomTypeDescriptor(CustomTypeDescriptor);
+                //// Use our internal Set routine.
+                //result.SetCustomTypeDescriptor(CustomTypeDescriptor);
 
                 result.Namespaces = new ObservableCollection<PropNameType>();
                 foreach (string ns in Namespaces)
@@ -346,22 +437,6 @@ namespace DRM.PropBag
         }
 
         public bool IsFixed { get; private set; }
-
-        private void OpenIfNotRegisteredWithCache()
-        {
-            if (IsFixed)
-            {
-                if (PropModelCache == null)
-                {
-                    System.Diagnostics.Debug.Assert(GenerationId == GEN_NONE, $"The PropModel with Full Class Name: {this} has no PropModelCache assigned to it, however the GenerationId is not {GEN_NONE}.");
-                    Open();
-                }
-                else
-                {
-                    throw new InvalidOperationException($"The PropModel with Full Class Name: {this} is fixed. Cannot make changed to this PropModel.");
-                }
-            }
-        }
 
         public int Count => _propDictionary.Count;
 
@@ -391,12 +466,17 @@ namespace DRM.PropBag
 
             set
             {
-                if(PropModelCache == null)
-                {
-                    throw new InvalidOperationException($"The PropModel with Full Class Name: {this} has no PropModelCache assigned to it. Setting the GenerationId is not allowed in this context.");
-                }
+                //if(PropModelCache == null)
+                //{
+                //    throw new InvalidOperationException($"The PropModel with Full Class Name: {this} has no PropModelCache assigned to it. Setting the GenerationId is not allowed in this context.");
+                //}
 
-                if (IsFixed) throw new InvalidOperationException($"The PropModel with Full Class Name: {this} is fixed. The GenerationId cannot be changed.");
+                //if (IsFixed) throw new InvalidOperationException($"The PropModel with Full Class Name: {this} is fixed. The GenerationId cannot be changed.");
+
+                if (IsFixed && PropModelCache != null)
+                {
+                    throw new InvalidOperationException($"The PropModel with Full Class Name: {this} is fixed and is associated with a PropModel Cache. The GenerationId cannot be changed.");
+                }
 
                 _generationId = value;
             }
@@ -412,8 +492,22 @@ namespace DRM.PropBag
         {
             lock(_syncLock)
             {
-                IsFixed = false;
-                //CustomTypeDescriptor = null;
+                if(PropModelCache != null)
+                {
+                    if(IsFixed)
+                    {
+                        throw new InvalidOperationException("Cannot open a fixed PropModel that is associated with a PropModel cache.");
+                    }
+                    return;
+                }
+                else
+                {
+                    if(IsFixed)
+                    {
+                        IsFixed = false;
+                    }
+                }
+
             }
         }
 
@@ -499,6 +593,20 @@ namespace DRM.PropBag
         #endregion
 
         #region Private Methods
+
+        private void OpenIfNotRegisteredWithCache()
+        {
+            if (IsFixed)
+            {
+                if (PropModelCache != null)
+                {
+                    throw new InvalidOperationException($"The PropModel with Full Class Name: {this} is fixed. Cannot make changed to this PropModel.");
+                }
+
+                System.Diagnostics.Debug.Assert(GenerationId == GEN_NONE, $"The PropModel with Full Class Name: {this} has no PropModelCache assigned to it, however the GenerationId is not {GEN_NONE}.");
+                Open();
+            }
+        }
 
         private string GetFullClassName(string namespaceName, string className)
         {

@@ -80,6 +80,7 @@ namespace DRM.PropBagWPF
                 }
 
             }
+
             return result;
         }
 

@@ -212,7 +212,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
             //personVM_PropModel = PropModelCache.GetPropModel("PersonVM");
 
             string className = "PersonVM";
-            string fcn = GetResourceKeyWithSuffix(className, ConfigPackageNameSuffix);
+            string fcn = GetFullClassName(DefaultNamespace, className, ConfigPackageNameSuffix);
 
             if (PropModelCache.TryGetPropModel(fcn, out PropModelType personVM_PropModel))
             {
@@ -268,7 +268,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
             //mainWindowPropModel = PropModelCache.GetPropModel("MainWindowVM");
 
             string className = "MainWindowVM";
-            string fcn = GetResourceKeyWithSuffix(className, ConfigPackageNameSuffix);
+            string fcn = GetFullClassName(DefaultNamespace, className, ConfigPackageNameSuffix);
 
             if (PropModelCache.TryGetPropModel(fcn, out PropModelType mainWindowPropModel))
             {
@@ -341,7 +341,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
             //mainWindowPropModel = PropModelCache.GetPropModel("MainWindowVM");
 
             string className = "MainWindowVM";
-            string fcn = GetResourceKeyWithSuffix(className, ConfigPackageNameSuffix);
+            string fcn = GetFullClassName(DefaultNamespace, className, ConfigPackageNameSuffix);
 
             if (PropModelCache.TryGetPropModel(fcn, out PropModelType mainWindowPropModel))
             {
@@ -418,7 +418,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
             //mainWindowPropModel = PropModelCache.GetPropModel("MainWindowVM");
 
             string className = "MainWindowVM";
-            string fcn = GetResourceKeyWithSuffix(className, ConfigPackageNameSuffix);
+            string fcn = GetFullClassName(DefaultNamespace, className, ConfigPackageNameSuffix);
 
             if (PropModelCache.TryGetPropModel(fcn, out PropModelType mainWindowPropModel))
             {

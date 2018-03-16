@@ -10,6 +10,8 @@ namespace DRM.TypeSafePropertyBag
     public class SimplePropModelFamilyCollection : IPropModelFamilyCollection<String>
     {
         public const long GEN_ZERO = 0;
+        public const long GEN_NONE = -1;
+
         private readonly Dictionary<long, PropModelType> _generations;
 
         object _sync = new object();
@@ -21,10 +23,18 @@ namespace DRM.TypeSafePropertyBag
 
         public long Add(PropModelType propModel)
         {
-            long genId = GetNextGenerationId();
-
-            lock(_sync)
+            if(propModel.GenerationId != GEN_NONE)
             {
+                if(_generations.TryGetValue(propModel.GenerationId, out PropModelType test))
+                {
+                    throw new InvalidOperationException("This PropModel has already been added to the FamilyCollection.");
+                }
+            }
+
+            long genId;
+            lock (_sync)
+            {
+                genId = GetNextGenerationId();
                 _generations.Add(genId, propModel);
             }
 

@@ -29,9 +29,14 @@ namespace PropBagLib.Tests.SpecBasedVMTests
 
         private string[] _pbTemplateFilenames = new string[]
         {
-                "MainWindowVM.xaml",
-                "PersonCollectionVM.xaml",
-                "PersonEditorVM.xaml",
+                "MainWindowVM_Emit.xaml",
+                "PersonCollectionVM_Emit.xaml",
+                "PersonEditorVM_Emit.xaml",
+
+                "MainWindowVM_Extra.xaml",
+                "PersonCollectionVM_Extra.xaml",
+                "PersonEditorVM_Extra.xaml",
+
                 "PersonVM.xaml"
         };
 
@@ -42,6 +47,8 @@ namespace PropBagLib.Tests.SpecBasedVMTests
 
         string _configPackageNameSuffix = "Emit";
         //string _configPackageNameSuffix = "Extra";
+
+        string _defaultNamespace = "MVVMApplication.ViewModel";
 
         #endregion
 
@@ -105,6 +112,18 @@ namespace PropBagLib.Tests.SpecBasedVMTests
             set
             {
                 _mapperRequestFilenames = value;
+            }
+        }
+
+        protected virtual string DefaultNamespace
+        {
+            get
+            {
+                return _defaultNamespace;
+            }
+            set
+            {
+                _defaultNamespace = value;
             }
         }
 
@@ -435,10 +454,20 @@ namespace PropBagLib.Tests.SpecBasedVMTests
 
         #region Helper Methods
 
-        protected string GetResourceKeyWithSuffix(string rawKey, string suffix)
+        protected string GetFullClassName(string defaultNamespace, string className, string suffix)
         {
-            string result = suffix != null ? $"{rawKey}_{suffix}" : rawKey;
+            string result;
+
+            if (className.Contains("."))
+            {
+                result = suffix != null ? $"{className}_{suffix}" : className;
+            }
+            else
+            {
+                result = suffix != null ? $"{defaultNamespace}.{className}_{suffix}" : className;
+            }
             return result;
+
         }
 
 

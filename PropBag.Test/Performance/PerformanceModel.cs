@@ -38,8 +38,7 @@ namespace PropBagLib.Tests
                 propModelCache: null,
                 typeSafetyMode: safetyMode,
                 deferMethodRefResolution: true,
-                requireExplicitInitialValue: true,
-                parent: null
+                requireExplicitInitialValue: true
                 );
 
             // TODO: AAA

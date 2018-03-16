@@ -7,6 +7,8 @@ namespace DRM.TypeSafePropertyBag
     {
         long Add(IPropModel<L2TRaw> propModel);
 
+        bool TryClone(IPropModel<L2TRaw> propModel, out IPropModel<L2TRaw> clonedCopy);
+
         bool TryGetPropModel(string fullClassName, out IPropModel<L2TRaw> propModel);
         bool TryGetPropModel(string fullClassName, long generationId, out IPropModel<L2TRaw> propModel);
 

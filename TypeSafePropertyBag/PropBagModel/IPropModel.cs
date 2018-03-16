@@ -51,11 +51,9 @@ namespace DRM.TypeSafePropertyBag
         IPropModel<L2TRaw> Parent { get; set; }
         long GenerationId { get; set; }
 
-        //object TypeDescriptionProvider { get; set; }
-        //PropertyDescriptorCollection PropertyDescriptorCollection { get; set; }
-
         ICustomTypeDescriptor CustomTypeDescriptor { get; set; }
 
-        //IList<PropertyDescriptor> PropertyDescriptors { get; set; }
+        IPropModel<L2TRaw> CloneIt();
+        IPropModel<L2TRaw> CloneIt(long generationId);
     }
 }

@@ -39,9 +39,9 @@ namespace DRM.TypeSafePropertyBag
         {
             string fullClassName = propModel.FullClassName ?? throw new InvalidOperationException("The PropModel must have a non-null FullClassName.");
 
-            if(propModel.IsFixed)
+            if(propModel.PropModelCache != null)
             {
-                throw new InvalidOperationException("Only open (IsFixed = false) PropModels can be added to the Cache.");
+                throw new InvalidOperationException("The PropModel is already associated with a PropModel cache.");
             }
 
             long generationId;
@@ -57,11 +57,29 @@ namespace DRM.TypeSafePropertyBag
                     _cache.Add(fullClassName, familyCollection);
 
                     generationId = familyCollection.Add(propModel);
-                    propModel.GenerationId = generationId;
                 }
+
+                AssignNewGenerationId(propModel, generationId);
+
+                // Associate the propModel with this cache.
+                propModel.PropModelCache = this;
             }
 
             return generationId;
+        }
+
+        private void AssignNewGenerationId(PropModelType propModel, long generationId)
+        {
+            if(propModel.IsFixed)
+            {
+                propModel.Open();
+                propModel.GenerationId = generationId;
+                Fix(propModel);
+            }
+            else
+            {
+                propModel.GenerationId = generationId;
+            }
         }
 
 
@@ -87,6 +105,7 @@ namespace DRM.TypeSafePropertyBag
                 {
                     if (TryFetchFromSourceProviders(fullClassName, out propModel))
                     {
+                        propModel.PropModelCache = this;
                         Add(propModel);
                         return true;
                     }
@@ -127,6 +146,19 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
+        public bool TryClone(PropModelType propModel, out PropModelType clonedCopy)
+        {
+            if(!ReferenceEquals(propModel.PropModelCache, this))
+            {
+                throw new InvalidOperationException("We are being asked to clone a PropModel that is assocated with some other PropModel cache.");
+            }
+
+            propModel.PropModelCache = null;
+            clonedCopy = (PropModelType) propModel.CloneIt();
+            Add(clonedCopy);
+            return true;
+        }
+
         public void Clear()
         {
             System.Diagnostics.Debug.WriteLine("The SimplePropModelCache is being cleared.");
@@ -138,10 +170,7 @@ namespace DRM.TypeSafePropertyBag
 
         public void Fix(PropModelType propModel)
         {
-            if (!TryFind(propModel, out long generationId))
-            {
-                throw new InvalidOperationException("We are being asked to fix a PropModel that is not in our cache.");
-            }
+            CheckOwnerShip(propModel);
 
             if (propModel.IsFixed)
             {
@@ -152,6 +181,16 @@ namespace DRM.TypeSafePropertyBag
             {
                 propModel.Fix();
             }
+        }
+
+        [System.Diagnostics.Conditional("DEBUG")]
+        private void CheckOwnerShip(PropModelType propModel)
+        {
+            if (!TryFind(propModel, out long generationId))
+            {
+                throw new InvalidOperationException("We are being asked to fix a PropModel that is not in our cache.");
+            }
+
         }
 
         // Make a copy within the same family, the copy is given the next available generationId.
@@ -215,6 +254,20 @@ namespace DRM.TypeSafePropertyBag
                 if (classNameToKeyMap.TryGetValue(fullClassName, out string resourceKey))
                 {
                     propModel = propModelProvider.GetPropModel(resourceKey);
+
+                    //if(propModel.IsFixed)
+                    //{
+                    //    throw new InvalidOperationException("The PropModel just fetched from a source provider was fixed.");
+                    //}
+
+                    if (propModel.PropModelCache != null)
+                    {
+                        throw new InvalidOperationException("The PropModel just fetched is already associated with a PropModelCache.");
+                    }
+
+                    // Make sure the propModel is not fixed. (So that we can set its GenerationId.
+                    if(propModel.IsFixed) propModel.Open();
+
                     return true;
                 }
             }
@@ -249,37 +302,36 @@ namespace DRM.TypeSafePropertyBag
 
         #endregion
 
-        #region OLD Style Methods
+        //#region OLD Style Methods
 
-        public PropModelType GetPropModel(string resourceKey)
-        {
-            PropModelType result = null;
-            foreach (IProvidePropModels propModelProvider in _propModelProviders)
-            {
-                try
-                {
-                    result = propModelProvider.GetPropModel(resourceKey);
-                    result.PropModelCache = this;
+        //public PropModelType GetPropModel(string resourceKey)
+        //{
+        //    PropModelType result = null;
+        //    foreach (IProvidePropModels propModelProvider in _propModelProviders)
+        //    {
+        //        try
+        //        {
+        //            result = propModelProvider.GetPropModel(resourceKey);
+        //            result.PropModelCache = this;
 
-                    lock (_syncLock)
-                    {
-                        if (!TryGetPropModel(result.FullClassName, out PropModelType test))
-                        {
-                            Add(result);
-                        }
-                    }
-                    break;
-                }
-                catch
-                {
-                    // Ignore the exception and continue.
-                }
-            }
+        //            lock (_syncLock)
+        //            {
+        //                if (!TryGetPropModel(result.FullClassName, out PropModelType test))
+        //                {
+        //                    Add(result);
+        //                }
+        //            }
+        //            break;
+        //        }
+        //        catch
+        //        {
+        //            // Ignore the exception and continue.
+        //        }
+        //    }
 
-            return result;
-        }
+        //    return result;
+        //}
 
-
-        #endregion
+        //#endregion
     }
 }

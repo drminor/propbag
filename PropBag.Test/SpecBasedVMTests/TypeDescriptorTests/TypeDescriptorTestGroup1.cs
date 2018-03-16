@@ -33,7 +33,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.TypeDescriptorTests
             //mainWindowPropModel = PropModelCache.GetPropModel("MainWindowVM");
 
             string className = "MainWindowVM";
-            string fcn = GetResourceKeyWithSuffix(className, ConfigPackageNameSuffix);
+            string fcn = GetFullClassName(DefaultNamespace, className, ConfigPackageNameSuffix);
 
             if (PropModelCache.TryGetPropModel(fcn, out PropModelType mainWindowPropModel))
             {
