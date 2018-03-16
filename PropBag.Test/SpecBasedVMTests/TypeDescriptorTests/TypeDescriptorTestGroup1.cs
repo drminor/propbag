@@ -15,22 +15,31 @@ namespace PropBagLib.Tests.SpecBasedVMTests.TypeDescriptorTests
     [NonParallelizable]
     public class CreateDestroyBasicVM : TypeDescriptorSetup
     {
-        PropModelType mainWindowPropModel;
+        PropModelType mainWindowPropModel = null;
         MainWindowViewModel mainWindowViewModel;
         //MainWindowViewModel mainWindowViewModel2;
 
 
         protected override Action EstablishContext()
         {
-            ConfigPackageNameSuffix = "Emit_Proxy";
-            //ConfigPackageNameSuffix = "Extra_Members";
+            ConfigPackageNameSuffix = "Emit";
+            //ConfigPackageNameSuffix = "Extra";
 
             return base.EstablishContext();
         }
 
         protected override void Because_Of()
         {
-            mainWindowPropModel = PropModelCache.GetPropModel("MainWindowVM");
+            //mainWindowPropModel = PropModelCache.GetPropModel("MainWindowVM");
+
+            string className = "MainWindowVM";
+            string fcn = GetResourceKeyWithSuffix(className, ConfigPackageNameSuffix);
+
+            if (PropModelCache.TryGetPropModel(fcn, out PropModelType mainWindowPropModel))
+            {
+                throw new KeyNotFoundException($"Could not find a PropModel with Full Class Name = {fcn}.");
+            }
+
             BaseMemTracker.CompactMeasureAndReport("After get mainWindow_PropModel.", "CreateDestroyBasicVM");
 
             // To see how much memory is not being cleaned up after one is created and then disposed.

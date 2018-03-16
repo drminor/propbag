@@ -5,6 +5,7 @@ using PropBagTestApp.Infra;
 using PropBagTestApp.Models;
 using PropBagTestApp.ViewModels;
 using System;
+using System.Collections.Generic;
 using System.Windows;
 
 namespace PropBagTestApp.View
@@ -144,8 +145,13 @@ namespace PropBagTestApp.View
                 {
                     PropModelCacheInterface propModelCache = PropStoreServicesForThisApp.PropModelCache;
 
-                    PropModelType propModel = propModelCache.GetPropModel(REFERENCE_BIND_VM_RES_KEY);
+                    //PropModelType propModel = propModelCache.GetPropModel(REFERENCE_BIND_VM_RES_KEY);
 
+                    string fcn = REFERENCE_BIND_VM_RES_KEY;
+                    if (propModelCache.TryGetPropModel(fcn, out PropModelType propModel))
+                    {
+                        throw new KeyNotFoundException($"Could not find a PropModel with Full Class Name = {fcn}.");
+                    }
 
                     IPropBagMapperKey<MyModel, ReferenceBindViewModelPB> mapperRequest
                         = PropStoreServicesForThisApp.AutoMapperProvider.SubmitMapperRequest<MyModel, ReferenceBindViewModelPB>

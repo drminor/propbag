@@ -7,11 +7,16 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="PropBagTemplates/MainWindowVM.xaml"/>
-                <ResourceDictionary Source="PropBagTemplates/PersonCollectionVM.xaml"/>
-                <ResourceDictionary Source="PropBagTemplates/PersonEditorVM.xaml"/>
+                <ResourceDictionary Source="PropBagTemplates/MainWindowVM_Extra.xaml"/>
+                <ResourceDictionary Source="PropBagTemplates/PersonCollectionVM_Extra.xaml"/>
+                <ResourceDictionary Source="PropBagTemplates/PersonEditorVM_Extra.xaml"/>
+
+                <ResourceDictionary Source="PropBagTemplates/MainWindowVM_Emit.xaml"/>
+                <ResourceDictionary Source="PropBagTemplates/PersonCollectionVM_Emit.xaml"/>
+                <ResourceDictionary Source="PropBagTemplates/PersonEditorVM_Emit.xaml"/>
+
                 <ResourceDictionary Source="PropBagTemplates/PersonVM.xaml"/>
-                <ResourceDictionary Source="PropBagTemplates/MapperConf_Both.xaml"/>
+                <ResourceDictionary Source="PropBagTemplates/MapperConfigs.xaml"/>
 
                 <!--<ResourceDictionary Source="PropBagTemplates/MapperConf_Emit.xaml"/>-->
                 <!--<ResourceDictionary Source="PropBagTemplates/MapperConf_Extra.xaml"/>-->

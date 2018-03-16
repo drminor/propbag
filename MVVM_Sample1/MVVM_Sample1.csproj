@@ -86,10 +86,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <None Include="MainWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </None>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -98,31 +94,31 @@
     <Compile Include="Infra\PropStoreServicesForThisApp.cs" />
     <None Include="Infra\PSServiceRef_NotUsed.cs" />
     <Compile Include="Infra\ViewModelProvider.cs" />
-    <None Include="MainWindow.xaml.cs">
-      <DependentUpon>MainWindow.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </None>
-    <Page Include="PropBagTemplates\MainWindowVM.xaml">
+    <Page Include="PropBagTemplates\MainWindowVM_Extra.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="PropBagTemplates\MapperConf_Both.xaml">
+    <Page Include="PropBagTemplates\MainWindowVM_Emit.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="PropBagTemplates\MapperConf_Emit.xaml">
+    <Page Include="PropBagTemplates\MapperConfigs.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="PropBagTemplates\MapperConf_Extra.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="PropBagTemplates\PersonEditorVM.xaml">
+    <Page Include="PropBagTemplates\PersonCollectionVM_Extra.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="PropBagTemplates\PersonCollectionVM.xaml">
+    <Page Include="PropBagTemplates\PersonEditorVM_Extra.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="PropBagTemplates\PersonEditorVM_Emit.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="PropBagTemplates\PersonCollectionVM_Emit.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

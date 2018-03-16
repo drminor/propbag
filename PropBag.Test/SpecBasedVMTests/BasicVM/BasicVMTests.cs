@@ -209,7 +209,16 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
 
         protected override void Because_Of()
         {
-            personVM_PropModel = PropModelCache.GetPropModel("PersonVM");
+            //personVM_PropModel = PropModelCache.GetPropModel("PersonVM");
+
+            string className = "PersonVM";
+            string fcn = GetResourceKeyWithSuffix(className, ConfigPackageNameSuffix);
+
+            if (PropModelCache.TryGetPropModel(fcn, out PropModelType personVM_PropModel))
+            {
+                throw new KeyNotFoundException($"Could not find a PropModel with Full Class Name = {fcn}.");
+            }
+
         }
 
         [Test]
@@ -244,18 +253,28 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
     [NonParallelizable]
     public class CreateVM : BasicVMSetup
     {
-        PropModelType mainWindowPropModel;
+        PropModelType mainWindowPropModel = null;
         MainWindowViewModel mainWindowViewModel;
 
         protected override Action EstablishContext()
         {
-            ConfigPackageNameSuffix = "Emit_Proxy";
+            ConfigPackageNameSuffix = "Emit";
+            //ConfigPackageNameSuffix = "Extra";
             return base.EstablishContext();
         }
 
         protected override void Because_Of()
         {
-            mainWindowPropModel = PropModelCache.GetPropModel("MainWindowVM");
+            //mainWindowPropModel = PropModelCache.GetPropModel("MainWindowVM");
+
+            string className = "MainWindowVM";
+            string fcn = GetResourceKeyWithSuffix(className, ConfigPackageNameSuffix);
+
+            if (PropModelCache.TryGetPropModel(fcn, out PropModelType mainWindowPropModel))
+            {
+                throw new KeyNotFoundException($"Could not find a PropModel with Full Class Name = {fcn}.");
+            }
+
             BaseMemTracker.CompactMeasureAndReport("After get mainWindow_PropModel.", "CreateVM_CreateMainWindowVM_Run1");
 
             mainWindowViewModel = new MainWindowViewModel(mainWindowPropModel, PropStoreAccessService_Factory, AutoMapperProvider, propFactory: null, fullClassName: null);
@@ -304,7 +323,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
     [NonParallelizable]
     public class CreateVM2 : BasicVMSetup
     {
-        PropModelType mainWindowPropModel;
+        PropModelType mainWindowPropModel = null;
         MainWindowViewModel mainWindowViewModel;
 
         protected override Action EstablishContext()
@@ -319,7 +338,15 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
 
         protected override void Because_Of()
         {
-            mainWindowPropModel = PropModelCache.GetPropModel("MainWindowVM");
+            //mainWindowPropModel = PropModelCache.GetPropModel("MainWindowVM");
+
+            string className = "MainWindowVM";
+            string fcn = GetResourceKeyWithSuffix(className, ConfigPackageNameSuffix);
+
+            if (PropModelCache.TryGetPropModel(fcn, out PropModelType mainWindowPropModel))
+            {
+                throw new KeyNotFoundException($"Could not find a PropModel with Full Class Name = {fcn}.");
+            }
             BaseMemTracker.CompactMeasureAndReport("After get mainWindow_PropModel.", "CreateVM_CreateMainWindowVM_Run2");
 
             // To see how much memory is not being cleaned up after one is created and then disposed.
@@ -376,18 +403,27 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
     [NonParallelizable]
     public class CreateVM3 : BasicVMSetup
     {
-        PropModelType mainWindowPropModel;
+        PropModelType mainWindowPropModel = null;
         MainWindowViewModel mainWindowViewModel;
 
         protected override Action EstablishContext()
         {
-            ConfigPackageNameSuffix = "Emit_Proxy";
+            ConfigPackageNameSuffix = "Emit";
+            //ConfigPackageNameSuffix = "Extra";
             return base.EstablishContext();
         }
 
         protected override void Because_Of()
         {
-            mainWindowPropModel = PropModelCache.GetPropModel("MainWindowVM");
+            //mainWindowPropModel = PropModelCache.GetPropModel("MainWindowVM");
+
+            string className = "MainWindowVM";
+            string fcn = GetResourceKeyWithSuffix(className, ConfigPackageNameSuffix);
+
+            if (PropModelCache.TryGetPropModel(fcn, out PropModelType mainWindowPropModel))
+            {
+                throw new KeyNotFoundException($"Could not find a PropModel with Full Class Name = {fcn}.");
+            }
             BaseMemTracker.CompactMeasureAndReport("After get mainWindow_PropModel.", "CreateVM_CreateMainWindowVM_Run1");
 
             mainWindowViewModel = new MainWindowViewModel(mainWindowPropModel, PropStoreAccessService_Factory, AutoMapperProvider, propFactory: null, fullClassName: null);

@@ -157,7 +157,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 IPropFactoryFactory propFactoryFactory = GetThePropFactoryFactory();
 
                 // PropModel Provider
-                RemotePropModelProvider remotePropModelProvider = GetPropModelProvider(propFactoryFactory, configPackageNameSuffix: null);
+                RemotePropModelProvider remotePropModelProvider = GetPropModelProvider(propFactoryFactory/*, configPackageNameSuffix: null*/);
 
 
                 // Load the PropBag and Mapper Templates
@@ -203,15 +203,15 @@ namespace PropBagLib.Tests.AutoMapperSupport
 
         private RemotePropModelProvider GetPropModelProvider
             (
-            IPropFactoryFactory propFactoryFactory,
-            string configPackageNameSuffix
+            IPropFactoryFactory propFactoryFactory
+            //, string configPackageNameSuffix
             )
         {
             ResourceDictionaryProvider rdProvider = new ResourceDictionaryProvider();
 
             PropBagTemplateParser pbtParser = new PropBagTemplateParser();
 
-            RemotePropModelProvider propModelProvider = new RemotePropModelProvider(rdProvider, pbtParser, propFactoryFactory, configPackageNameSuffix);
+            RemotePropModelProvider propModelProvider = new RemotePropModelProvider(rdProvider, pbtParser, propFactoryFactory/*, configPackageNameSuffix*/);
 
             return propModelProvider;
         }
@@ -347,6 +347,5 @@ namespace PropBagLib.Tests.AutoMapperSupport
         }
 
         #endregion
-
     }
 }

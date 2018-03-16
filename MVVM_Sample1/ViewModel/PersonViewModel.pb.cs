@@ -57,5 +57,10 @@ namespace MVVM_Sample1.ViewModel
         {
             return new PersonVM(this);
         }
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+        }
     }
 }

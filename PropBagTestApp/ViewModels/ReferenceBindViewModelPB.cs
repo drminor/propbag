@@ -2,6 +2,7 @@
 using DRM.TypeSafePropertyBag;
 using PropBagTestApp.Infra;
 using System;
+using System.Collections.Generic;
 
 namespace PropBagTestApp.ViewModels
 {
@@ -12,13 +13,27 @@ namespace PropBagTestApp.ViewModels
     {
 
         public ReferenceBindViewModelPB()
-            : this (PropStoreServicesForThisApp.PropModelCache.GetPropModel("ReferenceBindViewModelPB"))
+            : this (GetPropModel("ReferenceBindViewModelPB"))
         {
             System.Diagnostics.Debug.WriteLine
                 (
                     "ReferenceBindViewModelPB is being created no params, " +
                     "but loaded using the PropModel and Type Factory."
                 );
+        }
+
+        private static PropModelType GetPropModel(string fullClassName)
+        {
+            string fcn = PropStoreServicesForThisApp.GetResourceKeyWithSuffix(fullClassName, PropStoreServicesForThisApp.ConfigPackageNameSuffix);
+
+            if (PropStoreServicesForThisApp.PropModelCache.TryGetPropModel(fcn, out PropModelType mainWindowPropModel))
+            {
+                return mainWindowPropModel;
+            }
+            else
+            {
+                throw new KeyNotFoundException($"Could not find a PropModel with Full Class Name = {fcn}.");
+            }
         }
 
         //public ReferenceBindViewModelPB() { }

@@ -51,5 +51,10 @@ namespace MVVM_Sample1.ViewModel
 
             //TypeDescriptor.AddProvider(tdp, this);
         }
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+        }
     }
 }

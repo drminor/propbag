@@ -1,4 +1,5 @@
 ﻿using CommonAppData;
+using MVVM_Sample1.Infra;
 using ObjectSizeDiagnostics;
 using System;
 using System.Reflection;
@@ -64,7 +65,9 @@ namespace MVVM_Sample1.View
 
         private void ShowMain(string configPackageNameSuffix)
         {
-            MainWindow mw = new MainWindow(configPackageNameSuffix);
+            PropStoreServicesForThisApp.ConfigPackageNameSuffix = configPackageNameSuffix;
+
+            MainWindow mw = new MainWindow();
             mw.ShowDialog();
         }
 

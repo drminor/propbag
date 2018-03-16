@@ -64,7 +64,7 @@ namespace PropBagTestApp.Infra
                 delegateCacheProvider
                 );
 
-            IProvidePropModels propModelProvider = GetPropModelProvider(propFactoryFactory, ConfigPackageNameSuffix);
+            IProvidePropModels propModelProvider = GetPropModelProvider(propFactoryFactory/*, ConfigPackageNameSuffix*/);
 
             PropModelCache = new SimplePropModelCache(propModelProvider);
 
@@ -110,8 +110,8 @@ namespace PropBagTestApp.Infra
 
         private static IProvidePropModels GetPropModelProvider
             (
-            IPropFactoryFactory propFactoryFactory,
-            string configPackageNameSuffix
+            IPropFactoryFactory propFactoryFactory
+            //, string configPackageNameSuffix
             )
         {
             IPropBagTemplateProvider propBagTemplateProvider = new PropBagTemplateProvider(Application.Current.Resources);
@@ -126,8 +126,8 @@ namespace PropBagTestApp.Infra
                 propBagTemplateProvider,
                 mapperRequestProvider,
                 propBagTemplateParser,
-                propFactoryFactory,
-                configPackageNameSuffix
+                propFactoryFactory
+                //, configPackageNameSuffix
                 );
 
             return propModelProvider;
@@ -157,6 +157,13 @@ namespace PropBagTestApp.Infra
 
             return autoMapperProvider;
         }
+
+        public static string GetResourceKeyWithSuffix(string rawKey, string suffix)
+        {
+            string result = suffix != null ? $"{rawKey}_{suffix}" : rawKey;
+            return result;
+        }
+
 
         #region InDesign Support
 

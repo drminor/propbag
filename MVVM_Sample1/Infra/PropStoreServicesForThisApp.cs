@@ -39,33 +39,41 @@ namespace MVVM_Sample1.Infra
         public static ICreateWrapperTypes WrapperTypeCreator { get; }
         public static IProvideAutoMappers AutoMapperProvider { get; }
 
-        static string _configPackageNameSuffix;
-        public static string ConfigPackageNameSuffix
-        {
-            get
-            {
-                return _configPackageNameSuffix;
-            }
+        //static string _configPackageNameSuffix;
+        //public static string ConfigPackageNameSuffix
+        //{
+        //    get
+        //    {
+        //        return _configPackageNameSuffix;
+        //    }
 
-            set
-            {
-                if(value != _configPackageNameSuffix)
-                {
-                    _configPackageNameSuffix = value;
-                    IProvidePropModels propModelProvider = GetPropModelProvider(_propFactoryFactory, ConfigPackageNameSuffix);
+        //    set
+        //    {
+        //        if(value != _configPackageNameSuffix)
+        //        {
+        //            _configPackageNameSuffix = value;
+        //            IProvidePropModels propModelProvider = GetPropModelProvider(_propFactoryFactory, ConfigPackageNameSuffix);
 
-                    PropModelCache = new SimplePropModelCache(propModelProvider);
+        //            if(PropModelCache != null)
+        //            {
+        //                PropModelCache.Clear();
+        //            }
 
-                    ViewModelHelper = new ViewModelHelper(PropModelCache, _vmActivator, _theStore.PropStoreAccessServiceFactory, AutoMapperProvider);
+        //            PropModelCache = new SimplePropModelCache(propModelProvider);
 
-                    // Remove any AutoMapper that may have been previously created.
-                    AutoMapperProvider.ClearMappersCache();
+        //            ViewModelHelper = new ViewModelHelper(PropModelCache, _vmActivator, _theStore.PropStoreAccessServiceFactory, AutoMapperProvider);
 
-                    // TODO: Consider also clearing the cache of emitted Types.
-                    //AutoMapperProvider.ClearEmittedTypeCache();
-                }
-            }
-        }
+        //            // Remove any AutoMapper that may have been previously created.
+        //            AutoMapperProvider.ClearMappersCache();
+
+        //            // TODO: Consider also clearing the cache of emitted Types.
+        //            //AutoMapperProvider.ClearEmittedTypeCache();
+        //        }
+        //    }
+        //}
+
+        public static string ConfigPackageNameSuffix { get; set; }
+
 
         static PropStoreServicesForThisApp() 
         {
@@ -97,7 +105,7 @@ namespace MVVM_Sample1.Infra
 
             _propFactoryFactory = BuildThePropFactoryFactory(valueConverter, delegateCacheProvider, typeResolver);
 
-            IProvidePropModels propModelProvider = GetPropModelProvider(_propFactoryFactory, ConfigPackageNameSuffix);
+            IProvidePropModels propModelProvider = GetPropModelProvider(_propFactoryFactory/*, ConfigPackageNameSuffix*/);
 
             PropModelCache = new SimplePropModelCache(propModelProvider);
 
@@ -116,8 +124,8 @@ namespace MVVM_Sample1.Infra
 
         private static IProvidePropModels GetPropModelProvider
             (
-            IPropFactoryFactory propFactoryFactory,
-            string configPackageNameSuffix
+            IPropFactoryFactory propFactoryFactory
+            //, string configPackageNameSuffix
             )
         {
             IPropBagTemplateProvider propBagTemplateProvider = new PropBagTemplateProvider(Application.Current.Resources);
@@ -133,8 +141,8 @@ namespace MVVM_Sample1.Infra
                 propBagTemplateProvider,
                 mapperRequestProvider,
                 propBagTemplateParser,
-                propFactoryFactory,
-                configPackageNameSuffix
+                propFactoryFactory
+                //, configPackageNameSuffix
                 );
 
                 _mct.MeasureAndReport("After new PropModelProvider");

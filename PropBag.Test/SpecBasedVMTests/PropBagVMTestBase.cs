@@ -40,7 +40,8 @@ namespace PropBagLib.Tests.SpecBasedVMTests
                 "MapperConf_Both.xaml",
         };
 
-        string _configPackageNameSuffix = "Emit_Proxy";
+        string _configPackageNameSuffix = "Emit";
+        //string _configPackageNameSuffix = "Extra";
 
         #endregion
 
@@ -132,7 +133,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests
         //protected IProvidePropModels PropModelProvider { get; set; }
         protected PropModelCacheInterface PropModelCache { get; set; }
 
-        protected ViewModelHelper ViewModelHelper { get; set; }
+        //protected ViewModelHelper ViewModelHelper { get; set; }
 
         //protected IPropFactory DefaultPropFactory { get; set; }
 
@@ -198,7 +199,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests
                 );
 
             // PropModel Provider
-            RemotePropModelProvider remotePropModelProvider = GetPropModelProvider(propFactoryFactory, ConfigPackageNameSuffix);
+            RemotePropModelProvider remotePropModelProvider = GetPropModelProvider(propFactoryFactory/*, ConfigPackageNameSuffix*/);
             //PropModelProvider = remotePropModelProvider;
             _mct.MeasureAndReport("After GetPropModelProvider");
 
@@ -208,9 +209,9 @@ namespace PropBagLib.Tests.SpecBasedVMTests
 
             PropModelCache = new SimplePropModelCache(remotePropModelProvider);
 
-            // Create the ViewModelHelper
-            ViewModelHelper = new ViewModelHelper(PropModelCache, vmActivator, PropStoreAccessService_Factory, AutoMapperProvider);
-            _mct.MeasureAndReport("After new ViewModelHelper");
+            //// Create the ViewModelHelper
+            //ViewModelHelper = new ViewModelHelper(PropModelCache, vmActivator, PropStoreAccessService_Factory, AutoMapperProvider);
+            //_mct.MeasureAndReport("After new ViewModelHelper");
 
             //// Default PropFactory
             //DefaultPropFactory = BuildDefaultPropFactory
@@ -249,11 +250,11 @@ namespace PropBagLib.Tests.SpecBasedVMTests
                 PropModelCache = null;
 
                 // ViewModel Helper
-                if (ViewModelHelper is IDisposable disable4)
-                {
-                    disable4.Dispose();
-                }
-                ViewModelHelper = null;
+                //if (ViewModelHelper is IDisposable disable4)
+                //{
+                //    disable4.Dispose();
+                //}
+                //ViewModelHelper = null;
 
                 // The Property Store
                 _theStore.Dispose();
@@ -329,15 +330,15 @@ namespace PropBagLib.Tests.SpecBasedVMTests
 
         protected virtual RemotePropModelProvider GetPropModelProvider
             (
-            IPropFactoryFactory propFactoryFactory,
-            string configPackageNameSuffix
+            IPropFactoryFactory propFactoryFactory
+            //, string configPackageNameSuffix
             )
         {
             ResourceDictionaryProvider rdProvider = new ResourceDictionaryProvider();
 
             PropBagTemplateParser pbtParser = new PropBagTemplateParser();
 
-            RemotePropModelProvider propModelProvider = new RemotePropModelProvider(rdProvider, pbtParser, propFactoryFactory, configPackageNameSuffix);
+            RemotePropModelProvider propModelProvider = new RemotePropModelProvider(rdProvider, pbtParser, propFactoryFactory/*, configPackageNameSuffix*/);
             _mct.MeasureAndReport("After new PropModelProvider");
 
             return propModelProvider;
@@ -429,6 +430,17 @@ namespace PropBagLib.Tests.SpecBasedVMTests
 
             return result;
         }
+
+        #endregion
+
+        #region Helper Methods
+
+        protected string GetResourceKeyWithSuffix(string rawKey, string suffix)
+        {
+            string result = suffix != null ? $"{rawKey}_{suffix}" : rawKey;
+            return result;
+        }
+
 
         #endregion
     }
