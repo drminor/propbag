@@ -8,7 +8,7 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
 {
     // for use as the key to a hashtable, when the "real" key is an object
     // that we should not keep alive by a strong reference.
-    internal struct WeakRefKey<T>: IEquatable<WeakRefKey<T>> where T: class
+    public struct WeakRefKey<T>: IEquatable<WeakRefKey<T>> where T: class
     {
         //------------------------------------------------------
         //
@@ -16,8 +16,7 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
         //
         //------------------------------------------------------
 
-
-        internal WeakRefKey(T target)
+        public WeakRefKey(T target)
         {
             _weakRef = new WeakReference<T>(target);
             _hashCode = (target != null) ? target.GetHashCode() : 314159;
@@ -29,7 +28,7 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
         //
         //------------------------------------------------------
 
-        internal T Target
+        public T Target
         {
             get
             {
@@ -79,6 +78,25 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
             else
                 return (_weakRef == other._weakRef);
         }
+
+        //public override bool Equals(object o)
+        //{
+        //    if (o is WeakRefKey)
+        //    {
+        //        WeakRefKey ck = (WeakRefKey)o;
+        //        object c1 = Target;
+        //        object c2 = ck.Target;
+
+        //        if (c1 != null && c2 != null)
+        //            return (c1 == c2);
+        //        else
+        //            return (_weakRef == ck._weakRef);
+        //    }
+        //    else
+        //    {
+        //        return false;
+        //    }
+        //}
 
         public override string ToString()
         {
