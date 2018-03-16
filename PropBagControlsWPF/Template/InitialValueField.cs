@@ -100,18 +100,18 @@ namespace DRM.PropBagControlsWPF
             }
         }
 
-        static DependencyProperty PropBagResourceKeyProperty =
-            DependencyProperty.Register("PropBagResourceKey", typeof(string), typeof(InitialValueField));
+        static DependencyProperty PropBagFullClassNameProperty =
+            DependencyProperty.Register("PropBagFullClassName", typeof(string), typeof(InitialValueField));
 
-        public string PropBagResourceKey
+        public string PropBagFullClassName
         {
             get
             {
-                return (string)this.GetValue(PropBagResourceKeyProperty);
+                return (string)this.GetValue(PropBagFullClassNameProperty);
             }
             set
             {
-                this.SetValue(PropBagResourceKeyProperty, value);
+                this.SetValue(PropBagFullClassNameProperty, value);
             }
         }
 
@@ -126,7 +126,7 @@ namespace DRM.PropBagControlsWPF
             if (SetToEmptyString) if (++cnt > 1) return false;
             if (CreateNew) if (++cnt > 1) return false;
 
-            if (PropBagResourceKey != null && !CreateNew) return false;
+            if (PropBagFullClassName != null && !CreateNew) return false;
 
             return cnt == 1;
         }

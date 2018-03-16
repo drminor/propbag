@@ -143,9 +143,9 @@ namespace DRM.PropBagWPF
                     IPropInitialValueField rivf;
 
                     // TODO: Add error handling here.
-                    if (ivf.PropBagResourceKey != null)
+                    if (ivf.PropBagFullClassName != null)
                     {
-                        rivf = PropInitialValueField.FromPropBagResourceKey(ivf.PropBagResourceKey);
+                        rivf = PropInitialValueField.FromPropBagFCN(ivf.PropBagFullClassName);
                     }
                     else if (ivf.CreateNew)
                     {

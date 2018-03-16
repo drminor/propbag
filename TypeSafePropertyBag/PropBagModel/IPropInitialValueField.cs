@@ -11,7 +11,7 @@ namespace DRM.TypeSafePropertyBag
         bool SetToUndefined { get; set; }
 
         bool CreateNew { get; set; }
-        string PropBagResourceKey { get; set; }
+        string PropBagFCN { get; set; }
 
         Func<object> ValueCreator { get; set; }
 

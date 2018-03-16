@@ -714,10 +714,10 @@ namespace DRM.PropBag
             if (pi.StorageStrategy == PropStorageStrategyEnum.Internal && !pi.InitialValueField.SetToUndefined)
             {
                 // Create New PropBag-based Object
-                if (pi.InitialValueField.PropBagResourceKey != null)
+                if (pi.InitialValueField.PropBagFCN != null)
                 {
                     // TODO: This is assuming that the PropModelResourceKey is the same as the FullClassName.
-                    string fcn = pi.InitialValueField.PropBagResourceKey;
+                    string fcn = pi.InitialValueField.PropBagFCN;
                     IPropBag newObject = GetNewViewModel(fcn, pi.PropertyType, propModelProvider, storeAccessCreator, autoMapperService);
 
                     if (pi.PropTemplate != null && pi.PropCreator != null)

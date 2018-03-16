@@ -36,28 +36,30 @@ namespace DRM.PropBag
 
         public bool CreateNew { get; set; }
 
-        public string PropBagResourceKey { get; set; }
+        public string PropBagFCN { get; set; }
 
         public Func<object> ValueCreator { get { return _valueCreator; } set { SetIfDifferentDelegate<Func<object>>(ref _valueCreator, value); } }
+
+        #region Constructors
 
         /// <summary>
         /// This is the same as static IPropInitialValueField UseDefault.
         /// </summary>
         public PropInitialValueField()
             : this(initialValue: null, setToDefault: true, setToUndefined: false, setToNull: false, setToEmptyString: false,
-                  valueCreator: null, createNew: false, propBagResourceKey: null)
+                  valueCreator: null, createNew: false, propBagFCN: null)
         {
         }
 
         public PropInitialValueField(string initialValue)
             : this(initialValue: initialValue, setToDefault: false, setToUndefined: false, setToNull: false, setToEmptyString: false,
-                valueCreator: null, createNew: false, propBagResourceKey: null)
+                valueCreator: null, createNew: false, propBagFCN: null)
         {
         }
 
         public PropInitialValueField(string initialValue, bool setToDefault, bool setToUndefined, bool setToNull, bool setToEmptyString)
             : this(initialValue: initialValue, setToDefault: setToDefault, setToUndefined: setToUndefined, setToNull: setToNull, setToEmptyString: setToEmptyString,
-                valueCreator: null, createNew: false, propBagResourceKey: null)
+                valueCreator: null, createNew: false, propBagFCN: null)
         {
         }
 
@@ -70,7 +72,7 @@ namespace DRM.PropBag
             bool setToEmptyString,
             Func<object> valueCreator,
             bool createNew,
-            string propBagResourceKey
+            string propBagFCN
             )
         {
             InitialValue = initialValue;
@@ -80,13 +82,15 @@ namespace DRM.PropBag
             SetToEmptyString = setToEmptyString;
             ValueCreator = valueCreator;
             CreateNew = createNew;
-            PropBagResourceKey = propBagResourceKey;
+            PropBagFCN = propBagFCN;
         }
+
+        #endregion
 
         public object Clone()
         {
             PropInitialValueField result = new PropInitialValueField(InitialValue, SetToDefault, SetToUndefined, SetToNull, SetToEmptyString,
-                valueCreator: null, createNew: CreateNew, propBagResourceKey: PropBagResourceKey);
+                valueCreator: null, createNew: CreateNew, propBagFCN: PropBagFCN);
 
             return result;
         }
@@ -138,7 +142,7 @@ namespace DRM.PropBag
                     setToEmptyString: false,
                     valueCreator: null,
                     createNew: false,
-                    propBagResourceKey: null
+                    propBagFCN: null
                     );
             }
         }
@@ -174,7 +178,7 @@ namespace DRM.PropBag
                 setToEmptyString: false,
                 valueCreator: null,
                 createNew: false,
-                propBagResourceKey: null
+                propBagFCN: null
                 );
             }
         }
@@ -192,7 +196,7 @@ namespace DRM.PropBag
                 setToEmptyString: false,
                 valueCreator: null,
                 createNew: false,
-                propBagResourceKey: null
+                propBagFCN: null
                 );
             }
         }
@@ -210,12 +214,12 @@ namespace DRM.PropBag
                 setToEmptyString: false,
                 valueCreator: null,
                 createNew: true,
-                propBagResourceKey: null
+                propBagFCN: null
                 );
             }
         }
 
-        public static IPropInitialValueField FromPropBagResourceKey(string propBagResourceKey)
+        public static IPropInitialValueField FromPropBagFCN(string propBagFCN)
         {
             return new PropInitialValueField
             (
@@ -226,7 +230,7 @@ namespace DRM.PropBag
             setToEmptyString: false,
             valueCreator: null,
             createNew: true,
-            propBagResourceKey: propBagResourceKey
+            propBagFCN: propBagFCN
             );
         }
 

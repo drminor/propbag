@@ -28,11 +28,11 @@
             </pb:PropItem>
             
             <pb:PropItem PropertyName="PersonCollectionVM" PropertyType="{x:Type vmod:PersonCollectionViewModel}">
-                <pb:InitialValueField CreateNew="True" PropBagResourceKey="PersonCollectionVM"/>
+                <pb:InitialValueField CreateNew="True" PropBagFullClassName="PersonCollectionVM"/>
             </pb:PropItem>
 
             <pb:PropItem PropertyName="PersonEditorVM" PropertyType="{x:Type vmod:PersonEditorViewModel}">
-                <pb:InitialValueField CreateNew="True" PropBagResourceKey="PersonEditorVM"/>
+                <pb:InitialValueField CreateNew="True" PropBagFullClassName="PersonEditorVM"/>
             </pb:PropItem>
 
             <pb:PropItem PropertyName="WMessage" PropertyType="{x:Type sys:String}" StorageStrategy="External">
