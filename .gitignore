@@ -198,3 +198,5 @@ ModelManifest.xml
 /PropBagControlsWPF/Binders/DepPropChangedTypeConverter.cs
 /PropBag/EventManagement/IWeakEventListener.cs
 /PropBagLib.Tests.PropBagTemplates/ProbBagTemplates/MainWindowVM.txt
+/PropBag/PBTest.cs
+/TypeSafePropertyBag/PropBags/PropBagAbstractBase.cs
