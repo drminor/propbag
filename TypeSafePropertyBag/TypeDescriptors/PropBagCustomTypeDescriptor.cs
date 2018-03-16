@@ -13,6 +13,8 @@ namespace DRM.TypeSafePropertyBag
         //private readonly List<PropertyDescriptor> _customFields;
         //private PropertyDescriptorCollection _propDescCollection;
 
+        private readonly object _funcTarget;
+
         #endregion
 
         #region Constructor
@@ -23,6 +25,7 @@ namespace DRM.TypeSafePropertyBag
             //_instance = instance;
 
             _customPropsGetter = customPropsGetter;
+            _funcTarget = customPropsGetter?.Target;
 
             // Get the PropertyDescriptors for our custom fields 
             // by calling a private method on the class instance in which we are nested.
