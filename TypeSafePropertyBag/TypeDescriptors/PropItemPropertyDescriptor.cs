@@ -48,7 +48,7 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
 
         public override object GetValue(object component)
         {
-            ReportAccessCounter();
+            //ReportAccessCounter();
             object x = ((T)component)[PropertyType, Name];
             return x;
         }
