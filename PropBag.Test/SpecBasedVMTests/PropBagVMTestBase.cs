@@ -467,9 +467,22 @@ namespace PropBagLib.Tests.SpecBasedVMTests
                 result = suffix != null ? $"{defaultNamespace}.{className}_{suffix}" : className;
             }
             return result;
-
         }
 
+        protected string GetFullClassName(string defaultNamespace, string className)
+        {
+            string result;
+
+            if (className.Contains("."))
+            {
+                result = className;
+            }
+            else
+            {
+                result = $"{defaultNamespace}.{className}";
+            }
+            return result;
+        }
 
         #endregion
     }

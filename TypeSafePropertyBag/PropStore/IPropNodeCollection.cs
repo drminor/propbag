@@ -6,7 +6,9 @@ namespace DRM.TypeSafePropertyBag
 {
     internal interface IPropNodeCollection_Internal<L2T, L2TRaw> : IPropNodeCollection<L2T, L2TRaw>
     {
-        WeakRefKey<IPropModel<L2TRaw>>? PropItemSetId { get; }
+        //WeakRefKey<IPropModel<L2TRaw>>? PropItemSetId { get; }
+
+        PropItemSetKey<L2TRaw> PropItemSetKey { get; }
 
         bool Contains(PropNode propNode);
         PropNode CreateAndAdd(IPropDataInternal propData_Internal, L2TRaw propertyName, BagNode parent);

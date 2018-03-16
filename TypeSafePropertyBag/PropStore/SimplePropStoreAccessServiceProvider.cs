@@ -8,7 +8,10 @@ namespace DRM.TypeSafePropertyBag
     using CompositeKeyType = UInt64;
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
     using ObjectIdType = UInt64;
+
     using PropModelType = IPropModel<String>;
+    using PropItemSetKeyType = PropItemSetKey<String>;
+
     using PropNodeCollectionInterface = IPropNodeCollection<UInt32, String>;
     using PropNodeCollectionInternalInterface = IPropNodeCollection_Internal<UInt32, String>;
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
@@ -121,17 +124,17 @@ namespace DRM.TypeSafePropertyBag
 
         #region Get / Set Value Fast
 
-        public object GetValueFast(WeakRefKey<IPropBag> propBag_wrKey, WeakRefKey<PropModelType> propItemSetId, ExKeyT compKey)
+        public object GetValueFast(WeakRefKey<IPropBag> propBag_wrKey, PropItemSetKeyType propItemSetKey, ExKeyT compKey)
         {
-            BagNode propBagNode = GetBagAndChild(propBag_wrKey, propItemSetId, compKey, out PropNode child);
+            BagNode propBagNode = GetBagAndChild(propBag_wrKey, propItemSetKey, compKey, out PropNode child);
 
             object result = child.PropData_Internal.TypedProp.TypedValueAsObject;
             return result;
         }
 
-        public bool SetValueFast(WeakRefKey<IPropBag> propBag_wrKey, WeakRefKey<PropModelType> propItemSetId, ExKeyT compKey, object value)
+        public bool SetValueFast(WeakRefKey<IPropBag> propBag_wrKey, PropItemSetKeyType propItemSetKey, ExKeyT compKey, object value)
         {
-            BagNode propBagNode = GetBagAndChild(propBag_wrKey, propItemSetId, compKey, out PropNode child);
+            BagNode propBagNode = GetBagAndChild(propBag_wrKey, propItemSetKey, compKey, out PropNode child);
 
             if (!propBag_wrKey.TryGetTarget(out IPropBag component))
             {
@@ -158,7 +161,9 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        private BagNode GetBagAndChild(WeakRefKey<IPropBag> propBag_wrKey, WeakRefKey<PropModelType>? propItemSetId, ExKeyT compKey, out PropNode child)
+
+
+        private BagNode GetBagAndChild(WeakRefKey<IPropBag> propBag_wrKey, PropItemSetKeyType propItemSetId, ExKeyT compKey, out PropNode child)
         {
             if (!TryGetPropBagNode(propBag_wrKey, out BagNode propBagNode))
             {
@@ -170,25 +175,25 @@ namespace DRM.TypeSafePropertyBag
                 throw new InvalidOperationException("IPropBag target has been Garbage Collected.");
             }
 
-            if (propItemSetId.HasValue != propBagNode.PropItemSetId.HasValue)
+            if (propItemSetId != propBagNode.PropItemSetKey)
             {
                 throw new InvalidOperationException("Bad PropModel.");
             }
 
-            if (!propItemSetId.Value.TryGetTarget(out PropModelType testModel))
-            {
-                throw new InvalidOperationException("The specified PropItemSetId has been Garbage Collected.");
-            }
+            //if (!propItemSetId.Value.TryGetTarget(out PropModelType testModel))
+            //{
+            //    throw new InvalidOperationException("The specified PropItemSetId has been Garbage Collected.");
+            //}
 
-            if (!propBagNode.PropItemSetId.Value.TryGetTarget(out PropModelType testModel_fromBagNode)) 
-            {
-                throw new InvalidOperationException("The PropItemSetId on our BagNode has been Garbage Collected.");
-            }
+            //if (!propBagNode.PropItemSetId.Value.TryGetTarget(out PropModelType testModel_fromBagNode)) 
+            //{
+            //    throw new InvalidOperationException("The PropItemSetId on our BagNode has been Garbage Collected.");
+            //}
 
-            if(!ReferenceEquals(testModel, testModel_fromBagNode))
-            {
-                throw new InvalidOperationException("PropItemSet do not match.");
-            }
+            //if(!ReferenceEquals(testModel, testModel_fromBagNode))
+            //{
+            //    throw new InvalidOperationException("PropItemSet do not match.");
+            //}
 
             if (!propBagNode.TryGetChild(compKey.Level2Key, out child))
             {
@@ -220,13 +225,13 @@ namespace DRM.TypeSafePropertyBag
             return propBagNode.IsFixed;
         }
 
-        public bool TryFixPropItemSet(IPropBag propBag, WeakRefKey<PropModelType> propItemSetId)
+        public bool TryFixPropItemSet(IPropBag propBag, PropItemSetKeyType propItemSetKey)
         {
             //object propItemSet_Handle;
             if (TryGetPropBagNode(propBag, out BagNode propBagNode))
             {
                 //propItemSet_Handle = FixPropItemSet(propBagNode);
-                bool result = TryFixPropItemSet(propBagNode, propItemSetId);
+                bool result = TryFixPropItemSet(propBagNode, propItemSetKey);
                 return result;
             }
             else
@@ -239,7 +244,7 @@ namespace DRM.TypeSafePropertyBag
             //return propItemSet_Handle;
         }
 
-        public bool TryFixPropItemSet(BagNode propBagNode, WeakRefKey<PropModelType> propItemSetId)
+        public bool TryFixPropItemSet(BagNode propBagNode, PropItemSetKeyType propItemSetKey)
         {
             //object result;
 
@@ -253,7 +258,7 @@ namespace DRM.TypeSafePropertyBag
             }
             else
             {
-                PropNodeCollectionFixed newFixedCollection = new PropNodeCollectionFixed(pnc_int);
+                PropNodeCollectionFixed newFixedCollection = new PropNodeCollectionFixed(pnc_int, propItemSetKey);
                 propBagNode.PropNodeCollection = newFixedCollection;
                 //result = newFixedCollection;
                 return true;

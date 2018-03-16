@@ -35,6 +35,8 @@ namespace DRM.PropBag
     using PropItemSetInterface = IPropItemSet<String>;
 
     using PropModelType = IPropModel<String>;
+    using PropItemSetKeyType = PropItemSetKey<String>;
+
     using PropModelCacheInterface = ICachePropModels<String>;
 
     #region Summary and Remarks
@@ -228,8 +230,9 @@ namespace DRM.PropBag
                 _propModelCache?.Fix(propModel);
 
                 // Also, to improve performance, let the PropertyStore know that the set of PropItems can be fixed as well.
-                WeakRefKey<PropModelType> propItemSetId = new WeakRefKey<PropModelType>(propModel);
-                _ourStoreAccessor.TryFixPropItemSet(propItemSetId);
+                PropItemSetKeyType propItemSetKey = new PropItemSetKeyType(propModel);
+
+                _ourStoreAccessor.TryFixPropItemSet(propItemSetKey);
             }
             else
             {
@@ -1488,14 +1491,16 @@ namespace DRM.PropBag
 
         #region FAST Property Access Methods
 
-        public object GetValueFast(IPropBag component, WeakRefKey<PropModelType> propItemSetId, ExKeyT compKey)
+        public object GetValueFast(IPropBag component, PropItemSetKeyType propItemSetKey, ExKeyT compKey)
         {
-            return null;
+            object result = _ourStoreAccessor.GetValueFast(component, propItemSetKey, compKey);
+            return result;
         }
 
-        public bool SetValueFast(IPropBag component, WeakRefKey<PropModelType> propItemSetId, ExKeyT compKey, object value)
+        public bool SetValueFast(IPropBag component, PropItemSetKeyType propItemSetKey, ExKeyT compKey, object value)
         {
-            return true;
+            bool result = _ourStoreAccessor.SetValueFast(component, propItemSetKey, compKey, value);
+            return result;
         }
 
         #endregion
@@ -4040,7 +4045,7 @@ namespace DRM.PropBag
         }
 
         // Create a CollectionView Manager using an optional MapperRequest.
-        private IManageCViews CViewManagerFromDsBridge<TSource, TDestination>(IPropBag target, PropNameType srcPropName, IMapperRequest mr)
+        static private IManageCViews CViewManagerFromDsBridge<TSource, TDestination>(IPropBag target, PropNameType srcPropName, IMapperRequest mr)
             where TSource : class
             where TDestination : INotifyItemEndEdit
         {
@@ -4050,7 +4055,7 @@ namespace DRM.PropBag
         }
 
         // Create a CollectionView Manager Provider from a viewManagerProviderKey. Key consists of an optional MapperRequest and a Binding Path.)
-        private IProvideACViewManager CViewManagerProviderFromDsBridge<TSource, TDestination>(IPropBag target, IViewManagerProviderKey viewManagerProviderKey)
+        static private IProvideACViewManager CViewManagerProviderFromDsBridge<TSource, TDestination>(IPropBag target, IViewManagerProviderKey viewManagerProviderKey)
             where TSource : class
             where TDestination : INotifyItemEndEdit
         {

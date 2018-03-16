@@ -11,6 +11,7 @@ namespace DRM.TypeSafePropertyBag
 
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
     using PropModelType = IPropModel<String>;
+    using PropItemSetKeyType = PropItemSetKey<String>;
 
     using PropNodeCollectionIntInterface = IPropNodeCollection_Internal<UInt32, String>;
 
@@ -137,7 +138,7 @@ namespace DRM.TypeSafePropertyBag
                 //bool propItemSetIdsMatch = x.Equals(_propNodeCollection.PropItemSetId, template.PropItemSetId);
                 //System.Diagnostics.Debug.Assert(EqualityComparer<WeakRefKey<PropModelType>?>.Default.Equals(_propNodeCollection.PropItemSetId, template.PropItemSetId), "PropItemSetIds don't match.");
 
-                bool propItemSetIdsMatch = _propNodeCollection.PropItemSetId == template.PropItemSetId;
+                bool propItemSetIdsMatch = _propNodeCollection.PropItemSetKey == template.PropItemSetKey;
 
                 System.Diagnostics.Debug.Assert(propItemSetIdsMatch, "PropItemSetIds don't match.");
                 System.Diagnostics.Debug.Assert(_propNodeCollection.IsFixed == template.IsFixed, "IsFixed doesn't match.");
@@ -157,14 +158,14 @@ namespace DRM.TypeSafePropertyBag
 
             if (sourcePNC.IsFixed)
             {
-                System.Diagnostics.Debug.Assert(sourcePNC.PropItemSetId.HasValue, "We found a fixed PropSetCollection that does not have a PropItemSetId.");
+                System.Diagnostics.Debug.Assert(!sourcePNC.PropItemSetKey.IsEmpty, "We found a fixed PropSetCollection that has an empty PropItemSetKey.");
                 // Create a Fixed PropNodeCollection.
-                result = new PropNodeCollectionFixed(temp, sourcePNC.PropItemSetId.Value, sourcePNC.MaxPropsPerObject);
+                result = new PropNodeCollectionFixed(temp, sourcePNC.PropItemSetKey, sourcePNC.MaxPropsPerObject);
             }
             else
             {
                 // Create an open PropNodeCollection.
-                result = new PropNodeCollection(temp, sourcePNC.PropItemSetId, sourcePNC.MaxPropsPerObject);
+                result = new PropNodeCollection(temp, sourcePNC.PropItemSetKey, sourcePNC.MaxPropsPerObject);
             }
 
             return result;
@@ -232,7 +233,8 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        public WeakRefKey<PropModelType>? PropItemSetId => _propNodeCollection.PropItemSetId;
+        //public WeakRefKey<PropModelType>? PropItemSetId => _propNodeCollection.PropItemSetKey;
+        public PropItemSetKeyType PropItemSetKey => _propNodeCollection.PropItemSetKey;
 
         #endregion
 

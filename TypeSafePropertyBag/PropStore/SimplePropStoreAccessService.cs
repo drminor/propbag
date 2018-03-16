@@ -25,6 +25,8 @@ namespace DRM.TypeSafePropertyBag
     using PropNodeCollectionInterface = IPropNodeCollection<UInt32, String>;
 
     using PropModelType = IPropModel<String>;
+    using PropItemSetKeyType = PropItemSetKey<String>;
+
 
     internal class SimplePropStoreAccessService : PSAccessServiceInterface, IHaveTheStoreNode, PSAccessServiceInternalInterface, IDisposable
     {
@@ -557,18 +559,18 @@ namespace DRM.TypeSafePropertyBag
 
         #endregion
 
-        public object GetValueFast(IPropBag component, WeakRefKey<PropModelType> propItemSetId, ExKeyT compKey)
+        public object GetValueFast(IPropBag component, PropItemSetKeyType propItemSetKey, ExKeyT compKey)
         {
             WeakRefKey<IPropBag> propBag_wrKey = new WeakRefKey<IPropBag>(component);
-            object result = _propStoreAccessServiceProvider.GetValueFast(propBag_wrKey, propItemSetId, compKey);
+            object result = _propStoreAccessServiceProvider.GetValueFast(propBag_wrKey, propItemSetKey, compKey);
             GC.KeepAlive(component);
             return result;
         }
 
-        public bool SetValueFast(IPropBag component, WeakRefKey<PropModelType> propItemSetId, ExKeyT compKey, object value)
+        public bool SetValueFast(IPropBag component, PropItemSetKeyType propItemSetKey, ExKeyT compKey, object value)
         {
             WeakRefKey<IPropBag> propBag_wrKey = new WeakRefKey<IPropBag>(component);
-            bool result = _propStoreAccessServiceProvider.SetValueFast(propBag_wrKey, propItemSetId, compKey, value);
+            bool result = _propStoreAccessServiceProvider.SetValueFast(propBag_wrKey, propItemSetKey, compKey, value);
             return result;
         }
 
@@ -576,9 +578,9 @@ namespace DRM.TypeSafePropertyBag
 
         public bool IsPropItemSetFixed => _ourNode.IsFixed; // _propStoreAccessServiceProvider.IsPropItemSetFixed(_ourNode);
 
-        public bool TryFixPropItemSet(WeakRefKey<PropModelType> propItemSetId)
+        public bool TryFixPropItemSet(PropItemSetKeyType propItemSetKey)
         {
-            bool result = _propStoreAccessServiceProvider.TryFixPropItemSet(_ourNode, propItemSetId);
+            bool result = _propStoreAccessServiceProvider.TryFixPropItemSet(_ourNode, propItemSetKey);
             return result;
         }
 

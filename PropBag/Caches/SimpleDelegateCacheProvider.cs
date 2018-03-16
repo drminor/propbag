@@ -64,15 +64,17 @@ namespace DRM.PropBag.Caches
             DoSetDelegateCache = new DelegateCache<DoSetDelegate>(doSetMethodInfo);
             //curBytes = Sizer.ReportMemConsumption(startBytes, curBytes, "After new DelegateCache<DoSetDelegate>");
 
+            // Changed to use Static Method. (DRM 3/16/18)
             // CollectionView Manager using an optional MapperRequest.
-            MethodInfo getOrAddCViewManager_mi = propBagType.GetMethod("CViewManagerFromDsBridge", BindingFlags.Instance | BindingFlags.NonPublic);
+            MethodInfo getOrAddCViewManager_mi = propBagType.GetMethod("CViewManagerFromDsBridge", BindingFlags.Static | BindingFlags.NonPublic);
             //curBytes = Sizer.ReportMemConsumption(startBytes, curBytes, "After GetMethod(CViewManagerFromDsBridge)");
 
             GetOrAddCViewManagerCache = new TwoTypesDelegateCache<CViewManagerFromDsDelegate>(getOrAddCViewManager_mi);
             //curBytes = Sizer.ReportMemConsumption(startBytes, curBytes, "After TwoTypesDelegateCache<CViewManagerFromDsDelegate>");
 
+            // Changed to use Static Method. (DRM 3/16/18)
             // Collection View Manager Provider from a viewManagerProviderKey. Key consists of an optional MapperRequest and a Binding Path.)
-            MethodInfo getOrAddCViewManagerProvider_mi = propBagType.GetMethod("CViewManagerProviderFromDsBridge", BindingFlags.Instance | BindingFlags.NonPublic);
+            MethodInfo getOrAddCViewManagerProvider_mi = propBagType.GetMethod("CViewManagerProviderFromDsBridge", BindingFlags.Static | BindingFlags.NonPublic);
             GetOrAddCViewManagerProviderCache = new TwoTypesDelegateCache<CViewManagerProviderFromDsDelegate>(getOrAddCViewManagerProvider_mi);
 
             #endregion

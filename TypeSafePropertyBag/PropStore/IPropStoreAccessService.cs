@@ -9,6 +9,7 @@ namespace DRM.TypeSafePropertyBag
 {
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
     using PropModelType = IPropModel<String>;
+    using PropItemSetKeyType = PropItemSetKey<String>;
 
 
     public interface IPropStoreAccessService<L2T, L2TRaw> : IRegisterSubscriptions<L2T>, IRegisterBindings<L2T>, IDisposable
@@ -22,15 +23,15 @@ namespace DRM.TypeSafePropertyBag
         //object FixPropItemSet();
         //bool TryOpenPropItemSet(out object propItemSet_Handle);
 
-        bool TryFixPropItemSet(WeakRefKey<PropModelType> propItemSetId);
+        bool TryFixPropItemSet(PropItemSetKey<L2TRaw> propItemSetKey);
         bool TryOpenPropItemSet(/*out object propItemSet_Handle*/);
 
 
         // IDictionary-Like Methods
         IPropData this[IPropBag propBag, L2T propId] { get; }
 
-        object GetValueFast(IPropBag component, WeakRefKey<PropModelType> propItemSetId, ExKeyT compKey);
-        bool SetValueFast(IPropBag component, WeakRefKey<PropModelType> propItemSetId, ExKeyT compKey, object value);
+        object GetValueFast(IPropBag component, PropItemSetKey<L2TRaw> propItemSetKey, ExKeyT compKey);
+        bool SetValueFast(IPropBag component, PropItemSetKey<L2TRaw> propItemSetKey, ExKeyT compKey, object value);
 
         bool ContainsKey(IPropBag propBag, L2T propId);
 

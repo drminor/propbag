@@ -12,6 +12,7 @@ namespace DRM.PropBag.AutoMapperSupport
 {
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
     using PropModelType = IPropModel<String>;
+    using PropItemSetKeyType = PropItemSetKey<String>;
 
     public abstract class AbstractPropBagMapper<TSource, TDestination> 
         : IPropBagMapper<TSource, TDestination> where TDestination : class, IPropBag
@@ -105,9 +106,9 @@ namespace DRM.PropBag.AutoMapperSupport
                 if (!_storeAccessCreator.IsPropItemSetFixed(result))
                 {
                     // Fix the template's PropNodeCollection to improve performance.
-                    WeakRefKey<PropModelType> propItemSetId = new WeakRefKey<PropModelType>(PropModel);
-
-                    _storeAccessCreator.TryFixPropItemSet(result, propItemSetId);
+                    //WeakRefKey<PropModelType> propItemSetId = new WeakRefKey<PropModelType>(PropModel);
+                    PropItemSetKeyType propItemSetKey = new PropItemSetKeyType(PropModel);
+                    _storeAccessCreator.TryFixPropItemSet(result, propItemSetKey);
                 }
             }
             else

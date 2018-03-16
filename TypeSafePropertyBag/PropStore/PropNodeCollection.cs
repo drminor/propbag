@@ -1,5 +1,4 @@
-﻿using DRM.TypeSafePropertyBag.Fundamentals;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -8,15 +7,16 @@ namespace DRM.TypeSafePropertyBag
 {
     using PropIdType = UInt32;
     using PropNameType = String;
-    using PropModelType = IPropModel<String>;
-
+    using PropItemSetKeyType = PropItemSetKey<String>;
     using PropNodeCollectionIntInterface = IPropNodeCollection_Internal<UInt32, String>;
 
     internal class PropNodeCollection : PropNodeCollectionIntInterface/*, IEquatable<PropItemSetInternalInterface>*/
     {
         #region Private Members
 
-        WeakRefKey<PropModelType>? _propItemSetId;
+        //WeakRefKey<PropModelType>? _propItemSetId;
+        PropItemSetKeyType _propItemSetKey;
+
         readonly Dictionary<PropIdType, PropNode> _children;
 
         Dictionary<PropNameType, PropNode> _propItemsByName;
@@ -58,20 +58,20 @@ namespace DRM.TypeSafePropertyBag
         }
 
         public PropNodeCollection(int maxPropsPerObject)
-            : this(null, new WeakRefKey<PropModelType>(null), maxPropsPerObject)
+            : this(null, PropItemSetKeyType.Empty, maxPropsPerObject)
         {
         }
 
         public PropNodeCollection(PropNodeCollectionIntInterface sourcePropNodes)
-            : this(sourcePropNodes.GetPropNodes(), sourcePropNodes.PropItemSetId, sourcePropNodes.MaxPropsPerObject)
+            : this(sourcePropNodes.GetPropNodes(), sourcePropNodes.PropItemSetKey, sourcePropNodes.MaxPropsPerObject)
         {
         }
 
-        public PropNodeCollection(IEnumerable<PropNode> propNodes, WeakRefKey<PropModelType>? propItemSetId, int maxPropsPerObject) 
+        public PropNodeCollection(IEnumerable<PropNode> propNodes, PropItemSetKeyType propItemSetKey, int maxPropsPerObject) 
         {
             MaxPropsPerObject = maxPropsPerObject;
 
-            _propItemSetId = propItemSetId;
+            _propItemSetKey = propItemSetKey;
 
             if(propNodes == null)
             {
@@ -102,7 +102,8 @@ namespace DRM.TypeSafePropertyBag
 
         #region Public Members
 
-        public WeakRefKey<PropModelType>? PropItemSetId => _propItemSetId;
+        //public WeakRefKey<PropModelType>? PropItemSetId => _propItemSetId;
+        public PropItemSetKeyType PropItemSetKey => _propItemSetKey;
 
         public int Count => _children.Count;
 

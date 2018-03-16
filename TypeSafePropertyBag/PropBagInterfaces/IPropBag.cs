@@ -11,6 +11,8 @@ namespace DRM.TypeSafePropertyBag
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
 
     using PropModelType = IPropModel<String>;
+    using PropItemSetKeyType = PropItemSetKey<String>;
+
 
 
     ///// <summary>
@@ -55,8 +57,8 @@ namespace DRM.TypeSafePropertyBag
         object this[string typeName, PropNameType propertyName] { get; set; }
         object this[Type type, PropNameType propertyName] { get; set; }
 
-        object GetValueFast(IPropBag component, WeakRefKey<PropModelType> propItemSetId, ExKeyT compKey);
-        bool SetValueFast(IPropBag component, WeakRefKey<PropModelType> propItemSetId, ExKeyT compKey, object value);
+        object GetValueFast(IPropBag component, PropItemSetKeyType propItemSetKey, ExKeyT compKey);
+        bool SetValueFast(IPropBag component, PropItemSetKeyType propItemSetKey, ExKeyT compKey, object value);
 
         ValPlusType GetValPlusType(PropNameType propertyName, Type propertyType);
 

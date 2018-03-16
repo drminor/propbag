@@ -80,6 +80,7 @@
     <Compile Include="PropBagModelCaches\IPropModelFamilyCollection.cs" />
     <Compile Include="PropBagModelCaches\SimplePropModelFamilyCollection.cs" />
     <Compile Include="PropBagModelCaches\SimplePropModelCache.cs" />
+    <Compile Include="PropBagModel\PropItemSetKey.cs" />
     <Compile Include="PropBags\PropBagAbstractBase.cs" />
     <Compile Include="PropBagTemplateInterfaces\IPropBagTemplate.cs" />
     <Compile Include="PropBagTemplateInterfaces\NamespacesCollection.cs" />

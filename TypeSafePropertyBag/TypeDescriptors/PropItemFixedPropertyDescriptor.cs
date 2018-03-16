@@ -17,6 +17,8 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
     //using PropItemSetInterface = IPropItemSet<String>;
 
     using PropModelType = IPropModel<String>;
+    using PropItemSetKeyType = PropItemSetKey<String>;
+
     //using PropModelCacheInterface = ICachePropModels<String>;
 
     public class PropItemFixedPropertyDescriptor<T> : PropertyDescriptor where T : IPropBag
@@ -27,7 +29,9 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
         public readonly ExKeyT _compKey;
 
         readonly PSAccessServiceInterface _propStoreAccessor;
-        readonly WeakRefKey<PropModelType> _propModel_wrKey;
+        //readonly WeakRefKey<PropModelType> _propModel_wrKey;
+
+        readonly PropItemSetKeyType _propItemSetKey;
 
 
         #endregion
@@ -54,7 +58,10 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
             : base(propertyName, attributes)
         {
             _propStoreAccessor = propStoreAccessor;
-            _propModel_wrKey = new WeakRefKey<PropModelType>(propModel);
+
+            //_propModel_wrKey = new WeakRefKey<PropModelType>(propModel);
+            _propItemSetKey = new PropItemSetKeyType(propModel);
+
             _compKey = compKey;
 
             _tdConfig = new PropertyDescriptorValues<T>
@@ -84,7 +91,7 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
             //object x = ((T)component)[PropertyType, Name];
 
             T propBag = (T)component;
-            object x = _propStoreAccessor.GetValueFast(propBag, _propModel_wrKey, _compKey);
+            object x = _propStoreAccessor.GetValueFast(propBag, _propItemSetKey, _compKey);
             return x;
         }
 
@@ -98,7 +105,7 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
             //((T)component)[PropertyType, Name] = value;
 
             T propBag = (T)component;
-            bool result = _propStoreAccessor.SetValueFast(propBag, _propModel_wrKey, _compKey, value);
+            bool result = _propStoreAccessor.SetValueFast(propBag, _propItemSetKey, _compKey, value);
         }
 
         public override bool ShouldSerializeValue(object component)

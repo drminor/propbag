@@ -1,5 +1,4 @@
-﻿using DRM.TypeSafePropertyBag.Fundamentals;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -8,15 +7,15 @@ namespace DRM.TypeSafePropertyBag
 {
     using PropIdType = UInt32;
     using PropNameType = String;
-    using PropModelType = IPropModel<String>;
-
+    using PropItemSetKeyType = PropItemSetKey<String>;
     using PropNodeCollectionIntInterface = IPropNodeCollection_Internal<UInt32, String>;
 
     internal class PropNodeCollectionFixed : PropNodeCollectionIntInterface/*, IEquatable<PropItemSetInternalInterface>*/
     {
         #region Private Members
 
-        WeakRefKey<PropModelType>? _propItemSetId;
+        //WeakRefKey<PropModelType>? _propItemSetId;
+        PropItemSetKeyType _propItemSetKey;
 
         readonly PropNode[] _children;
 
@@ -29,41 +28,30 @@ namespace DRM.TypeSafePropertyBag
         #region Constructor
 
         public PropNodeCollectionFixed(PropNodeCollectionIntInterface sourcePropNodes)
-            : this(sourcePropNodes.GetPropNodes(), CheckPropItemSetId(sourcePropNodes.PropItemSetId), sourcePropNodes.MaxPropsPerObject)
+            : this(sourcePropNodes.GetPropNodes(), sourcePropNodes.PropItemSetKey, sourcePropNodes.MaxPropsPerObject)
         {
         }
 
-        public PropNodeCollectionFixed(PropNodeCollectionIntInterface sourcePropNodes, WeakRefKey<PropModelType> propItemSetId)
-            : this(sourcePropNodes.GetPropNodes(), propItemSetId, sourcePropNodes.MaxPropsPerObject)
+        public PropNodeCollectionFixed(PropNodeCollectionIntInterface sourcePropNodes, PropItemSetKeyType propItemSetKey)
+            : this(sourcePropNodes.GetPropNodes(), propItemSetKey, sourcePropNodes.MaxPropsPerObject)
         {
         }
 
-        private static WeakRefKey<PropModelType> CheckPropItemSetId(WeakRefKey<PropModelType>? nullableValue)
-        {
-            if(nullableValue.HasValue)
-            {
-                return nullableValue.Value;
-            }
-            else
-            {
-                throw new ArgumentException("The PropItemSetId cannot be null when creating a Fixed PropNodeCollection.");
-            }
-        }
-
-
-        public PropNodeCollectionFixed(IEnumerable<PropNode> propNodes, WeakRefKey<PropModelType> propItemSetId, int maxPropsPerObject)
+        public PropNodeCollectionFixed(IEnumerable<PropNode> propNodes, PropItemSetKeyType propItemSetKey, int maxPropsPerObject)
         {
             MaxPropsPerObject = maxPropsPerObject;
 
-            if(propItemSetId.TryGetTarget(out PropModelType target))
-            {
-                if(target == null)
-                {
-                    throw new ArgumentNullException("The PropItemSetId must refer to a non-null PropModel.");
-                }
-            }
+            //if(propItemSetId.TryGetTarget(out PropModelType target))
+            //{
+            //    if(target == null)
+            //    {
+            //        throw new ArgumentNullException("The PropItemSetId must refer to a non-null PropModel.");
+            //    }
+            //}
 
-            _propItemSetId = propItemSetId;
+            CheckPropItemSetId(propItemSetKey);
+
+            _propItemSetKey = propItemSetKey;
 
             _children = propNodes.ToArray();
             PropItemsByName = _children.ToDictionary(k => k.PropertyName, v => v);
@@ -71,6 +59,14 @@ namespace DRM.TypeSafePropertyBag
             CheckChildCount(_children.Length);
 
             _hashCode = ComputeHashCode();
+        }
+
+        private void CheckPropItemSetId(PropItemSetKeyType propItemSetKey)
+        {
+            if (propItemSetKey.IsEmpty)
+            {
+                throw new ArgumentException("The PropItemSetKey cannot be empty when creating a Fixed PropNodeCollection.");
+            }
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
@@ -86,7 +82,8 @@ namespace DRM.TypeSafePropertyBag
 
         #region Public Members
 
-        public WeakRefKey<PropModelType>? PropItemSetId => _propItemSetId;
+        //public WeakRefKey<PropModelType>? PropItemSetId => _propItemSetId;
+        public PropItemSetKeyType PropItemSetKey => _propItemSetKey;
 
         public int Count => _children.Length;
 

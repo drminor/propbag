@@ -212,9 +212,9 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
             //personVM_PropModel = PropModelCache.GetPropModel("PersonVM");
 
             string className = "PersonVM";
-            string fcn = GetFullClassName(DefaultNamespace, className, ConfigPackageNameSuffix);
+            string fcn = GetFullClassName(DefaultNamespace, className);
 
-            if (PropModelCache.TryGetPropModel(fcn, out PropModelType personVM_PropModel))
+            if (!PropModelCache.TryGetPropModel(fcn, out PropModelType personVM_PropModel))
             {
                 throw new KeyNotFoundException($"Could not find a PropModel with Full Class Name = {fcn}.");
             }
@@ -270,7 +270,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
             string className = "MainWindowVM";
             string fcn = GetFullClassName(DefaultNamespace, className, ConfigPackageNameSuffix);
 
-            if (PropModelCache.TryGetPropModel(fcn, out PropModelType mainWindowPropModel))
+            if (!PropModelCache.TryGetPropModel(fcn, out PropModelType mainWindowPropModel))
             {
                 throw new KeyNotFoundException($"Could not find a PropModel with Full Class Name = {fcn}.");
             }
@@ -280,8 +280,8 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
             mainWindowViewModel = new MainWindowViewModel(mainWindowPropModel, PropStoreAccessService_Factory, AutoMapperProvider, propFactory: null, fullClassName: null);
             BaseMemTracker.CompactMeasureAndReport("After create the mainWindowViewModel.", "CreateVM_CreateMainWindowVM_Run1");
 
-            mainWindowViewModel.Dispose();
-            BaseMemTracker.CompactMeasureAndReport("After dispose of the mainWindowViewModel.", "CreateVM_CreateMainWindowVM_Run1");
+            //mainWindowViewModel.Dispose();
+            //BaseMemTracker.CompactMeasureAndReport("After dispose of the mainWindowViewModel.", "CreateVM_CreateMainWindowVM_Run1");
         }
 
         [Test]
@@ -330,8 +330,8 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
         {
             // Take Heap SnapShot here. (CreateVM_CreateMainWindowVM_Run1 has completed and the Context has been cleaned up.)
 
-            //ConfigPackageNameSuffix = "Emit_Proxy";
-            ConfigPackageNameSuffix = "Extra_Members";
+            //ConfigPackageNameSuffix = "Emit";
+            ConfigPackageNameSuffix = "Extra";
 
             return base.EstablishContext();
         }
@@ -343,7 +343,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
             string className = "MainWindowVM";
             string fcn = GetFullClassName(DefaultNamespace, className, ConfigPackageNameSuffix);
 
-            if (PropModelCache.TryGetPropModel(fcn, out PropModelType mainWindowPropModel))
+            if (!PropModelCache.TryGetPropModel(fcn, out PropModelType mainWindowPropModel))
             {
                 throw new KeyNotFoundException($"Could not find a PropModel with Full Class Name = {fcn}.");
             }
@@ -420,7 +420,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
             string className = "MainWindowVM";
             string fcn = GetFullClassName(DefaultNamespace, className, ConfigPackageNameSuffix);
 
-            if (PropModelCache.TryGetPropModel(fcn, out PropModelType mainWindowPropModel))
+            if (!PropModelCache.TryGetPropModel(fcn, out PropModelType mainWindowPropModel))
             {
                 throw new KeyNotFoundException($"Could not find a PropModel with Full Class Name = {fcn}.");
             }
