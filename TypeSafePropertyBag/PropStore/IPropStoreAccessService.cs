@@ -1,4 +1,5 @@
 ﻿using DRM.TypeSafePropertyBag.DataAccessSupport;
+using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -6,6 +7,10 @@ using System.Windows.Data;
 
 namespace DRM.TypeSafePropertyBag
 {
+    using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
+    using PropModelType = IPropModel<String>;
+
+
     public interface IPropStoreAccessService<L2T, L2TRaw> : IRegisterSubscriptions<L2T>, IRegisterBindings<L2T>, IDisposable
     {
         int PropertyCount { get; }
@@ -14,11 +19,18 @@ namespace DRM.TypeSafePropertyBag
         bool TryGetPropName(L2T propertyId, out L2TRaw propertyName);
 
         bool IsPropItemSetFixed { get; }
-        object FixPropItemSet();
-        bool TryOpenPropItemSet(out object propItemSet_Handle);
+        //object FixPropItemSet();
+        //bool TryOpenPropItemSet(out object propItemSet_Handle);
+
+        bool TryFixPropItemSet(WeakRefKey<PropModelType> propItemSetId);
+        bool TryOpenPropItemSet(/*out object propItemSet_Handle*/);
+
 
         // IDictionary-Like Methods
         IPropData this[IPropBag propBag, L2T propId] { get; }
+
+        object GetValueFast(IPropBag component, WeakRefKey<PropModelType> propItemSetId, ExKeyT compKey);
+        bool SetValueFast(IPropBag component, WeakRefKey<PropModelType> propItemSetId, ExKeyT compKey, object value);
 
         bool ContainsKey(IPropBag propBag, L2T propId);
 
@@ -130,5 +142,7 @@ namespace DRM.TypeSafePropertyBag
         // Diagnostics
         void IncAccess();
         int AccessCounter { get; }
+
+        //bool PBTestSet(PropBagAbstractBase x);
     }
 }

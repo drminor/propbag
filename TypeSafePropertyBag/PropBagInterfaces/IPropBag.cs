@@ -1,4 +1,5 @@
 ﻿using DRM.TypeSafePropertyBag.DataAccessSupport;
+using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -7,6 +8,10 @@ using System.Windows.Data;
 namespace DRM.TypeSafePropertyBag
 {
     using PropNameType = String;
+    using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
+
+    using PropModelType = IPropModel<String>;
+
 
     ///// <summary>
     ///// All implementers of IPropBag that also want to use a shared property store must
@@ -49,6 +54,9 @@ namespace DRM.TypeSafePropertyBag
 
         object this[string typeName, PropNameType propertyName] { get; set; }
         object this[Type type, PropNameType propertyName] { get; set; }
+
+        object GetValueFast(IPropBag component, WeakRefKey<PropModelType> propItemSetId, ExKeyT compKey);
+        bool SetValueFast(IPropBag component, WeakRefKey<PropModelType> propItemSetId, ExKeyT compKey, object value);
 
         ValPlusType GetValPlusType(PropNameType propertyName, Type propertyType);
 

@@ -1,9 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using DRM.TypeSafePropertyBag.Fundamentals;
+using System;
+using System.Collections.Generic;
 
 namespace DRM.TypeSafePropertyBag
 {
     internal interface IPropNodeCollection_Internal<L2T, L2TRaw> : IPropNodeCollection<L2T, L2TRaw>
     {
+        WeakRefKey<IPropModel<L2TRaw>>? PropItemSetId { get; }
+
         bool Contains(PropNode propNode);
         PropNode CreateAndAdd(IPropDataInternal propData_Internal, L2TRaw propertyName, BagNode parent);
 
@@ -15,8 +19,6 @@ namespace DRM.TypeSafePropertyBag
         bool TryGetPropNode(L2T propId, out PropNode propNode);
 
         bool TryRemove(L2T propId, out PropNode propNode);
-
-        //long GetNextGenerationId();
     }
 
     public interface IPropNodeCollection<L2T, L2TRaw>

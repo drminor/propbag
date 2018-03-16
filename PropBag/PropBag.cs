@@ -25,6 +25,8 @@ namespace DRM.PropBag
 {
     using PropIdType = UInt32;
     using PropNameType = String;
+
+    using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
     using IRegisterBindingsFowarderType = IRegisterBindingsForwarder<UInt32>;
 
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
@@ -226,7 +228,8 @@ namespace DRM.PropBag
                 _propModelCache?.Fix(propModel);
 
                 // Also, to improve performance, let the PropertyStore know that the set of PropItems can be fixed as well.
-                _ourStoreAccessor.FixPropItemSet();
+                WeakRefKey<PropModelType> propItemSetId = new WeakRefKey<PropModelType>(propModel);
+                _ourStoreAccessor.TryFixPropItemSet(propItemSetId);
             }
             else
             {
@@ -617,7 +620,12 @@ namespace DRM.PropBag
             {
                 if (pi.MapperRequest.PropModelResourceKey != null)
                 {
-                    pi.MapperRequest.PropModel = propModelProvider.GetPropModel(pi.MapperRequest.PropModelResourceKey);
+                    //pi.MapperRequest.PropModel = propModelProvider.GetPropModel(pi.MapperRequest.PropModelResourceKey);
+
+                    if (propModelProvider.TryGetPropModel(pi.MapperRequest.PropModelResourceKey, out PropModelType propModel))
+                    {
+                        pi.MapperRequest.PropModel = propModel;
+                    }
                 }
                 else
                 {
@@ -708,7 +716,9 @@ namespace DRM.PropBag
                 // Create New PropBag-based Object
                 if (pi.InitialValueField.PropBagResourceKey != null)
                 {
-                    IPropBag newObject = GetNewViewModel(pi, propModelProvider, storeAccessCreator, autoMapperService);
+                    // TODO: This is assuming that the PropModelResourceKey is the same as the FullClassName.
+                    string fcn = pi.InitialValueField.PropBagResourceKey;
+                    IPropBag newObject = GetNewViewModel(fcn, pi.PropertyType, propModelProvider, storeAccessCreator, autoMapperService);
 
                     if (pi.PropTemplate != null && pi.PropCreator != null)
                     {
@@ -845,11 +855,19 @@ namespace DRM.PropBag
             }
         }
 
-        private IPropBag GetNewViewModel(IPropItemModel pi, PropModelCacheInterface propModelProvider, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService)
+        private IPropBag GetNewViewModel(string fullClassName, Type propertyType, PropModelCacheInterface propModelProvider, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService)
         {
-            PropModelType propModel = propModelProvider.GetPropModel(pi.InitialValueField.PropBagResourceKey);
-            IPropBag newObject = (IPropBag)VmActivator.GetNewViewModel(pi.PropertyType, propModel, storeAccessCreator, autoMapperService, propFactory: null, fullClassName: null);
-            return newObject;
+            //PropModelType propModel = propModelProvider.GetPropModel(pi.InitialValueField.PropBagResourceKey);
+
+            if (propModelProvider.TryGetPropModel(fullClassName, out PropModelType propModel))
+            {
+                IPropBag newObject = (IPropBag)VmActivator.GetNewViewModel(propertyType, propModel, storeAccessCreator, autoMapperService, propFactory: null, fullClassName: null);
+                return newObject;
+            }
+            else
+            {
+                throw new KeyNotFoundException($"Could not find a PropModel with Full Class Name = {fullClassName}.");
+            }
         }
 
         private IViewModelActivator _vmActivator;
@@ -1468,6 +1486,20 @@ namespace DRM.PropBag
 
         #endregion
 
+        #region FAST Property Access Methods
+
+        public object GetValueFast(IPropBag component, WeakRefKey<PropModelType> propItemSetId, ExKeyT compKey)
+        {
+            return null;
+        }
+
+        public bool SetValueFast(IPropBag component, WeakRefKey<PropModelType> propItemSetId, ExKeyT compKey, object value)
+        {
+            return true;
+        }
+
+        #endregion
+
         #region Event Subscriptions
 
         #region Subscribe to Property Changing
@@ -2011,7 +2043,7 @@ namespace DRM.PropBag
                     // This class, instead of this instance the PropBag, will be held by the new CustomTypeDescriptor,
                     // allowing this instance of the PropBag to be Garbage Collected, without interferring with 
                     // the opertion of the other users of this PropModel.
-                    IList<PropertyDescriptor> propertyDescriptors = GetCustomProps();
+                    IList<PropertyDescriptor> propertyDescriptors = BuildCustomFixedProps(_propModel);
                     PropertyDescriptorStaticListProvider pdList = new PropertyDescriptorStaticListProvider(propertyDescriptors);
 
                     // Store the CustomTypeDescriptor in the PropModel for all to use.
@@ -3877,6 +3909,45 @@ namespace DRM.PropBag
             return result;
         }
 
+        private IList<PropertyDescriptor> BuildCustomFixedProps(PropModelType propModel)
+        {
+            if(!propModel.IsFixed)
+            {
+                throw new InvalidOperationException("This can only be called using a fixed propModel.");
+            }
+
+            IEnumerable<IPropItemModel> propItemModels = _propModel.GetPropItems();
+
+            IList<PropertyDescriptor> result = new List<PropertyDescriptor>();
+
+            ulong objectId = 10;
+
+            foreach (IPropItemModel pi in propItemModels)
+            {
+                PropItemFixedPropertyDescriptor<PropBag> propItemTypeDesc;
+
+                if(!TryGetPropId(pi.PropertyName, out PropIdType propertyId))
+                {
+                    throw new InvalidOperationException("Could not get the property id.");
+                }
+
+                ExKeyT compKey = new SimpleExKey(objectId, propertyId);
+
+                if (pi.PropKind == PropKindEnum.CollectionView || pi.PropKind == PropKindEnum.ObservableCollection || pi.PropKind == PropKindEnum.Prop)
+                {
+                    propItemTypeDesc = new PropItemFixedPropertyDescriptor<PropBag>(_ourStoreAccessor, propModel, pi.PropertyName, compKey, pi.PropertyType, new Attribute[] { });
+                }
+                else
+                {
+                    throw new InvalidOperationException($"The {nameof(PropBagTypeDescriptionProvider<PropBag>)} does not recognized or does not support Props of Kind = {pi.PropKind}.");
+                }
+
+                result.Add(propItemTypeDesc);
+            }
+
+            return result;
+        }
+
         private IList<PropertyDescriptor> BuildCustomProps(IEnumerable<IPropItemModel> propItemModels)
         {
             IList<PropertyDescriptor> result = new List<PropertyDescriptor>();
@@ -3888,9 +3959,6 @@ namespace DRM.PropBag
                 if (pi.PropKind == PropKindEnum.CollectionView || pi.PropKind == PropKindEnum.ObservableCollection || pi.PropKind == PropKindEnum.Prop)
                 {
                     propItemTypeDesc = new PropItemPropertyDescriptor<PropBag>(pi.PropertyName, pi.PropertyType, new Attribute[] { });
-
-                    // TODO: Implement a way to create a Typed PropertyDescriptor for fast Get/Set methods.
-                    //propItemTypeDesc = new PropItemPropertyDescriptor_Typed<<T>(pi.PropertyName, pi.PropertyType, new Attribute[] { });
                 }
                 else
                 {

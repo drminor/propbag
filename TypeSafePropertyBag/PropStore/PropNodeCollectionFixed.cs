@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DRM.TypeSafePropertyBag.Fundamentals;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -7,12 +8,15 @@ namespace DRM.TypeSafePropertyBag
 {
     using PropIdType = UInt32;
     using PropNameType = String;
+    using PropModelType = IPropModel<String>;
 
-    using PropItemSetInternalInterface = IPropNodeCollection_Internal<UInt32, String>;
+    using PropNodeCollectionIntInterface = IPropNodeCollection_Internal<UInt32, String>;
 
-    internal class PropNodeCollectionFixed : PropItemSetInternalInterface/*, IEquatable<PropItemSetInternalInterface>*/
+    internal class PropNodeCollectionFixed : PropNodeCollectionIntInterface/*, IEquatable<PropItemSetInternalInterface>*/
     {
         #region Private Members
+
+        WeakRefKey<PropModelType>? _propItemSetId;
 
         readonly PropNode[] _children;
 
@@ -24,14 +28,43 @@ namespace DRM.TypeSafePropertyBag
 
         #region Constructor
 
-        public PropNodeCollectionFixed(PropItemSetInternalInterface sourcePropNodes)
-            : this(sourcePropNodes.GetPropNodes(), sourcePropNodes.MaxPropsPerObject)
+        public PropNodeCollectionFixed(PropNodeCollectionIntInterface sourcePropNodes)
+            : this(sourcePropNodes.GetPropNodes(), CheckPropItemSetId(sourcePropNodes.PropItemSetId), sourcePropNodes.MaxPropsPerObject)
         {
         }
 
-        public PropNodeCollectionFixed(IEnumerable<PropNode> propNodes, int maxPropsPerObject)
+        public PropNodeCollectionFixed(PropNodeCollectionIntInterface sourcePropNodes, WeakRefKey<PropModelType> propItemSetId)
+            : this(sourcePropNodes.GetPropNodes(), propItemSetId, sourcePropNodes.MaxPropsPerObject)
+        {
+        }
+
+        private static WeakRefKey<PropModelType> CheckPropItemSetId(WeakRefKey<PropModelType>? nullableValue)
+        {
+            if(nullableValue.HasValue)
+            {
+                return nullableValue.Value;
+            }
+            else
+            {
+                throw new ArgumentException("The PropItemSetId cannot be null when creating a Fixed PropNodeCollection.");
+            }
+        }
+
+
+        public PropNodeCollectionFixed(IEnumerable<PropNode> propNodes, WeakRefKey<PropModelType> propItemSetId, int maxPropsPerObject)
         {
             MaxPropsPerObject = maxPropsPerObject;
+
+            if(propItemSetId.TryGetTarget(out PropModelType target))
+            {
+                if(target == null)
+                {
+                    throw new ArgumentNullException("The PropItemSetId must refer to a non-null PropModel.");
+                }
+            }
+
+            _propItemSetId = propItemSetId;
+
             _children = propNodes.ToArray();
             PropItemsByName = _children.ToDictionary(k => k.PropertyName, v => v);
 
@@ -52,6 +85,8 @@ namespace DRM.TypeSafePropertyBag
         #endregion
 
         #region Public Members
+
+        public WeakRefKey<PropModelType>? PropItemSetId => _propItemSetId;
 
         public int Count => _children.Length;
 
@@ -219,10 +254,10 @@ namespace DRM.TypeSafePropertyBag
 
         public override bool Equals(object obj)
         {
-            return Equals(obj as PropItemSetInternalInterface);
+            return Equals(obj as PropNodeCollectionIntInterface);
         }
 
-        public bool Equals(PropItemSetInternalInterface other)
+        public bool Equals(PropNodeCollectionIntInterface other)
         {
             return other != null &&
                 IsFixed == other.IsFixed &&

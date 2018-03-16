@@ -6,22 +6,18 @@ using System.Linq;
 namespace DRM.TypeSafePropertyBag
 {
     using CompositeKeyType = UInt64;
+    using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
     using ObjectIdType = UInt64;
+    using PropModelType = IPropModel<String>;
+    using PropNodeCollectionInterface = IPropNodeCollection<UInt32, String>;
+    using PropNodeCollectionInternalInterface = IPropNodeCollection_Internal<UInt32, String>;
+    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
 
-    using PropIdType = UInt32;
+    //using PropIdType = UInt32;
     using PropNameType = String;
 
     using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
     using PSAccessServiceProviderInterface = IProvidePropStoreAccessService<UInt32, String>;
-    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
-
-    using PropNodeCollectionInternalInterface = IPropNodeCollection_Internal<UInt32, String>;
-    using PropNodeCollectionInterface = IPropNodeCollection<UInt32, String>;
-
-
-    //using PropNodeCollectionCacheInterface = ICachePropNodeCollections<IPropNodeCollection_Internal<UInt32, String>, UInt32, String>;
-
-    using GenerationIdType = Int64;
 
     internal class SimplePropStoreAccessServiceProvider : PSAccessServiceProviderInterface
     {
@@ -123,6 +119,87 @@ namespace DRM.TypeSafePropertyBag
 
         #endregion
 
+        #region Get / Set Value Fast
+
+        public object GetValueFast(WeakRefKey<IPropBag> propBag_wrKey, WeakRefKey<PropModelType> propItemSetId, ExKeyT compKey)
+        {
+            BagNode propBagNode = GetBagAndChild(propBag_wrKey, propItemSetId, compKey, out PropNode child);
+
+            object result = child.PropData_Internal.TypedProp.TypedValueAsObject;
+            return result;
+        }
+
+        public bool SetValueFast(WeakRefKey<IPropBag> propBag_wrKey, WeakRefKey<PropModelType> propItemSetId, ExKeyT compKey, object value)
+        {
+            BagNode propBagNode = GetBagAndChild(propBag_wrKey, propItemSetId, compKey, out PropNode child);
+
+            if (!propBag_wrKey.TryGetTarget(out IPropBag component))
+            {
+                // The target has been Garbage Collected, its ok to simply return false since the client is no longer waiting for our result.
+                return false;
+            }
+
+            if (!propBagNode.PropNodeCollection.TryGetPropertyName(compKey.Level2Key, out PropNameType propertyName))
+            {
+                throw new InvalidOperationException("Could not retrieve the Property's name using the CompKey.");
+            }
+
+            try
+            {
+                IProp typedProp = child.PropData_Internal.TypedProp;
+
+                DoSetDelegate dsd = typedProp.PropTemplate.DoSetDelegate;
+                bool result = dsd(component, compKey.Level2Key, propertyName, typedProp, value);
+                return result;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        private BagNode GetBagAndChild(WeakRefKey<IPropBag> propBag_wrKey, WeakRefKey<PropModelType>? propItemSetId, ExKeyT compKey, out PropNode child)
+        {
+            if (!TryGetPropBagNode(propBag_wrKey, out BagNode propBagNode))
+            {
+                throw new InvalidOperationException("The store has lost this node.");
+            }
+
+            if (!propBag_wrKey.TryGetTarget(out IPropBag target))
+            {
+                throw new InvalidOperationException("IPropBag target has been Garbage Collected.");
+            }
+
+            if (propItemSetId.HasValue != propBagNode.PropItemSetId.HasValue)
+            {
+                throw new InvalidOperationException("Bad PropModel.");
+            }
+
+            if (!propItemSetId.Value.TryGetTarget(out PropModelType testModel))
+            {
+                throw new InvalidOperationException("The specified PropItemSetId has been Garbage Collected.");
+            }
+
+            if (!propBagNode.PropItemSetId.Value.TryGetTarget(out PropModelType testModel_fromBagNode)) 
+            {
+                throw new InvalidOperationException("The PropItemSetId on our BagNode has been Garbage Collected.");
+            }
+
+            if(!ReferenceEquals(testModel, testModel_fromBagNode))
+            {
+                throw new InvalidOperationException("PropItemSet do not match.");
+            }
+
+            if (!propBagNode.TryGetChild(compKey.Level2Key, out child))
+            {
+                throw new InvalidOperationException("Could not retrieve PropNode for that compKey.");
+            }
+
+            return propBagNode;
+        }
+
+        #endregion
+
         #region PropItemSet Management
 
         public bool IsPropItemSetFixed(IPropBag propBag)
@@ -143,69 +220,74 @@ namespace DRM.TypeSafePropertyBag
             return propBagNode.IsFixed;
         }
 
-        public object FixPropItemSet(IPropBag propBag)
+        public bool TryFixPropItemSet(IPropBag propBag, WeakRefKey<PropModelType> propItemSetId)
         {
-            object propItemSet_Handle;
+            //object propItemSet_Handle;
             if (TryGetPropBagNode(propBag, out BagNode propBagNode))
             {
-                propItemSet_Handle = FixPropItemSet(propBagNode);
+                //propItemSet_Handle = FixPropItemSet(propBagNode);
+                bool result = TryFixPropItemSet(propBagNode, propItemSetId);
+                return result;
             }
             else
             {
-                propItemSet_Handle = null;
+                throw new InvalidOperationException($"Could not retrieve a BagNode for the given propBag.");
+                //return false;
+                //propItemSet_Handle = null;
             }
 
-            return propItemSet_Handle;
+            //return propItemSet_Handle;
         }
 
-        public object FixPropItemSet(BagNode propBagNode)
+        public bool TryFixPropItemSet(BagNode propBagNode, WeakRefKey<PropModelType> propItemSetId)
         {
-            object result;
+            //object result;
 
             PropNodeCollectionInternalInterface pnc_int = propBagNode.PropNodeCollection;
 
             if (pnc_int.IsFixed)
             {
                 System.Diagnostics.Debug.WriteLine("Warning: PropStoreAccessServiceProvider is being asked to fix an already fixed PropItemSet.");
-                result = propBagNode.PropNodeCollection.IsFixed;
+                //result = propBagNode.PropNodeCollection;
+                return true;
             }
             else
             {
                 PropNodeCollectionFixed newFixedCollection = new PropNodeCollectionFixed(pnc_int);
                 propBagNode.PropNodeCollection = newFixedCollection;
-                result = newFixedCollection;
+                //result = newFixedCollection;
+                return true;
             }
 
-            return result;
+            //return result;
         }
 
-        public bool TryOpenPropItemSet(IPropBag propBag, out object propItemSet_Handle)
+        public bool TryOpenPropItemSet(IPropBag propBag/*, out object propItemSet_Handle*/)
         {
             bool result;
             if(TryGetPropBagNode(propBag, out BagNode propBagNode))
             {
-                result = TryOpenPropItemSet(propBagNode, out propItemSet_Handle);
+                result = TryOpenPropItemSet(propBagNode/*, out propItemSet_Handle*/);
             }
             else
             {
-                propItemSet_Handle = null;
+                //propItemSet_Handle = null;
                 result = false;
             }
 
             return result;
         }
 
-        public bool TryOpenPropItemSet(BagNode propBagNode, out object propItemSet_Handle)
+        public bool TryOpenPropItemSet(BagNode propBagNode/*, out object propItemSet_Handle*/)
         {
             bool result;
 
             PropNodeCollectionInternalInterface pnc_int = propBagNode.PropNodeCollection;
-            propItemSet_Handle = pnc_int;
 
             if (!pnc_int.IsFixed)
             {
                 System.Diagnostics.Debug.WriteLine("Warning: PropStoreAccessServiceProvider is being asked to open a PropItemSet that is already open.");
-                propItemSet_Handle = pnc_int;
+                //propItemSet_Handle = pnc_int;
                 result = true;
             }
             else
@@ -217,25 +299,25 @@ namespace DRM.TypeSafePropertyBag
                 propBagNode.PropNodeCollection = newOpenCollection;
 
                 // return a reference to the new one cast as an object.
-                propItemSet_Handle = newOpenCollection;
+                //propItemSet_Handle = newOpenCollection;
                 result = true;
             }
 
             return result;
         }
 
-        [System.Diagnostics.Conditional("DEBUG")]
-        private void CheckGenerationRef(PropNodeCollectionInternalInterface key, PropNodeCollectionInternalInterface basePropItemSet, GenerationIdType generationId)
-        {
-            if (generationId == 0)
-            {
-                System.Diagnostics.Debug.Assert(ReferenceEquals(key, basePropItemSet), "The GenerationId is 0, but the base is not the same as the key.");
-            }
-            else
-            {
-                System.Diagnostics.Debug.Assert(!ReferenceEquals(key, basePropItemSet), "The GenerationId is not 0, but the base *is* the same as the key.");
-            }
-        }
+        //[System.Diagnostics.Conditional("DEBUG")]
+        //private void CheckGenerationRef(PropNodeCollectionInternalInterface key, PropNodeCollectionInternalInterface basePropItemSet, GenerationIdType generationId)
+        //{
+        //    if (generationId == 0)
+        //    {
+        //        System.Diagnostics.Debug.Assert(ReferenceEquals(key, basePropItemSet), "The GenerationId is 0, but the base is not the same as the key.");
+        //    }
+        //    else
+        //    {
+        //        System.Diagnostics.Debug.Assert(!ReferenceEquals(key, basePropItemSet), "The GenerationId is not 0, but the base *is* the same as the key.");
+        //    }
+        //}
 
         #endregion
 

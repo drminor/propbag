@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DRM.TypeSafePropertyBag.Fundamentals;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -7,6 +8,7 @@ namespace DRM.TypeSafePropertyBag
 {
     using PropIdType = UInt32;
     using PropNameType = String;
+    using PropModelType = IPropModel<String>;
 
     using PropNodeCollectionIntInterface = IPropNodeCollection_Internal<UInt32, String>;
 
@@ -14,6 +16,7 @@ namespace DRM.TypeSafePropertyBag
     {
         #region Private Members
 
+        WeakRefKey<PropModelType>? _propItemSetId;
         readonly Dictionary<PropIdType, PropNode> _children;
 
         Dictionary<PropNameType, PropNode> _propItemsByName;
@@ -42,19 +45,34 @@ namespace DRM.TypeSafePropertyBag
 
         #region Constructor
 
+        //public PropNodeCollectionFixed(PropNodeCollectionIntInterface sourcePropNodes)
+        //    : this(sourcePropNodes.GetPropNodes(), sourcePropNodes.PropItemSetId, sourcePropNodes.MaxPropsPerObject)
+        //{
+        //}
+
+        //public PropNodeCollectionFixed(IEnumerable<PropNode> propNodes, WeakRefKey<PropModelType> propItemSetId, int maxPropsPerObject)
+
+        public PropNodeCollection()
+        {
+            throw new InvalidOperationException("Don't use the parameterless constructor to create a PropNodeCollection.");
+        }
+
         public PropNodeCollection(int maxPropsPerObject)
-            : this(null, maxPropsPerObject)
+            : this(null, new WeakRefKey<PropModelType>(null), maxPropsPerObject)
         {
         }
 
         public PropNodeCollection(PropNodeCollectionIntInterface sourcePropNodes)
-            : this(sourcePropNodes.GetPropNodes(), sourcePropNodes.MaxPropsPerObject)
+            : this(sourcePropNodes.GetPropNodes(), sourcePropNodes.PropItemSetId, sourcePropNodes.MaxPropsPerObject)
         {
         }
 
-        public PropNodeCollection(IEnumerable<PropNode> propNodes, int maxPropsPerObject) 
+        public PropNodeCollection(IEnumerable<PropNode> propNodes, WeakRefKey<PropModelType>? propItemSetId, int maxPropsPerObject) 
         {
             MaxPropsPerObject = maxPropsPerObject;
+
+            _propItemSetId = propItemSetId;
+
             if(propNodes == null)
             {
                 _children = new Dictionary<PropIdType, PropNode>();
@@ -68,7 +86,7 @@ namespace DRM.TypeSafePropertyBag
             }
 
             _propItemsByName = null;
-            _isFixed = false;
+            //_isFixed = false;
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
@@ -84,26 +102,31 @@ namespace DRM.TypeSafePropertyBag
 
         #region Public Members
 
+        public WeakRefKey<PropModelType>? PropItemSetId => _propItemSetId;
+
         public int Count => _children.Count;
 
         public int MaxPropsPerObject { get; }
 
-        private bool _isFixed;
-        public bool IsFixed
-        {
-            get
-            {
-                return _isFixed;
-            }
-        }
+        //private bool _isFixed;
+        //public bool IsFixed
+        //{
+        //    get
+        //    {
+        //        return _isFixed;
+        //    }
+        //}
+
+        public bool IsFixed => false;
 
         public void Fix()
         {
-            lock(_sync)
-            {
-                _hashCode = ComputeHashCode();
-                _isFixed = true;
-            }
+            throw new InvalidOperationException("RegularPropNodeCollection instances cannot be fixed.");
+            //lock (_sync)
+            //{
+            //    _hashCode = ComputeHashCode();
+            //    _isFixed = true;
+            //}
         }
 
         public bool Contains(PropIdType propId)
@@ -180,10 +203,10 @@ namespace DRM.TypeSafePropertyBag
 
         public PropNode CreateAndAdd(IPropDataInternal propData_Internal, PropNameType propertyName, BagNode parent)
         {
-            if (_isFixed)
-            {
-                throw new InvalidOperationException("Cannot Add PropItems to a Fixed PropItemSet.");
-            }
+            //if (_isFixed)
+            //{
+            //    throw new InvalidOperationException("Cannot Add PropItems to a Fixed PropItemSet.");
+            //}
 
             PropIdType nextPropId = GetNextPropId();
             PropNode newPropNode = new PropNode(nextPropId, propData_Internal, parent);
@@ -195,10 +218,10 @@ namespace DRM.TypeSafePropertyBag
         {
             lock(_sync)
             {
-                if(_isFixed)
-                {
-                    throw new InvalidOperationException("Cannot Add PropItems to a Fixed PropItemSet.");
-                }
+                //if(_isFixed)
+                //{
+                //    throw new InvalidOperationException("Cannot Add PropItems to a Fixed PropItemSet.");
+                //}
 
                 _children.Add(propNode.PropId, propNode);
 
@@ -213,10 +236,10 @@ namespace DRM.TypeSafePropertyBag
         {
             lock (_sync)
             {
-                if(_isFixed)
-                {
-                    throw new InvalidOperationException("A fixed PropItemSet cannot be cleared.");
-                }
+                //if(_isFixed)
+                //{
+                //    throw new InvalidOperationException("A fixed PropItemSet cannot be cleared.");
+                //}
 
                 _children.Clear();
                 if (_propItemsByName != null)
@@ -230,10 +253,10 @@ namespace DRM.TypeSafePropertyBag
         {
             lock (_sync)
             {
-                if (_isFixed)
-                {
-                    throw new InvalidOperationException("PropItems cannot be remvoed from a fixed PropItemSet.");
-                }
+                //if (_isFixed)
+                //{
+                //    throw new InvalidOperationException("PropItems cannot be remvoed from a fixed PropItemSet.");
+                //}
 
                 if (_children.TryGetValue(propId, out propNode))
                 {
@@ -311,24 +334,25 @@ namespace DRM.TypeSafePropertyBag
         public bool Equals(PropNodeCollectionIntInterface other)
         {
             return other != null &&
-                _isFixed == other.IsFixed &&
+                IsFixed == other.IsFixed &&
                 EqualityComparer<IReadOnlyDictionary<PropNameType, IPropData>>.Default.Equals
                     (GetPropDataItemsDict(), other.GetPropDataItemsDict());
         }
 
-        int _hashCode;
+        //int _hashCode;
         public override int GetHashCode()
         {
             int result;
-            if (IsFixed)
-            {
-                result = _hashCode;
-            }
-            else
-            {
-                result = ComputeHashCode();
-            }
+            //if (IsFixed)
+            //{
+            //    result = _hashCode;
+            //}
+            //else
+            //{
+            //    result = ComputeHashCode();
+            //}
 
+            result = ComputeHashCode();
             return result;
         }
 
@@ -336,7 +360,7 @@ namespace DRM.TypeSafePropertyBag
         {
             var hashCode = 1667222605;
             hashCode = hashCode * -1521134295 + EqualityComparer<Dictionary<uint, PropNode>>.Default.GetHashCode(_children);
-            hashCode = hashCode * -1521134295 + _isFixed.GetHashCode();
+            hashCode = hashCode * -1521134295 + IsFixed.GetHashCode();
             return hashCode;
         }
 

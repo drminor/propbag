@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ObjectSizeDiagnostics;
+using DRM.TypeSafePropertyBag.Fundamentals;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
@@ -104,7 +105,9 @@ namespace DRM.PropBag.AutoMapperSupport
                 if (!_storeAccessCreator.IsPropItemSetFixed(result))
                 {
                     // Fix the template's PropNodeCollection to improve performance.
-                    _storeAccessCreator.FixPropItemSet(result);
+                    WeakRefKey<PropModelType> propItemSetId = new WeakRefKey<PropModelType>(PropModel);
+
+                    _storeAccessCreator.TryFixPropItemSet(result, propItemSetId);
                 }
             }
             else

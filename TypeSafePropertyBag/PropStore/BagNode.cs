@@ -10,6 +10,7 @@ namespace DRM.TypeSafePropertyBag
     using PropNameType = String;
 
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
+    using PropModelType = IPropModel<String>;
 
     using PropNodeCollectionIntInterface = IPropNodeCollection_Internal<UInt32, String>;
 
@@ -117,6 +118,7 @@ namespace DRM.TypeSafePropertyBag
         /// <param name="callPSParentNodeChangedEventSubsCache">A reference to a service that caches Parent Node Change Event dispatchers.</param>
         public BagNode(ObjectIdType objectId, IPropBag propBag, PropNodeCollectionIntInterface template, int maxPropsPerObject, ICacheDelegates<CallPSParentNodeChangedEventSubDelegate> callPSParentNodeChangedEventSubsCache)
         {
+
             CompKey = new SimpleExKey(objectId, 0);
             PropBagProxy = new WeakRefKey<IPropBag>(propBag ?? throw new ArgumentNullException(nameof(propBag)));
 
@@ -130,6 +132,15 @@ namespace DRM.TypeSafePropertyBag
             else
             {
                 _propNodeCollection = ClonePropNodes(template, this);
+
+                //var x = EqualityComparer<WeakRefKey<PropModelType>?>.Default;
+                //bool propItemSetIdsMatch = x.Equals(_propNodeCollection.PropItemSetId, template.PropItemSetId);
+                //System.Diagnostics.Debug.Assert(EqualityComparer<WeakRefKey<PropModelType>?>.Default.Equals(_propNodeCollection.PropItemSetId, template.PropItemSetId), "PropItemSetIds don't match.");
+
+                bool propItemSetIdsMatch = _propNodeCollection.PropItemSetId == template.PropItemSetId;
+
+                System.Diagnostics.Debug.Assert(propItemSetIdsMatch, "PropItemSetIds don't match.");
+                System.Diagnostics.Debug.Assert(_propNodeCollection.IsFixed == template.IsFixed, "IsFixed doesn't match.");
             }
         }
 
@@ -137,28 +148,23 @@ namespace DRM.TypeSafePropertyBag
         {
             PropNodeCollectionIntInterface result;
 
+            List<PropNode> temp = new List<PropNode>();
+            foreach (PropNode propNode in sourcePNC.GetPropNodes())
+            {
+                PropNode newPropNode = propNode.CloneForNewParent(targetParent, useExistingValues: true);
+                temp.Add(newPropNode);
+            }
+
             if (sourcePNC.IsFixed)
             {
-                List<PropNode> temp = new List<PropNode>();
-                foreach (PropNode propNode in sourcePNC.GetPropNodes())
-                {
-                    PropNode newPropNode = propNode.CloneForNewParent(targetParent, useExistingValues: true);
-                    temp.Add(newPropNode);
-                }
-
+                System.Diagnostics.Debug.Assert(sourcePNC.PropItemSetId.HasValue, "We found a fixed PropSetCollection that does not have a PropItemSetId.");
                 // Create a Fixed PropNodeCollection.
-                result = new PropNodeCollectionFixed(temp, sourcePNC.MaxPropsPerObject);
+                result = new PropNodeCollectionFixed(temp, sourcePNC.PropItemSetId.Value, sourcePNC.MaxPropsPerObject);
             }
             else
             {
                 // Create an open PropNodeCollection.
-                PropNodeCollection temp = new PropNodeCollection(sourcePNC.MaxPropsPerObject);
-                foreach (PropNode propNode in sourcePNC.GetPropNodes())
-                {
-                    PropNode newPropNode = propNode.CloneForNewParent(targetParent, useExistingValues: true);
-                    temp.Add(newPropNode);
-                }
-                result = temp;
+                result = new PropNodeCollection(temp, sourcePNC.PropItemSetId, sourcePNC.MaxPropsPerObject);
             }
 
             return result;
@@ -225,6 +231,8 @@ namespace DRM.TypeSafePropertyBag
                 }
             }
         }
+
+        public WeakRefKey<PropModelType>? PropItemSetId => _propNodeCollection.PropItemSetId;
 
         #endregion
 

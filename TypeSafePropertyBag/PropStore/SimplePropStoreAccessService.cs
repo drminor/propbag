@@ -24,6 +24,7 @@ namespace DRM.TypeSafePropertyBag
     using PropNodeCollectionIntInterface = IPropNodeCollection_Internal<UInt32, String>;
     using PropNodeCollectionInterface = IPropNodeCollection<UInt32, String>;
 
+    using PropModelType = IPropModel<String>;
 
     internal class SimplePropStoreAccessService : PSAccessServiceInterface, IHaveTheStoreNode, PSAccessServiceInternalInterface, IDisposable
     {
@@ -258,7 +259,7 @@ namespace DRM.TypeSafePropertyBag
 
             if (IsPropItemSetFixed)
             {
-                if (!TryOpenPropItemSet(out object propItemSet_Handle_NotUsed))
+                if (!TryOpenPropItemSet(/*out object propItemSet_Handle_NotUsed*/))
                 {
                     throw new InvalidOperationException("Can not add props to a fixed PropItemSet, and the attempt to open the PropItemSet failed.");
                 }
@@ -325,7 +326,7 @@ namespace DRM.TypeSafePropertyBag
         {
             if (IsPropItemSetFixed)
             {
-                if (!TryOpenPropItemSet(out object propItemSet_Handle_NotUsed))
+                if (!TryOpenPropItemSet(/*out object propItemSet_Handle_NotUsed*/))
                 {
                     throw new InvalidOperationException("Can not remove props to a fixed PropItemSet, and the attempt to open the PropItemSet failed.");
                 }
@@ -556,25 +557,40 @@ namespace DRM.TypeSafePropertyBag
 
         #endregion
 
+        public object GetValueFast(IPropBag component, WeakRefKey<PropModelType> propItemSetId, ExKeyT compKey)
+        {
+            WeakRefKey<IPropBag> propBag_wrKey = new WeakRefKey<IPropBag>(component);
+            object result = _propStoreAccessServiceProvider.GetValueFast(propBag_wrKey, propItemSetId, compKey);
+            GC.KeepAlive(component);
+            return result;
+        }
+
+        public bool SetValueFast(IPropBag component, WeakRefKey<PropModelType> propItemSetId, ExKeyT compKey, object value)
+        {
+            WeakRefKey<IPropBag> propBag_wrKey = new WeakRefKey<IPropBag>(component);
+            bool result = _propStoreAccessServiceProvider.SetValueFast(propBag_wrKey, propItemSetId, compKey, value);
+            return result;
+        }
+
         #region PropItemSet Management
 
         public bool IsPropItemSetFixed => _ourNode.IsFixed; // _propStoreAccessServiceProvider.IsPropItemSetFixed(_ourNode);
 
-        public object FixPropItemSet()
+        public bool TryFixPropItemSet(WeakRefKey<PropModelType> propItemSetId)
         {
-            object result = _propStoreAccessServiceProvider.FixPropItemSet(_ourNode);
+            bool result = _propStoreAccessServiceProvider.TryFixPropItemSet(_ourNode, propItemSetId);
             return result;
         }
 
-        public bool TryOpenPropItemSet(out object propItemSet_Handle)
+        public bool TryOpenPropItemSet(/*out object propItemSet_Handle*/)
         {
-            if(_propStoreAccessServiceProvider.TryOpenPropItemSet(_ourNode, out propItemSet_Handle))
+            if(_propStoreAccessServiceProvider.TryOpenPropItemSet(_ourNode/*, out propItemSet_Handle*/))
             {
                 return true;
             }
             else
             {
-                propItemSet_Handle = null;
+                //propItemSet_Handle = null;
                 return false;
             }
         }
@@ -1816,5 +1832,12 @@ namespace DRM.TypeSafePropertyBag
         public int AccessCounter => _propStoreAccessServiceProvider.AccessCounter;
 
         #endregion
+
+        //public bool PBTestSet(PropBagAbstractBase x)
+        //{
+        //    x.SetMyValue(-1);
+
+        //    return x.MyValue >= 0;
+        //}
     }
 }

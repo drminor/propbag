@@ -46,6 +46,7 @@
     <Compile Include="ClassGenerator\PropGenerator.cs" />
     <Compile Include="ClassGenerator\PropModelExtensions.cs" />
     <Compile Include="ClassGenerator\T4Support.cs" />
+    <Compile Include="PBTest.cs" />
     <Compile Include="Props\CProp.cs" />
     <Compile Include="Props\PropExternStore.cs" />
     <Compile Include="Props\PropNoStore.cs" />
