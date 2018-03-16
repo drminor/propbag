@@ -105,7 +105,7 @@ namespace DRM.TypeSafePropertyBag
                 {
                     if (TryFetchFromSourceProviders(fullClassName, out propModel))
                     {
-                        propModel.PropModelCache = this;
+                        //propModel.PropModelCache = this;
                         Add(propModel);
                         return true;
                     }
@@ -265,8 +265,8 @@ namespace DRM.TypeSafePropertyBag
                         throw new InvalidOperationException("The PropModel just fetched is already associated with a PropModelCache.");
                     }
 
-                    // Make sure the propModel is not fixed. (So that we can set its GenerationId.
-                    if(propModel.IsFixed) propModel.Open();
+                    //// Make sure the propModel is not fixed. (So that we can set its GenerationId.
+                    //if(propModel.IsFixed) propModel.Open();
 
                     return true;
                 }

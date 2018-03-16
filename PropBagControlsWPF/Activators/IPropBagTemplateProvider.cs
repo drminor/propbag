@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using DRM.TypeSafePropertyBag;
+using System.Collections.Generic;
 using System.Windows;
 
 namespace DRM.PropBagControlsWPF
@@ -9,7 +10,9 @@ namespace DRM.PropBagControlsWPF
 
         PropBagTemplate GetPropBagTemplate(string resourceKey);
         PropBagTemplate GetPropBagTemplate(ResourceDictionary resources, string resourceKey);
-        Dictionary<string, PropBagTemplate> GetPropBagTemplates(ResourceDictionary resources);
+
+        IDictionary<string, IPropBagTemplate> GetPropBagTemplates();
+        IDictionary<string, IPropBagTemplate> GetPropBagTemplates(ResourceDictionary resources);
     }
 
     public interface IMapperRequestProvider
@@ -20,6 +23,5 @@ namespace DRM.PropBagControlsWPF
         MapperRequestTemplate GetMapperRequest(ResourceDictionary resources, string resourceKey);
 
         Dictionary<string, MapperRequestTemplate> GetMapperRequests(ResourceDictionary resources);
-
     }
 }

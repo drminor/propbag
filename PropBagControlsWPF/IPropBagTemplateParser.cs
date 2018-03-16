@@ -8,6 +8,6 @@ namespace DRM.PropBagControlsWPF
 
     public interface IParsePropBagTemplates
     {
-        PropModelType ParsePropModel(PropBagTemplate pbt);
+        PropModelType ParsePropModel(IPropBagTemplate pbt);
     }
 }

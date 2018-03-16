@@ -26,7 +26,7 @@ namespace DRM.PropBagWPF
 
         #region Parse Model
 
-        public PropModelType ParsePropModel(PropBagTemplate pbt)
+        public PropModelType ParsePropModel(IPropBagTemplate pbt)
         {
             if (pbt.ClassName == "PersonCollectionViewModel")
             {

@@ -159,9 +159,10 @@ namespace DRM.PropBagWPF
 
         public IDictionary<string, string> GetTypeToKeyMap()
         {
-            if (_propModelCache == null)
+            if (_propModelCache.Count < 1)
             {
-                throw new InvalidOperationException("You must first call LoadPropModels.");
+                int count = ParseAll(_propModelCache);
+                System.Diagnostics.Debug.WriteLine($"GetTypeToKeyMap found {count} PropModels.");
             }
 
             Dictionary<string, string> result = new Dictionary<string, string>();
@@ -176,6 +177,24 @@ namespace DRM.PropBagWPF
                 }
 
                 result.Add(fullClassName, kvp.Key);
+            }
+
+            return result;
+        }
+
+        private int ParseAll(Dictionary<string, PropModelType> propModelCache)
+        {
+            int result = 0;
+
+            IDictionary<string, IPropBagTemplate> templates = _propBagTemplateProvider.GetPropBagTemplates();
+
+            foreach(KeyValuePair<string, IPropBagTemplate> kvp in templates)
+            {
+                PropModelType pm = _pbtParser.ParsePropModel(kvp.Value);
+                FixUpPropFactory(pm, _propFactoryFactory);
+
+                propModelCache.Add(kvp.Key, pm);
+                result++;
             }
 
             return result;

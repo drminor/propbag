@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Windows;
 using System;
+using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBagControlsWPF
 {
@@ -89,11 +90,17 @@ namespace DRM.PropBagControlsWPF
             }
         }
 
-        public Dictionary<string, PropBagTemplate> GetPropBagTemplates(ResourceDictionary resources)
+        public IDictionary<string, IPropBagTemplate> GetPropBagTemplates()
+        {
+            IDictionary<string, IPropBagTemplate> result = GetPropBagTemplates(_resources);
+            return result;
+        }
+
+        public IDictionary<string, IPropBagTemplate> GetPropBagTemplates(ResourceDictionary resources)
         {
             if (resources == null) throw new ArgumentNullException(nameof(resources));
 
-            Dictionary<string, PropBagTemplate> result = new Dictionary<string, PropBagTemplate>();
+            Dictionary<string, IPropBagTemplate> result = new Dictionary<string, IPropBagTemplate>();
 
             // TODO: build an enumerator that walks the tree of resource dictionaries.
             //ResourceDictionary resources = System.Windows.Application.Current.Resources;

@@ -51,7 +51,7 @@ namespace DRM.PropBagWPF
         {
             //PropModelType pm = _propModelCache.GetPropModel(resourceKey);
 
-            if (!_propModelCache.TryGetPropModel(fullClassName, out PropModelType pm))
+            if (_propModelCache.TryGetPropModel(fullClassName, out PropModelType pm))
             {
                 object result = GetNewViewModel(pm, null, null);
                 return result;
