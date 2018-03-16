@@ -80,6 +80,7 @@
     <Compile Include="PropBagModelCaches\IPropModelFamilyCollection.cs" />
     <Compile Include="PropBagModelCaches\SimplePropModelFamilyCollection.cs" />
     <Compile Include="PropBagModelCaches\SimplePropModelCache.cs" />
+    <Compile Include="PropBags\PropBagAbstractBase.cs" />
     <Compile Include="PropBagTemplateInterfaces\IPropBagTemplate.cs" />
     <Compile Include="PropBagTemplateInterfaces\NamespacesCollection.cs" />
     <Compile Include="PropBagTemplateInterfaces\PropsCollection.cs" />
@@ -134,6 +135,7 @@
     <Compile Include="TypeDescriptors\PropBagTypeDescriptionProvider.cs" />
     <None Include="TypeDescriptors\NotUsed\PropBagTypeDescriptor_NotUsed.cs" />
     <Compile Include="TypeDescriptors\PropertyDescriptorStaticListProvider.cs" />
+    <Compile Include="TypeDescriptors\PropItemFixedPropertyDescriptor.cs" />
     <Compile Include="TypeDescriptors\PropItemPropertyDescriptor.cs" />
     <Compile Include="TypeDescriptors\PropItemPropertyDescriptor_Typed.cs" />
     <Compile Include="TypeDescriptors\PropertyDescriptorValues.cs" />

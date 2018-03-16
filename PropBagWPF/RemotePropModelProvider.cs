@@ -21,7 +21,7 @@ namespace DRM.PropBagWPF
 
         private IPropFactoryFactory _propFactoryFactory;
 
-        public string MapperConfigPackageNameSuffix { get; }
+        //public string MapperConfigPackageNameSuffix { get; }
 
         private Dictionary<string, PropModelType> _propModelCache;
         private Dictionary<string, IMapperRequest> _mapperRequestCache;
@@ -34,14 +34,14 @@ namespace DRM.PropBagWPF
             (
             ResourceDictionaryProvider resourceDictionaryProvider,
             IParsePropBagTemplates propBagTemplateParser,
-            IPropFactoryFactory propFactoryFactory,
-            string mapperConfigPackageNameSuffix
+            IPropFactoryFactory propFactoryFactory
+            //, string mapperConfigPackageNameSuffix
             )
         {
             _resourceDictionaryProvider = resourceDictionaryProvider;
             _pbtParser = propBagTemplateParser;
             _propFactoryFactory = propFactoryFactory;
-            MapperConfigPackageNameSuffix = mapperConfigPackageNameSuffix;
+            //MapperConfigPackageNameSuffix = mapperConfigPackageNameSuffix;
 
             _propModelCache = new Dictionary<string, PropModelType>();
             _mapperRequestCache = new Dictionary<string, IMapperRequest>();
@@ -204,24 +204,23 @@ namespace DRM.PropBagWPF
                 throw new InvalidOperationException("You must first call LoadMapperRequests.");
             }
 
-            string cookedKey = GetResourceKeyWithSuffix(resourceKey);
+            //string cookedKey = GetResourceKeyWithSuffix(resourceKey);
 
-
-            if (_mapperRequestCache.TryGetValue(cookedKey, out IMapperRequest mrCooked))
+            if (_mapperRequestCache.TryGetValue(resourceKey, out IMapperRequest mrCooked))
             {
                 return mrCooked;
             }
             else
             {
-                throw new KeyNotFoundException($"No MapperRequest with resource key: {cookedKey} can be found.");
+                throw new KeyNotFoundException($"No MapperRequest with resource key: {resourceKey} can be found.");
             }
         }
 
-        private string GetResourceKeyWithSuffix(string rawKey)
-        {
-            string result = MapperConfigPackageNameSuffix != null ? $"{rawKey}_{MapperConfigPackageNameSuffix}" : rawKey;
-            return result;
-        }
+        //private string GetResourceKeyWithSuffix(string rawKey)
+        //{
+        //    string result = MapperConfigPackageNameSuffix != null ? $"{rawKey}_{MapperConfigPackageNameSuffix}" : rawKey;
+        //    return result;
+        //}
 
         #endregion
     }

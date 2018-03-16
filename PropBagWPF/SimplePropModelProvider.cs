@@ -30,15 +30,15 @@ namespace DRM.PropBagWPF
             IPropBagTemplateProvider propBagTemplateProvider,
             IMapperRequestProvider mapperRequestProvider,
             IParsePropBagTemplates propBagTemplateParser,
-            IPropFactoryFactory propFactoryFactory,
-            string resourceKeySuffix
+            IPropFactoryFactory propFactoryFactory
+            //, string resourceKeySuffix
             )
         {
             _propBagTemplateProvider = propBagTemplateProvider;
             _mapperRequestProvider = mapperRequestProvider;
             _pbtParser = propBagTemplateParser;
             _propFactoryFactory = propFactoryFactory ?? throw new ArgumentNullException(nameof(propFactoryFactory));
-            ResourceKeySuffix = resourceKeySuffix;
+            //ResourceKeySuffix = resourceKeySuffix;
 
             _propModelCache = new Dictionary<string, PropModelType>();
             _mapperRequestCache = new Dictionary<string, IMapperRequest>();
@@ -49,7 +49,7 @@ namespace DRM.PropBagWPF
 
         #region Public Properties
 
-        public string ResourceKeySuffix { get; }
+        //public string ResourceKeySuffix { get; }
 
         #endregion
 
@@ -188,16 +188,16 @@ namespace DRM.PropBagWPF
 
         public IMapperRequest GetMapperRequest(string resourceKey)
         {
-            string cookedKey = GetResourceKeyWithSuffix(resourceKey);
+            //string cookedKey = GetResourceKeyWithSuffix(resourceKey);
 
-            if(_mapperRequestCache.TryGetValue(cookedKey, out IMapperRequest value))
+            if(_mapperRequestCache.TryGetValue(resourceKey, out IMapperRequest value))
             {
                 return value;
             }
             else
             {
-                IMapperRequest result = FetchMapperRequest(cookedKey);
-                _mapperRequestCache.Add(cookedKey, result);
+                IMapperRequest result = FetchMapperRequest(resourceKey);
+                _mapperRequestCache.Add(resourceKey, result);
                 return result;
             }
         }
@@ -256,11 +256,11 @@ namespace DRM.PropBagWPF
             }
         }
 
-        private string GetResourceKeyWithSuffix(string rawKey)
-        {
-            string result = ResourceKeySuffix != null ? $"{rawKey}_{ResourceKeySuffix}" : rawKey;
-            return result;
-        }
+        //private string GetResourceKeyWithSuffix(string rawKey)
+        //{
+        //    string result = ResourceKeySuffix != null ? $"{rawKey}_{ResourceKeySuffix}" : rawKey;
+        //    return result;
+        //}
 
         #endregion
 

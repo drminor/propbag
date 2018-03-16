@@ -2,6 +2,7 @@
 using DRM.PropBag.ViewModelTools;
 using System;
 using DRM.PropBag.AutoMapperSupport;
+using System.Collections.Generic;
 
 namespace DRM.PropBagWPF
 {
@@ -46,11 +47,19 @@ namespace DRM.PropBagWPF
 
         #region Public Methods 
 
-        public object GetNewViewModel(string resourceKey)
+        public object GetNewViewModel(string fullClassName)
         {
-            PropModelType pm = _propModelCache.GetPropModel(resourceKey);
-            object result = GetNewViewModel(pm, null, null);
-            return result;
+            //PropModelType pm = _propModelCache.GetPropModel(resourceKey);
+
+            if (!_propModelCache.TryGetPropModel(fullClassName, out PropModelType pm))
+            {
+                object result = GetNewViewModel(pm, null, null);
+                return result;
+            }
+            else
+            {
+                throw new KeyNotFoundException($"Could not find a PropModel with Full Class Name = {fullClassName}.");
+            }
         }
 
         /// <summary>
@@ -59,11 +68,20 @@ namespace DRM.PropBagWPF
         /// <param name="resourceKey"></param>
         /// <param name="propFactory"></param>
         /// <returns></returns>
-        public object GetNewViewModel(string resourceKey, IPropFactory propFactory)
+        public object GetNewViewModel(string fullClassName, IPropFactory propFactory)
         {
-            PropModelType pm = _propModelCache.GetPropModel(resourceKey);
-            object result = GetNewViewModel(pm, propFactory, null);
-            return result;
+            //PropModelType pm = _propModelCache.GetPropModel(resourceKey);
+
+            if(!_propModelCache.TryGetPropModel(fullClassName, out PropModelType pm))
+            {
+                object result = GetNewViewModel(pm, propFactory, null);
+                return result;
+            }
+            else
+            {
+                throw new KeyNotFoundException($"Could not find a PropModel with Full Class Name = {fullClassName}.");
+            }
+
         }
 
         private object GetNewViewModel(PropModelType pm, IPropFactory propFactory, string fullClassName)

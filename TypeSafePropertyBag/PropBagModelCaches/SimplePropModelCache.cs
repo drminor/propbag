@@ -13,10 +13,16 @@ namespace DRM.TypeSafePropertyBag
     {
         public const long GEN_ZERO = 0;
 
+        #region Private Properties
+
         private readonly Dictionary<string, PropBagModelFamilyCollInterface> _cache;
         private readonly List<IProvidePropModels> _propModelProviders;
 
         private object _syncLock = new object();
+
+        #endregion
+
+        #region Constructor
 
         public SimplePropModelCache(params IProvidePropModels[] propModelProviders)
         {
@@ -25,63 +31,9 @@ namespace DRM.TypeSafePropertyBag
             _cache = new Dictionary<PropNameType, PropBagModelFamilyCollInterface>();
         }
 
-        public void Fix(PropModelType propModel)
-        {
-            if(propModel.IsFixed)
-            {
-                System.Diagnostics.Debug.WriteLine("Already Fixed.");
-                return;
-            }
-            else
-            {
-                propModel.Fix();
-            }
-        }
+        #endregion
 
-        // Make a copy within the same family, the copy is given the next available generationId.
-        public PropModelType Open(PropModelType propModel, out long generationId)
-        {
-            PropModelType result = Open(propModel, null, out generationId);
-            return result;
-        }
-
-        // Make a copy and if a new class name is given, start a new family of Type definitions.
-        public PropModelType Open(PropModelType propModel, string fullClassName, out long generationId)
-        {
-            if (!propModel.IsFixed)
-            {
-                if(fullClassName == null)
-                {
-                    System.Diagnostics.Debug.WriteLine("Already Open.");
-                    generationId = propModel.GenerationId;
-                    return propModel;
-                }
-                else
-                {
-                    throw new InvalidOperationException($"Cannot open the PropModel with FullClassName: {this}; it is already open.");
-                }
-            }
-            else
-            {
-                PropModelType result = (PropModelType)propModel.Clone();
-
-                if(fullClassName != null)
-                {
-                    string ns = TypeExtensions.GetNamespace(fullClassName, out string className);
-
-                    if (ns != null)
-                    {
-                        result.NamespaceName = ns;
-                    }
-
-                    result.ClassName = className;
-                }
-
-                generationId = Add(result);
-                return result;
-            }
-        }
-
+        #region Public Methods
 
         public long Add(PropModelType propModel)
         {
@@ -112,27 +64,14 @@ namespace DRM.TypeSafePropertyBag
             return generationId;
         }
 
-        public bool TryGetAllGenerations(string fullClassName, out IReadOnlyDictionary<long, PropModelType> familyCollection)
-        {
-            if(_cache.TryGetValue(fullClassName, out PropBagModelFamilyCollInterface list))
-            {
-                familyCollection = list.GetAll();
-                return true;
-            }
-            else
-            {
-                familyCollection = null;
-                return false;
-            }
-        }
 
-        public bool TryGetValue(string fullClassName, out PropModelType propModel)
+        public bool TryGetPropModel(string fullClassName, out PropModelType propModel)
         {
-            bool result = TryGetValue(fullClassName, GEN_ZERO, out propModel);
+            bool result = TryGetPropModel(fullClassName, GEN_ZERO, out propModel);
             return result;
         }
 
-        public bool TryGetValue(string fullClassName, long generationId, out PropModelType propModel)
+        public bool TryGetPropModel(string fullClassName, long generationId, out PropModelType propModel)
         {
             lock(_syncLock)
             {
@@ -158,25 +97,18 @@ namespace DRM.TypeSafePropertyBag
             return false;
         }
 
-        private bool TryFetchFromSourceProviders(string fullClassName, out PropModelType propModel)
+        public bool TryGetAllGenerations(string fullClassName, out IReadOnlyDictionary<long, PropModelType> familyCollection)
         {
-            //throw new NotSupportedException("The SimplePropModelCache cannot yet fetch PropModels from a list of providers using the fullClassName.");
-
-            IDictionary<string, string> classNameToKeyMap;
-
-            foreach (IProvidePropModels propModelProvider in _propModelProviders)
+            if (_cache.TryGetValue(fullClassName, out PropBagModelFamilyCollInterface list))
             {
-                classNameToKeyMap = propModelProvider.GetTypeToKeyMap();
-
-                if(classNameToKeyMap.TryGetValue(fullClassName, out string resourceKey))
-                {
-                    propModel = propModelProvider.GetPropModel(resourceKey);
-                    return true;
-                }
+                familyCollection = list.GetAll();
+                return true;
             }
-
-            propModel = null;
-            return false;
+            else
+            {
+                familyCollection = null;
+                return false;
+            }
         }
 
         public bool TryFind(PropModelType propModel, out long generationId)
@@ -195,33 +127,105 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        public PropModelType GetPropModel(string resourceKey)
+        public void Clear()
         {
-            PropModelType result = null;
+            System.Diagnostics.Debug.WriteLine("The SimplePropModelCache is being cleared.");
+        }
+
+        #endregion
+
+        #region Fix and Open
+
+        public void Fix(PropModelType propModel)
+        {
+            if (!TryFind(propModel, out long generationId))
+            {
+                throw new InvalidOperationException("We are being asked to fix a PropModel that is not in our cache.");
+            }
+
+            if (propModel.IsFixed)
+            {
+                System.Diagnostics.Debug.WriteLine("Already Fixed.");
+                return;
+            }
+            else
+            {
+                propModel.Fix();
+            }
+        }
+
+        // Make a copy within the same family, the copy is given the next available generationId.
+        public PropModelType Open(PropModelType propModel, out long generationId)
+        {
+            PropModelType result = Open(propModel, null, out generationId);
+            return result;
+        }
+
+        // Make a copy and if a new class name is given, start a new family of Type definitions.
+        public PropModelType Open(PropModelType propModel, string fullClassName, out long generationId)
+        {
+            if (!propModel.IsFixed)
+            {
+                if (fullClassName == null)
+                {
+                    System.Diagnostics.Debug.WriteLine("Already Open.");
+                    generationId = propModel.GenerationId;
+                    return propModel;
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Cannot open the PropModel with FullClassName: {this}; it is already open.");
+                }
+            }
+            else
+            {
+                PropModelType result = (PropModelType)propModel.Clone();
+
+                if (fullClassName != null)
+                {
+                    string ns = TypeExtensions.GetNamespace(fullClassName, out string className);
+
+                    if (ns != null)
+                    {
+                        result.NamespaceName = ns;
+                    }
+
+                    result.ClassName = className;
+                }
+
+                generationId = Add(result);
+                return result;
+            }
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private bool TryFetchFromSourceProviders(string fullClassName, out PropModelType propModel)
+        {
+            //throw new NotSupportedException("The SimplePropModelCache cannot yet fetch PropModels from a list of providers using the fullClassName.");
+
+            IDictionary<string, string> classNameToKeyMap;
+
             foreach (IProvidePropModels propModelProvider in _propModelProviders)
             {
-                try
-                {
-                    result = propModelProvider.GetPropModel(resourceKey);
-                    result.PropModelCache = this;
+                classNameToKeyMap = propModelProvider.GetTypeToKeyMap();
 
-                    lock (_syncLock)
-                    {
-                        if (!TryGetValue(result.FullClassName, out PropModelType test))
-                        {
-                            Add(result);
-                        }
-                    }
-                    break;
-                }
-                catch
+                if (classNameToKeyMap.TryGetValue(fullClassName, out string resourceKey))
                 {
-                    // Ignore the exception and continue.
+                    propModel = propModelProvider.GetPropModel(resourceKey);
+                    return true;
                 }
             }
 
-            return result;
+            propModel = null;
+            return false;
         }
+
+        #endregion
+
+        #region Get Mapper Request
 
         public IMapperRequest GetMapperRequest(string resourceKey)
         {
@@ -242,5 +246,40 @@ namespace DRM.TypeSafePropertyBag
 
             return result;
         }
+
+        #endregion
+
+        #region OLD Style Methods
+
+        public PropModelType GetPropModel(string resourceKey)
+        {
+            PropModelType result = null;
+            foreach (IProvidePropModels propModelProvider in _propModelProviders)
+            {
+                try
+                {
+                    result = propModelProvider.GetPropModel(resourceKey);
+                    result.PropModelCache = this;
+
+                    lock (_syncLock)
+                    {
+                        if (!TryGetPropModel(result.FullClassName, out PropModelType test))
+                        {
+                            Add(result);
+                        }
+                    }
+                    break;
+                }
+                catch
+                {
+                    // Ignore the exception and continue.
+                }
+            }
+
+            return result;
+        }
+
+
+        #endregion
     }
 }
