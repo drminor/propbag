@@ -65,11 +65,15 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="ProbBagTemplates\MainWindowVM.xaml">
+    <Page Include="ProbBagTemplates\MainWindowVM_Extra.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="ProbBagTemplates\MapperConf_Both.xaml">
+    <Page Include="ProbBagTemplates\MainWindowVM_Emit.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ProbBagTemplates\MapperConfigs.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -81,11 +85,19 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="ProbBagTemplates\PersonCollectionVM.xaml">
+    <Page Include="ProbBagTemplates\PersonCollectionVM_Extra.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="ProbBagTemplates\PersonEditorVM.xaml">
+    <Page Include="ProbBagTemplates\PersonCollectionVM_Emit.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ProbBagTemplates\PersonEditorVM_Extra.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ProbBagTemplates\PersonEditorVM_Emit.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

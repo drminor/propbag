@@ -37,7 +37,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests
 
         private string[] _mapperRequestFilenames = new string[]
         {
-                "MapperConf_Both.xaml",
+                "MapperConfigs.xaml",
         };
 
         string _configPackageNameSuffix = "Emit";
