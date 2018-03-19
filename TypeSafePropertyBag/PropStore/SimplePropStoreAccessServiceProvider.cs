@@ -6,18 +6,18 @@ using System.Linq;
 namespace DRM.TypeSafePropertyBag
 {
     using CompositeKeyType = UInt64;
-    using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
     using ObjectIdType = UInt64;
+    using PropIdType = UInt32;
+    using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
+    //using PropNameType = String;
 
-    using PropModelType = IPropModel<String>;
     using PropItemSetKeyType = PropItemSetKey<String>;
 
     using PropNodeCollectionInterface = IPropNodeCollection<UInt32, String>;
     using PropNodeCollectionInternalInterface = IPropNodeCollection_Internal<UInt32, String>;
-    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
+    using PropNodelCollectionSharedInterface = IPropNodeCollectionShared<UInt32, String>;
 
-    //using PropIdType = UInt32;
-    using PropNameType = String;
+    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
 
     using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
     using PSAccessServiceProviderInterface = IProvidePropStoreAccessService<UInt32, String>;
@@ -28,12 +28,14 @@ namespace DRM.TypeSafePropertyBag
 
         readonly Dictionary<WeakRefKey<IPropBag>, BagNode> _store;
 
+        readonly Dictionary<PropItemSetKeyType, PropNodelCollectionSharedInterface> _storeByType;
+
         readonly IProvideHandlerDispatchDelegateCaches _handlerDispatchDelegateCacheProvider;
 
         //PropNodeCollectionCacheInterface _propNodeCollectionCache;
 
         readonly object _sync = new object();
-        readonly object _syncForPropItemSetCache = new object();
+        readonly object _syncForByTypeStore = new object();
 
         const int NUMBER_OF_SECONDS_BETWEEN_PRUNE_OPS = 20;
         //private Timer _timer;
@@ -62,6 +64,7 @@ namespace DRM.TypeSafePropertyBag
             _handlerDispatchDelegateCacheProvider = handlerDispatchDelegateCacheProvider;
 
             _store = new Dictionary<WeakRefKey<IPropBag>, BagNode>();
+            _storeByType = new Dictionary<PropItemSetKeyType, PropNodelCollectionSharedInterface>();
 
             // TODO: Have the caller provide a PropTemplateCache.
             _propTemplateCache = new SimplePropTemplateCache();
@@ -124,46 +127,111 @@ namespace DRM.TypeSafePropertyBag
 
         #region Get / Set Value Fast
 
-        public object GetValueFast(WeakRefKey<IPropBag> propBag_wrKey, PropItemSetKeyType propItemSetKey, ExKeyT compKey)
+        public object GetValueFast(ExKeyT compKey, PropItemSetKeyType propItemSetKey)
         {
-            BagNode propBagNode = GetBagAndChild(propBag_wrKey, propItemSetKey, compKey, out PropNode child);
+            if (!TryGetSharedPropCollection(propItemSetKey, out PropNodelCollectionSharedInterface sharedPropCollection))
+            {
+                throw new InvalidOperationException($"Could not retrieve the SharedPropCollection for {propItemSetKey.FullClassName} .");
+            }
+
+            if (!sharedPropCollection.TryGetPropNode(compKey, out PropNode propNode))
+            {
+                throw new KeyNotFoundException($"The {sharedPropCollection} could not retrieve a PropNode for {compKey}.");
+            }
+
+            object result = propNode.PropData_Internal.TypedProp.TypedValueAsObject;
+            return result;
+        }
+
+        public bool SetValueFast(ExKeyT compKey, PropItemSetKeyType propItemSetKey, object value)
+        {
+            if (!TryGetSharedPropCollection(propItemSetKey, out PropNodelCollectionSharedInterface sharedPropCollection))
+            {
+                throw new InvalidOperationException($"Could not retrieve the SharedPropCollection for {propItemSetKey.FullClassName} .");
+            }
+
+            if (!sharedPropCollection.TryGetPropNode(compKey, out PropNode propNode))
+            {
+                throw new KeyNotFoundException($"The {sharedPropCollection} could not retrieve a PropNode for {compKey}.");
+
+            }
+
+            if (!propNode.Parent.TryGetPropBag(out IPropBag propBag))
+            {
+                // The target has been garbage collected.
+                return false;
+            }
+
+            bool result = SetPropValue(propBag, propNode, compKey.Level2Key, value);
+            return result;
+        }
+
+        private bool TryGetSharedPropCollection(PropItemSetKeyType propItemSetKey, out PropNodelCollectionSharedInterface sharedPropCollection)
+        {
+            bool result = _storeByType.TryGetValue(propItemSetKey, out sharedPropCollection);
+            return result;
+        }
+
+        public object GetValueFast(BagNode propBagNode, PropIdType propId, PropItemSetKeyType propItemSetKey)
+        {
+            if (propItemSetKey != propBagNode.PropItemSetKey)
+            {
+                throw new InvalidOperationException("Bad PropModel.");
+            }
+
+            if (!propBagNode.TryGetChild(propId, out PropNode child))
+            {
+                throw new InvalidOperationException("Could not retrieve PropNode for that compKey.");
+            }
 
             object result = child.PropData_Internal.TypedProp.TypedValueAsObject;
             return result;
         }
 
-        public bool SetValueFast(WeakRefKey<IPropBag> propBag_wrKey, PropItemSetKeyType propItemSetKey, ExKeyT compKey, object value)
+        public bool SetValueFast(BagNode propBagNode, PropIdType propId, PropItemSetKeyType propItemSetKey, object value)
         {
-            BagNode propBagNode = GetBagAndChild(propBag_wrKey, propItemSetKey, compKey, out PropNode child);
+            if (propItemSetKey != propBagNode.PropItemSetKey)
+            {
+                throw new InvalidOperationException("Bad PropModel.");
+            }
 
+            if (!propBagNode.TryGetPropBag(out IPropBag component))
+            {
+                throw new InvalidOperationException("IPropBag target has been Garbage Collected.");
+            }
+
+            if (!propBagNode.TryGetChild(propId, out PropNode child))
+            {
+                throw new InvalidOperationException("Could not retrieve PropNode for that compKey.");
+            }
+
+            bool result = SetPropValue(component, child, propId, value);
+            return result;
+        }
+
+        public object GetValueFast(WeakRefKey<IPropBag> propBag_wrKey, PropIdType propId, PropItemSetKeyType propItemSetKey)
+        {
+            BagNode propBagNode = GetBagAndChild(propBag_wrKey, propItemSetKey, propId, out PropNode child);
+
+            object result = child.PropData_Internal.TypedProp.TypedValueAsObject;
+            return result;
+        }
+
+        public bool SetValueFast(WeakRefKey<IPropBag> propBag_wrKey, PropIdType propId, PropItemSetKeyType propItemSetKey, object value)
+        {
             if (!propBag_wrKey.TryGetTarget(out IPropBag component))
             {
                 // The target has been Garbage Collected, its ok to simply return false since the client is no longer waiting for our result.
                 return false;
             }
 
-            if (!propBagNode.PropNodeCollection.TryGetPropertyName(compKey.Level2Key, out PropNameType propertyName))
-            {
-                throw new InvalidOperationException("Could not retrieve the Property's name using the CompKey.");
-            }
+            BagNode propBagNode = GetBagAndChild(propBag_wrKey, propItemSetKey, propId, out PropNode child);
 
-            try
-            {
-                IProp typedProp = child.PropData_Internal.TypedProp;
-
-                DoSetDelegate dsd = typedProp.PropTemplate.DoSetDelegate;
-                bool result = dsd(component, compKey.Level2Key, propertyName, typedProp, value);
-                return result;
-            }
-            catch
-            {
-                throw;
-            }
+            bool result = SetPropValue(component, child, propId, value);
+            return result;
         }
 
-
-
-        private BagNode GetBagAndChild(WeakRefKey<IPropBag> propBag_wrKey, PropItemSetKeyType propItemSetId, ExKeyT compKey, out PropNode child)
+        private BagNode GetBagAndChild(WeakRefKey<IPropBag> propBag_wrKey, PropItemSetKeyType propItemSetKey, PropIdType propId, out PropNode child)
         {
             if (!TryGetPropBagNode(propBag_wrKey, out BagNode propBagNode))
             {
@@ -175,7 +243,7 @@ namespace DRM.TypeSafePropertyBag
                 throw new InvalidOperationException("IPropBag target has been Garbage Collected.");
             }
 
-            if (propItemSetId != propBagNode.PropItemSetKey)
+            if (propItemSetKey != propBagNode.PropItemSetKey)
             {
                 throw new InvalidOperationException("Bad PropModel.");
             }
@@ -195,13 +263,32 @@ namespace DRM.TypeSafePropertyBag
             //    throw new InvalidOperationException("PropItemSet do not match.");
             //}
 
-            if (!propBagNode.TryGetChild(compKey.Level2Key, out child))
+            if (!propBagNode.TryGetChild(propId, out child))
             {
                 throw new InvalidOperationException("Could not retrieve PropNode for that compKey.");
             }
 
             return propBagNode;
         }
+
+        private bool SetPropValue(IPropBag component, PropNode child, PropIdType propId, object value)
+        {
+            try
+            {
+                IProp typedProp = child.PropData_Internal.TypedProp;
+
+                string propertyName = typedProp.PropertyName;
+
+                DoSetDelegate dsd = typedProp.PropTemplate.DoSetDelegate;
+                bool result = dsd(component, propId, propertyName, typedProp, value);
+                return result;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
 
         #endregion
 
@@ -227,63 +314,52 @@ namespace DRM.TypeSafePropertyBag
 
         public bool TryFixPropItemSet(IPropBag propBag, PropItemSetKeyType propItemSetKey)
         {
-            //object propItemSet_Handle;
             if (TryGetPropBagNode(propBag, out BagNode propBagNode))
             {
-                //propItemSet_Handle = FixPropItemSet(propBagNode);
                 bool result = TryFixPropItemSet(propBagNode, propItemSetKey);
                 return result;
             }
             else
             {
                 throw new InvalidOperationException($"Could not retrieve a BagNode for the given propBag.");
-                //return false;
-                //propItemSet_Handle = null;
             }
-
-            //return propItemSet_Handle;
         }
 
         public bool TryFixPropItemSet(BagNode propBagNode, PropItemSetKeyType propItemSetKey)
         {
-            //object result;
-
             PropNodeCollectionInternalInterface pnc_int = propBagNode.PropNodeCollection;
 
             if (pnc_int.IsFixed)
             {
                 System.Diagnostics.Debug.WriteLine("Warning: PropStoreAccessServiceProvider is being asked to fix an already fixed PropItemSet.");
-                //result = propBagNode.PropNodeCollection;
                 return true;
             }
             else
             {
                 PropNodeCollectionFixed newFixedCollection = new PropNodeCollectionFixed(pnc_int, propItemSetKey);
                 propBagNode.PropNodeCollection = newFixedCollection;
-                //result = newFixedCollection;
+
+                AddFixedPropCollection(newFixedCollection);
                 return true;
             }
-
-            //return result;
         }
 
-        public bool TryOpenPropItemSet(IPropBag propBag/*, out object propItemSet_Handle*/)
+        public bool TryOpenPropItemSet(IPropBag propBag)
         {
             bool result;
             if(TryGetPropBagNode(propBag, out BagNode propBagNode))
             {
-                result = TryOpenPropItemSet(propBagNode/*, out propItemSet_Handle*/);
+                result = TryOpenPropItemSet(propBagNode);
             }
             else
             {
-                //propItemSet_Handle = null;
                 result = false;
             }
 
             return result;
         }
 
-        public bool TryOpenPropItemSet(BagNode propBagNode/*, out object propItemSet_Handle*/)
+        public bool TryOpenPropItemSet(BagNode propBagNode)
         {
             bool result;
 
@@ -292,24 +368,77 @@ namespace DRM.TypeSafePropertyBag
             if (!pnc_int.IsFixed)
             {
                 System.Diagnostics.Debug.WriteLine("Warning: PropStoreAccessServiceProvider is being asked to open a PropItemSet that is already open.");
-                //propItemSet_Handle = pnc_int;
                 result = true;
             }
             else
             {
                 // Create a new collection. (New Collections are open by default.)
                 PropNodeCollectionInternalInterface newOpenCollection = new PropNodeCollection(pnc_int);
-                
+
+                // Remove the old set from the StoreByType
+                RemoveFixedPropCollection(pnc_int);
+
                 // Replace the exixting collection with the new one.
                 propBagNode.PropNodeCollection = newOpenCollection;
 
                 // return a reference to the new one cast as an object.
-                //propItemSet_Handle = newOpenCollection;
                 result = true;
             }
 
             return result;
         }
+
+        private PropNodelCollectionSharedInterface AddFixedPropCollection(PropNodeCollectionInternalInterface pnc)
+        {
+            PropItemSetKeyType propItemSetKey = pnc.PropItemSetKey;
+            lock (_syncForByTypeStore)
+            {
+                if (_storeByType.TryGetValue(propItemSetKey, out PropNodelCollectionSharedInterface sharedPropCollection))
+                {
+                    sharedPropCollection.Add(pnc);
+                    return sharedPropCollection;
+                }
+                else
+                {
+                    sharedPropCollection = new PropNodeCollectionShared(pnc);
+                    _storeByType.Add(propItemSetKey, sharedPropCollection);
+                    return sharedPropCollection;
+                }
+            }
+        }
+
+        private bool RemoveFixedPropCollection(PropNodeCollectionInternalInterface pnc)
+        {
+            PropItemSetKeyType propItemSetKey = pnc.PropItemSetKey;
+            lock (_syncForByTypeStore)
+            {
+                if (!TryGetSharedPropCollection(propItemSetKey, out PropNodelCollectionSharedInterface sharedPropCollection))
+                {
+                    throw new InvalidOperationException($"Could not retrieve the SharedPropCollection for {propItemSetKey.FullClassName} while removing {pnc}.");
+                }
+
+                if(sharedPropCollection.TryRemove(pnc))
+                {
+                    if(sharedPropCollection.Count == 0)
+                    {
+                        _storeByType.Remove(pnc.PropItemSetKey);
+                    }
+                    return true;
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"Could not remove {pnc} from {sharedPropCollection}.");
+                    return false;
+                }
+            }
+        }
+
+        private bool DeleteSharedPropCollection(PropNodeCollectionInternalInterface pnc)
+        {
+            bool result = _storeByType.Remove(pnc.PropItemSetKey);
+            return result;
+        }
+
 
         //[System.Diagnostics.Conditional("DEBUG")]
         //private void CheckGenerationRef(PropNodeCollectionInternalInterface key, PropNodeCollectionInternalInterface basePropItemSet, GenerationIdType generationId)
@@ -371,6 +500,12 @@ namespace DRM.TypeSafePropertyBag
             {
                 // Add the node to the global store.
                 _store.Add(propBagProxy, newBagNode);
+
+                // If the PropNodeCollection is fixed, update our Store By Type (for fast lookups.)
+                if(newBagNode.PropNodeCollection.IsFixed)
+                {
+                    AddFixedPropCollection(newBagNode.PropNodeCollection);
+                }
             }
 
             // Create the access service.

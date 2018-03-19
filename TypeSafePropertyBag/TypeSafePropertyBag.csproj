@@ -105,7 +105,9 @@
     <Compile Include="PropStore\IPropItemSet.cs" />
     <Compile Include="PropStore\IPropNodeCollection.cs" />
     <None Include="PropStore\ICachePropNodeCollections_NotUsed.cs" />
+    <Compile Include="PropStore\IPropNodeCollectionShared.cs" />
     <Compile Include="PropStore\IProvidePropTemplates.cs" />
+    <Compile Include="PropStore\PropNodeCollectionShared.cs" />
     <Compile Include="PropStore\PropNodeCollectionFixed.cs" />
     <Compile Include="PropStore\PropNodeCollection.cs" />
     <None Include="PropStore\PropStoreServices.cs" />

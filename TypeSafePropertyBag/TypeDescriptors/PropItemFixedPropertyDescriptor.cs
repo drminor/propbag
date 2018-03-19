@@ -1,25 +1,16 @@
-﻿using DRM.TypeSafePropertyBag.Fundamentals;
-using System;
+﻿using System;
 using System.Collections;
 using System.ComponentModel;
 
 namespace DRM.TypeSafePropertyBag.TypeDescriptors
 {
     using ObjectIdType = UInt64;
-
     using PropIdType = UInt32;
     using PropNameType = String;
-
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
-
-    using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
-
-    //using PropItemSetInterface = IPropItemSet<String>;
-
     using PropModelType = IPropModel<String>;
     using PropItemSetKeyType = PropItemSetKey<String>;
-
-    //using PropModelCacheInterface = ICachePropModels<String>;
+    using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
 
     public class PropItemFixedPropertyDescriptor<T> : PropertyDescriptor where T : IPropBag
     {
@@ -27,18 +18,16 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
 
         PropertyDescriptorValues<T> _tdConfig;
         public readonly ExKeyT _compKey;
+        public readonly PropIdType PropId; // This is the Level2 Key.
 
         readonly PSAccessServiceInterface _propStoreAccessor;
-        //readonly WeakRefKey<PropModelType> _propModel_wrKey;
-
         readonly PropItemSetKeyType _propItemSetKey;
-
 
         #endregion
 
         #region Public Properties
 
-        public PropIdType PropertyId => _compKey.Level2Key;
+        //public PropIdType PropertyId => _compKey.Level2Key;
 
         #endregion
 
@@ -54,27 +43,64 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
 
         #region Constructors
 
-        public PropItemFixedPropertyDescriptor(PSAccessServiceInterface propStoreAccessor, PropModelType propModel, string propertyName, ExKeyT compKey, Type propertyType, Attribute[] attributes)
-            : base(propertyName, attributes)
+        public PropItemFixedPropertyDescriptor
+        (
+            PSAccessServiceInterface propStoreAccessor,
+            PropModelType propModel,
+            PropIdType propId,
+            PropNameType propertyName,
+            Type propertyType,
+            Attribute[] attributes
+        )
+            //: base(propertyName, attributes)
+            : this
+            (
+                GetTdConfig(attributes, propertyName, propertyType),
+                propStoreAccessor,
+                propModel,
+                propId
+            )
         {
+            //_propStoreAccessor = propStoreAccessor;
+
+            //_propItemSetKey = new PropItemSetKeyType(propModel);
+
+            //_compKey = compKey;
+
+            //_tdConfig = new PropertyDescriptorValues<T>
+            //    (
+            //    attributes: attributes,
+            //    isReadOnly: false,
+            //    name: propertyName,
+            //    propertyType: propertyType,
+            //    supportsChangeEvents: true
+            //    );
+        }
+
+        public PropItemFixedPropertyDescriptor
+        (
+            PropertyDescriptorValues<T> tdConfig,
+            PSAccessServiceInterface propStoreAccessor,
+            PropModelType propModel,
+            PropIdType propId
+        )
+            : base(tdConfig.Name, tdConfig.Attributes)
+        {
+            _tdConfig = tdConfig;
             _propStoreAccessor = propStoreAccessor;
-
-            //_propModel_wrKey = new WeakRefKey<PropModelType>(propModel);
             _propItemSetKey = new PropItemSetKeyType(propModel);
+            PropId = propId;
 
-            _compKey = compKey;
-
-            _tdConfig = new PropertyDescriptorValues<T>
-                (
-                attributes: attributes,
-                isReadOnly: false,
-                name: propertyName,
-                propertyType: propertyType,
-                supportsChangeEvents: true
-                );
+            _compKey = new SimpleExKey(10, propId);
         }
 
         #endregion
+
+        private static PropertyDescriptorValues<T> GetTdConfig(Attribute[] attributes, PropNameType propertyName, Type propertyType)
+        {
+            PropertyDescriptorValues<T> result = new PropertyDescriptorValues<T>(attributes, false, propertyName, propertyType, true);
+            return result;
+        }
 
         #region PropertyDescriptor Method Overrides
 
@@ -86,13 +112,20 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
         public override object GetValue(object component)
         {
             //ReportAccessCounter();
+            //object x = _propStoreAccessor.GetValueFast((T)component, PropId, _propItemSetKey);
 
+            object result;
+            if (component is IPropBagInternal ipbi)
+            {
+                ExKeyT compKey = new SimpleExKey(ipbi.ObjectId, PropId);
+                result = _propStoreAccessor.GetValueFast(compKey, _propItemSetKey);
+            }
+            else
+            {
+                result = _propStoreAccessor.GetValueFast((T)component, PropId, _propItemSetKey);
+            }
 
-            //object x = ((T)component)[PropertyType, Name];
-
-            T propBag = (T)component;
-            object x = _propStoreAccessor.GetValueFast(propBag, _propItemSetKey, _compKey);
-            return x;
+            return result;
         }
 
         public override void ResetValue(object component)
@@ -102,10 +135,18 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
 
         public override void SetValue(object component, object value)
         {
-            //((T)component)[PropertyType, Name] = value;
+            //bool result = _propStoreAccessor.SetValueFast((T)component, PropId, _propItemSetKey, value);
 
-            T propBag = (T)component;
-            bool result = _propStoreAccessor.SetValueFast(propBag, _propItemSetKey, _compKey, value);
+            bool result;
+            if (component is IPropBagInternal ipbi)
+            {
+                ExKeyT compKey = new SimpleExKey(ipbi.ObjectId, PropId);
+                result = _propStoreAccessor.SetValueFast(compKey, _propItemSetKey, value);
+            }
+            else
+            {
+                result = _propStoreAccessor.SetValueFast((T)component, PropId, _propItemSetKey, value);
+            }
         }
 
         public override bool ShouldSerializeValue(object component)

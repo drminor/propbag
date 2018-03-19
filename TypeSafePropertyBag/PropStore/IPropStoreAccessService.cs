@@ -7,13 +7,13 @@ using System.Windows.Data;
 
 namespace DRM.TypeSafePropertyBag
 {
+    using ObjectIdType = UInt64;
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
-    using PropModelType = IPropModel<String>;
     using PropItemSetKeyType = PropItemSetKey<String>;
-
 
     public interface IPropStoreAccessService<L2T, L2TRaw> : IRegisterSubscriptions<L2T>, IRegisterBindings<L2T>, IDisposable
     {
+        ObjectIdType ObjectId { get; }
         int PropertyCount { get; }
 
         bool TryGetPropId(L2TRaw propertyName, out L2T propId);
@@ -26,12 +26,14 @@ namespace DRM.TypeSafePropertyBag
         bool TryFixPropItemSet(PropItemSetKey<L2TRaw> propItemSetKey);
         bool TryOpenPropItemSet(/*out object propItemSet_Handle*/);
 
-
         // IDictionary-Like Methods
         IPropData this[IPropBag propBag, L2T propId] { get; }
 
-        object GetValueFast(IPropBag component, PropItemSetKey<L2TRaw> propItemSetKey, ExKeyT compKey);
-        bool SetValueFast(IPropBag component, PropItemSetKey<L2TRaw> propItemSetKey, ExKeyT compKey, object value);
+        object GetValueFast(IPropBag component, L2T propId, PropItemSetKey<L2TRaw> propItemSetKey);
+        bool SetValueFast(IPropBag component, L2T propId, PropItemSetKey<L2TRaw> propItemSetKey, object value);
+
+        object GetValueFast(ExKeyT compKey, PropItemSetKeyType propItemSetKey);
+        bool SetValueFast(ExKeyT compKey, PropItemSetKeyType propItemSetKey, object value);
 
         bool ContainsKey(IPropBag propBag, L2T propId);
 

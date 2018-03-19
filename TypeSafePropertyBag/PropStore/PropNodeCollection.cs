@@ -142,10 +142,23 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
+        //public bool Contains(PropNode propNode)
+        //{
+        //    bool result = _children.ContainsValue(propNode);
+        //    return result;
+        //}
+
         public bool Contains(PropNode propNode)
         {
-            bool result = _children.ContainsValue(propNode);
-            return result;
+            foreach (PropNode x in _children.Values)
+            {
+                if (ReferenceEquals(x, propNode))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public bool TryGetPropNode(PropIdType propId, out PropNode propNode)

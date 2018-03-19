@@ -40,9 +40,14 @@ namespace DRM.TypeSafePropertyBag
         }
 
         public bool IsEmpty => FullClassName == null;
-            
+
 
         #region IEquatable and Object Overrides
+
+        public override string ToString()
+        {
+            return $"PropItemSetKey: {FullClassName}, {GenerationId}";
+        }
 
         public override bool Equals(object obj)
         {
@@ -51,9 +56,12 @@ namespace DRM.TypeSafePropertyBag
 
         public bool Equals(PropItemSetKey<L2TRaw> other)
         {
+            //return other != null &&
+            //       FullClassName == other.FullClassName &&
+            //       GenerationId == other.GenerationId;
+
             return other != null &&
-                   FullClassName == other.FullClassName &&
-                   GenerationId == other.GenerationId;
+               PropModel_wrKey == other.PropModel_wrKey;
         }
 
         int _hashCode;

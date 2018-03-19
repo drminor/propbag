@@ -27,11 +27,6 @@ namespace DRM.TypeSafePropertyBag
 
         #region Constructor
 
-        public PropNodeCollectionFixed(PropNodeCollectionIntInterface sourcePropNodes)
-            : this(sourcePropNodes.GetPropNodes(), sourcePropNodes.PropItemSetKey, sourcePropNodes.MaxPropsPerObject)
-        {
-        }
-
         public PropNodeCollectionFixed(PropNodeCollectionIntInterface sourcePropNodes, PropItemSetKeyType propItemSetKey)
             : this(sourcePropNodes.GetPropNodes(), propItemSetKey, sourcePropNodes.MaxPropsPerObject)
         {
@@ -111,9 +106,9 @@ namespace DRM.TypeSafePropertyBag
 
         public bool Contains(PropNode propNode)
         {
-            foreach(PropNode x in _children)
+            foreach (PropNode x in _children)
             {
-                if (x == propNode)
+                if (ReferenceEquals(x, propNode))
                 {
                     return true;
                 }
@@ -195,7 +190,7 @@ namespace DRM.TypeSafePropertyBag
 
         public bool TryRemove(PropIdType propId, out PropNode propNode)
         {
-            throw new InvalidOperationException("PropItems cannot be remvoed from a fixed PropItemSet.");
+            throw new InvalidOperationException("PropItems cannot be removed from a fixed PropItemSet.");
         }
 
         #endregion

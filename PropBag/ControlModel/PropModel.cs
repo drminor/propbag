@@ -632,7 +632,7 @@ namespace DRM.PropBag
 
         public override string ToString()
         {
-            return $"{FullClassName}, {GenerationId}";
+            return $"PropModel: {FullClassName}, {GenerationId}";
         }
 
         int _hashCode;

@@ -1,6 +1,5 @@
 ﻿using System;
 
-
 namespace DRM.TypeSafePropertyBag
 {
     using ObjectIdType = UInt64;

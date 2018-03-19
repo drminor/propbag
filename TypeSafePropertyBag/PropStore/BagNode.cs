@@ -251,6 +251,7 @@ namespace DRM.TypeSafePropertyBag
             {
                 
             }
+
             PropNode newPropNode = _propNodeCollection.CreateAndAdd(propData_Internal, propertyName, this);
             return newPropNode;
         }

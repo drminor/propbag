@@ -92,6 +92,8 @@ namespace DRM.TypeSafePropertyBag
 
         #region Public Members
 
+        public ObjectIdType ObjectId => _objectId;
+
         public int MaxPropsPerObject => _propStoreAccessServiceProvider.MaxPropsPerObject; 
         public long MaxObjectsPerAppDomain => _propStoreAccessServiceProvider.MaxObjectsPerAppDomain;
 
@@ -559,18 +561,55 @@ namespace DRM.TypeSafePropertyBag
 
         #endregion
 
-        public object GetValueFast(IPropBag component, PropItemSetKeyType propItemSetKey, ExKeyT compKey)
+        public object GetValueFast(IPropBag component, PropIdType propId, PropItemSetKeyType propItemSetKey)
         {
+            if (component is IPropBagInternal ipbi)
+            {
+                //if(ipbi.ItsStoreAccessor is IHaveTheStoreNode ihtsn)
+                //{
+                //    BagNode propBagNode = ihtsn.PropBagNode;
+                //    object result1 = _propStoreAccessServiceProvider.GetValueFast(propBagNode, propId, propItemSetKey);
+                //    return result1;
+                //}
+
+                BagNode propBagNode = ((IHaveTheStoreNode)ipbi.ItsStoreAccessor).PropBagNode;
+                object result1 = _propStoreAccessServiceProvider.GetValueFast(propBagNode, propId, propItemSetKey);
+                return result1;
+            }
+
+            //ExKeyT compKey = GetCompKey(component, propId);
             WeakRefKey<IPropBag> propBag_wrKey = new WeakRefKey<IPropBag>(component);
-            object result = _propStoreAccessServiceProvider.GetValueFast(propBag_wrKey, propItemSetKey, compKey);
-            GC.KeepAlive(component);
+            object result2 = _propStoreAccessServiceProvider.GetValueFast(propBag_wrKey, propId, propItemSetKey);
+            return result2;
+        }
+
+        public bool SetValueFast(IPropBag component, PropIdType propId, PropItemSetKeyType propItemSetKey, object value)
+        {
+            if (component is IPropBagInternal ipbi)
+            {
+                if (ipbi is IHaveTheStoreNode ihtsn)
+                {
+                    BagNode propBagNode = (ipbi as IHaveTheStoreNode)?.PropBagNode;
+                    bool result1 = _propStoreAccessServiceProvider.SetValueFast(propBagNode, propId, propItemSetKey, value);
+                    return result1;
+                }
+            }
+
+            //ExKeyT compKey = GetCompKey(component, propId);
+            WeakRefKey<IPropBag> propBag_wrKey = new WeakRefKey<IPropBag>(component);
+            bool result2 = _propStoreAccessServiceProvider.SetValueFast(propBag_wrKey, propId, propItemSetKey, value);
+            return result2;
+        }
+
+        public object GetValueFast(ExKeyT compKey, PropItemSetKeyType propItemSetKey)
+        {
+            object result = _propStoreAccessServiceProvider.GetValueFast(compKey, propItemSetKey);
             return result;
         }
 
-        public bool SetValueFast(IPropBag component, PropItemSetKeyType propItemSetKey, ExKeyT compKey, object value)
+        public bool SetValueFast(ExKeyT compKey, PropItemSetKeyType propItemSetKey, object value)
         {
-            WeakRefKey<IPropBag> propBag_wrKey = new WeakRefKey<IPropBag>(component);
-            bool result = _propStoreAccessServiceProvider.SetValueFast(propBag_wrKey, propItemSetKey, compKey, value);
+            bool result = _propStoreAccessServiceProvider.SetValueFast(compKey, propItemSetKey, value);
             return result;
         }
 

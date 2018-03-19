@@ -1,5 +1,4 @@
 ﻿using DRM.TypeSafePropertyBag.DataAccessSupport;
-using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -7,24 +6,22 @@ using System.Windows.Data;
 
 namespace DRM.TypeSafePropertyBag
 {
+    using ObjectIdType = UInt64;
+    using PropIdType = UInt32;
     using PropNameType = String;
-    using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
-
-    using PropModelType = IPropModel<String>;
     using PropItemSetKeyType = PropItemSetKey<String>;
+    using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
 
 
-
-    ///// <summary>
-    ///// All implementers of IPropBag that also want to use a shared property store must
-    ///// implement this interface.
-    ///// </summary>
-    //public interface IPropBagInternal : IPropBag
-    //{
-    //    PSAccessServiceInterface ItsStoreAccessor { get; }
-    //    //IPropFactory PropFactory { get; }
-    //    //void RaiseStandardPropertyChanged(PropIdType propId, PropNameType propertyName);
-    //}
+    /// <summary>
+    /// All implementers of IPropBag that also want to use a shared property store must
+    /// implement this interface.
+    /// </summary>
+    public interface IPropBagInternal : IPropBag
+    {
+        PSAccessServiceInterface ItsStoreAccessor { get; }
+        ObjectIdType ObjectId { get; }
+    }
 
     /// <summary>
     /// Base Property Bag Features
@@ -32,14 +29,12 @@ namespace DRM.TypeSafePropertyBag
     public interface IPropBag 
         : ITypeSafePropBag,
         IHaveACustomTypeDescriptor,
-        //ICustomTypeDescriptor,
         INotifyPropertyChanged,
         INotifyPropertyChanging,
         INotifyPCGen,
         INotifyPCObject,
         IEditableObject,
         INotifyItemEndEdit,
-        //IDisposable,
         ICloneable
     {
         // These are defined by ITypeSafePropBag
@@ -57,8 +52,8 @@ namespace DRM.TypeSafePropertyBag
         object this[string typeName, PropNameType propertyName] { get; set; }
         object this[Type type, PropNameType propertyName] { get; set; }
 
-        object GetValueFast(IPropBag component, PropItemSetKeyType propItemSetKey, ExKeyT compKey);
-        bool SetValueFast(IPropBag component, PropItemSetKeyType propItemSetKey, ExKeyT compKey, object value);
+        object GetValueFast(IPropBag component, PropItemSetKeyType propItemSetKey, PropIdType propId);
+        bool SetValueFast(IPropBag component, PropItemSetKeyType propItemSetKey, PropIdType propId, object value);
 
         ValPlusType GetValPlusType(PropNameType propertyName, Type propertyType);
 
@@ -101,8 +96,6 @@ namespace DRM.TypeSafePropertyBag
         IEnumerable<KeyValuePair<PropNameType, ValPlusType>> GetAllPropNamesValuesAndTypes();
 
         bool HasPropModel { get; }
-        //IEnumerable<IPropItemModel> GetPropItemModels();
-        //IList<PropertyDescriptor> PropertyDescriptors { get; }
 
         void RaiseStandardPropertyChanged(PropNameType propertyName);
 
@@ -110,9 +103,12 @@ namespace DRM.TypeSafePropertyBag
 
         bool TryGetViewManager(PropNameType propertyName, Type propertyType, out IManageCViews cViewManager);
 
-
         // Use when the property is a ICViewProp<CVT> where CVT : ICollectionView
-        IManageCViews GetOrAddViewManager(PropNameType propertyName, Type propertyType);
+        IManageCViews GetOrAddViewManager
+        (
+            PropNameType propertyName,
+            Type propertyType
+        );
 
         // Use when the property is a IDoCRUD<TSource>
         IManageCViews GetOrAddViewManager<TDal, TSource, TDestination>
@@ -135,15 +131,13 @@ namespace DRM.TypeSafePropertyBag
             where TSource : class
             where TDestination : INotifyItemEndEdit;
 
-        IProvideACViewManager GetOrAddCViewManagerProvider<TDal, TSource, TDestination>(IViewManagerProviderKey viewManagerProviderKey)
-        //(
-        //    //LocalBindingInfo bindingInfo,   // The name of the property that holds the data (of type IDoCRUD<TSource>.)
-        //    //IMapperRequest mr   // The (non-generic) information necessary to create a AutoMapper Mapper request.
-        //)
+        IProvideACViewManager GetOrAddCViewManagerProvider<TDal, TSource, TDestination>
+        (
+            IViewManagerProviderKey viewManagerProviderKey
+        )
             where TDal : class, IDoCRUD<TSource>
             where TSource : class
             where TDestination : INotifyItemEndEdit;
-
 
         //IPropGen this[int index] { get; }
         //int IndexOfProp(string propertyName, Type propertyType);

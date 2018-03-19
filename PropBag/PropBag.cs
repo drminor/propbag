@@ -23,21 +23,22 @@ using System.Windows.Data;
 
 namespace DRM.PropBag
 {
+    using CompositeKeyType = UInt64;
+    using ObjectIdType = UInt64;
     using PropIdType = UInt32;
+    using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
     using PropNameType = String;
 
-    using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
-    using IRegisterBindingsFowarderType = IRegisterBindingsForwarder<UInt32>;
+    using PropItemSetKeyType = PropItemSetKey<String>;
 
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
     using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
 
-    using PropItemSetInterface = IPropItemSet<String>;
-
     using PropModelType = IPropModel<String>;
-    using PropItemSetKeyType = PropItemSetKey<String>;
 
     using PropModelCacheInterface = ICachePropModels<String>;
+    using IRegisterBindingsFowarderType = IRegisterBindingsForwarder<UInt32>;
+
 
     #region Summary and Remarks
 
@@ -60,7 +61,7 @@ namespace DRM.PropBag
 
     #endregion
 
-    public partial class PropBag : IPropBag, IRegisterBindingsFowarderType, IDisposable
+    public partial class PropBag : IPropBagInternal, IRegisterBindingsFowarderType, IDisposable
     {
         #region Member Declarations
 
@@ -79,6 +80,9 @@ namespace DRM.PropBag
 
         // Inheritors may override this Property
         protected internal virtual ITypeSafePropBagMetaData OurMetaData { get { return _ourMetaData; } private set { _ourMetaData = value; } }
+
+        public PSAccessServiceInterface ItsStoreAccessor => _ourStoreAccessor;
+        public ObjectIdType ObjectId => _ourStoreAccessor.ObjectId;
 
         #endregion
 
@@ -1491,15 +1495,35 @@ namespace DRM.PropBag
 
         #region FAST Property Access Methods
 
-        public object GetValueFast(IPropBag component, PropItemSetKeyType propItemSetKey, ExKeyT compKey)
+        public object GetValueFast(IPropBag component, PropItemSetKeyType propItemSetKey, PropIdType propId)
         {
-            object result = _ourStoreAccessor.GetValueFast(component, propItemSetKey, compKey);
+            object result;
+            if (component is IPropBagInternal ipbi)
+            {
+                ExKeyT compKey = new SimpleExKey(ipbi.ObjectId, propId);
+                result = _ourStoreAccessor.GetValueFast(compKey, propItemSetKey);
+            }
+            else
+            {
+                result = _ourStoreAccessor.GetValueFast(component, propId, propItemSetKey);
+            }
             return result;
         }
 
-        public bool SetValueFast(IPropBag component, PropItemSetKeyType propItemSetKey, ExKeyT compKey, object value)
+        public bool SetValueFast(IPropBag component, PropItemSetKeyType propItemSetKey, PropIdType propId, object value)
         {
-            bool result = _ourStoreAccessor.SetValueFast(component, propItemSetKey, compKey, value);
+            bool result;
+
+            if (component is IPropBagInternal ipbi)
+            {
+                ExKeyT compKey = new SimpleExKey(ipbi.ObjectId, propId);
+                result = _ourStoreAccessor.SetValueFast(compKey, propItemSetKey, value);
+            }
+            else
+            {
+                result = _ourStoreAccessor.SetValueFast(component, propId, propItemSetKey, value);
+            }
+
             return result;
         }
 
@@ -3925,8 +3949,6 @@ namespace DRM.PropBag
 
             IList<PropertyDescriptor> result = new List<PropertyDescriptor>();
 
-            ulong objectId = 10;
-
             foreach (IPropItemModel pi in propItemModels)
             {
                 PropItemFixedPropertyDescriptor<PropBag> propItemTypeDesc;
@@ -3936,11 +3958,9 @@ namespace DRM.PropBag
                     throw new InvalidOperationException("Could not get the property id.");
                 }
 
-                ExKeyT compKey = new SimpleExKey(objectId, propertyId);
-
                 if (pi.PropKind == PropKindEnum.CollectionView || pi.PropKind == PropKindEnum.ObservableCollection || pi.PropKind == PropKindEnum.Prop)
                 {
-                    propItemTypeDesc = new PropItemFixedPropertyDescriptor<PropBag>(_ourStoreAccessor, propModel, pi.PropertyName, compKey, pi.PropertyType, new Attribute[] { });
+                    propItemTypeDesc = new PropItemFixedPropertyDescriptor<PropBag>(_ourStoreAccessor, propModel, propertyId, pi.PropertyName, pi.PropertyType, new Attribute[] { });
                 }
                 else
                 {
