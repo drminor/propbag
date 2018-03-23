@@ -106,11 +106,13 @@
     <Compile Include="PropStore\IPropNodeCollection.cs" />
     <None Include="PropStore\ICachePropNodeCollections_NotUsed.cs" />
     <Compile Include="PropStore\IPropNodeCollectionShared.cs" />
+    <Compile Include="PropStore\IPropStoreFastAccess.cs" />
     <Compile Include="PropStore\IProvidePropTemplates.cs" />
     <Compile Include="PropStore\PropNodeCollectionShared.cs" />
     <Compile Include="PropStore\PropNodeCollectionFixed.cs" />
     <Compile Include="PropStore\PropNodeCollection.cs" />
     <None Include="PropStore\PropStoreServices.cs" />
+    <Compile Include="PropStore\SimplePropStoreFastAccess.cs" />
     <Compile Include="PropStore\SimplePropTemplateCache.cs" />
     <Compile Include="PropStore\PSNodeChangedEventArgs.cs" />
     <None Include="PropStore\SimplePropNodeCollectionCache_NotUsed.cs" />
@@ -121,6 +123,7 @@
     <None Include="Props\PBCollectionDSP - SafetyCopy.cs" />
     <Compile Include="Props\PropItemWatcherGen.cs" />
     <Compile Include="Props\PropItemWatcherTyped.cs" />
+    <Compile Include="Props\PropTemplateGenComparer.cs" />
     <Compile Include="Props\PropTemplateTyped.cs" />
     <Compile Include="Props\PropTypedBase.cs" />
     <Compile Include="TypeConverters\ChangeType.cs" />
@@ -142,7 +145,7 @@
     <Compile Include="TypeDescriptors\PropItemPropertyDescriptor.cs" />
     <Compile Include="TypeDescriptors\PropItemPropertyDescriptor_Typed.cs" />
     <Compile Include="TypeDescriptors\PropertyDescriptorValues.cs" />
-    <Compile Include="Unused\ObsCollection.cs" />
+    <None Include="Unused\ObsCollection.cs" />
     <Compile Include="PropFactoryInterfaces\ICreateProps_NotUsed.cs" />
     <Compile Include="PropBagInterfaces\IRegisterBindingsForwarder.cs" />
     <None Include="Unused\CollectionViewSourceReferenceCode.cs" />

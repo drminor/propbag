@@ -1,15 +1,20 @@
-﻿using DRM.TypeSafePropertyBag.Fundamentals;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System;
 
 namespace DRM.TypeSafePropertyBag
 {
-    public class ParentNCSubscriberCollection : IEnumerable<ParentNCSubscription>
+    public class ParentNCSubscriberCollection : IEnumerable<ParentNCSubscription>, IDisposable
     {
+        #region Private Properties
+
         private readonly object _sync;
         private readonly List<ParentNCSubscription> _subs;
+
+        #endregion
+
+        #region Constructors
 
         public ParentNCSubscriberCollection()
         {
@@ -23,25 +28,9 @@ namespace DRM.TypeSafePropertyBag
             _subs = new List<ParentNCSubscription>(subs);
         }
 
-        // TODO: Complete the PruneSubscriptions method for class: ParentNodeChangedSubscribers.
-        /// <summary>
-        /// Removes subscriptions for which the reference object no longer lives.
-        /// </summary>
-        /// <param name="totalCount">The total number of subscriptions present when the operation began.</param>
-        /// <returns>The number of dead subscriptions found.</returns>
-        public int PruneSubscriptions(out int totalCount)
-        {
-            int result = 0;
-            totalCount = 0;
-            lock(_sync)
-            {
-                foreach(ISubscription x in _subs)
-                {
-                    totalCount++;
-                }
-            }
-            return result;
-        }
+        #endregion
+
+        #region Public Methods
 
         public ParentNCSubscription GetOrAdd(ParentNCSubscriptionRequest request, ICacheDelegates<CallPSParentNodeChangedEventSubDelegate> callPSParentNodeChangedEventSubsCache)
         {
@@ -50,7 +39,7 @@ namespace DRM.TypeSafePropertyBag
             {
                 if (null != (subscription = _subs.FirstOrDefault(x => SubscriptionIsForRequest(x,  request))))
                 {
-                    System.Diagnostics.Debug.WriteLine($"The subscription for {request.OwnerPropId} has aleady been created.");
+                    System.Diagnostics.Debug.WriteLine($"The subscription for {request} has aleady been created.");
                     return subscription;
                 }
                 else
@@ -100,6 +89,7 @@ namespace DRM.TypeSafePropertyBag
                 if (_subs.Exists(x => x.Equals(subscription)))
                 {
                     _subs.Remove(subscription);
+                    subscription.Dispose();
                     return true;
                 }
                 else
@@ -117,6 +107,7 @@ namespace DRM.TypeSafePropertyBag
                 if(null != (subscription = _subs.FirstOrDefault(x => SubscriptionIsForRequest(x, request))))
                 {
                     _subs.Remove(subscription);
+                    subscription.Dispose();
                     return true;
                 }
                 else
@@ -167,10 +158,19 @@ namespace DRM.TypeSafePropertyBag
             int result = _subs.Count;
             lock (_sync)
             {
+                foreach(ParentNCSubscription parentNodeChangedSub in _subs)
+                {
+                    parentNodeChangedSub.Dispose();
+                }
+
                 _subs.Clear();
             }
             return result;
         }
+
+        #endregion
+
+        #region IEnumerable<ParentNCSubscription> Implementation
 
         public IEnumerator<ParentNCSubscription> GetEnumerator()
         {
@@ -182,10 +182,68 @@ namespace DRM.TypeSafePropertyBag
             return GetEnumerator();
         }
 
+        #endregion
+
+        #region Private Methods
+
+        // TODO: Complete the PruneSubscriptions method for class: ParentNodeChangedSubscribers.
+        /// <summary>
+        /// Removes subscriptions for which the reference object no longer lives.
+        /// </summary>
+        /// <param name="totalCount">The total number of subscriptions present when the operation began.</param>
+        /// <returns>The number of dead subscriptions found.</returns>
+        private int PruneSubscriptions(out int totalCount)
+        {
+            int result = 0;
+            totalCount = 0;
+            lock (_sync)
+            {
+                foreach (ISubscription x in _subs)
+                {
+                    totalCount++;
+                }
+            }
+            return result;
+        }
+
+
+        #endregion
+
         #region IDisposable Support
 
-        protected virtual void Dispose(bool disposing) { }
-        public void Dispose() => Dispose(true);
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    //Dispose managed state (managed objects).
+                    ClearSubscriptions();
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        // ~Temp() {
+        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        //   Dispose(false);
+        // }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            // GC.SuppressFinalize(this);
+        }
 
         #endregion
     }

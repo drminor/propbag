@@ -8,16 +8,9 @@ namespace DRM.TypeSafePropertyBag
 {
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
 
-    public class ParentNCSubscription
+    public class ParentNCSubscription : IDisposable
     {
-        public ExKeyT OwnerPropId { get; } // The Node that raises the event.
-
-        public WeakRefKey Target { get; }
-        public string MethodName { get; }
-
-        public Delegate Proxy { get; }
-
-        public CallPSParentNodeChangedEventSubDelegate Dispatcher { get; }
+        #region Constructors
 
         //public ParentNCSubscription(ExKeyT ownerPropId, WeakRefKey target, string methodName, Delegate proxy, CallPSParentNodeChangedEventSubDelegate dispatcher)
         //{
@@ -43,6 +36,24 @@ namespace DRM.TypeSafePropertyBag
             Dispatcher = callPSParentNodeChangedEventSubsCache.GetOrAdd(targetType);
         }
 
+        #endregion
+
+        #region Public Properties
+
+        public ExKeyT OwnerPropId { get; } // The Node that raises the event.
+
+        public WeakRefKey Target { get; }
+        public string MethodName { get; }
+
+        public Delegate Proxy { get; private set; }
+
+        public CallPSParentNodeChangedEventSubDelegate Dispatcher { get; }
+
+
+        #endregion
+
+        #region Private Methods
+
         private Type GetDelegateType(MethodInfo method)
         {
             Type result = Expression.GetDelegateType
@@ -62,12 +73,51 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
-
         private void CallParentNodeChangedEventSubscriber<TCaller>(object target, object sender, PSNodeParentChangedEventArgs e, Delegate d)
         {
             Action<TCaller, object, PSNodeParentChangedEventArgs> realDel = (Action<TCaller, object, PSNodeParentChangedEventArgs>)d;
 
             realDel((TCaller)target, sender, e);
         }
+
+        #endregion
+
+        #region IDisposable Support
+
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // Dispose managed state (managed objects).
+                    Proxy = null;
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        // ~Temp() {
+        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        //   Dispose(false);
+        // }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            // GC.SuppressFinalize(this);
+        }
+
+        #endregion
     }
 }
