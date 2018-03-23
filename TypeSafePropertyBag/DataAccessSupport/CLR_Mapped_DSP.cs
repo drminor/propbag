@@ -122,7 +122,6 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
 
                     if (wrappedData is INotifyCollectionChanged inccNew)
                     {
-                        // XXTemp
                         inccNew.CollectionChanged += Incc_CollectionChanged;
                     }
 
@@ -166,7 +165,7 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
 
         private void Incc_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            if (e.Action == NotifyCollectionChangedAction.Remove)
+            if (e.Action == NotifyCollectionChangedAction.Remove || e.Action == NotifyCollectionChangedAction.Replace)
             {
                 foreach (T item in e.OldItems.OfType<T>())
                 {
@@ -175,6 +174,15 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
                         _dataAccessLayer.Delete(item);
                     }
                 }
+            }
+
+            if(e.Action == NotifyCollectionChangedAction.Add || e.Action == NotifyCollectionChangedAction.Replace)
+            {
+                // TODO: Handle new items.
+            }
+            else if(e.Action == NotifyCollectionChangedAction.Reset)
+            {
+                //DisposeOldData(Data);
             }
         }
 

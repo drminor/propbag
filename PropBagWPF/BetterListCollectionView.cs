@@ -18,26 +18,26 @@ namespace DRM.PropBagWPF
     {
         public static ICollectionView ProduceView(ObservableCollection<T> list)
         {
-            ICollectionView result = new BetterListCollectionView<T>(list);
-
+            BetterListCollectionView<T> result = new BetterListCollectionView<T>(list);
             return result;
         }
     }
-
 
     public class BetterListCollectionView<T> : ListCollectionView, IWeakEventListener
     {
         public BetterListCollectionView(ObservableCollection<T> list) : base(list)
         {
-            //if (list is INotifyCollectionChanged changed)
-            //{
-            //    this fixes the problem
-            //    changed.CollectionChanged -= this.OnCollectionChanged;
-            //    CollectionChangedEventManager.AddListener(changed, this);
-            //}
+            if (list is INotifyCollectionChanged collectionWithIncc)
+            {
+                // Remove the subscription just created by our base class: ListCollectionView::CollectionView
+                // and replace with Weak Subscription.
+                // When we receive a WeakEvent, call our base class' OnCollectionChanged.
+                collectionWithIncc.CollectionChanged -= this.OnCollectionChanged;
+                CollectionChangedEventManager.AddListener(collectionWithIncc, this);
+            }
 
-            list.CollectionChanged -= this.OnCollectionChanged;
-            CollectionChangedEventManager.AddListener(list, this);
+            //list.CollectionChanged -= this.OnCollectionChanged;
+            //CollectionChangedEventManager.AddListener(list, this);
         }
 
         public bool ReceiveWeakEvent(Type managerType, object sender, EventArgs e)
@@ -52,13 +52,68 @@ namespace DRM.PropBagWPF
                 return false;
             }
         }
-    }
 
-    //public class BetterObservableCollection_NotUsed<T> : ObservableCollection<T>, ICollectionViewFactory
-    //{
-    //    public ICollectionView CreateView()
-    //    {
-    //        return new BetterListCollectionView(this);
-    //    }
-    //}
+        //NotifyCollectionChangedEventHandler _backingStore;
+        //protected override event NotifyCollectionChangedEventHandler CollectionChanged
+        //{
+        //    add
+        //    {
+        //        _backingStore += value;
+        //        int cnt = InspectInvocationList(_backingStore);
+        //        //INotifyCollectionChanged ccSource = InternalList as INotifyCollectionChanged;
+
+        //        //if(InternalList != null && ccSource == null)
+        //        //{
+        //        //    throw new InvalidOperationException("The internal list does not implement INotifyCollectionChanged.");
+        //        //}
+
+        //        //CollectionChangedEventManager.AddListener(ccSource, this);
+        //    }
+        //    remove
+        //    {
+        //        _backingStore -= value;
+        //        int cnt = InspectInvocationList(_backingStore);
+
+        //        //INotifyCollectionChanged ccSource = InternalList as INotifyCollectionChanged;
+
+        //        //if (InternalList != null && ccSource == null)
+        //        //{
+        //        //    throw new InvalidOperationException("The internal list does not implement INotifyCollectionChanged.");
+        //        //}
+
+        //        //CollectionChangedEventManager.RemoveListener(ccSource, this);
+        //    }
+        //}
+
+        protected override event NotifyCollectionChangedEventHandler CollectionChanged
+        {
+            add
+            {
+                base.CollectionChanged += value; // _collectionChanged += value;
+            }
+            remove
+            {
+                base.CollectionChanged -= value; // _collectionChanged -= value;
+            }
+        }
+
+        private int InspectInvocationList(NotifyCollectionChangedEventHandler cc)
+        {
+            MulticastDelegate m = (MulticastDelegate)cc;
+
+            var list = m.GetInvocationList();
+
+            foreach (Delegate d in list)
+            {
+                System.Diagnostics.Debug.WriteLine(d.Target);
+                System.Diagnostics.Debug.WriteLine(d.Method);
+            }
+            return list.Length;
+        }
+
+        protected override void OnCollectionChanged(NotifyCollectionChangedEventArgs args)
+        {
+            base.OnCollectionChanged(args);
+        }
+    }
 }

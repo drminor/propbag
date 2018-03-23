@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 
 namespace DRM.TypeSafePropertyBag.DataAccessSupport
@@ -9,11 +10,13 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
         where T: INotifyItemEndEdit
     {
         private BetterLCVCreatorDelegate<T> _betterListCollViewCreator;
+        private ICollectionView _listWrapper;
 
         #region Constructors
 
         public EndEditWrapper()
         {
+            throw new NotSupportedException("Constructing an EndEditWrapper with no parameters is not supported.");
         }
 
         // TODO: Do we need this? We already take an IEnumerable<T> and IList<T> implements IEnumerable<T>
@@ -43,8 +46,27 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
 
         public ICollectionView CreateView()
         {
-            ICollectionView result = _betterListCollViewCreator(this);
-            return result;
+            // Unsubscribe our handler from the CollectionView, if any.
+            if(_listWrapper != null)
+            {
+                _listWrapper.CollectionChanged -= _listWrapper_CollectionChanged;
+            }
+
+            // Create the new CollectionView using the provided delegate.
+            _listWrapper = _betterListCollViewCreator(this);
+
+            // Subscribe to the new CollectionView, if not null.
+            if(_listWrapper != null)
+            {
+                _listWrapper.CollectionChanged += _listWrapper_CollectionChanged;
+            }
+
+            return _listWrapper;
+        }
+
+        private void _listWrapper_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            //OnCollectionChanged(e);
         }
 
         #endregion
@@ -79,6 +101,19 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
 
         public event EventHandler<EventArgs> ItemEndEdit;
 
+        //NotifyCollectionChangedEventHandler _collectionChanged;
+        public override event NotifyCollectionChangedEventHandler CollectionChanged
+        {
+            add
+            {
+                base.CollectionChanged += value; // _collectionChanged += value;
+            }
+            remove
+            {
+                base.CollectionChanged -= value; // _collectionChanged -= value;
+            }
+        }
+
         void ItemEndEditHandler(object sender, EventArgs e)
         {
             // simply forward any EndEdit events
@@ -98,6 +133,11 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
                 if (disposing)
                 {
                     // Dispose managed state (managed objects).
+                    if(_listWrapper != null)
+                    {
+                        _listWrapper.CollectionChanged -= _listWrapper_CollectionChanged;
+                    }
+
                     Clear();
                 }
 

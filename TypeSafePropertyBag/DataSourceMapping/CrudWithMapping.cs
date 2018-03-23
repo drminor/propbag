@@ -34,6 +34,12 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
             // TODO: Consider using the following statment, instead of the expanded version in place now.
             //DataAccessLayer = e.NewValue as TDal;
 
+            if(!typeof(TDal).IsAssignableFrom(e.PropertyType))
+            {
+                System.Diagnostics.Debug.WriteLine("PropItemWatcher is sending us the wrong event.");
+                return;
+            }
+                
             if (e.NewValueIsUndefined/* || e.NewValue == null*/)
             {
                 DataAccessLayer = null;
