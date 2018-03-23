@@ -35,7 +35,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.TypeDescriptorTests
             string className = "MainWindowVM";
             string fcn = GetFullClassName(DefaultNamespace, className, ConfigPackageNameSuffix);
 
-            if (!PropModelCache.TryGetPropModel(fcn, out PropModelType mainWindowPropModel))
+            if (!PropModelCache.TryGetPropModel(fcn, out mainWindowPropModel))
             {
                 throw new KeyNotFoundException($"Could not find a PropModel with Full Class Name = {fcn}.");
             }

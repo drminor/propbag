@@ -214,7 +214,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
             string className = "PersonVM";
             string fcn = GetFullClassName(DefaultNamespace, className);
 
-            if (!PropModelCache.TryGetPropModel(fcn, out PropModelType personVM_PropModel))
+            if (!PropModelCache.TryGetPropModel(fcn, out personVM_PropModel))
             {
                 throw new KeyNotFoundException($"Could not find a PropModel with Full Class Name = {fcn}.");
             }
@@ -270,7 +270,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
             string className = "MainWindowVM";
             string fcn = GetFullClassName(DefaultNamespace, className, ConfigPackageNameSuffix);
 
-            if (!PropModelCache.TryGetPropModel(fcn, out PropModelType mainWindowPropModel))
+            if (!PropModelCache.TryGetPropModel(fcn, out mainWindowPropModel))
             {
                 throw new KeyNotFoundException($"Could not find a PropModel with Full Class Name = {fcn}.");
             }
@@ -343,7 +343,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
             string className = "MainWindowVM";
             string fcn = GetFullClassName(DefaultNamespace, className, ConfigPackageNameSuffix);
 
-            if (!PropModelCache.TryGetPropModel(fcn, out PropModelType mainWindowPropModel))
+            if (!PropModelCache.TryGetPropModel(fcn, out mainWindowPropModel))
             {
                 throw new KeyNotFoundException($"Could not find a PropModel with Full Class Name = {fcn}.");
             }
@@ -420,7 +420,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
             string className = "MainWindowVM";
             string fcn = GetFullClassName(DefaultNamespace, className, ConfigPackageNameSuffix);
 
-            if (!PropModelCache.TryGetPropModel(fcn, out PropModelType mainWindowPropModel))
+            if (!PropModelCache.TryGetPropModel(fcn, out mainWindowPropModel))
             {
                 throw new KeyNotFoundException($"Could not find a PropModel with Full Class Name = {fcn}.");
             }
