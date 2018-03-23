@@ -46,28 +46,28 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
 
         public ICollectionView CreateView()
         {
-            // Unsubscribe our handler from the CollectionView, if any.
-            if(_listWrapper != null)
-            {
-                _listWrapper.CollectionChanged -= _listWrapper_CollectionChanged;
-            }
+            //// Unsubscribe our handler from the CollectionView, if any.
+            //if(_listWrapper != null)
+            //{
+            //    _listWrapper.CollectionChanged -= _listWrapper_CollectionChanged;
+            //}
 
             // Create the new CollectionView using the provided delegate.
             _listWrapper = _betterListCollViewCreator(this);
 
-            // Subscribe to the new CollectionView, if not null.
-            if(_listWrapper != null)
-            {
-                _listWrapper.CollectionChanged += _listWrapper_CollectionChanged;
-            }
+            //// Subscribe to the new CollectionView, if not null.
+            //if(_listWrapper != null)
+            //{
+            //    _listWrapper.CollectionChanged += _listWrapper_CollectionChanged;
+            //}
 
             return _listWrapper;
         }
 
-        private void _listWrapper_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            //OnCollectionChanged(e);
-        }
+        //private void _listWrapper_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        //{
+        //    OnCollectionChanged(e);
+        //}
 
         #endregion
 
