@@ -6,7 +6,7 @@ using PropBagLib.Tests.AutoMapperSupport;
 
 namespace PropBagLib.Tests
 {
-    [TestFixtureAttribute]
+    [TestFixture]
     public class TestCreateAtRunTime
     {
         public CreateAtRunTimeModel mod1;
