@@ -6,12 +6,6 @@ using System.Reflection;
 
 namespace DRM.TypeSafePropertyBag
 {
-    using CompositeKeyType = UInt64;
-    using ObjectIdType = UInt64;
-
-    using PropIdType = UInt32;
-    using PropNameType = String;
-
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
     using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
 
@@ -301,6 +295,11 @@ namespace DRM.TypeSafePropertyBag
         #endregion
 
         #region IEquatable Support and Object Overrides
+
+        public override string ToString()
+        {
+            return $"SubscriptionKeyGen for {OwnerPropId} of kind = {SubscriptionKind} with target object: {Target.GetType().Name} and method: {Method.Name}.";
+        }
 
         public override bool Equals(object obj)
         {
