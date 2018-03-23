@@ -133,10 +133,10 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
                 if (disposing)
                 {
                     // Dispose managed state (managed objects).
-                    if(_listWrapper != null)
-                    {
-                        _listWrapper.CollectionChanged -= _listWrapper_CollectionChanged;
-                    }
+                    //if(_listWrapper != null)
+                    //{
+                    //    _listWrapper.CollectionChanged -= _listWrapper_CollectionChanged;
+                    //}
 
                     Clear();
                 }
