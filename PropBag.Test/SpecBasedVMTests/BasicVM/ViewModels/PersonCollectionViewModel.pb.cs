@@ -27,17 +27,17 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM.ViewModels
         {
             System.Diagnostics.Debug.WriteLine("Constructing PersonCollectionViewModel -- with PropModel.");
 
-            IList<string> pNamesFromOurProvider = TypeInspectorUtility.GetPropertyNames
-                (_typeDescriptionProvider.GetTypeDescriptor(this));
+            //IList<string> pNamesFromOurProvider = TypeInspectorUtility.GetPropertyNames
+            //    (_typeDescriptionProvider.GetTypeDescriptor(this));
 
-            IList<string> pNamesFromOurPropModel = TypeInspectorUtility.GetPropertyNames
-                (pm.CustomTypeDescriptor);
+            //IList<string> pNamesFromOurPropModel = TypeInspectorUtility.GetPropertyNames
+            //    (pm.CustomTypeDescriptor);
 
-            IList<string> pNamesFromAppDomain_WT = TypeInspectorUtility.GetPropertyNames
-                (typeof(PersonCollectionViewModel), this);
+            //IList<string> pNamesFromAppDomain_WT = TypeInspectorUtility.GetPropertyNames
+            //    (typeof(PersonCollectionViewModel), this);
 
-            IList<string> pNamesFromAppDomain = TypeInspectorUtility.GetPropertyNames
-                (this);
+            //IList<string> pNamesFromAppDomain = TypeInspectorUtility.GetPropertyNames
+            //    (this);
         }
 
         protected PersonCollectionViewModel(PersonCollectionViewModel copySource)
