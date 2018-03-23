@@ -32,10 +32,34 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
         {
             get
             {
-                if(_weakRef.TryGetTarget(out T result))
-                    return result;
-                else
+                //T result = null;
+                //_weakRef?.TryGetTarget(out result);
+                //return result;
+
+                //if(_weakRef == null)
+                //{
+                //    return null;
+                //}
+                //else
+                //{
+                //    if(_weakRef.TryGetTarget(out T result))
+                //    {
+                //        return result;
+                //    }
+                //    else
+                //    {
+                //        return null;
+                //    }
+                //}
+
+                if (_weakRef == null || !_weakRef.TryGetTarget(out T result))
+                {
                     return null;
+                }
+                else
+                {
+                    return result;
+                }
             }
         }
 
@@ -70,13 +94,25 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
 
         public bool Equals(WeakRefKey<T> other)
         {
-            object c1 = Target;
-            object c2 = other.Target;
+            //if (_weakRef == null && other._weakRef == null) return true;
+
+            //if (_weakRef == null || other._weakRef == null) return false;
+
+            //T c1 = Target;
+            //T c2 = other.Target;
+
+            //if (c1 != null && c2 != null)
+            //    return (c1 == c2); // Reference Equality, could have used ReferenceEquals(c1, c2)
+            //else
+            //    return (_weakRef == other._weakRef);
+
+            T c1 = Target;
+            T c2 = other.Target;
 
             if (c1 != null && c2 != null)
-                return (c1 == c2); // Reference Equality, could have used ReferenceEquals(c1, c2)
+                return ReferenceEquals(c1, c2);
             else
-                return (_weakRef == other._weakRef);
+                return ReferenceEquals(_weakRef, other._weakRef);
         }
 
         //public override bool Equals(object o)

@@ -19,7 +19,7 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
         public WeakRefKey(object target)
         {
             _weakRef = new WeakReference(target);
-            _hashCode = (target != null) ? target.GetHashCode() : 314159;
+            _hashCode = target?.GetHashCode() ?? 314159; // (target != null) ? target.GetHashCode() : 314159;
         }
 
         //------------------------------------------------------
@@ -30,7 +30,7 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
 
         public object Target
         {
-            get { return _weakRef.Target; }
+            get { return _weakRef?.Target; }
         }
 
         //------------------------------------------------------
