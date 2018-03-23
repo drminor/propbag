@@ -138,14 +138,19 @@ namespace DRM.PropBagWPF
 
         public override void CleanUpTyped()
         {
-            if (TypedValue is IDisposable disable)
-            {
-                disable.Dispose();
-            }
+            //if (TypedValue is IDisposable disable)
+            //{
+            //    disable.Dispose();
+            //}
 
             if (_viewProvider != null)
             {
                 _viewProvider.ViewSourceRefreshed -= OurViewProviderGotRefreshed;
+            }
+
+            if(_viewProvider is IDisposable disableVP)
+            {
+                disableVP.Dispose();
             }
         }
 
