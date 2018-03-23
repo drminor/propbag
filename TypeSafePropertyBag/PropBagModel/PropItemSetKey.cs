@@ -60,8 +60,22 @@ namespace DRM.TypeSafePropertyBag
             //       FullClassName == other.FullClassName &&
             //       GenerationId == other.GenerationId;
 
-            return other != null &&
-               PropModel_wrKey == other.PropModel_wrKey;
+
+            //if (other == null) return false;
+
+            //if(PropModel_wrKey == null && other.PropModel_wrKey == null)
+            //{
+            //    return true;
+            //}
+
+            //if(PropModel_wrKey == null || other.PropModel_wrKey == null)
+            //{
+            //    return false;
+            //}
+
+            //return PropModel_wrKey == other.PropModel_wrKey;
+
+            return (!ReferenceEquals(other, null)) && PropModel_wrKey == other.PropModel_wrKey;
         }
 
         int _hashCode;
@@ -72,15 +86,22 @@ namespace DRM.TypeSafePropertyBag
 
         public int ComputetHashCode()
         {
-            var hashCode = -1269708783;
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(FullClassName);
-            hashCode = hashCode * -1521134295 + GenerationId.GetHashCode();
+            //var hashCode = -1269708783;
+            //hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(FullClassName);
+            //hashCode = hashCode * -1521134295 + GenerationId.GetHashCode();
+            //return hashCode;
+
+            // Two PropModels are the same if and only if they refer to the same instance.
+            // It is up to the client to cache PropModels and to always present the same instance.
+            object target = PropModel_wrKey.Target;
+            int hashCode = target.GetHashCode();
             return hashCode;
         }
 
         public static bool operator ==(PropItemSetKey<L2TRaw> key1, PropItemSetKey<L2TRaw> key2)
         {
-            return EqualityComparer<PropItemSetKey<L2TRaw>>.Default.Equals(key1, key2);
+            //return EqualityComparer<PropItemSetKey<L2TRaw>>.Default.Equals(key1, key2);
+            return key1.Equals(key2);
         }
 
         public static bool operator !=(PropItemSetKey<L2TRaw> key1, PropItemSetKey<L2TRaw> key2)
