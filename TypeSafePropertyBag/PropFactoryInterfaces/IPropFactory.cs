@@ -88,6 +88,7 @@ namespace DRM.TypeSafePropertyBag
             PropStorageStrategyEnum storageStrategy,
             bool isTypeSolid,
             Func<T, T, bool> comparer,
+            bool comparerIsRefEquality,
             Func<string, T> getDefaultValFunc);
 
         IProp<T> CreateWithNoValue<T>
@@ -97,6 +98,7 @@ namespace DRM.TypeSafePropertyBag
             PropStorageStrategyEnum storageStrategy,
             bool typeIsSolid,
             Func<T, T, bool> comparer,
+            bool comparerIsRefEquality,
             Func<string, T> getDefaultValFunc
             );
 

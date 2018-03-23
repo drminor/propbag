@@ -52,7 +52,9 @@ namespace DRM.PropBag
             Func<CT, CT, bool> comparer
         ) 
         {
-            IPropTemplate<CT> propTemplate = GetPropTemplate<CT>(PropKindEnum.ObservableCollection, storageStrategy, comparer, null);
+            // TODO: Get a real value for comparerIsReqEquality
+            bool comparerIsRefEquality = false;
+            IPropTemplate<CT> propTemplate = GetPropTemplate<CT>(PropKindEnum.ObservableCollection, storageStrategy, comparer, comparerIsRefEquality, getDefaultVal: null);
 
             ICProp<CT, T> prop = new CProp<CT, T>(propertyName, initialValue, typeIsSolid, propTemplate);
             return prop;
@@ -67,7 +69,9 @@ namespace DRM.PropBag
             Func<CT, CT, bool> comparer
         )
         {
-            IPropTemplate<CT> propTemplate = GetPropTemplate<CT>(PropKindEnum.ObservableCollection, storageStrategy, comparer, null);
+            // TODO: Get a real value for comparerIsReqEquality
+            bool comparerIsRefEquality = false;
+            IPropTemplate<CT> propTemplate = GetPropTemplate<CT>(PropKindEnum.ObservableCollection, storageStrategy, comparer, comparerIsRefEquality, getDefaultVal: null);
 
             ICProp<CT, T> prop = new CProp<CT, T>(propertyName, typeIsSolid, propTemplate);
             return prop;
@@ -89,10 +93,11 @@ namespace DRM.PropBag
             PropStorageStrategyEnum storageStrategy,
             bool typeIsSolid,
             Func<T, T, bool> comparer,
+            bool comparerIsRefEquality,
             Func<string, T> getDefaultValFunc
         )
         {
-            IPropTemplate<T> propTemplate = GetPropTemplate<T>(PropKindEnum.Prop, storageStrategy, comparer, getDefaultValFunc);
+            IPropTemplate<T> propTemplate = GetPropTemplate<T>(PropKindEnum.Prop, storageStrategy, comparer, comparerIsRefEquality, getDefaultValFunc);
             propTemplate.PropCreator = CookedScalarPropCreator<T>;
 
             IProp<T> prop = new Prop<T>(propertyName, initialValue, typeIsSolid, propTemplate);
@@ -112,10 +117,11 @@ namespace DRM.PropBag
             PropStorageStrategyEnum storageStrategy,
             bool typeIsSolid,
             Func<T, T, bool> comparer,
+            bool comparerIsRefEquality,
             Func<string, T> getDefaultValFunc
         )
         {
-            IPropTemplate<T> propTemplate = GetPropTemplate<T>(PropKindEnum.Prop, storageStrategy, comparer, getDefaultValFunc);
+            IPropTemplate<T> propTemplate = GetPropTemplate<T>(PropKindEnum.Prop, storageStrategy, comparer, comparerIsRefEquality, getDefaultValFunc);
 
             if(storageStrategy == PropStorageStrategyEnum.Internal)
             {

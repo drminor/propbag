@@ -48,8 +48,14 @@ namespace DRM.TypeSafePropertyBag
 
         Attribute[] Attributes { get; }
 
+        Type PropFactoryType { get; }
+        bool ComparerIsDefault { get; }
+        bool ComparerIsRefEquality { get; }
         Delegate ComparerProxy { get; }
+
+        bool DefaultValFuncIsDefault { get; }
         object GetDefaultValFuncProxy { get; }
+
         DoSetDelegate DoSetDelegate { get; set; }
 
         // TODO: The PropCreator property is just being used to carry the value temporarily.

@@ -172,12 +172,12 @@ namespace DRM.TypeSafePropertyBag
                 }
 
                 return propFactory.Create(initialValue, propertyName, extraInfo, storageStrategy, isTypeSolid,
-                    comparerToUse, getDefaultValFuncToUse);
+                    comparerToUse, useRefEquality, getDefaultValFuncToUse);
             }
             else
             {
                 return propFactory.CreateWithNoValue<T>(propertyName, extraInfo, storageStrategy, isTypeSolid,
-                    comparerToUse, getDefaultValFuncToUse);
+                    comparerToUse, useRefEquality, getDefaultValFuncToUse);
             }
         }
 

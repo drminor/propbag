@@ -9,7 +9,7 @@ namespace DRM.TypeSafePropertyBag
 
     public abstract class PropTypedBase<T> : IProp<T>
     {
-        protected IPropTemplate<T> _template { get; }
+        protected IPropTemplate<T> _template { get; private set; }
 
         public PropTypedBase(PropNameType propertyName, T initalValue, bool typeIsSolid, IPropTemplate<T> template)
         {
@@ -103,6 +103,7 @@ namespace DRM.TypeSafePropertyBag
             {
                 disable.Dispose();
             }
+            _template = null;
         }
 
         public bool CompareTo(T newValue)

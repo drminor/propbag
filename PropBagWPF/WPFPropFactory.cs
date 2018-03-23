@@ -3,6 +3,7 @@ using DRM.TypeSafePropertyBag;
 using DRM.TypeSafePropertyBag.DataAccessSupport;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -58,7 +59,11 @@ namespace DRM.PropBagWPF
 
         public override IProp CreateCVSProp(PropNameType propertyName, IProvideAView viewProvider, IPropTemplate propTemplate) 
         {
-            if(propTemplate == null) propTemplate = GetPropTemplate<CollectionViewSource>(PropKindEnum.CollectionViewSource, PropStorageStrategyEnum.Internal, null, null);
+            IEqualityComparer<CollectionViewSource> comparer = RefEqualityComparer<CollectionViewSource>.Default;
+
+            bool comparerIsRefEquality = true;
+
+            if (propTemplate == null) propTemplate = GetPropTemplate<CollectionViewSource>(PropKindEnum.CollectionViewSource, PropStorageStrategyEnum.Internal, comparer.Equals, comparerIsRefEquality, null);
             propTemplate.PropCreator = CookedCVSPropCreator;
 
             ICViewSourceProp<CollectionViewSource> result = new CViewSourceProp(propertyName, viewProvider, (IPropTemplate<CollectionViewSource>) propTemplate);
@@ -73,7 +78,10 @@ namespace DRM.PropBagWPF
 
         public override IProp CreateCVProp(string propertyName, IProvideAView viewProvider, IPropTemplate propTemplate)
         {
-            if (propTemplate == null) propTemplate = GetPropTemplate<ListCollectionView>(PropKindEnum.CollectionView, PropStorageStrategyEnum.Internal, null, null);
+            IEqualityComparer<ListCollectionView> comparer = RefEqualityComparer<ListCollectionView>.Default;
+            bool comparerIsRefEquality = true;
+
+            if (propTemplate == null) propTemplate = GetPropTemplate<ListCollectionView>(PropKindEnum.CollectionView, PropStorageStrategyEnum.Internal, comparer.Equals, comparerIsRefEquality, null);
             propTemplate.PropCreator = CookedCVPropCreator;
 
             CViewProp result = new CViewProp(propertyName, viewProvider, (IPropTemplate<ListCollectionView>)propTemplate);

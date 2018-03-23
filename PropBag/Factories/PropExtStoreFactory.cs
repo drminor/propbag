@@ -97,6 +97,7 @@ namespace DRM.PropBag
             PropStorageStrategyEnum storageStrategy,
             bool typeIsSolid,
             Func<T, T, bool> comparer,
+            bool comparerIsRefEquality,
             Func<string, T> getDefaultValFunc)
         {
             throw new InvalidOperationException("External Store Factory doesn't know how to create properties with initial values.");
@@ -109,10 +110,11 @@ namespace DRM.PropBag
             PropStorageStrategyEnum storageStrategy,
             bool typeIsSolid,
             Func<T, T, bool> comparer,
+            bool comparerIsRefEquality,
             Func<string, T> getDefaultValFunc
             )
         {
-            IPropTemplate<T> propTemplate = GetPropTemplate<T>(PropKindEnum.Prop, storageStrategy, comparer, getDefaultValFunc);
+            IPropTemplate<T> propTemplate = GetPropTemplate<T>(PropKindEnum.Prop, storageStrategy, comparer, comparerIsRefEquality, getDefaultValFunc);
 
             IProp<T> prop;
 

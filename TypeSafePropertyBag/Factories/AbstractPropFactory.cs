@@ -161,6 +161,7 @@ namespace DRM.TypeSafePropertyBag
             PropStorageStrategyEnum storageStrategy,
             bool isTypeSolid,
             Func<T, T, bool> comparer,
+            bool comparerIsRefEquality,
             Func<string, T> getDefaultValFunc
             );
 
@@ -171,6 +172,7 @@ namespace DRM.TypeSafePropertyBag
             PropStorageStrategyEnum storageStrategy,
             bool typeIsSolid,
             Func<T, T, bool> comparer,
+            bool comparerIsRefEquality,
             Func<string, T> getDefaultValFunc
             );
 
@@ -181,16 +183,45 @@ namespace DRM.TypeSafePropertyBag
             PropKindEnum propKindEnum,
             PropStorageStrategyEnum storageStrategy,
             Func<T, T, bool> comparer,
+            bool comparerIsRefEquality,
             Func<string, T> getDefaultVal
             )
         {
             // Supply a comparer, if one was not supplied by the caller.
-            if (comparer == null) comparer = EqualityComparer<T>.Default.Equals;
+            bool comparerIsDefault;
+            if (comparer == null)
+            {
+                comparer = EqualityComparer<T>.Default.Equals;
+                comparerIsDefault = true;
+            }
+            else
+            {
+                comparerIsDefault = false;
+            }
 
+            bool defaultValFuncIsDefault;
             // Use the Get Default Value function supplied or provided by this Prop Factory.
-            if (getDefaultVal == null) getDefaultVal = ValueConverter.GetDefaultValue<T>;
+            if (getDefaultVal == null)
+            {
+                getDefaultVal = ValueConverter.GetDefaultValue<T>;
+                defaultValFuncIsDefault = true;
+            }
+            else
+            {
+                defaultValFuncIsDefault = false;
+            }
 
-            IPropTemplate<T> propTemplateTyped = new PropTemplateTyped<T>(propKindEnum, storageStrategy, comparer, getDefaultVal);
+            IPropTemplate<T> propTemplateTyped = new PropTemplateTyped<T>
+                (
+                propKindEnum,
+                storageStrategy,
+                this.GetType(),
+                comparerIsDefault,
+                comparerIsRefEquality,
+                comparer,
+                getDefaultVal,
+                defaultValFuncIsDefault
+                );
 
             IPropTemplate<T> existingEntry = (IPropTemplate<T>)DelegateCacheProvider.PropTemplateCache.GetOrAdd(propTemplateTyped);
             return existingEntry;
