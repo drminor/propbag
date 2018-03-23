@@ -26,7 +26,7 @@
                 <pb:PropBinderField Path="../Business" MapperRequestResourceKey="PersonVM_Mapper_Emit_Proxy"/>
             </pb:PropItem>
 
-            <pb:PropItem PropertyName="WMessage" PropertyType="{x:Type sys:String}" StorageStrategy="External">
+            <pb:PropItem PropertyName="WMessage" PropertyType="{x:Type sys:String}" StorageStrategy="Virtual">
                 <pb:InitialValueField SetToNull="True"/>
             </pb:PropItem>
 

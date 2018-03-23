@@ -6,7 +6,6 @@
                     xmlns:pb="clr-namespace:DRM.PropBagControlsWPF;assembly=PropBag.WPFControls"
                     xmlns:pbWPF="clr-namespace:DRM.PropBagWPF;assembly=PropBagWPF"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
-    
 
     <pb:PropBagTemplate x:Key="MainWindowVM_Extra"
         ClassName="MainWindowVM_Extra"
@@ -35,7 +34,7 @@
                 <pb:InitialValueField CreateNew="True" PropBagFullClassName="MVVM_Sample1.ViewModel.PersonEditorVM_Extra"/>
             </pb:PropItem>
 
-            <pb:PropItem PropertyName="WMessage" PropertyType="{x:Type sys:String}" StorageStrategy="External">
+            <pb:PropItem PropertyName="WMessage" PropertyType="{x:Type sys:String}" StorageStrategy="Virtual">
                 <pb:InitialValueField SetToNull="True"/>
                 <pb:PropBinderField Path="./PersonEditorVM/WMessage"/>
             </pb:PropItem>
