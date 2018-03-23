@@ -335,15 +335,19 @@ namespace PropBagLib.Tests.PerformanceDb
             oTester.DoCleanup();
             oTester = null;
 
-            Thread.Sleep(new TimeSpan(0, 0, 1));
+            //Thread.Sleep(new TimeSpan(0, 0, 1));
 
-            for (int tp = 0; tp < 5; tp++)
-            {
-                // Yield for 1 seconds.
-                Thread.Sleep(new TimeSpan(0, 0, 1));
-                GC.WaitForPendingFinalizers();
-                GC.WaitForFullGCComplete();
-            }
+            //for (int tp = 0; tp < 5; tp++)
+            //{
+            //    // Yield for 1 seconds.
+            //    Thread.Sleep(new TimeSpan(0, 0, 1));
+            //    GC.WaitForPendingFinalizers();
+            //    GC.WaitForFullGCComplete();
+            //}
+
+            GC.WaitForPendingFinalizers();
+            GC.WaitForFullGCComplete();
+
         }
 
         #region DB Helper Methods
