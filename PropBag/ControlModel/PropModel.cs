@@ -360,7 +360,8 @@ namespace DRM.PropBag
         public object Clone()
         {
             object result;
-            if(PropModelCache != null)
+
+            if(PropModelCache == null)
             {
                 result = CloneIt(GEN_NONE);
             }
@@ -375,6 +376,7 @@ namespace DRM.PropBag
                     throw new InvalidOperationException("The PropModel cache could not clone this instance.");
                 }
             }
+
             return result;
         }
 
