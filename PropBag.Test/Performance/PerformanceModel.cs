@@ -42,14 +42,21 @@ namespace PropBagLib.Tests
                 );
 
             // TODO: AAA
-            PerformanceModel pm = new PerformanceModel(propModel, ourHelper.StoreAccessCreator);
+            PerformanceModel pmViewModel = new PerformanceModel(propModel, ourHelper.StoreAccessCreator);
 
-            pm.AddPropNoStore<int>("PropIntNoStore");
-            pm.AddPropNoStore<string>("PropStringNoStore");
-            pm.AddProp<int>("PropInt");
-            pm.AddProp<string>("PropString");
+            pmViewModel.AddPropNoStore<int>("PropIntNoStore");
+            pmViewModel.AddPropNoStore<string>("PropStringNoStore");
+            pmViewModel.AddProp<int>("PropInt");
+            pmViewModel.AddProp<string>("PropString");
 
-            return pm;
+            pmViewModel.FixProps();
+
+            return pmViewModel;
+        }
+
+        public void FixProps()
+        {
+            base.TryFixPropSet();
         }
 
         new public IProp<T> GetTypedProp<T>(string propertyName, bool mustBeRegistered, bool neverCreate)

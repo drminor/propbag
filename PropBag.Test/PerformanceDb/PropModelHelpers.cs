@@ -24,7 +24,7 @@ namespace PropBagLib.Tests.PerformanceDb
                 targetType: typeof(DestinationModel1),
                 propFactory: propFactory,
                 propFactoryType: null,
-                propModelCache: propModelCache,
+                propModelCache: null, //propModelCache,
                 typeSafetyMode: PropBagTypeSafetyMode.Tight,
                 deferMethodRefResolution: true,
                 requireExplicitInitialValue: true
@@ -69,6 +69,10 @@ namespace PropBagLib.Tests.PerformanceDb
                 storageStrategy: PropStorageStrategyEnum.Internal, propKind: PropKindEnum.Prop,
                 initialValueField: pivf);
             result.Add(propItem.PropertyName, propItem);
+
+            result.Open();
+
+            propModelCache.Add(result);
 
             return result;
         }
