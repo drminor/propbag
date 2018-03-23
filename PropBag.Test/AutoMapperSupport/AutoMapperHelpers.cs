@@ -28,19 +28,36 @@ namespace PropBagLib.Tests.AutoMapperSupport
 
         public static string _resourceFolderPath = @"C:\DEV\VS2013Projects\PubPropBag\PropBagLib.Tests.PropBagTemplates\ProbBagTemplates";
 
-        public static string[] _pbTemplateFilenames = new string[]
-            {
-                "MainWindowVM.xaml",
-                "PersonCollectionVM.xaml",
-                "PersonEditorVM.xaml",
-                "PersonVM.xaml"
-            };
+        //public static string[] _pbTemplateFilenames = new string[]
+        //    {
+        //        "MainWindowVM.xaml",
+        //        "PersonCollectionVM.xaml",
+        //        "PersonEditorVM.xaml",
+        //        "PersonVM.xaml"
+        //    };
 
-        public static string[] _mapperRequestFilenames = new string[]
-            {
-                "MapperConf_Both.xaml",
-            };
+        //public static string[] _mapperRequestFilenames = new string[]
+        //    {
+        //        "MapperConfigs.xaml",
+        //    };
 
+        private string[] _pbTemplateFilenames = new string[]
+        {
+            "MainWindowVM_Emit.xaml",
+            "PersonCollectionVM_Emit.xaml",
+            "PersonEditorVM_Emit.xaml",
+
+            "MainWindowVM_Extra.xaml",
+            "PersonCollectionVM_Extra.xaml",
+            "PersonEditorVM_Extra.xaml",
+
+            "PersonVM.xaml"
+        };
+
+        private string[] _mapperRequestFilenames = new string[]
+        {
+            "MapperConfigs.xaml"
+        };
 
         private SimplePropStoreProxy _theStore { get; set; }
 
