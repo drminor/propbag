@@ -473,7 +473,7 @@ namespace DRM.TypeSafePropertyBag
                 {
                     // Dispose managed state (managed objects).
                     DisposeChildren();
-                    ```
+
                     if(_parentNCSubscriberCollection != null)
                     {
                         _parentNCSubscriberCollection.Dispose();
