@@ -51,9 +51,11 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             {
                 LastEventSender = propBag_wrKey;
             }
-            else
+            else 
             {
-                LastEventSender = new WeakRefKey<IPropBag>(null);
+                //LastEventSender = new WeakRefKey<IPropBag>(null);
+                // Replaced above line with line below on 3/21/2018 (DRM)
+                LastEventSender = new WeakRefKey<IPropBag>(sender as IPropBag);
             }
 
             OnPropertyChangedWithTVals(e);

@@ -115,7 +115,8 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
             PSAccessServiceInterface propStoreAccessService,
             LocalBindingInfo bindingInfo,
             IReceivePropStoreNodeUpdates_PropNode<T> storeNodeUpdateReceiver_PropNode
-            ) : this(propStoreAccessService, bindingInfo)
+            )
+            : this(propStoreAccessService, bindingInfo)
         {
             _storeNodeUpdateReceiver_PropNode = storeNodeUpdateReceiver_PropNode;
             _notificationKind = PropStoreNotificationKindEnum.PropNode;

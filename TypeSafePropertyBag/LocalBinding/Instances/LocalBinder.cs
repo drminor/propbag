@@ -22,7 +22,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
         readonly LocalBindingInfo _bindingInfo;
 
-        PropStorageStrategyEnum _targetHasStore;
+        PropStorageStrategyEnum _targetStorageStrategy;
 
         readonly LocalWatcher<T> _localWatcher;
 
@@ -97,17 +97,28 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
                 PropIdType propId = _bindingTarget.Level2Key;
 
                 _propertyName = GetPropertyName(propStoreAccessService, propBag, propId, out PropStorageStrategyEnum storageStrategy);
-                
+
+                if(storageStrategy == PropStorageStrategyEnum.External)
+                {
+                    throw new InvalidOperationException($"{storageStrategy} is not a supported Prop Storage Strategy when used as a target of a local binding.");
+                }
+
                 // We will update the target property depending on how that PropItem stores its value.
-                _targetHasStore = storageStrategy;
+                _targetStorageStrategy = storageStrategy;
+
+                // Create a instance of our nested, internal class that reponds to Updates to the property store Nodes.
+                IReceivePropStoreNodeUpdates_PropNode<T> propStoreNodeUpdateReceiver = new PropStoreNodeUpdateReceiver(this);
+
+                // Create a new watcher, the bindingInfo specifies the PropItem for which to listen to changes,
+                // the propStoreNodeUpdateReceiver will be notfied when changes occur.
+                _localWatcher = new LocalWatcher<T>(propStoreAccessService, bindingInfo, propStoreNodeUpdateReceiver);
+
             }
-
-            // Create a instance of our nested, internal class that reponds to Updates to the property store Nodes.
-            IReceivePropStoreNodeUpdates_PropNode<T> propStoreNodeUpdateReceiver = new PropStoreNodeUpdateReceiver(this);
-
-            // Create a new watcher, the bindingInfo specifies the PropItem for which to listen to changes,
-            // the propStoreNodeUpdateReceiver will be notfied when changes occur.
-            _localWatcher = new LocalWatcher<T>(propStoreAccessService, bindingInfo, propStoreNodeUpdateReceiver);
+            else
+            {
+                // TODO: consider creating a TryCreateLocalBinding to avoid this situation.
+                System.Diagnostics.Debug.WriteLine("The target was found to have been Garbage Collected when creating a Local Binding.");
+            }
         }
 
         #endregion
@@ -192,17 +203,28 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
         private bool UpdateTargetWithStartingValue(WeakRefKey<IPropBag> bindingTarget, PropNode sourcePropNode)
         {
             IProp typedProp = sourcePropNode.PropData_Internal.TypedProp;
+            PropStorageStrategyEnum ss = typedProp.PropTemplate.StorageStrategy;
 
-            if (typedProp.PropTemplate.StorageStrategy == PropStorageStrategyEnum.Internal)
+            switch (ss)
             {
-                T newValue = (T)typedProp.TypedValueAsObject;
-                bool result = UpdateTarget(bindingTarget, newValue);
-                return result;
-            }
-            else
-            {
-                // This property has no backing store, there is no concept of a starting value. (Propably used to send messages.)
-                return false;
+                case PropStorageStrategyEnum.Internal:
+                    {
+                        T newValue = (T)typedProp.TypedValueAsObject;
+                        bool result = UpdateTarget(bindingTarget, newValue);
+                        return result;
+                    }
+
+                // Not Yet. Supported.
+                //case PropStorageStrategyEnum.External:
+                //    return false;
+
+                // This property has no backing store, there is no concept of a starting value.
+                // (Propably used to send messages.)
+                case PropStorageStrategyEnum.Virtual:
+                    return false;
+
+                default:
+                    throw new InvalidOperationException($"{ss} is not a recognized or supported Prop Storage Strategy when used as a source for a local binding.");
             }
         }
 
@@ -210,27 +232,42 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
         {
             if (bindingTarget.TryGetTarget(out IPropBag propBag))
             {
-                string status;
-                if(_targetHasStore == PropStorageStrategyEnum.Internal)
+                bool wasSet;
+
+                switch (_targetStorageStrategy)
                 {
-                    bool wasSet = (propBag).SetIt(newValue, this.PropertyName);
-                    status = wasSet ? "has been updated" : "already had the new value";
-                }
-                else
-                {
-                    T dummy = default(T);
-                    bool wasSet = (propBag).SetIt(newValue, ref dummy, this.PropertyName);
-                    status = wasSet ? "has been updated" : "already had the new value";
+                    case PropStorageStrategyEnum.Internal:
+                        wasSet = (propBag).SetIt(newValue, this.PropertyName);
+                        break;
+
+                    case PropStorageStrategyEnum.External:
+                        goto case PropStorageStrategyEnum.Virtual;
+
+                    case PropStorageStrategyEnum.Virtual:
+                        T dummy = default(T);
+                        wasSet = (propBag).SetIt(newValue, ref dummy, this.PropertyName);
+                        break;
+
+                    default:
+                        throw new InvalidOperationException($"{_targetStorageStrategy} is not a recognized or supported Prop Storage Strategy when used as a target of a local binding.");
                 }
 
-                System.Diagnostics.Debug.WriteLine($"The binding target {status}.");
+                ReportUpdateStatus(wasSet);
                 return true;
             }
             else
             {
-                System.Diagnostics.Debug.WriteLine("Target IPropBag was found to be 'not with us' on call to Update Target.");
+                System.Diagnostics.Debug.WriteLine("Target IPropBag has been Garbage Collected on call to Update Target.");
                 return false;
             }
+        }
+
+        [System.Diagnostics.Conditional("DEBUG")]
+        private void ReportUpdateStatus(bool wasSet)
+        {
+            string status = wasSet ? "has been updated" : "already had the new value";
+            System.Diagnostics.Debug.WriteLine($"The binding target {status}.");
+
         }
 
         #endregion
@@ -341,20 +378,23 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
             #endregion
 
-            public void OnPropStoreNodeUpdated(PropNode sourcePropNode, T oldValue)
+            public void OnPropStoreNodeUpdated(PropNode sourcePropNode, T newValue)
             {
-                DoUpdate(sourcePropNode);
+                _localBinder.UpdateTarget(_localBinder._targetObject, newValue);
+                //DoUpdate(sourcePropNode);
             }
 
             public void OnPropStoreNodeUpdated(PropNode sourcePropNode)
             {
-                DoUpdate(sourcePropNode);
+                _localBinder.UpdateTargetWithStartingValue(_localBinder._targetObject, sourcePropNode);
+
+                //DoUpdate(sourcePropNode);
             }
 
-            private void DoUpdate(PropNode sourcePropNode)
-            {
-                _localBinder.UpdateTargetWithStartingValue(_localBinder._targetObject, sourcePropNode);
-            }
+            //private void DoUpdate(PropNode sourcePropNode)
+            //{
+            //    _localBinder.UpdateTargetWithStartingValue(_localBinder._targetObject, sourcePropNode);
+            //}
         }
 
         #endregion

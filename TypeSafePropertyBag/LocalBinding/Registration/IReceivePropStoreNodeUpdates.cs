@@ -17,7 +17,7 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
 
     internal interface IReceivePropStoreNodeUpdates_PropNode<T>
     {
-        void OnPropStoreNodeUpdated(PropNode propNode, T oldValue);
+        void OnPropStoreNodeUpdated(PropNode propNode, T newValue);
         void OnPropStoreNodeUpdated(PropNode propNode);
     }
 
