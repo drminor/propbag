@@ -34,7 +34,7 @@ namespace MVVM_Sample1.ViewModel
 
             //List<string> pNames = TypeInspectorUtility.GetPropertyNames(this);
 
-            System.Diagnostics.Debug.WriteLine("PersonVM is being created with a PropModel.");
+            //System.Diagnostics.Debug.WriteLine("PersonVM is being created with a PropModel.");
         }
 
         // This constructor is required for AutoMapperSupport when using "Emit_Proxy."
@@ -47,7 +47,7 @@ namespace MVVM_Sample1.ViewModel
             //_propModel.TypeDescriptionProvider = tdp;
 
             //TypeDescriptor.AddProvider(tdp, this);
-            System.Diagnostics.Debug.WriteLine("PersonVM is being created from an existing instance of a PersonVM.");
+            //System.Diagnostics.Debug.WriteLine("PersonVM is being created from an existing instance of a PersonVM.");
         }
 
         // This constructor is required for AutoMapperSupport when using "Extra_Members."
