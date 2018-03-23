@@ -71,10 +71,16 @@ namespace DRM.PropBagWPF
 
         #region Fields
 
-        readonly Action<T> _execute = null;
-        readonly Predicate<T> _canExecute = null;
+        Action<T> _execute = null;
+        Predicate<T> _canExecute = null;
 
         #endregion // Fields
+
+        public void Clear()
+        {
+            _execute = null;
+            _canExecute = null;
+        }
     }
 
     /// <summary>
@@ -142,8 +148,13 @@ namespace DRM.PropBagWPF
         #region Fields
 
         readonly Action<object> _execute;
-        readonly Func<bool> _canExecute;
+        Func<bool> _canExecute;
 
         #endregion // Fields
+
+        public void Clear()
+        {
+            _canExecute = null;
+        }
     }
 }

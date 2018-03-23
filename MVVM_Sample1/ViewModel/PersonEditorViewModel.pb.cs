@@ -1,9 +1,12 @@
 ﻿using DRM.PropBag;
 using DRM.PropBag.AutoMapperSupport;
+using DRM.PropBagWPF;
 using DRM.TypeSafePropertyBag;
 using DRM.TypeSafePropertyBag.TypeDescriptors;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Windows.Input;
 
 namespace MVVM_Sample1.ViewModel
 {
@@ -12,6 +15,8 @@ namespace MVVM_Sample1.ViewModel
 
     public partial class PersonEditorViewModel : PropBag
     {
+        //private bool _wereDisposed;
+
         private static PropBagTypeDescriptionProvider<PersonEditorViewModel> _typeDescriptionProvider = new PropBagTypeDescriptionProvider<PersonEditorViewModel>();
 
         static PersonEditorViewModel()
@@ -34,6 +39,9 @@ namespace MVVM_Sample1.ViewModel
 
             //List<string> pNames = TypeInspectorUtility.GetPropertyNames(this);
 
+            _commands = new List<RelayCommand>();
+            //_wereDisposed = false;
+
             System.Diagnostics.Debug.WriteLine("Constructing PersonEditorViewModel -- with PropModel.");
         }
 
@@ -49,6 +57,25 @@ namespace MVVM_Sample1.ViewModel
         new public object Clone()
         {
             return new PersonEditorViewModel(this);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            // TODO: Instead of having to cleanup our RelayCommands,
+            // have the RelayCommand class use weak references.
+
+            // See: https://blogs.msdn.microsoft.com/nathannesbit/2009/05/29/wpf-icommandsource-implementations-leak-memory/
+            
+            //_wereDisposed = true;
+            foreach (RelayCommand rc in _commands)
+            {
+                //rc.CanExecuteChanged -= AddPersonRelayCmd_CanExecuteChanged;
+                rc.Clear();
+            }
+
+            _commands.Clear();
+
+            base.Dispose(disposing);
         }
 
         #endregion

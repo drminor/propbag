@@ -2,6 +2,7 @@
 using DRM.PropBagWPF;
 using DRM.TypeSafePropertyBag;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows.Data;
 
@@ -11,6 +12,7 @@ namespace MVVM_Sample1.ViewModel
     {
         //int ITEMS_PER_PAGE = 10;
         string PROP_NAME = "PersonListView";
+        List<RelayCommand> _commands;
 
         #region Command Handlers
 
@@ -72,8 +74,12 @@ namespace MVVM_Sample1.ViewModel
             PersonVM selectedPerson = (PersonVM)lcv.CurrentItem;
             if (selectedPerson == null) return;
 
+            lcv.MoveCurrentToNext();
+
             lcv.Remove(selectedPerson);
             ShowMessage("Selected Person has been removed!");
+
+            //ShowMessage("This is a test.");
         }
 
         //private void PageUpCom(object o)
@@ -111,7 +117,7 @@ namespace MVVM_Sample1.ViewModel
         {
             if (TryGetViewManager(PROP_NAME, out IManageCViews cViewManager))
             {
-                cViewManager.GetDefaultCollectionView().Refresh();
+                cViewManager?.GetDefaultCollectionView()?.Refresh();
             }
         }
 
@@ -138,14 +144,18 @@ namespace MVVM_Sample1.ViewModel
         {
             get
             {
-                var x = new RelayCommand(AddPerson, CanAddNewItem);
-                x.CanExecuteChanged += X_CanExecuteChanged;
-                return x;
+                RelayCommand addPersonRelayCmd = new RelayCommand(AddPerson, CanAddNewItem);
+                addPersonRelayCmd.CanExecuteChanged += AddPersonRelayCmd_CanExecuteChanged;
+
+                _commands.Add(addPersonRelayCmd);
+                return addPersonRelayCmd;
             }
         }
 
         private bool CanAddNewItem()
         {
+            //if (_wereDisposed) return false;
+
             try
             {
                 if (TryGetViewManager(PROP_NAME, out IManageCViews cViewManager))
@@ -170,27 +180,56 @@ namespace MVVM_Sample1.ViewModel
                     return false;
                 }
             }
-            catch
+            catch (Exception ee)
             {
-                // Ignore all exception.
+                // Ignore all exceptions.
+                string a = ee.Message;
                 return false;
             }
         }
 
-        private void X_CanExecuteChanged(object sender, EventArgs e)
+        private void AddPersonRelayCmd_CanExecuteChanged(object sender, EventArgs e)
         {
             System.Diagnostics.Debug.WriteLine("The state of 'CanExecute' has changed for the Add command.");
         }
 
-        public RelayCommand Save => new RelayCommand(SavePerson);
+        public RelayCommand Save
+        {
+            get
+            {
+                RelayCommand savePersonRelayCommand = new RelayCommand(SavePerson);
 
-        public RelayCommand Delete => new RelayCommand(DeletePerson);
+                _commands.Add(savePersonRelayCommand);
+                return savePersonRelayCommand;
+            }
+        }
+
+        public RelayCommand Delete // => new RelayCommand(DeletePerson);
+        {
+            get
+            {
+                RelayCommand deletePersonRelayCommand = new RelayCommand(DeletePerson);
+
+                _commands.Add(deletePersonRelayCommand);
+                return deletePersonRelayCommand;
+            }
+        }
+
 
         //public RelayCommand PageUp => new RelayCommand(PageUpCom);
 
         //public RelayCommand PageDown => new RelayCommand(PageDownCom);
 
-        public RelayCommand Refresh => new RelayCommand(RefreshIt);
+        public RelayCommand Refresh// => new RelayCommand(RefreshIt);
+        {
+            get
+            {
+                RelayCommand refreshRelayCommand = new RelayCommand(RefreshIt);
+
+                _commands.Add(refreshRelayCommand);
+                return refreshRelayCommand;
+            }
+        }
 
         #endregion
     }
