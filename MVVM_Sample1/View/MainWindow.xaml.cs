@@ -43,6 +43,7 @@ namespace MVVM_Sample1.View
         // We have been closed.
         private void Window_Closed(object sender, EventArgs e)
         {
+            OurData.RequestClose -= OurData_RequestClose;
             OurData?.Dispose();
         }
     }
