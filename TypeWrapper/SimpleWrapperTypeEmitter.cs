@@ -37,16 +37,19 @@ namespace DRM.PropBag.TypeWrapper
                 typesToImplement
                 );
 
+            CustomAttributeBuilder attributeBuilder = new AttributeEmitter().CreateAttributeBuilder(new WasEmittedAttribute(DateTime.Now.ToString()));
+            typeBuilder.SetCustomAttribute(attributeBuilder);
+
             IEnumerable<ConstructorInfo> ctors = parentType.GetDeclaredConstructors();
             BuildConstructors(typeBuilder, ctors);
 
-            // Build the Clone method.  //override public object Clone() { return new <<ClassName>>(this);  }
-            //MethodAttributes attributesForCloneMethod = MethodAttributes.Public | MethodAttributes.ReuseSlot | MethodAttributes.Virtual | MethodAttributes.HideBySig;
+            //// Build the Clone method.  //override public object Clone() { return new <<ClassName>>(this);  }
+            ////MethodAttributes attributesForCloneMethod = MethodAttributes.Public | MethodAttributes.ReuseSlot | MethodAttributes.Virtual | MethodAttributes.HideBySig;
 
-            MethodAttributes attributesForCloneMethod = MethodAttributes.Public | MethodAttributes.HideBySig;
+            //MethodAttributes attributesForCloneMethod = MethodAttributes.Public | MethodAttributes.HideBySig;
 
-            MethodBuilder mb = typeBuilder.DefineMethod("Clone", attributesForCloneMethod, typeof(object), new Type[0]);
-            BuildCloneMethod(mb);
+            //MethodBuilder mb = typeBuilder.DefineMethod("Clone", attributesForCloneMethod, typeof(object), new Type[0]);
+            //BuildCloneMethod(mb);
 
             var propertiesToImplement = new List<PropertyDescription>();
 
@@ -179,21 +182,21 @@ namespace DRM.PropBag.TypeWrapper
 
   //  } // end of method PersonVM::Clone
 
-      //override public object Clone() { return new <<ClassName>>(this);  }
-    private void BuildCloneMethod(MethodBuilder mb)
-        {
-            ILGenerator mbIl = mb.GetILGenerator();
-            //mbIl.Emit(OpCodes.Nop);
-            mbIl.Emit(OpCodes.Ldarg_0); // Load reference to this.
-            mbIl.Emit(OpCodes.Newobj);
+    //  //override public object Clone() { return new <<ClassName>>(this);  }
+    //private void BuildCloneMethod(MethodBuilder mb)
+    //    {
+    //        ILGenerator mbIl = mb.GetILGenerator();
+    //        //mbIl.Emit(OpCodes.Nop);
+    //        mbIl.Emit(OpCodes.Ldarg_0); // Load reference to this.
+    //        mbIl.Emit(OpCodes.Newobj);
 
-            mbIl.Emit(OpCodes.Stloc_0);
+    //        mbIl.Emit(OpCodes.Stloc_0);
 
-            mbIl.Emit(OpCodes.Br_S);
-            mbIl.Emit(OpCodes.Ldloc_0);
+    //        mbIl.Emit(OpCodes.Br_S);
+    //        mbIl.Emit(OpCodes.Ldloc_0);
 
-            mbIl.Emit(OpCodes.Ret);
-        }
+    //        mbIl.Emit(OpCodes.Ret);
+    //    }
 
         #region DevelopementWork Get Key Pair
 

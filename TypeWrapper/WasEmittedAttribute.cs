@@ -2,7 +2,7 @@
 
 namespace DRM.PropBag.TypeWrapper
 {
-    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Method)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Method)]
     public class WasEmittedAttribute : Attribute
     {
         private DateTime dateUpdated;
