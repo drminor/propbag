@@ -8,6 +8,7 @@ using PropBagLib.Tests.BusinessModel;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace PropBagLib.Tests.PerformanceDb
 {
@@ -18,7 +19,9 @@ namespace PropBagLib.Tests.PerformanceDb
     public class ObservableCollTestObject
     {
         private DestinationModel5 _testMainVM { get; set; }
-        private ObservableCollection<DestinationModel1> _readyForTheView { get; set; }
+        
+        //private ObservableCollection<DestinationModel1> _readyForTheView { get; set; }
+        private ObservableCollection<object> _readyForTheView { get; set; }
 
         public void CanMapObservableCollection(
             string configPackageName,
@@ -36,7 +39,7 @@ namespace PropBagLib.Tests.PerformanceDb
 
             // Setup Mapping between Model1 and Person
             PropModelType propModel1 = pmHelpers.GetPropModelForModel1Dest(propFactory_V1, propModelCache);
-            Type typeToWrap = typeof(DestinationModel1);
+            //Type typeToWrap = typeof(DestinationModel1);
 
             // Make sure we can activate (or clone as appropriate) the destination type.
             DestinationModel1 test = new DestinationModel1(PropBagTypeSafetyMode.AllPropsMustBeRegistered, ourHelper.StoreAccessCreator, null, ourHelper.PropFactory_V1);
@@ -51,25 +54,52 @@ namespace PropBagLib.Tests.PerformanceDb
 
             DestinationModel1 test2 = new DestinationModel1(propModel1, ourHelper.StoreAccessCreator, null, ourHelper.PropFactory_V1, null);
             
-            DestinationModel1 test2Copy = new DestinationModel1(test2);
+            if (configPackageName == "Emit_Proxy")
+            {
+                DestinationModel1 test2Copy = new DestinationModel1(test2);
+            }
+            else
+            {
+                DestinationModel1 test2Copy = (DestinationModel1)test2.Clone();
+            }
 
+            Type typeToWrap = typeof(PropBag);
 
-            IPropBagMapperKey<Person, DestinationModel1> mapperRequest = amp.SubmitMapperRequest<Person, DestinationModel1>
-                (
-                    propModel: propModel1,
-                    typeToWrap: typeToWrap,
-                    configPackageName: configPackageName
-                );
+            IPropBagMapperGen genMapper = null;
+            IPropBagMapper<Person, DestinationModel1> mapper = null;
 
-            Assert.That(mapperRequest, Is.Not.Null, "mapperRequest should be non-null.");
+            if (configPackageName == "Emit_Proxy")
+            {
+                IMapperRequest localMr = new MapperRequest(typeof(Person), propModel1, configPackageName);
+                Type et = amp.WrapperTypeCreator.GetWrapperType(propModel1, typeToWrap);
+                propModel1.NewEmittedType = et;
 
-            IPropBagMapper<Person, DestinationModel1> mapper = amp.GetMapper<Person, DestinationModel1>(mapperRequest);
-            Assert.That(mapper, Is.Not.Null, "mapper should be non-null");
+                IPropBagMapperKeyGen mapperRequest = amp.SubmitMapperRequest(localMr.PropModel, localMr.SourceType, localMr.ConfigPackageName);
+
+                Assert.That(mapperRequest, Is.Not.Null, "mapperRequest should be non-null.");
+
+                // Get the AutoMapper mapping function associated with the mapper request just submitted.
+                genMapper = amp.GetMapper(mapperRequest);
+                Assert.That(genMapper, Is.Not.Null, "mapper should be non-null");
+            }
+            else
+            {
+                IPropBagMapperKey<Person, DestinationModel1> mapperRequest = amp.SubmitMapperRequest<Person, DestinationModel1>
+                    (
+                        propModel: propModel1,
+                        typeToWrap: typeToWrap,
+                        configPackageName: configPackageName
+                    );
+
+                Assert.That(mapperRequest, Is.Not.Null, "mapperRequest should be non-null.");
+
+                mapper = amp.GetMapper<Person, DestinationModel1>(mapperRequest);
+                Assert.That(mapper, Is.Not.Null, "mapper should be non-null");
+            }
 
             PropModelType propModel5 = pmHelpers.GetPropModelForModel5Dest(propFactory_V1);
 
             string fullClassName = null; // Don't override the value from the PropModel.
-            // TODO: AAA
             _testMainVM = new DestinationModel5(propModel5, ourHelper.StoreAccessCreator, amp, propFactory_V1, fullClassName);
 
             Business b = new Business();
@@ -80,9 +110,21 @@ namespace PropBagLib.Tests.PerformanceDb
             // TODO: try using IEnumerable<Person> instead.
             List<Person> unMappedPeople = b.Get(1000);
 
-            IEnumerable<DestinationModel1> mappedPeople = mapper.MapToDestination(unMappedPeople);
+            //IEnumerable<DestinationModel1> mappedPeople;
+            IEnumerable<object> mappedPeople;
 
-            _readyForTheView = new System.Collections.ObjectModel.ObservableCollection<DestinationModel1>(mappedPeople);
+            if (configPackageName == "Emit_Proxy")
+            {
+                mappedPeople = genMapper.MapToDestination(unMappedPeople)/*.Cast<DestinationModel1>()*/;
+
+            }
+            else
+            {
+                mappedPeople = mapper.MapToDestination(unMappedPeople);
+            }
+
+
+            _readyForTheView = new ObservableCollection<object>(mappedPeople);
 
             // Each time a item is mapped, it is first created. (5 sets during consruction, and another 5 for the actual mapping.)
             int totalNumberOfGets = ourHelper.StoreAccessCreator.AccessCounter;
@@ -110,9 +152,15 @@ namespace PropBagLib.Tests.PerformanceDb
 
         public void DoCleanup()
         {
-            foreach (DestinationModel1 pp in _readyForTheView)
+            //foreach (DestinationModel1 pp in _readyForTheView)
+            //{
+            //    pp.Dispose();
+            //}
+
+            foreach (object pp in _readyForTheView)
             {
-                pp.Dispose();
+                if (pp is IDisposable disable)
+                    disable.Dispose();
             }
 
             Business b = _testMainVM.GetIt<Business>("Business");
