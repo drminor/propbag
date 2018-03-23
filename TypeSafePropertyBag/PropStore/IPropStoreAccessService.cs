@@ -29,6 +29,8 @@ namespace DRM.TypeSafePropertyBag
         // IDictionary-Like Methods
         IPropData this[IPropBag propBag, L2T propId] { get; }
 
+        IPropStoreFastAccess<L2T, L2TRaw> GetFastAccessService();
+
         object GetValueFast(IPropBag component, L2T propId, PropItemSetKey<L2TRaw> propItemSetKey);
         bool SetValueFast(IPropBag component, L2T propId, PropItemSetKey<L2TRaw> propItemSetKey, object value);
 
@@ -148,4 +150,6 @@ namespace DRM.TypeSafePropertyBag
 
         //bool PBTestSet(PropBagAbstractBase x);
     }
+
+
 }

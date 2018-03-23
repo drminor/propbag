@@ -8,12 +8,9 @@ namespace DRM.TypeSafePropertyBag
     {
         #region Private Properties
 
-        //private readonly PropBag _instance;
         private readonly Func<IList<PropertyDescriptor>> _customPropsGetter;
-        //private readonly List<PropertyDescriptor> _customFields;
-        //private PropertyDescriptorCollection _propDescCollection;
 
-        private readonly object _funcTarget;
+        //private readonly object _funcTarget;
 
         #endregion
 
@@ -22,22 +19,8 @@ namespace DRM.TypeSafePropertyBag
         public PropBagCustomTypeDescriptor(ICustomTypeDescriptor parent, Func<IList<PropertyDescriptor>> customPropsGetter)
             : base(parent)
         {
-            //_instance = instance;
-
             _customPropsGetter = customPropsGetter;
-            _funcTarget = customPropsGetter?.Target;
-
-            // Get the PropertyDescriptors for our custom fields 
-            // by calling a private method on the class instance in which we are nested.
-            //_customFields = instance.GetCustomProps().ToList();
-
-            //_propDescCollection = new PropertyDescriptorCollection
-            //    (
-            //    base.GetProperties()
-            //    .Cast<PropertyDescriptor>()
-            //    .Union(_customFields)
-            //    .ToArray()
-            //    );
+            //_funcTarget = customPropsGetter?.Target;
         }
 
         #endregion
@@ -69,7 +52,26 @@ namespace DRM.TypeSafePropertyBag
 
         public override object GetPropertyOwner(PropertyDescriptor pd)
         {
-            return base.GetPropertyOwner(pd);
+            object result = base.GetPropertyOwner(pd);
+            return result;
+        }
+
+        public override EventDescriptorCollection GetEvents()
+        {
+            EventDescriptorCollection result = base.GetEvents();
+            return result;
+        }
+
+        public override EventDescriptorCollection GetEvents(Attribute[] attributes)
+        {
+            EventDescriptorCollection result = base.GetEvents(attributes);
+            return result;
+        }
+
+        public override string GetComponentName()
+        {
+            string result = base.GetComponentName();
+            return result;
         }
 
         #endregion
@@ -119,21 +121,6 @@ namespace DRM.TypeSafePropertyBag
         //public override TypeConverter GetConverter()
         //{
         //    return base.GetConverter();
-        //}
-
-        //public override EventDescriptorCollection GetEvents()
-        //{
-        //    return base.GetEvents();
-        //}
-
-        //public override EventDescriptorCollection GetEvents(Attribute[] attributes)
-        //{
-        //    return base.GetEvents(attributes);
-        //}
-
-        //public override object GetPropertyOwner(PropertyDescriptor pd)
-        //{
-        //    return base.GetPropertyOwner(pd);
         //}
 
         //#endregion

@@ -22,6 +22,8 @@ namespace DRM.TypeSafePropertyBag
     using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
     using PSAccessServiceProviderInterface = IProvidePropStoreAccessService<UInt32, String>;
 
+    using PSFastAccessServiceInterface = IPropStoreFastAccess<UInt32, String>;
+
     internal class SimplePropStoreAccessServiceProvider : PSAccessServiceProviderInterface
     {
         #region Private Members
@@ -126,6 +128,11 @@ namespace DRM.TypeSafePropertyBag
         #endregion
 
         #region Get / Set Value Fast
+
+        public PSFastAccessServiceInterface GetFastAccessService()
+        {
+            return new SimplePropStoreFastAccess(this);
+        }
 
         public object GetValueFast(ExKeyT compKey, PropItemSetKeyType propItemSetKey)
         {
@@ -376,7 +383,7 @@ namespace DRM.TypeSafePropertyBag
                 PropNodeCollectionInternalInterface newOpenCollection = new PropNodeCollection(pnc_int);
 
                 // Remove the old set from the StoreByType
-                RemoveFixedPropCollection(pnc_int);
+                RemoveFixedPropCollection(propBagNode.ObjectId, pnc_int);
 
                 // Replace the exixting collection with the new one.
                 propBagNode.PropNodeCollection = newOpenCollection;
@@ -407,19 +414,24 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        private bool RemoveFixedPropCollection(PropNodeCollectionInternalInterface pnc)
+        private bool RemoveFixedPropCollection(ObjectIdType objectId, PropNodeCollectionInternalInterface pnc)
         {
+            if(pnc.Count == 0)
+            {
+                return true;
+            }
+
             PropItemSetKeyType propItemSetKey = pnc.PropItemSetKey;
             lock (_syncForByTypeStore)
             {
-                if (!TryGetSharedPropCollection(propItemSetKey, out PropNodelCollectionSharedInterface sharedPropCollection))
+                if (!TryGetSharedPropCollection(propItemSetKey, out PropNodelCollectionSharedInterface sharedPropNodeCollection))
                 {
                     throw new InvalidOperationException($"Could not retrieve the SharedPropCollection for {propItemSetKey.FullClassName} while removing {pnc}.");
                 }
 
-                if(sharedPropCollection.TryRemove(pnc))
+                if(sharedPropNodeCollection.TryRemove(objectId))
                 {
-                    if(sharedPropCollection.Count == 0)
+                    if(sharedPropNodeCollection.Count == 0)
                     {
                         _storeByType.Remove(pnc.PropItemSetKey);
                     }
@@ -427,7 +439,7 @@ namespace DRM.TypeSafePropertyBag
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine($"Could not remove {pnc} from {sharedPropCollection}.");
+                    System.Diagnostics.Debug.WriteLine($"Could not remove {pnc} from {sharedPropNodeCollection}.");
                     return false;
                 }
             }
@@ -522,11 +534,14 @@ namespace DRM.TypeSafePropertyBag
             return result;
         }
 
+        // TODO: Instead of performing each TearDown request synchronously, create a queue
+        // for a background thread to process. This background thread can remove PropBags in batches.
+        // If done in batches, ranges of Ids can be removed from the Store and StoreByType dictionaries.
         public bool TearDown(BagNode propBagNode)
         {
-            WeakRefKey<IPropBag> propBag_wrKey = propBagNode.PropBagProxy;
+            //WeakRefKey<IPropBag> propBag_wrKey = propBagNode.PropBagProxy;
 
-            if (TryRemoveBagNode(propBag_wrKey))
+            if (TryRemoveBagNode(propBagNode))
             {
                 propBagNode.Dispose();
                 return true;
@@ -537,13 +552,36 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        private bool TryRemoveBagNode(WeakRefKey<IPropBag> propBag_wrKey)
+        private bool TryRemoveBagNode(BagNode propBagNode)
         {
             try
             {
                 lock (_sync)
                 {
-                    _store.Remove(propBag_wrKey);
+                    _store.Remove(propBagNode.PropBagProxy);
+
+                    if (propBagNode.PropNodeCollection.IsFixed && !propBagNode.PropItemSetKey.IsEmpty)
+                    {
+                        if (_storeByType.TryGetValue(propBagNode.PropItemSetKey, out PropNodelCollectionSharedInterface sharedPropNodeCollection))
+                        {
+                            if (sharedPropNodeCollection.TryRemove(propBagNode.CompKey.Level1Key))
+                            {
+                                if (sharedPropNodeCollection.Count == 0)
+                                {
+                                    _storeByType.Remove(propBagNode.PropItemSetKey);
+                                }
+                            }
+                            else
+                            {
+                                // TODO: Make this Debug.WriteLine better.
+                                System.Diagnostics.Debug.WriteLine("Could not remove the child PropNodes from the Shared Prop Node Collection.");
+                            }
+                        }
+                        else
+                        {
+                            System.Diagnostics.Debug.WriteLine("Could not find PropBagNode in the Store By Type.");
+                        }
+                    }
                     return true;
                 }
             }
@@ -552,6 +590,22 @@ namespace DRM.TypeSafePropertyBag
                 return false;
             }
         }
+
+        //private bool TryRemoveBagNode(WeakRefKey<IPropBag> propBag_wrKey)
+        //{
+        //    try
+        //    {
+        //        lock (_sync)
+        //        {
+        //            _store.Remove(propBag_wrKey);
+        //            return true;
+        //        }
+        //    }
+        //    catch
+        //    {
+        //        return false;
+        //    }
+        //}
 
         public PSAccessServiceInterface ClonePSAccessService
             (

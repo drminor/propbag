@@ -4,9 +4,10 @@ using System.Collections.Generic;
 
 namespace DRM.TypeSafePropertyBag
 {
-    internal interface IPropNodeCollection_Internal<L2T, L2TRaw> : IPropNodeCollection<L2T, L2TRaw>
+    internal interface IPropNodeCollection_Internal<L2T, L2TRaw> : IPropNodeCollection<L2T, L2TRaw>, IDisposable
     {
-        //WeakRefKey<IPropModel<L2TRaw>>? PropItemSetId { get; }
+        void Clear();
+        void Fix();
 
         PropItemSetKey<L2TRaw> PropItemSetKey { get; }
 
@@ -28,9 +29,6 @@ namespace DRM.TypeSafePropertyBag
         int Count { get; }
         bool IsFixed { get; }
         int MaxPropsPerObject { get; }
-
-        void Clear();
-        void Fix();
 
         bool Contains(L2TRaw propertyName);
         bool Contains(L2T propId);

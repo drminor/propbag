@@ -27,8 +27,8 @@ namespace DRM.TypeSafePropertyBag
         bool TryGetPropNode(ExKeyT compKey, out PropNode propNode);
         bool TryGetPropNodeCollection(ObjectIdType objectId, out IPropNodeCollection_Internal<L2T, L2TRaw> propNodeCollection);
 
+        bool TryRemove(ObjectIdType objectId);
         bool TryRemove(IEnumerable<ExKeyT> compKeys);
-        bool TryRemove(IPropNodeCollection_Internal<L2T, L2TRaw> sourcePropNodes);
 
         // General PropId and PropName Support
         int PropertyCount { get; }

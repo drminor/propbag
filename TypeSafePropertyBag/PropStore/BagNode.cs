@@ -459,7 +459,8 @@ namespace DRM.TypeSafePropertyBag
             {
                 propNode.Dispose();
             }
-            _propNodeCollection.Clear();
+
+            _propNodeCollection.Dispose();
         }
 
         private bool disposedValue = false; // To detect redundant calls
@@ -471,10 +472,11 @@ namespace DRM.TypeSafePropertyBag
                 if (disposing)
                 {
                     // Dispose managed state (managed objects).
-                    if (!_propNodeCollection.IsFixed)
+                    DisposeChildren();
+                    ```
+                    if(_parentNCSubscriberCollection != null)
                     {
-                        // The PropNodeCollection is open (for additions) and therefore it is not shared: It can be disposed.
-                        DisposeChildren();
+                        _parentNCSubscriberCollection.Dispose();
                     }
                 }
 

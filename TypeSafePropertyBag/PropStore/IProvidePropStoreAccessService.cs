@@ -6,6 +6,7 @@ namespace DRM.TypeSafePropertyBag
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
     using PropItemSetKeyType = PropItemSetKey<String>;
 
+
     internal interface IProvidePropStoreAccessService<L2T, L2TRaw> : IPropStoreAccessServiceCreator<L2T, L2TRaw>, IDisposable
     {
         bool TryGetPropBagNode(IPropBag propBag, out BagNode propBagNode);
@@ -16,6 +17,8 @@ namespace DRM.TypeSafePropertyBag
 
         bool TryFixPropItemSet(BagNode propBagNode, PropItemSetKeyType propItemSetKey);
         bool TryOpenPropItemSet(BagNode propBagNode/*, out object propItemSet_Handle*/);
+
+        IPropStoreFastAccess<L2T, L2TRaw> GetFastAccessService();
 
         object GetValueFast(WeakRefKey<IPropBag> propBag_wrKey, L2T propId, PropItemSetKeyType propItemSetKey);
         bool SetValueFast(WeakRefKey<IPropBag> propBag_wrKey, L2T propId, PropItemSetKeyType propItemSetKey, object value);

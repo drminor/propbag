@@ -15,11 +15,14 @@ namespace DRM.TypeSafePropertyBag
     using ObjectIdType = UInt64;
     using PropIdType = UInt32;
     using PropNameType = String;
+
     using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
     using PSAccessServiceInternalInterface = IPropStoreAccessServiceInternal<UInt32, String>;
     using PSAccessServiceProviderInterface = IProvidePropStoreAccessService<UInt32, String>;
 
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
+
+    using PSFastAccessServiceInterface = IPropStoreFastAccess<UInt32, String>;
 
     using PropNodeCollectionIntInterface = IPropNodeCollection_Internal<UInt32, String>;
     using PropNodeCollectionInterface = IPropNodeCollection<UInt32, String>;
@@ -561,6 +564,11 @@ namespace DRM.TypeSafePropertyBag
 
         #endregion
 
+        public PSFastAccessServiceInterface GetFastAccessService()
+        {
+            return _propStoreAccessServiceProvider.GetFastAccessService();
+        }
+
         public object GetValueFast(IPropBag component, PropIdType propId, PropItemSetKeyType propItemSetKey)
         {
             if (component is IPropBagInternal ipbi)
@@ -897,7 +905,7 @@ namespace DRM.TypeSafePropertyBag
         {
             if (subscriptionRequest.HasBeenUsed)
             {
-                throw new ApplicationException("Its already been used.");
+                throw new ApplicationException($"The subscription request has already been used.");
             }
 
             SubscriberCollection sc = GetOrAddSubscriberCollection(subscriptionRequest.OwnerPropId);
@@ -910,6 +918,15 @@ namespace DRM.TypeSafePropertyBag
                     )
                 );
 
+            wasAdded = subscriptionRequest.HasBeenUsed;
+
+            //ReportSubRequestStatus(subscriptionRequest, result);
+            return result;
+        }
+
+        [System.Diagnostics.Conditional("DEBUG")]
+        private void ReportSubRequestStatus(ISubscriptionKeyGen subscriptionRequest, ISubscription result)
+        {
             string msgPrefix;
             string msgSuffix;
 
@@ -920,7 +937,6 @@ namespace DRM.TypeSafePropertyBag
 
                 msgPrefix = "Created a new Subscription for Property:";
                 msgSuffix = "successfully";
-                wasAdded = true;
             }
             else
             {
@@ -928,12 +944,10 @@ namespace DRM.TypeSafePropertyBag
                 //    $" {subscriptionRequest.OwnerPropId} / Event: {result.SubscriptionKind} was not added.");
                 msgPrefix = "The subscription for Property:";
                 msgSuffix = "was not added";
-                wasAdded = false;
             }
 
             System.Diagnostics.Debug.WriteLine($"{msgPrefix} {GetClassAndPropName(subscriptionRequest.OwnerPropId)} ({ subscriptionRequest.OwnerPropId}) / EventType: {result.SubscriptionKind} {msgSuffix}.");
 
-            return result;
         }
 
         public bool TryRemoveSubscription(ISubscriptionKeyGen subscriptionRequest)
@@ -1002,7 +1016,7 @@ namespace DRM.TypeSafePropertyBag
             SubscriberCollection result = _subscriberCollections.GetOrCreate(exKey.Level2Key, out bool subcriberListWasCreated);
             if (subcriberListWasCreated)
             {
-                System.Diagnostics.Debug.WriteLine($"Created a new SubscriberCollection for {exKey}.");
+                //System.Diagnostics.Debug.WriteLine($"Created a new SubscriberCollection for {exKey}.");
             }
 
             return result;

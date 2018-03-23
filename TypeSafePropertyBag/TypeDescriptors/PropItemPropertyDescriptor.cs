@@ -20,6 +20,14 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
 
         public override bool SupportsChangeEvents => _tdConfig.SupportsChangeEvents;
 
+        public override string DisplayName
+        {
+            get
+            {
+                return base.DisplayName;
+            }
+        }
+
         #endregion
 
         #region Constructors
@@ -88,6 +96,35 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
             return base.GetChildProperties(instance, filter);
         }
 
+        protected override void FillAttributes(IList attributeList)
+        {
+            base.FillAttributes(attributeList);
+
+            foreach(Attribute a in _tdConfig.Attributes)
+            {
+                attributeList.Add(a);
+            }
+        }
+
+        #endregion
+
+        #region Event Support
+
+        public override void AddValueChanged(object component, EventHandler handler)
+        {
+            base.AddValueChanged(component, handler);
+        }
+
+        protected override object GetInvocationTarget(Type type, object instance)
+        {
+            return base.GetInvocationTarget(type, instance);
+        }
+
+        public override void RemoveValueChanged(object component, EventHandler handler)
+        {
+            base.RemoveValueChanged(component, handler);
+        }
+
         //
         // Summary:
         //     Raises the ValueChanged event that you implemented.
@@ -103,16 +140,6 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
             base.OnValueChanged(component, e);
         }
 
-        protected override void FillAttributes(IList attributeList)
-        {
-            base.FillAttributes(attributeList);
-
-            foreach(Attribute a in _tdConfig.Attributes)
-            {
-                attributeList.Add(a);
-            }
-        }
-
         #endregion
 
         #region Diagnostics
@@ -123,7 +150,7 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
         void ReportAccessCounter()
         {
             System.Diagnostics.Debug.WriteLine($"{ComponentType.Name}::{Name} has been accessed {++access_counter} times.");
-        } 
+        }
 
         #endregion
     }

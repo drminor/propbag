@@ -45,13 +45,6 @@ namespace DRM.TypeSafePropertyBag
 
         #region Constructor
 
-        //public PropNodeCollectionFixed(PropNodeCollectionIntInterface sourcePropNodes)
-        //    : this(sourcePropNodes.GetPropNodes(), sourcePropNodes.PropItemSetId, sourcePropNodes.MaxPropsPerObject)
-        //{
-        //}
-
-        //public PropNodeCollectionFixed(IEnumerable<PropNode> propNodes, WeakRefKey<PropModelType> propItemSetId, int maxPropsPerObject)
-
         public PropNodeCollection()
         {
             throw new InvalidOperationException("Don't use the parameterless constructor to create a PropNodeCollection.");
@@ -86,7 +79,6 @@ namespace DRM.TypeSafePropertyBag
             }
 
             _propItemsByName = null;
-            //_isFixed = false;
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
@@ -102,32 +94,17 @@ namespace DRM.TypeSafePropertyBag
 
         #region Public Members
 
-        //public WeakRefKey<PropModelType>? PropItemSetId => _propItemSetId;
         public PropItemSetKeyType PropItemSetKey => _propItemSetKey;
 
         public int Count => _children.Count;
 
         public int MaxPropsPerObject { get; }
 
-        //private bool _isFixed;
-        //public bool IsFixed
-        //{
-        //    get
-        //    {
-        //        return _isFixed;
-        //    }
-        //}
-
         public bool IsFixed => false;
 
         public void Fix()
         {
             throw new InvalidOperationException("RegularPropNodeCollection instances cannot be fixed.");
-            //lock (_sync)
-            //{
-            //    _hashCode = ComputeHashCode();
-            //    _isFixed = true;
-            //}
         }
 
         public bool Contains(PropIdType propId)
@@ -141,12 +118,6 @@ namespace DRM.TypeSafePropertyBag
             bool result = _propItemsByName.ContainsKey(propertyName);
             return result;
         }
-
-        //public bool Contains(PropNode propNode)
-        //{
-        //    bool result = _children.ContainsValue(propNode);
-        //    return result;
-        //}
 
         public bool Contains(PropNode propNode)
         {
@@ -217,11 +188,6 @@ namespace DRM.TypeSafePropertyBag
 
         public PropNode CreateAndAdd(IPropDataInternal propData_Internal, PropNameType propertyName, BagNode parent)
         {
-            //if (_isFixed)
-            //{
-            //    throw new InvalidOperationException("Cannot Add PropItems to a Fixed PropItemSet.");
-            //}
-
             PropIdType nextPropId = GetNextPropId();
             PropNode newPropNode = new PropNode(nextPropId, propData_Internal, parent);
             Add(newPropNode);
@@ -232,11 +198,6 @@ namespace DRM.TypeSafePropertyBag
         {
             lock(_sync)
             {
-                //if(_isFixed)
-                //{
-                //    throw new InvalidOperationException("Cannot Add PropItems to a Fixed PropItemSet.");
-                //}
-
                 _children.Add(propNode.PropId, propNode);
 
                 if (_propItemsByName != null)
@@ -250,11 +211,6 @@ namespace DRM.TypeSafePropertyBag
         {
             lock (_sync)
             {
-                //if(_isFixed)
-                //{
-                //    throw new InvalidOperationException("A fixed PropItemSet cannot be cleared.");
-                //}
-
                 _children.Clear();
                 if (_propItemsByName != null)
                 {
@@ -267,11 +223,6 @@ namespace DRM.TypeSafePropertyBag
         {
             lock (_sync)
             {
-                //if (_isFixed)
-                //{
-                //    throw new InvalidOperationException("PropItems cannot be remvoed from a fixed PropItemSet.");
-                //}
-
                 if (_children.TryGetValue(propId, out propNode))
                 {
                     _children.Remove(propId);
@@ -335,9 +286,7 @@ namespace DRM.TypeSafePropertyBag
 
         public override string ToString()
         {
-            string @fixed = IsFixed ? "Fixed" : "Open";
-
-            return $"{@fixed} PropItemSet with {Count} items.";
+            return $"Open PropItemSet with {Count} items.";
         }
 
         public override bool Equals(object obj)
@@ -353,19 +302,9 @@ namespace DRM.TypeSafePropertyBag
                     (GetPropDataItemsDict(), other.GetPropDataItemsDict());
         }
 
-        //int _hashCode;
         public override int GetHashCode()
         {
             int result;
-            //if (IsFixed)
-            //{
-            //    result = _hashCode;
-            //}
-            //else
-            //{
-            //    result = ComputeHashCode();
-            //}
-
             result = ComputeHashCode();
             return result;
         }
@@ -404,6 +343,44 @@ namespace DRM.TypeSafePropertyBag
             long temp = System.Threading.Interlocked.Increment(ref m_PropIdCounter);
             if (temp > MaxPropsPerObject) throw new InvalidOperationException("The PropNodeCollection has run out of property ids.");
             return (PropIdType)temp;
+        }
+
+        #endregion
+
+        #region IDisposable Support
+
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // Dispose managed state (managed objects).
+                    Clear();
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        // ~Temp() {
+        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        //   Dispose(false);
+        // }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            // GC.SuppressFinalize(this);
         }
 
         #endregion

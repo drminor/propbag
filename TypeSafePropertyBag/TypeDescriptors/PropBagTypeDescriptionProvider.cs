@@ -23,11 +23,13 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
 
         #region Constuctors
 
-        public PropBagTypeDescriptionProvider() : this(TypeDescriptor.GetProvider(typeof(T)))
+        public PropBagTypeDescriptionProvider()
+            : this(TypeDescriptor.GetProvider(typeof(T)))
         {
         }
 
-        public PropBagTypeDescriptionProvider(TypeDescriptionProvider parent) : base(parent)
+        public PropBagTypeDescriptionProvider(TypeDescriptionProvider parent)
+            : base(parent)
         {
         }
 
@@ -42,16 +44,32 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
                 throw new InvalidOperationException($"The objectType is null. On call to {nameof(PropBagTypeDescriptionProvider<T>)}::GetTypeDescriptor.");
             }
 
-            if (objectType != typeof(T))
-            {
-                //throw new InvalidOperationException($"The objectType is {objectType}, expected type: {typeof(T)}. On call to {nameof(PropBagTypeDescriptionProvider<T>)}::GetTypeDescriptor.");
-                System.Diagnostics.Debug.WriteLine($"Calling GetTypeDesciptor with instance of type: {objectType}, expected type: {typeof(T)}. Returning Null.");
-            }
+            //if (objectType != typeof(T))
+            //{
+            //    //throw new InvalidOperationException($"The objectType is {objectType}, expected type: {typeof(T)}. On call to {nameof(PropBagTypeDescriptionProvider<T>)}::GetTypeDescriptor.");
+            //    System.Diagnostics.Debug.WriteLine($"Calling GetTypeDesciptor with instance of type: {objectType}, expected type: {typeof(T)}. Returning Null.");
+            //}
 
             ICustomTypeDescriptor defaultTypeDescriptor = base.GetTypeDescriptor(typeof(T), null);
 
             if (instance == null)
             {
+                if (objectType != typeof(T))
+                {
+                    //// Diagnostics.
+                    //System.Diagnostics.Debug.WriteLine($"Calling GetTypeDesciptor with instance of type: {objectType}, expected type: {typeof(T)}. Returning Null.");
+
+                    ////defaultTypeDescriptor.GetEvents()
+
+                    //if (typeof(INotifyPropertyChanged).IsAssignableFrom(objectType))
+                    //{
+                    //    EventDescriptor ev = TypeDescriptor.GetEvents(typeof(INotifyPropertyChanged))["PropertyChanged"];
+                    //}
+
+                    return defaultTypeDescriptor;
+                }
+
+
                 return defaultTypeDescriptor;
             }
             else

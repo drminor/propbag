@@ -10,7 +10,10 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
     using PropModelType = IPropModel<String>;
     using PropItemSetKeyType = PropItemSetKey<String>;
-    using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
+
+    using PSFastAccessServiceInterface = IPropStoreFastAccess<UInt32, String>;
+
+    //using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
 
     public class PropItemFixedPropertyDescriptor<T> : PropertyDescriptor where T : IPropBag
     {
@@ -20,7 +23,7 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
         public readonly ExKeyT _compKey;
         public readonly PropIdType PropId; // This is the Level2 Key.
 
-        readonly PSAccessServiceInterface _propStoreAccessor;
+        readonly PSFastAccessServiceInterface _psFastAccessService;
         readonly PropItemSetKeyType _propItemSetKey;
 
         #endregion
@@ -39,55 +42,48 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
 
         public override bool SupportsChangeEvents => _tdConfig.SupportsChangeEvents;
 
+        public override string DisplayName {
+            get
+            {
+                string result = base.DisplayName;
+                return result;
+            }
+        }
+
         #endregion
 
         #region Constructors
 
         public PropItemFixedPropertyDescriptor
         (
-            PSAccessServiceInterface propStoreAccessor,
+            PSFastAccessServiceInterface psFastAccessService,
             PropModelType propModel,
             PropIdType propId,
             PropNameType propertyName,
             Type propertyType,
             Attribute[] attributes
         )
-            //: base(propertyName, attributes)
             : this
             (
-                GetTdConfig(attributes, propertyName, propertyType),
-                propStoreAccessor,
+                GetTdConfig(propModel.ClassName, attributes, propertyName, propertyType),
+                psFastAccessService,
                 propModel,
                 propId
             )
         {
-            //_propStoreAccessor = propStoreAccessor;
-
-            //_propItemSetKey = new PropItemSetKeyType(propModel);
-
-            //_compKey = compKey;
-
-            //_tdConfig = new PropertyDescriptorValues<T>
-            //    (
-            //    attributes: attributes,
-            //    isReadOnly: false,
-            //    name: propertyName,
-            //    propertyType: propertyType,
-            //    supportsChangeEvents: true
-            //    );
         }
 
         public PropItemFixedPropertyDescriptor
         (
             PropertyDescriptorValues<T> tdConfig,
-            PSAccessServiceInterface propStoreAccessor,
+            PSFastAccessServiceInterface psFastAccessService,
             PropModelType propModel,
             PropIdType propId
         )
             : base(tdConfig.Name, tdConfig.Attributes)
         {
             _tdConfig = tdConfig;
-            _propStoreAccessor = propStoreAccessor;
+            _psFastAccessService = psFastAccessService;
             _propItemSetKey = new PropItemSetKeyType(propModel);
             PropId = propId;
 
@@ -96,9 +92,22 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
 
         #endregion
 
-        private static PropertyDescriptorValues<T> GetTdConfig(Attribute[] attributes, PropNameType propertyName, Type propertyType)
+        private static PropertyDescriptorValues<T> GetTdConfig(string componentName, Attribute[] attributes, PropNameType propertyName, Type propertyType)
         {
-            PropertyDescriptorValues<T> result = new PropertyDescriptorValues<T>(attributes, false, propertyName, propertyType, true);
+            bool isReadOnly = false;
+            bool supportsChangeEvents = true;
+
+            //if(componentName == "PersonVM")
+            //{
+            //    supportsChangeEvents = false;
+            //}
+
+            //if(propertyName == "PersonListView")
+            //{
+            //    supportsChangeEvents = false;
+            //}
+
+            PropertyDescriptorValues<T> result = new PropertyDescriptorValues<T>(attributes, isReadOnly, propertyName, propertyType, supportsChangeEvents);
             return result;
         }
 
@@ -112,17 +121,16 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
         public override object GetValue(object component)
         {
             //ReportAccessCounter();
-            //object x = _propStoreAccessor.GetValueFast((T)component, PropId, _propItemSetKey);
 
             object result;
             if (component is IPropBagInternal ipbi)
             {
                 ExKeyT compKey = new SimpleExKey(ipbi.ObjectId, PropId);
-                result = _propStoreAccessor.GetValueFast(compKey, _propItemSetKey);
+                result = _psFastAccessService.GetValueFast(compKey, _propItemSetKey);
             }
             else
             {
-                result = _propStoreAccessor.GetValueFast((T)component, PropId, _propItemSetKey);
+                result = _psFastAccessService.GetValueFast((T)component, PropId, _propItemSetKey);
             }
 
             return result;
@@ -135,17 +143,15 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
 
         public override void SetValue(object component, object value)
         {
-            //bool result = _propStoreAccessor.SetValueFast((T)component, PropId, _propItemSetKey, value);
-
             bool result;
             if (component is IPropBagInternal ipbi)
             {
                 ExKeyT compKey = new SimpleExKey(ipbi.ObjectId, PropId);
-                result = _propStoreAccessor.SetValueFast(compKey, _propItemSetKey, value);
+                result = _psFastAccessService.SetValueFast(compKey, _propItemSetKey, value);
             }
             else
             {
-                result = _propStoreAccessor.SetValueFast((T)component, PropId, _propItemSetKey, value);
+                result = _psFastAccessService.SetValueFast((T)component, PropId, _propItemSetKey, value);
             }
         }
 
@@ -174,6 +180,36 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
             return base.GetChildProperties(instance, filter);
         }
 
+        protected override void FillAttributes(IList attributeList)
+        {
+            base.FillAttributes(attributeList);
+
+            foreach(Attribute a in _tdConfig.Attributes)
+            {
+                attributeList.Add(a);
+            }
+        }
+
+        #endregion
+
+        #region Event Support
+
+        public override void AddValueChanged(object component, EventHandler handler)
+        {
+            base.AddValueChanged(component, handler);
+        }
+
+        protected override object GetInvocationTarget(Type type, object instance)
+        {
+            object target = base.GetInvocationTarget(type, instance);
+            return target;
+        }
+
+        public override void RemoveValueChanged(object component, EventHandler handler)
+        {
+            base.RemoveValueChanged(component, handler);
+        }
+
         //
         // Summary:
         //     Raises the ValueChanged event that you implemented.
@@ -189,17 +225,8 @@ namespace DRM.TypeSafePropertyBag.TypeDescriptors
             base.OnValueChanged(component, e);
         }
 
-        protected override void FillAttributes(IList attributeList)
-        {
-            base.FillAttributes(attributeList);
-
-            foreach(Attribute a in _tdConfig.Attributes)
-            {
-                attributeList.Add(a);
-            }
-        }
-
         #endregion
+
 
         #region Diagnostics
 

@@ -156,14 +156,21 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        public bool TryRemove(PropNodeCollectionIntInterface sourcePropNodes)
+        public bool TryRemove(ObjectIdType objectId)
         {
-            throw new NotImplementedException();
+            List<ExKeyT> toBeRemoved = _children.Keys.Where(x => x.Level1Key == objectId).ToList();
+
+            bool result = TryRemove(toBeRemoved);
+            return result;
         }
 
         public bool TryRemove(IEnumerable<ExKeyT> compKeys)
         {
-            throw new NotImplementedException();
+            foreach(ExKeyT cKey in compKeys)
+            {
+                _children.Remove(cKey);
+            }
+            return true;
         }
 
         #endregion

@@ -33,6 +33,7 @@ namespace DRM.PropBag
 
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
     using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
+    using PSFastAccessServiceInterface = IPropStoreFastAccess<UInt32, String>;
 
     using PropModelType = IPropModel<String>;
 
@@ -226,16 +227,18 @@ namespace DRM.PropBag
             // Cache or Set the PropertyDescriptors (for our ICustomTypeDescriptor implementation.)
             // If not already fixed, fix the PropModel.
 
+            if (propModel.Count == 0)
+                return;
+
             if (propModelWasRaw)
             {
                 // This must be the first time this PropModel has been applied.
 
                 // If we were given a PropModelCache, let the cache know that we are finished addding PropItems.
-                _propModelCache?.Fix(propModel);
+                _propModelCache?.TryFix(propModel);
 
                 // Also, to improve performance, let the PropertyStore know that the set of PropItems can be fixed as well.
                 PropItemSetKeyType propItemSetKey = new PropItemSetKeyType(propModel);
-
                 _ourStoreAccessor.TryFixPropItemSet(propItemSetKey);
             }
             else
@@ -307,7 +310,11 @@ namespace DRM.PropBag
             if (storeAcessorCreator == null) throw new ArgumentNullException(nameof(storeAcessorCreator));
             if (propFactory == null) throw new ArgumentNullException(nameof(propFactory));
 
-            BasicConstruction(typeSafetyMode, autoMapperService, autoMapperService?.WrapperTypeCreator, null, null, propFactory, fullClassName);
+            PropModelCacheInterface propModelCache = null;
+            PropModelType propModel = null;
+
+            BasicConstruction(typeSafetyMode, autoMapperService, autoMapperService?.WrapperTypeCreator,
+                propModelCache, propModel, propFactory, fullClassName);
 
             _ourStoreAccessor = storeAcessorCreator.CreatePropStoreService(this);
             _memConsumptionTracker.MeasureAndReport("CreatePropStoreService", null);
@@ -323,13 +330,14 @@ namespace DRM.PropBag
 
             _autoMapperService = autoMapperService;
             _wrapperTypeCreator = wrapperTypeCreator;
-            _propModelCache = propModelCache;
-            _propModel = propModel;
 
             _propFactory = propFactory ?? throw new ArgumentNullException(nameof(propFactory));
 
             _ourMetaData = BuildMetaData(typeSafetyMode, fullClassName, _propFactory);
             _memConsumptionTracker.MeasureAndReport("BuildMetaData", $"Full Class Name: {fullClassName ?? "NULL"}");
+
+            _propModelCache = propModelCache;
+            _propModel = propModel;
 
             _foreignViewManagers = null;
             _propertyDescriptors = null;
@@ -2251,18 +2259,35 @@ namespace DRM.PropBag
 
         public override string ToString()
         {
-            IEnumerable<KeyValuePair<PropNameType, ValPlusType>> namesTypesAndValues = GetAllPropNamesValuesAndTypes();
+            //IEnumerable<KeyValuePair<PropNameType, ValPlusType>> namesTypesAndValues = GetAllPropNamesValuesAndTypes();
+
+            //StringBuilder result = new StringBuilder();
+            //int cnt = 0;
+
+            //foreach (KeyValuePair<string, ValPlusType> kvp in namesTypesAndValues)
+            //{
+            //    if (cnt++ == 0) result.Append("\n\r");
+
+            //    result.Append($" -- {kvp.Key}: {kvp.Value.Value}");
+            //}
+            //return result.ToString();
+
+            IEnumerable<KeyValuePair<PropNameType,IPropData>> namesTypesAndValues = GetAllPropertyValues();
 
             StringBuilder result = new StringBuilder();
             int cnt = 0;
 
-            foreach (KeyValuePair<string, ValPlusType> kvp in namesTypesAndValues)
+            foreach (KeyValuePair<string, IPropData> kvp in namesTypesAndValues)
             {
                 if (cnt++ == 0) result.Append("\n\r");
 
-                result.Append($" -- {kvp.Key}: {kvp.Value.Value}");
+                result.Append($" -- {kvp.Key}: {kvp.Value.TypedProp.TypedValueAsObject}");
             }
-            return result.ToString();
+
+            string sResult = result.ToString();
+            return sResult;
+
+            //GetAllPropertyValues
         }
 
         #endregion
@@ -2587,7 +2612,10 @@ namespace DRM.PropBag
             bool typeIsSolid = true;
             Func<PropNameType, T> getDefaultValueFunc = null;
 
-            IProp<T> pg = _propFactory.Create<T>(initialValue, propertyName, extraInfo, storageStrategy, typeIsSolid, comparer, getDefaultValueFunc);
+            // TODO: Get a real value for comparerIsRefEquality
+            bool comparerIsRefEquality = false;
+
+            IProp<T> pg = _propFactory.Create<T>(initialValue, propertyName, extraInfo, storageStrategy, typeIsSolid, comparer, comparerIsRefEquality, getDefaultValueFunc);
 
             AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard, out PropIdType propId);
             return pg;
@@ -2599,7 +2627,7 @@ namespace DRM.PropBag
             bool typeIsSolid = true;
             Func<T, T, bool> comparer = _propFactory.GetRefEqualityComparer<T>();
 
-            IProp<T> pg = _propFactory.Create<T>(initialValue, propertyName, extraInfo, storageStrategy, typeIsSolid, comparer, null);
+            IProp<T> pg = _propFactory.Create<T>(initialValue, propertyName, extraInfo, storageStrategy, typeIsSolid, comparer, true, null);
 
             AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard, out PropIdType propId);
             return pg;
@@ -2609,7 +2637,11 @@ namespace DRM.PropBag
         {
             PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.Internal;
             bool typeIsSolid = true;
-            IProp<T> pg = _propFactory.CreateWithNoValue<T>(propertyName, extraInfo, storageStrategy, typeIsSolid, comparer, null);
+
+            // TODO: Get a real value for comparerIsRefEquality
+            bool comparerIsRefEquality = false;
+
+            IProp<T> pg = _propFactory.CreateWithNoValue<T>(propertyName, extraInfo, storageStrategy, typeIsSolid, comparer, comparerIsRefEquality, null);
             AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard, out PropIdType propId);
             return pg;
         }
@@ -2620,7 +2652,7 @@ namespace DRM.PropBag
             bool typeIsSolid = true;
             Func<T, T, bool> comparer = _propFactory.GetRefEqualityComparer<T>();
 
-            IProp<T> pg = _propFactory.CreateWithNoValue<T>(propertyName, extraInfo, storageStrategy, typeIsSolid, comparer, null);
+            IProp<T> pg = _propFactory.CreateWithNoValue<T>(propertyName, extraInfo, storageStrategy, typeIsSolid, comparer, true, null);
 
             AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard, out PropIdType propId);
             return pg;
@@ -2631,7 +2663,10 @@ namespace DRM.PropBag
             PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.External;
             bool typeIsSolid = true;
 
-            IProp<T> pg = _propFactory.CreateWithNoValue<T>(propertyName, extraInfo, storageStrategy, typeIsSolid, comparer, null);
+            // TODO: Get a real value for comparerIsRefEquality
+            bool comparerIsRefEquality = false;
+
+            IProp<T> pg = _propFactory.CreateWithNoValue<T>(propertyName, extraInfo, storageStrategy, typeIsSolid, comparer, comparerIsRefEquality, null);
             AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard, out PropIdType propId);
             return pg;
         }
@@ -2641,7 +2676,7 @@ namespace DRM.PropBag
             PropStorageStrategyEnum storageStrategy = PropStorageStrategyEnum.External;
             bool typeIsSolid = true;
             Func<T, T, bool> comparer = _propFactory.GetRefEqualityComparer<T>();
-            IProp<T> pg = _propFactory.CreateWithNoValue<T>(propertyName, extraInfo, storageStrategy, typeIsSolid, comparer, null);
+            IProp<T> pg = _propFactory.CreateWithNoValue<T>(propertyName, extraInfo, storageStrategy, typeIsSolid, comparer, true, null);
             AddProp<T>(propertyName, pg, null, SubscriptionPriorityGroup.Standard, out PropIdType propId);
             return pg;
         }
@@ -2742,8 +2777,8 @@ namespace DRM.PropBag
             }
             else
             {
-                _propModelCache.Fix(_propModel);
-                return true;
+                bool result = _propModelCache.TryFix(_propModel);
+                return result;
             }
         }
 
@@ -3949,6 +3984,9 @@ namespace DRM.PropBag
 
             IList<PropertyDescriptor> result = new List<PropertyDescriptor>();
 
+
+            PSFastAccessServiceInterface propStoreFastAccess = _ourStoreAccessor.GetFastAccessService();
+
             foreach (IPropItemModel pi in propItemModels)
             {
                 PropItemFixedPropertyDescriptor<PropBag> propItemTypeDesc;
@@ -3960,7 +3998,7 @@ namespace DRM.PropBag
 
                 if (pi.PropKind == PropKindEnum.CollectionView || pi.PropKind == PropKindEnum.ObservableCollection || pi.PropKind == PropKindEnum.Prop)
                 {
-                    propItemTypeDesc = new PropItemFixedPropertyDescriptor<PropBag>(_ourStoreAccessor, propModel, propertyId, pi.PropertyName, pi.PropertyType, new Attribute[] { });
+                    propItemTypeDesc = new PropItemFixedPropertyDescriptor<PropBag>(propStoreFastAccess, propModel, propertyId, pi.PropertyName, pi.PropertyType, new Attribute[] { });
                 }
                 else
                 {
