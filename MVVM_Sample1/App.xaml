@@ -1,9 +1,9 @@
 ﻿<Application x:Class="MVVM_Sample1.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:MVVM_Sample1"
-             StartupUri="FrontWindow.xaml">
-
+             StartupUri="FrontWindow.xaml"
+             ShutdownMode="OnMainWindowClose">
+    
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
