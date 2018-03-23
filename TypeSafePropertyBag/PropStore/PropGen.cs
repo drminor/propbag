@@ -7,13 +7,6 @@ namespace DRM.TypeSafePropertyBag
 
     public class PropGen : IPropDataInternal
     {
-        #region Private Properties
-
-        //private ExKeyT _cKey;
-        //public PropIdType PropId { get; }
-
-        #endregion
-
         #region Public PropGen Properties
 
         public bool IsEmpty { get; }
