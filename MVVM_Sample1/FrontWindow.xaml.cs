@@ -65,10 +65,18 @@ namespace MVVM_Sample1.View
 
         private void ShowMain(string configPackageNameSuffix)
         {
+            //GetWindowList_Diag();
             PropStoreServicesForThisApp.ConfigPackageNameSuffix = configPackageNameSuffix;
 
-            MainWindow mw = new MainWindow();
+            MainWindow mw = new MainWindow
+            {
+                Owner = GetWindow(this)
+            };
+
             mw.ShowDialog();
+
+            //WindowState ws = mw.WindowState;
+            //GetWindowList_Diag();
         }
 
         private void SetDataDirLocation()
@@ -76,6 +84,15 @@ namespace MVVM_Sample1.View
             Assembly thisAssembly = Assembly.GetEntryAssembly();
             CommonApplicationData cad = new CommonApplicationData(thisAssembly, allUsers: false);
             AppDomain.CurrentDomain.SetData("DataDirectory", cad.ApplicationFolderPath);
+        }
+
+        private void GetWindowList_Diag()
+        {
+            System.Diagnostics.Debug.WriteLine("The list of open windows....");
+            foreach (Window w in Application.Current.Windows)
+            {
+                System.Diagnostics.Debug.WriteLine(w.GetType().FullName);
+            }
         }
 
         #endregion
