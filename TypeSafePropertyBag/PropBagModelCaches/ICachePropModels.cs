@@ -12,7 +12,7 @@ namespace DRM.TypeSafePropertyBag
         bool TryGetPropModel(string fullClassName, out IPropModel<L2TRaw> propModel);
         bool TryGetPropModel(string fullClassName, long generationId, out IPropModel<L2TRaw> propModel);
 
-        void Fix(IPropModel<L2TRaw> propModel);
+        bool TryFix(IPropModel<L2TRaw> propModel);
 
         IPropModel<L2TRaw> Open(IPropModel<L2TRaw> propModel, out long generationId);
         IPropModel<L2TRaw> Open(IPropModel<L2TRaw> propModel, string fullClassName, out long generationId);

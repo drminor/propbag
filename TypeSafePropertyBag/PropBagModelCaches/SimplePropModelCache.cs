@@ -74,7 +74,7 @@ namespace DRM.TypeSafePropertyBag
             {
                 propModel.Open();
                 propModel.GenerationId = generationId;
-                Fix(propModel);
+                TryFix(propModel);
             }
             else
             {
@@ -168,18 +168,19 @@ namespace DRM.TypeSafePropertyBag
 
         #region Fix and Open
 
-        public void Fix(PropModelType propModel)
+        public bool TryFix(PropModelType propModel)
         {
             CheckOwnerShip(propModel);
 
             if (propModel.IsFixed)
             {
                 System.Diagnostics.Debug.WriteLine("Already Fixed.");
-                return;
+                return false;
             }
             else
             {
                 propModel.Fix();
+                return true;
             }
         }
 
@@ -218,7 +219,25 @@ namespace DRM.TypeSafePropertyBag
             }
             else
             {
-                PropModelType result = (PropModelType)propModel.Clone();
+                //PropModelType result = (PropModelType)propModel.Clone();
+
+                //if (fullClassName != null)
+                //{
+                //    string ns = TypeExtensions.GetNamespace(fullClassName, out string className);
+
+                //    if (ns != null)
+                //    {
+                //        result.NamespaceName = ns;
+                //    }
+
+                //    result.ClassName = className;
+                //}
+
+                //generationId = Add(result);
+
+                propModel.PropModelCache = null;
+                PropModelType result = (PropModelType)propModel.CloneIt();
+                result.Open();
 
                 if (fullClassName != null)
                 {
