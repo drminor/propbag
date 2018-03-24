@@ -149,23 +149,23 @@ namespace DRM.TypeSafePropertyBag
         {
             PropNodeCollectionIntInterface result;
 
-            List<PropNode> temp = new List<PropNode>();
+            List<PropNode> newPropNodeColl = new List<PropNode>();
             foreach (PropNode propNode in sourcePNC.GetPropNodes())
             {
                 PropNode newPropNode = propNode.CloneForNewParent(targetParent, useExistingValues: true);
-                temp.Add(newPropNode);
+                newPropNodeColl.Add(newPropNode);
             }
 
             if (sourcePNC.IsFixed)
             {
                 System.Diagnostics.Debug.Assert(!sourcePNC.PropItemSetKey.IsEmpty, "We found a fixed PropSetCollection that has an empty PropItemSetKey.");
                 // Create a Fixed PropNodeCollection.
-                result = new PropNodeCollectionFixed(temp, sourcePNC.PropItemSetKey, sourcePNC.MaxPropsPerObject);
+                result = new PropNodeCollectionFixed(newPropNodeColl, sourcePNC.PropItemSetKey, sourcePNC.MaxPropsPerObject);
             }
             else
             {
                 // Create an open PropNodeCollection.
-                result = new PropNodeCollection(temp, sourcePNC.PropItemSetKey, sourcePNC.MaxPropsPerObject);
+                result = new PropNodeCollection(newPropNodeColl, sourcePNC.PropItemSetKey, sourcePNC.MaxPropsPerObject);
             }
 
             return result;
