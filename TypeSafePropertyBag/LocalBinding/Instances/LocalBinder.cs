@@ -214,12 +214,10 @@ namespace DRM.TypeSafePropertyBag.LocalBinding
                         return result;
                     }
 
-                // Not Yet. Supported.
-                //case PropStorageStrategyEnum.External:
-                //    return false;
+                case PropStorageStrategyEnum.External:
+                    goto case PropStorageStrategyEnum.Internal;
 
                 // This property has no backing store, there is no concept of a starting value.
-                // (Propably used to send messages.)
                 case PropStorageStrategyEnum.Virtual:
                     return false;
 
