@@ -908,14 +908,22 @@ namespace DRM.TypeSafePropertyBag
                 throw new ApplicationException($"The subscription request has already been used.");
             }
 
+            if (subscriptionRequest.OwnerPropId.Level2Key == 0 &&
+                    (
+                    subscriptionRequest.SubscriptionKind == SubscriptionKind.TypedHandler ||
+                    subscriptionRequest.SubscriptionKind == SubscriptionKind.TypedAction
+                    )
+                )
+            {
+                throw new InvalidOperationException("Subscription of Kind = TypeHandler or TypedAction cannot be global, i.e., they must have a non-zero PropertyId.");
+            }
+
             SubscriberCollection sc = GetOrAddSubscriberCollection(subscriptionRequest.OwnerPropId);
 
             ISubscription result = sc.GetOrAdd
                 (
-                subscriptionRequest,
-                    (
-                    x => subscriptionRequest.CreateSubscription(_handlerDispatchDelegateCacheProvider)
-                    )
+                    request: subscriptionRequest,
+                    factory: x => subscriptionRequest.CreateSubscription(_handlerDispatchDelegateCacheProvider)
                 );
 
             wasAdded = subscriptionRequest.HasBeenUsed;
@@ -967,6 +975,7 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
+        // TODO: Implement a TryGetSubscriptions(IPropBag host, PropIdType propId)
         public IEnumerable<ISubscription> GetSubscriptions(IPropBag host, PropIdType propId)
         {
             // TODO: NOTE: This does not verify that the caller is the "correct" one.
