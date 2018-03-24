@@ -501,7 +501,7 @@ namespace DRM.TypeSafePropertyBag
         public PSAccessServiceInterface CreatePropStoreService(IPropBag propBag, PropNodeCollectionInternalInterface propNodes, out BagNode newBagNode)
         {
             // Issue a new, unique Id for this propBag.
-            ObjectIdType objectId = NextCookedVal;
+            ObjectIdType objectId = NextObjectId;
 
             // Create a new PropStoreNode for this PropBag
             newBagNode = new BagNode(objectId, propBag, propNodes, MaxPropsPerObject, _handlerDispatchDelegateCacheProvider.CallPSParentNodeChangedEventSubsCache);
@@ -624,13 +624,13 @@ namespace DRM.TypeSafePropertyBag
 
         #region Private Methods
 
-        private long m_Counter = 0;
-        private ulong NextCookedVal
+        private long m_Counter = 0; // The first ObjectId issued will be 1. (0 is reserved to indicate and empty ExplodedKey.)
+        private ulong NextObjectId
         {
             get
             {
                 long temp = System.Threading.Interlocked.Increment(ref m_Counter);
-                if (temp > MaxObjectsPerAppDomain) throw new InvalidOperationException("The SimplePropStore has run out object ids.");
+                if (temp > MaxObjectsPerAppDomain) throw new InvalidOperationException($"The {nameof(SimplePropStoreAccessServiceProvider)} has run out object ids.");
                 return (ulong)temp;
             }
         }
