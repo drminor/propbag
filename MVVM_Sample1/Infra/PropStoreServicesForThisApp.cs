@@ -28,6 +28,9 @@ namespace MVVM_Sample1.Infra
 
         private static MemConsumptionTracker _mct = new MemConsumptionTracker();
         private readonly static SimplePropStoreProxy _theStore;
+
+        public readonly static IProvideHandlerDispatchDelegateCaches HandlerDispatchDelegateCacheProvider;
+
         private static IPropFactoryFactory _propFactoryFactory { get; }
         private static IViewModelActivator _vmActivator { get; }
         //private static IPropFactory _defaultPropFactory { get; }
@@ -88,11 +91,11 @@ namespace MVVM_Sample1.Infra
             IProvideDelegateCaches delegateCacheProvider = new SimpleDelegateCacheProvider(typeof(PropBag), typeof(APFGenericMethodTemplates));
             _mct.MeasureAndReport("After new SimpleDelegateCacheProvider");
 
-            IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider = new SimpleHandlerDispatchDelegateCacheProvider();
+            HandlerDispatchDelegateCacheProvider = new SimpleHandlerDispatchDelegateCacheProvider();
             _mct.MeasureAndReport("After new SimpleHandlerDispatchDelegateCacheProvider");
 
             // This creates the Global, Shared, Property Store.
-            _theStore = new SimplePropStoreProxy(MAX_NUMBER_OF_PROPERTIES, handlerDispatchDelegateCacheProvider);
+            _theStore = new SimplePropStoreProxy(MAX_NUMBER_OF_PROPERTIES, HandlerDispatchDelegateCacheProvider);
 
             // Get a reference to the PropStoreAccessService Factory.
             PSAccessServiceCreatorInterface psAccessServiceFactory = _theStore.PropStoreAccessServiceFactory;
@@ -115,7 +118,7 @@ namespace MVVM_Sample1.Infra
             AutoMapperProvider = GetAutoMapperProvider(WrapperTypeCreator, _vmActivator, psAccessServiceFactory);
                 _mct.MeasureAndReport("After GetAutoMapperProvider");
 
-            ViewModelHelper = new ViewModelHelper(PropModelCache, _vmActivator, psAccessServiceFactory, AutoMapperProvider);
+            ViewModelHelper = new ViewModelHelper(PropModelCache, _vmActivator, psAccessServiceFactory, AutoMapperProvider, WrapperTypeCreator);
                 _mct.MeasureAndReport("After new ViewModelHelper");
 
             //_defaultPropFactory = BuildDefaultPropFactory(valueConverter, delegateCacheProvider, typeResolver);

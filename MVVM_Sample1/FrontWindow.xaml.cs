@@ -5,6 +5,8 @@ using System;
 using System.Reflection;
 using System.Windows;
 
+using DRM.TypeSafePropertyBag;
+
 namespace MVVM_Sample1.View
 {
     public partial class FrontWindow : Window
@@ -68,15 +70,19 @@ namespace MVVM_Sample1.View
             //GetWindowList_Diag();
             PropStoreServicesForThisApp.ConfigPackageNameSuffix = configPackageNameSuffix;
 
+            //InspectDispatchHandlerCache();
             MainWindow mw = new MainWindow
             {
                 Owner = GetWindow(this)
             };
 
             mw.ShowDialog();
+            //InspectDispatchHandlerCache();
 
             //WindowState ws = mw.WindowState;
             //GetWindowList_Diag();
+
+
         }
 
         private void SetDataDirLocation()
@@ -93,6 +99,17 @@ namespace MVVM_Sample1.View
             {
                 System.Diagnostics.Debug.WriteLine(w.GetType().FullName);
             }
+        }
+
+        private void InspectDispatchHandlerCache()
+        {
+            IProvideHandlerDispatchDelegateCaches handlerDispatches = PropStoreServicesForThisApp.HandlerDispatchDelegateCacheProvider;
+            int pcGenCount = handlerDispatches.CallPcGenEventSubsCache.Count;
+            int pcObjCount = handlerDispatches.CallPcObjEventSubsCache.Count;
+            int pcStCount = handlerDispatches.CallPcStEventSubsCache.Count;
+            int pcTypedCount = handlerDispatches.CallPcTypedEventSubsCache.Count;
+            int psParentNodeChangedCount = handlerDispatches.CallPSParentNodeChangedEventSubsCache.Count;
+            int delegateProxyCount = handlerDispatches.DelegateProxyCache.Count;
         }
 
         #endregion
