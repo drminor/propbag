@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using DRM.PropBag.TypeWrapper;
 using DRM.PropBag.ViewModelTools;
 using DRM.TypeSafePropertyBag;
 using System;
@@ -15,7 +16,8 @@ namespace DRM.PropBag.AutoMapperSupport
                 IMapper mapper,
                 IViewModelActivator vmActivator,
                 PSAccessServiceCreatorInterface storeAccessCreator,
-                IProvideAutoMappers autoMapperService
+                IProvideAutoMappers autoMapperService,
+                ICreateWrapperTypes wrapperTypeCreator
             )
             : base
             (
@@ -23,7 +25,8 @@ namespace DRM.PropBag.AutoMapperSupport
                 mapper,
                 vmActivator,
                 storeAccessCreator,
-                autoMapperService
+                autoMapperService,
+                wrapperTypeCreator
             )
         {
         }

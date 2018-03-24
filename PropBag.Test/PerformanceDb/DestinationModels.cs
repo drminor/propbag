@@ -1,5 +1,6 @@
 ﻿using DRM.PropBag;
 using DRM.PropBag.AutoMapperSupport;
+using DRM.PropBag.TypeWrapper;
 using DRM.TypeSafePropertyBag;
 using PropBagLib.Tests.BusinessModel;
 using System;
@@ -25,8 +26,10 @@ namespace PropBagLib.Tests.PerformanceDb
             AddProp<Profession>("Profession", null, null, Profession.Default);
         }
 
-        public DestinationModel1(PropModelType propModel, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
-            : base(propModel, storeAccessCreator, autoMapperService, propFactory, fullClassName)
+        public DestinationModel1(PropModelType propModel, PSAccessServiceCreatorInterface storeAccessCreator,
+            IProvideAutoMappers autoMapperService, ICreateWrapperTypes wrapperTypeCreator,
+            IPropFactory propFactory, string fullClassName)
+            : base(propModel, storeAccessCreator, autoMapperService, wrapperTypeCreator, propFactory, fullClassName)
         {
             TryOpenPropSet();
             AddProp<int>("NewAfterFixedProp", null, null, 0);
@@ -53,8 +56,10 @@ namespace PropBagLib.Tests.PerformanceDb
             AddProp<Guid>("ProductId", null, null, Guid.NewGuid());
         }
 
-        public DestinationModel5(PropModelType propModel, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
-            : base(propModel, storeAccessCreator, autoMapperService, propFactory, fullClassName)
+        public DestinationModel5(PropModelType propModel, PSAccessServiceCreatorInterface storeAccessCreator,
+            IProvideAutoMappers autoMapperService, ICreateWrapperTypes wrapperTypeCreator,
+            IPropFactory propFactory, string fullClassName)
+            : base(propModel, storeAccessCreator, autoMapperService, wrapperTypeCreator, propFactory, fullClassName)
         {
         }
 
@@ -73,8 +78,10 @@ namespace PropBagLib.Tests.PerformanceDb
         //    AddProp<Guid>("ProductId", null, false, null, null, Guid.NewGuid());
         //}
 
-        public DestinationModel6(PropModelType propModel, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
-            : base(propModel, storeAccessCreator, autoMapperService, propFactory, fullClassName)
+        public DestinationModel6(PropModelType propModel, PSAccessServiceCreatorInterface storeAccessCreator,
+            IProvideAutoMappers autoMapperService, ICreateWrapperTypes wrapperTypeCreator,
+            IPropFactory propFactory, string fullClassName)
+            : base(propModel, storeAccessCreator, autoMapperService, wrapperTypeCreator, propFactory, fullClassName)
         {
         }
 

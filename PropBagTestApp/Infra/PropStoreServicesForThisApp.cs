@@ -1,6 +1,8 @@
 ﻿using DRM.PropBag;
 using DRM.PropBag.AutoMapperSupport;
 using DRM.PropBag.Caches;
+using DRM.PropBag.TypeWrapper;
+using DRM.PropBag.TypeWrapper.TypeDesc;
 using DRM.PropBag.ViewModelTools;
 using DRM.PropBagControlsWPF;
 using DRM.PropBagWPF;
@@ -30,6 +32,8 @@ namespace PropBagTestApp.Infra
         public static ViewModelHelper ViewModelHelper { get; }
         public static IProvideAutoMappers AutoMapperProvider { get; }
 
+        public static ICreateWrapperTypes WrapperTypeCreator { get; }
+
         public static string ConfigPackageNameSuffix { get; set; }
 
         static PropStoreServicesForThisApp()
@@ -46,7 +50,10 @@ namespace PropBagTestApp.Infra
 
             IViewModelActivator vmActivator = new SimpleViewModelActivator();
 
-            AutoMapperProvider = GetAutoMapperProvider(vmActivator, psAccessServiceFactory);
+            WrapperTypeCreator = BuildSimpleWrapperTypeCreator();
+
+
+            AutoMapperProvider = GetAutoMapperProvider(vmActivator, psAccessServiceFactory, WrapperTypeCreator);
 
             IConvertValues valueConverter = new PropFactoryValueConverter(typeDescBasedTConverterCache);
 
@@ -68,7 +75,9 @@ namespace PropBagTestApp.Infra
 
             PropModelCache = new SimplePropModelCache(propModelProvider);
 
-            ViewModelHelper = new ViewModelHelper(PropModelCache, vmActivator, psAccessServiceFactory, AutoMapperProvider);
+            WrapperTypeCreator = BuildSimpleWrapperTypeCreator();
+
+            ViewModelHelper = new ViewModelHelper(PropModelCache, vmActivator, psAccessServiceFactory, AutoMapperProvider, WrapperTypeCreator);
         }
 
         private static IPropFactoryFactory BuildThePropFactoryFactory
@@ -134,12 +143,17 @@ namespace PropBagTestApp.Infra
         }
 
 
-        private static IProvideAutoMappers GetAutoMapperProvider(IViewModelActivator viewModelActivator, PSAccessServiceCreatorInterface storeAccessCreator)
+        private static IProvideAutoMappers GetAutoMapperProvider
+            (
+            IViewModelActivator viewModelActivator,
+            PSAccessServiceCreatorInterface storeAccessCreator,
+            ICreateWrapperTypes wrapperTypeCreator
+            )
         {
             // TODO: Expose the creation of wrapperTypeCreator (ICreateWrapperTypes).
             IPropBagMapperBuilderProvider propBagMapperBuilderProvider = new SimplePropBagMapperBuilderProvider
                 (
-                wrapperTypesCreator: null,
+                wrapperTypesCreator: wrapperTypeCreator,
                 viewModelActivator: viewModelActivator,
                 storeAccessCreator: storeAccessCreator
                 );
@@ -157,6 +171,41 @@ namespace PropBagTestApp.Infra
 
             return autoMapperProvider;
         }
+
+        private static ICreateWrapperTypes BuildSimpleWrapperTypeCreator()
+        {
+            // -- Build WrapperType Caching Service
+            // Used by some ViewModel Activators to emit types, i.e., modules.
+            IModuleBuilderInfo moduleBuilderInfo = new SimpleModuleBuilderInfo();
+
+            IEmitWrapperType emitWrapperType = new SimpleWrapperTypeEmitter
+                (
+                mbInfo: moduleBuilderInfo
+                );
+
+            ICacheEmittedTypes wrapperTypeCachingService = new SimpleEmittedTypesCache
+                (
+                emitterEngine: emitWrapperType
+                );
+
+            // -- Build TypeDesc Caching Service
+            // Used only by some ModuleBuilders.
+            ITypeDescriptionProvider typeDescriptionProvider = new SimpleTypeDescriptionProvider();
+
+            ICacheTypeDescriptions typeDescCachingService = new TypeDescriptionLocalCache
+                (
+                typeDescriptionProvider: typeDescriptionProvider
+                );
+
+            ICreateWrapperTypes result = new SimpleWrapperTypeCreator
+                (
+                wrapperTypeCachingService: wrapperTypeCachingService,
+                typeDescCachingService: typeDescCachingService
+                );
+
+            return result;
+        }
+
 
         public static string GetResourceKeyWithSuffix(string rawKey, string suffix)
         {

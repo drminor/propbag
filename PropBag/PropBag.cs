@@ -177,17 +177,17 @@ namespace DRM.PropBag
         #region Constructor
 
         public PropBag(PropModelType propModel, PSAccessServiceCreatorInterface storeAcessorCreator)
-            : this(propModel, storeAcessorCreator, autoMapperService: null, propFactory: null, fullClassName: null)
+            : this(propModel, storeAcessorCreator, autoMapperService: null, wrapperTypeCreator: null, propFactory: null, fullClassName: null)
         {
         }
 
         public PropBag(PropModelType propModel, PSAccessServiceCreatorInterface storeAcessorCreator, IPropFactory propFactory)
-            : this(propModel, storeAcessorCreator, autoMapperService: null, propFactory: propFactory, fullClassName: null)
+            : this(propModel, storeAcessorCreator, autoMapperService: null, wrapperTypeCreator: null, propFactory: propFactory, fullClassName: null)
         {
         }
 
         public PropBag(PropModelType propModel, PSAccessServiceCreatorInterface storeAcessorCreator, IPropFactory propFactory, string fullClassName)
-            : this(propModel, storeAcessorCreator, autoMapperService: null, propFactory: propFactory, fullClassName: fullClassName)
+            : this(propModel, storeAcessorCreator, autoMapperService: null, wrapperTypeCreator: null, propFactory: propFactory, fullClassName: fullClassName)
         {
         }
 
@@ -199,7 +199,9 @@ namespace DRM.PropBag
         /// <param name="storeAcessorCreator"></param>
         /// <param name="propFactory">The PropFactory to use instead of the one specified by the PropModel.</param>
         /// <param name="fullClassName">The namespace and class name to use instead of the one specified by the PropMode.</param>
-        public PropBag(PropModelType propModel, PSAccessServiceCreatorInterface storeAcessorCreator, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
+        public PropBag(PropModelType propModel, PSAccessServiceCreatorInterface storeAcessorCreator,
+            IProvideAutoMappers autoMapperService, ICreateWrapperTypes wrapperTypeCreator,
+            IPropFactory propFactory, string fullClassName)
         {
             long memUsedSoFar = _memConsumptionTracker.UsedSoFar;
 
@@ -213,7 +215,7 @@ namespace DRM.PropBag
             IPropFactory propFactoryToUse = propFactory ?? propModel.PropFactory ?? throw new InvalidOperationException("The propModel has no PropFactory and one was not provided in the constructor.");
             string fullClassNameToUse = fullClassName ?? propModel.FullClassName;
 
-            BasicConstruction(propModel.TypeSafetyMode, autoMapperService, autoMapperService?.WrapperTypeCreator,
+            BasicConstruction(propModel.TypeSafetyMode, autoMapperService, wrapperTypeCreator,
                 propModel.PropModelCache, propModel, propFactoryToUse, fullClassNameToUse);
 
             _ourStoreAccessor = storeAcessorCreator.CreatePropStoreService(this);
@@ -285,11 +287,12 @@ namespace DRM.PropBag
 
             PropBagTypeSafetyMode typeSafetyMode = ((PropBag)copySource).TypeSafetyMode;
             IProvideAutoMappers autoMapperService = ((PropBag)copySource)._autoMapperService;
+            ICreateWrapperTypes wrapperTypeCreator = ((PropBag)copySource)._wrapperTypeCreator;
             IPropFactory propFactory = ((PropBag)copySource)._propFactory;
             PropModelCacheInterface propModelCache = ((PropBag)copySource)._propModelCache;
             PropModelType propModel = ((PropBag)copySource)._propModel;
 
-            BasicConstruction(typeSafetyMode, autoMapperService, autoMapperService?.WrapperTypeCreator, propModelCache, propModel, propFactory, copySource.FullClassName);
+            BasicConstruction(typeSafetyMode, autoMapperService, wrapperTypeCreator, propModelCache, propModel, propFactory, copySource.FullClassName);
 
             PSAccessServiceInterface storeAccessor = ((PropBag)copySource)._ourStoreAccessor;
             _ourStoreAccessor = CloneProps(copySource, storeAccessor);
@@ -297,12 +300,12 @@ namespace DRM.PropBag
 
         protected PropBag(PropBagTypeSafetyMode typeSafetyMode, PSAccessServiceCreatorInterface storeAcessorCreator,
             IPropFactory propFactory, string fullClassName)
-            : this(typeSafetyMode, storeAcessorCreator, autoMapperService: null, propFactory: propFactory, fullClassName: fullClassName)
+            : this(typeSafetyMode, storeAcessorCreator, autoMapperService: null, wrapperTypeCreator: null, propFactory: propFactory, fullClassName: fullClassName)
         {
         }
 
         protected PropBag(PropBagTypeSafetyMode typeSafetyMode, PSAccessServiceCreatorInterface storeAcessorCreator,
-            IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
+            IProvideAutoMappers autoMapperService, ICreateWrapperTypes wrapperTypeCreator, IPropFactory propFactory, string fullClassName)
         {
             _memConsumptionTracker.MeasureAndReport("Testing", "Top of PropBag Constructor.");
             _memConsumptionTracker.Measure($"Top of PropBag Constructor.");
@@ -313,7 +316,7 @@ namespace DRM.PropBag
             PropModelCacheInterface propModelCache = null;
             PropModelType propModel = null;
 
-            BasicConstruction(typeSafetyMode, autoMapperService, autoMapperService?.WrapperTypeCreator,
+            BasicConstruction(typeSafetyMode, autoMapperService, wrapperTypeCreator,
                 propModelCache, propModel, propFactory, fullClassName);
 
             _ourStoreAccessor = storeAcessorCreator.CreatePropStoreService(this);
@@ -439,7 +442,7 @@ namespace DRM.PropBag
             }
             else
             {
-                typedProp = BuildStandardProp(pi, propModelCache, storeAccessCreator, autoMapperService);
+                typedProp = BuildStandardProp(pi, propModelCache, storeAccessCreator, autoMapperService, wrapperTypeCreator);
             }
 
             return typedProp;
@@ -713,7 +716,8 @@ namespace DRM.PropBag
             return genMapper;
         }
 
-        private IProp BuildStandardProp(IPropItemModel pi, PropModelCacheInterface propModelProvider, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService)
+        private IProp BuildStandardProp(IPropItemModel pi, PropModelCacheInterface propModelProvider, PSAccessServiceCreatorInterface storeAccessCreator,
+            IProvideAutoMappers autoMapperService, ICreateWrapperTypes wrapperTypeCreator)
         {
             _memConsumptionTracker.Measure($"Begin BuildStandardPropFromCooked: {pi.PropertyName}.");
 
@@ -733,7 +737,7 @@ namespace DRM.PropBag
                 {
                     // TODO: This is assuming that the PropModelResourceKey is the same as the FullClassName.
                     string fcn = pi.InitialValueField.PropBagFCN;
-                    IPropBag newObject = GetNewViewModel(fcn, pi.PropertyType, propModelProvider, storeAccessCreator, autoMapperService);
+                    IPropBag newObject = GetNewViewModel(fcn, pi.PropertyType, propModelProvider, storeAccessCreator, autoMapperService, wrapperTypeCreator);
 
                     if (pi.PropTemplate != null && pi.PropCreator != null)
                     {
@@ -870,13 +874,14 @@ namespace DRM.PropBag
             }
         }
 
-        private IPropBag GetNewViewModel(string fullClassName, Type propertyType, PropModelCacheInterface propModelProvider, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService)
+        private IPropBag GetNewViewModel(string fullClassName, Type propertyType, PropModelCacheInterface propModelProvider,
+            PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService, ICreateWrapperTypes wrapperTypeCreator)
         {
             //PropModelType propModel = propModelProvider.GetPropModel(pi.InitialValueField.PropBagResourceKey);
 
             if (propModelProvider.TryGetPropModel(fullClassName, out PropModelType propModel))
             {
-                IPropBag newObject = (IPropBag)VmActivator.GetNewViewModel(propertyType, propModel, storeAccessCreator, autoMapperService, propFactory: null, fullClassName: null);
+                IPropBag newObject = (IPropBag)VmActivator.GetNewViewModel(propertyType, propModel, storeAccessCreator, autoMapperService, wrapperTypeCreator, propFactory: null, fullClassName: null);
                 return newObject;
             }
             else
@@ -1664,22 +1669,26 @@ namespace DRM.PropBag
 
         #region Subscribe to Typed PropertyChanged
 
-        public bool SubscribeToGlobalPropChanged<T>(EventHandler<PcTypedEventArgs<T>> eventHandler, bool unregister)
-        {
-            uint propId = 0;
+        // Global Property Changed Events notifies the subscriber whenever any property has a value changed.
+        // Since this event is typed, it only makes sense when a property of the correct type has been changed.
+        // Since it very difficult to determine when a property has a type that matches a specified type,
+        // SUBSCRIBING to GLOBAL PropertyChangedTyped events is NOT SUPPORTED.
+        //public bool SubscribeToGlobalPropChanged<T>(EventHandler<PcTypedEventArgs<T>> eventHandler, bool unregister)
+        //{
+        //    uint propId = 0;
 
-            bool result;
-            if (unregister)
-            {
-                result = _ourStoreAccessor.UnregisterHandler(this, propId, eventHandler/*, SubscriptionPriorityGroup.Standard, keepRef: false*/);
-            }
-            else
-            {
-                IDisposable disable = _ourStoreAccessor.RegisterHandler(this, propId, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
-                result = disable != null;
-            }
-            return result;
-        }
+        //    bool result;
+        //    if (unregister)
+        //    {
+        //        result = _ourStoreAccessor.UnregisterHandler(this, propId, eventHandler/*, SubscriptionPriorityGroup.Standard, keepRef: false*/);
+        //    }
+        //    else
+        //    {
+        //        IDisposable disable = _ourStoreAccessor.RegisterHandler(this, propId, eventHandler, SubscriptionPriorityGroup.Standard, keepRef: false);
+        //        result = disable != null;
+        //    }
+        //    return result;
+        //}
 
         public IDisposable SubscribeToPropChanged<T>(EventHandler<PcTypedEventArgs<T>> eventHandler, string propertyName)
         {
@@ -2953,8 +2962,11 @@ namespace DRM.PropBag
                     curValue = newValue;
 
                     // Raise notify events.
-                    if(subscriptions != null) DoNotifyWork(propId, propertyName, typedProp, oldValue, newValue, subscriptions);
-                    if (globalSubs != null) DoNotifyWork(propId, propertyName, typedProp, oldValue, newValue, globalSubs);
+                    if(subscriptions != null)
+                        DoNotifyWork(propId, propertyName, typedProp, oldValue, newValue, subscriptions);
+
+                    if (globalSubs != null && globalSubs.Count() > 0)
+                        DoNotifyWork(propId, propertyName, typedProp, oldValue, newValue, globalSubs);
                 }
                 return !theSame;
             }
@@ -2971,8 +2983,11 @@ namespace DRM.PropBag
                 curValue = newValue;
 
                 // Raise notify events.
-                if (subscriptions != null) DoNotifyWork(propId, propertyName, typedProp, newValue, subscriptions);
-                if (globalSubs != null) DoNotifyWork(propId, propertyName, typedProp, newValue, globalSubs);
+                if (subscriptions != null)
+                    DoNotifyWork(propId, propertyName, typedProp, newValue, subscriptions);
+
+                if (globalSubs != null && globalSubs.Count() > 0)
+                    DoNotifyWork(propId, propertyName, typedProp, newValue, globalSubs);
 
                 // The current value is undefined and the new value is defined, therefore: their has been a real update -- return true.
                 return true;

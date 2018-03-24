@@ -1,5 +1,6 @@
 ﻿using DRM.PropBag.AutoMapperSupport;
 using DRM.TypeSafePropertyBag;
+using DRM.PropBag.TypeWrapper;
 using System;
 
 namespace DRM.PropBag.ViewModelTools
@@ -16,7 +17,9 @@ namespace DRM.PropBag.ViewModelTools
 
         // With AutoMapper Support
         object GetNewViewModel(Type typeToCreate, PropModelType propModel,
-            PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName);
+            PSAccessServiceCreatorInterface storeAccessCreator,
+            IProvideAutoMappers autoMapperService, ICreateWrapperTypes wrapperTypeCreator,
+            IPropFactory propFactory, string fullClassName);
 
         // Create new Type that is derived from a Type known at compile time.
         object GetNewViewModel<BT>(PropModelType propModel, PSAccessServiceCreatorInterface storeAccessCreator,
@@ -24,7 +27,8 @@ namespace DRM.PropBag.ViewModelTools
 
         // With AutoMapper Support
         object GetNewViewModel<BT>(PropModelType propModel, PSAccessServiceCreatorInterface storeAccessCreator,
-            IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName) where BT : class, IPropBag;
+            IProvideAutoMappers autoMapperService, ICreateWrapperTypes wrapperTypeCreator,
+            IPropFactory propFactory, string fullClassName) where BT : class, IPropBag;
 
         object GetNewViewModel(Type typeToCreate, IPropBag copySource);
         object GetNewViewModel<BT>(IPropBag copySource) where BT : class, IPropBag;

@@ -1,5 +1,6 @@
 ﻿using DRM.PropBag;
 using DRM.PropBag.AutoMapperSupport;
+using DRM.PropBag.TypeWrapper;
 using DRM.TypeSafePropertyBag;
 using NUnit.Framework;
 using PropBagLib.Tests.AutoMapperSupport;
@@ -52,7 +53,7 @@ namespace PropBagLib.Tests.PerformanceDb
                 DestinationModel1 testCopy = (DestinationModel1) test.Clone();
             }
 
-            DestinationModel1 test2 = new DestinationModel1(propModel1, ourHelper.StoreAccessCreator, null, ourHelper.PropFactory_V1, null);
+            DestinationModel1 test2 = new DestinationModel1(propModel1, ourHelper.StoreAccessCreator, null, null, ourHelper.PropFactory_V1, null);
             
             if (configPackageName == "Emit_Proxy")
             {
@@ -68,10 +69,14 @@ namespace PropBagLib.Tests.PerformanceDb
             IPropBagMapperGen genMapper = null;
             IPropBagMapper<Person, DestinationModel1> mapper = null;
 
+            ICreateWrapperTypes wrapperTypeCreator = null;
+
             if (configPackageName == "Emit_Proxy")
             {
                 IMapperRequest localMr = new MapperRequest(typeof(Person), propModel1, configPackageName);
-                Type et = amp.WrapperTypeCreator.GetWrapperType(propModel1, typeToWrap);
+
+                wrapperTypeCreator = ourHelper.GetWrapperTypeCreator_V1();
+                Type et = wrapperTypeCreator.GetWrapperType(propModel1, typeToWrap);
                 propModel1.NewEmittedType = et;
 
                 IPropBagMapperKeyGen mapperRequest = amp.SubmitMapperRequest(localMr.PropModel, localMr.SourceType, localMr.ConfigPackageName);
@@ -100,7 +105,7 @@ namespace PropBagLib.Tests.PerformanceDb
             PropModelType propModel5 = pmHelpers.GetPropModelForModel5Dest(propFactory_V1);
 
             string fullClassName = null; // Don't override the value from the PropModel.
-            _testMainVM = new DestinationModel5(propModel5, ourHelper.StoreAccessCreator, amp, propFactory_V1, fullClassName);
+            _testMainVM = new DestinationModel5(propModel5, ourHelper.StoreAccessCreator, amp, wrapperTypeCreator, propFactory_V1, fullClassName);
 
             Business b = new Business();
             _testMainVM.SetIt(b, "Business"); // THIS IS A SET ACESSS OPERATION.

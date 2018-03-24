@@ -41,11 +41,11 @@ namespace DRM.PropBag.AutoMapperSupport
 
         #endregion
 
-        #region Public Properties
+        //#region Public Properties
 
-        public ICreateWrapperTypes WrapperTypeCreator => _mapperBuilderProvider.WrapperTypeCreator;
+        //public ICreateWrapperTypes WrapperTypeCreator => _mapperBuilderProvider.WrapperTypeCreator;
 
-        #endregion
+        //#endregion
 
         #region Public Methods
 
@@ -110,15 +110,15 @@ namespace DRM.PropBag.AutoMapperSupport
             return (IPropBagMapperKey<TSource, TDestination>) newMapRequest;
         }
 
-        public long ClearEmittedTypeCache()
-        {
-            return _mapperBuilderProvider.ClearTypeCache();
-        }
+        //public long ClearEmittedTypeCache()
+        //{
+        //    return _mapperBuilderProvider.ClearTypeCache();
+        //}
 
         public void ClearCaches()
         {
             ClearMappersCache();
-            ClearEmittedTypeCache();
+            //ClearEmittedTypeCache();
         }
 
         #endregion

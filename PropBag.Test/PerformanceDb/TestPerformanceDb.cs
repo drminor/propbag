@@ -1,5 +1,6 @@
 ﻿using DRM.PropBag;
 using DRM.PropBag.AutoMapperSupport;
+using DRM.PropBag.TypeWrapper;
 using DRM.TypeSafePropertyBag;
 using NUnit.Framework;
 using PropBagLib.Tests.AutoMapperSupport;
@@ -277,6 +278,8 @@ namespace PropBagLib.Tests.PerformanceDb
         {
             AutoMapperHelpers ourHelper = new AutoMapperHelpers();
             IPropFactory propFactory_V1 = ourHelper.GetNewPropFactory_V1();
+            ICreateWrapperTypes wrapperTypeCreator = ourHelper.GetWrapperTypeCreator_V1();
+
             Assert.That(ourHelper.StoreAccessCreator.AccessCounter == 0, "The Provider of PropStoreAccessServices has not had its Access Counter reset.");
 
             List<DestinationModel1> destinationList = new List<DestinationModel1>();
@@ -287,7 +290,7 @@ namespace PropBagLib.Tests.PerformanceDb
             PropModelType propModel5 = pmHelpers.GetPropModelForModel5Dest(propFactory_V1);
 
             // TODO: AAA
-            DestinationModel5 testChildVM = new DestinationModel5(propModel5, ourHelper.StoreAccessCreator, _amp, propFactory_V1, null);
+            DestinationModel5 testChildVM = new DestinationModel5(propModel5, ourHelper.StoreAccessCreator, _amp, wrapperTypeCreator, propFactory_V1, null);
 
             Business b = new Business();
             testChildVM.SetIt(b, "Business");
@@ -300,7 +303,7 @@ namespace PropBagLib.Tests.PerformanceDb
 
             // Set up MainVM (Using Model 6)
             PropModelType propModel6 = pmHelpers.GetPropModelForModel6Dest(propFactory_V1);
-            DestinationModel6 testMainVM = new DestinationModel6(propModel6, ourHelper.StoreAccessCreator, _amp, propFactory_V1, null);
+            DestinationModel6 testMainVM = new DestinationModel6(propModel6, ourHelper.StoreAccessCreator, _amp, wrapperTypeCreator, propFactory_V1, null);
 
             Business b2 = new Business();
             testMainVM.SetIt(b2, "Business");
@@ -320,6 +323,8 @@ namespace PropBagLib.Tests.PerformanceDb
             GC.WaitForFullGCComplete();
 
             _ourHelper = new AutoMapperHelpers();
+            ICreateWrapperTypes wrapperTypeCreator = _ourHelper.GetWrapperTypeCreator_V1();
+
             _propFactory_V1 = _ourHelper.GetNewPropFactory_V1();
             _propModelCache = _ourHelper.GetPropModelCache_V1();
 

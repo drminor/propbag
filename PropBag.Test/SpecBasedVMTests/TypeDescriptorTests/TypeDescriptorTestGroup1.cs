@@ -43,7 +43,9 @@ namespace PropBagLib.Tests.SpecBasedVMTests.TypeDescriptorTests
             BaseMemTracker.CompactMeasureAndReport("After get mainWindow_PropModel.", "CreateDestroyBasicVM");
 
             // To see how much memory is not being cleaned up after one is created and then disposed.
-            mainWindowViewModel = new MainWindowViewModel(mainWindowPropModel, PropStoreAccessService_Factory, AutoMapperProvider, propFactory: null, fullClassName: null);
+            mainWindowViewModel = new MainWindowViewModel(mainWindowPropModel, PropStoreAccessService_Factory,
+                AutoMapperProvider, WrapperTypeCreator,
+                propFactory: null, fullClassName: null);
             BaseMemTracker.CompactMeasureAndReport("After create the first mainWindowViewModel.", "CreateDestroyBasicVM");
 
             //mainWindowViewModel.Dispose();

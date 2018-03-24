@@ -10,7 +10,7 @@ namespace DRM.PropBag.AutoMapperSupport
     // TODO: Change Register<xxx> to Submit<xxx>. (We are submitting a notice that we will need this at some point -- remember: GetMapper creates a mapper for all pending requests on first access to any request.)
     public interface IProvideAutoMappers : ICachePropBagMappers
     {
-        ICreateWrapperTypes WrapperTypeCreator { get; }
+        //ICreateWrapperTypes WrapperTypeCreator { get; }
 
         IPropBagMapperKey<TSource, TDestination> SubmitMapperRequest<TSource, TDestination>
             (
@@ -38,7 +38,7 @@ namespace DRM.PropBag.AutoMapperSupport
             )
             where TDestination : class, IPropBag;
 
-        long ClearEmittedTypeCache();
+        //long ClearEmittedTypeCache();
 
         void ClearCaches();
     }

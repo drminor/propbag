@@ -32,11 +32,13 @@ namespace DRM.PropBag.AutoMapperSupport
 
         #region Constructor
 
-        public PropBagMapperKey(
+        public PropBagMapperKey
+            (
             IBuildPropBagMapper<TSource, TDestination> propBagMapperBuilder,
             IConfigureAMapper<TSource, TDestination> mappingConfiguration,
             IMapTypeDefinition<TSource> sourceMapTypeDef,
-            IMapTypeDefinition<TDestination> destinationMapTypeDef)
+            IMapTypeDefinition<TDestination> destinationMapTypeDef
+            )
             : base(propBagMapperBuilder.GenMapperCreator, sourceMapTypeDef, destinationMapTypeDef)
         {
             PropBagMapperBuilder = propBagMapperBuilder;
@@ -48,18 +50,33 @@ namespace DRM.PropBag.AutoMapperSupport
             //SourceConstructor = mappingConfiguration.SourceConstructor;
             //DestinationConstructor = mappingConfiguration.DestinationConstructor;
 
-            ValidateBuilder();
+            ValidateThisKey();
         }
 
         #endregion
 
         [System.Diagnostics.Conditional("DEBUG")]
-        private void ValidateBuilder()
+        private void ValidateThisKey()
         {
-            PropBagMapperBuilder.Validate(this);
+            Validate(this);
+        }
+
+        private bool Validate(IPropBagMapperKey<TSource, TDestination> mapperRequestKey)
+        {
+            if (mapperRequestKey.MappingConfiguration.RequiresWrappperTypeEmitServices)
+            {
+                if (mapperRequestKey.SourceTypeDef.IsPropBag)
+                    throw new ApplicationException("The first type, TSource, is expected to be a regular, i.e., non-propbag-based type.");
+
+                if (!mapperRequestKey.DestinationTypeDef.IsPropBag)
+                    throw new ApplicationException("The second type, TDestination, is expected to be a propbag-based type.");
+            }
+
+            return true;
         }
 
         #region IEquatable Support and Object Overrides
+
         public override bool Equals(object obj)
         {
             return Equals(obj as PropBagMapperKeyGen);

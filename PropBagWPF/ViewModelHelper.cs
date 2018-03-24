@@ -3,6 +3,7 @@ using DRM.PropBag.ViewModelTools;
 using System;
 using DRM.PropBag.AutoMapperSupport;
 using System.Collections.Generic;
+using DRM.PropBag.TypeWrapper;
 
 namespace DRM.PropBagWPF
 {
@@ -24,6 +25,7 @@ namespace DRM.PropBagWPF
         IViewModelActivator _viewModelActivator { get; }
         PSAccessServiceCreatorInterface _storeAccessCreator;
         IProvideAutoMappers _autoMapperService;
+        ICreateWrapperTypes _wrapperTypeCreator;
 
         #endregion
 
@@ -34,13 +36,15 @@ namespace DRM.PropBagWPF
             PropModelCacheInterface propModelCache,
             IViewModelActivator viewModelActivator,
             PSAccessServiceCreatorInterface storeAccessCreator,
-            IProvideAutoMappers autoMapperService
+            IProvideAutoMappers autoMapperService,
+            ICreateWrapperTypes wrapperTypeCreator
             )
         {
             _propModelCache = propModelCache ?? throw new ArgumentNullException(nameof(propModelCache));
             _viewModelActivator = viewModelActivator ?? throw new ArgumentNullException(nameof(viewModelActivator));
             _storeAccessCreator = storeAccessCreator ?? throw new ArgumentNullException(nameof(storeAccessCreator));
             _autoMapperService = autoMapperService ?? throw new ArgumentNullException(nameof(autoMapperService));
+            _wrapperTypeCreator = wrapperTypeCreator ?? throw new ArgumentNullException(nameof(wrapperTypeCreator));
         }
 
         #endregion
@@ -92,6 +96,7 @@ namespace DRM.PropBagWPF
                 propModel: pm,
                 storeAccessCreator: _storeAccessCreator,
                 autoMapperService: _autoMapperService,
+                wrapperTypeCreator: _wrapperTypeCreator,
                 propFactory: propFactory,
                 fullClassName: fullClassName
                 );

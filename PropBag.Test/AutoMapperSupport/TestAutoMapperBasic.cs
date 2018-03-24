@@ -1,5 +1,6 @@
 ﻿using DRM.PropBag;
 using DRM.PropBag.AutoMapperSupport;
+using DRM.PropBag.TypeWrapper;
 using DRM.TypeSafePropertyBag;
 using NUnit.Framework;
 using System;
@@ -15,6 +16,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
     {
         IProvideAutoMappers _amp;
         IPropFactory _propFactory_V1;
+        ICreateWrapperTypes _wrapperTypeCreator_V1;
 
         [OneTimeSetUp]
         public void SetupAutoMapperSupport_V1()
@@ -23,6 +25,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
 
             _propFactory_V1 = ourHelper.PropFactory_V1;
             _amp = ourHelper.GetAutoMapperSetup_V1();
+            _wrapperTypeCreator_V1 = ourHelper.GetWrapperTypeCreator_V1();
             PropModelCacheInterface _propModelCache = ourHelper.GetPropModelCache_V1();
         }
 
@@ -68,7 +71,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
 
             IMapperRequest mapperRequest = new MapperRequest(typeof(MyModel3), propModel, configPackageName);
 
-            Type et = _amp.WrapperTypeCreator.GetWrapperType(propModel, typeToWrap);
+            Type et = _wrapperTypeCreator_V1.GetWrapperType(propModel, typeToWrap);
 
             propModel.NewEmittedType = et;
 

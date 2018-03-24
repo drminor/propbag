@@ -1,21 +1,15 @@
 ﻿using DRM.PropBag;
 using DRM.PropBag.AutoMapperSupport;
 using DRM.PropBag.Caches;
-using DRM.PropBagWPF;
-using DRM.TypeSafePropertyBag;
-using DRM.PropBag.ViewModelTools;
-using System;
 using DRM.PropBag.TypeWrapper;
 using DRM.PropBag.TypeWrapper.TypeDesc;
-using DRM.PropBagControlsWPF;
-using System.Windows;
+using DRM.PropBag.ViewModelTools;
+using DRM.PropBagWPF;
+using DRM.TypeSafePropertyBag;
+using System;
 
 namespace PropBagLib.Tests.AutoMapperSupport
 {
-    using PropIdType = UInt32;
-    using PropNameType = String;
-
-    using PropModelType = IPropModel<String>;
     using PropModelCacheInterface = ICachePropModels<String>;
 
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
@@ -65,7 +59,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
         {
             IViewModelActivator vmActivator = new SimpleViewModelActivator();
 
-            ICreateWrapperTypes simpleWrapperTypeCreator = GetSimpleWrapperTypeCreator();
+            ICreateWrapperTypes simpleWrapperTypeCreator = GetWrapperTypeCreator_V1();
 
             IPropBagMapperBuilderProvider propBagMapperBuilderProvider
                 = new SimplePropBagMapperBuilderProvider
@@ -166,6 +160,16 @@ namespace PropBagLib.Tests.AutoMapperSupport
             return _autoMapperProvider_V1;
         }
 
+        ICreateWrapperTypes _wrapperTypeCreator_V1;
+        public ICreateWrapperTypes GetWrapperTypeCreator_V1()
+        {
+            if(_wrapperTypeCreator_V1 == null)
+            {
+                _wrapperTypeCreator_V1 = BuildSimpleWrapperTypeCreator();
+            }
+            return _wrapperTypeCreator_V1;
+        }
+
         PropModelCacheInterface _propModelCache_V1;
         public PropModelCacheInterface GetPropModelCache_V1()
         {
@@ -246,7 +250,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
             remotePropModelProvider.LoadPropModels(resourceFolderPath, pbTemplateFilenames);
         }
 
-        protected virtual ICreateWrapperTypes GetSimpleWrapperTypeCreator()
+        protected virtual ICreateWrapperTypes BuildSimpleWrapperTypeCreator()
         {
             // -- Build WrapperType Caching Service
             // Used by some ViewModel Activators to emit types, i.e., modules.

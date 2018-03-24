@@ -1,5 +1,6 @@
 ﻿using DRM.PropBag;
 using DRM.PropBag.AutoMapperSupport;
+using DRM.PropBag.TypeWrapper;
 using DRM.TypeSafePropertyBag;
 using System;
 
@@ -19,8 +20,10 @@ namespace PropBagLib.Tests.AutoMapperSupport
         //    AddProp<MyModel4>("Deep", null, null, null);
         //}
 
-        public DestinationModel3(PropModel propModel, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
-            : base(propModel, storeAccessCreator, autoMapperService, propFactory, fullClassName)
+        public DestinationModel3(PropModel propModel, PSAccessServiceCreatorInterface storeAccessCreator,
+            IProvideAutoMappers autoMapperService, ICreateWrapperTypes wrapperTypeCreator,
+            IPropFactory propFactory, string fullClassName)
+            : base(propModel, storeAccessCreator, autoMapperService, wrapperTypeCreator, propFactory, fullClassName)
         {
             //AddProp<Guid>("ProductId", null, null, Guid.NewGuid());
             //AddProp<int>("Amount", null, null, initialValue: 0);

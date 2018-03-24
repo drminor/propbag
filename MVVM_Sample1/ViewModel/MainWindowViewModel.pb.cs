@@ -1,5 +1,6 @@
 ﻿using DRM.PropBag;
 using DRM.PropBag.AutoMapperSupport;
+using DRM.PropBag.TypeWrapper;
 using DRM.TypeSafePropertyBag;
 using DRM.TypeSafePropertyBag.TypeDescriptors;
 using System;
@@ -20,8 +21,10 @@ namespace MVVM_Sample1.ViewModel
             TypeDescriptor.AddProvider(_typeDescriptionProvider, typeof(MainWindowViewModel));
         }
 
-        public MainWindowViewModel(PropModelType pm, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService, IPropFactory propFactory, string fullClassName)
-            : base(pm, storeAccessCreator, autoMapperService, propFactory, fullClassName)
+        public MainWindowViewModel(PropModelType pm, PSAccessServiceCreatorInterface storeAccessCreator,
+            IProvideAutoMappers autoMapperService, ICreateWrapperTypes wrapperTypeCreator,
+            IPropFactory propFactory, string fullClassName)
+            : base(pm, storeAccessCreator, autoMapperService, wrapperTypeCreator, propFactory, fullClassName)
         {
             //System.Diagnostics.Debug.WriteLine("Beginning to construct MainWindowViewModel -- From PropModel.");
 
