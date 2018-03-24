@@ -14,13 +14,9 @@ namespace DRM.TypeSafePropertyBag
     {
         #region Private Members
 
-        //WeakRefKey<PropModelType>? _propItemSetId;
         PropItemSetKeyType _propItemSetKey;
-
         PropNode[] _children;
-
         Dictionary<PropNameType, PropNode> PropItemsByName;
-
         object _sync = new object();
 
         #endregion
@@ -36,24 +32,27 @@ namespace DRM.TypeSafePropertyBag
         {
             MaxPropsPerObject = maxPropsPerObject;
 
-            //if(propItemSetId.TryGetTarget(out PropModelType target))
-            //{
-            //    if(target == null)
-            //    {
-            //        throw new ArgumentNullException("The PropItemSetId must refer to a non-null PropModel.");
-            //    }
-            //}
-
             CheckPropItemSetId(propItemSetKey);
-
             _propItemSetKey = propItemSetKey;
 
-            _children = propNodes.ToArray();
+            _children = PopulateChildren(propNodes);
             PropItemsByName = _children.ToDictionary(k => k.PropertyName, v => v);
-
-            CheckChildCount(_children.Length);
-
             _hashCode = ComputeHashCode();
+        }
+
+        private PropNode[] PopulateChildren(IEnumerable<PropNode> propNodes)
+        {
+            long maxPropId = propNodes.Max(pn => pn.PropId);
+            CheckChildCount(maxPropId - 1);
+
+            PropNode[] result = new PropNode[maxPropId];
+
+            foreach(PropNode pn in propNodes)
+            {
+                result[pn.PropId - 1] = pn; // PropIds start at 1, our array's first index is 0.
+            }
+
+            return result;
         }
 
         private void CheckPropItemSetId(PropItemSetKeyType propItemSetKey)
@@ -77,7 +76,6 @@ namespace DRM.TypeSafePropertyBag
 
         #region Public Members
 
-        //public WeakRefKey<PropModelType>? PropItemSetId => _propItemSetId;
         public PropItemSetKeyType PropItemSetKey => _propItemSetKey;
 
         public int Count => _children.Length;
@@ -94,7 +92,7 @@ namespace DRM.TypeSafePropertyBag
 
         public bool Contains(PropIdType propId)
         {
-            bool result = propId >= 0 && propId < _children.Length;
+            bool result = propId > 0 && propId <= _children.Length;
             return result;
         }
 
@@ -123,7 +121,7 @@ namespace DRM.TypeSafePropertyBag
             {
                 if (Contains(propId))
                 {
-                    propNode = _children[propId];
+                    propNode = _children[propId - 1]; // Our Array begin at index 0; PropIds start at 1. (0 is reserved for none or all Properties.)
                     return true;
                 }
             }
@@ -172,6 +170,10 @@ namespace DRM.TypeSafePropertyBag
                 return false;
             }
         }
+
+        #endregion
+
+        #region Invalid Methods
 
         public PropNode CreateAndAdd(IPropDataInternal propData_Internal, PropNameType propertyName, BagNode parent)
         {
