@@ -1,5 +1,4 @@
-﻿using DRM.TypeSafePropertyBag.Fundamentals;
-using System;
+﻿using System;
 
 namespace DRM.TypeSafePropertyBag
 {
@@ -12,8 +11,6 @@ namespace DRM.TypeSafePropertyBag
     /// </summary>
     public interface IPropData
     {
-        //PropIdType PropId { get; }
-
         bool IsEmpty { get; }
         bool IsPropBag { get; }
         //bool IsPrivate { get; } // TODO: Consider adding the ability to register private PropItems.
