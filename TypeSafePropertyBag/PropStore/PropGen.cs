@@ -33,10 +33,7 @@ namespace DRM.TypeSafePropertyBag
         public PropGen(IProp genericTypedProp)
         {
             IsEmpty = false;
-
             TypedProp = genericTypedProp ?? throw new ArgumentNullException($"{nameof(genericTypedProp)} must be non-null.");
-
-            //PropId = cKey.Level2Key;
             IsPropBag = genericTypedProp.PropTemplate.Type.IsPropBagBased();
         }
 
@@ -44,8 +41,6 @@ namespace DRM.TypeSafePropertyBag
         {
             IsEmpty = true;
             TypedProp = null;
-            //_cKey = new SimpleExKey();
-            //PropId = _cKey.Level2Key;
             IsPropBag = false;
         }
 
@@ -73,10 +68,6 @@ namespace DRM.TypeSafePropertyBag
         #endregion
 
         #region IPropDataInternal Implementation
-
-        //ExKeyT IPropDataInternal.CKey => _cKey;
-
-        //public bool IsPropBag => _isPropBag;
 
         void IPropDataInternal.SetTypedProp(PropNameType propertyName, IProp value)
         {
