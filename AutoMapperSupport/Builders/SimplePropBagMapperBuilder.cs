@@ -33,10 +33,10 @@ namespace DRM.PropBag.AutoMapperSupport
         public SimplePropBagMapperBuilder
             (
             IBuildMapperConfigurations<TSource, TDestination> mapperConfigurationBuilder,
-            ICreateWrapperTypes wrapperTypeCreator,
             IViewModelActivator viewModelActivator,
             PSAccessServiceCreatorInterface storeAccessCreator,
-            IProvideAutoMappers autoMapperService
+            IProvideAutoMappers autoMapperService,
+            ICreateWrapperTypes wrapperTypeCreator
             )
         {
             _mapperConfigurationBuilder = mapperConfigurationBuilder;

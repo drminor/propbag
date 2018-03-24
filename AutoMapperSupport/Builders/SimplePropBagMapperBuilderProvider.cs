@@ -11,9 +11,10 @@ namespace DRM.PropBag.AutoMapperSupport
     {
         #region Private Properties
 
-        private readonly ICreateWrapperTypes _wrapperTypeCreator;
         private readonly IViewModelActivator _viewModelActivator;
         private PSAccessServiceCreatorInterface _storeAccessCreator;
+        //private readonly IProvideAutoMappers _autoMapperService;
+        private readonly ICreateWrapperTypes _wrapperTypeCreator;
 
         #endregion
 
@@ -21,14 +22,16 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public SimplePropBagMapperBuilderProvider
             (
-            ICreateWrapperTypes wrapperTypesCreator,
-            IViewModelActivator viewModelActivator, 
-            PSAccessServiceCreatorInterface storeAccessCreator
+            IViewModelActivator viewModelActivator,
+            PSAccessServiceCreatorInterface storeAccessCreator,
+            //IProvideAutoMappers autoMapperService,
+            ICreateWrapperTypes wrapperTypesCreator
             )
         {
-            _wrapperTypeCreator = wrapperTypesCreator ?? throw new ArgumentNullException(nameof(wrapperTypesCreator)); // GetSimpleWrapperTypeCreator();
-            _viewModelActivator = viewModelActivator ?? throw new ArgumentNullException(nameof(viewModelActivator)); // new SimpleViewModelActivator();
+            _viewModelActivator = viewModelActivator ?? throw new ArgumentNullException(nameof(viewModelActivator));
             _storeAccessCreator = storeAccessCreator ?? throw new ArgumentNullException(nameof(storeAccessCreator));
+            //_autoMapperService = autoMapperService ?? throw new ArgumentNullException(nameof(autoMapperService));
+            _wrapperTypeCreator = wrapperTypesCreator ?? throw new ArgumentNullException(nameof(wrapperTypesCreator));
         }
 
         #endregion
@@ -52,16 +55,15 @@ namespace DRM.PropBag.AutoMapperSupport
                 = new SimplePropBagMapperBuilder<TSource, TDestination>
                 (
                     mapperConfigurationBuilder: mapperConfigurationBuilder,
-                    wrapperTypeCreator: _wrapperTypeCreator,
                     viewModelActivator: _viewModelActivator,
                     storeAccessCreator: _storeAccessCreator,
-                    autoMapperService: autoMapperService
-                );
+                    autoMapperService: autoMapperService,
+                    wrapperTypeCreator: _wrapperTypeCreator);
 
             return result;
         }
 
-        // TODO: Note: The WrapperTypeCreator hold two caches, the result provide is only from the cache of emitted types.
+        // TODO: Note: The WrapperTypeCreator hold two caches, the result provided is only from the cache of emitted types.
         // The number of entries in the cache of TypeDescriptors is not included.
         public long ClearTypeCache()
         {

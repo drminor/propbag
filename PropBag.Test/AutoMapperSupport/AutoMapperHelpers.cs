@@ -64,10 +64,9 @@ namespace PropBagLib.Tests.AutoMapperSupport
             IPropBagMapperBuilderProvider propBagMapperBuilderProvider
                 = new SimplePropBagMapperBuilderProvider
                 (
-                    wrapperTypesCreator: simpleWrapperTypeCreator,
                     viewModelActivator: vmActivator,
-                    storeAccessCreator: storeAccessCreator
-                );
+                    storeAccessCreator: storeAccessCreator,
+                    wrapperTypesCreator: simpleWrapperTypeCreator);
 
             IMapTypeDefinitionProvider mapTypeDefinitionProvider = new SimpleMapTypeDefinitionProvider();
 

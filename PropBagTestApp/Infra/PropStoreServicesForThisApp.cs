@@ -142,7 +142,6 @@ namespace PropBagTestApp.Infra
             return propModelProvider;
         }
 
-
         private static IProvideAutoMappers GetAutoMapperProvider
             (
             IViewModelActivator viewModelActivator,
@@ -150,13 +149,11 @@ namespace PropBagTestApp.Infra
             ICreateWrapperTypes wrapperTypeCreator
             )
         {
-            // TODO: Expose the creation of wrapperTypeCreator (ICreateWrapperTypes).
             IPropBagMapperBuilderProvider propBagMapperBuilderProvider = new SimplePropBagMapperBuilderProvider
                 (
-                wrapperTypesCreator: wrapperTypeCreator,
                 viewModelActivator: viewModelActivator,
-                storeAccessCreator: storeAccessCreator
-                );
+                storeAccessCreator: storeAccessCreator,
+                wrapperTypesCreator: wrapperTypeCreator);
 
             IMapTypeDefinitionProvider mapTypeDefinitionProvider = new SimpleMapTypeDefinitionProvider();
 

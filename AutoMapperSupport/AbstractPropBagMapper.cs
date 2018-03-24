@@ -1,19 +1,17 @@
 ﻿using AutoMapper;
-using DRM.TypeSafePropertyBag;
+using DRM.PropBag.TypeWrapper;
 using DRM.PropBag.ViewModelTools;
+using DRM.TypeSafePropertyBag;
+using ObjectSizeDiagnostics;
 using System;
-
 using System.Collections.Generic;
 using System.Linq;
-using ObjectSizeDiagnostics;
-using DRM.TypeSafePropertyBag.Fundamentals;
-using DRM.PropBag.TypeWrapper;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
-    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
-    using PropModelType = IPropModel<String>;
     using PropItemSetKeyType = PropItemSetKey<String>;
+    using PropModelType = IPropModel<String>;
+    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
 
     public abstract class AbstractPropBagMapper<TSource, TDestination> 
         : IPropBagMapper<TSource, TDestination> where TDestination : class, IPropBag

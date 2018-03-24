@@ -397,10 +397,9 @@ namespace PropBagLib.Tests.SpecBasedVMTests
             // TODO: Expose the creation of wrapperTypeCreator (ICreateWrapperTypes).
             IPropBagMapperBuilderProvider propBagMapperBuilderProvider = new SimplePropBagMapperBuilderProvider
                 (
-                wrapperTypesCreator: wrapperTypesCreator,
                 viewModelActivator: viewModelActivator,
-                storeAccessCreator: psAccessServiceFactory
-                );
+                storeAccessCreator: psAccessServiceFactory,
+                wrapperTypesCreator: wrapperTypesCreator);
 
             IMapTypeDefinitionProvider mapTypeDefinitionProvider = new SimpleMapTypeDefinitionProvider();
 

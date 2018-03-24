@@ -196,10 +196,9 @@ namespace MVVM_Sample1.Infra
         {
             IPropBagMapperBuilderProvider propBagMapperBuilderProvider = new SimplePropBagMapperBuilderProvider
                 (
-                wrapperTypesCreator: wrapperTypesCreator,
                 viewModelActivator: viewModelActivator,
-                storeAccessCreator: storeAccessCreator
-                );
+                storeAccessCreator: storeAccessCreator,
+                wrapperTypesCreator: wrapperTypesCreator);
 
             IMapTypeDefinitionProvider mapTypeDefinitionProvider = new SimpleMapTypeDefinitionProvider();
 
