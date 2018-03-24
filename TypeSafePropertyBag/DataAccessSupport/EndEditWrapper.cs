@@ -78,7 +78,6 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
             base.InsertItem(index, item);
 
             // handle any EndEdit events relating to this item
-            // XXTemp
             item.ItemEndEdit += ItemEndEditHandler;
         }
 
@@ -101,7 +100,6 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
 
         public event EventHandler<EventArgs> ItemEndEdit;
 
-        //NotifyCollectionChangedEventHandler _collectionChanged;
         public override event NotifyCollectionChangedEventHandler CollectionChanged
         {
             add
