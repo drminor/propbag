@@ -69,13 +69,15 @@ namespace DRM.TypeSafePropertyBag
             if(propNodes == null)
             {
                 _children = new Dictionary<PropIdType, PropNode>();
-                m_PropIdCounter = -1;
+                m_PropIdCounter = 0; // The first PropId issued will be 1. (0 is reserved to indicate all Properties or that the ExplodedKey identifies an Object.)
             }
             else
             {
                 _children = propNodes.ToDictionary(k => k.PropId, v => v);
                 CheckChildCount(_children.Count);
-                m_PropIdCounter = _children.Count - 1;
+
+                // TODO: See if we have the caller provide this value.
+                m_PropIdCounter = propNodes.Max(pn => pn.CompKey.Level2Key);
             }
 
             _propItemsByName = null;
