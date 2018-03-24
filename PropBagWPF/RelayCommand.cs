@@ -124,17 +124,24 @@ namespace DRM.PropBagWPF
             return _canExecute == null ? true : _canExecute();
         }
 
+        event EventHandler _ourCopy = null;
         public event EventHandler CanExecuteChanged
         {
             add
             {
                 if (_canExecute != null)
+                {
+                    _ourCopy += value;
                     CommandManager.RequerySuggested += value;
+                }
             }
             remove
             {
                 if (_canExecute != null)
+                {
+                    _ourCopy -= value;
                     CommandManager.RequerySuggested -= value;
+                }
             }
         }
 
@@ -147,13 +154,27 @@ namespace DRM.PropBagWPF
 
         #region Fields
 
-        readonly Action<object> _execute;
+        Action<object> _execute;
         Func<bool> _canExecute;
 
         #endregion // Fields
 
         public void Clear()
         {
+            if(_canExecute != null && _ourCopy!= null)
+            {
+                Delegate[] handlers = _ourCopy?.GetInvocationList() ?? new Delegate[] { };
+
+                foreach (Delegate d in handlers)
+                {
+                    if (d is EventHandler eh)
+                    {
+                        CommandManager.RequerySuggested -= eh;
+                    }
+                }
+            }
+
+            _execute = null;
             _canExecute = null;
         }
     }
