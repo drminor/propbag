@@ -8,6 +8,8 @@ namespace DRM.PropBag.AutoMapperSupport
 {
     using PropNameType = String;
     using PropModelType = IPropModel<String>;
+    using ViewModelActivatorInterface = IViewModelActivator<UInt32, String>;
+
 
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
 
@@ -19,7 +21,7 @@ namespace DRM.PropBag.AutoMapperSupport
 
         private readonly IBuildMapperConfigurations<TSource, TDestination> _mapperConfigurationBuilder;
 
-        private readonly IViewModelActivator _viewModelActivator;
+        private readonly ViewModelActivatorInterface _viewModelActivator;
         private readonly PSAccessServiceCreatorInterface _storeAccessCreator;
         private readonly IProvideAutoMappers _autoMapperService;
         private readonly ICreateWrapperTypes _wrapperTypeCreator;
@@ -33,7 +35,7 @@ namespace DRM.PropBag.AutoMapperSupport
         public SimplePropBagMapperBuilder
             (
             IBuildMapperConfigurations<TSource, TDestination> mapperConfigurationBuilder,
-            IViewModelActivator viewModelActivator,
+            ViewModelActivatorInterface viewModelActivator,
             PSAccessServiceCreatorInterface storeAccessCreator,
             IProvideAutoMappers autoMapperService,
             ICreateWrapperTypes wrapperTypeCreator

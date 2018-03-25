@@ -12,6 +12,8 @@ namespace DRM.PropBag.AutoMapperSupport
     using PropItemSetKeyType = PropItemSetKey<String>;
     using PropModelType = IPropModel<String>;
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
+    using ViewModelActivatorInterface = IViewModelActivator<UInt32, String>;
+
 
     public abstract class AbstractPropBagMapper<TSource, TDestination> 
         : IPropBagMapper<TSource, TDestination> where TDestination : class, IPropBag
@@ -32,7 +34,7 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public Type TargetRunTimeType => RunTimeType;
 
-        IViewModelActivator _vmActivator;
+        ViewModelActivatorInterface _vmActivator;
         PSAccessServiceCreatorInterface _storeAccessCreator;
         IProvideAutoMappers _autoMapperService;
         ICreateWrapperTypes _wrapperTypeCreator;
@@ -50,7 +52,7 @@ namespace DRM.PropBag.AutoMapperSupport
             (
             IPropBagMapperKey<TSource, TDestination> mapRequest,
             IMapper mapper,
-            IViewModelActivator vmActivator,
+            ViewModelActivatorInterface vmActivator,
             PSAccessServiceCreatorInterface storeAccessCreator,
             IProvideAutoMappers autoMapperService,
             ICreateWrapperTypes wrapperTypeCreator

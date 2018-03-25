@@ -38,6 +38,8 @@ namespace DRM.PropBag
     using PropModelType = IPropModel<String>;
 
     using PropModelCacheInterface = ICachePropModels<String>;
+    using ViewModelActivatorInterface = IViewModelActivator<UInt32, String>;
+
     using IRegisterBindingsFowarderType = IRegisterBindingsForwarder<UInt32>;
 
 
@@ -735,9 +737,8 @@ namespace DRM.PropBag
                 // Create New PropBag-based Object
                 if (pi.InitialValueField.PropBagFCN != null)
                 {
-                    // TODO: This is assuming that the PropModelResourceKey is the same as the FullClassName.
                     string fcn = pi.InitialValueField.PropBagFCN;
-                    IPropBag newObject = GetNewViewModel(fcn, pi.PropertyType, propModelProvider, storeAccessCreator, autoMapperService, wrapperTypeCreator);
+                    IPropBag newObject = BuildNewViewModel(fcn, pi.PropertyType, propModelProvider, storeAccessCreator, autoMapperService, wrapperTypeCreator);
 
                     if (pi.PropTemplate != null && pi.PropCreator != null)
                     {
@@ -874,14 +875,12 @@ namespace DRM.PropBag
             }
         }
 
-        private IPropBag GetNewViewModel(string fullClassName, Type propertyType, PropModelCacheInterface propModelProvider,
+        private IPropBag BuildNewViewModel(string fullClassName, Type propertyType, PropModelCacheInterface propModelProvider,
             PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService, ICreateWrapperTypes wrapperTypeCreator)
         {
-            //PropModelType propModel = propModelProvider.GetPropModel(pi.InitialValueField.PropBagResourceKey);
-
             if (propModelProvider.TryGetPropModel(fullClassName, out PropModelType propModel))
             {
-                IPropBag newObject = (IPropBag)VmActivator.GetNewViewModel(propertyType, propModel, storeAccessCreator, autoMapperService, wrapperTypeCreator, propFactory: null, fullClassName: null);
+                IPropBag newObject = (IPropBag)VmActivator.GetNewViewModel(propertyType, propModel, storeAccessCreator, autoMapperService, wrapperTypeCreator, pfOverride: null, fcnOverride: null);
                 return newObject;
             }
             else
@@ -890,8 +889,8 @@ namespace DRM.PropBag
             }
         }
 
-        private IViewModelActivator _vmActivator;
-        private IViewModelActivator VmActivator
+        private ViewModelActivatorInterface _vmActivator;
+        private ViewModelActivatorInterface VmActivator
         {
             get
             {

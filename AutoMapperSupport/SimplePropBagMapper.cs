@@ -7,6 +7,7 @@ using System;
 namespace DRM.PropBag.AutoMapperSupport
 {
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
+    using ViewModelActivatorInterface = IViewModelActivator<UInt32, String>;
 
     public class SimplePropBagMapper<TSource, TDestination> : AbstractPropBagMapper<TSource, TDestination> where TDestination : class, IPropBag
     {
@@ -14,7 +15,7 @@ namespace DRM.PropBag.AutoMapperSupport
             (
                 IPropBagMapperKey<TSource, TDestination> mapRequest,
                 IMapper mapper,
-                IViewModelActivator vmActivator,
+                ViewModelActivatorInterface vmActivator,
                 PSAccessServiceCreatorInterface storeAccessCreator,
                 IProvideAutoMappers autoMapperService,
                 ICreateWrapperTypes wrapperTypeCreator

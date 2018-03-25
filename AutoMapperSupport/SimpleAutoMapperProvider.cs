@@ -6,7 +6,6 @@ using System.Threading;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
-    using PropNameType = String;
     using PropModelType = IPropModel<String>;
 
     public class SimpleAutoMapperProvider : IProvideAutoMappers, IDisposable
@@ -40,12 +39,6 @@ namespace DRM.PropBag.AutoMapperSupport
         }
 
         #endregion
-
-        //#region Public Properties
-
-        //public ICreateWrapperTypes WrapperTypeCreator => _mapperBuilderProvider.WrapperTypeCreator;
-
-        //#endregion
 
         #region Public Methods
 
@@ -108,17 +101,6 @@ namespace DRM.PropBag.AutoMapperSupport
             IPropBagMapperKeyGen newMapRequest = RegisterMapperRequest(typedMapperRequest);
 
             return (IPropBagMapperKey<TSource, TDestination>) newMapRequest;
-        }
-
-        //public long ClearEmittedTypeCache()
-        //{
-        //    return _mapperBuilderProvider.ClearTypeCache();
-        //}
-
-        public void ClearCaches()
-        {
-            ClearMappersCache();
-            //ClearEmittedTypeCache();
         }
 
         #endregion
@@ -233,7 +215,7 @@ namespace DRM.PropBag.AutoMapperSupport
                 if (disposing)
                 {
                     // Dispose managed state (managed objects).
-                    ClearCaches();
+                    ClearMappersCache();
 
                     if(_mapTypeDefinitionProvider is IDisposable disable)
                     {

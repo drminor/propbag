@@ -262,8 +262,6 @@ namespace DRM.TypeSafePropertyBag
 
         private bool TryFetchFromSourceProviders(string fullClassName, out PropModelType propModel)
         {
-            //throw new NotSupportedException("The SimplePropModelCache cannot yet fetch PropModels from a list of providers using the fullClassName.");
-
             IDictionary<string, string> classNameToKeyMap;
 
             foreach (IProvidePropModels propModelProvider in _propModelProviders)

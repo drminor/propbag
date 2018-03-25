@@ -11,8 +11,9 @@ using System;
 namespace PropBagLib.Tests.AutoMapperSupport
 {
     using PropModelCacheInterface = ICachePropModels<String>;
-
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
+    using ViewModelActivatorInterface = IViewModelActivator<UInt32, String>;
+
 
     public class AutoMapperHelpers : IDisposable
     {
@@ -21,19 +22,6 @@ namespace PropBagLib.Tests.AutoMapperSupport
         public static readonly int MAX_NUMBER_OF_PROPERTIES = (int)Math.Pow(2, LOG_BASE2_MAX_PROPERTIES); //65536;
 
         public static string _resourceFolderPath = @"C:\DEV\VS2013Projects\PubPropBag\PropBagLib.Tests.PropBagTemplates\ProbBagTemplates";
-
-        //public static string[] _pbTemplateFilenames = new string[]
-        //    {
-        //        "MainWindowVM.xaml",
-        //        "PersonCollectionVM.xaml",
-        //        "PersonEditorVM.xaml",
-        //        "PersonVM.xaml"
-        //    };
-
-        //public static string[] _mapperRequestFilenames = new string[]
-        //    {
-        //        "MapperConfigs.xaml",
-        //    };
 
         private string[] _pbTemplateFilenames = new string[]
         {
@@ -57,7 +45,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
 
         public IProvideAutoMappers InitializeAutoMappers(PSAccessServiceCreatorInterface storeAccessCreator)
         {
-            IViewModelActivator vmActivator = new SimpleViewModelActivator();
+            ViewModelActivatorInterface vmActivator = new SimpleViewModelActivator();
 
             ICreateWrapperTypes simpleWrapperTypeCreator = GetWrapperTypeCreator_V1();
 
@@ -177,8 +165,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 IPropFactoryFactory propFactoryFactory = GetThePropFactoryFactory();
 
                 // PropModel Provider
-                RemotePropModelProvider remotePropModelProvider = GetPropModelProvider(propFactoryFactory/*, configPackageNameSuffix: null*/);
-
+                RemotePropModelProvider remotePropModelProvider = GetPropModelProvider(propFactoryFactory);
 
                 // Load the PropBag and Mapper Templates
                 LoadPropModelsAndMappers(remotePropModelProvider, _resourceFolderPath, _pbTemplateFilenames, _mapperRequestFilenames);
@@ -221,17 +208,13 @@ namespace PropBagLib.Tests.AutoMapperSupport
             return result;
         }
 
-        private RemotePropModelProvider GetPropModelProvider
-            (
-            IPropFactoryFactory propFactoryFactory
-            //, string configPackageNameSuffix
-            )
+        private RemotePropModelProvider GetPropModelProvider(IPropFactoryFactory propFactoryFactory)
         {
             ResourceDictionaryProvider rdProvider = new ResourceDictionaryProvider();
 
             PropBagTemplateParser pbtParser = new PropBagTemplateParser();
 
-            RemotePropModelProvider propModelProvider = new RemotePropModelProvider(rdProvider, pbtParser, propFactoryFactory/*, configPackageNameSuffix*/);
+            RemotePropModelProvider propModelProvider = new RemotePropModelProvider(rdProvider, pbtParser, propFactoryFactory);
 
             return propModelProvider;
         }

@@ -6,12 +6,13 @@ using System;
 namespace DRM.PropBag.AutoMapperSupport
 {
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
+    using ViewModelActivatorInterface = IViewModelActivator<UInt32, String>;
 
     public class SimplePropBagMapperBuilderProvider : IPropBagMapperBuilderProvider
     {
         #region Private Properties
 
-        private readonly IViewModelActivator _viewModelActivator;
+        private readonly ViewModelActivatorInterface _viewModelActivator;
         private PSAccessServiceCreatorInterface _storeAccessCreator;
         //private readonly IProvideAutoMappers _autoMapperService;
         private readonly ICreateWrapperTypes _wrapperTypeCreator;
@@ -22,7 +23,7 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public SimplePropBagMapperBuilderProvider
             (
-            IViewModelActivator viewModelActivator,
+            ViewModelActivatorInterface viewModelActivator,
             PSAccessServiceCreatorInterface storeAccessCreator,
             //IProvideAutoMappers autoMapperService,
             ICreateWrapperTypes wrapperTypesCreator

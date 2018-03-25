@@ -57,7 +57,7 @@
     <Compile Include="ViewProvider.cs" />
     <Compile Include="WPFPropFactory.cs" />
     <Compile Include="SimplePropModelProvider.cs" />
-    <Compile Include="ViewModelHelper.cs" />
+    <Compile Include="ViewModelFactory.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AutoMapperSupportInterfaces\AutoMapperSupportInterfaces.csproj">

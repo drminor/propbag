@@ -15,6 +15,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests
     using PropNameType = String;
     using PropModelType = IPropModel<String>;
     using PropModelCacheInterface = ICachePropModels<String>;
+    using ViewModelActivatorInterface = IViewModelActivator<UInt32, String>;
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
 
     public abstract class PropBagVMTestBase : Specification
@@ -196,7 +197,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests
             PropStoreAccessService_Factory = _theStore.PropStoreAccessServiceFactory;
 
             // ViewModelActivator.
-            IViewModelActivator vmActivator = new SimpleViewModelActivator();
+            ViewModelActivatorInterface vmActivator = new SimpleViewModelActivator();
             _mct.MeasureAndReport("After new SimpleViewModelActivator");
 
             WrapperTypeCreator = GetSimpleWrapperTypeCreator();
@@ -390,7 +391,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests
         protected virtual IProvideAutoMappers GetAutoMapperProvider
             (
             ICreateWrapperTypes wrapperTypesCreator,
-            IViewModelActivator viewModelActivator,
+            ViewModelActivatorInterface viewModelActivator,
             PSAccessServiceCreatorInterface psAccessServiceFactory
             )
         {
