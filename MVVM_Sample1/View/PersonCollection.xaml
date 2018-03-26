@@ -49,15 +49,27 @@
     <!--SelectedItem="{Binding SelectedPerson, Converter={StaticResource SelectedItemConverter}, Mode=TwoWay}">-->
 
 
-    <Grid Name="TestGrid1" Width="500">
+    <Grid Width="500">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
 
-        <DataGrid Grid.Row="0" Name="PersonListDataGrid" AutoGenerateColumns="False" Width="500" HorizontalAlignment="Center"
+        <DataGrid Grid.Row="0" AutoGenerateColumns="False" Width="500" HorizontalAlignment="Center"
                  VerticalScrollBarVisibility="Visible" VerticalAlignment="Stretch" VirtualizingStackPanel.VirtualizationMode="Recycling"
                   VirtualizingStackPanel.IsVirtualizing="False" ItemsSource="{Binding PersonListView}"
                   SelectionChanged="PersonListDataGrid_SelectionChanged">
+
+            <!--<DataGrid.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel>
+                        <TextBlock><TextBox Text="{Binding Path=FirstName}" Width="116"/></TextBlock>
+                        <TextBlock><TextBox Text="{Binding Path=LastName}" Width="120"/></TextBlock>
+                        <TextBlock><TextBox Text="{Binding Path=CityOfResidence}" Width="100"/></TextBlock>
+                        <TextBlock><TextBox Text="{Binding Path=Profession}" Width="120"/></TextBlock>
+
+                    </StackPanel>
+                </DataTemplate>
+            </DataGrid.ItemTemplate>-->
             
             <DataGrid.Columns>
                 <DataGridTextColumn Binding="{Binding Path=FirstName}" Header="FirstName" Width="116"/>
@@ -65,7 +77,14 @@
                 <DataGridTextColumn Binding="{Binding CityOfResidence}" Header="City" Width="100"/>
                 <DataGridTextColumn Binding="{Binding Profession}" Header="Profession" Width="120"/>
             </DataGrid.Columns>
-            
+
+            <!--<DataGrid.Columns>
+                <DataGridTextColumn Header="FirstName" Width="116"/>
+                <DataGridTextColumn Header="LastName" Width="120"/>
+                <DataGridTextColumn Header="City" Width="100"/>
+                <DataGridTextColumn Header="Profession" Width="120"/>
+            </DataGrid.Columns>-->
+
         </DataGrid>
 
     </Grid>

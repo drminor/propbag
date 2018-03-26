@@ -35,13 +35,13 @@
 
     </UserControl.Resources>
 
-    <Grid Name="TestGrid2" Width="500">
+    <Grid Width="500">
         <Grid.RowDefinitions>
             <RowDefinition Height="70"></RowDefinition>
             <RowDefinition Height="35"></RowDefinition>
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" Name="SelectedPersonGrid" DataContext="{Binding PersonListView/, Mode=TwoWay}" Width="500"
+        <Grid Grid.Row="0" DataContext="{Binding PersonListView/, Mode=TwoWay}" Width="500"
               HorizontalAlignment="Center" Margin="0,10,0,0" VerticalAlignment="Stretch">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"></RowDefinition>
