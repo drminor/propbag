@@ -1,5 +1,4 @@
-﻿using MVVM_Sample1.ViewModel;
-using System.Windows.Controls;
+﻿using System.Windows.Controls;
 
 namespace MVVM_Sample1.View
 {
