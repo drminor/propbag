@@ -1,22 +1,22 @@
 ﻿using DRM.PropBag;
 using DRM.PropBag.AutoMapperSupport;
-using DRM.PropBag.TypeWrapper;
+using DRM.PropBag.ViewModelTools;
 using DRM.TypeSafePropertyBag;
 using NUnit.Framework;
 using System;
 
 namespace PropBagLib.Tests.AutoMapperSupport
 {
-    using PropNameType = String;
-    using PropModelType = IPropModel<String>;
     using PropModelCacheInterface = ICachePropModels<String>;
+    using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
 
-    [TestFixtureAttribute]
+    [TestFixture]
     public class TestAutoMapperBasic
     {
         IProvideAutoMappers _amp;
         IPropFactory _propFactory_V1;
         ICreateWrapperTypes _wrapperTypeCreator_V1;
+        ViewModelFactoryInterface _viewModelFactory;
 
         [OneTimeSetUp]
         public void SetupAutoMapperSupport_V1()
@@ -27,6 +27,8 @@ namespace PropBagLib.Tests.AutoMapperSupport
             _amp = ourHelper.GetAutoMapperSetup_V1();
             _wrapperTypeCreator_V1 = ourHelper.GetWrapperTypeCreator_V1();
             PropModelCacheInterface _propModelCache = ourHelper.GetPropModelCache_V1();
+
+            _viewModelFactory = ourHelper.ViewModelFactory;
         }
 
         [TearDown]
@@ -44,6 +46,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
         public void CanRegisterMod3ToDestinationMapper_Proxy()
         {
             IPropFactory propFactory = _propFactory_V1;
+            ViewModelFactoryInterface viewModelFactory = _viewModelFactory;
 
             PropModel propModel = GetPropModelForModel3Dest(propFactory);
             Type typeToWrap = typeof(PropBag);
@@ -53,6 +56,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 _amp.SubmitMapperRequest<MyModel3, DestinationModel3>
                 (
                     propModel: propModel,
+                    viewModelFactory: viewModelFactory,
                     typeToWrap: typeToWrap,
                     configPackageName: configPackageName
                 );
@@ -75,7 +79,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
 
             propModel.NewEmittedType = et;
 
-            IPropBagMapperKeyGen mapperKey = _amp.SubmitMapperRequest(mapperRequest.PropModel, mapperRequest.SourceType, mapperRequest.ConfigPackageName);
+            IPropBagMapperKeyGen mapperKey = _amp.SubmitMapperRequest(mapperRequest.PropModel, _viewModelFactory,  mapperRequest.SourceType, mapperRequest.ConfigPackageName);
 
             // Get the AutoMapper mapping function associated with the mapper request already submitted.
             IPropBagMapperGen genMapper = _amp.GetMapper(mapperKey);
@@ -129,6 +133,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
         public void CanGetMapperForMod3ToDestination_Extra()
         {
             IPropFactory propFactory = _propFactory_V1;
+            ViewModelFactoryInterface viewModelFactory = _viewModelFactory;
 
             PropModel propModel = GetPropModelForModel3Dest(propFactory);
             Type typeToWrap = typeof(DestinationModel3); // typeof(PropBag);
@@ -138,6 +143,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 _amp.SubmitMapperRequest<MyModel3, DestinationModel3>
                 (
                     propModel: propModel,
+                    viewModelFactory: viewModelFactory,
                     typeToWrap: typeToWrap,
                     configPackageName: configPackageName
                 );
@@ -168,6 +174,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 _amp.SubmitMapperRequest<MyModel3, DestinationModel3>
                 (
                     propModel: propModel,
+                    viewModelFactory: viewModelFactory,
                     typeToWrap: typeToWrap,
                     configPackageName: configPackageName
                 );

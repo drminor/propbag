@@ -38,7 +38,7 @@ namespace MVVM_Sample1.Infra
 
         public static PropModelCacheInterface PropModelCache { get; private set; }
 
-        public static ViewModelFactory ViewModelHelper { get; private set; }
+        public static SimpleViewModelFactory ViewModelHelper { get; private set; }
         public static ICreateWrapperTypes WrapperTypeCreator { get; }
         public static IProvideAutoMappers AutoMapperProvider { get; }
 
@@ -84,7 +84,7 @@ namespace MVVM_Sample1.Infra
             AutoMapperProvider = GetAutoMapperProvider(WrapperTypeCreator, _vmActivator, psAccessServiceFactory);
                 _mct.MeasureAndReport("After GetAutoMapperProvider");
 
-            ViewModelHelper = new ViewModelFactory(PropModelCache, _vmActivator, psAccessServiceFactory, AutoMapperProvider, WrapperTypeCreator);
+            ViewModelHelper = new SimpleViewModelFactory(PropModelCache, _vmActivator, psAccessServiceFactory, AutoMapperProvider, WrapperTypeCreator);
                 _mct.MeasureAndReport("After new ViewModelHelper");
 
             //_defaultPropFactory = BuildDefaultPropFactory(valueConverter, delegateCacheProvider, typeResolver);
@@ -157,9 +157,10 @@ namespace MVVM_Sample1.Infra
         {
             IPropBagMapperBuilderProvider propBagMapperBuilderProvider = new SimplePropBagMapperBuilderProvider
                 (
-                viewModelActivator: viewModelActivator,
-                storeAccessCreator: storeAccessCreator,
-                wrapperTypesCreator: wrapperTypesCreator);
+                //viewModelActivator: viewModelActivator,
+                //storeAccessCreator: storeAccessCreator,
+                //wrapperTypesCreator: wrapperTypesCreator
+                );
 
             IMapTypeDefinitionProvider mapTypeDefinitionProvider = new SimpleMapTypeDefinitionProvider();
 

@@ -1,5 +1,6 @@
 ﻿using DRM.PropBag.AutoMapperSupport;
 using DRM.PropBag.TypeWrapper;
+using DRM.PropBag.ViewModelTools;
 using DRM.TypeSafePropertyBag;
 using System;
 using System.Collections;
@@ -11,6 +12,7 @@ using System.ComponentModel;
 namespace DRM.PropBag
 {
     using PropNameType = String;
+    using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
 
     #region Summary and Remarks
@@ -49,30 +51,29 @@ namespace DRM.PropBag
         {
         }
 
-        protected PubPropBag(PropBagTypeSafetyMode typeSafetyMode, PSAccessServiceCreatorInterface storeAcessorCreator,
-            IProvideAutoMappers autoMapperService, ICreateWrapperTypes wrapperTypeCreator, IPropFactory propFactory, string fullClassName)
-            : base(typeSafetyMode, storeAcessorCreator, autoMapperService, wrapperTypeCreator, propFactory, fullClassName)
+        protected PubPropBag(PropBagTypeSafetyMode typeSafetyMode, ViewModelFactoryInterface viewModelFactory, IPropFactory propFactory, string fullClassName)
+            : base(typeSafetyMode, viewModelFactory, propFactory, fullClassName)
         {
         }
 
         // Using a PropModel
-        public PubPropBag(PropModel pm, PSAccessServiceCreatorInterface storeAccessCreator)
-            : this(pm, storeAccessCreator, propFactory: null, fullClassName: null)
+        public PubPropBag(PropModel pm, ViewModelFactoryInterface viewModelFactory)
+            : this(pm, viewModelFactory, propFactory: null, fullClassName: null)
         {
         }
 
-        public PubPropBag(PropModel pm, PSAccessServiceCreatorInterface storeAccessCreator, IPropFactory propFactory)
-            : this(pm, storeAccessCreator, propFactory, fullClassName: null)
+        public PubPropBag(PropModel pm, ViewModelFactoryInterface viewModelFactory, IPropFactory propFactory)
+            : this(pm, viewModelFactory, propFactory, fullClassName: null)
         {
         }
 
-        public PubPropBag(PropModel pm, PSAccessServiceCreatorInterface storeAccessCreator, string fullClassName)
-            : this(pm, storeAccessCreator, propFactory: null, fullClassName: fullClassName)
+        public PubPropBag(PropModel pm, ViewModelFactoryInterface viewModelFactory, string fullClassName)
+            : this(pm, viewModelFactory, propFactory: null, fullClassName: fullClassName)
         {
         }
 
-        public PubPropBag(PropModel pm, PSAccessServiceCreatorInterface storeAccessCreator, IPropFactory propFactory, string fullClassName)
-            : base(pm, storeAccessCreator, propFactory, fullClassName)
+        public PubPropBag(PropModel pm, ViewModelFactoryInterface viewModelFactory, IPropFactory propFactory, string fullClassName)
+            : base(pm, viewModelFactory, propFactory, fullClassName)
         {
         }
 

@@ -10,7 +10,7 @@ namespace PropBagLib.Tests
     {
 
 		public LooseModel(PropBagTypeSafetyMode typeSafetyMode, PSAccessServiceCreatorInterface storeAccessCreator, IPropFactory propFactory)
-            : base(typeSafetyMode, storeAccessCreator, propFactory, fullClassName: null)
+            : base(typeSafetyMode, storeAccessCreator, propFactory, fullClassName: "PropBagLib.Tests.LooseModel")
         {
             AddProp<object>("PropObject");
             AddProp<string>("PropString");

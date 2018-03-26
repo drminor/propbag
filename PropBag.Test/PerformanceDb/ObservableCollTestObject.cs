@@ -1,6 +1,7 @@
 ﻿using DRM.PropBag;
 using DRM.PropBag.AutoMapperSupport;
 using DRM.PropBag.TypeWrapper;
+using DRM.PropBag.ViewModelTools;
 using DRM.TypeSafePropertyBag;
 using NUnit.Framework;
 using PropBagLib.Tests.AutoMapperSupport;
@@ -13,9 +14,14 @@ using System.Linq;
 
 namespace PropBagLib.Tests.PerformanceDb
 {
-    using PropNameType = String;
-    using PropModelType = IPropModel<String>;
+    //using PropNameType = String;
+    //using PropModelType = IPropModel<String>;
     using PropModelCacheInterface = ICachePropModels<String>;
+
+    using PropModelType = IPropModel<String>;
+    using ViewModelActivatorInterface = IViewModelActivator<UInt32, String>;
+    using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
+
 
     public class ObservableCollTestObject
     {
@@ -40,10 +46,15 @@ namespace PropBagLib.Tests.PerformanceDb
 
             // Setup Mapping between Model1 and Person
             PropModelType propModel1 = pmHelpers.GetPropModelForModel1Dest(propFactory_V1, propModelCache);
-            //Type typeToWrap = typeof(DestinationModel1);
+
+            ViewModelActivatorInterface viewModelActivator = new SimpleViewModelActivator();
+            IProvideAutoMappers autoMapperService = ourHelper.GetAutoMapperSetup_V1();
+            ICreateWrapperTypes wrapperTypeCreator = ourHelper.GetWrapperTypeCreator_V1();
+
+            ViewModelFactoryInterface viewModelFactory = new SimpleViewModelFactory(propModelCache, viewModelActivator, ourHelper.StoreAccessCreator, autoMapperService, wrapperTypeCreator);
 
             // Make sure we can activate (or clone as appropriate) the destination type.
-            DestinationModel1 test = new DestinationModel1(PropBagTypeSafetyMode.AllPropsMustBeRegistered, ourHelper.StoreAccessCreator, null, ourHelper.PropFactory_V1);
+            DestinationModel1 test = new DestinationModel1(PropBagTypeSafetyMode.AllPropsMustBeRegistered, ourHelper.StoreAccessCreator, ourHelper.PropFactory_V1, "Test");
             if (configPackageName == "Emit_Proxy")
             {
                 DestinationModel1 testCopy = new DestinationModel1(test);
@@ -53,7 +64,7 @@ namespace PropBagLib.Tests.PerformanceDb
                 DestinationModel1 testCopy = (DestinationModel1) test.Clone();
             }
 
-            DestinationModel1 test2 = new DestinationModel1(propModel1, ourHelper.StoreAccessCreator, null, null, ourHelper.PropFactory_V1, null);
+            DestinationModel1 test2 = new DestinationModel1(propModel1, viewModelFactory, ourHelper.PropFactory_V1, null);
             
             if (configPackageName == "Emit_Proxy")
             {
@@ -69,8 +80,6 @@ namespace PropBagLib.Tests.PerformanceDb
             IPropBagMapperGen genMapper = null;
             IPropBagMapper<Person, DestinationModel1> mapper = null;
 
-            ICreateWrapperTypes wrapperTypeCreator = null;
-
             if (configPackageName == "Emit_Proxy")
             {
                 IMapperRequest localMr = new MapperRequest(typeof(Person), propModel1, configPackageName);
@@ -79,7 +88,7 @@ namespace PropBagLib.Tests.PerformanceDb
                 Type et = wrapperTypeCreator.GetWrapperType(propModel1, typeToWrap);
                 propModel1.NewEmittedType = et;
 
-                IPropBagMapperKeyGen mapperRequest = amp.SubmitMapperRequest(localMr.PropModel, localMr.SourceType, localMr.ConfigPackageName);
+                IPropBagMapperKeyGen mapperRequest = amp.SubmitMapperRequest(localMr.PropModel, viewModelFactory, localMr.SourceType, localMr.ConfigPackageName);
 
                 Assert.That(mapperRequest, Is.Not.Null, "mapperRequest should be non-null.");
 
@@ -92,6 +101,7 @@ namespace PropBagLib.Tests.PerformanceDb
                 IPropBagMapperKey<Person, DestinationModel1> mapperRequest = amp.SubmitMapperRequest<Person, DestinationModel1>
                     (
                         propModel: propModel1,
+                        viewModelFactory: viewModelFactory,
                         typeToWrap: typeToWrap,
                         configPackageName: configPackageName
                     );
@@ -102,10 +112,10 @@ namespace PropBagLib.Tests.PerformanceDb
                 Assert.That(mapper, Is.Not.Null, "mapper should be non-null");
             }
 
-            PropModelType propModel5 = pmHelpers.GetPropModelForModel5Dest(propFactory_V1);
+            PropModelType propModel5 = pmHelpers.GetPropModelForModel5Dest(propFactory_V1, propModelCache);
 
             string fullClassName = null; // Don't override the value from the PropModel.
-            _testMainVM = new DestinationModel5(propModel5, ourHelper.StoreAccessCreator, amp, wrapperTypeCreator, propFactory_V1, fullClassName);
+            _testMainVM = new DestinationModel5(propModel5, viewModelFactory, ourHelper.PropFactory_V1, fullClassName);
 
             Business b = new Business();
             _testMainVM.SetIt(b, "Business"); // THIS IS A SET ACESSS OPERATION.

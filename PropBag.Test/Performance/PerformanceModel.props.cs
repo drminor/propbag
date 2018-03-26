@@ -41,9 +41,14 @@ namespace PropBagLib.Tests
 		 
 		}
 
-	#region Property Declarations
-		  
-		public object PropObject
+        internal static PerformanceModel Create(PropBagTypeSafetyMode allPropsMustBeRegistered)
+        {
+            throw new NotImplementedException();
+        }
+
+        #region Property Declarations
+
+        public object PropObject
 		{
 			get
 			{

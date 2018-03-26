@@ -4,7 +4,6 @@ using System;
 
 namespace DRM.PropBag.TypeWrapper
 {
-    using PropNameType = String;
     using PropModelType = IPropModel<String>;
 
     public class SimpleWrapperTypeCreator : ICreateWrapperTypes

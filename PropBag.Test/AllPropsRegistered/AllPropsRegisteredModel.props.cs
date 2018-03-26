@@ -17,8 +17,9 @@ namespace PropBagLib.Tests
         //public AllPropsRegisteredModel(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
 
         public AllPropsRegisteredModel(PropBagTypeSafetyMode typeSafetyMode, PSAccessServiceCreatorInterface storeAccessCreator, IPropFactory factory)
-            : base(typeSafetyMode, storeAccessCreator, factory, fullClassName: null)
-		{
+            : base(typeSafetyMode, storeAccessCreator, factory, fullClassName: "PropBagLib.Tests.AllPropsRegisteredModel")
+
+        {
 	        AddProp<object>("PropObject");
 		 
 	        AddProp<string>("PropString");

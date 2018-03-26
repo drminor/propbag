@@ -1,6 +1,6 @@
 ﻿using DRM.PropBag;
 using DRM.PropBag.AutoMapperSupport;
-using DRM.PropBag.TypeWrapper;
+using DRM.PropBag.ViewModelTools;
 using DRM.TypeSafePropertyBag;
 using NUnit.Framework;
 using PropBagLib.Tests.AutoMapperSupport;
@@ -8,15 +8,13 @@ using PropBagLib.Tests.BusinessModel;
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
-using System.Threading;
 
 namespace PropBagLib.Tests.PerformanceDb
 {
-    using PropNameType = String;
-    using PropModelType = IPropModel<String>;
     using PropModelCacheInterface = ICachePropModels<String>;
+    using PropModelType = IPropModel<String>;
+    using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
 
     [TestFixture]
     public class TestPerformanceDb
@@ -109,7 +107,7 @@ namespace PropBagLib.Tests.PerformanceDb
             foreach (Person p in personList)
             {
                 // TODO: AAA
-                DestinationModel1 dest = new DestinationModel1(PropBagTypeSafetyMode.Tight, ourHelper.StoreAccessCreator, fullClassName, propFactory_V1);
+                DestinationModel1 dest = new DestinationModel1(PropBagTypeSafetyMode.Tight, ourHelper.StoreAccessCreator, propFactory_V1, fullClassName);
 
                 dest.SetIt<int>(p.Id, "Id");
                 dest.SetIt<string>(p.FirstName, "FirstName");
@@ -287,10 +285,11 @@ namespace PropBagLib.Tests.PerformanceDb
             PropModelHelpers pmHelpers = new PropModelHelpers();
 
             // Set up Child VM (Using Model 5)
-            PropModelType propModel5 = pmHelpers.GetPropModelForModel5Dest(propFactory_V1);
+            PropModelType propModel5 = pmHelpers.GetPropModelForModel5Dest(propFactory_V1, _propModelCache);
 
-            // TODO: AAA
-            DestinationModel5 testChildVM = new DestinationModel5(propModel5, ourHelper.StoreAccessCreator, _amp, wrapperTypeCreator, propFactory_V1, null);
+            ViewModelFactoryInterface viewModelFactory = ourHelper.ViewModelFactory;
+
+            DestinationModel5 testChildVM = new DestinationModel5(propModel: propModel5, viewModelFactory: viewModelFactory, propFactory: propFactory_V1, fullClassName: "PropBagLib.Tests.PerformanceDb.DestinationModel5");
 
             Business b = new Business();
             testChildVM.SetIt(b, "Business");
@@ -302,8 +301,8 @@ namespace PropBagLib.Tests.PerformanceDb
 
 
             // Set up MainVM (Using Model 6)
-            PropModelType propModel6 = pmHelpers.GetPropModelForModel6Dest(propFactory_V1);
-            DestinationModel6 testMainVM = new DestinationModel6(propModel6, ourHelper.StoreAccessCreator, _amp, wrapperTypeCreator, propFactory_V1, null);
+            PropModelType propModel6 = pmHelpers.GetPropModelForModel6Dest(propFactory_V1, _propModelCache);
+            DestinationModel6 testMainVM = new DestinationModel6(propModel6, viewModelFactory, propFactory_V1, null);
 
             Business b2 = new Business();
             testMainVM.SetIt(b2, "Business");

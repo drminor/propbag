@@ -1,5 +1,5 @@
 ﻿using DRM.PropBag.AutoMapperSupport;
-
+using DRM.PropBag.ViewModelTools;
 using DRM.TypeSafePropertyBag;
 using PropBagTestApp.Infra;
 using PropBagTestApp.Models;
@@ -10,10 +10,9 @@ using System.Windows;
 
 namespace PropBagTestApp.View
 {
-    using PropNameType = String;
     using PropModelType = IPropModel<String>;
     using PropModelCacheInterface = ICachePropModels<String>;
-    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
+    using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
 
     /// <summary>
     /// Interaction logic for ReferenceBindWindowPB_Simple.xaml
@@ -153,10 +152,13 @@ namespace PropBagTestApp.View
                         throw new KeyNotFoundException($"Could not find a PropModel with Full Class Name = {fcn}.");
                     }
 
+                    ViewModelFactoryInterface viewModelFactory = null; // Fix Me.
+
                     IPropBagMapperKey<MyModel, ReferenceBindViewModelPB> mapperRequest
                         = PropStoreServicesForThisApp.AutoMapperProvider.SubmitMapperRequest<MyModel, ReferenceBindViewModelPB>
                         (
-                        propModel, 
+                        propModel,
+                        viewModelFactory,
                         typeof(ReferenceBindViewModelPB),
                         configPackageName: "emit_proxy"
                         );

@@ -25,7 +25,7 @@ namespace PropBagTestApp
         /// <param name="pm"></param>
         
         /// TODO: AAA
-        public DtoTestViewModelExtra(PropModel pm) : base(pm, storeAccessCreator: null, propFactory: null, fullClassName: null)
+        public DtoTestViewModelExtra(PropModel pm) : base(pm, viewModelFactory: null, propFactory: null, fullClassName: null)
         {
             // Save a reference to the model used to defined our properties.
             _pm = pm;

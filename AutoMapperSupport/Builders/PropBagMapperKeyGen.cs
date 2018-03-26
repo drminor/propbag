@@ -1,42 +1,59 @@
-﻿using DRM.TypeSafePropertyBag;
+﻿using DRM.PropBag.ViewModelTools;
+using DRM.TypeSafePropertyBag;
 using System;
 using System.Collections.Generic;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
+    using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
+
     public class PropBagMapperKeyGen : IPropBagMapperKeyGen, IEquatable<IPropBagMapperKeyGen>, IEquatable<PropBagMapperKeyGen>
     {
         #region Private Members
-        private Func<IPropBagMapperKeyGen, IPropBagMapperGen> MapperCreator { get; }
+
+        //private Func<IPropBagMapperKeyGen, IPropBagMapperGen> MapperCreator { get; }
+        private Func<IPropBagMapperKeyGen, ViewModelFactoryInterface, IPropBagMapperGen> _mapperCreator { get; }
+        private ViewModelFactoryInterface _viewModelFactory { get; }
+
         #endregion
 
         #region Public Properties
+
         public IMapTypeDefinitionGen SourceTypeGenDef { get; set; }
         public IMapTypeDefinitionGen DestinationTypeGenDef { get; set; }
+
         #endregion
 
         #region Constructor
-        public PropBagMapperKeyGen(
-            Func<IPropBagMapperKeyGen, IPropBagMapperGen> mapperCreator,
+
+        public PropBagMapperKeyGen
+            (
+            Func<IPropBagMapperKeyGen, ViewModelFactoryInterface, IPropBagMapperGen> mapperCreator,
+            ViewModelFactoryInterface viewModelFactory,
+            //Func<IPropBagMapperKeyGen, IPropBagMapperGen> mapperCreator,
             IMapTypeDefinitionGen sourceTypeGenDef,
-            IMapTypeDefinitionGen destinationTypeGenDef)
+            IMapTypeDefinitionGen destinationTypeGenDef
+            )
         {
+            _mapperCreator = mapperCreator;
+            _viewModelFactory = viewModelFactory;
             SourceTypeGenDef = sourceTypeGenDef;
             DestinationTypeGenDef = destinationTypeGenDef;
-            MapperCreator = mapperCreator;
         }
+
         #endregion
 
         #region Public Methods
 
         public IPropBagMapperGen CreateMapper()
         {
-            return MapperCreator(this);
+            return _mapperCreator(this, _viewModelFactory);
         }
 
         #endregion
 
         #region IEquatable Support and Object Overrides
+
         public override bool Equals(object obj)
         {
             return Equals(obj as PropBagMapperKeyGen);
@@ -230,5 +247,4 @@ namespace DRM.PropBag.AutoMapperSupport
     //        return !(oLD1 == oLD2);
     //    }
     //}
-
 }

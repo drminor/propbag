@@ -1,6 +1,5 @@
 ﻿using DRM.PropBag;
-using DRM.PropBag.AutoMapperSupport;
-using DRM.PropBag.TypeWrapper;
+using DRM.PropBag.ViewModelTools;
 using DRM.PropBagWPF;
 using DRM.TypeSafePropertyBag;
 using DRM.TypeSafePropertyBag.TypeDescriptors;
@@ -11,7 +10,7 @@ using System.ComponentModel;
 namespace MVVM_Sample1.ViewModel
 {
     using PropModelType = IPropModel<String>;
-    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
+    using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
 
     public partial class PersonEditorViewModel : PropBag
     {
@@ -24,10 +23,11 @@ namespace MVVM_Sample1.ViewModel
 
         #region Constructors
 
-        public PersonEditorViewModel(PropModelType pm, PSAccessServiceCreatorInterface storeAccessCreator,
-            IProvideAutoMappers autoMapperService, ICreateWrapperTypes wrapperTypeCreator,
+
+
+        public PersonEditorViewModel(PropModelType pm, ViewModelFactoryInterface viewModelFactory,
             IPropFactory propFactory, string fullClassName)
-            : base(pm, storeAccessCreator, autoMapperService, wrapperTypeCreator, propFactory, fullClassName)
+            : base(pm, viewModelFactory, propFactory, fullClassName)
         {
             //PropBagTypeDescriptionProvider<PersonEditorViewModel> tdp = RegisterTypeDescriptorProvider<PersonEditorViewModel>(pm);
             //pm.TypeDescriptionProvider = tdp;

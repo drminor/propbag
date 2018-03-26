@@ -1,17 +1,11 @@
 ﻿using AutoMapper;
-using DRM.PropBag.TypeWrapper;
 using DRM.PropBag.ViewModelTools;
 using DRM.TypeSafePropertyBag;
 using System;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
-    using PropNameType = String;
-    using PropModelType = IPropModel<String>;
-    using ViewModelActivatorInterface = IViewModelActivator<UInt32, String>;
-
-
-    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
+    using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
 
     public class SimplePropBagMapperBuilder<TSource, TDestination>
         : IBuildPropBagMapper<TSource, TDestination>
@@ -21,10 +15,10 @@ namespace DRM.PropBag.AutoMapperSupport
 
         private readonly IBuildMapperConfigurations<TSource, TDestination> _mapperConfigurationBuilder;
 
-        private readonly ViewModelActivatorInterface _viewModelActivator;
-        private readonly PSAccessServiceCreatorInterface _storeAccessCreator;
-        private readonly IProvideAutoMappers _autoMapperService;
-        private readonly ICreateWrapperTypes _wrapperTypeCreator;
+        //private readonly ViewModelActivatorInterface _viewModelActivator;
+        //private readonly PSAccessServiceCreatorInterface _storeAccessCreator;
+        //private readonly IProvideAutoMappers _autoMapperService;
+        //private readonly ICreateWrapperTypes _wrapperTypeCreator;
 
         #endregion
 
@@ -34,31 +28,32 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public SimplePropBagMapperBuilder
             (
-            IBuildMapperConfigurations<TSource, TDestination> mapperConfigurationBuilder,
-            ViewModelActivatorInterface viewModelActivator,
-            PSAccessServiceCreatorInterface storeAccessCreator,
-            IProvideAutoMappers autoMapperService,
-            ICreateWrapperTypes wrapperTypeCreator
+            IBuildMapperConfigurations<TSource, TDestination> mapperConfigurationBuilder
+            //,
+            //ViewModelActivatorInterface viewModelActivator,
+            //PSAccessServiceCreatorInterface storeAccessCreator,
+            //IProvideAutoMappers autoMapperService,
+            //ICreateWrapperTypes wrapperTypeCreator
             )
         {
             _mapperConfigurationBuilder = mapperConfigurationBuilder;
-            _viewModelActivator = viewModelActivator;
-            _storeAccessCreator = storeAccessCreator;
-            _autoMapperService = autoMapperService;
-            _wrapperTypeCreator = wrapperTypeCreator;
+            //_viewModelActivator = viewModelActivator;
+            //_storeAccessCreator = storeAccessCreator;
+            //_autoMapperService = autoMapperService;
+            //_wrapperTypeCreator = wrapperTypeCreator;
         }
 
         #endregion
 
         #region Public Properties
 
-        public Func<IPropBagMapperKeyGen, IPropBagMapperGen> GenMapperCreator => GenerateMapperGen;
+        public Func<IPropBagMapperKeyGen, ViewModelFactoryInterface, IPropBagMapperGen> GenMapperCreator => GenerateMapperGen;
 
         #endregion
 
         #region Public Methods
 
-        public IPropBagMapper<TSource, TDestination> GenerateMapper(IPropBagMapperKey<TSource, TDestination> mapperRequestKey)
+        public IPropBagMapper<TSource, TDestination> GenerateMapper(IPropBagMapperKey<TSource, TDestination> mapperRequestKey, ViewModelFactoryInterface viewModelFactory)
         {
             IConfigurationProvider configProvider = _mapperConfigurationBuilder.GetNewConfiguration(mapperRequestKey);
 
@@ -68,10 +63,11 @@ namespace DRM.PropBag.AutoMapperSupport
                 (
                 mapperRequestKey,
                 theMapper,
-                _viewModelActivator,
-                _storeAccessCreator,
-                _autoMapperService,
-                _wrapperTypeCreator
+                //_viewModelActivator,
+                //_storeAccessCreator,
+                //_autoMapperService,
+                //_wrapperTypeCreator
+                viewModelFactory
                 );
 
             return result;
@@ -79,11 +75,11 @@ namespace DRM.PropBag.AutoMapperSupport
 
         #endregion
 
-        #region Private Methods
+        #region Private Methods 
 
-        private IPropBagMapperGen GenerateMapperGen(IPropBagMapperKeyGen mapRequestGen)
+        private IPropBagMapperGen GenerateMapperGen(IPropBagMapperKeyGen mapRequestGen, ViewModelFactoryInterface viewModelFactory)
         {
-            return (IPropBagMapperGen)GenerateMapper((IPropBagMapperKey<TSource, TDestination>)mapRequestGen);
+            return (IPropBagMapperGen)GenerateMapper((IPropBagMapperKey<TSource, TDestination>)mapRequestGen, viewModelFactory);
         }
 
         //[System.Diagnostics.Conditional("DEBUG")]

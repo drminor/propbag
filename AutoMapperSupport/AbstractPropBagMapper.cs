@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using DRM.PropBag.TypeWrapper;
+using DRM.PropBag;
 using DRM.PropBag.ViewModelTools;
 using DRM.TypeSafePropertyBag;
 using ObjectSizeDiagnostics;
@@ -11,9 +11,8 @@ namespace DRM.PropBag.AutoMapperSupport
 {
     using PropItemSetKeyType = PropItemSetKey<String>;
     using PropModelType = IPropModel<String>;
-    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
     using ViewModelActivatorInterface = IViewModelActivator<UInt32, String>;
-
+    using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
 
     public abstract class AbstractPropBagMapper<TSource, TDestination> 
         : IPropBagMapper<TSource, TDestination> where TDestination : class, IPropBag
@@ -34,10 +33,12 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public Type TargetRunTimeType => RunTimeType;
 
-        ViewModelActivatorInterface _vmActivator;
-        PSAccessServiceCreatorInterface _storeAccessCreator;
-        IProvideAutoMappers _autoMapperService;
-        ICreateWrapperTypes _wrapperTypeCreator;
+        //ViewModelActivatorInterface _vmActivator;
+        //PSAccessServiceCreatorInterface _storeAccessCreator;
+        //IProvideAutoMappers _autoMapperService;
+        //ICreateWrapperTypes _wrapperTypeCreator;
+
+        ViewModelFactoryInterface _viewModelFactory;
 
         private readonly bool _requiresWrappperTypeEmitServices;
         private readonly TDestination _destPropBagTemplate;
@@ -48,29 +49,60 @@ namespace DRM.PropBag.AutoMapperSupport
 
         #region Constructor
 
+        //public AbstractPropBagMapper
+        //    (
+        //    IPropBagMapperKey<TSource, TDestination> mapRequest,
+        //    IMapper mapper,
+        //    ViewModelActivatorInterface vmActivator,
+        //    PSAccessServiceCreatorInterface storeAccessCreator,
+        //    IProvideAutoMappers autoMapperService,
+        //    ICreateWrapperTypes wrapperTypeCreator
+        //    )
+        //{
+        //    SourceType = mapRequest.SourceTypeDef.TargetType;
+        //    DestinationType = mapRequest.DestinationTypeDef.TargetType;
+
+        //    RunTimeType = mapRequest.DestinationTypeDef.NewEmittedType ?? DestinationType; 
+        //    PropModel = mapRequest.DestinationTypeDef.PropModel;
+        //    PropFactory = mapRequest.DestinationTypeDef.PropFactory;
+
+        //    Mapper = mapper;
+        //    _vmActivator = vmActivator;
+        //    _storeAccessCreator = storeAccessCreator;
+        //    _autoMapperService = autoMapperService;
+        //    _wrapperTypeCreator = wrapperTypeCreator;
+
+
+        //    SupportsMapFrom = true;
+
+        //    _requiresWrappperTypeEmitServices = mapRequest.MappingConfiguration.RequiresWrappperTypeEmitServices;
+
+        //    _mct.Measure();
+
+        //    _destPropBagTemplate = GetDestinationTemplate(RunTimeType);
+
+        //    _mct.MeasureAndReport("GetNewDestination(PropModel, ... [In Constructor]", "AbstractPropBagMapper");
+
+        //    return;
+        //}
+
         public AbstractPropBagMapper
             (
             IPropBagMapperKey<TSource, TDestination> mapRequest,
             IMapper mapper,
-            ViewModelActivatorInterface vmActivator,
-            PSAccessServiceCreatorInterface storeAccessCreator,
-            IProvideAutoMappers autoMapperService,
-            ICreateWrapperTypes wrapperTypeCreator
+            ViewModelFactoryInterface viewModelFactory
             )
         {
             SourceType = mapRequest.SourceTypeDef.TargetType;
             DestinationType = mapRequest.DestinationTypeDef.TargetType;
 
-            RunTimeType = mapRequest.DestinationTypeDef.NewEmittedType ?? DestinationType; 
+            RunTimeType = mapRequest.DestinationTypeDef.NewEmittedType ?? DestinationType;
             PropModel = mapRequest.DestinationTypeDef.PropModel;
             PropFactory = mapRequest.DestinationTypeDef.PropFactory;
 
             Mapper = mapper;
-            _vmActivator = vmActivator;
-            _storeAccessCreator = storeAccessCreator;
-            _autoMapperService = autoMapperService;
-            _wrapperTypeCreator = wrapperTypeCreator;
-            
+
+            _viewModelFactory = viewModelFactory;
 
             SupportsMapFrom = true;
 
@@ -99,7 +131,9 @@ namespace DRM.PropBag.AutoMapperSupport
             //}
             //_destPropBagTemplate = GetNewDestination(tType, PropModel, _storeAccessCreator, _autoMapperService, PropFactory, fullClassName: null);
 
-            TDestination result = GetNewDestination(DestinationType, PropModel, _storeAccessCreator, _autoMapperService, _wrapperTypeCreator, PropFactory, fullClassName: null);
+            //TDestination result = GetNewDestination(DestinationType, PropModel, _storeAccessCreator, _autoMapperService, _wrapperTypeCreator, PropFactory, fullClassName: null);
+            TDestination result = GetNewDestination(DestinationType, PropModel, _viewModelFactory, PropFactory, fullClassName: null);
+
 
             if (TestCreateDest(targetType, result))
             {
@@ -108,12 +142,12 @@ namespace DRM.PropBag.AutoMapperSupport
                     PropModel.Fix();
                 }
 
-                if (!_storeAccessCreator.IsPropItemSetFixed(result))
+                if (!_viewModelFactory.PropStoreAccessServiceCreator.IsPropItemSetFixed(result))
                 {
                     // Fix the template's PropNodeCollection to improve performance.
                     //WeakRefKey<PropModelType> propItemSetId = new WeakRefKey<PropModelType>(PropModel);
                     PropItemSetKeyType propItemSetKey = new PropItemSetKeyType(PropModel);
-                    _storeAccessCreator.TryFixPropItemSet(result, propItemSetKey);
+                    _viewModelFactory.PropStoreAccessServiceCreator.TryFixPropItemSet(result, propItemSetKey);
                 }
             }
             else
@@ -129,7 +163,7 @@ namespace DRM.PropBag.AutoMapperSupport
         {
             try
             {
-                GetNewDestination(targetType, template);
+                GetNewDestination(targetType, template, _viewModelFactory.ViewModelActivator);
                 return true;
             }
             catch 
@@ -218,7 +252,7 @@ namespace DRM.PropBag.AutoMapperSupport
             {
                 if (_requiresWrappperTypeEmitServices)
                 {
-                    result = GetNewDestination(RunTimeType, _destPropBagTemplate);
+                    result = GetNewDestination(RunTimeType, _destPropBagTemplate, _viewModelFactory.ViewModelActivator);
                     _mct.MeasureAndReport("GetNewDestination using the copy constructor", "AstractPropBagMapper");
                 }
                 else
@@ -246,7 +280,9 @@ namespace DRM.PropBag.AutoMapperSupport
             }
             else
             {
-                result = GetNewDestination(RunTimeType, PropModel, _storeAccessCreator, _autoMapperService, _wrapperTypeCreator, PropFactory, fullClassName: null);
+                //result = GetNewDestination(RunTimeType, PropModel, _storeAccessCreator, _autoMapperService, _wrapperTypeCreator, PropFactory, fullClassName: null);
+                result = GetNewDestination(RunTimeType, PropModel, _viewModelFactory, PropFactory, fullClassName: null);
+
                 _mct.MeasureAndReport("GetNewDestination(PropModel, ...", "AstractPropBagMapper");
             }
 
@@ -254,11 +290,17 @@ namespace DRM.PropBag.AutoMapperSupport
         }
 
         // Regular Instantiation using the PropModel. 
-        private TDestination GetNewDestination(Type destinationOrProxyType, PropModelType propModel, PSAccessServiceCreatorInterface storeAccessCreator,  IProvideAutoMappers autoMapperService, ICreateWrapperTypes wrapperTypeCreator, IPropFactory propFactory, string fullClassName)
+        //private TDestination GetNewDestination(Type destinationOrProxyType, PropModelType propModel, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService, ICreateWrapperTypes wrapperTypeCreator, IPropFactory propFactory, string fullClassName)
+
+        private TDestination GetNewDestination(Type destinationOrProxyType, PropModelType propModel, ViewModelFactoryInterface viewModelFactory, IPropFactory propFactory, string fullClassName)
         {
+            ViewModelActivatorInterface vmActivator = viewModelFactory.ViewModelActivator;
             try
             {
-                var newViewModel = _vmActivator.GetNewViewModel(destinationOrProxyType, propModel, storeAccessCreator, autoMapperService, wrapperTypeCreator, propFactory, fullClassName);
+                //var newViewModel =  _vmActivator.GetNewViewModel(destinationOrProxyType, propModel, viewModelFactory, propFactory, fullClassName);
+
+                var newViewModel = vmActivator.GetNewViewModel(destinationOrProxyType, propModel, viewModelFactory, propFactory, fullClassName);
+
                 return newViewModel as TDestination;
             }
             catch (Exception e2)
@@ -270,11 +312,11 @@ namespace DRM.PropBag.AutoMapperSupport
 
         // Emitted Types do not implement clone for the Emitted Type (Clone calls the base type.)
         // So this uses the emitted type's constructor that takes a source IPropBag.
-        private TDestination GetNewDestination(Type destinationOrProxyType, IPropBag copySource)
+        private TDestination GetNewDestination(Type destinationOrProxyType, IPropBag copySource, ViewModelActivatorInterface vmActivator)
         {
             try
             {
-                var newViewModel = _vmActivator.GetNewViewModel(destinationOrProxyType, copySource);
+                var newViewModel = vmActivator.GetNewViewModel(destinationOrProxyType, copySource);
                 return newViewModel as TDestination;
             }
             catch (Exception e2)

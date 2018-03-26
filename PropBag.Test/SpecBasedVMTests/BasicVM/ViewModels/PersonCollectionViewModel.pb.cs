@@ -1,18 +1,14 @@
 ﻿using DRM.PropBag;
-using DRM.PropBag.AutoMapperSupport;
-using DRM.PropBag.TypeWrapper;
+using DRM.PropBag.ViewModelTools;
 using DRM.TypeSafePropertyBag;
-using DRM.TypeSafePropertyBag.Fundamentals;
 using DRM.TypeSafePropertyBag.TypeDescriptors;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 
 namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM.ViewModels
 {
     using PropModelType = IPropModel<String>;
-    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
+    using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
 
     public partial class PersonCollectionViewModel : PropBag
     {
@@ -23,10 +19,8 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM.ViewModels
             TypeDescriptor.AddProvider(_typeDescriptionProvider, typeof(PersonCollectionViewModel));
         }
 
-        public PersonCollectionViewModel(PropModelType pm, PSAccessServiceCreatorInterface storeAccessCreator,
-            IProvideAutoMappers autoMapperService, ICreateWrapperTypes wrapperTypeCreator,
-            IPropFactory propFactory, string fullClassName)
-            : base(pm, storeAccessCreator, autoMapperService, wrapperTypeCreator, propFactory, fullClassName)
+        public PersonCollectionViewModel(PropModelType pm, ViewModelFactoryInterface viewModelFactory, IPropFactory propFactory, string fullClassName)
+            : base(pm, viewModelFactory, propFactory, fullClassName)
         {
             System.Diagnostics.Debug.WriteLine("Constructing PersonCollectionViewModel -- with PropModel.");
 

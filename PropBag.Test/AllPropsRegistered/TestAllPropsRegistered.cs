@@ -8,7 +8,6 @@ using System.Text;
 using DRM.TypeSafePropertyBag;
 using System.Reflection;
 
-using DRM.TypeSafePropertyBag.Fundamentals;
 
 namespace PropBagLib.Tests
 {
@@ -66,7 +65,8 @@ namespace PropBagLib.Tests
             //Type tt = Type.GetType(strDestDType);
 
             // TODO: AAA
-            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered, _amHelpers.StoreAccessCreator, _amHelpers.PropFactory_V1);
+            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered,
+                _amHelpers.StoreAccessCreator, _amHelpers.PropFactory_V1);
 
             //mod1.reg
 
@@ -85,7 +85,8 @@ namespace PropBagLib.Tests
         public void TestAllRegSetString()
         {
             // TODO: AAA
-            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered, _amHelpers.StoreAccessCreator, _amHelpers.PropFactory_V1);
+            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered,
+                _amHelpers.StoreAccessCreator, _amHelpers.PropFactory_V1);
 
             mod1.PropStringChanged += Mod1_PropStringChanged;
 
@@ -117,7 +118,8 @@ namespace PropBagLib.Tests
         public void TestDoWhenPropStringChangedBefore()
         {
             // TODO: AAA
-            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered, _amHelpers.StoreAccessCreator, _amHelpers.PropFactory_V1);
+            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered,
+                _amHelpers.StoreAccessCreator, _amHelpers.PropFactory_V1);
 
             mod1.PropStringChanged += Mod1_PropStringChanged;
 
@@ -153,7 +155,8 @@ namespace PropBagLib.Tests
         public void TestDoWhenPropStringChangedAfter()
         {
             // TODO: AAA
-            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered, _amHelpers.StoreAccessCreator, _amHelpers.PropFactory_V1);
+            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered,
+                _amHelpers.StoreAccessCreator, _amHelpers.PropFactory_V1);
 
             string temp;
 
@@ -215,7 +218,8 @@ namespace PropBagLib.Tests
         public void TestStringRefComp()
         {
             // TODO: AAA
-            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered, _amHelpers.StoreAccessCreator, _amHelpers.PropFactory_V1);
+            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered,
+                _amHelpers.StoreAccessCreator, _amHelpers.PropFactory_V1);
 
             mod1.PropStringUseRefCompChanged += Mod1_PropStringUseRefCompChanged;
 
@@ -285,7 +289,8 @@ namespace PropBagLib.Tests
         public void ShouldSetAndRetrieveNullableInt()
         {
             // TODO: AAA
-            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered, _amHelpers.StoreAccessCreator, _amHelpers.PropFactory_V1);
+            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered,
+                _amHelpers.StoreAccessCreator, _amHelpers.PropFactory_V1);
 
             mod1.PropNullableIntChanged += Mod1_PropNullableIntChanged;
 
@@ -320,7 +325,8 @@ namespace PropBagLib.Tests
         public void ShouldSetAndRetrieveICollectionInt()
         {
             // TODO: AAA
-            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered, _amHelpers.StoreAccessCreator, _amHelpers.PropFactory_V1);
+            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered,
+                _amHelpers.StoreAccessCreator, _amHelpers.PropFactory_V1);
 
             mod1.PropICollectionIntChanged += Mod1_PropICollectionIntChanged;
 
@@ -357,7 +363,8 @@ namespace PropBagLib.Tests
         public void TestAddNewProp()
         {
             // TODO: AAA
-            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered, _amHelpers.StoreAccessCreator, _amHelpers.PropFactory_V1);
+            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered,
+                _amHelpers.StoreAccessCreator, _amHelpers.PropFactory_V1);
 
             InvalidOperationException kk = new InvalidOperationException();
 
@@ -378,7 +385,8 @@ namespace PropBagLib.Tests
         public void TestPropertyChangedWithVals()
         {
             // TODO: AAA
-            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered, _amHelpers.StoreAccessCreator, _amHelpers.PropFactory_V1);
+            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered,
+                _amHelpers.StoreAccessCreator, _amHelpers.PropFactory_V1);
 
             //mod1.SubscribeToPropChanged(Mod1_PropertyChangedWithVals, "PropInt", typeof(int));
             mod1.PropertyChangedWithGenVals += Mod1_PropertyChangedWithVals;
@@ -447,7 +455,8 @@ namespace PropBagLib.Tests
         public void TestSubscribePropChangedGen()
         {
             // TODO: AAA
-            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered, _amHelpers.StoreAccessCreator, _amHelpers.PropFactory_V1);
+            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered,
+                _amHelpers.StoreAccessCreator, _amHelpers.PropFactory_V1);
 
             mod1.SubscribeToPropChanged(eventHandler: DoWhenPropIntChangesGen, propertyName: "PropInt", propertyType: typeof(int));
 
@@ -477,7 +486,8 @@ namespace PropBagLib.Tests
         public void TestSubscribePropChangedTyped()
         {
             // TODO: AAA
-            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered, _amHelpers.StoreAccessCreator, _amHelpers.PropFactory_V1);
+            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered,
+                _amHelpers.StoreAccessCreator, _amHelpers.PropFactory_V1);
 
             mod1.SubscribeToPropChanged<int>(DoWhenPropIntChangesTyped, "PropInt");
 
@@ -507,7 +517,8 @@ namespace PropBagLib.Tests
         public void TestPropertyChangedObject()
         {
             // TODO: AAA
-            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered, _amHelpers.StoreAccessCreator, _amHelpers.PropFactory_V1);
+            mod1 = new AllPropsRegisteredModel(PropBagTypeSafetyMode.AllPropsMustBeRegistered,
+                _amHelpers.StoreAccessCreator, _amHelpers.PropFactory_V1);
 
             //Action<object, EventArgs> objHandler = this.TestHandler;
 
@@ -582,7 +593,8 @@ namespace PropBagLib.Tests
         public void TestPublicPropBag()
         {
             // TODO: AAA
-            PubPropBag ppb = new PubPropBag(PropBagTypeSafetyMode.AllPropsMustBeRegistered, _amHelpers.StoreAccessCreator, _amHelpers.PropFactory_V1);
+            PubPropBag ppb = new PubPropBag(PropBagTypeSafetyMode.AllPropsMustBeRegistered,
+                _amHelpers.StoreAccessCreator, _amHelpers.PropFactory_V1, "PropBagLib.Tests.PubPropBag");
 
             ppb.AddProp<int>("PropInt");
         }

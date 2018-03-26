@@ -1,4 +1,5 @@
 ﻿using DRM.PropBag;
+using DRM.PropBag.ViewModelTools;
 using DRM.TypeSafePropertyBag;
 using PropBagLib.Tests.AutoMapperSupport;
 using System;
@@ -9,20 +10,18 @@ using System.Threading;
 namespace PropBagLib.Tests
 {
     using PropModelType = IPropModel<String>;
-    using PropModelCacheInterface = ICachePropModels<String>;
-    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
-
+    using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
 
     public partial class PerformanceModel : PropBag
     {
 
-        public PerformanceModel(PropModelType propModel, PSAccessServiceCreatorInterface storeCreator) :
-            base(propModel, storeCreator)
+        public PerformanceModel(PropModelType propModel, ViewModelFactoryInterface viewModelFactory) :
+            base(propModel, viewModelFactory)
         {
 
         }
 
-        static public PerformanceModel Create(PropBagTypeSafetyMode safetyMode)
+        static public PerformanceModel Create(PropBagTypeSafetyMode safetyMode, ViewModelFactoryInterface viewModelFactory)
         {
             AutoMapperHelpers ourHelper = new AutoMapperHelpers();
             IPropFactory propFactory_V1 = ourHelper.GetNewPropFactory_V1();
@@ -41,8 +40,11 @@ namespace PropBagLib.Tests
                 requireExplicitInitialValue: true
                 );
 
-            // TODO: AAA
-            PerformanceModel pmViewModel = new PerformanceModel(propModel, ourHelper.StoreAccessCreator);
+            //ViewModelActivatorInterface vmActivator = new SimpleViewModelActivator();
+
+            //ViewModelFactoryInterface viewModelFactory = new SimpleViewModelFactory(vmActivator, ourHelper.StoreAccessCreator);
+
+            PerformanceModel pmViewModel = new PerformanceModel(propModel, viewModelFactory);
 
             pmViewModel.AddPropNoStore<int>("PropIntNoStore");
             pmViewModel.AddPropNoStore<string>("PropStringNoStore");

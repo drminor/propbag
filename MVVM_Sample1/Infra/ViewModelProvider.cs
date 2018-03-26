@@ -6,7 +6,6 @@ namespace MVVM_Sample1.Infra
     public class ViewModelProvider
     {
         private Lazy<object> _dataGetter;
-        //static private object _dataHold;
 
         public ViewModelProvider(string resourceKey)
         {
@@ -25,7 +24,6 @@ namespace MVVM_Sample1.Infra
         {
             get
             {
-                //_dataHold = _dataGetter.Value;
                 return _dataGetter.Value;
             }
         }
@@ -37,6 +35,5 @@ namespace MVVM_Sample1.Infra
             string result = suffix != null ? $"{rawKey}_{suffix}" : rawKey;
             return result;
         }
-
     }
 }

@@ -85,6 +85,7 @@
     <Compile Include="PropBagTemplateInterfaces\IPropBagTemplate.cs" />
     <Compile Include="PropBagTemplateInterfaces\NamespacesCollection.cs" />
     <Compile Include="PropBagTemplateInterfaces\PropsCollection.cs" />
+    <Compile Include="PropFactoryInterfaces\ICreateWrapperType.cs" />
     <Compile Include="PropFactoryInterfaces\IPropFactoryFactory.cs" />
     <Compile Include="PropBagModel\DeriveFromClassModeEnum.cs" />
     <Compile Include="PropBagModel\IMapperRequest.cs" />

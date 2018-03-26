@@ -17,17 +17,17 @@ namespace PropBagLib.Tests
 		//public OnlyTypedAccessModel(PropBagTypeSafetyMode typeSafetyMode) : this(typeSafetyMode, null) { }
 
 		public OnlyTypedAccessModel(PropBagTypeSafetyMode typeSafetyMode, PSAccessServiceCreatorInterface storeAccessCreator,
-            string fullClassName, IPropFactory propFactory)
+            IPropFactory propFactory, string fullClassName)
             : base(typeSafetyMode, storeAccessCreator, propFactory, fullClassName)
         {
 	        AddProp<object>("PropObject");
 		 
 	        AddProp<string>("PropString");
-		SubscribeToPropChanged<string>(GetDelegate<string>("DoWhenStringChanged"), "PropString"); 
+		    SubscribeToPropChanged<string>(GetDelegate<string>("DoWhenStringChanged"), "PropString"); 
 	        AddPropNoValue<string>("PropStringCallDoAfter", comparer:EqualityComparer<string>.Default.Equals);
-		SubscribeToPropChanged<string>(GetDelegate<string>("DoWhenStringChanged"), "PropStringCallDoAfter"); 
+		    SubscribeToPropChanged<string>(GetDelegate<string>("DoWhenStringChanged"), "PropStringCallDoAfter"); 
 	        AddPropObjComp<string>("PropStringUseRefComp", extraInfo:null);
-		SubscribeToPropChanged<string>(GetDelegate<string>("DoWhenStringChanged"), "PropStringUseRefComp"); 
+		    SubscribeToPropChanged<string>(GetDelegate<string>("DoWhenStringChanged"), "PropStringUseRefComp"); 
 	        AddProp<bool>("PropBool");
 		 
 	        AddProp<int>("PropInt");

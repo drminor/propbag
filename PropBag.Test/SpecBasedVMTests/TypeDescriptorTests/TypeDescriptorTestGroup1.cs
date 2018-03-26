@@ -1,4 +1,5 @@
-﻿using DRM.TypeSafePropertyBag;
+﻿using DRM.PropBag.ViewModelTools;
+using DRM.TypeSafePropertyBag;
 using DRM.TypeSafePropertyBag.Fundamentals;
 using NUnit.Framework;
 using PropBagLib.Tests.SpecBasedVMTests.BasicVM.Services;
@@ -10,6 +11,7 @@ using System.ComponentModel;
 namespace PropBagLib.Tests.SpecBasedVMTests.TypeDescriptorTests
 {
     using PropModelType = IPropModel<String>;
+    using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
 
     [TestFixture(TestName = "CreateDestroyBasicVM")]
     [NonParallelizable]
@@ -43,9 +45,8 @@ namespace PropBagLib.Tests.SpecBasedVMTests.TypeDescriptorTests
             BaseMemTracker.CompactMeasureAndReport("After get mainWindow_PropModel.", "CreateDestroyBasicVM");
 
             // To see how much memory is not being cleaned up after one is created and then disposed.
-            mainWindowViewModel = new MainWindowViewModel(mainWindowPropModel, PropStoreAccessService_Factory,
-                AutoMapperProvider, WrapperTypeCreator,
-                propFactory: null, fullClassName: null);
+
+            mainWindowViewModel = new MainWindowViewModel(mainWindowPropModel, ViewModelFactory);
             BaseMemTracker.CompactMeasureAndReport("After create the first mainWindowViewModel.", "CreateDestroyBasicVM");
 
             //mainWindowViewModel.Dispose();

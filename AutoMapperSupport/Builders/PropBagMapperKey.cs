@@ -1,9 +1,12 @@
-﻿using DRM.TypeSafePropertyBag;
+﻿using DRM.PropBag.ViewModelTools;
+using DRM.TypeSafePropertyBag;
 using System;
 using System.Collections.Generic;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
+    using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
+
     // TODO: check to see if we really need to use the base class: PropBagMapperKeyGen
 
     public class PropBagMapperKey<TSource, TDestination> : PropBagMapperKeyGen,
@@ -35,11 +38,12 @@ namespace DRM.PropBag.AutoMapperSupport
         public PropBagMapperKey
             (
             IBuildPropBagMapper<TSource, TDestination> propBagMapperBuilder,
+            ViewModelFactoryInterface viewModelFactory,
             IConfigureAMapper<TSource, TDestination> mappingConfiguration,
             IMapTypeDefinition<TSource> sourceMapTypeDef,
             IMapTypeDefinition<TDestination> destinationMapTypeDef
             )
-            : base(propBagMapperBuilder.GenMapperCreator, sourceMapTypeDef, destinationMapTypeDef)
+            : base(propBagMapperBuilder.GenMapperCreator, viewModelFactory, sourceMapTypeDef, destinationMapTypeDef)
         {
             PropBagMapperBuilder = propBagMapperBuilder;
             MappingConfiguration = mappingConfiguration;

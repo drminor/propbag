@@ -1,10 +1,12 @@
 ﻿using DRM.PropBag;
+using DRM.PropBag.ViewModelTools;
 using DRM.TypeSafePropertyBag;
 using System;
 
 namespace PropBagLib.Tests
 {
-    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
+    using PropModelType = IPropModel<String>;
+    using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
 
     public class CreateAtRunTimeModel : PropBag
     {
@@ -14,8 +16,8 @@ namespace PropBagLib.Tests
         //{
         //}
 
-        public CreateAtRunTimeModel(PropModel pm, PSAccessServiceCreatorInterface storeAccessCreator)
-            : base(pm, storeAccessCreator, propFactory: null, fullClassName: null)
+        public CreateAtRunTimeModel(PropModel pm, ViewModelFactoryInterface viewModelFactory)
+            : base(pm, viewModelFactory, propFactory: null, fullClassName: "PropBagLib.Tests.CreateAtRunTimeModel")
         {
         }
 

@@ -77,7 +77,7 @@ namespace PropBagLib.Tests.PerformanceDb
             return result;
         }
 
-        public PropModelType GetPropModelForModel5Dest(IPropFactory propFactory)
+        public PropModelType GetPropModelForModel5Dest(IPropFactory propFactory, PropModelCacheInterface propModelCache)
         {
             PropModelType result = new PropModel
                 (
@@ -121,10 +121,14 @@ namespace PropBagLib.Tests.PerformanceDb
                 initialValueField: pivf, itemType: typeof(Person));
             result.Add(propItem.PropertyName, propItem);
 
+            result.Open();
+
+            propModelCache.Add(result);
+
             return result;
         }
 
-        public PropModelType GetPropModelForModel6Dest(IPropFactory propFactory)
+        public PropModelType GetPropModelForModel6Dest(IPropFactory propFactory, PropModelCacheInterface propModelCache)
         {
             PropModelType result = new PropModel
                 (
@@ -180,6 +184,10 @@ namespace PropBagLib.Tests.PerformanceDb
                 storageStrategy: PropStorageStrategyEnum.Internal, propKind: PropKindEnum.Prop,
                 initialValueField: pivf);
             result.Add(propItem.PropertyName, propItem);
+
+            result.Open();
+
+            propModelCache.Add(result);
 
             return result;
         }

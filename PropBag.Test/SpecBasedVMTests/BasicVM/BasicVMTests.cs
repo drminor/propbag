@@ -1,4 +1,6 @@
-﻿using DRM.TypeSafePropertyBag;
+﻿using DRM.PropBag;
+using DRM.PropBag.ViewModelTools;
+using DRM.TypeSafePropertyBag;
 using NUnit.Framework;
 using PropBagLib.Tests.BusinessModel;
 using PropBagLib.Tests.SpecBasedVMTests.BasicVM.Services;
@@ -9,9 +11,8 @@ using System.Linq;
 
 namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
 {
-    using PropNameType = String;
     using PropModelType = IPropModel<String>;
-
+    using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
 
     [TestFixture(TestName = "AAA No Resources Run1")]
     [NonParallelizable]
@@ -277,9 +278,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
 
             BaseMemTracker.CompactMeasureAndReport("After get mainWindow_PropModel.", "CreateVM_CreateMainWindowVM_Run1");
 
-            mainWindowViewModel = new MainWindowViewModel(mainWindowPropModel, PropStoreAccessService_Factory,
-                AutoMapperProvider, WrapperTypeCreator,
-                propFactory: null, fullClassName: null);
+            mainWindowViewModel = new MainWindowViewModel(mainWindowPropModel, ViewModelFactory);
             BaseMemTracker.CompactMeasureAndReport("After create the mainWindowViewModel.", "CreateVM_CreateMainWindowVM_Run1");
 
             //mainWindowViewModel.Dispose();
@@ -352,17 +351,13 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
             BaseMemTracker.CompactMeasureAndReport("After get mainWindow_PropModel.", "CreateVM_CreateMainWindowVM_Run2");
 
             // To see how much memory is not being cleaned up after one is created and then disposed.
-            mainWindowViewModel = new MainWindowViewModel(mainWindowPropModel, PropStoreAccessService_Factory,
-                AutoMapperProvider, WrapperTypeCreator,
-                propFactory: null, fullClassName: null);
+            mainWindowViewModel = new MainWindowViewModel(mainWindowPropModel, ViewModelFactory);
             BaseMemTracker.CompactMeasureAndReport("After create the first mainWindowViewModel.", "CreateVM_CreateMainWindowVM_Run2");
 
             mainWindowViewModel.Dispose();
             BaseMemTracker.CompactMeasureAndReport("After dispose of the first mainWindowViewModel.", "CreateVM_CreateMainWindowVM_Run2");
 
-            mainWindowViewModel = new MainWindowViewModel(mainWindowPropModel, PropStoreAccessService_Factory,
-                AutoMapperProvider, WrapperTypeCreator,
-                propFactory: null, fullClassName: null);
+            mainWindowViewModel = new MainWindowViewModel(mainWindowPropModel, ViewModelFactory);
             BaseMemTracker.CompactMeasureAndReport("After create the second mainWindowViewModel.", "CreateVM_CreateMainWindowVM_Run2");
 
             // And here.
@@ -432,9 +427,9 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
             }
             BaseMemTracker.CompactMeasureAndReport("After get mainWindow_PropModel.", "CreateVM_CreateMainWindowVM_Run1");
 
-            mainWindowViewModel = new MainWindowViewModel(mainWindowPropModel, PropStoreAccessService_Factory,
-                AutoMapperProvider, WrapperTypeCreator,
-                propFactory: null, fullClassName: null);
+
+            ViewModelFactoryInterface viewModelFactory = ViewModelFactory;
+            mainWindowViewModel = new MainWindowViewModel(mainWindowPropModel, viewModelFactory);
             BaseMemTracker.CompactMeasureAndReport("After create the mainWindowViewModel.", "CreateVM_CreateMainWindowVM_Run1");
 
             mainWindowViewModel.Dispose();

@@ -1,19 +1,30 @@
 ﻿
+using DRM.PropBag.ViewModelTools;
 using DRM.TypeSafePropertyBag;
 using NUnit.Framework;
+using PropBagLib.Tests.AutoMapperSupport;
+using System;
 using System.Collections.Generic;
 
 namespace PropBagLib.Tests
 {
-    [TestFixtureAttribute]
+    using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
+
+    [TestFixture]
     public class TestPerformance
     {
-
+        ViewModelFactoryInterface _viewModelFactory;
         public PerformanceModel mod1;
 
         bool varToEnsureWorkIsDone = false;
 
         const int InterationCount = 100000;
+
+        [OneTimeSetUp]
+        public void EstContext()
+        {
+            _viewModelFactory = new AutoMapperHelpers().ViewModelFactory;   
+        }
 
 
         [SetUp]
@@ -31,7 +42,7 @@ namespace PropBagLib.Tests
         [Test]
         public void SetInt1000Regular()
         {
-            mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+            mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered, _viewModelFactory);
             mod1.PropertyChanged += Mod1_PropertyChanged;
             mod1.PropertyChanged2 += Mod1_PropertyChanged2;
 
@@ -44,7 +55,7 @@ namespace PropBagLib.Tests
         [Test]
         public void SetInt1000WithType()
         {
-            mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+            mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered, _viewModelFactory);
             mod1.PropertyChanged += Mod1_PropertyChanged;
             mod1.PropertyChanged2 += Mod1_PropertyChanged2;
 
@@ -57,7 +68,7 @@ namespace PropBagLib.Tests
         [Test]
         public void SetInt1000WithTypeDirect()
         {
-            mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+            mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered, _viewModelFactory);
             mod1.PropertyChanged += Mod1_PropertyChanged;
             mod1.PropertyChanged2 += Mod1_PropertyChanged2;
 
@@ -70,7 +81,7 @@ namespace PropBagLib.Tests
         [Test]
         public void SetInt1000WithTypeTypedSub()
         {
-            mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+            mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered, _viewModelFactory);
             mod1.SubscribeToPropChanged<int>(Mod1_PropertyChangedTyped, "PropInt");
 
             for (int cntr = 0; cntr < InterationCount - 1; cntr++)
@@ -83,7 +94,7 @@ namespace PropBagLib.Tests
         [Test]
         public void ASetInt1000WithTypeTypedSub()
         {
-            mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+            mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered, _viewModelFactory);
 
             IList<string> testList = mod1.GetAllPropertyNames();
 
@@ -100,7 +111,7 @@ namespace PropBagLib.Tests
         [Test]
         public void SetInt1000WithTypeGenSub()
         {
-            mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+            mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered, _viewModelFactory);
             mod1.SubscribeToPropChanged(Mod1_PropertyChangedGen, "PropInt", typeof(int));
 
             for (int cntr = 0; cntr < InterationCount - 1; cntr++)
@@ -113,7 +124,7 @@ namespace PropBagLib.Tests
         [Test]
         public void ASetInt1000WithTypeGenSub()
         {
-            mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+            mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered, _viewModelFactory);
 
 
             mod1.SubscribeToPropChanged(Mod1_PropertyChangedGen, "PropInt", typeof(int));
@@ -128,7 +139,7 @@ namespace PropBagLib.Tests
         [Test]
         public void SetInt1000Index()
         {
-            mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.None);
+            mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.None, _viewModelFactory);
             mod1.PropertyChanged += Mod1_PropertyChanged;
             mod1.PropertyChanged2 += Mod1_PropertyChanged2;
 
@@ -142,7 +153,7 @@ namespace PropBagLib.Tests
         [Test]
         public void SetInt1000WithNoStore()
         {
-            mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+            mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered, _viewModelFactory);
             mod1.PropertyChanged += Mod1_PropertyChangedNoStore;
             mod1.PropertyChanged2 += Mod1_PropertyChanged2;
 
@@ -155,7 +166,7 @@ namespace PropBagLib.Tests
         [Test]
         public void SetInt1000UsingTypeProp()
         {
-            mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+            mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered, _viewModelFactory);
             mod1.PropertyChanged += Mod1_PropertyChangedNoStore;
             mod1.PropertyChanged2 += Mod1_PropertyChanged2;
 
@@ -170,7 +181,7 @@ namespace PropBagLib.Tests
         //[Test]
         //public void ASetInt1000UsingTypeProp()
         //{
-        //    mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+        //    mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered, _viewModelFactory);
         //    mod1.PropertyChanged += Mod1_PropertyChangedNoStore;
         //    mod1.PropertyChanged2 += Mod1_PropertyChanged2;
 
@@ -187,7 +198,7 @@ namespace PropBagLib.Tests
         [Test]
         public void SetString1000Regular()
         {
-            mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+            mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered, _viewModelFactory);
             mod1.PropertyChanged += Mod1_PropertyChanged;
             mod1.PropertyChanged2 += Mod1_PropertyChanged2;
 
@@ -203,7 +214,7 @@ namespace PropBagLib.Tests
         [Test]
         public void SetString1000WithType()
         {
-            mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+            mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered, _viewModelFactory);
             mod1.PropertyChanged += Mod1_PropertyChanged;
             mod1.PropertyChanged2 += Mod1_PropertyChanged2;
 
@@ -219,7 +230,7 @@ namespace PropBagLib.Tests
         [Test]
         public void SetString1000NoType()
         {
-            mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.None);
+            mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.None, _viewModelFactory);
             mod1.PropertyChanged += Mod1_PropertyChanged;
             mod1.PropertyChanged2 += Mod1_PropertyChanged2;
 
@@ -235,7 +246,7 @@ namespace PropBagLib.Tests
         [Test]
         public void SetString1000WithNoStore()
         {
-            mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered);
+            mod1 = PerformanceModel.Create(PropBagTypeSafetyMode.AllPropsMustBeRegistered, _viewModelFactory);
             mod1.PropertyChanged += Mod1_PropertyChangedNoStore;
             mod1.PropertyChanged2 += Mod1_PropertyChanged2;
 

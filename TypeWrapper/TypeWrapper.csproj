@@ -51,7 +51,6 @@
     <Compile Include="SimpleModuleBuilderInfo.cs" />
     <Compile Include="SimpleWrapperTypeEmitter.cs" />
     <Compile Include="Caches\ICacheTypeDescriptions.cs" />
-    <Compile Include="TypeCreators\ICreateWrapperType.cs" />
     <Compile Include="TypeCreators\SimpleWrapperTypeCreator.cs" />
     <Compile Include="TypeDesc\ITypeDescriptionProvider.cs" />
     <Compile Include="TypeDesc\NewTypeRequest.cs" />

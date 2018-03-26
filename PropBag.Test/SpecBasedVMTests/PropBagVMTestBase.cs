@@ -8,13 +8,12 @@ using DRM.PropBagWPF;
 using DRM.TypeSafePropertyBag;
 using ObjectSizeDiagnostics;
 using System;
-using System.Windows;
 
 namespace PropBagLib.Tests.SpecBasedVMTests
 {
-    using PropNameType = String;
-    using PropModelType = IPropModel<String>;
     using PropModelCacheInterface = ICachePropModels<String>;
+    using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
+
     using ViewModelActivatorInterface = IViewModelActivator<UInt32, String>;
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
 
@@ -147,13 +146,12 @@ namespace PropBagLib.Tests.SpecBasedVMTests
         protected SimplePropStoreProxy _theStore { get; set; }
         protected PSAccessServiceCreatorInterface PropStoreAccessService_Factory { get; set; }
 
+        protected ViewModelFactoryInterface ViewModelFactory { get; set; }
+
         protected ICreateWrapperTypes WrapperTypeCreator { get; set; }
         protected IProvideAutoMappers AutoMapperProvider { get; set; }
 
-        //protected IProvidePropModels PropModelProvider { get; set; }
         protected PropModelCacheInterface PropModelCache { get; set; }
-
-        //protected ViewModelHelper ViewModelHelper { get; set; }
 
         //protected IPropFactory DefaultPropFactory { get; set; }
 
@@ -229,9 +227,10 @@ namespace PropBagLib.Tests.SpecBasedVMTests
 
             PropModelCache = new SimplePropModelCache(remotePropModelProvider);
 
-            //// Create the ViewModelHelper
-            //ViewModelHelper = new ViewModelHelper(PropModelCache, vmActivator, PropStoreAccessService_Factory, AutoMapperProvider);
-            //_mct.MeasureAndReport("After new ViewModelHelper");
+            // Create the ViewModelFactory
+            ViewModelFactory = new SimpleViewModelFactory(PropModelCache, vmActivator, PropStoreAccessService_Factory, AutoMapperProvider, WrapperTypeCreator);
+            _mct.MeasureAndReport("After new ViewModelFactory");
+
 
             //// Default PropFactory
             //DefaultPropFactory = BuildDefaultPropFactory
@@ -398,9 +397,10 @@ namespace PropBagLib.Tests.SpecBasedVMTests
             // TODO: Expose the creation of wrapperTypeCreator (ICreateWrapperTypes).
             IPropBagMapperBuilderProvider propBagMapperBuilderProvider = new SimplePropBagMapperBuilderProvider
                 (
-                viewModelActivator: viewModelActivator,
-                storeAccessCreator: psAccessServiceFactory,
-                wrapperTypesCreator: wrapperTypesCreator);
+                //viewModelActivator: viewModelActivator,
+                //storeAccessCreator: psAccessServiceFactory,
+                //wrapperTypesCreator: wrapperTypesCreator
+                );
 
             IMapTypeDefinitionProvider mapTypeDefinitionProvider = new SimpleMapTypeDefinitionProvider();
 

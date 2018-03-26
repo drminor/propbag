@@ -1,11 +1,15 @@
 ﻿
 using DRM.PropBag;
+using DRM.PropBag.ViewModelTools;
 using DRM.TypeSafePropertyBag;
 using NUnit.Framework;
 using PropBagLib.Tests.AutoMapperSupport;
+using System;
 
 namespace PropBagLib.Tests
 {
+    using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
+
     [TestFixture]
     public class TestCreateAtRunTime
     {
@@ -48,7 +52,8 @@ namespace PropBagLib.Tests
             pm.Add(pi.PropertyName, pi);
 
 
-            mod1 = new CreateAtRunTimeModel(pm, ourHelper.StoreAccessCreator);
+            ViewModelFactoryInterface viewModelFactory = ourHelper.ViewModelFactory;
+            mod1 = new CreateAtRunTimeModel(pm, viewModelFactory);
 
             Assert.That(mod1, Is.Not.EqualTo(null), "Expected the CreateAtRunTimeModel to have been created.");
 

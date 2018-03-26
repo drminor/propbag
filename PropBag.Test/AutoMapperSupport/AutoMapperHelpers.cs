@@ -13,6 +13,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
     using PropModelCacheInterface = ICachePropModels<String>;
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
     using ViewModelActivatorInterface = IViewModelActivator<UInt32, String>;
+    using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
 
 
     public class AutoMapperHelpers : IDisposable
@@ -43,6 +44,24 @@ namespace PropBagLib.Tests.AutoMapperSupport
 
         private SimplePropStoreProxy _theStore { get; set; }
 
+        ViewModelFactoryInterface _viewModelFactory;
+        public ViewModelFactoryInterface ViewModelFactory
+        {
+            get
+            {
+                if(_viewModelFactory == null)
+                {
+                    PropModelCacheInterface propModelCache = GetPropModelCache_V1();
+                    ViewModelActivatorInterface vmActivator = new SimpleViewModelActivator();
+                    ICreateWrapperTypes simpleWrapperTypeCreator = GetWrapperTypeCreator_V1();
+                    IProvideAutoMappers autoMapperService = GetAutoMapperSetup_V1();
+
+                    _viewModelFactory = new SimpleViewModelFactory(propModelCache, vmActivator, StoreAccessCreator, autoMapperService, simpleWrapperTypeCreator);
+                }
+                return _viewModelFactory;
+            }
+        }
+
         public IProvideAutoMappers InitializeAutoMappers(PSAccessServiceCreatorInterface storeAccessCreator)
         {
             ViewModelActivatorInterface vmActivator = new SimpleViewModelActivator();
@@ -52,9 +71,10 @@ namespace PropBagLib.Tests.AutoMapperSupport
             IPropBagMapperBuilderProvider propBagMapperBuilderProvider
                 = new SimplePropBagMapperBuilderProvider
                 (
-                    viewModelActivator: vmActivator,
-                    storeAccessCreator: storeAccessCreator,
-                    wrapperTypesCreator: simpleWrapperTypeCreator);
+                    //viewModelActivator: vmActivator,
+                    //storeAccessCreator: storeAccessCreator,
+                    //wrapperTypesCreator: simpleWrapperTypeCreator
+                );
 
             IMapTypeDefinitionProvider mapTypeDefinitionProvider = new SimpleMapTypeDefinitionProvider();
 

@@ -30,7 +30,7 @@ namespace PropBagTestApp.Infra
 
         public static PropModelCacheInterface PropModelCache { get; set; }
 
-        public static ViewModelFactory ViewModelHelper { get; }
+        public static SimpleViewModelFactory ViewModelHelper { get; }
         public static IProvideAutoMappers AutoMapperProvider { get; }
 
         public static ICreateWrapperTypes WrapperTypeCreator { get; }
@@ -75,7 +75,7 @@ namespace PropBagTestApp.Infra
 
             PropModelCache = new SimplePropModelCache(propModelProvider);
 
-            ViewModelHelper = new ViewModelFactory(PropModelCache, vmActivator, psAccessServiceFactory, AutoMapperProvider, WrapperTypeCreator);
+            ViewModelHelper = new SimpleViewModelFactory(PropModelCache, vmActivator, psAccessServiceFactory, AutoMapperProvider, WrapperTypeCreator);
         }
 
         private static IPropFactoryFactory BuildThePropFactoryFactory
@@ -150,9 +150,9 @@ namespace PropBagTestApp.Infra
 
             IPropBagMapperBuilderProvider propBagMapperBuilderProvider = new SimplePropBagMapperBuilderProvider
                 (
-                viewModelActivator: viewModelActivator,
-                storeAccessCreator: storeAccessCreator,
-                wrapperTypesCreator: wrapperTypeCreator
+                //viewModelActivator: viewModelActivator,
+                //storeAccessCreator: storeAccessCreator,
+                //wrapperTypesCreator: wrapperTypeCreator
                 );
 
             SimpleAutoMapperProvider autoMapperProvider = new SimpleAutoMapperProvider

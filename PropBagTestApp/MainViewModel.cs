@@ -1,4 +1,5 @@
 ﻿using DRM.PropBag;
+using DRM.PropBag.ViewModelTools;
 using DRM.TypeSafePropertyBag;
 using System;
 using System.ComponentModel;
@@ -6,7 +7,7 @@ using System.Drawing;
 
 namespace PropBagTestApp
 {
-    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
+    using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
 
     public class MainViewModel : PropBag, INotifyPropertyChanged, INotifyPropertyChanging
     {
@@ -27,8 +28,8 @@ namespace PropBagTestApp
         /// Constructor used by View to create with properties
         /// </summary>
         /// <param name="pm"></param>
-        public MainViewModel(PropModel pm, PSAccessServiceCreatorInterface storeAccessCreator, IPropFactory propFactory)
-            : base(pm, storeAccessCreator, propFactory, fullClassName: null)
+        public MainViewModel(PropModel pm, ViewModelFactoryInterface viewModelFactory, IPropFactory propFactory)
+            : base(pm, viewModelFactory, propFactory, fullClassName: null)
         {
             this.PropFirstDidChange = false;
             this.PropMyStringDidChange = false;

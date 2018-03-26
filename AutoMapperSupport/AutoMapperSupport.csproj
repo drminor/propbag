@@ -47,6 +47,7 @@
     <Compile Include="ConfigPackages\ConfigPackage_ExtraMembers.cs" />
     <Compile Include="ConfigPackages\ICreateMapperRequests.cs" />
     <Compile Include="ConfigPackages\IProvideAMapperConfiguration.cs" />
+    <Compile Include="Builders\IBuildPropBagMapper.cs" />
     <Compile Include="MapTypeDefinition\IMapTypeDefinitionProvider.cs" />
     <Compile Include="Builders\PropBagMapperKeyGen.cs" />
     <Compile Include="MapTypeDefinition\SimpleMapTypeDefinitionProvider.cs" />

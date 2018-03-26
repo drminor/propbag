@@ -41,7 +41,8 @@ namespace PropBagLib.Tests
         public void TestAllRegSetBool()
         {
             // TODO: AAA
-            mod1 = new OnlyTypedAccessModel(PropBagTypeSafetyMode.OnlyTypedAccess, _amHelpers.StoreAccessCreator, null, _amHelpers.PropFactory_V1);
+            mod1 = new OnlyTypedAccessModel(PropBagTypeSafetyMode.OnlyTypedAccess, _amHelpers.StoreAccessCreator,
+                _amHelpers.PropFactory_V1, "PropBagLib.Tests.OnlyTypedAccessModel");
 
             bool temp = mod1.PropBool;
             Assert.That(temp, Is.EqualTo(false),"Expecting the initial value of PropBool to be false.");
@@ -56,7 +57,8 @@ namespace PropBagLib.Tests
         public void TestAllRegSetString()
         {
             // TODO: AAA
-            mod1 = new OnlyTypedAccessModel(PropBagTypeSafetyMode.OnlyTypedAccess, _amHelpers.StoreAccessCreator, null, _amHelpers.PropFactory_V1);
+            mod1 = new OnlyTypedAccessModel(PropBagTypeSafetyMode.OnlyTypedAccess, _amHelpers.StoreAccessCreator,
+                _amHelpers.PropFactory_V1, "PropBagLib.Tests.OnlyTypedAccessModel");
             mod1.PropStringChanged += Mod1_PropStringChanged;
 
             string temp = mod1.PropString;
@@ -87,7 +89,8 @@ namespace PropBagLib.Tests
         public void TestDoWhenPropStringChangedBefore()
         {
             // TODO: AAA
-            mod1 = new OnlyTypedAccessModel(PropBagTypeSafetyMode.OnlyTypedAccess, _amHelpers.StoreAccessCreator, null, _amHelpers.PropFactory_V1);
+            mod1 = new OnlyTypedAccessModel(PropBagTypeSafetyMode.OnlyTypedAccess, _amHelpers.StoreAccessCreator,
+                _amHelpers.PropFactory_V1, "PropBagLib.Tests.OnlyTypedAccessModel");
 
             mod1.PropStringChanged += Mod1_PropStringChanged;
 
@@ -120,7 +123,8 @@ namespace PropBagLib.Tests
         public void TestDoWhenPropStringChangedAfter()
         {
             // TODO: AAA
-            mod1 = new OnlyTypedAccessModel(PropBagTypeSafetyMode.OnlyTypedAccess, _amHelpers.StoreAccessCreator, null, _amHelpers.PropFactory_V1);
+            mod1 = new OnlyTypedAccessModel(PropBagTypeSafetyMode.OnlyTypedAccess, _amHelpers.StoreAccessCreator,
+                _amHelpers.PropFactory_V1, "PropBagLib.Tests.OnlyTypedAccessModel");
 
             mod1.PropStringCallDoAfterChanged += Mod1_PropStringChanged;
 
@@ -162,7 +166,8 @@ namespace PropBagLib.Tests
         public void TestAddNewProp()
         {
             // TODO: AAA
-            mod1 = new OnlyTypedAccessModel(PropBagTypeSafetyMode.Tight, _amHelpers.StoreAccessCreator, null, _amHelpers.PropFactory_V1);
+            mod1 = new OnlyTypedAccessModel(PropBagTypeSafetyMode.Tight, _amHelpers.StoreAccessCreator,
+                _amHelpers.PropFactory_V1, "PropBagLib.Tests.OnlyTypedAccessModel");
 
             //mod1["System.String", "NewProperty"] = "This is a a test.";
 
