@@ -1,7 +1,6 @@
-﻿using DRM.TypeSafePropertyBag;
-using System;
+﻿using System;
 
-namespace DRM.PropBag.TypeWrapper
+namespace DRM.TypeSafePropertyBag
 {
     using PropNameType = String;
     using PropModelType = IPropModel<String>;
