@@ -40,9 +40,7 @@ namespace PropBagLib.Tests
                 requireExplicitInitialValue: true
                 );
 
-            //ViewModelActivatorInterface vmActivator = new SimpleViewModelActivator();
-
-            //ViewModelFactoryInterface viewModelFactory = new SimpleViewModelFactory(vmActivator, ourHelper.StoreAccessCreator);
+            long generationId = viewModelFactory.PropModelCache.Add(propModel);
 
             PerformanceModel pmViewModel = new PerformanceModel(propModel, viewModelFactory);
 

@@ -2,6 +2,8 @@
 
 namespace DRM.PropBag.AutoMapperSupport
 {
+    //using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
+
     public interface IPropBagMapperKey<TSource, TDestination> : IPropBagMapperKeyGen where TDestination: class, IPropBag
     {
         IMapTypeDefinition<TSource> SourceTypeDef { get; }

@@ -493,9 +493,9 @@ namespace DRM.PropBag
 
                     if (propModel.NewEmittedType == null)
                     {
-                        Type et = wrapperTypeCreator.GetWrapperType(propModel, propModel.TypeToCreate);
+                        Type et = wrapperTypeCreator.GetWrapperType(propModel, propModel.TypeToWrap);
                         propModel.NewEmittedType = et;
-                        _memConsumptionTracker.MeasureAndReport("After GetWrapperType", $"PropBag: {_ourStoreAccessor.ToString()}: {pi.PropertyName}, Created Type: {propModel.TypeToCreate}");
+                        _memConsumptionTracker.MeasureAndReport("After GetWrapperType", $"PropBag: {_ourStoreAccessor.ToString()}: {pi.PropertyName}, Created Type: {propModel.TypeToWrap}");
                     }
                 }
 
@@ -687,7 +687,7 @@ namespace DRM.PropBag
             }
 
             propertyName = kvp.Key;
-            propertyType = viewManagerProviderKey.MapperRequest.PropModel.TypeToCreate;
+            propertyType = viewManagerProviderKey.MapperRequest.PropModel.TypeToWrap;
             return true;
         }
 

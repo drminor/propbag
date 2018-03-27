@@ -157,7 +157,7 @@ namespace DRM.PropBag.ViewModelTools
         {
             object result = _viewModelActivator.GetNewViewModel
                 (
-                typeToCreate: propModel.TypeToCreate,
+                typeToCreate: propModel.TypeToWrap,
                 propModel: propModel,
                 viewModelFactory: this,
                 pfOverride: pfOverride,

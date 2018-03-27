@@ -3,7 +3,6 @@ using System;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
-    using PropNameType = String;
     using PropModelType = IPropModel<String>;
 
     /// <summary>
@@ -17,7 +16,10 @@ namespace DRM.PropBag.AutoMapperSupport
 
     public interface IMapTypeDefinitionGen : IEquatable<IMapTypeDefinitionGen>
     {
-        string FullClassName { get; }
+        /// <summary>
+        /// The PropModel to use when constructing new instances of objects of Type: Type or of Type: NewWrapperType.
+        /// </summary>
+        PropModelType PropModel { get; }
 
         /// <summary>
         /// The type of object that will serve as the source or destination in
@@ -31,17 +33,6 @@ namespace DRM.PropBag.AutoMapperSupport
         bool IsPropBag { get; }
 
         /// <summary>
-        /// The PropModel to use when constructing new instances of objects of Type: Type or of Type: NewWrapperType.
-        /// </summary>
-        PropModelType PropModel { get; }
-
-        /// <summary>
-        /// The PropFactory to use when constructing new instances.
-        /// If set, it overrides the PropFactory setting on the PropModel.
-        /// </summary>
-        IPropFactory PropFactory { get; }
-
-        /// <summary>
         /// The Type for which the proxy will stand in, or the Wrapper will wrap.
         /// This type must implement IPropBag and is usually PropBag or the same as the target type above.
         /// </summary>
@@ -52,5 +43,17 @@ namespace DRM.PropBag.AutoMapperSupport
         /// new emitted type.
         /// </summary>
         Type NewEmittedType { get; set; }
+
+        /// <summary>
+        /// If set, the PropFactory to use instead of the one recorded in the PropModel.
+        /// </summary>
+        IPropFactory PropFactory { get; }
+
+        /// <summary>
+        /// If set, the FullClass name to use instead of the one recorded in the PropModel.
+        /// </summary>
+        string FullClassName { get; }
+
+
     }
 }

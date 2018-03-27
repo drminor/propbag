@@ -6,13 +6,11 @@ using System.Reflection;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
-    using PropNameType = String;
     using PropModelType = IPropModel<String>;
 
     public class ExtraMembersConfigFinalStep<TSource, TDestination>
         : ICreateMappingExpressions<TSource, TDestination> where TDestination : class, IPropBag
     {
-
         public bool RequiresProxyType => false;
 
         public Action<IPropBagMapperKey<TSource, TDestination>, IMapperConfigurationExpression> ActionStep
@@ -27,6 +25,8 @@ namespace DRM.PropBag.AutoMapperSupport
         {
             PropModelType propModel = mapRequest.DestinationTypeDef.PropModel;
 
+            // TODO: Create an interface for the ExtraMembersProvider and then create
+            // property so that this value can be set after construction, but before calling BuildExtraMemberConfig.
             IEnumerable<MemberInfo> extraMembers = new ExtraMembersProvider().GetExtraMembers(propModel);
 
             Func<TDestination, TSource> regularInstanceCreator = mapRequest.MappingConfiguration.SourceConstructor;
@@ -42,14 +42,12 @@ namespace DRM.PropBag.AutoMapperSupport
 
             //Func<Destination, bool> cond = (s => "x" != (string)s.GetIt("Item1", typeof(string)));
 
-
             cfg
                 .CreateMap<TDestination, TSource>()
                 .AddExtraSourceMembers(extraMembers)
             //.ForMember("Item1", opt => opt.Condition(cond))
             ;
         }
-
     }
 }
 

@@ -53,6 +53,9 @@ namespace PropBagLib.Tests
 
 
             ViewModelFactoryInterface viewModelFactory = ourHelper.ViewModelFactory;
+
+            viewModelFactory.PropModelCache.Add(pm);
+
             mod1 = new CreateAtRunTimeModel(pm, viewModelFactory);
 
             Assert.That(mod1, Is.Not.EqualTo(null), "Expected the CreateAtRunTimeModel to have been created.");

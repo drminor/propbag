@@ -278,16 +278,22 @@ namespace PropBagLib.Tests.PerformanceDb
             IPropFactory propFactory_V1 = ourHelper.GetNewPropFactory_V1();
             ICreateWrapperTypes wrapperTypeCreator = ourHelper.GetWrapperTypeCreator_V1();
 
+            ViewModelFactoryInterface viewModelFactory = ourHelper.ViewModelFactory;
+            //viewModelFactory.PropModelCache.Add(propModel5);
+            _propModelCache = viewModelFactory.PropModelCache;
+
+
             Assert.That(ourHelper.StoreAccessCreator.AccessCounter == 0, "The Provider of PropStoreAccessServices has not had its Access Counter reset.");
 
             List<DestinationModel1> destinationList = new List<DestinationModel1>();
+
+
 
             PropModelHelpers pmHelpers = new PropModelHelpers();
 
             // Set up Child VM (Using Model 5)
             PropModelType propModel5 = pmHelpers.GetPropModelForModel5Dest(propFactory_V1, _propModelCache);
 
-            ViewModelFactoryInterface viewModelFactory = ourHelper.ViewModelFactory;
 
             DestinationModel5 testChildVM = new DestinationModel5(propModel: propModel5, viewModelFactory: viewModelFactory, propFactory: propFactory_V1, fullClassName: "PropBagLib.Tests.PerformanceDb.DestinationModel5");
 

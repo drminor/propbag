@@ -57,6 +57,7 @@
     <Compile Include="Config\SimpleMapperConfigurationBuilder.cs" />
     <Compile Include="Config\AbstractMapperConfigGen.cs" />
     <Compile Include="Builders\SimplePropBagMapperBuilder.cs" />
+    <Compile Include="PropBagAdapter\Class1.cs" />
     <Compile Include="SimplePropBagMapper.cs" />
     <Compile Include="SimpleAutoMapperProvider.cs" />
     <Compile Include="Config\EmitProxyConfigFinalStep.cs" />

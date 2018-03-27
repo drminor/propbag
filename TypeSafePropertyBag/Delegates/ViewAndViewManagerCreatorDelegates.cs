@@ -17,21 +17,39 @@ namespace DRM.TypeSafePropertyBag
     // so that the TypeSafePropertyBag does not depend on AutoMapper.
     public delegate IPropBagMapperGen PropBagMapperCreator(IMapperRequest mr);
 
-    internal delegate IManageCViews CViewManagerCreator(PropIdType sourceCollectionPropId, PropKindEnum propKind,
-        PSAccessServiceInternalInterface propStoreInternalAccessService, CViewProviderCreator cViewProviderCreator);
-
-    public delegate IProvideATypedView<CT, T> TypedCViewProviderCreator<CT, T>(string viewName, 
-        DataSourceProvider dataSourceProvider)
-        where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>,
-        IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged;
-
-    internal delegate IManageTypedCViews<CT, T> TypedCViewManagerCreator<CT, T>(string viewName,
-        PropIdType sourceCollectionPropId, PropKindEnum propKind,
+    internal delegate IManageCViews CViewManagerCreator
+        (
+        PropIdType sourceCollectionPropId,
+        PropKindEnum propKind,
         PSAccessServiceInternalInterface propStoreInternalAccessService,
-        TypedCViewProviderCreator<CT,T> typedCViewProviderCreator)
-        where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>,
-        IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged;
+        CViewProviderCreator cViewProviderCreator
+        );
 
-    public delegate IDoCRUD<TDestination> CrudWrapperCreator<TSource, TDestination>(IDoCRUD<TSource> dataAccessLayer, IPropBagMapper<TSource, TDestination> mapper) where TSource : class;
+    public delegate IProvideATypedView<CT, T> TypedCViewProviderCreator<CT, T>
+        (
+        string viewName, 
+        DataSourceProvider dataSourceProvider
+        )
+        where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>,
+            IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged;
+
+    internal delegate IManageTypedCViews<CT, T> TypedCViewManagerCreator<CT, T>
+        (
+        string viewName,
+        PropIdType sourceCollectionPropId,
+        PropKindEnum propKind,
+        PSAccessServiceInternalInterface propStoreInternalAccessService,
+        TypedCViewProviderCreator<CT,T> typedCViewProviderCreator
+        )
+        where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>,
+            IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged;
+
+    //// TODO: AM_cleanup -- Move out of TSPB assembly.
+    //public delegate IDoCRUD<TDestination> CrudWrapperCreator<TSource, TDestination>
+    //    (
+    //    IDoCRUD<TSource> dataAccessLayer,
+    //    IPropBagMapper<TSource, TDestination> mapper
+    //    )
+    //    where TSource : class;
 
 }

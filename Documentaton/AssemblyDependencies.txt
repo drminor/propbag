@@ -1,0 +1,43 @@
+
+PropBagWPF
+	AutoMapperSupport
+	AutoMapperSupportInterfaces
+	PropBag
+	PropBagControlsWPF
+	TypeSafePropertyBag
+	TypeWrapper
+	ViewModelTools
+
+PropBag
+	AutoMapperSupport
+	AutoMapperSupportInterfaces
+	TypeSafePropertyBag
+	TypeWrapper
+	ViewModelTools
+	
+PropBagControlsWPF
+	PropBag
+	TypeSafePropertyBag
+	ViewModelTools
+
+ViewModelTools
+	AutoMapperSupportInterfaces
+	TypeSafePropertyBag
+	TypeWrapper
+
+TypeWrapper
+	TypeSafePropertyBag
+
+
+AutoMapperSupport
+	AutoMapper
+	AutoMapperSupportInterfaces
+
+AutoMapperSupportInterfaces
+	TypeSafePropertyBag
+
+TypeSafePropertyBag
+	AutoMapper
+
+AutoMapper
+

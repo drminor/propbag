@@ -4,7 +4,6 @@ using System.Collections.Generic;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
-    using PropNameType = String;
     using PropModelType = IPropModel<String>;
 
     public class MapTypeDefinition<T> : IMapTypeDefinition<T>, IEquatable<IMapTypeDefinitionGen>, IEquatable<MapTypeDefinition<T>>
@@ -40,18 +39,18 @@ namespace DRM.PropBag.AutoMapperSupport
             _hashCode = TargetType.GetHashCode();
         }
 
-        public MapTypeDefinition(PropModelType pm, Type typeToWrap, string fullClassName, IPropFactory propFactory)
+        public MapTypeDefinition(PropModelType propModel, Type typeToWrap, string fullClassName, IPropFactory propFactory)
         {
-            if(pm.DeriveFromClassMode == DeriveFromClassModeEnum.Custom && typeToWrap != null && pm.TypeToCreate != typeToWrap)
+            if(propModel.DeriveFromClassMode == DeriveFromClassModeEnum.Custom && typeToWrap != null && propModel.TypeToWrap != typeToWrap)
             {
                 System.Diagnostics.Debug.WriteLine($"Warning: the value for the PropModel's TypeToCreate property is not equal to the supplied typeToWrap.");
             }
 
             TargetType = typeof(T);
             IsPropBag = true;
-            PropModel = pm ?? throw new ArgumentNullException(nameof(pm));
-            TypeToWrap = typeToWrap ?? pm.TypeToCreate; // throw new ArgumentNullException(nameof(typeToWrap));
-            NewEmittedType = pm.NewEmittedType;
+            PropModel = propModel ?? throw new ArgumentNullException(nameof(propModel));
+            TypeToWrap = typeToWrap ?? propModel.TypeToWrap; // throw new ArgumentNullException(nameof(typeToWrap));
+            NewEmittedType = propModel.NewEmittedType;
             _fullClassName = fullClassName;
             _propFactory = propFactory;
             _hashCode = ComputeHashCode();

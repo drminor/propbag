@@ -1,13 +1,7 @@
-﻿using DRM.PropBag.TypeWrapper;
-using DRM.PropBag.ViewModelTools;
-using DRM.TypeSafePropertyBag;
-using System;
+﻿using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
-    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
-    using ViewModelActivatorInterface = IViewModelActivator<UInt32, String>;
-
     public class SimplePropBagMapperBuilderProvider : IPropBagMapperBuilderProvider
     {
         #region Private Properties

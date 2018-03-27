@@ -68,8 +68,14 @@ namespace PropBagLib.Tests.AutoMapperSupport
         public void CanGetMapperForMod3ToDestination_Proxy()
         {
             IPropFactory propFactory = _propFactory_V1;
+            ViewModelFactoryInterface viewModelFactory = _viewModelFactory;
+
 
             PropModel propModel = GetPropModelForModel3Dest(propFactory);
+
+            viewModelFactory.PropModelCache.Add(propModel);
+
+
             Type typeToWrap = typeof(PropBag);
             string configPackageName = "Emit_Proxy";
 
@@ -135,7 +141,11 @@ namespace PropBagLib.Tests.AutoMapperSupport
             IPropFactory propFactory = _propFactory_V1;
             ViewModelFactoryInterface viewModelFactory = _viewModelFactory;
 
+
+
             PropModel propModel = GetPropModelForModel3Dest(propFactory);
+            viewModelFactory.PropModelCache.Add(propModel);
+
             Type typeToWrap = typeof(DestinationModel3); // typeof(PropBag);
             string configPackageName = "Extra_Members"; // "Emit_Proxy";
 

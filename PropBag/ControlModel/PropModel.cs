@@ -298,7 +298,7 @@ namespace DRM.PropBag
         #region Type and Namespace support
 
         Type _typeToCreate;
-        public Type TypeToCreate
+        public Type TypeToWrap
         {
             get
             {
@@ -659,7 +659,7 @@ namespace DRM.PropBag
             hashCode = hashCode * -1521134295 + _propDictionary?.Count.GetHashCode() ?? 1521134295;
             hashCode = hashCode * -1521134295 + TypeSafetyMode.GetHashCode();
             hashCode = hashCode * -1521134295 + RequireExplicitInitialValue.GetHashCode();
-            hashCode = hashCode * -1521134295 + EqualityComparer<Type>.Default.GetHashCode(TypeToCreate);
+            hashCode = hashCode * -1521134295 + EqualityComparer<Type>.Default.GetHashCode(TypeToWrap);
             hashCode = hashCode * -1521134295 + EqualityComparer<Type>.Default.GetHashCode(TargetType);
             hashCode = hashCode * -1521134295 + EqualityComparer<IPropFactory>.Default.GetHashCode(PropFactory);
             hashCode = hashCode * -1521134295 + EqualityComparer<Type>.Default.GetHashCode(PropFactoryType);

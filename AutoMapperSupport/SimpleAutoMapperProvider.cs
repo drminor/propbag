@@ -45,7 +45,7 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public IPropBagMapperKeyGen SubmitMapperRequest(PropModelType propModel, object viewModelFactory, Type sourceType, string configPackageName)
         {
-            Type typeToCreate = propModel.NewEmittedType ?? propModel.TypeToCreate;
+            Type typeToCreate = propModel.NewEmittedType ?? propModel.TypeToWrap;
 
             MapperRequestSubmitterDelegate mapperRequestSubmitter = GetTheMapperRequestSubmitterDelegate(sourceType, typeToCreate);
 
@@ -115,16 +115,16 @@ namespace DRM.PropBag.AutoMapperSupport
 
         #region Pass-through calls to the MappersCachingService
 
-        public IPropBagMapper<TSource,TDestination> GetMapper<TSource, TDestination>(IPropBagMapperKey<TSource, TDestination> mapperRequest) where TDestination : class, IPropBag
-        {
-            return (IPropBagMapper<TSource, TDestination>)_mappersCachingService.GetMapper(mapperRequest);
-        }
-
         public IPropBagMapperKeyGen RegisterMapperRequest(IPropBagMapperKeyGen mapperRequest)
         {
             return _mappersCachingService.RegisterMapperRequest(mapperRequest);
         }
 
+        public IPropBagMapper<TSource,TDestination> GetMapper<TSource, TDestination>(IPropBagMapperKey<TSource, TDestination> mapperRequest) where TDestination : class, IPropBag
+        {
+            return (IPropBagMapper<TSource, TDestination>)_mappersCachingService.GetMapper(mapperRequest);
+        }
+        
         public IPropBagMapperGen GetMapper(IPropBagMapperKeyGen mapperRequest)
         {
             return _mappersCachingService.GetMapper(mapperRequest);
