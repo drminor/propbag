@@ -108,7 +108,6 @@ namespace DRM.PropBag.ViewModelTools
 
         public object AutoMapperService { get; set; }
 
-
         #endregion
 
         #region Public Methods 

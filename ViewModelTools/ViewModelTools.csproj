@@ -40,8 +40,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Activator\IViewModelActivator.cs" />
-    <Compile Include="Activator\SimpleViewModelActivator.cs" />
+    <Compile Include="IViewModelActivator.cs" />
+    <Compile Include="SimpleViewModelActivator.cs" />
     <Compile Include="IViewModelFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SimpleViewModelFactory.cs" />
