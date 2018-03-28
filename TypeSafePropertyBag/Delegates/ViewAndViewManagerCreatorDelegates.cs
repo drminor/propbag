@@ -50,17 +50,4 @@ namespace DRM.TypeSafePropertyBag
         where TDal : class, IDoCRUD<TSource>
         where TSource : class
         where TDestination : INotifyItemEndEdit;
-
-    // Instead of the next two commented sections...
-    // Have the caller supply us with a Function that 
-    //      1. Takes a propItemWatcher
-    // &    2. Returns IDoCrudWithMapping<Item Type>
-
-        //public delegate IDoCRUD<TDestination> CrudWrapperCreator<TSource, TDestination>
-        //    (
-        //    IDoCRUD<TSource> dataAccessLayer,
-        //    IPropBagMapper<TSource, TDestination> mapper
-        //    )
-        //    where TSource : class;
-
 }
