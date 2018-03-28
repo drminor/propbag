@@ -1,6 +1,6 @@
-﻿using DRM.PropBag.AutoMapperSupport;
+﻿using AutoMapper;
+using DRM.PropBag.AutoMapperSupport;
 using DRM.PropBag.Caches;
-//using DRM.PropBag.TypeWrapper;
 using DRM.PropBag.ViewModelTools;
 
 using DRM.TypeSafePropertyBag;
@@ -686,35 +686,35 @@ namespace DRM.PropBag
             return true;
         }
 
-        private PropBagMapperCreator GetPropBagMapperFactory()
-        {
-            return GetPropBagMapper;
-        }
+        //private PropBagMapperCreator GetPropBagMapperFactory()
+        //{
+        //    return GetPropBagMapper;
+        //}
 
-        private IPropBagMapperGen GetPropBagMapper(IMapperRequest mr)
-        {
-            if (_autoMapperService == null)
-            {
-                throw new InvalidOperationException($"This PropBag instance cannot create IProvideDataSourceProvider instances:" +
-                    $" No AutoMapperSupport was supplied upon construction.");
-            }
+        //private IPropBagMapperGen GetPropBagMapper(IMapperRequest mr)
+        //{
+        //    if (_autoMapperService == null)
+        //    {
+        //        throw new InvalidOperationException($"This PropBag instance cannot create IProvideDataSourceProvider instances:" +
+        //            $" No AutoMapperSupport was supplied upon construction.");
+        //    }
 
-            return GetPropBagMapper_Internal(mr, _viewModelFactory, out IPropBagMapperKeyGen dummyMapperKey);
-        }
+        //    return GetPropBagMapper_Internal(mr, _viewModelFactory, out IPropBagMapperKeyGen dummyMapperKey);
+        //}
 
-        private IPropBagMapperGen GetPropBagMapper_Internal(IMapperRequest mapperRequest, ViewModelFactoryInterface viewModelFactory, out IPropBagMapperKeyGen mapperKey)
-        {
-            // This is where the PropModel is used to define the Mapper 
+        //private IPropBagMapperGen GetPropBagMapper_Internal(IMapperRequest mapperRequest, ViewModelFactoryInterface viewModelFactory, out IPropBagMapperKeyGen mapperKey)
+        //{
+        //    // This is where the PropModel is used to define the Mapper 
 
-            // TODO: See if we can submit the request earlier; perhaps when the mapper request is created.
+        //    // TODO: See if we can submit the request earlier; perhaps when the mapper request is created.
 
-            // Submit the Mapper Request.
-            mapperKey = _autoMapperService.SubmitMapperRequest(mapperRequest.PropModel, viewModelFactory, mapperRequest.SourceType, mapperRequest.ConfigPackageName, _autoMapperService);
+        //    // Submit the Mapper Request.
+        //    mapperKey = _autoMapperService.SubmitMapperRequest(mapperRequest.PropModel, viewModelFactory, mapperRequest.SourceType, mapperRequest.ConfigPackageName, _autoMapperService);
 
-            // Get the AutoMapper mapping function associated with the mapper request already submitted.
-            IPropBagMapperGen genMapper = _autoMapperService.GetMapper(mapperKey);
-            return genMapper;
-        }
+        //    // Get the AutoMapper mapping function associated with the mapper request already submitted.
+        //    IPropBagMapperGen genMapper = _autoMapperService.GetMapper(mapperKey);
+        //    return genMapper;
+        //}
 
         private IProp BuildStandardProp(IPropItemModel pi, ViewModelFactoryInterface viewModelFactory, IAutoMapperService autoMapperService)
         {
@@ -2360,7 +2360,7 @@ namespace DRM.PropBag
         {
             // Check the delegate cache to see if a delegate for this already exists, and if not create a new delegate.
             ICacheDelegatesForTypePair<CViewManagerFromDsDelegate> dc = _propFactory.DelegateCacheProvider.GetOrAddCViewManagerCache;
-            CViewManagerFromDsDelegate cViewManagerCreator = dc.GetOrAdd(new TypePair(mr.SourceType, typeOfThisProperty));
+            CViewManagerFromDsDelegate cViewManagerCreator = dc.GetOrAdd(new TypeSafePropertyBag.Fundamentals.TypePair(mr.SourceType, typeOfThisProperty));
 
             // Use the delegate to create or fetch the existing Collection View Manager for this propperty.
             // This eventually calls: this.GetOrAddCViewManager
@@ -2379,7 +2379,7 @@ namespace DRM.PropBag
             Type sourceType = viewManagerProviderKey.MapperRequest.SourceType;
             Type destinationType = typeOfThisProperty;
 
-            TypePair tp = new TypePair(sourceType, destinationType);
+            TypeSafePropertyBag.Fundamentals.TypePair tp = new TypeSafePropertyBag.Fundamentals.TypePair(sourceType, destinationType);
 
             // Get the CollectionView Manager Provider Creator Delegate from the Delegate Cache.
             CViewManagerProviderFromDsDelegate cViewManagerProviderCreator = dc.GetOrAdd(tp);
@@ -2401,7 +2401,7 @@ namespace DRM.PropBag
         //)
         //    where TDal : class, IDoCRUD<TSource>
         //    where TSource : class
-        //    where TDestination : INotifyItemEndEdit
+        //                where TDestination : class, INotifyItemEndEdit, IPropBag
         //{
         //    // Get the PropItem for the property that holds the DataSource (IDoCRUD<TSource>)
         //    IPropData propGen = GetPropGen(srcPropName, propertyType: null, haveValue: false, value: null,
@@ -2441,7 +2441,7 @@ namespace DRM.PropBag
         )
             where TDal : class, IDoCRUD<TSource>
             where TSource : class
-            where TDestination : INotifyItemEndEdit
+                        where TDestination : class, INotifyItemEndEdit, IPropBag
         {
             // Get the PropItem for the property that holds the DataSource (IDoCRUD<TSource>)
             IPropData propGen = GetPropGen(srcPropName, propertyType: null, haveValue: false, value: null,
@@ -2509,7 +2509,7 @@ namespace DRM.PropBag
         //)
         //    where TDal : class, IDoCRUD<TSource>
         //    where TSource : class
-        //    where TDestination : INotifyItemEndEdit
+        //                where TDestination : class, INotifyItemEndEdit, IPropBag
         //{
         //    IProvideACViewManager cViewManagerProvider = _ourStoreAccessor.GetOrAddViewManagerProvider<TDal, TSource, TDestination>
         //        (
@@ -2529,7 +2529,7 @@ namespace DRM.PropBag
         )
             where TDal : class, IDoCRUD<TSource>
             where TSource : class
-            where TDestination : INotifyItemEndEdit
+            where TDestination : class, INotifyItemEndEdit, IPropBag
         {
             IProvideACViewManager cViewManagerProvider = _ourStoreAccessor.GetOrAddViewManagerProvider_New<TDal, TSource, TDestination>
                 (
@@ -2564,7 +2564,7 @@ namespace DRM.PropBag
         //)
         //    where TDal : class, IDoCRUD<TSource>
         //    where TSource : class
-        //    where TDestination : INotifyItemEndEdit
+        //                where TDestination : class, INotifyItemEndEdit, IPropBag
         //{
         //    // Get the PropItem for the property that holds the DataSource (IDoCRUD<TSource>)
         //    IPropData propGen = GetPropGen(srcPropName, propertyType: null, haveValue: false, value: null,
@@ -2608,7 +2608,7 @@ namespace DRM.PropBag
         )
             where TDal : class, IDoCRUD<TSource>
             where TSource : class
-            where TDestination : INotifyItemEndEdit
+                        where TDestination : class, INotifyItemEndEdit, IPropBag
         {
             // Get the PropItem for the property that holds the DataSource (IDoCRUD<TSource>)
             IPropData propGen = GetPropGen(srcPropName, propertyType: null, haveValue: false, value: null,
@@ -2659,7 +2659,7 @@ namespace DRM.PropBag
         //)
         //    where TDal : class, IDoCRUD<TSource>
         //    where TSource : class
-        //    where TDestination : INotifyItemEndEdit
+        //                where TDestination : class, INotifyItemEndEdit, IPropBag
         //{
         //    IPropData propGen = GetPropGen(srcPropName, propertyType: null, haveValue: false, value: null,
         //        alwaysRegister: false, mustBeRegistered: true, neverCreate: true, 
@@ -2701,7 +2701,7 @@ namespace DRM.PropBag
         //    where CVT : ICollectionView
         //    where TDal : class, IDoCRUD<TSource>
         //    where TSource : class
-        //    where TDestination : INotifyItemEndEdit
+        //                where TDestination : class, INotifyItemEndEdit, IPropBag
         //{
         //    IPropData propGen = GetPropGen(srcPropName, propertyType: null, haveValue: false, value: null,
         //        alwaysRegister: false, mustBeRegistered: true, neverCreate: true, 
@@ -3860,7 +3860,7 @@ namespace DRM.PropBag
         //)
         //    where TDal : IDoCRUD<TSource>
         //    where TSource : class
-        //    where TDestination : INotifyItemEndEdit
+        //                where TDestination : class, INotifyItemEndEdit, IPropBag
         //{
         //    IManageCViews result = null;
         //    return result;
@@ -3875,7 +3875,7 @@ namespace DRM.PropBag
         //)
         //    where TDal : class, IDoCRUD<TSource>
         //    where TSource : class
-        //    where TDestination : INotifyItemEndEdit
+        //                where TDestination : class, INotifyItemEndEdit, IPropBag
         //{
         //    bool mustBeRegistered = true; // TryGetViewManager is called in the constructor, we cannot reference the virtual property: OurMetaData.AllPropsMustBeRegistered; 
 
@@ -3936,7 +3936,7 @@ namespace DRM.PropBag
         )
             where TDal : class, IDoCRUD<TSource>
             where TSource : class
-            where TDestination : INotifyItemEndEdit
+            where TDestination : class, INotifyItemEndEdit, IPropBag
         {
             bool mustBeRegistered = true; // TryGetViewManager is called in the constructor, we cannot reference the virtual property: OurMetaData.AllPropsMustBeRegistered; 
 
@@ -3952,13 +3952,15 @@ namespace DRM.PropBag
 
             if (propData != null)
             {
+                CrudWithMappingCreator<TDal, TSource, TDestination> cwmc = BuildCrudWithMapping<TDal, TSource, TDestination>;
+
                 IManageCViews result = _ourStoreAccessor.GetOrAddViewManager_New<TDal, TSource, TDestination>
                     (
                     this,
                     propId,
                     propData,
                     mr,
-                    BuildCrudWithMapping,
+                    cwmc, //BuildCrudWithMapping,
                     _propFactory.GetCViewProviderFactory(),
                     _propFactory.ListCollectionViewCreator<TDestination>()
                     );
@@ -3974,19 +3976,39 @@ namespace DRM.PropBag
             }
 
             // CrudWithMapping Factory
-            IDoCrudWithMapping<TDestination> BuildCrudWithMapping(IWatchAPropItem<TDal> propItemWatcher)
+            IDoCrudWithMapping<TDestination> BuildCrudWithMapping<TDal, TSource, TDestination>(IWatchAPropItem<TDal> propItemWatcher)
+            where TDal : class, IDoCRUD<TSource>
+            where TSource : class
+            where TDestination : class, INotifyItemEndEdit, IPropBag
             {
-                PropBagMapperCreator propBagMapperCreator = GetPropBagMapperFactory();
+                //PropBagMapperCreator propBagMapperCreator = GetPropBagMapperFactory();
 
                 // Create a Typed PropBag Mapper using the supplied function and local Mapper Request.
-                IPropBagMapper<TSource, TDestination> mapper = propBagMapperCreator(mr) as IPropBagMapper<TSource, TDestination>;
+                //IPropBagMapper<TSource, TDestination> mapper = propBagMapperCreator(mr) as IPropBagMapper<TSource, TDestination>;
+
+                IMapper rawAutoMapper = this.GetAutoMapper<TSource, TDestination>
+                    (
+                    mr,
+                    //_viewModelFactory,
+                    _autoMapperService,
+                    out IPropBagMapperKey<TSource, TDestination> propBagMapperKey
+                    );
+
+                IPropBagMapper<TSource, TDestination> cookedAutoMapper = new SimplePropBagMapper<TSource, TDestination>
+                    (
+                    propBagMapperKey,
+                    rawAutoMapper,
+                    _viewModelFactory,
+                    _autoMapperService
+                    );
 
                 // Create a IDoCRUD<TSource> using the watcher and mapper
                 IDoCrudWithMapping<TDestination> result =
-                    new CrudWithMapping<TDal, TSource, TDestination>(propItemWatcher, mapper);
+                    new CrudWithMapping<TDal, TSource, TDestination>(propItemWatcher, cookedAutoMapper);
 
                 return result;
             }
+            //where TDestination : class, IPropBag
 
             //// Just for Diagnostics
             //void DataSourceProvider_DataChanged(object sender, EventArgs e)
@@ -4001,6 +4023,32 @@ namespace DRM.PropBag
             //        }
             //    }
             //}
+        }
+
+        private IMapper GetAutoMapper<TSource, TDestination>
+            (
+            IMapperRequest mapperRequest,
+            //ViewModelFactoryInterface viewModelFactory,
+            IAutoMapperService autoMapperService,
+            out IPropBagMapperKey<TSource, TDestination> propBagMapperKey
+            )
+            where TDestination: class, IPropBag
+        {
+            // This is where the PropModel is used to define the Mapper 
+
+            // TODO: See if we can submit the request earlier; perhaps when the mapper request is created.
+
+            Type typeToWrap = mapperRequest.PropModel.TypeToWrap;
+
+            // Submit the Mapper Request.
+            propBagMapperKey = autoMapperService.SubmitRawAutoMapperRequest<TSource, TDestination>
+                (mapperRequest.PropModel/*, viewModelFactory*/, typeToWrap, mapperRequest.ConfigPackageName);
+
+            // Get the AutoMapper mapping function associated with the mapper request just submitted.
+            //IPropBagMapperGen genMapper = _autoMapperService.GetMapper(mapperKey);
+
+            IMapper rawAutoMapper = autoMapperService.GetRawAutoMapper(propBagMapperKey);
+            return rawAutoMapper;
         }
 
         public IManageCViews GetOrAddViewManager(PropNameType propertyName, Type propertyType)
@@ -4114,7 +4162,7 @@ namespace DRM.PropBag
         protected internal Type GetCollectionItemRunTimeType<TDal, TSource, TDestination>(IManageCViews cViewManager)
             where TDal : class, IDoCRUD<TSource>
             where TSource : class
-            where TDestination : INotifyItemEndEdit
+                        where TDestination : class, INotifyItemEndEdit, IPropBag
         {
             DataSourceProvider dsp = cViewManager.DataSourceProvider;
             Type result = GetCollectionItemRunTimeType<TDal, TSource, TDestination>(dsp);
@@ -4124,7 +4172,7 @@ namespace DRM.PropBag
         protected internal Type GetCollectionItemRunTimeType<TDal, TSource, TDestination>(DataSourceProvider dsp)
             where TDal : class, IDoCRUD<TSource>
             where TSource : class
-            where TDestination : INotifyItemEndEdit
+                        where TDestination : class, INotifyItemEndEdit, IPropBag
         {
             ClrMappedDSP<TDestination> mappedDsp = dsp as ClrMappedDSP<TDestination>;  //  CrudWithMapping<TDal, TSource, TDestination>;
 
@@ -4334,7 +4382,7 @@ namespace DRM.PropBag
         // Create a CollectionView Manager using an optional MapperRequest.
         static private IManageCViews CViewManagerFromDsBridge<TSource, TDestination>(IPropBag target, PropNameType srcPropName, IMapperRequest mr)
             where TSource : class
-            where TDestination : INotifyItemEndEdit
+                        where TDestination : class, INotifyItemEndEdit, IPropBag
         {
             PropBag pb = (PropBag)target;
             IManageCViews result = pb.GetOrAddCViewManager_New<IDoCRUD<TSource>, TSource, TDestination>(srcPropName, mr);
@@ -4344,7 +4392,7 @@ namespace DRM.PropBag
         // Create a CollectionView Manager Provider from a viewManagerProviderKey. Key consists of an optional MapperRequest and a Binding Path.)
         static private IProvideACViewManager CViewManagerProviderFromDsBridge<TSource, TDestination>(IPropBag target, IViewManagerProviderKey viewManagerProviderKey)
             where TSource : class
-            where TDestination : INotifyItemEndEdit
+                        where TDestination : class, INotifyItemEndEdit, IPropBag
         {
             PropBag pb = (PropBag)target;
             IProvideACViewManager result = pb.GetOrAddCViewManagerProvider<IDoCRUD<TSource>, TSource, TDestination>(viewManagerProviderKey);

@@ -96,7 +96,7 @@ namespace DRM.TypeSafePropertyBag
         //    )
         //    where TDal : class, IDoCRUD<TSource>
         //    where TSource : class
-        //    where TDestination : INotifyItemEndEdit;
+        //                where TDestination : class, INotifyItemEndEdit, IPropBag;
 
         //// Using a IMapperRequest and Factory.
         //IManageCViews GetOrAddViewManager<TDal, TSource, TDestination>
@@ -111,7 +111,7 @@ namespace DRM.TypeSafePropertyBag
         //    )
         //    where TDal : class, IDoCRUD<TSource>
         //    where TSource : class
-        //    where TDestination : INotifyItemEndEdit;
+        //                where TDestination : class, INotifyItemEndEdit, IPropBag;
 
         // Using a CrudWithMappingCreator.
         IManageCViews GetOrAddViewManager_New<TDal, TSource, TDestination>
@@ -128,7 +128,7 @@ namespace DRM.TypeSafePropertyBag
             )
             where TDal : class, IDoCRUD<TSource>
             where TSource : class
-            where TDestination : INotifyItemEndEdit;
+                        where TDestination : class, INotifyItemEndEdit, IPropBag;
 
 
         //IProvideATypedCViewManager<EndEditWrapper<TDestination>, TDestination> GetOrAddViewManagerProviderTyped<TDal, TSource, TDestination>
@@ -140,7 +140,7 @@ namespace DRM.TypeSafePropertyBag
         //    )
         //        where TDal : class, IDoCRUD<TSource>
         //        where TSource : class
-        //        where TDestination : INotifyItemEndEdit;
+        //                    where TDestination : class, INotifyItemEndEdit, IPropBag;
 
         //IProvideACViewManager GetOrAddViewManagerProvider<TDal, TSource, TDestination>
         //(
@@ -153,7 +153,7 @@ namespace DRM.TypeSafePropertyBag
         //)
         //    where TDal : class, IDoCRUD<TSource>
         //    where TSource : class
-        //    where TDestination : INotifyItemEndEdit;
+        //                where TDestination : class, INotifyItemEndEdit, IPropBag;
 
         IProvideACViewManager GetOrAddViewManagerProvider_New<TDal, TSource, TDestination>
         (
@@ -164,7 +164,7 @@ namespace DRM.TypeSafePropertyBag
         )
         where TDal : class, IDoCRUD<TSource>
         where TSource : class
-        where TDestination : INotifyItemEndEdit;
+                    where TDestination : class, INotifyItemEndEdit, IPropBag;
 
         bool TryGetViewManagerProvider
         (

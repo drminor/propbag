@@ -139,7 +139,7 @@ namespace DRM.TypeSafePropertyBag
         )
             where TDal : class, IDoCRUD<TSource>
             where TSource : class
-            where TDestination : INotifyItemEndEdit;
+            where TDestination : class, INotifyItemEndEdit, IPropBag;
 
         IProvideACViewManager GetOrAddCViewManagerProvider<TDal, TSource, TDestination>
         (
@@ -147,7 +147,7 @@ namespace DRM.TypeSafePropertyBag
         )
             where TDal : class, IDoCRUD<TSource>
             where TSource : class
-            where TDestination : INotifyItemEndEdit;
+            where TDestination : class, INotifyItemEndEdit, IPropBag;
 
         //IPropGen this[int index] { get; }
         //int IndexOfProp(string propertyName, Type propertyType);

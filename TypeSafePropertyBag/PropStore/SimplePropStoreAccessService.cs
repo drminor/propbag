@@ -1300,7 +1300,7 @@ namespace DRM.TypeSafePropertyBag
         //)
         //    where TDal : class, IDoCRUD<TSource>
         //    where TSource : class
-        //    where TDestination : INotifyItemEndEdit
+        //                where TDestination : class, INotifyItemEndEdit, IPropBag
         //{
         //    CheckObjectRef(propBag);
 
@@ -1347,7 +1347,7 @@ namespace DRM.TypeSafePropertyBag
         //)
         //    where TDal : class, IDoCRUD<TSource>
         //    where TSource : class
-        //    where TDestination : INotifyItemEndEdit
+        //                where TDestination : class, INotifyItemEndEdit, IPropBag
         //{
         //    CheckObjectRef(propBag);
 
@@ -1420,7 +1420,7 @@ namespace DRM.TypeSafePropertyBag
         )
             where TDal : class, IDoCRUD<TSource>
             where TSource : class
-            where TDestination : INotifyItemEndEdit
+            where TDestination : class, INotifyItemEndEdit, IPropBag
         {
             CheckObjectRef(propBag);
 
@@ -1468,7 +1468,7 @@ namespace DRM.TypeSafePropertyBag
         //)
         //    where TDal : class, IDoCRUD<TSource>
         //    where TSource : class
-        //    where TDestination : INotifyItemEndEdit
+        //                where TDestination : class, INotifyItemEndEdit, IPropBag
         //{
         //    //ObjectIdType objectId = GetAndCheckObjectRef(propBag);
 
@@ -1484,7 +1484,7 @@ namespace DRM.TypeSafePropertyBag
         )
             where TDal : class, IDoCRUD<TSource>
             where TSource : class
-            where TDestination : INotifyItemEndEdit
+                        where TDestination : class, INotifyItemEndEdit, IPropBag
         {
             //ObjectIdType objectId = GetAndCheckObjectRef(propBag);
 
@@ -1500,7 +1500,7 @@ namespace DRM.TypeSafePropertyBag
         //)
         //    where TDal : class, IDoCRUD<TSource>
         //    where TSource : class
-        //    where TDestination : INotifyItemEndEdit
+        //                where TDestination : class, INotifyItemEndEdit, IPropBag
         //{
         //    CheckObjectRef(propBag);
 
@@ -1528,7 +1528,7 @@ namespace DRM.TypeSafePropertyBag
         )
             where TDal : class, IDoCRUD<TSource>
             where TSource : class
-            where TDestination : INotifyItemEndEdit
+                        where TDestination : class, INotifyItemEndEdit, IPropBag
         {
             CheckObjectRef(propBag);
 

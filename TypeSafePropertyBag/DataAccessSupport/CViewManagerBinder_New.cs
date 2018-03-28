@@ -13,7 +13,7 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
     public class CViewManagerBinder_New<TDal, TSource, TDestination> : IProvideACViewManager /*IProvideATypedCViewManager<EndEditWrapper<TDestination>, TDestination>*/, IDisposable
             where TDal : class, IDoCRUD<TSource>
             where TSource : class
-            where TDestination : INotifyItemEndEdit
+            where TDestination : class, INotifyItemEndEdit, IPropBag
     {
         const string BINDER_NAME = "CViewManager";
 
