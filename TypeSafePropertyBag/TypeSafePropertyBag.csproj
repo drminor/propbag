@@ -42,9 +42,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataAccessSupport\BetterLCVCreatorDelegate.cs" />
-    <Compile Include="DataAccessSupport\CViewManagerBinder.cs" />
+    <Compile Include="DataAccessSupport\CViewManagerBinder_New.cs" />
+    <None Include="DataAccessSupport\CViewManagerBinder_NotUsed.cs" />
     <Compile Include="DataAccessSupport\IMappedDSP.cs" />
-    <Compile Include="DataSourceMapping\CrudWithMapping.cs" />
     <Compile Include="DataSourceMapping\IDoCrudWithMapping.cs" />
     <Compile Include="DataAccessSupport\IDoCRUD.cs" />
     <Compile Include="DataAccessSupport\CLR_Mapped_DSP.cs" />
@@ -60,11 +60,12 @@
     <Compile Include="Delegates\ViewAndViewManagerCreatorDelegates.cs" />
     <Compile Include="Factories\AbstractPropFactory.cs" />
     <Compile Include="Factories\APFGenericMethodTemplates.cs" />
+    <Compile Include="Factories\PropFactoryValueConverter.cs" />
     <Compile Include="Factories\SimplePropFactoryFactory.cs" />
     <Compile Include="Factories\SimpleTypeResolver.cs" />
+    <Compile Include="Factories\StaticTConverter.cs" />
     <Compile Include="Fundamentals\ActivationInfo.cs" />
     <Compile Include="Fundamentals\CollectionViewExtensions.cs" />
-    <Compile Include="DataSourceMapping\IPropBagMapper.cs" />
     <None Include="LocalBinding\Instances\LocalBinder - SafetyCopy.cs" />
     <Compile Include="Fundamentals\TypeInspectorUtility.cs" />
     <Compile Include="LocalBinding\Engine\BindingPathParser.cs" />
@@ -287,10 +288,6 @@
     <ProjectReference Include="..\ObjectSizeDiagnostics\ObjectSizeDiagnostics.csproj">
       <Project>{9b18f82d-3ed9-49e0-9ee3-cfbfc3af9d9c}</Project>
       <Name>ObjectSizeDiagnostics</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\src\AutoMapper\AutoMapper.csproj">
-      <Project>{8cba8a56-9b60-4430-9d54-9a523baf1e14}</Project>
-      <Name>AutoMapper</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

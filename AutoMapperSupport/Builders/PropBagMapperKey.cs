@@ -27,7 +27,7 @@ namespace DRM.PropBag.AutoMapperSupport
         //public Func<TDestination, TSource> SourceConstructor { get; }
         //public Func<TSource, TDestination> DestinationConstructor { get; }
 
-        //public Func<IPropBagMapperKeyGen, IPropBagMapperGen> MapperCreator => PropBagMapperBuilder.GenMapperCreator;
+        public Func<IPropBagMapperKeyGen, ViewModelFactoryInterface, IPropBagMapperGen> MapperCreator => PropBagMapperBuilder.GenMapperCreator;
 
         public IConfigureAMapper<TSource, TDestination> MappingConfiguration { get; }
 
@@ -43,7 +43,7 @@ namespace DRM.PropBag.AutoMapperSupport
             IMapTypeDefinition<TSource> sourceMapTypeDef,
             IMapTypeDefinition<TDestination> destinationMapTypeDef
             )
-            : base(propBagMapperBuilder.GenMapperCreator, viewModelFactory, sourceMapTypeDef, destinationMapTypeDef)
+            : base(propBagMapperBuilder.GenMapperCreator, sourceMapTypeDef, destinationMapTypeDef)
         {
             PropBagMapperBuilder = propBagMapperBuilder;
             MappingConfiguration = mappingConfiguration;

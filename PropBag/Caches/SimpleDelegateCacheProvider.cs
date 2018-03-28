@@ -39,7 +39,7 @@ namespace DRM.PropBag.Caches
         public ICacheDelegatesForTypePair<CreateCPropFromObjectDelegate> CreateCPropFromObjectCache { get; }
 
         // DataSourceProviderProvider
-        public ICacheDelegatesForTypePair<CreateMappedDSPProviderDelegate> CreateDSPProviderCache { get; }
+        //public ICacheDelegatesForTypePair<CreateMappedDSPProviderDelegate> CreateDSPProviderCache { get; }
 
         public IProvidePropTemplates PropTemplateCache { get; }
 
@@ -118,8 +118,8 @@ namespace DRM.PropBag.Caches
 
             #region DataSource Creation MethodInfo
 
-            MethodInfo createDSPProvider_mi = propCreatorType.GetMethod("CreateMappedDSPProvider", BindingFlags.Static | BindingFlags.NonPublic);
-            CreateDSPProviderCache = new TwoTypesDelegateCache<CreateMappedDSPProviderDelegate>(createDSPProvider_mi);
+            //MethodInfo createDSPProvider_mi = propCreatorType.GetMethod("CreateMappedDSPProvider", BindingFlags.Static | BindingFlags.NonPublic);
+            //CreateDSPProviderCache = new TwoTypesDelegateCache<CreateMappedDSPProviderDelegate>(createDSPProvider_mi);
 
             #endregion
 
@@ -167,7 +167,7 @@ namespace DRM.PropBag.Caches
                 CreateCPropFromStringCache,
                 CreateCPropWithNoValCache,
                 CreateCPropWithNoValCache,
-                CreateDSPProviderCache,
+                //CreateDSPProviderCache,
                 PropTemplateCache
             };
 

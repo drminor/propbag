@@ -67,15 +67,16 @@ namespace DRM.TypeSafePropertyBag
 
         //CrudWithMapping<TSource, TDestination> Test<TSource, TDestination>();
 
-        ClrMappedDSP<TDestination> CreateMappedDS<TSource, TDestination>
-            (
-            PropIdType propId,
-            PropKindEnum propKind,
-            IDoCRUD<TSource> dal,
-            PSAccessServiceInterface storeAccesor,
-            IPropBagMapper<TSource, TDestination> mapper
-            /*, out CrudWithMapping<TSource, TDestination> mappedDal*/
-            ) where TSource : class where TDestination : INotifyItemEndEdit;
+        //ClrMappedDSP<TDestination> CreateMappedDS<TSource, TDestination>
+        //    (
+        //    PropIdType propId,
+        //    PropKindEnum propKind,
+        //    IDoCRUD<TSource> dal,
+        //    PSAccessServiceInterface storeAccesor,
+        //    IPropBagMapper<TSource, TDestination> mapper
+        //    /*, out CrudWithMapping<TSource, TDestination> mappedDal*/
+        //    )
+        //    where TSource : class where TDestination : INotifyItemEndEdit;
 
         #endregion
 

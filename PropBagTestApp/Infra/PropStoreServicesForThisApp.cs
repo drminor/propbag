@@ -17,6 +17,7 @@ namespace PropBagTestApp.Infra
     using PropModelType = IPropModel<String>;
     using PropModelCacheInterface = ICachePropModels<String>;
     using ViewModelActivatorInterface = IViewModelActivator<UInt32, String>;
+    using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
 
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
 
@@ -30,8 +31,8 @@ namespace PropBagTestApp.Infra
 
         public static PropModelCacheInterface PropModelCache { get; set; }
 
-        public static SimpleViewModelFactory ViewModelHelper { get; }
-        public static IProvideAutoMappers AutoMapperProvider { get; }
+        public static SimpleViewModelFactory ViewModelFactory { get; }
+        public static IAutoMapperService AutoMapperService { get; }
 
         public static ICreateWrapperTypes WrapperTypeCreator { get; }
 
@@ -53,7 +54,6 @@ namespace PropBagTestApp.Infra
 
             WrapperTypeCreator = BuildSimpleWrapperTypeCreator();
 
-            AutoMapperProvider = GetAutoMapperProvider(vmActivator, psAccessServiceFactory, WrapperTypeCreator);
 
             IConvertValues valueConverter = new PropFactoryValueConverter(typeDescBasedTConverterCache);
 
@@ -75,7 +75,11 @@ namespace PropBagTestApp.Infra
 
             PropModelCache = new SimplePropModelCache(propModelProvider);
 
-            ViewModelHelper = new SimpleViewModelFactory(PropModelCache, vmActivator, psAccessServiceFactory, AutoMapperProvider, WrapperTypeCreator);
+            ViewModelFactory = new SimpleViewModelFactory(PropModelCache, vmActivator, psAccessServiceFactory, null, WrapperTypeCreator);
+
+            AutoMapperService = GetAutoMapperProvider(ViewModelFactory);
+
+            ViewModelFactory.AutoMapperService = AutoMapperService;
         }
 
         private static IPropFactoryFactory BuildThePropFactoryFactory
@@ -137,16 +141,11 @@ namespace PropBagTestApp.Infra
             return propModelProvider;
         }
 
-        private static IProvideAutoMappers GetAutoMapperProvider
-            (
-            ViewModelActivatorInterface viewModelActivator,
-            PSAccessServiceCreatorInterface storeAccessCreator,
-            ICreateWrapperTypes wrapperTypeCreator
-            )
+        private static IAutoMapperService GetAutoMapperProvider(ViewModelFactoryInterface viewModelFactory)
         {
 
             IMapTypeDefinitionProvider mapTypeDefinitionProvider = new SimpleMapTypeDefinitionProvider();
-            ICachePropBagMappers mappersCachingService = new SimplePropBagMapperCache();
+            ICachePropBagMappers mappersCachingService = new SimplePropBagMapperCache(viewModelFactory);
 
             IPropBagMapperBuilderProvider propBagMapperBuilderProvider = new SimplePropBagMapperBuilderProvider
                 (

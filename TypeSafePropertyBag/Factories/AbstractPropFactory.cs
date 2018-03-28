@@ -144,9 +144,9 @@ namespace DRM.TypeSafePropertyBag
         //    IPropBagMapper<TSource, TDestination> mapper
         //    /*, out CrudWithMapping<TSource, TDestination> mappedDal*/) where TSource : class where TDestination : INotifyItemEndEdit;
 
-        public abstract ClrMappedDSP<TDestination> CreateMappedDS<TSource, TDestination>(PropIdType propId, PropKindEnum propKind,
-            IDoCRUD<TSource> dal, PSAccessServiceInterface storeAccesor, IPropBagMapper<TSource, TDestination> mapper
-            /*, out CrudWithMapping<TSource, TDestination> mappedDal*/) where TSource : class where TDestination : INotifyItemEndEdit;
+        //public abstract ClrMappedDSP<TDestination> CreateMappedDS<TSource, TDestination>(PropIdType propId, PropKindEnum propKind,
+        //    IDoCRUD<TSource> dal, PSAccessServiceInterface storeAccesor, IPropBagMapper<TSource, TDestination> mapper
+        //    /*, out CrudWithMapping<TSource, TDestination> mappedDal*/) where TSource : class where TDestination : INotifyItemEndEdit;
 
 
         #endregion
@@ -576,11 +576,11 @@ namespace DRM.TypeSafePropertyBag
 
         #region DataSource Creation Methods
 
-        protected virtual CreateMappedDSPProviderDelegate GetDSPProviderCreator(Type sourceType, Type destinationType)
-        {
-            CreateMappedDSPProviderDelegate result = DelegateCacheProvider.CreateDSPProviderCache.GetOrAdd(new TypePair(sourceType, destinationType));
-            return result;
-        }
+        //protected virtual CreateMappedDSPProviderDelegate GetDSPProviderCreator(Type sourceType, Type destinationType)
+        //{
+        //    CreateMappedDSPProviderDelegate result = DelegateCacheProvider.CreateDSPProviderCache.GetOrAdd(new TypePair(sourceType, destinationType));
+        //    return result;
+        //}
 
         #endregion
 

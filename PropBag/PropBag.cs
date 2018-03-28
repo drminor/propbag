@@ -1,6 +1,6 @@
 ﻿using DRM.PropBag.AutoMapperSupport;
 using DRM.PropBag.Caches;
-using DRM.PropBag.TypeWrapper;
+//using DRM.PropBag.TypeWrapper;
 using DRM.PropBag.ViewModelTools;
 
 using DRM.TypeSafePropertyBag;
@@ -78,23 +78,14 @@ namespace DRM.PropBag
         // These items are provided to us and are only set during construction.
         protected internal PSAccessServiceInterface _ourStoreAccessor { get; private set; }
         protected internal ViewModelFactoryInterface _viewModelFactory { get; private set; }
+        protected internal IAutoMapperService _autoMapperService { get; private set; }
+
         protected internal PropModelType _propModel { get; private set; }
         protected internal IPropFactory _propFactory { get; private set; }
-
-        //protected internal PSAccessServiceInterface _ourStoreAccessor { get; private set; }
-        //protected internal PropModelCacheInterface _propModelCache { get; private set; }
-        //protected internal ICreateWrapperTypes _wrapperTypeCreator { get; private set; }
-        //protected internal IProvideAutoMappers _autoMapperService { get; private set; }
-
-
-        //protected internal PropModelCacheInterface _propModelCache => _viewModelFactory.PropModelCache;
-        //protected internal ICreateWrapperTypes _wrapperTypeCreator => _viewModelFactory.WrapperTypeCreator;
-        //protected internal IProvideAutoMappers _autoMapperService => _viewModelFactory.AutoMapperService;
 
         // Inheritors may override this Property
         protected internal virtual ITypeSafePropBagMetaData OurMetaData { get { return _ourMetaData; } private set { _ourMetaData = value; } }
         protected internal PropBagTypeSafetyMode TypeSafetyMode => _ourMetaData.TypeSafetyMode;
-
 
         #endregion
 
@@ -186,13 +177,13 @@ namespace DRM.PropBag
 
         #region Constructor
 
-        public PropBag(PropModelType propModel, ViewModelFactoryInterface viewModelFactory)
-            : this(propModel, viewModelFactory, propFactory: null, fullClassName: null)
+        public PropBag(PropModelType propModel, ViewModelFactoryInterface viewModelFactory, IAutoMapperService autoMapperService)
+            : this(propModel, viewModelFactory, autoMapperService, propFactory: null, fullClassName: null)
         {
         }
 
-        public PropBag(PropModelType propModel, ViewModelFactoryInterface viewModelFactory, IPropFactory propFactory)
-            : this(propModel, viewModelFactory, propFactory: propFactory, fullClassName: null)
+        public PropBag(PropModelType propModel, ViewModelFactoryInterface viewModelFactory, IAutoMapperService autoMapperService, IPropFactory propFactory)
+            : this(propModel, viewModelFactory, autoMapperService, propFactory: propFactory, fullClassName: null)
         {
         }
 
@@ -204,7 +195,7 @@ namespace DRM.PropBag
         /// <param name="storeAcessorCreator"></param>
         /// <param name="propFactory">The PropFactory to use instead of the one specified by the PropModel.</param>
         /// <param name="fullClassName">The namespace and class name to use instead of the one specified by the PropMode.</param>
-        public PropBag(PropModelType propModel, ViewModelFactoryInterface viewModelFactory, IPropFactory propFactory, string fullClassName)
+        public PropBag(PropModelType propModel, ViewModelFactoryInterface viewModelFactory, IAutoMapperService autoMapperService, IPropFactory propFactory, string fullClassName)
         {
             long memUsedSoFar = _memConsumptionTracker.UsedSoFar;
 
@@ -216,7 +207,7 @@ namespace DRM.PropBag
             IPropFactory propFactoryToUse = propFactory ?? propModel.PropFactory ?? throw new InvalidOperationException("The propModel has no PropFactory and one was not provided in the constructor.");
             string fullClassNameToUse = fullClassName ?? propModel.FullClassName;
 
-            BasicConstruction(propModel.TypeSafetyMode, propModel, viewModelFactory, propFactoryToUse, fullClassNameToUse);
+            BasicConstruction(propModel.TypeSafetyMode, propModel, viewModelFactory, autoMapperService, propFactoryToUse, fullClassNameToUse);
 
             PSAccessServiceCreatorInterface psStoreCreator = viewModelFactory.PropStoreAccessServiceCreator;
 
@@ -225,7 +216,7 @@ namespace DRM.PropBag
 
             bool propModelWasRaw = IsPropModelRaw(propModel);
 
-            BuildPropItems(propModel, viewModelFactory);
+            BuildPropItems(propModel, viewModelFactory, autoMapperService);
                 _memConsumptionTracker.Report(memUsedSoFar, "---- After BuildPropItems.");
 
             // Cache or Set the PropertyDescriptors (for our ICustomTypeDescriptor implementation.)
@@ -289,7 +280,7 @@ namespace DRM.PropBag
 
             PropBagTypeSafetyMode typeSafetyMode = ((PropBag)copySource).TypeSafetyMode;
 
-            //IProvideAutoMappers autoMapperService = ((PropBag)copySource)._autoMapperService;
+            IAutoMapperService autoMapperService = ((PropBag)copySource)._autoMapperService;
             //ICreateWrapperTypes wrapperTypeCreator = ((PropBag)copySource)._wrapperTypeCreator;
             //PropModelCacheInterface propModelCache = ((PropBag)copySource)._propModelCache;
 
@@ -298,7 +289,7 @@ namespace DRM.PropBag
             PropModelType propModel = ((PropBag)copySource)._propModel;
             IPropFactory propFactory = ((PropBag)copySource)._propFactory;
 
-            BasicConstruction(typeSafetyMode, propModel, viewModelFactory, propFactory, copySource.FullClassName);
+            BasicConstruction(typeSafetyMode, propModel, viewModelFactory, autoMapperService, propFactory, copySource.FullClassName);
 
             PSAccessServiceInterface storeAccessor = ((PropBag)copySource)._ourStoreAccessor;
             _ourStoreAccessor = CloneProps(copySource, storeAccessor);
@@ -314,8 +305,10 @@ namespace DRM.PropBag
             ViewModelActivatorInterface viewModelActivator = VmActivator;
             ViewModelFactoryInterface viewModelFactory = new SimpleViewModelFactory(viewModelActivator, storeAcessorCreator);
 
+            IAutoMapperService autoMapperService = null;
+
             PropModelType propModel = null;
-            BasicConstruction(typeSafetyMode, propModel, viewModelFactory, propFactory, fullClassName);
+            BasicConstruction(typeSafetyMode, propModel, viewModelFactory, autoMapperService, propFactory, fullClassName);
 
             _ourStoreAccessor = storeAcessorCreator.CreatePropStoreService(this);
             _memConsumptionTracker.MeasureAndReport("CreatePropStoreService", null);
@@ -324,19 +317,21 @@ namespace DRM.PropBag
         protected PropBag(PropBagTypeSafetyMode typeSafetyMode, ViewModelFactoryInterface viewModelFactory, IPropFactory propFactory, string fullClassName)
         {
             PropModelType propModel = null;
-            BasicConstruction(typeSafetyMode, propModel, viewModelFactory, propFactory, fullClassName);
+            IAutoMapperService autoMapperService = null;
+            BasicConstruction(typeSafetyMode, propModel, viewModelFactory, autoMapperService, propFactory, fullClassName);
 
             _ourStoreAccessor = viewModelFactory.PropStoreAccessServiceCreator.CreatePropStoreService(this);
         }
 
-        private void BasicConstruction(PropBagTypeSafetyMode typeSafetyMode, PropModelType propModel, ViewModelFactoryInterface viewModelFactory, IPropFactory propFactory, string fullClassName)
+        private void BasicConstruction(PropBagTypeSafetyMode typeSafetyMode, PropModelType propModel, ViewModelFactoryInterface viewModelFactory, IAutoMapperService autoMapperService, IPropFactory propFactory, string fullClassName)
         {
-            if (!viewModelFactory.HasAutoMapperServices)
+            if (autoMapperService == null)
             {
                 Debug.WriteLine($"Note: IPropBag with FullClassName: {fullClassName} does not have a AutoMapperService.");
             }
 
             _viewModelFactory = viewModelFactory;
+            _autoMapperService = autoMapperService;
 
             _propFactory = propFactory ?? throw new ArgumentNullException(nameof(propFactory));
             if (fullClassName == null) throw new ArgumentNullException(nameof(fullClassName));
@@ -377,7 +372,7 @@ namespace DRM.PropBag
         // Consider providing a separate class (and associated caches) for 'cooked' PropModels.
         // In this way, we can make PropModels fetched from XAML, XML, or other sources immutable.
 
-        protected void BuildPropItems(PropModelType pm, ViewModelFactoryInterface viewModelFactory)
+        protected void BuildPropItems(PropModelType pm, ViewModelFactoryInterface viewModelFactory, IAutoMapperService autoMapperService)
         {
             CheckClassNames(pm);
 
@@ -386,7 +381,7 @@ namespace DRM.PropBag
                 long amountUsedBeforeThisPropItem = _memConsumptionTracker.Measure($"Building Prop Item: {pi.PropertyName}");
 
                 bool weHadAPropTemplate = pi.PropTemplate != null;
-                IProp typedProp = BuildProp(pi, viewModelFactory);
+                IProp typedProp = BuildProp(pi, viewModelFactory, autoMapperService);
 
                 if(!weHadAPropTemplate)
                 {
@@ -430,7 +425,7 @@ namespace DRM.PropBag
             }
         }
 
-        protected IProp BuildProp(IPropItemModel pi, ViewModelFactoryInterface viewModelFactory)
+        protected IProp BuildProp(IPropItemModel pi, ViewModelFactoryInterface viewModelFactory, IAutoMapperService autoMapperService)
         {
             IProp typedProp;
 
@@ -444,7 +439,7 @@ namespace DRM.PropBag
             }
             else
             {
-                typedProp = BuildStandardProp(pi, viewModelFactory);
+                typedProp = BuildStandardProp(pi, viewModelFactory, autoMapperService);
             }
 
             return typedProp;
@@ -698,7 +693,7 @@ namespace DRM.PropBag
 
         private IPropBagMapperGen GetPropBagMapper(IMapperRequest mr)
         {
-            if(!_viewModelFactory.HasAutoMapperServices)
+            if (_autoMapperService == null)
             {
                 throw new InvalidOperationException($"This PropBag instance cannot create IProvideDataSourceProvider instances:" +
                     $" No AutoMapperSupport was supplied upon construction.");
@@ -713,17 +708,15 @@ namespace DRM.PropBag
 
             // TODO: See if we can submit the request earlier; perhaps when the mapper request is created.
 
-            IProvideAutoMappers autoMapperService = viewModelFactory.AutoMapperService;
-
             // Submit the Mapper Request.
-            mapperKey = autoMapperService.SubmitMapperRequest(mapperRequest.PropModel, viewModelFactory, mapperRequest.SourceType, mapperRequest.ConfigPackageName);
+            mapperKey = _autoMapperService.SubmitMapperRequest(mapperRequest.PropModel, viewModelFactory, mapperRequest.SourceType, mapperRequest.ConfigPackageName, _autoMapperService);
 
             // Get the AutoMapper mapping function associated with the mapper request already submitted.
-            IPropBagMapperGen genMapper = autoMapperService.GetMapper(mapperKey);
+            IPropBagMapperGen genMapper = _autoMapperService.GetMapper(mapperKey);
             return genMapper;
         }
 
-        private IProp BuildStandardProp(IPropItemModel pi, ViewModelFactoryInterface viewModelFactory)
+        private IProp BuildStandardProp(IPropItemModel pi, ViewModelFactoryInterface viewModelFactory, IAutoMapperService autoMapperService)
         {
             _memConsumptionTracker.Measure($"Begin BuildStandardPropFromCooked: {pi.PropertyName}.");
 
@@ -743,7 +736,7 @@ namespace DRM.PropBag
                 {
                     string fcn = pi.InitialValueField.PropBagFCN;
                     //IPropBag newObject = BuildNewViewModel(fcn, pi.PropertyType, propModelProvider, storeAccessCreator, autoMapperService, wrapperTypeCreator);
-                    IPropBag newObject = BuildNewViewModel(fcn, pi.PropertyType, viewModelFactory);
+                    IPropBag newObject = BuildNewViewModel(fcn, pi.PropertyType, viewModelFactory, autoMapperService);
 
 
                     if (pi.PropTemplate != null && pi.PropCreator != null)
@@ -895,13 +888,13 @@ namespace DRM.PropBag
         //    }
         //}
 
-        private IPropBag BuildNewViewModel(string fullClassName, Type propertyType, ViewModelFactoryInterface viewModelFactory)
+        private IPropBag BuildNewViewModel(string fullClassName, Type propertyType, ViewModelFactoryInterface viewModelFactory, IAutoMapperService autoMapperService)
         {
             PropModelCacheInterface propModelCache = viewModelFactory.PropModelCache;
 
             if (propModelCache.TryGetPropModel(fullClassName, out PropModelType propModel))
             {
-                IPropBag newObject = (IPropBag)VmActivator.GetNewViewModel(propertyType, propModel, viewModelFactory, pfOverride: null, fcnOverride: null);
+                IPropBag newObject = (IPropBag)VmActivator.GetNewViewModel(propertyType, propModel, viewModelFactory, autoMapperService, pfOverride: null, fcnOverride: null);
                 return newObject;
             }
             else
@@ -2361,6 +2354,8 @@ namespace DRM.PropBag
         //    return result;
         //}
 
+        // Eventually calls GetOrAddCViewManager<IDoCRUD<TSource>, TSource, TDestination>(srcPropName, mr);
+        // This is currenlty not used (nor is there any test coverage.)
         protected IManageCViews GetOrAddCViewManagerGen(Type typeOfThisProperty, PropNameType srcPropName, IMapperRequest mr)
         {
             // Check the delegate cache to see if a delegate for this already exists, and if not create a new delegate.
@@ -2374,7 +2369,8 @@ namespace DRM.PropBag
             return result;
         }
 
-        //protected IProvideACViewManager GetOrAddCViewManagerProviderGen(Type typeOfThisProperty, PropNameType srcPropName, IMapperRequest mr)
+        // Eventually calls GetOrAddCViewManagerProvider<IDoCRUD<TSource>, TSource, TDestination>(viewManagerProviderKey);
+        // Used by PropBag::Hydrate::BuildCollectionViewProp
         protected IProvideACViewManager GetOrAddCViewManagerProviderGen(Type typeOfThisProperty, IViewManagerProviderKey viewManagerProviderKey)
         {
             // Check the delegate cache to see if a delegate for this already exists, and if not create a new delegate.
@@ -2395,8 +2391,50 @@ namespace DRM.PropBag
             return result;
         }
 
-        // new version: returns a IManageCViews Using a IMapperRequest and Factory
-        public IManageCViews GetOrAddCViewManager<TDal, TSource, TDestination>
+        //// TODO: Update to use the CrudWithMappingCreator delegate (has a gen counterpart.)
+        //// Currently this is only used by the Gen counterpart -- and its not being used.
+        // TODO: This is being replaced by the next method.
+        //public IManageCViews GetOrAddCViewManager<TDal, TSource, TDestination>
+        //(
+        //    PropNameType srcPropName,   // The name of the property that holds the data (of type IDoCRUD<TSource>.)
+        //    IMapperRequest mr   // The (non-generic) information necessary to create a AutoMapper Mapper request.
+        //)
+        //    where TDal : class, IDoCRUD<TSource>
+        //    where TSource : class
+        //    where TDestination : INotifyItemEndEdit
+        //{
+        //    // Get the PropItem for the property that holds the DataSource (IDoCRUD<TSource>)
+        //    IPropData propGen = GetPropGen(srcPropName, propertyType: null, haveValue: false, value: null,
+        //        alwaysRegister: false, mustBeRegistered: true, neverCreate: true, 
+        //        desiredHasStoreValue: true, wasRegistered: out bool wasRegistered, propId: out PropIdType dalPropId);
+
+        //    if(propGen.IsEmpty)
+        //    {
+        //        throw new InvalidOperationException($"The {nameof(GetOrAddCViewManager)} cannot find the source PropItem with name = {srcPropName}.");
+        //    }
+
+        //    if (!(propGen.TypedProp.PropTemplate.Type is IDoCRUD<TSource>))
+        //    {
+        //        throw new InvalidOperationException($"The PropItem used as a data source for the CollectionView Manager does not implement IDoCRUD<({typeof(TSource)}.");
+        //    }
+
+        //    IManageCViews cViewManager = _ourStoreAccessor.GetOrAddViewManager<TDal, TSource, TDestination>
+        //        (
+        //        this,
+        //        dalPropId,
+        //        propGen,
+        //        mr,
+        //        GetPropBagMapperFactory(),
+        //        _propFactory.GetCViewProviderFactory(),
+        //        _propFactory.ListCollectionViewCreator<TDestination>()
+        //        );
+
+        //    return cViewManager;
+        //}
+
+        // TODO: Update to use the CrudWithMappingCreator delegate (has a gen counterpart.)
+        // Currently this is only used by the Gen counterpart -- and its not being used.
+        public IManageCViews GetOrAddCViewManager_New<TDal, TSource, TDestination>
         (
             PropNameType srcPropName,   // The name of the property that holds the data (of type IDoCRUD<TSource>.)
             IMapperRequest mr   // The (non-generic) information necessary to create a AutoMapper Mapper request.
@@ -2407,12 +2445,12 @@ namespace DRM.PropBag
         {
             // Get the PropItem for the property that holds the DataSource (IDoCRUD<TSource>)
             IPropData propGen = GetPropGen(srcPropName, propertyType: null, haveValue: false, value: null,
-                alwaysRegister: false, mustBeRegistered: true, neverCreate: true, 
+                alwaysRegister: false, mustBeRegistered: true, neverCreate: true,
                 desiredHasStoreValue: true, wasRegistered: out bool wasRegistered, propId: out PropIdType dalPropId);
 
-            if(propGen.IsEmpty)
+            if (propGen.IsEmpty)
             {
-                throw new InvalidOperationException($"The {nameof(GetOrAddCViewManager)} cannot find the source PropItem with name = {srcPropName}.");
+                throw new InvalidOperationException($"The {nameof(GetOrAddCViewManager_New)} cannot find the source PropItem with name = {srcPropName}.");
             }
 
             if (!(propGen.TypedProp.PropTemplate.Type is IDoCRUD<TSource>))
@@ -2420,19 +2458,28 @@ namespace DRM.PropBag
                 throw new InvalidOperationException($"The PropItem used as a data source for the CollectionView Manager does not implement IDoCRUD<({typeof(TSource)}.");
             }
 
-            IManageCViews cViewManager = _ourStoreAccessor.GetOrAddViewManager<TDal, TSource, TDestination>
+            IManageCViews cViewManager = _ourStoreAccessor.GetOrAddViewManager_New<TDal, TSource, TDestination>
                 (
                 this,
                 dalPropId,
                 propGen,
                 mr,
-                GetPropBagMapperFactory(),
+                BuildCrudWithMapping,
                 _propFactory.GetCViewProviderFactory(),
                 _propFactory.ListCollectionViewCreator<TDestination>()
                 );
 
             return cViewManager;
+
+            // CrudWithMapping Factory
+            IDoCrudWithMapping<TDestination> BuildCrudWithMapping(IWatchAPropItem<TDal> propItemWatcher)
+            {
+                // TODO: ---------------- 
+                IDoCrudWithMapping<TDestination> result = null;
+                return result;
+            }
         }
+
 
         public bool TryGetCViewManagerProvider(PropNameType propertyName, out IProvideACViewManager cViewManagerProvider)
         {
@@ -2454,7 +2501,28 @@ namespace DRM.PropBag
             }
         }
 
-        // new version: returns a IManageCViews Using a IMapperRequest and Factory
+        //// TODO: Update to use the CrudWithMappingCreator delegate (has a gen counterpart.)
+        //// The Gen counterpart is being used.
+        //public IProvideACViewManager GetOrAddCViewManagerProvider_OLD<TDal, TSource, TDestination>
+        //(
+        //    IViewManagerProviderKey viewManagerProviderKey
+        //)
+        //    where TDal : class, IDoCRUD<TSource>
+        //    where TSource : class
+        //    where TDestination : INotifyItemEndEdit
+        //{
+        //    IProvideACViewManager cViewManagerProvider = _ourStoreAccessor.GetOrAddViewManagerProvider<TDal, TSource, TDestination>
+        //        (
+        //        this,
+        //        viewManagerProviderKey,
+        //        GetPropBagMapperFactory(),
+        //        _propFactory.GetCViewProviderFactory()
+        //        );
+
+        //    return cViewManagerProvider;
+        //}
+
+        // Working this to submit a CrudWithMappingCreator delegate
         public IProvideACViewManager GetOrAddCViewManagerProvider<TDal, TSource, TDestination>
         (
             IViewManagerProviderKey viewManagerProviderKey
@@ -2463,21 +2531,74 @@ namespace DRM.PropBag
             where TSource : class
             where TDestination : INotifyItemEndEdit
         {
-            IProvideACViewManager cViewManagerProvider = _ourStoreAccessor.GetOrAddViewManagerProvider<TDal, TSource, TDestination>
+            IProvideACViewManager cViewManagerProvider = _ourStoreAccessor.GetOrAddViewManagerProvider_New<TDal, TSource, TDestination>
                 (
                 this,
                 viewManagerProviderKey,
-                GetPropBagMapperFactory(),
+                BuildCrudWithMapping,
                 _propFactory.GetCViewProviderFactory()
                 );
 
             return cViewManagerProvider;
+
+            // CrudWithMapping Factory
+            IDoCrudWithMapping<TDestination> BuildCrudWithMapping(IWatchAPropItem<TDal> propItemWatcher)
+            {
+                // TODO: ---------------- 
+                IDoCrudWithMapping<TDestination> result = null;
+                return result;
+            }
         }
 
         // TODO: Allow mapper to be null on construction, and then omit mapping functionality, but instead
         // use the IDoCRUD<T> straight, without any mapping
 
-        // Using a IMapperRequest and Factory
+        //// TODO: Update to use the CrudWithMappingCreator delegate.
+        //// This is currenlty not used (nor is there any test coverage.)
+        //public IProp CreateCollectionViewPropDS<TDal, TSource, TDestination>
+        //(
+        //    PropNameType propertyName, // The name for the new property.
+        //    PropNameType srcPropName,   // The name of the property that holds the data (of type IDoCRUD<TSource>.)
+        //    IMapperRequest mr,   // The (non-generic) information necessary to create a AutoMapper Mapper request.
+        //    IPropTemplate propTemplate
+        //)
+        //    where TDal : class, IDoCRUD<TSource>
+        //    where TSource : class
+        //    where TDestination : INotifyItemEndEdit
+        //{
+        //    // Get the PropItem for the property that holds the DataSource (IDoCRUD<TSource>)
+        //    IPropData propGen = GetPropGen(srcPropName, propertyType: null, haveValue: false, value: null,
+        //        alwaysRegister: false, mustBeRegistered: true, neverCreate: true,
+        //        desiredHasStoreValue: true, wasRegistered: out bool wasRegistered, propId: out PropIdType dalPropId);
+
+        //    if (propGen.IsEmpty)
+        //    {
+        //        throw new InvalidOperationException($"The {nameof(GetOrAddCViewManager)} cannot find the source PropItem with name = {srcPropName}.");
+        //    }
+
+        //    if (!(propGen.TypedProp.PropTemplate.Type is IDoCRUD<TSource>))
+        //    {
+        //        throw new InvalidOperationException($"The PropItem used as a data source for the CollectionView Manager does not implement IDoCRUD<({typeof(TSource)}.");
+        //    }
+
+        //    IManageCViews cViewManager = _ourStoreAccessor.GetOrAddViewManager<TDal, TSource, TDestination>
+        //        (
+        //        this,
+        //        dalPropId,
+        //        propGen,
+        //        mr,
+        //        GetPropBagMapperFactory(),
+        //        _propFactory.GetCViewProviderFactory(),
+        //        _propFactory.ListCollectionViewCreator<TDestination>()
+        //        );
+
+        //    IProvideAView viewProvider = cViewManager.GetDefaultViewProvider();
+        //    IProp result = CreateCollectionViewProp(propertyName, viewProvider, propTemplate);
+        //    return result;
+        //}
+
+        // TODO: Update to use the CrudWithMappingCreator delegate.
+        // This is currenlty not used (nor is there any test coverage.)
         public IProp CreateCollectionViewPropDS<TDal, TSource, TDestination>
         (
             PropNameType propertyName, // The name for the new property.
@@ -2496,7 +2617,7 @@ namespace DRM.PropBag
 
             if (propGen.IsEmpty)
             {
-                throw new InvalidOperationException($"The {nameof(GetOrAddCViewManager)} cannot find the source PropItem with name = {srcPropName}.");
+                throw new InvalidOperationException($"The {nameof(CreateCollectionViewPropDS)} cannot find the source PropItem with name = {srcPropName}.");
             }
 
             if (!(propGen.TypedProp.PropTemplate.Type is IDoCRUD<TSource>))
@@ -2504,13 +2625,13 @@ namespace DRM.PropBag
                 throw new InvalidOperationException($"The PropItem used as a data source for the CollectionView Manager does not implement IDoCRUD<({typeof(TSource)}.");
             }
 
-            IManageCViews cViewManager = _ourStoreAccessor.GetOrAddViewManager<TDal, TSource, TDestination>
+            IManageCViews cViewManager = _ourStoreAccessor.GetOrAddViewManager_New<TDal, TSource, TDestination>
                 (
                 this,
                 dalPropId,
                 propGen,
                 mr,
-                GetPropBagMapperFactory(),
+                BuildCrudWithMapping,
                 _propFactory.GetCViewProviderFactory(),
                 _propFactory.ListCollectionViewCreator<TDestination>()
                 );
@@ -2518,85 +2639,93 @@ namespace DRM.PropBag
             IProvideAView viewProvider = cViewManager.GetDefaultViewProvider();
             IProp result = CreateCollectionViewProp(propertyName, viewProvider, propTemplate);
             return result;
+
+            // CrudWithMapping Factory
+            IDoCrudWithMapping<TDestination> BuildCrudWithMapping(IWatchAPropItem<TDal> propItemWatcher)
+            {
+                // TODO: ---------------- 
+                IDoCrudWithMapping<TDestination> result2 = null;
+                return result2;
+            }
         }
 
-        // Using a IPropBagMapper directly.
-        public IProp CreateCollectionViewPropDS<TDal, TSource, TDestination>
-        (
-            PropNameType propertyName, // The name for the new property.
-            PropNameType srcPropName,   // The name of the property that holds the data (of type IDoCRUD<TSource>.)
-            IPropBagMapper<TSource, TDestination> mapper,    // Optional. The AutoMapper to use to map data from the source to data in the view.
-            IPropTemplate propTemplate
-        )
-            where TDal : class, IDoCRUD<TSource>
-            where TSource : class
-            where TDestination : INotifyItemEndEdit
-        {
-            IPropData propGen = GetPropGen(srcPropName, propertyType: null, haveValue: false, value: null,
-                alwaysRegister: false, mustBeRegistered: true, neverCreate: true, 
-                desiredHasStoreValue: true, wasRegistered: out bool wasRegistered, propId: out PropIdType dalPropId);
+        //// Using a IPropBagMapper directly.
+        //public IProp CreateCollectionViewPropDS<TDal, TSource, TDestination>
+        //(
+        //    PropNameType propertyName, // The name for the new property.
+        //    PropNameType srcPropName,   // The name of the property that holds the data (of type IDoCRUD<TSource>.)
+        //    IPropBagMapper<TSource, TDestination> mapper,    // Optional. The AutoMapper to use to map data from the source to data in the view.
+        //    IPropTemplate propTemplate
+        //)
+        //    where TDal : class, IDoCRUD<TSource>
+        //    where TSource : class
+        //    where TDestination : INotifyItemEndEdit
+        //{
+        //    IPropData propGen = GetPropGen(srcPropName, propertyType: null, haveValue: false, value: null,
+        //        alwaysRegister: false, mustBeRegistered: true, neverCreate: true, 
+        //        desiredHasStoreValue: true, wasRegistered: out bool wasRegistered, propId: out PropIdType dalPropId);
 
-            if (propGen.IsEmpty)
-            {
-                throw new InvalidOperationException($"The {nameof(GetOrAddCViewManager)} cannot find the source PropItem with name = {srcPropName}.");
-            }
+        //    if (propGen.IsEmpty)
+        //    {
+        //        throw new InvalidOperationException($"The {nameof(GetOrAddCViewManager)} cannot find the source PropItem with name = {srcPropName}.");
+        //    }
 
-            if(!(propGen.TypedProp.PropTemplate.Type is IDoCRUD<TSource>))
-            {
-                throw new InvalidOperationException($"The PropItem used as a data source for the CollectionView DataSource does not implement IDoCRUD<({typeof(TSource)}.");
-            }
+        //    if(!(propGen.TypedProp.PropTemplate.Type is IDoCRUD<TSource>))
+        //    {
+        //        throw new InvalidOperationException($"The PropItem used as a data source for the CollectionView DataSource does not implement IDoCRUD<({typeof(TSource)}.");
+        //    }
 
-            IManageCViews cViewManager = _ourStoreAccessor.GetOrAddViewManager<TDal, TSource, TDestination>
-                (
-                this,
-                dalPropId,
-                propGen,
-                mapper,
-                _propFactory.GetCViewProviderFactory(),
-                _propFactory.ListCollectionViewCreator<TDestination>()
-                );
+        //    IManageCViews cViewManager = _ourStoreAccessor.GetOrAddViewManager<TDal, TSource, TDestination>
+        //        (
+        //        this,
+        //        dalPropId,
+        //        propGen,
+        //        mapper,
+        //        _propFactory.GetCViewProviderFactory(),
+        //        _propFactory.ListCollectionViewCreator<TDestination>()
+        //        );
 
-            IProvideAView viewProvider = cViewManager.GetDefaultViewProvider();
-            IProp result = CreateCollectionViewProp(propertyName, viewProvider, propTemplate);
-            return result;
-        }
+        //    IProvideAView viewProvider = cViewManager.GetDefaultViewProvider();
+        //    IProp result = CreateCollectionViewProp(propertyName, viewProvider, propTemplate);
+        //    return result;
+        //}
 
-        // Typed version, using a IPropBagMapper directly. 
-        public ICViewProp<CVT> AddCollectionViewPropDS_Typed<CVT, TDal, TSource, TDestination>
-        (
-            PropNameType propertyName,
-            PropNameType srcPropName,
-            IPropBagMapper<TSource, TDestination> mapper,
-            IPropTemplate propTemplate
-        )
-            where CVT : ICollectionView
-            where TDal : class, IDoCRUD<TSource>
-            where TSource : class
-            where TDestination : INotifyItemEndEdit
-        {
-            IPropData propGen = GetPropGen(srcPropName, propertyType: null, haveValue: false, value: null,
-                alwaysRegister: false, mustBeRegistered: true, neverCreate: true, 
-                desiredHasStoreValue: true, wasRegistered: out bool wasRegistered, propId: out PropIdType dalPropId);
+        //// Typed version, using a IPropBagMapper directly. 
+        //public ICViewProp<CVT> AddCollectionViewPropDS_Typed<CVT, TDal, TSource, TDestination>
+        //(
+        //    PropNameType propertyName,
+        //    PropNameType srcPropName,
+        //    IPropBagMapper<TSource, TDestination> mapper,
+        //    IPropTemplate propTemplate
+        //)
+        //    where CVT : ICollectionView
+        //    where TDal : class, IDoCRUD<TSource>
+        //    where TSource : class
+        //    where TDestination : INotifyItemEndEdit
+        //{
+        //    IPropData propGen = GetPropGen(srcPropName, propertyType: null, haveValue: false, value: null,
+        //        alwaysRegister: false, mustBeRegistered: true, neverCreate: true, 
+        //        desiredHasStoreValue: true, wasRegistered: out bool wasRegistered, propId: out PropIdType dalPropId);
 
-            if (propGen.IsEmpty)
-            {
-                throw new InvalidOperationException($"The {nameof(GetOrAddCViewManager)} cannot find the source PropItem with name = {srcPropName}.");
-            }
+        //    if (propGen.IsEmpty)
+        //    {
+        //        throw new InvalidOperationException($"The {nameof(GetOrAddCViewManager)} cannot find the source PropItem with name = {srcPropName}.");
+        //    }
 
-            IManageCViews cViewManager = _ourStoreAccessor.GetOrAddViewManager<TDal, TSource, TDestination>
-                (
-                this,
-                dalPropId,
-                propGen,
-                mapper,
-                _propFactory.GetCViewProviderFactory(),
-                _propFactory.ListCollectionViewCreator<TDestination>()
-                );
+        //    IManageCViews cViewManager = _ourStoreAccessor.GetOrAddViewManager<TDal, TSource, TDestination>
+        //        (
+        //        this,
+        //        dalPropId,
+        //        propGen,
+        //        mapper,
+        //        _propFactory.GetCViewProviderFactory(),
+        //        _propFactory.ListCollectionViewCreator<TDestination>()
+        //        );
 
-            IProvideAView viewProvider = cViewManager.GetDefaultViewProvider();
-            ICViewProp<CVT> result = (ICViewProp<CVT>)CreateCollectionViewProp(propertyName, viewProvider, propTemplate);
-            return result;
-        }
+        //    IProvideAView viewProvider = cViewManager.GetDefaultViewProvider();
+        //    ICViewProp<CVT> result = (ICViewProp<CVT>)CreateCollectionViewProp(propertyName, viewProvider, propTemplate);
+        //    return result;
+        //}
 
         #endregion
 
@@ -3723,21 +3852,83 @@ namespace DRM.PropBag
 
         #region View Manager Support
 
-        public IManageCViews GetOrAddViewManager<TDal, TSource, TDestination>
-        (
-            PropNameType propertyName,
-            Type propertyType,
-            IPropBagMapper<TSource, TDestination> mapper
-        )
-            where TDal : IDoCRUD<TSource>
-            where TSource : class
-            where TDestination : INotifyItemEndEdit
-        {
-            IManageCViews result = null;
-            return result;
-        }
+        //public IManageCViews GetOrAddViewManager<TDal, TSource, TDestination>
+        //(
+        //    PropNameType propertyName,
+        //    Type propertyType,
+        //    IPropBagMapper<TSource, TDestination> mapper
+        //)
+        //    where TDal : IDoCRUD<TSource>
+        //    where TSource : class
+        //    where TDestination : INotifyItemEndEdit
+        //{
+        //    IManageCViews result = null;
+        //    return result;
+        //}
 
-        public IManageCViews GetOrAddViewManager<TDal, TSource, TDestination>
+        //// TODO: Being Replaced with New Version -- see next method.
+        //public IManageCViews GetOrAddViewManager<TDal, TSource, TDestination>
+        //(
+        //    PropNameType propertyName,
+        //    Type propertyType,
+        //    IMapperRequest mr
+        //)
+        //    where TDal : class, IDoCRUD<TSource>
+        //    where TSource : class
+        //    where TDestination : INotifyItemEndEdit
+        //{
+        //    bool mustBeRegistered = true; // TryGetViewManager is called in the constructor, we cannot reference the virtual property: OurMetaData.AllPropsMustBeRegistered; 
+
+        //    IPropData propData = GetPropGen(propertyName, propertyType,
+        //        haveValue: false,
+        //        value: null,
+        //        alwaysRegister: false,
+        //        mustBeRegistered: mustBeRegistered,
+        //        neverCreate: false,
+        //        desiredHasStoreValue: null,
+        //        wasRegistered: out bool wasRegistered,
+        //        propId: out PropIdType propId);
+
+        //    if (propData != null)
+        //    {
+        //        IManageCViews result = _ourStoreAccessor.GetOrAddViewManager<TDal, TSource, TDestination>
+        //            (
+        //            this,
+        //            propId,
+        //            propData,
+        //            mr,
+        //            GetPropBagMapperFactory(),
+        //            _propFactory.GetCViewProviderFactory(),
+        //            _propFactory.ListCollectionViewCreator<TDestination>()
+        //            );
+
+        //        // Used to test the ability to create a new Prop that has a PropertyType = to some Emitted Type.
+        //        //result.DataSourceProvider.DataChanged += DataSourceProvider_DataChanged;
+
+        //        return result;
+        //    }
+        //    else
+        //    {
+        //        return null;
+        //    }
+
+        //    //// Just for Diagnostics
+        //    //void DataSourceProvider_DataChanged(object sender, EventArgs e)
+        //    //{
+        //    //    if(sender is DataSourceProvider dsp)
+        //    //    {
+        //    //        Type rtt = GetCollectionItemRunTimeType<TDal, TSource, TDestination>(dsp);
+
+        //    //        if (rtt != null)
+        //    //        {
+        //    //            _propFactory.CreateGenWithNoValue(rtt, "test", null, PropStorageStrategyEnum.Internal, true, PropKindEnum.Prop, null, false, null);
+        //    //        }
+        //    //    }
+        //    //}
+        //}
+
+        // TODO: Working on this to use the CrudWithMappingCreator delegate (has a gen counterpart.)
+        public IManageCViews GetOrAddViewManager_New<TDal, TSource, TDestination>
         (
             PropNameType propertyName,
             Type propertyType,
@@ -3761,13 +3952,13 @@ namespace DRM.PropBag
 
             if (propData != null)
             {
-                IManageCViews result = _ourStoreAccessor.GetOrAddViewManager<TDal, TSource, TDestination>
+                IManageCViews result = _ourStoreAccessor.GetOrAddViewManager_New<TDal, TSource, TDestination>
                     (
                     this,
                     propId,
                     propData,
                     mr,
-                    GetPropBagMapperFactory(),
+                    BuildCrudWithMapping,
                     _propFactory.GetCViewProviderFactory(),
                     _propFactory.ListCollectionViewCreator<TDestination>()
                     );
@@ -3780,6 +3971,21 @@ namespace DRM.PropBag
             else
             {
                 return null;
+            }
+
+            // CrudWithMapping Factory
+            IDoCrudWithMapping<TDestination> BuildCrudWithMapping(IWatchAPropItem<TDal> propItemWatcher)
+            {
+                PropBagMapperCreator propBagMapperCreator = GetPropBagMapperFactory();
+
+                // Create a Typed PropBag Mapper using the supplied function and local Mapper Request.
+                IPropBagMapper<TSource, TDestination> mapper = propBagMapperCreator(mr) as IPropBagMapper<TSource, TDestination>;
+
+                // Create a IDoCRUD<TSource> using the watcher and mapper
+                IDoCrudWithMapping<TDestination> result =
+                    new CrudWithMapping<TDal, TSource, TDestination>(propItemWatcher, mapper);
+
+                return result;
             }
 
             //// Just for Diagnostics
@@ -4131,7 +4337,7 @@ namespace DRM.PropBag
             where TDestination : INotifyItemEndEdit
         {
             PropBag pb = (PropBag)target;
-            IManageCViews result = pb.GetOrAddCViewManager<IDoCRUD<TSource>, TSource, TDestination>(srcPropName, mr);
+            IManageCViews result = pb.GetOrAddCViewManager_New<IDoCRUD<TSource>, TSource, TDestination>(srcPropName, mr);
             return result;
         }
 

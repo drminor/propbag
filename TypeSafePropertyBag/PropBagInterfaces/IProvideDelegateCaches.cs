@@ -17,7 +17,7 @@ namespace DRM.TypeSafePropertyBag
 
         ICacheDelegatesForTypePair<CreateCPropFromObjectDelegate> CreateCPropFromObjectCache { get; }
 
-        ICacheDelegatesForTypePair<CreateMappedDSPProviderDelegate> CreateDSPProviderCache { get; }
+        //ICacheDelegatesForTypePair<CreateMappedDSPProviderDelegate> CreateDSPProviderCache { get; }
 
         IProvidePropTemplates PropTemplateCache { get; }
     }

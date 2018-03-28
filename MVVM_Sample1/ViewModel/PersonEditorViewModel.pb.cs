@@ -1,4 +1,5 @@
 ﻿using DRM.PropBag;
+using DRM.PropBag.AutoMapperSupport;
 using DRM.PropBag.ViewModelTools;
 using DRM.PropBagWPF;
 using DRM.TypeSafePropertyBag;
@@ -26,8 +27,8 @@ namespace MVVM_Sample1.ViewModel
 
 
         public PersonEditorViewModel(PropModelType pm, ViewModelFactoryInterface viewModelFactory,
-            IPropFactory propFactory, string fullClassName)
-            : base(pm, viewModelFactory, propFactory, fullClassName)
+            IAutoMapperService autoMapperService, IPropFactory propFactory, string fullClassName)
+            : base(pm, viewModelFactory, autoMapperService, propFactory, fullClassName)
         {
             //PropBagTypeDescriptionProvider<PersonEditorViewModel> tdp = RegisterTypeDescriptorProvider<PersonEditorViewModel>(pm);
             //pm.TypeDescriptionProvider = tdp;

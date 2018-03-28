@@ -17,7 +17,7 @@ namespace PropBagLib.Tests
         //}
 
         public CreateAtRunTimeModel(PropModel pm, ViewModelFactoryInterface viewModelFactory)
-            : base(pm, viewModelFactory, propFactory: null, fullClassName: "PropBagLib.Tests.CreateAtRunTimeModel")
+            : base(pm, viewModelFactory, null, propFactory: null, fullClassName: "PropBagLib.Tests.CreateAtRunTimeModel")
         {
         }
 

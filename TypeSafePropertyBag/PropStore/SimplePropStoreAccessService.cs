@@ -1288,18 +1288,133 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
+        // Using IPropBagMapper directly.
+        //public IManageCViews GetOrAddViewManager<TDal, TSource, TDestination>
+        //(
+        //    IPropBag propBag,   // The client of this service.
+        //    PropIdType propId,  // Identifies the PropItem that implements IDoCrud<TSource>
+        //    IPropData propData, // The PropStore management wrapper for IProp<TSource> which holds the value of the 'IDoCrud<T>' data access layer.
+        //    IPropBagMapper<TSource, TDestination> mapper,   // The AutoMapper used to translate from source data to view items.
+        //    CViewProviderCreator viewBuilder,                // Method that can be used to create a IProvideAView from a DataSourceProvider.
+        //    BetterLCVCreatorDelegate<TDestination> betterLCVCreatorDelegate
+        //)
+        //    where TDal : class, IDoCRUD<TSource>
+        //    where TSource : class
+        //    where TDestination : INotifyItemEndEdit
+        //{
+        //    CheckObjectRef(propBag);
+
+        //    // There is one View Manager for each PropItem. The View Manager for a particular PropItem is created on first use.
+        //    if (_genViewManagers == null)
+        //        _genViewManagers = new ViewManagerCollection();
+
+        //    IManageCViews result = _genViewManagers.GetOrAdd(propId, CViewGenManagerFactory);
+        //    return result;
+
+        //    IManageCViews CViewGenManagerFactory(PropIdType propId2)
+        //    {
+        //        IProvideADataSourceProvider dSProviderProvider;
+        //        if (propData.TypedProp.PropTemplate.PropKind == PropKindEnum.Prop)
+        //        {
+        //            IWatchAPropItem<TDal> propItemWatcher = new PropItemWatcher<TDal>(this as PSAccessServiceInternalInterface, propId2);
+
+        //            CrudWithMapping<TDal, TSource, TDestination> mappedDal =
+        //                new CrudWithMapping<TDal, TSource, TDestination>(propItemWatcher, mapper);
+
+        //            dSProviderProvider = new ClrMappedDSP<TDestination>(dataAccessLayer: mappedDal, betterLCVCreatorDelegate: betterLCVCreatorDelegate);
+        //        }
+        //        else
+        //        {
+        //            throw new InvalidOperationException("This version of GetOrAddViewManager requires a PropItem of kind = Prop and PropertyType = IDoCRUD<T>.");
+        //            //dSProviderProvider = new PBCollectionDSP_Provider(propId2, propData.TypedProp.PropKind, this);
+        //        }
+
+        //        IManageCViews result2 = new ViewManager(dSProviderProvider, viewBuilder);
+        //        return result2;
+        //    }
+        //}
+
+        //// TOOD: This is being replace with a new version -- see next method.
+        //public IManageCViews GetOrAddViewManager<TDal, TSource, TDestination> 
+        //(
+        //    IPropBag propBag,   // The client of this service.
+        //    PropIdType propId,  // Identifies the PropItem that implements IDoCrud<TSource>
+        //    IPropData propData, // The PropStore management wrapper for IProp<TSource> which holds the value of the 'IDoCrud<T>' data access layer.
+        //    IMapperRequest mr,  // The information necessary to create a IPropBagMapper<TSource, TDestination>
+        //    PropBagMapperCreator propBagMapperCreator,  // A delegate that can be called to create a IPropBagMapper<TSource, TDestination> given a IMapperRequest.
+        //    CViewProviderCreator viewBuilder,            // Method that can be used to create a IProvideAView from a DataSourceProvider.
+        //    BetterLCVCreatorDelegate<TDestination> betterLCVCreatorDelegate
+        //)
+        //    where TDal : class, IDoCRUD<TSource>
+        //    where TSource : class
+        //    where TDestination : INotifyItemEndEdit
+        //{
+        //    CheckObjectRef(propBag);
+
+        //    // There is one View Manager for each PropItem. The View Manager for a particular PropItem is created on first use.
+        //    if (_genViewManagers == null)
+        //        _genViewManagers = new ViewManagerCollection();
+
+        //    IManageCViews result = _genViewManagers.GetOrAdd(propId, CViewGenManagerFactory);
+        //    return result;
+
+        //    // Factory Method used to create the Collection View Manager.
+        //    IManageCViews CViewGenManagerFactory(PropIdType propId2)
+        //    {
+        //        IProvideADataSourceProvider dSProviderProvider;
+        //        if (!  (propData.TypedProp.PropTemplate.PropKind == PropKindEnum.Prop))
+        //        {
+        //            throw new InvalidOperationException("This version of GetOrAddViewManager requires a PropItem of kind = Prop and PropertyType = IDoCRUD<T>.");
+        //            //dSProviderProvider = new PBCollectionDSP_Provider(propId, propData.TypedProp.PropKind, this);
+        //        }
+
+        //        // Create a LocalWatcher on the property that hosts the DataSource.
+        //        IWatchAPropItem<TDal> propItemWatcher = new PropItemWatcher<TDal>(this as PSAccessServiceInternalInterface, propId2);
+
+
+        //        // ----- TODO -----
+
+        //        // Instead of the next two commented sections...
+        //        // Have the caller supply us with a Function that 
+        //        //      1. Takes a propItemWatcher
+        //        // &    2. Returns IDoCrudWithMapping<Item Type>
+        //        // it will be used create a IProvideADataSourceProvider (i.e., a new ClrMappedDSP)
+
+        //        // Create a Typed PropBag Mapper using the supplied function and local Mapper Request.
+        //        IPropBagMapper<TSource, TDestination> mapper = propBagMapperCreator(mr) as IPropBagMapper<TSource, TDestination>;
+
+        //        // Create a IDoCRUD<TSource> using the watcher and mapper
+        //        CrudWithMapping<TDal, TSource, TDestination> mappedDal = 
+        //            new CrudWithMapping<TDal, TSource, TDestination>(propItemWatcher, mapper);
+
+        //        // ---- END TODO ----
+
+
+        //        // Create a IDoCRUD<TDestination> using the IDoCRUD<TSource and the ICollectionView delegate.
+        //        dSProviderProvider = new ClrMappedDSP<TDestination>(dataAccessLayer: mappedDal, betterLCVCreatorDelegate: betterLCVCreatorDelegate);
+
+        //        // Create a new ViewManager using the (mapped) DataSourceProvider and the IProvideAView delegate.
+        //        IManageCViews result2 = new ViewManager(dSProviderProvider, viewBuilder);
+        //        return result2;
+        //    }
+        //}
+
+        // TODO: Working on this method to use a CrudWithMappingCreator
+
         // ViewManager from IDoCRUD<T>, optionally using an IMapperRequest and propBagMapper factory.     
         // Build a ViewManager whose source is a PropItem of Kind = Prop and whose type is IDoCrud<T>
         // A DataSourceProvider, a CollectionViewSource and a ListCollectionView are created.
         // The DataSourceProvider not only raises the standard DataChanged event, but also raises
         // EventHandler<EventArgs> ItemEndEdit events whenever an item in the list raises it's ItemEndEdit event.
-        public IManageCViews GetOrAddViewManager<TDal, TSource, TDestination> 
+        public IManageCViews GetOrAddViewManager_New<TDal, TSource, TDestination>
         (
             IPropBag propBag,   // The client of this service.
             PropIdType propId,  // Identifies the PropItem that implements IDoCrud<TSource>
             IPropData propData, // The PropStore management wrapper for IProp<TSource> which holds the value of the 'IDoCrud<T>' data access layer.
             IMapperRequest mr,  // The information necessary to create a IPropBagMapper<TSource, TDestination>
-            PropBagMapperCreator propBagMapperCreator,  // A delegate that can be called to create a IPropBagMapper<TSource, TDestination> given a IMapperRequest.
+                                //PropBagMapperCreator propBagMapperCreator,  // A delegate that can be called to create a IPropBagMapper<TSource, TDestination> given a IMapperRequest.
+
+            CrudWithMappingCreator<TDal, TSource, TDestination> crudWithMappingCreator,
             CViewProviderCreator viewBuilder,            // Method that can be used to create a IProvideAView from a DataSourceProvider.
             BetterLCVCreatorDelegate<TDestination> betterLCVCreatorDelegate
         )
@@ -1316,76 +1431,25 @@ namespace DRM.TypeSafePropertyBag
             IManageCViews result = _genViewManagers.GetOrAdd(propId, CViewGenManagerFactory);
             return result;
 
+            // Factory Method used to create the Collection View Manager.
             IManageCViews CViewGenManagerFactory(PropIdType propId2)
             {
                 IProvideADataSourceProvider dSProviderProvider;
-                if (propData.TypedProp.PropTemplate.PropKind == PropKindEnum.Prop)
-                {
-                    IWatchAPropItem<TDal> propItemWatcher = new PropItemWatcher<TDal>(this as PSAccessServiceInternalInterface, propId2);
-
-                    IPropBagMapper<TSource, TDestination> mapper = propBagMapperCreator(mr) as IPropBagMapper<TSource, TDestination>;
-
-                    CrudWithMapping<TDal, TSource, TDestination> mappedDal = 
-                        new CrudWithMapping<TDal, TSource, TDestination>(propItemWatcher, mapper);
-
-                    dSProviderProvider = new ClrMappedDSP<TDestination>(mappedDal, betterLCVCreatorDelegate);
-                }
-                else
+                if (!(propData.TypedProp.PropTemplate.PropKind == PropKindEnum.Prop))
                 {
                     throw new InvalidOperationException("This version of GetOrAddViewManager requires a PropItem of kind = Prop and PropertyType = IDoCRUD<T>.");
                     //dSProviderProvider = new PBCollectionDSP_Provider(propId, propData.TypedProp.PropKind, this);
                 }
 
-                IManageCViews result2 = new ViewManager(dSProviderProvider, viewBuilder);
-                return result2;
-            }
-        }
+                // Create a LocalWatcher on the property that hosts the DataSource.
+                IWatchAPropItem<TDal> propItemWatcher = new PropItemWatcher<TDal>(this as PSAccessServiceInternalInterface, propId2);
 
-        // ViewManager from IDoCRUD<T>, optionally using an IPropBagMapper.     
-        // Build a ViewManager whose source is a PropItem of Kind = Prop and whose type is IDoCrud<T>
-        // A DataSourceProvider, a CollectionViewSource and a ListCollectionView are created.
-        // The DataSourceProvider not only raises the standard DataChanged event, but also raises
-        // EventHandler<EventArgs> ItemEndEdit events whenever an item in the list raises it's ItemEndEdit event.
-        public IManageCViews GetOrAddViewManager<TDal, TSource, TDestination>
-        (
-            IPropBag propBag,   // The client of this service.
-            PropIdType propId,  // Identifies the PropItem that implements IDoCrud<TSource>
-            IPropData propData, // The PropStore management wrapper for IProp<TSource> which holds the value of the 'IDoCrud<T>' data access layer.
-            IPropBagMapper<TSource, TDestination> mapper,   // The AutoMapper used to translate from source data to view items.
-            CViewProviderCreator viewBuilder,                // Method that can be used to create a IProvideAView from a DataSourceProvider.
-            BetterLCVCreatorDelegate<TDestination> betterLCVCreatorDelegate
-        )
-            where TDal : class, IDoCRUD<TSource>
-            where TSource : class
-            where TDestination : INotifyItemEndEdit
-        {
-            CheckObjectRef(propBag);
+                IDoCrudWithMapping<TDestination> mappedDal = crudWithMappingCreator(propItemWatcher);
 
-            // There is one View Manager for each PropItem. The View Manager for a particular PropItem is created on first use.
-            if (_genViewManagers == null)
-                _genViewManagers = new ViewManagerCollection();
+                // Create a IDoCRUD<TDestination> using the IDoCRUD<TSource and the ICollectionView delegate.
+                dSProviderProvider = new ClrMappedDSP<TDestination>(mappedDal, betterLCVCreatorDelegate);
 
-            IManageCViews result = _genViewManagers.GetOrAdd(propId, CViewGenManagerFactory);
-            return result;
-
-            IManageCViews CViewGenManagerFactory(PropIdType propId2)
-            {
-                IProvideADataSourceProvider dSProviderProvider;
-                if (propData.TypedProp.PropTemplate.PropKind == PropKindEnum.Prop)
-                {
-                    IWatchAPropItem<TDal> propItemWatcher = new PropItemWatcher<TDal>(this as PSAccessServiceInternalInterface, propId2);
-
-                    CrudWithMapping<TDal, TSource, TDestination> mappedDal = 
-                        new CrudWithMapping<TDal, TSource, TDestination>(propItemWatcher, mapper);
-
-                    dSProviderProvider = new ClrMappedDSP<TDestination>(mappedDal, betterLCVCreatorDelegate);
-                }
-                else
-                {
-                    throw new InvalidOperationException("This version of GetOrAddViewManager requires a PropItem of kind = Prop and PropertyType = IDoCRUD<T>.");
-                    //dSProviderProvider = new PBCollectionDSP_Provider(propId2, propData.TypedProp.PropKind, this);
-                }
-
+                // Create a new ViewManager using the (mapped) DataSourceProvider and the IProvideAView delegate.
                 IManageCViews result2 = new ViewManager(dSProviderProvider, viewBuilder);
                 return result2;
             }
@@ -1395,11 +1459,27 @@ namespace DRM.TypeSafePropertyBag
 
         #region Collection ViewManager Provider Support
 
+        //public IProvideATypedCViewManager<EndEditWrapper<TDestination>, TDestination> GetOrAddViewManagerProviderTyped<TDal, TSource, TDestination>
+        //(
+        //    IPropBag propBag,   // The client of this service.
+        //    IViewManagerProviderKey viewManagerProviderKey,
+        //    PropBagMapperCreator propBagMapperCreator,  // A delegate that can be called to create a IPropBagMapper<TSource, TDestination> given a IMapperRequest.
+        //    CViewProviderCreator viewBuilder            // Method that can be used to create a IProvideAView from a DataSourceProvider.
+        //)
+        //    where TDal : class, IDoCRUD<TSource>
+        //    where TSource : class
+        //    where TDestination : INotifyItemEndEdit
+        //{
+        //    //ObjectIdType objectId = GetAndCheckObjectRef(propBag);
+
+        //    throw new NotImplementedException("GetOrAddViewManagerProvider has not been implemented.");
+        //}
+
         public IProvideATypedCViewManager<EndEditWrapper<TDestination>, TDestination> GetOrAddViewManagerProviderTyped<TDal, TSource, TDestination>
         (
             IPropBag propBag,   // The client of this service.
             IViewManagerProviderKey viewManagerProviderKey,
-            PropBagMapperCreator propBagMapperCreator,  // A delegate that can be called to create a IPropBagMapper<TSource, TDestination> given a IMapperRequest.
+            CrudWithMappingCreator<TDal, TSource, TDestination> crudWithMappingCreator,
             CViewProviderCreator viewBuilder            // Method that can be used to create a IProvideAView from a DataSourceProvider.
         )
             where TDal : class, IDoCRUD<TSource>
@@ -1411,11 +1491,39 @@ namespace DRM.TypeSafePropertyBag
             throw new NotImplementedException("GetOrAddViewManagerProvider has not been implemented.");
         }
 
-        public IProvideACViewManager GetOrAddViewManagerProvider<TDal, TSource, TDestination>
+        //public IProvideACViewManager GetOrAddViewManagerProvider<TDal, TSource, TDestination>
+        //(
+        //    IPropBag propBag,   // The client of this service.
+        //    IViewManagerProviderKey viewManagerProviderKey,
+        //    PropBagMapperCreator propBagMapperCreator,  // A delegate that can be called to create a IPropBagMapper<TSource, TDestination> given a IMapperRequest.
+        //    CViewProviderCreator viewBuilder            // Method that can be used to create a IProvideAView from a DataSourceProvider.
+        //)
+        //    where TDal : class, IDoCRUD<TSource>
+        //    where TSource : class
+        //    where TDestination : INotifyItemEndEdit
+        //{
+        //    CheckObjectRef(propBag);
+
+        //    if (_genViewManagerProviders == null)
+        //        _genViewManagerProviders = new ViewManagerProviderCollection();
+
+        //    IProvideACViewManager result = _genViewManagerProviders.GetOrAdd(viewManagerProviderKey, CViewGenManagerProviderFactory);
+        //    return result;
+
+        //    IProvideACViewManager CViewGenManagerProviderFactory(IViewManagerProviderKey key)
+        //    {
+        //        CViewManagerBinder<TDal, TSource, TDestination> result2 =
+        //            new CViewManagerBinder<TDal, TSource, TDestination>(this, key, propBagMapperCreator, viewBuilder);
+
+        //        return result2;
+        //    }
+        //}
+
+        public IProvideACViewManager GetOrAddViewManagerProvider_New<TDal, TSource, TDestination>
         (
             IPropBag propBag,   // The client of this service.
             IViewManagerProviderKey viewManagerProviderKey,
-            PropBagMapperCreator propBagMapperCreator,  // A delegate that can be called to create a IPropBagMapper<TSource, TDestination> given a IMapperRequest.
+            CrudWithMappingCreator<TDal, TSource, TDestination> crudWithMappingCreator,
             CViewProviderCreator viewBuilder            // Method that can be used to create a IProvideAView from a DataSourceProvider.
         )
             where TDal : class, IDoCRUD<TSource>
@@ -1430,10 +1538,11 @@ namespace DRM.TypeSafePropertyBag
             IProvideACViewManager result = _genViewManagerProviders.GetOrAdd(viewManagerProviderKey, CViewGenManagerProviderFactory);
             return result;
 
+            // Factory Method to produce a Collection View Manager Provider (un typed.)
             IProvideACViewManager CViewGenManagerProviderFactory(IViewManagerProviderKey key)
             {
-                CViewManagerBinder<TDal, TSource, TDestination> result2 =
-                    new CViewManagerBinder<TDal, TSource, TDestination>(this, key, propBagMapperCreator, viewBuilder);
+                CViewManagerBinder_New<TDal, TSource, TDestination> result2 =
+                    new CViewManagerBinder_New<TDal, TSource, TDestination>(this, key, crudWithMappingCreator, viewBuilder);
 
                 return result2;
             }

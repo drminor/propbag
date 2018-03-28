@@ -1,5 +1,4 @@
-﻿using DRM.PropBag.AutoMapperSupport;
-using DRM.TypeSafePropertyBag;
+﻿using DRM.TypeSafePropertyBag;
 using System;
 using System.Collections.Generic;
 
@@ -23,7 +22,10 @@ namespace DRM.PropBag.ViewModelTools
         private readonly PropModelCacheInterface _propModelCache;
         private readonly ViewModelActivatorInterface _viewModelActivator;
         private readonly PSAccessServiceCreatorInterface _storeAccessCreator;
-        private readonly IProvideAutoMappers _autoMapperService;
+
+        //private readonly IProvideAutoMappers _autoMapperService;
+        private object _autoMapperService;
+
         private readonly ICreateWrapperTypes _wrapperTypeCreator;
 
         #endregion
@@ -84,12 +86,12 @@ namespace DRM.PropBag.ViewModelTools
             PropModelCacheInterface propModelCache,
             ViewModelActivatorInterface viewModelActivator,
             PSAccessServiceCreatorInterface storeAccessCreator,
-            IProvideAutoMappers autoMapperService,
+            object autoMapperService,
             ICreateWrapperTypes wrapperTypeCreator
             )
             : this(propModelCache, viewModelActivator, storeAccessCreator)
         {
-            _autoMapperService = autoMapperService ?? throw new ArgumentNullException(nameof(autoMapperService));
+            _autoMapperService = autoMapperService; // ?? throw new ArgumentNullException(nameof(autoMapperService));
             _wrapperTypeCreator = wrapperTypeCreator ?? throw new ArgumentNullException(nameof(wrapperTypeCreator));
         }
 
@@ -97,13 +99,15 @@ namespace DRM.PropBag.ViewModelTools
 
         #region Public Properties
 
-        public bool HasAutoMapperServices => _autoMapperService != null;
+        //public bool HasAutoMapperServices => _autoMapperService != null;
 
         public PropModelCacheInterface PropModelCache => _propModelCache;
         public PSAccessServiceCreatorInterface PropStoreAccessServiceCreator => _storeAccessCreator;
         public ViewModelActivatorInterface ViewModelActivator => _viewModelActivator;
-        public IProvideAutoMappers AutoMapperService => _autoMapperService;
         public ICreateWrapperTypes WrapperTypeCreator => _wrapperTypeCreator;
+
+        public object AutoMapperService { get; set; }
+
 
         #endregion
 
@@ -160,6 +164,7 @@ namespace DRM.PropBag.ViewModelTools
                 typeToCreate: propModel.TypeToWrap,
                 propModel: propModel,
                 viewModelFactory: this,
+                ams: _autoMapperService,
                 pfOverride: pfOverride,
                 fcnOverride: fcnOverride
                 );

@@ -16,7 +16,7 @@ namespace PropBagLib.Tests
     {
 
         public PerformanceModel(PropModelType propModel, ViewModelFactoryInterface viewModelFactory) :
-            base(propModel, viewModelFactory)
+            base(propModel, viewModelFactory, null)
         {
 
         }

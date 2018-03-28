@@ -54,7 +54,9 @@ namespace PropBagLib.Tests.AutoMapperSupport
                     PropModelCacheInterface propModelCache = GetPropModelCache_V1();
                     ViewModelActivatorInterface vmActivator = new SimpleViewModelActivator();
                     ICreateWrapperTypes simpleWrapperTypeCreator = GetWrapperTypeCreator_V1();
-                    IProvideAutoMappers autoMapperService = GetAutoMapperSetup_V1();
+
+                    //IAutoMapperService autoMapperService = GetAutoMapperSetup_V1();
+                    IAutoMapperService autoMapperService = null;
 
                     _viewModelFactory = new SimpleViewModelFactory(propModelCache, vmActivator, StoreAccessCreator, autoMapperService, simpleWrapperTypeCreator);
                 }
@@ -62,23 +64,11 @@ namespace PropBagLib.Tests.AutoMapperSupport
             }
         }
 
-        public IProvideAutoMappers InitializeAutoMappers(PSAccessServiceCreatorInterface storeAccessCreator)
+        public IAutoMapperService InitializeAutoMappers(ViewModelFactoryInterface viewModelFactory)
         {
-            ViewModelActivatorInterface vmActivator = new SimpleViewModelActivator();
-
-            ICreateWrapperTypes simpleWrapperTypeCreator = GetWrapperTypeCreator_V1();
-
-            IPropBagMapperBuilderProvider propBagMapperBuilderProvider
-                = new SimplePropBagMapperBuilderProvider
-                (
-                    //viewModelActivator: vmActivator,
-                    //storeAccessCreator: storeAccessCreator,
-                    //wrapperTypesCreator: simpleWrapperTypeCreator
-                );
-
             IMapTypeDefinitionProvider mapTypeDefinitionProvider = new SimpleMapTypeDefinitionProvider();
-
-            ICachePropBagMappers mappersCachingService = new SimplePropBagMapperCache();
+            ICachePropBagMappers mappersCachingService = new SimplePropBagMapperCache(viewModelFactory);
+            IPropBagMapperBuilderProvider propBagMapperBuilderProvider = new SimplePropBagMapperBuilderProvider();
 
             SimpleAutoMapperProvider autoMapperProvider = new SimpleAutoMapperProvider
                 (
@@ -157,12 +147,14 @@ namespace PropBagLib.Tests.AutoMapperSupport
             }
         }
 
-        IProvideAutoMappers _autoMapperProvider_V1;
-        public IProvideAutoMappers GetAutoMapperSetup_V1() 
+        IAutoMapperService _autoMapperProvider_V1;
+        public IAutoMapperService GetAutoMapperSetup_V1() 
         {
             if(_autoMapperProvider_V1 == null)
             {
-                _autoMapperProvider_V1 = new AutoMapperHelpers().InitializeAutoMappers(storeAccessCreator: StoreAccessCreator);
+                ViewModelFactoryInterface viewModelFactory = ViewModelFactory;
+                _autoMapperProvider_V1 = new AutoMapperHelpers().InitializeAutoMappers(viewModelFactory);
+                ViewModelFactory.AutoMapperService = _autoMapperProvider_V1;
             }
             return _autoMapperProvider_V1;
         }

@@ -1,4 +1,5 @@
 ﻿using DRM.PropBag;
+using DRM.PropBag.AutoMapperSupport;
 using DRM.TypeSafePropertyBag;
 using DRM.TypeSafePropertyBag.DataAccessSupport;
 using System;
@@ -125,34 +126,34 @@ namespace DRM.PropBagWPF
         #region Generic property creators
 
         // DataSource Provider
-        public override IProvideADataSourceProvider GetDSProviderProvider(PropIdType propId, PropKindEnum propKind, 
-            object iDoCrudDataSource, PSAccessServiceInterface propStoreAccessService, IMapperRequest mr)
-        {
-            //IProvideAutoMappers autoMapperProvider = this._autoMapperProvider ?? throw new InvalidOperationException
-            //    ($"This WPFPropFactory instance cannot create IProvideDataSourceProvider instances: No AutoMapperSupport was supplied upon construction.");
+        //public override IProvideADataSourceProvider GetDSProviderProvider(PropIdType propId, PropKindEnum propKind, 
+        //    object iDoCrudDataSource, PSAccessServiceInterface propStoreAccessService, IMapperRequest mr)
+        //{
+        //    //IProvideAutoMappers autoMapperProvider = this._autoMapperProvider ?? throw new InvalidOperationException
+        //    //    ($"This WPFPropFactory instance cannot create IProvideDataSourceProvider instances: No AutoMapperSupport was supplied upon construction.");
 
-            //IPropBagMapperKeyGen realMapperRequest = autoMapperProvider.RegisterMapperRequest(mr.PropModel, mr.SourceType, mr.ConfigPackageName);
-            //IPropBagMapperGen genMapper = autoMapperProvider.GetMapper(realMapperRequest);
+        //    //IPropBagMapperKeyGen realMapperRequest = autoMapperProvider.RegisterMapperRequest(mr.PropModel, mr.SourceType, mr.ConfigPackageName);
+        //    //IPropBagMapperGen genMapper = autoMapperProvider.GetMapper(realMapperRequest);
 
-            IPropBagMapperGen genMapper = null; // GetPropBagMapper(mr, out IPropBagMapperKeyGen mapperRequest);
+        //    IPropBagMapperGen genMapper = null; // GetPropBagMapper(mr, out IPropBagMapperKeyGen mapperRequest);
 
-            Type sourceType = mr.SourceType; // mapperRequest.SourceTypeGenDef.TargetType;
-            Type destinationType = mr.PropModel.TargetType; // mapperRequest.DestinationTypeGenDef.TargetType;
+        //    Type sourceType = mr.SourceType; // mapperRequest.SourceTypeGenDef.TargetType;
+        //    Type destinationType = mr.PropModel.TargetType; // mapperRequest.DestinationTypeGenDef.TargetType;
 
-            CreateMappedDSPProviderDelegate dspProviderCreator = GetDSPProviderCreator(sourceType, destinationType.BaseType.BaseType);
+        //    CreateMappedDSPProviderDelegate dspProviderCreator = GetDSPProviderCreator(sourceType, destinationType.BaseType.BaseType);
 
-            IProvideADataSourceProvider result = dspProviderCreator
-                (
-                this,
-                propId,
-                propKind,
-                iDoCrudDataSource,
-                propStoreAccessService,
-                genMapper
-                );
+        //    IProvideADataSourceProvider result = dspProviderCreator
+        //        (
+        //        this,
+        //        propId,
+        //        propKind,
+        //        iDoCrudDataSource,
+        //        propStoreAccessService,
+        //        genMapper
+        //        );
 
-            return result;
-        }
+        //    return result;
+        //}
 
         #endregion
     }

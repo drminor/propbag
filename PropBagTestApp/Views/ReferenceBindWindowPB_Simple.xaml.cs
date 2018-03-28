@@ -155,7 +155,7 @@ namespace PropBagTestApp.View
                     ViewModelFactoryInterface viewModelFactory = null; // Fix Me.
 
                     IPropBagMapperKey<MyModel, ReferenceBindViewModelPB> mapperRequest
-                        = PropStoreServicesForThisApp.AutoMapperProvider.SubmitMapperRequest<MyModel, ReferenceBindViewModelPB>
+                        = PropStoreServicesForThisApp.AutoMapperService.SubmitMapperRequest<MyModel, ReferenceBindViewModelPB>
                         (
                         propModel,
                         viewModelFactory,
@@ -163,7 +163,7 @@ namespace PropBagTestApp.View
                         configPackageName: "emit_proxy"
                         );
 
-                    _mapper = PropStoreServicesForThisApp.AutoMapperProvider.GetMapper(mapperRequest);
+                    _mapper = PropStoreServicesForThisApp.AutoMapperService.GetMapper(mapperRequest);
                 }
                 return _mapper;
             }

@@ -4,9 +4,6 @@ using System.Globalization;
 using System.Windows.Data;
 using System.Windows.Markup;
 
-using DRM.PropBag.Caches;
-using DRM.PropBag;
-
 namespace DRM.PropBagControlsWPF
 {
     public class PropValueConverter : MarkupExtension, IValueConverter

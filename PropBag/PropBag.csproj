@@ -41,11 +41,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Caches\SimpleDelegateCacheProvider.cs" />
-    <Compile Include="Caches\StaticTConverter.cs" />
     <Compile Include="ClassGenerator\PropDefRaw.cs" />
     <Compile Include="ClassGenerator\PropGenerator.cs" />
     <Compile Include="ClassGenerator\PropModelExtensions.cs" />
     <Compile Include="ClassGenerator\T4Support.cs" />
+    <Compile Include="CrudWithMapping.cs" />
     <Compile Include="PBTest.cs" />
     <Compile Include="Props\CProp.cs" />
     <Compile Include="Props\PropExternStore.cs" />
@@ -66,7 +66,6 @@
     <Compile Include="ControlModel\PropItemModel.cs" />
     <Compile Include="ControlModel\PropModel.cs" />
     <Compile Include="ExtValDelegates.cs" />
-    <Compile Include="Factories\PropFactoryValueConverter.cs" />
     <None Include="PropBag.CustomTypeDescriptor.cs" />
     <None Include="Documentation\TypeInfoField.md" />
     <None Include="Unused\PropBagDyn.cs" />
@@ -90,10 +89,6 @@
       <Project>{f0903390-0628-434c-8d27-80fb263955b6}</Project>
       <Name>AutoMapperSupportInterfaces</Name>
     </ProjectReference>
-    <ProjectReference Include="..\AutoMapperSupport\AutoMapperSupport.csproj">
-      <Project>{10cf1c6f-f877-49a8-8678-6947f55e6920}</Project>
-      <Name>AutoMapperSupport</Name>
-    </ProjectReference>
     <ProjectReference Include="..\ObjectSizeDiagnostics\ObjectSizeDiagnostics.csproj">
       <Project>{9B18F82D-3ED9-49E0-9EE3-CFBFC3AF9D9C}</Project>
       <Name>ObjectSizeDiagnostics</Name>
@@ -101,10 +96,6 @@
     <ProjectReference Include="..\TypeSafePropertyBag\TypeSafePropertyBag.csproj">
       <Project>{bbb1e311-374e-4c91-a313-1667d83767db}</Project>
       <Name>TypeSafePropertyBag</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\TypeWrapper\TypeWrapper.csproj">
-      <Project>{7C45D001-90D6-4521-82AE-41F9492F8ECE}</Project>
-      <Name>TypeWrapper</Name>
     </ProjectReference>
     <ProjectReference Include="..\ViewModelTools\ViewModelTools.csproj">
       <Project>{A149EAD5-06A9-47C8-8853-1D329D553EA7}</Project>

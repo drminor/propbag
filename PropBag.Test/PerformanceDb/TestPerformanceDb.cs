@@ -21,7 +21,7 @@ namespace PropBagLib.Tests.PerformanceDb
     {
         const int NUMBER_OF_PEOPLE = 1000;
 
-        IProvideAutoMappers _amp;
+        IAutoMapperService _amp;
         AutoMapperHelpers _ourHelper;
         IPropFactory _propFactory_V1;
         PropModelCacheInterface _propModelCache;
@@ -275,6 +275,9 @@ namespace PropBagLib.Tests.PerformanceDb
         public void Z_BindParent()
         {
             AutoMapperHelpers ourHelper = new AutoMapperHelpers();
+
+            IAutoMapperService autoMapperService = ourHelper.GetAutoMapperSetup_V1();
+
             IPropFactory propFactory_V1 = ourHelper.GetNewPropFactory_V1();
             ICreateWrapperTypes wrapperTypeCreator = ourHelper.GetWrapperTypeCreator_V1();
 
@@ -295,7 +298,7 @@ namespace PropBagLib.Tests.PerformanceDb
             PropModelType propModel5 = pmHelpers.GetPropModelForModel5Dest(propFactory_V1, _propModelCache);
 
 
-            DestinationModel5 testChildVM = new DestinationModel5(propModel: propModel5, viewModelFactory: viewModelFactory, propFactory: propFactory_V1, fullClassName: "PropBagLib.Tests.PerformanceDb.DestinationModel5");
+            DestinationModel5 testChildVM = new DestinationModel5(pm: propModel5, viewModelFactory: viewModelFactory, autoMapperService: autoMapperService, propFactory: propFactory_V1, fullClassName: "PropBagLib.Tests.PerformanceDb.DestinationModel5");
 
             Business b = new Business();
             testChildVM.SetIt(b, "Business");
@@ -308,7 +311,7 @@ namespace PropBagLib.Tests.PerformanceDb
 
             // Set up MainVM (Using Model 6)
             PropModelType propModel6 = pmHelpers.GetPropModelForModel6Dest(propFactory_V1, _propModelCache);
-            DestinationModel6 testMainVM = new DestinationModel6(propModel6, viewModelFactory, propFactory_V1, null);
+            DestinationModel6 testMainVM = new DestinationModel6(propModel6, viewModelFactory, autoMapperService, propFactory_V1, null);
 
             Business b2 = new Business();
             testMainVM.SetIt(b2, "Business");

@@ -37,10 +37,10 @@ namespace DRM.TypeSafePropertyBag
 
     #region DataSource Methods
 
-    public delegate IProvideADataSourceProvider CreateMappedDSPProviderDelegate(IPropFactory propFactory,
-        PropIdType propId, PropKindEnum propKind, object genDal, 
-        PSAccessServiceInterface propStoreAccessService, IPropBagMapperGen genMapper /* , out CrudWithMapping<TSource, TDestination> mappedDs*/);
-        //where TSource : class where TDestination : INotifyItemEndEdit;
+    //public delegate IProvideADataSourceProvider CreateMappedDSPProviderDelegate(IPropFactory propFactory,
+    //    PropIdType propId, PropKindEnum propKind, object genDal, 
+    //    PSAccessServiceInterface propStoreAccessService, IPropBagMapperGen genMapper /* , out CrudWithMapping<TSource, TDestination> mappedDs*/);
+    //    //where TSource : class where TDestination : INotifyItemEndEdit;
 
     #endregion
 

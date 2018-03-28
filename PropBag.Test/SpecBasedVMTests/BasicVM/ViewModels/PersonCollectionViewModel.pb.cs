@@ -1,4 +1,5 @@
 ﻿using DRM.PropBag;
+using DRM.PropBag.AutoMapperSupport;
 using DRM.PropBag.ViewModelTools;
 using DRM.TypeSafePropertyBag;
 using DRM.TypeSafePropertyBag.TypeDescriptors;
@@ -19,8 +20,9 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM.ViewModels
             TypeDescriptor.AddProvider(_typeDescriptionProvider, typeof(PersonCollectionViewModel));
         }
 
-        public PersonCollectionViewModel(PropModelType pm, ViewModelFactoryInterface viewModelFactory, IPropFactory propFactory, string fullClassName)
-            : base(pm, viewModelFactory, propFactory, fullClassName)
+        public PersonCollectionViewModel(PropModelType pm, ViewModelFactoryInterface viewModelFactory,
+            IAutoMapperService autoMapperService, IPropFactory propFactory, string fullClassName)
+            : base(pm, viewModelFactory, autoMapperService, propFactory, fullClassName)
         {
             System.Diagnostics.Debug.WriteLine("Constructing PersonCollectionViewModel -- with PropModel.");
 

@@ -2,7 +2,6 @@
 
 namespace DRM.TypeSafePropertyBag
 {
-    using PropNameType = String;
     using PropModelType = IPropModel<String>;
 
     public interface IMapperRequest : IEquatable<IMapperRequest>, ICloneable

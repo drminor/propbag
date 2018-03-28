@@ -9,7 +9,7 @@ namespace DRM.PropBag.AutoMapperSupport
     using PropModelType = IPropModel<String>;
     using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
 
-    public class SimpleAutoMapperProvider : IProvideAutoMappers, IDisposable
+    public class SimpleAutoMapperProvider : IAutoMapperService, IDisposable
     {
         #region Private Members
 
@@ -43,13 +43,13 @@ namespace DRM.PropBag.AutoMapperSupport
 
         #region Public Methods
 
-        public IPropBagMapperKeyGen SubmitMapperRequest(PropModelType propModel, object viewModelFactory, Type sourceType, string configPackageName)
+        public IPropBagMapperKeyGen SubmitMapperRequest(PropModelType propModel, object viewModelFactory, Type sourceType, string configPackageName, IAutoMapperService autoMapperService)
         {
             Type typeToCreate = propModel.NewEmittedType ?? propModel.TypeToWrap;
 
             MapperRequestSubmitterDelegate mapperRequestSubmitter = GetTheMapperRequestSubmitterDelegate(sourceType, typeToCreate);
 
-            IPropBagMapperKeyGen result = mapperRequestSubmitter(propModel, viewModelFactory, typeToCreate, configPackageName);
+            IPropBagMapperKeyGen result = mapperRequestSubmitter(propModel, viewModelFactory, typeToCreate, configPackageName, autoMapperService);
 
             return result;
         }
@@ -82,7 +82,7 @@ namespace DRM.PropBag.AutoMapperSupport
 
             // Create a MapperBuilder for this request.
             IBuildPropBagMapper<TSource, TDestination> propBagMapperBuilder
-                = _mapperBuilderProvider.GetPropBagMapperBuilder<TSource, TDestination>(propBagMapperConfigurationBuilder/*, this*/);
+                = _mapperBuilderProvider.GetPropBagMapperBuilder<TSource, TDestination>(propBagMapperConfigurationBuilder, this);
 
             // Lookup the package name and return a mapping configuration.
             IConfigureAMapper<TSource, TDestination> mappingConfiguration
@@ -171,8 +171,12 @@ namespace DRM.PropBag.AutoMapperSupport
         }
 
         // TODO: See if we can use ViewModelFactoryInterface instead of object in the delegate: MapperRequestSubmitterDelegate
+        //internal delegate IPropBagMapperKeyGen MapperRequestSubmitterDelegate
+        //    (PropModelType propModel, object viewModelFactory, Type targetType, string configPackageName);
+
         internal delegate IPropBagMapperKeyGen MapperRequestSubmitterDelegate
-            (PropModelType propModel, object viewModelFactory, Type targetType, string configPackageName);
+            (PropModelType propModel, object viewModelFactory, Type targetType, string configPackageName, IAutoMapperService autoMapperService);
+
 
         /// <summary>
         /// Used to create Delegates when the type of the value is not known at run time.
@@ -192,31 +196,58 @@ namespace DRM.PropBag.AutoMapperSupport
                     LazyThreadSafetyMode.PublicationOnly);
             }
 
+            //// The Typed Method
+            //static IPropBagMapperKey<TSource, TDestination> SubmitMapperRequest<TSource, TDestination>
+            //    (PropModelType propModel, object viewModelFactory, Type targetType, string configPackageName) where TDestination : class, IPropBag
+            //{
+            //    if (viewModelFactory is ViewModelFactoryInterface vmFactory)
+            //    {
+            //        //IProvideAutoMappers autoMapperService = vmFactory.AutoMapperService;
+
+            //        IPropBagMapperKey<TSource, TDestination> result
+            //            = SubmitMapperRequest<TSource, TDestination>
+            //            (
+            //                propModel: propModel,
+            //                viewModelFactory: viewModelFactory,
+            //                targetType: targetType,
+            //                configPackageName: configPackageName //,
+            //                //configStarterForThisRequest: null,
+            //                //propFactory: null
+            //                );
+
+            //        return result;
+            //    }
+            //    else
+            //    {
+            //        throw new InvalidOperationException($"The {nameof(viewModelFactory)} argument does not implement the interface {nameof(ViewModelFactoryInterface)}.");
+            //    }
+            //}
+
+
             // The Typed Method
             static IPropBagMapperKey<TSource, TDestination> SubmitMapperRequest<TSource, TDestination>
-                (PropModelType propModel, object viewModelFactory, Type targetType, string configPackageName) where TDestination : class, IPropBag
+                (
+                PropModelType propModel,
+                object viewModelFactory,
+                Type targetType,
+                string configPackageName,
+                IAutoMapperService autoMapperProvider
+                )
+                where TDestination : class, IPropBag
             {
-                if (viewModelFactory is ViewModelFactoryInterface vmFactory)
-                {
-                    IProvideAutoMappers autoMapperService = vmFactory.AutoMapperService;
 
-                    IPropBagMapperKey<TSource, TDestination> result
-                        = autoMapperService.SubmitMapperRequest<TSource, TDestination>
-                        (
-                            propModel: propModel,
-                            viewModelFactory: viewModelFactory,
-                            typeToWrap: targetType,
-                            configPackageName: configPackageName,
-                            configStarterForThisRequest: null,
-                            propFactory: null
-                            );
+                IPropBagMapperKey<TSource, TDestination> result
+                    = autoMapperProvider.SubmitMapperRequest<TSource, TDestination>
+                    (
+                        propModel: propModel,
+                        viewModelFactory: viewModelFactory,
+                        typeToWrap: targetType,
+                        configPackageName: configPackageName,
+                        configStarterForThisRequest: null,
+                        propFactory: null
+                        );
 
-                    return result;
-                }
-                else
-                {
-                    throw new InvalidOperationException($"The {nameof(viewModelFactory)} argument does not implement the interface {nameof(ViewModelFactoryInterface)}.");
-                }
+                return result;
             }
         }
 

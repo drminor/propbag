@@ -35,10 +35,10 @@ namespace DRM.PropBag.AutoMapperSupport
 
         //ViewModelActivatorInterface _vmActivator;
         //PSAccessServiceCreatorInterface _storeAccessCreator;
-        //IProvideAutoMappers _autoMapperService;
         //ICreateWrapperTypes _wrapperTypeCreator;
 
         ViewModelFactoryInterface _viewModelFactory;
+        IAutoMapperService _autoMapperService;
 
         private readonly bool _requiresWrappperTypeEmitServices;
         private readonly TDestination _destPropBagTemplate;
@@ -90,7 +90,8 @@ namespace DRM.PropBag.AutoMapperSupport
             (
             IPropBagMapperKey<TSource, TDestination> mapRequest,
             IMapper mapper,
-            ViewModelFactoryInterface viewModelFactory
+            ViewModelFactoryInterface viewModelFactory,
+            IAutoMapperService autoMapperService
             )
         {
             SourceType = mapRequest.SourceTypeDef.TargetType;
@@ -103,6 +104,7 @@ namespace DRM.PropBag.AutoMapperSupport
             Mapper = mapper;
 
             _viewModelFactory = viewModelFactory;
+            _autoMapperService = autoMapperService;
 
             SupportsMapFrom = true;
 
@@ -132,7 +134,7 @@ namespace DRM.PropBag.AutoMapperSupport
             //_destPropBagTemplate = GetNewDestination(tType, PropModel, _storeAccessCreator, _autoMapperService, PropFactory, fullClassName: null);
 
             //TDestination result = GetNewDestination(DestinationType, PropModel, _storeAccessCreator, _autoMapperService, _wrapperTypeCreator, PropFactory, fullClassName: null);
-            TDestination result = GetNewDestination(DestinationType, PropModel, _viewModelFactory, PropFactory, fullClassName: null);
+            TDestination result = GetNewDestination(DestinationType, PropModel, _viewModelFactory, _autoMapperService, PropFactory, fullClassName: null);
 
 
             if (TestCreateDest(targetType, result))
@@ -281,7 +283,7 @@ namespace DRM.PropBag.AutoMapperSupport
             else
             {
                 //result = GetNewDestination(RunTimeType, PropModel, _storeAccessCreator, _autoMapperService, _wrapperTypeCreator, PropFactory, fullClassName: null);
-                result = GetNewDestination(RunTimeType, PropModel, _viewModelFactory, PropFactory, fullClassName: null);
+                result = GetNewDestination(RunTimeType, PropModel, _viewModelFactory, _autoMapperService, PropFactory, fullClassName: null);
 
                 _mct.MeasureAndReport("GetNewDestination(PropModel, ...", "AstractPropBagMapper");
             }
@@ -292,14 +294,16 @@ namespace DRM.PropBag.AutoMapperSupport
         // Regular Instantiation using the PropModel. 
         //private TDestination GetNewDestination(Type destinationOrProxyType, PropModelType propModel, PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService, ICreateWrapperTypes wrapperTypeCreator, IPropFactory propFactory, string fullClassName)
 
-        private TDestination GetNewDestination(Type destinationOrProxyType, PropModelType propModel, ViewModelFactoryInterface viewModelFactory, IPropFactory propFactory, string fullClassName)
+        private TDestination GetNewDestination(Type destinationOrProxyType, PropModelType propModel,
+            ViewModelFactoryInterface viewModelFactory, IAutoMapperService autoMapperService,
+            IPropFactory propFactory, string fullClassName)
         {
             ViewModelActivatorInterface vmActivator = viewModelFactory.ViewModelActivator;
             try
             {
                 //var newViewModel =  _vmActivator.GetNewViewModel(destinationOrProxyType, propModel, viewModelFactory, propFactory, fullClassName);
 
-                var newViewModel = vmActivator.GetNewViewModel(destinationOrProxyType, propModel, viewModelFactory, propFactory, fullClassName);
+                var newViewModel = vmActivator.GetNewViewModel(destinationOrProxyType, propModel, viewModelFactory, autoMapperService, propFactory, fullClassName);
 
                 return newViewModel as TDestination;
             }

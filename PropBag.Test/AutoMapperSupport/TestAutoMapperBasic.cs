@@ -13,7 +13,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
     [TestFixture]
     public class TestAutoMapperBasic
     {
-        IProvideAutoMappers _amp;
+        IAutoMapperService _amp;
         IPropFactory _propFactory_V1;
         ICreateWrapperTypes _wrapperTypeCreator_V1;
         ViewModelFactoryInterface _viewModelFactory;
@@ -85,7 +85,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
 
             propModel.NewEmittedType = et;
 
-            IPropBagMapperKeyGen mapperKey = _amp.SubmitMapperRequest(mapperRequest.PropModel, _viewModelFactory,  mapperRequest.SourceType, mapperRequest.ConfigPackageName);
+            IPropBagMapperKeyGen mapperKey = _amp.SubmitMapperRequest(mapperRequest.PropModel, _viewModelFactory,  mapperRequest.SourceType, mapperRequest.ConfigPackageName, _amp);
 
             // Get the AutoMapper mapping function associated with the mapper request already submitted.
             IPropBagMapperGen genMapper = _amp.GetMapper(mapperKey);

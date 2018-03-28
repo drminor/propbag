@@ -126,17 +126,9 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\PropBag\PropBag.csproj">
-      <Project>{7387b893-fbdc-4b9c-ac9e-0b56388b46c1}</Project>
-      <Name>PropBag</Name>
-    </ProjectReference>
     <ProjectReference Include="..\TypeSafePropertyBag\TypeSafePropertyBag.csproj">
       <Project>{BBB1E311-374E-4C91-A313-1667D83767DB}</Project>
       <Name>TypeSafePropertyBag</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ViewModelTools\ViewModelTools.csproj">
-      <Project>{a149ead5-06a9-47c8-8853-1d329d553ea7}</Project>
-      <Name>ViewModelTools</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

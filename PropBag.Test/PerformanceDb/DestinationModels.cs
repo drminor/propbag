@@ -1,4 +1,5 @@
 ﻿using DRM.PropBag;
+using DRM.PropBag.AutoMapperSupport;
 using DRM.PropBag.ViewModelTools;
 using DRM.TypeSafePropertyBag;
 using PropBagLib.Tests.BusinessModel;
@@ -24,9 +25,9 @@ namespace PropBagLib.Tests.PerformanceDb
         }
 
 
-        public DestinationModel1(PropModelType propModel, ViewModelFactoryInterface viewModelFactory,
-                IPropFactory propFactory, string fullClassName)
-            : base(propModel, viewModelFactory, propFactory, fullClassName)
+        public DestinationModel1(PropModelType pm, ViewModelFactoryInterface viewModelFactory,
+            IAutoMapperService autoMapperService, IPropFactory propFactory, string fullClassName)
+            : base(pm, viewModelFactory, autoMapperService, propFactory, fullClassName)
         {
             TryOpenPropSet();
             AddProp<int>("NewAfterFixedProp", null, null, 0);
@@ -55,8 +56,9 @@ namespace PropBagLib.Tests.PerformanceDb
 
 
 
-        public DestinationModel5(PropModelType propModel, ViewModelFactoryInterface viewModelFactory, IPropFactory propFactory, string fullClassName)
-            : base(propModel, viewModelFactory, propFactory, fullClassName)
+        public DestinationModel5(PropModelType pm, ViewModelFactoryInterface viewModelFactory,
+            IAutoMapperService autoMapperService, IPropFactory propFactory, string fullClassName)
+            : base(pm, viewModelFactory, autoMapperService, propFactory, fullClassName)
         {
         }
 
@@ -75,9 +77,9 @@ namespace PropBagLib.Tests.PerformanceDb
         //    AddProp<Guid>("ProductId", null, false, null, null, Guid.NewGuid());
         //}
 
-        public DestinationModel6(PropModelType propModel, ViewModelFactoryInterface viewModelFactory,
-                IPropFactory propFactory, string fullClassName)
-            : base(propModel, viewModelFactory, propFactory, fullClassName)
+        public DestinationModel6(PropModelType pm, ViewModelFactoryInterface viewModelFactory,
+            IAutoMapperService autoMapperService, IPropFactory propFactory, string fullClassName)
+            : base(pm, viewModelFactory, autoMapperService, propFactory, fullClassName)
         {
         }
 

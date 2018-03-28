@@ -1,5 +1,5 @@
 ﻿using DRM.PropBag.AutoMapperSupport;
-using DRM.PropBag.TypeWrapper;
+//using DRM.PropBag.TypeWrapper;
 using DRM.PropBag.ViewModelTools;
 using DRM.TypeSafePropertyBag;
 using System;
@@ -57,23 +57,23 @@ namespace DRM.PropBag
         }
 
         // Using a PropModel
-        public PubPropBag(PropModel pm, ViewModelFactoryInterface viewModelFactory)
-            : this(pm, viewModelFactory, propFactory: null, fullClassName: null)
+        public PubPropBag(PropModel pm, ViewModelFactoryInterface viewModelFactory, IAutoMapperService autoMapperService)
+            : this(pm, viewModelFactory, autoMapperService, propFactory: null, fullClassName: null)
         {
         }
 
-        public PubPropBag(PropModel pm, ViewModelFactoryInterface viewModelFactory, IPropFactory propFactory)
-            : this(pm, viewModelFactory, propFactory, fullClassName: null)
+        public PubPropBag(PropModel pm, ViewModelFactoryInterface viewModelFactory, IAutoMapperService autoMapperService, IPropFactory propFactory)
+            : this(pm, viewModelFactory, autoMapperService, propFactory, fullClassName: null)
         {
         }
 
-        public PubPropBag(PropModel pm, ViewModelFactoryInterface viewModelFactory, string fullClassName)
-            : this(pm, viewModelFactory, propFactory: null, fullClassName: fullClassName)
+        public PubPropBag(PropModel pm, ViewModelFactoryInterface viewModelFactory, IAutoMapperService autoMapperService, string fullClassName)
+            : this(pm, viewModelFactory, autoMapperService, propFactory: null, fullClassName: fullClassName)
         {
         }
 
-        public PubPropBag(PropModel pm, ViewModelFactoryInterface viewModelFactory, IPropFactory propFactory, string fullClassName)
-            : base(pm, viewModelFactory, propFactory, fullClassName)
+        public PubPropBag(PropModel pm, ViewModelFactoryInterface viewModelFactory, IAutoMapperService autoMapperService, IPropFactory propFactory, string fullClassName)
+            : base(pm, viewModelFactory, autoMapperService, propFactory, fullClassName)
         {
         }
 

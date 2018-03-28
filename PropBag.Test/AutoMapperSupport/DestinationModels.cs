@@ -1,4 +1,5 @@
 ﻿using DRM.PropBag;
+using DRM.PropBag.AutoMapperSupport;
 using DRM.PropBag.ViewModelTools;
 using DRM.TypeSafePropertyBag;
 using System;
@@ -23,8 +24,9 @@ namespace PropBagLib.Tests.AutoMapperSupport
 
 
 
-        public DestinationModel3(PropModelType pm, ViewModelFactoryInterface viewModelFactory, IPropFactory propFactory, string fullClassName)
-            : base(pm, viewModelFactory, propFactory, fullClassName)
+        public DestinationModel3(PropModelType pm, ViewModelFactoryInterface viewModelFactory,
+            IAutoMapperService autoMapperService, IPropFactory propFactory, string fullClassName)
+            : base(pm, viewModelFactory, autoMapperService, propFactory, fullClassName)
         {
             //AddProp<Guid>("ProductId", null, null, Guid.NewGuid());
             //AddProp<int>("Amount", null, null, initialValue: 0);

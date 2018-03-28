@@ -9,39 +9,20 @@ namespace DRM.PropBag.AutoMapperSupport
 
     public class SimplePropBagMapper<TSource, TDestination> : AbstractPropBagMapper<TSource, TDestination> where TDestination : class, IPropBag
     {
-        //public SimplePropBagMapper
-        //    (
-        //        IPropBagMapperKey<TSource, TDestination> mapRequest,
-        //        IMapper mapper,
-        //        ViewModelActivatorInterface vmActivator,
-        //        PSAccessServiceCreatorInterface storeAccessCreator,
-        //        IProvideAutoMappers autoMapperService,
-        //        ICreateWrapperTypes wrapperTypeCreator
-        //    )
-        //    : base
-        //    (
-        //        mapRequest,
-        //        mapper,
-        //        vmActivator,
-        //        storeAccessCreator,
-        //        autoMapperService,
-        //        wrapperTypeCreator
-        //    )
-        //{
-        //}
-
         public SimplePropBagMapper
         (
             IPropBagMapperKey<TSource, TDestination> mapRequest,
             IMapper mapper,
-            ViewModelFactoryInterface viewModelFactory
+            ViewModelFactoryInterface viewModelFactory,
+            IAutoMapperService autoMapperService
         )
         : base
-        (
+            (
             mapRequest,
             mapper,
-            viewModelFactory
-        )
+            viewModelFactory,
+            autoMapperService
+            )
         {
         }
 

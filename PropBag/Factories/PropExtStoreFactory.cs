@@ -81,10 +81,10 @@ namespace DRM.PropBag
 
         #region DataSource Creation
 
-        public override ClrMappedDSP<TDestination> CreateMappedDS<TSource, TDestination>(uint propId, PropKindEnum propKind, IDoCRUD<TSource> dal, IPropStoreAccessService<uint, string> storeAccesor, IPropBagMapper<TSource, TDestination> mapper)
-        {
-            throw new NotImplementedException();
-        }
+        //public override ClrMappedDSP<TDestination> CreateMappedDS<TSource, TDestination>(uint propId, PropKindEnum propKind, IDoCRUD<TSource> dal, IPropStoreAccessService<uint, string> storeAccesor, IPropBagMapper<TSource, TDestination> mapper)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
         #endregion
 

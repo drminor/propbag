@@ -1,5 +1,4 @@
-﻿using DRM.PropBag.AutoMapperSupport;
-using DRM.TypeSafePropertyBag;
+﻿using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBag.ViewModelTools
 {
@@ -11,12 +10,14 @@ namespace DRM.PropBag.ViewModelTools
 
         object GetNewViewModel(IPropModel<L2TRaw> propModel, IPropFactory pfOverride, string fcnOverride);
 
-        bool HasAutoMapperServices { get; }
+        //bool HasAutoMapperServices { get; }
 
         ICachePropModels<L2TRaw> PropModelCache { get; }
         IPropStoreAccessServiceCreator<L2T, L2TRaw> PropStoreAccessServiceCreator { get; }
         IViewModelActivator<L2T, L2TRaw> ViewModelActivator { get; }
-        IProvideAutoMappers AutoMapperService { get; }
         ICreateWrapperTypes WrapperTypeCreator { get; }
+
+        object AutoMapperService { get; set; }
+
     }
 }

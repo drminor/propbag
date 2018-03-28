@@ -93,30 +93,30 @@ namespace DRM.TypeSafePropertyBag
 
         #region DataSource creators
 
-        // TODO: replace IPropBagMapperGen with a IMapperRequest.
-        // So that the Mapper gets created only if it's needed.
-        private static IProvideADataSourceProvider CreateMappedDSPProvider<TSource, TDestination>
-            (
-            IPropFactory propFactory,
-            PropIdType propId,
-            PropKindEnum propKind,
-            object genDal, // presumably, the value of the propItem.
-            PSAccessServiceInterface propStoreAccessService,
-            IPropBagMapperGen genMapper  //, out CrudWithMapping<TSource, TDestination> mappedDs
-            ) where TSource : class where TDestination : INotifyItemEndEdit
-        {
-            // Cast the genDal object back to it's original type.
-            IDoCRUD<TSource> dal = (IDoCRUD<TSource>)genDal;
+        //// TODO: replace IPropBagMapperGen with a IMapperRequest.
+        //// So that the Mapper gets created only if it's needed.
+        //private static IProvideADataSourceProvider CreateMappedDSPProvider<TSource, TDestination>
+        //    (
+        //    IPropFactory propFactory,
+        //    PropIdType propId,
+        //    PropKindEnum propKind,
+        //    object genDal, // presumably, the value of the propItem.
+        //    PSAccessServiceInterface propStoreAccessService,
+        //    IPropBagMapperGen genMapper  //, out CrudWithMapping<TSource, TDestination> mappedDs
+        //    ) where TSource : class where TDestination : INotifyItemEndEdit
+        //{
+        //    // Cast the genDal object back to it's original type.
+        //    IDoCRUD<TSource> dal = (IDoCRUD<TSource>)genDal;
 
-            // Cast the genMapper to it's typed-counterpart (All genMappers also implement IPropBagMapper<TS, TD>
-            IPropBagMapper<TSource, TDestination> mapper = (IPropBagMapper<TSource, TDestination>)genMapper;
+        //    // Cast the genMapper to it's typed-counterpart (All genMappers also implement IPropBagMapper<TS, TD>
+        //    IPropBagMapper<TSource, TDestination> mapper = (IPropBagMapper<TSource, TDestination>)genMapper;
 
-            // Now that we have performed the type casts, we can call the propFactory using "compile-time" type parameters.
-            ClrMappedDSP<TDestination> mappedDSP = propFactory.CreateMappedDS<TSource, TDestination>(propId, propKind, dal, propStoreAccessService, mapper);
+        //    // Now that we have performed the type casts, we can call the propFactory using "compile-time" type parameters.
+        //    ClrMappedDSP<TDestination> mappedDSP = propFactory.CreateMappedDS<TSource, TDestination>(propId, propKind, dal, propStoreAccessService, mapper);
 
-            //IProvideADataSourceProvider result = mappedDSP;
-            return mappedDSP; // result;
-        }
+        //    //IProvideADataSourceProvider result = mappedDSP;
+        //    return mappedDSP; // result;
+        //}
 
         //private static ClrMappedDSP<TDestination> CreateMappedDS_Typed<TSource, TDestination>
         //    (

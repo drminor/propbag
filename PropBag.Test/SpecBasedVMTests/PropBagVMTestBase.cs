@@ -149,7 +149,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests
         protected ViewModelFactoryInterface ViewModelFactory { get; set; }
 
         protected ICreateWrapperTypes WrapperTypeCreator { get; set; }
-        protected IProvideAutoMappers AutoMapperProvider { get; set; }
+        protected IAutoMapperService AutoMapperService { get; set; }
 
         protected PropModelCacheInterface PropModelCache { get; set; }
 
@@ -201,10 +201,6 @@ namespace PropBagLib.Tests.SpecBasedVMTests
             WrapperTypeCreator = GetSimpleWrapperTypeCreator();
             _mct.MeasureAndReport("After GetSimpleWrapperTypeCreator");
 
-            // AutoMapper Services
-            AutoMapperProvider = GetAutoMapperProvider(WrapperTypeCreator, vmActivator, PropStoreAccessService_Factory);
-            _mct.MeasureAndReport("After GetAutoMapperProvider");
-
             IConvertValues valueConverter = new PropFactoryValueConverter(typeDescBasedTConverterCache);
             ResolveTypeDelegate typeResolver = null;
 
@@ -228,9 +224,14 @@ namespace PropBagLib.Tests.SpecBasedVMTests
             PropModelCache = new SimplePropModelCache(remotePropModelProvider);
 
             // Create the ViewModelFactory
-            ViewModelFactory = new SimpleViewModelFactory(PropModelCache, vmActivator, PropStoreAccessService_Factory, AutoMapperProvider, WrapperTypeCreator);
+            ViewModelFactory = new SimpleViewModelFactory(PropModelCache, vmActivator, PropStoreAccessService_Factory, null, WrapperTypeCreator);
             _mct.MeasureAndReport("After new ViewModelFactory");
 
+            // AutoMapper Services
+            AutoMapperService = GetAutoMapperProvider(ViewModelFactory);
+            _mct.MeasureAndReport("After GetAutoMapperProvider");
+
+            ViewModelFactory.AutoMapperService = AutoMapperService;
 
             //// Default PropFactory
             //DefaultPropFactory = BuildDefaultPropFactory
@@ -255,11 +256,11 @@ namespace PropBagLib.Tests.SpecBasedVMTests
                 }
 
                 // AutoMapper Provider
-                if (AutoMapperProvider is IDisposable disable2)
+                if (AutoMapperService is IDisposable disable2)
                 {
                     disable2.Dispose();
                 }
-                AutoMapperProvider = null;
+                AutoMapperService = null;
 
                 // PropModel Provider
                 if (PropModelCache is IDisposable disable3)
@@ -387,11 +388,9 @@ namespace PropBagLib.Tests.SpecBasedVMTests
         //    return resources;
         //}
 
-        protected virtual IProvideAutoMappers GetAutoMapperProvider
+        protected virtual IAutoMapperService GetAutoMapperProvider
             (
-            ICreateWrapperTypes wrapperTypesCreator,
-            ViewModelActivatorInterface viewModelActivator,
-            PSAccessServiceCreatorInterface psAccessServiceFactory
+            ViewModelFactoryInterface viewModelFactory
             )
         {
             // TODO: Expose the creation of wrapperTypeCreator (ICreateWrapperTypes).
@@ -404,7 +403,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests
 
             IMapTypeDefinitionProvider mapTypeDefinitionProvider = new SimpleMapTypeDefinitionProvider();
 
-            ICachePropBagMappers mappersCachingService = new SimplePropBagMapperCache();
+            ICachePropBagMappers mappersCachingService = new SimplePropBagMapperCache(viewModelFactory);
 
             SimpleAutoMapperProvider autoMapperProvider = new SimpleAutoMapperProvider
                 (

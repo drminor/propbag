@@ -5,8 +5,11 @@ namespace DRM.PropBag.AutoMapperSupport
 {
     using PropModelType = IPropModel<String>;
 
+    public delegate IPropBagMapperGen PropBagMapperCreator(IMapperRequest mr);
+
+
     // TODO: Change Register<xxx> to Submit<xxx>. (We are submitting a notice that we will need this at some point -- remember: GetMapper creates a mapper for all pending requests on first access to any request.)
-    public interface IProvideAutoMappers : ICachePropBagMappers
+    public interface IAutoMapperService : ICachePropBagMappers
     {
         IPropBagMapperKey<TSource, TDestination> SubmitMapperRequest<TSource, TDestination>
             (
@@ -25,7 +28,8 @@ namespace DRM.PropBag.AutoMapperSupport
             PropModelType propModel,
             object viewModelFactory,
             Type sourceType,
-            string configPackageName
+            string configPackageName,
+            IAutoMapperService autoMapperService
             );
 
 

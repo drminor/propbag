@@ -278,7 +278,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
 
             BaseMemTracker.CompactMeasureAndReport("After get mainWindow_PropModel.", "CreateVM_CreateMainWindowVM_Run1");
 
-            mainWindowViewModel = new MainWindowViewModel(mainWindowPropModel, ViewModelFactory);
+            mainWindowViewModel = new MainWindowViewModel(mainWindowPropModel, ViewModelFactory, AutoMapperService);
             BaseMemTracker.CompactMeasureAndReport("After create the mainWindowViewModel.", "CreateVM_CreateMainWindowVM_Run1");
 
             //mainWindowViewModel.Dispose();
@@ -351,13 +351,13 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
             BaseMemTracker.CompactMeasureAndReport("After get mainWindow_PropModel.", "CreateVM_CreateMainWindowVM_Run2");
 
             // To see how much memory is not being cleaned up after one is created and then disposed.
-            mainWindowViewModel = new MainWindowViewModel(mainWindowPropModel, ViewModelFactory);
+            mainWindowViewModel = new MainWindowViewModel(mainWindowPropModel, ViewModelFactory, AutoMapperService);
             BaseMemTracker.CompactMeasureAndReport("After create the first mainWindowViewModel.", "CreateVM_CreateMainWindowVM_Run2");
 
             mainWindowViewModel.Dispose();
             BaseMemTracker.CompactMeasureAndReport("After dispose of the first mainWindowViewModel.", "CreateVM_CreateMainWindowVM_Run2");
 
-            mainWindowViewModel = new MainWindowViewModel(mainWindowPropModel, ViewModelFactory);
+            mainWindowViewModel = new MainWindowViewModel(mainWindowPropModel, ViewModelFactory, AutoMapperService);
             BaseMemTracker.CompactMeasureAndReport("After create the second mainWindowViewModel.", "CreateVM_CreateMainWindowVM_Run2");
 
             // And here.
@@ -429,7 +429,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM
 
 
             ViewModelFactoryInterface viewModelFactory = ViewModelFactory;
-            mainWindowViewModel = new MainWindowViewModel(mainWindowPropModel, viewModelFactory);
+            mainWindowViewModel = new MainWindowViewModel(mainWindowPropModel, viewModelFactory, AutoMapperService);
             BaseMemTracker.CompactMeasureAndReport("After create the mainWindowViewModel.", "CreateVM_CreateMainWindowVM_Run1");
 
             mainWindowViewModel.Dispose();

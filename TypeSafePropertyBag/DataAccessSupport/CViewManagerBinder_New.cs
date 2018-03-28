@@ -10,7 +10,7 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
 
     using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
 
-    public class CViewManagerBinder<TDal, TSource, TDestination> : IProvideACViewManager /*IProvideATypedCViewManager<EndEditWrapper<TDestination>, TDestination>*/, IDisposable
+    public class CViewManagerBinder_New<TDal, TSource, TDestination> : IProvideACViewManager /*IProvideATypedCViewManager<EndEditWrapper<TDestination>, TDestination>*/, IDisposable
             where TDal : class, IDoCRUD<TSource>
             where TSource : class
             where TDestination : INotifyItemEndEdit
@@ -21,7 +21,9 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
 
         readonly LocalWatcher<TDal> _localWatcher;
 
-        PropBagMapperCreator _propBagMapperCreator; // A delegate that can be called to create a IPropBagMapper<TSource, TDestination> given a IMapperRequest.
+        //PropBagMapperCreator _propBagMapperCreator; // A delegate that can be called to create a IPropBagMapper<TSource, TDestination> given a IMapperRequest.
+
+        CrudWithMappingCreator<TDal, TSource, TDestination> _crudWithMappingCreator;
         CViewProviderCreator _viewBuilder;          // Method that can be used to create a IProvideAView from a DataSourceProvider.
 
         // The Binding Source's PropBag
@@ -37,16 +39,19 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
 
         #region Constructor
 
-        public CViewManagerBinder
+        public CViewManagerBinder_New
             (
             PSAccessServiceInterface propStoreAccessService,
             IViewManagerProviderKey viewManagerProviderKey,
-            PropBagMapperCreator propBagMapperCreator,  // A delegate that can be called to create a IPropBagMapper<TSource, TDestination> given a IMapperRequest.
+            CrudWithMappingCreator<TDal, TSource, TDestination> crudWithMappingCreator,
             CViewProviderCreator viewBuilder            // Method that can be used to create a IProvideAView from a DataSourceProvider.
             )
         {
             ViewManagerProviderKey = viewManagerProviderKey;
-            _propBagMapperCreator = propBagMapperCreator;
+
+            //_propBagMapperCreator = propBagMapperCreator;
+            _crudWithMappingCreator = crudWithMappingCreator;
+
             _viewBuilder = viewBuilder;
 
             // Create a instance of our nested, internal class that reponds to Updates to the property store Nodes.
@@ -85,7 +90,7 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
             {
                 if (_propItemParent_wr != null && _propItemParent_wr.TryGetTarget(out IPropBag propBagHost))
                 {
-                    IManageCViews result = propBagHost.GetOrAddViewManager<TDal, TSource, TDestination>
+                    IManageCViews result = propBagHost.GetOrAddViewManager_New<TDal, TSource, TDestination>
                         (
                         propertyName: PropertyName,
                         propertyType: null, // We only know that this property implements IDoCRUD<TSource>
@@ -173,11 +178,11 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
 
         internal class PropStoreNodeUpdateReceiver : IReceivePropStoreNodeUpdates_PropBag<TDal>
         {
-            private readonly CViewManagerBinder<TDal, TSource, TDestination> _localBinder;
+            private readonly CViewManagerBinder_New<TDal, TSource, TDestination> _localBinder;
 
             #region Constructor
 
-            public PropStoreNodeUpdateReceiver(CViewManagerBinder<TDal, TSource, TDestination> localBinder)
+            public PropStoreNodeUpdateReceiver(CViewManagerBinder_New<TDal, TSource, TDestination> localBinder)
             {
                 _localBinder = localBinder;
             }

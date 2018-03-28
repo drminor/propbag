@@ -8,16 +8,17 @@ using System.Collections.ObjectModel;
 
 namespace DRM.TypeSafePropertyBag.DataAccessSupport
 {
-    // This class takes an IEnumerable<T> of CLR objects that implement the IEditableObject interface
-    // comming from a IDoCRUD data source...
+    // This class takes an IDoCRUD<T> data source
+    //      (which supports 'getting' an IEnumerable<T> of CLR objects that implement the IEditableObject interface)
     // and produces an ObservableCollection<T> that raises the ItemEndEdit event.
 
-    //public class ClrMappedDSP<T> : DataSourceProvider, IMappedDSP<T> where T : INotifyItemEndEdit
     public class ClrMappedDSP<T> : DataSourceProvider, IDisposable, INotifyItemEndEdit, IProvideADataSourceProvider, IHaveACrudWithMapping<T> where T : INotifyItemEndEdit
     {
         #region Private Properties
 
-        IDoCRUD<T> _dataAccessLayer;
+        IDoCRUD<T> _dataAccessLayerSimple;
+        IDoCrudWithMapping<T> _dataAccessLayerWithMapping;
+        
         BetterLCVCreatorDelegate<T> _betterLCVCreatorDelegate;
 
         #endregion
@@ -26,13 +27,36 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
 
         #region Constructor
 
-        public ClrMappedDSP(IDoCRUD<T> dataAccessLayer, BetterLCVCreatorDelegate<T> betterLCVCreatorDelegate/*, bool isAsynchronous*/)
+        // TODO: Get rid of this constructor.
+        public ClrMappedDSP(IDoCRUD<T> dataAccessLayerSimple, BetterLCVCreatorDelegate<T> betterLCVCreatorDelegate/*, bool isAsynchronous*/)
         {
-            _dataAccessLayer = dataAccessLayer;
+            _dataAccessLayerSimple = dataAccessLayerSimple;
+
+            if (dataAccessLayerSimple is IDoCrudWithMapping<T> dalWithMapping)
+            {
+                _dataAccessLayerWithMapping = dalWithMapping;
+
+            }
             _betterLCVCreatorDelegate = betterLCVCreatorDelegate;
             //IsAsynchronous = isAsynchronous;
 
-            _dataAccessLayer.DataSourceChanged += _dataAccessLayer_DataSourceChanged;
+            dataAccessLayerSimple.DataSourceChanged += _dataAccessLayer_DataSourceChanged;
+        }
+
+        public ClrMappedDSP(IDoCrudWithMapping<T> dataAccessLayer, BetterLCVCreatorDelegate<T> betterLCVCreatorDelegate/*, bool isAsynchronous*/)
+        {
+            _dataAccessLayerWithMapping = dataAccessLayer;
+            _betterLCVCreatorDelegate = betterLCVCreatorDelegate;
+            //IsAsynchronous = isAsynchronous;
+
+            _dataAccessLayerSimple = dataAccessLayer as IDoCRUD<T>;
+            if(_dataAccessLayerSimple == null)
+            {
+                throw new InvalidOperationException($"The dataAccessLayer ({nameof(IDoCrudWithMapping<T>)}) does not implement {nameof(IDoCRUD<T>)}.");
+            }
+
+            // TODO: Consider adding a DataSourceChanged event declaration on the IDoCrudWithMapping<T> interface.
+            _dataAccessLayerSimple.DataSourceChanged += _dataAccessLayer_DataSourceChanged;
         }
 
         private void _dataAccessLayer_DataSourceChanged(object sender, EventArgs e)
@@ -51,27 +75,42 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
 
         #region Public Properties
 
-        public bool TryGetTypedData(out IList data)
+        public bool IsAsynchronous => false;
+
+        #endregion
+
+        #region IHaveACrudWithMapping Implementation
+
+        public IDoCrudWithMapping<T> CrudWithMapping => _dataAccessLayerWithMapping as IDoCrudWithMapping<T>;
+
+        #endregion
+
+        #region IProvideADataSourceProvider Implementation
+
+        public DataSourceProvider DataSourceProvider => this;
+
+        public Type CollectionItemRunTimeType => typeof(T);
+
+        public bool IsCollection() => true;
+        public bool IsReadOnly() => false;
+
+        #endregion
+
+        #region ISupplyNewItem Implementation
+
+        public bool TryGetNewItem(out object newItem)
         {
-            if (TryGetDataFromProp(_dataAccessLayer, out IEnumerable<T> rawData))
+            if (CrudWithMapping != null)
             {
-                data = (IList)rawData;
+                newItem = CrudWithMapping.GetNewItem();
                 return true;
             }
             else
             {
-                data = null;
+                newItem = null;
                 return false;
             }
         }
-
-        public bool IsAsynchronous => false;
-
-        public DataSourceProvider DataSourceProvider => this;
-
-        public IDoCrudWithMapping<T> CrudWithMapping => _dataAccessLayer as IDoCrudWithMapping<T>;
-
-        public Type CollectionItemRunTimeType => typeof(T);
 
         #endregion
 
@@ -104,7 +143,7 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
 
             try
             {
-                if (TryGetDataFromProp(_dataAccessLayer, out IEnumerable<T> rawData))
+                if (TryGetDataFromProp(_dataAccessLayerSimple, out IEnumerable<T> rawData))
                 {
                     EndEditWrapper<T> wrappedData = new EndEditWrapper<T>(rawData, _betterLCVCreatorDelegate);
 
@@ -152,7 +191,7 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
 
             if(sender is T selectedItem)
             {
-                _dataAccessLayer.Update(selectedItem);
+                _dataAccessLayerSimple.Update(selectedItem);
             }
             else
             {
@@ -171,7 +210,7 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
                 {
                     if(item != null)
                     {
-                        _dataAccessLayer.Delete(item);
+                        _dataAccessLayerSimple.Delete(item);
                     }
                 }
             }
@@ -199,23 +238,6 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
         {
             data = dataAccessLayer.Get(200);
             return true;
-        }
-
-        public bool IsCollection() => true;
-        public bool IsReadOnly() => false;
-
-        public bool TryGetNewItem(out object newItem)
-        {
-            if(CrudWithMapping != null)
-            {
-                newItem = CrudWithMapping.GetNewItem();
-                return true;
-            }
-            else
-            {
-                newItem = null;
-                return false;
-            }
         }
 
         //// This is simply so that we can see when these events occur for diagnostic reasons.
@@ -264,12 +286,12 @@ namespace DRM.TypeSafePropertyBag.DataAccessSupport
                     // Dispose managed state (managed objects).
                     DisposeOldData(this.Data);
 
-                    _dataAccessLayer.Dispose();
+                    _dataAccessLayerSimple.Dispose();
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
                 // Set large fields to null.
-                _dataAccessLayer = null;
+                _dataAccessLayerWithMapping = null;
 
                 disposedValue = true;
             }

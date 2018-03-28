@@ -102,8 +102,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Documentation\Roles and Dependencies.md" />
-    <None Include="Documentation\ServiceNotes.md" />
     <Compile Include="PropBagMappingStrategyEnum.cs" />
   </ItemGroup>
   <ItemGroup />

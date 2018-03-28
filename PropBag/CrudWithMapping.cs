@@ -1,10 +1,13 @@
-﻿using System;
+﻿using DRM.PropBag.AutoMapperSupport;
+using DRM.TypeSafePropertyBag;
+using DRM.TypeSafePropertyBag.DataAccessSupport;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
-namespace DRM.TypeSafePropertyBag.DataAccessSupport
-{
+namespace DRM.PropBag
+{ 
     public class CrudWithMapping<TDal, TSource, TDestination> : IDoCRUD<TDestination>, IDisposable, IDoCrudWithMapping<TDestination> where TDal: class, IDoCRUD<TSource> where TSource : class
     {
         #region Private Members

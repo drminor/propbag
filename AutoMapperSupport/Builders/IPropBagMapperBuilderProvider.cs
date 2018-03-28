@@ -4,16 +4,11 @@ namespace DRM.PropBag.AutoMapperSupport
 {
     public interface IPropBagMapperBuilderProvider
     {
-        //ICreateWrapperTypes WrapperTypeCreator { get; }
-
         IBuildPropBagMapper<TSource, TDestination> GetPropBagMapperBuilder<TSource, TDestination>
             (
-            IBuildMapperConfigurations<TSource, TDestination> mapperConfigurationBuilder
-            //,
-            //IProvideAutoMappers autoMapperService
+            IBuildMapperConfigurations<TSource, TDestination> mapperConfigurationBuilder,
+            IAutoMapperService autoMapperService
             )
             where TDestination : class, IPropBag;
-
-        //long ClearTypeCache();
     }
 }

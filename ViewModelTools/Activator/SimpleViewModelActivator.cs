@@ -1,6 +1,4 @@
-﻿using DRM.PropBag.AutoMapperSupport;
-using DRM.PropBag.TypeWrapper;
-using DRM.TypeSafePropertyBag;
+﻿using DRM.TypeSafePropertyBag;
 using System;
 
 namespace DRM.PropBag.ViewModelTools
@@ -66,17 +64,17 @@ namespace DRM.PropBag.ViewModelTools
 
         // BaseType + PropModel (BaseType known at compile time.)
         public object GetNewViewModel<BT>(PropModelType propModel, ViewModelFactoryInterface viewModelFactory,
-            IPropFactory propFactory = null, string fcnOverride = null) where BT : class, IPropBag
+            object ams, IPropFactory propFactory = null, string fcnOverride = null) where BT : class, IPropBag
         {
-            object result = GetNewViewModel(typeof(BT), propModel, viewModelFactory, propFactory, fcnOverride);
+            object result = GetNewViewModel(typeof(BT), propModel, viewModelFactory, ams, propFactory, fcnOverride);
             return result;
         }
 
 
         public object GetNewViewModel(Type typeToCreate, PropModelType propModel, ViewModelFactoryInterface viewModelFactory,
-            IPropFactory propFactory, string fcnOverride)
+             object ams, IPropFactory propFactory, string fcnOverride)
         {
-            object[] parameters = new object[] { propModel, viewModelFactory, propFactory, fcnOverride };
+            object[] parameters = new object[] { propModel, viewModelFactory, ams, propFactory, fcnOverride };
 
             //BindingFlags bFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.CreateInstance;
             //object result = Activator.CreateInstance(typeToCreate, bFlags, binder: null, args: parameters, culture: null);

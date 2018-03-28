@@ -15,7 +15,6 @@ namespace DRM.TypeSafePropertyBag
 
     // TODO: Move CollectionView Manager support to a project separate from TypeSafePropertyBag
     // so that the TypeSafePropertyBag does not depend on AutoMapper.
-    public delegate IPropBagMapperGen PropBagMapperCreator(IMapperRequest mr);
 
     internal delegate IManageCViews CViewManagerCreator
         (
@@ -44,12 +43,24 @@ namespace DRM.TypeSafePropertyBag
         where CT : class, IReadOnlyList<T>, IList<T>, IEnumerable<T>,
             IList, IEnumerable, INotifyCollectionChanged, INotifyPropertyChanged;
 
-    //// TODO: AM_cleanup -- Move out of TSPB assembly.
-    //public delegate IDoCRUD<TDestination> CrudWrapperCreator<TSource, TDestination>
-    //    (
-    //    IDoCRUD<TSource> dataAccessLayer,
-    //    IPropBagMapper<TSource, TDestination> mapper
-    //    )
-    //    where TSource : class;
+    public delegate IDoCrudWithMapping<TDestination> CrudWithMappingCreator<TDal, TSource, TDestination>
+        (
+        IWatchAPropItem<TDal> propItemWatcher
+        )
+        where TDal : class, IDoCRUD<TSource>
+        where TSource : class
+        where TDestination : INotifyItemEndEdit;
+
+    // Instead of the next two commented sections...
+    // Have the caller supply us with a Function that 
+    //      1. Takes a propItemWatcher
+    // &    2. Returns IDoCrudWithMapping<Item Type>
+
+        //public delegate IDoCRUD<TDestination> CrudWrapperCreator<TSource, TDestination>
+        //    (
+        //    IDoCRUD<TSource> dataAccessLayer,
+        //    IPropBagMapper<TSource, TDestination> mapper
+        //    )
+        //    where TSource : class;
 
 }

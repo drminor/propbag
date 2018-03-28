@@ -1,4 +1,5 @@
 ﻿using DRM.PropBag;
+using DRM.PropBag.AutoMapperSupport;
 using DRM.PropBag.ViewModelTools;
 using DRM.TypeSafePropertyBag;
 using DRM.TypeSafePropertyBag.TypeDescriptors;
@@ -21,8 +22,8 @@ namespace MVVM_Sample1.ViewModel
         }
 
         public PersonVM(PropModelType pm, ViewModelFactoryInterface viewModelFactory,
-            IPropFactory propFactory, string fullClassName)
-            : base(pm, viewModelFactory, propFactory, fullClassName)
+            IAutoMapperService autoMapperService, IPropFactory propFactory, string fullClassName)
+            : base(pm, viewModelFactory, autoMapperService, propFactory, fullClassName)
         {
             //PropBagTypeDescriptionProvider<PersonVM> tdp = RegisterTypeDescriptorProvider<PersonVM>(pm);
             //pm.TypeDescriptionProvider = tdp;

@@ -14,7 +14,7 @@ namespace PropBagTestApp.Infra
 
             _dataGetter = new Lazy<object>
             (
-                () => PropStoreServicesForThisApp.ViewModelHelper.GetNewViewModel(GetResourceKeyWithSuffix(ResourceKey, PropStoreServicesForThisApp.ConfigPackageNameSuffix)),
+                () => PropStoreServicesForThisApp.ViewModelFactory.GetNewViewModel(GetResourceKeyWithSuffix(ResourceKey, PropStoreServicesForThisApp.ConfigPackageNameSuffix)),
                     LazyThreadSafetyMode.PublicationOnly
             );
         }

@@ -45,8 +45,10 @@
     <Compile Include="ICreateMappingExpressions.cs" />
     <Compile Include="IHaveAMapperConfigurationStep.cs" />
     <Compile Include="IMapTypeDefinition.cs" />
+    <Compile Include="IPropBagMapper.cs" />
     <Compile Include="IPropBagMapperKey.cs" />
-    <Compile Include="IProvideAutoMappers.cs" />
+    <Compile Include="IPropBagMapperKeyGen.cs" />
+    <Compile Include="IAutoMapperService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -57,6 +59,10 @@
     <ProjectReference Include="..\TypeSafePropertyBag\TypeSafePropertyBag.csproj">
       <Project>{bbb1e311-374e-4c91-a313-1667d83767db}</Project>
       <Name>TypeSafePropertyBag</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ViewModelTools\ViewModelTools.csproj">
+      <Project>{a149ead5-06a9-47c8-8853-1d329d553ea7}</Project>
+      <Name>ViewModelTools</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

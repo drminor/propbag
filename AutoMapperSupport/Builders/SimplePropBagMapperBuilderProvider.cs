@@ -41,21 +41,16 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public IBuildPropBagMapper<TSource, TDestination> GetPropBagMapperBuilder<TSource, TDestination>
             (
-            IBuildMapperConfigurations<TSource, TDestination> mapperConfigurationBuilder
-            //,
-            //IProvideAutoMappers autoMapperService
+            IBuildMapperConfigurations<TSource, TDestination> mapperConfigurationBuilder,
+            IAutoMapperService autoMapperService
             )
             where TDestination: class, IPropBag
         {
             IBuildPropBagMapper<TSource, TDestination> result
                 = new SimplePropBagMapperBuilder<TSource, TDestination>
                 (
-                    mapperConfigurationBuilder: mapperConfigurationBuilder
-                    //,
-                    //viewModelActivator: _viewModelActivator,
-                    //storeAccessCreator: _storeAccessCreator,
-                    //autoMapperService: autoMapperService,
-                    //wrapperTypeCreator: _wrapperTypeCreator
+                    mapperConfigurationBuilder: mapperConfigurationBuilder,
+                    autoMapperService: autoMapperService
                 );
 
             return result;

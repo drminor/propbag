@@ -63,10 +63,6 @@
       <Project>{f0903390-0628-434c-8d27-80fb263955b6}</Project>
       <Name>AutoMapperSupportInterfaces</Name>
     </ProjectReference>
-    <ProjectReference Include="..\AutoMapperSupport\AutoMapperSupport.csproj">
-      <Project>{10cf1c6f-f877-49a8-8678-6947f55e6920}</Project>
-      <Name>AutoMapperSupport</Name>
-    </ProjectReference>
     <ProjectReference Include="..\ObjectSizeDiagnostics\ObjectSizeDiagnostics.csproj">
       <Project>{9b18f82d-3ed9-49e0-9ee3-cfbfc3af9d9c}</Project>
       <Name>ObjectSizeDiagnostics</Name>
@@ -82,14 +78,6 @@
     <ProjectReference Include="..\TypeSafePropertyBag\TypeSafePropertyBag.csproj">
       <Project>{bbb1e311-374e-4c91-a313-1667d83767db}</Project>
       <Name>TypeSafePropertyBag</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\TypeWrapper\TypeWrapper.csproj">
-      <Project>{7c45d001-90d6-4521-82ae-41f9492f8ece}</Project>
-      <Name>TypeWrapper</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ViewModelTools\ViewModelTools.csproj">
-      <Project>{a149ead5-06a9-47c8-8853-1d329d553ea7}</Project>
-      <Name>ViewModelTools</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

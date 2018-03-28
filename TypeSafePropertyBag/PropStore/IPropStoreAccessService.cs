@@ -84,28 +84,45 @@ namespace DRM.TypeSafePropertyBag
         IManageCViews GetOrAddViewManager(IPropBag propBag, L2T propId, IPropData propData, CViewProviderCreator viewBuilder);
         IManageCViews GetOrAddViewManager(IPropBag propBag, L2T propId, IPropData propData, CViewProviderCreator viewBuilder, IProvideADataSourceProvider dSProviderProvider);
 
-        // Providing a Mapper directly
-        IManageCViews GetOrAddViewManager<TDal, TSource, TDestination>
-            (
-            IPropBag propBag, // The client to this PropStore Access Service
-            L2T propId, // Identifies the PropItem that implements IDoCrud<TSource>
-            IPropData propData, // The PropStore management wrapper for IProp<TSource> which holds the value of the 'IDoCrud<T>' data access layer.
-            IPropBagMapper<TSource, TDestination> mapper,
-            CViewProviderCreator viewBuilder, // Method that can be used to create a IProvideAView from a DataSourceProvider.
-            BetterLCVCreatorDelegate<TDestination> betterLCVCreatorDelegate
-            )
-            where TDal : class, IDoCRUD<TSource>
-            where TSource : class
-            where TDestination : INotifyItemEndEdit;
+        //// Providing a Mapper directly
+        //IManageCViews GetOrAddViewManager<TDal, TSource, TDestination>
+        //    (
+        //    IPropBag propBag, // The client to this PropStore Access Service
+        //    L2T propId, // Identifies the PropItem that implements IDoCrud<TSource>
+        //    IPropData propData, // The PropStore management wrapper for IProp<TSource> which holds the value of the 'IDoCrud<T>' data access layer.
+        //    IPropBagMapper<TSource, TDestination> mapper,
+        //    CViewProviderCreator viewBuilder, // Method that can be used to create a IProvideAView from a DataSourceProvider.
+        //    BetterLCVCreatorDelegate<TDestination> betterLCVCreatorDelegate
+        //    )
+        //    where TDal : class, IDoCRUD<TSource>
+        //    where TSource : class
+        //    where TDestination : INotifyItemEndEdit;
 
-        // Using a IMapperRequest and Factory.
-        IManageCViews GetOrAddViewManager<TDal, TSource, TDestination>
+        //// Using a IMapperRequest and Factory.
+        //IManageCViews GetOrAddViewManager<TDal, TSource, TDestination>
+        //    (
+        //    IPropBag propBag, // The client to this PropStore Access Service
+        //    L2T propId, // Identifies the PropItem that implements IDoCrud<TSource>
+        //    IPropData propData, // The PropStore management wrapper for IProp<TSource> which holds the value of the 'IDoCrud<T>' data access layer.
+        //    IMapperRequest mr, // The information necessar to create a IPropBagMapper<TSource, TDestination>
+        //    PropBagMapperCreator propBagMapperCreator, // A delegate that can be called to create a IPropBagMapper<TSource, TDestination> given a IMapperRequest.
+        //    CViewProviderCreator viewBuilder, // Method that can be used to create a IProvideAView from a DataSourceProvider.
+        //    BetterLCVCreatorDelegate<TDestination> betterLCVCreatorDelegate
+        //    )
+        //    where TDal : class, IDoCRUD<TSource>
+        //    where TSource : class
+        //    where TDestination : INotifyItemEndEdit;
+
+        // Using a CrudWithMappingCreator.
+        IManageCViews GetOrAddViewManager_New<TDal, TSource, TDestination>
             (
             IPropBag propBag, // The client to this PropStore Access Service
             L2T propId, // Identifies the PropItem that implements IDoCrud<TSource>
             IPropData propData, // The PropStore management wrapper for IProp<TSource> which holds the value of the 'IDoCrud<T>' data access layer.
             IMapperRequest mr, // The information necessar to create a IPropBagMapper<TSource, TDestination>
-            PropBagMapperCreator propBagMapperCreator, // A delegate that can be called to create a IPropBagMapper<TSource, TDestination> given a IMapperRequest.
+
+            CrudWithMappingCreator<TDal, TSource, TDestination> crudWithMappingCreator,
+
             CViewProviderCreator viewBuilder, // Method that can be used to create a IProvideAView from a DataSourceProvider.
             BetterLCVCreatorDelegate<TDestination> betterLCVCreatorDelegate
             )
@@ -113,29 +130,41 @@ namespace DRM.TypeSafePropertyBag
             where TSource : class
             where TDestination : INotifyItemEndEdit;
 
-        IProvideATypedCViewManager<EndEditWrapper<TDestination>, TDestination> GetOrAddViewManagerProviderTyped<TDal, TSource, TDestination>
-            (
-                IPropBag propBag,   // The client of this service.
-                IViewManagerProviderKey viewManagerProviderKey,
-                PropBagMapperCreator propBagMapperCreator,  // A delegate that can be called to create a IPropBagMapper<TSource, TDestination> given a IMapperRequest.
-                CViewProviderCreator viewBuilder            // Method that can be used to create a IProvideAView from a DataSourceProvider.
-            )
-                where TDal : class, IDoCRUD<TSource>
-                where TSource : class
-                where TDestination : INotifyItemEndEdit;
 
-        IProvideACViewManager GetOrAddViewManagerProvider<TDal, TSource, TDestination>
+        //IProvideATypedCViewManager<EndEditWrapper<TDestination>, TDestination> GetOrAddViewManagerProviderTyped<TDal, TSource, TDestination>
+        //    (
+        //        IPropBag propBag,   // The client of this service.
+        //        IViewManagerProviderKey viewManagerProviderKey,
+        //        PropBagMapperCreator propBagMapperCreator,  // A delegate that can be called to create a IPropBagMapper<TSource, TDestination> given a IMapperRequest.
+        //        CViewProviderCreator viewBuilder            // Method that can be used to create a IProvideAView from a DataSourceProvider.
+        //    )
+        //        where TDal : class, IDoCRUD<TSource>
+        //        where TSource : class
+        //        where TDestination : INotifyItemEndEdit;
+
+        //IProvideACViewManager GetOrAddViewManagerProvider<TDal, TSource, TDestination>
+        //(
+        //    IPropBag propBag,   // The client of this service.
+        //    IViewManagerProviderKey viewManagerProviderKey,
+        //    //LocalBindingInfo bindingInfo,
+        //    //IMapperRequest mr,  // The information necessary to create a IPropBagMapper<TSource, TDestination>
+        //    PropBagMapperCreator propBagMapperCreator,  // A delegate that can be called to create a IPropBagMapper<TSource, TDestination> given a IMapperRequest.
+        //    CViewProviderCreator viewBuilder            // Method that can be used to create a IProvideAView from a DataSourceProvider.
+        //)
+        //    where TDal : class, IDoCRUD<TSource>
+        //    where TSource : class
+        //    where TDestination : INotifyItemEndEdit;
+
+        IProvideACViewManager GetOrAddViewManagerProvider_New<TDal, TSource, TDestination>
         (
             IPropBag propBag,   // The client of this service.
             IViewManagerProviderKey viewManagerProviderKey,
-            //LocalBindingInfo bindingInfo,
-            //IMapperRequest mr,  // The information necessary to create a IPropBagMapper<TSource, TDestination>
-            PropBagMapperCreator propBagMapperCreator,  // A delegate that can be called to create a IPropBagMapper<TSource, TDestination> given a IMapperRequest.
+            CrudWithMappingCreator<TDal, TSource, TDestination> crudWithMappingCreator,
             CViewProviderCreator viewBuilder            // Method that can be used to create a IProvideAView from a DataSourceProvider.
         )
-            where TDal : class, IDoCRUD<TSource>
-            where TSource : class
-            where TDestination : INotifyItemEndEdit;
+        where TDal : class, IDoCRUD<TSource>
+        where TSource : class
+        where TDestination : INotifyItemEndEdit;
 
         bool TryGetViewManagerProvider
         (

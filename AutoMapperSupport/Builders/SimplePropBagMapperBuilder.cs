@@ -13,10 +13,7 @@ namespace DRM.PropBag.AutoMapperSupport
 
         private readonly IBuildMapperConfigurations<TSource, TDestination> _mapperConfigurationBuilder;
 
-        //private readonly ViewModelActivatorInterface _viewModelActivator;
-        //private readonly PSAccessServiceCreatorInterface _storeAccessCreator;
-        //private readonly IProvideAutoMappers _autoMapperService;
-        //private readonly ICreateWrapperTypes _wrapperTypeCreator;
+        private readonly IAutoMapperService _autoMapperService;
 
         #endregion
 
@@ -26,26 +23,23 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public SimplePropBagMapperBuilder
             (
-            IBuildMapperConfigurations<TSource, TDestination> mapperConfigurationBuilder
-            //,
-            //ViewModelActivatorInterface viewModelActivator,
-            //PSAccessServiceCreatorInterface storeAccessCreator,
-            //IProvideAutoMappers autoMapperService,
-            //ICreateWrapperTypes wrapperTypeCreator
+            IBuildMapperConfigurations<TSource, TDestination> mapperConfigurationBuilder,
+            IAutoMapperService autoMapperService
             )
         {
             _mapperConfigurationBuilder = mapperConfigurationBuilder;
-            //_viewModelActivator = viewModelActivator;
-            //_storeAccessCreator = storeAccessCreator;
-            //_autoMapperService = autoMapperService;
-            //_wrapperTypeCreator = wrapperTypeCreator;
+            _autoMapperService = autoMapperService;
         }
 
         #endregion
 
         #region Public Members
 
-        public IPropBagMapper<TSource, TDestination> GenerateMapper(IPropBagMapperKey<TSource, TDestination> mapperRequestKey, ViewModelFactoryInterface viewModelFactory)
+        public IPropBagMapper<TSource, TDestination> GenerateMapper
+            (
+            IPropBagMapperKey<TSource, TDestination> mapperRequestKey,
+            ViewModelFactoryInterface viewModelFactory
+            )
         {
             // TODO: Add 'virtual' property to IMapTypeDefinition named: TargetRunTimeType.
             Type TargetRunTimeType = mapperRequestKey.DestinationTypeDef.NewEmittedType ?? mapperRequestKey.DestinationTypeDef.TargetType;
@@ -60,11 +54,8 @@ namespace DRM.PropBag.AutoMapperSupport
                 (
                 mapperRequestKey,
                 theMapper,
-                //_viewModelActivator,
-                //_storeAccessCreator,
-                //_autoMapperService,
-                //_wrapperTypeCreator
-                viewModelFactory
+                viewModelFactory,
+                _autoMapperService
                 );
 
             return result;

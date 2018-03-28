@@ -1,4 +1,4 @@
-﻿using DRM.TypeSafePropertyBag;
+﻿using DRM.PropBag.ViewModelTools;
 using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
 using System.Collections.Generic;
@@ -7,15 +7,21 @@ using System.Linq;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
+    using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
+
     //[Synchronization()]
     public class SimplePropBagMapperCache : /*ContextBoundObject,*/ ICachePropBagMappers, IDisposable
     {
-        private int pCntr = 0;
-        private LockingConcurrentDictionary<IPropBagMapperKeyGen, IPropBagMapperKeyGen> _unSealedPropBagMappers;
-        private LockingConcurrentDictionary<IPropBagMapperKeyGen, IPropBagMapperGen> _sealedPropBagMappers;
+        private readonly ViewModelFactoryInterface _viewModelFactory;
 
-        public SimplePropBagMapperCache()
+        private readonly LockingConcurrentDictionary<IPropBagMapperKeyGen, IPropBagMapperKeyGen> _unSealedPropBagMappers;
+        private readonly LockingConcurrentDictionary<IPropBagMapperKeyGen, IPropBagMapperGen> _sealedPropBagMappers;
+
+        private int pCntr = 0;
+
+        public SimplePropBagMapperCache(ViewModelFactoryInterface viewModelFactory)
         {
+            _viewModelFactory = viewModelFactory;
             _unSealedPropBagMappers = 
                 new LockingConcurrentDictionary<IPropBagMapperKeyGen, IPropBagMapperKeyGen>
                 (GetPropBagMapperPromise);
@@ -121,7 +127,7 @@ namespace DRM.PropBag.AutoMapperSupport
 
         private IPropBagMapperGen GetPropBagMapperReal(IPropBagMapperKeyGen key)
         {
-            IPropBagMapperGen result = key.CreateMapper();
+            IPropBagMapperGen result = key.CreateMapper(_viewModelFactory);
             return result;
         }
 
