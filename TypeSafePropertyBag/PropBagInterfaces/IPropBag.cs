@@ -110,18 +110,28 @@ namespace DRM.TypeSafePropertyBag
             Type propertyType
         );
 
-        // Use when the property is a IDoCRUD<TSource>
-        IManageCViews GetOrAddViewManager<TDal, TSource, TDestination>
-        (
-            PropNameType propertyName,
-            Type propertyType,
-            IPropBagMapper<TSource, TDestination> mapper
-        )
-            where TDal : IDoCRUD<TSource>
-            where TSource : class
-            where TDestination : INotifyItemEndEdit;
+        //// Use when the property is a IDoCRUD<TSource>
+        //IManageCViews GetOrAddViewManager<TDal, TSource, TDestination>
+        //(
+        //    PropNameType propertyName,
+        //    Type propertyType,
+        //    IPropBagMapper<TSource, TDestination> mapper
+        //)
+        //    where TDal : IDoCRUD<TSource>
+        //    where TSource : class
+        //    where TDestination : INotifyItemEndEdit;
 
-        IManageCViews GetOrAddViewManager<TDal, TSource, TDestination>
+        //IManageCViews GetOrAddViewManager<TDal, TSource, TDestination>
+        //(
+        //    PropNameType propertyName,
+        //    Type propertyType,
+        //    IMapperRequest mapperRequest
+        //)
+        //    where TDal : class, IDoCRUD<TSource>
+        //    where TSource : class
+        //    where TDestination : INotifyItemEndEdit;
+
+        IManageCViews GetOrAddViewManager_New<TDal, TSource, TDestination>
         (
             PropNameType propertyName,
             Type propertyType,

@@ -1,16 +1,12 @@
-﻿using DRM.PropBag.Caches;
-using DRM.TypeSafePropertyBag;
-using DRM.TypeSafePropertyBag.Fundamentals;
+﻿using DRM.TypeSafePropertyBag.Fundamentals;
 
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 
-using System.Windows;
 
-
-namespace DRM.PropBag
+namespace DRM.TypeSafePropertyBag
 {
     public class PropFactoryValueConverter : IConvertValues
     {

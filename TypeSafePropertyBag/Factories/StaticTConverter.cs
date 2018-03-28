@@ -1,11 +1,5 @@
-﻿using DRM.TypeSafePropertyBag;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DRM.PropBag.Caches
+﻿
+namespace DRM.TypeSafePropertyBag
 {
     public static class StaticTConverterProvider
     {
