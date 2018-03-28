@@ -393,22 +393,18 @@ namespace PropBagLib.Tests.SpecBasedVMTests
             ViewModelFactoryInterface viewModelFactory
             )
         {
-            // TODO: Expose the creation of wrapperTypeCreator (ICreateWrapperTypes).
-            IPropBagMapperBuilderProvider propBagMapperBuilderProvider = new SimplePropBagMapperBuilderProvider
-                (
-                //viewModelActivator: viewModelActivator,
-                //storeAccessCreator: psAccessServiceFactory,
-                //wrapperTypesCreator: wrapperTypesCreator
-                );
-
             IMapTypeDefinitionProvider mapTypeDefinitionProvider = new SimpleMapTypeDefinitionProvider();
 
             ICachePropBagMappers mappersCachingService = new SimplePropBagMapperCache(viewModelFactory);
+            ICacheAutoMappers rawAutoMapperCache = new SimpleAutoMapperCache();
+
+            IPropBagMapperBuilderProvider propBagMapperBuilderProvider = new SimplePropBagMapperBuilderProvider();
 
             SimpleAutoMapperProvider autoMapperProvider = new SimpleAutoMapperProvider
                 (
                 mapTypeDefinitionProvider: mapTypeDefinitionProvider,
                 mappersCachingService: mappersCachingService,
+                rawAutoMapperCache: rawAutoMapperCache,
                 mapperBuilderProvider: propBagMapperBuilderProvider
                 );
 

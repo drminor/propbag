@@ -1,4 +1,6 @@
-﻿using DRM.PropBag.AutoMapperSupport;
+﻿using AutoMapper;
+using DRM.PropBag;
+using DRM.PropBag.AutoMapperSupport;
 using DRM.PropBag.ViewModelTools;
 using DRM.TypeSafePropertyBag;
 using PropBagTestApp.Infra;
@@ -144,8 +146,6 @@ namespace PropBagTestApp.View
                 {
                     PropModelCacheInterface propModelCache = PropStoreServicesForThisApp.PropModelCache;
 
-                    //PropModelType propModel = propModelCache.GetPropModel(REFERENCE_BIND_VM_RES_KEY);
-
                     string fcn = REFERENCE_BIND_VM_RES_KEY;
                     if (propModelCache.TryGetPropModel(fcn, out PropModelType propModel))
                     {
@@ -154,20 +154,69 @@ namespace PropBagTestApp.View
 
                     ViewModelFactoryInterface viewModelFactory = null; // Fix Me.
 
-                    IPropBagMapperKey<MyModel, ReferenceBindViewModelPB> mapperRequest
-                        = PropStoreServicesForThisApp.AutoMapperService.SubmitMapperRequest<MyModel, ReferenceBindViewModelPB>
+                    IAutoMapperService autoMapperService = PropStoreServicesForThisApp.AutoMapperService;
+
+                    IMapperRequest mr = new MapperRequest(typeof(MyModel), propModel, "emit_proxy");
+
+                    IMapper rawAutoMapper = PropStoreServicesForThisApp.GetAutoMapper<MyModel, ReferenceBindViewModelPB>
                         (
-                        propModel,
-                        viewModelFactory,
-                        typeof(ReferenceBindViewModelPB),
-                        configPackageName: "emit_proxy"
+                        mr,
+                        autoMapperService,
+                        out IPropBagMapperKey<MyModel, ReferenceBindViewModelPB> propBagMapperKey
                         );
 
-                    _mapper = PropStoreServicesForThisApp.AutoMapperService.GetMapper(mapperRequest);
+                    IPropBagMapper<MyModel, ReferenceBindViewModelPB> cookedAutoMapper = new SimplePropBagMapper<MyModel, ReferenceBindViewModelPB>
+                        (
+                        propBagMapperKey,
+                        rawAutoMapper,
+                        viewModelFactory,
+                        autoMapperService
+                        );
+
+                    //IPropBagMapperKey<MyModel, ReferenceBindViewModelPB> mapperRequest
+                    //    = PropStoreServicesForThisApp.AutoMapperService.SubmitRawAutoMapperRequest<MyModel, ReferenceBindViewModelPB>
+                    //    (
+                    //    propModel,
+                    //    //viewModelFactory,
+                    //    typeof(ReferenceBindViewModelPB),
+                    //    configPackageName: "emit_proxy"
+                    //    );
+
+
+
+                    //_mapper = PropStoreServicesForThisApp.AutoMapperService.GetMapper(mapperRequest);
+
+                    _mapper = cookedAutoMapper;
                 }
                 return _mapper;
             }
         }
+
+        //private IMapper GetAutoMapper<TSource, TDestination>
+        //    (
+        //    IMapperRequest mapperRequest,
+        //    IAutoMapperService autoMapperService,
+        //    out IPropBagMapperKey<TSource, TDestination> propBagMapperKey
+        //    )
+        //    where TDestination : class, IPropBag
+        //{
+        //    // This is where the PropModel is used to define the Mapper 
+
+        //    // TODO: See if we can submit the request earlier; perhaps when the mapper request is created.
+
+        //    Type typeToWrap = mapperRequest.PropModel.TypeToWrap;
+
+        //    // Submit the Mapper Request.
+        //    propBagMapperKey = autoMapperService.SubmitRawAutoMapperRequest<TSource, TDestination>
+        //        (mapperRequest.PropModel/*, viewModelFactory*/, typeToWrap, mapperRequest.ConfigPackageName);
+
+        //    // Get the AutoMapper mapping function associated with the mapper request just submitted.
+        //    //IPropBagMapperGen genMapper = _autoMapperService.GetMapper(mapperKey);
+
+        //    IMapper rawAutoMapper = autoMapperService.GetRawAutoMapper(propBagMapperKey);
+        //    return rawAutoMapper;
+        //}
+
 
 
     }

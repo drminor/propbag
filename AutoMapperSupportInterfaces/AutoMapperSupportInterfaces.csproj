@@ -40,6 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ICacheAutoMappers.cs" />
     <Compile Include="ICachePropBagMappers.cs" />
     <Compile Include="IConfigureAMapper.cs" />
     <Compile Include="ICreateMappingExpressions.cs" />

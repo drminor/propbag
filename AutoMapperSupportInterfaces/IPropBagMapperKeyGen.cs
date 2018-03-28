@@ -1,4 +1,5 @@
-﻿using DRM.PropBag.ViewModelTools;
+﻿using AutoMapper;
+using DRM.PropBag.ViewModelTools;
 using System;
 
 namespace DRM.PropBag.AutoMapperSupport
@@ -10,5 +11,8 @@ namespace DRM.PropBag.AutoMapperSupport
         IMapTypeDefinitionGen DestinationTypeGenDef { get; }
 
         IPropBagMapperGen CreateMapper(ViewModelFactoryInterface viewModelFactory);
+
+        IMapper CreateRawAutoMapper();
+
     }
 }

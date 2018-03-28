@@ -1,4 +1,5 @@
-﻿using DRM.PropBag;
+﻿using AutoMapper;
+using DRM.PropBag;
 using DRM.PropBag.AutoMapperSupport;
 using DRM.PropBag.ViewModelTools;
 using DRM.TypeSafePropertyBag;
@@ -52,14 +53,26 @@ namespace PropBagLib.Tests.AutoMapperSupport
             Type typeToWrap = typeof(PropBag);
             string configPackageName = "Emit_Proxy";
 
-            IPropBagMapperKey<MyModel3, DestinationModel3> mapperRequest =
-                _amp.SubmitMapperRequest<MyModel3, DestinationModel3>
-                (
-                    propModel: propModel,
-                    viewModelFactory: viewModelFactory,
-                    typeToWrap: typeToWrap,
-                    configPackageName: configPackageName
-                );
+            //IMapperRequest mr = new MapperRequest(typeof(MyModel3), propModel, configPackageName);
+
+            //IMapper rawAutoMapper = AutoMapperHelpers.GetAutoMapper<MyModel3, DestinationModel3>
+            //    (
+            //    mr,
+            //    _amp,
+            //    out IPropBagMapperKey<MyModel3, DestinationModel3> propBagMapperKey
+            //    );
+
+            ////IPropBagMapper<MyModel3, DestinationModel3> cookedAutoMapper = new SimplePropBagMapper<MyModel3, DestinationModel3>
+            ////    (
+            ////    propBagMapperKey,
+            ////    rawAutoMapper,
+            ////    viewModelFactory,
+            ////    _amp
+            ////    );
+
+            IPropBagMapperKeyGen mapperRequest =
+                _amp.SubmitMapperRequest(propModel, typeof(MyModel3), configPackageName, _amp);
+
 
             Assert.That(mapperRequest, Is.Not.Null, "mapperRequest should be non-null.");
         }
@@ -85,19 +98,12 @@ namespace PropBagLib.Tests.AutoMapperSupport
 
             propModel.NewEmittedType = et;
 
-            IPropBagMapperKeyGen mapperKey = _amp.SubmitMapperRequest(mapperRequest.PropModel, _viewModelFactory,  mapperRequest.SourceType, mapperRequest.ConfigPackageName, _amp);
+            IPropBagMapperKeyGen mapperKey = _amp.SubmitMapperRequest(mapperRequest.PropModel/*, _viewModelFactory*/, mapperRequest.SourceType, mapperRequest.ConfigPackageName, _amp);
 
             // Get the AutoMapper mapping function associated with the mapper request already submitted.
             IPropBagMapperGen genMapper = _amp.GetMapper(mapperKey);
 
-
-            //IPropBagMapperKey<MyModel3, DestinationModel3> mapperRequest =
-            //    _amp.SubmitMapperRequest<MyModel3, DestinationModel3>
-            //    (
-            //        propModel: propModel,
-            //        typeToWrap: et, //typeToWrap
-            //        configPackageName: configPackageName
-            //    );
+            //IMapper genMapper = _amp.GetRawAutoMapper(mapperKey);
 
             Assert.That(mapperKey, Is.Not.Null, "mapperRequest should be non-null.");
 
@@ -118,7 +124,6 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 Deep = dp
             };
 
-
             var testDest = genMapper.MapToDestination(testSource);
 
             //IPropBagMapperKey<MyModel3, DestinationModel3> mapperRequest2 =
@@ -131,7 +136,13 @@ namespace PropBagLib.Tests.AutoMapperSupport
 
             //IPropBagMapper<MyModel3, DestinationModel3> mapper2 = _amp.GetMapper<MyModel3, DestinationModel3>(mapperRequest2);
 
-            //DestinationModel3 testDest2 = mapper.MapToDestination(testSource);
+            IPropBagMapperKeyGen mapperKey2 = _amp.SubmitMapperRequest(mapperRequest.PropModel/*, _viewModelFactory*/, mapperRequest.SourceType, mapperRequest.ConfigPackageName, _amp);
+
+            // Get the AutoMapper mapping function associated with the mapper request already submitted.
+            IPropBagMapperGen genMapper2 = _amp.GetMapper(mapperKey);
+
+
+            var testDest2 = genMapper2.MapToDestination(testSource);
 
         }
 
@@ -141,28 +152,44 @@ namespace PropBagLib.Tests.AutoMapperSupport
             IPropFactory propFactory = _propFactory_V1;
             ViewModelFactoryInterface viewModelFactory = _viewModelFactory;
 
-
-
             PropModel propModel = GetPropModelForModel3Dest(propFactory);
             viewModelFactory.PropModelCache.Add(propModel);
 
             Type typeToWrap = typeof(DestinationModel3); // typeof(PropBag);
             string configPackageName = "Extra_Members"; // "Emit_Proxy";
 
-            IPropBagMapperKey<MyModel3, DestinationModel3> mapperRequest =
-                _amp.SubmitMapperRequest<MyModel3, DestinationModel3>
+
+            IMapperRequest mr = new MapperRequest(typeof(MyModel3), propModel, configPackageName);
+
+            IMapper rawAutoMapper = AutoMapperHelpers.GetAutoMapper<MyModel3, DestinationModel3>
                 (
-                    propModel: propModel,
-                    viewModelFactory: viewModelFactory,
-                    typeToWrap: typeToWrap,
-                    configPackageName: configPackageName
+                mr,
+                _amp,
+                out IPropBagMapperKey<MyModel3, DestinationModel3> propBagMapperKey
                 );
 
-            Assert.That(mapperRequest, Is.Not.Null, "mapperRequest should be non-null.");
+            IPropBagMapper<MyModel3, DestinationModel3> cookedAutoMapper = new SimplePropBagMapper<MyModel3, DestinationModel3>
+                (
+                propBagMapperKey,
+                rawAutoMapper,
+                viewModelFactory,
+                _amp
+                );
 
-            IPropBagMapper<MyModel3, DestinationModel3> mapper = _amp.GetMapper<MyModel3, DestinationModel3>(mapperRequest);
+            //IPropBagMapperKey<MyModel3, DestinationModel3> mapperRequest =
+            //    _amp.SubmitMapperRequest<MyModel3, DestinationModel3>
+            //    (
+            //        propModel: propModel,
+            //        viewModelFactory: viewModelFactory,
+            //        typeToWrap: typeToWrap,
+            //        configPackageName: configPackageName
+            //    );
 
-            Assert.That(mapper, Is.Not.Null, "mapper should be non-null");
+            Assert.That(propBagMapperKey, Is.Not.Null, "mapperRequest should be non-null.");
+
+            //IPropBagMapper<MyModel3, DestinationModel3> mapper = _amp.GetMapper<MyModel3, DestinationModel3>(mapperRequest);
+
+            Assert.That(cookedAutoMapper, Is.Not.Null, "mapper should be non-null");
 
             MyModel4 dp = new MyModel4
             {
@@ -178,20 +205,36 @@ namespace PropBagLib.Tests.AutoMapperSupport
             };
 
 
-            DestinationModel3 testDest = mapper.MapToDestination(testSource);
+            DestinationModel3 testDest = cookedAutoMapper.MapToDestination(testSource);
 
-            IPropBagMapperKey<MyModel3, DestinationModel3> mapperRequest2 =
-                _amp.SubmitMapperRequest<MyModel3, DestinationModel3>
+            //IPropBagMapperKey<MyModel3, DestinationModel3> mapperRequest2 =
+            //    _amp.SubmitMapperRequest<MyModel3, DestinationModel3>
+            //    (
+            //        propModel: propModel,
+            //        viewModelFactory: viewModelFactory,
+            //        typeToWrap: typeToWrap,
+            //        configPackageName: configPackageName
+            //    );
+
+            //IPropBagMapper<MyModel3, DestinationModel3> mapper2 = _amp.GetMapper<MyModel3, DestinationModel3>(mapperRequest2);
+
+
+            IMapper rawAutoMapper2 = AutoMapperHelpers.GetAutoMapper<MyModel3, DestinationModel3>
                 (
-                    propModel: propModel,
-                    viewModelFactory: viewModelFactory,
-                    typeToWrap: typeToWrap,
-                    configPackageName: configPackageName
+                mr,
+                _amp,
+                out IPropBagMapperKey<MyModel3, DestinationModel3> propBagMapperKey2
                 );
 
-            IPropBagMapper<MyModel3, DestinationModel3> mapper2 = _amp.GetMapper<MyModel3, DestinationModel3>(mapperRequest2);
+            IPropBagMapper<MyModel3, DestinationModel3> cookedAutoMapper2 = new SimplePropBagMapper<MyModel3, DestinationModel3>
+                (
+                propBagMapperKey,
+                rawAutoMapper,
+                viewModelFactory,
+                _amp
+                );
 
-            DestinationModel3 testDest2 = mapper.MapToDestination(testSource);
+            DestinationModel3 testDest2 = cookedAutoMapper2.MapToDestination(testSource);
         }
 
         #region Private Support Methods
@@ -248,6 +291,8 @@ namespace PropBagLib.Tests.AutoMapperSupport
 
             return result;
         }
+
+
 
         #endregion
     }

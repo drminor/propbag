@@ -60,7 +60,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <None Include="Infra\AutoMapperHelpers.cs" />
     <None Include="Infra\DataContextProvider_NotUsed.cs" />
     <Compile Include="Infra\PropStoreServicesForThisApp.cs" />
     <Compile Include="Infra\ViewModelProvider.cs" />

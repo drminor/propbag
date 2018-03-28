@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using DRM.PropBag;
 using DRM.PropBag.ViewModelTools;
 using DRM.TypeSafePropertyBag;
 using ObjectSizeDiagnostics;

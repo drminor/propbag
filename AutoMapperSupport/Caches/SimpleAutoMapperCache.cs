@@ -1,4 +1,4 @@
-﻿using DRM.PropBag.ViewModelTools;
+﻿using AutoMapper;
 using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
 using System.Collections.Generic;
@@ -7,32 +7,27 @@ using System.Linq;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
-    using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
-
     //[Synchronization()]
-    public class SimplePropBagMapperCache : /*ContextBoundObject,*/ ICachePropBagMappers, IDisposable
+    public class SimpleAutoMapperCache : /*ContextBoundObject,*/ ICacheAutoMappers, IDisposable
     {
-        private readonly ViewModelFactoryInterface _viewModelFactory;
 
         private readonly LockingConcurrentDictionary<IPropBagMapperKeyGen, IPropBagMapperKeyGen> _unSealedPropBagMappers;
-        private readonly LockingConcurrentDictionary<IPropBagMapperKeyGen, IPropBagMapperGen> _sealedPropBagMappers;
+        private readonly LockingConcurrentDictionary<IPropBagMapperKeyGen, IMapper> _sealedPropBagMappers;
 
         private int pCntr = 0;
 
-        public SimplePropBagMapperCache(ViewModelFactoryInterface viewModelFactory)
+        public SimpleAutoMapperCache()
         {
-            _viewModelFactory = viewModelFactory;
-
             _unSealedPropBagMappers = 
                 new LockingConcurrentDictionary<IPropBagMapperKeyGen, IPropBagMapperKeyGen>
                 (GetPropBagMapperPromise);
 
             _sealedPropBagMappers =
-                new LockingConcurrentDictionary<IPropBagMapperKeyGen, IPropBagMapperGen>
+                new LockingConcurrentDictionary<IPropBagMapperKeyGen, IMapper>
                 (GetPropBagMapperReal);
         }
 
-        public IPropBagMapperKeyGen RegisterMapperRequest(IPropBagMapperKeyGen mapRequest)
+        public IPropBagMapperKeyGen RegisterRawAutoMapperRequest(IPropBagMapperKeyGen mapRequest)
         {
 
             if (_sealedPropBagMappers.ContainsKey(mapRequest))
@@ -50,11 +45,11 @@ namespace DRM.PropBag.AutoMapperSupport
             }
         }
 
-        public IPropBagMapperGen GetMapper(IPropBagMapperKeyGen mapRequest)
+        public IMapper GetRawAutoMapper(IPropBagMapperKeyGen mapRequest)
         {
             IPropBagMapperKeyGen save = mapRequest;
 
-            if (_sealedPropBagMappers.TryGetValue(mapRequest, out IPropBagMapperGen result))
+            if (_sealedPropBagMappers.TryGetValue(mapRequest, out IMapper result))
             {
                 CheckForChanges(save, mapRequest, "Find in Sealed -- First Check.");
                 return result;
@@ -116,7 +111,7 @@ namespace DRM.PropBag.AutoMapperSupport
             int result = 0;
             foreach (IPropBagMapperKeyGen key in _unSealedPropBagMappers.Keys)
             {
-                IPropBagMapperGen mapper = _sealedPropBagMappers.GetOrAdd(key);
+                IMapper mapper = _sealedPropBagMappers.GetOrAdd(key);
                 if (!(_unSealedPropBagMappers.TryRemoveValue(key, out IPropBagMapperKeyGen dummyKey)))
                 {
                     System.Diagnostics.Debug.WriteLine("Couldn't remove mappper request from list of registered, pending to be created, mapper requests.");
@@ -126,9 +121,9 @@ namespace DRM.PropBag.AutoMapperSupport
             return result;
         }
 
-        private IPropBagMapperGen GetPropBagMapperReal(IPropBagMapperKeyGen key)
+        private IMapper GetPropBagMapperReal(IPropBagMapperKeyGen key)
         {
-            IPropBagMapperGen result = key.CreateMapper(_viewModelFactory);
+            IMapper result = key.CreateRawAutoMapper();
             return result;
         }
 

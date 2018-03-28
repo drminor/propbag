@@ -61,7 +61,23 @@ namespace DRM.PropBag.AutoMapperSupport
             return result;
         }
 
+        public IMapper GenerateRawAutoMapperTyped(IPropBagMapperKey<TSource, TDestination> mapperRequestKey)
+        {
+            // TODO: Add 'virtual' property to IMapTypeDefinition named: TargetRunTimeType.
+            Type TargetRunTimeType = mapperRequestKey.DestinationTypeDef.NewEmittedType ?? mapperRequestKey.DestinationTypeDef.TargetType;
+
+            CheckTypeToCreate(typeof(TDestination), mapperRequestKey.DestinationTypeDef.TargetType);
+
+            IConfigurationProvider configProvider = _mapperConfigurationBuilder.GetNewConfiguration(mapperRequestKey);
+
+            IMapper theMapper = configProvider.CreateMapper();
+
+            return theMapper;
+        }
+
         public Func<IPropBagMapperKeyGen, ViewModelFactoryInterface, IPropBagMapperGen> GenMapperCreator => GenerateMapperGen;
+
+        public Func<IPropBagMapperKeyGen, IMapper> RawAutoMapperCreator => GenerateRawAutoMapper;
 
         #endregion
 
@@ -77,6 +93,18 @@ namespace DRM.PropBag.AutoMapperSupport
             }
 
             return GenerateMapper(mapRequestTyped, viewModelFactory);
+        }
+
+        private IMapper GenerateRawAutoMapper(IPropBagMapperKeyGen mapRequestGen)
+        {
+            IPropBagMapperKey<TSource, TDestination> mapRequestTyped = mapRequestGen as IPropBagMapperKey<TSource, TDestination>;
+
+            if (mapRequestTyped == null)
+            {
+                throw new InvalidOperationException($"{nameof(mapRequestGen)} does not implement the correct typed {nameof(IPropBagMapperKey<TSource, TDestination>)} interface.");
+            }
+
+            return GenerateRawAutoMapperTyped(mapRequestTyped);
         }
 
 

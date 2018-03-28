@@ -1,6 +1,7 @@
 ﻿using System;
 using DRM.TypeSafePropertyBag;
 using DRM.PropBag.ViewModelTools;
+using AutoMapper;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
@@ -10,5 +11,7 @@ namespace DRM.PropBag.AutoMapperSupport
         IPropBagMapper<TSource, TDestination> GenerateMapper(IPropBagMapperKey<TSource, TDestination> mapperRequestKey, ViewModelFactoryInterface viewModelFactory);
 
         Func<IPropBagMapperKeyGen, ViewModelFactoryInterface, IPropBagMapperGen> GenMapperCreator { get; }
+
+        Func<IPropBagMapperKeyGen, IMapper> RawAutoMapperCreator { get; }
     }
 }

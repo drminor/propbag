@@ -89,9 +89,17 @@
       <Project>{f0903390-0628-434c-8d27-80fb263955b6}</Project>
       <Name>AutoMapperSupportInterfaces</Name>
     </ProjectReference>
+    <ProjectReference Include="..\AutoMapperSupport\AutoMapperSupport.csproj">
+      <Project>{10cf1c6f-f877-49a8-8678-6947f55e6920}</Project>
+      <Name>AutoMapperSupport</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ObjectSizeDiagnostics\ObjectSizeDiagnostics.csproj">
       <Project>{9B18F82D-3ED9-49E0-9EE3-CFBFC3AF9D9C}</Project>
       <Name>ObjectSizeDiagnostics</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\src\AutoMapper\AutoMapper.csproj">
+      <Project>{8CBA8A56-9B60-4430-9D54-9A523BAF1E14}</Project>
+      <Name>AutoMapper</Name>
     </ProjectReference>
     <ProjectReference Include="..\TypeSafePropertyBag\TypeSafePropertyBag.csproj">
       <Project>{bbb1e311-374e-4c91-a313-1667d83767db}</Project>

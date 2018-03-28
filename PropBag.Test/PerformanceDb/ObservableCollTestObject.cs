@@ -1,4 +1,5 @@
-﻿using DRM.PropBag;
+﻿using AutoMapper;
+using DRM.PropBag;
 using DRM.PropBag.AutoMapperSupport;
 using DRM.PropBag.TypeWrapper;
 using DRM.PropBag.ViewModelTools;
@@ -78,7 +79,10 @@ namespace PropBagLib.Tests.PerformanceDb
             Type typeToWrap = typeof(PropBag);
 
             IPropBagMapperGen genMapper = null;
-            IPropBagMapper<Person, DestinationModel1> mapper = null;
+            //IPropBagMapper<Person, DestinationModel1> mapper = null;
+
+            IPropBagMapper<Person, DestinationModel1> cookedAutoMapper = null;
+
 
             if (configPackageName == "Emit_Proxy")
             {
@@ -88,7 +92,7 @@ namespace PropBagLib.Tests.PerformanceDb
                 Type et = wrapperTypeCreator.GetWrapperType(propModel1, typeToWrap);
                 propModel1.NewEmittedType = et;
 
-                IPropBagMapperKeyGen mapperRequest = amp.SubmitMapperRequest(localMr.PropModel, viewModelFactory, localMr.SourceType, localMr.ConfigPackageName, amp);
+                IPropBagMapperKeyGen mapperRequest = amp.SubmitMapperRequest(localMr.PropModel/*, viewModelFactory*/, localMr.SourceType, localMr.ConfigPackageName, amp);
 
                 Assert.That(mapperRequest, Is.Not.Null, "mapperRequest should be non-null.");
 
@@ -98,18 +102,36 @@ namespace PropBagLib.Tests.PerformanceDb
             }
             else
             {
-                IPropBagMapperKey<Person, DestinationModel1> mapperRequest = amp.SubmitMapperRequest<Person, DestinationModel1>
+                //IPropBagMapperKey<Person, DestinationModel1> mapperRequest = amp.SubmitMapperRequest<Person, DestinationModel1>
+                //    (
+                //        propModel: propModel1,
+                //        viewModelFactory: viewModelFactory,
+                //        typeToWrap: typeToWrap,
+                //        configPackageName: configPackageName
+                //    );
+
+                IMapperRequest localMr = new MapperRequest(typeof(Person), propModel1, configPackageName);
+
+                IMapper rawAutoMapper = AutoMapperHelpers.GetAutoMapper<Person, DestinationModel1>
                     (
-                        propModel: propModel1,
-                        viewModelFactory: viewModelFactory,
-                        typeToWrap: typeToWrap,
-                        configPackageName: configPackageName
+                    localMr,
+                    autoMapperService,
+                    out IPropBagMapperKey<Person, DestinationModel1> propBagMapperKey
                     );
 
-                Assert.That(mapperRequest, Is.Not.Null, "mapperRequest should be non-null.");
+                cookedAutoMapper = new SimplePropBagMapper<Person, DestinationModel1>
+                    (
+                    propBagMapperKey,
+                    rawAutoMapper,
+                    viewModelFactory,
+                    autoMapperService
+                    );
 
-                mapper = amp.GetMapper<Person, DestinationModel1>(mapperRequest);
-                Assert.That(mapper, Is.Not.Null, "mapper should be non-null");
+
+                Assert.That(propBagMapperKey, Is.Not.Null, "mapperRequest should be non-null.");
+
+                //mapper = amp.GetMapper<Person, DestinationModel1>(mapperRequest);
+                Assert.That(cookedAutoMapper, Is.Not.Null, "mapper should be non-null");
             }
 
             PropModelType propModel5 = pmHelpers.GetPropModelForModel5Dest(propFactory_V1, propModelCache);
@@ -135,7 +157,7 @@ namespace PropBagLib.Tests.PerformanceDb
             }
             else
             {
-                mappedPeople = mapper.MapToDestination(unMappedPeople);
+                mappedPeople = cookedAutoMapper.MapToDestination(unMappedPeople);
             }
 
 
