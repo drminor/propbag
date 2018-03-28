@@ -1,9 +1,11 @@
 ﻿using System;
 using DRM.TypeSafePropertyBag;
+using DRM.PropBag.ViewModelTools;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
     using PropModelType = IPropModel<String>;
+    using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
 
     public delegate IPropBagMapperGen PropBagMapperCreator(IMapperRequest mr);
 
@@ -26,7 +28,7 @@ namespace DRM.PropBag.AutoMapperSupport
         IPropBagMapperKeyGen SubmitMapperRequest
             (
             PropModelType propModel,
-            object viewModelFactory,
+            ViewModelFactoryInterface viewModelFactory,
             Type sourceType,
             string configPackageName,
             IAutoMapperService autoMapperService

@@ -11,9 +11,7 @@ namespace DRM.PropBag.AutoMapperSupport
     {
         #region Private Members
 
-        //private Func<IPropBagMapperKeyGen, IPropBagMapperGen> MapperCreator { get; }
         private Func<IPropBagMapperKeyGen, ViewModelFactoryInterface, IPropBagMapperGen> _mapperCreator { get; }
-        //private ViewModelFactoryInterface _viewModelFactory { get; }
 
         #endregion
 
@@ -29,13 +27,11 @@ namespace DRM.PropBag.AutoMapperSupport
         public PropBagMapperKeyGen
             (
             Func<IPropBagMapperKeyGen, ViewModelFactoryInterface, IPropBagMapperGen> mapperCreator,
-            //ViewModelFactoryInterface viewModelFactory,
             IMapTypeDefinitionGen sourceTypeGenDef,
             IMapTypeDefinitionGen destinationTypeGenDef
             )
         {
             _mapperCreator = mapperCreator;
-            //_viewModelFactory = viewModelFactory;
             SourceTypeGenDef = sourceTypeGenDef;
             DestinationTypeGenDef = destinationTypeGenDef;
         }

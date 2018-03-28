@@ -43,7 +43,7 @@ namespace DRM.PropBag.AutoMapperSupport
 
         #region Public Methods
 
-        public IPropBagMapperKeyGen SubmitMapperRequest(PropModelType propModel, object viewModelFactory, Type sourceType, string configPackageName, IAutoMapperService autoMapperService)
+        public IPropBagMapperKeyGen SubmitMapperRequest(PropModelType propModel, ViewModelFactoryInterface viewModelFactory, Type sourceType, string configPackageName, IAutoMapperService autoMapperService)
         {
             Type typeToCreate = propModel.NewEmittedType ?? propModel.TypeToWrap;
 
