@@ -24,7 +24,7 @@ namespace DRM.PropBag.ViewModelTools
         private readonly PSAccessServiceCreatorInterface _storeAccessCreator;
 
         //private readonly IProvideAutoMappers _autoMapperService;
-        private object _autoMapperService;
+        //private object _autoMapperService;
 
         private readonly ICreateWrapperTypes _wrapperTypeCreator;
 
@@ -48,7 +48,7 @@ namespace DRM.PropBag.ViewModelTools
             _viewModelActivator = viewModelActivator ?? throw new ArgumentNullException(nameof(viewModelActivator));
             _storeAccessCreator = storeAccessCreator ?? throw new ArgumentNullException(nameof(storeAccessCreator));
 
-            _autoMapperService = null;
+            AutoMapperService = null;
             _wrapperTypeCreator = null;
         }
 
@@ -69,7 +69,7 @@ namespace DRM.PropBag.ViewModelTools
             _viewModelActivator = viewModelActivator ?? throw new ArgumentNullException(nameof(viewModelActivator));
             _storeAccessCreator = storeAccessCreator ?? throw new ArgumentNullException(nameof(storeAccessCreator));
 
-            _autoMapperService = null;
+            AutoMapperService = null;
             _wrapperTypeCreator = null;
         }
 
@@ -91,7 +91,7 @@ namespace DRM.PropBag.ViewModelTools
             )
             : this(propModelCache, viewModelActivator, storeAccessCreator)
         {
-            _autoMapperService = autoMapperService; // ?? throw new ArgumentNullException(nameof(autoMapperService));
+            AutoMapperService = autoMapperService; // ?? throw new ArgumentNullException(nameof(autoMapperService));
             _wrapperTypeCreator = wrapperTypeCreator ?? throw new ArgumentNullException(nameof(wrapperTypeCreator));
         }
 
@@ -164,7 +164,7 @@ namespace DRM.PropBag.ViewModelTools
                 typeToCreate: propModel.TypeToWrap,
                 propModel: propModel,
                 viewModelFactory: this,
-                ams: _autoMapperService,
+                ams: AutoMapperService,
                 pfOverride: pfOverride,
                 fcnOverride: fcnOverride
                 );
