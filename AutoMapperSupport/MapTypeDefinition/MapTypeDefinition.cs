@@ -8,21 +8,31 @@ namespace DRM.PropBag.AutoMapperSupport
 
     public class MapTypeDefinition<T> : IMapTypeDefinition<T>, IEquatable<IMapTypeDefinitionGen>, IEquatable<MapTypeDefinition<T>>
     {
-        public Type TargetType { get; }
-
-        public bool IsPropBag { get; }
-        public PropModelType PropModel { get; }
-        public Type TypeToWrap { get; }
-        public Type NewEmittedType { get; set; }
+        #region Private Properties
 
         IPropFactory _propFactory { get; }
         string _fullClassName { get; }
 
+        #endregion
+
+        #region Public Properties
+
+        public Type TargetType { get; }
+
+        public bool IsPropBag { get; }
+        public PropModelType PropModel { get; }
+
+        public Type TypeToWrap => PropModel?.TypeToWrap;
+
+        public Type NewEmittedType => PropModel?.NewEmittedType;
+
         // If specified, use the PropFactory provided by the caller instead of the one specified by the PropModel.
-        public IPropFactory PropFactory => _propFactory ?? PropModel.PropFactory;
+        public IPropFactory PropFactory => _propFactory ?? PropModel?.PropFactory;
 
         // If specified, use the FullClassName provided by the caller instead of the one specified by the PropModel.
-        public string FullClassName => _fullClassName ?? PropModel.FullClassName;
+        public string FullClassName => _fullClassName ?? PropModel?.FullClassName;
+
+        #endregion
 
         #region Constructors
 
@@ -32,25 +42,54 @@ namespace DRM.PropBag.AutoMapperSupport
             TargetType = typeof(T);
             IsPropBag = false;
             PropModel = null;
-            TypeToWrap = null;
-            NewEmittedType = null;
+            //TypeToWrap = null;
+            //NewEmittedType = null;
             _fullClassName = fullClassName;
             _propFactory = null;
-            _hashCode = TargetType.GetHashCode();
+
+            _hashCode = ComputeHashCode();
         }
 
-        public MapTypeDefinition(PropModelType propModel, Type typeToWrap, string fullClassName, IPropFactory propFactory)
+        public MapTypeDefinition(PropModelType propModel/*, Type typeToWrap*/, string fullClassName, IPropFactory propFactory)
         {
-            if(propModel.DeriveFromClassMode == DeriveFromClassModeEnum.Custom && typeToWrap != null && propModel.TypeToWrap != typeToWrap)
-            {
-                System.Diagnostics.Debug.WriteLine($"Warning: the value for the PropModel's TypeToCreate property is not equal to the supplied typeToWrap.");
-            }
+
+            //if (propModel.DeriveFromClassMode == DeriveFromClassModeEnum.Custom && typeToWrap != null && propModel.TypeToWrap != typeToWrap)
+            //{
+            //    System.Diagnostics.Debug.WriteLine($"Warning: the value for the PropModel's TypeToCreate property is not equal to the supplied typeToWrap.");
+            //}
+
+            //if (typeToWrap != null && typeToWrap != propModel.TypeToWrap)
+            //{
+            //    System.Diagnostics.Debug.WriteLine($"Warning: the value for the PropModel's TypeToCreate property is not equal to the supplied typeToWrap.");
+            //}
 
             TargetType = typeof(T);
+
+            if(propModel != null)
+            {
+                if(propModel.RunTimeType == null)
+                {
+                    throw new InvalidOperationException("The PropModel's RunTimeType is null.");
+                }
+
+                if (propModel.RunTimeType != TargetType)
+                {
+                    //System.Diagnostics.Debug.WriteLine($"Warning: The type parameter T: ({typeof(T)}) does not equal the " +
+                    //    $"PropModel's RunTimeType: ({propModel.RunTimeType}).");
+
+                    throw new InvalidOperationException($"The type parameter T: ({typeof(T)}) does not equal the " +
+                        $"PropModel's RunTimeType: ({propModel.RunTimeType}).");
+                }
+            }
+
+
+
             IsPropBag = true;
             PropModel = propModel ?? throw new ArgumentNullException(nameof(propModel));
-            TypeToWrap = typeToWrap ?? propModel.TypeToWrap; // throw new ArgumentNullException(nameof(typeToWrap));
-            NewEmittedType = propModel.NewEmittedType;
+
+            //TypeToWrap = typeToWrap ?? propModel.TypeToWrap; // throw new ArgumentNullException(nameof(typeToWrap));
+            //NewEmittedType = propModel.NewEmittedType;
+
             _fullClassName = fullClassName;
             _propFactory = propFactory;
             _hashCode = ComputeHashCode();
@@ -77,24 +116,17 @@ namespace DRM.PropBag.AutoMapperSupport
         // Clients of this service cache the PropModels so it should be easy to supply these unique references.
         public override bool Equals(object obj)
         {
-            var definition = obj as MapTypeDefinition<T>;
-            return definition != null
-                && EqualityComparer<Type>.Default.Equals(TargetType, definition.TargetType)
-                && EqualityComparer<Type>.Default.Equals(TypeToWrap, definition.TypeToWrap)
-                && ReferenceEquals(PropModel, definition.PropModel);
-        }
-
-        bool IEquatable<MapTypeDefinition<T>>.Equals(MapTypeDefinition<T> other)
-        {
-            return other != null
-                && EqualityComparer<Type>.Default.Equals(TargetType, other.TargetType)
-                && EqualityComparer<Type>.Default.Equals(TypeToWrap, other.TypeToWrap)
-                && ReferenceEquals(PropModel, other.PropModel)
-                && EqualityComparer<String>.Default.Equals(FullClassName, other.FullClassName);
+            return obj != null
+                && ((IMapTypeDefinitionGen)this).Equals(obj as IMapTypeDefinitionGen);
         }
 
         #region IEquatable<MapTypeDefinition<T>>
 
+        bool IEquatable<MapTypeDefinition<T>>.Equals(MapTypeDefinition<T> other)
+        {
+            return other != null
+                && ((IMapTypeDefinitionGen)this).Equals(other);
+        }
 
         #endregion
 
@@ -104,8 +136,9 @@ namespace DRM.PropBag.AutoMapperSupport
         {
             return other != null
                 && EqualityComparer<Type>.Default.Equals(TargetType, other.TargetType)
-                && EqualityComparer<Type>.Default.Equals(TypeToWrap, other.TypeToWrap)
                 && ReferenceEquals(PropModel, other.PropModel)
+                //&& EqualityComparer<Type>.Default.Equals(TypeToWrap, other.TypeToWrap)
+                && EqualityComparer<IPropFactory>.Default.Equals(PropFactory, other.PropFactory)
                 && EqualityComparer<String>.Default.Equals(FullClassName, other.FullClassName);
         }
 
@@ -121,11 +154,22 @@ namespace DRM.PropBag.AutoMapperSupport
             {
                 var hashCode = 1000498031;
                 hashCode = hashCode * -1521134295 + EqualityComparer<Type>.Default.GetHashCode(TargetType);
-                hashCode = hashCode * -1521134295 + PropModel.GetHashCode();
-                if(TypeToWrap != null)
+
+                if(PropModel != null)
                 {
-                    hashCode = hashCode * -1521134295 + EqualityComparer<Type>.Default.GetHashCode(TypeToWrap);
+                    hashCode = hashCode * -1521134295 + PropModel.GetHashCode();
                 }
+
+                //if (TypeToWrap != null)
+                //{
+                //    hashCode = hashCode * -1521134295 + EqualityComparer<Type>.Default.GetHashCode(TypeToWrap);
+                //}
+
+                if (PropFactory != null)
+                {
+                    hashCode = hashCode * -1521134295 + PropFactory.GetHashCode();
+                }
+
                 hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(FullClassName);
                 return hashCode;
             } 

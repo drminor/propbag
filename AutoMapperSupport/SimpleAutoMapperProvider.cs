@@ -8,7 +8,6 @@ using System.Threading;
 namespace DRM.PropBag.AutoMapperSupport
 {
     using PropModelType = IPropModel<String>;
-    using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
 
     public class SimpleAutoMapperProvider : IAutoMapperService, IDisposable
     {
@@ -51,11 +50,11 @@ namespace DRM.PropBag.AutoMapperSupport
 
         #region Public Methods
 
-        public IPropBagMapperKeyGen SubmitPropBagMapperRequest(PropModelType propModel/*, ViewModelFactoryInterface viewModelFactory*/, Type sourceType, string configPackageName, IAutoMapperService autoMapperService)
+        public IPropBagMapperKeyGen SubmitPropBagMapperRequest(PropModelType propModel, Type sourceType, string configPackageName)
         {
             Type typeToCreate = propModel.NewEmittedType ?? propModel.TypeToWrap;
             MapperRequestSubmitterDelegate mapperRequestSubmitter = GetPropBagMapperReqSubDelegate(sourceType, typeToCreate);
-            IPropBagMapperKeyGen result = mapperRequestSubmitter(propModel/*, viewModelFactory*/, typeToCreate, configPackageName, autoMapperService);
+            IPropBagMapperKeyGen result = mapperRequestSubmitter(propModel, typeToCreate, configPackageName, this);
 
             return result;
         }
@@ -64,7 +63,6 @@ namespace DRM.PropBag.AutoMapperSupport
         public IPropBagMapperKey<TSource, TDestination> SubmitPropBagMapperRequest<TSource, TDestination>
             (
             PropModelType propModel,
-            //object viewModelFactory,
             Type targetType,
             string configPackageName,
             IHaveAMapperConfigurationStep configStarterForThisRequest = null,
@@ -72,11 +70,6 @@ namespace DRM.PropBag.AutoMapperSupport
             )
             where TDestination : class, IPropBag
         {
-            //if(!(viewModelFactory is ViewModelFactoryInterface realVMFactory))
-            //{
-            //    throw new InvalidOperationException("The viewModelFactory argument is not an IViewModelFactory<L2T, L2TRaw>.");
-            //}
-
             // TODO: check to make sure that the "configStarterForThisRequest" value is being sent to the correct place.
 
             // TODO: Consider making the caller supply a IBuildMapperConfigurations "service."
@@ -95,10 +88,10 @@ namespace DRM.PropBag.AutoMapperSupport
                 = GetMappingConfiguration<TSource, TDestination>(configPackageName);
 
             IMapTypeDefinition<TSource> srcMapTypeDef
-                = _mapTypeDefinitionProvider.GetTypeDescription<TSource>(propModel, targetType, propFactory: propFactory, className: null);
+                = _mapTypeDefinitionProvider.GetTypeDescription<TSource>(propModel/*, targetType*/, propFactory: propFactory, className: null);
 
             IMapTypeDefinition<TDestination> dstMapTypeDef
-                = _mapTypeDefinitionProvider.GetTypeDescription<TDestination>(propModel, targetType, propFactory: propFactory, className: null);
+                = _mapTypeDefinitionProvider.GetTypeDescription<TDestination>(propModel/*, targetType*/, propFactory: propFactory, className: null);
 
 
             // Create the mapper request.
@@ -106,7 +99,6 @@ namespace DRM.PropBag.AutoMapperSupport
                 = new PropBagMapperKey<TSource, TDestination>
                 (
                     propBagMapperBuilder: propBagMapperBuilder,
-                    //viewModelFactory: realVMFactory,
                     mappingConfiguration: mappingConfiguration,
                     sourceMapTypeDef: srcMapTypeDef,
                     destinationMapTypeDef: dstMapTypeDef
@@ -117,11 +109,11 @@ namespace DRM.PropBag.AutoMapperSupport
         }
 
         // TODO: Is this necessary -- Can't AutoMapper requests be manipulated using only the 'gen' interfaces?
-        public IPropBagMapperKeyGen SubmitRawAutoMapperRequest(PropModelType propModel/*, ViewModelFactoryInterface viewModelFactory*/, Type sourceType, string configPackageName, IAutoMapperService autoMapperService)
+        public IPropBagMapperKeyGen SubmitRawAutoMapperRequest(PropModelType propModel, Type sourceType, string configPackageName)
         {
             Type typeToCreate = propModel.NewEmittedType ?? propModel.TypeToWrap;
             MapperRequestSubmitterDelegate mapperRequestSubmitter = GetPropBagMapperReqSubDelegate(sourceType, typeToCreate);
-            IPropBagMapperKeyGen result = mapperRequestSubmitter(propModel/*, viewModelFactory*/, typeToCreate, configPackageName, autoMapperService);
+            IPropBagMapperKeyGen result = mapperRequestSubmitter(propModel, typeToCreate, configPackageName, this);
 
             return result;
         }
@@ -130,7 +122,7 @@ namespace DRM.PropBag.AutoMapperSupport
         public IPropBagMapperKey<TSource, TDestination> SubmitRawAutoMapperRequest<TSource, TDestination>
             (
             PropModelType propModel,
-            //ViewModelFactoryInterface viewModelFactory,
+
             Type targetType,
             string configPackageName,
             IHaveAMapperConfigurationStep configStarterForThisRequest = null,
@@ -161,10 +153,10 @@ namespace DRM.PropBag.AutoMapperSupport
                 = GetMappingConfiguration<TSource, TDestination>(configPackageName);
 
             IMapTypeDefinition<TSource> srcMapTypeDef
-                = _mapTypeDefinitionProvider.GetTypeDescription<TSource>(propModel, targetType, propFactory: propFactory, className: null);
+                = _mapTypeDefinitionProvider.GetTypeDescription<TSource>(propModel/*, targetType*/, propFactory: propFactory, className: null);
 
             IMapTypeDefinition<TDestination> dstMapTypeDef
-                = _mapTypeDefinitionProvider.GetTypeDescription<TDestination>(propModel, targetType, propFactory: propFactory, className: null);
+                = _mapTypeDefinitionProvider.GetTypeDescription<TDestination>(propModel/*, targetType*/, propFactory: propFactory, className: null);
 
 
             // Create the mapper request.
@@ -172,7 +164,6 @@ namespace DRM.PropBag.AutoMapperSupport
                 = new PropBagMapperKey<TSource, TDestination>
                 (
                     propBagMapperBuilder: propBagMapperBuilder,
-                    //viewModelFactory: realVMFactory,
                     mappingConfiguration: mappingConfiguration,
                     sourceMapTypeDef: srcMapTypeDef,
                     destinationMapTypeDef: dstMapTypeDef
@@ -191,7 +182,8 @@ namespace DRM.PropBag.AutoMapperSupport
             return _propBagMappersCache.RegisterPropBagMapperRequest(mapperRequest);
         }
 
-        public IPropBagMapper<TSource, TDestination> GetPropBagMapper<TSource, TDestination>(IPropBagMapperKey<TSource, TDestination> mapperRequest) where TDestination : class, IPropBag
+        public IPropBagMapper<TSource, TDestination> GetPropBagMapper<TSource, TDestination>(IPropBagMapperKey<TSource, TDestination> mapperRequest)
+            where TDestination : class, IPropBag
         {
             return (IPropBagMapper<TSource, TDestination>)_propBagMappersCache.GetPropBagMapper(mapperRequest);
         }
@@ -215,7 +207,8 @@ namespace DRM.PropBag.AutoMapperSupport
             return _rawAutoMapperCache.RegisterRawAutoMapperRequest(mapperRequest);
         }
 
-        public IMapper GetRawAutoMapper<TSource, TDestination>(IPropBagMapperKey<TSource, TDestination> mapperRequest) where TDestination : class, IPropBag
+        public IMapper GetRawAutoMapper<TSource, TDestination>(IPropBagMapperKey<TSource, TDestination> mapperRequest)
+            where TDestination : class, IPropBag
         {
             return _rawAutoMapperCache.GetRawAutoMapper(mapperRequest);
         }
@@ -306,7 +299,6 @@ namespace DRM.PropBag.AutoMapperSupport
             static IPropBagMapperKey<TSource, TDestination> SubmitPropBagMapperRequest<TSource, TDestination>
                 (
                 PropModelType propModel,
-                //ViewModelFactoryInterface viewModelFactory,
                 Type targetType,
                 string configPackageName,
                 IAutoMapperService autoMapperProvider
@@ -332,7 +324,6 @@ namespace DRM.PropBag.AutoMapperSupport
             static IPropBagMapperKey<TSource, TDestination> SubmitRawAutoMapperRequest<TSource, TDestination>
                 (
                 PropModelType propModel,
-                //ViewModelFactoryInterface viewModelFactory,
                 Type targetType,
                 string configPackageName,
                 IAutoMapperService autoMapperProvider
@@ -344,7 +335,6 @@ namespace DRM.PropBag.AutoMapperSupport
                     = autoMapperProvider.SubmitRawAutoMapperRequest<TSource, TDestination>
                         (
                         propModel: propModel,
-                        //viewModelFactory: viewModelFactory,
                         typeToWrap: targetType,
                         configPackageName: configPackageName,
                         configStarterForThisRequest: null,

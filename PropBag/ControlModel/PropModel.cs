@@ -28,7 +28,17 @@ namespace DRM.PropBag
 
         Type _targetType;
         [XmlElement("type")]
-        public Type TargetType { get { return _targetType; } set { _targetType = value; } }
+        public Type TargetType
+        {
+            get
+            {
+                return _targetType;
+            }
+            set
+            {
+                _targetType = value;
+            }
+        }
 
         ITypeInfoField _wrapperTypeInfoField;
         [XmlElement("type-info")]
@@ -297,20 +307,20 @@ namespace DRM.PropBag
 
         #region Type and Namespace support
 
-        Type _typeToCreate;
+        Type _typeToWrap;
         public Type TypeToWrap
         {
             get
             {
-                if(_typeToCreate == null)
+                if(_typeToWrap == null)
                 {
-                    _typeToCreate = GetTypeToCreate(this.DeriveFromClassMode, this.TargetType, this.WrapperTypeInfoField);
+                    _typeToWrap = GetTypeToWrap(this.DeriveFromClassMode, this.TargetType, this.WrapperTypeInfoField);
                 }
-                return _typeToCreate;
+                return _typeToWrap;
             }
         }
 
-        private Type GetTypeToCreate(DeriveFromClassModeEnum deriveFrom, Type targetType, ITypeInfoField typeInfofield)
+        private Type GetTypeToWrap(DeriveFromClassModeEnum deriveFrom, Type targetType, ITypeInfoField typeInfofield)
         {
             Type result;
 
@@ -339,6 +349,27 @@ namespace DRM.PropBag
 
             return result;
         }
+
+        Type _runTimeType;
+        public Type RunTimeType
+        {
+            get
+            {
+                if (_runTimeType == null)
+                {
+                    _runTimeType = GetRunTimeType(this.TypeToWrap, this.NewEmittedType);
+                }
+                return _runTimeType;
+            }
+        }
+
+        private Type GetRunTimeType(Type typeToWrap, Type newEmittedType)
+        {
+            Type result = newEmittedType ?? typeToWrap;
+
+            return result;
+        }
+
 
         string _fullClassName;
         public string FullClassName

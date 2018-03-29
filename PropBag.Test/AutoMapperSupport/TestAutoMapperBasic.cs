@@ -71,7 +71,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
             ////    );
 
             IPropBagMapperKeyGen mapperRequest =
-                _amp.SubmitPropBagMapperRequest(propModel, typeof(MyModel3), configPackageName, _amp);
+                _amp.SubmitPropBagMapperRequest(propModel, typeof(MyModel3), configPackageName);
 
 
             Assert.That(mapperRequest, Is.Not.Null, "mapperRequest should be non-null.");
@@ -95,7 +95,8 @@ namespace PropBagLib.Tests.AutoMapperSupport
 
             propModel.NewEmittedType = et;
 
-            IPropBagMapperKeyGen mapperKey = _amp.SubmitPropBagMapperRequest(mapperRequest.PropModel/*, _viewModelFactory*/, mapperRequest.SourceType, mapperRequest.ConfigPackageName, _amp);
+            IPropBagMapperKeyGen mapperKey = _amp.SubmitPropBagMapperRequest(mapperRequest.PropModel,
+                mapperRequest.SourceType, mapperRequest.ConfigPackageName);
 
             // Get the AutoMapper mapping function associated with the mapper request already submitted.
             IPropBagMapperGen genMapper = _amp.GetPropBagMapper(mapperKey);
@@ -133,7 +134,8 @@ namespace PropBagLib.Tests.AutoMapperSupport
 
             //IPropBagMapper<MyModel3, DestinationModel3> mapper2 = _amp.GetMapper<MyModel3, DestinationModel3>(mapperRequest2);
 
-            IPropBagMapperKeyGen mapperKey2 = _amp.SubmitPropBagMapperRequest(mapperRequest.PropModel/*, _viewModelFactory*/, mapperRequest.SourceType, mapperRequest.ConfigPackageName, _amp);
+            IPropBagMapperKeyGen mapperKey2 = _amp.SubmitPropBagMapperRequest(mapperRequest.PropModel,
+                mapperRequest.SourceType, mapperRequest.ConfigPackageName);
 
             // Get the AutoMapper mapping function associated with the mapper request already submitted.
             IPropBagMapperGen genMapper2 = _amp.GetPropBagMapper(mapperKey);

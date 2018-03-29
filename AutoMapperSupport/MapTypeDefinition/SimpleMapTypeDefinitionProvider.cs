@@ -9,11 +9,11 @@ namespace DRM.PropBag.AutoMapperSupport
 
     public class SimpleMapTypeDefinitionProvider : IMapTypeDefinitionProvider
     {
-        public IMapTypeDefinition<T> GetTypeDescription<T>(PropModelType propModel, Type typeToWrap, IPropFactory propFactory, string fullClassName)
+        public IMapTypeDefinition<T> GetTypeDescription<T>(PropModelType propModel/*, Type typeToWrap*/, IPropFactory propFactory, string fullClassName)
         {
             if (typeof(T).IsPropBagBased())
             {
-                return new MapTypeDefinition<T>(propModel, typeToWrap, fullClassName, propFactory);
+                return new MapTypeDefinition<T>(propModel/*, typeToWrap*/, fullClassName, propFactory);
             }
             else
             {

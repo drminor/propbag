@@ -92,7 +92,7 @@ namespace PropBagLib.Tests.PerformanceDb
                 Type et = wrapperTypeCreator.GetWrapperType(propModel1, typeToWrap);
                 propModel1.NewEmittedType = et;
 
-                IPropBagMapperKeyGen mapperRequest = amp.SubmitPropBagMapperRequest(localMr.PropModel/*, viewModelFactory*/, localMr.SourceType, localMr.ConfigPackageName, amp);
+                IPropBagMapperKeyGen mapperRequest = amp.SubmitPropBagMapperRequest(localMr.PropModel, localMr.SourceType, localMr.ConfigPackageName);
 
                 Assert.That(mapperRequest, Is.Not.Null, "mapperRequest should be non-null.");
 

@@ -17,7 +17,6 @@ namespace DRM.PropBag.AutoMapperSupport
         IPropBagMapperKey<TSource, TDestination> SubmitPropBagMapperRequest<TSource, TDestination>
             (
             PropModelType propModel,
-            //object viewModelFactory,
             Type typeToWrap,
             string configPackageName,
             IHaveAMapperConfigurationStep configStarterForThisRequest = null,
@@ -28,7 +27,6 @@ namespace DRM.PropBag.AutoMapperSupport
         IPropBagMapperKey<TSource, TDestination> SubmitRawAutoMapperRequest<TSource, TDestination>
             (
             PropModelType propModel,
-            //ViewModelFactoryInterface viewModelFactory,
             Type typeToWrap,
             string configPackageName,
             IHaveAMapperConfigurationStep configStarterForThisRequest = null,
@@ -40,10 +38,8 @@ namespace DRM.PropBag.AutoMapperSupport
         IPropBagMapperKeyGen SubmitPropBagMapperRequest
             (
             PropModelType propModel,
-            //ViewModelFactoryInterface viewModelFactory,
             Type sourceType,
-            string configPackageName,
-            IAutoMapperService autoMapperService
+            string configPackageName
             );
 
         // Execute the Request and get the Mapper (Typed version)

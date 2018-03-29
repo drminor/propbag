@@ -75,9 +75,13 @@ namespace PropBagLib.Tests.PerformanceDb
         public void ReadIntoNativeArray()
         {
             Business b = new Business();
-            List<Person> personList = b.Get(1000).ToList();
-            Assert.That(personList.Count == 1000, $"The PersonList contains {personList.Count}, it should contain {NUMBER_OF_PEOPLE}.");
 
+            //List<Person> personList = b.Get(1000).ToList();
+            //Assert.That(personList.Count == 1000, $"The PersonList contains {personList.Count}, it should contain {NUMBER_OF_PEOPLE}.");
+
+            IEnumerable<Person> personList = b.Get(1000);
+
+            int cnt = 0;
             foreach(Person p in personList)
             {
                 Person np = new Person()
@@ -88,7 +92,11 @@ namespace PropBagLib.Tests.PerformanceDb
                     CityOfResidence = p.CityOfResidence,
                     Profession = p.Profession
                 };
+                cnt++;
             }
+
+            Assert.That(cnt == NUMBER_OF_PEOPLE, $"The PersonList contains {cnt}, it should contain {NUMBER_OF_PEOPLE}.");
+
         }
 
         [Test]

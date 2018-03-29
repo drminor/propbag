@@ -64,31 +64,31 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public override bool Equals(object obj)
         {
-            return Equals(obj as PropBagMapperKeyGen);
+            return Equals(obj as IPropBagMapperKeyGen);
         }
 
         public bool Equals(PropBagMapperKeyGen other)
         {
-            return other != null &&
-                   //MappingStrategy == other.MappingStrategy &&
-                   EqualityComparer<IMapTypeDefinitionGen>.Default.Equals(SourceTypeGenDef, other.SourceTypeGenDef) &&
-                   EqualityComparer<IMapTypeDefinitionGen>.Default.Equals(DestinationTypeGenDef, other.DestinationTypeGenDef);
+            return Equals(other as IPropBagMapperKeyGen);
         }
 
         public bool Equals(IPropBagMapperKeyGen other)
         {
+            //return other != null &&
+            //       EqualityComparer<IMapTypeDefinitionGen>.Default.Equals(SourceTypeGenDef, other.SourceTypeGenDef) &&
+            //       EqualityComparer<IMapTypeDefinitionGen>.Default.Equals(DestinationTypeGenDef, other.DestinationTypeGenDef);
+
             return other != null &&
-                   //MappingStrategy == other.MappingStrategy &&
-                   EqualityComparer<IMapTypeDefinitionGen>.Default.Equals(SourceTypeGenDef, other.SourceTypeGenDef) &&
-                   EqualityComparer<IMapTypeDefinitionGen>.Default.Equals(DestinationTypeGenDef, other.DestinationTypeGenDef);
+               SourceTypeGenDef == other.SourceTypeGenDef &&
+               DestinationTypeGenDef == other.DestinationTypeGenDef;
+
         }
 
         public override int GetHashCode()
         {
             var hashCode = 1973524047;
-            //hashCode = hashCode * -1521134295 + MappingStrategy.GetHashCode();
-            hashCode = hashCode * -1521134295 + EqualityComparer<IMapTypeDefinitionGen>.Default.GetHashCode(SourceTypeGenDef);
-            hashCode = hashCode * -1521134295 + EqualityComparer<IMapTypeDefinitionGen>.Default.GetHashCode(DestinationTypeGenDef);
+            hashCode = hashCode * -1521134295 + SourceTypeGenDef.GetHashCode();
+            hashCode = hashCode * -1521134295 + DestinationTypeGenDef.GetHashCode();
             return hashCode;
         }
 
@@ -99,7 +99,8 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public static bool operator ==(PropBagMapperKeyGen gen1, PropBagMapperKeyGen gen2)
         {
-            return EqualityComparer<PropBagMapperKeyGen>.Default.Equals(gen1, gen2);
+            //return EqualityComparer<PropBagMapperKeyGen>.Default.Equals(gen1, gen2);
+            return ((IPropBagMapperKeyGen)gen1).Equals(gen2);
         }
 
         public static bool operator !=(PropBagMapperKeyGen gen1, PropBagMapperKeyGen gen2)

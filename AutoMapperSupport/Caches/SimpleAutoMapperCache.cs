@@ -32,6 +32,11 @@ namespace DRM.PropBag.AutoMapperSupport
 
                 // TODO: This is relatively resource intensive, perhaps there's a better way.
                 IPropBagMapperKeyGen existingKey = keys.FirstOrDefault(x => x.DestinationTypeGenDef.Equals(mapRequest.DestinationTypeGenDef));
+
+                if(!ReferenceEquals(existingKey, mapRequest))
+                {
+                    System.Diagnostics.Debug.WriteLine("The mapRequest given to RegisterRawAutoMapperRequest was not the original key.");
+                }
                 return existingKey;
             }
             else

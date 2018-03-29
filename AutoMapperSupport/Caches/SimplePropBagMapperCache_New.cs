@@ -80,6 +80,10 @@ namespace DRM.PropBag.AutoMapperSupport
             {
                 System.Diagnostics.Debug.WriteLine($"The mapRequest was updated by method call: {operationName}.");
             }
+            else
+            {
+                System.Diagnostics.Debug.Assert(1 == 1, "Remove this.");
+            }
         }
 
         private IPropBagMapperGen GetPropBagMapperReal(IPropBagMapperKeyGen key)

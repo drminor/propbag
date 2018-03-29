@@ -29,18 +29,18 @@ namespace DRM.PropBag.TypeWrapper
 
         #region Public Methods
 
-        public Type GetWrapperType(PropModelType propModel, Type typeToCreate)
+        public Type GetWrapperType(PropModelType propModel, Type typeToWrap)
         {
-            if (!typeToCreate.IsPropBagBased())
+            if (!typeToWrap.IsPropBagBased())
             {
-                throw new InvalidOperationException($"Type: {typeToCreate.Name} must derive from IPropBag.");
+                throw new InvalidOperationException($"Type: {typeToWrap.Name} must derive from IPropBag.");
             }
 
             //TypeDescription td = _typeDescCachingService.GetOrAdd(new NewTypeRequest(propModel, typeToCreate, null));
             //Type newWrapperType = _wrapperTypeCachingService.GetOrAdd(td);
             //return newWrapperType;
 
-            Type result = GetWrapperType_Internal(propModel, typeToCreate, null);
+            Type result = GetWrapperType_Internal(propModel, typeToWrap, null);
             return result;
         }
 
@@ -54,9 +54,9 @@ namespace DRM.PropBag.TypeWrapper
             return result;
         }
 
-        private Type GetWrapperType_Internal(PropModelType propModel, Type typeToCreate, string fullClassName)
+        private Type GetWrapperType_Internal(PropModelType propModel, Type typeToWrap, string fullClassName)
         {
-            TypeDescription td = _typeDescCachingService.GetOrAdd(new NewTypeRequest(propModel, typeToCreate, fullClassName));
+            TypeDescription td = _typeDescCachingService.GetOrAdd(new NewTypeRequest(propModel, typeToWrap, fullClassName));
             Type newWrapperType = _wrapperTypeCachingService.GetOrAdd(td);
 
             return newWrapperType;

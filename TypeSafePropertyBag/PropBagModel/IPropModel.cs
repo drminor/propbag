@@ -15,8 +15,15 @@ namespace DRM.TypeSafePropertyBag
         DeriveFromClassModeEnum DeriveFromClassMode { get; set; }
         ObservableCollection<string> Namespaces { get; set; }
 
+        // TODO: Consider renaming TargetType to LogicalType or CustomBaseType to avoid confusion with
+        // IMapTypeDefinition's TargetType.
         /// <summary>
         /// If the DeriveFromClassMode = 'Custom'. This is the Custom Type.
+        /// </summary>
+        Type TargetType { get; }
+
+        /// <summary>
+        /// Either PropBag, PubPropBag, or TargetType depending on the value of DeriveFromClassMode.
         /// </summary>
         Type TypeToWrap { get; }
 
@@ -29,13 +36,10 @@ namespace DRM.TypeSafePropertyBag
         /// </summary>
         Type NewEmittedType { get; set; }
 
-        /// <summary>
         /// The destination type. 
         /// This will be same value as NewEmittedType if NewEmitedType is not null,
-        /// Otherwise will be 'PropBag', 'PubPropBag' or the value of TypeToWrap, 
-        /// depending on the value of DeriveFromClassMode.
-        /// </summary>
-        Type TargetType { get; }
+        /// Otherwise it will be the same value as TypeToWrap, 
+        Type RunTimeType { get; }
 
         IPropFactory PropFactory { get; set; }
         Type PropFactoryType { get; set; }
