@@ -147,7 +147,7 @@ namespace PropBagTestApp.Infra
             IMapTypeDefinitionProvider mapTypeDefinitionProvider = new SimpleMapTypeDefinitionProvider();
 
             ICacheAutoMappers rawAutoMapperCache = new SimpleAutoMapperCache();
-            ICachePropBagMappers mappersCachingService = new SimplePropBagMapperCache_New(rawAutoMapperCache, viewModelFactory);
+            ICachePropBagMappers mappersCachingService = new SimplePropBagMapperCache(rawAutoMapperCache, viewModelFactory);
 
             IPropBagMapperBuilderProvider propBagMapperBuilderProvider = new SimplePropBagMapperBuilderProvider();
 

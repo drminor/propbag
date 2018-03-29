@@ -8,7 +8,7 @@ namespace DRM.PropBag.AutoMapperSupport
     using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
 
     //[Synchronization()]
-    public class SimplePropBagMapperCache_New : /*ContextBoundObject,*/ ICachePropBagMappers, IDisposable
+    public class SimplePropBagMapperCache : /*ContextBoundObject,*/ ICachePropBagMappers, IDisposable
     {
         private readonly ViewModelFactoryInterface _viewModelFactory;
         private readonly ICacheAutoMappers _autoMappersCache;
@@ -16,7 +16,7 @@ namespace DRM.PropBag.AutoMapperSupport
         private readonly LockingConcurrentDictionary<IPropBagMapperKeyGen, IPropBagMapperGen> _propBagMappers;
 
 
-        public SimplePropBagMapperCache_New(ICacheAutoMappers autoMappersCache, ViewModelFactoryInterface viewModelFactory)
+        public SimplePropBagMapperCache(ICacheAutoMappers autoMappersCache, ViewModelFactoryInterface viewModelFactory)
         {
             _autoMappersCache = autoMappersCache;
             _viewModelFactory = viewModelFactory;
