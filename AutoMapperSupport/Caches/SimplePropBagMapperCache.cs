@@ -88,7 +88,7 @@ namespace DRM.PropBag.AutoMapperSupport
 
         private IPropBagMapperGen GetPropBagMapperReal(IPropBagMapperKeyGen key)
         {
-            IPropBagMapperGen result = key.CreateMapper(_viewModelFactory);
+            IPropBagMapperGen result = key.CreatePropBagMapper(_viewModelFactory);
             return result;
         }
 

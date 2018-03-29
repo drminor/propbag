@@ -12,9 +12,10 @@ namespace DRM.PropBag.AutoMapperSupport
     // TODO: check to see if we really need to use the base class: PropBagMapperKeyGen
 
     public class PropBagMapperKey<TSource, TDestination> : PropBagMapperKeyGen,
-        IPropBagMapperKey<TSource, TDestination>, 
-        IEquatable<IPropBagMapperKey<TSource, TDestination>>,
-        IEquatable<PropBagMapperKey<TSource, TDestination>> where TDestination: class, IPropBag
+                IPropBagMapperKey<TSource, TDestination>, 
+                IEquatable<IPropBagMapperKey<TSource, TDestination>>,
+                IEquatable<PropBagMapperKey<TSource, TDestination>>
+        where TDestination: class, IPropBag
     {
         #region Private Members
 
@@ -26,10 +27,9 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public IMapTypeDefinition<TSource> SourceTypeDef { get; }
         public IMapTypeDefinition<TDestination> DestinationTypeDef { get; }
+
         //public Func<TDestination, TSource> SourceConstructor { get; }
         //public Func<TSource, TDestination> DestinationConstructor { get; }
-
-        public Func<IPropBagMapperKeyGen, ViewModelFactoryInterface, IPropBagMapperGen> MapperCreator => PropBagMapperBuilder.GenMapperCreator;
 
         public IConfigureAMapper<TSource, TDestination> MappingConfiguration { get; }
 
@@ -46,8 +46,8 @@ namespace DRM.PropBag.AutoMapperSupport
             )
             : base
             (
-                propBagMapperBuilder.GenMapperCreator,
-                propBagMapperBuilder.RawAutoMapperCreator,
+                propBagMapperBuilder.GenPropBagMapperCreator,
+                propBagMapperBuilder.GenRawAutoMapperCreator,
                 sourceMapTypeDef,
                 destinationMapTypeDef
             )
@@ -95,6 +95,7 @@ namespace DRM.PropBag.AutoMapperSupport
             return Equals(obj as PropBagMapperKeyGen);
         }
 
+        [System.Diagnostics.DebuggerStepThrough()]
         public override int GetHashCode()
         {
             var hashCode = 1780333077;
@@ -103,7 +104,6 @@ namespace DRM.PropBag.AutoMapperSupport
             hashCode = hashCode * -1521134295 + EqualityComparer<IMapTypeDefinition<TDestination>>.Default.GetHashCode(DestinationTypeDef);
             return hashCode;
         }
-
 
         public override string ToString()
         {
