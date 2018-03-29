@@ -14,5 +14,6 @@ namespace DRM.PropBag.AutoMapperSupport
 
         IMapper CreateRawAutoMapper();
 
+        IMapper AutoMapper { get; set; }
     }
 }

@@ -17,8 +17,6 @@ namespace DRM.PropBag.AutoMapperSupport
 
         #endregion
 
-        //private ICreateWrapperTypes _wrapperTypeCreator { get; }
-
         #region Constructor
 
         public SimplePropBagMapperBuilder
@@ -46,9 +44,7 @@ namespace DRM.PropBag.AutoMapperSupport
 
             CheckTypeToCreate(typeof(TDestination), mapperRequestKey.DestinationTypeDef.TargetType);
 
-            IConfigurationProvider configProvider = _mapperConfigurationBuilder.GetNewConfiguration(mapperRequestKey);
-
-            IMapper theMapper = configProvider.CreateMapper();
+            IMapper theMapper = mapperRequestKey.AutoMapper;
 
             IPropBagMapper<TSource, TDestination> result = new SimplePropBagMapper<TSource, TDestination>
                 (

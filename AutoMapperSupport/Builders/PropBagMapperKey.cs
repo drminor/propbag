@@ -1,4 +1,5 @@
-﻿using DRM.PropBag.ViewModelTools;
+﻿using AutoMapper;
+using DRM.PropBag.ViewModelTools;
 using DRM.TypeSafePropertyBag;
 using System;
 using System.Collections.Generic;
@@ -60,6 +61,8 @@ namespace DRM.PropBag.AutoMapperSupport
 
             //SourceConstructor = mappingConfiguration.SourceConstructor;
             //DestinationConstructor = mappingConfiguration.DestinationConstructor;
+
+            AutoMapper = null;
 
             ValidateThisKey();
         }

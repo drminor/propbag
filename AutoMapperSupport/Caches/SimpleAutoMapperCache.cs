@@ -10,29 +10,25 @@ namespace DRM.PropBag.AutoMapperSupport
     //[Synchronization()]
     public class SimpleAutoMapperCache : /*ContextBoundObject,*/ ICacheAutoMappers, IDisposable
     {
-
-        private readonly LockingConcurrentDictionary<IPropBagMapperKeyGen, IPropBagMapperKeyGen> _unSealedPropBagMappers;
-        private readonly LockingConcurrentDictionary<IPropBagMapperKeyGen, IMapper> _sealedPropBagMappers;
+        private readonly LockingConcurrentDictionary<IPropBagMapperKeyGen, IPropBagMapperKeyGen> _unSealedAutoMappers;
+        private readonly LockingConcurrentDictionary<IPropBagMapperKeyGen, IMapper> _sealedAutoMappers;
 
         private int pCntr = 0;
 
         public SimpleAutoMapperCache()
         {
-            _unSealedPropBagMappers = 
-                new LockingConcurrentDictionary<IPropBagMapperKeyGen, IPropBagMapperKeyGen>
-                (GetPropBagMapperPromise);
+            _unSealedAutoMappers = 
+                new LockingConcurrentDictionary<IPropBagMapperKeyGen, IPropBagMapperKeyGen>(GetPropBagMapperPromise);
 
-            _sealedPropBagMappers =
-                new LockingConcurrentDictionary<IPropBagMapperKeyGen, IMapper>
-                (GetPropBagMapperReal);
+            _sealedAutoMappers =
+                new LockingConcurrentDictionary<IPropBagMapperKeyGen, IMapper>(GetPropBagMapperReal);
         }
 
         public IPropBagMapperKeyGen RegisterRawAutoMapperRequest(IPropBagMapperKeyGen mapRequest)
         {
-
-            if (_sealedPropBagMappers.ContainsKey(mapRequest))
+            if (_sealedAutoMappers.ContainsKey(mapRequest))
             {
-                ICollection<IPropBagMapperKeyGen> keys = _sealedPropBagMappers.Keys;
+                ICollection<IPropBagMapperKeyGen> keys = _sealedAutoMappers.Keys;
 
                 // TODO: This is relatively resource intensive, perhaps there's a better way.
                 IPropBagMapperKeyGen existingKey = keys.FirstOrDefault(x => x.DestinationTypeGenDef.Equals(mapRequest.DestinationTypeGenDef));
@@ -40,7 +36,7 @@ namespace DRM.PropBag.AutoMapperSupport
             }
             else
             {
-                _unSealedPropBagMappers.GetOrAdd(mapRequest);
+                _unSealedAutoMappers.GetOrAdd(mapRequest);
                 return mapRequest;
             }
         }
@@ -49,20 +45,21 @@ namespace DRM.PropBag.AutoMapperSupport
         {
             IPropBagMapperKeyGen save = mapRequest;
 
-            if (_sealedPropBagMappers.TryGetValue(mapRequest, out IMapper result))
+            if (_sealedAutoMappers.TryGetValue(mapRequest, out IMapper result))
             {
                 CheckForChanges(save, mapRequest, "Find in Sealed -- First Check.");
                 return result;
             }
 
-            _unSealedPropBagMappers.GetOrAdd(mapRequest);
+            _unSealedAutoMappers.GetOrAdd(mapRequest);
             CheckForChanges(save, mapRequest, "GetOrAdd to UnSealed");
 
+            // Seal all pending mapper requests.
             int numberInThisBatch = SealThis(pCntr++);
 
             CheckForChanges(save, mapRequest, "Seal");
 
-            if (!_sealedPropBagMappers.TryGetValue(mapRequest, out result))
+            if (!_sealedAutoMappers.TryGetValue(mapRequest, out result))
             {
                 CheckForChanges(save, mapRequest, "Find in Sealed -- second check.");
                 result = null;
@@ -72,33 +69,38 @@ namespace DRM.PropBag.AutoMapperSupport
         }
 
         // TODO: Note: only the sealed mappers are counted.
-        public long ClearMappersCache()
+        public long ClearRawAutoMappersCache()
         {
-            long result = _sealedPropBagMappers.Count;
-            foreach (IPropBagMapperGen mapper in _sealedPropBagMappers)
+            long result = _sealedAutoMappers.Count;
+            foreach (IPropBagMapperGen mapper in _sealedAutoMappers)
             {
                 if (mapper is IDisposable disable)
                 {
                     disable.Dispose();
                 }
             }
-            _unSealedPropBagMappers.Clear();
+            _unSealedAutoMappers.Clear();
 
-            foreach (IPropBagMapperGen mapper in _sealedPropBagMappers)
+            foreach (IPropBagMapperGen mapper in _sealedAutoMappers)
             {
                 if (mapper is IDisposable disable)
                 {
                     disable.Dispose();
                 }
             }
-            _sealedPropBagMappers.Clear();
+            _sealedAutoMappers.Clear();
 
             return result;
         }
 
         private void CheckForChanges(IPropBagMapperKeyGen original, IPropBagMapperKeyGen current, string operationName)
         {
-            if(!ReferenceEquals(original,current))
+            if (!ReferenceEquals(original, current))
+            {
+                System.Diagnostics.Debug.WriteLine($"The mapRequest object was replaced by method call: {operationName}.");
+            }
+
+            if (original != current)
             {
                 System.Diagnostics.Debug.WriteLine($"The mapRequest was updated by method call: {operationName}.");
             }
@@ -109,10 +111,12 @@ namespace DRM.PropBag.AutoMapperSupport
             System.Diagnostics.Debug.WriteLine($"Creating Profile_{cntr.ToString()}");
 
             int result = 0;
-            foreach (IPropBagMapperKeyGen key in _unSealedPropBagMappers.Keys)
+            foreach (IPropBagMapperKeyGen key in _unSealedAutoMappers.Keys)
             {
-                IMapper mapper = _sealedPropBagMappers.GetOrAdd(key);
-                if (!(_unSealedPropBagMappers.TryRemoveValue(key, out IPropBagMapperKeyGen dummyKey)))
+                IMapper mapper = _sealedAutoMappers.GetOrAdd(key);
+                key.AutoMapper = mapper;
+
+                if (!(_unSealedAutoMappers.TryRemoveValue(key, out IPropBagMapperKeyGen dummyKey)))
                 {
                     System.Diagnostics.Debug.WriteLine("Couldn't remove mappper request from list of registered, pending to be created, mapper requests.");
                 }
@@ -143,7 +147,7 @@ namespace DRM.PropBag.AutoMapperSupport
                 if (disposing)
                 {
                     // Dispose managed state (managed objects).
-                    ClearMappersCache();
+                    ClearRawAutoMappersCache();
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.

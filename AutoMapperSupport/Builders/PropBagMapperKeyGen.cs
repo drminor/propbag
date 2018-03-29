@@ -8,6 +8,7 @@ namespace DRM.PropBag.AutoMapperSupport
 {
     using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
 
+    // TODO: Consider implementing IDisposable -- to let go of any references we may hold to the mapper creators.
     public class PropBagMapperKeyGen : IPropBagMapperKeyGen, IEquatable<IPropBagMapperKeyGen>, IEquatable<PropBagMapperKeyGen>
     {
         #region Private Members
@@ -22,6 +23,8 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public IMapTypeDefinitionGen SourceTypeGenDef { get; set; }
         public IMapTypeDefinitionGen DestinationTypeGenDef { get; set; }
+
+        public IMapper AutoMapper { get; set; }
 
         #endregion
 

@@ -44,6 +44,7 @@
     <Compile Include="Builders\IPropBagMapperBuilderProvider.cs" />
     <Compile Include="Builders\SimplePropBagMapperBuilderProvider.cs" />
     <Compile Include="Caches\SimpleAutoMapperCache.cs" />
+    <Compile Include="Caches\SimplePropBagMapperCache_New.cs" />
     <Compile Include="ConfigPackages\ConfigPackage_EmitProxy.cs" />
     <Compile Include="ConfigPackages\ConfigPackage_ExtraMembers.cs" />
     <Compile Include="ConfigPackages\ICreateMapperRequests.cs" />
@@ -53,7 +54,7 @@
     <Compile Include="Builders\PropBagMapperKeyGen.cs" />
     <Compile Include="MapTypeDefinition\SimpleMapTypeDefinitionProvider.cs" />
     <Compile Include="Caches\ICacheConfigPackages.cs" />
-    <Compile Include="Caches\SimplePropBagMapperCache.cs" />
+    <None Include="Caches\SimplePropBagMapperCache_Old.cs" />
     <Compile Include="Config\SimpleMapperConfigurationBuilderGenBase.cs" />
     <Compile Include="Config\SimpleMapperConfigurationBuilder.cs" />
     <Compile Include="Config\AbstractMapperConfigGen.cs" />

@@ -1,11 +1,13 @@
-﻿namespace DRM.PropBag.AutoMapperSupport
+﻿using DRM.TypeSafePropertyBag;
+
+namespace DRM.PropBag.AutoMapperSupport
 {
     public interface ICachePropBagMappers
     {
-        IPropBagMapperKeyGen RegisterMapperRequest(IPropBagMapperKeyGen mapperRequest);
+        IPropBagMapperKeyGen RegisterPropBagMapperRequest(IPropBagMapperKeyGen mapperRequest);
 
-        IPropBagMapperGen GetMapper(IPropBagMapperKeyGen mapperRequest);
+        IPropBagMapperGen GetPropBagMapper(IPropBagMapperKeyGen mapperRequest);
 
-        long ClearMappersCache();
+        long ClearPropBagMappersCache();
     }
 }

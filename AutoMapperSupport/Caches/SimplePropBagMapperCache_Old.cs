@@ -32,7 +32,7 @@ namespace DRM.PropBag.AutoMapperSupport
                 (GetPropBagMapperReal);
         }
 
-        public IPropBagMapperKeyGen RegisterMapperRequest(IPropBagMapperKeyGen mapRequest)
+        public IPropBagMapperKeyGen RegisterPropBagMapperRequest(IPropBagMapperKeyGen mapRequest)
         {
 
             if (_sealedPropBagMappers.ContainsKey(mapRequest))
@@ -50,7 +50,7 @@ namespace DRM.PropBag.AutoMapperSupport
             }
         }
 
-        public IPropBagMapperGen GetMapper(IPropBagMapperKeyGen mapRequest)
+        public IPropBagMapperGen GetPropBagMapper(IPropBagMapperKeyGen mapRequest)
         {
             IPropBagMapperKeyGen save = mapRequest;
 
@@ -77,7 +77,7 @@ namespace DRM.PropBag.AutoMapperSupport
         }
 
         // TODO: Note: only the sealed mappers are counted.
-        public long ClearMappersCache()
+        public long ClearPropBagMappersCache()
         {
             long result = _sealedPropBagMappers.Count;
             foreach (IPropBagMapperGen mapper in _sealedPropBagMappers)
@@ -87,16 +87,18 @@ namespace DRM.PropBag.AutoMapperSupport
                     disable.Dispose();
                 }
             }
-            _unSealedPropBagMappers.Clear();
+            _sealedPropBagMappers.Clear();
 
-            foreach (IPropBagMapperGen mapper in _sealedPropBagMappers)
+
+            foreach (IPropBagMapperKeyGen mapperRequest in _unSealedPropBagMappers)
             {
-                if (mapper is IDisposable disable)
+                if (mapperRequest is IDisposable disable)
                 {
                     disable.Dispose();
                 }
             }
-            _sealedPropBagMappers.Clear();
+            _unSealedPropBagMappers.Clear();
+
 
             return result;
         }
@@ -148,7 +150,7 @@ namespace DRM.PropBag.AutoMapperSupport
                 if (disposing)
                 {
                     // Dispose managed state (managed objects).
-                    ClearMappersCache();
+                    ClearPropBagMappersCache();
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.

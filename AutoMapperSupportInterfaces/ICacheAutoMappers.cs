@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
@@ -8,6 +9,6 @@ namespace DRM.PropBag.AutoMapperSupport
 
         IMapper GetRawAutoMapper(IPropBagMapperKeyGen mapperRequest);
 
-        long ClearMappersCache();
+        long ClearRawAutoMappersCache();
     }
 }
