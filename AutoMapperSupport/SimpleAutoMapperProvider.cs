@@ -153,10 +153,10 @@ namespace DRM.PropBag.AutoMapperSupport
                 = GetMappingConfiguration<TSource, TDestination>(configPackageName);
 
             IMapTypeDefinition<TSource> srcMapTypeDef
-                = _mapTypeDefinitionProvider.GetTypeDescription<TSource>(propModel/*, targetType*/, propFactory: propFactory, className: null);
+                = _mapTypeDefinitionProvider.GetTypeDescription<TSource>(propModel, propFactory: propFactory, className: null);
 
             IMapTypeDefinition<TDestination> dstMapTypeDef
-                = _mapTypeDefinitionProvider.GetTypeDescription<TDestination>(propModel/*, targetType*/, propFactory: propFactory, className: null);
+                = _mapTypeDefinitionProvider.GetTypeDescription<TDestination>(propModel, propFactory: propFactory, className: null);
 
 
             // Create the mapper request.

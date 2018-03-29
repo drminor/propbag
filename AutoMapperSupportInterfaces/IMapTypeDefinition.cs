@@ -45,6 +45,11 @@ namespace DRM.PropBag.AutoMapperSupport
         Type NewEmittedType { get; /*set;*/ }
 
         /// <summary>
+        /// If NewEmittedType is non-null, the value of NewEmittedType, otherwise the value of TargetType. 
+        /// </summary>
+        Type RunTimeType { get; }
+
+        /// <summary>
         /// If set, the PropFactory to use instead of the one recorded in the PropModel.
         /// </summary>
         IPropFactory PropFactory { get; }
@@ -53,7 +58,5 @@ namespace DRM.PropBag.AutoMapperSupport
         /// If set, the FullClass name to use instead of the one recorded in the PropModel.
         /// </summary>
         string FullClassName { get; }
-
-
     }
 }

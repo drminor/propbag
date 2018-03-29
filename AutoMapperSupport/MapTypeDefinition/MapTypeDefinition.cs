@@ -26,6 +26,8 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public Type NewEmittedType => PropModel?.NewEmittedType;
 
+        public Type RunTimeType => PropModel?.RunTimeType ?? TargetType;
+
         // If specified, use the PropFactory provided by the caller instead of the one specified by the PropModel.
         public IPropFactory PropFactory => _propFactory ?? PropModel?.PropFactory;
 

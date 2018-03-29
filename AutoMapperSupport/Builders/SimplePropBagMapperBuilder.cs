@@ -12,7 +12,6 @@ namespace DRM.PropBag.AutoMapperSupport
         #region Private Properties
 
         private readonly IBuildMapperConfigurations<TSource, TDestination> _mapperConfigurationBuilder;
-
         private readonly IAutoMapperService _autoMapperService;
 
         #endregion
@@ -33,15 +32,15 @@ namespace DRM.PropBag.AutoMapperSupport
 
         #region Public Members
 
-        public IPropBagMapper<TSource, TDestination> GenerateMapper
+        public IPropBagMapper<TSource, TDestination> GeneratePropBagMapper
             (
             IPropBagMapperKey<TSource, TDestination> mapperRequestKey,
             ViewModelFactoryInterface viewModelFactory
             )
         {
-            // TODO: Add 'virtual' property to IMapTypeDefinition named: TargetRunTimeType.
-            Type TargetRunTimeType = mapperRequestKey.DestinationTypeDef.NewEmittedType ?? mapperRequestKey.DestinationTypeDef.TargetType;
+            //Type TargetRunTimeType = mapperRequestKey.DestinationTypeDef.NewEmittedType ?? mapperRequestKey.DestinationTypeDef.TargetType;
 
+            CheckTypeToCreate(typeof(TSource), mapperRequestKey.SourceTypeDef.TargetType);
             CheckTypeToCreate(typeof(TDestination), mapperRequestKey.DestinationTypeDef.TargetType);
 
             IMapper theMapper = mapperRequestKey.AutoMapper;
@@ -59,8 +58,8 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public IMapper GenerateRawAutoMapperTyped(IPropBagMapperKey<TSource, TDestination> mapperRequestKey)
         {
-            // TODO: Add 'virtual' property to IMapTypeDefinition named: TargetRunTimeType.
-            Type TargetRunTimeType = mapperRequestKey.DestinationTypeDef.NewEmittedType ?? mapperRequestKey.DestinationTypeDef.TargetType;
+            //Type TargetRunTimeType = mapperRequestKey.DestinationTypeDef.NewEmittedType ?? mapperRequestKey.DestinationTypeDef.TargetType;
+            Type TargetRunTimeType = mapperRequestKey.DestinationTypeDef.RunTimeType;
 
             CheckTypeToCreate(typeof(TDestination), mapperRequestKey.DestinationTypeDef.TargetType);
 
@@ -88,7 +87,7 @@ namespace DRM.PropBag.AutoMapperSupport
                 throw new InvalidOperationException($"{nameof(mapRequestGen)} does not implement the correct typed {nameof(IPropBagMapperKey<TSource, TDestination>)} interface.");
             }
 
-            return GenerateMapper(mapRequestTyped, viewModelFactory);
+            return GeneratePropBagMapper(mapRequestTyped, viewModelFactory);
         }
 
         private IMapper GenerateRawAutoMapper(IPropBagMapperKeyGen mapRequestGen)
