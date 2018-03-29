@@ -122,6 +122,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="PropBagTemplates\PersonVM_Emit.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="PropBagTemplates\PersonVM.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

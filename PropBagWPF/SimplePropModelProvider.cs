@@ -31,25 +31,16 @@ namespace DRM.PropBagWPF
             IMapperRequestProvider mapperRequestProvider,
             IParsePropBagTemplates propBagTemplateParser,
             IPropFactoryFactory propFactoryFactory
-            //, string resourceKeySuffix
             )
         {
             _propBagTemplateProvider = propBagTemplateProvider;
             _mapperRequestProvider = mapperRequestProvider;
             _pbtParser = propBagTemplateParser;
             _propFactoryFactory = propFactoryFactory ?? throw new ArgumentNullException(nameof(propFactoryFactory));
-            //ResourceKeySuffix = resourceKeySuffix;
 
             _propModelCache = new Dictionary<string, PropModelType>();
             _mapperRequestCache = new Dictionary<string, IMapperRequest>();
-
         }
-
-        #endregion
-
-        #region Public Properties
-
-        //public string ResourceKeySuffix { get; }
 
         #endregion
 

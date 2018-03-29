@@ -18,8 +18,8 @@ namespace DRM.PropBag
         private Type _sourceType;
         public Type SourceType { get { return _sourceType; } set { _sourceType = value; } }
 
-        private string _pmrk;
-        public string PropModelResourceKey { get { return _pmrk; } set { this.SetIfDifferent<string>(ref _pmrk, value); } }
+        private string _propModelFullClassName;
+        public string PropModelFullClassName { get { return _propModelFullClassName; } set { this.SetIfDifferent<string>(ref _propModelFullClassName, value); } }
 
         private PropModelType _pm;
         public PropModelType PropModel { get { return _pm; } set
@@ -28,10 +28,10 @@ namespace DRM.PropBag
             }
         }
 
-        public MapperRequest(Type sourceType, string propModelResourceKey, string configPackageName)
+        public MapperRequest(Type sourceType, string propModelFullClassName, string configPackageName)
         {
             SourceType = sourceType ?? throw new ArgumentNullException(nameof(sourceType));
-            PropModelResourceKey = propModelResourceKey ?? throw new ArgumentNullException(nameof(propModelResourceKey));
+            PropModelFullClassName = propModelFullClassName ?? throw new ArgumentNullException(nameof(propModelFullClassName));
             ConfigPackageName = configPackageName ?? throw new ArgumentNullException(nameof(configPackageName));
             PropModel = null;
         }
@@ -39,7 +39,7 @@ namespace DRM.PropBag
         public MapperRequest(Type sourceType, PropModelType propModel, string configPackageName)
         {
             SourceType = sourceType ?? throw new ArgumentNullException(nameof(sourceType));
-            PropModelResourceKey = null;
+            PropModelFullClassName = null;
             ConfigPackageName = configPackageName ?? throw new ArgumentNullException(nameof(configPackageName));
             PropModel = propModel ?? throw new ArgumentNullException(nameof(propModel));
         }
@@ -57,7 +57,7 @@ namespace DRM.PropBag
             if (PropModel == null)
             {
                 result = EqualityComparer<Type>.Default.Equals(SourceType, other.SourceType) &&
-                   PropModelResourceKey == other.PropModelResourceKey &&
+                   PropModelFullClassName == other.PropModelFullClassName &&
                    ConfigPackageName == other.ConfigPackageName;
             }
             else
@@ -74,14 +74,14 @@ namespace DRM.PropBag
         {
             var hashCode = 435110090;
             hashCode = hashCode * -1521134295 + EqualityComparer<Type>.Default.GetHashCode(SourceType);
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(PropModelResourceKey);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(PropModelFullClassName);
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(ConfigPackageName);
             return hashCode;
         }
 
         public object Clone()
         {
-            MapperRequest result = new MapperRequest(SourceType, PropModelResourceKey, ConfigPackageName);
+            MapperRequest result = new MapperRequest(SourceType, PropModelFullClassName, ConfigPackageName);
             result.PropModel = PropModel;
             return result;
         }

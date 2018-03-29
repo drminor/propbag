@@ -50,7 +50,24 @@ namespace DRM.PropBag
 
         Type _newEmittedType;
         [XmlIgnore]
-        public Type NewEmittedType { get { return _newEmittedType; } set { _newEmittedType = value; } }
+        public Type NewEmittedType
+        {
+            get
+            {
+                return _newEmittedType;
+            }
+            set
+            {
+                if(_newEmittedType != value)
+                {
+                    if (IsFixed && PropModelCache != null)
+                    {
+                        throw new InvalidOperationException($"The {this} is fixed and is associated with a PropModel Cache. The value of '{nameof(NewEmittedType)}' cannot be changed.");
+                    }
+                    _newEmittedType = value;
+                }
+            }
+        }
 
         string _className;
         [XmlAttribute(AttributeName = "class-name")]
@@ -508,7 +525,7 @@ namespace DRM.PropBag
 
                 if (IsFixed && PropModelCache != null)
                 {
-                    throw new InvalidOperationException($"The PropModel with Full Class Name: {this} is fixed and is associated with a PropModel Cache. The GenerationId cannot be changed.");
+                    throw new InvalidOperationException($"The {this} is fixed and is associated with a PropModel Cache. The GenerationId cannot be changed.");
                 }
 
                 _generationId = value;

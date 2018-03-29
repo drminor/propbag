@@ -10,7 +10,8 @@ namespace DRM.TypeSafePropertyBag
 
         string ConfigPackageName { get; set; }
 
-        string PropModelResourceKey { get; set; }
+        string PropModelFullClassName { get; set; }
+
         PropModelType PropModel { get; set; }
     }
 }

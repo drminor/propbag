@@ -488,9 +488,21 @@ namespace DRM.PropBag
 
                     if (propModel.NewEmittedType == null)
                     {
+                        if(propModel.IsFixed)
+                        {
+                            throw new InvalidOperationException("This PropModel has been fixed and has a null value for the NewEmittedType. We were expecting an open PropModel, or a fixed PropModel with a non-null value for NewEmittedType.");
+                        }
+
                         Type et = wrapperTypeCreator.GetWrapperType(propModel, propModel.TypeToWrap);
                         propModel.NewEmittedType = et;
                         _memConsumptionTracker.MeasureAndReport("After GetWrapperType", $"PropBag: {_ourStoreAccessor.ToString()}: {pi.PropertyName}, Created Type: {propModel.TypeToWrap}");
+                    }
+                }
+                else
+                {
+                    if(mr.PropModel.NewEmittedType != null)
+                    {
+                        throw new InvalidOperationException("This PropModel has a non-null value for the NewEmittedType. We were expecting a PropModel that has a null value for the NewEmitedType.");
                     }
                 }
 
@@ -609,7 +621,7 @@ namespace DRM.PropBag
             }
         }
 
-        private IViewManagerProviderKey BuildTheViewManagerProviderKey(IPropItemModel pi, PropModelCacheInterface propModelProvider)
+        private IViewManagerProviderKey BuildTheViewManagerProviderKey(IPropItemModel pi, PropModelCacheInterface propModelCache)
         {
             if (pi == null) throw new ArgumentNullException(nameof(pi));
 
@@ -622,7 +634,7 @@ namespace DRM.PropBag
                 if (pi.MapperRequestResourceKey != null)
                 {
                     // Get the MapperRequestTemplate specified by this PropModelItem.
-                    pi.MapperRequest = propModelProvider.GetMapperRequest(pi.MapperRequestResourceKey);
+                    pi.MapperRequest = propModelCache.GetMapperRequest(pi.MapperRequestResourceKey);
                 }
                 else
                 {
@@ -633,11 +645,11 @@ namespace DRM.PropBag
             // Get the PropModel specified by this MapperRequestTemplate.
             if (pi.MapperRequest.PropModel == null)
             {
-                if (pi.MapperRequest.PropModelResourceKey != null)
+                if (pi.MapperRequest.PropModelFullClassName != null)
                 {
                     //pi.MapperRequest.PropModel = propModelProvider.GetPropModel(pi.MapperRequest.PropModelResourceKey);
 
-                    if (propModelProvider.TryGetPropModel(pi.MapperRequest.PropModelResourceKey, out PropModelType propModel))
+                    if (propModelCache.TryGetPropModel(pi.MapperRequest.PropModelFullClassName, out PropModelType propModel))
                     {
                         pi.MapperRequest.PropModel = propModel;
                     }

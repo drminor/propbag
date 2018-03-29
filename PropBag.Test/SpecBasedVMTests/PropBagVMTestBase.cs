@@ -29,15 +29,15 @@ namespace PropBagLib.Tests.SpecBasedVMTests
 
         private string[] _pbTemplateFilenames = new string[]
         {
-                "MainWindowVM_Emit.xaml",
-                "PersonCollectionVM_Emit.xaml",
-                "PersonEditorVM_Emit.xaml",
+            "MainWindowVM_Emit.xaml",
+            "PersonCollectionVM_Emit.xaml",
+            "PersonEditorVM_Emit.xaml",
+            "PersonVM_Emit.xaml",
 
-                "MainWindowVM_Extra.xaml",
-                "PersonCollectionVM_Extra.xaml",
-                "PersonEditorVM_Extra.xaml",
-
-                "PersonVM.xaml"
+            "MainWindowVM_Extra.xaml",
+            "PersonCollectionVM_Extra.xaml",
+            "PersonEditorVM_Extra.xaml",
+            "PersonVM.xaml"
         };
 
         private string[] _mapperRequestFilenames = new string[]

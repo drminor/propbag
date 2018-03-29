@@ -30,11 +30,11 @@ namespace PropBagLib.Tests.AutoMapperSupport
             "MainWindowVM_Emit.xaml",
             "PersonCollectionVM_Emit.xaml",
             "PersonEditorVM_Emit.xaml",
+            "PersonVM_Emit.xaml",
 
             "MainWindowVM_Extra.xaml",
             "PersonCollectionVM_Extra.xaml",
             "PersonEditorVM_Extra.xaml",
-
             "PersonVM.xaml"
         };
 

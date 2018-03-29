@@ -105,7 +105,6 @@ namespace DRM.TypeSafePropertyBag
                 {
                     if (TryFetchFromSourceProviders(fullClassName, out propModel))
                     {
-                        //propModel.PropModelCache = this;
                         Add(propModel);
                         return true;
                     }
@@ -219,22 +218,6 @@ namespace DRM.TypeSafePropertyBag
             }
             else
             {
-                //PropModelType result = (PropModelType)propModel.Clone();
-
-                //if (fullClassName != null)
-                //{
-                //    string ns = TypeExtensions.GetNamespace(fullClassName, out string className);
-
-                //    if (ns != null)
-                //    {
-                //        result.NamespaceName = ns;
-                //    }
-
-                //    result.ClassName = className;
-                //}
-
-                //generationId = Add(result);
-
                 propModel.PropModelCache = null;
                 PropModelType result = (PropModelType)propModel.CloneIt();
                 result.Open();
@@ -272,18 +255,10 @@ namespace DRM.TypeSafePropertyBag
                 {
                     propModel = propModelProvider.GetPropModel(resourceKey);
 
-                    //if(propModel.IsFixed)
-                    //{
-                    //    throw new InvalidOperationException("The PropModel just fetched from a source provider was fixed.");
-                    //}
-
                     if (propModel.PropModelCache != null)
                     {
                         throw new InvalidOperationException("The PropModel just fetched is already associated with a PropModelCache.");
                     }
-
-                    //// Make sure the propModel is not fixed. (So that we can set its GenerationId.
-                    //if(propModel.IsFixed) propModel.Open();
 
                     return true;
                 }
