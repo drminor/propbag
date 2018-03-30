@@ -8,52 +8,35 @@ namespace DRM.PropBag.AutoMapperSupport
     using PropModelType = IPropModel<String>;
     using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
 
-    public delegate IPropBagMapperGen PropBagMapperCreator(IMapperRequest mr);
-
-
-    // TODO: Change Register<xxx> to Submit<xxx>. (We are submitting a notice that we will need this at some point -- remember: GetMapper creates a mapper for all pending requests on first access to any request.)
-    public interface IAutoMapperService : ICachePropBagMappers, ICacheAutoMappers
+    public interface IAutoMapperService : ICacheAutoMappers
     {
-        IPropBagMapperKey<TSource, TDestination> SubmitPropBagMapperRequest<TSource, TDestination>
-            (
+        //Typed Submit 
+        IAutoMapperRequestKey<TSource, TDestination> SubmitRawAutoMapperRequest<TSource, TDestination>
+        (
             PropModelType propModel,
-            Type typeToWrap,
             string configPackageName,
             IHaveAMapperConfigurationStep configStarterForThisRequest = null,
             IPropFactory propFactory = null
-            )
-            where TDestination : class, IPropBag;
+        )
+        where TDestination : class, IPropBag;
 
-        IPropBagMapperKey<TSource, TDestination> SubmitRawAutoMapperRequest<TSource, TDestination>
-            (
-            PropModelType propModel,
-            Type typeToWrap,
-            string configPackageName,
-            IHaveAMapperConfigurationStep configStarterForThisRequest = null,
-            IPropFactory propFactory = null
-            )
-            where TDestination : class, IPropBag;
+        // Typed Get Mapper
+        IMapper GetRawAutoMapper<TSource, TDestination>
+        (
+            IAutoMapperRequestKey<TSource, TDestination> mapperRequest
+        )
+        where TDestination : class, IPropBag;
 
-        // The PropModel supplies the TDestination type and the Type that will be wrapped.
-        IPropBagMapperKeyGen SubmitPropBagMapperRequest
-            (
+        // Gen Submit 
+        IAutoMapperRequestKeyGen SubmitRawAutoMapperRequest
+        (
             PropModelType propModel,
             Type sourceType,
             string configPackageName
-            );
+        );
 
-        // Execute the Request and get the Mapper (Typed version)
-        IPropBagMapper<TSource, TDestination> GetPropBagMapper<TSource, TDestination>
-            (
-            IPropBagMapperKey<TSource, TDestination> mapperRequest
-            )
-            where TDestination : class, IPropBag;
-
-        // Execute the Request and get the Mapper (Typed version)
-        IMapper GetRawAutoMapper<TSource, TDestination>
-            (
-            IPropBagMapperKey<TSource, TDestination> mapperRequest
-            )
-            where TDestination : class, IPropBag;
+        // Provided by ICacheAutoMappers
+        //IMapper GetRawAutoMapper(IAutoMapperRequestKeyGen mapperRequest);
     }
+
 }

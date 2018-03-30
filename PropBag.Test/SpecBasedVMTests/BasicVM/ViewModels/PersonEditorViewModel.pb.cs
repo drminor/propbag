@@ -23,7 +23,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM.ViewModels
         #region Constructors
 
         public PersonEditorViewModel(PropModelType pm, ViewModelFactoryInterface viewModelFactory,
-            IAutoMapperService autoMapperService, IPropFactory propFactory, string fullClassName)
+            IPropBagMapperService autoMapperService, IPropFactory propFactory, string fullClassName)
             : base(pm, viewModelFactory, autoMapperService, propFactory, fullClassName)
         {
             System.Diagnostics.Debug.WriteLine("Constructing PersonEditorViewModel -- with PropModel.");

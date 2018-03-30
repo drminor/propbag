@@ -57,23 +57,23 @@ namespace DRM.PropBag
         }
 
         // Using a PropModel
-        public PubPropBag(PropModel pm, ViewModelFactoryInterface viewModelFactory, IAutoMapperService autoMapperService)
-            : this(pm, viewModelFactory, autoMapperService, propFactory: null, fullClassName: null)
+        public PubPropBag(PropModel pm, ViewModelFactoryInterface viewModelFactory, IPropBagMapperService propBagMapperService)
+            : this(pm, viewModelFactory, propBagMapperService, propFactory: null, fullClassName: null)
         {
         }
 
-        public PubPropBag(PropModel pm, ViewModelFactoryInterface viewModelFactory, IAutoMapperService autoMapperService, IPropFactory propFactory)
-            : this(pm, viewModelFactory, autoMapperService, propFactory, fullClassName: null)
+        public PubPropBag(PropModel pm, ViewModelFactoryInterface viewModelFactory, IPropBagMapperService propBagMapperService, IPropFactory propFactory)
+            : this(pm, viewModelFactory, propBagMapperService, propFactory, fullClassName: null)
         {
         }
 
-        public PubPropBag(PropModel pm, ViewModelFactoryInterface viewModelFactory, IAutoMapperService autoMapperService, string fullClassName)
-            : this(pm, viewModelFactory, autoMapperService, propFactory: null, fullClassName: fullClassName)
+        public PubPropBag(PropModel pm, ViewModelFactoryInterface viewModelFactory, IPropBagMapperService propBagMapperService, string fullClassName)
+            : this(pm, viewModelFactory, propBagMapperService, propFactory: null, fullClassName: fullClassName)
         {
         }
 
-        public PubPropBag(PropModel pm, ViewModelFactoryInterface viewModelFactory, IAutoMapperService autoMapperService, IPropFactory propFactory, string fullClassName)
-            : base(pm, viewModelFactory, autoMapperService, propFactory, fullClassName)
+        public PubPropBag(PropModel pm, ViewModelFactoryInterface viewModelFactory, IPropBagMapperService propBagMapperService, IPropFactory propFactory, string fullClassName)
+            : base(pm, viewModelFactory, propBagMapperService, propFactory, fullClassName)
         {
         }
 

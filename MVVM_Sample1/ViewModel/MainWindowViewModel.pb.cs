@@ -22,7 +22,7 @@ namespace MVVM_Sample1.ViewModel
         }
 
         public MainWindowViewModel(PropModelType pm, ViewModelFactoryInterface viewModelFactory,
-            IAutoMapperService autoMapperService, IPropFactory propFactory, string fullClassName)
+            IPropBagMapperService autoMapperService, IPropFactory propFactory, string fullClassName)
             : base(pm, viewModelFactory, autoMapperService, propFactory, fullClassName)
         {
             //System.Diagnostics.Debug.WriteLine("Beginning to construct MainWindowViewModel -- From PropModel.");

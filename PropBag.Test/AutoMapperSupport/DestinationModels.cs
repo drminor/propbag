@@ -25,7 +25,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
 
 
         public DestinationModel3(PropModelType pm, ViewModelFactoryInterface viewModelFactory,
-            IAutoMapperService autoMapperService, IPropFactory propFactory, string fullClassName)
+            IPropBagMapperService autoMapperService, IPropFactory propFactory, string fullClassName)
             : base(pm, viewModelFactory, autoMapperService, propFactory, fullClassName)
         {
             //AddProp<Guid>("ProductId", null, null, Guid.NewGuid());

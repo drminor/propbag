@@ -33,7 +33,7 @@ namespace PropBagTestApp.Infra
         public static PropModelCacheInterface PropModelCache { get; set; }
 
         public static SimpleViewModelFactory ViewModelFactory { get; }
-        public static IAutoMapperService AutoMapperService { get; }
+        public static IPropBagMapperService PropBagMapperService { get; }
 
         public static ICreateWrapperTypes WrapperTypeCreator { get; }
 
@@ -78,9 +78,9 @@ namespace PropBagTestApp.Infra
 
             ViewModelFactory = new SimpleViewModelFactory(PropModelCache, vmActivator, psAccessServiceFactory, null, WrapperTypeCreator);
 
-            AutoMapperService = GetAutoMapperProvider(ViewModelFactory);
+            PropBagMapperService = GetAutoMapperProvider(ViewModelFactory);
 
-            ViewModelFactory.AutoMapperService = AutoMapperService;
+            ViewModelFactory.AutoMapperService = PropBagMapperService;
         }
 
         private static IPropFactoryFactory BuildThePropFactoryFactory
@@ -142,25 +142,37 @@ namespace PropBagTestApp.Infra
             return propModelProvider;
         }
 
-        private static IAutoMapperService GetAutoMapperProvider(ViewModelFactoryInterface viewModelFactory)
+        private static IPropBagMapperService GetAutoMapperProvider
+        (
+            ViewModelFactoryInterface viewModelFactory
+        )
         {
             IMapTypeDefinitionProvider mapTypeDefinitionProvider = new SimpleMapTypeDefinitionProvider();
 
+            IAutoMapperBuilderProvider autoMapperBuilderProvider = new SimpleAutoMapperBuilderProvider();
+
             ICacheAutoMappers rawAutoMapperCache = new SimpleAutoMapperCache();
-            ICachePropBagMappers mappersCachingService = new SimplePropBagMapperCache(rawAutoMapperCache, viewModelFactory);
+            SimpleAutoMapperProvider autoMapperService = new SimpleAutoMapperProvider
+            (
+                mapTypeDefinitionProvider: mapTypeDefinitionProvider,
+                autoMapperBuilderProvider: autoMapperBuilderProvider,
+                autoMapperCache: rawAutoMapperCache
+            );
 
             IPropBagMapperBuilderProvider propBagMapperBuilderProvider = new SimplePropBagMapperBuilderProvider();
-
-            SimpleAutoMapperProvider autoMapperProvider = new SimpleAutoMapperProvider
-                (
+            ICachePropBagMappers mappersCachingService = new SimplePropBagMapperCache(viewModelFactory);
+            IPropBagMapperService propBagMapperService = new SimplePropBagMapperService
+            (
                 mapTypeDefinitionProvider: mapTypeDefinitionProvider,
+                mapperBuilderProvider: propBagMapperBuilderProvider,
                 mappersCachingService: mappersCachingService,
-                rawAutoMapperCache: rawAutoMapperCache,
-                mapperBuilderProvider: propBagMapperBuilderProvider
-                );
+                autoMapperService: autoMapperService
+            );
 
-            return autoMapperProvider;
+            return propBagMapperService;
+
         }
+
 
         private static ICreateWrapperTypes BuildSimpleWrapperTypeCreator()
         {
@@ -203,12 +215,11 @@ namespace PropBagTestApp.Infra
             return result;
         }
 
-        public static IMapper GetAutoMapper<TSource, TDestination>
+        public static IPropBagMapper<TSource, TDestination> GetAutoMapper<TSource, TDestination>
             (
             IMapperRequest mapperRequest,
-            //ViewModelFactoryInterface viewModelFactory,
-            IAutoMapperService autoMapperService,
-            out IPropBagMapperKey<TSource, TDestination> propBagMapperKey
+            IPropBagMapperService propBagMapperService,
+            out IPropBagMapperKey<TSource, TDestination> propBagMapperRequestKey
             )
             where TDestination : class, IPropBag
         {
@@ -219,14 +230,20 @@ namespace PropBagTestApp.Infra
             Type typeToWrap = mapperRequest.PropModel.TypeToWrap;
 
             // Submit the Mapper Request.
-            propBagMapperKey = autoMapperService.SubmitRawAutoMapperRequest<TSource, TDestination>
-                (mapperRequest.PropModel/*, viewModelFactory*/, typeToWrap, mapperRequest.ConfigPackageName);
+            //propBagMapperKey = autoMapperService.SubmitRawAutoMapperRequest<TSource, TDestination>
+            //    (mapperRequest.PropModel, typeToWrap, mapperRequest.ConfigPackageName);
+
+
+            IPropBagMapperKeyGen propBagMapperRequestKeyGen = propBagMapperService.SubmitPropBagMapperRequest(mapperRequest.PropModel, typeToWrap, mapperRequest.ConfigPackageName);
+
+            propBagMapperRequestKey = (IPropBagMapperKey<TSource, TDestination>)propBagMapperRequestKeyGen;
 
             // Get the AutoMapper mapping function associated with the mapper request just submitted.
-            //IPropBagMapperGen genMapper = _autoMapperService.GetMapper(mapperKey);
+            IPropBagMapperGen mapperGen = propBagMapperService.GetPropBagMapper(propBagMapperRequestKeyGen);
 
-            IMapper rawAutoMapper = autoMapperService.GetRawAutoMapper(propBagMapperKey);
-            return rawAutoMapper;
+            IPropBagMapper<TSource, TDestination> result = (IPropBagMapper<TSource, TDestination>)mapperGen;
+                
+            return result;
         }
 
 

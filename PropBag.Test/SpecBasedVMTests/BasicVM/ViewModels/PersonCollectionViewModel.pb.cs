@@ -21,7 +21,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM.ViewModels
         }
 
         public PersonCollectionViewModel(PropModelType pm, ViewModelFactoryInterface viewModelFactory,
-            IAutoMapperService autoMapperService, IPropFactory propFactory, string fullClassName)
+            IPropBagMapperService autoMapperService, IPropFactory propFactory, string fullClassName)
             : base(pm, viewModelFactory, autoMapperService, propFactory, fullClassName)
         {
             System.Diagnostics.Debug.WriteLine("Constructing PersonCollectionViewModel -- with PropModel.");

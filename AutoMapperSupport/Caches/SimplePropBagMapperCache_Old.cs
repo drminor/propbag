@@ -119,7 +119,7 @@ namespace DRM.PropBag.AutoMapperSupport
             foreach (IPropBagMapperKeyGen key in _unSealedPropBagMappers.Keys)
             {
                 IPropBagMapperGen mapper = _sealedPropBagMappers.GetOrAdd(key);
-                if (!(_unSealedPropBagMappers.TryRemoveValue(key, out IPropBagMapperKeyGen dummyKey)))
+                if (!(_unSealedPropBagMappers.TryRemoveValue(key, out IPropBagMapperKeyGen dummyMapperRequestKeyGen)))
                 {
                     System.Diagnostics.Debug.WriteLine("Couldn't remove mappper request from list of registered, pending to be created, mapper requests.");
                 }

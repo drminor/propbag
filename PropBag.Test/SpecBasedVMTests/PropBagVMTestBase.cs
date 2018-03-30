@@ -149,7 +149,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests
         protected ViewModelFactoryInterface ViewModelFactory { get; set; }
 
         protected ICreateWrapperTypes WrapperTypeCreator { get; set; }
-        protected IAutoMapperService AutoMapperService { get; set; }
+        protected IPropBagMapperService PropBagMapperService { get; set; }
 
         protected PropModelCacheInterface PropModelCache { get; set; }
 
@@ -228,10 +228,10 @@ namespace PropBagLib.Tests.SpecBasedVMTests
             _mct.MeasureAndReport("After new ViewModelFactory");
 
             // AutoMapper Services
-            AutoMapperService = GetAutoMapperProvider(ViewModelFactory);
+            PropBagMapperService = GetAutoMapperProvider(ViewModelFactory);
             _mct.MeasureAndReport("After GetAutoMapperProvider");
 
-            ViewModelFactory.AutoMapperService = AutoMapperService;
+            ViewModelFactory.AutoMapperService = PropBagMapperService;
 
             //// Default PropFactory
             //DefaultPropFactory = BuildDefaultPropFactory
@@ -256,11 +256,11 @@ namespace PropBagLib.Tests.SpecBasedVMTests
                 }
 
                 // AutoMapper Provider
-                if (AutoMapperService is IDisposable disable2)
+                if (PropBagMapperService is IDisposable disable2)
                 {
                     disable2.Dispose();
                 }
-                AutoMapperService = null;
+                PropBagMapperService = null;
 
                 // PropModel Provider
                 if (PropModelCache is IDisposable disable3)
@@ -388,27 +388,34 @@ namespace PropBagLib.Tests.SpecBasedVMTests
         //    return resources;
         //}
 
-        protected virtual IAutoMapperService GetAutoMapperProvider
-            (
+        protected virtual IPropBagMapperService GetAutoMapperProvider
+        (
             ViewModelFactoryInterface viewModelFactory
-            )
+        )
         {
             IMapTypeDefinitionProvider mapTypeDefinitionProvider = new SimpleMapTypeDefinitionProvider();
 
+            IAutoMapperBuilderProvider autoMapperBuilderProvider = new SimpleAutoMapperBuilderProvider();
+
             ICacheAutoMappers rawAutoMapperCache = new SimpleAutoMapperCache();
-            ICachePropBagMappers mappersCachingService = new SimplePropBagMapperCache(rawAutoMapperCache, viewModelFactory);
+            SimpleAutoMapperProvider autoMapperService = new SimpleAutoMapperProvider
+            (
+                mapTypeDefinitionProvider: mapTypeDefinitionProvider,
+                autoMapperBuilderProvider: autoMapperBuilderProvider,
+                autoMapperCache: rawAutoMapperCache
+            );
 
             IPropBagMapperBuilderProvider propBagMapperBuilderProvider = new SimplePropBagMapperBuilderProvider();
-
-            SimpleAutoMapperProvider autoMapperProvider = new SimpleAutoMapperProvider
-                (
+            ICachePropBagMappers mappersCachingService = new SimplePropBagMapperCache(viewModelFactory);
+            IPropBagMapperService propBagMapperService = new SimplePropBagMapperService
+            (
                 mapTypeDefinitionProvider: mapTypeDefinitionProvider,
+                mapperBuilderProvider: propBagMapperBuilderProvider,
                 mappersCachingService: mappersCachingService,
-                rawAutoMapperCache: rawAutoMapperCache,
-                mapperBuilderProvider: propBagMapperBuilderProvider
-                );
+                autoMapperService: autoMapperService
+            );
 
-            return autoMapperProvider;
+            return propBagMapperService;
         }
 
         protected virtual ICreateWrapperTypes GetSimpleWrapperTypeCreator()

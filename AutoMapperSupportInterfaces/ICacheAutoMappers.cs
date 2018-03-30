@@ -1,14 +1,11 @@
 ﻿using AutoMapper;
-using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
     public interface ICacheAutoMappers
     {
-        IPropBagMapperKeyGen RegisterRawAutoMapperRequest(IPropBagMapperKeyGen mapperRequest);
-
-        IMapper GetRawAutoMapper(IPropBagMapperKeyGen mapperRequest);
-
+        IAutoMapperRequestKeyGen RegisterRawAutoMapperRequest(IAutoMapperRequestKeyGen mapperRequest);
+        IMapper GetRawAutoMapper(IAutoMapperRequestKeyGen mapperRequest);
         long ClearRawAutoMappersCache();
     }
 }

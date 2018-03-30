@@ -1,67 +1,61 @@
-﻿using AutoMapper;
-using DRM.PropBag.ViewModelTools;
+﻿using DRM.PropBag.ViewModelTools;
 using DRM.TypeSafePropertyBag;
 using System;
 using System.Collections.Generic;
-
 
 namespace DRM.PropBag.AutoMapperSupport
 {
     using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
 
-    // TODO: check to see if we really need to use the base class: PropBagMapperKeyGen
-
-    public class PropBagMapperKey<TSource, TDestination> : PropBagMapperKeyGen,
-                IPropBagMapperKey<TSource, TDestination>, 
+    public class PropBagMapperKey<TSource, TDestination>
+            :   PropBagMapperKeyGen,
+                IPropBagMapperKey<TSource, TDestination>,
                 IEquatable<IPropBagMapperKey<TSource, TDestination>>,
                 IEquatable<PropBagMapperKey<TSource, TDestination>>
         where TDestination: class, IPropBag
     {
         #region Private Members
 
-        private IBuildPropBagMapper<TSource, TDestination> PropBagMapperBuilder { get; }
+        private readonly IBuildPropBagMapper<TSource, TDestination> _propBagMapperBuilder;
 
         #endregion
 
         #region Public Properties
 
-        public IMapTypeDefinition<TSource> SourceTypeDef { get; }
-        public IMapTypeDefinition<TDestination> DestinationTypeDef { get; }
+        public IAutoMapperRequestKey<TSource, TDestination> AutoMapperRequestKey => (IAutoMapperRequestKey<TSource, TDestination>) AutoMapperRequestKeyGen;
 
-        //public Func<TDestination, TSource> SourceConstructor { get; }
-        //public Func<TSource, TDestination> DestinationConstructor { get; }
+        public IMapTypeDefinition<TSource> SourceTypeDef => AutoMapperRequestKey.SourceTypeDef;
+        public IMapTypeDefinition<TDestination> DestinationTypeDef => AutoMapperRequestKey.DestinationTypeDef;
 
-        public IConfigureAMapper<TSource, TDestination> MappingConfiguration { get; }
+        public IConfigureAMapper<TSource, TDestination> MappingConfiguration => AutoMapperRequestKey.MappingConfiguration;
+
+        public IPropBagMapper<TSource, TDestination> GeneratePropBagMapper
+            (
+            IPropBagMapperKey<TSource, TDestination> mapperRequestKey,
+            ViewModelFactoryInterface viewModelFactory
+            )
+        {
+            var result = _propBagMapperBuilder.GeneratePropBagMapper(mapperRequestKey, viewModelFactory);
+            return result;
+        }
+
 
         #endregion
 
         #region Constructor
 
         public PropBagMapperKey
-            (
+        (
             IBuildPropBagMapper<TSource, TDestination> propBagMapperBuilder,
-            IConfigureAMapper<TSource, TDestination> mappingConfiguration,
-            IMapTypeDefinition<TSource> sourceMapTypeDef,
-            IMapTypeDefinition<TDestination> destinationMapTypeDef
-            )
-            : base
-            (
-                propBagMapperBuilder.GenPropBagMapperCreator,
-                propBagMapperBuilder.GenRawAutoMapperCreator,
-                sourceMapTypeDef,
-                destinationMapTypeDef
-            )
+            IAutoMapperRequestKey<TSource, TDestination> autoMapperRequestKey
+        )
+        : base
+        (
+            propBagMapperBuilder.GenPropBagMapperCreator,
+            autoMapperRequestKey
+        )
         {
-            PropBagMapperBuilder = propBagMapperBuilder;
-            MappingConfiguration = mappingConfiguration;
-
-            SourceTypeDef = sourceMapTypeDef;
-            DestinationTypeDef = destinationMapTypeDef;
-
-            //SourceConstructor = mappingConfiguration.SourceConstructor;
-            //DestinationConstructor = mappingConfiguration.DestinationConstructor;
-
-            AutoMapper = null;
+            _propBagMapperBuilder = propBagMapperBuilder;
 
             ValidateThisKey();
         }

@@ -1,8 +1,6 @@
 ﻿using AutoMapper;
 using DRM.PropBag.ViewModelTools;
-using DRM.TypeSafePropertyBag;
 using System;
-using System.Collections.Generic;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
@@ -13,14 +11,29 @@ namespace DRM.PropBag.AutoMapperSupport
     {
         #region Public Properties
 
+        public Type SourceType => SourceTypeGenDef.TargetType;
+        public Type DestinationType => DestinationTypeGenDef.TargetType;
+
+        public IMapTypeDefinitionGen SourceTypeGenDef => AutoMapperRequestKeyGen.SourceTypeGenDef;
+        public IMapTypeDefinitionGen DestinationTypeGenDef => AutoMapperRequestKeyGen.DestinationTypeGenDef;
+
+        public IAutoMapperRequestKeyGen AutoMapperRequestKeyGen { get; }
+
+        public IMapper AutoMapper
+        {
+            get
+            {
+                return AutoMapperRequestKeyGen.AutoMapper;
+            }
+            set
+            {
+                AutoMapperRequestKeyGen.AutoMapper = value;
+            }
+        }
+
         public Func<IPropBagMapperKeyGen, ViewModelFactoryInterface, IPropBagMapperGen> PropBagMapperCreator { get; }
 
-        public Func<IPropBagMapperKeyGen, IMapper> RawAutoMapperCreator { get; }
 
-        public IMapTypeDefinitionGen SourceTypeGenDef { get; }
-        public IMapTypeDefinitionGen DestinationTypeGenDef { get; }
-
-        public IMapper AutoMapper { get; set; }
 
         #endregion
 
@@ -29,15 +42,11 @@ namespace DRM.PropBag.AutoMapperSupport
         public PropBagMapperKeyGen
             (
             Func<IPropBagMapperKeyGen, ViewModelFactoryInterface, IPropBagMapperGen> mapperCreator,
-            Func<IPropBagMapperKeyGen, IMapper> rawAutoMapperCreator,
-            IMapTypeDefinitionGen sourceTypeGenDef,
-            IMapTypeDefinitionGen destinationTypeGenDef
+            IAutoMapperRequestKeyGen autoMapperRequestKeyGen
             )
         {
             PropBagMapperCreator = mapperCreator;
-            RawAutoMapperCreator = rawAutoMapperCreator;
-            SourceTypeGenDef = sourceTypeGenDef;
-            DestinationTypeGenDef = destinationTypeGenDef;
+            AutoMapperRequestKeyGen = autoMapperRequestKeyGen;
         }
 
         #endregion
@@ -49,10 +58,17 @@ namespace DRM.PropBag.AutoMapperSupport
             return PropBagMapperCreator(this, viewModelFactory);
         }
 
-        public IMapper CreateRawAutoMapper()
-        {
-            return RawAutoMapperCreator(this);
-        }
+        //public IMapper CreateRawAutoMapper()
+        //{
+        //    IAutoMapperRequestKeyGen amRequestKey = GetAutoMapperRequestKeyGen();
+        //    return RawAutoMapperCreator(amRequestKey);
+        //}
+
+        //public IAutoMapperRequestKeyGen GetAutoMapperRequestKeyGen()
+        //{
+        //    IAutoMapperRequestKeyGen amRequestKey = new AutoMapperRequestKeyGen(RawAutoMapperCreator, SourceTypeGenDef, DestinationTypeGenDef);
+        //    return amRequestKey;
+        //}
 
         #endregion
 
@@ -75,9 +91,8 @@ namespace DRM.PropBag.AutoMapperSupport
             //       EqualityComparer<IMapTypeDefinitionGen>.Default.Equals(DestinationTypeGenDef, other.DestinationTypeGenDef);
 
             return other != null &&
-               SourceTypeGenDef == other.SourceTypeGenDef &&
-               DestinationTypeGenDef == other.DestinationTypeGenDef;
-
+               AutoMapperRequestKeyGen.SourceTypeGenDef == other.SourceTypeGenDef &&
+               AutoMapperRequestKeyGen.DestinationTypeGenDef == other.DestinationTypeGenDef;
         }
 
         public override int GetHashCode()
@@ -90,7 +105,8 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public override string ToString()
         {
-            return $"PropBagMapperKey: S={SourceTypeGenDef.ToString()}, D={DestinationTypeGenDef.ToString()}";
+            return $"PropBagMapperKey: S={SourceTypeGenDef.ToString()}," +
+                $" D={DestinationTypeGenDef.ToString()}";
         }
 
         public static bool operator ==(PropBagMapperKeyGen gen1, PropBagMapperKeyGen gen2)

@@ -78,7 +78,7 @@ namespace DRM.PropBag
         // These items are provided to us and are only set during construction.
         protected internal PSAccessServiceInterface _ourStoreAccessor { get; private set; }
         protected internal ViewModelFactoryInterface _viewModelFactory { get; private set; }
-        protected internal IAutoMapperService _autoMapperService { get; private set; }
+        protected internal IPropBagMapperService _propBagMapperService { get; private set; }
 
         protected internal PropModelType _propModel { get; private set; }
         protected internal IPropFactory _propFactory { get; private set; }
@@ -177,13 +177,13 @@ namespace DRM.PropBag
 
         #region Constructor
 
-        public PropBag(PropModelType propModel, ViewModelFactoryInterface viewModelFactory, IAutoMapperService autoMapperService)
-            : this(propModel, viewModelFactory, autoMapperService, propFactory: null, fullClassName: null)
+        public PropBag(PropModelType propModel, ViewModelFactoryInterface viewModelFactory, IPropBagMapperService propBagMapperService)
+            : this(propModel, viewModelFactory, propBagMapperService, propFactory: null, fullClassName: null)
         {
         }
 
-        public PropBag(PropModelType propModel, ViewModelFactoryInterface viewModelFactory, IAutoMapperService autoMapperService, IPropFactory propFactory)
-            : this(propModel, viewModelFactory, autoMapperService, propFactory: propFactory, fullClassName: null)
+        public PropBag(PropModelType propModel, ViewModelFactoryInterface viewModelFactory, IPropBagMapperService propBagMapperService, IPropFactory propFactory)
+            : this(propModel, viewModelFactory, propBagMapperService, propFactory: propFactory, fullClassName: null)
         {
         }
 
@@ -195,7 +195,7 @@ namespace DRM.PropBag
         /// <param name="storeAcessorCreator"></param>
         /// <param name="propFactory">The PropFactory to use instead of the one specified by the PropModel.</param>
         /// <param name="fullClassName">The namespace and class name to use instead of the one specified by the PropMode.</param>
-        public PropBag(PropModelType propModel, ViewModelFactoryInterface viewModelFactory, IAutoMapperService autoMapperService, IPropFactory propFactory, string fullClassName)
+        public PropBag(PropModelType propModel, ViewModelFactoryInterface viewModelFactory, IPropBagMapperService propBagMapperService, IPropFactory propFactory, string fullClassName)
         {
             long memUsedSoFar = _memConsumptionTracker.UsedSoFar;
 
@@ -207,7 +207,7 @@ namespace DRM.PropBag
             IPropFactory propFactoryToUse = propFactory ?? propModel.PropFactory ?? throw new InvalidOperationException("The propModel has no PropFactory and one was not provided in the constructor.");
             string fullClassNameToUse = fullClassName ?? propModel.FullClassName;
 
-            BasicConstruction(propModel.TypeSafetyMode, propModel, viewModelFactory, autoMapperService, propFactoryToUse, fullClassNameToUse);
+            BasicConstruction(propModel.TypeSafetyMode, propModel, viewModelFactory, propBagMapperService, propFactoryToUse, fullClassNameToUse);
 
             PSAccessServiceCreatorInterface psStoreCreator = viewModelFactory.PropStoreAccessServiceCreator;
 
@@ -216,7 +216,7 @@ namespace DRM.PropBag
 
             bool propModelWasRaw = IsPropModelRaw(propModel);
 
-            BuildPropItems(propModel, viewModelFactory, autoMapperService);
+            BuildPropItems(propModel, viewModelFactory, propBagMapperService);
                 _memConsumptionTracker.Report(memUsedSoFar, "---- After BuildPropItems.");
 
             // Cache or Set the PropertyDescriptors (for our ICustomTypeDescriptor implementation.)
@@ -280,7 +280,7 @@ namespace DRM.PropBag
 
             PropBagTypeSafetyMode typeSafetyMode = ((PropBag)copySource).TypeSafetyMode;
 
-            IAutoMapperService autoMapperService = ((PropBag)copySource)._autoMapperService;
+            IPropBagMapperService propBagMapperService = ((PropBag)copySource)._propBagMapperService;
             //ICreateWrapperTypes wrapperTypeCreator = ((PropBag)copySource)._wrapperTypeCreator;
             //PropModelCacheInterface propModelCache = ((PropBag)copySource)._propModelCache;
 
@@ -289,7 +289,7 @@ namespace DRM.PropBag
             PropModelType propModel = ((PropBag)copySource)._propModel;
             IPropFactory propFactory = ((PropBag)copySource)._propFactory;
 
-            BasicConstruction(typeSafetyMode, propModel, viewModelFactory, autoMapperService, propFactory, copySource.FullClassName);
+            BasicConstruction(typeSafetyMode, propModel, viewModelFactory, propBagMapperService, propFactory, copySource.FullClassName);
 
             PSAccessServiceInterface storeAccessor = ((PropBag)copySource)._ourStoreAccessor;
             _ourStoreAccessor = CloneProps(copySource, storeAccessor);
@@ -305,10 +305,10 @@ namespace DRM.PropBag
             ViewModelActivatorInterface viewModelActivator = VmActivator;
             ViewModelFactoryInterface viewModelFactory = new SimpleViewModelFactory(viewModelActivator, storeAcessorCreator);
 
-            IAutoMapperService autoMapperService = null;
+            IPropBagMapperService propBagMapperService = null;
 
             PropModelType propModel = null;
-            BasicConstruction(typeSafetyMode, propModel, viewModelFactory, autoMapperService, propFactory, fullClassName);
+            BasicConstruction(typeSafetyMode, propModel, viewModelFactory, propBagMapperService, propFactory, fullClassName);
 
             _ourStoreAccessor = storeAcessorCreator.CreatePropStoreService(this);
             _memConsumptionTracker.MeasureAndReport("CreatePropStoreService", null);
@@ -317,21 +317,23 @@ namespace DRM.PropBag
         protected PropBag(PropBagTypeSafetyMode typeSafetyMode, ViewModelFactoryInterface viewModelFactory, IPropFactory propFactory, string fullClassName)
         {
             PropModelType propModel = null;
-            IAutoMapperService autoMapperService = null;
-            BasicConstruction(typeSafetyMode, propModel, viewModelFactory, autoMapperService, propFactory, fullClassName);
+            IPropBagMapperService propBagMapperService = null;
+            BasicConstruction(typeSafetyMode, propModel, viewModelFactory, propBagMapperService, propFactory, fullClassName);
 
             _ourStoreAccessor = viewModelFactory.PropStoreAccessServiceCreator.CreatePropStoreService(this);
         }
 
-        private void BasicConstruction(PropBagTypeSafetyMode typeSafetyMode, PropModelType propModel, ViewModelFactoryInterface viewModelFactory, IAutoMapperService autoMapperService, IPropFactory propFactory, string fullClassName)
+        private void BasicConstruction(PropBagTypeSafetyMode typeSafetyMode, PropModelType propModel,
+            ViewModelFactoryInterface viewModelFactory, IPropBagMapperService propBagMapperService,
+            IPropFactory propFactory, string fullClassName)
         {
-            if (autoMapperService == null)
+            if (propBagMapperService == null)
             {
-                Debug.WriteLine($"Note: IPropBag with FullClassName: {fullClassName} does not have a AutoMapperService.");
+                Debug.WriteLine($"Note: IPropBag with FullClassName: {fullClassName} does not have a (PropBag) AutoMapperService.");
             }
 
             _viewModelFactory = viewModelFactory;
-            _autoMapperService = autoMapperService;
+            _propBagMapperService = propBagMapperService;
 
             _propFactory = propFactory ?? throw new ArgumentNullException(nameof(propFactory));
             if (fullClassName == null) throw new ArgumentNullException(nameof(fullClassName));
@@ -372,7 +374,7 @@ namespace DRM.PropBag
         // Consider providing a separate class (and associated caches) for 'cooked' PropModels.
         // In this way, we can make PropModels fetched from XAML, XML, or other sources immutable.
 
-        protected void BuildPropItems(PropModelType pm, ViewModelFactoryInterface viewModelFactory, IAutoMapperService autoMapperService)
+        protected void BuildPropItems(PropModelType pm, ViewModelFactoryInterface viewModelFactory, IPropBagMapperService propBagMapperService)
         {
             CheckClassNames(pm);
 
@@ -381,7 +383,7 @@ namespace DRM.PropBag
                 long amountUsedBeforeThisPropItem = _memConsumptionTracker.Measure($"Building Prop Item: {pi.PropertyName}");
 
                 bool weHadAPropTemplate = pi.PropTemplate != null;
-                IProp typedProp = BuildProp(pi, viewModelFactory, autoMapperService);
+                IProp typedProp = BuildProp(pi, viewModelFactory, propBagMapperService);
 
                 if(!weHadAPropTemplate)
                 {
@@ -425,7 +427,7 @@ namespace DRM.PropBag
             }
         }
 
-        protected IProp BuildProp(IPropItemModel pi, ViewModelFactoryInterface viewModelFactory, IAutoMapperService autoMapperService)
+        protected IProp BuildProp(IPropItemModel pi, ViewModelFactoryInterface viewModelFactory, IPropBagMapperService propBagMapperService)
         {
             IProp typedProp;
 
@@ -439,7 +441,7 @@ namespace DRM.PropBag
             }
             else
             {
-                typedProp = BuildStandardProp(pi, viewModelFactory, autoMapperService);
+                typedProp = BuildStandardProp(pi, viewModelFactory, propBagMapperService);
             }
 
             return typedProp;
@@ -728,7 +730,8 @@ namespace DRM.PropBag
         //    return genMapper;
         //}
 
-        private IProp BuildStandardProp(IPropItemModel pi, ViewModelFactoryInterface viewModelFactory, IAutoMapperService autoMapperService)
+        private IProp BuildStandardProp(IPropItemModel pi, ViewModelFactoryInterface viewModelFactory,
+            IPropBagMapperService propBagMapperService)
         {
             _memConsumptionTracker.Measure($"Begin BuildStandardPropFromCooked: {pi.PropertyName}.");
 
@@ -748,7 +751,7 @@ namespace DRM.PropBag
                 {
                     string fcn = pi.InitialValueField.PropBagFCN;
                     //IPropBag newObject = BuildNewViewModel(fcn, pi.PropertyType, propModelProvider, storeAccessCreator, autoMapperService, wrapperTypeCreator);
-                    IPropBag newObject = BuildNewViewModel(fcn, pi.PropertyType, viewModelFactory, autoMapperService);
+                    IPropBag newObject = BuildNewViewModel(fcn, pi.PropertyType, viewModelFactory, propBagMapperService);
 
 
                     if (pi.PropTemplate != null && pi.PropCreator != null)
@@ -900,13 +903,13 @@ namespace DRM.PropBag
         //    }
         //}
 
-        private IPropBag BuildNewViewModel(string fullClassName, Type propertyType, ViewModelFactoryInterface viewModelFactory, IAutoMapperService autoMapperService)
+        private IPropBag BuildNewViewModel(string fullClassName, Type propertyType, ViewModelFactoryInterface viewModelFactory, IPropBagMapperService propBagMapperService)
         {
             PropModelCacheInterface propModelCache = viewModelFactory.PropModelCache;
 
             if (propModelCache.TryGetPropModel(fullClassName, out PropModelType propModel))
             {
-                IPropBag newObject = (IPropBag)VmActivator.GetNewViewModel(propertyType, propModel, viewModelFactory, autoMapperService, pfOverride: null, fcnOverride: null);
+                IPropBag newObject = (IPropBag)VmActivator.GetNewViewModel(propertyType, propModel, viewModelFactory, propBagMapperService, pfOverride: null, fcnOverride: null);
                 return newObject;
             }
             else
@@ -3993,34 +3996,19 @@ namespace DRM.PropBag
             where TSource : class
             where TDestination : class, INotifyItemEndEdit, IPropBag
             {
-                //PropBagMapperCreator propBagMapperCreator = GetPropBagMapperFactory();
-
-                // Create a Typed PropBag Mapper using the supplied function and local Mapper Request.
-                //IPropBagMapper<TSource, TDestination> mapper = propBagMapperCreator(mr) as IPropBagMapper<TSource, TDestination>;
-
-                IMapper rawAutoMapper = this.GetAutoMapper<TSource, TDestination>
+                IPropBagMapper<TSource, TDestination> propBagMapper = GetAutoMapper<TSource, TDestination>
                     (
                     mr,
-                    //_viewModelFactory,
-                    _autoMapperService,
-                    out IPropBagMapperKey<TSource, TDestination> propBagMapperKey
-                    );
-
-                IPropBagMapper<TSource, TDestination> cookedAutoMapper = new SimplePropBagMapper<TSource, TDestination>
-                    (
-                    propBagMapperKey,
-                    rawAutoMapper,
-                    _viewModelFactory,
-                    _autoMapperService
+                    _propBagMapperService,
+                    out IPropBagMapperKey<TSource, TDestination> propBagMapperRequestKey
                     );
 
                 // Create a IDoCRUD<TSource> using the watcher and mapper
                 IDoCrudWithMapping<TDestination> result =
-                    new CrudWithMapping<TDal, TSource, TDestination>(propItemWatcher, cookedAutoMapper);
+                    new CrudWithMapping<TDal, TSource, TDestination>(propItemWatcher, propBagMapper);
 
                 return result;
             }
-            //where TDestination : class, IPropBag
 
             //// Just for Diagnostics
             //void DataSourceProvider_DataChanged(object sender, EventArgs e)
@@ -4037,31 +4025,65 @@ namespace DRM.PropBag
             //}
         }
 
-        private IMapper GetAutoMapper<TSource, TDestination>
+        private IPropBagMapper<TSource, TDestination> GetAutoMapper<TSource, TDestination>
             (
             IMapperRequest mapperRequest,
-            //ViewModelFactoryInterface viewModelFactory,
-            IAutoMapperService autoMapperService,
-            out IPropBagMapperKey<TSource, TDestination> propBagMapperKey
+            IPropBagMapperService propBagMapperService,
+            out IPropBagMapperKey<TSource, TDestination> propBagMapperRequestKey
             )
-            where TDestination: class, IPropBag
+            where TDestination : class, IPropBag
         {
-            // This is where the PropModel is used to define the Mapper 
-
             // TODO: See if we can submit the request earlier; perhaps when the mapper request is created.
-
-            Type typeToWrap = mapperRequest.PropModel.TypeToWrap;
+            //Type typeToWrap = mapperRequest.PropModel.TypeToWrap;
 
             // Submit the Mapper Request.
-            propBagMapperKey = autoMapperService.SubmitRawAutoMapperRequest<TSource, TDestination>
-                (mapperRequest.PropModel/*, viewModelFactory*/, typeToWrap, mapperRequest.ConfigPackageName);
+            propBagMapperRequestKey = propBagMapperService.SubmitPropBagMapperRequest<TSource, TDestination>
+                (mapperRequest.PropModel/*, typeToWrap*/, mapperRequest.ConfigPackageName);
 
             // Get the AutoMapper mapping function associated with the mapper request just submitted.
-            //IPropBagMapperGen genMapper = _autoMapperService.GetMapper(mapperKey);
-
-            IMapper rawAutoMapper = autoMapperService.GetRawAutoMapper(propBagMapperKey);
-            return rawAutoMapper;
+            IPropBagMapper<TSource, TDestination> propBagMapper = propBagMapperService.GetPropBagMapper<TSource, TDestination>(propBagMapperRequestKey);
+            return propBagMapper;
         }
+
+        // This is used by this.BuildPropItems.
+        private IPropBagMapperGen GetPropBagMapperGen
+        (
+            IMapperRequest mapperRequest,
+            IPropBagMapperService propBagMapperService,
+            out IPropBagMapperKeyGen propBagMapperRequestKeyGen
+        )
+        {
+            // Submit the Mapper Request. TODO: See if we can submit the request earlier; perhaps when the mapper request is created.
+            propBagMapperRequestKeyGen = propBagMapperService.SubmitPropBagMapperRequest(mapperRequest.PropModel, mapperRequest.SourceType, mapperRequest.ConfigPackageName);
+
+            // Get the AutoMapper mapping function associated with the mapper request just submitted.
+            IPropBagMapperGen mapperGen = propBagMapperService.GetPropBagMapper(propBagMapperRequestKeyGen);
+
+            return mapperGen;
+        }
+
+        //private IPropBagMapper<TSource, TDestination> GetAutoMapper<TSource, TDestination>
+        //(
+        //    IMapperRequest mapperRequest,
+        //    IPropBagMapperService propBagMapperService,
+        //    out IPropBagMapperKey<TSource, TDestination> propBagMapperRequestKey
+        //)
+        //where TDestination : class, IPropBag
+        //{
+        //    // This is where the PropModel is used to define the Mapper 
+
+        //    // TODO: See if we can submit the request earlier; perhaps when the mapper request is created.
+
+        //    Type typeToWrap = null; // This should only be used if we are overridding the TypeToWrap value stored in the PropModel.
+
+        //    // Submit the Mapper Request.
+        //    propBagMapperRequestKey = propBagMapperService.SubmitPropBagMapperRequest<TSource, TDestination>(mapperRequest.PropModel, typeToWrap, mapperRequest.ConfigPackageName);
+
+        //    // Get the AutoMapper mapping function associated with the mapper request just submitted.
+        //    IPropBagMapper<TSource, TDestination> result = propBagMapperService.GetPropBagMapper<TSource, TDestination>(propBagMapperRequestKey);
+
+        //    return result;
+        //}
 
         public IManageCViews GetOrAddViewManager(PropNameType propertyName, Type propertyType)
         {

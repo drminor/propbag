@@ -18,7 +18,7 @@ namespace DRM.PropBag.AutoMapperSupport
     {
         public bool RequiresProxyType => true;
 
-        public Action<IPropBagMapperKey<TSource, TDestination>,IMapperConfigurationExpression> ActionStep
+        public Action<IAutoMapperRequestKey<TSource, TDestination>,IMapperConfigurationExpression> ActionStep
         {
             get
             {
@@ -26,7 +26,7 @@ namespace DRM.PropBag.AutoMapperSupport
             }
         }
 
-        public void BuildEmitProxyConfig(IPropBagMapperKey<TSource, TDestination> mapRequest, IMapperConfigurationExpression cfg)
+        public void BuildEmitProxyConfig(IAutoMapperRequestKey<TSource, TDestination> mapRequest, IMapperConfigurationExpression cfg)
         {
             //PropModelType propModel = mapRequest.DestinationTypeDef.PropModel;
 

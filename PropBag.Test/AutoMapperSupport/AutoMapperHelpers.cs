@@ -56,33 +56,40 @@ namespace PropBagLib.Tests.AutoMapperSupport
                     ViewModelActivatorInterface vmActivator = new SimpleViewModelActivator();
                     ICreateWrapperTypes simpleWrapperTypeCreator = GetWrapperTypeCreator_V1();
 
-                    //IAutoMapperService autoMapperService = GetAutoMapperSetup_V1();
-                    IAutoMapperService autoMapperService = null;
+                    //IPropBagMapperService propBagMapperService = GetAutoMapperSetup_V1();
+                    IPropBagMapperService propBagMapperService = null;
 
-                    _viewModelFactory = new SimpleViewModelFactory(propModelCache, vmActivator, StoreAccessCreator, autoMapperService, simpleWrapperTypeCreator);
+                    _viewModelFactory = new SimpleViewModelFactory(propModelCache, vmActivator, StoreAccessCreator, propBagMapperService, simpleWrapperTypeCreator);
                 }
                 return _viewModelFactory;
             }
         }
 
-        public IAutoMapperService InitializeAutoMappers(ViewModelFactoryInterface viewModelFactory)
+        public IPropBagMapperService InitializeAutoMappers(ViewModelFactoryInterface viewModelFactory)
         {
             IMapTypeDefinitionProvider mapTypeDefinitionProvider = new SimpleMapTypeDefinitionProvider();
 
+            IAutoMapperBuilderProvider autoMapperBuilderProvider = new SimpleAutoMapperBuilderProvider();
+
             ICacheAutoMappers rawAutoMapperCache = new SimpleAutoMapperCache();
-            ICachePropBagMappers mappersCachingService = new SimplePropBagMapperCache(rawAutoMapperCache, viewModelFactory);
+            SimpleAutoMapperProvider autoMapperService = new SimpleAutoMapperProvider
+            (
+                mapTypeDefinitionProvider: mapTypeDefinitionProvider,
+                autoMapperBuilderProvider: autoMapperBuilderProvider,
+                autoMapperCache: rawAutoMapperCache
+            );
 
             IPropBagMapperBuilderProvider propBagMapperBuilderProvider = new SimplePropBagMapperBuilderProvider();
-
-            SimpleAutoMapperProvider autoMapperProvider = new SimpleAutoMapperProvider
-                (
+            ICachePropBagMappers mappersCachingService = new SimplePropBagMapperCache(viewModelFactory);
+            IPropBagMapperService propBagMapperService = new SimplePropBagMapperService
+            (
                 mapTypeDefinitionProvider: mapTypeDefinitionProvider,
+                mapperBuilderProvider: propBagMapperBuilderProvider,
                 mappersCachingService: mappersCachingService,
-                rawAutoMapperCache: rawAutoMapperCache,
-                mapperBuilderProvider: propBagMapperBuilderProvider
-                );
+                autoMapperService: autoMapperService
+            );
 
-            return autoMapperProvider;
+            return propBagMapperService;
         }
 
         public PSAccessServiceCreatorInterface StoreAccessCreator
@@ -152,8 +159,8 @@ namespace PropBagLib.Tests.AutoMapperSupport
             }
         }
 
-        IAutoMapperService _autoMapperProvider_V1;
-        public IAutoMapperService GetAutoMapperSetup_V1() 
+        IPropBagMapperService _autoMapperProvider_V1;
+        public IPropBagMapperService GetAutoMapperSetup_V1() 
         {
             if(_autoMapperProvider_V1 == null)
             {
@@ -283,32 +290,71 @@ namespace PropBagLib.Tests.AutoMapperSupport
             return result;
         }
 
-        public static IMapper GetAutoMapper<TSource, TDestination>
-            (
+        //public static IMapper GetAutoMapper<TSource, TDestination>
+        //    (
+        //    IMapperRequest mapperRequest,
+        //    //ViewModelFactoryInterface viewModelFactory,
+        //    IPropBagMapperService propBagMapperService,
+        //    out IAutoMapperRequestKey<TSource, TDestination> rawAutoMapperRequest
+        //    )
+        //    where TDestination : class, IPropBag
+        //{
+        //    // This is where the PropModel is used to define the Mapper 
+
+        //    // TODO: See if we can submit the request earlier; perhaps when the mapper request is created.
+
+        //    Type typeToWrap = mapperRequest.PropModel.TypeToWrap;
+
+        //    // Submit the Mapper Request.
+        //    rawAutoMapperRequest = propBagMapperService.SubmitRawAutoMapperRequest<TSource, TDestination>
+        //        (mapperRequest.PropModel/*, viewModelFactory*/, typeToWrap, mapperRequest.ConfigPackageName);
+
+        //    // Get the AutoMapper mapping function associated with the mapper request just submitted.
+        //    //IPropBagMapperGen genMapper = _propBagMapperService.GetMapper(mapperKey);
+
+        //    IMapper rawAutoMapper = propBagMapperService.GetRawAutoMapper(rawAutoMapperRequest);
+        //    return rawAutoMapper;
+        //}
+
+        public static IPropBagMapperGen GetAutoMapper
+        (
             IMapperRequest mapperRequest,
-            //ViewModelFactoryInterface viewModelFactory,
-            IAutoMapperService autoMapperService,
-            out IPropBagMapperKey<TSource, TDestination> propBagMapperKey
-            )
-            where TDestination : class, IPropBag
+            IPropBagMapperService propBagMapperService,
+            out IPropBagMapperKeyGen propBagMapperRequestKeyGen
+        )
+        {
+            // Submit the Mapper Request. TODO: See if we can submit the request earlier; perhaps when the mapper request is created.
+            propBagMapperRequestKeyGen = propBagMapperService.SubmitPropBagMapperRequest(mapperRequest.PropModel, mapperRequest.SourceType, mapperRequest.ConfigPackageName);
+
+            // Get the AutoMapper mapping function associated with the mapper request just submitted.
+            IPropBagMapperGen mapperGen = propBagMapperService.GetPropBagMapper(propBagMapperRequestKeyGen);
+
+            return mapperGen;
+        }
+
+        public static IPropBagMapper<TSource, TDestination> GetAutoMapper<TSource, TDestination>
+        (
+            IMapperRequest mapperRequest,
+            IPropBagMapperService propBagMapperService,
+            out IPropBagMapperKey<TSource, TDestination> propBagMapperRequestKey
+        )
+        where TDestination : class, IPropBag
         {
             // This is where the PropModel is used to define the Mapper 
 
             // TODO: See if we can submit the request earlier; perhaps when the mapper request is created.
 
-            Type typeToWrap = mapperRequest.PropModel.TypeToWrap;
+            //Type typeToWrap = null; // This should only be used if we are overridding the TypeToWrap value stored in the PropModel.
 
             // Submit the Mapper Request.
-            propBagMapperKey = autoMapperService.SubmitRawAutoMapperRequest<TSource, TDestination>
-                (mapperRequest.PropModel/*, viewModelFactory*/, typeToWrap, mapperRequest.ConfigPackageName);
+            propBagMapperRequestKey = propBagMapperService.SubmitPropBagMapperRequest<TSource, TDestination>
+                (mapperRequest.PropModel/*, typeToWrap*/, mapperRequest.ConfigPackageName);
 
             // Get the AutoMapper mapping function associated with the mapper request just submitted.
-            //IPropBagMapperGen genMapper = _autoMapperService.GetMapper(mapperKey);
+            IPropBagMapper<TSource, TDestination> result = propBagMapperService.GetPropBagMapper<TSource, TDestination>(propBagMapperRequestKey);
 
-            IMapper rawAutoMapper = autoMapperService.GetRawAutoMapper(propBagMapperKey);
-            return rawAutoMapper;
+            return result;
         }
-
 
         //public Type GetTypeFromName(string typeName)
         //{

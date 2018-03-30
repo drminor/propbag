@@ -26,7 +26,7 @@ namespace PropBagLib.Tests.PerformanceDb
 
 
         public DestinationModel1(PropModelType pm, ViewModelFactoryInterface viewModelFactory,
-            IAutoMapperService autoMapperService, IPropFactory propFactory, string fullClassName)
+            IPropBagMapperService autoMapperService, IPropFactory propFactory, string fullClassName)
             : base(pm, viewModelFactory, autoMapperService, propFactory, fullClassName)
         {
             TryOpenPropSet();
@@ -57,7 +57,7 @@ namespace PropBagLib.Tests.PerformanceDb
 
 
         public DestinationModel5(PropModelType pm, ViewModelFactoryInterface viewModelFactory,
-            IAutoMapperService autoMapperService, IPropFactory propFactory, string fullClassName)
+            IPropBagMapperService autoMapperService, IPropFactory propFactory, string fullClassName)
             : base(pm, viewModelFactory, autoMapperService, propFactory, fullClassName)
         {
         }
@@ -78,7 +78,7 @@ namespace PropBagLib.Tests.PerformanceDb
         //}
 
         public DestinationModel6(PropModelType pm, ViewModelFactoryInterface viewModelFactory,
-            IAutoMapperService autoMapperService, IPropFactory propFactory, string fullClassName)
+            IPropBagMapperService autoMapperService, IPropFactory propFactory, string fullClassName)
             : base(pm, viewModelFactory, autoMapperService, propFactory, fullClassName)
         {
         }

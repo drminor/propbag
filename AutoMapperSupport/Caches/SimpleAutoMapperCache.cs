@@ -10,68 +10,90 @@ namespace DRM.PropBag.AutoMapperSupport
     //[Synchronization()]
     public class SimpleAutoMapperCache : /*ContextBoundObject,*/ ICacheAutoMappers, IDisposable
     {
-        private readonly LockingConcurrentDictionary<IPropBagMapperKeyGen, IPropBagMapperKeyGen> _unSealedAutoMappers;
-        private readonly LockingConcurrentDictionary<IPropBagMapperKeyGen, IMapper> _sealedAutoMappers;
+        private readonly LockingConcurrentDictionary<IAutoMapperRequestKeyGen, IAutoMapperRequestKeyGen> _unSealedAutoMappers;
+        private readonly LockingConcurrentDictionary<IAutoMapperRequestKeyGen, IMapper> _sealedAutoMappers;
 
         private int pCntr = 0;
 
         public SimpleAutoMapperCache()
         {
             _unSealedAutoMappers = 
-                new LockingConcurrentDictionary<IPropBagMapperKeyGen, IPropBagMapperKeyGen>(GetPropBagMapperPromise);
+                new LockingConcurrentDictionary<IAutoMapperRequestKeyGen, IAutoMapperRequestKeyGen>(RequestFactory);
 
             _sealedAutoMappers =
-                new LockingConcurrentDictionary<IPropBagMapperKeyGen, IMapper>(GetPropBagMapperReal);
+                new LockingConcurrentDictionary<IAutoMapperRequestKeyGen, IMapper>(MapperFactory);
         }
 
-        public IPropBagMapperKeyGen RegisterRawAutoMapperRequest(IPropBagMapperKeyGen mapRequest)
+        /// <summary>
+        /// Queues a request to create an IMapper.
+        /// </summary>
+        /// <param name="mapperRequest"></param>
+        /// <returns>The 'true' key present in the dictionary. This will be the key given if no previous matching registration has occured.</returns>
+
+        public IAutoMapperRequestKeyGen RegisterRawAutoMapperRequest(IAutoMapperRequestKeyGen mapperRequest)
         {
-            if (_sealedAutoMappers.ContainsKey(mapRequest))
+            IAutoMapperRequestKeyGen result;
+
+            if (_sealedAutoMappers.ContainsKey(mapperRequest))
             {
-                ICollection<IPropBagMapperKeyGen> keys = _sealedAutoMappers.Keys;
+                //ICollection<IAutoMapperRequestKeyGen> keys = _sealedAutoMappers.Keys;
 
-                // TODO: This is relatively resource intensive, perhaps there's a better way.
-                IPropBagMapperKeyGen existingKey = keys.FirstOrDefault(x => x.DestinationTypeGenDef.Equals(mapRequest.DestinationTypeGenDef));
+                //// TODO: This is relatively resource intensive, perhaps there's a better way.
+                //IAutoMapperRequestKeyGen existingKey = keys.FirstOrDefault(x => x.DestinationTypeGenDef.Equals(autoMapperRequestKeyGen.DestinationTypeGenDef));
 
-                if(!ReferenceEquals(existingKey, mapRequest))
-                {
-                    System.Diagnostics.Debug.WriteLine("The mapRequest given to RegisterRawAutoMapperRequest was not the original key.");
-                }
-                return existingKey;
+                //if(!ReferenceEquals(existingKey, autoMapperRequestKeyGen))
+                //{
+                //    System.Diagnostics.Debug.WriteLine("The mapRequest given to RegisterRawAutoMapperRequest was not the original key.");
+                //}
+                //result = existingKey;
+                result = mapperRequest;
             }
             else
             {
-                _unSealedAutoMappers.GetOrAdd(mapRequest);
-                return mapRequest;
+                _unSealedAutoMappers.GetOrAdd(mapperRequest);
+                result = mapperRequest;
             }
+
+            return result;
         }
 
-        public IMapper GetRawAutoMapper(IPropBagMapperKeyGen mapRequest)
+        public IMapper GetRawAutoMapper(IAutoMapperRequestKeyGen mapperRequest)
         {
-            IPropBagMapperKeyGen save = mapRequest;
+            IAutoMapperRequestKeyGen save = mapperRequest;
 
-            if (_sealedAutoMappers.TryGetValue(mapRequest, out IMapper result))
+            if (_sealedAutoMappers.TryGetValue(mapperRequest, out IMapper result))
             {
-                CheckForChanges(save, mapRequest, "Find in Sealed -- First Check.");
+                CheckForChanges(save, mapperRequest, "Find in Sealed -- First Check.");
                 return result;
             }
 
-            _unSealedAutoMappers.GetOrAdd(mapRequest);
-            CheckForChanges(save, mapRequest, "GetOrAdd to UnSealed");
+            _unSealedAutoMappers.GetOrAdd(mapperRequest);
+            CheckForChanges(save, mapperRequest, "GetOrAdd to UnSealed");
 
             // Seal all pending mapper requests.
             int numberInThisBatch = SealThis(pCntr++);
 
-            CheckForChanges(save, mapRequest, "Seal");
+            CheckForChanges(save, mapperRequest, "Seal");
 
-            if (!_sealedAutoMappers.TryGetValue(mapRequest, out result))
+            if (!_sealedAutoMappers.TryGetValue(mapperRequest, out result))
             {
-                CheckForChanges(save, mapRequest, "Find in Sealed -- second check.");
+                CheckForChanges(save, mapperRequest, "Find in Sealed -- second check.");
                 result = null;
             }
 
             return result;
         }
+
+        // Note: Creating a Typed GetRawAutoMapper would only offer a very small benefit. 
+        // Remember if we create on IMapper, we need to process all pending requests in a single batch.
+        // These requests have different values for TSource and TDestination and we would still have to
+        // use the 'generic way' for all but the one referenced in this request.
+        //public IMapper GetRawAutoMapper<TSource, TDestination>(IAutoMapperRequestKey<TSource, TDestination> mapperRequest) where TDestination : class, IPropBag
+        //{
+        //    IMapper result = null;
+
+        //    return result;
+        //}
 
         // TODO: Note: only the sealed mappers are counted.
         public long ClearRawAutoMappersCache()
@@ -98,7 +120,7 @@ namespace DRM.PropBag.AutoMapperSupport
             return result;
         }
 
-        private void CheckForChanges(IPropBagMapperKeyGen original, IPropBagMapperKeyGen current, string operationName)
+        private void CheckForChanges(IAutoMapperRequestKeyGen original, IAutoMapperRequestKeyGen current, string operationName)
         {
             if (!ReferenceEquals(original, current))
             {
@@ -116,12 +138,12 @@ namespace DRM.PropBag.AutoMapperSupport
             System.Diagnostics.Debug.WriteLine($"Creating Profile_{cntr.ToString()}");
 
             int result = 0;
-            foreach (IPropBagMapperKeyGen key in _unSealedAutoMappers.Keys)
+            foreach (IAutoMapperRequestKeyGen key in _unSealedAutoMappers.Keys)
             {
                 IMapper mapper = _sealedAutoMappers.GetOrAdd(key);
                 key.AutoMapper = mapper;
 
-                if (!(_unSealedAutoMappers.TryRemoveValue(key, out IPropBagMapperKeyGen dummyKey)))
+                if (!(_unSealedAutoMappers.TryRemoveValue(key, out IAutoMapperRequestKeyGen dummyKey)))
                 {
                     System.Diagnostics.Debug.WriteLine("Couldn't remove mappper request from list of registered, pending to be created, mapper requests.");
                 }
@@ -130,13 +152,13 @@ namespace DRM.PropBag.AutoMapperSupport
             return result;
         }
 
-        private IMapper GetPropBagMapperReal(IPropBagMapperKeyGen key)
+        private IMapper MapperFactory(IAutoMapperRequestKeyGen key)
         {
             IMapper result = key.CreateRawAutoMapper();
             return result;
         }
 
-        private IPropBagMapperKeyGen GetPropBagMapperPromise(IPropBagMapperKeyGen key)
+        private IAutoMapperRequestKeyGen RequestFactory(IAutoMapperRequestKeyGen key)
         {
             return key;
         }

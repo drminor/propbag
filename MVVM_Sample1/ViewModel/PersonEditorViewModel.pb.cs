@@ -27,7 +27,7 @@ namespace MVVM_Sample1.ViewModel
 
 
         public PersonEditorViewModel(PropModelType pm, ViewModelFactoryInterface viewModelFactory,
-            IAutoMapperService autoMapperService, IPropFactory propFactory, string fullClassName)
+            IPropBagMapperService autoMapperService, IPropFactory propFactory, string fullClassName)
             : base(pm, viewModelFactory, autoMapperService, propFactory, fullClassName)
         {
             //PropBagTypeDescriptionProvider<PersonEditorViewModel> tdp = RegisterTypeDescriptorProvider<PersonEditorViewModel>(pm);

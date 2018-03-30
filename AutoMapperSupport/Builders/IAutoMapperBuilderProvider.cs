@@ -2,12 +2,12 @@
 
 namespace DRM.PropBag.AutoMapperSupport
 {
-    public interface IPropBagMapperBuilderProvider
+    public interface IAutoMapperBuilderProvider
     {
-        IBuildPropBagMapper<TSource, TDestination> GetPropBagMapperBuilder<TSource, TDestination>
+        IBuildAutoMapper<TSource, TDestination> GetAutoMapperBuilder<TSource, TDestination>
             (
             IBuildMapperConfigurations<TSource, TDestination> mapperConfigurationBuilder,
-            IPropBagMapperService propBagMapperService
+            IAutoMapperService autoMapperService
             )
             where TDestination : class, IPropBag;
     }

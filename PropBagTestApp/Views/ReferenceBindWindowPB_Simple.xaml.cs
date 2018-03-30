@@ -152,25 +152,15 @@ namespace PropBagTestApp.View
                         throw new KeyNotFoundException($"Could not find a PropModel with Full Class Name = {fcn}.");
                     }
 
-                    ViewModelFactoryInterface viewModelFactory = null; // Fix Me.
-
-                    IAutoMapperService autoMapperService = PropStoreServicesForThisApp.AutoMapperService;
+                    IPropBagMapperService propBagMapperService = PropStoreServicesForThisApp.PropBagMapperService;
 
                     IMapperRequest mr = new MapperRequest(typeof(MyModel), propModel, "emit_proxy");
 
-                    IMapper rawAutoMapper = PropStoreServicesForThisApp.GetAutoMapper<MyModel, ReferenceBindViewModelPB>
+                    IPropBagMapper<MyModel, ReferenceBindViewModelPB> propBagMapper = PropStoreServicesForThisApp.GetAutoMapper<MyModel, ReferenceBindViewModelPB>
                         (
                         mr,
-                        autoMapperService,
+                        propBagMapperService,
                         out IPropBagMapperKey<MyModel, ReferenceBindViewModelPB> propBagMapperKey
-                        );
-
-                    IPropBagMapper<MyModel, ReferenceBindViewModelPB> cookedAutoMapper = new SimplePropBagMapper<MyModel, ReferenceBindViewModelPB>
-                        (
-                        propBagMapperKey,
-                        rawAutoMapper,
-                        viewModelFactory,
-                        autoMapperService
                         );
 
                     //IPropBagMapperKey<MyModel, ReferenceBindViewModelPB> mapperRequest
@@ -186,7 +176,7 @@ namespace PropBagTestApp.View
 
                     //_mapper = PropStoreServicesForThisApp.AutoMapperService.GetMapper(mapperRequest);
 
-                    _mapper = cookedAutoMapper;
+                    _mapper = propBagMapper;
                 }
                 return _mapper;
             }

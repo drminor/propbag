@@ -12,7 +12,7 @@ namespace DRM.PropBag.AutoMapperSupport
         #region Private Properties
 
         private readonly IBuildMapperConfigurations<TSource, TDestination> _mapperConfigurationBuilder;
-        private readonly IAutoMapperService _autoMapperService;
+        private readonly IPropBagMapperService _propBagMapperService;
 
         #endregion
 
@@ -21,11 +21,11 @@ namespace DRM.PropBag.AutoMapperSupport
         public SimplePropBagMapperBuilder
             (
             IBuildMapperConfigurations<TSource, TDestination> mapperConfigurationBuilder,
-            IAutoMapperService autoMapperService
+            IPropBagMapperService propBagMapperService
             )
         {
             _mapperConfigurationBuilder = mapperConfigurationBuilder;
-            _autoMapperService = autoMapperService;
+            _propBagMapperService = propBagMapperService;
         }
 
         #endregion
@@ -49,28 +49,13 @@ namespace DRM.PropBag.AutoMapperSupport
                 mapperRequestKey,
                 theMapper,
                 viewModelFactory,
-                _autoMapperService
+                _propBagMapperService
                 );
 
             return result;
         }
 
-        // Create a new AutoMapper (IMapper)
-        public IMapper GenerateRawAutoMapper(IPropBagMapperKey<TSource, TDestination> mapperRequestKey)
-        {
-            CheckTypeToCreate(typeof(TSource), mapperRequestKey.SourceTypeDef.TargetType);
-            CheckTypeToCreate(typeof(TDestination), mapperRequestKey.DestinationTypeDef.TargetType);
-
-            IConfigurationProvider configProvider = _mapperConfigurationBuilder.GetNewConfiguration(mapperRequestKey);
-
-            IMapper theMapper = configProvider.CreateMapper();
-
-            return theMapper;
-        }
-
         public Func<IPropBagMapperKeyGen, ViewModelFactoryInterface, IPropBagMapperGen> GenPropBagMapperCreator => GeneratePropBagMapperGen;
-
-        public Func<IPropBagMapperKeyGen, IMapper> GenRawAutoMapperCreator => GenerateRawAutoMapperGen;
 
         #endregion
 
@@ -87,19 +72,6 @@ namespace DRM.PropBag.AutoMapperSupport
 
             return GeneratePropBagMapper(mapRequestTyped, viewModelFactory);
         }
-
-        private IMapper GenerateRawAutoMapperGen(IPropBagMapperKeyGen mapRequestGen)
-        {
-            IPropBagMapperKey<TSource, TDestination> mapRequestTyped = mapRequestGen as IPropBagMapperKey<TSource, TDestination>;
-
-            if (mapRequestTyped == null)
-            {
-                throw new InvalidOperationException($"{nameof(mapRequestGen)} does not implement the correct typed {nameof(IPropBagMapperKey<TSource, TDestination>)} interface.");
-            }
-
-            return GenerateRawAutoMapper(mapRequestTyped);
-        }
-
 
         [System.Diagnostics.Conditional("DEBUG")]
         private void CheckTypeToCreate(Type typeParameter, Type typeFromPropModel)

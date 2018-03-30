@@ -21,7 +21,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM.ViewModels
             TypeDescriptor.AddProvider(_typeDescriptionProvider, typeof(MainWindowViewModel));
         }
 
-        public MainWindowViewModel(PropModelType pm, ViewModelFactoryInterface viewModelFactory, IAutoMapperService autoMapperService, IPropFactory propFactory, string fullClassName)
+        public MainWindowViewModel(PropModelType pm, ViewModelFactoryInterface viewModelFactory, IPropBagMapperService autoMapperService, IPropFactory propFactory, string fullClassName)
             : base(pm, viewModelFactory, autoMapperService, propFactory, fullClassName)
         {
             //System.Diagnostics.Debug.WriteLine("Beginning to construct MainWindowViewModel -- From PropModel.");
@@ -30,7 +30,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests.BasicVM.ViewModels
             //System.Diagnostics.Debug.WriteLine("Completed Constructing MainWindowViewModel -- From PropModel.");
         }
 
-        public MainWindowViewModel(PropModelType pm, ViewModelFactoryInterface viewModelFactory, IAutoMapperService autoMapperService)
+        public MainWindowViewModel(PropModelType pm, ViewModelFactoryInterface viewModelFactory, IPropBagMapperService autoMapperService)
             : base(pm, viewModelFactory, autoMapperService)
         {
             //System.Diagnostics.Debug.WriteLine("Beginning to construct MainWindowViewModel -- From PropModel.");

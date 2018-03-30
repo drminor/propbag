@@ -21,7 +21,7 @@ namespace PropBagLib.Tests.PerformanceDb
     {
         const int NUMBER_OF_PEOPLE = 1000;
 
-        IAutoMapperService _amp;
+        IPropBagMapperService _amp;
         AutoMapperHelpers _ourHelper;
         IPropFactory _propFactory_V1;
         PropModelCacheInterface _propModelCache;
@@ -193,7 +193,7 @@ namespace PropBagLib.Tests.PerformanceDb
         {
             AutoMapperHelpers ourHelper = new AutoMapperHelpers();
 
-            IAutoMapperService autoMapperService = ourHelper.GetAutoMapperSetup_V1();
+            IPropBagMapperService autoMapperService = ourHelper.GetAutoMapperSetup_V1();
 
             IPropFactory propFactory_V1 = ourHelper.GetNewPropFactory_V1();
             ICreateWrapperTypes wrapperTypeCreator = ourHelper.GetWrapperTypeCreator_V1();

@@ -41,7 +41,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Builders\IAutoMapperBuilderProvider.cs" />
+    <Compile Include="Builders\IBuildAutoMapper.cs" />
     <Compile Include="Builders\IPropBagMapperBuilderProvider.cs" />
+    <Compile Include="Builders\AutoMapperRequestKeyGen.cs" />
+    <Compile Include="Builders\AutoMapperRequestKey.cs" />
+    <Compile Include="Builders\SimpleAutoMapperBuilderProvider.cs" />
+    <Compile Include="Builders\SimpleAutoMapperBuilder.cs" />
     <Compile Include="Builders\SimplePropBagMapperBuilderProvider.cs" />
     <Compile Include="Caches\SimpleAutoMapperCache.cs" />
     <Compile Include="Caches\SimplePropBagMapperCache.cs" />
@@ -60,8 +66,9 @@
     <Compile Include="Config\AbstractMapperConfigGen.cs" />
     <Compile Include="Builders\SimplePropBagMapperBuilder.cs" />
     <Compile Include="PropBagAdapter\Class1.cs" />
+    <Compile Include="SimplePropBagMapperService.cs" />
     <Compile Include="SimplePropBagMapper.cs" />
-    <Compile Include="SimpleAutoMapperProvider.cs" />
+    <Compile Include="SimpleAutoMapperService.cs" />
     <Compile Include="Config\EmitProxyConfigFinalStep.cs" />
     <Compile Include="Config\ExtraMembersConfigInitialStep.cs" />
     <Compile Include="Config\MapperConfigStarter_Empty.cs" />

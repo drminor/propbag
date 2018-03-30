@@ -31,8 +31,8 @@ namespace PropBagTestApp
         /// </summary>
         /// <param name="pm"></param>
         public MainViewModel(PropModelType pm, ViewModelFactoryInterface viewModelFactory,
-            IAutoMapperService autoMapperService, IPropFactory propFactory, string fullClassName)
-            : base(pm, viewModelFactory, autoMapperService, propFactory, fullClassName)
+            IPropBagMapperService propBagMapperService,IPropFactory propFactory, string fullClassName)
+            : base(pm, viewModelFactory, propBagMapperService,propFactory, fullClassName)
         {
             this.PropFirstDidChange = false;
             this.PropMyStringDidChange = false;

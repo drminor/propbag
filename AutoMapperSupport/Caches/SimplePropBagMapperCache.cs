@@ -1,7 +1,9 @@
-﻿using AutoMapper;
-using DRM.PropBag.ViewModelTools;
+﻿using DRM.PropBag.ViewModelTools;
+using DRM.TypeSafePropertyBag;
 using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
@@ -11,50 +13,124 @@ namespace DRM.PropBag.AutoMapperSupport
     public class SimplePropBagMapperCache : /*ContextBoundObject,*/ ICachePropBagMappers, IDisposable
     {
         private readonly ViewModelFactoryInterface _viewModelFactory;
-        private readonly ICacheAutoMappers _autoMappersCache;
 
+        private readonly LockingConcurrentDictionary<IPropBagMapperKeyGen, IPropBagMapperKeyGen> _requests;
         private readonly LockingConcurrentDictionary<IPropBagMapperKeyGen, IPropBagMapperGen> _propBagMappers;
 
 
-        public SimplePropBagMapperCache(ICacheAutoMappers autoMappersCache, ViewModelFactoryInterface viewModelFactory)
+        public SimplePropBagMapperCache(ViewModelFactoryInterface viewModelFactory)
         {
-            _autoMappersCache = autoMappersCache;
-            _viewModelFactory = viewModelFactory;
+            _viewModelFactory = viewModelFactory ?? throw new ArgumentNullException(nameof(viewModelFactory));
+
+            _requests =
+                new LockingConcurrentDictionary<IPropBagMapperKeyGen, IPropBagMapperKeyGen>(RequestFactory);
 
             _propBagMappers =
-                new LockingConcurrentDictionary<IPropBagMapperKeyGen, IPropBagMapperGen>(GetPropBagMapperReal);
+                new LockingConcurrentDictionary<IPropBagMapperKeyGen, IPropBagMapperGen>(MapperFactory);
         }
 
+        /// <summary>
+        /// Queues a request to create and IMapper and a new PropBagMapper to be created from the IMapper.
+        /// </summary>
+        /// <param name="mapperRequest"></param>
+        /// <returns>The 'true' key present in the dictionary. This will be the key given if no previous matching registration has occured.</returns>
         public IPropBagMapperKeyGen RegisterPropBagMapperRequest(IPropBagMapperKeyGen mapperRequest)
         {
-            IPropBagMapperKeyGen result = _autoMappersCache.RegisterRawAutoMapperRequest(mapperRequest);
+            IPropBagMapperKeyGen result;
+
+            if (_propBagMappers.ContainsKey(mapperRequest))
+            {
+                //ICollection<IPropBagMapperKeyGen> keys = _propBagMappers.Keys;
+
+                //// TODO: This is relatively resource intensive, perhaps there's a better way.
+                //IPropBagMapperKeyGen existingRequest = keys.FirstOrDefault
+                //    (
+                //    x => x.DestinationTypeGenDef.Equals(mapperRequest.DestinationTypeGenDef)
+                //    );
+
+                //result = existingRequest;
+                result = mapperRequest;
+            }
+            else
+            {
+                IPropBagMapperKeyGen newOrExistingRequest = _requests.GetOrAdd(mapperRequest);
+                result = newOrExistingRequest;
+            }
+
             return result;
         }
 
-        public IPropBagMapperGen GetPropBagMapper(IPropBagMapperKeyGen mapRequest)
+        public IPropBagMapperGen GetPropBagMapper(IPropBagMapperKeyGen mapperRequest)
         {
-            IPropBagMapperKeyGen save = mapRequest;
-
-            if (_propBagMappers.TryGetValue(mapRequest, out IPropBagMapperGen result))
+            if(mapperRequest.AutoMapper == null)
             {
-                CheckForChanges(save, mapRequest, "PropBagMapperCache - After TryGetValue from our Cache.");
+                throw new InvalidOperationException($"The {nameof(SimplePropBagMapperCache)} was asked to GetPropBagMapper, however the mapperRequest has a null AutoMapper.");
+            }
+
+            IPropBagMapperKeyGen save = mapperRequest;
+
+            if (_propBagMappers.TryGetValue(mapperRequest, out IPropBagMapperGen result))
+            {
                 return result;
             }
             else
             {
-                IMapper autoMapper = _autoMappersCache.GetRawAutoMapper(mapRequest);
-                mapRequest.AutoMapper = autoMapper;
-                result = _propBagMappers.GetOrAdd(mapRequest);
+                //IPropBagMapperKeyGen newOrExistingRequest = _Requests.GetOrAdd(mapperRequest);
+                //result = _propBagMappers.GetOrAdd(newOrExistingRequest);
 
-                CheckForChanges(save, mapRequest, "PropBagMapperCache - After GetRaw from AutoMapperCache.");
+                // Remove the request from the request que if present.
+                _requests.TryRemoveValue(mapperRequest, out IPropBagMapperKeyGen dummyExistingRequest);
+
+                result = _propBagMappers.GetOrAdd(mapperRequest);
+                CheckForChanges(save, mapperRequest, "GetOrAdd PropBagMapper.");
             }
 
             return result;
         }
 
-        // TODO: Note: only the sealed mappers are counted.
+        // Typed Get Mapper
+        public IPropBagMapper<TSource, TDestination> GetPropBagMapper<TSource, TDestination>
+        (
+            IPropBagMapperKey<TSource, TDestination> mapperRequest
+        )
+        where TDestination : class, IPropBag
+        {
+            IPropBagMapper<TSource, TDestination> result;
+
+            if (mapperRequest.AutoMapper == null)
+            {
+                throw new InvalidOperationException($"The {nameof(SimplePropBagMapperCache)} was asked to GetPropBagMapper, however the mapperRequest has a null AutoMapper.");
+            }
+
+            if (_propBagMappers.TryGetValue(mapperRequest, out IPropBagMapperGen genMapper))
+            {
+                result = (IPropBagMapper<TSource, TDestination>)genMapper;
+            }
+            else
+            {
+                result = mapperRequest.GeneratePropBagMapper(mapperRequest, _viewModelFactory);
+
+                // Remove the request from the request que if present.
+                _requests.TryRemoveValue(mapperRequest, out IPropBagMapperKeyGen dummyExistingRequest);
+            }
+
+            return result;
+        }
+
         public long ClearPropBagMappersCache()
         {
+            // TODO: Clear the request que as well.
+
+            foreach (IPropBagMapperKeyGen mapperRequest in _requests)
+            {
+                if (mapperRequest is IDisposable disable)
+                {
+                    disable.Dispose();
+                }
+            }
+
+            _requests.Clear();
+
             long result = _propBagMappers.Count;
             foreach (IPropBagMapperGen mapper in _propBagMappers)
             {
@@ -86,7 +162,12 @@ namespace DRM.PropBag.AutoMapperSupport
             }
         }
 
-        private IPropBagMapperGen GetPropBagMapperReal(IPropBagMapperKeyGen key)
+        private IPropBagMapperKeyGen RequestFactory(IPropBagMapperKeyGen key)
+        {
+            return key;
+        }
+
+        private IPropBagMapperGen MapperFactory(IPropBagMapperKeyGen key)
         {
             IPropBagMapperGen result = key.CreatePropBagMapper(_viewModelFactory);
             return result;

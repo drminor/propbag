@@ -42,7 +42,7 @@ namespace MVVM_Sample1.Infra
 
         public static SimpleViewModelFactory ViewModelFactory { get; private set; }
         public static ICreateWrapperTypes WrapperTypeCreator { get; }
-        public static IAutoMapperService AutoMapperService { get; }
+        public static IPropBagMapperService AutoMapperService { get; }
 
         public static string ConfigPackageNameSuffix { get; set; }
 
@@ -154,25 +154,36 @@ namespace MVVM_Sample1.Infra
             return result;
         }
 
-        private static IAutoMapperService GetAutoMapperProvider(ViewModelFactoryInterface viewModelFactory)
+        private static IPropBagMapperService GetAutoMapperProvider
+        (
+            ViewModelFactoryInterface viewModelFactory
+        )
         {
             IMapTypeDefinitionProvider mapTypeDefinitionProvider = new SimpleMapTypeDefinitionProvider();
 
+            IAutoMapperBuilderProvider autoMapperBuilderProvider = new SimpleAutoMapperBuilderProvider();
+
             ICacheAutoMappers rawAutoMapperCache = new SimpleAutoMapperCache();
-            ICachePropBagMappers mappersCachingService = new SimplePropBagMapperCache(rawAutoMapperCache, viewModelFactory);
+            SimpleAutoMapperProvider autoMapperService = new SimpleAutoMapperProvider
+            (
+                mapTypeDefinitionProvider: mapTypeDefinitionProvider,
+                autoMapperBuilderProvider: autoMapperBuilderProvider,
+                autoMapperCache: rawAutoMapperCache
+            );
 
             IPropBagMapperBuilderProvider propBagMapperBuilderProvider = new SimplePropBagMapperBuilderProvider();
-
-            SimpleAutoMapperProvider autoMapperProvider = new SimpleAutoMapperProvider
-                (
+            ICachePropBagMappers mappersCachingService = new SimplePropBagMapperCache(viewModelFactory);
+            IPropBagMapperService propBagMapperService = new SimplePropBagMapperService
+            (
                 mapTypeDefinitionProvider: mapTypeDefinitionProvider,
+                mapperBuilderProvider: propBagMapperBuilderProvider,
                 mappersCachingService: mappersCachingService,
-                rawAutoMapperCache: rawAutoMapperCache,
-                mapperBuilderProvider: propBagMapperBuilderProvider
-                );
+                autoMapperService: autoMapperService
+            );
 
-            return autoMapperProvider;
+            return propBagMapperService;
         }
+
 
         private static ICreateWrapperTypes GetSimpleWrapperTypeCreator()
         {

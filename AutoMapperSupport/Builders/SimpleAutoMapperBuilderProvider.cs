@@ -2,11 +2,20 @@
 
 namespace DRM.PropBag.AutoMapperSupport
 {
-    public class SimplePropBagMapperBuilderProvider : IPropBagMapperBuilderProvider
+    public class SimpleAutoMapperBuilderProvider : IAutoMapperBuilderProvider
     {
+        #region Private Properties
+
+        //private readonly ViewModelActivatorInterface _viewModelActivator;
+        //private PSAccessServiceCreatorInterface _storeAccessCreator;
+        ////private readonly IProvideAutoMappers _autoMapperService;
+        //private readonly ICreateWrapperTypes _wrapperTypeCreator;
+
+        #endregion
+
         #region Constructor
 
-        public SimplePropBagMapperBuilderProvider()
+        public SimpleAutoMapperBuilderProvider()
         {
         }
 
@@ -20,18 +29,17 @@ namespace DRM.PropBag.AutoMapperSupport
 
         #region Public Methods
 
-        public IBuildPropBagMapper<TSource, TDestination> GetPropBagMapperBuilder<TSource, TDestination>
+        public IBuildAutoMapper<TSource, TDestination> GetAutoMapperBuilder<TSource, TDestination>
             (
             IBuildMapperConfigurations<TSource, TDestination> mapperConfigurationBuilder,
-            IPropBagMapperService autoMapperService
+            IAutoMapperService autoMapperService
             )
             where TDestination: class, IPropBag
         {
-            IBuildPropBagMapper<TSource, TDestination> result
-                = new SimplePropBagMapperBuilder<TSource, TDestination>
+            IBuildAutoMapper<TSource, TDestination> result = new SimpleAutoMapperBuilder<TSource, TDestination>
                 (
                     mapperConfigurationBuilder: mapperConfigurationBuilder,
-                    propBagMapperService: autoMapperService
+                    autoMapperService: autoMapperService
                 );
 
             return result;

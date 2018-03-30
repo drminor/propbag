@@ -36,7 +36,7 @@ namespace PropBagLib.Tests.PerformanceDb
             AutoMapperHelpers ourHelper,
             IPropFactory propFactory_V1,
             PropModelCacheInterface propModelCache,
-            IAutoMapperService amp,
+            IPropBagMapperService amp,
             PropModelHelpers pmHelpers,
             int numberOfItemsToLoad
             )
@@ -49,10 +49,13 @@ namespace PropBagLib.Tests.PerformanceDb
             PropModelType propModel1 = pmHelpers.GetPropModelForModel1Dest(propFactory_V1, propModelCache);
 
             ViewModelActivatorInterface viewModelActivator = new SimpleViewModelActivator();
-            IAutoMapperService autoMapperService = ourHelper.GetAutoMapperSetup_V1();
+            IPropBagMapperService autoMapperService = ourHelper.GetAutoMapperSetup_V1();
             ICreateWrapperTypes wrapperTypeCreator = ourHelper.GetWrapperTypeCreator_V1();
 
             ViewModelFactoryInterface viewModelFactory = new SimpleViewModelFactory(propModelCache, viewModelActivator, ourHelper.StoreAccessCreator, amp, wrapperTypeCreator);
+
+            // TODO: Move this to a separate test.
+            #region Clone Tests
 
             // Make sure we can activate (or clone as appropriate) the destination type.
             DestinationModel1 test = new DestinationModel1(PropBagTypeSafetyMode.AllPropsMustBeRegistered, ourHelper.StoreAccessCreator, ourHelper.PropFactory_V1, "Test");
@@ -76,62 +79,43 @@ namespace PropBagLib.Tests.PerformanceDb
                 DestinationModel1 test2Copy = (DestinationModel1)test2.Clone();
             }
 
+            #endregion
+
             Type typeToWrap = typeof(PropBag);
 
-            IPropBagMapperGen genMapper = null;
-            //IPropBagMapper<Person, DestinationModel1> mapper = null;
+            IMapperRequest localMr = new MapperRequest(typeof(Person), propModel1, configPackageName);
 
-            IPropBagMapper<Person, DestinationModel1> cookedAutoMapper = null;
+            IPropBagMapper<Person, DestinationModel1> propBagMapper = null;
+            IPropBagMapperKey<Person, DestinationModel1> propBagMapperRequestKey = null;
 
+            IPropBagMapperGen propBagMapperGen = null;
+            IPropBagMapperKeyGen propBagMapperRequestKeyGen = null;
 
             if (configPackageName == "Emit_Proxy")
             {
-                IMapperRequest localMr = new MapperRequest(typeof(Person), propModel1, configPackageName);
-
                 wrapperTypeCreator = ourHelper.GetWrapperTypeCreator_V1();
                 Type et = wrapperTypeCreator.GetWrapperType(propModel1, typeToWrap);
                 propModel1.NewEmittedType = et;
 
-                IPropBagMapperKeyGen mapperRequest = amp.SubmitPropBagMapperRequest(localMr.PropModel, localMr.SourceType, localMr.ConfigPackageName);
-
-                Assert.That(mapperRequest, Is.Not.Null, "mapperRequest should be non-null.");
-
-                // Get the AutoMapper mapping function associated with the mapper request just submitted.
-                genMapper = amp.GetPropBagMapper(mapperRequest);
-                Assert.That(genMapper, Is.Not.Null, "mapper should be non-null");
+                propBagMapperGen = AutoMapperHelpers.GetAutoMapper
+                (
+                    localMr,
+                    amp,
+                    out propBagMapperRequestKeyGen
+                );
+                Assert.That(propBagMapperRequestKeyGen, Is.Not.Null, "mapperRequest should be non-null.");
+                Assert.That(propBagMapperGen, Is.Not.Null, "mapper should be non-null");
             }
             else
             {
-                //IPropBagMapperKey<Person, DestinationModel1> mapperRequest = amp.SubmitMapperRequest<Person, DestinationModel1>
-                //    (
-                //        propModel: propModel1,
-                //        viewModelFactory: viewModelFactory,
-                //        typeToWrap: typeToWrap,
-                //        configPackageName: configPackageName
-                //    );
-
-                IMapperRequest localMr = new MapperRequest(typeof(Person), propModel1, configPackageName);
-
-                IMapper rawAutoMapper = AutoMapperHelpers.GetAutoMapper<Person, DestinationModel1>
-                    (
+                propBagMapper = AutoMapperHelpers.GetAutoMapper<Person, DestinationModel1>
+                (
                     localMr,
                     autoMapperService,
-                    out IPropBagMapperKey<Person, DestinationModel1> propBagMapperKey
-                    );
-
-                cookedAutoMapper = new SimplePropBagMapper<Person, DestinationModel1>
-                    (
-                    propBagMapperKey,
-                    rawAutoMapper,
-                    viewModelFactory,
-                    autoMapperService
-                    );
-
-
-                Assert.That(propBagMapperKey, Is.Not.Null, "mapperRequest should be non-null.");
-
-                //mapper = amp.GetMapper<Person, DestinationModel1>(mapperRequest);
-                Assert.That(cookedAutoMapper, Is.Not.Null, "mapper should be non-null");
+                    out propBagMapperRequestKey
+                );
+                Assert.That(propBagMapperRequestKey, Is.Not.Null, "mapperRequest should be non-null.");
+                Assert.That(propBagMapper, Is.Not.Null, "mapper should be non-null");
             }
 
             PropModelType propModel5 = pmHelpers.GetPropModelForModel5Dest(propFactory_V1, propModelCache);
@@ -152,14 +136,12 @@ namespace PropBagLib.Tests.PerformanceDb
 
             if (configPackageName == "Emit_Proxy")
             {
-                mappedPeople = genMapper.MapToDestination(unMappedPeople)/*.Cast<DestinationModel1>()*/;
-
+                mappedPeople = propBagMapperGen.MapToDestination(unMappedPeople);
             }
             else
             {
-                mappedPeople = cookedAutoMapper.MapToDestination(unMappedPeople);
+                mappedPeople = propBagMapper.MapToDestination(unMappedPeople);
             }
-
 
             _readyForTheView = new ObservableCollection<object>(mappedPeople);
 

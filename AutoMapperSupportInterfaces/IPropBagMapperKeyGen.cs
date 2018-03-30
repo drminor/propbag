@@ -8,17 +8,32 @@ namespace DRM.PropBag.AutoMapperSupport
 
     public interface IPropBagMapperKeyGen
     {
+        Type SourceType { get; }
+        Type DestinationType { get; }
+
         IMapTypeDefinitionGen SourceTypeGenDef { get; }
         IMapTypeDefinitionGen DestinationTypeGenDef { get; }
 
-        IPropBagMapperGen CreatePropBagMapper(ViewModelFactoryInterface viewModelFactory);
-
-        IMapper CreateRawAutoMapper();
+        IAutoMapperRequestKeyGen AutoMapperRequestKeyGen { get; }
 
         IMapper AutoMapper { get; set; }
 
         Func<IPropBagMapperKeyGen, ViewModelFactoryInterface, IPropBagMapperGen> PropBagMapperCreator { get; }
-        Func<IPropBagMapperKeyGen, IMapper> RawAutoMapperCreator { get; }
 
+        IPropBagMapperGen CreatePropBagMapper(ViewModelFactoryInterface viewModelFactory);
     }
+
+
+    // Convenient Reference
+    //public interface IAutoMapperRequestKeyGen
+    //{
+    //    IMapTypeDefinitionGen SourceTypeGenDef { get; }
+    //    IMapTypeDefinitionGen DestinationTypeGenDef { get; }
+
+    //    IMapper CreateRawAutoMapper();
+
+    //    IMapper AutoMapper { get; set; }
+
+    //    Func<IAutoMapperRequestKeyGen, IMapper> RawAutoMapperCreator { get; }
+    //}
 }

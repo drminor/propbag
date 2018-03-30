@@ -14,14 +14,14 @@ namespace DRM.PropBag.AutoMapperSupport
             IPropBagMapperKey<TSource, TDestination> mapRequest,
             IMapper mapper,
             ViewModelFactoryInterface viewModelFactory,
-            IAutoMapperService autoMapperService
+            IPropBagMapperService propBagMapperService
         )
         : base
             (
             mapRequest,
             mapper,
             viewModelFactory,
-            autoMapperService
+            propBagMapperService
             )
         {
         }
