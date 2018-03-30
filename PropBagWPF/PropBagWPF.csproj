@@ -59,10 +59,6 @@
     <Compile Include="SimplePropModelProvider.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AutoMapperSupportInterfaces\AutoMapperSupportInterfaces.csproj">
-      <Project>{f0903390-0628-434c-8d27-80fb263955b6}</Project>
-      <Name>AutoMapperSupportInterfaces</Name>
-    </ProjectReference>
     <ProjectReference Include="..\ObjectSizeDiagnostics\ObjectSizeDiagnostics.csproj">
       <Project>{9b18f82d-3ed9-49e0-9ee3-cfbfc3af9d9c}</Project>
       <Name>ObjectSizeDiagnostics</Name>

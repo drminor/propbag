@@ -50,16 +50,15 @@
     <Compile Include="Caches\SimpleAutoMapperCache.cs" />
     <Compile Include="ConfigPackages\ConfigPackage_EmitProxy.cs" />
     <Compile Include="ConfigPackages\ConfigPackage_ExtraMembers.cs" />
-    <Compile Include="ConfigPackages\ICreateMapperRequests.cs" />
     <Compile Include="ConfigPackages\IProvideAMapperConfiguration.cs" />
-    <Compile Include="IAutoMapperRequestKey.cs" />
-    <Compile Include="IAutoMapperRequestKeyGen.cs" />
+    <Compile Include="Builders\IAutoMapperRequestKey.cs" />
+    <Compile Include="Builders\IAutoMapperRequestKeyGen.cs" />
     <Compile Include="IAutoMapperService.cs" />
-    <Compile Include="ICacheAutoMappers.cs" />
-    <Compile Include="IConfigureAMapper.cs" />
-    <Compile Include="ICreateMappingExpressions.cs" />
-    <Compile Include="IHaveAMapperConfigurationStep.cs" />
-    <Compile Include="IMapTypeDefinition.cs" />
+    <Compile Include="Caches\ICacheAutoMappers.cs" />
+    <Compile Include="Config\IConfigureAMapper.cs" />
+    <Compile Include="Config\ICreateMappingExpressions.cs" />
+    <Compile Include="Config\IHaveAMapperConfigurationStep.cs" />
+    <Compile Include="MapTypeDefinition\IMapTypeDefinition.cs" />
     <Compile Include="MapTypeDefinition\IMapTypeDefinitionProvider.cs" />
     <Compile Include="MapTypeDefinition\SimpleMapTypeDefinitionProvider.cs" />
     <Compile Include="Caches\ICacheConfigPackages.cs" />
@@ -81,10 +80,6 @@
     <Compile Include="ExtraMembers\PropertyInfoWT.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AutoMapperSupportInterfaces\AutoMapperSupportInterfaces.csproj">
-      <Project>{f0903390-0628-434c-8d27-80fb263955b6}</Project>
-      <Name>AutoMapperSupportInterfaces</Name>
-    </ProjectReference>
     <ProjectReference Include="..\ObjectSizeDiagnostics\ObjectSizeDiagnostics.csproj">
       <Project>{9b18f82d-3ed9-49e0-9ee3-cfbfc3af9d9c}</Project>
       <Name>ObjectSizeDiagnostics</Name>
@@ -105,9 +100,6 @@
       <Project>{a149ead5-06a9-47c8-8853-1d329d553ea7}</Project>
       <Name>ViewModelTools</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="PropBagMappingStrategyEnum.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
