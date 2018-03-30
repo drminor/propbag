@@ -11,19 +11,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		ToDoList.txt = ToDoList.txt
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{F93D2783-82C5-46F0-A50A-3925ADE7B367}"
-	ProjectSection(SolutionItems) = preProject
-		Documentaton\BigPicture.txt = Documentaton\BigPicture.txt
-		Documentaton\BINDING_WORK.txt = Documentaton\BINDING_WORK.txt
-		Documentaton\DataTable stuff for PropBag.txt = Documentaton\DataTable stuff for PropBag.txt
-		Documentaton\Dependencies.md = Documentaton\Dependencies.md
-		Documentaton\Documentation.md = Documentaton\Documentation.md
-		Documentaton\MemoryConsumptionReport.docx = Documentaton\MemoryConsumptionReport.docx
-		Documentaton\Roles and Dependencies.md = Documentaton\Roles and Dependencies.md
-		Documentaton\ServiceNotes.md = Documentaton\ServiceNotes.md
-		Documentaton\TopLevelObjectReferences.md = Documentaton\TopLevelObjectReferences.md
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PropBagTestApp", "PropBagTestApp\PropBagTestApp.csproj", "{9D2C9BA2-FBDD-4EA8-9322-FDC0653B3E60}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PropBagControlsWPF", "PropBagControlsWPF\PropBagControlsWPF.csproj", "{9BEE9979-9812-4675-8F97-A4DD1E7DBA5F}"
@@ -53,6 +40,21 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PropBagLib.Tests", "PropBag.Test\PropBagLib.Tests.csproj", "{7578349D-63E0-4B73-BC1A-25B667008B9D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PropBagAutoMapperService", "PropBagAutoMapperService\PropBagAutoMapperService.csproj", "{D7FA7FF1-9E07-40F6-ABEC-3725F72865E0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{A3C9C099-FFD9-4618-B10B-F8764568D777}"
+	ProjectSection(SolutionItems) = preProject
+		Documentaton\AssemblyDependencies.txt = Documentaton\AssemblyDependencies.txt
+		Documentaton\AssemblyDependencies.vsd = Documentaton\AssemblyDependencies.vsd
+		Documentaton\BigPicture.txt = Documentaton\BigPicture.txt
+		Documentaton\BINDING_WORK.txt = Documentaton\BINDING_WORK.txt
+		Documentaton\DataTable stuff for PropBag.txt = Documentaton\DataTable stuff for PropBag.txt
+		Documentaton\Dependencies.md = Documentaton\Dependencies.md
+		Documentaton\Documentation.md = Documentaton\Documentation.md
+		Documentaton\MemoryConsumptionReport.docx = Documentaton\MemoryConsumptionReport.docx
+		Documentaton\Roles and Dependencies.md = Documentaton\Roles and Dependencies.md
+		Documentaton\ServiceNotes.md = Documentaton\ServiceNotes.md
+		Documentaton\TopLevelObjectReferences.md = Documentaton\TopLevelObjectReferences.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -124,8 +126,8 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{F93D2783-82C5-46F0-A50A-3925ADE7B367} = {D1E92622-001D-48C3-901F-5DD6393BEA53}
 		{6BB7FBDD-E030-4803-86DD-68619C6DB7A0} = {FA19F7A3-98DA-4965-B377-2387A8D2FAB6}
+		{A3C9C099-FFD9-4618-B10B-F8764568D777} = {D1E92622-001D-48C3-901F-5DD6393BEA53}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B8B4EBB5-703A-4D04-8840-4E98DD72994B}
