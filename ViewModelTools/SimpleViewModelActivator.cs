@@ -22,17 +22,17 @@ namespace DRM.PropBag.ViewModelTools
 
         // BaseType + PropModel (BaseType known at compile time.)
         public object GetNewViewModel<BT>(PropModelType propModel, ViewModelFactoryInterface viewModelFactory,
-            object ams, IPropFactory propFactory = null, string fcnOverride = null) where BT : class, IPropBag
+            object propBagAutoMapperService, IPropFactory propFactory = null, string fcnOverride = null) where BT : class, IPropBag
         {
-            object result = GetNewViewModel(typeof(BT), propModel, viewModelFactory, ams, propFactory, fcnOverride);
+            object result = GetNewViewModel(typeof(BT), propModel, viewModelFactory, propBagAutoMapperService, propFactory, fcnOverride);
             return result;
         }
 
 
         public object GetNewViewModel(Type typeToCreate, PropModelType propModel, ViewModelFactoryInterface viewModelFactory,
-             object ams, IPropFactory propFactory, string fcnOverride)
+             object propBagAutoMapperService, IPropFactory propFactory, string fcnOverride)
         {
-            object[] parameters = new object[] { propModel, viewModelFactory, ams, propFactory, fcnOverride };
+            object[] parameters = new object[] { propModel, viewModelFactory, propBagAutoMapperService, propFactory, fcnOverride };
 
             //BindingFlags bFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.CreateInstance;
             //object result = Activator.CreateInstance(typeToCreate, bFlags, binder: null, args: parameters, culture: null);
