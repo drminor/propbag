@@ -43,17 +43,18 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PropBagAutoMapperService", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{A3C9C099-FFD9-4618-B10B-F8764568D777}"
 	ProjectSection(SolutionItems) = preProject
-		Documentaton\AssemblyDependencies.txt = Documentaton\AssemblyDependencies.txt
-		Documentaton\AssemblyDependencies.vsd = Documentaton\AssemblyDependencies.vsd
-		Documentaton\BigPicture.txt = Documentaton\BigPicture.txt
-		Documentaton\BINDING_WORK.txt = Documentaton\BINDING_WORK.txt
-		Documentaton\DataTable stuff for PropBag.txt = Documentaton\DataTable stuff for PropBag.txt
-		Documentaton\Dependencies.md = Documentaton\Dependencies.md
-		Documentaton\Documentation.md = Documentaton\Documentation.md
-		Documentaton\MemoryConsumptionReport.docx = Documentaton\MemoryConsumptionReport.docx
-		Documentaton\Roles and Dependencies.md = Documentaton\Roles and Dependencies.md
-		Documentaton\ServiceNotes.md = Documentaton\ServiceNotes.md
-		Documentaton\TopLevelObjectReferences.md = Documentaton\TopLevelObjectReferences.md
+		Documentation\AssemblyDependencies.txt = Documentation\AssemblyDependencies.txt
+		Documentation\AssemblyDependencies.vsd = Documentation\AssemblyDependencies.vsd
+		Documentation\BigPicture.txt = Documentation\BigPicture.txt
+		Documentation\BINDING_WORK.txt = Documentation\BINDING_WORK.txt
+		Documentation\DataTable stuff for PropBag.txt = Documentation\DataTable stuff for PropBag.txt
+		Documentation\Dependencies.md = Documentation\Dependencies.md
+		Documentation\Documentation.md = Documentation\Documentation.md
+		Documentation\IDoCRUD to DataSourceProvider notes.txt = Documentation\IDoCRUD to DataSourceProvider notes.txt
+		Documentation\MemoryConsumptionReport.docx = Documentation\MemoryConsumptionReport.docx
+		Documentation\Roles and Dependencies.md = Documentation\Roles and Dependencies.md
+		Documentation\ServiceNotes.md = Documentation\ServiceNotes.md
+		Documentation\TopLevelObjectReferences.md = Documentation\TopLevelObjectReferences.md
 	EndProjectSection
 EndProject
 Global

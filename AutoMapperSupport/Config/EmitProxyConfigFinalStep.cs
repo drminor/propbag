@@ -14,7 +14,7 @@ namespace DRM.PropBag.AutoMapperSupport
     /// <typeparam name="TSource"></typeparam>
     /// <typeparam name="TDestination"></typeparam>
     public class EmitProxyConfigFinalStep<TSource, TDestination>
-        : ICreateMappingExpressions<TSource, TDestination> where TDestination : class, IPropBag
+        : ICreateMappingExpressions<TSource, TDestination> //where TDestination : class, IPropBag
     {
         public bool RequiresProxyType => true;
 

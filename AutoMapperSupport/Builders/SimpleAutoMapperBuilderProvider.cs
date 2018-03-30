@@ -34,7 +34,7 @@ namespace DRM.PropBag.AutoMapperSupport
             IBuildMapperConfigurations<TSource, TDestination> mapperConfigurationBuilder,
             IAutoMapperService autoMapperService
             )
-            where TDestination: class, IPropBag
+            //where TDestination: class, IPropBag
         {
             IBuildAutoMapper<TSource, TDestination> result = new SimpleAutoMapperBuilder<TSource, TDestination>
                 (

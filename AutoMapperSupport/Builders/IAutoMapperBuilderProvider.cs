@@ -8,7 +8,7 @@ namespace DRM.PropBag.AutoMapperSupport
             (
             IBuildMapperConfigurations<TSource, TDestination> mapperConfigurationBuilder,
             IAutoMapperService autoMapperService
-            )
-            where TDestination : class, IPropBag;
+            );
+            //where TDestination : class, IPropBag;
     }
 }

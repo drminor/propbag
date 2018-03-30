@@ -3,7 +3,7 @@ using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
-    public interface IBuildMapperConfigurations<TSource, TDestination> /*: IBuildMapperConfigurationsGen*/ where TDestination : class, IPropBag
+    public interface IBuildMapperConfigurations<TSource, TDestination> /*: IBuildMapperConfigurationsGen*/ //where TDestination : class, IPropBag
     {
         //IConfigurationProvider GetNewConfiguration
         //    (

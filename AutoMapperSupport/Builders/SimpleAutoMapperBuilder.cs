@@ -1,11 +1,10 @@
 ﻿using AutoMapper;
-using DRM.PropBag.ViewModelTools;
 using DRM.TypeSafePropertyBag;
 using System;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
-    public class SimpleAutoMapperBuilder<TSource, TDestination> : IBuildAutoMapper<TSource, TDestination> where TDestination : class, IPropBag
+    public class SimpleAutoMapperBuilder<TSource, TDestination> : IBuildAutoMapper<TSource, TDestination> //where TDestination : class, IPropBag
     {
         #region Private Properties
 

@@ -5,7 +5,7 @@ using DRM.TypeSafePropertyBag;
 namespace DRM.PropBag.AutoMapperSupport
 {
     public class SimpleMapperConfigTyped<TSource, TDestination>
-        : AbstractMapperConfigGen, IConfigureAMapper<TSource, TDestination> where TDestination : class, IPropBag
+        : AbstractMapperConfigGen, IConfigureAMapper<TSource, TDestination> //where TDestination : class, IPropBag
     {
         public ICreateMappingExpressions<TSource, TDestination> FinalConfigActionProvider { get; }
 

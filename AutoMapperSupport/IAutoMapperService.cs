@@ -1,12 +1,10 @@
 ﻿using System;
 using DRM.TypeSafePropertyBag;
-using DRM.PropBag.ViewModelTools;
 using AutoMapper;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
     using PropModelType = IPropModel<String>;
-    using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
 
     public interface IAutoMapperService : ICacheAutoMappers
     {

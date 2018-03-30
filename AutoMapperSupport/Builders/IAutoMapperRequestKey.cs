@@ -2,7 +2,7 @@
 
 namespace DRM.PropBag.AutoMapperSupport
 {
-    public interface IAutoMapperRequestKey<TSource, TDestination> : IAutoMapperRequestKeyGen where TDestination: class, IPropBag
+    public interface IAutoMapperRequestKey<TSource, TDestination> : IAutoMapperRequestKeyGen //where TDestination: class, IPropBag
     {
         IMapTypeDefinition<TSource> SourceTypeDef { get; }
         IMapTypeDefinition<TDestination> DestinationTypeDef { get; }

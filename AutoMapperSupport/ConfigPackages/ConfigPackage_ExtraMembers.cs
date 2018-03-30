@@ -5,7 +5,7 @@ namespace DRM.PropBag.AutoMapperSupport
 {
     public class ConfigPackage_ExtraMembers : IProvideAMapperConfiguration
     {
-        public IConfigureAMapper<TSource, TDestination> GetTheMapperConfig<TSource, TDestination>() where TDestination : class, IPropBag
+        public IConfigureAMapper<TSource, TDestination> GetTheMapperConfig<TSource, TDestination>() //where TDestination : class, IPropBag
         {
             List<IHaveAMapperConfigurationStep> configSteps = new List<IHaveAMapperConfigurationStep>
             {

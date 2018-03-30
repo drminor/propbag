@@ -6,7 +6,7 @@ namespace DRM.PropBag.AutoMapperSupport
 {
     public class SimpleMapperConfigurationBuilder<TSource, TDestination>
         : SimpleMapperConfigurationBuilderGenBase, IBuildMapperConfigurations<TSource, TDestination>
-        where TDestination : class, IPropBag
+        //where TDestination : class, IPropBag
     {
         public SimpleMapperConfigurationBuilder()
             : base(null) 

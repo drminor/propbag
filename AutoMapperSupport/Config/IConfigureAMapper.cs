@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
-    public interface IConfigureAMapper<TSource, TDestination> : IConfigureAMapperGen where TDestination : class, IPropBag
+    public interface IConfigureAMapper<TSource, TDestination> : IConfigureAMapperGen //where TDestination : class, IPropBag
     {
         ICreateMappingExpressions<TSource, TDestination> FinalConfigActionProvider { get; }
         Func<TDestination, TSource> SourceConstructor { get; }
