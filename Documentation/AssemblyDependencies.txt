@@ -1,18 +1,24 @@
 
 PropBagWPF
-	AutoMapperSupportInterfaces
 	PropBag
 	PropBagControlsWPF
 	TypeSafePropertyBag
 
 PropBag
-	AutoMapperSupportInterfaces
+	AutoMapperSupport
+	PropBagAutoMapperService
+	TypeSafePropertyBag
+	ViewModelTools
+
+PropBagAutoMapperService
+	AutoMapper
+	AutoMapperSupport
 	TypeSafePropertyBag
 	ViewModelTools
 
 PropBagControlsWPF
 	TypeSafePropertyBag
-	
+
 ViewModelTools
 	TypeSafePropertyBag
 	TypeWrapper
@@ -20,17 +26,8 @@ ViewModelTools
 TypeWrapper
 	TypeSafePropertyBag
 
-
-AutoMapperService
-	AutoMapperSupportInterfaces
-	TypeSafePropertyBag
-
 AutoMapperSupport
 	AutoMapper
-	AutoMapperSupportInterfaces
-	TypeSafePropertyBag
-
-AutoMapperSupportInterfaces
 	TypeSafePropertyBag
 
 TypeSafePropertyBag
