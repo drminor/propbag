@@ -52,6 +52,14 @@
     <Compile Include="ConfigPackages\ConfigPackage_ExtraMembers.cs" />
     <Compile Include="ConfigPackages\ICreateMapperRequests.cs" />
     <Compile Include="ConfigPackages\IProvideAMapperConfiguration.cs" />
+    <Compile Include="IAutoMapperRequestKey.cs" />
+    <Compile Include="IAutoMapperRequestKeyGen.cs" />
+    <Compile Include="IAutoMapperService.cs" />
+    <Compile Include="ICacheAutoMappers.cs" />
+    <Compile Include="IConfigureAMapper.cs" />
+    <Compile Include="ICreateMappingExpressions.cs" />
+    <Compile Include="IHaveAMapperConfigurationStep.cs" />
+    <Compile Include="IMapTypeDefinition.cs" />
     <Compile Include="MapTypeDefinition\IMapTypeDefinitionProvider.cs" />
     <Compile Include="MapTypeDefinition\SimpleMapTypeDefinitionProvider.cs" />
     <Compile Include="Caches\ICacheConfigPackages.cs" />

@@ -1,5 +1,4 @@
 ﻿using DRM.PropBag;
-using DRM.PropBag.AutoMapperSupport;
 using DRM.TypeSafePropertyBag;
 using DRM.TypeSafePropertyBag.DataAccessSupport;
 using System;
@@ -8,9 +7,7 @@ using System.Windows.Data;
 
 namespace DRM.PropBagWPF
 {
-    using PropIdType = UInt32;
     using PropNameType = String;
-    using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
 
     public class WPFPropFactory : PropFactory
     {

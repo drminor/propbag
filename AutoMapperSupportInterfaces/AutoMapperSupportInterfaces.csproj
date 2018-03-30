@@ -40,14 +40,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ICacheAutoMappers.cs" />
-    <Compile Include="IConfigureAMapper.cs" />
-    <Compile Include="ICreateMappingExpressions.cs" />
-    <Compile Include="IHaveAMapperConfigurationStep.cs" />
-    <Compile Include="IMapTypeDefinition.cs" />
-    <Compile Include="IAutoMapperRequestKey.cs" />
-    <Compile Include="IAutoMapperRequestKeyGen.cs" />
-    <Compile Include="IAutoMapperService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
