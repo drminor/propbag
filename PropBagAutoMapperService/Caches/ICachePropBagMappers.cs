@@ -5,13 +5,13 @@ namespace DRM.PropBag.AutoMapperSupport
 {
     public interface ICachePropBagMappers
     {
-        IPropBagMapperKeyGen RegisterPropBagMapperRequest(IPropBagMapperKeyGen mapperRequest);
+        IPropBagMapperRequestKeyGen RegisterPropBagMapperRequest(IPropBagMapperRequestKeyGen mapperRequest);
 
-        IPropBagMapperGen GetPropBagMapper(IPropBagMapperKeyGen mapperRequest);
+        IPropBagMapperGen GetPropBagMapper(IPropBagMapperRequestKeyGen mapperRequest);
 
         IPropBagMapper<TSource, TDestination> GetPropBagMapper<TSource, TDestination>
         (
-            IPropBagMapperKey<TSource, TDestination> mapperRequest
+            IPropBagMapperRequestKey<TSource, TDestination> mapperRequest
         )
         where TDestination : class, IPropBag;
 

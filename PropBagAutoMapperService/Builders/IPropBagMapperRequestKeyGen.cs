@@ -6,7 +6,7 @@ namespace DRM.PropBag.AutoMapperSupport
 {
     using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
 
-    public interface IPropBagMapperKeyGen
+    public interface IPropBagMapperRequestKeyGen
     {
         Type SourceType { get; }
         Type DestinationType { get; }
@@ -18,7 +18,7 @@ namespace DRM.PropBag.AutoMapperSupport
 
         IMapper AutoMapper { get; set; }
 
-        Func<IPropBagMapperKeyGen, ViewModelFactoryInterface, IPropBagMapperGen> PropBagMapperCreator { get; }
+        Func<IPropBagMapperRequestKeyGen, ViewModelFactoryInterface, IPropBagMapperGen> PropBagMapperCreator { get; }
 
         IPropBagMapperGen CreatePropBagMapper(ViewModelFactoryInterface viewModelFactory);
     }

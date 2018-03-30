@@ -160,7 +160,7 @@ namespace PropBagTestApp.View
                         (
                         mr,
                         propBagMapperService,
-                        out IPropBagMapperKey<MyModel, ReferenceBindViewModelPB> propBagMapperKey
+                        out IPropBagMapperRequestKey<MyModel, ReferenceBindViewModelPB> propBagMapperKey
                         );
 
                     //IPropBagMapperKey<MyModel, ReferenceBindViewModelPB> mapperRequest

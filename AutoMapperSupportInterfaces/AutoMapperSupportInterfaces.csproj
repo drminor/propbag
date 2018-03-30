@@ -41,18 +41,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ICacheAutoMappers.cs" />
-    <Compile Include="ICachePropBagMappers.cs" />
     <Compile Include="IConfigureAMapper.cs" />
     <Compile Include="ICreateMappingExpressions.cs" />
     <Compile Include="IHaveAMapperConfigurationStep.cs" />
     <Compile Include="IMapTypeDefinition.cs" />
-    <Compile Include="IPropBagMapper.cs" />
     <Compile Include="IAutoMapperRequestKey.cs" />
-    <Compile Include="IPropBagMapperKey.cs" />
     <Compile Include="IAutoMapperRequestKeyGen.cs" />
-    <Compile Include="IPropBagMapperKeyGen.cs" />
     <Compile Include="IAutoMapperService.cs" />
-    <Compile Include="IPropBagMapperService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

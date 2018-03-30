@@ -219,7 +219,7 @@ namespace PropBagTestApp.Infra
             (
             IMapperRequest mapperRequest,
             IPropBagMapperService propBagMapperService,
-            out IPropBagMapperKey<TSource, TDestination> propBagMapperRequestKey
+            out IPropBagMapperRequestKey<TSource, TDestination> propBagMapperRequestKey
             )
             where TDestination : class, IPropBag
         {
@@ -234,9 +234,9 @@ namespace PropBagTestApp.Infra
             //    (mapperRequest.PropModel, typeToWrap, mapperRequest.ConfigPackageName);
 
 
-            IPropBagMapperKeyGen propBagMapperRequestKeyGen = propBagMapperService.SubmitPropBagMapperRequest(mapperRequest.PropModel, typeToWrap, mapperRequest.ConfigPackageName);
+            IPropBagMapperRequestKeyGen propBagMapperRequestKeyGen = propBagMapperService.SubmitPropBagMapperRequest(mapperRequest.PropModel, typeToWrap, mapperRequest.ConfigPackageName);
 
-            propBagMapperRequestKey = (IPropBagMapperKey<TSource, TDestination>)propBagMapperRequestKeyGen;
+            propBagMapperRequestKey = (IPropBagMapperRequestKey<TSource, TDestination>)propBagMapperRequestKeyGen;
 
             // Get the AutoMapper mapping function associated with the mapper request just submitted.
             IPropBagMapperGen mapperGen = propBagMapperService.GetPropBagMapper(propBagMapperRequestKeyGen);

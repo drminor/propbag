@@ -55,7 +55,7 @@ namespace DRM.PropBag.AutoMapperSupport
 
             if (mapRequestTyped == null)
             {
-                throw new InvalidOperationException($"{nameof(mapRequestGen)} does not implement the correct typed {nameof(IPropBagMapperKey<TSource, TDestination>)} interface.");
+                throw new InvalidOperationException($"{nameof(mapRequestGen)} does not implement the correct typed {nameof(IAutoMapperRequestKey<TSource, TDestination>)} interface.");
             }
 
             return GenerateRawAutoMapper(mapRequestTyped);

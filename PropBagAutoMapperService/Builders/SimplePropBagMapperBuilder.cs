@@ -35,7 +35,7 @@ namespace DRM.PropBag.AutoMapperSupport
         // Create a new PropBagMapper
         public IPropBagMapper<TSource, TDestination> GeneratePropBagMapper
             (
-            IPropBagMapperKey<TSource, TDestination> mapperRequestKey,
+            IPropBagMapperRequestKey<TSource, TDestination> mapperRequestKey,
             ViewModelFactoryInterface viewModelFactory
             )
         {
@@ -55,19 +55,19 @@ namespace DRM.PropBag.AutoMapperSupport
             return result;
         }
 
-        public Func<IPropBagMapperKeyGen, ViewModelFactoryInterface, IPropBagMapperGen> GenPropBagMapperCreator => GeneratePropBagMapperGen;
+        public Func<IPropBagMapperRequestKeyGen, ViewModelFactoryInterface, IPropBagMapperGen> GenPropBagMapperCreator => GeneratePropBagMapperGen;
 
         #endregion
 
         #region Private Methods 
 
-        private IPropBagMapperGen GeneratePropBagMapperGen(IPropBagMapperKeyGen mapRequestGen, ViewModelFactoryInterface viewModelFactory)
+        private IPropBagMapperGen GeneratePropBagMapperGen(IPropBagMapperRequestKeyGen mapRequestGen, ViewModelFactoryInterface viewModelFactory)
         {
-            IPropBagMapperKey<TSource, TDestination> mapRequestTyped = mapRequestGen as IPropBagMapperKey<TSource, TDestination>;
+            IPropBagMapperRequestKey<TSource, TDestination> mapRequestTyped = mapRequestGen as IPropBagMapperRequestKey<TSource, TDestination>;
 
             if(mapRequestTyped == null)
             {
-                throw new InvalidOperationException($"{nameof(mapRequestGen)} does not implement the correct typed {nameof(IPropBagMapperKey<TSource, TDestination>)} interface.");
+                throw new InvalidOperationException($"{nameof(mapRequestGen)} does not implement the correct typed {nameof(IPropBagMapperRequestKey<TSource, TDestination>)} interface.");
             }
 
             return GeneratePropBagMapper(mapRequestTyped, viewModelFactory);

@@ -7,11 +7,11 @@ namespace DRM.PropBag.AutoMapperSupport
 {
     using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
 
-    public class PropBagMapperKey<TSource, TDestination>
-            :   PropBagMapperKeyGen,
-                IPropBagMapperKey<TSource, TDestination>,
-                IEquatable<IPropBagMapperKey<TSource, TDestination>>,
-                IEquatable<PropBagMapperKey<TSource, TDestination>>
+    public class PropBagMapperRequestKey<TSource, TDestination>
+            :   PropBagMapperRequestKeyGen,
+                IPropBagMapperRequestKey<TSource, TDestination>,
+                IEquatable<IPropBagMapperRequestKey<TSource, TDestination>>,
+                IEquatable<PropBagMapperRequestKey<TSource, TDestination>>
         where TDestination: class, IPropBag
     {
         #region Private Members
@@ -31,7 +31,7 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public IPropBagMapper<TSource, TDestination> GeneratePropBagMapper
             (
-            IPropBagMapperKey<TSource, TDestination> mapperRequestKey,
+            IPropBagMapperRequestKey<TSource, TDestination> mapperRequestKey,
             ViewModelFactoryInterface viewModelFactory
             )
         {
@@ -44,7 +44,7 @@ namespace DRM.PropBag.AutoMapperSupport
 
         #region Constructor
 
-        public PropBagMapperKey
+        public PropBagMapperRequestKey
         (
             IBuildPropBagMapper<TSource, TDestination> propBagMapperBuilder,
             IAutoMapperRequestKey<TSource, TDestination> autoMapperRequestKey
@@ -68,7 +68,7 @@ namespace DRM.PropBag.AutoMapperSupport
             Validate(this);
         }
 
-        private bool Validate(IPropBagMapperKey<TSource, TDestination> mapperRequestKey)
+        private bool Validate(IPropBagMapperRequestKey<TSource, TDestination> mapperRequestKey)
         {
             if (mapperRequestKey.MappingConfiguration.RequiresWrappperTypeEmitServices)
             {
@@ -86,7 +86,7 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public override bool Equals(object obj)
         {
-            return Equals(obj as PropBagMapperKeyGen);
+            return Equals(obj as PropBagMapperRequestKeyGen);
         }
 
         [System.Diagnostics.DebuggerStepThrough()]
@@ -104,7 +104,7 @@ namespace DRM.PropBag.AutoMapperSupport
             return base.ToString();
         }
 
-        public bool Equals(IPropBagMapperKey<TSource, TDestination> other)
+        public bool Equals(IPropBagMapperRequestKey<TSource, TDestination> other)
         {
             if (other == null) return false;
             if ( (this.DestinationTypeDef.Equals(other.DestinationTypeDef)) && this.SourceTypeDef.Equals(other.SourceTypeDef))
@@ -117,19 +117,19 @@ namespace DRM.PropBag.AutoMapperSupport
             }
         }
 
-        public bool Equals(PropBagMapperKey<TSource, TDestination> other)
+        public bool Equals(PropBagMapperRequestKey<TSource, TDestination> other)
         {
-            return ((IPropBagMapperKey<TSource, TDestination>)this).Equals(other);
+            return ((IPropBagMapperRequestKey<TSource, TDestination>)this).Equals(other);
         }
 
         // TODO: Can we do better than using the Default EqualityComparer?
-        public static bool operator ==(PropBagMapperKey<TSource, TDestination> key1, PropBagMapperKey<TSource, TDestination> key2)
+        public static bool operator ==(PropBagMapperRequestKey<TSource, TDestination> key1, PropBagMapperRequestKey<TSource, TDestination> key2)
         {
             //return EqualityComparer<PropBagMapperKey<TSource, TDestination>>.Default.Equals(key1, key2);
-            return ((IPropBagMapperKey<TSource, TDestination>)key1).Equals(key2);
+            return ((IPropBagMapperRequestKey<TSource, TDestination>)key1).Equals(key2);
         }
 
-        public static bool operator !=(PropBagMapperKey<TSource, TDestination> key1, PropBagMapperKey<TSource, TDestination> key2)
+        public static bool operator !=(PropBagMapperRequestKey<TSource, TDestination> key1, PropBagMapperRequestKey<TSource, TDestination> key2)
         {
             return !(key1 == key2);
         }

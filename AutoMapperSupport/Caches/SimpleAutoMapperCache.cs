@@ -99,16 +99,16 @@ namespace DRM.PropBag.AutoMapperSupport
         public long ClearRawAutoMappersCache()
         {
             long result = _sealedAutoMappers.Count;
-            foreach (IPropBagMapperGen mapper in _sealedAutoMappers)
+            foreach (IAutoMapperRequestKeyGen mapperRequest in _sealedAutoMappers)
             {
-                if (mapper is IDisposable disable)
+                if (mapperRequest is IDisposable disable)
                 {
                     disable.Dispose();
                 }
             }
             _unSealedAutoMappers.Clear();
 
-            foreach (IPropBagMapperGen mapper in _sealedAutoMappers)
+            foreach (IAutoMapperRequestKeyGen mapper in _sealedAutoMappers)
             {
                 if (mapper is IDisposable disable)
                 {

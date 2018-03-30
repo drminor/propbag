@@ -121,7 +121,7 @@ namespace DRM.PropBag.AutoMapperSupport
         public static bool operator ==(AutoMapperRequestKey<TSource, TDestination> key1, AutoMapperRequestKey<TSource, TDestination> key2)
         {
             //return EqualityComparer<PropBagMapperKey<TSource, TDestination>>.Default.Equals(key1, key2);
-            return ((IPropBagMapperKey<TSource, TDestination>)key1).Equals(key2);
+            return ((IAutoMapperRequestKey<TSource, TDestination>)key1).Equals(key2);
         }
 
         public static bool operator !=(AutoMapperRequestKey<TSource, TDestination> key1, AutoMapperRequestKey<TSource, TDestination> key2)

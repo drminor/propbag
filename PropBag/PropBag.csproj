@@ -97,6 +97,10 @@
       <Project>{9B18F82D-3ED9-49E0-9EE3-CFBFC3AF9D9C}</Project>
       <Name>ObjectSizeDiagnostics</Name>
     </ProjectReference>
+    <ProjectReference Include="..\PropBagAutoMapperService\PropBagAutoMapperService.csproj">
+      <Project>{d7fa7ff1-9e07-40f6-abec-3725f72865e0}</Project>
+      <Name>PropBagAutoMapperService</Name>
+    </ProjectReference>
     <ProjectReference Include="..\src\AutoMapper\AutoMapper.csproj">
       <Project>{8CBA8A56-9B60-4430-9D54-9A523BAF1E14}</Project>
       <Name>AutoMapper</Name>

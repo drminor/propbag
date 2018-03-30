@@ -86,10 +86,10 @@ namespace PropBagLib.Tests.PerformanceDb
             IMapperRequest localMr = new MapperRequest(typeof(Person), propModel1, configPackageName);
 
             IPropBagMapper<Person, DestinationModel1> propBagMapper = null;
-            IPropBagMapperKey<Person, DestinationModel1> propBagMapperRequestKey = null;
+            IPropBagMapperRequestKey<Person, DestinationModel1> propBagMapperRequestKey = null;
 
             IPropBagMapperGen propBagMapperGen = null;
-            IPropBagMapperKeyGen propBagMapperRequestKeyGen = null;
+            IPropBagMapperRequestKeyGen propBagMapperRequestKeyGen = null;
 
             if (configPackageName == "Emit_Proxy")
             {

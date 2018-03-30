@@ -84,7 +84,7 @@ namespace DRM.PropBag.AutoMapperSupport
         public static bool operator ==(AutoMapperRequestKeyGen gen1, AutoMapperRequestKeyGen gen2)
         {
             //return EqualityComparer<PropBagMapperKeyGen>.Default.Equals(gen1, gen2);
-            return ((IPropBagMapperKeyGen)gen1).Equals(gen2);
+            return ((IAutoMapperRequestKeyGen)gen1).Equals(gen2);
         }
 
         public static bool operator !=(AutoMapperRequestKeyGen gen1, AutoMapperRequestKeyGen gen2)

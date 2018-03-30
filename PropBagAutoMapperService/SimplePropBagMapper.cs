@@ -11,7 +11,7 @@ namespace DRM.PropBag.AutoMapperSupport
     {
         public SimplePropBagMapper
         (
-            IPropBagMapperKey<TSource, TDestination> mapRequest,
+            IPropBagMapperRequestKey<TSource, TDestination> mapRequest,
             IMapper mapper,
             ViewModelFactoryInterface viewModelFactory,
             IPropBagMapperService propBagMapperService

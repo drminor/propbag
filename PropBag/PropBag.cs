@@ -4000,7 +4000,7 @@ namespace DRM.PropBag
                     (
                     mr,
                     _propBagMapperService,
-                    out IPropBagMapperKey<TSource, TDestination> propBagMapperRequestKey
+                    out IPropBagMapperRequestKey<TSource, TDestination> propBagMapperRequestKey
                     );
 
                 // Create a IDoCRUD<TSource> using the watcher and mapper
@@ -4029,7 +4029,7 @@ namespace DRM.PropBag
             (
             IMapperRequest mapperRequest,
             IPropBagMapperService propBagMapperService,
-            out IPropBagMapperKey<TSource, TDestination> propBagMapperRequestKey
+            out IPropBagMapperRequestKey<TSource, TDestination> propBagMapperRequestKey
             )
             where TDestination : class, IPropBag
         {
@@ -4050,7 +4050,7 @@ namespace DRM.PropBag
         (
             IMapperRequest mapperRequest,
             IPropBagMapperService propBagMapperService,
-            out IPropBagMapperKeyGen propBagMapperRequestKeyGen
+            out IPropBagMapperRequestKeyGen propBagMapperRequestKeyGen
         )
         {
             // Submit the Mapper Request. TODO: See if we can submit the request earlier; perhaps when the mapper request is created.

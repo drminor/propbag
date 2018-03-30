@@ -40,14 +40,48 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AbstractPropBagMapper.cs" />
     <Compile Include="Builders\IBuildPropBagMapper.cs" />
     <Compile Include="Builders\IPropBagMapperBuilderProvider.cs" />
-    <Compile Include="Builders\PropBagMapperKey.cs" />
-    <Compile Include="Builders\PropBagMapperKeyGen.cs" />
+    <Compile Include="Builders\PropBagMapperRequestKey.cs" />
+    <Compile Include="Builders\PropBagMapperRequestKeyGen.cs" />
     <Compile Include="Builders\SimplePropBagMapperBuilder.cs" />
     <Compile Include="Builders\SimplePropBagMapperBuilderProvider.cs" />
-    <Compile Include="Class1.cs" />
+    <Compile Include="Caches\ICachePropBagMappers.cs" />
+    <Compile Include="Caches\SimplePropBagMapperCache.cs" />
+    <Compile Include="IPropBagMapper.cs" />
+    <Compile Include="Builders\IPropBagMapperRequestKey.cs" />
+    <Compile Include="Builders\IPropBagMapperRequestKeyGen.cs" />
+    <Compile Include="IPropBagMapperService.cs" />
+    <Compile Include="SimplePropBagMapper.cs" />
+    <Compile Include="SimplePropBagMapperService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AutoMapperSupportInterfaces\AutoMapperSupportInterfaces.csproj">
+      <Project>{f0903390-0628-434c-8d27-80fb263955b6}</Project>
+      <Name>AutoMapperSupportInterfaces</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AutoMapperSupport\AutoMapperSupport.csproj">
+      <Project>{10cf1c6f-f877-49a8-8678-6947f55e6920}</Project>
+      <Name>AutoMapperSupport</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ObjectSizeDiagnostics\ObjectSizeDiagnostics.csproj">
+      <Project>{9b18f82d-3ed9-49e0-9ee3-cfbfc3af9d9c}</Project>
+      <Name>ObjectSizeDiagnostics</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\src\AutoMapper\AutoMapper.csproj">
+      <Project>{8cba8a56-9b60-4430-9d54-9a523baf1e14}</Project>
+      <Name>AutoMapper</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TypeSafePropertyBag\TypeSafePropertyBag.csproj">
+      <Project>{BBB1E311-374E-4C91-A313-1667D83767DB}</Project>
+      <Name>TypeSafePropertyBag</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ViewModelTools\ViewModelTools.csproj">
+      <Project>{A149EAD5-06A9-47C8-8853-1D329D553EA7}</Project>
+      <Name>ViewModelTools</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -7,7 +7,7 @@ namespace DRM.PropBag.AutoMapperSupport
     using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
 
     // TODO: Consider implementing IDisposable -- to let go of any references we may hold to the mapper creators.
-    public class PropBagMapperKeyGen : IPropBagMapperKeyGen, IEquatable<IPropBagMapperKeyGen>, IEquatable<PropBagMapperKeyGen>
+    public class PropBagMapperRequestKeyGen : IPropBagMapperRequestKeyGen, IEquatable<IPropBagMapperRequestKeyGen>, IEquatable<PropBagMapperRequestKeyGen>
     {
         #region Public Properties
 
@@ -31,7 +31,7 @@ namespace DRM.PropBag.AutoMapperSupport
             }
         }
 
-        public Func<IPropBagMapperKeyGen, ViewModelFactoryInterface, IPropBagMapperGen> PropBagMapperCreator { get; }
+        public Func<IPropBagMapperRequestKeyGen, ViewModelFactoryInterface, IPropBagMapperGen> PropBagMapperCreator { get; }
 
 
 
@@ -39,9 +39,9 @@ namespace DRM.PropBag.AutoMapperSupport
 
         #region Constructor
 
-        public PropBagMapperKeyGen
+        public PropBagMapperRequestKeyGen
             (
-            Func<IPropBagMapperKeyGen, ViewModelFactoryInterface, IPropBagMapperGen> mapperCreator,
+            Func<IPropBagMapperRequestKeyGen, ViewModelFactoryInterface, IPropBagMapperGen> mapperCreator,
             IAutoMapperRequestKeyGen autoMapperRequestKeyGen
             )
         {
@@ -76,15 +76,15 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public override bool Equals(object obj)
         {
-            return Equals(obj as IPropBagMapperKeyGen);
+            return Equals(obj as IPropBagMapperRequestKeyGen);
         }
 
-        public bool Equals(PropBagMapperKeyGen other)
+        public bool Equals(PropBagMapperRequestKeyGen other)
         {
-            return Equals(other as IPropBagMapperKeyGen);
+            return Equals(other as IPropBagMapperRequestKeyGen);
         }
 
-        public bool Equals(IPropBagMapperKeyGen other)
+        public bool Equals(IPropBagMapperRequestKeyGen other)
         {
             //return other != null &&
             //       EqualityComparer<IMapTypeDefinitionGen>.Default.Equals(SourceTypeGenDef, other.SourceTypeGenDef) &&
@@ -109,13 +109,13 @@ namespace DRM.PropBag.AutoMapperSupport
                 $" D={DestinationTypeGenDef.ToString()}";
         }
 
-        public static bool operator ==(PropBagMapperKeyGen gen1, PropBagMapperKeyGen gen2)
+        public static bool operator ==(PropBagMapperRequestKeyGen gen1, PropBagMapperRequestKeyGen gen2)
         {
             //return EqualityComparer<PropBagMapperKeyGen>.Default.Equals(gen1, gen2);
-            return ((IPropBagMapperKeyGen)gen1).Equals(gen2);
+            return ((IPropBagMapperRequestKeyGen)gen1).Equals(gen2);
         }
 
-        public static bool operator !=(PropBagMapperKeyGen gen1, PropBagMapperKeyGen gen2)
+        public static bool operator !=(PropBagMapperRequestKeyGen gen1, PropBagMapperRequestKeyGen gen2)
         {
             return !(gen1 == gen2);
         }

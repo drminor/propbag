@@ -8,8 +8,8 @@ namespace DRM.PropBag.AutoMapperSupport
 
     public interface IBuildPropBagMapper<TSource, TDestination> where TDestination : class, IPropBag
     {
-        Func<IPropBagMapperKeyGen, ViewModelFactoryInterface, IPropBagMapperGen> GenPropBagMapperCreator { get; }
+        Func<IPropBagMapperRequestKeyGen, ViewModelFactoryInterface, IPropBagMapperGen> GenPropBagMapperCreator { get; }
 
-        IPropBagMapper<TSource, TDestination> GeneratePropBagMapper(IPropBagMapperKey<TSource, TDestination> mapperRequestKey, ViewModelFactoryInterface viewModelFactory);
+        IPropBagMapper<TSource, TDestination> GeneratePropBagMapper(IPropBagMapperRequestKey<TSource, TDestination> mapperRequestKey, ViewModelFactoryInterface viewModelFactory);
     }
 }

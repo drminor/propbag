@@ -8,7 +8,7 @@ namespace DRM.PropBag.AutoMapperSupport
     public interface IPropBagMapperService : ICachePropBagMappers
     {
         // Typed Submit 
-        IPropBagMapperKey<TSource, TDestination> SubmitPropBagMapperRequest<TSource, TDestination>
+        IPropBagMapperRequestKey<TSource, TDestination> SubmitPropBagMapperRequest<TSource, TDestination>
         (
             PropModelType propModel,
             string configPackageName,
@@ -18,7 +18,7 @@ namespace DRM.PropBag.AutoMapperSupport
         where TDestination : class, IPropBag;
 
         // Gen Submit 
-        IPropBagMapperKeyGen SubmitPropBagMapperRequest
+        IPropBagMapperRequestKeyGen SubmitPropBagMapperRequest
         (
             PropModelType propModel,
             Type sourceType,

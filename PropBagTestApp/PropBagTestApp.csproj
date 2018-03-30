@@ -159,6 +159,10 @@
       <Project>{10cf1c6f-f877-49a8-8678-6947f55e6920}</Project>
       <Name>AutoMapperSupport</Name>
     </ProjectReference>
+    <ProjectReference Include="..\PropBagAutoMapperService\PropBagAutoMapperService.csproj">
+      <Project>{d7fa7ff1-9e07-40f6-abec-3725f72865e0}</Project>
+      <Name>PropBagAutoMapperService</Name>
+    </ProjectReference>
     <ProjectReference Include="..\PropBagControlsWPF\PropBagControlsWPF.csproj">
       <Project>{9bee9979-9812-4675-8f97-a4dd1e7dba5f}</Project>
       <Name>PropBagControlsWPF</Name>

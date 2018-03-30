@@ -55,7 +55,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
 
             //IMapperRequest mr = new MapperRequest(typeof(MyModel3), propModel, configPackageName);
 
-            IPropBagMapperKeyGen mapperRequest =
+            IPropBagMapperRequestKeyGen mapperRequest =
                 _amp.SubmitPropBagMapperRequest(propModel, typeof(MyModel3), configPackageName);
 
 
@@ -80,7 +80,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
 
             propModel.NewEmittedType = et;
 
-            IPropBagMapperKeyGen mapperKey = _amp.SubmitPropBagMapperRequest(mapperRequest.PropModel,
+            IPropBagMapperRequestKeyGen mapperKey = _amp.SubmitPropBagMapperRequest(mapperRequest.PropModel,
                 mapperRequest.SourceType, mapperRequest.ConfigPackageName);
 
             // Get the AutoMapper mapping function associated with the mapper request already submitted.
@@ -119,7 +119,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
 
             //IPropBagMapper<MyModel3, DestinationModel3> mapper2 = _amp.GetMapper<MyModel3, DestinationModel3>(mapperRequest2);
 
-            IPropBagMapperKeyGen mapperKey2 = _amp.SubmitPropBagMapperRequest(mapperRequest.PropModel,
+            IPropBagMapperRequestKeyGen mapperKey2 = _amp.SubmitPropBagMapperRequest(mapperRequest.PropModel,
                 mapperRequest.SourceType, mapperRequest.ConfigPackageName);
 
             // Get the AutoMapper mapping function associated with the mapper request already submitted.
@@ -164,7 +164,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
             (
                 mr,
                 _amp,
-                out IPropBagMapperKey<MyModel3, DestinationModel3> propBagMapperKey
+                out IPropBagMapperRequestKey<MyModel3, DestinationModel3> propBagMapperKey
             );
 
 
@@ -215,7 +215,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
             (
                 mr,
                 _amp,
-                out IPropBagMapperKey<MyModel3, DestinationModel3> propBagMapperKey2
+                out IPropBagMapperRequestKey<MyModel3, DestinationModel3> propBagMapperKey2
             );
 
             //IPropBagMapper<MyModel3, DestinationModel3> cookedAutoMapper2 = new SimplePropBagMapper<MyModel3, DestinationModel3>

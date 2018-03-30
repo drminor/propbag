@@ -191,6 +191,10 @@
       <Project>{9b18f82d-3ed9-49e0-9ee3-cfbfc3af9d9c}</Project>
       <Name>ObjectSizeDiagnostics</Name>
     </ProjectReference>
+    <ProjectReference Include="..\PropBagAutoMapperService\PropBagAutoMapperService.csproj">
+      <Project>{d7fa7ff1-9e07-40f6-abec-3725f72865e0}</Project>
+      <Name>PropBagAutoMapperService</Name>
+    </ProjectReference>
     <ProjectReference Include="..\PropBagControlsWPF\PropBagControlsWPF.csproj">
       <Project>{9bee9979-9812-4675-8f97-a4dd1e7dba5f}</Project>
       <Name>PropBagControlsWPF</Name>

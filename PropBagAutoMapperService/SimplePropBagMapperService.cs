@@ -47,18 +47,18 @@ namespace DRM.PropBag.AutoMapperSupport
         #region Public Methods
 
         // Gen Submit
-        public IPropBagMapperKeyGen SubmitPropBagMapperRequest(PropModelType propModel, Type sourceType, string configPackageName)
+        public IPropBagMapperRequestKeyGen SubmitPropBagMapperRequest(PropModelType propModel, Type sourceType, string configPackageName)
         {
             Type typeToCreate = propModel.NewEmittedType ?? propModel.TypeToWrap;
             PropBagMapperReqSubDelegate mapperRequestSubmitter = GetPropBagMapperReqSubDelegate(sourceType, typeToCreate);
-            IPropBagMapperKeyGen result = mapperRequestSubmitter(propModel, configPackageName, this);
+            IPropBagMapperRequestKeyGen result = mapperRequestSubmitter(propModel, configPackageName, this);
 
             return result;
         }
 
         // Typed Submit
         // TODO: Consider adding a method that takes a IConfigureAMapper instead of a configPackageName.
-        public IPropBagMapperKey<TSource, TDestination> SubmitPropBagMapperRequest<TSource, TDestination>
+        public IPropBagMapperRequestKey<TSource, TDestination> SubmitPropBagMapperRequest<TSource, TDestination>
         (
             PropModelType propModel,
             string configPackageName,
@@ -83,8 +83,8 @@ namespace DRM.PropBag.AutoMapperSupport
                 SubmitRawAutoMapperRequest<TSource, TDestination>(propModel, configPackageName);
 
             // Create the PropBag Mapper Request.
-            IPropBagMapperKey<TSource, TDestination> typedMapperRequest
-                = new PropBagMapperKey<TSource, TDestination>(propBagMapperBuilder, autoMapperRequestKey);
+            IPropBagMapperRequestKey<TSource, TDestination> typedMapperRequest
+                = new PropBagMapperRequestKey<TSource, TDestination>(propBagMapperBuilder, autoMapperRequestKey);
 
             //// Store the request 
             //IPropBagMapperKeyGen newMapRequest = RegisterPropBagMapperRequest(typedMapperRequest);
@@ -97,7 +97,7 @@ namespace DRM.PropBag.AutoMapperSupport
         // Typed Get PropBag Mapper
         public IPropBagMapper<TSource, TDestination> GetPropBagMapper<TSource, TDestination>
         (
-            IPropBagMapperKey<TSource, TDestination> mapperRequest
+            IPropBagMapperRequestKey<TSource, TDestination> mapperRequest
         )
         where TDestination : class, IPropBag
         {
@@ -116,12 +116,12 @@ namespace DRM.PropBag.AutoMapperSupport
 
         #region Pass-through calls to the PropBag MappersCache
 
-        public IPropBagMapperKeyGen RegisterPropBagMapperRequest(IPropBagMapperKeyGen propBagMapperRequestKey)
+        public IPropBagMapperRequestKeyGen RegisterPropBagMapperRequest(IPropBagMapperRequestKeyGen propBagMapperRequestKey)
         {
             return _propBagMappersCache.RegisterPropBagMapperRequest(propBagMapperRequestKey);
         }
 
-        public IPropBagMapperGen GetPropBagMapper(IPropBagMapperKeyGen mapperRequest)
+        public IPropBagMapperGen GetPropBagMapper(IPropBagMapperRequestKeyGen mapperRequest)
         {
             // Make sure that the 'raw' AutoMapper (IMapper) has been created.
             GetRawAutoMapperGen(mapperRequest);
@@ -150,7 +150,7 @@ namespace DRM.PropBag.AutoMapperSupport
         }
 
         // From Typed PropBagMapperRequestKey
-        private IMapper GetRawAutoMapper<TSource, TDestination>(IPropBagMapperKey<TSource, TDestination> propBagMapperRequestKey) where TDestination : class, IPropBag
+        private IMapper GetRawAutoMapper<TSource, TDestination>(IPropBagMapperRequestKey<TSource, TDestination> propBagMapperRequestKey) where TDestination : class, IPropBag
         {
             IAutoMapperRequestKey<TSource, TDestination> rawAutoMapperRequest = propBagMapperRequestKey.AutoMapperRequestKey;
             IMapper result = GetRawAutoMapper<TSource, TDestination>(rawAutoMapperRequest);
@@ -170,7 +170,7 @@ namespace DRM.PropBag.AutoMapperSupport
         }
 
         // From Gen PropBagMapperRequest Key
-        private IMapper GetRawAutoMapperGen(IPropBagMapperKeyGen propBagMapperRequestKeyGen)
+        private IMapper GetRawAutoMapperGen(IPropBagMapperRequestKeyGen propBagMapperRequestKeyGen)
         {
             IAutoMapperRequestKeyGen rawAutoMapperRequestKeyGenTrue = propBagMapperRequestKeyGen.AutoMapperRequestKeyGen;
 
@@ -195,7 +195,7 @@ namespace DRM.PropBag.AutoMapperSupport
 
         #region Generic Method Support
 
-        internal delegate IPropBagMapperKeyGen PropBagMapperReqSubDelegate
+        internal delegate IPropBagMapperRequestKeyGen PropBagMapperReqSubDelegate
             (PropModelType propModel, string configPackageName, IPropBagMapperService propBagMapperService);
 
         static PropBagMapperReqSubDelegate GetPropBagMapperReqSubDelegate(Type sourceType, Type destinationType)
@@ -226,7 +226,7 @@ namespace DRM.PropBag.AutoMapperSupport
             }
 
             // The Typed Method for PropBagMappers
-            static IPropBagMapperKey<TSource, TDestination> SubmitPropBagMapperRequest<TSource, TDestination>
+            static IPropBagMapperRequestKey<TSource, TDestination> SubmitPropBagMapperRequest<TSource, TDestination>
             (
                 PropModelType propModel,
                 string configPackageName,
@@ -234,7 +234,7 @@ namespace DRM.PropBag.AutoMapperSupport
             )
             where TDestination : class, IPropBag
             {
-                IPropBagMapperKey<TSource, TDestination> result
+                IPropBagMapperRequestKey<TSource, TDestination> result
                     = propBagMapperService.SubmitPropBagMapperRequest<TSource, TDestination>
                     (
                         propModel: propModel,
