@@ -86,7 +86,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AutoMapperSupport\AutoMapperSupport.csproj">
-      <Project>{10cf1c6f-f877-49a8-8678-6947f55e6920}</Project>
+      <Project>{10CF1C6F-F877-49A8-8678-6947F55E6920}</Project>
       <Name>AutoMapperSupport</Name>
     </ProjectReference>
     <ProjectReference Include="..\ObjectSizeDiagnostics\ObjectSizeDiagnostics.csproj">
