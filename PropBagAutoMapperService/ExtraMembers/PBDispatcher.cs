@@ -1,7 +1,7 @@
 ﻿using DRM.TypeSafePropertyBag;
 using System;
 
-namespace DRM.PropBag.AutoMapperSupport
+namespace DRM.TypeSafePropertyBag
 {
     public static class PBDispatcher
     {

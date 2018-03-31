@@ -1,12 +1,9 @@
 ﻿using AutoMapper;
+using DRM.PropBag.AutoMapperSupport;
 using System;
-using DRM.TypeSafePropertyBag;
 
-namespace DRM.PropBag.AutoMapperSupport
+namespace DRM.TypeSafePropertyBag
 {
-    using PropNameType = String;
-    using PropModelType = IPropModel<String>;
-
     /// <summary>
     /// For use with EmitProxy. EmitProxy produces "real" properties,
     /// so no custom AutoMapper support is required.

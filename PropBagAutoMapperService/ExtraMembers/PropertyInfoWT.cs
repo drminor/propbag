@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 
-namespace DRM.PropBag.AutoMapperSupport
+namespace DRM.TypeSafePropertyBag
 {
     /// <summary>
     /// 

@@ -1,12 +1,13 @@
 ﻿using AutoMapper;
 using AutoMapper.ExtraMembers;
+using DRM.PropBag.AutoMapperSupport;
 using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace DRM.PropBag.AutoMapperSupport
+namespace DRM.TypeSafePropertyBag
 {
     public class ExtraMembersConfigInitialStep : IHaveAMapperConfigurationStep
     {
