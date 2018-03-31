@@ -1,7 +1,5 @@
 ﻿
-using DRM.TypeSafePropertyBag;
-
-namespace DRM.PropBag.AutoMapperSupport
+namespace DRM.TypeSafePropertyBag
 {
     public interface ICachePropBagMappers
     {

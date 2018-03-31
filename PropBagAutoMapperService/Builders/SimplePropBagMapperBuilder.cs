@@ -1,9 +1,8 @@
 ﻿using AutoMapper;
 using DRM.PropBag.ViewModelTools;
-using DRM.TypeSafePropertyBag;
 using System;
 
-namespace DRM.PropBag.AutoMapperSupport
+namespace DRM.TypeSafePropertyBag
 {
     using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
 

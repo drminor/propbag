@@ -1,9 +1,9 @@
-﻿using DRM.PropBag.ViewModelTools;
-using DRM.TypeSafePropertyBag;
+﻿using DRM.PropBag.AutoMapperSupport;
+using DRM.PropBag.ViewModelTools;
 using System;
 using System.Collections.Generic;
 
-namespace DRM.PropBag.AutoMapperSupport
+namespace DRM.TypeSafePropertyBag
 {
     using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
 

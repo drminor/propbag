@@ -48,9 +48,7 @@
     <Compile Include="Builders\SimpleAutoMapperBuilderProvider.cs" />
     <Compile Include="Builders\SimpleAutoMapperBuilder.cs" />
     <Compile Include="Caches\SimpleAutoMapperCache.cs" />
-    <Compile Include="ConfigPackages\ConfigPackage_EmitProxy.cs" />
-    <Compile Include="ConfigPackages\ConfigPackage_ExtraMembers.cs" />
-    <Compile Include="ConfigPackages\IProvideAMapperConfiguration.cs" />
+    <Compile Include="Config\IProvideAMapperConfiguration.cs" />
     <Compile Include="Builders\IAutoMapperRequestKey.cs" />
     <Compile Include="Builders\IAutoMapperRequestKeyGen.cs" />
     <Compile Include="IAutoMapperService.cs" />
@@ -58,6 +56,7 @@
     <Compile Include="Config\IConfigureAMapper.cs" />
     <Compile Include="Config\ICreateMappingExpressions.cs" />
     <Compile Include="Config\IHaveAMapperConfigurationStep.cs" />
+    <Compile Include="LockingConcurrentDictionary.cs" />
     <Compile Include="MapTypeDefinition\IMapTypeDefinition.cs" />
     <Compile Include="MapTypeDefinition\IMapTypeDefinitionProvider.cs" />
     <Compile Include="Caches\ICacheConfigPackages.cs" />
@@ -65,18 +64,12 @@
     <Compile Include="Config\SimpleMapperConfigurationBuilder.cs" />
     <Compile Include="Config\AbstractMapperConfigGen.cs" />
     <Compile Include="SimpleAutoMapperService.cs" />
-    <Compile Include="Config\EmitProxyConfigFinalStep.cs" />
-    <Compile Include="Config\ExtraMembersConfigInitialStep.cs" />
     <Compile Include="Config\MapperConfigStarter_Empty.cs" />
     <Compile Include="Config\MapperConfigStarter_Default.cs" />
     <Compile Include="Config\IBuildMapperConfigurations.cs" />
     <Compile Include="Config\SimpleMapperConfigTyped.cs" />
-    <Compile Include="Config\ExtraMembersConfigFinalStep.cs" />
-    <Compile Include="ExtraMembers\ExtraMembersProvider.cs" />
     <Compile Include="MapTypeDefinition\MapTypeDefinition.cs" />
-    <Compile Include="ExtraMembers\PBDispatcher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ExtraMembers\PropertyInfoWT.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ObjectSizeDiagnostics\ObjectSizeDiagnostics.csproj">
@@ -87,11 +80,10 @@
       <Project>{8cba8a56-9b60-4430-9d54-9a523baf1e14}</Project>
       <Name>AutoMapper</Name>
     </ProjectReference>
-    <ProjectReference Include="..\TypeSafePropertyBag\TypeSafePropertyBag.csproj">
-      <Project>{bbb1e311-374e-4c91-a313-1667d83767db}</Project>
-      <Name>TypeSafePropertyBag</Name>
-    </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="ConfigPackages\" />
+    <Folder Include="ExtraMembers\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

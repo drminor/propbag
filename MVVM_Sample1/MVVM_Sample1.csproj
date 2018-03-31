@@ -200,6 +200,10 @@
       <Project>{7387b893-fbdc-4b9c-ac9e-0b56388b46c1}</Project>
       <Name>PropBag</Name>
     </ProjectReference>
+    <ProjectReference Include="..\TypeSafePropertyBag.Fundamentals\TypeSafePropertyBag.Fundamentals.csproj">
+      <Project>{D029088C-C248-4D2F-95B4-32E26908C082}</Project>
+      <Name>TypeSafePropertyBag.Fundamentals</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TypeSafePropertyBag\TypeSafePropertyBag.csproj">
       <Project>{bbb1e311-374e-4c91-a313-1667d83767db}</Project>
       <Name>TypeSafePropertyBag</Name>

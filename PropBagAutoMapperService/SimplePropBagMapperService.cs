@@ -1,10 +1,10 @@
 ﻿using AutoMapper;
-using DRM.TypeSafePropertyBag;
+using DRM.PropBag.AutoMapperSupport;
 using System;
 using System.Reflection;
 using System.Threading;
 
-namespace DRM.PropBag.AutoMapperSupport
+namespace DRM.TypeSafePropertyBag
 {
     using PropModelType = IPropModel<String>;
 

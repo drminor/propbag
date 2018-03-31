@@ -175,6 +175,10 @@
       <Project>{8CBA8A56-9B60-4430-9D54-9A523BAF1E14}</Project>
       <Name>AutoMapper</Name>
     </ProjectReference>
+    <ProjectReference Include="..\TypeSafePropertyBag.Fundamentals\TypeSafePropertyBag.Fundamentals.csproj">
+      <Project>{d029088c-c248-4d2f-95b4-32e26908c082}</Project>
+      <Name>TypeSafePropertyBag.Fundamentals</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TypeSafePropertyBag\TypeSafePropertyBag.csproj">
       <Project>{bbb1e311-374e-4c91-a313-1667d83767db}</Project>
       <Name>TypeSafePropertyBag</Name>

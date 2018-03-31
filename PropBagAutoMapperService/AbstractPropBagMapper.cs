@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DRM.PropBag.AutoMapperSupport
+namespace DRM.TypeSafePropertyBag
 {
     using PropItemSetKeyType = PropItemSetKey<String>;
     using PropModelType = IPropModel<String>;

@@ -7,7 +7,7 @@
     <ProjectGuid>{D7FA7FF1-9E07-40F6-ABEC-3725F72865E0}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>PropBagAutoMapperService</RootNamespace>
+    <RootNamespace>DRM.TypeSafePropertyBag.PropBagAutoMapperService</RootNamespace>
     <AssemblyName>PropBagAutoMapperService</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -49,6 +49,14 @@
     <Compile Include="Builders\SimplePropBagMapperBuilderProvider.cs" />
     <Compile Include="Caches\ICachePropBagMappers.cs" />
     <Compile Include="Caches\SimplePropBagMapperCache.cs" />
+    <Compile Include="ConfigPackages\ConfigPackage_EmitProxy.cs" />
+    <Compile Include="ConfigPackages\ConfigPackage_ExtraMembers.cs" />
+    <Compile Include="ConfigPackages\EmitProxyConfigFinalStep.cs" />
+    <Compile Include="ConfigPackages\ExtraMembersConfigFinalStep.cs" />
+    <Compile Include="ConfigPackages\ExtraMembersConfigInitialStep.cs" />
+    <Compile Include="ExtraMembers\ExtraMembersProvider.cs" />
+    <Compile Include="ExtraMembers\PBDispatcher.cs" />
+    <Compile Include="ExtraMembers\PropertyInfoWT.cs" />
     <Compile Include="IPropBagMapper.cs" />
     <Compile Include="Builders\IPropBagMapperRequestKey.cs" />
     <Compile Include="Builders\IPropBagMapperRequestKeyGen.cs" />
@@ -71,6 +79,10 @@
       <Project>{8cba8a56-9b60-4430-9d54-9a523baf1e14}</Project>
       <Name>AutoMapper</Name>
     </ProjectReference>
+    <ProjectReference Include="..\TypeSafePropertyBag.Fundamentals\TypeSafePropertyBag.Fundamentals.csproj">
+      <Project>{d029088c-c248-4d2f-95b4-32e26908c082}</Project>
+      <Name>TypeSafePropertyBag.Fundamentals</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TypeSafePropertyBag\TypeSafePropertyBag.csproj">
       <Project>{BBB1E311-374E-4C91-A313-1667D83767DB}</Project>
       <Name>TypeSafePropertyBag</Name>
@@ -80,5 +92,6 @@
       <Name>ViewModelTools</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

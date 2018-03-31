@@ -1,5 +1,4 @@
-﻿using DRM.TypeSafePropertyBag;
-
+﻿
 namespace DRM.PropBag.AutoMapperSupport
 {
     public interface IAutoMapperRequestKey<TSource, TDestination> : IAutoMapperRequestKeyGen //where TDestination: class, IPropBag
