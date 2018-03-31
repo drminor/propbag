@@ -1,8 +1,9 @@
 ﻿using System;
 
-namespace DRM.TypeSafePropertyBag.Fundamentals
+namespace DRM.TypeSafePropertyBag
 {
-    // TODO: Consider replacing this with the TypePair struct.
+    // This is used by the AbstractPropFactory.
+
     public struct TwoTypes
     {
         bool _beenInitialized;

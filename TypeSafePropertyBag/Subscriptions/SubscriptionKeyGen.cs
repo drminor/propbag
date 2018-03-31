@@ -27,7 +27,7 @@ namespace DRM.TypeSafePropertyBag
         public SubscriptionPriorityGroup SubscriptionPriorityGroup { get; }
         //public SubscriptionTargetKind SubscriptionTargetKind { get; }
 
-        public WeakRefKey Target_Wrk { get; }
+        public WeakRefKey Target_Wrk { get; private set; }
         public object Target => Target_Wrk.Target;
 
         public MethodInfo Method { get; }
@@ -295,7 +295,7 @@ namespace DRM.TypeSafePropertyBag
 
         public void MarkAsUsed()
         {
-            Target_Wrk.Clear();
+            Target_Wrk = WeakRefKey.Empty; // This removes our reference to the underlying System.WeakRef value.
 
             //GenDoWhenChanged = null;
             //Action = null;

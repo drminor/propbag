@@ -2,22 +2,25 @@
 PropBagWPF
 	PropBag
 	PropBagControlsWPF
-	TypeSafePropertyBag
+	TypeSafePropertyBag (No reference to TSPB.Fun)
 
 PropBag
 	AutoMapperSupport
 	PropBagAutoMapperService
 	TypeSafePropertyBag
+	TypeSafePropertyBag.Fundamentals
 	ViewModelTools
 
 PropBagAutoMapperService
 	AutoMapper
 	AutoMapperSupport
 	TypeSafePropertyBag
+	TypeSafePropertyBag.Fundamentals
 	ViewModelTools
 
 PropBagControlsWPF
 	TypeSafePropertyBag
+	TypeSafePropertyBag.Fundamentals
 
 ViewModelTools
 	TypeSafePropertyBag
@@ -28,7 +31,7 @@ TypeWrapper
 
 AutoMapperSupport
 	AutoMapper
-	TypeSafePropertyBag
+	TypeSafePropertyBag -- This has been removed!!!
 
 TypeSafePropertyBag
 

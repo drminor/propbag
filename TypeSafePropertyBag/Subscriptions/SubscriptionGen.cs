@@ -16,7 +16,7 @@ namespace DRM.TypeSafePropertyBag
         //public SubscriptionTargetKind SubscriptionTargetKind { get; protected set; }
 
         public WeakRefKey Target_Wrk { get; protected set; }
-        public object Target { get; }
+        public object Target => Target_Wrk.Target;
 
         public string MethodName { get; }
 

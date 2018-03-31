@@ -1,6 +1,6 @@
 ﻿
 
-namespace DRM.TypeSafePropertyBag.Fundamentals.GenericTree
+namespace DRM.TypeSafePropertyBag.Work.GenericTree
 {
     using System;
     using System.Collections.Generic;

@@ -60,11 +60,11 @@
     <Compile Include="Delegates\ViewAndViewManagerCreatorDelegates.cs" />
     <Compile Include="Factories\AbstractPropFactory.cs" />
     <Compile Include="Factories\APFGenericMethodTemplates.cs" />
-    <Compile Include="Factories\PropFactoryValueConverter.cs" />
     <Compile Include="Factories\SimplePropFactoryFactory.cs" />
     <Compile Include="Factories\SimpleTypeResolver.cs" />
     <Compile Include="Factories\StaticTConverter.cs" />
     <None Include="LocalBinding\Instances\LocalBinder - SafetyCopy.cs" />
+    <Compile Include="Factories\TwoTypes.cs" />
     <Compile Include="LocalBinding\Engine\BindingPathParser.cs" />
     <Compile Include="LocalBinding\Instances\LocalWatcher.cs" />
     <Compile Include="LocalBinding\Instances\PropStoreNotificationKindEnum.cs" />
@@ -198,10 +198,6 @@
     <Compile Include="TypeConverters\TypeDescBasedTConverterCache.cs" />
     <Compile Include="TypeConverters\TypeDescBasedTConverterKey.cs" />
     <Compile Include="Unused\PropValueStateEnum.cs" />
-    <Compile Include="SimpleIOC\Container.cs" />
-    <Compile Include="SimpleIOC\ContainerException.cs" />
-    <Compile Include="SimpleIOC\ITypeContainer.cs" />
-    <Compile Include="SimpleIOC\TypeContainer.cs" />
     <Compile Include="Subscriptions\IRegisterSubscriptions.cs" />
     <None Include="Unused\PCTypedEventBase.cs" />
     <Compile Include="Unused\PropertyChangedEventManager.cs" />
@@ -278,8 +274,6 @@
       <Name>TypeSafePropertyBag.Fundamentals</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Fundamentals\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

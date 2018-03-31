@@ -31,12 +31,6 @@ namespace DRM.TypeSafePropertyBag
                 $" does not provide a ViewProviderFactory, please use the WPFPropfactory or similar.");
         }
 
-        //public virtual PropBagMapperCreator GetPropBagMapperFactory()
-        //{
-        //    throw new NotImplementedException($"This implementation of {nameof(IPropFactory)}" +
-        //        $" does not provide a PropBagMapperFactory, please use the WPFPropfactory or similar.");
-        //}
-
         public IConvertValues ValueConverter { get; }
 
         public abstract bool ProvidesStorage { get; }

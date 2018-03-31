@@ -1,9 +1,10 @@
 ﻿using DRM.PropBag.AutoMapperSupport;
-using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
 
 namespace DRM.TypeSafePropertyBag
 {
+    using static DRM.TypeSafePropertyBag.Fundamentals.TypeExtensions.TypeExtensions;
+
     public class SimpleMapTypeDefinitionProvider : IMapTypeDefinitionProvider
     {
         public IMapTypeDefinition GetTypeDescription(object propModel,Type targetType, object propFactory, string fullClassName)

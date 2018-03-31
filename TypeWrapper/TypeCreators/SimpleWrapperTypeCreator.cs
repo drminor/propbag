@@ -1,9 +1,9 @@
 ﻿using DRM.TypeSafePropertyBag;
-using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
 
 namespace DRM.PropBag.TypeWrapper
 {
+    using static DRM.TypeSafePropertyBag.Fundamentals.TypeExtensions.TypeExtensions;
     using PropModelType = IPropModel<String>;
 
     public class SimpleWrapperTypeCreator : ICreateWrapperTypes

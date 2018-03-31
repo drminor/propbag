@@ -1,8 +1,9 @@
-﻿using DRM.TypeSafePropertyBag.Fundamentals;
-using System;
+﻿using System;
 
 namespace DRM.TypeSafePropertyBag
 {
+    using static DRM.TypeSafePropertyBag.Fundamentals.TypeExtensions.TypeExtensions;
+
     using PropNameType = String;
 
     public class PropGen : IPropDataInternal

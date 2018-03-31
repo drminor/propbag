@@ -420,8 +420,10 @@ namespace DRM.TypeSafePropertyBag
                     foreach (ParentNCSubscription sub in subs)
                     {
                         numberOfSubscribers++;
-                        object target = sub.Target_Wrk.Target;
-                        if(target != null)
+                        WeakRefKey target_Wrk = sub.Target_Wrk;
+                        object target;
+                        
+                        if(!target_Wrk.IsEmpty && ((target = target_Wrk.Target) != null))
                         {
                             try
                             {

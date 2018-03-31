@@ -25,8 +25,6 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
             }
 
             _weakRef = new WeakReference(target);
-            //_isInitialized = true;
-
             _hashCode = target.GetHashCode(); // ?? 314159; // (target != null) ? target.GetHashCode() : 314159;
         }
 
@@ -40,9 +38,9 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
         {
             get
             {
-                if(!_isInitialized)
+                if(IsEmpty)
                 {
-                    throw new InvalidOperationException("The WeakRefKey has not been initialized.");
+                    throw new InvalidOperationException("The WeakRefKey is Empty");
                 }
                 return _weakRef.Target;
             }
@@ -54,12 +52,9 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
         //
         //------------------------------------------------------
 
-        static public WeakRefKey Empty => new WeakRefKey(SharedDefaultObject.Instance);
+        static public WeakRefKey Empty => new WeakRefKey();
 
-        public void Clear()
-        {
-            _weakRef = null;
-        }
+        public bool IsEmpty => _weakRef == null;
 
         public override int GetHashCode()
         {
@@ -80,21 +75,26 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
 
         public bool Equals(WeakRefKey other)
         {
+            if (IsEmpty != other.IsEmpty) return false;
+
             object c1 = Target;
             object c2 = other.Target;
 
             if (c1 != null && c2 != null)
+            {
+                // Neither has been Garbage Collected.
                 return (c1 == c2);
+            }
             else
+            {
+                // Use reference equality to compare the 'containers.'
                 return (_weakRef == other._weakRef);
+            }
         }
 
         // overload operator for ==, to be same as Equal implementation.
         public static bool operator ==(WeakRefKey left, WeakRefKey right)
         {
-            if ((object)left == null)
-                return (object)right == null;
-
             return left.Equals(right);
         }
 
@@ -111,14 +111,6 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
         //------------------------------------------------------
 
         WeakReference _weakRef;
-
-        ///// <summary>
-        ///// Used to distinguish between a reference that has been garbage collected and
-        ///// a default instance of this struct, i.e. an instance created using the parameterless constructor.
-        ///// </summary>
-        //bool _isInitialized;
-
-        bool _isInitialized => _weakRef != null;
         int _hashCode;  // cache target's hashcode, lest it get GC'd out from under us
     }
 }

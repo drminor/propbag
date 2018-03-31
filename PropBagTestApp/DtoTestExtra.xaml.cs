@@ -1,4 +1,5 @@
 ﻿using DRM.PropBagControlsWPF;
+using DRM.TypeSafePropertyBag;
 using DRM.TypeSafePropertyBag.Fundamentals;
 using PropBagTestApp.Models;
 using System;

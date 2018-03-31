@@ -61,7 +61,7 @@ namespace DRM.TypeSafePropertyBag
 
         public void MarkAsUsed()
         {
-            Target_Wrk.Clear();
+            Target_Wrk = WeakRefKey.Empty; // This removes our reference to the underlying System.WeakRef value.
             HasBeenUsed = true;
         }
 

@@ -1,5 +1,5 @@
 ﻿
-namespace DRM.TypeSafePropertyBag.Fundamentals
+namespace DRM.TypeSafePropertyBag.Fundamentals.Unused
 {
     class SharedDefaultObject
     {

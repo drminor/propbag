@@ -5,6 +5,7 @@ using DRM.PropBag.Caches;
 using DRM.PropBag.TypeWrapper;
 using DRM.PropBag.TypeWrapper.TypeDesc;
 using DRM.PropBag.ViewModelTools;
+using DRM.PropBagControlsWPF;
 using DRM.PropBagWPF;
 using DRM.TypeSafePropertyBag;
 using System;

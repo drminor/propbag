@@ -1,6 +1,4 @@
-﻿using DRM.PropBag.AutoMapperSupport;
-//using DRM.PropBag.TypeWrapper;
-using DRM.PropBag.ViewModelTools;
+﻿using DRM.PropBag.ViewModelTools;
 using DRM.TypeSafePropertyBag;
 using System;
 using System.Collections;

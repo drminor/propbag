@@ -142,9 +142,9 @@ namespace DRM.TypeSafePropertyBag
         private bool SubscriptionIsForRequest(ParentNCSubscription subscription, ParentNCSubscriptionRequest subscriptionRequest)
         {
             // Used for debugging.
-            bool t1 = subscription.OwnerPropId.Equals(subscriptionRequest.OwnerPropId);
-            bool t2 = subscription.MethodName == subscriptionRequest.Method.Name;
-            bool t3 = subscription.Target_Wrk == subscriptionRequest.Target_Wrk;
+            //bool t1 = subscription.OwnerPropId.Equals(subscriptionRequest.OwnerPropId);
+            //bool t2 = subscription.MethodName == subscriptionRequest.Method.Name;
+            //bool t3 = subscription.Target_Wrk == subscriptionRequest.Target_Wrk;
 
             bool result =
                 subscription.OwnerPropId.Equals(subscriptionRequest.OwnerPropId) &&

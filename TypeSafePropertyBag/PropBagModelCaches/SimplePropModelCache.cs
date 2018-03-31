@@ -1,9 +1,10 @@
-﻿using DRM.TypeSafePropertyBag.Fundamentals;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace DRM.TypeSafePropertyBag
 {
+    using static DRM.TypeSafePropertyBag.Fundamentals.TypeExtensions.TypeExtensions;
+
     using PropNameType = String;
     using PropModelType = IPropModel<String>;
     using PropModelCacheInterface = ICachePropModels<String>;
@@ -224,7 +225,7 @@ namespace DRM.TypeSafePropertyBag
 
                 if (fullClassName != null)
                 {
-                    string ns = TypeExtensions.GetNamespace(fullClassName, out string className);
+                    string ns = GetNamespace(fullClassName, out string className);
 
                     if (ns != null)
                     {

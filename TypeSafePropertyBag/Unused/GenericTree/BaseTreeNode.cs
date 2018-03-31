@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DRM.TypeSafePropertyBag.Fundamentals.GenericTree
+namespace DRM.TypeSafePropertyBag.Work.GenericTree
 {
     public class BaseTreeNode<T> : IAmANodeInATree<T> where T : class
     {

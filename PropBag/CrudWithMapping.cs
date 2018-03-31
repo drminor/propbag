@@ -1,5 +1,4 @@
-﻿using DRM.PropBag.AutoMapperSupport;
-using DRM.TypeSafePropertyBag;
+﻿using DRM.TypeSafePropertyBag;
 using DRM.TypeSafePropertyBag.DataAccessSupport;
 using System;
 using System.Collections.Generic;

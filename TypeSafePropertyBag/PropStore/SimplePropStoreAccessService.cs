@@ -28,6 +28,8 @@ using System.Windows.Data;
 
 namespace DRM.TypeSafePropertyBag
 {
+    using static DRM.TypeSafePropertyBag.Fundamentals.TypeExtensions.TypeExtensions;
+
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
     using ObjectIdType = UInt64;
     using PropIdType = UInt32;

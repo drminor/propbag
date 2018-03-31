@@ -1,6 +1,5 @@
 ﻿using DRM.PropBagControlsWPF.WPFHelpers;
 using DRM.TypeSafePropertyBag;
-using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -13,6 +12,7 @@ using System.Windows.Data;
 
 namespace DRM.PropBagControlsWPF.Binders
 {
+    using static DRM.TypeSafePropertyBag.Fundamentals.TypeExtensions.TypeExtensions;
     public class ObservableSource
     {
         #region Public events and properties

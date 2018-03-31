@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Threading;
 
-using DRM.TypeSafePropertyBag.Fundamentals;
 
 namespace DRM.TypeSafePropertyBag
 {
+    using static DRM.TypeSafePropertyBag.Fundamentals.TypeExtensions.TypeExtensions;
     using PropNameType = String;
 
     //, IEquatable<IPropTemplate>, IEquatable<PropTemplateTyped<T>>

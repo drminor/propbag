@@ -1,4 +1,5 @@
-﻿using DRM.TypeSafePropertyBag.Fundamentals;
+﻿using DRM.TypeSafePropertyBag;
+
 using System;
 using System.Windows;
 using System.Windows.Data;

@@ -1,4 +1,4 @@
-﻿using DRM.TypeSafePropertyBag.Fundamentals;
+﻿using DRM.TypeSafePropertyBag;
 
 using System;
 using System.Collections.Generic;
@@ -6,7 +6,7 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 
 
-namespace DRM.TypeSafePropertyBag
+namespace DRM.PropBagControlsWPF
 {
     public class PropFactoryValueConverter : IConvertValues
     {

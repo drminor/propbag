@@ -32,7 +32,9 @@ namespace DRM.TypeSafePropertyBag
             Type delegateType = GetDelegateType(subRequestKey.Method);
             Proxy = MakeTheDelegate(delegateType, subRequestKey.Method);
 
-            Type targetType = subRequestKey.Target_Wrk.GetType();
+            object target = Target_Wrk.Target;
+
+            Type targetType = target.GetType();
             Dispatcher = callPSParentNodeChangedEventSubsCache.GetOrAdd(targetType);
         }
 
@@ -42,7 +44,7 @@ namespace DRM.TypeSafePropertyBag
 
         public ExKeyT OwnerPropId { get; } // The Node that raises the event.
 
-        public WeakRefKey Target_Wrk { get; }
+        public WeakRefKey Target_Wrk { get; private set; }
         public object Target => Target_Wrk.Target;
 
         public string MethodName { get; }
@@ -95,7 +97,7 @@ namespace DRM.TypeSafePropertyBag
                 if (disposing)
                 {
                     // Dispose managed state (managed objects).
-                    Target_Wrk.Clear();
+                    Target_Wrk = WeakRefKey.Empty; // This removes our reference to the underlying System.WeakRef value.
                     Proxy = null;
                 }
 
