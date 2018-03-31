@@ -29,7 +29,7 @@ namespace DRM.TypeSafePropertyBag
 
             // The parameter, if only specifying one type, is specifying the type
             // of the native (i.e., source) object.
-            TwoTypes tt = TwoTypes.FromMkUpExtParam(parameter, typeof(string));
+            TwoTypes tt =  FromMkUpExtParam(parameter, typeof(string));
 
             if (tt.IsEmpty)
             {
@@ -67,7 +67,7 @@ namespace DRM.TypeSafePropertyBag
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
 #if DEBUG
-            TwoTypes tt = TwoTypes.FromMkUpExtParam(parameter, typeof(string));
+            TwoTypes tt = FromMkUpExtParam(parameter, typeof(string));
             if (tt.IsEmpty) throw new InvalidOperationException("Type information was not available.");
 
             // Check to see if the specified type is compatible with the type of the property the converter is asking for.
@@ -144,6 +144,30 @@ namespace DRM.TypeSafePropertyBag
                 return null;
 
             return System.Activator.CreateInstance(propertyType);
+        }
+
+        private TwoTypes FromMkUpExtParam(object parameter, Type destinationType = null)
+        {
+            if (parameter == null)
+            {
+                return TwoTypes.Empty;
+            }
+            else if (parameter is TwoTypes)
+            {
+                return (TwoTypes)parameter;
+            }
+            else if (parameter is Type && destinationType != null)
+            {
+                return new TwoTypes((Type)parameter, destinationType);
+            }
+            else if (parameter is IPropData && destinationType != null)
+            {
+                return new TwoTypes(((IPropData)parameter).TypedProp.PropTemplate.Type, destinationType);
+            }
+            else
+            {
+                return TwoTypes.Empty;
+            }
         }
     }
 }
