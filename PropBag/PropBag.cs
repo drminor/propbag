@@ -3163,7 +3163,7 @@ namespace DRM.PropBag
 
                 try
                 {
-                    object target = sub.Target.Target;
+                    object target = sub.Target;
                     if (target == null)
                     {
                         Debug.WriteLine($"The object listening to this event is 'no longer with us.'");
@@ -3192,7 +3192,7 @@ namespace DRM.PropBag
             {
                 CheckSubScriptionObject(sub);
 
-                object target = sub.Target.Target;
+                object target = sub.Target;
                 if (target == null)
                     return; // The subscriber has been collected by the GC.
 
@@ -3295,7 +3295,7 @@ namespace DRM.PropBag
                     throw new InvalidOperationException($"Handlers of kind: {sub.SubscriptionKind} are not supported.");
             }
 
-            if (sub.Target.Target == null)
+            if (sub.Target == null)
             {
                 Debug.WriteLine($"The object listening to this event is 'no longer with us.'");
             }
@@ -3313,7 +3313,7 @@ namespace DRM.PropBag
             {
                 CheckSubScriptionObject(sub);
 
-                object target = sub.Target.Target;
+                object target = sub.Target;
                 if (target == null)
                     return; // The subscriber has been collected by the GC.
 
@@ -3719,7 +3719,7 @@ namespace DRM.PropBag
 
                 if (sub.SubscriptionKind == SubscriptionKind.StandardHandler)
                 {
-                    object target = sub.Target.Target;
+                    object target = sub.Target;
                     if (target == null)
                     {
                         return; // The subscriber has been collected by the GC.

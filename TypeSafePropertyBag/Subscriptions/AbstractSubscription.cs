@@ -26,6 +26,8 @@ namespace DRM.TypeSafePropertyBag
         public SubscriptionPriorityGroup SubscriptionPriorityGroup { get; protected set; }
         //public SubscriptionTargetKind SubscriptionTargetKind { get; protected set; }
 
+        public object Target { get; }
+
         public WeakRefKey Target_Wrk { get; protected set; }
         public string MethodName { get; protected set; }
 
