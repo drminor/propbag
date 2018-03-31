@@ -49,15 +49,14 @@ namespace DRM.PropBag.AutoMapperSupport
         // Gen Submit
         public IPropBagMapperRequestKeyGen SubmitPropBagMapperRequest(PropModelType propModel, Type sourceType, string configPackageName)
         {
-            Type typeToCreate = propModel.NewEmittedType ?? propModel.TypeToWrap;
+            Type typeToCreate = propModel.RunTimeType;
             PropBagMapperReqSubDelegate mapperRequestSubmitter = GetPropBagMapperReqSubDelegate(sourceType, typeToCreate);
             IPropBagMapperRequestKeyGen result = mapperRequestSubmitter(propModel, configPackageName, this);
 
             return result;
         }
 
-        // Typed Submit
-        // TODO: Consider adding a method that takes a IConfigureAMapper instead of a configPackageName.
+        // Typed Submit with ConfigPackageName
         public IPropBagMapperRequestKey<TSource, TDestination> SubmitPropBagMapperRequest<TSource, TDestination>
         (
             PropModelType propModel,
@@ -67,20 +66,32 @@ namespace DRM.PropBag.AutoMapperSupport
         )
         where TDestination : class, IPropBag
         {
-            // TODO: check to make sure that the "configStarterForThisRequest" value is being sent to the correct place.
-            // TODO: Consider making the caller supply a IBuildMapperConfigurations "service."
+            // Lookup the package name and return a mapping configuration.
+            IConfigureAMapper<TSource, TDestination> mappingConfiguration
+                = GetTheMappingConfiguration<TSource, TDestination>(configPackageName);
 
-            // Create a Configuration Builder for this request.
-            IBuildMapperConfigurations<TSource, TDestination> propBagMapperConfigurationBuilder
-                = new SimpleMapperConfigurationBuilder<TSource, TDestination>(configStarter: configStarterForThisRequest);
+            var result = SubmitPropBagMapperRequest<TSource, TDestination>(propModel, mappingConfiguration, configStarterForThisRequest, propFactory);
+
+            return result;
+        }
+
+        // Typed Submit with Mapping Configuration.
+        public IPropBagMapperRequestKey<TSource, TDestination> SubmitPropBagMapperRequest<TSource, TDestination>
+        (
+            PropModelType propModel,
+            IConfigureAMapper<TSource, TDestination> mappingConfiguration,
+            IHaveAMapperConfigurationStep configStarterForThisRequest,
+            IPropFactory propFactory = null
+        )
+        where TDestination : class, IPropBag
+        {
+            // Use the AutoMapperService to register a 'raw' request.
+            IAutoMapperRequestKey<TSource, TDestination> autoMapperRequestKey =
+                this.SubmitRawAutoMapperRequest<TSource, TDestination>(propModel, mappingConfiguration, configStarterForThisRequest);
 
             // Create a MapperBuilder for this request.
             IBuildPropBagMapper<TSource, TDestination> propBagMapperBuilder
-                = _mapperBuilderProvider.GetPropBagMapperBuilder<TSource, TDestination>(propBagMapperConfigurationBuilder, this);
-
-            // Use the AutoMapperService to register a 'raw' request.
-            IAutoMapperRequestKey<TSource, TDestination> autoMapperRequestKey =
-                SubmitRawAutoMapperRequest<TSource, TDestination>(propModel, configPackageName);
+                = BuildTheAutoMapperBuilder<TSource, TDestination>(/*configStarterForThisRequest*/);
 
             // Create the PropBag Mapper Request.
             IPropBagMapperRequestKey<TSource, TDestination> typedMapperRequest
@@ -92,6 +103,32 @@ namespace DRM.PropBag.AutoMapperSupport
 
             // We could store the request in the PropBagMapper Cache, but it would not be used.
             return typedMapperRequest;
+        }
+
+        private IBuildPropBagMapper<TSource, TDestination> BuildTheAutoMapperBuilder<TSource, TDestination>
+        (
+            //IHaveAMapperConfigurationStep configStarterForThisRequest
+        )
+        where TDestination : class, IPropBag
+        {
+            // TODO: check to make sure that the "configStarterForThisRequest" value is being sent to the correct place.
+
+            // TODO: Make the method: GetAutoMapperBuilder on IAutoMapperBuilderProvider accept a
+            // configStarterForThisRequest parameter.
+            // Then create a new interface: IBuildMapperConfigurations_Provider
+            // an implementation of this interface can be injected into the IBuildAutoMapper instance
+            // so that the AutoMapperBuilder can create the ConfigurationBuilder for this request
+            // and give it the configStarterForThisRequest value.
+
+            //// Create a Configuration Builder for this request.
+            //IBuildMapperConfigurations<TSource, TDestination> propBagMapperConfigurationBuilder
+            //    = new SimpleMapperConfigurationBuilder<TSource, TDestination>(configStarter: configStarterForThisRequest);
+
+            // Create a MapperBuilder for this request.
+            IBuildPropBagMapper<TSource, TDestination> propBagMapperBuilder
+                = _mapperBuilderProvider.GetPropBagMapperBuilder<TSource, TDestination>(/*propBagMapperConfigurationBuilder,*/ this);
+
+            return propBagMapperBuilder;
         }
 
         // Typed Get PropBag Mapper
@@ -138,15 +175,32 @@ namespace DRM.PropBag.AutoMapperSupport
 
         #region Methods using the AutoMapper Service
 
+        // Submit a request to queue up the creation of a Raw AutoMapper, and receive the RequestKey.
         private IAutoMapperRequestKey<TSource, TDestination> SubmitRawAutoMapperRequest<TSource, TDestination>
-            (PropModelType propModel, string configPackageName)
-        where TDestination: class, IPropBag
+        (
+            PropModelType propModel,
+            IConfigureAMapper<TSource, TDestination> mappingConfiguration,
+            IHaveAMapperConfigurationStep configStarterForThisRequest
+        )
+        where TDestination : class, IPropBag
         {
+            IMapTypeDefinition srcMapTypeDef
+                = _mapTypeDefinitionProvider.GetTypeDescription(propModel, typeof(TSource), propFactory: null, className: null);
+
+            IMapTypeDefinition dstMapTypeDef
+                = _mapTypeDefinitionProvider.GetTypeDescription(propModel, typeof(TDestination), propFactory: null, className: null);
+
+
             IAutoMapperRequestKey<TSource, TDestination> autoMapperRequestKey =
-                _autoMapperService.SubmitRawAutoMapperRequest<TSource, TDestination>(propModel, configPackageName);
+                _autoMapperService.SubmitRawAutoMapperRequest<TSource, TDestination>
+                (
+                    srcMapTypeDef,
+                    dstMapTypeDef,
+                    mappingConfiguration,
+                    configStarterForThisRequest
+                );
 
             return autoMapperRequestKey;
-
         }
 
         // From Typed PropBagMapperRequestKey
@@ -192,6 +246,30 @@ namespace DRM.PropBag.AutoMapperSupport
         }
 
         #endregion
+
+        #region Private Methods
+
+        private IConfigureAMapper<TSource, TDestination> GetTheMappingConfiguration<TSource, TDestination>(string configPackageName) where TDestination : class, IPropBag
+        {
+            switch (configPackageName.ToLower())
+            {
+                case "extra_members":
+                    {
+                        return new ConfigPackage_ExtraMembers().GetTheMapperConfig<TSource, TDestination>();
+                    }
+                case "emit_proxy":
+                    {
+                        return new ConfigPackage_EmitProxy().GetTheMapperConfig<TSource, TDestination>();
+                    }
+                default:
+                    {
+                        throw new InvalidOperationException($"The configPackageName: {configPackageName} is not recognized.");
+                    }
+            }
+        }
+
+        #endregion
+
 
         #region Generic Method Support
 

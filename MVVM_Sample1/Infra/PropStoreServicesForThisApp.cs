@@ -50,37 +50,41 @@ namespace MVVM_Sample1.Infra
         {
                 _mct.Measure("Begin PropStoreServicesForThisApp");
 
-            Person p = new Person();
-                _mct.MeasureAndReport("New Person");
+            //Person p = new Person();
+            //    _mct.MeasureAndReport("New Person");
+
+            // Build the PropFactory Provider and the two Delegate Caches on which it depends.
 
             ITypeDescBasedTConverterCache typeDescBasedTConverterCache = new TypeDescBasedTConverterCache();
-            _mct.MeasureAndReport("After new TypeDescBasedTConverterCache");
+                _mct.MeasureAndReport("After new TypeDescBasedTConverterCache");
 
             IProvideDelegateCaches delegateCacheProvider = new SimpleDelegateCacheProvider(typeof(PropBag), typeof(APFGenericMethodTemplates));
-            _mct.MeasureAndReport("After new SimpleDelegateCacheProvider");
-
-            HandlerDispatchDelegateCacheProvider = new SimpleHandlerDispatchDelegateCacheProvider();
-            _mct.MeasureAndReport("After new SimpleHandlerDispatchDelegateCacheProvider");
-
-            // This creates the Global, Shared, Property Store.
-            _theStore = new SimplePropStoreProxy(MAX_NUMBER_OF_PROPERTIES, HandlerDispatchDelegateCacheProvider);
-
-            // Get a reference to the PropStoreAccessService Factory.
-            PSAccessServiceCreatorInterface psAccessServiceFactory = _theStore.PropStoreAccessServiceFactory;
-
-            _vmActivator = new SimpleViewModelActivator();
-                _mct.MeasureAndReport("After new SimpleViewModelActivator");
+                _mct.MeasureAndReport("After new SimpleDelegateCacheProvider");
 
             IConvertValues valueConverter = new PropFactoryValueConverter(typeDescBasedTConverterCache);
             ResolveTypeDelegate typeResolver = null;
 
             _propFactoryFactory = BuildThePropFactoryFactory(valueConverter, delegateCacheProvider, typeResolver);
 
+            // Build the AppDomain-Wide Property Store and the EventHandler (Delegate) Dispatch cache on which it depends.
+            HandlerDispatchDelegateCacheProvider = new SimpleHandlerDispatchDelegateCacheProvider();
+                _mct.MeasureAndReport("After new SimpleHandlerDispatchDelegateCacheProvider");
+
+            // This creates the global, shared, Property Store.
+            _theStore = new SimplePropStoreProxy(MAX_NUMBER_OF_PROPERTIES, HandlerDispatchDelegateCacheProvider);
+
+            // Get a reference to the PropStoreAccessService Factory that the PropertyStore provides.
+            PSAccessServiceCreatorInterface psAccessServiceFactory = _theStore.PropStoreAccessServiceFactory;
+
+            _vmActivator = new SimpleViewModelActivator();
+                _mct.MeasureAndReport("After new SimpleViewModelActivator");
+
+
             IProvidePropModels propModelProvider = GetPropModelProvider(_propFactoryFactory);
 
             PropModelCache = new SimplePropModelCache(propModelProvider);
 
-            WrapperTypeCreator = GetSimpleWrapperTypeCreator();
+            WrapperTypeCreator = BuildSimpleWrapperTypeCreator();
                 _mct.MeasureAndReport("After GetSimpleWrapperTypeCreator");
 
 
@@ -108,12 +112,12 @@ namespace MVVM_Sample1.Infra
             IParsePropBagTemplates propBagTemplateParser = new PropBagTemplateParser();
 
             IProvidePropModels propModelProvider = new SimplePropModelProvider
-                (
+            (
                 propBagTemplateProvider,
                 mapperRequestProvider,
                 propBagTemplateParser,
                 propFactoryFactory
-                );
+            );
 
                 _mct.MeasureAndReport("After new PropModelProvider");
 
@@ -121,11 +125,11 @@ namespace MVVM_Sample1.Infra
         }
 
         private static IPropFactoryFactory BuildThePropFactoryFactory
-            (
+        (
             IConvertValues valueConverter,
             IProvideDelegateCaches delegateCacheProvider,
             ResolveTypeDelegate typeResolver
-            )
+        )
         {
             IPropFactoryFactory result = new SimplePropFactoryFactory
                 (
@@ -138,11 +142,11 @@ namespace MVVM_Sample1.Infra
         }
 
         private static IPropFactory BuildDefaultPropFactory
-            (
+        (
             IConvertValues valueConverter,
             IProvideDelegateCaches delegateCacheProvider,
             ResolveTypeDelegate typeResolver
-            )
+        )
         {
             IPropFactory result = new WPFPropFactory
                 (
@@ -154,22 +158,18 @@ namespace MVVM_Sample1.Infra
             return result;
         }
 
-        private static IPropBagMapperService GetAutoMapperProvider
-        (
-            ViewModelFactoryInterface viewModelFactory
-        )
+        private static IPropBagMapperService GetAutoMapperProvider(ViewModelFactoryInterface viewModelFactory)
         {
-            IMapTypeDefinitionProvider mapTypeDefinitionProvider = new SimpleMapTypeDefinitionProvider();
-
             IAutoMapperBuilderProvider autoMapperBuilderProvider = new SimpleAutoMapperBuilderProvider();
-
             ICacheAutoMappers rawAutoMapperCache = new SimpleAutoMapperCache();
             SimpleAutoMapperProvider autoMapperService = new SimpleAutoMapperProvider
             (
-                mapTypeDefinitionProvider: mapTypeDefinitionProvider,
                 autoMapperBuilderProvider: autoMapperBuilderProvider,
-                autoMapperCache: rawAutoMapperCache
+                autoMapperCache: rawAutoMapperCache,
+                mapperConfigurationLookupService: null
             );
+
+            IMapTypeDefinitionProvider mapTypeDefinitionProvider = new SimpleMapTypeDefinitionProvider();
 
             IPropBagMapperBuilderProvider propBagMapperBuilderProvider = new SimplePropBagMapperBuilderProvider();
             ICachePropBagMappers mappersCachingService = new SimplePropBagMapperCache(viewModelFactory);
@@ -184,8 +184,7 @@ namespace MVVM_Sample1.Infra
             return propBagMapperService;
         }
 
-
-        private static ICreateWrapperTypes GetSimpleWrapperTypeCreator()
+        private static ICreateWrapperTypes BuildSimpleWrapperTypeCreator()
         {
             // -- Build WrapperType Caching Service
             // Used by some ViewModel Activators to emit types, i.e., modules.

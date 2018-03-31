@@ -3,11 +3,28 @@ using DRM.TypeSafePropertyBag.Fundamentals;
 using DRM.TypeSafePropertyBag.LocalBinding;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Windows.Data;
+
+/// <remarks>
+/// The contents of this code file were designed and created by David R. Minor, Pittsboro, NC. (Swamp Hill Productions)
+/// I have chosen to provide others free access to this intellectual product using the terms set forth
+/// by the well known Code Project Open License.
+/// Please refer to the file in this same folder named CPOP.htm for the exact set of terms that govern this release.
+/// Although not included as a condition of use, I would prefer that this text, 
+/// or a similar text which covers all of the points made here, be included along with a copy of cpol.htm
+/// in the set of artifacts deployed with any product
+/// wherein this source code, or a derivative thereof, is used.
+/// </remarks>
+
+/// <remarks>
+/// While writing this code, I learned much and was guided by the material found at the following locations.
+/// http://northhorizon.net/2011/the-right-way-to-do-inotifypropertychanged/ (Daniel Moore)
+/// https://codeblog.jonskeet.uk/2008/08/09/making-reflection-fly-and-exploring-delegates/ (Jon Skeet)
+/// </remarks>
+
 
 namespace DRM.TypeSafePropertyBag
 {
@@ -27,9 +44,7 @@ namespace DRM.TypeSafePropertyBag
     using PropNodeCollectionIntInterface = IPropNodeCollection_Internal<UInt32, String>;
     using PropNodeCollectionInterface = IPropNodeCollection<UInt32, String>;
 
-    using PropModelType = IPropModel<String>;
     using PropItemSetKeyType = PropItemSetKey<String>;
-
 
     internal class SimplePropStoreAccessService : PSAccessServiceInterface, IHaveTheStoreNode, PSAccessServiceInternalInterface, IDisposable
     {

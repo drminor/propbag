@@ -8,8 +8,8 @@ namespace DRM.PropBag.AutoMapperSupport
         Type SourceType { get; }
         Type DestinationType { get; }
 
-        IMapTypeDefinitionGen SourceTypeGenDef { get; }
-        IMapTypeDefinitionGen DestinationTypeGenDef { get; }
+        IMapTypeDefinition SourceTypeGenDef { get; }
+        IMapTypeDefinition DestinationTypeGenDef { get; }
 
         Func<IAutoMapperRequestKeyGen, IMapper> RawAutoMapperCreator { get; }
         IMapper AutoMapper { get; set; }

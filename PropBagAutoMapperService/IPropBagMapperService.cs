@@ -17,6 +17,16 @@ namespace DRM.PropBag.AutoMapperSupport
         )
         where TDestination : class, IPropBag;
 
+        //Typed Submit with a Mapping Configuration (IConfigureAMapper)
+        IPropBagMapperRequestKey<TSource, TDestination> SubmitPropBagMapperRequest<TSource, TDestination>
+        (
+            PropModelType propModel,
+            IConfigureAMapper<TSource, TDestination> mappingConfiguration,
+            IHaveAMapperConfigurationStep configStarterForThisRequest = null,
+            IPropFactory propFactory = null
+        )
+        where TDestination : class, IPropBag;
+
         // Gen Submit 
         IPropBagMapperRequestKeyGen SubmitPropBagMapperRequest
         (

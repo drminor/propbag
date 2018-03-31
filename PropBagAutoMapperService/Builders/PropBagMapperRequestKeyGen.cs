@@ -11,11 +11,11 @@ namespace DRM.PropBag.AutoMapperSupport
     {
         #region Public Properties
 
-        public Type SourceType => SourceTypeGenDef.TargetType;
-        public Type DestinationType => DestinationTypeGenDef.TargetType;
+        public Type SourceType => SourceTypeDef.TargetType;
+        public Type DestinationType => DestinationTypeDef.TargetType;
 
-        public IMapTypeDefinitionGen SourceTypeGenDef => AutoMapperRequestKeyGen.SourceTypeGenDef;
-        public IMapTypeDefinitionGen DestinationTypeGenDef => AutoMapperRequestKeyGen.DestinationTypeGenDef;
+        public IMapTypeDefinition SourceTypeDef => AutoMapperRequestKeyGen.SourceTypeGenDef;
+        public IMapTypeDefinition DestinationTypeDef => AutoMapperRequestKeyGen.DestinationTypeGenDef;
 
         public IAutoMapperRequestKeyGen AutoMapperRequestKeyGen { get; }
 
@@ -91,22 +91,22 @@ namespace DRM.PropBag.AutoMapperSupport
             //       EqualityComparer<IMapTypeDefinitionGen>.Default.Equals(DestinationTypeGenDef, other.DestinationTypeGenDef);
 
             return other != null &&
-               AutoMapperRequestKeyGen.SourceTypeGenDef == other.SourceTypeGenDef &&
-               AutoMapperRequestKeyGen.DestinationTypeGenDef == other.DestinationTypeGenDef;
+               AutoMapperRequestKeyGen.SourceTypeGenDef == other.SourceTypeDef &&
+               AutoMapperRequestKeyGen.DestinationTypeGenDef == other.DestinationTypeDef;
         }
 
         public override int GetHashCode()
         {
             var hashCode = 1973524047;
-            hashCode = hashCode * -1521134295 + SourceTypeGenDef.GetHashCode();
-            hashCode = hashCode * -1521134295 + DestinationTypeGenDef.GetHashCode();
+            hashCode = hashCode * -1521134295 + SourceTypeDef.GetHashCode();
+            hashCode = hashCode * -1521134295 + DestinationTypeDef.GetHashCode();
             return hashCode;
         }
 
         public override string ToString()
         {
-            return $"PropBagMapperKey: S={SourceTypeGenDef.ToString()}," +
-                $" D={DestinationTypeGenDef.ToString()}";
+            return $"PropBagMapperKey: S={SourceTypeDef.ToString()}," +
+                $" D={DestinationTypeDef.ToString()}";
         }
 
         public static bool operator ==(PropBagMapperRequestKeyGen gen1, PropBagMapperRequestKeyGen gen2)

@@ -53,6 +53,7 @@
     <Compile Include="Builders\IPropBagMapperRequestKey.cs" />
     <Compile Include="Builders\IPropBagMapperRequestKeyGen.cs" />
     <Compile Include="IPropBagMapperService.cs" />
+    <Compile Include="SimpleMapTypeDefinitionProvider.cs" />
     <Compile Include="SimplePropBagMapper.cs" />
     <Compile Include="SimplePropBagMapperService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

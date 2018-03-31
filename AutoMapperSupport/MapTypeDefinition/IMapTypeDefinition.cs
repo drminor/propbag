@@ -1,25 +1,24 @@
-﻿using DRM.TypeSafePropertyBag;
-using System;
+﻿using System;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
-    using PropModelType = IPropModel<String>;
+    //using PropModelType = IPropModel<String>;
 
-    /// <summary>
-    /// This is the typed version of the IMapTypeDefinitionGen interface.
-    /// It allows one to create a MapTypeDefinition using a type known at compile time.
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public interface IMapTypeDefinition<T> : IMapTypeDefinitionGen
-    {
-    }
+    ///// <summary>
+    ///// This is the typed version of the IMapTypeDefinitionGen interface.
+    ///// It allows one to create a MapTypeDefinition using a type known at compile time.
+    ///// </summary>
+    ///// <typeparam name="T"></typeparam>
+    //public interface IMapTypeDefinition<T> : IMapTypeDefinitionGen
+    //{
+    //}
 
-    public interface IMapTypeDefinitionGen : IEquatable<IMapTypeDefinitionGen>
+    public interface IMapTypeDefinition : IEquatable<IMapTypeDefinition>
     {
         /// <summary>
         /// The PropModel to use when constructing new instances of objects of Type: Type or of Type: NewWrapperType.
         /// </summary>
-        PropModelType PropModel { get; }
+        object PropModel { get; }
 
         /// <summary>
         /// The type of object that will serve as the source or destination in
@@ -52,7 +51,7 @@ namespace DRM.PropBag.AutoMapperSupport
         /// <summary>
         /// If set, the PropFactory to use instead of the one recorded in the PropModel.
         /// </summary>
-        IPropFactory PropFactory { get; }
+        object PropFactory { get; }
 
         /// <summary>
         /// If set, the FullClass name to use instead of the one recorded in the PropModel.

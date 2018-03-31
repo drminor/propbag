@@ -67,17 +67,16 @@ namespace PropBagLib.Tests.AutoMapperSupport
 
         public IPropBagMapperService InitializeAutoMappers(ViewModelFactoryInterface viewModelFactory)
         {
-            IMapTypeDefinitionProvider mapTypeDefinitionProvider = new SimpleMapTypeDefinitionProvider();
-
             IAutoMapperBuilderProvider autoMapperBuilderProvider = new SimpleAutoMapperBuilderProvider();
-
             ICacheAutoMappers rawAutoMapperCache = new SimpleAutoMapperCache();
             SimpleAutoMapperProvider autoMapperService = new SimpleAutoMapperProvider
             (
-                mapTypeDefinitionProvider: mapTypeDefinitionProvider,
                 autoMapperBuilderProvider: autoMapperBuilderProvider,
-                autoMapperCache: rawAutoMapperCache
+                autoMapperCache: rawAutoMapperCache,
+                mapperConfigurationLookupService: null
             );
+
+            IMapTypeDefinitionProvider mapTypeDefinitionProvider = new SimpleMapTypeDefinitionProvider();
 
             IPropBagMapperBuilderProvider propBagMapperBuilderProvider = new SimplePropBagMapperBuilderProvider();
             ICachePropBagMappers mappersCachingService = new SimplePropBagMapperCache(viewModelFactory);
@@ -90,6 +89,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
             );
 
             return propBagMapperService;
+
         }
 
         public PSAccessServiceCreatorInterface StoreAccessCreator

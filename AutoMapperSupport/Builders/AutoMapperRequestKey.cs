@@ -1,5 +1,4 @@
-﻿using DRM.TypeSafePropertyBag;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace DRM.PropBag.AutoMapperSupport
@@ -11,13 +10,13 @@ namespace DRM.PropBag.AutoMapperSupport
                 IAutoMapperRequestKey<TSource, TDestination>, 
                 IEquatable<IAutoMapperRequestKey<TSource, TDestination>>,
                 IEquatable<AutoMapperRequestKey<TSource, TDestination>>
-        where TDestination: class, IPropBag
+        //where TDestination: class, IPropBag
     {
 
         #region Public Properties
 
-        public IMapTypeDefinition<TSource> SourceTypeDef { get; }
-        public IMapTypeDefinition<TDestination> DestinationTypeDef { get; }
+        public IMapTypeDefinition SourceTypeDef { get; }
+        public IMapTypeDefinition DestinationTypeDef { get; }
 
         //public Func<TDestination, TSource> SourceConstructor { get; }
         //public Func<TSource, TDestination> DestinationConstructor { get; }
@@ -32,8 +31,8 @@ namespace DRM.PropBag.AutoMapperSupport
             (
             IBuildAutoMapper<TSource, TDestination> autoMapperBuilder,
             IConfigureAMapper<TSource, TDestination> mappingConfiguration,
-            IMapTypeDefinition<TSource> sourceMapTypeDef,
-            IMapTypeDefinition<TDestination> destinationMapTypeDef
+            IMapTypeDefinition sourceMapTypeDef,
+            IMapTypeDefinition destinationMapTypeDef
             )
             : base
             (
@@ -89,8 +88,8 @@ namespace DRM.PropBag.AutoMapperSupport
         {
             var hashCode = 1780333077;
             //hashCode = hashCode * -1521134295 + base.GetHashCode();
-            hashCode = hashCode * -1521134295 + EqualityComparer<IMapTypeDefinition<TSource>>.Default.GetHashCode(SourceTypeDef);
-            hashCode = hashCode * -1521134295 + EqualityComparer<IMapTypeDefinition<TDestination>>.Default.GetHashCode(DestinationTypeDef);
+            hashCode = hashCode * -1521134295 + EqualityComparer<IMapTypeDefinition>.Default.GetHashCode(SourceTypeDef);
+            hashCode = hashCode * -1521134295 + EqualityComparer<IMapTypeDefinition>.Default.GetHashCode(DestinationTypeDef);
             return hashCode;
         }
 

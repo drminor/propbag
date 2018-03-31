@@ -24,8 +24,8 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public IAutoMapperRequestKey<TSource, TDestination> AutoMapperRequestKey => (IAutoMapperRequestKey<TSource, TDestination>) AutoMapperRequestKeyGen;
 
-        public IMapTypeDefinition<TSource> SourceTypeDef => AutoMapperRequestKey.SourceTypeDef;
-        public IMapTypeDefinition<TDestination> DestinationTypeDef => AutoMapperRequestKey.DestinationTypeDef;
+        //public IMapTypeDefinition SourceTypeGenDef => AutoMapperRequestKey.SourceTypeDef;
+        //public IMapTypeDefinition DestinationTypeDef => AutoMapperRequestKey.DestinationTypeDef;
 
         public IConfigureAMapper<TSource, TDestination> MappingConfiguration => AutoMapperRequestKey.MappingConfiguration;
 
@@ -94,8 +94,8 @@ namespace DRM.PropBag.AutoMapperSupport
         {
             var hashCode = 1780333077;
             //hashCode = hashCode * -1521134295 + base.GetHashCode();
-            hashCode = hashCode * -1521134295 + EqualityComparer<IMapTypeDefinition<TSource>>.Default.GetHashCode(SourceTypeDef);
-            hashCode = hashCode * -1521134295 + EqualityComparer<IMapTypeDefinition<TDestination>>.Default.GetHashCode(DestinationTypeDef);
+            hashCode = hashCode * -1521134295 + EqualityComparer<IMapTypeDefinition>.Default.GetHashCode(SourceTypeDef);
+            hashCode = hashCode * -1521134295 + EqualityComparer<IMapTypeDefinition>.Default.GetHashCode(DestinationTypeDef);
             return hashCode;
         }
 

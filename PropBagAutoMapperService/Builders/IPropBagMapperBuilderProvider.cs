@@ -6,7 +6,7 @@ namespace DRM.PropBag.AutoMapperSupport
     {
         IBuildPropBagMapper<TSource, TDestination> GetPropBagMapperBuilder<TSource, TDestination>
             (
-            IBuildMapperConfigurations<TSource, TDestination> mapperConfigurationBuilder,
+            //IBuildMapperConfigurations<TSource, TDestination> mapperConfigurationBuilder,
             IPropBagMapperService propBagMapperService
             )
             where TDestination : class, IPropBag;

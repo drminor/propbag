@@ -18,8 +18,8 @@ namespace DRM.PropBag
     #region Summary and Remarks
 
     /// <remarks>
-    /// The contents of this code file were designed and created by David R. Minor, Pittsboro, NC.
-    /// I have chosen to provide others free access to this intellectual property using the terms set forth
+    /// The contents of this code file were designed and created by David R. Minor, Pittsboro, NC. (Swamp Hill Productions)
+    /// I have chosen to provide others free access to this intellectual product using the terms set forth
     /// by the well known Code Project Open License.
     /// Please refer to the file in this same folder named CPOP.htm for the exact set of terms that govern this release.
     /// Although not included as a condition of use, I would prefer that this text, 

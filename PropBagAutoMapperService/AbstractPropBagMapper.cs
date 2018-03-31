@@ -55,8 +55,8 @@ namespace DRM.PropBag.AutoMapperSupport
             DestinationType = mapRequest.DestinationType;
 
             RunTimeType = mapRequest.DestinationTypeDef.RunTimeType;
-            PropModel = mapRequest.DestinationTypeDef.PropModel;
-            PropFactory = mapRequest.DestinationTypeDef.PropFactory;
+            PropModel = (PropModelType) mapRequest.DestinationTypeDef.PropModel;
+            PropFactory = (IPropFactory)mapRequest.DestinationTypeDef.PropFactory;
 
             Mapper = mapper;
 

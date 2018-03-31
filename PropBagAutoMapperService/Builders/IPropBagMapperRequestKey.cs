@@ -10,8 +10,8 @@ namespace DRM.PropBag.AutoMapperSupport
     {
         IAutoMapperRequestKey<TSource, TDestination> AutoMapperRequestKey { get; }
 
-        IMapTypeDefinition<TSource> SourceTypeDef { get; }
-        IMapTypeDefinition<TDestination> DestinationTypeDef { get; }
+        //IMapTypeDefinition SourceTypeDef { get; }
+        //IMapTypeDefinition DestinationTypeDef { get; }
 
         //Func<TDestination, TSource> SourceConstructor { get; }
         //Func<TSource, TDestination> DestinationConstructor { get; }

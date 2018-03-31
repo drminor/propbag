@@ -24,73 +24,115 @@ namespace PropBagTestApp.Infra
 
     public static class PropStoreServicesForThisApp
     {
-        private readonly static SimplePropStoreProxy _theStore;
-
         public static int MAX_NUMBER_OF_PROPERTIES = 65536;
 
-        public static IPropFactory DefaultPropFactory { get; }
+        private readonly static SimplePropStoreProxy _theStore;
 
-        public static PropModelCacheInterface PropModelCache { get; set; }
+        public readonly static IProvideHandlerDispatchDelegateCaches HandlerDispatchDelegateCacheProvider;
 
-        public static SimpleViewModelFactory ViewModelFactory { get; }
-        public static IPropBagMapperService PropBagMapperService { get; }
+        private static IPropFactoryFactory _propFactoryFactory { get; }
+        private static ViewModelActivatorInterface _vmActivator { get; }
+        //private static IPropFactory _defaultPropFactory { get; }
 
+        public static PropModelCacheInterface PropModelCache { get; private set; }
+
+        public static SimpleViewModelFactory ViewModelFactory { get; private set; }
         public static ICreateWrapperTypes WrapperTypeCreator { get; }
+        public static IPropBagMapperService PropBagMapperService { get; }
 
         public static string ConfigPackageNameSuffix { get; set; }
 
+        //static PropStoreServicesForThisApp()
+        //{
+        //    // Create the 3 core caches
+        //    ITypeDescBasedTConverterCache typeDescBasedTConverterCache = new TypeDescBasedTConverterCache();
+        //    IProvideDelegateCaches delegateCacheProvider = new SimpleDelegateCacheProvider(typeof(PropBag), typeof(APFGenericMethodTemplates));
+        //    IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider = new SimpleHandlerDispatchDelegateCacheProvider();
+
+        //    _theStore = new SimplePropStoreProxy(MAX_NUMBER_OF_PROPERTIES, handlerDispatchDelegateCacheProvider);
+
+        //    // Get a reference to the PropStoreAccessService Factory.
+        //    PSAccessServiceCreatorInterface psAccessServiceFactory = _theStore.PropStoreAccessServiceFactory;
+
+        //    ViewModelActivatorInterface vmActivator = new SimpleViewModelActivator();
+
+        //    WrapperTypeCreator = BuildSimpleWrapperTypeCreator();
+
+
+        //    IConvertValues valueConverter = new PropFactoryValueConverter(typeDescBasedTConverterCache);
+
+        //    // Default PropFactory
+        //    DefaultPropFactory = BuildDefaultPropFactory
+        //        (
+        //        valueConverter,
+        //        delegateCacheProvider
+        //        );
+
+        //    // The Factory used to build PropFactories.
+        //    IPropFactoryFactory propFactoryFactory = BuildThePropFactoryFactory
+        //        (
+        //        valueConverter,
+        //        delegateCacheProvider
+        //        );
+
+        //    IProvidePropModels propModelProvider = GetPropModelProvider(propFactoryFactory);
+
+        //    PropModelCache = new SimplePropModelCache(propModelProvider);
+
+        //    ViewModelFactory = new SimpleViewModelFactory(PropModelCache, vmActivator, psAccessServiceFactory, null, WrapperTypeCreator);
+
+        //    PropBagMapperService = GetAutoMapperProvider(ViewModelFactory);
+
+        //    ViewModelFactory.AutoMapperService = PropBagMapperService;
+        //}
+
         static PropStoreServicesForThisApp()
         {
-            // Create the 3 core caches
+            // Build the PropFactory Provider and the two Delegate Caches on which it depends.
             ITypeDescBasedTConverterCache typeDescBasedTConverterCache = new TypeDescBasedTConverterCache();
+
             IProvideDelegateCaches delegateCacheProvider = new SimpleDelegateCacheProvider(typeof(PropBag), typeof(APFGenericMethodTemplates));
-            IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider = new SimpleHandlerDispatchDelegateCacheProvider();
-
-            _theStore = new SimplePropStoreProxy(MAX_NUMBER_OF_PROPERTIES, handlerDispatchDelegateCacheProvider);
-
-            // Get a reference to the PropStoreAccessService Factory.
-            PSAccessServiceCreatorInterface psAccessServiceFactory = _theStore.PropStoreAccessServiceFactory;
-
-            ViewModelActivatorInterface vmActivator = new SimpleViewModelActivator();
-
-            WrapperTypeCreator = BuildSimpleWrapperTypeCreator();
-
 
             IConvertValues valueConverter = new PropFactoryValueConverter(typeDescBasedTConverterCache);
+            ResolveTypeDelegate typeResolver = null;
 
-            // Default PropFactory
-            DefaultPropFactory = BuildDefaultPropFactory
-                (
-                valueConverter,
-                delegateCacheProvider
-                );
+            _propFactoryFactory = BuildThePropFactoryFactory(valueConverter, delegateCacheProvider, typeResolver);
 
-            // The Factory used to build PropFactories.
-            IPropFactoryFactory propFactoryFactory = BuildThePropFactoryFactory
-                (
-                valueConverter,
-                delegateCacheProvider
-                );
+            // Build the AppDomain-Wide Property Store and the EventHandler (Delegate) Dispatch cache on which it depends.
+            HandlerDispatchDelegateCacheProvider = new SimpleHandlerDispatchDelegateCacheProvider();
 
-            IProvidePropModels propModelProvider = GetPropModelProvider(propFactoryFactory);
+            // This creates the global, shared, Property Store.
+            _theStore = new SimplePropStoreProxy(MAX_NUMBER_OF_PROPERTIES, HandlerDispatchDelegateCacheProvider);
+
+            // Get a reference to the PropStoreAccessService Factory that the PropertyStore provides.
+            PSAccessServiceCreatorInterface psAccessServiceFactory = _theStore.PropStoreAccessServiceFactory;
+
+            _vmActivator = new SimpleViewModelActivator();
+
+
+            IProvidePropModels propModelProvider = GetPropModelProvider(_propFactoryFactory);
 
             PropModelCache = new SimplePropModelCache(propModelProvider);
 
-            ViewModelFactory = new SimpleViewModelFactory(PropModelCache, vmActivator, psAccessServiceFactory, null, WrapperTypeCreator);
+            WrapperTypeCreator = BuildSimpleWrapperTypeCreator();
+
+            ViewModelFactory = new SimpleViewModelFactory(PropModelCache, _vmActivator, psAccessServiceFactory, null, WrapperTypeCreator);
 
             PropBagMapperService = GetAutoMapperProvider(ViewModelFactory);
 
             ViewModelFactory.AutoMapperService = PropBagMapperService;
+
+            //_defaultPropFactory = BuildDefaultPropFactory(valueConverter, delegateCacheProvider, typeResolver);
+            //_mct.MeasureAndReport("After new BuildDefaultPropFactory");
         }
 
         private static IPropFactoryFactory BuildThePropFactoryFactory
-            (
+        (
             IConvertValues valueConverter,
-            IProvideDelegateCaches delegateCacheProvider
-            )
+            IProvideDelegateCaches delegateCacheProvider,
+            ResolveTypeDelegate typeResolver
+        )
         {
-            ResolveTypeDelegate typeResolver = null;
-
             IPropFactoryFactory result = new SimplePropFactoryFactory
                 (
                 delegateCacheProvider,
@@ -142,22 +184,18 @@ namespace PropBagTestApp.Infra
             return propModelProvider;
         }
 
-        private static IPropBagMapperService GetAutoMapperProvider
-        (
-            ViewModelFactoryInterface viewModelFactory
-        )
+        private static IPropBagMapperService GetAutoMapperProvider(ViewModelFactoryInterface viewModelFactory)
         {
-            IMapTypeDefinitionProvider mapTypeDefinitionProvider = new SimpleMapTypeDefinitionProvider();
-
             IAutoMapperBuilderProvider autoMapperBuilderProvider = new SimpleAutoMapperBuilderProvider();
-
             ICacheAutoMappers rawAutoMapperCache = new SimpleAutoMapperCache();
             SimpleAutoMapperProvider autoMapperService = new SimpleAutoMapperProvider
             (
-                mapTypeDefinitionProvider: mapTypeDefinitionProvider,
                 autoMapperBuilderProvider: autoMapperBuilderProvider,
-                autoMapperCache: rawAutoMapperCache
+                autoMapperCache: rawAutoMapperCache,
+                mapperConfigurationLookupService: null
             );
+
+            IMapTypeDefinitionProvider mapTypeDefinitionProvider = new SimpleMapTypeDefinitionProvider();
 
             IPropBagMapperBuilderProvider propBagMapperBuilderProvider = new SimplePropBagMapperBuilderProvider();
             ICachePropBagMappers mappersCachingService = new SimplePropBagMapperCache(viewModelFactory);
@@ -170,9 +208,41 @@ namespace PropBagTestApp.Infra
             );
 
             return propBagMapperService;
-
         }
 
+        //private static ICreateWrapperTypes BuildSimpleWrapperTypeCreator()
+        //{
+        //    // -- Build WrapperType Caching Service
+        //    // Used by some ViewModel Activators to emit types, i.e., modules.
+        //    IModuleBuilderInfo moduleBuilderInfo = new SimpleModuleBuilderInfo();
+
+        //    IEmitWrapperType emitWrapperType = new SimpleWrapperTypeEmitter
+        //        (
+        //        mbInfo: moduleBuilderInfo
+        //        );
+
+        //    ICacheEmittedTypes wrapperTypeCachingService = new SimpleEmittedTypesCache
+        //        (
+        //        emitterEngine: emitWrapperType
+        //        );
+
+        //    // -- Build TypeDesc Caching Service
+        //    // Used only by some ModuleBuilders.
+        //    ITypeDescriptionProvider typeDescriptionProvider = new SimpleTypeDescriptionProvider();
+
+        //    ICacheTypeDescriptions typeDescCachingService = new TypeDescriptionLocalCache
+        //        (
+        //        typeDescriptionProvider: typeDescriptionProvider
+        //        );
+
+        //    ICreateWrapperTypes result = new SimpleWrapperTypeCreator
+        //        (
+        //        wrapperTypeCachingService: wrapperTypeCachingService,
+        //        typeDescCachingService: typeDescCachingService
+        //        );
+
+        //    return result;
+        //}
 
         private static ICreateWrapperTypes BuildSimpleWrapperTypeCreator()
         {
@@ -209,43 +279,33 @@ namespace PropBagTestApp.Infra
         }
 
 
+
         public static string GetResourceKeyWithSuffix(string rawKey, string suffix)
         {
             string result = suffix != null ? $"{rawKey}_{suffix}" : rawKey;
             return result;
         }
 
+
         public static IPropBagMapper<TSource, TDestination> GetAutoMapper<TSource, TDestination>
-            (
+        (
             IMapperRequest mapperRequest,
             IPropBagMapperService propBagMapperService,
             out IPropBagMapperRequestKey<TSource, TDestination> propBagMapperRequestKey
-            )
-            where TDestination : class, IPropBag
+        )
+        where TDestination : class, IPropBag
         {
-            // This is where the PropModel is used to define the Mapper 
-
             // TODO: See if we can submit the request earlier; perhaps when the mapper request is created.
-
-            Type typeToWrap = mapperRequest.PropModel.TypeToWrap;
+            //Type typeToWrap = mapperRequest.PropModel.TypeToWrap;
 
             // Submit the Mapper Request.
-            //propBagMapperKey = autoMapperService.SubmitRawAutoMapperRequest<TSource, TDestination>
-            //    (mapperRequest.PropModel, typeToWrap, mapperRequest.ConfigPackageName);
-
-
-            IPropBagMapperRequestKeyGen propBagMapperRequestKeyGen = propBagMapperService.SubmitPropBagMapperRequest(mapperRequest.PropModel, typeToWrap, mapperRequest.ConfigPackageName);
-
-            propBagMapperRequestKey = (IPropBagMapperRequestKey<TSource, TDestination>)propBagMapperRequestKeyGen;
+            propBagMapperRequestKey = propBagMapperService.SubmitPropBagMapperRequest<TSource, TDestination>
+                (mapperRequest.PropModel, mapperRequest.ConfigPackageName);
 
             // Get the AutoMapper mapping function associated with the mapper request just submitted.
-            IPropBagMapperGen mapperGen = propBagMapperService.GetPropBagMapper(propBagMapperRequestKeyGen);
-
-            IPropBagMapper<TSource, TDestination> result = (IPropBagMapper<TSource, TDestination>)mapperGen;
-                
-            return result;
+            IPropBagMapper<TSource, TDestination> propBagMapper = propBagMapperService.GetPropBagMapper<TSource, TDestination>(propBagMapperRequestKey);
+            return propBagMapper;
         }
-
 
         #region InDesign Support
 

@@ -23,7 +23,7 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public void BuildExtraMemberConfig(IAutoMapperRequestKey<TSource, TDestination> mapRequest, IMapperConfigurationExpression cfg)
         {
-            PropModelType propModel = mapRequest.DestinationTypeDef.PropModel;
+            PropModelType propModel = mapRequest.DestinationTypeDef.PropModel as PropModelType;
 
             // TODO: Create an interface for the ExtraMembersProvider and then create
             // property so that this value can be set after construction, but before calling BuildExtraMemberConfig.

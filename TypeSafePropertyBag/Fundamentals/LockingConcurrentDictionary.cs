@@ -6,18 +6,30 @@ using System.Linq;
 
 /// <remarks>
 /// This was copied whole sale from the AutoMapper project on GitHub.
-/// DRM Added TryRemove.
+/// DRM Added the following features:
+///     IEnumerable<typeparamref name="TValue"/> implementation,
+///     IEqualityComparer<typeparam name="TKey"></typeparam> constructor parameter,
+///     TryRemoveValue and Clear methods.
 /// </remarks>
 
-///<summary>
+///<remarks>
 /// Note: Since this uses the version of GetOrAdd that takes a delegate,
 /// Locks are not held by the ConcurrentDictionary while the delegate is being invoked.
 /// 
 /// TODO: Need to determine that since the Lazy constructor is thread-safe, if the overall
 /// operation is thread-safe.
-///</summary>
+///</remarks>
+
 namespace DRM.TypeSafePropertyBag.Fundamentals
 {
+    /// <summary>
+    /// Wraps a ConcurrentDictionary. Values are created by evaluating a 'factory' Func<typeparamref name="TKey"/>, Lazy<typeparamref name="TValue"/>> 
+    /// specified when an instance of this class is created.
+    /// GetOrAdd(<typeparamref name="TValue"/> key, only calls the factory Func when their is no existing entry in the Dictionary.
+    /// If an entry does exist, instead of executing the factory Func, the existing value is returned from the Dictionary.
+    /// </summary>
+    /// <typeparam name="TKey"></typeparam>
+    /// <typeparam name="TValue"></typeparam>
     public struct LockingConcurrentDictionary<TKey, TValue> : IEnumerable<TValue>
     {
         private readonly ConcurrentDictionary<TKey, Lazy<TValue>> _dictionary;

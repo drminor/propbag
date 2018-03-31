@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using System;
-using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
@@ -19,29 +18,12 @@ namespace DRM.PropBag.AutoMapperSupport
 
         }
 
-        //public IConfigurationProvider GetNewConfiguration(
-        //    IConfigureAMapper<TSource, TDestination> configs,
-        //    IPropBagMapperKey<TSource, TDestination> mapRequest)
-        //{
-        //    // Reset all settings but configStarter
-        //    base.Configs = configs;
-        //    base.Action = null;
-
-        //    // The base will produce a single compositeAction from the list of actions
-        //    // in configs.
-        //    Action<IMapperConfigurationExpression> compositeGenAction = base.Action;
-
-        //    IConfigurationProvider result = GetNewConfiguration(compositeGenAction, configs.FinalConfigActionProvider.ActionStep, mapRequest);
-
-        //    return result;
-        //}
-
         public IConfigurationProvider GetNewConfiguration
             (
             //IConfigureAMapper<TSource, TDestination> configs,
             //IPropBagMapperKey<TSource, TDestination> mapRequest
             IAutoMapperRequestKey<TSource, TDestination> mapRequest
-            /*,  IHaveAMapperConfigurationStep configStarter*/
+            //, IHaveAMapperConfigurationStep configStarter
             )
         {
             // Reset all to force new evaluation of configs.
@@ -49,11 +31,10 @@ namespace DRM.PropBag.AutoMapperSupport
             base.ConfigStarter = null; // configStarter;
             base.Action = null;
 
-            // The base will produce a single compositeAction from the list of actions
-            // in configs.
+            // The base will produce a single compositeAction from the list of actions in configs.
             Action<IMapperConfigurationExpression> compositeGenAction = base.Action;
 
-            IConfigurationProvider result = GetNewConfiguration
+            IConfigurationProvider result = GetNewConfiguration_Internal
                 (
                 compositeGenAction,
                 //mapRequest.MappingConfiguration.FinalConfigActionProvider.ActionStep,
@@ -63,7 +44,7 @@ namespace DRM.PropBag.AutoMapperSupport
             return result;
         }
 
-        private IConfigurationProvider GetNewConfiguration
+        private IConfigurationProvider GetNewConfiguration_Internal
             (
             Action<IMapperConfigurationExpression> compositeGenAction,
             //Action<IPropBagMapperKey<TSource, TDestination>,

@@ -1,17 +1,17 @@
-﻿using DRM.TypeSafePropertyBag;
+﻿//using DRM.TypeSafePropertyBag;
 using System;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
-    using PropModelType = IPropModel<String>;
+    //using PropModelType = IPropModel<String>;
 
     public interface IMapTypeDefinitionProvider
     {
-        IMapTypeDefinition<T> GetTypeDescription<T>
+        IMapTypeDefinition GetTypeDescription
             (
-            PropModelType propModel,
-            //Type typeToWrap,
-            IPropFactory propFactory,
+            object propModel,
+            Type targetType,
+            object propFactory,
             string className
             );
     }

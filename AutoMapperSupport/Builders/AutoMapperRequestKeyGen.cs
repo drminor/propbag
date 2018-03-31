@@ -11,8 +11,8 @@ namespace DRM.PropBag.AutoMapperSupport
         public Type SourceType => SourceTypeGenDef.TargetType;
         public Type DestinationType => DestinationTypeGenDef.TargetType;
 
-        public IMapTypeDefinitionGen SourceTypeGenDef { get; }
-        public IMapTypeDefinitionGen DestinationTypeGenDef { get; }
+        public IMapTypeDefinition SourceTypeGenDef { get; }
+        public IMapTypeDefinition DestinationTypeGenDef { get; }
 
         public Func<IAutoMapperRequestKeyGen, IMapper> RawAutoMapperCreator { get; }
 
@@ -25,8 +25,8 @@ namespace DRM.PropBag.AutoMapperSupport
         public AutoMapperRequestKeyGen
             (
             Func<IAutoMapperRequestKeyGen, IMapper> rawAutoMapperCreator,
-            IMapTypeDefinitionGen sourceTypeGenDef,
-            IMapTypeDefinitionGen destinationTypeGenDef
+            IMapTypeDefinition sourceTypeGenDef,
+            IMapTypeDefinition destinationTypeGenDef
             )
         {
             RawAutoMapperCreator = rawAutoMapperCreator;

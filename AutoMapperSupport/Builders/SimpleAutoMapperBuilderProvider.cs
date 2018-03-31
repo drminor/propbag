@@ -1,6 +1,4 @@
-﻿using DRM.TypeSafePropertyBag;
-
-namespace DRM.PropBag.AutoMapperSupport
+﻿namespace DRM.PropBag.AutoMapperSupport
 {
     public class SimpleAutoMapperBuilderProvider : IAutoMapperBuilderProvider
     {

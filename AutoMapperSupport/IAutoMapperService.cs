@@ -1,36 +1,49 @@
 ﻿using System;
-using DRM.TypeSafePropertyBag;
 using AutoMapper;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
-    using PropModelType = IPropModel<String>;
+    //using PropModelType = IPropModel<String>;
 
     public interface IAutoMapperService : ICacheAutoMappers
     {
-        //Typed Submit 
+        //Typed Submit with ConfigPackageName
         IAutoMapperRequestKey<TSource, TDestination> SubmitRawAutoMapperRequest<TSource, TDestination>
         (
-            PropModelType propModel,
+            //PropModelType propModel,
+            IMapTypeDefinition srcMapTypeDef,
+            IMapTypeDefinition dstMapTypeDef,
             string configPackageName,
-            IHaveAMapperConfigurationStep configStarterForThisRequest = null,
-            IPropFactory propFactory = null
-        )
-        where TDestination : class, IPropBag;
+            IHaveAMapperConfigurationStep configStarterForThisRequest
+        );
+        //where TDestination : class, IPropBag;
+
+        //Typed Submit with a Mapping Configuration (IConfigureAMapper)
+        IAutoMapperRequestKey<TSource, TDestination> SubmitRawAutoMapperRequest<TSource, TDestination>
+        (
+            //PropModelType propModel,
+            IMapTypeDefinition srcMapTypeDef,
+            IMapTypeDefinition dstMapTypeDef,
+            IConfigureAMapper<TSource, TDestination> mappingConfiguration,
+            IHaveAMapperConfigurationStep configStarterForThisRequest
+        );
+        //where TDestination : class, IPropBag;
 
         // Typed Get Mapper
         IMapper GetRawAutoMapper<TSource, TDestination>
         (
             IAutoMapperRequestKey<TSource, TDestination> mapperRequest
-        )
-        where TDestination : class, IPropBag;
+        );
+        //where TDestination : class, IPropBag;
 
         // Gen Submit 
         IAutoMapperRequestKeyGen SubmitRawAutoMapperRequest
         (
-            PropModelType propModel,
+            //PropModelType propModel,
             Type sourceType,
-            string configPackageName
+            Type destType,
+            string configPackageName,
+            IHaveAMapperConfigurationStep configStarterForThisRequest
         );
 
         // Provided by ICacheAutoMappers

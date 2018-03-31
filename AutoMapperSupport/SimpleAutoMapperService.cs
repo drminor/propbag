@@ -1,24 +1,37 @@
 ﻿using AutoMapper;
-using DRM.TypeSafePropertyBag;
 using System;
 using System.Reflection;
 using System.Threading;
 
 namespace DRM.PropBag.AutoMapperSupport
 {
-    using PropModelType = IPropModel<String>;
-
     public class SimpleAutoMapperProvider : IAutoMapperService, IDisposable
     {
         #region Private Members
 
-        private readonly IMapTypeDefinitionProvider _mapTypeDefinitionProvider;
+        //private readonly IMapTypeDefinitionProvider _mapTypeDefinitionProvider;
         private readonly ICacheAutoMappers _autoMapperCache;
         private readonly IAutoMapperBuilderProvider _autoMapperBuilderProvider;
+        private IMapperConfigurationLookupService _mapperConfigurationLookupService { get; set; }
 
         #endregion
 
         #region Constructors
+
+        public SimpleAutoMapperProvider
+        (
+            //IMapTypeDefinitionProvider mapTypeDefinitionProvider,
+            IAutoMapperBuilderProvider autoMapperBuilderProvider,
+            ICacheAutoMappers autoMapperCache,
+            IMapperConfigurationLookupService mapperConfigurationLookupService
+        )
+        {
+            //_mapTypeDefinitionProvider = mapTypeDefinitionProvider ?? throw new ArgumentNullException(nameof(mapTypeDefinitionProvider));
+            _autoMapperBuilderProvider = autoMapperBuilderProvider ?? throw new ArgumentNullException(nameof(autoMapperBuilderProvider));
+            _autoMapperCache = autoMapperCache ?? throw new ArgumentNullException(nameof(autoMapperCache));
+
+            _mapperConfigurationLookupService = mapperConfigurationLookupService;
+        }
 
         // Disallow the parameterless constructor.
         private SimpleAutoMapperProvider()
@@ -26,44 +39,101 @@ namespace DRM.PropBag.AutoMapperSupport
             throw new NotSupportedException("Use of the paremeterless constructor for SimpleAutoMapperProvider is not supported.");
         }
 
-        public SimpleAutoMapperProvider
-        (
-            IMapTypeDefinitionProvider mapTypeDefinitionProvider,
-            IAutoMapperBuilderProvider autoMapperBuilderProvider,
-            ICacheAutoMappers autoMapperCache)
-        {
-            _mapTypeDefinitionProvider = mapTypeDefinitionProvider ?? throw new ArgumentNullException(nameof(mapTypeDefinitionProvider));
-            _autoMapperBuilderProvider = autoMapperBuilderProvider ?? throw new ArgumentNullException(nameof(autoMapperBuilderProvider));
-            _autoMapperCache = autoMapperCache ?? throw new ArgumentNullException(nameof(autoMapperCache));
-        }
-
         #endregion
 
         #region Public Methods
 
         // Gen Submit
-        public IAutoMapperRequestKeyGen SubmitRawAutoMapperRequest(PropModelType propModel, Type sourceType, string configPackageName)
+        public IAutoMapperRequestKeyGen SubmitRawAutoMapperRequest
+            (
+            Type sourceType,
+            Type destinationType,
+            string configPackageName,
+            IHaveAMapperConfigurationStep configStarterForThisRequest
+            )
         {
-            Type typeToCreate = propModel.NewEmittedType ?? propModel.TypeToWrap;
-            AutoMapperReqSubDelegate mapperRequestSubmitter = GetAutoMapperReqSubDelegate(sourceType, typeToCreate);
-            IAutoMapperRequestKeyGen result = mapperRequestSubmitter(propModel, configPackageName, this);
+            //Type typeToCreate = propModel.RunTimeType;
+            AutoMapperReqSubDelegate mapperRequestSubmitter = GetAutoMapperReqSubDelegate(sourceType, destinationType);
+            IAutoMapperRequestKeyGen result = mapperRequestSubmitter(sourceType, destinationType, configPackageName, configStarterForThisRequest, this);
+
+            return result;
+        }
+
+        public IAutoMapperRequestKey<TSource, TDestination> SubmitRawAutoMapperRequest<TSource, TDestination>
+        (
+            IMapTypeDefinition srcMapTypeDef,
+            IMapTypeDefinition dstMapTypeDef,
+            string configPackageName,
+            IHaveAMapperConfigurationStep configStarterForThisRequest
+        )
+        //where TDestination : class, IPropBag
+        {
+            if(_mapperConfigurationLookupService == null)
+            {
+                throw new InvalidOperationException("The AutoMapperService has no MapperConfigurationLookup Service.");
+            }
+
+            // Lookup the package name and return a mapping configuration.
+            IConfigureAMapper<TSource, TDestination> mappingConfiguration
+                = _mapperConfigurationLookupService.GetTheMapperConfig<TSource, TDestination>(configPackageName);
+
+            IAutoMapperRequestKey<TSource, TDestination> result
+                = SubmitRawAutoMapperRequest
+                (
+                    srcMapTypeDef,
+                    dstMapTypeDef,
+                    mappingConfiguration,
+                    configStarterForThisRequest
+                    );
 
             return result;
         }
 
         // Typed Submit Raw Auto
-        // TODO: Consider adding a method that takes a IConfigureAMapper instead of a configPackageName.
         public IAutoMapperRequestKey<TSource, TDestination> SubmitRawAutoMapperRequest<TSource, TDestination>
         (
-            PropModelType propModel,
-            string configPackageName,
-            IHaveAMapperConfigurationStep configStarterForThisRequest = null,
-            IPropFactory propFactory = null
+            IMapTypeDefinition srcMapTypeDef,
+            IMapTypeDefinition dstMapTypeDef,
+            IConfigureAMapper<TSource, TDestination> mappingConfiguration,
+            IHaveAMapperConfigurationStep configStarterForThisRequest
         )
-            where TDestination : class, IPropBag
+            //where TDestination : class, IPropBag
+        {
+            // Create a MapperBuilder for this request.
+            IBuildAutoMapper<TSource, TDestination> autoMapperBuilder
+                = BuildTheAutoMapperBuilder<TSource, TDestination>(configStarterForThisRequest);
+
+            // Create the mapper request.
+            IAutoMapperRequestKey<TSource, TDestination> autoMapperRequestKey
+                = new AutoMapperRequestKey<TSource, TDestination>
+                (
+                    autoMapperBuilder: autoMapperBuilder,
+                    mappingConfiguration: mappingConfiguration,
+                    sourceMapTypeDef: srcMapTypeDef,
+                    destinationMapTypeDef: dstMapTypeDef
+                );
+
+            IAutoMapperRequestKeyGen response_AutoMapperRequestKey = RegisterRawAutoMapperRequest(autoMapperRequestKey);
+            return (IAutoMapperRequestKey<TSource, TDestination>)response_AutoMapperRequestKey;
+        }
+
+        // Typed Get Mapper (Simple wrapper around our pass through method.)
+        public IMapper GetRawAutoMapper<TSource, TDestination>(IAutoMapperRequestKey<TSource, TDestination> autoMapperRequestKey)
+            //where TDestination : class, IPropBag
+        {
+            return _autoMapperCache.GetRawAutoMapper(autoMapperRequestKey);
+        }
+
+        private IBuildAutoMapper<TSource, TDestination> BuildTheAutoMapperBuilder<TSource, TDestination>(IHaveAMapperConfigurationStep configStarterForThisRequest)
         {
             // TODO: check to make sure that the "configStarterForThisRequest" value is being sent to the correct place.
-            // TODO: Consider making the caller supply a IBuildMapperConfigurations "service."
+
+            // TODO: Make the method: GetAutoMapperBuilder on IAutoMapperBuilderProvider accept a
+            // configStarterForThisRequest parameter.
+            // Then create a new interface: IBuildMapperConfigurations_Provider
+            // an implementation of this interface can be injected into the IBuildAutoMapper instance
+            // so that the AutoMapperBuilder can create the ConfigurationBuilder for this request
+            // and give it the configStarterForThisRequest value.
 
             // Create a Configuration Builder for this request.
             IBuildMapperConfigurations<TSource, TDestination> propBagMapperConfigurationBuilder
@@ -73,49 +143,21 @@ namespace DRM.PropBag.AutoMapperSupport
             IBuildAutoMapper<TSource, TDestination> autoMapperBuilder
                 = _autoMapperBuilderProvider.GetAutoMapperBuilder<TSource, TDestination>(propBagMapperConfigurationBuilder, this);
 
-            // Lookup the package name and return a mapping configuration.
-            IConfigureAMapper<TSource, TDestination> mappingConfiguration
-                = GetMappingConfiguration<TSource, TDestination>(configPackageName);
-
-            IMapTypeDefinition<TSource> srcMapTypeDef
-                = _mapTypeDefinitionProvider.GetTypeDescription<TSource>(propModel, propFactory: propFactory, className: null);
-
-            IMapTypeDefinition<TDestination> dstMapTypeDef
-                = _mapTypeDefinitionProvider.GetTypeDescription<TDestination>(propModel, propFactory: propFactory, className: null);
-
-            // Create the mapper request.
-            IAutoMapperRequestKey<TSource, TDestination> typedMapperRequest
-                = new AutoMapperRequestKey<TSource, TDestination>
-                (
-                    autoMapperBuilder: autoMapperBuilder,
-                    mappingConfiguration: mappingConfiguration,
-                    sourceMapTypeDef: srcMapTypeDef,
-                    destinationMapTypeDef: dstMapTypeDef
-                );
-
-            IAutoMapperRequestKeyGen newMapRequest_raw = RegisterRawAutoMapperRequest(typedMapperRequest);
-            return (IAutoMapperRequestKey<TSource, TDestination>)newMapRequest_raw;
-        }
-
-        // Typed Get Mapper (Simple wrapper around our pass through method.)
-        public IMapper GetRawAutoMapper<TSource, TDestination>(IAutoMapperRequestKey<TSource, TDestination> mapperRequest)
-            where TDestination : class, IPropBag
-        {
-            return _autoMapperCache.GetRawAutoMapper(mapperRequest);
+            return autoMapperBuilder;
         }
 
         #endregion
 
         #region Pass-through calls to the Raw Auto MappersCache
 
-        public IAutoMapperRequestKeyGen RegisterRawAutoMapperRequest(IAutoMapperRequestKeyGen mapperRequest)
+        public IAutoMapperRequestKeyGen RegisterRawAutoMapperRequest(IAutoMapperRequestKeyGen autoMapperRequestKey)
         {
-            return _autoMapperCache.RegisterRawAutoMapperRequest(mapperRequest);
+            return _autoMapperCache.RegisterRawAutoMapperRequest(autoMapperRequestKey);
         }
 
-        public IMapper GetRawAutoMapper(IAutoMapperRequestKeyGen mapperRequest)
+        public IMapper GetRawAutoMapper(IAutoMapperRequestKeyGen autoMapperRequestKey)
         {
-            return _autoMapperCache.GetRawAutoMapper(mapperRequest);
+            return _autoMapperCache.GetRawAutoMapper(autoMapperRequestKey);
         }
 
         public long ClearRawAutoMappersCache()
@@ -125,33 +167,17 @@ namespace DRM.PropBag.AutoMapperSupport
 
         #endregion
 
-        #region Private Methods
-
-        private IConfigureAMapper<TSource, TDestination> GetMappingConfiguration<TSource, TDestination>(string configPackageName) where TDestination : class, IPropBag
-        {
-            switch (configPackageName.ToLower())
-            {
-                case "extra_members":
-                    {
-                        return new ConfigPackage_ExtraMembers().GetTheMapperConfig<TSource, TDestination>();
-                    }
-                case "emit_proxy":
-                    {
-                        return new ConfigPackage_EmitProxy().GetTheMapperConfig<TSource, TDestination>();
-                    }
-                default:
-                    {
-                        throw new InvalidOperationException($"The configPackageName: {configPackageName} is not recognized.");
-                    }
-            }
-        }
-
-        #endregion
-
         #region Generic Method Support
 
         internal delegate IAutoMapperRequestKeyGen AutoMapperReqSubDelegate
-            (PropModelType propModel, string configPackageName, IAutoMapperService autoMapperService);
+            (
+            //PropModelType propModel,
+             Type sourceType,
+             Type destinationType,
+             string configPackageName,
+             IHaveAMapperConfigurationStep configStarterForThisRequest,
+             IAutoMapperService autoMapperService
+            );
 
         static AutoMapperReqSubDelegate GetAutoMapperReqSubDelegate(Type sourceType, Type destinationType)
         {
@@ -183,19 +209,24 @@ namespace DRM.PropBag.AutoMapperSupport
             // The Typed method for RawAutoMappers
             static IAutoMapperRequestKey<TSource, TDestination> SubmitRawAutoMapperRequest<TSource, TDestination>
             (
-                PropModelType propModel,
+                Type sourceType,
+                Type destinationType,
                 string configPackageName,
+                IHaveAMapperConfigurationStep configStarterForThisRequest,
                 IAutoMapperService autoMapperProvider
             )
-            where TDestination : class, IPropBag
+            //where TDestination : class, IPropBag
             {
+                IMapTypeDefinition srcMapTypeDef = new MapTypeDefinition(typeof(TSource));
+                IMapTypeDefinition dstMapTypeDef = new MapTypeDefinition(typeof(TDestination));
+
                 IAutoMapperRequestKey<TSource, TDestination> result
                     = autoMapperProvider.SubmitRawAutoMapperRequest<TSource, TDestination>
                         (
-                        propModel: propModel,
+                        srcMapTypeDef: srcMapTypeDef,
+                        dstMapTypeDef: dstMapTypeDef,
                         configPackageName: configPackageName,
-                        configStarterForThisRequest: null,
-                        propFactory: null
+                        configStarterForThisRequest: configStarterForThisRequest
                         );
 
                 return result;
@@ -217,10 +248,10 @@ namespace DRM.PropBag.AutoMapperSupport
                     // Dispose managed state (managed objects).
                     ClearRawAutoMappersCache();
 
-                    if(_mapTypeDefinitionProvider is IDisposable disable1)
-                    {
-                        disable1.Dispose();
-                    }
+                    //if(_mapTypeDefinitionProvider is IDisposable disable1)
+                    //{
+                    //    disable1.Dispose();
+                    //}
 
                     if (_autoMapperCache is IDisposable disable2)
                     {

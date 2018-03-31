@@ -11,7 +11,7 @@ namespace DRM.PropBag.AutoMapperSupport
     {
         #region Private Properties
 
-        private readonly IBuildMapperConfigurations<TSource, TDestination> _mapperConfigurationBuilder;
+        //private readonly IBuildMapperConfigurations<TSource, TDestination> _mapperConfigurationBuilder;
         private readonly IPropBagMapperService _propBagMapperService;
 
         #endregion
@@ -20,11 +20,11 @@ namespace DRM.PropBag.AutoMapperSupport
 
         public SimplePropBagMapperBuilder
             (
-            IBuildMapperConfigurations<TSource, TDestination> mapperConfigurationBuilder,
+            //IBuildMapperConfigurations<TSource, TDestination> mapperConfigurationBuilder,
             IPropBagMapperService propBagMapperService
             )
         {
-            _mapperConfigurationBuilder = mapperConfigurationBuilder;
+            //_mapperConfigurationBuilder = mapperConfigurationBuilder;
             _propBagMapperService = propBagMapperService;
         }
 

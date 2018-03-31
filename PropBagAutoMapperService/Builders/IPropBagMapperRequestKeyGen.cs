@@ -11,8 +11,8 @@ namespace DRM.PropBag.AutoMapperSupport
         Type SourceType { get; }
         Type DestinationType { get; }
 
-        IMapTypeDefinitionGen SourceTypeGenDef { get; }
-        IMapTypeDefinitionGen DestinationTypeGenDef { get; }
+        IMapTypeDefinition SourceTypeDef { get; }
+        IMapTypeDefinition DestinationTypeDef { get; }
 
         IAutoMapperRequestKeyGen AutoMapperRequestKeyGen { get; }
 

@@ -60,7 +60,6 @@
     <Compile Include="Config\IHaveAMapperConfigurationStep.cs" />
     <Compile Include="MapTypeDefinition\IMapTypeDefinition.cs" />
     <Compile Include="MapTypeDefinition\IMapTypeDefinitionProvider.cs" />
-    <Compile Include="MapTypeDefinition\SimpleMapTypeDefinitionProvider.cs" />
     <Compile Include="Caches\ICacheConfigPackages.cs" />
     <Compile Include="Config\SimpleMapperConfigurationBuilderGenBase.cs" />
     <Compile Include="Config\SimpleMapperConfigurationBuilder.cs" />
