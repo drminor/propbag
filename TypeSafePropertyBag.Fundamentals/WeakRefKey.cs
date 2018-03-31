@@ -2,6 +2,7 @@
 
 /// <remarks>
 /// Copied from src\Framework\MS\Internal\Data\ViewManager.cs (Assembly: PresentationFramework)
+/// Modified to not allow references to null.
 /// </remarks>
 
 namespace DRM.TypeSafePropertyBag.Fundamentals
@@ -18,8 +19,15 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
 
         public WeakRefKey(object target)
         {
+            if(target == null)
+            {
+                throw new ArgumentNullException($"Cannot create a WeakRefKey that references null.");
+            }
+
             _weakRef = new WeakReference(target);
-            _hashCode = target?.GetHashCode() ?? 314159; // (target != null) ? target.GetHashCode() : 314159;
+            //_isInitialized = true;
+
+            _hashCode = target.GetHashCode(); // ?? 314159; // (target != null) ? target.GetHashCode() : 314159;
         }
 
         //------------------------------------------------------
@@ -30,7 +38,14 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
 
         public object Target
         {
-            get { return _weakRef?.Target; }
+            get
+            {
+                if(!_isInitialized)
+                {
+                    throw new InvalidOperationException("The WeakRefKey has not been initialized.");
+                }
+                return _weakRef.Target;
+            }
         }
 
         //------------------------------------------------------
@@ -38,6 +53,13 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
         //  Public Methods
         //
         //------------------------------------------------------
+
+        static public WeakRefKey Empty => new WeakRefKey(SharedDefaultObject.Instance);
+
+        public void Clear()
+        {
+            _weakRef = null;
+        }
 
         public override int GetHashCode()
         {
@@ -89,7 +111,14 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
         //------------------------------------------------------
 
         WeakReference _weakRef;
+
+        ///// <summary>
+        ///// Used to distinguish between a reference that has been garbage collected and
+        ///// a default instance of this struct, i.e. an instance created using the parameterless constructor.
+        ///// </summary>
+        //bool _isInitialized;
+
+        bool _isInitialized => _weakRef != null;
         int _hashCode;  // cache target's hashcode, lest it get GC'd out from under us
     }
-
 }

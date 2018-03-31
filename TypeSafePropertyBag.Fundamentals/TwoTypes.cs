@@ -72,30 +72,5 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
                 _destType = value;
             }
         }
-
-        // TODO: Move this logic to the PropBagControlsWPF project.
-        public static TwoTypes FromMkUpExtParam(object parameter, Type destinationType = null)
-        {
-            if (parameter == null)
-            {
-                return TwoTypes.Empty;
-            }
-            else if (parameter is TwoTypes)
-            {
-                return (TwoTypes)parameter;
-            }
-            else if (parameter is Type && destinationType != null)
-            {
-                return new TwoTypes((Type)parameter, destinationType);
-            }
-            else if (parameter is IPropData && destinationType != null)
-            {
-                return new TwoTypes(((IPropData)parameter).TypedProp.PropTemplate.Type, destinationType);
-            }
-            else
-            {
-                return TwoTypes.Empty;
-            }
-        }
     }
 }
