@@ -21,7 +21,7 @@ namespace DRM.TypeSafePropertyBag
 
         #region ISubscription Implementation
 
-        new public object Target => null;
+        new public object Target_Wrk => null;
         new public Delegate HandlerProxy => null;
         new public object LocalBinderAsObject => (object)LocalBinder;
 
@@ -29,19 +29,22 @@ namespace DRM.TypeSafePropertyBag
 
         #region Constructors
 
-        public BindingSubscription(IBindingSubscriptionKey<T> sKey, PSAccessServiceInterface propStoreAccessService)
+        public BindingSubscription(IBindingSubscriptionKey<T> subRequestKey, PSAccessServiceInterface propStoreAccessService)
         {
-            OwnerPropId = sKey.OwnerPropId;
-            BindingInfo = sKey.BindingInfo;
+            OwnerPropId = subRequestKey.OwnerPropId;
+            BindingInfo = subRequestKey.BindingInfo;
 
-            SubscriptionKind = sKey.SubscriptionKind;
-            SubscriptionPriorityGroup = sKey.SubscriptionPriorityGroup;
+            SubscriptionKind = subRequestKey.SubscriptionKind;
+            SubscriptionPriorityGroup = subRequestKey.SubscriptionPriorityGroup;
             //SubscriptionTargetKind = sKey.SubscriptionTargetKind;
 
-            LocalBinder = new LocalBinder<T>(propStoreAccessService, OwnerPropId, sKey.BindingInfo);
+            LocalBinder = new LocalBinder<T>(propStoreAccessService, OwnerPropId, subRequestKey.BindingInfo);
         }
 
         #endregion
+
+        // TODO: Write a comment explaining why Reference Equality of the LocalBinder value is used to
+        // determing if two Bindng Subscriptions are equal.
 
         #region IEquatable Support and Object Overrides
 
@@ -68,6 +71,7 @@ namespace DRM.TypeSafePropertyBag
         public static bool operator ==(BindingSubscription<T> subscription1, BindingSubscription<T> subscription2)
         {
             return object.ReferenceEquals(subscription1.LocalBinder, subscription2.LocalBinder);
+            //return subscription1.LocalBinder == subscription2.LocalBinder;
         }
 
         public static bool operator !=(BindingSubscription<T> subscription1, BindingSubscription<T> subscription2)

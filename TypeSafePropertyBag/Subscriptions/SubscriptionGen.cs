@@ -5,6 +5,7 @@ namespace DRM.TypeSafePropertyBag
 {
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
 
+    // TODO: Consider implementing IDisposable -- to clear the WeakRefKey(Target)
     internal class SubscriptionGen : ISubscription 
     {
         public ExKeyT OwnerPropId { get; set; }
@@ -14,7 +15,7 @@ namespace DRM.TypeSafePropertyBag
         public SubscriptionPriorityGroup SubscriptionPriorityGroup { get; set; }
         //public SubscriptionTargetKind SubscriptionTargetKind { get; protected set; }
 
-        public WeakRefKey Target { get; protected set; }
+        public WeakRefKey Target_Wrk { get; protected set; }
         public string MethodName { get; }
 
         public Delegate HandlerProxy { get; }
@@ -32,30 +33,30 @@ namespace DRM.TypeSafePropertyBag
         public LocalBindingInfo BindingInfo => throw new InvalidOperationException("SubscriptionGen cannot be used for BindingSubscriptions.");
         public object LocalBinderAsObject => throw new InvalidOperationException("SubscriptionGen cannot be used for BindingSubscriptions.");
 
-        public SubscriptionGen(ISubscriptionKeyGen sKey, IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider)
+        public SubscriptionGen(ISubscriptionKeyGen subRequestKey, IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider)
         {
-            if(sKey.HasBeenUsed)
+            if(subRequestKey.HasBeenUsed)
             {
                 throw new InvalidOperationException("The Key has already been used.");
             }
 
-            OwnerPropId = sKey.OwnerPropId;
-            PropertyType = sKey.PropertyType;
+            OwnerPropId = subRequestKey.OwnerPropId;
+            PropertyType = subRequestKey.PropertyType;
 
-            SubscriptionKind = sKey.SubscriptionKind;
-            SubscriptionPriorityGroup = sKey.SubscriptionPriorityGroup;
+            SubscriptionKind = subRequestKey.SubscriptionKind;
+            SubscriptionPriorityGroup = subRequestKey.SubscriptionPriorityGroup;
             //SubscriptionTargetKind = sKey.SubscriptionTargetKind;
 
             switch (SubscriptionKind)
             {
                 case SubscriptionKind.TypedHandler:
                     {
-                        Target = new WeakRefKey(sKey.Target);
+                        Target_Wrk = subRequestKey.Target_Wrk; // new WeakRefKey(subRequestKey.Target);
 
-                        Delegate proxyDelegate = handlerDispatchDelegateCacheProvider.DelegateProxyCache.GetOrAdd(new MethodSubscriptionKind(sKey.Method, sKey.SubscriptionKind));
+                        Delegate proxyDelegate = handlerDispatchDelegateCacheProvider.DelegateProxyCache.GetOrAdd(new MethodSubscriptionKind(subRequestKey.Method, subRequestKey.SubscriptionKind));
                         HandlerProxy = proxyDelegate;
 
-                        Type targetType = sKey.Target.GetType();
+                        Type targetType = subRequestKey.Target.GetType();
 
                         TypePair tp = new TypePair(targetType, PropertyType);
 
@@ -70,14 +71,13 @@ namespace DRM.TypeSafePropertyBag
 
                 case SubscriptionKind.GenHandler:
                     {
-                        //Target = new WeakReference(sKey.GenHandler.Target);
-                        Target = new WeakRefKey(sKey.Target);
+                        Target_Wrk = subRequestKey.Target_Wrk; // new WeakRefKey(subRequestKey.Target);
 
-                        Delegate proxyDelegate = handlerDispatchDelegateCacheProvider.DelegateProxyCache.GetOrAdd(new MethodSubscriptionKind(sKey.Method, sKey.SubscriptionKind));
+                        Delegate proxyDelegate = handlerDispatchDelegateCacheProvider.DelegateProxyCache.GetOrAdd(new MethodSubscriptionKind(subRequestKey.Method, subRequestKey.SubscriptionKind));
                         HandlerProxy = proxyDelegate;
 
                         //Type targetType = sKey.GenHandler.Target.GetType();
-                        Type targetType = sKey.Target.GetType();
+                        Type targetType = subRequestKey.Target.GetType();
 
                         PcGenHandlerDispatcher = handlerDispatchDelegateCacheProvider.CallPcGenEventSubsCache.GetOrAdd(targetType);
 
@@ -86,14 +86,13 @@ namespace DRM.TypeSafePropertyBag
                     }
                 case SubscriptionKind.ObjHandler:
                     {
-                        //Target = new WeakReference(sKey.ObjHandler.Target);
-                        Target = new WeakRefKey(sKey.Target);
+                        Target_Wrk = subRequestKey.Target_Wrk; // new WeakRefKey(subRequestKey.Target);
 
-                        Delegate proxyDelegate = handlerDispatchDelegateCacheProvider.DelegateProxyCache.GetOrAdd(new MethodSubscriptionKind(sKey.Method, sKey.SubscriptionKind));
+                        Delegate proxyDelegate = handlerDispatchDelegateCacheProvider.DelegateProxyCache.GetOrAdd(new MethodSubscriptionKind(subRequestKey.Method, subRequestKey.SubscriptionKind));
                         HandlerProxy = proxyDelegate;
 
                         //Type targetType = sKey.ObjHandler.Target.GetType();
-                        Type targetType = sKey.Target.GetType();
+                        Type targetType = subRequestKey.Target.GetType();
 
                         PcObjHandlerDispatcher = handlerDispatchDelegateCacheProvider.CallPcObjEventSubsCache.GetOrAdd(targetType);
 
@@ -102,15 +101,13 @@ namespace DRM.TypeSafePropertyBag
                     }
                 case SubscriptionKind.StandardHandler:
                     {
-                        //Target = new WeakReference(sKey.StandardHandler.Target);
-                        Target = new WeakRefKey(sKey.Target);
+                        Target_Wrk = subRequestKey.Target_Wrk; // new WeakRefKey(subRequestKey.Target);
 
-
-                        Delegate proxyDelegate = handlerDispatchDelegateCacheProvider.DelegateProxyCache.GetOrAdd(new MethodSubscriptionKind(sKey.Method, sKey.SubscriptionKind));
+                        Delegate proxyDelegate = handlerDispatchDelegateCacheProvider.DelegateProxyCache.GetOrAdd(new MethodSubscriptionKind(subRequestKey.Method, subRequestKey.SubscriptionKind));
                         HandlerProxy = proxyDelegate;
 
                         //Type targetType = sKey.StandardHandler.Target.GetType();
-                        Type targetType = sKey.Target.GetType();
+                        Type targetType = subRequestKey.Target.GetType();
 
                         PcStandardHandlerDispatcher = handlerDispatchDelegateCacheProvider.CallPcStEventSubsCache.GetOrAdd(targetType);
 
@@ -120,15 +117,13 @@ namespace DRM.TypeSafePropertyBag
 
                 case SubscriptionKind.ChangingHandler:
                     {
-                        //Target = new WeakReference(sKey.ChangingHandler.Target);
-                        Target = new WeakRefKey(sKey.Target);
+                        Target_Wrk = subRequestKey.Target_Wrk; // new WeakRefKey(subRequestKey.Target);
 
-
-                        Delegate proxyDelegate = handlerDispatchDelegateCacheProvider.DelegateProxyCache.GetOrAdd(new MethodSubscriptionKind(sKey.Method, sKey.SubscriptionKind));
+                        Delegate proxyDelegate = handlerDispatchDelegateCacheProvider.DelegateProxyCache.GetOrAdd(new MethodSubscriptionKind(subRequestKey.Method, subRequestKey.SubscriptionKind));
                         HandlerProxy = proxyDelegate;
 
                         //Type targetType = sKey.ChangingHandler.Target.GetType();
-                        Type targetType = sKey.Target.GetType();
+                        Type targetType = subRequestKey.Target.GetType();
 
                         PChangingHandlerDispatcher = handlerDispatchDelegateCacheProvider.CallPChangingEventSubsCache.GetOrAdd(targetType);
 

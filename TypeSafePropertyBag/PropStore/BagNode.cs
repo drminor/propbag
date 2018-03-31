@@ -119,7 +119,6 @@ namespace DRM.TypeSafePropertyBag
         /// <param name="callPSParentNodeChangedEventSubsCache">A reference to a service that caches Parent Node Change Event dispatchers.</param>
         public BagNode(ObjectIdType objectId, IPropBag propBag, PropNodeCollectionIntInterface template, int maxPropsPerObject, ICacheDelegates<CallPSParentNodeChangedEventSubDelegate> callPSParentNodeChangedEventSubsCache)
         {
-
             CompKey = new SimpleExKey(objectId, 0);
             PropBagProxy = new WeakRefKey<IPropBag>(propBag ?? throw new ArgumentNullException(nameof(propBag)));
 
@@ -421,7 +420,7 @@ namespace DRM.TypeSafePropertyBag
                     foreach (ParentNCSubscription sub in subs)
                     {
                         numberOfSubscribers++;
-                        object target = sub.Target.Target;
+                        object target = sub.Target_Wrk.Target;
                         if(target != null)
                         {
                             try

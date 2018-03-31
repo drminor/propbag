@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DRM.TypeSafePropertyBag.Fundamentals;
+using System;
 using System.Reflection;
 
 namespace DRM.TypeSafePropertyBag
@@ -39,6 +40,8 @@ namespace DRM.TypeSafePropertyBag
         //Action Action { get; }
 
         object Target { get; } 
+        WeakRefKey Target_Wrk { get; }
+
         MethodInfo Method { get; }
 
         ISubscription CreateSubscription(IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider);

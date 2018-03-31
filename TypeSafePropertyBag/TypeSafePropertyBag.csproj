@@ -64,19 +64,13 @@
     <Compile Include="Factories\SimplePropFactoryFactory.cs" />
     <Compile Include="Factories\SimpleTypeResolver.cs" />
     <Compile Include="Factories\StaticTConverter.cs" />
-    <Compile Include="Fundamentals\ActivationInfo.cs" />
-    <Compile Include="Fundamentals\CollectionViewExtensions.cs" />
     <None Include="LocalBinding\Instances\LocalBinder - SafetyCopy.cs" />
-    <Compile Include="Fundamentals\TypeInspectorUtility.cs" />
     <Compile Include="LocalBinding\Engine\BindingPathParser.cs" />
     <Compile Include="LocalBinding\Instances\LocalWatcher.cs" />
     <Compile Include="LocalBinding\Instances\PropStoreNotificationKindEnum.cs" />
     <Compile Include="LocalBinding\Registration\IReceivePropStoreNodeUpdates.cs" />
     <Compile Include="PropBagInterfaces\IHaveACustomTypeDesriptor.cs" />
     <Compile Include="PropBagInterfaces\INotifyItemEndEdit.cs" />
-    <Compile Include="Fundamentals\ICacheDelegates.cs" />
-    <Compile Include="Fundamentals\ICacheDelegatesForTypePair.cs" />
-    <Compile Include="Fundamentals\TwoTypes.cs" />
     <Compile Include="PropBagModelCaches\ICachePropModels.cs" />
     <Compile Include="PropBagModelCaches\IPropModelFamilyCollection.cs" />
     <Compile Include="PropBagModelCaches\SimplePropModelFamilyCollection.cs" />
@@ -174,12 +168,6 @@
     <Compile Include="Props\PBCollectionDSP.cs" />
     <Compile Include="Props\ViewRefreshedEventArgs.cs" />
     <Compile Include="RefEqualityComparer.cs" />
-    <Compile Include="Fundamentals\TwoTypesDelegateCache.cs" />
-    <Compile Include="Fundamentals\DelegateCache.cs" />
-    <Compile Include="Fundamentals\TypeEqualityComparer.cs" />
-    <Compile Include="Fundamentals\TypeKey.cs" />
-    <Compile Include="Fundamentals\TypePair.cs" />
-    <Compile Include="Fundamentals\UniversalTypeConverter.cs" />
     <Compile Include="Unused\GenericTree\BaseTreeNode.cs" />
     <Compile Include="Unused\GenericTree\IAmANodeInATree.cs" />
     <Compile Include="Unused\GenericTree\Node.cs" />
@@ -262,7 +250,6 @@
     <Compile Include="Unused\ObjectIdDictionary\SimpleObjectIdDictionary.cs" />
     <None Include="Unused\PropertyObserver.cs" />
     <None Include="Unused\CommonGenius.Collections\IOrderedDictionary.cs" />
-    <Compile Include="Fundamentals\LockingConcurrentDictionary.cs" />
     <Compile Include="ReadMissingPropPolicyEnum.cs" />
     <None Include="Unused\CommonGenius.Collections\OrderedDictionary.cs" />
     <Compile Include="PropBagTypeSafetyMode.cs" />
@@ -272,7 +259,6 @@
     <Compile Include="Unused\IDisposableTemplate.cs" />
     <None Include="Unused\TypedBusiness_NotUsed.cs" />
     <Compile Include="Unused\TypedWeakReference.cs" />
-    <Compile Include="Fundamentals\TypeExtensions.cs" />
     <Compile Include="Subscriptions\SubscriptionKeyForBinding.cs" />
     <Compile Include="Subscriptions\SubscriptionKeyGen.cs" />
     <Compile Include="Subscriptions\SubscriptionKeyTyped.cs" />
@@ -280,8 +266,6 @@
     <Compile Include="Subscriptions\SubscriptionPriorityGroup.cs" />
     <Compile Include="Subscriptions\SubscriptionTargetKind.cs" />
     <Compile Include="TypeSafePropBagMetaData.cs" />
-    <Compile Include="Fundamentals\WeakRefKeyTyped.cs" />
-    <Compile Include="Fundamentals\WeakRefKey.cs" />
     <Compile Include="ValPlusType.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -289,6 +273,13 @@
       <Project>{9b18f82d-3ed9-49e0-9ee3-cfbfc3af9d9c}</Project>
       <Name>ObjectSizeDiagnostics</Name>
     </ProjectReference>
+    <ProjectReference Include="..\TypeSafePropertyBag.Fundamentals\TypeSafePropertyBag.Fundamentals.csproj">
+      <Project>{d029088c-c248-4d2f-95b4-32e26908c082}</Project>
+      <Name>TypeSafePropertyBag.Fundamentals</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Fundamentals\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

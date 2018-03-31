@@ -188,7 +188,8 @@ namespace DRM.TypeSafePropertyBag
             bool result =
                 subscription.OwnerPropId.Equals(subscriptionRequest.OwnerPropId) &&
                 subscription.MethodName == subscriptionRequest.Method.Name &&
-                ReferenceEquals(subscription.Target.Target, subscriptionRequest.Target);
+                //ReferenceEquals(subscription.Target_Wrk.Target, subscriptionRequest.Target);
+                subscription.Target_Wrk == subscriptionRequest.Target_Wrk;
 
             return result;
         }

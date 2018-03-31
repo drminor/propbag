@@ -35,7 +35,8 @@ namespace DRM.TypeSafePropertyBag
         SubscriptionPriorityGroup SubscriptionPriorityGroup { get; }
         //SubscriptionTargetKind SubscriptionTargetKind { get; }
 
-        WeakRefKey Target { get; }
+        WeakRefKey Target_Wrk { get; }
+
         string MethodName { get; }
 
         Delegate HandlerProxy { get; }

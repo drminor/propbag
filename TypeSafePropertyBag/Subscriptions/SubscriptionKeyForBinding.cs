@@ -2,14 +2,7 @@
 
 namespace DRM.TypeSafePropertyBag
 {
-    using CompositeKeyType = UInt64;
-    using ObjectIdType = UInt64;
-
-    using PropIdType = UInt32;
-    using PropNameType = String;
-
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
-
     using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
     using System.Collections.Generic;
 

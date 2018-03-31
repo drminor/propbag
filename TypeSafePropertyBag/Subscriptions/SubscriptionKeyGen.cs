@@ -27,7 +27,9 @@ namespace DRM.TypeSafePropertyBag
         public SubscriptionPriorityGroup SubscriptionPriorityGroup { get; }
         //public SubscriptionTargetKind SubscriptionTargetKind { get; }
 
-        public object Target { get; private set; } 
+        public WeakRefKey Target_Wrk { get; }
+        public object Target => Target_Wrk.Target;
+
         public MethodInfo Method { get; }
 
         //public Action<object, object> GenDoWhenChanged { get; private set; }
@@ -56,7 +58,8 @@ namespace DRM.TypeSafePropertyBag
             //GenDoWhenChanged = null;
             //Action = null;
 
-            Target = standardDelegate.Target ?? throw new ArgumentNullException(nameof(standardDelegate.Target));
+            object target = standardDelegate.Target ?? throw new ArgumentNullException(nameof(standardDelegate.Target));
+            Target_Wrk = new WeakRefKey(target);
             Method = standardDelegate.Method ?? throw new ArgumentNullException(nameof(standardDelegate.Method));
 
             SubscriptionFactory = CreateSubscriptionGen;
@@ -78,7 +81,8 @@ namespace DRM.TypeSafePropertyBag
             //GenDoWhenChanged = null;
             //Action = null;
 
-            Target = changingDelegate.Target ?? throw new ArgumentNullException(nameof(changingDelegate.Target));
+            object target = changingDelegate.Target ?? throw new ArgumentNullException(nameof(changingDelegate.Target));
+            Target_Wrk = new WeakRefKey(target);
             Method = changingDelegate.Method ?? throw new ArgumentNullException(nameof(changingDelegate.Method));
 
             SubscriptionFactory = CreateSubscriptionGen;
@@ -100,7 +104,8 @@ namespace DRM.TypeSafePropertyBag
             //GenDoWhenChanged = null;
             //Action = null;
 
-            Target = genDelegate.Target ?? throw new ArgumentNullException(nameof(genDelegate.Target));
+            object target = genDelegate.Target ?? throw new ArgumentNullException(nameof(genDelegate.Target));
+            Target_Wrk = new WeakRefKey(target);
             Method = genDelegate.Method ?? throw new ArgumentNullException(nameof(genDelegate.Method));
 
             SubscriptionFactory = CreateSubscriptionGen;
@@ -122,7 +127,8 @@ namespace DRM.TypeSafePropertyBag
             //GenDoWhenChanged = null;
             //Action = null;
 
-            Target = objDelegate.Target ?? throw new ArgumentNullException(nameof(objDelegate.Target));
+            object target = objDelegate.Target ?? throw new ArgumentNullException(nameof(objDelegate.Target));
+            Target_Wrk = new WeakRefKey(target);
             Method = objDelegate.Method ?? throw new ArgumentNullException(nameof(objDelegate.Method));
 
             SubscriptionFactory = CreateSubscriptionGen;
@@ -148,7 +154,8 @@ namespace DRM.TypeSafePropertyBag
             //GenDoWhenChanged = null;
             //Action = null;
 
-            Target = target ?? throw new ArgumentNullException(nameof(target));
+            if(target == null) throw new ArgumentNullException(nameof(target));
+            Target_Wrk = new WeakRefKey(target);
             Method = method ?? throw new ArgumentNullException(nameof(method));
 
             SubscriptionFactory = subscriptionFactory ?? CreateSubscriptionGen;
@@ -176,7 +183,8 @@ namespace DRM.TypeSafePropertyBag
             //GenDoWhenChanged = genAction ?? throw new ArgumentNullException(nameof(genAction));
             //Action = null;
 
-            Target = genAction.Target ?? throw new InvalidOperationException($"The value for Target on the GenAction action, cannot be null.");
+            object target = genAction.Target ?? throw new InvalidOperationException($"The value for Target on the GenAction action, cannot be null.");
+            Target_Wrk = new WeakRefKey(target);
             Method = genAction.Method ?? throw new ArgumentNullException(nameof(genAction.Method));
 
             SubscriptionFactory = subscriptionFactory;
@@ -200,7 +208,8 @@ namespace DRM.TypeSafePropertyBag
             //GenDoWhenChanged = null;
             //Action = action;
 
-            Target = action.Target ?? throw new ArgumentNullException(nameof(action.Target));
+            object target = action.Target ?? throw new ArgumentNullException(nameof(action.Target));
+            Target_Wrk = new WeakRefKey(target);
             Method = action.Method ?? throw new ArgumentNullException(nameof(action.Method));
 
             SubscriptionFactory = subscriptionFactory;
@@ -212,8 +221,10 @@ namespace DRM.TypeSafePropertyBag
 
         #region Constructors for Binding Subscriptions
 
-        // TODO: Note since the Target and Method are not set, the default IEquatable implementation does not produce
+        // Note since the Target and Method are not set, the default IEquatable implementation does not produce
         // accurate results.
+        // DRM: Acutally the IEquatable implementation should be ok -- but need to create unit test to be sure. 
+        // TODO: Create unit test to verify that the IEquatable implementation for SubscriptionKeyForBinding produces accurate result.
 
         // Creates a new Binding Request.
         protected SubscriptionKeyGen(
@@ -234,7 +245,7 @@ namespace DRM.TypeSafePropertyBag
             //GenDoWhenChanged = null;
             //Action = null;
 
-            Target = null;
+            Target_Wrk = WeakRefKey.Empty;
             Method = null;
 
             SubscriptionFactory = null;
@@ -284,7 +295,7 @@ namespace DRM.TypeSafePropertyBag
 
         public void MarkAsUsed()
         {
-            Target = null;
+            Target_Wrk.Clear();
 
             //GenDoWhenChanged = null;
             //Action = null;

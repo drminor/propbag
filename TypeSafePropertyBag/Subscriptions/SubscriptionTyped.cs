@@ -7,24 +7,24 @@ namespace DRM.TypeSafePropertyBag
     {
         #region Constructors
 
-        internal Subscription(ISubscriptionKey<T> sKey, IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider)
+        internal Subscription(ISubscriptionKey<T> subRequestKey, IProvideHandlerDispatchDelegateCaches handlerDispatchDelegateCacheProvider)
         {
-            OwnerPropId = sKey.OwnerPropId;
+            OwnerPropId = subRequestKey.OwnerPropId;
 
-            SubscriptionKind = sKey.SubscriptionKind;
-            SubscriptionPriorityGroup = sKey.SubscriptionPriorityGroup;
+            SubscriptionKind = subRequestKey.SubscriptionKind;
+            SubscriptionPriorityGroup = subRequestKey.SubscriptionPriorityGroup;
             //SubscriptionTargetKind = sKey.SubscriptionTargetKind;
 
-            switch (sKey.SubscriptionKind)
+            switch (subRequestKey.SubscriptionKind)
             {
                 case SubscriptionKind.TypedHandler:
                     {
-                        Target = new WeakRefKey(sKey.Target);
+                        Target_Wrk = subRequestKey.Target_Wrk; //new WeakRefKey(subRequestKey.Target);
 
-                        Delegate proxyDelegate = handlerDispatchDelegateCacheProvider.DelegateProxyCache.GetOrAdd(new MethodSubscriptionKind(sKey.Method, sKey.SubscriptionKind));
+                        Delegate proxyDelegate = handlerDispatchDelegateCacheProvider.DelegateProxyCache.GetOrAdd(new MethodSubscriptionKind(subRequestKey.Method, subRequestKey.SubscriptionKind));
                         HandlerProxy = proxyDelegate;
 
-                        Type targetType = sKey.Target.GetType();
+                        Type targetType = subRequestKey.Target.GetType();
 
                         TypePair tp = new TypePair(targetType, typeof(T));
 
