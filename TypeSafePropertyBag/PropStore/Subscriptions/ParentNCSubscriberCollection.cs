@@ -5,7 +5,7 @@ using System;
 
 namespace DRM.TypeSafePropertyBag
 {
-    public class ParentNCSubscriberCollection : IEnumerable<ParentNCSubscription>, IDisposable
+    internal class ParentNCSubscriberCollection : IEnumerable<ParentNCSubscription>, IDisposable
     {
         #region Private Properties
 
@@ -49,7 +49,7 @@ namespace DRM.TypeSafePropertyBag
                     if(subscription.OwnerPropId == null)
                     {
                         // TODO: See if we make this exception message more informative.
-                        throw new InvalidOperationException($"OwnerPropId is null in subscription {request.Target.GetType().ToString()}.");
+                        throw new InvalidOperationException($"OwnerPropId is null in subscription {request.Target_Wrk.GetType().ToString()}.");
                     }
                     AddSubscription(subscription);
                     return subscription;
@@ -141,14 +141,16 @@ namespace DRM.TypeSafePropertyBag
 
         private bool SubscriptionIsForRequest(ParentNCSubscription subscription, ParentNCSubscriptionRequest subscriptionRequest)
         {
+            // Used for debugging.
             bool t1 = subscription.OwnerPropId.Equals(subscriptionRequest.OwnerPropId);
             bool t2 = subscription.MethodName == subscriptionRequest.Method.Name;
-            bool t3 = ReferenceEquals(subscription.Target.Target, subscriptionRequest.Target);
+            bool t3 = subscription.Target_Wrk == subscriptionRequest.Target_Wrk;
 
             bool result =
                 subscription.OwnerPropId.Equals(subscriptionRequest.OwnerPropId) &&
                 subscription.MethodName == subscriptionRequest.Method.Name &&
-                ReferenceEquals(subscription.Target.Target, subscriptionRequest.Target);
+                //ReferenceEquals(subscription.Target.Target, subscriptionRequest.Target);
+                subscription.Target_Wrk == subscriptionRequest.Target_Wrk;
 
             return result;
         }

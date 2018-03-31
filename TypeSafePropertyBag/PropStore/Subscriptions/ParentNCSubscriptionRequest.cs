@@ -1,21 +1,13 @@
 ﻿using DRM.TypeSafePropertyBag.Fundamentals;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Reflection;
 
 namespace DRM.TypeSafePropertyBag
 {
-    using CompositeKeyType = UInt64;
-    using ObjectIdType = UInt64;
-
-    using PropIdType = UInt32;
-    using PropNameType = String;
-
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
-    using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
 
-    public class ParentNCSubscriptionRequest
+    // TODO: Consider implementing IDisposable -- to clear the WeakRefKey(Target)
+    internal class ParentNCSubscriptionRequest
     {
         #region Private Members
 
@@ -27,7 +19,9 @@ namespace DRM.TypeSafePropertyBag
 
         public ExKeyT OwnerPropId { get; }
 
-        public object Target { get; private set; } 
+        public WeakRefKey Target_Wrk { get; private set; }
+        public object Target => Target_Wrk.Target;
+
         public MethodInfo Method { get; }
 
         public bool HasBeenUsed { get; private set; }
@@ -40,7 +34,8 @@ namespace DRM.TypeSafePropertyBag
         {
             OwnerPropId = sourcePropId;
 
-            Target = handler.Target ?? throw new ArgumentNullException(nameof(handler.Target));
+            object target = handler.Target ?? throw new ArgumentNullException(nameof(handler.Target));
+            Target_Wrk = new WeakRefKey(target);
             Method = handler.Method ?? throw new ArgumentNullException(nameof(handler.Method));
 
             SubscriptionFactory = CreateSubscriptionGen;
@@ -66,7 +61,7 @@ namespace DRM.TypeSafePropertyBag
 
         public void MarkAsUsed()
         {
-            Target = null;
+            Target_Wrk.Clear();
             HasBeenUsed = true;
         }
 

@@ -8,7 +8,7 @@ namespace DRM.TypeSafePropertyBag
 {
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
 
-    public class ParentNCSubscription : IDisposable
+    internal class ParentNCSubscription : IDisposable
     {
         #region Constructors
 
@@ -21,18 +21,18 @@ namespace DRM.TypeSafePropertyBag
         //    Dispatcher = dispatcher;
         //}
 
-        public ParentNCSubscription(ParentNCSubscriptionRequest request, ICacheDelegates<CallPSParentNodeChangedEventSubDelegate> callPSParentNodeChangedEventSubsCache)
+        public ParentNCSubscription(ParentNCSubscriptionRequest subRequestKey, ICacheDelegates<CallPSParentNodeChangedEventSubDelegate> callPSParentNodeChangedEventSubsCache)
         {
-            OwnerPropId = request.OwnerPropId;
-            Target = new WeakRefKey(request.Target);
-            MethodName = request.Method.Name;
+            OwnerPropId = subRequestKey.OwnerPropId;
+            Target_Wrk = subRequestKey.Target_Wrk; // new WeakRefKey(subRequestKey.Target_Wrk);
+            MethodName = subRequestKey.Method.Name;
 
             // TODO: Note: The Proxy Delegate is not being cached (using the DelegateProxyCache.)
             // Create an open delegate from the delegate provided. (An open delegate has a null value for the target.)
-            Type delegateType = GetDelegateType(request.Method);
-            Proxy = MakeTheDelegate(delegateType, request.Method);
+            Type delegateType = GetDelegateType(subRequestKey.Method);
+            Proxy = MakeTheDelegate(delegateType, subRequestKey.Method);
 
-            Type targetType = request.Target.GetType();
+            Type targetType = subRequestKey.Target_Wrk.GetType();
             Dispatcher = callPSParentNodeChangedEventSubsCache.GetOrAdd(targetType);
         }
 
@@ -42,7 +42,9 @@ namespace DRM.TypeSafePropertyBag
 
         public ExKeyT OwnerPropId { get; } // The Node that raises the event.
 
-        public WeakRefKey Target { get; }
+        public WeakRefKey Target_Wrk { get; }
+        public object Target => Target_Wrk.Target;
+
         public string MethodName { get; }
 
         public Delegate Proxy { get; private set; }
@@ -93,6 +95,7 @@ namespace DRM.TypeSafePropertyBag
                 if (disposing)
                 {
                     // Dispose managed state (managed objects).
+                    Target_Wrk.Clear();
                     Proxy = null;
                 }
 
