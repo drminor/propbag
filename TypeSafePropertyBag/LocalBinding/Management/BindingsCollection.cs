@@ -126,7 +126,6 @@ namespace DRM.TypeSafePropertyBag
             lock (_sync)
             {
                 binding = _bindings.FirstOrDefault(x => x.Equals(binding));
-
             }
             bool result = binding != null;
             return result;
