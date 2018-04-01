@@ -1,13 +1,13 @@
-﻿using System;
+﻿using DRM.TypeSafePropertyBag;
+using DRM.TypeSafePropertyBag.DelegateCaches;
+using ObjectSizeDiagnostics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using DRM.TypeSafePropertyBag.Fundamentals;
-using DRM.TypeSafePropertyBag;
-using System.Reflection;
-using ObjectSizeDiagnostics;
 
 namespace DRM.PropBag.Caches
 {
