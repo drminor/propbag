@@ -4,7 +4,7 @@ using DRM.PropBag.ViewModelTools;
 
 using DRM.TypeSafePropertyBag;
 using DRM.TypeSafePropertyBag.DataAccessSupport;
-using DRM.TypeSafePropertyBag.Fundamentals;
+using DRM.TypeSafePropertyBag.DelegateCaches;
 using DRM.TypeSafePropertyBag.TypeDescriptors;
 using ObjectSizeDiagnostics;
 using System;
@@ -2374,7 +2374,7 @@ namespace DRM.PropBag
         {
             // Check the delegate cache to see if a delegate for this already exists, and if not create a new delegate.
             ICacheDelegatesForTypePair<CViewManagerFromDsDelegate> dc = _propFactory.DelegateCacheProvider.GetOrAddCViewManagerCache;
-            CViewManagerFromDsDelegate cViewManagerCreator = dc.GetOrAdd(new TypeSafePropertyBag.Fundamentals.TypePair(mr.SourceType, typeOfThisProperty));
+            CViewManagerFromDsDelegate cViewManagerCreator = dc.GetOrAdd(new TypeSafePropertyBag.DelegateCaches.TypePair(mr.SourceType, typeOfThisProperty));
 
             // Use the delegate to create or fetch the existing Collection View Manager for this propperty.
             // This eventually calls: this.GetOrAddCViewManager
@@ -2393,7 +2393,7 @@ namespace DRM.PropBag
             Type sourceType = viewManagerProviderKey.MapperRequest.SourceType;
             Type destinationType = typeOfThisProperty;
 
-            TypeSafePropertyBag.Fundamentals.TypePair tp = new TypeSafePropertyBag.Fundamentals.TypePair(sourceType, destinationType);
+            TypeSafePropertyBag.DelegateCaches.TypePair tp = new TypeSafePropertyBag.DelegateCaches.TypePair(sourceType, destinationType);
 
             // Get the CollectionView Manager Provider Creator Delegate from the Delegate Cache.
             CViewManagerProviderFromDsDelegate cViewManagerProviderCreator = dc.GetOrAdd(tp);
