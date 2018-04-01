@@ -1,5 +1,5 @@
 ﻿using System;
-using DRM.TypeSafePropertyBag;
+using DRM.TypeSafePropertyBag; using Swhp.Tspb.PropBagAutoMapperService;
 using DRM.PropBag; 
 
 namespace PropBagLib.Tests

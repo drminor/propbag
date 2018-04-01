@@ -1,5 +1,5 @@
 ﻿using DRM.PropBag.ViewModelTools;
-using DRM.TypeSafePropertyBag;
+using DRM.TypeSafePropertyBag; using Swhp.Tspb.PropBagAutoMapperService;
 using DRM.TypeSafePropertyBag.TypeDescriptors;
 using NUnit.Framework;
 using PropBagLib.Tests.SpecBasedVMTests.BasicVM.Services;

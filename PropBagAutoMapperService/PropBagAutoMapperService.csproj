@@ -7,8 +7,8 @@
     <ProjectGuid>{D7FA7FF1-9E07-40F6-ABEC-3725F72865E0}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>DRM.TypeSafePropertyBag.PropBagAutoMapperService</RootNamespace>
-    <AssemblyName>PropBagAutoMapperService</AssemblyName>
+    <RootNamespace>Swhp.Tspb.PropBagAutoMapperService</RootNamespace>
+    <AssemblyName>Swhp.Tspb.PropBagAutoMapperService</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

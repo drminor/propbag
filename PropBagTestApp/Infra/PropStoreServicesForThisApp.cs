@@ -1,6 +1,4 @@
-﻿using AutoMapper;
-using DRM.PropBag;
-using DRM.PropBag.AutoMapperSupport;
+﻿using DRM.PropBag;
 using DRM.PropBag.Caches;
 using DRM.PropBag.TypeWrapper;
 using DRM.PropBag.TypeWrapper.TypeDesc;
@@ -8,19 +6,19 @@ using DRM.PropBag.ViewModelTools;
 using DRM.PropBagControlsWPF;
 using DRM.PropBagWPF;
 using DRM.TypeSafePropertyBag;
+using Swhp.Tspb.PropBagAutoMapperService;
+using Swhp.AutoMapperSupport;
 using System;
 using System.ComponentModel;
 using System.Windows;
 
+
 namespace PropBagTestApp.Infra
 {
-    using PropNameType = String;
-    using PropModelType = IPropModel<String>;
     using PropModelCacheInterface = ICachePropModels<String>;
+    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
     using ViewModelActivatorInterface = IViewModelActivator<UInt32, String>;
     using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
-
-    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
 
     public static class PropStoreServicesForThisApp
     {

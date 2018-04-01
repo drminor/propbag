@@ -1,6 +1,6 @@
 ﻿
 using DRM.PropBag;
-using DRM.TypeSafePropertyBag;
+using DRM.TypeSafePropertyBag; using Swhp.Tspb.PropBagAutoMapperService;
 
 namespace PropBagLib.Tests
 {

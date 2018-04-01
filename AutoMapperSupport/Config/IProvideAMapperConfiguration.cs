@@ -1,6 +1,6 @@
 ﻿//using DRM.TypeSafePropertyBag;
 
-namespace DRM.PropBag.AutoMapperSupport
+namespace Swhp.AutoMapperSupport
 {
     public interface IProvideAMapperConfiguration
     {

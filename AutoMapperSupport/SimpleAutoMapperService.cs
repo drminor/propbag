@@ -3,7 +3,7 @@ using System;
 using System.Reflection;
 using System.Threading;
 
-namespace DRM.PropBag.AutoMapperSupport
+namespace Swhp.AutoMapperSupport
 {
     public class SimpleAutoMapperProvider : IAutoMapperService, IDisposable
     {

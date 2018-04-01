@@ -1,7 +1,7 @@
 ﻿
 using DRM.PropBag;
 using DRM.PropBag.Caches;
-using DRM.TypeSafePropertyBag;
+using DRM.TypeSafePropertyBag; using Swhp.Tspb.PropBagAutoMapperService;
 
 using NUnit.Framework;
 using System;

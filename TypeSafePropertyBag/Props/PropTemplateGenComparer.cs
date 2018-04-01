@@ -11,8 +11,11 @@ namespace DRM.TypeSafePropertyBag
             {
                 return a.Equals(y);
             }
-
-            throw new NotImplementedException("This item does not implement IEquatable<IPropTemplate>");
+            else
+            {
+                System.Diagnostics.Debug.WriteLine("This IPropTemplate item does not implement IEquatable<IPropTemplate>");
+                return false;
+            }
         }
 
         public int GetHashCode(IPropTemplate obj)

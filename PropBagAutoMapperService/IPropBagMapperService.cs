@@ -1,7 +1,8 @@
-﻿using DRM.PropBag.AutoMapperSupport;
+﻿using DRM.TypeSafePropertyBag;
+using Swhp.AutoMapperSupport;
 using System;
 
-namespace DRM.TypeSafePropertyBag
+namespace Swhp.Tspb.PropBagAutoMapperService
 {
     using PropModelType = IPropModel<String>;
 

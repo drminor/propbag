@@ -1,5 +1,5 @@
 ﻿using DRM.PropBag;
-using DRM.TypeSafePropertyBag;
+using DRM.TypeSafePropertyBag; using Swhp.Tspb.PropBagAutoMapperService;
 using System;
 using System.Collections.Generic;
 

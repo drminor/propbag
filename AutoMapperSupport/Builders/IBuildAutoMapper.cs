@@ -1,7 +1,7 @@
 ﻿using System;
 using AutoMapper;
 
-namespace DRM.PropBag.AutoMapperSupport
+namespace Swhp.AutoMapperSupport
 {
     public interface IBuildAutoMapper<TSource, TDestination> //where TDestination : class, IPropBag
     {

@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 
-namespace DRM.PropBag.AutoMapperSupport
+namespace Swhp.AutoMapperSupport
 {
     public interface ICacheAutoMappers
     {

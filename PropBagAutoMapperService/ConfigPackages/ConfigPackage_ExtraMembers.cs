@@ -1,7 +1,7 @@
-﻿using DRM.PropBag.AutoMapperSupport;
+﻿using Swhp.AutoMapperSupport;
 using System.Collections.Generic;
 
-namespace DRM.TypeSafePropertyBag
+namespace Swhp.Tspb.PropBagAutoMapperService
 {
     public class ConfigPackage_ExtraMembers : IProvideAMapperConfiguration
     {

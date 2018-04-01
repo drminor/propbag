@@ -1,5 +1,7 @@
 ﻿
-namespace DRM.TypeSafePropertyBag
+using DRM.TypeSafePropertyBag;
+
+namespace Swhp.Tspb.PropBagAutoMapperService
 {
     public interface IPropBagMapperBuilderProvider
     {

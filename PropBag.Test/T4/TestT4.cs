@@ -1,6 +1,6 @@
 ﻿using DRM.PropBag.ClassGenerator;
 using DRM.PropBag.XMLModel;
-using DRM.TypeSafePropertyBag;
+using DRM.TypeSafePropertyBag; using Swhp.Tspb.PropBagAutoMapperService;
 using NUnit.Framework;
 using System.Collections.Generic;
 using System.Linq;

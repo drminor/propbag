@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace DRM.PropBag.AutoMapperSupport
+namespace Swhp.AutoMapperSupport
 {
     // TODO: check to see if we really need to use the base class: PropBagMapperKeyGen
 

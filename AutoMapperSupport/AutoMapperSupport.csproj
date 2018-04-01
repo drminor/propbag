@@ -7,8 +7,8 @@
     <ProjectGuid>{10CF1C6F-F877-49A8-8678-6947F55E6920}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>DRM.PropBag.AutoMapperSupport</RootNamespace>
-    <AssemblyName>PropBag.AutoMapperSupport</AssemblyName>
+    <RootNamespace>Swhp.AutoMapperSupport</RootNamespace>
+    <AssemblyName>SWMP.AutoMapperSupport</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -56,10 +56,8 @@
     <Compile Include="Config\IConfigureAMapper.cs" />
     <Compile Include="Config\ICreateMappingExpressions.cs" />
     <Compile Include="Config\IHaveAMapperConfigurationStep.cs" />
-    <Compile Include="LockingConcurrentDictionary.cs" />
     <Compile Include="MapTypeDefinition\IMapTypeDefinition.cs" />
     <Compile Include="MapTypeDefinition\IMapTypeDefinitionProvider.cs" />
-    <Compile Include="Caches\ICacheConfigPackages.cs" />
     <Compile Include="Config\SimpleMapperConfigurationBuilderGenBase.cs" />
     <Compile Include="Config\SimpleMapperConfigurationBuilder.cs" />
     <Compile Include="Config\AbstractMapperConfigGen.cs" />
@@ -80,10 +78,11 @@
       <Project>{8cba8a56-9b60-4430-9d54-9a523baf1e14}</Project>
       <Name>AutoMapper</Name>
     </ProjectReference>
+    <ProjectReference Include="..\TypeSafePropertyBag\TypeSafePropertyBag.csproj">
+      <Project>{BBB1E311-374E-4C91-A313-1667D83767DB}</Project>
+      <Name>TypeSafePropertyBag</Name>
+    </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="ConfigPackages\" />
-    <Folder Include="ExtraMembers\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

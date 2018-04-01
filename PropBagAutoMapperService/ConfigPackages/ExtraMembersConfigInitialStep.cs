@@ -1,13 +1,13 @@
 ﻿using AutoMapper;
 using AutoMapper.ExtraMembers;
-using DRM.PropBag.AutoMapperSupport;
+using Swhp.AutoMapperSupport;
 
 using System;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace DRM.TypeSafePropertyBag
+namespace Swhp.Tspb.PropBagAutoMapperService
 {
     using static DRM.TypeSafePropertyBag.TypeExtensions.TypeExtensions;
 

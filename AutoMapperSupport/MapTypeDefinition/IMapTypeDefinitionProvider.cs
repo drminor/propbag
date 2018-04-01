@@ -1,7 +1,7 @@
 ﻿//using DRM.TypeSafePropertyBag;
 using System;
 
-namespace DRM.PropBag.AutoMapperSupport
+namespace Swhp.AutoMapperSupport
 {
     //using PropModelType = IPropModel<String>;
 

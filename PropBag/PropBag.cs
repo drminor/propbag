@@ -1,4 +1,4 @@
-﻿//using DRM.PropBag.AutoMapperSupport;
+﻿
 using DRM.PropBag.Caches;
 using DRM.PropBag.ViewModelTools;
 
@@ -7,6 +7,7 @@ using DRM.TypeSafePropertyBag.DataAccessSupport;
 using DRM.TypeSafePropertyBag.DelegateCaches;
 using DRM.TypeSafePropertyBag.TypeDescriptors;
 using ObjectSizeDiagnostics;
+using Swhp.Tspb.PropBagAutoMapperService;
 using System;
 using System.Collections;
 using System.Collections.Generic;

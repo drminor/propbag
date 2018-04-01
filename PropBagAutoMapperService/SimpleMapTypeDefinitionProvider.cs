@@ -1,7 +1,7 @@
-﻿using DRM.PropBag.AutoMapperSupport;
+﻿using Swhp.AutoMapperSupport;
 using System;
 
-namespace DRM.TypeSafePropertyBag
+namespace Swhp.Tspb.PropBagAutoMapperService
 {
     using static DRM.TypeSafePropertyBag.TypeExtensions.TypeExtensions;
 

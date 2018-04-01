@@ -1,8 +1,8 @@
 ﻿using DRM.PropBag;
-using DRM.PropBag.AutoMapperSupport;
 using DRM.PropBag.ViewModelTools;
 using DRM.TypeSafePropertyBag;
 using DRM.TypeSafePropertyBag.TypeDescriptors;
+using Swhp.Tspb.PropBagAutoMapperService;
 using System;
 using System.ComponentModel;
 

@@ -1,11 +1,9 @@
 ﻿using DRM.PropBag;
 using DRM.PropBag.ViewModelTools;
-using DRM.TypeSafePropertyBag;
 using System;
 
 namespace PropBagLib.Tests
 {
-    using PropModelType = IPropModel<String>;
     using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
 
     public class CreateAtRunTimeModel : PropBag

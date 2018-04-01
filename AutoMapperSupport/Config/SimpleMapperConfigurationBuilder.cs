@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using System;
 
-namespace DRM.PropBag.AutoMapperSupport
+namespace Swhp.AutoMapperSupport
 {
     public class SimpleMapperConfigurationBuilder<TSource, TDestination>
         : SimpleMapperConfigurationBuilderGenBase, IBuildMapperConfigurations<TSource, TDestination>

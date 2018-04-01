@@ -1,4 +1,4 @@
-﻿using DRM.PropBag.AutoMapperSupport;
+﻿using Swhp.Tspb.PropBagAutoMapperService;
 using DRM.PropBagControlsWPF;
 using DRM.TypeSafePropertyBag;
 

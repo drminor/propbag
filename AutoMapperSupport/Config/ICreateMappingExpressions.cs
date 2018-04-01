@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using System;
 
-namespace DRM.PropBag.AutoMapperSupport
+namespace Swhp.AutoMapperSupport
 {
     public interface ICreateMappingExpressions<TSource, TDestination> //where TDestination : class, IPropBag
     {

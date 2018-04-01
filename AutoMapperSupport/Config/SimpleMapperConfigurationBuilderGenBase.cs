@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using System;
 
-namespace DRM.PropBag.AutoMapperSupport
+namespace Swhp.AutoMapperSupport
 {
     // TODO: replace this class with a method, or two in the SimpleMapperConfigurationBuilder class.
 

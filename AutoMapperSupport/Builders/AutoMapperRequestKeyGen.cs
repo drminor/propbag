@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using System;
 
-namespace DRM.PropBag.AutoMapperSupport
+namespace Swhp.AutoMapperSupport
 {
     // TODO: Consider implementing IDisposable -- to let go of any references we may hold to the mapper creators.
     public class AutoMapperRequestKeyGen : IAutoMapperRequestKeyGen, IEquatable<IAutoMapperRequestKeyGen>, IEquatable<AutoMapperRequestKeyGen>

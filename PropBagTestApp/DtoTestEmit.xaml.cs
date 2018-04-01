@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using DRM.PropBag.AutoMapperSupport;
+using Swhp.AutoMapperSupport; using Swhp.Tspb.PropBagAutoMapperService;
 using DRM.PropBagControlsWPF;
 using PropBagTestApp.Models;
 using System;

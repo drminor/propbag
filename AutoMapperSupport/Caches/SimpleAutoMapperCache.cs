@@ -1,8 +1,9 @@
 ﻿using AutoMapper;
+using DRM.TypeSafePropertyBag.DelegateCaches;
 using System;
 using System.Linq;
 
-namespace DRM.PropBag.AutoMapperSupport
+namespace Swhp.AutoMapperSupport
 {
     //[Synchronization()]
     public class SimpleAutoMapperCache : /*ContextBoundObject,*/ ICacheAutoMappers, IDisposable

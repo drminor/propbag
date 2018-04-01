@@ -1,8 +1,8 @@
 ﻿using DRM.PropBag;
-using DRM.PropBag.AutoMapperSupport;
 using DRM.PropBag.ViewModelTools;
 using DRM.TypeSafePropertyBag;
 using PropBagLib.Tests.BusinessModel;
+using Swhp.Tspb.PropBagAutoMapperService;
 using System;
 
 namespace PropBagLib.Tests.PerformanceDb

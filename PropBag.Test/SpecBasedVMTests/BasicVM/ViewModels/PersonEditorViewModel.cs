@@ -1,6 +1,6 @@
 ﻿using DRM.PropBag;
 using DRM.PropBagWPF;
-using DRM.TypeSafePropertyBag;
+using DRM.TypeSafePropertyBag; using Swhp.Tspb.PropBagAutoMapperService;
 using System;
 using System.ComponentModel;
 using System.Windows.Data;

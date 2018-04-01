@@ -3,8 +3,8 @@ using System.Runtime.CompilerServices;
 
 using System.ComponentModel;
 
-using DRM.TypeSafePropertyBag;
-using DRM.PropBag; using DRM.TypeSafePropertyBag;
+using DRM.TypeSafePropertyBag; using Swhp.Tspb.PropBagAutoMapperService;
+using DRM.PropBag; using DRM.TypeSafePropertyBag; using Swhp.Tspb.PropBagAutoMapperService;
 
 namespace PropBagLib.Tests
 {

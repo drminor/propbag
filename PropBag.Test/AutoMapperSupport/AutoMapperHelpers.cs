@@ -1,6 +1,4 @@
-﻿using AutoMapper;
-using DRM.PropBag;
-using DRM.PropBag.AutoMapperSupport;
+﻿using DRM.PropBag;
 using DRM.PropBag.Caches;
 using DRM.PropBag.TypeWrapper;
 using DRM.PropBag.TypeWrapper.TypeDesc;
@@ -8,6 +6,8 @@ using DRM.PropBag.ViewModelTools;
 using DRM.PropBagControlsWPF;
 using DRM.PropBagWPF;
 using DRM.TypeSafePropertyBag;
+using Swhp.Tspb.PropBagAutoMapperService;
+using Swhp.AutoMapperSupport;
 using System;
 
 namespace PropBagLib.Tests.AutoMapperSupport

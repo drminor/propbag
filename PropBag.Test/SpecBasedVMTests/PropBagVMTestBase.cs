@@ -1,5 +1,4 @@
 ﻿using DRM.PropBag;
-using DRM.PropBag.AutoMapperSupport;
 using DRM.PropBag.Caches;
 using DRM.PropBag.TypeWrapper;
 using DRM.PropBag.TypeWrapper.TypeDesc;
@@ -8,15 +7,16 @@ using DRM.PropBagControlsWPF;
 using DRM.PropBagWPF;
 using DRM.TypeSafePropertyBag;
 using ObjectSizeDiagnostics;
+using Swhp.Tspb.PropBagAutoMapperService;
+using Swhp.AutoMapperSupport;
 using System;
 
 namespace PropBagLib.Tests.SpecBasedVMTests
 {
     using PropModelCacheInterface = ICachePropModels<String>;
-    using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
-
-    using ViewModelActivatorInterface = IViewModelActivator<UInt32, String>;
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
+    using ViewModelActivatorInterface = IViewModelActivator<UInt32, String>;
+    using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
 
     public abstract class PropBagVMTestBase : Specification
     {

@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace DRM.TypeSafePropertyBag
+namespace Swhp.Tspb.PropBagAutoMapperService
 {
     public interface IPropBagMapper<TSource, TDestination>
         : IPropBagMapperGen

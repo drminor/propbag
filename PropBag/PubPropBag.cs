@@ -1,5 +1,6 @@
 ﻿using DRM.PropBag.ViewModelTools;
 using DRM.TypeSafePropertyBag;
+using Swhp.Tspb.PropBagAutoMapperService;
 using System;
 using System.Collections;
 using System.Collections.Generic;

@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
-using DRM.PropBag.AutoMapperSupport;
+using Swhp.AutoMapperSupport;
 using System;
 
-namespace DRM.TypeSafePropertyBag
+namespace Swhp.Tspb.PropBagAutoMapperService
 {
     /// <summary>
     /// For use with EmitProxy. EmitProxy produces "real" properties,

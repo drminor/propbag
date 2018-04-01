@@ -1,4 +1,4 @@
-﻿using DRM.PropBag; using DRM.TypeSafePropertyBag;
+﻿using DRM.PropBag; using DRM.TypeSafePropertyBag; using Swhp.Tspb.PropBagAutoMapperService;
 
 using NUnit.Framework;
 

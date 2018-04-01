@@ -1,4 +1,4 @@
-﻿namespace DRM.PropBag.AutoMapperSupport
+﻿namespace Swhp.AutoMapperSupport
 {
     public class SimpleAutoMapperBuilderProvider : IAutoMapperBuilderProvider
     {

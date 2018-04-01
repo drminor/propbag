@@ -1,17 +1,13 @@
-﻿using AutoMapper;
-using DRM.PropBag;
-using DRM.PropBag.AutoMapperSupport;
-using DRM.PropBag.TypeWrapper;
+﻿using DRM.PropBag;
 using DRM.PropBag.ViewModelTools;
 using DRM.TypeSafePropertyBag;
 using NUnit.Framework;
 using PropBagLib.Tests.AutoMapperSupport;
 using PropBagLib.Tests.BusinessModel;
-
+using Swhp.Tspb.PropBagAutoMapperService;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 
 namespace PropBagLib.Tests.PerformanceDb
 {

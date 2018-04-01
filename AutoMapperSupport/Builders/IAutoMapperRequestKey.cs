@@ -1,5 +1,5 @@
 ﻿
-namespace DRM.PropBag.AutoMapperSupport
+namespace Swhp.AutoMapperSupport
 {
     public interface IAutoMapperRequestKey<TSource, TDestination> : IAutoMapperRequestKeyGen //where TDestination: class, IPropBag
     {

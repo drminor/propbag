@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace DRM.PropBag.AutoMapperSupport
+namespace Swhp.AutoMapperSupport
 {
     public interface IConfigureAMapper<TSource, TDestination> : IConfigureAMapperGen //where TDestination : class, IPropBag
     {

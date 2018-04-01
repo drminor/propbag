@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using DRM.PropBag;
-using DRM.PropBag.AutoMapperSupport;
+using Swhp.AutoMapperSupport; using Swhp.Tspb.PropBagAutoMapperService;
 using DRM.PropBag.ViewModelTools;
 using DRM.TypeSafePropertyBag;
 using PropBagTestApp.Infra;

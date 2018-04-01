@@ -36,7 +36,7 @@ namespace DRM.TypeSafePropertyBag
         void CleanUp(bool doTypedCleanup);
     }
 
-    public interface IPropTemplate
+    public interface IPropTemplate : IEquatable<IPropTemplate>
     {
         PropKindEnum PropKind { get; }
         Type Type { get; }

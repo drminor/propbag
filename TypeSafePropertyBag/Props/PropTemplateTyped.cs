@@ -8,9 +8,6 @@ namespace DRM.TypeSafePropertyBag
     using static DRM.TypeSafePropertyBag.TypeExtensions.TypeExtensions;
     using PropNameType = String;
 
-    //, IEquatable<IPropTemplate>, IEquatable<PropTemplateTyped<T>>
-
-
     public class PropTemplateTyped<T> : IPropTemplate<T>, IEquatable<PropTemplateTyped<T>>
     {
         #region Public and Protected Properties
