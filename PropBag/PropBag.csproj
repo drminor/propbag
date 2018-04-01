@@ -97,10 +97,6 @@
       <Project>{d7fa7ff1-9e07-40f6-abec-3725f72865e0}</Project>
       <Name>PropBagAutoMapperService</Name>
     </ProjectReference>
-    <ProjectReference Include="..\TypeSafePropertyBag.Fundamentals\TypeSafePropertyBag.Fundamentals.csproj">
-      <Project>{D029088C-C248-4D2F-95B4-32E26908C082}</Project>
-      <Name>TypeSafePropertyBag.Fundamentals</Name>
-    </ProjectReference>
     <ProjectReference Include="..\TypeSafePropertyBag\TypeSafePropertyBag.csproj">
       <Project>{bbb1e311-374e-4c91-a313-1667d83767db}</Project>
       <Name>TypeSafePropertyBag</Name>

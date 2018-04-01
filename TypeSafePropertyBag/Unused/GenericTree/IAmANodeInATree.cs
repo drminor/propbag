@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace DRM.TypeSafePropertyBag.Work.GenericTree
+namespace DRM.TypeSafePropertyBag.Unused.GenericTree
 {
     public interface IAmANodeInATree<T> where T: class
     {

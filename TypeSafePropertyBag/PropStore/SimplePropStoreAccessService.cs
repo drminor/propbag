@@ -1,5 +1,5 @@
 ﻿using DRM.TypeSafePropertyBag.DataAccessSupport;
-using DRM.TypeSafePropertyBag.Fundamentals;
+using DRM.TypeSafePropertyBag.DelegateCaches;
 using DRM.TypeSafePropertyBag.LocalBinding;
 using System;
 using System.Collections.Generic;
@@ -28,7 +28,7 @@ using System.Windows.Data;
 
 namespace DRM.TypeSafePropertyBag
 {
-    using static DRM.TypeSafePropertyBag.Fundamentals.TypeExtensions.TypeExtensions;
+    using static DRM.TypeSafePropertyBag.TypeExtensions.TypeExtensions;
 
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
     using ObjectIdType = UInt64;

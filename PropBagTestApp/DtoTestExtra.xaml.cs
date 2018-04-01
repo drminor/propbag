@@ -1,6 +1,6 @@
 ﻿using DRM.PropBagControlsWPF;
 using DRM.TypeSafePropertyBag;
-using DRM.TypeSafePropertyBag.Fundamentals;
+using DRM.TypeSafePropertyBag.DelegateCaches;
 using PropBagTestApp.Models;
 using System;
 using System.Windows;

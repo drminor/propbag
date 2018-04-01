@@ -7,9 +7,7 @@ using System.ComponentModel;
 
 namespace DRM.TypeSafePropertyBag
 {
-    using PropIdType = UInt32;
     using PropNameType = String;
-    using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
 
     public class APFGenericMethodTemplates
     {

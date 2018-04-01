@@ -1,5 +1,5 @@
 ﻿using DRM.PropBag.ViewModelTools;
-using DRM.TypeSafePropertyBag.Fundamentals;
+using DRM.TypeSafePropertyBag.DelegateCaches;
 using System;
 
 

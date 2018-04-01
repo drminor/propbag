@@ -1,5 +1,5 @@
 ﻿using DRM.TypeSafePropertyBag.DataAccessSupport;
-using DRM.TypeSafePropertyBag.Fundamentals;
+using DRM.TypeSafePropertyBag.DelegateCaches;
 using System;
 using System.Collections;
 using System.Collections.Generic;

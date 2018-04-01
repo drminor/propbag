@@ -43,12 +43,31 @@
   <ItemGroup>
     <Compile Include="DataAccessSupport\BetterLCVCreatorDelegate.cs" />
     <Compile Include="DataAccessSupport\CViewManagerBinder_New.cs" />
+    <Compile Include="TypeDescriptors\Diagnostics\TypeInspectorUtility.cs" />
+    <Compile Include="TypeExtensions\TypeExtensions.cs" />
+    <Compile Include="Unused\SimpleIOC\Container.cs" />
+    <Compile Include="Unused\SimpleIOC\ContainerException.cs" />
+    <Compile Include="Unused\SimpleIOC\ITypeContainer.cs" />
+    <Compile Include="Unused\SimpleIOC\TypeContainer.cs" />
+    <Compile Include="Unused\AA_MayBeUsedSoon\ActivationInfo.cs" />
+    <Compile Include="Unused\AA_MayBeUsedSoon\CollectionViewExtensions.cs" />
+    <Compile Include="Unused\AA_MayBeUsedSoon\SharedDefaultObject.cs" />
+    <Compile Include="Unused\AA_MayBeUsedSoon\TypeEqualityComparer.cs" />
+    <Compile Include="Unused\AA_MayBeUsedSoon\UniversalTypeConverter.cs" />
+    <Compile Include="WeakRefKey.cs" />
+    <Compile Include="WeakRefKeyTyped.cs" />
     <None Include="DataAccessSupport\CViewManagerBinder_NotUsed.cs" />
     <Compile Include="DataAccessSupport\IMappedDSP.cs" />
     <Compile Include="DataSourceMapping\IDoCrudWithMapping.cs" />
     <Compile Include="DataAccessSupport\IDoCRUD.cs" />
     <Compile Include="DataAccessSupport\CLR_Mapped_DSP.cs" />
     <Compile Include="DataAccessSupport\EndEditWrapper.cs" />
+    <Compile Include="DelegateCaches\DelegateCache.cs" />
+    <Compile Include="DelegateCaches\ICacheDelegates.cs" />
+    <Compile Include="DelegateCaches\ICacheDelegatesForTypePair.cs" />
+    <Compile Include="DelegateCaches\TwoTypesDelegateCache.cs" />
+    <Compile Include="DelegateCaches\TypeKey.cs" />
+    <Compile Include="DelegateCaches\TypePair.cs" />
     <Compile Include="Delegates\ConverterDelegates.cs" />
     <Compile Include="Delegates\CreatePropDelegate.cs" />
     <Compile Include="Delegates\CViewManagerFromDsDelegate.cs" />
@@ -69,6 +88,7 @@
     <Compile Include="LocalBinding\Instances\LocalWatcher.cs" />
     <Compile Include="LocalBinding\Instances\PropStoreNotificationKindEnum.cs" />
     <Compile Include="LocalBinding\Registration\IReceivePropStoreNodeUpdates.cs" />
+    <Compile Include="LockingConcurrentDictionary.cs" />
     <Compile Include="PropBagInterfaces\IHaveACustomTypeDesriptor.cs" />
     <Compile Include="PropBagInterfaces\INotifyItemEndEdit.cs" />
     <Compile Include="PropBagModelCaches\ICachePropModels.cs" />
@@ -127,11 +147,11 @@
     <None Include="Unused\HyperTypeDescriptors\ChainingPropertyDescriptor.cs" />
     <None Include="Unused\HyperTypeDescriptors\HyperTypeDescriptionProvider.cs" />
     <None Include="Unused\HyperTypeDescriptors\HyperTypeDescriptor.cs" />
-    <Compile Include="TypeDescriptors\NotUsed\IMyTypeDescriptor_NotUsed.cs" />
+    <None Include="TypeDescriptors\NotUsed\IMyTypeDescriptor_NotUsed.cs" />
     <None Include="TypeDescriptors\NotUsed\IPbCollectionTypeDescriptor_NotUsed.cs" />
     <None Include="TypeDescriptors\NotUsed\IPropBagTypeDescriptor_NotUsed.cs" />
     <None Include="TypeDescriptors\NotUsed\IPropItemTypeDescriptor_NotUsed.cs" />
-    <Compile Include="TypeDescriptors\NotUsed\MyTypeDescriptorBase_NotUsed.cs" />
+    <None Include="TypeDescriptors\NotUsed\MyTypeDescriptorBase_NotUsed.cs" />
     <None Include="TypeDescriptors\NotUsed\PbCollectionItemTypeDescriptor_NotUsed.cs" />
     <Compile Include="TypeDescriptors\PropBagCustomTypeDescriptor.cs" />
     <Compile Include="TypeDescriptors\PropBagTypeDescriptionProvider.cs" />
@@ -268,10 +288,6 @@
     <ProjectReference Include="..\ObjectSizeDiagnostics\ObjectSizeDiagnostics.csproj">
       <Project>{9b18f82d-3ed9-49e0-9ee3-cfbfc3af9d9c}</Project>
       <Name>ObjectSizeDiagnostics</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\TypeSafePropertyBag.Fundamentals\TypeSafePropertyBag.Fundamentals.csproj">
-      <Project>{d029088c-c248-4d2f-95b4-32e26908c082}</Project>
-      <Name>TypeSafePropertyBag.Fundamentals</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />

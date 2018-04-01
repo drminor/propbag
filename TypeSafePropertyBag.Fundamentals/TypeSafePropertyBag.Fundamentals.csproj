@@ -41,28 +41,13 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Unused\SimpleIOC\Container.cs" />
-    <None Include="Unused\SimpleIOC\ContainerException.cs" />
-    <None Include="Unused\SimpleIOC\ITypeContainer.cs" />
-    <None Include="Unused\SimpleIOC\TypeContainer.cs" />
-    <Compile Include="Unused\ActivationInfo.cs" />
-    <Compile Include="Unused\CollectionViewExtensions.cs" />
-    <Compile Include="DelegateCaches\DelegateCache.cs" />
-    <Compile Include="DelegateCaches\ICacheDelegates.cs" />
-    <Compile Include="DelegateCaches\ICacheDelegatesForTypePair.cs" />
-    <Compile Include="LockingConcurrentDictionary.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Unused\SharedDefaultObject.cs" />
-    <Compile Include="DelegateCaches\TwoTypesDelegateCache.cs" />
-    <Compile Include="Unused\TypeEqualityComparer.cs" />
-    <Compile Include="TypeSupport\TypeExtensions.cs" />
-    <Compile Include="Diagnostics\TypeInspectorUtility.cs" />
-    <Compile Include="DelegateCaches\TypeKey.cs" />
-    <Compile Include="DelegateCaches\TypePair.cs" />
-    <Compile Include="Unused\UniversalTypeConverter.cs" />
-    <Compile Include="WeakRefKey.cs" />
-    <Compile Include="WeakRefKeyTyped.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="DelegateCaches\" />
+    <Folder Include="Diagnostics\" />
+    <Folder Include="TypeSupport\" />
+    <Folder Include="Unused\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

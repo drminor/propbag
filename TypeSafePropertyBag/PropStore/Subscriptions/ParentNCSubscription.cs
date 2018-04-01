@@ -1,4 +1,4 @@
-﻿using DRM.TypeSafePropertyBag.Fundamentals;
+﻿using DRM.TypeSafePropertyBag.DelegateCaches;
 using System;
 using System.Linq;
 using System.Linq.Expressions;

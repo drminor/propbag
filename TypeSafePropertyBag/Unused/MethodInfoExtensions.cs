@@ -3,7 +3,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace DRM.TypeSafePropertyBag.Work.Unused
+namespace DRM.TypeSafePropertyBag.Unused
 {
     public static class MethodInfoExtensions
     {

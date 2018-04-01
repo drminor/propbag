@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace DRM.TypeSafePropertyBag
 {
-    using static DRM.TypeSafePropertyBag.Fundamentals.TypeExtensions.TypeExtensions;
+    using static DRM.TypeSafePropertyBag.TypeExtensions.TypeExtensions;
 
     using PropNameType = String;
     using PropModelType = IPropModel<String>;

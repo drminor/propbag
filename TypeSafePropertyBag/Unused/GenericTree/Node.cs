@@ -6,7 +6,7 @@
 /// http://www.siepman.nl/blog/author/Admin.aspx
 /// </remarks>
 
-namespace DRM.TypeSafePropertyBag.Work.GenericTree
+namespace DRM.TypeSafePropertyBag.Unused.GenericTree
 {
     using System;
     using System.Collections;
