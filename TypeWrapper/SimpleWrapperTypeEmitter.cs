@@ -7,7 +7,7 @@ using System.Reflection.Emit;
 
 namespace DRM.PropBag.TypeWrapper
 {
-    using static DRM.TypeSafePropertyBag.Fundamentals.TypeExtensions.TypeExtensions;
+    using static DRM.TypeSafePropertyBag.TypeExtensions.TypeExtensions;
 
     public class SimpleWrapperTypeEmitter : IEmitWrapperType
     {

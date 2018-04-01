@@ -9,7 +9,7 @@ using System.Reflection;
 
 namespace DRM.TypeSafePropertyBag
 {
-    using static DRM.TypeSafePropertyBag.Fundamentals.TypeExtensions.TypeExtensions;
+    using static DRM.TypeSafePropertyBag.TypeExtensions.TypeExtensions;
 
     public class ExtraMembersConfigInitialStep : IHaveAMapperConfigurationStep
     {

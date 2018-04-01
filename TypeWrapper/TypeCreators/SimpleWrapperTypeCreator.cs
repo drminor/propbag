@@ -3,7 +3,7 @@ using System;
 
 namespace DRM.PropBag.TypeWrapper
 {
-    using static DRM.TypeSafePropertyBag.Fundamentals.TypeExtensions.TypeExtensions;
+    using static DRM.TypeSafePropertyBag.TypeExtensions.TypeExtensions;
     using PropModelType = IPropModel<String>;
 
     public class SimpleWrapperTypeCreator : ICreateWrapperTypes

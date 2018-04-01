@@ -3,7 +3,7 @@ using System;
 
 namespace DRM.TypeSafePropertyBag
 {
-    using static DRM.TypeSafePropertyBag.Fundamentals.TypeExtensions.TypeExtensions;
+    using static DRM.TypeSafePropertyBag.TypeExtensions.TypeExtensions;
 
     public class SimpleMapTypeDefinitionProvider : IMapTypeDefinitionProvider
     {
