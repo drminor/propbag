@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 
-namespace DRM.TypeSafePropertyBag.Fundamentals
+namespace DRM.TypeSafePropertyBag.TypeDescriptors
 {
     public class TypeInspectorUtility
     {

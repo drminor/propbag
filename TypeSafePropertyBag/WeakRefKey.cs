@@ -5,7 +5,7 @@
 /// Modified to not allow references to null.
 /// </remarks>
 
-namespace DRM.TypeSafePropertyBag.Fundamentals
+namespace DRM.TypeSafePropertyBag.DelegateCaches
 {
     // for use as the key to a hashtable, when the "real" key is an object
     // that we should not keep alive by a strong reference.

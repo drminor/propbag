@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace DRM.TypeSafePropertyBag.Fundamentals.Unused
+namespace DRM.TypeSafePropertyBag.DelegateCaches.Unused
 {
     public class ActivationInfo
     {

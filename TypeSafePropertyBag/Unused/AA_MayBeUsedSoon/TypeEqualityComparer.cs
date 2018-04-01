@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace DRM.TypeSafePropertyBag.Fundamentals
+namespace DRM.TypeSafePropertyBag.DelegateCaches
 {
     public class TypeEqualityComparer : IEqualityComparer<Type>
     {

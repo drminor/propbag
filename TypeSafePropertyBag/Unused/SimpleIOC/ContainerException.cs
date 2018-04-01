@@ -9,7 +9,7 @@ using System.Text;
 /// http://www.siepman.nl/blog/author/Admin.aspx
 /// </remarks>
 
-namespace DRM.TypeSafePropertyBag.Fundamentals.SimpleIOC
+namespace DRM.TypeSafePropertyBag.SimpleIOC
 {
     [Serializable]
     public class ContainerException<T> : Exception

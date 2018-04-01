@@ -20,7 +20,7 @@ using System.Linq;
 /// operation is thread-safe.
 ///</remarks>
 
-namespace DRM.TypeSafePropertyBag.Fundamentals
+namespace DRM.TypeSafePropertyBag.DelegateCaches
 {
     /// <summary>
     /// Wraps a ConcurrentDictionary. Values are created by evaluating a 'factory' Func<typeparamref name="TKey"/>, Lazy<typeparamref name="TValue"/>> 

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace DRM.TypeSafePropertyBag.Fundamentals.TypeExtensions
+namespace DRM.TypeSafePropertyBag.TypeExtensions
 {
     public static class TypeExtensions
     {

@@ -4,7 +4,7 @@
 /// Based on the non-generic version copied from src\Framework\MS\Internal\Data\ViewManager.cs (Assembly: PresentationFramework)
 /// </remarks>
 
-namespace DRM.TypeSafePropertyBag.Fundamentals
+namespace DRM.TypeSafePropertyBag.DelegateCaches
 {
     // for use as the key to a hashtable, when the "real" key is an object
     // that we should not keep alive by a strong reference.

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DRM.TypeSafePropertyBag
+namespace DRM.TypeSafePropertyBag.DelegateCaches
 {
     public interface ICacheDelegates<T> where T : class
     {

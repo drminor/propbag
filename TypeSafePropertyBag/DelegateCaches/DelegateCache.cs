@@ -1,17 +1,25 @@
 ﻿using System;
 using System.Reflection;
 
-namespace DRM.TypeSafePropertyBag.Fundamentals
+namespace DRM.TypeSafePropertyBag.DelegateCaches
 {
-    public class TwoTypesDelegateCache<T> : ICacheDelegatesForTypePair<T>, IDisposable where T : class
+    public class DelegateCache<T> : ICacheDelegates<T>, IDisposable where T : class
     { 
-        LockingConcurrentDictionary<TypePair, T> _cache;
+        LockingConcurrentDictionary<TypeKey, T> _cache;
         MethodInfo _theMethod;
+        Type[] _typeArguments;
 
-        public TwoTypesDelegateCache(MethodInfo theMethod)
+        public DelegateCache(MethodInfo theMethod)
         {
-            _cache = new LockingConcurrentDictionary<TypePair, T>(MakeTheDelegate);
+            _cache = new LockingConcurrentDictionary<TypeKey, T>(MakeTheDelegate);
             _theMethod = theMethod;
+
+            _typeArguments = _theMethod.GetGenericArguments();
+            _typeArguments[0] = typeof(T);
+            for(int ptr = 1; ptr < _typeArguments.Length; ptr++)
+            {
+                _typeArguments[ptr] = typeof(object);
+            }
         }
 
         public int Count
@@ -22,17 +30,17 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
             }
         }
 
-        public T GetOrAdd(TypePair argumentTypes)
+        public T GetOrAdd(Type typeOfThisValue)
         {
-            T result = _cache.GetOrAdd(argumentTypes);
+            T result = _cache.GetOrAdd(new TypeKey(typeOfThisValue));
             return result;
         }
 
-        private T MakeTheDelegate(TypePair argumentTypes)
+        private T MakeTheDelegate(TypeKey tKey)
         {
-            System.Diagnostics.Debug.WriteLine($"Creating new delegate of type: {typeof(T)} for {argumentTypes.SourceType}/{argumentTypes.DestinationType}.");
+            System.Diagnostics.Debug.WriteLine($"Creating new delegate of type: {typeof(T)} for {tKey.Type}.");
 
-            MethodInfo methInfoSetProp = _theMethod.MakeGenericMethod(argumentTypes.TypeArguments);
+            MethodInfo methInfoSetProp = _theMethod.MakeGenericMethod(tKey.Type);
             Delegate result = Delegate.CreateDelegate(typeof(T), null, methInfoSetProp);
             return result as T;
         }
@@ -47,12 +55,12 @@ namespace DRM.TypeSafePropertyBag.Fundamentals
             {
                 if (disposing)
                 {
-                    // Dispose managed state (managed objects).
-                    _cache.Clear();
+                    // Dispose managed state (managed objects) here.
                 }
 
-                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
-                // TODO: set large fields to null.
+                // Set large fields to null.
+
+                _cache.Clear();
 
                 disposedValue = true;
             }

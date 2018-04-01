@@ -6,7 +6,7 @@
 /// http://www.siepman.nl/blog/author/Admin.aspx
 /// </remarks>
 
-namespace DRM.TypeSafePropertyBag.Fundamentals.SimpleIOC
+namespace DRM.TypeSafePropertyBag.SimpleIOC
 {
     class TypeContainer<T> : ITypeContainer
     {

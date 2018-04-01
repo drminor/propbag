@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Globalization;
 
-namespace DRM.TypeSafePropertyBag.Fundamentals.Unused
+namespace DRM.TypeSafePropertyBag.DelegateCaches.Unused
 {
     public static class ObjectExtensions
     {
