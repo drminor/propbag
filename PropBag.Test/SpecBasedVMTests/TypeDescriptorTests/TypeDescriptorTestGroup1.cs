@@ -1,6 +1,6 @@
 ﻿using DRM.PropBag.ViewModelTools;
 using DRM.TypeSafePropertyBag;
-using DRM.TypeSafePropertyBag.Fundamentals;
+using DRM.TypeSafePropertyBag.TypeDescriptors;
 using NUnit.Framework;
 using PropBagLib.Tests.SpecBasedVMTests.BasicVM.Services;
 using PropBagLib.Tests.SpecBasedVMTests.BasicVM.ViewModels;
@@ -11,7 +11,6 @@ using System.ComponentModel;
 namespace PropBagLib.Tests.SpecBasedVMTests.TypeDescriptorTests
 {
     using PropModelType = IPropModel<String>;
-    using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
 
     [TestFixture(TestName = "CreateDestroyBasicVM")]
     [NonParallelizable]
