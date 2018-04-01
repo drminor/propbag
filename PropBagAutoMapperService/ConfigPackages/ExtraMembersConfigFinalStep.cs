@@ -24,7 +24,8 @@ namespace Swhp.Tspb.PropBagAutoMapperService
 
         public void BuildExtraMemberConfig(IAutoMapperRequestKey<TSource, TDestination> mapRequest, IMapperConfigurationExpression cfg)
         {
-            PropModelType propModel = mapRequest.DestinationTypeDef.PropModel as PropModelType;
+            // Fix Me !!
+            PropModelType propModel = mapRequest.DestinationTypeDef.UniqueRef as PropModelType;
 
             // TODO: Create an interface for the ExtraMembersProvider and then create
             // property so that this value can be set after construction, but before calling BuildExtraMemberConfig.

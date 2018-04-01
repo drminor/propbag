@@ -1,27 +1,22 @@
-﻿using DRM.TypeSafePropertyBag.DelegateCaches;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace DRM.TypeSafePropertyBag
 {
     using CompositeKeyType = UInt64;
+    using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
     using ObjectIdType = UInt64;
     using PropIdType = UInt32;
-    using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
     //using PropNameType = String;
 
     using PropItemSetKeyType = PropItemSetKey<String>;
-
     using PropNodeCollectionInterface = IPropNodeCollection<UInt32, String>;
     using PropNodeCollectionInternalInterface = IPropNodeCollection_Internal<UInt32, String>;
     using PropNodelCollectionSharedInterface = IPropNodeCollectionShared<UInt32, String>;
-
     using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
-
     using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
     using PSAccessServiceProviderInterface = IProvidePropStoreAccessService<UInt32, String>;
-
     using PSFastAccessServiceInterface = IPropStoreFastAccess<UInt32, String>;
 
     internal class SimplePropStoreAccessServiceProvider : PSAccessServiceProviderInterface

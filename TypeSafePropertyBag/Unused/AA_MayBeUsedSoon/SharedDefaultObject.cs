@@ -1,5 +1,5 @@
 ﻿
-namespace DRM.TypeSafePropertyBag.DelegateCaches.Unused
+namespace DRM.TypeSafePropertyBag.Unused
 {
     class SharedDefaultObject
     {

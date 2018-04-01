@@ -1,5 +1,4 @@
 ﻿using DRM.TypeSafePropertyBag.DataAccessSupport;
-using DRM.TypeSafePropertyBag.DelegateCaches;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -7,8 +6,8 @@ using System.Windows.Data;
 
 namespace DRM.TypeSafePropertyBag
 {
-    using ObjectIdType = UInt64;
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
+    using ObjectIdType = UInt64;
     using PropItemSetKeyType = PropItemSetKey<String>;
 
     public interface IPropStoreAccessService<L2T, L2TRaw> : IRegisterSubscriptions<L2T>, IRegisterBindings<L2T>, IDisposable

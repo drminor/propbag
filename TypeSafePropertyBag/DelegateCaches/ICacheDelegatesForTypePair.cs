@@ -1,4 +1,5 @@
-﻿namespace DRM.TypeSafePropertyBag.DelegateCaches
+﻿
+namespace DRM.TypeSafePropertyBag.DelegateCaches
 {
     public interface ICacheDelegatesForTypePair<T> where T : class
     {

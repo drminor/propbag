@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using DRM.TypeSafePropertyBag.DelegateCaches;
+using DRM.TypeSafePropertyBag;
 using System;
 using System.Linq;
 

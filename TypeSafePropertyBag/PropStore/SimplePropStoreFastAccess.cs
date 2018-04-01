@@ -1,14 +1,11 @@
-﻿using DRM.TypeSafePropertyBag.DelegateCaches;
-using System;
+﻿using System;
 
 namespace DRM.TypeSafePropertyBag
 {
-    using PropIdType = UInt32;
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
+    using PropIdType = UInt32;
     using PropItemSetKeyType = PropItemSetKey<String>;
-
     using PSAccessServiceProviderInterface = IProvidePropStoreAccessService<UInt32, String>;
-
     using PSFastAccessServiceInterface = IPropStoreFastAccess<UInt32, String>;
 
 

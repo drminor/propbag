@@ -55,8 +55,11 @@ namespace Swhp.Tspb.PropBagAutoMapperService
             DestinationType = mapRequest.DestinationType;
 
             RunTimeType = mapRequest.DestinationTypeDef.RunTimeType;
-            PropModel = (PropModelType) mapRequest.DestinationTypeDef.PropModel;
-            PropFactory = (IPropFactory)mapRequest.DestinationTypeDef.PropFactory;
+
+            // Fix Me !!
+            PropModel = (PropModelType) mapRequest.DestinationTypeDef.UniqueRef;
+
+            PropFactory = PropModel.PropFactory; // (IPropFactory)mapRequest.DestinationTypeDef.PropFactory;
 
             Mapper = mapper;
 

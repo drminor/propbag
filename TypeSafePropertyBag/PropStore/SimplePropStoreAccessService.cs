@@ -1,5 +1,4 @@
 ﻿using DRM.TypeSafePropertyBag.DataAccessSupport;
-using DRM.TypeSafePropertyBag.DelegateCaches;
 using DRM.TypeSafePropertyBag.LocalBinding;
 using System;
 using System.Collections.Generic;
@@ -29,24 +28,18 @@ using System.Windows.Data;
 namespace DRM.TypeSafePropertyBag
 {
     using static DRM.TypeSafePropertyBag.TypeExtensions.TypeExtensions;
-
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
     using ObjectIdType = UInt64;
     using PropIdType = UInt32;
+    using PropItemSetKeyType = PropItemSetKey<String>;
     using PropNameType = String;
-
+    using PropNodeCollectionInterface = IPropNodeCollection<UInt32, String>;
+    using PropNodeCollectionIntInterface = IPropNodeCollection_Internal<UInt32, String>;
+    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
     using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
     using PSAccessServiceInternalInterface = IPropStoreAccessServiceInternal<UInt32, String>;
     using PSAccessServiceProviderInterface = IProvidePropStoreAccessService<UInt32, String>;
-
-    using PSAccessServiceCreatorInterface = IPropStoreAccessServiceCreator<UInt32, String>;
-
     using PSFastAccessServiceInterface = IPropStoreFastAccess<UInt32, String>;
-
-    using PropNodeCollectionIntInterface = IPropNodeCollection_Internal<UInt32, String>;
-    using PropNodeCollectionInterface = IPropNodeCollection<UInt32, String>;
-
-    using PropItemSetKeyType = PropItemSetKey<String>;
 
     internal class SimplePropStoreAccessService : PSAccessServiceInterface, IHaveTheStoreNode, PSAccessServiceInternalInterface, IDisposable
     {

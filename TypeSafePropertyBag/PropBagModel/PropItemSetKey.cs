@@ -1,7 +1,4 @@
-﻿using DRM.TypeSafePropertyBag;
-using DRM.TypeSafePropertyBag.DelegateCaches;
-using System;
-using System.Collections.Generic;
+﻿using System;
 
 namespace DRM.TypeSafePropertyBag
 {

@@ -1,5 +1,4 @@
-﻿using DRM.TypeSafePropertyBag.DelegateCaches;
-using DRM.TypeSafePropertyBag.LocalBinding;
+﻿using DRM.TypeSafePropertyBag.LocalBinding;
 using System;
 using System.Threading;
 

@@ -1,18 +1,13 @@
 ﻿using DRM.TypeSafePropertyBag.DataAccessSupport;
-using DRM.TypeSafePropertyBag.DelegateCaches;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Windows.Data;
 
 namespace DRM.TypeSafePropertyBag
 {
-    using PropIdType = UInt32;
     using PropNameType = String;
-    using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
 
     public interface IPropFactory
     {

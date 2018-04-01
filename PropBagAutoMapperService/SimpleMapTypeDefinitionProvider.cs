@@ -11,7 +11,7 @@ namespace Swhp.Tspb.PropBagAutoMapperService
         {
             if (targetType.IsPropBagBased())
             {
-                return new MapTypeDefinition(propModel, targetType, propFactory, fullClassName);
+                return new MapTypeDefinition(targetType, propModel, fullClassName);
             }
             else
             {

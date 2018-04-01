@@ -1,10 +1,9 @@
 ﻿
-using System.Reflection;
 using DRM.PropBag;
-using DRM.TypeSafePropertyBag; using Swhp.Tspb.PropBagAutoMapperService;
+using DRM.TypeSafePropertyBag;
 using System;
 using System.Collections.Generic;
-
+using System.Reflection;
 
 namespace PropBagLib.Tests
 {

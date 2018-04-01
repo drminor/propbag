@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
-namespace DRM.TypeSafePropertyBag.DelegateCaches.Unused
+namespace DRM.TypeSafePropertyBag.Unused
 {
     public static class CollectionViewExtensions
     {

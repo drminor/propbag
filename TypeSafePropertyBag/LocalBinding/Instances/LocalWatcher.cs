@@ -1,14 +1,9 @@
-﻿using DRM.TypeSafePropertyBag.DelegateCaches;
-using System;
-using System.Collections.Generic;
+﻿using System;
 
 namespace DRM.TypeSafePropertyBag.LocalBinding
 {
-    using PropIdType = UInt32;
-    using PropNameType = String;
-
     using ExKeyT = IExplodedKey<UInt64, UInt64, UInt32>;
-
+    using PropNameType = String;
     using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
     using PSAccessServiceInternalInterface = IPropStoreAccessServiceInternal<UInt32, String>;
 

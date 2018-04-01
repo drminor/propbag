@@ -1,4 +1,4 @@
-﻿using DRM.TypeSafePropertyBag.DelegateCaches;
+﻿using DRM.TypeSafePropertyBag;
 using System;
 
 namespace DRM.PropBag.TypeWrapper
