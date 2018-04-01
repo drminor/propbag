@@ -7,16 +7,26 @@ namespace Swhp.Tspb.PropBagAutoMapperService
 
     public class SimpleMapTypeDefinitionProvider : IMapTypeDefinitionProvider
     {
-        public IMapTypeDefinition GetTypeDescription(object propModel,Type targetType, object propFactory, string fullClassName)
+        public IMapTypeDefinition GetTypeDescription
+        (
+            Type targetType,
+            object uniqueRef,
+            string uniqueToken
+        )
         {
-            if (targetType.IsPropBagBased())
+            IMapTypeDefinition result;
+
+            bool isPropBagBased = targetType.IsPropBagBased();
+            if(isPropBagBased)
             {
-                return new MapTypeDefinition(targetType, propModel, fullClassName);
+                result = new MapTypeDefinition(targetType, isPropBagBased, uniqueRef, uniqueToken);
             }
             else
             {
-                return new MapTypeDefinition(targetType);
+                result = new MapTypeDefinition(targetType);
             }
+
+            return result;
         }
     }
 }

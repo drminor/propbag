@@ -18,7 +18,7 @@ namespace Swhp.AutoMapperSupport
 
         public bool IsPropBag { get; }
 
-        public object PropModel { get; }
+        //public object PropModel { get; }
 
         //public Type TypeToWrap => TargetType; // PropModel?.TypeToWrap;
         // If specified, use the PropFactory provided by the caller instead of the one specified by the PropModel.
@@ -29,16 +29,16 @@ namespace Swhp.AutoMapperSupport
         #region Constructors
 
         // For non-IPropBag based types.
-        public MapTypeDefinition(Type targetType) : this(targetType, null, null)
+        public MapTypeDefinition(Type targetType) : this(targetType, false, null, null)
         {
         }
 
         // For non-IPropBag based types.
-        public MapTypeDefinition(Type targetType, object uniqueRef) : this(targetType, uniqueRef, null)
+        public MapTypeDefinition(Type targetType, object uniqueRef) : this(targetType, true, uniqueRef, null)
         {
         }
 
-        public MapTypeDefinition(Type targetType, object uniqueRef, string uniqueToken)
+        public MapTypeDefinition(Type targetType, bool isPropBag, object uniqueRef, string uniqueToken)
         {
             TargetType = targetType;
             NewEmittedType = null;
@@ -47,10 +47,10 @@ namespace Swhp.AutoMapperSupport
             //UniqueRef = uniqueRef ?? throw new ArgumentNullException(nameof(uniqueRef));
             //UniqueToken = uniqueToken;
 
-            UniqueRef = uniqueRef ?? throw new ArgumentNullException("Must have a propModel for now.");
+            UniqueRef = uniqueRef; // ?? throw new ArgumentNullException("Must have a propModel for now.");
             UniqueToken = null; // Set this to null in all cases, for now.
 
-            IsPropBag = true; // TODO: Get this from our caller.
+            IsPropBag = isPropBag;
 
             _hashCode = ComputeHashCode();
         }

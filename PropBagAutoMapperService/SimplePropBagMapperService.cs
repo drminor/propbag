@@ -186,10 +186,10 @@ namespace Swhp.Tspb.PropBagAutoMapperService
         where TDestination : class, IPropBag
         {
             IMapTypeDefinition srcMapTypeDef
-                = _mapTypeDefinitionProvider.GetTypeDescription(propModel, typeof(TSource), propFactory: null, className: null);
+                = _mapTypeDefinitionProvider.GetTypeDescription(typeof(TSource), propModel, uniqueToken: null);
 
             IMapTypeDefinition dstMapTypeDef
-                = _mapTypeDefinitionProvider.GetTypeDescription(propModel, typeof(TDestination), propFactory: null, className: null);
+                = _mapTypeDefinitionProvider.GetTypeDescription(typeof(TDestination), propModel, uniqueToken: null);
 
 
             IAutoMapperRequestKey<TSource, TDestination> autoMapperRequestKey =
@@ -270,7 +270,6 @@ namespace Swhp.Tspb.PropBagAutoMapperService
         }
 
         #endregion
-
 
         #region Generic Method Support
 

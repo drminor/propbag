@@ -23,7 +23,7 @@
 
             <pb:PropItem PropertyName="PersonListView" PropKind="CollectionView" PropertyType="{x:Type vmod:PersonVM}">
                 <pb:InitialValueField SetToNull="True"/>
-                <pb:PropBinderField Path="../Business" MapperRequestResourceKey="PersonVM_Mapper_Emit_Proxy"/>
+                <pb:PropBinderField Path="../Business" MapperRequestResourceKey="PersonVM_Mapper_Extra_Members"/>
             </pb:PropItem>
 
             <pb:PropItem PropertyName="WMessage" PropertyType="{x:Type sys:String}" StorageStrategy="Virtual">

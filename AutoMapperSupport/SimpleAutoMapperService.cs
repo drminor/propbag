@@ -66,7 +66,6 @@ namespace Swhp.AutoMapperSupport
             string configPackageName,
             IHaveAMapperConfigurationStep configStarterForThisRequest
         )
-        //where TDestination : class, IPropBag
         {
             if(_mapperConfigurationLookupService == null)
             {
@@ -97,7 +96,6 @@ namespace Swhp.AutoMapperSupport
             IConfigureAMapper<TSource, TDestination> mappingConfiguration,
             IHaveAMapperConfigurationStep configStarterForThisRequest
         )
-            //where TDestination : class, IPropBag
         {
             // Create a MapperBuilder for this request.
             IBuildAutoMapper<TSource, TDestination> autoMapperBuilder
@@ -215,7 +213,6 @@ namespace Swhp.AutoMapperSupport
                 IHaveAMapperConfigurationStep configStarterForThisRequest,
                 IAutoMapperService autoMapperProvider
             )
-            //where TDestination : class, IPropBag
             {
                 IMapTypeDefinition srcMapTypeDef = new MapTypeDefinition(typeof(TSource));
                 IMapTypeDefinition dstMapTypeDef = new MapTypeDefinition(typeof(TDestination));

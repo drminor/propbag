@@ -29,7 +29,10 @@ namespace Swhp.Tspb.PropBagAutoMapperService
 
             Func<TDestination, TSource> regularInstanceCreator = mapRequest.MappingConfiguration.SourceConstructor;
 
-            Type newWrapperType = mapRequest.DestinationTypeDef.NewEmittedType;
+            //Type newWrapperType = mapRequest.DestinationTypeDef.NewEmittedType;
+
+            Type newWrapperType = mapRequest.DestinationTypeDef.RunTimeType;
+
 
             cfg.CreateMap(typeof(TSource), newWrapperType);
 
