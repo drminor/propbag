@@ -397,8 +397,8 @@ namespace PropBagLib.Tests.SpecBasedVMTests
         protected virtual IPropBagMapperService GetAutoMapperProvider(ViewModelFactoryInterface viewModelFactory)
         {
             IAutoMapperBuilderProvider autoMapperBuilderProvider = new SimpleAutoMapperBuilderProvider();
-            ICacheAutoMappers rawAutoMapperCache = new SimpleAutoMapperCache();
-            SimpleAutoMapperProvider autoMapperService = new SimpleAutoMapperProvider
+            IAutoMapperCache rawAutoMapperCache = new SimpleAutoMapperCache();
+            SimpleAutoMapperService autoMapperService = new SimpleAutoMapperService
             (
                 autoMapperBuilderProvider: autoMapperBuilderProvider,
                 autoMapperCache: rawAutoMapperCache,

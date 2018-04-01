@@ -2,7 +2,7 @@
 
 namespace Swhp.AutoMapperSupport
 {
-    public interface ICacheAutoMappers
+    public interface IAutoMapperCache
     {
         IAutoMapperRequestKeyGen RegisterRawAutoMapperRequest(IAutoMapperRequestKeyGen mapperRequest);
         IMapper GetRawAutoMapper(IAutoMapperRequestKeyGen mapperRequest);

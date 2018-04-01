@@ -15,14 +15,14 @@ namespace Swhp.Tspb.PropBagAutoMapperService
 
         #region Public Methods
 
-        public IBuildPropBagMapper<TSource, TDestination> GetPropBagMapperBuilder<TSource, TDestination>
+        public IPropBagMapperBuilder<TSource, TDestination> GetPropBagMapperBuilder<TSource, TDestination>
             (
             //IBuildMapperConfigurations<TSource, TDestination> mapperConfigurationBuilder,
             IPropBagMapperService propBagMapperService
             )
             where TDestination: class, IPropBag
         {
-            IBuildPropBagMapper<TSource, TDestination> result
+            IPropBagMapperBuilder<TSource, TDestination> result
                 = new SimplePropBagMapperBuilder<TSource, TDestination>
                 (
                     //mapperConfigurationBuilder: mapperConfigurationBuilder,

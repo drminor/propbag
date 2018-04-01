@@ -5,7 +5,7 @@ namespace Swhp.AutoMapperSupport
 {
     public interface IConfigureAMapper<TSource, TDestination> : IConfigureAMapperGen //where TDestination : class, IPropBag
     {
-        ICreateMappingExpressions<TSource, TDestination> FinalConfigActionProvider { get; }
+        IMapperConfigurationExpressionProvider<TSource, TDestination> FinalConfigActionProvider { get; }
         Func<TDestination, TSource> SourceConstructor { get; }
         Func<TSource, TDestination> DestinationConstructor { get; }
     }
@@ -15,7 +15,5 @@ namespace Swhp.AutoMapperSupport
         bool SupportsMapFrom { get; }
         bool RequiresWrappperTypeEmitServices { get; }
         IReadOnlyCollection<IHaveAMapperConfigurationStep> ConfigurationSteps { get; }
-
-        //IConfigurationProvider GetConfigurationProviderGen();
     }
 }

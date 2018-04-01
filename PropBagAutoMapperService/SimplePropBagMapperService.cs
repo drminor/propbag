@@ -91,12 +91,12 @@ namespace Swhp.Tspb.PropBagAutoMapperService
                 this.SubmitRawAutoMapperRequest<TSource, TDestination>(propModel, mappingConfiguration, configStarterForThisRequest);
 
             // Create a MapperBuilder for this request.
-            IBuildPropBagMapper<TSource, TDestination> propBagMapperBuilder
+            IPropBagMapperBuilder<TSource, TDestination> propBagMapperBuilder
                 = BuildTheAutoMapperBuilder<TSource, TDestination>(/*configStarterForThisRequest*/);
 
             // Create the PropBag Mapper Request.
             IPropBagMapperRequestKey<TSource, TDestination> typedMapperRequest
-                = new PropBagMapperRequestKey<TSource, TDestination>(propBagMapperBuilder, autoMapperRequestKey);
+                = new PropBagMapperRequestKey<TSource, TDestination>(propBagMapperBuilder, autoMapperRequestKey, propModel);
 
             //// Store the request 
             //IPropBagMapperKeyGen newMapRequest = RegisterPropBagMapperRequest(typedMapperRequest);
@@ -106,7 +106,7 @@ namespace Swhp.Tspb.PropBagAutoMapperService
             return typedMapperRequest;
         }
 
-        private IBuildPropBagMapper<TSource, TDestination> BuildTheAutoMapperBuilder<TSource, TDestination>
+        private IPropBagMapperBuilder<TSource, TDestination> BuildTheAutoMapperBuilder<TSource, TDestination>
         (
             //IHaveAMapperConfigurationStep configStarterForThisRequest
         )
@@ -126,7 +126,7 @@ namespace Swhp.Tspb.PropBagAutoMapperService
             //    = new SimpleMapperConfigurationBuilder<TSource, TDestination>(configStarter: configStarterForThisRequest);
 
             // Create a MapperBuilder for this request.
-            IBuildPropBagMapper<TSource, TDestination> propBagMapperBuilder
+            IPropBagMapperBuilder<TSource, TDestination> propBagMapperBuilder
                 = _mapperBuilderProvider.GetPropBagMapperBuilder<TSource, TDestination>(/*propBagMapperConfigurationBuilder,*/ this);
 
             return propBagMapperBuilder;
@@ -179,9 +179,9 @@ namespace Swhp.Tspb.PropBagAutoMapperService
         // Submit a request to queue up the creation of a Raw AutoMapper, and receive the RequestKey.
         private IAutoMapperRequestKey<TSource, TDestination> SubmitRawAutoMapperRequest<TSource, TDestination>
         (
-            PropModelType propModel,
-            IConfigureAMapper<TSource, TDestination> mappingConfiguration,
-            IHaveAMapperConfigurationStep configStarterForThisRequest
+        PropModelType propModel,
+        IConfigureAMapper<TSource, TDestination> mappingConfiguration,
+        IHaveAMapperConfigurationStep configStarterForThisRequest
         )
         where TDestination : class, IPropBag
         {
@@ -191,14 +191,18 @@ namespace Swhp.Tspb.PropBagAutoMapperService
             IMapTypeDefinition dstMapTypeDef
                 = _mapTypeDefinitionProvider.GetTypeDescription(typeof(TDestination), propModel, uniqueToken: null);
 
+            // TODO: Add property PackageName to  IConfigureAMapper 
+            IAutoMapperConfigDetails pbMapperDetails = new PropBagMapperConfigDetails(mappingConfiguration.ToString(), propModel);
 
+
+            // TOOD: Add constructor parameter: IConfigDetails
             IAutoMapperRequestKey<TSource, TDestination> autoMapperRequestKey =
                 _autoMapperService.SubmitRawAutoMapperRequest<TSource, TDestination>
                 (
-                    srcMapTypeDef,
-                    dstMapTypeDef,
-                    mappingConfiguration,
-                    configStarterForThisRequest
+                srcMapTypeDef,
+                dstMapTypeDef,
+                mappingConfiguration,
+                configStarterForThisRequest
                 );
 
             return autoMapperRequestKey;

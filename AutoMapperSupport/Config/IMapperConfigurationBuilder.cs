@@ -2,7 +2,7 @@
 
 namespace Swhp.AutoMapperSupport
 {
-    public interface IBuildMapperConfigurations<TSource, TDestination> /*: IBuildMapperConfigurationsGen*/ //where TDestination : class, IPropBag
+    public interface IMapperConfigurationBuilder<TSource, TDestination> /*: IBuildMapperConfigurationsGen*/ //where TDestination : class, IPropBag
     {
         //IConfigurationProvider GetNewConfiguration
         //    (

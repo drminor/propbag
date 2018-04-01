@@ -3,11 +3,10 @@ namespace Swhp.AutoMapperSupport
 {
     public interface IAutoMapperBuilderProvider
     {
-        IBuildAutoMapper<TSource, TDestination> GetAutoMapperBuilder<TSource, TDestination>
+        IAutoMapperBuilder<TSource, TDestination> GetAutoMapperBuilder<TSource, TDestination>
         (
-            IBuildMapperConfigurations<TSource, TDestination> mapperConfigurationBuilder,
+            IMapperConfigurationBuilder<TSource, TDestination> mapperConfigurationBuilder,
             IAutoMapperService autoMapperService
         );
-        //where TDestination : class, IPropBag;
     }
 }

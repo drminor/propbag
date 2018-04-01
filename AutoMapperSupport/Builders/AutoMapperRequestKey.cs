@@ -29,14 +29,14 @@ namespace Swhp.AutoMapperSupport
 
         public AutoMapperRequestKey
             (
-            IBuildAutoMapper<TSource, TDestination> autoMapperBuilder,
+            IAutoMapperBuilder<TSource, TDestination> autoMapperBuilder,
             IConfigureAMapper<TSource, TDestination> mappingConfiguration,
             IMapTypeDefinition sourceMapTypeDef,
             IMapTypeDefinition destinationMapTypeDef
             )
             : base
             (
-                autoMapperBuilder.GenRawAutoMapperCreator,
+                autoMapperBuilder.AutoMapperBuilderGen,
                 sourceMapTypeDef,
                 destinationMapTypeDef
             )

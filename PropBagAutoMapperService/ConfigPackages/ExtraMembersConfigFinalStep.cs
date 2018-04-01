@@ -7,10 +7,17 @@ using System.Reflection;
 
 namespace Swhp.Tspb.PropBagAutoMapperService
 {
+
+
+
+
+
+
+
     using PropModelType = IPropModel<String>;
 
     public class ExtraMembersConfigFinalStep<TSource, TDestination>
-        : ICreateMappingExpressions<TSource, TDestination> //where TDestination : class, IPropBag
+        : IMapperConfigurationExpressionProvider<TSource, TDestination> //where TDestination : class, IPropBag
     {
         public bool RequiresProxyType => false;
 

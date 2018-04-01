@@ -5,8 +5,8 @@ using System;
 using System.Collections.Generic;
 
 namespace Swhp.Tspb.PropBagAutoMapperService
-
 {
+    using PropModelType = IPropModel<String>;
     using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
 
     public class PropBagMapperRequestKey<TSource, TDestination>
@@ -18,7 +18,7 @@ namespace Swhp.Tspb.PropBagAutoMapperService
     {
         #region Private Members
 
-        private readonly IBuildPropBagMapper<TSource, TDestination> _propBagMapperBuilder;
+        private readonly IPropBagMapperBuilder<TSource, TDestination> _propBagMapperBuilder;
 
         #endregion
 
@@ -41,20 +41,21 @@ namespace Swhp.Tspb.PropBagAutoMapperService
             return result;
         }
 
-
         #endregion
 
         #region Constructor
 
         public PropBagMapperRequestKey
         (
-            IBuildPropBagMapper<TSource, TDestination> propBagMapperBuilder,
-            IAutoMapperRequestKey<TSource, TDestination> autoMapperRequestKey
+            IPropBagMapperBuilder<TSource, TDestination> propBagMapperBuilder,
+            IAutoMapperRequestKey<TSource, TDestination> autoMapperRequestKey,
+            PropModelType propModel
         )
         : base
         (
             propBagMapperBuilder.GenPropBagMapperCreator,
-            autoMapperRequestKey
+            autoMapperRequestKey,
+            propModel
         )
         {
             _propBagMapperBuilder = propBagMapperBuilder;

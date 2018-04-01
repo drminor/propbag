@@ -5,9 +5,10 @@ using System;
 
 namespace Swhp.Tspb.PropBagAutoMapperService
 {
+    using PropModelType = IPropModel<String>;
     using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
 
-    public class SimplePropBagMapperBuilder<TSource, TDestination> : IBuildPropBagMapper<TSource, TDestination> where TDestination : class, IPropBag
+    public class SimplePropBagMapperBuilder<TSource, TDestination> : IPropBagMapperBuilder<TSource, TDestination> where TDestination : class, IPropBag
     {
         #region Private Properties
 

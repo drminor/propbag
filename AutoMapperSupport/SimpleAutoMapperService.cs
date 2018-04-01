@@ -5,12 +5,12 @@ using System.Threading;
 
 namespace Swhp.AutoMapperSupport
 {
-    public class SimpleAutoMapperProvider : IAutoMapperService, IDisposable
+    public class SimpleAutoMapperService : IAutoMapperService, IDisposable
     {
         #region Private Members
 
         //private readonly IMapTypeDefinitionProvider _mapTypeDefinitionProvider;
-        private readonly ICacheAutoMappers _autoMapperCache;
+        private readonly IAutoMapperCache _autoMapperCache;
         private readonly IAutoMapperBuilderProvider _autoMapperBuilderProvider;
         private IMapperConfigurationLookupService _mapperConfigurationLookupService { get; set; }
 
@@ -18,11 +18,11 @@ namespace Swhp.AutoMapperSupport
 
         #region Constructors
 
-        public SimpleAutoMapperProvider
+        public SimpleAutoMapperService
         (
             //IMapTypeDefinitionProvider mapTypeDefinitionProvider,
             IAutoMapperBuilderProvider autoMapperBuilderProvider,
-            ICacheAutoMappers autoMapperCache,
+            IAutoMapperCache autoMapperCache,
             IMapperConfigurationLookupService mapperConfigurationLookupService
         )
         {
@@ -34,7 +34,7 @@ namespace Swhp.AutoMapperSupport
         }
 
         // Disallow the parameterless constructor.
-        private SimpleAutoMapperProvider()
+        private SimpleAutoMapperService()
         {
             throw new NotSupportedException("Use of the paremeterless constructor for SimpleAutoMapperProvider is not supported.");
         }
@@ -98,7 +98,7 @@ namespace Swhp.AutoMapperSupport
         )
         {
             // Create a MapperBuilder for this request.
-            IBuildAutoMapper<TSource, TDestination> autoMapperBuilder
+            IAutoMapperBuilder<TSource, TDestination> autoMapperBuilder
                 = BuildTheAutoMapperBuilder<TSource, TDestination>(configStarterForThisRequest);
 
             // Create the mapper request.
@@ -122,7 +122,7 @@ namespace Swhp.AutoMapperSupport
             return _autoMapperCache.GetRawAutoMapper(autoMapperRequestKey);
         }
 
-        private IBuildAutoMapper<TSource, TDestination> BuildTheAutoMapperBuilder<TSource, TDestination>(IHaveAMapperConfigurationStep configStarterForThisRequest)
+        private IAutoMapperBuilder<TSource, TDestination> BuildTheAutoMapperBuilder<TSource, TDestination>(IHaveAMapperConfigurationStep configStarterForThisRequest)
         {
             // TODO: check to make sure that the "configStarterForThisRequest" value is being sent to the correct place.
 
@@ -134,11 +134,11 @@ namespace Swhp.AutoMapperSupport
             // and give it the configStarterForThisRequest value.
 
             // Create a Configuration Builder for this request.
-            IBuildMapperConfigurations<TSource, TDestination> propBagMapperConfigurationBuilder
+            IMapperConfigurationBuilder<TSource, TDestination> propBagMapperConfigurationBuilder
                 = new SimpleMapperConfigurationBuilder<TSource, TDestination>(configStarter: configStarterForThisRequest);
 
             // Create a MapperBuilder for this request.
-            IBuildAutoMapper<TSource, TDestination> autoMapperBuilder
+            IAutoMapperBuilder<TSource, TDestination> autoMapperBuilder
                 = _autoMapperBuilderProvider.GetAutoMapperBuilder<TSource, TDestination>(propBagMapperConfigurationBuilder, this);
 
             return autoMapperBuilder;

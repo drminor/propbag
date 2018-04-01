@@ -4,8 +4,7 @@ using System;
 namespace Swhp.AutoMapperSupport
 {
     public class SimpleMapperConfigurationBuilder<TSource, TDestination>
-        : SimpleMapperConfigurationBuilderGenBase, IBuildMapperConfigurations<TSource, TDestination>
-        //where TDestination : class, IPropBag
+        : SimpleMapperConfigurationBuilderGenBase, IMapperConfigurationBuilder<TSource, TDestination>
     {
         public SimpleMapperConfigurationBuilder()
             : base(null) 

@@ -5,7 +5,7 @@ namespace Swhp.AutoMapperSupport
 {
     //using PropModelType = IPropModel<String>;
 
-    public interface IAutoMapperService : ICacheAutoMappers
+    public interface IAutoMapperService : IAutoMapperCache
     {
         //Typed Submit with ConfigPackageName
         IAutoMapperRequestKey<TSource, TDestination> SubmitRawAutoMapperRequest<TSource, TDestination>

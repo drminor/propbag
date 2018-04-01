@@ -5,7 +5,7 @@ namespace Swhp.Tspb.PropBagAutoMapperService
 {
     public class ConfigPackage_ExtraMembers : IProvideAMapperConfiguration
     {
-        public IConfigureAMapper<TSource, TDestination> GetTheMapperConfig<TSource, TDestination>() //where TDestination : class, IPropBag
+        public IConfigureAMapper<TSource, TDestination> GetTheMapperConfig<TSource, TDestination>()
         {
             List<IHaveAMapperConfigurationStep> configSteps = new List<IHaveAMapperConfigurationStep>
             {
@@ -13,14 +13,15 @@ namespace Swhp.Tspb.PropBagAutoMapperService
                 new ExtraMembersConfigInitialStep()
             };
 
-            IConfigureAMapper<TSource, TDestination> result = new SimpleMapperConfigTyped<TSource, TDestination>
+            IConfigureAMapper<TSource, TDestination> result = new SimpleMapperConfiguration<TSource, TDestination>
             (
                 configSteps: configSteps,
                 finalConfigActionProvider: new ExtraMembersConfigFinalStep<TSource, TDestination>(),
                 sourceConstructor: null,
                 destinationConstructor: null,
                 configStarter: null,
-                requiresWrappperTypeEmitServices: false
+                requiresWrappperTypeEmitServices: false,
+                supportsMapFrom: true
             );
                 
             return result;

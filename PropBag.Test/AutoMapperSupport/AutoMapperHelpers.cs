@@ -69,8 +69,8 @@ namespace PropBagLib.Tests.AutoMapperSupport
         public IPropBagMapperService InitializeAutoMappers(ViewModelFactoryInterface viewModelFactory)
         {
             IAutoMapperBuilderProvider autoMapperBuilderProvider = new SimpleAutoMapperBuilderProvider();
-            ICacheAutoMappers rawAutoMapperCache = new SimpleAutoMapperCache();
-            SimpleAutoMapperProvider autoMapperService = new SimpleAutoMapperProvider
+            IAutoMapperCache rawAutoMapperCache = new SimpleAutoMapperCache();
+            SimpleAutoMapperService autoMapperService = new SimpleAutoMapperService
             (
                 autoMapperBuilderProvider: autoMapperBuilderProvider,
                 autoMapperCache: rawAutoMapperCache,

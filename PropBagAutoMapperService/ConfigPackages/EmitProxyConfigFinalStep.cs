@@ -11,7 +11,7 @@ namespace Swhp.Tspb.PropBagAutoMapperService
     /// <typeparam name="TSource"></typeparam>
     /// <typeparam name="TDestination"></typeparam>
     public class EmitProxyConfigFinalStep<TSource, TDestination>
-        : ICreateMappingExpressions<TSource, TDestination> //where TDestination : class, IPropBag
+        : IMapperConfigurationExpressionProvider<TSource, TDestination> //where TDestination : class, IPropBag
     {
         public bool RequiresProxyType => true;
 

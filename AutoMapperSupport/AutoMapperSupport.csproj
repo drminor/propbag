@@ -42,30 +42,32 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Builders\IAutoMapperBuilderProvider.cs" />
-    <Compile Include="Builders\IBuildAutoMapper.cs" />
+    <Compile Include="Builders\IAutoMapperBuilder.cs" />
     <Compile Include="Builders\AutoMapperRequestKeyGen.cs" />
     <Compile Include="Builders\AutoMapperRequestKey.cs" />
     <Compile Include="Builders\SimpleAutoMapperBuilderProvider.cs" />
     <Compile Include="Builders\SimpleAutoMapperBuilder.cs" />
     <Compile Include="Caches\SimpleAutoMapperCache.cs" />
+    <Compile Include="ConfigDetails\AutoMapperConfigDetailsBase.cs" />
+    <Compile Include="ConfigDetails\IAutoMapperConfigDetails.cs" />
     <Compile Include="Config\IProvideAMapperConfiguration.cs" />
     <Compile Include="Builders\IAutoMapperRequestKey.cs" />
     <Compile Include="Builders\IAutoMapperRequestKeyGen.cs" />
     <Compile Include="IAutoMapperService.cs" />
-    <Compile Include="Caches\ICacheAutoMappers.cs" />
+    <Compile Include="Caches\IAutoMapperCache.cs" />
     <Compile Include="Config\IConfigureAMapper.cs" />
-    <Compile Include="Config\ICreateMappingExpressions.cs" />
+    <Compile Include="Config\IMapperConfigurationExpressionProvider.cs" />
     <Compile Include="Config\IHaveAMapperConfigurationStep.cs" />
     <Compile Include="MapTypeDefinition\IMapTypeDefinition.cs" />
     <Compile Include="MapTypeDefinition\IMapTypeDefinitionProvider.cs" />
     <Compile Include="Config\SimpleMapperConfigurationBuilderGenBase.cs" />
     <Compile Include="Config\SimpleMapperConfigurationBuilder.cs" />
-    <Compile Include="Config\AbstractMapperConfigGen.cs" />
+    <Compile Include="Config\AbstractMapperConfigurationGen.cs" />
     <Compile Include="SimpleAutoMapperService.cs" />
     <Compile Include="Config\MapperConfigStarter_Empty.cs" />
     <Compile Include="Config\MapperConfigStarter_Default.cs" />
-    <Compile Include="Config\IBuildMapperConfigurations.cs" />
-    <Compile Include="Config\SimpleMapperConfigTyped.cs" />
+    <Compile Include="Config\IMapperConfigurationBuilder.cs" />
+    <Compile Include="Config\SimpleMapperConfiguration.cs" />
     <Compile Include="MapTypeDefinition\MapTypeDefinition.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

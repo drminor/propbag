@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Swhp.AutoMapperSupport
 {
-    public abstract class AbstractMapperConfigGen : IConfigureAMapperGen
+    public abstract class AbstractMapperConfigurationGen : IConfigureAMapperGen
     {
         //protected IBuildMapperConfigurationsGen MapperConfigBuilderGen { get; }
 
@@ -15,7 +15,7 @@ namespace Swhp.AutoMapperSupport
         public virtual bool SupportsMapFrom { get; }
         public bool RequiresWrappperTypeEmitServices { get; }
 
-        public AbstractMapperConfigGen
+        public AbstractMapperConfigurationGen
             (
             //mapperConfigBuilderGen,
             List<IHaveAMapperConfigurationStep> configSteps,

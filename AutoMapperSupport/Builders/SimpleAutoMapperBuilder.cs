@@ -3,11 +3,11 @@ using System;
 
 namespace Swhp.AutoMapperSupport
 {
-    public class SimpleAutoMapperBuilder<TSource, TDestination> : IBuildAutoMapper<TSource, TDestination> //where TDestination : class, IPropBag
+    public class SimpleAutoMapperBuilder<TSource, TDestination> : IAutoMapperBuilder<TSource, TDestination>
     {
         #region Private Properties
 
-        private readonly IBuildMapperConfigurations<TSource, TDestination> _mapperConfigurationBuilder;
+        private readonly IMapperConfigurationBuilder<TSource, TDestination> _mapperConfigurationBuilder;
         private readonly IAutoMapperService _autoMapperService;
 
         #endregion
@@ -16,7 +16,7 @@ namespace Swhp.AutoMapperSupport
 
         public SimpleAutoMapperBuilder
             (
-            IBuildMapperConfigurations<TSource, TDestination> mapperConfigurationBuilder,
+            IMapperConfigurationBuilder<TSource, TDestination> mapperConfigurationBuilder,
             IAutoMapperService autoMapperService
             )
         {
@@ -29,7 +29,7 @@ namespace Swhp.AutoMapperSupport
         #region Public Members
 
         // Create a new AutoMapper (IMapper)
-        public IMapper GenerateRawAutoMapper(IAutoMapperRequestKey<TSource, TDestination> mapperRequestKey)
+        public IMapper BuildAutoMapper(IAutoMapperRequestKey<TSource, TDestination> mapperRequestKey)
         {
             CheckTypeToCreate(typeof(TSource), mapperRequestKey.SourceTypeDef.TargetType);
             CheckTypeToCreate(typeof(TDestination), mapperRequestKey.DestinationTypeDef.TargetType);
@@ -41,7 +41,7 @@ namespace Swhp.AutoMapperSupport
             return theMapper;
         }
 
-        public Func<IAutoMapperRequestKeyGen, IMapper> GenRawAutoMapperCreator => GenerateRawAutoMapperGen;
+        public Func<IAutoMapperRequestKeyGen, IMapper> AutoMapperBuilderGen => GenerateRawAutoMapperGen;
 
         #endregion
 
@@ -56,7 +56,7 @@ namespace Swhp.AutoMapperSupport
                 throw new InvalidOperationException($"{nameof(mapRequestGen)} does not implement the correct typed {nameof(IAutoMapperRequestKey<TSource, TDestination>)} interface.");
             }
 
-            return GenerateRawAutoMapper(mapRequestTyped);
+            return BuildAutoMapper(mapRequestTyped);
         }
 
 

@@ -1,12 +1,11 @@
 ﻿using AutoMapper;
 using DRM.TypeSafePropertyBag;
 using System;
-using System.Linq;
 
 namespace Swhp.AutoMapperSupport
 {
     //[Synchronization()]
-    public class SimpleAutoMapperCache : /*ContextBoundObject,*/ ICacheAutoMappers, IDisposable
+    public class SimpleAutoMapperCache : /*ContextBoundObject,*/ IAutoMapperCache, IDisposable
     {
         private readonly LockingConcurrentDictionary<IAutoMapperRequestKeyGen, IAutoMapperRequestKeyGen> _unSealedAutoMappers;
         private readonly LockingConcurrentDictionary<IAutoMapperRequestKeyGen, IMapper> _sealedAutoMappers;

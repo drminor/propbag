@@ -12,14 +12,15 @@ namespace Swhp.Tspb.PropBagAutoMapperService
                 new MapperConfigStarter_Default()
             };
 
-            IConfigureAMapper<TSource, TDestination> result = new SimpleMapperConfigTyped<TSource, TDestination>
+            IConfigureAMapper<TSource, TDestination> result = new SimpleMapperConfiguration<TSource, TDestination>
             (
                 configSteps: configSteps,
                 finalConfigActionProvider: new EmitProxyConfigFinalStep<TSource, TDestination>(),
                 sourceConstructor: null,
                 destinationConstructor: null,
                 configStarter: null,
-                requiresWrappperTypeEmitServices: true
+                requiresWrappperTypeEmitServices: true,
+                supportsMapFrom: true
             );
                 
             return result;

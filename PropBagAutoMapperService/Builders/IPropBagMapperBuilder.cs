@@ -6,7 +6,7 @@ namespace Swhp.Tspb.PropBagAutoMapperService
 {
     using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
 
-    public interface IBuildPropBagMapper<TSource, TDestination> where TDestination : class, IPropBag
+    public interface IPropBagMapperBuilder<TSource, TDestination> where TDestination : class, IPropBag
     {
         Func<IPropBagMapperRequestKeyGen, ViewModelFactoryInterface, IPropBagMapperGen> GenPropBagMapperCreator { get; }
 

@@ -27,14 +27,14 @@
 
         #region Public Methods
 
-        public IBuildAutoMapper<TSource, TDestination> GetAutoMapperBuilder<TSource, TDestination>
+        public IAutoMapperBuilder<TSource, TDestination> GetAutoMapperBuilder<TSource, TDestination>
             (
-            IBuildMapperConfigurations<TSource, TDestination> mapperConfigurationBuilder,
+            IMapperConfigurationBuilder<TSource, TDestination> mapperConfigurationBuilder,
             IAutoMapperService autoMapperService
             )
-            //where TDestination: class, IPropBag
+
         {
-            IBuildAutoMapper<TSource, TDestination> result = new SimpleAutoMapperBuilder<TSource, TDestination>
+            IAutoMapperBuilder<TSource, TDestination> result = new SimpleAutoMapperBuilder<TSource, TDestination>
                 (
                     mapperConfigurationBuilder: mapperConfigurationBuilder,
                     autoMapperService: autoMapperService

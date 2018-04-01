@@ -8,11 +8,11 @@ namespace Swhp.Tspb.PropBagAutoMapperService
     public class SimpleMapTypeDefinitionProvider : IMapTypeDefinitionProvider
     {
         public IMapTypeDefinition GetTypeDescription
-        (
+            (
             Type targetType,
             object uniqueRef,
             string uniqueToken
-        )
+            )
         {
             IMapTypeDefinition result;
 

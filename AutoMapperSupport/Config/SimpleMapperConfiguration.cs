@@ -3,10 +3,10 @@ using System.Collections.Generic;
 
 namespace Swhp.AutoMapperSupport
 {
-    public class SimpleMapperConfigTyped<TSource, TDestination>
-        : AbstractMapperConfigGen, IConfigureAMapper<TSource, TDestination> //where TDestination : class, IPropBag
+    public class SimpleMapperConfiguration<TSource, TDestination>
+        : AbstractMapperConfigurationGen, IConfigureAMapper<TSource, TDestination> //where TDestination : class, IPropBag
     {
-        public ICreateMappingExpressions<TSource, TDestination> FinalConfigActionProvider { get; }
+        public IMapperConfigurationExpressionProvider<TSource, TDestination> FinalConfigActionProvider { get; }
 
         public Func<TDestination, TSource> SourceConstructor { get; }
 
@@ -14,15 +14,15 @@ namespace Swhp.AutoMapperSupport
 
         #region Constructor
 
-        public SimpleMapperConfigTyped
+        public SimpleMapperConfiguration
             (
                 List<IHaveAMapperConfigurationStep> configSteps,
-                ICreateMappingExpressions<TSource, TDestination> finalConfigActionProvider,
+                IMapperConfigurationExpressionProvider<TSource, TDestination> finalConfigActionProvider,
                 Func<TDestination, TSource> sourceConstructor,
                 Func<TSource, TDestination> destinationConstructor,
                 IHaveAMapperConfigurationStep configStarter,
                 bool requiresWrappperTypeEmitServices,
-                bool supportsMapFrom = true
+                bool supportsMapFrom
             )
             : base
             (

@@ -6,6 +6,7 @@ using System;
 
 namespace Swhp.Tspb.PropBagAutoMapperService
 {
+    using PropModelType = IPropModel<String>;
     using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
 
     // TODO: Consider implementing IDisposable -- to let go of any references we may hold to the mapper creators.
@@ -35,7 +36,7 @@ namespace Swhp.Tspb.PropBagAutoMapperService
 
         public Func<IPropBagMapperRequestKeyGen, ViewModelFactoryInterface, IPropBagMapperGen> PropBagMapperCreator { get; }
 
-
+        public PropModelType PropModel { get; }
 
         #endregion
 
@@ -44,11 +45,13 @@ namespace Swhp.Tspb.PropBagAutoMapperService
         public PropBagMapperRequestKeyGen
             (
             Func<IPropBagMapperRequestKeyGen, ViewModelFactoryInterface, IPropBagMapperGen> mapperCreator,
-            IAutoMapperRequestKeyGen autoMapperRequestKeyGen
+            IAutoMapperRequestKeyGen autoMapperRequestKeyGen,
+            PropModelType propModel
             )
         {
             PropBagMapperCreator = mapperCreator;
             AutoMapperRequestKeyGen = autoMapperRequestKeyGen;
+            PropModel = propModel;
         }
 
         #endregion
@@ -59,18 +62,6 @@ namespace Swhp.Tspb.PropBagAutoMapperService
         {
             return PropBagMapperCreator(this, viewModelFactory);
         }
-
-        //public IMapper CreateRawAutoMapper()
-        //{
-        //    IAutoMapperRequestKeyGen amRequestKey = GetAutoMapperRequestKeyGen();
-        //    return RawAutoMapperCreator(amRequestKey);
-        //}
-
-        //public IAutoMapperRequestKeyGen GetAutoMapperRequestKeyGen()
-        //{
-        //    IAutoMapperRequestKeyGen amRequestKey = new AutoMapperRequestKeyGen(RawAutoMapperCreator, SourceTypeGenDef, DestinationTypeGenDef);
-        //    return amRequestKey;
-        //}
 
         #endregion
 

@@ -10,12 +10,12 @@ namespace Swhp.Tspb.PropBagAutoMapperService
     public class SimplePropBagMapper<TSource, TDestination> : AbstractPropBagMapper<TSource, TDestination> where TDestination : class, IPropBag
     {
         public SimplePropBagMapper
-        (
+            (
             IPropBagMapperRequestKey<TSource, TDestination> mapRequest,
             IMapper mapper,
             ViewModelFactoryInterface viewModelFactory,
             IPropBagMapperService propBagMapperService
-        )
+            )
         : base
             (
             mapRequest,

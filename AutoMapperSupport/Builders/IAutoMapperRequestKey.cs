@@ -1,7 +1,7 @@
 ﻿
 namespace Swhp.AutoMapperSupport
 {
-    public interface IAutoMapperRequestKey<TSource, TDestination> : IAutoMapperRequestKeyGen //where TDestination: class, IPropBag
+    public interface IAutoMapperRequestKey<TSource, TDestination> : IAutoMapperRequestKeyGen
     {
         IMapTypeDefinition SourceTypeDef { get; }
         IMapTypeDefinition DestinationTypeDef { get; }
