@@ -5,8 +5,7 @@ namespace Swhp.AutoMapperSupport
 {
     public abstract class AbstractMapperConfigurationGen : IConfigureAMapperGen
     {
-        //protected IBuildMapperConfigurationsGen MapperConfigBuilderGen { get; }
-
+        public string PackageName { get; }
         public IHaveAMapperConfigurationStep ConfigStarter { get; }
 
         protected List<IHaveAMapperConfigurationStep> _ourConfigurationSteps;
@@ -17,14 +16,14 @@ namespace Swhp.AutoMapperSupport
 
         public AbstractMapperConfigurationGen
             (
-            //mapperConfigBuilderGen,
+            string packageName,
             List<IHaveAMapperConfigurationStep> configSteps,
             IHaveAMapperConfigurationStep configStarter,
             bool requiresWrapperTypeEmitServices,
             bool supportsMapFrom
             )
         {
-            //MapperConfigBuilderGen = mapperConfigBuilderGen;
+            PackageName = packageName;
             ConfigStarter = configStarter;
 
             _ourConfigurationSteps = MakeACopy(configSteps);
@@ -33,14 +32,6 @@ namespace Swhp.AutoMapperSupport
             SupportsMapFrom = supportsMapFrom;
             RequiresWrappperTypeEmitServices = requiresWrapperTypeEmitServices;
         }
-
-        //// TODO: Make this use the singleton pattern -- once the base has been provided,
-        //// and the steps performed, there is no reason to re-evaluate.
-        //public IConfigurationProvider GetConfigurationProviderGen()
-        //{
-        //    IConfigurationProvider mapperProfile = MapperConfigBuilderGen.GetNewConfiguration(this);
-        //    return mapperProfile;
-        //}
 
         private List<IHaveAMapperConfigurationStep> MakeACopy(List<IHaveAMapperConfigurationStep> source)
         {

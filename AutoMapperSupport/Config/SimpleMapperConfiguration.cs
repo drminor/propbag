@@ -4,7 +4,9 @@ using System.Collections.Generic;
 namespace Swhp.AutoMapperSupport
 {
     public class SimpleMapperConfiguration<TSource, TDestination>
-        : AbstractMapperConfigurationGen, IConfigureAMapper<TSource, TDestination> //where TDestination : class, IPropBag
+        :
+        AbstractMapperConfigurationGen,
+        IConfigureAMapper<TSource, TDestination>
     {
         public IMapperConfigurationExpressionProvider<TSource, TDestination> FinalConfigActionProvider { get; }
 
@@ -16,20 +18,23 @@ namespace Swhp.AutoMapperSupport
 
         public SimpleMapperConfiguration
             (
-                List<IHaveAMapperConfigurationStep> configSteps,
-                IMapperConfigurationExpressionProvider<TSource, TDestination> finalConfigActionProvider,
-                Func<TDestination, TSource> sourceConstructor,
-                Func<TSource, TDestination> destinationConstructor,
-                IHaveAMapperConfigurationStep configStarter,
-                bool requiresWrappperTypeEmitServices,
-                bool supportsMapFrom
+            string packageName,
+            List<IHaveAMapperConfigurationStep> configSteps,
+            IMapperConfigurationExpressionProvider<TSource, TDestination> finalConfigActionProvider,
+            Func<TDestination, TSource> sourceConstructor,
+            Func<TSource, TDestination> destinationConstructor,
+            IHaveAMapperConfigurationStep configStarter,
+            bool requiresWrappperTypeEmitServices,
+            bool supportsMapFrom
             )
-            : base
+        : base
             (
-                  configSteps,
-                  configStarter,
-                  requiresWrappperTypeEmitServices,
-                  supportsMapFrom)
+            packageName,
+            configSteps,
+            configStarter,
+            requiresWrappperTypeEmitServices,
+            supportsMapFrom
+            )
         {
             FinalConfigActionProvider = finalConfigActionProvider;
             SourceConstructor = sourceConstructor;
@@ -37,6 +42,5 @@ namespace Swhp.AutoMapperSupport
         }
 
         #endregion
-
     }
 }

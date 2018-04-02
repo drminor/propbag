@@ -12,6 +12,7 @@ namespace Swhp.AutoMapperSupport
 
     public interface IConfigureAMapperGen
     {
+        string PackageName { get; }
         bool SupportsMapFrom { get; }
         bool RequiresWrappperTypeEmitServices { get; }
         IReadOnlyCollection<IHaveAMapperConfigurationStep> ConfigurationSteps { get; }

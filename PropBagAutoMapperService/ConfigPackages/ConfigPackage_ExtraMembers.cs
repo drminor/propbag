@@ -5,6 +5,8 @@ namespace Swhp.Tspb.PropBagAutoMapperService
 {
     public class ConfigPackage_ExtraMembers : IProvideAMapperConfiguration
     {
+        public const string EXTRA_MEMBERS_PROP_BAG_PACKAGE_NAME = "Extra_Members";
+
         public IConfigureAMapper<TSource, TDestination> GetTheMapperConfig<TSource, TDestination>()
         {
             List<IHaveAMapperConfigurationStep> configSteps = new List<IHaveAMapperConfigurationStep>
@@ -15,6 +17,7 @@ namespace Swhp.Tspb.PropBagAutoMapperService
 
             IConfigureAMapper<TSource, TDestination> result = new SimpleMapperConfiguration<TSource, TDestination>
             (
+                EXTRA_MEMBERS_PROP_BAG_PACKAGE_NAME,
                 configSteps: configSteps,
                 finalConfigActionProvider: new ExtraMembersConfigFinalStep<TSource, TDestination>(),
                 sourceConstructor: null,
