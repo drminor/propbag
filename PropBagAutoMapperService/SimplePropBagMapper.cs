@@ -5,23 +5,26 @@ using System;
 
 namespace Swhp.Tspb.PropBagAutoMapperService
 {
+    using PropModelType = IPropModel<String>;
     using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
 
     public class SimplePropBagMapper<TSource, TDestination> : AbstractPropBagMapper<TSource, TDestination> where TDestination : class, IPropBag
     {
         public SimplePropBagMapper
             (
-            IPropBagMapperRequestKey<TSource, TDestination> mapRequest,
+            PropModelType propModel,
             IMapper mapper,
             ViewModelFactoryInterface viewModelFactory,
-            IPropBagMapperService propBagMapperService
+            IPropBagMapperService propBagMapperService,
+            IPropBagMapperRequestKey<TSource, TDestination> mapRequest
             )
-        : base
+            : base
             (
-            mapRequest,
+            propModel,
             mapper,
             viewModelFactory,
-            propBagMapperService
+            propBagMapperService,
+            mapRequest
             )
         {
         }

@@ -6,7 +6,6 @@ using System.Collections.Generic;
 
 namespace Swhp.Tspb.PropBagAutoMapperService
 {
-    using PropModelType = IPropModel<String>;
     using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
 
     public class PropBagMapperRequestKey<TSource, TDestination>
@@ -26,9 +25,6 @@ namespace Swhp.Tspb.PropBagAutoMapperService
 
         public IAutoMapperRequestKey<TSource, TDestination> AutoMapperRequestKey => (IAutoMapperRequestKey<TSource, TDestination>) AutoMapperRequestKeyGen;
 
-        //public IMapTypeDefinition SourceTypeGenDef => AutoMapperRequestKey.SourceTypeDef;
-        //public IMapTypeDefinition DestinationTypeDef => AutoMapperRequestKey.DestinationTypeDef;
-
         public IConfigureAMapper<TSource, TDestination> MappingConfiguration => AutoMapperRequestKey.MappingConfiguration;
 
         public IPropBagMapper<TSource, TDestination> GeneratePropBagMapper
@@ -37,7 +33,7 @@ namespace Swhp.Tspb.PropBagAutoMapperService
             ViewModelFactoryInterface viewModelFactory
             )
         {
-            var result = _propBagMapperBuilder.GeneratePropBagMapper(mapperRequestKey, viewModelFactory);
+            var result = _propBagMapperBuilder.BuildPropBagMapper(mapperRequestKey, viewModelFactory);
             return result;
         }
 
@@ -48,14 +44,16 @@ namespace Swhp.Tspb.PropBagAutoMapperService
         public PropBagMapperRequestKey
         (
             IPropBagMapperBuilder<TSource, TDestination> propBagMapperBuilder,
-            IAutoMapperRequestKey<TSource, TDestination> autoMapperRequestKey,
-            PropModelType propModel
+            IAutoMapperRequestKey<TSource, TDestination> autoMapperRequestKey
+            //,
+            //PropModelType propModel
         )
         : base
         (
-            propBagMapperBuilder.GenPropBagMapperCreator,
-            autoMapperRequestKey,
-            propModel
+            propBagMapperBuilder.PropBagMapperBuilderGen,
+            autoMapperRequestKey
+            //  ,
+            //propModel
         )
         {
             _propBagMapperBuilder = propBagMapperBuilder;

@@ -3996,7 +3996,7 @@ namespace DRM.PropBag
             where TSource : class
             where TDestination : class, INotifyItemEndEdit, IPropBag
             {
-                IPropBagMapper<TSource, TDestination> propBagMapper = GetAutoMapper<TSource, TDestination>
+                IPropBagMapper<TSource, TDestination> propBagMapper = GetPropBagMapper<TSource, TDestination>
                     (
                     mr,
                     _propBagMapperService,
@@ -4025,7 +4025,7 @@ namespace DRM.PropBag
             //}
         }
 
-        private IPropBagMapper<TSource, TDestination> GetAutoMapper<TSource, TDestination>
+        private IPropBagMapper<TSource, TDestination> GetPropBagMapper<TSource, TDestination>
             (
             IMapperRequest mapperRequest,
             IPropBagMapperService propBagMapperService,
@@ -4034,7 +4034,6 @@ namespace DRM.PropBag
             where TDestination : class, IPropBag
         {
             // TODO: See if we can submit the request earlier; perhaps when the mapper request is created.
-            //Type typeToWrap = mapperRequest.PropModel.TypeToWrap;
 
             // Submit the Mapper Request.
             propBagMapperRequestKey = propBagMapperService.SubmitPropBagMapperRequest<TSource, TDestination>
@@ -4056,36 +4055,14 @@ namespace DRM.PropBag
         )
         {
             // Submit the Mapper Request. TODO: See if we can submit the request earlier; perhaps when the mapper request is created.
-            propBagMapperRequestKeyGen = propBagMapperService.SubmitPropBagMapperRequest(mapperRequest.PropModel, mapperRequest.SourceType, mapperRequest.ConfigPackageName);
+            propBagMapperRequestKeyGen = propBagMapperService.SubmitPropBagMapperRequest
+                (mapperRequest.PropModel, mapperRequest.SourceType, mapperRequest.ConfigPackageName);
 
             // Get the AutoMapper mapping function associated with the mapper request just submitted.
-            IPropBagMapperGen mapperGen = propBagMapperService.GetPropBagMapper(propBagMapperRequestKeyGen);
+            IPropBagMapperGen propBagMapperGen = propBagMapperService.GetPropBagMapper(propBagMapperRequestKeyGen);
 
-            return mapperGen;
+            return propBagMapperGen;
         }
-
-        //private IPropBagMapper<TSource, TDestination> GetAutoMapper<TSource, TDestination>
-        //(
-        //    IMapperRequest mapperRequest,
-        //    IPropBagMapperService propBagMapperService,
-        //    out IPropBagMapperKey<TSource, TDestination> propBagMapperRequestKey
-        //)
-        //where TDestination : class, IPropBag
-        //{
-        //    // This is where the PropModel is used to define the Mapper 
-
-        //    // TODO: See if we can submit the request earlier; perhaps when the mapper request is created.
-
-        //    Type typeToWrap = null; // This should only be used if we are overridding the TypeToWrap value stored in the PropModel.
-
-        //    // Submit the Mapper Request.
-        //    propBagMapperRequestKey = propBagMapperService.SubmitPropBagMapperRequest<TSource, TDestination>(mapperRequest.PropModel, typeToWrap, mapperRequest.ConfigPackageName);
-
-        //    // Get the AutoMapper mapping function associated with the mapper request just submitted.
-        //    IPropBagMapper<TSource, TDestination> result = propBagMapperService.GetPropBagMapper<TSource, TDestination>(propBagMapperRequestKey);
-
-        //    return result;
-        //}
 
         public IManageCViews GetOrAddViewManager(PropNameType propertyName, Type propertyType)
         {

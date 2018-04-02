@@ -45,10 +45,11 @@ namespace Swhp.Tspb.PropBagAutoMapperService
 
         public AbstractPropBagMapper
             (
-            IPropBagMapperRequestKey<TSource, TDestination> mapRequest,
+            PropModelType propModel,
             IMapper mapper,
             ViewModelFactoryInterface viewModelFactory,
-            IPropBagMapperService propBagMapperService
+            IPropBagMapperService propBagMapperService,
+            IPropBagMapperRequestKey<TSource, TDestination> mapRequest
             )
         {
             SourceType = mapRequest.SourceType;
@@ -57,7 +58,7 @@ namespace Swhp.Tspb.PropBagAutoMapperService
             RunTimeType = mapRequest.DestinationTypeDef.RunTimeType;
 
             // Fix Me !!
-            PropModel = (PropModelType) mapRequest.DestinationTypeDef.UniqueRef;
+            PropModel = propModel; //(PropModelType) mapRequest.DestinationTypeDef.UniqueRef;
 
             PropFactory = PropModel.PropFactory; // (IPropFactory)mapRequest.DestinationTypeDef.PropFactory;
 
@@ -68,6 +69,9 @@ namespace Swhp.Tspb.PropBagAutoMapperService
 
             SupportsMapFrom = true;
 
+            
+
+
             _requiresWrappperTypeEmitServices = mapRequest.MappingConfiguration.RequiresWrappperTypeEmitServices;
 
             _mct.Measure();
@@ -75,6 +79,11 @@ namespace Swhp.Tspb.PropBagAutoMapperService
             _destPropBagTemplate = GetDestinationTemplate(RunTimeType);
 
             _mct.MeasureAndReport("GetNewDestination(PropModel, ... [In Constructor]", "AbstractPropBagMapper");
+
+            // Working on see if we can get the SupportsMapFrom from the Mapper itself.
+            //TypePair tp = new TypePair(SourceType, DestinationType);
+            //IObjectMapper mpr = mapper.ConfigurationProvider.FindMapper(tp);
+
 
             return;
         }

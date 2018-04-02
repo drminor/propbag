@@ -95,22 +95,44 @@ namespace Swhp.Tspb.PropBagAutoMapperService
         {
             // Use the AutoMapperService to register a 'raw' request.
             IAutoMapperRequestKey<TSource, TDestination> autoMapperRequestKey =
-                this.SubmitRawAutoMapperRequest<TSource, TDestination>(propModel, mappingConfiguration, configStarterForThisRequest);
+                this.SubmitRawAutoMapperRequest<TSource, TDestination>
+                (
+                propModel,
+                mappingConfiguration,
+                configStarterForThisRequest
+                );
+
+
+            // Note: at this point we can fetch the Mapper Config Details.
+            //IAutoMapperConfigDetails autoMapperConfigDetails = autoMapperRequestKey.AutoMapperConfigDetails;
+            //IPropBagMapperConfigDetails propBagMapperConfigDetails = (IPropBagMapperConfigDetails)autoMapperConfigDetails;
+
 
             // Create a MapperBuilder for this request.
             IPropBagMapperBuilder<TSource, TDestination> propBagMapperBuilder
                 = BuildTheAutoMapperBuilder<TSource, TDestination>(/*configStarterForThisRequest*/);
 
             // Create the PropBag Mapper Request.
-            IPropBagMapperRequestKey<TSource, TDestination> typedMapperRequest
-                = new PropBagMapperRequestKey<TSource, TDestination>(propBagMapperBuilder, autoMapperRequestKey, propModel);
+            IPropBagMapperRequestKey<TSource, TDestination> propBagMapperRequestKey
+                = new PropBagMapperRequestKey<TSource, TDestination>
+                (
+                    propBagMapperBuilder,
+                    autoMapperRequestKey // This contains a reference to the propModel.
+                    //,
+                    //propModel
+                );
+
+
+            // Note: at this point we can fetch the Mapper Config Details from the PropBagMapperRequestKey.
+            //IPropBagMapperConfigDetails propBagMapperConfigDetails = propBagMapperRequestKey.PropBagMapperConfigDetails;
+
 
             //// Store the request 
             //IPropBagMapperKeyGen newMapRequest = RegisterPropBagMapperRequest(typedMapperRequest);
             //return (IPropBagMapperKey<TSource, TDestination>)newMapRequest;
 
             // We could store the request in the PropBagMapper Cache, but it would not be used.
-            return typedMapperRequest;
+            return propBagMapperRequestKey;
         }
 
         private IPropBagMapperBuilder<TSource, TDestination> BuildTheAutoMapperBuilder<TSource, TDestination>()
@@ -143,7 +165,9 @@ namespace Swhp.Tspb.PropBagAutoMapperService
                     GetRawAutoMapper<TSource, TDestination>(mapperRequest.AutoMapperRequestKey);
             }
 
-            IPropBagMapper<TSource, TDestination> result = _propBagMappersCache.GetPropBagMapper<TSource, TDestination>(mapperRequest);
+            IPropBagMapper<TSource, TDestination> result =
+                _propBagMappersCache.GetPropBagMapper<TSource, TDestination>(mapperRequest);
+
             return result;
         }
 

@@ -14,7 +14,6 @@ namespace Swhp.Tspb.PropBagAutoMapperService
     {
         #region Public Properties
 
-        public PropModelType PropModel { get; }
         public IAutoMapperRequestKeyGen AutoMapperRequestKeyGen { get; }
         public IMapper AutoMapper { get; set; }
 
@@ -29,6 +28,8 @@ namespace Swhp.Tspb.PropBagAutoMapperService
 
         public IPropBagMapperConfigDetails PropBagMapperConfigDetails => AutoMapperRequestKeyGen.AutoMapperConfigDetails as IPropBagMapperConfigDetails;
 
+        public PropModelType PropModel => PropBagMapperConfigDetails.PropModel;
+
         #endregion
 
         #region Constructor
@@ -36,13 +37,14 @@ namespace Swhp.Tspb.PropBagAutoMapperService
         public PropBagMapperRequestKeyGen
             (
             Func<IPropBagMapperRequestKeyGen, ViewModelFactoryInterface, IPropBagMapperGen> mapperCreator,
-            IAutoMapperRequestKeyGen autoMapperRequestKeyGen,
-            PropModelType propModel
+            IAutoMapperRequestKeyGen autoMapperRequestKeyGen
+            //,
+            //PropModelType propModel
             )
         {
             PropBagMapperCreator = mapperCreator;
             AutoMapperRequestKeyGen = autoMapperRequestKeyGen;
-            PropModel = propModel;
+            //PropModel = propModel;
         }
 
         #endregion
@@ -75,8 +77,8 @@ namespace Swhp.Tspb.PropBagAutoMapperService
             //       EqualityComparer<IMapTypeDefinitionGen>.Default.Equals(DestinationTypeGenDef, other.DestinationTypeGenDef);
 
             return other != null &&
-               AutoMapperRequestKeyGen.SourceTypeDef == other.SourceTypeDef &&
-               AutoMapperRequestKeyGen.DestinationTypeDef == other.DestinationTypeDef;
+               SourceTypeDef == other.SourceTypeDef &&
+               DestinationTypeDef == other.DestinationTypeDef;
         }
 
         public override int GetHashCode()

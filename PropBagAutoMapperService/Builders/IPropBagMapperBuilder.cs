@@ -8,8 +8,8 @@ namespace Swhp.Tspb.PropBagAutoMapperService
 
     public interface IPropBagMapperBuilder<TSource, TDestination> where TDestination : class, IPropBag
     {
-        Func<IPropBagMapperRequestKeyGen, ViewModelFactoryInterface, IPropBagMapperGen> GenPropBagMapperCreator { get; }
+        Func<IPropBagMapperRequestKeyGen, ViewModelFactoryInterface, IPropBagMapperGen> PropBagMapperBuilderGen { get; }
 
-        IPropBagMapper<TSource, TDestination> GeneratePropBagMapper(IPropBagMapperRequestKey<TSource, TDestination> mapperRequestKey, ViewModelFactoryInterface viewModelFactory);
+        IPropBagMapper<TSource, TDestination> BuildPropBagMapper(IPropBagMapperRequestKey<TSource, TDestination> mapperRequestKey, ViewModelFactoryInterface viewModelFactory);
     }
 }

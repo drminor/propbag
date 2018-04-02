@@ -30,9 +30,5 @@ namespace Swhp.AutoMapperSupport
 
         Type SourceType { get; }
         Type DestinationType { get; }
-
-
-        // The AutoMapper.IMapper that was created from this request.
-        //IMapper AutoMapper { get; set; }
     }
 }
