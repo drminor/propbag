@@ -165,7 +165,9 @@ namespace Swhp.Tspb.PropBagAutoMapperService
                 {
                     // We are using the concrete type here because we do not want to make
                     // the AutoMapperRequestKey part of the public interface.
-                    // TODO: consider creating an internal interface.
+                    // TODO: Keep a dictionary of our request keys to IMapper 
+                    // -- this will allow us to remove the AutoMapper property from the Key altogether.
+                    // The BuildPropBagMapper would get a new parameter for the IMapper
                     ourImp.AutoMapper =
                         GetRawAutoMapper<TSource, TDestination>(ourImp.AutoMapperRequestKey);
                 }
@@ -200,7 +202,9 @@ namespace Swhp.Tspb.PropBagAutoMapperService
                 {
                     // We are using the concrete type here because we do not want to make
                     // the AutoMapperRequestKey part of the public interface.
-                    // TODO: consider creating an internal interface.
+                    // TODO: Keep a dictionary of our request keys to IMapper 
+                    // -- this will allow us to remove the AutoMapper property from the Key altogether.
+                    // The BuildPropBagMapper would get a new parameter for the IMapper
                     ourImp.AutoMapper = GetRawAutoMapperGen(ourImp.AutoMapperRequestKeyGen);
                 }
                 else
