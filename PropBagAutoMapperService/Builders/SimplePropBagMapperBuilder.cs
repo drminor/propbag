@@ -47,7 +47,6 @@ namespace Swhp.Tspb.PropBagAutoMapperService
                 theMapper,
                 viewModelFactory,
                 _propBagMapperService,
-                //mapperRequestKey
                 mapperRequestKey.MappingConfiguration
                 );
 

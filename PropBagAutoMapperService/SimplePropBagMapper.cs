@@ -17,7 +17,6 @@ namespace Swhp.Tspb.PropBagAutoMapperService
             IMapper mapper,
             ViewModelFactoryInterface viewModelFactory,
             IPropBagMapperService propBagMapperService,
-            //IPropBagMapperRequestKey<TSource, TDestination> mapRequest
             IConfigureAMapper<TSource, TDestination> mappingConfiguration
             )
             : base
@@ -26,7 +25,6 @@ namespace Swhp.Tspb.PropBagAutoMapperService
             mapper,
             viewModelFactory,
             propBagMapperService,
-            //mapRequest
             mappingConfiguration
             )
         {
