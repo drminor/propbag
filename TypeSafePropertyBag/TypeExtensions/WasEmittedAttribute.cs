@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DRM.PropBag.TypeWrapper
+namespace DRM.TypeSafePropertyBag.TypeExtensions
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Method)]
     public class WasEmittedAttribute : Attribute

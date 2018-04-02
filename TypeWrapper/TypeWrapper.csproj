@@ -59,7 +59,6 @@
     <Compile Include="TypeDesc\TypeDescription.cs" />
     <Compile Include="Caches\TypeDescriptionLocalCache.cs" />
     <Compile Include="TypeDesc\TypeName.cs" />
-    <Compile Include="WasEmittedAttribute.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TypeSafePropertyBag\TypeSafePropertyBag.csproj">

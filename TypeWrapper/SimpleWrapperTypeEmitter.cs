@@ -1,4 +1,4 @@
-﻿
+﻿using DRM.TypeSafePropertyBag.TypeExtensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,8 +7,6 @@ using System.Reflection.Emit;
 
 namespace DRM.PropBag.TypeWrapper
 {
-    using static DRM.TypeSafePropertyBag.TypeExtensions.TypeExtensions;
-
     public class SimpleWrapperTypeEmitter : IEmitWrapperType
     {
         IModuleBuilderInfo _mbInfo;

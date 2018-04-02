@@ -1,4 +1,5 @@
 using DRM.TypeSafePropertyBag;
+using DRM.TypeSafePropertyBag.TypeExtensions;
 using System;
 using System.Linq;
 using System.Reflection;
@@ -6,7 +7,6 @@ using System.Reflection.Emit;
 
 namespace DRM.PropBag.TypeWrapper
 {
-
     public class PropertyEmitter
     {
         private static readonly MethodInfo BaseGetItGen = 

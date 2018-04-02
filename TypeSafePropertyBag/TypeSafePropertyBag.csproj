@@ -45,6 +45,7 @@
     <Compile Include="DataAccessSupport\CViewManagerBinder_New.cs" />
     <Compile Include="TypeDescriptors\Diagnostics\TypeInspectorUtility.cs" />
     <Compile Include="TypeExtensions\TypeExtensions.cs" />
+    <Compile Include="TypeExtensions\WasEmittedAttribute.cs" />
     <Compile Include="Unused\SimpleIOC\Container.cs" />
     <Compile Include="Unused\SimpleIOC\ContainerException.cs" />
     <Compile Include="Unused\SimpleIOC\ITypeContainer.cs" />

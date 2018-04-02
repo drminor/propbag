@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using DRM.PropBag.ViewModelTools;
 using DRM.TypeSafePropertyBag;
+using DRM.TypeSafePropertyBag.TypeExtensions;
 using ObjectSizeDiagnostics;
+using Swhp.AutoMapperSupport;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +23,7 @@ namespace Swhp.Tspb.PropBagAutoMapperService
         public Type DestinationType { get; }
 
         public PropModelType PropModel { get; }
-        public Type RunTimeType { get; }
+        //public Type RunTimeType { get; }
 
         IPropFactory PropFactory { get; }
         public IMapper Mapper { get; }
@@ -29,10 +31,12 @@ namespace Swhp.Tspb.PropBagAutoMapperService
         //public Func<TDestination, TSource> RegularInstanceCreator { get; }
         public bool SupportsMapFrom { get; }
 
-        public Type TargetRunTimeType => RunTimeType;
+        public Type TargetRunTimeType => DestinationType;  //=> RunTimeType;
 
-        ViewModelFactoryInterface _viewModelFactory;
-        IPropBagMapperService _propBagMapperService;
+        private readonly ViewModelFactoryInterface _viewModelFactory;
+        private readonly IPropBagMapperService _propBagMapperService;
+
+        private readonly IConfigureAMapper<TSource, TDestination> _mappingConfiguration;
 
         private readonly bool _requiresWrappperTypeEmitServices;
         private readonly TDestination _destPropBagTemplate;
@@ -49,15 +53,18 @@ namespace Swhp.Tspb.PropBagAutoMapperService
             IMapper mapper,
             ViewModelFactoryInterface viewModelFactory,
             IPropBagMapperService propBagMapperService,
-            IPropBagMapperRequestKey<TSource, TDestination> mapRequest
+            //IPropBagMapperRequestKey<TSource, TDestination> mapRequest
+            IConfigureAMapper<TSource, TDestination> mappingConfiguration
             )
         {
-            SourceType = mapRequest.SourceType;
-            DestinationType = mapRequest.DestinationType;
+            //SourceType = mapRequest.SourceType;
+            //DestinationType = mapRequest.DestinationType;
 
-            RunTimeType = mapRequest.DestinationTypeDef.RunTimeType;
+            SourceType = typeof(TSource);
+            DestinationType = typeof(TDestination);
 
-            // Fix Me !!
+            //RunTimeType = mapRequest.DestinationTypeDef.RunTimeType;
+
             PropModel = propModel; //(PropModelType) mapRequest.DestinationTypeDef.UniqueRef;
 
             PropFactory = PropModel.PropFactory; // (IPropFactory)mapRequest.DestinationTypeDef.PropFactory;
@@ -66,17 +73,20 @@ namespace Swhp.Tspb.PropBagAutoMapperService
 
             _viewModelFactory = viewModelFactory;
             _propBagMapperService = propBagMapperService;
+            _mappingConfiguration = mappingConfiguration;
 
             SupportsMapFrom = true;
 
-            
+            //_requiresWrappperTypeEmitServices = mapRequest.MappingConfiguration.RequiresWrappperTypeEmitServices;
+            //_requiresWrappperTypeEmitServices = DestinationType.CustomAttributes.OfType<WasEmittedAttribute>()
 
+            _requiresWrappperTypeEmitServices = _mappingConfiguration.RequiresWrappperTypeEmitServices;
 
-            _requiresWrappperTypeEmitServices = mapRequest.MappingConfiguration.RequiresWrappperTypeEmitServices;
+            CheckRequiresEmitted(_requiresWrappperTypeEmitServices, DestinationType);
 
             _mct.Measure();
 
-            _destPropBagTemplate = GetDestinationTemplate(RunTimeType);
+            _destPropBagTemplate = GetDestinationTemplate(DestinationType);
 
             _mct.MeasureAndReport("GetNewDestination(PropModel, ... [In Constructor]", "AbstractPropBagMapper");
 
@@ -86,6 +96,19 @@ namespace Swhp.Tspb.PropBagAutoMapperService
 
 
             return;
+        }
+
+        private void CheckRequiresEmitted(bool fromMappingConfig, Type destinationType)
+        {
+            IEnumerable<WasEmittedAttribute> list = destinationType.GetCustomAttributes(typeof(WasEmittedAttribute), true).Cast<WasEmittedAttribute>();
+            WasEmittedAttribute f = list.FirstOrDefault();
+            bool theWasEmittedAttributeWasFound = f != null;
+
+            if(fromMappingConfig != theWasEmittedAttributeWasFound)
+            {
+                // TODO: Make the WasEmitted mismatch error more descriptive.
+                throw new InvalidOperationException("AbstractPropBagMapper found a 'WasEmitted mismatch.");
+            }
         }
 
         private TDestination GetDestinationTemplate(Type targetType)
@@ -145,22 +168,22 @@ namespace Swhp.Tspb.PropBagAutoMapperService
 
         public TDestination MapToDestination(TSource s, TDestination d)
         {
-            return (TDestination) Mapper.Map(s, d, SourceType, RunTimeType);
+            return (TDestination) Mapper.Map(s, d, SourceType, TargetRunTimeType);
         }
 
         public TDestination MapToDestination(TSource s, object d)
         {
-            return (TDestination)Mapper.Map(s, d, SourceType, RunTimeType);
+            return (TDestination)Mapper.Map(s, d, SourceType, TargetRunTimeType);
         }
 
         public TSource MapToSource(TDestination d)
         {
-            return (TSource)Mapper.Map(d, RunTimeType, SourceType);
+            return (TSource)Mapper.Map(d, TargetRunTimeType, SourceType);
         }
 
         public TSource MapToSource(TDestination d, TSource s)
         {
-            return (TSource) Mapper.Map(d, s, RunTimeType, SourceType);
+            return (TSource) Mapper.Map(d, s, TargetRunTimeType, SourceType);
         }
 
         #endregion
@@ -209,7 +232,7 @@ namespace Swhp.Tspb.PropBagAutoMapperService
             {
                 if (_requiresWrappperTypeEmitServices)
                 {
-                    result = GetNewDestination(RunTimeType, _destPropBagTemplate, _viewModelFactory.ViewModelActivator);
+                    result = GetNewDestination(TargetRunTimeType, _destPropBagTemplate, _viewModelFactory.ViewModelActivator);
                     _mct.MeasureAndReport("GetNewDestination using the copy constructor", "AstractPropBagMapper");
                 }
                 else
@@ -238,7 +261,7 @@ namespace Swhp.Tspb.PropBagAutoMapperService
             else
             {
                 //result = GetNewDestination(RunTimeType, PropModel, _storeAccessCreator, _autoMapperService, _wrapperTypeCreator, PropFactory, fullClassName: null);
-                result = GetNewDestination(RunTimeType, PropModel, _viewModelFactory, _propBagMapperService, PropFactory, fullClassName: null);
+                result = GetNewDestination(TargetRunTimeType, PropModel, _viewModelFactory, _propBagMapperService, PropFactory, fullClassName: null);
 
                 _mct.MeasureAndReport("GetNewDestination(PropModel, ...", "AstractPropBagMapper");
             }

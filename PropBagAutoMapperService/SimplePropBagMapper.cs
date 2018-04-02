@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using DRM.PropBag.ViewModelTools;
 using DRM.TypeSafePropertyBag;
+using Swhp.AutoMapperSupport;
 using System;
 
 namespace Swhp.Tspb.PropBagAutoMapperService
@@ -16,7 +17,8 @@ namespace Swhp.Tspb.PropBagAutoMapperService
             IMapper mapper,
             ViewModelFactoryInterface viewModelFactory,
             IPropBagMapperService propBagMapperService,
-            IPropBagMapperRequestKey<TSource, TDestination> mapRequest
+            //IPropBagMapperRequestKey<TSource, TDestination> mapRequest
+            IConfigureAMapper<TSource, TDestination> mappingConfiguration
             )
             : base
             (
@@ -24,7 +26,8 @@ namespace Swhp.Tspb.PropBagAutoMapperService
             mapper,
             viewModelFactory,
             propBagMapperService,
-            mapRequest
+            //mapRequest
+            mappingConfiguration
             )
         {
         }
