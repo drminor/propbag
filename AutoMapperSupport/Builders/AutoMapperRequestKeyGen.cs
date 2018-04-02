@@ -8,15 +8,17 @@ namespace Swhp.AutoMapperSupport
     {
         #region Public Properties
 
-        public Type SourceType => SourceTypeGenDef.TargetType;
-        public Type DestinationType => DestinationTypeGenDef.TargetType;
+        public IMapTypeDefinition SourceTypeDef { get; }
+        public IMapTypeDefinition DestinationTypeDef { get; }
 
-        public IMapTypeDefinition SourceTypeGenDef { get; }
-        public IMapTypeDefinition DestinationTypeGenDef { get; }
+        public IAutoMapperConfigDetails AutoMapperConfigDetails { get; }
 
-        public Func<IAutoMapperRequestKeyGen, IMapper> RawAutoMapperCreator { get; }
+        public Func<IAutoMapperRequestKeyGen, IMapper> AutoMapperBuilder { get; }
 
-        public IMapper AutoMapper { get; set; }
+        //public IMapper AutoMapper { get; set; }
+
+        public Type SourceType => SourceTypeDef.TargetType;
+        public Type DestinationType => DestinationTypeDef.TargetType;
 
         #endregion
 
@@ -24,23 +26,24 @@ namespace Swhp.AutoMapperSupport
 
         public AutoMapperRequestKeyGen
             (
-            Func<IAutoMapperRequestKeyGen, IMapper> rawAutoMapperCreator,
             IMapTypeDefinition sourceTypeGenDef,
-            IMapTypeDefinition destinationTypeGenDef
-            )
+            IMapTypeDefinition destinationTypeGenDef,
+            IAutoMapperConfigDetails autoMapperConfigDetails,
+            Func<IAutoMapperRequestKeyGen, IMapper> autoMapperBuilder)
         {
-            RawAutoMapperCreator = rawAutoMapperCreator;
-            SourceTypeGenDef = sourceTypeGenDef;
-            DestinationTypeGenDef = destinationTypeGenDef;
+            SourceTypeDef = sourceTypeGenDef;
+            DestinationTypeDef = destinationTypeGenDef;
+            AutoMapperConfigDetails = autoMapperConfigDetails;
+            AutoMapperBuilder = autoMapperBuilder;
         }
 
         #endregion
 
         #region Public Methods
 
-        public IMapper CreateRawAutoMapper()
+        public IMapper BuildAutoMapper()
         {
-            return RawAutoMapperCreator(this);
+            return AutoMapperBuilder(this);
         }
 
         #endregion
@@ -64,21 +67,21 @@ namespace Swhp.AutoMapperSupport
             //       EqualityComparer<IMapTypeDefinitionGen>.Default.Equals(DestinationTypeGenDef, other.DestinationTypeGenDef);
 
             return other != null &&
-               SourceTypeGenDef == other.SourceTypeGenDef &&
-               DestinationTypeGenDef == other.DestinationTypeGenDef;
+               SourceTypeDef == other.SourceTypeDef &&
+               DestinationTypeDef == other.DestinationTypeDef;
         }
 
         public override int GetHashCode()
         {
             var hashCode = 1973524047;
-            hashCode = hashCode * -1521134295 + SourceTypeGenDef.GetHashCode();
-            hashCode = hashCode * -1521134295 + DestinationTypeGenDef.GetHashCode();
+            hashCode = hashCode * -1521134295 + SourceTypeDef.GetHashCode();
+            hashCode = hashCode * -1521134295 + DestinationTypeDef.GetHashCode();
             return hashCode;
         }
 
         public override string ToString()
         {
-            return $"PropBagMapperKey: S={SourceTypeGenDef.ToString()}, D={DestinationTypeGenDef.ToString()}";
+            return $"PropBagMapperKey: S={SourceTypeDef.ToString()}, D={DestinationTypeDef.ToString()}";
         }
 
         public static bool operator ==(AutoMapperRequestKeyGen gen1, AutoMapperRequestKeyGen gen2)

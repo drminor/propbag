@@ -60,19 +60,24 @@ namespace Swhp.Tspb.PropBagAutoMapperService
         {
             _propBagMapperBuilder = propBagMapperBuilder;
 
-            ValidateThisKey();
+            CheckTypes();
         }
 
         #endregion
 
-        [System.Diagnostics.Conditional("DEBUG")]
-        private void ValidateThisKey()
-        {
-            Validate(this);
-        }
+        // TODO: The source type should be able to derive from IPropBag if its an emitted type (and therefor 'real'.)
+        // TODO: The destination type should not have to be a IPropBag.
 
-        private bool Validate(IPropBagMapperRequestKey<TSource, TDestination> mapperRequestKey)
+        /// <summary>
+        /// Make sure that ...
+        /// the source type is not a IPropBag and 
+        /// the destination type is a IPropBag.
+        /// </summary>
+        /// <returns></returns>
+        private bool CheckTypes()
         {
+            IPropBagMapperRequestKey<TSource, TDestination> mapperRequestKey = this;
+
             if (mapperRequestKey.MappingConfiguration.RequiresWrappperTypeEmitServices)
             {
                 if (mapperRequestKey.SourceTypeDef.IsPropBag)

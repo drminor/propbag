@@ -4,8 +4,8 @@ namespace Swhp.AutoMapperSupport
 {
     public interface IAutoMapperCache
     {
-        IAutoMapperRequestKeyGen RegisterRawAutoMapperRequest(IAutoMapperRequestKeyGen mapperRequest);
-        IMapper GetRawAutoMapper(IAutoMapperRequestKeyGen mapperRequest);
-        long ClearRawAutoMappersCache();
+        IAutoMapperRequestKeyGen RegisterAutoMapperRequest(IAutoMapperRequestKeyGen mapperRequest);
+        IMapper GetAutoMapper(IAutoMapperRequestKeyGen mapperRequest);
+        long ClearTheAutoMappersCache();
     }
 }

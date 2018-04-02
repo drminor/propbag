@@ -27,7 +27,7 @@ namespace Swhp.AutoMapperSupport
         /// <param name="mapperRequest"></param>
         /// <returns>The 'true' key present in the dictionary. This will be the key given if no previous matching registration has occured.</returns>
 
-        public IAutoMapperRequestKeyGen RegisterRawAutoMapperRequest(IAutoMapperRequestKeyGen mapperRequest)
+        public IAutoMapperRequestKeyGen RegisterAutoMapperRequest(IAutoMapperRequestKeyGen mapperRequest)
         {
             IAutoMapperRequestKeyGen result;
 
@@ -54,7 +54,7 @@ namespace Swhp.AutoMapperSupport
             return result;
         }
 
-        public IMapper GetRawAutoMapper(IAutoMapperRequestKeyGen mapperRequest)
+        public IMapper GetAutoMapper(IAutoMapperRequestKeyGen mapperRequest)
         {
             IAutoMapperRequestKeyGen save = mapperRequest;
 
@@ -93,7 +93,7 @@ namespace Swhp.AutoMapperSupport
         //}
 
         // TODO: Note: only the sealed mappers are counted.
-        public long ClearRawAutoMappersCache()
+        public long ClearTheAutoMappersCache()
         {
             long result = _sealedAutoMappers.Count;
             foreach (IAutoMapperRequestKeyGen mapperRequest in _sealedAutoMappers)
@@ -138,7 +138,7 @@ namespace Swhp.AutoMapperSupport
             foreach (IAutoMapperRequestKeyGen key in _unSealedAutoMappers.Keys)
             {
                 IMapper mapper = _sealedAutoMappers.GetOrAdd(key);
-                key.AutoMapper = mapper;
+                //key.AutoMapper = mapper;
 
                 if (!(_unSealedAutoMappers.TryRemoveValue(key, out IAutoMapperRequestKeyGen dummyKey)))
                 {
@@ -151,7 +151,7 @@ namespace Swhp.AutoMapperSupport
 
         private IMapper MapperFactory(IAutoMapperRequestKeyGen key)
         {
-            IMapper result = key.CreateRawAutoMapper();
+            IMapper result = key.BuildAutoMapper();
             return result;
         }
 
@@ -171,7 +171,7 @@ namespace Swhp.AutoMapperSupport
                 if (disposing)
                 {
                     // Dispose managed state (managed objects).
-                    ClearRawAutoMappersCache();
+                    ClearTheAutoMappersCache();
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.

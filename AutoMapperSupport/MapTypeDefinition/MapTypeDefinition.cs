@@ -44,9 +44,6 @@ namespace Swhp.AutoMapperSupport
             NewEmittedType = null;
             RunTimeType = TargetType;
 
-            //UniqueRef = uniqueRef ?? throw new ArgumentNullException(nameof(uniqueRef));
-            //UniqueToken = uniqueToken;
-
             UniqueRef = uniqueRef; // ?? throw new ArgumentNullException("Must have a propModel for now.");
             UniqueToken = null; // Set this to null in all cases, for now.
 
@@ -54,26 +51,6 @@ namespace Swhp.AutoMapperSupport
 
             _hashCode = ComputeHashCode();
         }
-
-        //private void CheckRunTimeType(PropModelType propModel)
-        //{
-        //    if (propModel != null)
-        //    {
-        //        if (propModel.RunTimeType == null)
-        //        {
-        //            throw new InvalidOperationException("The PropModel's RunTimeType is null.");
-        //        }
-
-        //        if (propModel.RunTimeType != typeof(T))
-        //        {
-        //            //System.Diagnostics.Debug.WriteLine($"Warning: The type parameter T: ({typeof(T)}) does not equal the " +
-        //            //    $"PropModel's RunTimeType: ({propModel.RunTimeType}).");
-
-        //            throw new InvalidOperationException($"The type parameter T: ({typeof(T)}) does not equal the " +
-        //                $"PropModel's RunTimeType: ({propModel.RunTimeType}).");
-        //        }
-        //    }
-        //}
 
         #endregion
 

@@ -3,25 +3,18 @@ using System.Collections.Generic;
 
 namespace Swhp.AutoMapperSupport
 {
-    // TODO: check to see if we really need to use the base class: PropBagMapperKeyGen
-
     public class AutoMapperRequestKey<TSource, TDestination>
             :   AutoMapperRequestKeyGen,
                 IAutoMapperRequestKey<TSource, TDestination>, 
                 IEquatable<IAutoMapperRequestKey<TSource, TDestination>>,
                 IEquatable<AutoMapperRequestKey<TSource, TDestination>>
-        //where TDestination: class, IPropBag
     {
-
         #region Public Properties
 
-        public IMapTypeDefinition SourceTypeDef { get; }
-        public IMapTypeDefinition DestinationTypeDef { get; }
-
-        //public Func<TDestination, TSource> SourceConstructor { get; }
-        //public Func<TSource, TDestination> DestinationConstructor { get; }
-
         public IConfigureAMapper<TSource, TDestination> MappingConfiguration { get; }
+
+        //public Func<TDestination, TSource> SourceConstructor => MappingConfiguration.SourceConstructor;
+        //public Func<TSource, TDestination> DestinationConstructor => MappingConfiguration.DestinationConstructor;
 
         #endregion
 
@@ -29,52 +22,24 @@ namespace Swhp.AutoMapperSupport
 
         public AutoMapperRequestKey
             (
-            IAutoMapperBuilder<TSource, TDestination> autoMapperBuilder,
-            IConfigureAMapper<TSource, TDestination> mappingConfiguration,
             IMapTypeDefinition sourceMapTypeDef,
-            IMapTypeDefinition destinationMapTypeDef
+            IMapTypeDefinition destinationMapTypeDef,
+            IAutoMapperConfigDetails autoMapperConfigDetails,
+            IConfigureAMapper<TSource, TDestination> mappingConfiguration,
+            IAutoMapperBuilder<TSource, TDestination> autoMapperBuilder
             )
             : base
             (
-                autoMapperBuilder.AutoMapperBuilderGen,
-                sourceMapTypeDef,
-                destinationMapTypeDef
+            sourceMapTypeDef,
+            destinationMapTypeDef,
+            autoMapperConfigDetails,
+            autoMapperBuilder.AutoMapperBuilderGen
             )
         {
             MappingConfiguration = mappingConfiguration;
-
-            SourceTypeDef = sourceMapTypeDef;
-            DestinationTypeDef = destinationMapTypeDef;
-
-            //SourceConstructor = mappingConfiguration.SourceConstructor;
-            //DestinationConstructor = mappingConfiguration.DestinationConstructor;
-
-            AutoMapper = null;
-
-            ValidateThisKey();
         }
 
         #endregion
-
-        [System.Diagnostics.Conditional("DEBUG")]
-        private void ValidateThisKey()
-        {
-            Validate(this);
-        }
-
-        private bool Validate(IAutoMapperRequestKey<TSource, TDestination> mapperRequestKey)
-        {
-            if (mapperRequestKey.MappingConfiguration.RequiresWrappperTypeEmitServices)
-            {
-                if (mapperRequestKey.SourceTypeDef.IsPropBag)
-                    throw new ApplicationException("The first type, TSource, is expected to be a regular, i.e., non-propbag-based type.");
-
-                if (!mapperRequestKey.DestinationTypeDef.IsPropBag)
-                    throw new ApplicationException("The second type, TDestination, is expected to be a propbag-based type.");
-            }
-
-            return true;
-        }
 
         #region IEquatable Support and Object Overrides
 

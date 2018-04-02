@@ -17,7 +17,6 @@ namespace Swhp.Tspb.PropBagAutoMapperService
 
         public IPropBagMapperBuilder<TSource, TDestination> GetPropBagMapperBuilder<TSource, TDestination>
             (
-            //IBuildMapperConfigurations<TSource, TDestination> mapperConfigurationBuilder,
             IPropBagMapperService propBagMapperService
             )
             where TDestination: class, IPropBag
@@ -25,7 +24,6 @@ namespace Swhp.Tspb.PropBagAutoMapperService
             IPropBagMapperBuilder<TSource, TDestination> result
                 = new SimplePropBagMapperBuilder<TSource, TDestination>
                 (
-                    //mapperConfigurationBuilder: mapperConfigurationBuilder,
                     propBagMapperService: propBagMapperService
                 );
 

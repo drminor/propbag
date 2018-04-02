@@ -14,29 +14,20 @@ namespace Swhp.Tspb.PropBagAutoMapperService
     {
         #region Public Properties
 
-        public Type SourceType => SourceTypeDef.TargetType;
-        public Type DestinationType => DestinationTypeDef.TargetType;
-
-        public IMapTypeDefinition SourceTypeDef => AutoMapperRequestKeyGen.SourceTypeGenDef;
-        public IMapTypeDefinition DestinationTypeDef => AutoMapperRequestKeyGen.DestinationTypeGenDef;
-
+        public PropModelType PropModel { get; }
         public IAutoMapperRequestKeyGen AutoMapperRequestKeyGen { get; }
-
-        public IMapper AutoMapper
-        {
-            get
-            {
-                return AutoMapperRequestKeyGen.AutoMapper;
-            }
-            set
-            {
-                AutoMapperRequestKeyGen.AutoMapper = value;
-            }
-        }
+        public IMapper AutoMapper { get; set; }
 
         public Func<IPropBagMapperRequestKeyGen, ViewModelFactoryInterface, IPropBagMapperGen> PropBagMapperCreator { get; }
 
-        public PropModelType PropModel { get; }
+
+        public Type SourceType => SourceTypeDef.TargetType;
+        public Type DestinationType => DestinationTypeDef.TargetType;
+
+        public IMapTypeDefinition SourceTypeDef => AutoMapperRequestKeyGen.SourceTypeDef;
+        public IMapTypeDefinition DestinationTypeDef => AutoMapperRequestKeyGen.DestinationTypeDef;
+
+        public IPropBagMapperConfigDetails PropBagMapperConfigDetails => AutoMapperRequestKeyGen.AutoMapperConfigDetails as IPropBagMapperConfigDetails;
 
         #endregion
 
@@ -84,8 +75,8 @@ namespace Swhp.Tspb.PropBagAutoMapperService
             //       EqualityComparer<IMapTypeDefinitionGen>.Default.Equals(DestinationTypeGenDef, other.DestinationTypeGenDef);
 
             return other != null &&
-               AutoMapperRequestKeyGen.SourceTypeGenDef == other.SourceTypeDef &&
-               AutoMapperRequestKeyGen.DestinationTypeGenDef == other.DestinationTypeDef;
+               AutoMapperRequestKeyGen.SourceTypeDef == other.SourceTypeDef &&
+               AutoMapperRequestKeyGen.DestinationTypeDef == other.DestinationTypeDef;
         }
 
         public override int GetHashCode()

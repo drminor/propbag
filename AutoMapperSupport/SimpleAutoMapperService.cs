@@ -43,9 +43,9 @@ namespace Swhp.AutoMapperSupport
         // Gen Submit
         public IAutoMapperRequestKeyGen SubmitRawAutoMapperRequest
             (
-            IAutoMapperConfigDetails autoMapperConfigDetails,
             Type sourceType,
             Type destinationType,
+            IAutoMapperConfigDetails autoMapperConfigDetails,
             string configPackageName,
             IHaveAMapperConfigurationStep configStarterForThisRequest
             )
@@ -59,9 +59,9 @@ namespace Swhp.AutoMapperSupport
         // Submit with Configuaration Package Name
         public IAutoMapperRequestKey<TSource, TDestination> SubmitRawAutoMapperRequest<TSource, TDestination>
             (
-            IAutoMapperConfigDetails configuationDetails,
             IMapTypeDefinition srcMapTypeDef,
             IMapTypeDefinition dstMapTypeDef,
+            IAutoMapperConfigDetails configuationDetails,
             string configPackageName,
             IHaveAMapperConfigurationStep configStarterForThisRequest
             )
@@ -78,9 +78,9 @@ namespace Swhp.AutoMapperSupport
             IAutoMapperRequestKey<TSource, TDestination> result
                 = SubmitRawAutoMapperRequest
                 (
-                    configuationDetails,
                     srcMapTypeDef,
                     dstMapTypeDef,
+                    configuationDetails,
                     mappingConfiguration,
                     configStarterForThisRequest
                     );
@@ -91,9 +91,9 @@ namespace Swhp.AutoMapperSupport
         // Typed Submit Raw Auto
         public IAutoMapperRequestKey<TSource, TDestination> SubmitRawAutoMapperRequest<TSource, TDestination>
             (
-            IAutoMapperConfigDetails configuationDetails,
             IMapTypeDefinition srcMapTypeDef,
             IMapTypeDefinition dstMapTypeDef,
+            IAutoMapperConfigDetails configuationDetails,
             IConfigureAMapper<TSource, TDestination> mappingConfiguration,
             IHaveAMapperConfigurationStep configStarterForThisRequest
             )
@@ -106,14 +106,14 @@ namespace Swhp.AutoMapperSupport
             IAutoMapperRequestKey<TSource, TDestination> autoMapperRequestKey
                 = new AutoMapperRequestKey<TSource, TDestination>
                 (
-                    autoMapperBuilder: autoMapperBuilder,
-                    mappingConfiguration: mappingConfiguration,
                     sourceMapTypeDef: srcMapTypeDef,
-                    destinationMapTypeDef: dstMapTypeDef
-                );
+                    destinationMapTypeDef: dstMapTypeDef,
+                    autoMapperConfigDetails: configuationDetails,
+                    mappingConfiguration: mappingConfiguration,
+                    autoMapperBuilder: autoMapperBuilder);
 
             IAutoMapperRequestKeyGen response_AutoMapperRequestKey
-                = RegisterRawAutoMapperRequest(autoMapperRequestKey);
+                = RegisterAutoMapperRequest(autoMapperRequestKey);
 
             return (IAutoMapperRequestKey<TSource, TDestination>)response_AutoMapperRequestKey;
         }
@@ -124,7 +124,7 @@ namespace Swhp.AutoMapperSupport
             IAutoMapperRequestKey<TSource, TDestination> autoMapperRequestKey
             )
         {
-            return _autoMapperCache.GetRawAutoMapper(autoMapperRequestKey);
+            return _autoMapperCache.GetAutoMapper(autoMapperRequestKey);
         }
 
         private IAutoMapperBuilder<TSource, TDestination> BuildTheAutoMapperBuilder<TSource, TDestination>(IHaveAMapperConfigurationStep configStarterForThisRequest)
@@ -146,8 +146,7 @@ namespace Swhp.AutoMapperSupport
             IAutoMapperBuilder<TSource, TDestination> autoMapperBuilder
                 = _autoMapperBuilderProvider.GetAutoMapperBuilder<TSource, TDestination>
                 (
-                    propBagMapperConfigurationBuilder,
-                    this
+                    propBagMapperConfigurationBuilder
                 );
 
             return autoMapperBuilder;
@@ -157,19 +156,19 @@ namespace Swhp.AutoMapperSupport
 
         #region Pass-through calls to the Raw Auto MappersCache
 
-        public IAutoMapperRequestKeyGen RegisterRawAutoMapperRequest(IAutoMapperRequestKeyGen autoMapperRequestKey)
+        public IAutoMapperRequestKeyGen RegisterAutoMapperRequest(IAutoMapperRequestKeyGen autoMapperRequestKey)
         {
-            return _autoMapperCache.RegisterRawAutoMapperRequest(autoMapperRequestKey);
+            return _autoMapperCache.RegisterAutoMapperRequest(autoMapperRequestKey);
         }
 
-        public IMapper GetRawAutoMapper(IAutoMapperRequestKeyGen autoMapperRequestKey)
+        public IMapper GetAutoMapper(IAutoMapperRequestKeyGen autoMapperRequestKey)
         {
-            return _autoMapperCache.GetRawAutoMapper(autoMapperRequestKey);
+            return _autoMapperCache.GetAutoMapper(autoMapperRequestKey);
         }
 
-        public long ClearRawAutoMappersCache()
+        public long ClearTheAutoMappersCache()
         {
-            return _autoMapperCache.ClearRawAutoMappersCache();
+            return _autoMapperCache.ClearTheAutoMappersCache();
         }
 
         #endregion
@@ -204,12 +203,12 @@ namespace Swhp.AutoMapperSupport
         // Method Templates for Property Bag
         internal static class GenericMethodTemplates
         {
-            static Lazy<MethodInfo> rawAutoMapperReqSubmitter_Lazy_MI;
-            public static MethodInfo RawAutoMapperReqSubmitter_MI { get { return rawAutoMapperReqSubmitter_Lazy_MI.Value; } }
+            static Lazy<MethodInfo> autoMapperReqSubmitter_Lazy_MI;
+            public static MethodInfo RawAutoMapperReqSubmitter_MI { get { return autoMapperReqSubmitter_Lazy_MI.Value; } }
 
             static GenericMethodTemplates()
             {
-                rawAutoMapperReqSubmitter_Lazy_MI = new Lazy<MethodInfo>(() =>
+                autoMapperReqSubmitter_Lazy_MI = new Lazy<MethodInfo>(() =>
                     GMT_TYPE.GetMethod("SubmitRawAutoMapperRequest", BindingFlags.Static | BindingFlags.NonPublic),
                     LazyThreadSafetyMode.PublicationOnly);
             }
@@ -231,9 +230,9 @@ namespace Swhp.AutoMapperSupport
                 IAutoMapperRequestKey<TSource, TDestination> result
                     = autoMapperProvider.SubmitRawAutoMapperRequest<TSource, TDestination>
                     (
-                        autoMapperConfigDetails,
                         srcMapTypeDef: srcMapTypeDef,
                         dstMapTypeDef: dstMapTypeDef,
+                        configuationDetails: autoMapperConfigDetails,
                         configPackageName: configPackageName,
                         configStarterForThisRequest: configStarterForThisRequest
                     );
@@ -255,7 +254,7 @@ namespace Swhp.AutoMapperSupport
                 if (disposing)
                 {
                     // Dispose managed state (managed objects).
-                    ClearRawAutoMappersCache();
+                    ClearTheAutoMappersCache();
 
                     if (_autoMapperCache is IDisposable disable1)
                     {

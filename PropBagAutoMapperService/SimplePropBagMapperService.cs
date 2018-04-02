@@ -113,15 +113,12 @@ namespace Swhp.Tspb.PropBagAutoMapperService
             return typedMapperRequest;
         }
 
-        private IPropBagMapperBuilder<TSource, TDestination> BuildTheAutoMapperBuilder<TSource, TDestination>
-            (
-            //IHaveAMapperConfigurationStep configStarterForThisRequest
-            )
-        where TDestination : class, IPropBag
+        private IPropBagMapperBuilder<TSource, TDestination> BuildTheAutoMapperBuilder<TSource, TDestination>()
+            where TDestination : class, IPropBag
         {
             // Create a MapperBuilder for this request.
             IPropBagMapperBuilder<TSource, TDestination> propBagMapperBuilder
-                = _mapperBuilderProvider.GetPropBagMapperBuilder<TSource, TDestination>(/*propBagMapperConfigurationBuilder,*/ this);
+                = _mapperBuilderProvider.GetPropBagMapperBuilder<TSource, TDestination>(this);
 
             return propBagMapperBuilder;
         }
@@ -131,14 +128,20 @@ namespace Swhp.Tspb.PropBagAutoMapperService
             (
             IPropBagMapperRequestKey<TSource, TDestination> mapperRequest
             )
-        where TDestination : class, IPropBag
+            where TDestination : class, IPropBag
         {
             // TODO: Consider simply using the 'Gen' version on the PropBagMappers Cache
             // it not that much less type safe and not that much faster -- however it does add some complexity.
             //IPropBagMapper<TSource, TDestination> result = GetPropBagMapper(propBagMapperRequestKey);
 
-            // Make sure that the 'raw' AutoMapper (IMapper) has been created.
-            GetRawAutoMapper<TSource, TDestination>(mapperRequest);
+            // --- LOOK AT ME ----
+
+            // Fetch the raw AutoMapper, if not already retrieved.
+            if (mapperRequest.AutoMapper == null)
+            {
+                mapperRequest.AutoMapper =
+                    GetRawAutoMapper<TSource, TDestination>(mapperRequest.AutoMapperRequestKey);
+            }
 
             IPropBagMapper<TSource, TDestination> result = _propBagMappersCache.GetPropBagMapper<TSource, TDestination>(mapperRequest);
             return result;
@@ -153,10 +156,14 @@ namespace Swhp.Tspb.PropBagAutoMapperService
             return _propBagMappersCache.RegisterPropBagMapperRequest(propBagMapperRequestKey);
         }
 
+        // --- LOOK AT ME ----
         public IPropBagMapperGen GetPropBagMapper(IPropBagMapperRequestKeyGen mapperRequest)
         {
-            // Make sure that the 'raw' AutoMapper (IMapper) has been created.
-            GetRawAutoMapperGen(mapperRequest);
+            // Fetch the raw AutoMapper, if not already retrieved.
+            if (mapperRequest.AutoMapper == null)
+            {
+                mapperRequest.AutoMapper = GetRawAutoMapperGen(mapperRequest.AutoMapperRequestKeyGen);
+            }
 
             return _propBagMappersCache.GetPropBagMapper(mapperRequest);
         }
@@ -177,13 +184,15 @@ namespace Swhp.Tspb.PropBagAutoMapperService
             IConfigureAMapper<TSource, TDestination> mappingConfiguration,
             IHaveAMapperConfigurationStep configStarterForThisRequest
             )
-        where TDestination : class, IPropBag
+            where TDestination : class, IPropBag
         {
             IMapTypeDefinition srcMapTypeDef
-                = _mapTypeDefinitionProvider.GetTypeDescription(typeof(TSource), propModel, uniqueToken: null);
+                = _mapTypeDefinitionProvider.GetTypeDescription(typeof(TSource), uniqueRef: propModel, uniqueToken: null);
 
             IMapTypeDefinition dstMapTypeDef
-                = _mapTypeDefinitionProvider.GetTypeDescription(typeof(TDestination), propModel, uniqueToken: null);
+                = _mapTypeDefinitionProvider.GetTypeDescription(typeof(TDestination), uniqueRef: propModel, uniqueToken: null);
+
+            CheckRunTimeType(propModel, typeof(TDestination));
 
             IAutoMapperConfigDetails pbMapperConfigDetails
                 = new PropBagMapperConfigDetails
@@ -196,9 +205,9 @@ namespace Swhp.Tspb.PropBagAutoMapperService
             IAutoMapperRequestKey<TSource, TDestination> autoMapperRequestKey
                 = _autoMapperService.SubmitRawAutoMapperRequest<TSource, TDestination>
                 (
-                    pbMapperConfigDetails,
                     srcMapTypeDef,
                     dstMapTypeDef,
+                    pbMapperConfigDetails,
                     mappingConfiguration,
                     configStarterForThisRequest
                 );
@@ -206,46 +215,58 @@ namespace Swhp.Tspb.PropBagAutoMapperService
             return autoMapperRequestKey;
         }
 
-        // From Typed PropBagMapperRequestKey
-        private IMapper GetRawAutoMapper<TSource, TDestination>(IPropBagMapperRequestKey<TSource, TDestination> propBagMapperRequestKey) where TDestination : class, IPropBag
+        private void CheckRunTimeType(PropModelType propModel, Type destinationType)
         {
-            IAutoMapperRequestKey<TSource, TDestination> rawAutoMapperRequest = propBagMapperRequestKey.AutoMapperRequestKey;
-            IMapper result = GetRawAutoMapper<TSource, TDestination>(rawAutoMapperRequest);
-            return result;
-        }
-
-        // From Typed AutoMapperRequestKey
-        private IMapper GetRawAutoMapper<TSource, TDestination>(IAutoMapperRequestKey<TSource, TDestination> rawAutoMappeRequestKey) where TDestination : class, IPropBag
-        {
-            if (rawAutoMappeRequestKey.AutoMapper == null)
+            if (propModel != null)
             {
-                IMapper autoMapper = _autoMapperService.GetRawAutoMapper<TSource, TDestination>(rawAutoMappeRequestKey);
-                rawAutoMappeRequestKey.AutoMapper = autoMapper;
-            }
+                if (propModel.RunTimeType == null)
+                {
+                    throw new InvalidOperationException("The PropModel's RunTimeType is null.");
+                }
 
-            return rawAutoMappeRequestKey.AutoMapper;
+                if (propModel.RunTimeType != destinationType)
+                {
+                    //System.Diagnostics.Debug.WriteLine($"Warning: The type parameter T: ({typeof(T)}) does not equal the " +
+                    //    $"PropModel's RunTimeType: ({propModel.RunTimeType}).");
+
+                    throw new InvalidOperationException($"The type parameter T: ({destinationType}) does not equal the " +
+                        $"PropModel's RunTimeType: ({propModel.RunTimeType}).");
+                }
+            }
         }
 
-        // From Gen PropBagMapperRequest Key
-        private IMapper GetRawAutoMapperGen(IPropBagMapperRequestKeyGen propBagMapperRequestKeyGen)
+        // From AutoMapperRequestKey (Typed)
+        private IMapper GetRawAutoMapper<TSource, TDestination>
+            (
+            IAutoMapperRequestKey<TSource, TDestination> rawAutoMappeRequestKey
+            )
+            where TDestination : class, IPropBag
         {
-            IAutoMapperRequestKeyGen rawAutoMapperRequestKeyGenTrue = propBagMapperRequestKeyGen.AutoMapperRequestKeyGen;
+            //if (rawAutoMappeRequestKey.AutoMapper == null)
+            //{
+            //    IMapper autoMapper = _autoMapperService.GetRawAutoMapper<TSource, TDestination>(rawAutoMappeRequestKey);
+            //    rawAutoMappeRequestKey.AutoMapper = autoMapper;
+            //}
 
-            IMapper result = GetRawAutoMapperGen(rawAutoMapperRequestKeyGenTrue);
+            //return rawAutoMappeRequestKey.AutoMapper;
 
+            IMapper result = _autoMapperService.GetRawAutoMapper<TSource, TDestination>(rawAutoMappeRequestKey);
             return result;
         }
 
-        // From Gen AutoMapperRequestKey
+        // From AutoMapperRequestKey (Gen)
         private IMapper GetRawAutoMapperGen(IAutoMapperRequestKeyGen rawAutoMappeRequestKeyGen)
         {
-            if (rawAutoMappeRequestKeyGen.AutoMapper == null)
-            {
-                IMapper autoMapper = _autoMapperService.GetRawAutoMapper(rawAutoMappeRequestKeyGen);
-                rawAutoMappeRequestKeyGen.AutoMapper = autoMapper;
-            }
+            //if (rawAutoMappeRequestKeyGen.AutoMapper == null)
+            //{
+            //    IMapper autoMapper = _autoMapperService.GetAutoMapper(rawAutoMappeRequestKeyGen);
+            //    rawAutoMappeRequestKeyGen.AutoMapper = autoMapper;
+            //}
 
-            return rawAutoMappeRequestKeyGen.AutoMapper;
+            //return rawAutoMappeRequestKeyGen.AutoMapper;
+
+            IMapper result = _autoMapperService.GetAutoMapper(rawAutoMappeRequestKeyGen);
+            return result;
         }
 
         #endregion

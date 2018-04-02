@@ -2,54 +2,18 @@
 {
     public class SimpleAutoMapperBuilderProvider : IAutoMapperBuilderProvider
     {
-        #region Private Properties
-
-        //private readonly ViewModelActivatorInterface _viewModelActivator;
-        //private PSAccessServiceCreatorInterface _storeAccessCreator;
-        ////private readonly IProvideAutoMappers _autoMapperService;
-        //private readonly ICreateWrapperTypes _wrapperTypeCreator;
-
-        #endregion
-
-        #region Constructor
-
-        public SimpleAutoMapperBuilderProvider()
-        {
-        }
-
-        #endregion
-
-        #region Public Properties
-
-        //public ICreateWrapperTypes WrapperTypeCreator => _wrapperTypeCreator;
-
-        #endregion
-
-        #region Public Methods
-
         public IAutoMapperBuilder<TSource, TDestination> GetAutoMapperBuilder<TSource, TDestination>
             (
-            IMapperConfigurationBuilder<TSource, TDestination> mapperConfigurationBuilder,
-            IAutoMapperService autoMapperService
+            IMapperConfigurationBuilder<TSource, TDestination> mapperConfigurationBuilder
             )
 
         {
             IAutoMapperBuilder<TSource, TDestination> result = new SimpleAutoMapperBuilder<TSource, TDestination>
                 (
-                    mapperConfigurationBuilder: mapperConfigurationBuilder,
-                    autoMapperService: autoMapperService
+                    mapperConfigurationBuilder: mapperConfigurationBuilder
                 );
 
             return result;
         }
-
-        //// TODO: Note: The WrapperTypeCreator hold two caches, the result provided is only from the cache of emitted types.
-        //// The number of entries in the cache of TypeDescriptors is not included.
-        //public long ClearTypeCache()
-        //{
-        //    return _wrapperTypeCreator.ClearTypeCache();
-        //}
-
-        #endregion
     }
 }

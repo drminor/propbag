@@ -5,8 +5,7 @@ namespace Swhp.AutoMapperSupport
     {
         IAutoMapperBuilder<TSource, TDestination> GetAutoMapperBuilder<TSource, TDestination>
         (
-            IMapperConfigurationBuilder<TSource, TDestination> mapperConfigurationBuilder,
-            IAutoMapperService autoMapperService
+            IMapperConfigurationBuilder<TSource, TDestination> mapperConfigurationBuilder
         );
     }
 }

@@ -8,9 +8,9 @@ namespace Swhp.AutoMapperSupport
         //Typed Submit with ConfigPackageName
         IAutoMapperRequestKey<TSource, TDestination> SubmitRawAutoMapperRequest<TSource, TDestination>
         (
-            IAutoMapperConfigDetails configuationDetails,
             IMapTypeDefinition srcMapTypeDef,
             IMapTypeDefinition dstMapTypeDef,
+            IAutoMapperConfigDetails configuationDetails,
             string configPackageName,
             IHaveAMapperConfigurationStep configStarterForThisRequest
         );
@@ -18,9 +18,9 @@ namespace Swhp.AutoMapperSupport
         //Typed Submit with a Mapping Configuration (IConfigureAMapper)
         IAutoMapperRequestKey<TSource, TDestination> SubmitRawAutoMapperRequest<TSource, TDestination>
         (
-            IAutoMapperConfigDetails configuationDetails,
             IMapTypeDefinition srcMapTypeDef,
             IMapTypeDefinition dstMapTypeDef,
+            IAutoMapperConfigDetails configuationDetails,
             IConfigureAMapper<TSource, TDestination> mappingConfiguration,
             IHaveAMapperConfigurationStep configStarterForThisRequest
         );
@@ -34,9 +34,9 @@ namespace Swhp.AutoMapperSupport
         // Gen Submit 
         IAutoMapperRequestKeyGen SubmitRawAutoMapperRequest
         (
-            IAutoMapperConfigDetails configuationDetails,
             Type sourceType,
             Type destType,
+            IAutoMapperConfigDetails configuationDetails,
             string configPackageName,
             IHaveAMapperConfigurationStep configStarterForThisRequest
         );

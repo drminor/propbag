@@ -3,7 +3,7 @@ using AutoMapper;
 
 namespace Swhp.AutoMapperSupport
 {
-    public interface IAutoMapperBuilder<TSource, TDestination> //where TDestination : class, IPropBag
+    public interface IAutoMapperBuilder<TSource, TDestination> 
     {
         Func<IAutoMapperRequestKeyGen, IMapper> AutoMapperBuilderGen { get; }
 

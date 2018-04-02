@@ -5,27 +5,20 @@ using System;
 
 namespace Swhp.Tspb.PropBagAutoMapperService
 {
-    using PropModelType = IPropModel<String>;
     using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
 
     public class SimplePropBagMapperBuilder<TSource, TDestination> : IPropBagMapperBuilder<TSource, TDestination> where TDestination : class, IPropBag
     {
         #region Private Properties
 
-        //private readonly IBuildMapperConfigurations<TSource, TDestination> _mapperConfigurationBuilder;
         private readonly IPropBagMapperService _propBagMapperService;
 
         #endregion
 
         #region Constructor
 
-        public SimplePropBagMapperBuilder
-            (
-            //IBuildMapperConfigurations<TSource, TDestination> mapperConfigurationBuilder,
-            IPropBagMapperService propBagMapperService
-            )
+        public SimplePropBagMapperBuilder(IPropBagMapperService propBagMapperService)
         {
-            //_mapperConfigurationBuilder = mapperConfigurationBuilder;
             _propBagMapperService = propBagMapperService;
         }
 
@@ -40,8 +33,8 @@ namespace Swhp.Tspb.PropBagAutoMapperService
             ViewModelFactoryInterface viewModelFactory
             )
         {
-            CheckTypeToCreate(typeof(TSource), mapperRequestKey.SourceTypeDef.TargetType);
-            CheckTypeToCreate(typeof(TDestination), mapperRequestKey.DestinationTypeDef.TargetType);
+            CheckTypeToCreate("source", typeof(TSource), mapperRequestKey.SourceTypeDef.TargetType);
+            CheckTypeToCreate("destination", typeof(TDestination), mapperRequestKey.DestinationTypeDef.TargetType);
 
             IMapper theMapper = mapperRequestKey.AutoMapper;
 
@@ -56,15 +49,21 @@ namespace Swhp.Tspb.PropBagAutoMapperService
             return result;
         }
 
-        public Func<IPropBagMapperRequestKeyGen, ViewModelFactoryInterface, IPropBagMapperGen> GenPropBagMapperCreator => GeneratePropBagMapperGen;
+        public Func<IPropBagMapperRequestKeyGen, ViewModelFactoryInterface, IPropBagMapperGen> GenPropBagMapperCreator
+            => GeneratePropBagMapperGen;
 
         #endregion
 
         #region Private Methods 
 
-        private IPropBagMapperGen GeneratePropBagMapperGen(IPropBagMapperRequestKeyGen mapRequestGen, ViewModelFactoryInterface viewModelFactory)
+        private IPropBagMapperGen GeneratePropBagMapperGen
+            (
+            IPropBagMapperRequestKeyGen mapRequestGen,
+            ViewModelFactoryInterface viewModelFactory
+            )
         {
-            IPropBagMapperRequestKey<TSource, TDestination> mapRequestTyped = mapRequestGen as IPropBagMapperRequestKey<TSource, TDestination>;
+            IPropBagMapperRequestKey<TSource, TDestination> mapRequestTyped
+                = mapRequestGen as IPropBagMapperRequestKey<TSource, TDestination>;
 
             if(mapRequestTyped == null)
             {
@@ -75,11 +74,11 @@ namespace Swhp.Tspb.PropBagAutoMapperService
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
-        private void CheckTypeToCreate(Type typeParameter, Type typeFromPropModel)
+        private void CheckTypeToCreate(string parameterName, Type typeParameter, Type typeFromPropModel)
         {
             if (typeParameter != typeFromPropModel)
             {
-                throw new InvalidOperationException($"The type parameter: {typeParameter} does not match the PropModel's TypeToCreate: {typeFromPropModel}.");
+                throw new InvalidOperationException($"The {parameterName} type parameter: {typeParameter} does not match the PropModel's TypeToCreate: {typeFromPropModel}.");
             }
         }
 
