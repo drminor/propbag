@@ -12,10 +12,15 @@ namespace Swhp.Tspb.PropBagAutoMapperService
     // TODO: Consider implementing IDisposable -- to let go of any references we may hold to the mapper creators.
     public class PropBagMapperRequestKeyGen : IPropBagMapperRequestKeyGen, IEquatable<IPropBagMapperRequestKeyGen>, IEquatable<PropBagMapperRequestKeyGen>
     {
+        #region Private Properties
+
+        internal IAutoMapperRequestKeyGen AutoMapperRequestKeyGen { get; }
+
+        #endregion
+
         #region Public Properties
 
-        public IAutoMapperRequestKeyGen AutoMapperRequestKeyGen { get; }
-        public IMapper AutoMapper { get; set; }
+        public IMapper AutoMapper { get; internal set; }
 
         public Func<IPropBagMapperRequestKeyGen, ViewModelFactoryInterface, IPropBagMapperGen> PropBagMapperCreator { get; }
 

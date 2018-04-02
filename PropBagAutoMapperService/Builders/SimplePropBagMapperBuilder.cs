@@ -34,8 +34,8 @@ namespace Swhp.Tspb.PropBagAutoMapperService
             ViewModelFactoryInterface viewModelFactory
             )
         {
-            CheckTypeToCreate("source", typeof(TSource), mapperRequestKey.SourceTypeDef.TargetType);
-            CheckTypeToCreate("destination", typeof(TDestination), mapperRequestKey.DestinationTypeDef.TargetType);
+            CheckTypeToCreate("source", typeof(TSource), mapperRequestKey.SourceType);
+            CheckTypeToCreate("destination", typeof(TDestination), mapperRequestKey.DestinationType);
 
             PropModelType propModel = mapperRequestKey.PropModel;
             IMapper theMapper = mapperRequestKey.AutoMapper;

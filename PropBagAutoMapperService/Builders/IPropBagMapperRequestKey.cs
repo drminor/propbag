@@ -5,12 +5,11 @@ using DRM.TypeSafePropertyBag;
 
 namespace Swhp.Tspb.PropBagAutoMapperService
 {
-    using PropModelType = IPropModel<String>;
     using ViewModelFactoryInterface = IViewModelFactory<UInt32, String>;
 
-    public interface IPropBagMapperRequestKey<TSource, TDestination> : IPropBagMapperRequestKeyGen // where TDestination: class, IPropBag
+    public interface IPropBagMapperRequestKey<TSource, TDestination> : IPropBagMapperRequestKeyGen  where TDestination: class, IPropBag
     {
-        IAutoMapperRequestKey<TSource, TDestination> AutoMapperRequestKey { get; }
+        //IAutoMapperRequestKey<TSource, TDestination> AutoMapperRequestKey { get; }
 
         //Func<TDestination, TSource> SourceConstructor { get; }
         //Func<TSource, TDestination> DestinationConstructor { get; }

@@ -19,11 +19,13 @@ namespace Swhp.Tspb.PropBagAutoMapperService
 
         private readonly IPropBagMapperBuilder<TSource, TDestination> _propBagMapperBuilder;
 
+        internal IAutoMapperRequestKey<TSource, TDestination> AutoMapperRequestKey => (IAutoMapperRequestKey<TSource, TDestination>)AutoMapperRequestKeyGen;
+
+
         #endregion
 
         #region Public Properties
 
-        public IAutoMapperRequestKey<TSource, TDestination> AutoMapperRequestKey => (IAutoMapperRequestKey<TSource, TDestination>) AutoMapperRequestKeyGen;
 
         public IConfigureAMapper<TSource, TDestination> MappingConfiguration => AutoMapperRequestKey.MappingConfiguration;
 

@@ -161,8 +161,18 @@ namespace Swhp.Tspb.PropBagAutoMapperService
             // Fetch the raw AutoMapper, if not already retrieved.
             if (mapperRequest.AutoMapper == null)
             {
-                mapperRequest.AutoMapper =
-                    GetRawAutoMapper<TSource, TDestination>(mapperRequest.AutoMapperRequestKey);
+                if(mapperRequest is PropBagMapperRequestKey<TSource, TDestination> ourImp)
+                {
+                    // We are using the concrete type here because we do not want to make
+                    // the AutoMapperRequestKey part of the public interface.
+                    // TODO: consider creating an internal interface.
+                    ourImp.AutoMapper =
+                        GetRawAutoMapper<TSource, TDestination>(ourImp.AutoMapperRequestKey);
+                }
+                else
+                {
+                    throw new InvalidOperationException("The mapperRequest is not a PropBagMapperRequestKey.");
+                }
             }
 
             IPropBagMapper<TSource, TDestination> result =
@@ -186,7 +196,17 @@ namespace Swhp.Tspb.PropBagAutoMapperService
             // Fetch the raw AutoMapper, if not already retrieved.
             if (mapperRequest.AutoMapper == null)
             {
-                mapperRequest.AutoMapper = GetRawAutoMapperGen(mapperRequest.AutoMapperRequestKeyGen);
+                if(mapperRequest is PropBagMapperRequestKeyGen ourImp)
+                {
+                    // We are using the concrete type here because we do not want to make
+                    // the AutoMapperRequestKey part of the public interface.
+                    // TODO: consider creating an internal interface.
+                    ourImp.AutoMapper = GetRawAutoMapperGen(ourImp.AutoMapperRequestKeyGen);
+                }
+                else
+                {
+                    throw new InvalidOperationException("The mapperRequest is not a PropBagMapperRequestKeyGen.");
+                }
             }
 
             return _propBagMappersCache.GetPropBagMapper(mapperRequest);

@@ -15,22 +15,16 @@ namespace Swhp.Tspb.PropBagAutoMapperService
         PropModelType PropModel { get; }
 
         // Our link to the AutoMapperService
-        IAutoMapperRequestKeyGen AutoMapperRequestKeyGen { get; }
+        //IAutoMapperRequestKeyGen AutoMapperRequestKeyGen { get; }
 
         // The result from the AutoMapperService if it has been retrieved.
-        IMapper AutoMapper { get; set; }
+        IMapper AutoMapper { get; }
 
         // Returns a function that when called creates a IPropBagMapper
         Func<IPropBagMapperRequestKeyGen, ViewModelFactoryInterface, IPropBagMapperGen> PropBagMapperCreator { get; }
 
         // A function that creates a IPropBagMapper.
         IPropBagMapperGen CreatePropBagMapper(ViewModelFactoryInterface viewModelFactory);
-
-        // -----------------
-        //
-        //    Below are Convenience Properties that source from the AutoMapperRequestKeyGen.
-        //
-        // -----------------
 
         IPropBagMapperConfigDetails PropBagMapperConfigDetails { get; }
 
