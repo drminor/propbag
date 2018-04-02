@@ -43,6 +43,7 @@ namespace Swhp.AutoMapperSupport
         // Gen Submit
         public IAutoMapperRequestKeyGen SubmitRawAutoMapperRequest
             (
+            IAutoMapperConfigDetails autoMapperConfigDetails,
             Type sourceType,
             Type destinationType,
             string configPackageName,
@@ -50,13 +51,15 @@ namespace Swhp.AutoMapperSupport
             )
         {
             AutoMapperReqSubDelegate mapperRequestSubmitter = GetAutoMapperReqSubDelegate(sourceType, destinationType);
-            IAutoMapperRequestKeyGen result = mapperRequestSubmitter(sourceType, destinationType, configPackageName, configStarterForThisRequest, this);
+            IAutoMapperRequestKeyGen result = mapperRequestSubmitter(autoMapperConfigDetails, sourceType, destinationType, configPackageName, configStarterForThisRequest, this);
 
             return result;
         }
 
+        // Submit with Configuaration Package Name
         public IAutoMapperRequestKey<TSource, TDestination> SubmitRawAutoMapperRequest<TSource, TDestination>
             (
+            IAutoMapperConfigDetails configuationDetails,
             IMapTypeDefinition srcMapTypeDef,
             IMapTypeDefinition dstMapTypeDef,
             string configPackageName,
@@ -75,6 +78,7 @@ namespace Swhp.AutoMapperSupport
             IAutoMapperRequestKey<TSource, TDestination> result
                 = SubmitRawAutoMapperRequest
                 (
+                    configuationDetails,
                     srcMapTypeDef,
                     dstMapTypeDef,
                     mappingConfiguration,
@@ -87,6 +91,7 @@ namespace Swhp.AutoMapperSupport
         // Typed Submit Raw Auto
         public IAutoMapperRequestKey<TSource, TDestination> SubmitRawAutoMapperRequest<TSource, TDestination>
             (
+            IAutoMapperConfigDetails configuationDetails,
             IMapTypeDefinition srcMapTypeDef,
             IMapTypeDefinition dstMapTypeDef,
             IConfigureAMapper<TSource, TDestination> mappingConfiguration,
@@ -173,11 +178,12 @@ namespace Swhp.AutoMapperSupport
 
         internal delegate IAutoMapperRequestKeyGen AutoMapperReqSubDelegate
             (
-             Type sourceType,
-             Type destinationType,
-             string configPackageName,
-             IHaveAMapperConfigurationStep configStarterForThisRequest,
-             IAutoMapperService autoMapperService
+                IAutoMapperConfigDetails autoMapperConfigDetails,
+                Type sourceType,
+                Type destinationType,
+                string configPackageName,
+                IHaveAMapperConfigurationStep configStarterForThisRequest,
+                IAutoMapperService autoMapperService
             );
 
         static AutoMapperReqSubDelegate GetAutoMapperReqSubDelegate(Type sourceType, Type destinationType)
@@ -211,6 +217,7 @@ namespace Swhp.AutoMapperSupport
             // The Typed method for RawAutoMappers
             static IAutoMapperRequestKey<TSource, TDestination> SubmitRawAutoMapperRequest<TSource, TDestination>
                 (
+                IAutoMapperConfigDetails autoMapperConfigDetails,
                 Type sourceType,
                 Type destinationType,
                 string configPackageName,
@@ -224,10 +231,11 @@ namespace Swhp.AutoMapperSupport
                 IAutoMapperRequestKey<TSource, TDestination> result
                     = autoMapperProvider.SubmitRawAutoMapperRequest<TSource, TDestination>
                     (
-                    srcMapTypeDef: srcMapTypeDef,
-                    dstMapTypeDef: dstMapTypeDef,
-                    configPackageName: configPackageName,
-                    configStarterForThisRequest: configStarterForThisRequest
+                        autoMapperConfigDetails,
+                        srcMapTypeDef: srcMapTypeDef,
+                        dstMapTypeDef: dstMapTypeDef,
+                        configPackageName: configPackageName,
+                        configStarterForThisRequest: configStarterForThisRequest
                     );
 
                 return result;

@@ -11,6 +11,8 @@ namespace Swhp.Tspb.PropBagAutoMapperService
 
     public class SimplePropBagMapperService : IPropBagMapperService, IDisposable
     {
+        public const int PROP_BAG_MAPPER_CONFIG_DETAIL_EXTENSION_SOURCE_ID = 1;
+
         #region Private Members
 
         private readonly IMapTypeDefinitionProvider _mapTypeDefinitionProvider;
@@ -183,18 +185,22 @@ namespace Swhp.Tspb.PropBagAutoMapperService
             IMapTypeDefinition dstMapTypeDef
                 = _mapTypeDefinitionProvider.GetTypeDescription(typeof(TDestination), propModel, uniqueToken: null);
 
-            // TODO: Add property PackageName to  IConfigureAMapper 
-            IAutoMapperConfigDetails pbMapperDetails = new PropBagMapperConfigDetails(mappingConfiguration.ToString(), propModel);
-
-
-            // TOOD: Add constructor parameter: IConfigDetails
-            IAutoMapperRequestKey<TSource, TDestination> autoMapperRequestKey =
-                _autoMapperService.SubmitRawAutoMapperRequest<TSource, TDestination>
+            IAutoMapperConfigDetails pbMapperConfigDetails
+                = new PropBagMapperConfigDetails
                 (
-                srcMapTypeDef,
-                dstMapTypeDef,
-                mappingConfiguration,
-                configStarterForThisRequest
+                PROP_BAG_MAPPER_CONFIG_DETAIL_EXTENSION_SOURCE_ID,
+                mappingConfiguration.PackageName,
+                propModel
+                );
+
+            IAutoMapperRequestKey<TSource, TDestination> autoMapperRequestKey
+                = _autoMapperService.SubmitRawAutoMapperRequest<TSource, TDestination>
+                (
+                    pbMapperConfigDetails,
+                    srcMapTypeDef,
+                    dstMapTypeDef,
+                    mappingConfiguration,
+                    configStarterForThisRequest
                 );
 
             return autoMapperRequestKey;

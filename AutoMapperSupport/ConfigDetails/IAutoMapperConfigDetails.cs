@@ -1,7 +1,7 @@
 ﻿
 namespace Swhp.AutoMapperSupport
 {
-    public class IAutoMapperConfigDetails
+    public interface IAutoMapperConfigDetails
     {
         int ExtensionSourceId { get; }
         string PackageName { get; }

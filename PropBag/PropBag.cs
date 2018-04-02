@@ -4041,7 +4041,9 @@ namespace DRM.PropBag
                 (mapperRequest.PropModel, mapperRequest.ConfigPackageName);
 
             // Get the AutoMapper mapping function associated with the mapper request just submitted.
-            IPropBagMapper<TSource, TDestination> propBagMapper = propBagMapperService.GetPropBagMapper<TSource, TDestination>(propBagMapperRequestKey);
+            IPropBagMapper<TSource, TDestination> propBagMapper
+                = propBagMapperService.GetPropBagMapper<TSource, TDestination>(propBagMapperRequestKey);
+
             return propBagMapper;
         }
 
