@@ -700,36 +700,6 @@ namespace DRM.PropBag
             return true;
         }
 
-        //private PropBagMapperCreator GetPropBagMapperFactory()
-        //{
-        //    return GetPropBagMapper;
-        //}
-
-        //private IPropBagMapperGen GetPropBagMapper(IMapperRequest mr)
-        //{
-        //    if (_autoMapperService == null)
-        //    {
-        //        throw new InvalidOperationException($"This PropBag instance cannot create IProvideDataSourceProvider instances:" +
-        //            $" No AutoMapperSupport was supplied upon construction.");
-        //    }
-
-        //    return GetPropBagMapper_Internal(mr, _viewModelFactory, out IPropBagMapperKeyGen dummyMapperKey);
-        //}
-
-        //private IPropBagMapperGen GetPropBagMapper_Internal(IMapperRequest mapperRequest, ViewModelFactoryInterface viewModelFactory, out IPropBagMapperKeyGen mapperKey)
-        //{
-        //    // This is where the PropModel is used to define the Mapper 
-
-        //    // TODO: See if we can submit the request earlier; perhaps when the mapper request is created.
-
-        //    // Submit the Mapper Request.
-        //    mapperKey = _autoMapperService.SubmitMapperRequest(mapperRequest.PropModel, viewModelFactory, mapperRequest.SourceType, mapperRequest.ConfigPackageName, _autoMapperService);
-
-        //    // Get the AutoMapper mapping function associated with the mapper request already submitted.
-        //    IPropBagMapperGen genMapper = _autoMapperService.GetMapper(mapperKey);
-        //    return genMapper;
-        //}
-
         private IProp BuildStandardProp(IPropItemModel pi, ViewModelFactoryInterface viewModelFactory,
             IPropBagMapperService propBagMapperService)
         {
@@ -4212,11 +4182,11 @@ namespace DRM.PropBag
         // TOOD: Consider building the PropertyDescriptors directly from our list of PropData Items.
         //_ourStoreAccessor.GetPropDataItemsWithNames(this);
 
-        protected internal Func<IList<PropertyDescriptor>> CustomPropsGetter => GetCustomProps;
+        protected internal Func<IList<PropertyDescriptor>> CustomPropsGetter => GetPropertyDescriptors;
 
         private IList<PropertyDescriptor> _propertyDescriptors;
 
-        private IList<PropertyDescriptor> GetCustomProps()
+        private IList<PropertyDescriptor> GetPropertyDescriptors()
         {
             IList<PropertyDescriptor> result;
 
@@ -4234,7 +4204,7 @@ namespace DRM.PropBag
                         //}
 
                         IEnumerable<IPropItemModel> propItemModels = _propModel.GetPropItems();
-                        _propertyDescriptors = BuildCustomProps(propItemModels);
+                        _propertyDescriptors = BuildPropertyDescriptors(propItemModels);
                     }
                     result = _propertyDescriptors;
                 }
@@ -4242,7 +4212,7 @@ namespace DRM.PropBag
                 {
                     // Build a new set every time.
                     IEnumerable<IPropItemModel> propItemModels = _propModel.GetPropItems();
-                    result = BuildCustomProps(propItemModels);
+                    result = BuildPropertyDescriptors(propItemModels);
                 }
             }
             else
@@ -4301,7 +4271,7 @@ namespace DRM.PropBag
             return result;
         }
 
-        private IList<PropertyDescriptor> BuildCustomProps(IEnumerable<IPropItemModel> propItemModels)
+        private IList<PropertyDescriptor> BuildPropertyDescriptors(IEnumerable<IPropItemModel> propItemModels)
         {
             IList<PropertyDescriptor> result = new List<PropertyDescriptor>();
 
