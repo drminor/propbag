@@ -12,15 +12,16 @@ namespace DRM.PropBag
 {
     public class PropInitialValueField : NotifyPropertyChangedBase, IEquatable<PropInitialValueField>, IPropInitialValueField, IDisposable
     {
-        string iv;
+        object iv;
         bool stu;
         bool std;
         bool stn;
         bool stes;
         Func<object> _valueCreator;
 
-        [XmlText]
-        public string InitialValue { get { return iv; } set { SetIfDifferent<string>(ref iv, value); } }
+        //[XmlText]
+        [XmlIgnore]
+        public object InitialValue { get { return iv; } set { SetIfDifferentRefEqu<object>(ref iv, value); } }
 
         [XmlAttribute("use-undefined")]
         public bool SetToUndefined { get { return stu; } set { SetIfDifferent<bool>(ref stu, value); } }
@@ -39,6 +40,13 @@ namespace DRM.PropBag
         public string PropBagFCN { get; set; }
 
         public Func<object> ValueCreator { get { return _valueCreator; } set { SetIfDifferentDelegate<Func<object>>(ref _valueCreator, value); } }
+
+        public Func<T> GetValueCreatorTyped<T>() => GetInitialValue<T>;
+
+        private T GetInitialValue<T>()
+        {
+            return default(T);
+        }
 
         #region Constructors
 
@@ -65,7 +73,7 @@ namespace DRM.PropBag
 
         public PropInitialValueField
             (
-            string initialValue,
+            object initialValue,
             bool setToDefault,
             bool setToUndefined,
             bool setToNull,
@@ -96,6 +104,7 @@ namespace DRM.PropBag
         }
 
         // TODO: Include the two new properties: CreateNew and PropBagResourceKey
+        // TODO: The value creators
         public bool Equals(PropInitialValueField other)
         {
             if (other == null) return false;
@@ -125,7 +134,7 @@ namespace DRM.PropBag
             }
             else
             {
-                return InitialValue;
+                return InitialValue.ToString();
             }
         }
 

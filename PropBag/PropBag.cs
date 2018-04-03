@@ -767,13 +767,21 @@ namespace DRM.PropBag
                     }
                     else
                     {
+                        object value;
                         bool useDefault = pi.InitialValueField.SetToDefault;
-                        string value = GetValue(pi);
+                        if(useDefault)
+                        {
+                            value = _propFactory.GetDefaultValue(pi.PropertyType, pi.PropertyName);
+                        }
+                        else
+                        {
+                            value = pi.InitialValueField.InitialValue;
+                        }
 
                         pi.TypeIsSolid = _propFactory.IsTypeSolid(value, pi.PropertyType);
 
                         creationMethodDescription = "CreateGenFromString - PropCreator was not set.";
-                        result = _propFactory.CreateGenFromString(pi.PropertyType, value, useDefault, pi.PropertyName, pi.ExtraInfo, pi.StorageStrategy, pi.TypeIsSolid,
+                        result = _propFactory.CreateGenFromObject(pi.PropertyType, value, pi.PropertyName, pi.ExtraInfo, pi.StorageStrategy, pi.TypeIsSolid,
                             pi.PropKind, pi.ComparerField.Comparer, pi.ComparerField.UseRefEquality, pi.ItemType);
                     }
                 }
