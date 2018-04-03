@@ -167,14 +167,14 @@ namespace PropBagTestApp.Infra
         {
             IPropBagTemplateBuilder propBagTemplateBuilder = new PropBagTemplateBuilder(Application.Current.Resources);
 
-            IMapperRequestBuilder mapperRequestProvider = new MapperRequestProvider(Application.Current.Resources);
+            IMapperRequestBuilder mapperRequestBuilder = new MapperRequestBuilder(Application.Current.Resources);
 
             IParsePropBagTemplates propBagTemplateParser = new PropBagTemplateParser();
 
             IProvidePropModels propModelProvider = new SimplePropModelProvider
                 (
                 propBagTemplateBuilder,
-                mapperRequestProvider,
+                mapperRequestBuilder,
                 propBagTemplateParser,
                 propFactoryFactory
                 );

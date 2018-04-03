@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace DRM.PropBagControlsWPF
 {
-    public class MapperRequestProvider : IMapperRequestBuilder
+    public class MapperRequestBuilder : IMapperRequestBuilder
     {
         #region Private Fields and Properties
 
@@ -29,12 +29,12 @@ namespace DRM.PropBagControlsWPF
 
         #region Constructor
 
-        public MapperRequestProvider()
+        public MapperRequestBuilder()
         {
             _resources = null;
         }
 
-        public MapperRequestProvider(ResourceDictionary resources/*, string resourceKeySuffix*/)
+        public MapperRequestBuilder(ResourceDictionary resources/*, string resourceKeySuffix*/)
         {
             _resources = resources;
             //ResourceKeySuffix = resourceKeySuffix;

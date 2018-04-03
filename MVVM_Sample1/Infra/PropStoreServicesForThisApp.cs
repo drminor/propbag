@@ -101,15 +101,15 @@ namespace MVVM_Sample1.Infra
             IPropBagTemplateBuilder propBagTemplateBuilder = new PropBagTemplateBuilder(Application.Current.Resources);
                 _mct.MeasureAndReport("After new PropBagTemplateBuilder");
 
-            IMapperRequestBuilder mapperRequestProvider = new MapperRequestProvider(Application.Current.Resources);
-                _mct.MeasureAndReport("After new MapperRequestProvider");
+            IMapperRequestBuilder mapperRequestBuilder = new MapperRequestBuilder(Application.Current.Resources);
+                _mct.MeasureAndReport("After new MapperRequestBuilder");
 
             IParsePropBagTemplates propBagTemplateParser = new PropBagTemplateParser();
 
             IProvidePropModels propModelProvider = new SimplePropModelProvider
             (
                 propBagTemplateBuilder,
-                mapperRequestProvider,
+                mapperRequestBuilder,
                 propBagTemplateParser,
                 propFactoryFactory
             );

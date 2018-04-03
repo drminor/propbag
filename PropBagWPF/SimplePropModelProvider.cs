@@ -14,7 +14,7 @@ namespace DRM.PropBagWPF
         #region Private Fields
 
         private IPropBagTemplateBuilder _propBagTemplateBuilder;
-        private IMapperRequestBuilder _mapperRequestProvider;
+        private IMapperRequestBuilder _mapperRequestBuilder;
         private IParsePropBagTemplates _pbtParser;
         private IPropFactoryFactory _propFactoryFactory;
 
@@ -28,13 +28,13 @@ namespace DRM.PropBagWPF
         public SimplePropModelProvider
             (
             IPropBagTemplateBuilder propBagTemplateBuilder,
-            IMapperRequestBuilder mapperRequestProvider,
+            IMapperRequestBuilder mapperRequestBuilder,
             IParsePropBagTemplates propBagTemplateParser,
             IPropFactoryFactory propFactoryFactory
             )
         {
             _propBagTemplateBuilder = propBagTemplateBuilder;
-            _mapperRequestProvider = mapperRequestProvider;
+            _mapperRequestBuilder = mapperRequestBuilder;
             _pbtParser = propBagTemplateParser;
             _propFactoryFactory = propFactoryFactory ?? throw new ArgumentNullException(nameof(propFactoryFactory));
 
@@ -193,8 +193,8 @@ namespace DRM.PropBagWPF
 
         #region AutoMapperRequest Lookup Support
 
-        public bool CanFindMapperRequestWithJustKey => _mapperRequestProvider?.CanFindMapperRequestWithJustAKey != false;
-        public bool HasMrLookupResources => _mapperRequestProvider != null;
+        public bool CanFindMapperRequestWithJustKey => _mapperRequestBuilder?.CanFindMapperRequestWithJustAKey != false;
+        public bool HasMrLookupResources => _mapperRequestBuilder != null;
 
         public IMapperRequest GetMapperRequest(string resourceKey)
         {
@@ -218,7 +218,7 @@ namespace DRM.PropBagWPF
             {
                 try
                 {
-                    MapperRequestTemplate mr = _mapperRequestProvider.GetMapperRequest(resourceKey);
+                    MapperRequestTemplate mr = _mapperRequestBuilder.GetMapperRequest(resourceKey);
                     IMapperRequest mrCooked = new MapperRequest(mr.SourceType, mr.DestinationPropModelKey, mr.ConfigPackageName);
                     return mrCooked;
                 }
@@ -230,7 +230,7 @@ namespace DRM.PropBagWPF
             else if (HasMrLookupResources)
             {
                 throw new InvalidOperationException($"A call providing only a ResourceKey can only be done, " +
-                    $"if this PropModelProvider was supplied with a MapperRequestProvider upon construction. " +
+                    $"if this PropModelProvider was supplied with a MapperRequestBuilder upon construction. " +
                     $"No class implementing: {nameof(IMapperRequestBuilder)} was provided. " +
                     $"Please supply a MapperRequest object.");
             }
@@ -238,7 +238,7 @@ namespace DRM.PropBagWPF
             {
                 throw new InvalidOperationException($"A call providing only a ResourceKey can only be done, " +
                     $"if this PropModelProvider was supplied with the necessary resources upon construction. " +
-                    $"A {_mapperRequestProvider.GetType()} was provided, but it does not have the necessary resources. " +
+                    $"A {_mapperRequestBuilder.GetType()} was provided, but it does not have the necessary resources. " +
                     $"Please supply a ResourceDictionary and ResourceKey or a MapperRequest object.");
             }
         }
@@ -249,7 +249,7 @@ namespace DRM.PropBagWPF
             {
                 try
                 {
-                    MapperRequestTemplate mr = _mapperRequestProvider.GetMapperRequest(rd, resourceKey);
+                    MapperRequestTemplate mr = _mapperRequestBuilder.GetMapperRequest(rd, resourceKey);
                     IMapperRequest mapperRequest = new MapperRequest(mr.SourceType, mr.DestinationPropModelKey, mr.ConfigPackageName);
                     return mapperRequest;
                 }
