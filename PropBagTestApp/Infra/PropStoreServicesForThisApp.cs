@@ -165,7 +165,7 @@ namespace PropBagTestApp.Infra
             IPropFactoryFactory propFactoryFactory
             )
         {
-            IPropBagTemplateProvider propBagTemplateProvider = new PropBagTemplateProvider(Application.Current.Resources);
+            IPropBagTemplateBuilder propBagTemplateBuilder = new PropBagTemplateBuilder(Application.Current.Resources);
 
             IMapperRequestProvider mapperRequestProvider = new MapperRequestProvider(Application.Current.Resources);
 
@@ -173,7 +173,7 @@ namespace PropBagTestApp.Infra
 
             IProvidePropModels propModelProvider = new SimplePropModelProvider
                 (
-                propBagTemplateProvider,
+                propBagTemplateBuilder,
                 mapperRequestProvider,
                 propBagTemplateParser,
                 propFactoryFactory

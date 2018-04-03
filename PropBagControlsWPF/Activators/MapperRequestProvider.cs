@@ -53,7 +53,7 @@ namespace DRM.PropBagControlsWPF
 
         public MapperRequestTemplate GetMapperRequest(string resourceKey)
         {
-            if (!CanFindMapperRequestWithJustAKey) throw new InvalidOperationException($"This instance of {nameof(PropBagTemplateProvider)} was not provide a ResourceDictionary.");
+            if (!CanFindMapperRequestWithJustAKey) throw new InvalidOperationException($"This instance of {nameof(PropBagTemplateBuilder)} was not provide a ResourceDictionary.");
             return GetMapperRequest(_resources, resourceKey);
         }
 

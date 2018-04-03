@@ -5,7 +5,8 @@ using DRM.TypeSafePropertyBag;
 
 namespace DRM.PropBagControlsWPF
 {
-    public class PropBagTemplateProvider : IPropBagTemplateProvider
+    // TODO: This is really a builder, not a provider, change the class name.
+    public class PropBagTemplateBuilder : IPropBagTemplateBuilder
     {
         #region Private Fields and Properties
 
@@ -30,12 +31,12 @@ namespace DRM.PropBagControlsWPF
 
         #region Constructor
 
-        public PropBagTemplateProvider()
+        public PropBagTemplateBuilder()
         {
             _resources = null;
         }
 
-        public PropBagTemplateProvider(ResourceDictionary resources/*, string resourceKeySuffix*/)
+        public PropBagTemplateBuilder(ResourceDictionary resources/*, string resourceKeySuffix*/)
         {
             _resources = resources;
             //ResourceKeySuffix = resourceKeySuffix;
@@ -54,7 +55,7 @@ namespace DRM.PropBagControlsWPF
 
         public PropBagTemplate GetPropBagTemplate(string resourceKey)
         {
-            if (!CanFindPropBagTemplateWithJustAKey) throw new InvalidOperationException($"This instance of {nameof(PropBagTemplateProvider)} was not provide a ResourceDictionary.");
+            if (!CanFindPropBagTemplateWithJustAKey) throw new InvalidOperationException($"This instance of {nameof(PropBagTemplateBuilder)} was not provide a ResourceDictionary.");
             return GetPropBagTemplate(_resources, resourceKey);
         }
 

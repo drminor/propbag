@@ -13,7 +13,7 @@ namespace DRM.PropBagWPF
     { 
         #region Private Fields
 
-        private IPropBagTemplateProvider _propBagTemplateProvider;
+        private IPropBagTemplateBuilder _propBagTemplateBuilder;
         private IMapperRequestProvider _mapperRequestProvider;
         private IParsePropBagTemplates _pbtParser;
         private IPropFactoryFactory _propFactoryFactory;
@@ -27,13 +27,13 @@ namespace DRM.PropBagWPF
 
         public SimplePropModelProvider
             (
-            IPropBagTemplateProvider propBagTemplateProvider,
+            IPropBagTemplateBuilder propBagTemplateBuilder,
             IMapperRequestProvider mapperRequestProvider,
             IParsePropBagTemplates propBagTemplateParser,
             IPropFactoryFactory propFactoryFactory
             )
         {
-            _propBagTemplateProvider = propBagTemplateProvider;
+            _propBagTemplateBuilder = propBagTemplateBuilder;
             _mapperRequestProvider = mapperRequestProvider;
             _pbtParser = propBagTemplateParser;
             _propFactoryFactory = propFactoryFactory ?? throw new ArgumentNullException(nameof(propFactoryFactory));
@@ -46,8 +46,8 @@ namespace DRM.PropBagWPF
 
         #region PropBagTemplate Locator Support
 
-        public bool CanFindPropBagTemplateWithJustKey => _propBagTemplateProvider?.CanFindPropBagTemplateWithJustAKey != false;
-        public bool HasPbtLookupResources => _propBagTemplateProvider != null;
+        public bool CanFindPropBagTemplateWithJustKey => _propBagTemplateBuilder?.CanFindPropBagTemplateWithJustAKey != false;
+        public bool HasPbtLookupResources => _propBagTemplateBuilder != null;
 
         // TODO: Add locks to this code.
         public PropModelType GetPropModel(string resourceKey)
@@ -70,7 +70,7 @@ namespace DRM.PropBagWPF
             {
                 if (CanFindPropBagTemplateWithJustKey)
                 {
-                    PropBagTemplate pbt = _propBagTemplateProvider.GetPropBagTemplate(resourceKey);
+                    PropBagTemplate pbt = _propBagTemplateBuilder.GetPropBagTemplate(resourceKey);
                     PropModelType pm = _pbtParser.ParsePropModel(pbt);
                     FixUpPropFactory(pm, _propFactoryFactory);
                     return pm;
@@ -78,15 +78,15 @@ namespace DRM.PropBagWPF
                 else if (HasPbtLookupResources)
                 {
                     throw new InvalidOperationException($"A call providing only a ResourceKey can only be done, " +
-                        $"if this PropModelProvider was supplied with a PropBagTemplateProvider upon construction. " +
-                        $"No class implementing: {nameof(IPropBagTemplateProvider)} was provided. " +
+                        $"if this PropModelProvider was supplied with a PropBagTemplateBuilder upon construction. " +
+                        $"No class implementing: {nameof(IPropBagTemplateBuilder)} was provided. " +
                         $"Please supply a PropBagTemplate object.");
                 }
                 else
                 {
                     throw new InvalidOperationException($"A call providing only a ResourceKey can only be done, " +
                         $"if this PropModelProvider was supplied with the necessary resources upon construction. " +
-                        $"A {_propBagTemplateProvider.GetType()} was provided, but it does not have the necessary resources. " +
+                        $"A {_propBagTemplateBuilder.GetType()} was provided, but it does not have the necessary resources. " +
                         $"Please supply a ResourceDictionary and ResourceKey or a ProbBagTemplate object.");
                 }
             }
@@ -102,7 +102,7 @@ namespace DRM.PropBagWPF
             {
                 if (HasPbtLookupResources)
                 {
-                    PropBagTemplate pbt = _propBagTemplateProvider.GetPropBagTemplate(resourceKey);
+                    PropBagTemplate pbt = _propBagTemplateBuilder.GetPropBagTemplate(resourceKey);
                     PropModelType pm = _pbtParser.ParsePropModel(pbt);
                     FixUpPropFactory(pm, _propFactoryFactory);
                     return pm;
@@ -111,7 +111,7 @@ namespace DRM.PropBagWPF
                 {
                     throw new InvalidOperationException($"A call providing a ResourceDictionary and a ResouceKey can only be done, " +
                         $"if this PropModelProvider was supplied with a resource upon construction. " +
-                        $"No class implementing: {nameof(IPropBagTemplateProvider)} was provided.");
+                        $"No class implementing: {nameof(IPropBagTemplateBuilder)} was provided.");
                 }
             }
             catch (System.Exception e)
@@ -177,7 +177,7 @@ namespace DRM.PropBagWPF
         {
             int result = 0;
 
-            IDictionary<string, IPropBagTemplate> templates = _propBagTemplateProvider.GetPropBagTemplates();
+            IDictionary<string, IPropBagTemplate> templates = _propBagTemplateBuilder.GetPropBagTemplates();
 
             foreach(KeyValuePair<string, IPropBagTemplate> kvp in templates)
             {

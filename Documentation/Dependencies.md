@@ -56,14 +56,14 @@ ViewModelHelper =>
 - IPropStoreAccessServiceCreator<L2T, L2TRaw> (Implemented by all IProvidePropStoreAccessService<L2T, L2TRaw>)
 
 IPropModelProvider =>
-- IPropBagTemplateProvider
+- IPropBagTemplateBuilder
 - IPropFactory fallBackPropFactory (Will propably be removed and then all PropModel instances must specify a IPropFactory.)
 - IViewModelActivator viewModelActivator
 - IPropStoreAccessServiceCreator<L2T, L2TRaw>
 
 IViewModelActivator => none
 
-IPropBagTemplateProvider => ResourceDictionary (Optional)
+IPropBagTemplateBuilder => ResourceDictionary (Optional)
 
 
 

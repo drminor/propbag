@@ -98,8 +98,8 @@ namespace MVVM_Sample1.Infra
 
         private static IProvidePropModels GetPropModelProvider(IPropFactoryFactory propFactoryFactory)
         {
-            IPropBagTemplateProvider propBagTemplateProvider = new PropBagTemplateProvider(Application.Current.Resources);
-                _mct.MeasureAndReport("After new PropBagTemplateProvider");
+            IPropBagTemplateBuilder propBagTemplateBuilder = new PropBagTemplateBuilder(Application.Current.Resources);
+                _mct.MeasureAndReport("After new PropBagTemplateBuilder");
 
             IMapperRequestProvider mapperRequestProvider = new MapperRequestProvider(Application.Current.Resources);
                 _mct.MeasureAndReport("After new MapperRequestProvider");
@@ -108,7 +108,7 @@ namespace MVVM_Sample1.Infra
 
             IProvidePropModels propModelProvider = new SimplePropModelProvider
             (
-                propBagTemplateProvider,
+                propBagTemplateBuilder,
                 mapperRequestProvider,
                 propBagTemplateParser,
                 propFactoryFactory

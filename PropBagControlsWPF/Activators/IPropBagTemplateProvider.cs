@@ -4,7 +4,7 @@ using System.Windows;
 
 namespace DRM.PropBagControlsWPF
 {
-    public interface IPropBagTemplateProvider
+    public interface IPropBagTemplateBuilder
     {
         bool CanFindPropBagTemplateWithJustAKey { get; }
 
