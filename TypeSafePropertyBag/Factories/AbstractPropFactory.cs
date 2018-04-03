@@ -277,6 +277,10 @@ namespace DRM.TypeSafePropertyBag
                 CreateScalarProp propCreator = GetPropCreator(typeOfThisProperty);
                 mct.MeasureAndReport("GetPropCreator", $"for {propertyName}");
 
+                // TODO: This is where strings are parsed to create objects of type T.
+                // TODO: This needs more work, to say the least.
+
+
                 IProp prop = propCreator(this, haveValue: true, value: value, useDefault: useDefault, propertyName: propertyName,
                     extraInfo: extraInfo, storageStrategy: storageStrategy, isTypeSolid: isTypeSolid,
                     comparer: comparer, useRefEquality: useRefEquality, getDefaultValFunc: null);
