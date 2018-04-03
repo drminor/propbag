@@ -14,7 +14,7 @@ namespace DRM.PropBagWPF
         #region Private Fields
 
         private IPropBagTemplateBuilder _propBagTemplateBuilder;
-        private IMapperRequestProvider _mapperRequestProvider;
+        private IMapperRequestBuilder _mapperRequestProvider;
         private IParsePropBagTemplates _pbtParser;
         private IPropFactoryFactory _propFactoryFactory;
 
@@ -28,7 +28,7 @@ namespace DRM.PropBagWPF
         public SimplePropModelProvider
             (
             IPropBagTemplateBuilder propBagTemplateBuilder,
-            IMapperRequestProvider mapperRequestProvider,
+            IMapperRequestBuilder mapperRequestProvider,
             IParsePropBagTemplates propBagTemplateParser,
             IPropFactoryFactory propFactoryFactory
             )
@@ -231,7 +231,7 @@ namespace DRM.PropBagWPF
             {
                 throw new InvalidOperationException($"A call providing only a ResourceKey can only be done, " +
                     $"if this PropModelProvider was supplied with a MapperRequestProvider upon construction. " +
-                    $"No class implementing: {nameof(IMapperRequestProvider)} was provided. " +
+                    $"No class implementing: {nameof(IMapperRequestBuilder)} was provided. " +
                     $"Please supply a MapperRequest object.");
             }
             else
@@ -262,7 +262,7 @@ namespace DRM.PropBagWPF
             {
                 throw new InvalidOperationException($"A call providing a ResourceDictionary and a ResouceKey can only be done, " +
                     $"if this PropModelProvider was supplied with a resource upon construction. " +
-                    $"No class implementing: {nameof(IMapperRequestProvider)} was provided.");
+                    $"No class implementing: {nameof(IMapperRequestBuilder)} was provided.");
             }
         }
 

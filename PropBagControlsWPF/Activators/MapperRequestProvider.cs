@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace DRM.PropBagControlsWPF
 {
-    public class MapperRequestProvider : IMapperRequestProvider
+    public class MapperRequestProvider : IMapperRequestBuilder
     {
         #region Private Fields and Properties
 

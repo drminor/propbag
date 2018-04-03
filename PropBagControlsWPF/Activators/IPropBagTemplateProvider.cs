@@ -15,7 +15,7 @@ namespace DRM.PropBagControlsWPF
         IDictionary<string, IPropBagTemplate> GetPropBagTemplates(ResourceDictionary resources);
     }
 
-    public interface IMapperRequestProvider
+    public interface IMapperRequestBuilder
     {
         bool CanFindMapperRequestWithJustAKey { get; }
 
