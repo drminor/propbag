@@ -1,9 +1,7 @@
-﻿using DRM.TypeSafePropertyBag;
-using System;
+﻿using System;
 
-namespace DRM.PropBagControlsWPF
+namespace DRM.TypeSafePropertyBag
 {
-    using PropNameType = String;
     using PropModelType = IPropModel<String>;
 
     public interface IParsePropBagTemplates
