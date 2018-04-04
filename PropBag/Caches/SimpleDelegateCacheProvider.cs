@@ -48,6 +48,8 @@ namespace DRM.PropBag.Caches
 
         #region Constructor
 
+        // TODO: instead of injecting types, inject objects that implement a specified interface.
+        // Currently this is always called with typeof(PropBag), typeof(APFGenericMethodTemplates)
         public SimpleDelegateCacheProvider(Type propBagType, Type propCreatorType)
         {
             //long startBytes = System.GC.GetTotalMemory(true);
@@ -131,21 +133,6 @@ namespace DRM.PropBag.Caches
 
             CreateScalarPropCache = new DelegateCache<CreateScalarProp>(createScalarProp_mi);
             //curBytes = Sizer.ReportMemConsumption(startBytes, curBytes, "After new DelegateCache<CreatePropFromStringDelegate>");
-
-            //// Create Prop From String
-            //MethodInfo createPropFromString_mi = propCreatorType.GetMethod("CreatePropFromString", BindingFlags.Static | BindingFlags.NonPublic);
-            //curBytes = Sizer.ReportMemConsumption(startBytes, curBytes, "After GetMethod(CreatePropFromString)");
-
-            //CreatePropFromStringCache = new DelegateCache<CreatePropFromStringDelegate>(createPropFromString_mi);
-            //curBytes = Sizer.ReportMemConsumption(startBytes, curBytes, "After new DelegateCache<CreatePropFromStringDelegate>");
-
-            //// Create Prop From Object
-            //MethodInfo createPropFromObject_mi = propCreatorType.GetMethod("CreatePropFromObject", BindingFlags.Static | BindingFlags.NonPublic);
-            //CreatePropFromObjectCache = new DelegateCache<CreatePropFromObjectDelegate>(createPropFromObject_mi);
-
-            //// Create Prop With No Value
-            //MethodInfo createPropNoVal_mi = propCreatorType.GetMethod("CreatePropWithNoValue", BindingFlags.Static | BindingFlags.NonPublic);
-            //CreatePropWithNoValCache = new DelegateCache<CreatePropWithNoValueDelegate>(createPropNoVal_mi);
 
             PropTemplateCache = new SimplePropTemplateCache();
 

@@ -419,7 +419,7 @@ namespace DRM.PropBag
                 if (pi.BinderField?.Path != null && pi.PropKind != PropKindEnum.CollectionView && pi.PropKind != PropKindEnum.CollectionViewSource_RO)
                 {
                     _memConsumptionTracker.Measure();
-                    processBinderField(pi, propId, newPropItem);
+                    ProcessBinderField(pi, propId, newPropItem);
                     _memConsumptionTracker.MeasureAndReport("Process Binder Field", $"PropBag: {_ourStoreAccessor.ToString()} : {pi.PropertyName}");
                 }
 
@@ -515,8 +515,10 @@ namespace DRM.PropBag
 
                 if (_foreignViewManagers == null)
                 {
-                    _foreignViewManagers = new Dictionary<PropNameType, IViewManagerProviderKey>();
-                    _foreignViewManagers.Add(pi.PropertyName, viewManagerProviderKey);
+                    _foreignViewManagers = new Dictionary<PropNameType, IViewManagerProviderKey>
+                    {
+                        { pi.PropertyName, viewManagerProviderKey }
+                    };
                 }
                 else
                 {
@@ -909,7 +911,7 @@ namespace DRM.PropBag
             }
         }
 
-        private void processBinderField(IPropItemModel pi, PropIdType propId, IPropData propItem)
+        private void ProcessBinderField(IPropItemModel pi, PropIdType propId, IPropData propItem)
         {
             switch (pi.PropKind)
             {
@@ -933,7 +935,7 @@ namespace DRM.PropBag
                 //    break;
 
                 case PropKindEnum.CollectionViewSource:
-                    throw new InvalidOperationException($"LocalBinding for {pi.PropKind} is not handled by the {nameof(processBinderField)} method.");
+                    throw new InvalidOperationException($"LocalBinding for {pi.PropKind} is not handled by the {nameof(ProcessBinderField)} method.");
                 case PropKindEnum.CollectionViewSource_RO:
                     goto case PropKindEnum.CollectionViewSource;
 
@@ -2943,7 +2945,7 @@ namespace DRM.PropBag
         {
             IPropTemplate propTemplate = propGen.TypedProp?.PropTemplate ?? throw new InvalidOperationException("The PropTemplate is null during call to GetPropItemRecord.");
 
-            PropItemModel propItem = new PropItemModel
+            PropItemModel propItemModel = new PropItemModel
                 (
                 type: propTemplate.Type,
                 name: propertyName,
@@ -2958,9 +2960,11 @@ namespace DRM.PropBag
                 binderField: null,
                 mapperRequest: null,
                 propCreator: propTemplate.PropCreator
-                );
-
-            propItem.InitialValueCooked = propGen.TypedProp.TypedValueAsObject;
+                )
+            {
+                InitialValueCooked = propGen.TypedProp.TypedValueAsObject
+            };
+            PropItemModel propItem = propItemModel;
             return propItem;
         }
 
@@ -3778,10 +3782,7 @@ namespace DRM.PropBag
 
         public void EndEdit()
         {
-            if (ItemEndEdit != null)
-            {
-                ItemEndEdit(this, EventArgs.Empty);
-            }
+            ItemEndEdit?.Invoke(this, EventArgs.Empty);
         }
 
         #endregion
@@ -4165,9 +4166,9 @@ namespace DRM.PropBag
             where TSource : class
                         where TDestination : class, INotifyItemEndEdit, IPropBag
         {
-            ClrMappedDSP<TDestination> mappedDsp = dsp as ClrMappedDSP<TDestination>;  //  CrudWithMapping<TDal, TSource, TDestination>;
+            //  CrudWithMapping<TDal, TSource, TDestination>;
 
-            if (mappedDsp != null)
+            if (dsp is ClrMappedDSP<TDestination> mappedDsp)
             {
                 //var z = y.CrudWithMapping;
 
@@ -4407,7 +4408,7 @@ namespace DRM.PropBag
         {
             get
             {
-                int result = _propFactory.CreatePropFromStringCacheCount;
+                int result = _propFactory.CreateScalarPropCacheCount;
                 return result;
             }
         }

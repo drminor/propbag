@@ -43,8 +43,7 @@ namespace DRM.TypeSafePropertyBag
 
         // These are used for diagnostics.
         public virtual int DoSetCacheCount => DelegateCacheProvider.DoSetDelegateCache.Count; // abstract int DoSetCacheCount { get; }
-        public virtual int CreatePropFromStringCacheCount => DelegateCacheProvider.CreateScalarPropCache.Count; //abstract int CreatePropFromStringCacheCount { get; }
-        //public virtual int CreatePropWithNoValCacheCount => DelegateCacheProvider.CreatePropWithNoValCache.Count; //abstract int CreatePropWithNoValCacheCount { get; }
+        public virtual int CreateScalarPropCacheCount => DelegateCacheProvider.CreateScalarPropCache.Count; //abstract int CreatePropFromStringCacheCount { get; }
 
         #endregion
 
@@ -264,49 +263,49 @@ namespace DRM.TypeSafePropertyBag
             }
         }
 
-        public virtual IProp CreateGenFromString(Type typeOfThisProperty,
-            string value, bool useDefault,
-            PropNameType propertyName, object extraInfo,
-            PropStorageStrategyEnum storageStrategy, bool isTypeSolid, PropKindEnum propKind,
-            Delegate comparer, bool useRefEquality = false, Type itemType = null)
-        {
-            MemConsumptionTracker mct = new MemConsumptionTracker(enabled: false);
+        //public virtual IProp CreateGenFromString(Type typeOfThisProperty,
+        //    string value, bool useDefault,
+        //    PropNameType propertyName, object extraInfo,
+        //    PropStorageStrategyEnum storageStrategy, bool isTypeSolid, PropKindEnum propKind,
+        //    Delegate comparer, bool useRefEquality = false, Type itemType = null)
+        //{
+        //    MemConsumptionTracker mct = new MemConsumptionTracker(enabled: false);
 
-            if (propKind == PropKindEnum.Prop)
-            {
-                CreateScalarProp propCreator = GetPropCreator(typeOfThisProperty);
-                mct.MeasureAndReport("GetPropCreator", $"for {propertyName}");
+        //    if (propKind == PropKindEnum.Prop)
+        //    {
+        //        CreateScalarProp propCreator = GetPropCreator(typeOfThisProperty);
+        //        mct.MeasureAndReport("GetPropCreator", $"for {propertyName}");
 
-                // TODO: This is where strings are parsed to create objects of type T.
-                // TODO: This needs more work, to say the least.
+        //        // TODO: This is where strings are parsed to create objects of type T.
+        //        // TODO: This needs more work, to say the least.
 
 
-                IProp prop = propCreator(this, haveValue: true, value: value, useDefault: useDefault, propertyName: propertyName,
-                    extraInfo: extraInfo, storageStrategy: storageStrategy, isTypeSolid: isTypeSolid,
-                    comparer: comparer, useRefEquality: useRefEquality, getDefaultValFunc: null);
+        //        IProp prop = propCreator(this, haveValue: true, value: value, useDefault: useDefault, propertyName: propertyName,
+        //            extraInfo: extraInfo, storageStrategy: storageStrategy, isTypeSolid: isTypeSolid,
+        //            comparer: comparer, useRefEquality: useRefEquality, getDefaultValFunc: null);
 
-                mct.MeasureAndReport("Ran propCreator to get IProp", $"for {propertyName}");
+        //        mct.MeasureAndReport("Ran propCreator to get IProp", $"for {propertyName}");
 
-                return prop;
-            }
-            else if (propKind.IsCollection())
-            {
-                CreateCPropFromStringDelegate propCreator = GetCPropFromStringCreator(typeOfThisProperty, itemType);
-                mct.MeasureAndReport("GetCPropFromStringCreator", $"for {propertyName}");
+        //        return prop;
+        //    }
+        //    else if (propKind.IsCollection())
+        //    {
+        //        CreateCPropFromStringDelegate propCreator = GetCPropFromStringCreator(typeOfThisProperty, itemType);
+        //        mct.MeasureAndReport("GetCPropFromStringCreator", $"for {propertyName}");
 
-                IProp prop = propCreator(this, value: value, useDefault: useDefault, propertyName: propertyName,
-                    extraInfo: extraInfo, storageStrategy: storageStrategy, isTypeSolid: isTypeSolid,
-                    comparer: comparer, useRefEquality: useRefEquality);
+        //        IProp prop = propCreator(this, value: value, useDefault: useDefault, propertyName: propertyName,
+        //            extraInfo: extraInfo, storageStrategy: storageStrategy, isTypeSolid: isTypeSolid,
+        //            comparer: comparer, useRefEquality: useRefEquality);
 
-                mct.MeasureAndReport("Ran GetCPropFromStringCreator to get IProp", $"for {propertyName}");
+        //        mct.MeasureAndReport("Ran GetCPropFromStringCreator to get IProp", $"for {propertyName}");
 
-                return prop;
-            }
-            else
-            {
-                throw new InvalidOperationException($"PropKind = {propKind} is not recognized or is not supported.");
-            }
-        }
+        //        return prop;
+        //    }
+        //    else
+        //    {
+        //        throw new InvalidOperationException($"PropKind = {propKind} is not recognized or is not supported.");
+        //    }
+        //}
 
         public virtual IProp CreateGenWithNoValue(Type typeOfThisProperty,
             PropNameType propertyName, object extraInfo,
@@ -598,7 +597,7 @@ namespace DRM.TypeSafePropertyBag
 
         #endregion Property-Type Methods
 
-        #endregion Shared Delegate Creation
+        #endregion Get PropItem Creation Delegates
 
     }
 }

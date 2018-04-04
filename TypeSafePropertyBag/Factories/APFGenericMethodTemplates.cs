@@ -155,6 +155,7 @@ namespace DRM.TypeSafePropertyBag
         {
             Func<T, T, bool> comparerToUse = GetComparerForProps<T>(comparer, propFactory, useRefEquality);
 
+            // If the caller did not provide a function used to get the default value, use the default-value-getter provided by the factory.
             Func<string, T> getDefaultValFuncToUse = (Func<string, T>) getDefaultValFunc ?? propFactory.ValueConverter.GetDefaultValue<T>;
 
             if (haveValue || useDefault)
@@ -166,6 +167,8 @@ namespace DRM.TypeSafePropertyBag
                 }
                 else
                 {
+                    // TODO: the caller must provide this function the prop factory is not responsible for this.
+                    // The InitialValueField from the PropModel has a Func<object> property that the caller can use.
                     initialValue = propFactory.GetValueFromObject<T>(value);
                 }
 

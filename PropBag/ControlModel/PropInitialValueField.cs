@@ -41,10 +41,11 @@ namespace DRM.PropBag
 
         public Func<object> ValueCreator { get { return _valueCreator; } set { SetIfDifferentDelegate<Func<object>>(ref _valueCreator, value); } }
 
-        public Func<T> GetValueCreatorTyped<T>() => GetInitialValue<T>;
+        public Func<T> GetInitialValue<T>() => GetInitialValue_Internal<T>;
 
-        private T GetInitialValue<T>()
+        private T GetInitialValue_Internal<T>()
         {
+            // TODO: Fix Me.
             return default(T);
         }
 

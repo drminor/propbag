@@ -106,9 +106,9 @@ namespace DRM.TypeSafePropertyBag
             PropStorageStrategyEnum storageStrategy, bool isTypeSolid, PropKindEnum propKind,
             Delegate comparer, bool useRefEquality = false, Type collectionType = null);
 
-        IProp CreateGenFromString(Type typeOfThisProperty, string value, bool useDefault, PropNameType propertyName, object extraInfo,
-            PropStorageStrategyEnum storageStrategy, bool isTypeSolid, PropKindEnum propKind,
-            Delegate comparer, bool useRefEquality = false, Type collectionType = null);
+        //IProp CreateGenFromString(Type typeOfThisProperty, string value, bool useDefault, PropNameType propertyName, object extraInfo,
+        //    PropStorageStrategyEnum storageStrategy, bool isTypeSolid, PropKindEnum propKind,
+        //    Delegate comparer, bool useRefEquality = false, Type collectionType = null);
 
         IProp CreateGenWithNoValue(Type typeOfThisProperty, PropNameType propertyName, object extraInfo,
             PropStorageStrategyEnum storageStrategy, bool isTypeSolid, PropKindEnum propKind,
@@ -143,7 +143,7 @@ namespace DRM.TypeSafePropertyBag
         #region Diagnostics
 
         int DoSetCacheCount { get; }
-        int CreatePropFromStringCacheCount { get; }
+        int CreateScalarPropCacheCount { get; }
         //int CreatePropWithNoValCacheCount { get; }
 
         #endregion
