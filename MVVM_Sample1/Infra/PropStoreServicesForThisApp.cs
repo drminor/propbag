@@ -75,9 +75,9 @@ namespace MVVM_Sample1.Infra
                 _mct.MeasureAndReport("After new SimpleViewModelActivator");
 
 
-            IPropModelBuilder propModelProvider = GetPropModelProvider(_propFactoryFactory);
+            IPropModelBuilder propModelBuilder = GetPropModelProvider(_propFactoryFactory);
 
-            PropModelCache = new SimplePropModelCache(propModelProvider);
+            PropModelCache = new SimplePropModelCache(propModelBuilder);
 
             WrapperTypeCreator = BuildSimpleWrapperTypeCreator();
                 _mct.MeasureAndReport("After GetSimpleWrapperTypeCreator");
@@ -106,7 +106,7 @@ namespace MVVM_Sample1.Infra
 
             IParsePropBagTemplates propBagTemplateParser = new PropBagTemplateParser();
 
-            IPropModelBuilder propModelProvider = new SimplePropModelBuilder
+            IPropModelBuilder propModelBuilder = new SimplePropModelBuilder
             (
                 propBagTemplateBuilder,
                 mapperRequestBuilder,
@@ -114,9 +114,9 @@ namespace MVVM_Sample1.Infra
                 propFactoryFactory
             );
 
-                _mct.MeasureAndReport("After new PropModelProvider");
+                _mct.MeasureAndReport("After new PropModelBuilder");
 
-            return propModelProvider;
+            return propModelBuilder;
         }
 
         private static IPropFactoryFactory BuildThePropFactoryFactory

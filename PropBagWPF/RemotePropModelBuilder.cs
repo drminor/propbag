@@ -144,8 +144,8 @@ namespace DRM.PropBagWPF
 
         private PropModelType FixUpPropFactory(PropModelType propModel, IPropFactoryFactory propFactoryGenerator)
         {
-            //// Include a reference to this PropModelProvider
-            //propModel.PropModelProvider = this;
+            //// Include a reference to this PropModelBuilder
+            //propModel.PropModelBuilder = this;
 
             if (propModel.PropFactory == null)
             {

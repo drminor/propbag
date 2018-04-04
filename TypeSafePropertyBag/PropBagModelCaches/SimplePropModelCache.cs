@@ -17,7 +17,7 @@ namespace DRM.TypeSafePropertyBag
         #region Private Properties
 
         private readonly Dictionary<string, PropBagModelFamilyCollInterface> _cache;
-        private readonly List<IPropModelBuilder> _propModelProviders;
+        private readonly List<IPropModelBuilder> _propModelBuilders;
 
         private object _syncLock = new object();
 
@@ -25,9 +25,9 @@ namespace DRM.TypeSafePropertyBag
 
         #region Constructor
 
-        public SimplePropModelCache(params IPropModelBuilder[] propModelProviders)
+        public SimplePropModelCache(params IPropModelBuilder[] propModelBuilders)
         {
-            _propModelProviders = new List<IPropModelBuilder>(propModelProviders);
+            _propModelBuilders = new List<IPropModelBuilder>(propModelBuilders);
 
             _cache = new Dictionary<PropNameType, PropBagModelFamilyCollInterface>();
         }
@@ -248,13 +248,13 @@ namespace DRM.TypeSafePropertyBag
         {
             IDictionary<string, string> classNameToKeyMap;
 
-            foreach (IPropModelBuilder propModelProvider in _propModelProviders)
+            foreach (IPropModelBuilder propModelBuilder in _propModelBuilders)
             {
-                classNameToKeyMap = propModelProvider.GetTypeToKeyMap();
+                classNameToKeyMap = propModelBuilder.GetTypeToKeyMap();
 
                 if (classNameToKeyMap.TryGetValue(fullClassName, out string resourceKey))
                 {
-                    propModel = propModelProvider.GetPropModel(resourceKey);
+                    propModel = propModelBuilder.GetPropModel(resourceKey);
 
                     if (propModel.PropModelCache != null)
                     {
@@ -276,11 +276,11 @@ namespace DRM.TypeSafePropertyBag
         public IMapperRequest GetMapperRequest(string resourceKey)
         {
             IMapperRequest result = null;
-            foreach (IPropModelBuilder propModelProvider in _propModelProviders)
+            foreach (IPropModelBuilder propModelBuilder in _propModelBuilders)
             {
                 try
                 {
-                    result = propModelProvider.GetMapperRequest(resourceKey);
+                    result = propModelBuilder.GetMapperRequest(resourceKey);
                     break;
                 }
                 catch
@@ -300,11 +300,11 @@ namespace DRM.TypeSafePropertyBag
         //public PropModelType GetPropModel(string resourceKey)
         //{
         //    PropModelType result = null;
-        //    foreach (IProvidePropModels propModelProvider in _propModelProviders)
+        //    foreach (IProvidePropModels propModelBuilder in _propModelBuilders)
         //    {
         //        try
         //        {
-        //            result = propModelProvider.GetPropModel(resourceKey);
+        //            result = propModelBuilder.GetPropModel(resourceKey);
         //            result.PropModelCache = this;
 
         //            lock (_syncLock)

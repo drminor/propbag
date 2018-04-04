@@ -239,9 +239,9 @@ namespace PropBagLib.Tests.AutoMapperSupport
 
             PropBagTemplateParser pbtParser = new PropBagTemplateParser();
 
-            RemotePropModelBuilder propModelProvider = new RemotePropModelBuilder(rdProvider, pbtParser, propFactoryFactory);
+            RemotePropModelBuilder propModelBuilder = new RemotePropModelBuilder(rdProvider, pbtParser, propFactoryFactory);
 
-            return propModelProvider;
+            return propModelBuilder;
         }
 
         void LoadPropModelsAndMappers

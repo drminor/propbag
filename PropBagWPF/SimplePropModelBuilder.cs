@@ -78,14 +78,14 @@ namespace DRM.PropBagWPF
                 else if (HasPbtLookupResources)
                 {
                     throw new InvalidOperationException($"A call providing only a ResourceKey can only be done, " +
-                        $"if this PropModelProvider was supplied with a PropBagTemplateBuilder upon construction. " +
+                        $"if this PropModelBuilder was supplied with a PropBagTemplateBuilder upon construction. " +
                         $"No class implementing: {nameof(IPropBagTemplateBuilder)} was provided. " +
                         $"Please supply a PropBagTemplate object.");
                 }
                 else
                 {
                     throw new InvalidOperationException($"A call providing only a ResourceKey can only be done, " +
-                        $"if this PropModelProvider was supplied with the necessary resources upon construction. " +
+                        $"if this PropModelBuilder was supplied with the necessary resources upon construction. " +
                         $"A {_propBagTemplateBuilder.GetType()} was provided, but it does not have the necessary resources. " +
                         $"Please supply a ResourceDictionary and ResourceKey or a ProbBagTemplate object.");
                 }
@@ -110,7 +110,7 @@ namespace DRM.PropBagWPF
                 else
                 {
                     throw new InvalidOperationException($"A call providing a ResourceDictionary and a ResouceKey can only be done, " +
-                        $"if this PropModelProvider was supplied with a resource upon construction. " +
+                        $"if this PropModelBuilder was supplied with a resource upon construction. " +
                         $"No class implementing: {nameof(IPropBagTemplateBuilder)} was provided.");
                 }
             }
@@ -122,8 +122,8 @@ namespace DRM.PropBagWPF
 
         private PropModelType FixUpPropFactory(PropModelType propModel, IPropFactoryFactory propFactoryGenerator)
         {
-            //// Include a reference to this PropModelProvider
-            //propModel.PropModelProvider = this;
+            //// Include a reference to this PropModelBuilder
+            //propModel.PropModelBuilder = this;
 
             // If the propModel does not supply a PropFactory, create one using the PropFactoryType.
             if (propModel.PropFactory == null)
@@ -230,14 +230,14 @@ namespace DRM.PropBagWPF
             else if (HasMrLookupResources)
             {
                 throw new InvalidOperationException($"A call providing only a ResourceKey can only be done, " +
-                    $"if this PropModelProvider was supplied with a MapperRequestBuilder upon construction. " +
+                    $"if this PropModelBuilder was supplied with a MapperRequestBuilder upon construction. " +
                     $"No class implementing: {nameof(IMapperRequestBuilder)} was provided. " +
                     $"Please supply a MapperRequest object.");
             }
             else
             {
                 throw new InvalidOperationException($"A call providing only a ResourceKey can only be done, " +
-                    $"if this PropModelProvider was supplied with the necessary resources upon construction. " +
+                    $"if this PropModelBuilder was supplied with the necessary resources upon construction. " +
                     $"A {_mapperRequestBuilder.GetType()} was provided, but it does not have the necessary resources. " +
                     $"Please supply a ResourceDictionary and ResourceKey or a MapperRequest object.");
             }
@@ -261,7 +261,7 @@ namespace DRM.PropBagWPF
             else
             {
                 throw new InvalidOperationException($"A call providing a ResourceDictionary and a ResouceKey can only be done, " +
-                    $"if this PropModelProvider was supplied with a resource upon construction. " +
+                    $"if this PropModelBuilder was supplied with a resource upon construction. " +
                     $"No class implementing: {nameof(IMapperRequestBuilder)} was provided.");
             }
         }

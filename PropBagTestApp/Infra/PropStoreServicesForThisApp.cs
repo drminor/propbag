@@ -73,9 +73,9 @@ namespace PropBagTestApp.Infra
         //        delegateCacheProvider
         //        );
 
-        //    IProvidePropModels propModelProvider = GetPropModelProvider(propFactoryFactory);
+        //    IProvidePropModels propModelBuilder = GetPropModelProvider(propFactoryFactory);
 
-        //    PropModelCache = new SimplePropModelCache(propModelProvider);
+        //    PropModelCache = new SimplePropModelCache(propModelBuilder);
 
         //    ViewModelFactory = new SimpleViewModelFactory(PropModelCache, vmActivator, psAccessServiceFactory, null, WrapperTypeCreator);
 
@@ -108,9 +108,9 @@ namespace PropBagTestApp.Infra
             _vmActivator = new SimpleViewModelActivator();
 
 
-            IPropModelBuilder propModelProvider = GetPropModelProvider(_propFactoryFactory);
+            IPropModelBuilder propModelBuilder = GetPropModelProvider(_propFactoryFactory);
 
-            PropModelCache = new SimplePropModelCache(propModelProvider);
+            PropModelCache = new SimplePropModelCache(propModelBuilder);
 
             WrapperTypeCreator = BuildSimpleWrapperTypeCreator();
 
@@ -171,7 +171,7 @@ namespace PropBagTestApp.Infra
 
             IParsePropBagTemplates propBagTemplateParser = new PropBagTemplateParser();
 
-            IPropModelBuilder propModelProvider = new SimplePropModelBuilder
+            IPropModelBuilder propModelBuilder = new SimplePropModelBuilder
                 (
                 propBagTemplateBuilder,
                 mapperRequestBuilder,
@@ -179,7 +179,7 @@ namespace PropBagTestApp.Infra
                 propFactoryFactory
                 );
 
-            return propModelProvider;
+            return propModelBuilder;
         }
 
         private static IPropBagMapperService GetAutoMapperProvider(ViewModelFactoryInterface viewModelFactory)

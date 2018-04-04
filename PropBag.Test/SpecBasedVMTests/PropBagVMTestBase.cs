@@ -206,7 +206,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests
 
             // Property Store
             _theStore = new SimplePropStoreProxy(MaxPropsPerObject, handlerDispatchDelegateCacheProvider);
-
+propModelBuilder
             // PropStoreAccessService Factory.
             PropStoreAccessService_Factory = _theStore.PropStoreAccessServiceFactory;
 
@@ -220,7 +220,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests
 
             // PropModel Provider
             RemotePropModelBuilder remotePropModelProvider = GetPropModelProvider(propFactoryFactory/*, ConfigPackageNameSuffix*/);
-            //PropModelProvider = remotePropModelProvider;
+            //PropModelBuilder = remotePropModelProvider;
                 _mct.MeasureAndReport("After GetPropModelProvider");
 
             // Load the PropBag and Mapper Templates
@@ -364,10 +364,10 @@ namespace PropBagLib.Tests.SpecBasedVMTests
 
             PropBagTemplateParser pbtParser = new PropBagTemplateParser();
 
-            RemotePropModelBuilder propModelProvider = new RemotePropModelBuilder(rdProvider, pbtParser, propFactoryFactory/*, configPackageNameSuffix*/);
-            _mct.MeasureAndReport("After new PropModelProvider");
+            RemotePropModelBuilder propModelBuilder = new RemotePropModelBuilder(rdProvider, pbtParser, propFactoryFactory/*, configPackageNameSuffix*/);
+            _mct.MeasureAndReport("After new PropModelBuilder");
 
-            return propModelProvider;
+            return propModelBuilder;
         }
 
         void LoadPropModelsAndMappers

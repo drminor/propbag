@@ -1,7 +1,7 @@
 
 TODO List
 
-1. Make the PropModelProvider build instances of classes that implement IPropFactory. DONE
+1. Make the PropModelBuilder build instances of classes that implement IPropFactory. DONE
 
 2. Make a MarkUpExtension or UserControl that replaces MVVMApplication.Infra.ViewModelProvider.
 

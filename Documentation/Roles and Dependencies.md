@@ -9,7 +9,7 @@ II. AutoMapperProvider is given object that implement the following interfaces u
 
 III. Each request to register a MapperRequest takes the following arguments:
 0. The Type Paramerters: TSource and TDestination.
-1. PropModel propModel (or a ResourceKey that the PropModelProvider will use to return a PropModel.
+1. PropModel propModel (or a ResourceKey that the PropModelBuilder will use to return a PropModel.
 2. Type typeToWrap
 3. string configPackageName
 4. IHaveAMapperConfigurationStep configStarterForThisRequest = null

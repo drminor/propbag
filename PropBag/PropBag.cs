@@ -467,7 +467,7 @@ namespace DRM.PropBag
             }
         }
 
-        private IProp BuildCollectionViewProp(IPropItemModel pi, PropModelCacheInterface propModelProvider, ICreateWrapperTypes wrapperTypeCreator)
+        private IProp BuildCollectionViewProp(IPropItemModel pi, PropModelCacheInterface propModelBuilder, ICreateWrapperTypes wrapperTypeCreator)
         {
             IProvideAView viewProvider;
 
@@ -477,7 +477,7 @@ namespace DRM.PropBag
             if (binderPath != null)
             {
                 //_memConsumptionTracker.Measure();
-                IViewManagerProviderKey viewManagerProviderKey = BuildTheViewManagerProviderKey(pi, propModelProvider);
+                IViewManagerProviderKey viewManagerProviderKey = BuildTheViewManagerProviderKey(pi, propModelBuilder);
                 _memConsumptionTracker.MeasureAndReport("After BuildTheViewManagerProviderKey", $"PropBag: {_ourStoreAccessor.ToString()}: {pi.PropertyName}");
 
                 IMapperRequest mr = viewManagerProviderKey.MapperRequest;
@@ -651,7 +651,7 @@ namespace DRM.PropBag
             {
                 if (pi.MapperRequest.PropModelFullClassName != null)
                 {
-                    //pi.MapperRequest.PropModel = propModelProvider.GetPropModel(pi.MapperRequest.PropModelResourceKey);
+                    //pi.MapperRequest.PropModel = propModelBuilder.GetPropModel(pi.MapperRequest.PropModelResourceKey);
 
                     if (propModelCache.TryGetPropModel(pi.MapperRequest.PropModelFullClassName, out PropModelType propModel))
                     {
@@ -722,7 +722,7 @@ namespace DRM.PropBag
                 if (pi.InitialValueField.PropBagFCN != null)
                 {
                     string fcn = pi.InitialValueField.PropBagFCN;
-                    //IPropBag newObject = BuildNewViewModel(fcn, pi.PropertyType, propModelProvider, storeAccessCreator, autoMapperService, wrapperTypeCreator);
+                    //IPropBag newObject = BuildNewViewModel(fcn, pi.PropertyType, propModelBuilder, storeAccessCreator, autoMapperService, wrapperTypeCreator);
                     IPropBag newObject = BuildNewViewModel(fcn, pi.PropertyType, viewModelFactory, propBagMapperService);
 
 
@@ -869,10 +869,10 @@ namespace DRM.PropBag
             }
         }
 
-        //private IPropBag BuildNewViewModel(string fullClassName, Type propertyType, PropModelCacheInterface propModelProvider,
+        //private IPropBag BuildNewViewModel(string fullClassName, Type propertyType, PropModelCacheInterface propModelBuilder,
         //    PSAccessServiceCreatorInterface storeAccessCreator, IProvideAutoMappers autoMapperService, ICreateWrapperTypes wrapperTypeCreator)
         //{
-        //    if (propModelProvider.TryGetPropModel(fullClassName, out PropModelType propModel))
+        //    if (propModelBuilder.TryGetPropModel(fullClassName, out PropModelType propModel))
         //    {
         //        IPropBag newObject = (IPropBag)VmActivator.GetNewViewModel(propertyType, propModel, storeAccessCreator, autoMapperService, wrapperTypeCreator, pfOverride: null, fcnOverride: null);
         //        return newObject;
