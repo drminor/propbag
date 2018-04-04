@@ -152,28 +152,14 @@ namespace DRM.PropBag
 
         #region Generic Prop Creators
 
-        public override IProp CreateGenFromObject(Type typeOfThisProperty,
-            object value,
-            PropNameType propertyName, object extraInfo,
-            PropStorageStrategyEnum storageStrategy, bool isTypeSolid, PropKindEnum propKind,
-            Delegate comparer, bool useRefEquality = false, Type itemType = null)
-        {
-            throw new InvalidOperationException("External Store Factory doesn't know how to create properties with initial values.");
-        }
-
-        public override IProp CreateGenFromString(Type typeOfThisProperty,
-            string value, bool useDefault,
-            PropNameType propertyName, object extraInfo,
-            PropStorageStrategyEnum storageStrategy, bool isTypeSolid, PropKindEnum propKind,
-            Delegate comparer, bool useRefEquality = false, Type itemType = null)
-        {
-            throw new InvalidOperationException("External Store Factory doesn't know how to create properties with initial values.");
-        }
-
-        public override IProvideADataSourceProvider GetDSProviderProvider(uint propId, PropKindEnum propKind, object iDoCrudDataSource, IPropStoreAccessService<uint, string> storeAccesor, IMapperRequest mr)
-        {
-            throw new NotImplementedException();
-        }
+        //public override IProp CreateGenFromObject(Type typeOfThisProperty,
+        //    object value,
+        //    PropNameType propertyName, object extraInfo,
+        //    PropStorageStrategyEnum storageStrategy, bool isTypeSolid, PropKindEnum propKind,
+        //    Delegate comparer, bool useRefEquality = false, Type itemType = null)
+        //{
+        //    throw new NotImplementedException("External Store Factory doesn't know how to create properties with initial values.");
+        //}
 
         #endregion
     }
