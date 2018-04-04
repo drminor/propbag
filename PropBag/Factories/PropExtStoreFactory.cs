@@ -161,6 +161,11 @@ namespace DRM.PropBag
         //    throw new NotImplementedException("External Store Factory doesn't know how to create properties with initial values.");
         //}
 
+        //public override IProvideADataSourceProvider GetDSProviderProvider(uint propId, PropKindEnum propKind, object iDoCrudDataSource, IPropStoreAccessService<uint, string> storeAccesor, IMapperRequest mr)
+        //{
+        //    throw new NotImplementedException();
+        //}
+
         #endregion
     }
 

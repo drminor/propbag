@@ -8,14 +8,10 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Globalization;
-using System.Windows.Data;
 
 namespace DRM.TypeSafePropertyBag
 {
-    using System.Collections.ObjectModel;
-    using PropIdType = UInt32;
     using PropNameType = String;
-    using PSAccessServiceInterface = IPropStoreAccessService<UInt32, String>;
 
     public abstract class AbstractPropFactory : IPropFactory
     {
@@ -222,7 +218,7 @@ namespace DRM.TypeSafePropertyBag
 
         #region Generic Property Creation
 
-        public abstract IProvideADataSourceProvider GetDSProviderProvider(PropIdType propId, PropKindEnum propKind, object iDoCrudDataSource, PSAccessServiceInterface storeAccesor, IMapperRequest mr);
+        //public abstract IProvideADataSourceProvider GetDSProviderProvider(PropIdType propId, PropKindEnum propKind, object iDoCrudDataSource, PSAccessServiceInterface storeAccesor, IMapperRequest mr);
 
         public virtual IProp CreateGenFromObject(Type typeOfThisProperty,
             object value,

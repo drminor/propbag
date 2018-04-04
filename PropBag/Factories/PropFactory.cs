@@ -172,10 +172,10 @@ namespace DRM.PropBag
         //    throw new NotImplementedException();
         //}
 
-        public override IProvideADataSourceProvider GetDSProviderProvider(uint propId, PropKindEnum propKind, object iDoCrudDataSource, IPropStoreAccessService<uint, string> storeAccesor, IMapperRequest mr)
-        {
-            throw new NotImplementedException();
-        }
+        //public override IProvideADataSourceProvider GetDSProviderProvider(uint propId, PropKindEnum propKind, object iDoCrudDataSource, IPropStoreAccessService<uint, string> storeAccesor, IMapperRequest mr)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
         #endregion
 
