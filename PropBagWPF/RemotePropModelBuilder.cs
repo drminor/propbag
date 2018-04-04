@@ -9,10 +9,9 @@ using System.Windows;
 
 namespace DRM.PropBagWPF
 {
-    using PropNameType = String;
     using PropModelType = IPropModel<String>;
 
-    public class RemotePropModelProvider : IProvidePropModels
+    public class RemotePropModelBuilder : IPropModelBuilder
     {
         #region Private Fields
 
@@ -30,7 +29,7 @@ namespace DRM.PropBagWPF
 
         #region Constructors
 
-        public RemotePropModelProvider
+        public RemotePropModelBuilder
             (
             ResourceDictionaryProvider resourceDictionaryProvider,
             IParsePropBagTemplates propBagTemplateParser,

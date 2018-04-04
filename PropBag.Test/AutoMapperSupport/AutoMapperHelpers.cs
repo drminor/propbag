@@ -190,7 +190,7 @@ namespace PropBagLib.Tests.AutoMapperSupport
                 IPropFactoryFactory propFactoryFactory = GetThePropFactoryFactory();
 
                 // PropModel Provider
-                RemotePropModelProvider remotePropModelProvider = GetPropModelProvider(propFactoryFactory);
+                RemotePropModelBuilder remotePropModelProvider = GetPropModelProvider(propFactoryFactory);
 
                 // Load the PropBag and Mapper Templates
                 LoadPropModelsAndMappers(remotePropModelProvider, _resourceFolderPath, _pbTemplateFilenames, _mapperRequestFilenames);
@@ -233,20 +233,20 @@ namespace PropBagLib.Tests.AutoMapperSupport
             return result;
         }
 
-        private RemotePropModelProvider GetPropModelProvider(IPropFactoryFactory propFactoryFactory)
+        private RemotePropModelBuilder GetPropModelProvider(IPropFactoryFactory propFactoryFactory)
         {
             ResourceDictionaryProvider rdProvider = new ResourceDictionaryProvider();
 
             PropBagTemplateParser pbtParser = new PropBagTemplateParser();
 
-            RemotePropModelProvider propModelProvider = new RemotePropModelProvider(rdProvider, pbtParser, propFactoryFactory);
+            RemotePropModelBuilder propModelProvider = new RemotePropModelBuilder(rdProvider, pbtParser, propFactoryFactory);
 
             return propModelProvider;
         }
 
         void LoadPropModelsAndMappers
             (
-            RemotePropModelProvider remotePropModelProvider,
+            RemotePropModelBuilder remotePropModelProvider,
             string resourceFolderPath,
             string[] pbTemplateFilenames,
             string[] mapperRequestFilenames

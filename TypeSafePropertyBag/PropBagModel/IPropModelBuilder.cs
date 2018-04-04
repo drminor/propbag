@@ -3,10 +3,9 @@ using System.Collections.Generic;
 
 namespace DRM.TypeSafePropertyBag
 {
-    using PropNameType = String;
     using PropModelType = IPropModel<String>;
 
-    public interface IProvidePropModels
+    public interface IPropModelBuilder
     {
         PropModelType GetPropModel(string resourceKey);
 

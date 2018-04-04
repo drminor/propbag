@@ -219,7 +219,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests
 
 
             // PropModel Provider
-            RemotePropModelProvider remotePropModelProvider = GetPropModelProvider(propFactoryFactory/*, ConfigPackageNameSuffix*/);
+            RemotePropModelBuilder remotePropModelProvider = GetPropModelProvider(propFactoryFactory/*, ConfigPackageNameSuffix*/);
             //PropModelProvider = remotePropModelProvider;
                 _mct.MeasureAndReport("After GetPropModelProvider");
 
@@ -354,7 +354,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests
             return result;
         }
 
-        protected virtual RemotePropModelProvider GetPropModelProvider
+        protected virtual RemotePropModelBuilder GetPropModelProvider
             (
             IPropFactoryFactory propFactoryFactory
             //, string configPackageNameSuffix
@@ -364,7 +364,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests
 
             PropBagTemplateParser pbtParser = new PropBagTemplateParser();
 
-            RemotePropModelProvider propModelProvider = new RemotePropModelProvider(rdProvider, pbtParser, propFactoryFactory/*, configPackageNameSuffix*/);
+            RemotePropModelBuilder propModelProvider = new RemotePropModelBuilder(rdProvider, pbtParser, propFactoryFactory/*, configPackageNameSuffix*/);
             _mct.MeasureAndReport("After new PropModelProvider");
 
             return propModelProvider;
@@ -372,7 +372,7 @@ namespace PropBagLib.Tests.SpecBasedVMTests
 
         void LoadPropModelsAndMappers
             (
-            RemotePropModelProvider remotePropModelProvider,
+            RemotePropModelBuilder remotePropModelProvider,
             string resourceFolderPath,
             string[] pbTemplateFilenames,
             string[] mapperRequestFilenames

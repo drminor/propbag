@@ -57,7 +57,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentat
 		Documentation\TopLevelObjectReferences.md = Documentation\TopLevelObjectReferences.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PropBagModelBuilder.Jason", "PropBagModelBuilderJason\PropBagModelBuilder.Jason.csproj", "{A41CE066-9A2B-4E39-892A-BE2B61846654}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PropBagModelBuilder.Jason", "PropBagModelBuilder.Jason\PropBagModelBuilder.Jason.csproj", "{A41CE066-9A2B-4E39-892A-BE2B61846654}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -9,7 +9,7 @@ namespace DRM.PropBagWPF
 {
     using PropModelType = IPropModel<String>;
 
-    public class SimplePropModelProvider : IProvidePropModels
+    public class SimplePropModelBuilder : IPropModelBuilder
     { 
         #region Private Fields
 
@@ -25,7 +25,7 @@ namespace DRM.PropBagWPF
 
         #region Constructor
 
-        public SimplePropModelProvider
+        public SimplePropModelBuilder
             (
             IPropBagTemplateBuilder propBagTemplateBuilder,
             IMapperRequestBuilder mapperRequestBuilder,

@@ -108,7 +108,7 @@ namespace PropBagTestApp.Infra
             _vmActivator = new SimpleViewModelActivator();
 
 
-            IProvidePropModels propModelProvider = GetPropModelProvider(_propFactoryFactory);
+            IPropModelBuilder propModelProvider = GetPropModelProvider(_propFactoryFactory);
 
             PropModelCache = new SimplePropModelCache(propModelProvider);
 
@@ -160,7 +160,7 @@ namespace PropBagTestApp.Infra
         }
 
 
-        private static IProvidePropModels GetPropModelProvider
+        private static IPropModelBuilder GetPropModelProvider
             (
             IPropFactoryFactory propFactoryFactory
             )
@@ -171,7 +171,7 @@ namespace PropBagTestApp.Infra
 
             IParsePropBagTemplates propBagTemplateParser = new PropBagTemplateParser();
 
-            IProvidePropModels propModelProvider = new SimplePropModelProvider
+            IPropModelBuilder propModelProvider = new SimplePropModelBuilder
                 (
                 propBagTemplateBuilder,
                 mapperRequestBuilder,

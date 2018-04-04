@@ -65,7 +65,6 @@
     <Compile Include="Binders\OSSExtensions.cs" />
     <Compile Include="Binders\SelectedItemConverter.cs" />
     <Compile Include="Binders\SourceKindEnum.cs" />
-    <Compile Include="IPropBagTemplateParser.cs" />
     <Compile Include="Converters\PropFactoryValueConverter.cs" />
     <Compile Include="Template\PropBinderField.cs" />
     <Compile Include="Converters\ComparerFuncTypeConverter.cs" />

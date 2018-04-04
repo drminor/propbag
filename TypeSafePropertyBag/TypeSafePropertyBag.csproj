@@ -43,6 +43,7 @@
   <ItemGroup>
     <Compile Include="DataAccessSupport\BetterLCVCreatorDelegate.cs" />
     <Compile Include="DataAccessSupport\CViewManagerBinder_New.cs" />
+    <Compile Include="PropBagTemplateInterfaces\IPropBagTemplateParser.cs" />
     <Compile Include="TypeDescriptors\Diagnostics\TypeInspectorUtility.cs" />
     <Compile Include="TypeExtensions\TypeExtensions.cs" />
     <Compile Include="TypeExtensions\WasEmittedAttribute.cs" />
@@ -111,7 +112,7 @@
     <Compile Include="PropBagModel\IPropInitialValueField.cs" />
     <Compile Include="PropBagModel\IPropModelItem.cs" />
     <Compile Include="PropBagModel\IPropModel.cs" />
-    <Compile Include="PropBagModel\IPropModelProvider.cs" />
+    <Compile Include="PropBagModel\IPropModelBuilder.cs" />
     <Compile Include="PropBagModel\ITypeInfoField.cs" />
     <Compile Include="PropBagModel\WellKnownCollectionTypeEnum.cs" />
     <Compile Include="PropBagTemplateInterfaces\INamespaceItem.cs" />

@@ -1,7 +1,5 @@
 ﻿using System;
 
-using System.Collections.ObjectModel;
-
 namespace DRM.TypeSafePropertyBag
 {
     public interface IPropBagTemplate

@@ -17,7 +17,7 @@ namespace DRM.TypeSafePropertyBag
         #region Private Properties
 
         private readonly Dictionary<string, PropBagModelFamilyCollInterface> _cache;
-        private readonly List<IProvidePropModels> _propModelProviders;
+        private readonly List<IPropModelBuilder> _propModelProviders;
 
         private object _syncLock = new object();
 
@@ -25,9 +25,9 @@ namespace DRM.TypeSafePropertyBag
 
         #region Constructor
 
-        public SimplePropModelCache(params IProvidePropModels[] propModelProviders)
+        public SimplePropModelCache(params IPropModelBuilder[] propModelProviders)
         {
-            _propModelProviders = new List<IProvidePropModels>(propModelProviders);
+            _propModelProviders = new List<IPropModelBuilder>(propModelProviders);
 
             _cache = new Dictionary<PropNameType, PropBagModelFamilyCollInterface>();
         }
@@ -248,7 +248,7 @@ namespace DRM.TypeSafePropertyBag
         {
             IDictionary<string, string> classNameToKeyMap;
 
-            foreach (IProvidePropModels propModelProvider in _propModelProviders)
+            foreach (IPropModelBuilder propModelProvider in _propModelProviders)
             {
                 classNameToKeyMap = propModelProvider.GetTypeToKeyMap();
 
@@ -276,7 +276,7 @@ namespace DRM.TypeSafePropertyBag
         public IMapperRequest GetMapperRequest(string resourceKey)
         {
             IMapperRequest result = null;
-            foreach (IProvidePropModels propModelProvider in _propModelProviders)
+            foreach (IPropModelBuilder propModelProvider in _propModelProviders)
             {
                 try
                 {
